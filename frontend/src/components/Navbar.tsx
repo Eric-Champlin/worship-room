@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Sunrise, ChevronDown, Menu, X } from 'lucide-react'
+import { ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_LINKS = [
@@ -18,17 +18,17 @@ const CONNECT_LINKS = [
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+    'relative py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+    "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
     isActive
-      ? 'border-b-2 border-primary text-primary'
-      : 'text-text-dark hover:text-primary'
+      ? 'text-primary after:scale-x-100'
+      : 'text-text-dark hover:text-primary after:scale-x-0 hover:after:scale-x-100'
   )
 
 function NavbarLogo() {
   return (
-    <Link to="/" className="flex items-center gap-2" aria-label="Worship Room home">
-      <Sunrise className="h-6 w-6 text-primary" aria-hidden="true" />
-      <span className="text-3xl font-bold text-primary" style={{ fontFamily: "'Caveat', cursive" }}>Worship Room</span>
+    <Link to="/" className="flex items-center" aria-label="Worship Room home">
+      <span className="text-4xl font-bold text-primary" style={{ fontFamily: "'Caveat', cursive" }}>Worship Room</span>
     </Link>
   )
 }
@@ -131,18 +131,19 @@ function ConnectDropdown() {
         ref={triggerRef}
         type="button"
         className={cn(
-          'flex items-center gap-1 py-2 text-sm font-medium transition-colors',
+          'relative flex items-center gap-1 py-2 text-sm font-medium transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+          "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
           isConnectActive
-            ? 'border-b-2 border-primary text-primary'
-            : 'text-text-dark hover:text-primary'
+            ? 'text-primary after:scale-x-100'
+            : 'text-text-dark hover:text-primary after:scale-x-0 hover:after:scale-x-100'
         )}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-controls={isOpen ? 'connect-dropdown' : undefined}
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        Connect
+        Local Support
         <ChevronDown
           className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
           aria-hidden="true"
@@ -150,9 +151,10 @@ function ConnectDropdown() {
       </button>
 
       {isOpen && (
+        <div className="absolute left-0 top-full w-44 pt-2">
         <ul
           id="connect-dropdown"
-          className="absolute left-0 top-full mt-2 w-44 rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5"
+          className="rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5"
         >
           {CONNECT_LINKS.map((link) => (
             <li key={link.to}>
@@ -173,6 +175,7 @@ function ConnectDropdown() {
             </li>
           ))}
         </ul>
+        </div>
       )}
     </div>
   )
@@ -196,7 +199,11 @@ function DesktopAuthActions() {
     <div className="hidden items-center gap-4 lg:flex">
       <Link
         to="/login"
-        className="py-2 text-sm font-medium text-text-dark transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
+        className={cn(
+          'relative py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+          "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+          'text-text-dark hover:text-primary after:scale-x-0 hover:after:scale-x-100'
+        )}
       >
         Log In
       </Link>
@@ -254,17 +261,17 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               </NavLink>
             ))}
 
-            {/* Connect section */}
+            {/* Local Support section */}
             <div
               className="mt-2 border-t border-gray-100 pt-2"
               role="group"
-              aria-labelledby="connect-heading"
+              aria-labelledby="local-support-heading"
             >
               <span
-                id="connect-heading"
+                id="local-support-heading"
                 className="px-3 text-xs font-semibold uppercase tracking-wider text-text-dark"
               >
-                Connect
+                Local Support
               </span>
               {CONNECT_LINKS.map((link) => (
                 <NavLink
@@ -291,7 +298,12 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               <Link
                 to="/login"
                 onClick={onClose}
-                className="min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium text-text-dark transition-colors hover:bg-neutral-bg hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className={cn(
+                  'relative min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                  "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                  'text-text-dark hover:text-primary after:scale-x-0 hover:after:scale-x-100'
+                )}
               >
                 Log In
               </Link>

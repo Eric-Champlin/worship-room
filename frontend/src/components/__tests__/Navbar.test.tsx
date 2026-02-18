@@ -33,10 +33,10 @@ describe('Navbar', () => {
       }
     })
 
-    it('renders "Connect" dropdown trigger', () => {
+    it('renders "Local Support" dropdown trigger', () => {
       renderNavbar()
       expect(
-        screen.getByRole('button', { name: /connect/i })
+        screen.getByRole('button', { name: /local support/i })
       ).toBeInTheDocument()
     })
   })
@@ -61,7 +61,7 @@ describe('Navbar', () => {
     })
   })
 
-  describe('Connect dropdown', () => {
+  describe('Local Support dropdown', () => {
     it('dropdown is closed by default', () => {
       renderNavbar()
       expect(screen.queryByText('Churches')).not.toBeInTheDocument()
@@ -70,7 +70,7 @@ describe('Navbar', () => {
     it('clicking the trigger opens the dropdown', () => {
       renderNavbar()
 
-      const trigger = screen.getByRole('button', { name: /connect/i })
+      const trigger = screen.getByRole('button', { name: /local support/i })
       fireEvent.click(trigger)
 
       expect(screen.getByText('Churches')).toBeInTheDocument()
@@ -80,7 +80,7 @@ describe('Navbar', () => {
     it('clicking the trigger again closes the dropdown', () => {
       renderNavbar()
 
-      const trigger = screen.getByRole('button', { name: /connect/i })
+      const trigger = screen.getByRole('button', { name: /local support/i })
       fireEvent.click(trigger)
       expect(screen.getByText('Churches')).toBeInTheDocument()
 
@@ -91,7 +91,7 @@ describe('Navbar', () => {
     it('dropdown links point to correct routes', () => {
       renderNavbar()
 
-      fireEvent.click(screen.getByRole('button', { name: /connect/i }))
+      fireEvent.click(screen.getByRole('button', { name: /local support/i }))
 
       const dropdown = document.getElementById('connect-dropdown')!
       const links = within(dropdown).getAllByRole('link')
@@ -105,7 +105,7 @@ describe('Navbar', () => {
       const user = userEvent.setup()
       renderNavbar()
 
-      fireEvent.click(screen.getByRole('button', { name: /connect/i }))
+      fireEvent.click(screen.getByRole('button', { name: /local support/i }))
       expect(screen.getByText('Churches')).toBeInTheDocument()
 
       await user.keyboard('{Escape}')
@@ -116,7 +116,7 @@ describe('Navbar', () => {
       const user = userEvent.setup()
       renderNavbar()
 
-      const trigger = screen.getByRole('button', { name: /connect/i })
+      const trigger = screen.getByRole('button', { name: /local support/i })
       fireEvent.click(trigger)
       expect(screen.getByText('Churches')).toBeInTheDocument()
 
@@ -127,7 +127,7 @@ describe('Navbar', () => {
     it('outside click closes the dropdown', () => {
       renderNavbar()
 
-      fireEvent.click(screen.getByRole('button', { name: /connect/i }))
+      fireEvent.click(screen.getByRole('button', { name: /local support/i }))
       expect(screen.getByText('Churches')).toBeInTheDocument()
 
       fireEvent.mouseDown(screen.getByLabelText('Main navigation'))
@@ -137,7 +137,7 @@ describe('Navbar', () => {
     it('trigger has aria-haspopup="menu" and correct aria-expanded', () => {
       renderNavbar()
 
-      const trigger = screen.getByRole('button', { name: /connect/i })
+      const trigger = screen.getByRole('button', { name: /local support/i })
       expect(trigger).toHaveAttribute('aria-haspopup', 'menu')
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
 
@@ -148,7 +148,7 @@ describe('Navbar', () => {
     it('aria-controls is only set when dropdown is open', () => {
       renderNavbar()
 
-      const trigger = screen.getByRole('button', { name: /connect/i })
+      const trigger = screen.getByRole('button', { name: /local support/i })
       expect(trigger).not.toHaveAttribute('aria-controls')
 
       fireEvent.click(trigger)
@@ -158,7 +158,7 @@ describe('Navbar', () => {
     it('dropdown panel uses ul/li with no ARIA role override', () => {
       renderNavbar()
 
-      fireEvent.click(screen.getByRole('button', { name: /connect/i }))
+      fireEvent.click(screen.getByRole('button', { name: /local support/i }))
 
       const dropdown = document.getElementById('connect-dropdown')!
       expect(dropdown.tagName).toBe('UL')
@@ -172,7 +172,7 @@ describe('Navbar', () => {
       const user = userEvent.setup()
       renderNavbar()
 
-      const trigger = screen.getByRole('button', { name: /connect/i })
+      const trigger = screen.getByRole('button', { name: /local support/i })
       const wrapper = trigger.closest('.relative')!
       await user.hover(wrapper)
 
@@ -186,7 +186,7 @@ describe('Navbar', () => {
       try {
         renderNavbar()
 
-        const trigger = screen.getByRole('button', { name: /connect/i })
+        const trigger = screen.getByRole('button', { name: /local support/i })
         const wrapper = trigger.closest('.relative')!
 
         await user.hover(wrapper)
@@ -335,7 +335,7 @@ describe('Navbar', () => {
       renderNavbar('/pray')
       const prayLink = screen.getByRole('link', { name: 'Pray' })
       expect(prayLink.className).toContain('text-primary')
-      expect(prayLink.className).toContain('border-primary')
+      expect(prayLink.className).toContain('after:scale-x-100')
     })
 
     it('active route link has aria-current="page"', () => {

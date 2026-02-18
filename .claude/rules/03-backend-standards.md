@@ -5,7 +5,7 @@ paths: ["backend/**"]
 ## Tech Stack
 
 ### Backend
-- **Framework**: Spring Boot 3.x (pin exact version in pom.xml, currently 3.2.2)
+- **Framework**: Spring Boot 3.x (pin exact version in pom.xml, currently 3.5.10)
 - **Language**: Java 21
 - **Build**: Maven
 - **API Style**: RESTful

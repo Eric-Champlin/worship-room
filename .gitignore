@@ -35,3 +35,8 @@ buildNumber.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# Local screenshots/images
+*.png
+*.jpg
+*.jpeg
