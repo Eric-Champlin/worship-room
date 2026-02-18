@@ -177,6 +177,6 @@ ALTER TABLE users ADD CONSTRAINT unique_user_email UNIQUE (email);
 - **Encryption**: Encrypt sensitive private content at the application layer before writing to database (not only disk-level encryption)
   - **Journal Entries**: Always encrypted (private content)
   - **Prayer Wall Posts**: NOT encrypted (public by design for community sharing)
-  - **Mood Selections**: NOT encrypted (analytics data, user_id can be NULL for logged-out users)
+  - **Mood Selections**: NOT encrypted (analytics data). MVP: only persisted for logged-in users (user_id is never NULL in practice)
   - **Key Management**: Encryption keys stored in env/secret manager; rotate keys periodically; never commit keys to repository
   - **Important**: Encrypt/decrypt only on backend; frontend never sees encryption keys

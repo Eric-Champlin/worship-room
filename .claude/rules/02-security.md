@@ -52,7 +52,7 @@
   - **Production**: `https://worshiproom.com` (or actual production domain)
 - **Allowed Methods**: `GET, POST, PUT, DELETE, OPTIONS`
 - **Allowed Headers**: `Content-Type, Authorization, X-Request-Id`
-- **Credentials**: `true` (if using cookies for auth)
+- **Credentials**: `false` for MVP (in-memory JWT, no cookies). Set to `true` only if migrating to cookie-based JWT in the future.
 - **Implementation**: Spring Boot `@CrossOrigin` or global CORS configuration
 
 ### Input Validation & Sanitization

@@ -12,13 +12,15 @@ High-level feature specifications. Each spec describes **what** you want to buil
 ## Naming Convention
 
 ```
-YYYY-MM-DD-feature-name.md
+feature-slug.md
 ```
 
+Spec files use a simple kebab-case slug. The `/spec` command generates this automatically from your feature description.
+
 **Examples:**
-- `2026-02-17-landing-page.md`
-- `2026-02-17-mood-selector.md`
-- `2026-02-17-scripture-display.md`
+- `landing-page.md`
+- `mood-selector.md`
+- `scripture-display.md`
 
 ## Spec Template
 

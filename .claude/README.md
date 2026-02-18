@@ -6,77 +6,61 @@ This directory contains project-specific Claude Code customizations.
 
 ```
 .claude/
-├── rules/     - Modular topic-specific project instructions (STANDARD FEATURE)
-├── skills/    - Project-specific skills (e.g., custom design workflows)
-├── agents/    - Project-specific agents (e.g., specialized reviewers)
-├── hooks/     - Project-specific hooks (e.g., auto-run tests on commit)
+├── rules/     - Modular topic-specific project instructions (auto-loaded)
+├── skills/    - User-invokable commands (e.g., /spec, /code-review)
+├── agents/    - Specialized subagents (e.g., a11y-reviewer, code-quality-reviewer)
 └── README.md  - This file
 ```
 
 ## Usage
 
 ### Rules (Modular Instructions)
-**Standard Claude Code feature** for organizing project instructions into focused, topic-specific files.
+**Standard Claude Code feature.** All `.md` files in `rules/` are automatically loaded as project memory.
 
-Place `.md` files in `rules/` directory - all are automatically loaded as project memory.
+Files with a `paths:` frontmatter are scoped to specific file patterns:
 
-**Example structure:**
+```yaml
+---
+paths: ["frontend/**"]
+---
+```
+
+**Current rules:**
 ```
 rules/
-├── ai-safety.md       - AI safety guardrails and crisis detection rules
-├── security.md        - Security policies and authentication rules
-├── frontend.md        - Frontend coding standards and patterns
-├── backend.md         - Spring Boot conventions and API standards
-├── database.md        - PostgreSQL schema and query guidelines
-└── testing.md         - Testing requirements and patterns
+├── 01-ai-safety.md          - Crisis detection, AI content boundaries, moderation (global)
+├── 02-security.md           - Auth, rate limiting, encryption, input validation (global)
+├── 03-backend-standards.md  - Spring Boot conventions, API contract (backend/** only)
+├── 04-frontend-standards.md - React patterns, design system, accessibility (frontend/** only)
+├── 05-database.md           - Schema, indexes, encryption policies (backend/**, *.sql only)
+├── 06-testing.md            - Testing strategy, coverage requirements (global)
+├── 07-logging-monitoring.md - Structured logging, PII handling (global)
+└── 08-deployment.md         - Environment variables, deployment platforms (global)
 ```
 
-**Path-specific rules** (optional):
-```markdown
----
-paths:
-  - "frontend/**/*.tsx"
----
-# React Component Rules
-- Always use functional components
-- Include accessibility attributes
-```
+### Skills (User-Invokable Commands)
+Place custom skills in `skills/<name>/SKILL.md`. Skills with `user-invokable: true` appear in the `/` command palette.
 
-**When to use:**
-- Split large CLAUDE.md into focused files
-- Organize rules by topic (security, testing, etc.)
-- Apply rules to specific file types/paths
+**Current skills:**
+- `/spec` — Spins up a new feature spec file and git branch from a short description
+- `/code-review` — Runs accessibility + code quality review on uncommitted changes
 
-### Skills
-Place custom skills in `skills/` directory. Each skill should have:
-- `SKILL.md` - Skill definition and instructions
-- Any supporting files
+### Agents (Specialized Subagents)
+Place custom agents in `agents/<name>.md`. Agents are invoked by skills or by Claude when appropriate.
 
-Example: `skills/worship-design/SKILL.md` - Custom design skill tailored for peaceful, contemplative aesthetics
+**Current agents:**
+- `a11y-reviewer` — WCAG accessibility audit on diffs, Worship Room–specific priorities
+- `code-quality-reviewer` — Code quality audit on diffs, enforces project safety/security rules
 
-### Agents
-Place custom agents in `agents/` directory for specialized tasks like:
-- Custom code reviewers for AI safety checks
-- Scripture reference validators
-- Accessibility checkers
-
-### Hooks
-Place custom hooks in `hooks/` directory for automation like:
-- Pre-commit AI safety validation
-- Auto-run tests before push
-- Check for exposed API keys
+### Hooks (Optional)
+Place project-specific hooks in `hooks/` if needed (not created yet). Use global `~/.claude/hooks/` for hooks that apply to all projects.
 
 ## When to Use Project-Specific vs Global
 
 **Use project-specific** (this folder) when:
-- Customizations are specific to Worship Room (e.g., AI safety validation)
-- You want to commit them to git for team use
-- Different projects need different configurations
+- Customizations are specific to Worship Room
+- You want them committed to git
 
 **Use global** (`~/.claude/`) when:
 - Customizations apply to all your projects
 - Personal preferences (not team-wide)
-
----
-
-**Note**: Project-specific config takes precedence over global config.

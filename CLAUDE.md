@@ -250,6 +250,14 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 
 ## Build Approach
 
+### Spec-Driven Workflow
+Use this workflow for all new features:
+
+1. **`/spec <feature description>`** — Generates a spec file in `_specs/` and switches to a new feature branch
+2. **Plan Mode** — Review the spec, then enter Plan Mode to generate a technical plan saved to `_plans/`
+3. **Implement** — Build the feature following the plan
+4. **`/code-review`** — Runs accessibility + code quality review on uncommitted changes before merging
+
 ### Development Strategy
 1. **Build logged-out experience first**:
    - Landing page with all features showcased
