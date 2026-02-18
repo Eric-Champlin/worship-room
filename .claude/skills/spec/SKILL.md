@@ -1,6 +1,7 @@
 ---
 description: Create a feature spec file and branch from a short idea
 argument-hint: Short feature description
+user-invokable: true
 ---
 
 You are helping to spin up a new feature spec for **Worship Room** — a Christian emotional healing and worship web application. Always adhere to the rules and requirements in `CLAUDE.md` and `.claude/rules/` when generating spec content.
