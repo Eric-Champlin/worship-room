@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { Navbar } from '@/components/Navbar'
 
 interface LayoutProps {
   children: ReactNode
@@ -6,8 +7,11 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">{children}</div>
+    <div className="min-h-screen bg-neutral-bg font-sans">
+      <Navbar />
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {children}
+      </main>
     </div>
   )
 }
