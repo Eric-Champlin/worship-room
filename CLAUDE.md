@@ -31,6 +31,8 @@ Guide users toward emotional healing and spiritual growth through:
 - 📊 **[Logging & Monitoring](.claude/rules/07-logging-monitoring.md)** - Structured logging, PII handling
 - 🚀 **[Deployment](.claude/rules/08-deployment.md)** - Environment variables, deployment platforms
 
+**Source of truth**: If CLAUDE.md conflicts with a rule file, rule file wins.
+
 ---
 
 ## Complete Feature List

@@ -19,7 +19,7 @@
   - Crisis Text Line: Text HOME to 741741
   - SAMHSA National Helpline: 1-800-662-4357
   - Encourage user to seek professional help immediately
-- **Escalation**: Prayer wall posts with self-harm content flagged and emailed to admin immediately
+- **Escalation**: Prayer wall posts with self-harm content are flagged (classifier success OR clear keyword match) and emailed to admin immediately
 
 ### AI Content Boundaries
 - **Medical Disclaimer**: "This is not professional medical, psychological, or psychiatric advice. If you are experiencing a mental health crisis, please contact a licensed professional or crisis hotline."
@@ -58,7 +58,7 @@
 - **Encryption**: Encrypt sensitive private content at the application layer before writing to database (not only disk-level encryption)
   - **Journal Entries**: Always encrypted (private content)
   - **Prayer Wall Posts**: NOT encrypted (public by design for community sharing)
-  - **Mood Selections**: NOT encrypted (analytics data, user_id can be NULL for logged-out users)
+  - **Mood Selections**: NOT encrypted (analytics data). MVP: only persisted for logged-in users
   - **Key Management**: Encryption keys stored in env/secret manager; rotate keys periodically; never commit keys to repository
   - **Important**: Encrypt/decrypt only on backend; frontend never sees encryption keys
 - **Anonymization**: Mood tracking analytics should be anonymized

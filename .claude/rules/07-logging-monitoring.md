@@ -14,7 +14,7 @@
   - **Never log in app logs**: User input text (journals, prayers), email addresses, raw IP addresses
   - **IP addresses**: May be used transiently in-memory for rate limiting, never stored/logged
     - **Hashed IPs for rate limiting**: Stored only in Redis/in-memory rate-limit cache with short TTL (15 minutes), never in app logs, never in database
-  - **Admin audit trail**: Emails stored only in database `admin_audit_log` table (never in application logs)
+  - **Admin audit trail**: Admin actions stored in database `admin_audit_log` table with `admin_user_id` (no email, only ID)
 
 ### Error Tracking
 - **Platform**: Sentry or Rollbar
