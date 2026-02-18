@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils'
 const NAV_LINKS = [
   { label: 'Pray', to: '/pray' },
   { label: 'Journal', to: '/journal' },
-  { label: 'Music', to: '/music' },
   { label: 'Meditate', to: '/meditate' },
+  { label: 'Music', to: '/music' },
   { label: 'Prayer Wall', to: '/prayer-wall' },
 ] as const
 
