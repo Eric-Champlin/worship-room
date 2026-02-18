@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Sunrise, ChevronDown, Menu, X } from 'lucide-react'
+import { ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_LINKS = [
@@ -18,17 +18,17 @@ const CONNECT_LINKS = [
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+    'relative py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+    "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
     isActive
-      ? 'border-b-2 border-primary text-primary'
-      : 'text-text-dark hover:text-primary'
+      ? 'text-primary after:scale-x-100'
+      : 'text-text-dark hover:text-primary after:scale-x-0 hover:after:scale-x-100'
   )
 
 function NavbarLogo() {
   return (
-    <Link to="/" className="flex items-center gap-2" aria-label="Worship Room home">
-      <Sunrise className="h-6 w-6 text-primary" aria-hidden="true" />
-      <span className="text-3xl font-bold text-primary" style={{ fontFamily: "'Caveat', cursive" }}>Worship Room</span>
+    <Link to="/" className="flex items-center" aria-label="Worship Room home">
+      <span className="text-4xl font-bold text-primary" style={{ fontFamily: "'Caveat', cursive" }}>Worship Room</span>
     </Link>
   )
 }
@@ -131,11 +131,12 @@ function ConnectDropdown() {
         ref={triggerRef}
         type="button"
         className={cn(
-          'flex items-center gap-1 py-2 text-sm font-medium transition-colors',
+          'relative flex items-center gap-1 py-2 text-sm font-medium transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+          "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
           isConnectActive
-            ? 'border-b-2 border-primary text-primary'
-            : 'text-text-dark hover:text-primary'
+            ? 'text-primary after:scale-x-100'
+            : 'text-text-dark hover:text-primary after:scale-x-0 hover:after:scale-x-100'
         )}
         aria-haspopup="menu"
         aria-expanded={isOpen}
