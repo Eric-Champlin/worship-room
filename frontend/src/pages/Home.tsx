@@ -1,9 +1,13 @@
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { HeroSection } from '@/components/HeroSection'
 
 export function Home() {
   return (
-    <Layout>
-      {null}
-    </Layout>
+    <div className="min-h-screen bg-neutral-bg font-sans">
+      <Navbar transparent />
+      <main>
+        <HeroSection />
+      </main>
+    </div>
   )
 }
