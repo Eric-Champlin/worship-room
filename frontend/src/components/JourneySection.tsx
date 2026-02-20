@@ -176,7 +176,38 @@ export function JourneySection() {
               </span>
             </h2>
             <p className="text-base text-text-dark sm:text-lg">
-              From prayer to community, every step draws you closer to peace.
+              From{' '}
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  color: '#6D28D9',
+                  fontSize: '1.5em',
+                }}
+              >
+                prayer
+              </span>{' '}
+              to{' '}
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  color: '#6D28D9',
+                  fontSize: '1.5em',
+                }}
+              >
+                community
+              </span>
+              , every step
+              draws you closer to{' '}
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  color: '#6D28D9',
+                  fontSize: '1.5em',
+                }}
+              >
+                peace
+              </span>
+              .
             </p>
           </div>
 

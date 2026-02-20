@@ -399,7 +399,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
     <nav
       className={cn(
         'top-0 z-50',
-        transparent ? 'fixed inset-x-0 bg-transparent' : 'sticky bg-neutral-bg'
+        transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-neutral-bg'
       )}
       aria-label="Main navigation"
     >
