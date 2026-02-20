@@ -82,3 +82,18 @@ Title:     <feature_title>
 ```
 
 Do not repeat the full spec in the chat output unless the user explicitly asks to see it. The main goal is to save the spec file and report where it lives and what branch to use.
+
+---
+
+## Step 6: Enter Plan Mode
+
+After saving the spec, **automatically enter Plan Mode** to generate a technical implementation plan.
+
+In Plan Mode:
+1. Read the spec at `_specs/<feature_slug>.md`
+2. Explore the codebase to understand existing patterns, components, and architecture
+3. Generate a detailed technical plan covering: files to create/modify, implementation order, component/API structure, test plan, accessibility considerations, and potential pitfalls
+4. **Before exiting Plan Mode**, save the plan to `_plans/YYYY-MM-DD-<feature_slug>.md` (using today's date)
+5. Exit Plan Mode — the user reviews and approves the plan before implementation begins
+
+The plan file in `_plans/` is the durable artifact. It persists across sessions and serves as the implementation reference.

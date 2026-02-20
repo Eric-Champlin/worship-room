@@ -5,10 +5,13 @@
 **Worship Room** is a Christian emotional healing and worship web application that provides a safe, peaceful online space where users can find comfort, guidance, and spiritual support through AI-powered scripture matching, prayer generation, journaling, community support, and worship music.
 
 ### Mission
+
 Create an accessible platform where anyone (especially Christians) can find emotional healing through worship, scripture, prayer, and community support.
 
 ### End Goal
+
 Guide users toward emotional healing and spiritual growth through:
+
 - AI-matched scripture based on emotional state
 - Personalized prayer generation
 - Reflective journaling with AI prompts
@@ -39,9 +42,8 @@ Guide users toward emotional healing and spiritual growth through:
 
 Full launch targets a complete feature set; features may ship incrementally (alpha/beta) for early feedback.
 
-**Note on Phases**: Phases are guidance for logical dependencies, not strict order. It's okay to jump around as long as prerequisites are satisfied.
+**Prerequisites Cheatsheet** (build features in any order, just satisfy dependencies first):
 
-**Prerequisites Cheatsheet**:
 - **AI features** require: safety checks + rate limiting + logging + backend crisis detection
 - **Community features** (prayer wall) require: auth + moderation + admin audit log + email notifications
 - **Analytics** require: mood tracking persisted to database
@@ -49,6 +51,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - **Data encryption** require: key management + env/secret manager
 
 **Non-Goals for MVP** (to prevent scope creep):
+
 - ❌ Multi-language support (English only for MVP)
 - ❌ Payments/subscriptions (free for MVP)
 - ❌ Social login (OAuth) - email/password only for MVP
@@ -58,7 +61,8 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - ❌ Complex user profiles (minimal profile for MVP)
 - ❌ Multi-tenant / multiple admins / role systems (single-admin MVP)
 
-### Phase 1: Foundation
+### Foundation
+
 1. **Authentication System** - Spring Security + JWT, email/password login (Auth scaffolding early; core flows must work logged-out in demo mode)
 2. **React Router Setup** - Protected routes, public routes
 3. **Landing Page** - Full marketing site (hero, Journey to Healing timeline, feature cards, footer)
@@ -66,7 +70,8 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 5. **PostgreSQL + Docker** - Database setup with Docker Compose
 6. **Design System** - Colors, typography, responsive components
 
-### Phase 2: Core Features
+### Core Features
+
 7. **Mood Selector** - 5 buttons (Terrible, Bad, Neutral, Good, Excellent) + text input for custom descriptions
 8. **Scripture Display** - AI-matched scripture with fade-in animation
 9. **AI Scripture Reflection** - AI-generated reflection notes below each verse
@@ -74,41 +79,48 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 11. **AI Pre-Tagging** - OpenAI API to tag scriptures with mood/theme mappings
 12. **Mood Tracking** - Save mood selections with timestamp and scripture shown
 
-### Phase 3: Journaling & Music
+### Journaling & Music
+
 13. **Journal Page** - Text editor with save functionality
 14. **AI Journaling Prompts** - Auto-generated prompts based on mood
 15. **Saved Journal Entries** - View past entries at `/journal/my-entries`
 16. **Spotify Integration** - Embed player + "Open in Spotify" deep link
 17. **Music Page** - Dedicated `/music` page with playlist
 
-### Phase 4: AI-Powered Features
+### AI-Powered Features
+
 18. **AI-Generated Prayers** - Available on `/scripture` page, `/pray` page, and dashboard widget
 19. **Text-Based Scripture Matching** - OpenAI analyzes user's custom text input to find matching scripture
 20. **Prayer Request Generation** - AI helps users articulate prayer needs
 
-### Phase 5: Community Features
+### Community Features
+
 21. **Prayer Wall** - Community forum for prayer requests
 22. **AI Auto-Moderation** - Flag inappropriate content (profanity, abuse, spam)
 23. **Admin Moderation Interface** - Simple CRUD at `/admin/prayer-wall` for reviewing, editing, deleting posts
 24. **Email Notifications** - Send flagged posts to admin email from `ADMIN_EMAIL` env var
 25. **User Reporting** - Report button on each prayer post
 
-### Phase 6: Locator Features
+### Locator Features
+
 26. **Church Locator** - Google Maps Places API real-time search at `/churches`
 27. **Christian Counselor Locator** - Google Maps Places API real-time search at `/counselors`
 
-### Phase 7: Content Features
+### Content Features
+
 28. **Guided Meditations** - 20 text-based meditations organized by topic
 29. **Verse of the Day** - Daily scripture on `/daily` page, homepage, and dashboard
 30. **Song of the Day** - Daily worship song recommendation on `/daily` page, homepage, and dashboard
 
-### Phase 8: Analytics & Personalization
+### Analytics & Personalization
+
 31. **Mood History Dashboard** - 7-day snapshot on `/dashboard`
 32. **Mood Insights Page** - Full history with calendar heatmap and line charts at `/insights`
 33. **Trend Analysis** - AI-generated insights ("Your mood is improving this week!")
 34. **Personalized Recommendations** - Scripture/music suggestions based on mood history
 
-### Phase 9: Polish & Launch Prep
+### Polish & Launch Prep
+
 35. **Complete Landing Page** - Showcase all features with CTAs
 36. **Performance Optimization** - Lazy loading, code splitting, caching
 37. **Security Audit** - Vulnerability scanning, penetration testing
@@ -121,6 +133,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 ## Routes
 
 ### Public Routes (No Authentication Required)
+
 - `/` - Landing page (full marketing site)
 - `/scripture` - Mood selector (buttons + text input) → Scripture display → AI reflection → Prayer generator button
 - `/pray` - Standalone AI prayer generator
@@ -135,6 +148,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - `/register` - Registration page
 
 ### Protected Routes (Require Authentication)
+
 - `/dashboard` - Personalized dashboard with widgets (daily verse/song, quick prayer, 7-day mood snapshot)
 - `/insights` - Mood tracking charts & trends (calendar heatmap, line graph, AI insights)
 - `/journal/my-entries` - Saved journal entries
@@ -142,6 +156,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - `/prayer-wall` - Community prayer requests (can post when logged in)
 
 ### Admin Routes (Requires `is_admin = true`)
+
 - `/admin/prayer-wall` - Moderation interface (table view, edit/delete posts, view flagged, ban users, search)
 
 ---
@@ -149,7 +164,9 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 ## UX Flows
 
 ### Demo Mode (Logged-Out Experience) Data Policy
+
 **Critical Privacy Rule**: Logged-out users can use all features (mood selection, scripture, prayers, journaling prompts), but **zero data persistence**.
+
 - **No database writes** for logged-out users (no mood tracking, no journal saves, no prayer saves)
 - **Session-only**: Mood/scripture shown in UI, stored in React state/memory only
 - **Privacy-first**: No cookies, no anonymous IDs, no IP persistence for logged-out users
@@ -157,6 +174,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - **Conversion**: Prompts to "Create account to save" appear after feature use (non-intrusive)
 
 ### Mood Selection & Scripture Display Flow
+
 1. User lands on `/scripture` page
 2. Sees two input options:
    - **5 mood buttons**: Terrible, Bad, Neutral, Good, Excellent
@@ -170,6 +188,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 9. If logged out: Prompt to "Create account to save your mood history"
 
 ### Prayer Generation Flow
+
 1. **Option A**: User clicks "Generate a prayer" on `/scripture` page after viewing scripture
 2. **Option B**: User navigates to `/pray` page directly
 3. **Option C**: User clicks prayer widget on `/dashboard`
@@ -179,6 +198,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 7. Prayer displays with copy button and option to save (if logged in)
 
 ### Journaling Flow
+
 1. User navigates to `/journal`
 2. AI prompt auto-appears based on:
    - Current mood (if just selected)
@@ -190,6 +210,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 6. If logged out: Modal prompts "Create account to save"
 
 ### Mood Tracking Flow
+
 1. Every time user submits mood (button OR text input), save to `mood_selections` table:
    - `user_id` (if logged in)
    - `mood` (if button clicked)
@@ -204,6 +225,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
    - AI insights: "Your mood is improving!" or "You've had a tough week"
 
 ### Prayer Wall Flow
+
 1. User navigates to `/prayer-wall`
 2. If logged out: Can view posts, prompted to login to post
 3. If logged in: Can create new prayer request
@@ -218,6 +240,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 ## Design System
 
 ### Color Palette
+
 - **Primary**: `#6D28D9` (deep violet)
 - **Primary Light**: `#8B5CF6` (lighter violet accent)
 - **Hero Dark**: `#0D0620` (dark purple for hero gradient)
@@ -231,6 +254,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - **Danger**: `#E74C3C` (red for negative moods/flags)
 
 ### Typography
+
 - **Body Font**: Inter (sans-serif)
   - Regular: 400
   - Medium: 500
@@ -246,6 +270,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
   - Bold: 700
 
 ### Breakpoints
+
 - **Mobile**: < 640px
 - **Tablet**: 640px - 1024px
 - **Desktop**: > 1024px
@@ -255,14 +280,16 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 ## Build Approach
 
 ### Spec-Driven Workflow
+
 Use this workflow for all new features:
 
-1. **`/spec <feature description>`** — Generates a spec file in `_specs/` and switches to a new feature branch
-2. **Plan Mode** — Review the spec, then enter Plan Mode to generate a technical plan saved to `_plans/`
+1. **`/spec <feature description>`** — Generates a spec file in `_specs/`, switches to a new feature branch, then auto-enters Plan Mode to generate a technical plan saved to `_plans/YYYY-MM-DD-<feature>.md`
+2. **Review** — User reviews and approves the plan before implementation begins
 3. **Implement** — Build the feature following the plan
 4. **`/code-review`** — Runs accessibility + code quality review on uncommitted changes before merging
 
 ### Development Strategy
+
 1. **Build logged-out experience first**:
    - Landing page with all features showcased
    - All features work in "demo mode" without requiring login
