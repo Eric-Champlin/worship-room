@@ -31,25 +31,29 @@ paths: ["frontend/**"]
 ## Design System
 
 ### Color Palette
-- **Primary Blue**: `#4A90E2` (soft, calming blue)
-- **Secondary Blue**: `#5BA3F5` (lighter accent)
+- **Primary**: `#6D28D9` (deep violet)
+- **Primary Light**: `#8B5CF6` (lighter violet accent)
+- **Hero Dark**: `#0D0620` (dark purple for hero gradient)
+- **Glow Cyan**: `#00D4FF` (cyan for input glow effects)
 - **Neutral Background**: `#F5F5F5` (warm off-white)
 - **White**: `#FFFFFF`
 - **Text Dark**: `#2C3E50` (dark gray-blue)
 - **Text Light**: `#7F8C8D` (medium gray)
 - **Success**: `#27AE60` (green for positive moods)
 - **Warning**: `#F39C12` (orange for neutral moods)
-- **Error**: `#E74C3C` (red for negative moods/flags)
+- **Danger**: `#E74C3C` (red for negative moods/flags)
 
 ### Typography
-- **Body Font**: Inter or Open Sans (sans-serif)
+- **Body Font**: Inter (sans-serif)
   - Regular: 400
   - Medium: 500
+  - Semi-bold: 600
   - Bold: 700
-- **Scripture Font**: Lora or Merriweather (serif)
+- **Scripture Font**: Lora (serif)
   - Regular: 400
   - Italic: 400 italic
   - Bold: 700
+- **Decorative Font**: Caveat (cursive) — script emphasis in headings and branding
 - **Font Sizes**:
   - Hero: 3rem (mobile: 2rem)
   - H1: 2.5rem (mobile: 1.75rem)
@@ -91,5 +95,5 @@ paths: ["frontend/**"]
 - **Scripture Display**: Centered text, large serif font, gentle fade-in animation (CSS transition)
 - **Cards**: Soft shadows, rounded corners (8px border-radius)
 - **Forms**: Clear labels, inline validation, accessible error messages
-- **Navigation**: Clean, minimal, sticky header
+- **Navigation**: Clean, minimal header (non-sticky); transparent glass-morphism variant on hero sections
 - **Crisis Alert**: Prominent, accessible alert banner with hotline numbers (red/orange, high contrast)

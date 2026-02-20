@@ -21,7 +21,7 @@ These are non-negotiable for this project:
 - **Scripture Display**: Animated content (fade-in) must not trigger accessibility issues. Must not auto-play or auto-advance without user control.
 - **AI-Generated Content Disclaimers**: Must be accessible to screen readers. Do not hide with `aria-hidden`.
 - **Forms (Prayer Wall, Journal, Registration, Login)**: Full label association, error messages via `aria-describedby`/`aria-errormessage`, `aria-invalid` on error state.
-- **Color Contrast**: Use design system colors — Primary Blue `#4A90E2` on white `#FFFFFF` must meet WCAG AA (4.5:1 for normal text, 3:1 for large text). Error Red `#E74C3C` backgrounds must have sufficient contrast for text overlaid on them.
+- **Color Contrast**: Use design system colors — Primary `#6D28D9` on white `#FFFFFF` must meet WCAG AA (4.5:1 for normal text, 3:1 for large text). Danger `#E74C3C` backgrounds must have sufficient contrast for text overlaid on them.
 
 ## Review Checklist
 
