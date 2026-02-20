@@ -1,5 +1,6 @@
 export { ExampleForm } from './ExampleForm'
 export { HeroSection } from './HeroSection'
+export { JourneySection } from './JourneySection'
 export { Layout } from './Layout'
 export { Navbar } from './Navbar'
 export { TypewriterInput } from './TypewriterInput'
