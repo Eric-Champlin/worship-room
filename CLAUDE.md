@@ -484,17 +484,99 @@ Below the hero input box, add a secondary entry point:
 
 ### Starting Point Quiz Flow
 
-1. Quiz section has `id="quiz"` so the hero teaser can scroll to it. User can also scroll to it naturally.
-2. Sees: "Not Sure Where to Start?" with subheading
-3. 3-5 multiple-choice questions with progress bar (single-select, forward/back navigation)
-4. Questions cover: what brought them, emotional state, what sounds helpful, existing practice
-5. Client-side result mapping → personalized recommendation card with:
-   - Recommended feature + CTA button
-   - Relevant scripture verse
-   - "Or explore all features →" secondary link
-6. **Safety**: If answers indicate distress → include crisis resource note on result page
-7. **Privacy**: 100% client-side (React state), no data persistence for logged-out users
-8. **If logged in**: Optionally save quiz results to inform future AI recommendations
+**Purpose:** Route new visitors to the best starting feature based on their answers. Purely a navigation tool — no AI, no backend, no data persistence.
+
+**Location:** Section 5 on landing page, `id="quiz"`, sits below Growth Teasers section. Hero quiz teaser smooth-scrolls here.
+
+**Background:** Gradient transition from the dark purple Growth Teasers section back into white/light. Top of section fades from Hero Dark (#0D0620) → white (#FFFFFF). The quiz card and content sit on the white portion.
+
+**Layout:** Always visible inline on the landing page (not a modal). Shows one question at a time inside a card. Progress indicator shows "Question 1 of 5" so users know the commitment.
+
+**Heading:** "Not Sure Where to Start?" with Caveat script accent on "Start" (consistent with other section headings). Subheading: "Take a 30-second quiz and we’ll point you in the right direction."
+
+**Tone:** Gentle and guided, like a counselor intake. Warm but purposeful.
+
+**5 Questions (single-select, 4 options each):**
+
+Q1: "What brought you here today?"
+- Going through a hard time → +2 Pray, +1 Local Support
+- Want to grow my faith → +2 Meditate, +1 Journal
+- Feeling anxious or stressed → +2 Music, +1 Meditate
+- All of the above → +1 Pray, +1 Journal, +1 Meditate, +1 Music
+
+Q2: "How are you feeling right now?"
+- I need comfort → +2 Pray, +1 Music
+- I feel stuck in my faith → +2 Meditate, +1 Journal
+- I’m okay but want more → +2 Journal, +1 Prayer Wall
+- I’m doing well → +2 Prayer Wall, +1 Music
+
+Q3: "What sounds most helpful?"
+- Prayer and scripture → +3 Pray
+- Writing out my thoughts → +3 Journal
+- Quiet reflection → +3 Meditate
+- Worship music → +3 Music
+
+Q4: "When do you most need support?"
+- Mornings → +1 Pray, +1 Journal
+- During stressful moments → +1 Pray, +1 Music
+- At night / bedtime → +2 Sleep & Rest, +1 Music
+- Throughout the day → +1 Journal, +1 Prayer Wall
+
+Q5: "What’s your experience with faith practices?"
+- I practice regularly → +2 Prayer Wall, +1 Journal
+- I try but not consistent → +1 Meditate, +1 Music
+- I used to but stopped → +1 Pray, +1 Meditate
+- I’m brand new → +2 Pray, +1 Local Support
+
+**Scoring:** Each answer adds points to one or more features. After 5 questions, the feature with the highest total points is recommended. Tiebreaker: Pray wins ties (strongest first-time experience).
+
+**Possible destinations (7):**
+- **Pray** → /scripture — "Start with Prayer"
+- **Journal** → /journal — "Begin Journaling"
+- **Meditate** → /meditate — "Find Peace in Meditation"
+- **Music** → /music — "Worship Through Music"
+- **Sleep & Rest** → /music/sleep — "Rest & Restore"
+- **Prayer Wall** → /prayer-wall — "Join the Community"
+- **Local Support** → /churches — "Find Support Near You"
+
+**Result card (shown after Q5):**
+- Personalized headline: "We’d recommend starting with [Feature Name]"
+- 2-3 sentence explanation based on their answers (hardcoded per destination, not AI-generated)
+- Primary CTA button: "Go to [Feature]" → routes to the recommended page
+- Secondary link: "Or explore all features ←" (scrolls up to Journey Section)
+- A relevant encouraging scripture verse (hardcoded per destination)
+- "Retake Quiz" link to reset and start over
+
+**Result descriptions (one per destination):**
+- **Pray:** "It sounds like you could use a moment with God. Share what’s on your heart and receive a personalized scripture and prayer."
+- **Journal:** "Writing is a powerful way to process your thoughts. Let guided prompts help you reflect on what God is doing in your life."
+- **Meditate:** "A quiet moment of reflection can bring clarity and peace. Explore scripture-based meditations at your own pace."
+- **Music:** "Sometimes worship music speaks when words can’t. Let curated playlists meet you where you are."
+- **Sleep & Rest:** "Nighttime can be the hardest. Let calming scripture and gentle sounds help you find rest."
+- **Prayer Wall:** "You’re not alone in this. See what others are praying for and find encouragement in community."
+- **Local Support:** "Sometimes the next step is a real conversation. Find churches and Christian counselors near you."
+
+**Result scripture verses (one per destination):**
+- **Pray:** "Cast all your anxiety on him because he cares for you." — 1 Peter 5:7
+- **Journal:** "Search me, God, and know my heart; test me and know my anxious thoughts." — Psalm 139:23
+- **Meditate:** "Be still, and know that I am God." — Psalm 46:10
+- **Music:** "Sing to the Lord a new song, for he has done marvelous things." — Psalm 98:1
+- **Sleep & Rest:** "In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety." — Psalm 4:8
+- **Prayer Wall:** "Carry each other’s burdens, and in this way you will fulfill the law of Christ." — Galatians 6:2
+- **Local Support:** "Where two or three gather in my name, there am I with them." — Matthew 18:20
+
+**UI behavior:**
+- Progress bar at top of quiz card (fills as user progresses, Primary violet)
+- "Question X of 5" text indicator
+- Forward/back navigation buttons (Back disabled on Q1)
+- Single-select radio-style options (only one selectable per question)
+- Smooth slide/fade transition between questions
+- After Q5, slide transition to result card
+- "Retake Quiz" resets all state and returns to Q1
+
+**Privacy:** 100% client-side React state. No cookies, no analytics, no data persistence. Quiz state resets on page refresh.
+
+**If logged in (future):** Optionally save quiz result to `user_preferences` table to inform future AI recommendations. Not implemented for MVP.
 
 ### Logged-Out Conversion Strategy
 
