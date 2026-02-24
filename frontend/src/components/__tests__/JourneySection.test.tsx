@@ -34,27 +34,33 @@ describe('JourneySection', () => {
       renderJourney()
       expect(
         screen.getByText(
-          /from prayer to community, every step draws you closer to peace/i
+          (_, element) =>
+            element?.tagName === 'P' &&
+            /from\s+prayer\s+to\s+community.*every step draws you closer to\s+peace/i.test(
+              element.textContent ?? ''
+            )
         )
       ).toBeInTheDocument()
     })
 
-    it('renders an ordered list with 6 items', () => {
+    it('renders an ordered list with 8 items', () => {
       renderJourney()
       const list = screen.getByRole('list')
       const items = within(list).getAllByRole('listitem')
-      expect(items).toHaveLength(6)
+      expect(items).toHaveLength(8)
     })
   })
 
   describe('Step Content', () => {
-    it('renders all 6 step title headings', () => {
+    it('renders all 8 step title headings', () => {
       renderJourney()
       const titles = [
         'Pray',
         'Journal',
         'Meditate',
+        'Listen',
         'Music',
+        'Reflect',
         'Prayer Wall',
         'Local Support',
       ]
@@ -65,9 +71,9 @@ describe('JourneySection', () => {
       }
     })
 
-    it('renders numbered circles 1-6', () => {
+    it('renders numbered circles 1-8', () => {
       renderJourney()
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 1; i <= 8; i++) {
         expect(screen.getByText(String(i))).toBeInTheDocument()
       }
     })
@@ -82,7 +88,13 @@ describe('JourneySection', () => {
       ).toBeInTheDocument()
       expect(screen.getByText(/quiet your mind/i)).toBeInTheDocument()
       expect(
+        screen.getByText(/hear god.s word spoken over you/i)
+      ).toBeInTheDocument()
+      expect(
         screen.getByText(/let music carry you deeper/i)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(/see how far you.ve come/i)
       ).toBeInTheDocument()
       expect(screen.getByText(/you.re not alone/i)).toBeInTheDocument()
       expect(
@@ -95,10 +107,12 @@ describe('JourneySection', () => {
     it('each step links to its correct route', () => {
       renderJourney()
       const expectedRoutes = [
-        '/pray',
+        '/scripture',
         '/journal',
         '/meditate',
+        '/listen',
         '/music',
+        '/insights',
         '/prayer-wall',
         '/churches',
       ]
@@ -109,10 +123,10 @@ describe('JourneySection', () => {
       }
     })
 
-    it('all 6 links are keyboard-focusable', () => {
+    it('all 8 links are keyboard-focusable', () => {
       renderJourney()
       const links = screen.getAllByRole('link')
-      expect(links).toHaveLength(6)
+      expect(links).toHaveLength(8)
       for (const link of links) {
         expect(link).not.toHaveAttribute('tabindex', '-1')
       }
@@ -122,7 +136,7 @@ describe('JourneySection', () => {
   describe('Accessibility', () => {
     it('numbered circles are hidden from screen readers', () => {
       renderJourney()
-      const circles = screen.getAllByText(/^[1-6]$/)
+      const circles = screen.getAllByText(/^[1-8]$/)
       for (const circle of circles) {
         expect(circle).toHaveAttribute('aria-hidden', 'true')
       }
@@ -158,7 +172,7 @@ describe('JourneySection', () => {
       renderJourney()
       const items = screen.getAllByRole('listitem')
       items.forEach((item, index) => {
-        expect(item.style.transitionDelay).toBe(`${index * 150}ms`)
+        expect(item.style.transitionDelay).toBe(`${index * 120}ms`)
       })
     })
   })
