@@ -10,8 +10,13 @@ const DAILY_LINKS = [
   { label: 'Verse & Song', to: '/daily' },
 ] as const
 
+const MUSIC_LINKS = [
+  { label: 'Worship Playlists', to: '/music/playlists' },
+  { label: 'Ambient Sounds', to: '/music/ambient' },
+  { label: 'Sleep & Rest', to: '/music/sleep' },
+] as const
+
 const NAV_LINKS = [
-  { label: 'Music', to: '/music' },
   { label: 'Prayer Wall', to: '/prayer-wall' },
 ] as const
 
@@ -235,6 +240,185 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
   )
 }
 
+function MusicDropdown({ transparent }: { transparent: boolean }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const location = useLocation()
+
+  const open = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+    setIsOpen(true)
+  }, [])
+
+  const closeWithDelay = useCallback(() => {
+    closeTimerRef.current = setTimeout(() => {
+      setIsOpen(false)
+      closeTimerRef.current = null
+    }, 150)
+  }, [])
+
+  const close = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+    setIsOpen(false)
+  }, [])
+
+  // Close on route change
+  useEffect(() => {
+    close()
+  }, [location.pathname, close])
+
+  // Close on Escape and return focus to trigger
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        close()
+        triggerRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, close])
+
+  // Close on outside click
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        close()
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [isOpen, close])
+
+  // Close on focus leaving the wrapper
+  const handleBlur = useCallback(
+    (e: React.FocusEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
+        close()
+      }
+    },
+    [close]
+  )
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current)
+      }
+    }
+  }, [])
+
+  const isMusicActive = MUSIC_LINKS.some(
+    (link) => location.pathname === link.to
+  ) || location.pathname === '/music'
+
+  return (
+    <div
+      ref={wrapperRef}
+      className={cn(
+        'relative flex items-center py-2',
+        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+        transparent ? 'after:bg-white' : 'after:bg-primary',
+        isMusicActive
+          ? 'after:scale-x-100'
+          : 'after:scale-x-0 hover:after:scale-x-100'
+      )}
+      onMouseEnter={open}
+      onMouseLeave={closeWithDelay}
+      onBlur={handleBlur}
+    >
+      <NavLink
+        to="/music"
+        className={cn(
+          'text-sm font-medium transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+          isMusicActive
+            ? transparent ? 'text-white' : 'text-primary'
+            : transparent
+              ? 'text-white/90 hover:text-white'
+              : 'text-text-dark hover:text-primary'
+        )}
+      >
+        Music
+      </NavLink>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={cn(
+          'ml-0.5 rounded p-0.5 transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+          isMusicActive
+            ? transparent ? 'text-white' : 'text-primary'
+            : transparent
+              ? 'text-white/90 hover:text-white'
+              : 'text-text-dark hover:text-primary'
+        )}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? 'music-dropdown' : undefined}
+        aria-label="Music menu"
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        <ChevronDown
+          className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
+          aria-hidden="true"
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-full min-w-[200px] pt-2">
+          <ul
+            id="music-dropdown"
+            className="animate-dropdown-in rounded-xl bg-white py-1.5 shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10"
+          >
+            {MUSIC_LINKS.map((link) => (
+              <li key={link.to}>
+                <NavLink
+                  to={link.to}
+                  className={({ isActive }) =>
+                    cn(
+                      'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+                      isActive ? 'text-primary' : 'text-text-dark hover:text-primary'
+                    )
+                  }
+                >
+                  {({ isActive }) => (
+                    <span
+                      className={cn(
+                        'relative pb-0.5',
+                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        isActive
+                          ? 'after:scale-x-100'
+                          : 'after:scale-x-0 group-hover:after:scale-x-100'
+                      )}
+                    >
+                      {link.label}
+                    </span>
+                  )}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -418,6 +602,7 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
   return (
     <div className="hidden items-center gap-6 lg:flex">
       <DailyDropdown transparent={transparent} />
+      <MusicDropdown transparent={transparent} />
       {NAV_LINKS.map((link) => (
         <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
           {link.label}
@@ -512,7 +697,39 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               ))}
             </div>
 
-            {/* Standalone links */}
+            {/* Music section */}
+            <div
+              className="mt-2 border-t border-gray-100 pt-2"
+              role="group"
+              aria-labelledby="music-heading"
+            >
+              <span
+                id="music-heading"
+                className="px-3 text-xs font-semibold uppercase tracking-wider text-text-dark"
+              >
+                Music
+              </span>
+              {MUSIC_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    cn(
+                      'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                      isActive
+                        ? 'bg-primary/5 text-primary'
+                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                    )
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Standalone link: Prayer Wall */}
             <div className="mt-2 border-t border-gray-100 pt-2">
               {NAV_LINKS.map((link) => (
                 <NavLink

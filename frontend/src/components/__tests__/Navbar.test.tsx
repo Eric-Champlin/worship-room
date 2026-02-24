@@ -25,18 +25,18 @@ describe('Navbar', () => {
   })
 
   describe('Desktop nav links', () => {
-    it('renders 2 top-level nav links', () => {
+    it('renders 1 top-level nav link', () => {
       renderNavbar()
-      const links = ['Music', 'Prayer Wall']
-      for (const label of links) {
-        expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
-      }
+      expect(screen.getByRole('link', { name: 'Prayer Wall' })).toBeInTheDocument()
     })
 
-    it('renders "Daily" and "Local Support" dropdown triggers', () => {
+    it('renders "Daily", "Music", and "Local Support" dropdown triggers', () => {
       renderNavbar()
       expect(
         screen.getByRole('button', { name: /daily menu/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /music menu/i })
       ).toBeInTheDocument()
       expect(
         screen.getByRole('button', { name: /local support menu/i })
@@ -234,6 +234,127 @@ describe('Navbar', () => {
     })
   })
 
+  describe('Music dropdown', () => {
+    it('"Music" label is a link to /music', () => {
+      renderNavbar()
+      const link = screen.getByRole('link', { name: 'Music' })
+      expect(link).toHaveAttribute('href', '/music')
+    })
+
+    it('dropdown is closed by default', () => {
+      renderNavbar()
+      expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
+    })
+
+    it('clicking the chevron opens the dropdown', () => {
+      renderNavbar()
+      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
+      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
+    })
+
+    it('clicking the chevron again closes the dropdown', () => {
+      renderNavbar()
+      const trigger = screen.getByRole('button', { name: /music menu/i })
+      fireEvent.click(trigger)
+      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
+      fireEvent.click(trigger)
+      expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
+    })
+
+    it('dropdown links point to correct routes', () => {
+      renderNavbar()
+      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
+      const dropdown = document.getElementById('music-dropdown')!
+      const links = within(dropdown).getAllByRole('link')
+      expect(links).toHaveLength(3)
+      expect(links[0]).toHaveAttribute('href', '/music/playlists')
+      expect(links[1]).toHaveAttribute('href', '/music/ambient')
+      expect(links[2]).toHaveAttribute('href', '/music/sleep')
+    })
+
+    it('Escape key closes the dropdown', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
+      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
+      await user.keyboard('{Escape}')
+      expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
+    })
+
+    it('Escape key returns focus to the chevron trigger', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+      const trigger = screen.getByRole('button', { name: /music menu/i })
+      fireEvent.click(trigger)
+      await user.keyboard('{Escape}')
+      expect(document.activeElement).toBe(trigger)
+    })
+
+    it('outside click closes the dropdown', () => {
+      renderNavbar()
+      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
+      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
+      fireEvent.mouseDown(screen.getByLabelText('Main navigation'))
+      expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
+    })
+
+    it('chevron trigger has aria-haspopup="true" and correct aria-expanded', () => {
+      renderNavbar()
+      const trigger = screen.getByRole('button', { name: /music menu/i })
+      expect(trigger).toHaveAttribute('aria-haspopup', 'true')
+      expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      fireEvent.click(trigger)
+      expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('aria-controls is only set when dropdown is open', () => {
+      renderNavbar()
+      const trigger = screen.getByRole('button', { name: /music menu/i })
+      expect(trigger).not.toHaveAttribute('aria-controls')
+      fireEvent.click(trigger)
+      expect(trigger).toHaveAttribute('aria-controls', 'music-dropdown')
+    })
+
+    it('dropdown panel uses ul/li with no ARIA role override', () => {
+      renderNavbar()
+      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
+      const dropdown = document.getElementById('music-dropdown')!
+      expect(dropdown.tagName).toBe('UL')
+      expect(dropdown).not.toHaveAttribute('role')
+      const links = within(dropdown).getAllByRole('link')
+      expect(links).toHaveLength(3)
+    })
+
+    it('hovering over the wrapper opens the dropdown', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+      const trigger = screen.getByRole('button', { name: /music menu/i })
+      const wrapper = trigger.closest('.relative')!
+      await user.hover(wrapper)
+      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
+    })
+
+    it('unhovering the wrapper closes the dropdown after delay', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      try {
+        renderNavbar()
+        const trigger = screen.getByRole('button', { name: /music menu/i })
+        const wrapper = trigger.closest('.relative')!
+        await user.hover(wrapper)
+        expect(document.getElementById('music-dropdown')).toBeInTheDocument()
+        await user.unhover(wrapper)
+        expect(document.getElementById('music-dropdown')).toBeInTheDocument()
+        act(() => {
+          vi.advanceTimersByTime(200)
+        })
+        expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+  })
+
   describe('Hamburger menu', () => {
     it('hamburger button exists with correct aria-label', () => {
       renderNavbar()
@@ -334,7 +455,9 @@ describe('Navbar', () => {
         'Journal',
         'Meditate',
         'Verse & Song',
-        'Music',
+        'Worship Playlists',
+        'Ambient Sounds',
+        'Sleep & Rest',
         'Prayer Wall',
         'Churches',
         'Counselors',
@@ -360,16 +483,16 @@ describe('Navbar', () => {
 
   describe('Active route', () => {
     it('active top-level link has active styling', () => {
-      renderNavbar('/music')
-      const musicLink = screen.getByRole('link', { name: 'Music' })
-      expect(musicLink.className).toContain('text-primary')
-      expect(musicLink.className).toContain('after:scale-x-100')
+      renderNavbar('/prayer-wall')
+      const link = screen.getByRole('link', { name: 'Prayer Wall' })
+      expect(link.className).toContain('text-primary')
+      expect(link.className).toContain('after:scale-x-100')
     })
 
     it('active route link has aria-current="page"', () => {
-      renderNavbar('/music')
-      const musicLink = screen.getByRole('link', { name: 'Music' })
-      expect(musicLink).toHaveAttribute('aria-current', 'page')
+      renderNavbar('/prayer-wall')
+      const link = screen.getByRole('link', { name: 'Prayer Wall' })
+      expect(link).toHaveAttribute('aria-current', 'page')
     })
   })
 })
