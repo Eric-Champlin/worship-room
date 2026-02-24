@@ -4,7 +4,8 @@ import { useInView } from '@/hooks/useInView'
 
 interface JourneyStep {
   number: number
-  title: string
+  prefix: string
+  highlight: string
   description: string
   to: string
 }
@@ -12,42 +13,48 @@ interface JourneyStep {
 const JOURNEY_STEPS: JourneyStep[] = [
   {
     number: 1,
-    title: 'Pray',
+    prefix: 'Learn to',
+    highlight: 'Pray',
     description:
       "Begin with what\u2019s on your heart. Share your feelings and receive a personalized prayer grounded in Scripture.",
     to: '/scripture',
   },
   {
     number: 2,
-    title: 'Journal',
+    prefix: 'Learn to',
+    highlight: 'Journal',
     description:
       'Put your thoughts into words. Guided prompts help you reflect on what God is doing in your life.',
     to: '/journal',
   },
   {
     number: 3,
-    title: 'Meditate',
+    prefix: 'Learn to',
+    highlight: 'Meditate',
     description:
       'Quiet your mind with guided meditations rooted in Biblical truth. Let peace settle in.',
     to: '/meditate',
   },
   {
     number: 4,
-    title: 'Music',
+    prefix: 'Listen to',
+    highlight: 'Music',
     description:
       'Let music carry you deeper. Curated worship playlists matched to where you are right now.',
     to: '/music',
   },
   {
     number: 5,
-    title: 'Prayer Wall',
+    prefix: 'Write on the',
+    highlight: 'Prayer Wall',
     description:
       "You\u2019re not alone. Share prayer requests and lift others up in a safe, supportive community.",
     to: '/prayer-wall',
   },
   {
     number: 6,
-    title: 'Local Support',
+    prefix: 'Find',
+    highlight: 'Local Support',
     description:
       'Find churches and Christian counselors near you. The next step in your healing may be just around the corner.',
     to: '/churches',
@@ -176,38 +183,7 @@ export function JourneySection() {
               </span>
             </h2>
             <p className="text-base text-text-dark sm:text-lg">
-              From{' '}
-              <span
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  color: '#6D28D9',
-                  fontSize: '1.5em',
-                }}
-              >
-                prayer
-              </span>{' '}
-              to{' '}
-              <span
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  color: '#6D28D9',
-                  fontSize: '1.5em',
-                }}
-              >
-                community
-              </span>
-              , every step
-              draws you closer to{' '}
-              <span
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  color: '#6D28D9',
-                  fontSize: '1.5em',
-                }}
-              >
-                peace
-              </span>
-              .
+              From prayer to community, every step draws you closer to peace.
             </p>
           </div>
 
@@ -248,7 +224,16 @@ export function JourneySection() {
 
                   <div className={cn('pb-8', isLast && 'pb-0')}>
                     <h3 className="mb-1 font-sans text-lg font-semibold text-text-dark group-hover:text-primary sm:text-xl">
-                      {step.title}
+                      {step.prefix}{' '}
+                      <span
+                        className="text-2xl sm:text-3xl"
+                        style={{
+                          fontFamily: "'Caveat', cursive",
+                          color: '#6D28D9',
+                        }}
+                      >
+                        {step.highlight}
+                      </span>
                     </h3>
                     <p className="text-sm leading-relaxed text-text-dark sm:text-base">
                       {step.description}

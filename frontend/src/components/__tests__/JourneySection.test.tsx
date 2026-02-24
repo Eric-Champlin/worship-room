@@ -55,12 +55,12 @@ describe('JourneySection', () => {
     it('renders all 6 step title headings', () => {
       renderJourney()
       const titles = [
-        'Pray',
-        'Journal',
-        'Meditate',
-        'Music',
-        'Prayer Wall',
-        'Local Support',
+        'Learn to Pray',
+        'Learn to Journal',
+        'Learn to Meditate',
+        'Listen to Music',
+        'Write on the Prayer Wall',
+        'Find Local Support',
       ]
       for (const title of titles) {
         expect(

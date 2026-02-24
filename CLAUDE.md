@@ -154,11 +154,12 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 
 ### Landing Page Sections
 
-51. **Starting Point Quiz** - 3-5 question quiz ("Not Sure Where to Start?") that recommends a personalized entry point based on user's emotional state, spiritual background, and preferences. Client-side only, no data persistence for logged-out users. Includes crisis resource note if answers indicate distress.
-52. **Values Section** - "Why Worship Room?" — 4 value cards: Always Free, Privacy-First, Built with Safety, Grounded in Scripture (replaces testimonials for new site)
-53. **Impact Counter** - Growing stats (scriptures matched, prayers generated, community prayer requests)
-54. **CTA Section** - Bottom call-to-action repeating hero input or "Get Started Free" button
-55. **Footer** - Nav links, crisis resources, mission statement, disclaimers
+51. **Growth Teasers Section** - "See How You're Growing" — 3 blurred preview cards (Mood Insights, Streaks & Faith Points, Friends & Leaderboard) showing logged-out visitors what they unlock with an account. Dark purple gradient background with frosted glass card previews. CTA to register.
+52. **Starting Point Quiz** - 3-5 question quiz ("Not Sure Where to Start?") that recommends a personalized entry point based on user's emotional state, spiritual background, and preferences. Client-side only, no data persistence for logged-out users. Includes crisis resource note if answers indicate distress.
+53. **Values Section** - "Why Worship Room?" — 4 value cards: Always Free, Privacy-First, Built with Safety, Grounded in Scripture (replaces testimonials for new site)
+54. **Impact Counter** - Growing stats (scriptures matched, prayers generated, community prayer requests)
+55. **CTA Section** - Bottom call-to-action repeating hero input or "Get Started Free" button
+56. **Footer** - Nav links, crisis resources, mission statement, disclaimers
 
 ### Polish & Launch Prep
 
@@ -312,11 +313,12 @@ The landing page sections render in this order:
 1. Navbar (transparent glassmorphic pill — Daily dropdown, Music dropdown, Prayer Wall, Local Support dropdown)
 2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /scripture, quiz teaser link scrolls to #quiz)
 3. Journey Section (6-step vertical timeline: Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
-4. Starting Point Quiz (id="quiz" — "Not Sure Where to Start?" — 3-5 questions, Ramsey-style progress bar, routes to recommended feature)
-5. Values Section ("Why Worship Room?" — 4 cards: Always Free, Privacy-First, Built with Safety, Grounded in Scripture)
-6. Impact Counter (growing stats: scriptures matched, prayers generated, community prayer requests)
-7. CTA Section (repeat hero input or "Get Started Free" button)
-8. Footer (nav links, crisis resources, mission statement, disclaimers)
+4. Growth Teasers Section ("See How You're Growing" — 3 blurred preview cards: Mood Insights, Streaks & Faith Points, Friends & Leaderboard. Dark purple gradient background.)
+5. Starting Point Quiz (id="quiz" — "Not Sure Where to Start?" — 3-5 questions, Ramsey-style progress bar, routes to recommended feature)
+6. Values Section ("Why Worship Room?" — 4 cards: Always Free, Privacy-First, Built with Safety, Grounded in Scripture)
+7. Impact Counter (growing stats: scriptures matched, prayers generated, community prayer requests)
+8. CTA Section (repeat hero input or "Get Started Free" button)
+9. Footer (nav links, crisis resources, mission statement, disclaimers)
 ```
 
 ### Journey Steps (6 Steps)
@@ -424,6 +426,52 @@ The landing page sections render in this order:
 7. Users can "Mark as Answered" on their own posts → optional testimony sharing
 8. Admin can view flagged posts at `/admin/prayer-wall` and edit/delete
 9. Admin actions logged to `admin_audit_log`
+
+### Growth Teasers Section
+
+**Purpose:** Show logged-out visitors what they unlock with an account. Answers: "Why should I come back?" Sits between the Journey Section and the Starting Point Quiz.
+
+**Background:** Gradient transition from the white Journey Section background into dark purple (Hero Dark #0D0620). The top of the section fades from white/light → dark purple, so it feels like re-entering the immersive hero space. The cards and content sit on the dark purple portion.
+
+**Section heading:** "See How You're Growing" — with Caveat script accent on "Growing" (consistent with Journey Section heading style). Subheading below in Text Light: "Create a free account and unlock your personal dashboard."
+
+**3 preview cards, side-by-side on desktop, stacked on mobile:**
+
+1. **📊 Mood Insights**
+   - Title: "Mood Insights"
+   - Description: "See how God is meeting you over time."
+   - Preview: A CSS-rendered mini mood heatmap (7x4 grid of colored squares, like a GitHub contribution graph) + a simple trend line below it. Use sample data with mood colors (greens, yellows, occasional red). Apply a frosted glass blur overlay (backdrop-filter: blur) with ~60% opacity so it looks real but clearly locked.
+   - Icon: Lucide `BarChart3` or `TrendingUp` in Primary violet
+
+2. **🔥 Streaks & Faith Points**
+   - Title: "Streaks & Faith Points"
+   - Description: "Build daily habits and watch your faith grow."
+   - Preview: A streak counter showing "🔥 12 Days" in large text + a Faith Points badge showing "⭐ 145 pts" below it. Show 3 small milestone badges in a row ("First Prayer", "7-Day Streak", "Prayer Warrior") — some unlocked (colored), some locked (gray). Apply same frosted blur overlay.
+   - Icon: Lucide `Flame` or `Zap` in orange/amber
+
+3. **🏆 Friends & Leaderboard**
+   - Title: "Friends & Leaderboard"
+   - Description: "Grow together and encourage each other."
+   - Preview: A mini leaderboard table with 4 rows — blurred usernames, visible point totals (280, 245, 190, 145), small rank numbers (#1-#4). One row subtly highlighted as "You" at #4. Apply same frosted blur overlay.
+   - Icon: Lucide `Users` or `Trophy` in cyan (#00D4FF)
+
+**Card styling:**
+- Dark card background (#1a1030 or similar) with subtle border (1px solid #2a2040)
+- Rounded corners (16px), soft shadow
+- Preview area at top (~150px height), title + description below
+- Small lock icon (🔒 or Lucide `Lock`) in the corner of each preview overlay
+- Subtle hover animation: slight lift + blur decreases slightly (teasing what's underneath)
+
+**CTA below cards:** Centered button: "Create a Free Account" → routes to `/register`. Styled as primary button (Primary violet background, white text, rounded). Secondary text below: "It's free. No credit card. No catch."
+
+**Responsive:**
+- Desktop: 3 cards in a row (equal width)
+- Tablet: 3 cards in a row (slightly compressed) or 2+1 layout
+- Mobile: stacked vertically, full width
+
+**Animation:** Cards fade in with stagger animation on scroll (same pattern as Journey Section). The gradient background transition should feel smooth and natural.
+
+**Important:** The previews are 100% static CSS/HTML mockups — no real data, no API calls, no JavaScript logic. They just need to look like real dashboard previews that are blurred/locked.
 
 ### Hero Quiz Teaser
 
@@ -583,13 +631,15 @@ Use this workflow for all new features:
 ### Implementation Phases
 
 **Phase 1 — Complete the Landing Page**
-- Update Navbar (Daily dropdown + Music + Prayer Wall + Local Support dropdown)
+- Update Navbar (Daily dropdown + Music dropdown + Prayer Wall + Local Support dropdown)
 - Keep JourneySection at 6 steps (Pray, Journal, Meditate, Music, Prayer Wall, Local Support) — update descriptions if needed
-- Build Footer (nav links, crisis resources, mission statement)
+- Add hero quiz teaser (smooth scroll link to #quiz)
+- Build GrowthTeasers section (3 blurred preview cards, dark purple gradient background)
+- Build StartingPointQuiz (Ramsey-style quiz, id="quiz")
 - Build ValuesSection (4 value cards)
-- Build CTASection (bottom call-to-action)
-- Build StartingPointQuiz (Ramsey-style quiz)
 - Build ImpactCounter (growing stats)
+- Build CTASection (bottom call-to-action)
+- Build Footer (nav links, crisis resources, mission statement)
 
 **Phase 2 — Core Product Experience**
 - Build `/scripture` page (mood selector → AI scripture match → reflection → prayer → Read Aloud)
