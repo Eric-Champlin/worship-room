@@ -203,7 +203,12 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
         <div className="absolute left-0 top-full min-w-[180px] pt-2">
           <ul
             id="daily-dropdown"
-            className="animate-dropdown-in rounded-xl bg-white py-1.5 shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10"
+            className={cn(
+              'animate-dropdown-in rounded-xl py-1.5',
+              transparent
+                ? 'bg-[#1E0B3E] border border-white/15 shadow-lg'
+                : 'bg-white shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10'
+            )}
           >
             {DAILY_LINKS.map((link) => (
               <li key={link.to}>
@@ -213,7 +218,9 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
                     cn(
                       'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      isActive ? 'text-primary' : 'text-text-dark hover:text-primary'
+                      isActive
+                        ? transparent ? 'text-white' : 'text-primary'
+                        : transparent ? 'text-white/90 hover:text-white' : 'text-text-dark hover:text-primary'
                     )
                   }
                 >
@@ -221,7 +228,8 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
                     <span
                       className={cn(
                         'relative pb-0.5',
-                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        transparent ? 'after:bg-white' : 'after:bg-primary',
                         isActive
                           ? 'after:scale-x-100'
                           : 'after:scale-x-0 group-hover:after:scale-x-100'
@@ -382,7 +390,12 @@ function MusicDropdown({ transparent }: { transparent: boolean }) {
         <div className="absolute left-0 top-full min-w-[200px] pt-2">
           <ul
             id="music-dropdown"
-            className="animate-dropdown-in rounded-xl bg-white py-1.5 shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10"
+            className={cn(
+              'animate-dropdown-in rounded-xl py-1.5',
+              transparent
+                ? 'bg-[#1E0B3E] border border-white/15 shadow-lg'
+                : 'bg-white shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10'
+            )}
           >
             {MUSIC_LINKS.map((link) => (
               <li key={link.to}>
@@ -392,7 +405,9 @@ function MusicDropdown({ transparent }: { transparent: boolean }) {
                     cn(
                       'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      isActive ? 'text-primary' : 'text-text-dark hover:text-primary'
+                      isActive
+                        ? transparent ? 'text-white' : 'text-primary'
+                        : transparent ? 'text-white/90 hover:text-white' : 'text-text-dark hover:text-primary'
                     )
                   }
                 >
@@ -400,7 +415,8 @@ function MusicDropdown({ transparent }: { transparent: boolean }) {
                     <span
                       className={cn(
                         'relative pb-0.5',
-                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        transparent ? 'after:bg-white' : 'after:bg-primary',
                         isActive
                           ? 'after:scale-x-100'
                           : 'after:scale-x-0 group-hover:after:scale-x-100'
@@ -561,7 +577,12 @@ function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
         <div className="absolute left-0 top-full min-w-[200px] pt-2">
           <ul
             id="local-support-dropdown"
-            className="animate-dropdown-in rounded-xl bg-white py-1.5 shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10"
+            className={cn(
+              'animate-dropdown-in rounded-xl py-1.5',
+              transparent
+                ? 'bg-[#1E0B3E] border border-white/15 shadow-lg'
+                : 'bg-white shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10'
+            )}
           >
             {LOCAL_SUPPORT_LINKS.map((link) => (
               <li key={link.to}>
@@ -571,7 +592,9 @@ function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
                     cn(
                       'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      isActive ? 'text-primary' : 'text-text-dark hover:text-primary'
+                      isActive
+                        ? transparent ? 'text-white' : 'text-primary'
+                        : transparent ? 'text-white/90 hover:text-white' : 'text-text-dark hover:text-primary'
                     )
                   }
                 >
@@ -579,7 +602,8 @@ function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
                     <span
                       className={cn(
                         'relative pb-0.5',
-                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        transparent ? 'after:bg-white' : 'after:bg-primary',
                         isActive
                           ? 'after:scale-x-100'
                           : 'after:scale-x-0 group-hover:after:scale-x-100'

@@ -310,9 +310,9 @@ The landing page sections render in this order:
 
 ```
 1. Navbar (transparent glassmorphic pill — Daily dropdown, Music dropdown, Prayer Wall, Local Support dropdown)
-2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /scripture)
+2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /scripture, quiz teaser link scrolls to #quiz)
 3. Journey Section (6-step vertical timeline: Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
-4. Starting Point Quiz ("Not Sure Where to Start?" — 3-5 questions, Ramsey-style progress bar, routes to recommended feature)
+4. Starting Point Quiz (id="quiz" — "Not Sure Where to Start?" — 3-5 questions, Ramsey-style progress bar, routes to recommended feature)
 5. Values Section ("Why Worship Room?" — 4 cards: Always Free, Privacy-First, Built with Safety, Grounded in Scripture)
 6. Impact Counter (growing stats: scriptures matched, prayers generated, community prayer requests)
 7. CTA Section (repeat hero input or "Get Started Free" button)
@@ -425,9 +425,18 @@ The landing page sections render in this order:
 8. Admin can view flagged posts at `/admin/prayer-wall` and edit/delete
 9. Admin actions logged to `admin_audit_log`
 
+### Hero Quiz Teaser
+
+Below the hero input box, add a secondary entry point:
+- Text: "Not sure where to start? Take a 30-second quiz and we'll help you find your path."
+- "Take the quiz" is a clickable link/button that smooth-scrolls to the `#quiz` section further down the landing page.
+- Styling: subtle, secondary text (Text Light color, smaller font). Not competing with the main input box — just a gentle alternative for people who feel overwhelmed or curious.
+- Uses `scrollIntoView({ behavior: 'smooth' })` or an `<a href="#quiz">` with CSS `scroll-behavior: smooth` on the html element.
+- The quiz section (built later) must have `id="quiz"` on its container.
+
 ### Starting Point Quiz Flow
 
-1. User scrolls to quiz section on landing page (below journey steps)
+1. Quiz section has `id="quiz"` so the hero teaser can scroll to it. User can also scroll to it naturally.
 2. Sees: "Not Sure Where to Start?" with subheading
 3. 3-5 multiple-choice questions with progress bar (single-select, forward/back navigation)
 4. Questions cover: what brought them, emotional state, what sounds helpful, existing practice
