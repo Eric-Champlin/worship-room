@@ -67,6 +67,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - ❌ Community prayer groups / small groups (post-MVP growth feature)
 - ❌ Church partnership portal (post-MVP growth feature)
 - ❌ Apple Health / Google Fit integration (app-only, post-launch)
+- ❌ Standalone "Listen" page (audio features are distributed across Scripture, Meditation, and Journal pages)
 
 ### Foundation
 
@@ -101,12 +102,14 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 20. **Prayer Request Generation** - AI helps users articulate prayer needs
 21. **AI Scripture Follow-Up Chat** - Conversational follow-up after scripture display ("Dig Deeper" — context-aware cross-references, historical context, practical applications)
 
-### Audio & Listen Features
+### Audio Features (Distributed — No Standalone Page)
 
-22. **Audio Scripture Playback** - TTS reading of AI-matched scriptures (browser Speech Synthesis API for MVP, upgrade to OpenAI TTS or ElevenLabs later)
-23. **Audio Prayer Playback** - TTS reading of AI-generated prayers and reflections
-24. **Ambient Background Sounds** - Nature sounds, gentle piano, rain during meditation, scripture reading, and journaling
-25. **Sleep & Bedtime Content** - Calming scripture readings, bedtime meditations, sleep timer with audio fade-out, "Wind Down" dimmed UI mode
+Audio is a feature layer that enhances existing pages, not a standalone destination.
+
+22. **Audio Scripture Playback** - "Read Aloud" TTS on `/scripture` page (browser Speech Synthesis API for MVP, upgrade to OpenAI TTS or ElevenLabs later)
+23. **Audio Prayer Playback** - "Read Aloud" TTS on AI-generated prayers and reflections
+24. **Ambient Background Sounds** - Toggle on `/meditate` and `/journal` pages (nature sounds, gentle piano, rain)
+25. **Sleep & Bedtime Content** - Calming meditations with sleep timer and audio fade-out on `/meditate` page, "Wind Down" dimmed UI mode
 26. **Read Aloud Button** - Available on all text content (scriptures, prayers, reflections, meditations) for accessibility
 
 ### Community Features
@@ -133,7 +136,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 ### Analytics & Personalization
 
 39. **Mood History Dashboard** - 7-day snapshot on `/dashboard`
-40. **Mood Insights Page** - Full history with calendar heatmap and line charts at `/insights`
+40. **Mood Insights Page** - Full history with calendar heatmap and line charts at `/insights` (accessible from dashboard, not top-level nav)
 41. **Trend Analysis** - AI-generated insights ("Your mood is improving this week!")
 42. **Mood Correlations** - "You tend to feel better on days you journal"
 43. **Personalized Recommendations** - Scripture/music suggestions based on mood history
@@ -180,38 +183,38 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 ### Desktop Navbar
 
 ```
-[Worship Room logo]   Pray   Journal   Meditate   Listen   [Explore ▾]   [Log In]  [Get Started]
+[Worship Room logo]   [Daily ▾]   Music   Prayer Wall   [Local Support ▾]   [Log In]  [Get Started]
 ```
 
-**Top-level links (4):** Pray, Journal, Meditate, Listen — the core solo healing activities.
+**Top-level links (2):** Music, Prayer Wall — your key differentiators, always visible.
 
-**"Explore" dropdown:**
+**"Daily" dropdown** (clickable label goes to `/daily`; dropdown expands on hover/click):
 ```
-├── Music
-├── Prayer Wall
-├── Reflect (Mood Insights)
-├── Daily Verse & Song
-├── ─────────────────
-├── LOCAL SUPPORT
-├──   Churches
-├──   Counselors
+├── Pray
+├── Journal
+├── Meditate
+├── Verse & Song
 ```
 
-**Design rationale:** Someone in emotional distress reaches for Pray, Journal, Meditate, or Listen first. Music, community, and discovery features are one click away under Explore. This keeps the navbar clean and leaves room to grow (Reading Plans, Sleep & Rest, Community Groups slot into Explore later).
+**"Local Support" dropdown** (clickable label goes to `/churches`; dropdown expands on hover/click):
+```
+├── Churches
+├── Counselors
+```
+
+**Design rationale:** This navbar highlights what makes Worship Room different from competitors — community prayer support (Prayer Wall) and real-world help (Local Support) are top-level and immediately visible. The daily healing activities (Pray, Journal, Meditate, Verse & Song) are grouped under "Daily" because they're habits you return to every day. Music gets its own top-level link because worship music is a distinct, recognizable experience. The navbar has only 4 visible items + auth, which is clean and comfortable at all screen sizes.
 
 ### Mobile Drawer
 
 ```
-Pray
-Journal
-Meditate
-Listen
+DAILY
+  Pray
+  Journal
+  Meditate
+  Verse & Song
 ──────────────
-EXPLORE
-  Music
-  Prayer Wall
-  Reflect (Mood Insights)
-  Daily Verse & Song
+Music
+Prayer Wall
 ──────────────
 LOCAL SUPPORT
   Churches
@@ -229,10 +232,13 @@ Replace "Log In / Get Started" with user avatar dropdown:
 ├── My Journal Entries
 ├── My Prayer Requests
 ├── My Favorites
+├── Mood Insights
 ├── Settings
 ├── ─────────────────
 └── Log Out
 ```
+
+**Note:** Mood Insights (`/insights`) is accessible from the user dropdown and from the Dashboard, not from the main nav. It's a personal analytics feature that only makes sense for logged-in users.
 
 ---
 
@@ -241,11 +247,10 @@ Replace "Log In / Get Started" with user avatar dropdown:
 ### Public Routes (No Authentication Required)
 
 - `/` - Landing page (hero, journey timeline, starting point quiz, values section, impact counter, CTA, footer)
-- `/scripture` - Mood selector (buttons + text input) → Scripture display → AI reflection → Prayer generator button → Audio playback
+- `/scripture` - Mood selector (buttons + text input) → Scripture display → AI reflection → Prayer generator button → Read Aloud button
 - `/pray` - Standalone AI prayer generator
-- `/journal` - Journal editor (prompts login to save)
-- `/meditate` - Guided meditations (text + audio, organized by topic)
-- `/listen` - Audio hub: scripture readings, prayer audio, sleep/bedtime content, ambient sounds
+- `/journal` - Journal editor with ambient sounds toggle (prompts login to save)
+- `/meditate` - Guided meditations with ambient sounds, sleep/bedtime content, sleep timer
 - `/music` - Spotify playlist page (embed + deep link)
 - `/prayer-wall` - Community prayer requests (view only when logged out)
 - `/daily` - Verse & Song of the Day
@@ -256,7 +261,7 @@ Replace "Log In / Get Started" with user avatar dropdown:
 
 ### Protected Routes (Require Authentication)
 
-- `/dashboard` - Personalized dashboard with widgets (daily verse/song, quick prayer, 7-day mood snapshot, streak counter)
+- `/dashboard` - Personalized dashboard with widgets (daily verse/song, quick prayer, 7-day mood snapshot, streak counter, link to insights)
 - `/insights` - Mood tracking charts & trends (calendar heatmap, line graph, AI insights, correlations)
 - `/journal/my-entries` - Saved journal entries
 - `/prayers/my-requests` - User's own prayer wall posts (with answered prayer tracking)
@@ -274,9 +279,9 @@ Replace "Log In / Get Started" with user avatar dropdown:
 The landing page sections render in this order:
 
 ```
-1. Navbar (transparent glassmorphic pill — 4 top-level links + Explore dropdown)
+1. Navbar (transparent glassmorphic pill — Daily dropdown, Music, Prayer Wall, Local Support dropdown)
 2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /scripture)
-3. Journey Section (8-step vertical timeline: Pray → Journal → Meditate → Listen → Music → Reflect → Prayer Wall → Local Support)
+3. Journey Section (6-step vertical timeline: Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
 4. Starting Point Quiz ("Not Sure Where to Start?" — 3-5 questions, Ramsey-style progress bar, routes to recommended feature)
 5. Values Section ("Why Worship Room?" — 4 cards: Always Free, Privacy-First, Built with Safety, Grounded in Scripture)
 6. Impact Counter (growing stats: scriptures matched, prayers generated, community prayer requests)
@@ -284,20 +289,18 @@ The landing page sections render in this order:
 8. Footer (nav links, crisis resources, mission statement, disclaimers)
 ```
 
-### Journey Steps (8 Steps)
+### Journey Steps (6 Steps)
 
 | # | Step | Description | Route |
 |---|------|-------------|-------|
 | 1 | Pray | Begin with what's on your heart. Share your feelings and receive a personalized prayer grounded in Scripture. | `/scripture` |
 | 2 | Journal | Put your thoughts into words. Guided prompts help you reflect on what God is doing in your life. | `/journal` |
 | 3 | Meditate | Quiet your mind with guided meditations rooted in Biblical truth. Let peace settle in. | `/meditate` |
-| 4 | Listen | Hear God's Word spoken over you. Audio scripture, prayers, and calming content for rest and renewal. | `/listen` |
-| 5 | Music | Let music carry you deeper. Curated worship playlists matched to where you are right now. | `/music` |
-| 6 | Reflect | See how far you've come. Track your journey and discover patterns in your spiritual growth. | `/insights` |
-| 7 | Prayer Wall | You're not alone. Share prayer requests and lift others up in a safe, supportive community. | `/prayer-wall` |
-| 8 | Local Support | Find churches and Christian counselors near you. The next step in your healing may be just around the corner. | `/churches` |
+| 4 | Music | Let music carry you deeper. Curated worship playlists matched to where you are right now. | `/music` |
+| 5 | Prayer Wall | You're not alone. Share prayer requests and lift others up in a safe, supportive community. | `/prayer-wall` |
+| 6 | Local Support | Find churches and Christian counselors near you. The next step in your healing may be just around the corner. | `/churches` |
 
-**The flow tells a story:** Start with God (Pray) → Process internally (Journal, Meditate) → Receive God's Word (Listen, Music) → See your growth (Reflect) → Connect with others (Prayer Wall) → Get real-world help (Local Support).
+**The flow tells a story:** Start with God (Pray) → Process internally (Journal, Meditate) → Worship (Music) → Connect with others (Prayer Wall) → Get real-world help (Local Support).
 
 ---
 
@@ -324,7 +327,7 @@ The landing page sections render in this order:
 5. Scripture fades in with animation
 6. AI-generated reflection appears below scripture (2-3 sentences)
 7. "Generate a prayer for this" button appears
-8. "Listen" / "Read Aloud" button appears (TTS playback of scripture + reflection)
+8. "Read Aloud" button appears (TTS playback of scripture + reflection)
 9. "Dig Deeper" button for AI follow-up chat (cross-references, context, practical applications)
 10. If logged in: Mood + scripture + timestamp saved to database
 11. If logged out: Prompt to "Create account to save your mood history"
@@ -337,7 +340,7 @@ The landing page sections render in this order:
 4. User optionally provides context via text input
 5. **AI Safety Check** (backend): Run crisis detection (classifier; keywords fallback). Scan input for inappropriate requests or crisis indicators
 6. OpenAI generates personalized prayer
-7. Prayer displays with copy button, audio playback button, and option to save (if logged in)
+7. Prayer displays with copy button, "Read Aloud" button, and option to save (if logged in)
 
 ### Journaling Flow
 
@@ -352,17 +355,16 @@ The landing page sections render in this order:
 6. If logged in: Entry saved to database (encrypted)
 7. If logged out: Modal prompts "Create account to save"
 
-### Audio / Listen Flow
+### Meditation Flow
 
-1. User navigates to `/listen`
-2. Sees content organized by category:
-   - **Scripture Readings** — Audio playback of popular/curated verses (TTS)
-   - **Prayers** — Audio playback of AI-generated prayers
-   - **Sleep & Bedtime** — Calming scripture readings with ambient sounds, sleep timer
-   - **Ambient Sounds** — Standalone soundscapes (rain, ocean, gentle piano, forest)
-3. User selects content → audio player appears with play/pause, volume, timer controls
-4. Sleep timer: User sets duration (15, 30, 60 min) → audio fades out gradually
-5. "Wind Down" mode: Dimmed UI colors for bedtime use
+1. User navigates to `/meditate`
+2. Sees meditations organized by topic (Peace & Calm, Anxiety Relief, Healing, Gratitude, Sleep & Rest, etc.)
+3. User selects a meditation → text displays with "Read Aloud" TTS button
+4. Optional: Ambient background sounds toggle (rain, ocean, gentle piano, forest)
+5. **Sleep & Bedtime content** available as a category:
+   - Calming scripture readings with ambient sounds
+   - Sleep timer: User sets duration (15, 30, 60 min) → audio fades out gradually
+   - "Wind Down" mode: Dimmed UI colors for bedtime use
 
 ### Mood Tracking Flow
 
@@ -373,7 +375,7 @@ The landing page sections render in this order:
    - `scripture_id` (scripture shown)
    - `timestamp`
 2. On `/dashboard`: Show 7-day snapshot (mini chart) + streak counter
-3. On `/insights`: Show full history with:
+3. On `/insights` (accessible from dashboard + user dropdown): Show full history with:
    - Calendar heatmap (like GitHub contributions)
    - Line chart showing mood over time
    - Stats: "This week you felt Good 4 times, Terrible 2 times"
@@ -485,8 +487,8 @@ Use this workflow for all new features:
 ### Implementation Phases
 
 **Phase 1 — Complete the Landing Page**
-- Update JourneySection (6 → 8 steps: add Listen + Reflect)
-- Update Navbar (4 top-level links + Explore dropdown)
+- Update Navbar (Daily dropdown + Music + Prayer Wall + Local Support dropdown)
+- Keep JourneySection at 6 steps (Pray, Journal, Meditate, Music, Prayer Wall, Local Support) — update descriptions if needed
 - Build Footer (nav links, crisis resources, mission statement)
 - Build ValuesSection (4 value cards)
 - Build CTASection (bottom call-to-action)
@@ -494,16 +496,16 @@ Use this workflow for all new features:
 - Build ImpactCounter (growing stats)
 
 **Phase 2 — Core Product Experience**
-- Build `/scripture` page (mood selector → AI scripture match → reflection → prayer)
-- Add TTS audio playback to scripture display
+- Build `/scripture` page (mood selector → AI scripture match → reflection → prayer → Read Aloud)
 - Build mood selector (5 buttons + text)
 - Wire up OpenAI API for scripture matching + prayer generation
-- Build `/listen` page framework
+- Add TTS "Read Aloud" button to scripture display
+- Build `/meditate` page with ambient sounds
 
 **Phase 3 — Auth & Persistence**
 - Auth system (login/register)
-- Dashboard skeleton
-- Journaling with save
+- Dashboard skeleton (with link to /insights)
+- Journaling with save + ambient sounds
 - Prayer wall with moderation
 - Mood tracking to database
 
@@ -514,7 +516,7 @@ Use this workflow for all new features:
 - Saved/favorited content
 - Reading plans
 - Expanded mood insights
-- Sleep & bedtime content
+- Sleep & bedtime content on /meditate
 
 ---
 
