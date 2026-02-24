@@ -33,34 +33,20 @@ const JOURNEY_STEPS: JourneyStep[] = [
   },
   {
     number: 4,
-    title: 'Listen',
-    description:
-      "Hear God\u2019s Word spoken over you. Audio scripture, prayers, and calming content for rest and renewal.",
-    to: '/listen',
-  },
-  {
-    number: 5,
     title: 'Music',
     description:
       'Let music carry you deeper. Curated worship playlists matched to where you are right now.',
     to: '/music',
   },
   {
-    number: 6,
-    title: 'Reflect',
-    description:
-      "See how far you\u2019ve come. Track your journey and discover patterns in your spiritual growth.",
-    to: '/insights',
-  },
-  {
-    number: 7,
+    number: 5,
     title: 'Prayer Wall',
     description:
       "You\u2019re not alone. Share prayer requests and lift others up in a safe, supportive community.",
     to: '/prayer-wall',
   },
   {
-    number: 8,
+    number: 6,
     title: 'Local Support',
     description:
       'Find churches and Christian counselors near you. The next step in your healing may be just around the corner.',
