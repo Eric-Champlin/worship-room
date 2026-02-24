@@ -15,7 +15,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     title: 'Pray',
     description:
       "Begin with what\u2019s on your heart. Share your feelings and receive a personalized prayer grounded in Scripture.",
-    to: '/pray',
+    to: '/scripture',
   },
   {
     number: 2,
@@ -33,20 +33,34 @@ const JOURNEY_STEPS: JourneyStep[] = [
   },
   {
     number: 4,
+    title: 'Listen',
+    description:
+      "Hear God\u2019s Word spoken over you. Audio scripture, prayers, and calming content for rest and renewal.",
+    to: '/listen',
+  },
+  {
+    number: 5,
     title: 'Music',
     description:
       'Let music carry you deeper. Curated worship playlists matched to where you are right now.',
     to: '/music',
   },
   {
-    number: 5,
+    number: 6,
+    title: 'Reflect',
+    description:
+      "See how far you\u2019ve come. Track your journey and discover patterns in your spiritual growth.",
+    to: '/insights',
+  },
+  {
+    number: 7,
     title: 'Prayer Wall',
     description:
       "You\u2019re not alone. Share prayer requests and lift others up in a safe, supportive community.",
     to: '/prayer-wall',
   },
   {
-    number: 6,
+    number: 8,
     title: 'Local Support',
     description:
       'Find churches and Christian counselors near you. The next step in your healing may be just around the corner.',
@@ -59,13 +73,13 @@ function BackgroundSquiggle() {
     <svg
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 h-full w-full"
-      viewBox="0 0 1200 1000"
+      viewBox="0 0 1200 1350"
       preserveAspectRatio="none"
       fill="none"
     >
       {/* Wide central brushstroke */}
       <path
-        d="M400,0 C550,50 300,120 500,200 C700,280 250,370 500,450 C750,530 300,620 550,700 C800,780 350,870 500,960 L500,1000"
+        d="M400,0 C550,50 300,120 500,200 C700,280 250,370 500,450 C750,530 300,620 550,700 C800,780 350,870 500,960 C650,1050 350,1140 500,1230 L500,1350"
         stroke="#D6D3D1"
         strokeWidth="100"
         strokeLinecap="round"
@@ -73,7 +87,7 @@ function BackgroundSquiggle() {
       />
       {/* Right sweeping stroke */}
       <path
-        d="M700,0 C850,80 600,170 800,260 C1000,350 650,440 850,530 C1050,620 700,710 900,800 C1100,890 750,960 900,1000"
+        d="M700,0 C850,80 600,170 800,260 C1000,350 650,440 850,530 C1050,620 700,710 900,800 C1100,890 750,960 900,1050 C1050,1140 800,1230 950,1350"
         stroke="#D6D3D1"
         strokeWidth="80"
         strokeLinecap="round"
@@ -81,7 +95,7 @@ function BackgroundSquiggle() {
       />
       {/* Left sweeping stroke */}
       <path
-        d="M200,50 C350,130 100,220 300,310 C500,400 150,490 350,580 C550,670 200,760 350,850 C500,940 250,980 350,1000"
+        d="M200,50 C350,130 100,220 300,310 C500,400 150,490 350,580 C550,670 200,760 350,850 C500,940 250,1030 350,1120 C500,1210 250,1280 350,1350"
         stroke="#E7E5E4"
         strokeWidth="90"
         strokeLinecap="round"
@@ -89,7 +103,7 @@ function BackgroundSquiggle() {
       />
       {/* Thin central accent for depth */}
       <path
-        d="M550,20 C700,100 400,190 600,280 C800,370 450,460 650,550 C850,640 500,730 680,820 C860,910 550,970 650,1000"
+        d="M550,20 C700,100 400,190 600,280 C800,370 450,460 650,550 C850,640 500,730 680,820 C860,910 550,1000 680,1090 C810,1180 550,1270 650,1350"
         stroke="#D6D3D1"
         strokeWidth="30"
         strokeLinecap="round"
@@ -97,7 +111,7 @@ function BackgroundSquiggle() {
       />
       {/* Far-left thin accent */}
       <path
-        d="M80,80 C200,160 0,250 150,340 C300,430 50,520 200,610 C350,700 100,790 200,880 C300,960 120,1000 200,1000"
+        d="M80,80 C200,160 0,250 150,340 C300,430 50,520 200,610 C350,700 100,790 200,880 C300,970 100,1060 200,1150 C300,1240 120,1300 200,1350"
         stroke="#E7E5E4"
         strokeWidth="45"
         strokeLinecap="round"
@@ -105,7 +119,7 @@ function BackgroundSquiggle() {
       />
       {/* Far-right thin accent */}
       <path
-        d="M1000,30 C1120,110 900,200 1050,290 C1200,380 950,470 1080,560 C1210,650 980,740 1080,830 C1180,920 1000,980 1080,1000"
+        d="M1000,30 C1120,110 900,200 1050,290 C1200,380 950,470 1080,560 C1210,650 980,740 1080,830 C1180,920 1000,1010 1080,1100 C1180,1190 1000,1280 1080,1350"
         stroke="#E7E5E4"
         strokeWidth="45"
         strokeLinecap="round"
@@ -225,7 +239,7 @@ export function JourneySection() {
                     : 'translate-y-4 opacity-0'
                 )}
                 style={{
-                  transitionDelay: inView ? `${index * 150}ms` : '0ms',
+                  transitionDelay: inView ? `${index * 120}ms` : '0ms',
                 }}
               >
                 <Link
