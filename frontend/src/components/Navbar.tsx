@@ -3,18 +3,16 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const NAV_LINKS = [
+const DAILY_LINKS = [
   { label: 'Pray', to: '/scripture' },
   { label: 'Journal', to: '/journal' },
   { label: 'Meditate', to: '/meditate' },
-  { label: 'Listen', to: '/listen' },
+  { label: 'Verse & Song', to: '/daily' },
 ] as const
 
-const EXPLORE_LINKS = [
+const NAV_LINKS = [
   { label: 'Music', to: '/music' },
   { label: 'Prayer Wall', to: '/prayer-wall' },
-  { label: 'Reflect', to: '/insights' },
-  { label: 'Daily Verse & Song', to: '/daily' },
 ] as const
 
 const LOCAL_SUPPORT_LINKS = [
@@ -58,7 +56,7 @@ function NavbarLogo({ transparent }: { transparent: boolean }) {
   )
 }
 
-function ExploreDropdown({ transparent }: { transparent: boolean }) {
+function DailyDropdown({ transparent }: { transparent: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -120,7 +118,7 @@ function ExploreDropdown({ transparent }: { transparent: boolean }) {
     return () => document.removeEventListener('mousedown', handleMouseDown)
   }, [isOpen, close])
 
-  // Close on focus leaving the wrapper and return focus to trigger
+  // Close on focus leaving the wrapper
   const handleBlur = useCallback(
     (e: React.FocusEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
@@ -139,45 +137,57 @@ function ExploreDropdown({ transparent }: { transparent: boolean }) {
     }
   }, [])
 
-  // Check if any explore or local support link is active
-  const isExploreActive = [...EXPLORE_LINKS, ...LOCAL_SUPPORT_LINKS].some(
+  const isDailyActive = DAILY_LINKS.some(
     (link) => location.pathname === link.to
   )
 
   return (
     <div
       ref={wrapperRef}
-      className="relative"
+      className={cn(
+        'relative flex items-center py-2',
+        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+        transparent ? 'after:bg-white' : 'after:bg-primary',
+        isDailyActive
+          ? 'after:scale-x-100'
+          : 'after:scale-x-0 hover:after:scale-x-100'
+      )}
       onMouseEnter={open}
       onMouseLeave={closeWithDelay}
       onBlur={handleBlur}
     >
+      <NavLink
+        to="/daily"
+        className={cn(
+          'text-sm font-medium transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+          isDailyActive
+            ? transparent ? 'text-white' : 'text-primary'
+            : transparent
+              ? 'text-white/90 hover:text-white'
+              : 'text-text-dark hover:text-primary'
+        )}
+      >
+        Daily
+      </NavLink>
       <button
         ref={triggerRef}
         type="button"
         className={cn(
-          'relative flex items-center gap-1 py-2 text-sm font-medium transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
-          "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-          transparent ? 'after:bg-white' : 'after:bg-primary',
-          isExploreActive
-            ? cn(
-                'after:scale-x-100',
-                transparent ? 'text-white' : 'text-primary'
-              )
-            : cn(
-                'after:scale-x-0 hover:after:scale-x-100',
-                transparent
-                  ? 'text-white/90 hover:text-white'
-                  : 'text-text-dark hover:text-primary'
-              )
+          'ml-0.5 rounded p-0.5 transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+          isDailyActive
+            ? transparent ? 'text-white' : 'text-primary'
+            : transparent
+              ? 'text-white/90 hover:text-white'
+              : 'text-text-dark hover:text-primary'
         )}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        aria-controls={isOpen ? 'explore-dropdown' : undefined}
+        aria-controls={isOpen ? 'daily-dropdown' : undefined}
+        aria-label="Daily menu"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        Explore
         <ChevronDown
           className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
           aria-hidden="true"
@@ -185,66 +195,217 @@ function ExploreDropdown({ transparent }: { transparent: boolean }) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full min-w-[220px] pt-2">
-        <ul
-          id="explore-dropdown"
-          className={cn(
-            'rounded-md py-1 shadow-lg',
-            transparent
-              ? 'bg-white/[0.08] backdrop-blur-xl saturate-[1.8] border border-white/25 ring-0'
-              : 'bg-white ring-1 ring-black/5'
-          )}
-        >
-          {EXPLORE_LINKS.map((link) => (
-            <li key={link.to}>
-              <NavLink
-                to={link.to}
-                className={({ isActive }) =>
-                  cn(
-                    'min-h-[44px] flex items-center px-4 py-2 text-sm transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                    transparent
-                      ? isActive
-                        ? 'text-white bg-white/10'
-                        : 'text-white/90 hover:text-white hover:bg-white/10'
-                      : isActive
-                        ? 'bg-primary/5 text-primary'
-                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
-                  )
-                }
-              >
-                {link.label}
-              </NavLink>
-            </li>
-          ))}
-          <li role="separator" className="mx-3 my-1 border-t border-gray-200 pt-2">
-            <span className="block px-1 text-xs font-semibold uppercase tracking-wider text-text-light">
-              Local Support
-            </span>
-          </li>
-          {LOCAL_SUPPORT_LINKS.map((link) => (
-            <li key={link.to}>
-              <NavLink
-                to={link.to}
-                className={({ isActive }) =>
-                  cn(
-                    'min-h-[44px] flex items-center px-4 py-2 text-sm transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                    transparent
-                      ? isActive
-                        ? 'text-white bg-white/10'
-                        : 'text-white/90 hover:text-white hover:bg-white/10'
-                      : isActive
-                        ? 'bg-primary/5 text-primary'
-                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
-                  )
-                }
-              >
-                {link.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+        <div className="absolute left-0 top-full min-w-[180px] pt-2">
+          <ul
+            id="daily-dropdown"
+            className={cn(
+              'rounded-md py-1 shadow-lg',
+              transparent
+                ? 'bg-white/[0.08] backdrop-blur-xl saturate-[1.8] border border-white/25 ring-0'
+                : 'bg-white ring-1 ring-black/5'
+            )}
+          >
+            {DAILY_LINKS.map((link) => (
+              <li key={link.to}>
+                <NavLink
+                  to={link.to}
+                  className={({ isActive }) =>
+                    cn(
+                      'min-h-[44px] flex items-center px-4 py-2 text-sm transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+                      transparent
+                        ? isActive
+                          ? 'text-white bg-white/10'
+                          : 'text-white/90 hover:text-white hover:bg-white/10'
+                        : isActive
+                          ? 'bg-primary/5 text-primary'
+                          : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                    )
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const location = useLocation()
+
+  const open = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+    setIsOpen(true)
+  }, [])
+
+  const closeWithDelay = useCallback(() => {
+    closeTimerRef.current = setTimeout(() => {
+      setIsOpen(false)
+      closeTimerRef.current = null
+    }, 150)
+  }, [])
+
+  const close = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+    setIsOpen(false)
+  }, [])
+
+  // Close on route change
+  useEffect(() => {
+    close()
+  }, [location.pathname, close])
+
+  // Close on Escape and return focus to trigger
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        close()
+        triggerRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, close])
+
+  // Close on outside click
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        close()
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [isOpen, close])
+
+  // Close on focus leaving the wrapper
+  const handleBlur = useCallback(
+    (e: React.FocusEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
+        close()
+      }
+    },
+    [close]
+  )
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current)
+      }
+    }
+  }, [])
+
+  const isLocalSupportActive = LOCAL_SUPPORT_LINKS.some(
+    (link) => location.pathname === link.to
+  )
+
+  return (
+    <div
+      ref={wrapperRef}
+      className={cn(
+        'relative flex items-center py-2',
+        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+        transparent ? 'after:bg-white' : 'after:bg-primary',
+        isLocalSupportActive
+          ? 'after:scale-x-100'
+          : 'after:scale-x-0 hover:after:scale-x-100'
+      )}
+      onMouseEnter={open}
+      onMouseLeave={closeWithDelay}
+      onBlur={handleBlur}
+    >
+      <NavLink
+        to="/churches"
+        className={cn(
+          'text-sm font-medium transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
+          isLocalSupportActive
+            ? transparent ? 'text-white' : 'text-primary'
+            : transparent
+              ? 'text-white/90 hover:text-white'
+              : 'text-text-dark hover:text-primary'
+        )}
+      >
+        Local Support
+      </NavLink>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={cn(
+          'ml-0.5 rounded p-0.5 transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+          isLocalSupportActive
+            ? transparent ? 'text-white' : 'text-primary'
+            : transparent
+              ? 'text-white/90 hover:text-white'
+              : 'text-text-dark hover:text-primary'
+        )}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? 'local-support-dropdown' : undefined}
+        aria-label="Local Support menu"
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        <ChevronDown
+          className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
+          aria-hidden="true"
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-full min-w-[200px] pt-2">
+          <ul
+            id="local-support-dropdown"
+            className={cn(
+              'rounded-md py-1 shadow-lg',
+              transparent
+                ? 'bg-white/[0.08] backdrop-blur-xl saturate-[1.8] border border-white/25 ring-0'
+                : 'bg-white ring-1 ring-black/5'
+            )}
+          >
+            {LOCAL_SUPPORT_LINKS.map((link) => (
+              <li key={link.to}>
+                <NavLink
+                  to={link.to}
+                  className={({ isActive }) =>
+                    cn(
+                      'min-h-[44px] flex items-center px-4 py-2 text-sm transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+                      transparent
+                        ? isActive
+                          ? 'text-white bg-white/10'
+                          : 'text-white/90 hover:text-white hover:bg-white/10'
+                        : isActive
+                          ? 'bg-primary/5 text-primary'
+                          : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                    )
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
@@ -254,12 +415,13 @@ function ExploreDropdown({ transparent }: { transparent: boolean }) {
 function DesktopNav({ transparent }: { transparent: boolean }) {
   return (
     <div className="hidden items-center gap-6 lg:flex">
+      <DailyDropdown transparent={transparent} />
       {NAV_LINKS.map((link) => (
         <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
           {link.label}
         </NavLink>
       ))}
-      <ExploreDropdown transparent={transparent} />
+      <LocalSupportDropdown transparent={transparent} />
     </div>
   )
 }
@@ -320,38 +482,15 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           className="relative z-50 border-t border-gray-100 lg:hidden"
         >
           <div className="flex flex-col px-4 py-4">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  cn(
-                    'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                    isActive
-                      ? 'bg-primary/5 text-primary'
-                      : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
-                  )
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
-
-            {/* Explore section */}
-            <div
-              className="mt-2 border-t border-gray-100 pt-2"
-              role="group"
-              aria-labelledby="explore-heading"
-            >
+            {/* Daily section */}
+            <div role="group" aria-labelledby="daily-heading">
               <span
-                id="explore-heading"
+                id="daily-heading"
                 className="px-3 text-xs font-semibold uppercase tracking-wider text-text-dark"
               >
-                Explore
+                Daily
               </span>
-              {EXPLORE_LINKS.map((link) => (
+              {DAILY_LINKS.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
@@ -359,6 +498,28 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   className={({ isActive }) =>
                     cn(
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                      isActive
+                        ? 'bg-primary/5 text-primary'
+                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                    )
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Standalone links */}
+            <div className="mt-2 border-t border-gray-100 pt-2">
+              {NAV_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    cn(
+                      'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
                         ? 'bg-primary/5 text-primary'
