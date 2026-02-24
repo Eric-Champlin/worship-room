@@ -9,6 +9,8 @@ export function Home() {
       <main>
         <HeroSection />
         <JourneySection />
+        {/* Quiz placeholder — will be replaced by StartingPointQuiz component */}
+        <div id="quiz" />
       </main>
     </div>
   )

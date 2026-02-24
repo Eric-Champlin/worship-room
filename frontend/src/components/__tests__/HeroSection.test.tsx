@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { HeroSection } from '@/components/HeroSection'
 
 function renderHero() {
@@ -75,5 +75,33 @@ describe('HeroSection', () => {
     )
 
     expect(screen.getByTestId('scripture-page')).toBeInTheDocument()
+  })
+
+  it('renders the quiz teaser text', () => {
+    renderHero()
+    expect(screen.getByText(/not sure where to start/i)).toBeInTheDocument()
+  })
+
+  it('renders the quiz teaser link', () => {
+    renderHero()
+    expect(
+      screen.getByRole('button', { name: /take a 30-second quiz/i })
+    ).toBeInTheDocument()
+  })
+
+  it('scrolls to #quiz on teaser link click', async () => {
+    const user = userEvent.setup()
+    renderHero()
+
+    const scrollIntoViewMock = vi.fn()
+    const mockElement = { scrollIntoView: scrollIntoViewMock }
+    vi.spyOn(document, 'getElementById').mockReturnValue(mockElement as unknown as HTMLElement)
+
+    await user.click(screen.getByRole('button', { name: /take a 30-second quiz/i }))
+
+    expect(document.getElementById).toHaveBeenCalledWith('quiz')
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'smooth' })
+
+    vi.restoreAllMocks()
   })
 })

@@ -36,6 +36,20 @@ export function HeroSection() {
         </p>
 
         <TypewriterInput onSubmit={handleInputSubmit} />
+
+        <p className="mt-5 font-sans text-sm text-white/90">
+          Not sure where to start?{' '}
+          <button
+            type="button"
+            onClick={() => {
+              document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' })
+            }}
+            className="font-semibold text-white underline underline-offset-2 transition-colors hover:text-white/80"
+          >
+            Take a 30-second quiz
+          </button>{' '}
+          and we&apos;ll help you find your path.
+        </p>
       </div>
     </section>
   )
