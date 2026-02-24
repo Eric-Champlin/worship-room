@@ -17,6 +17,9 @@ function App() {
           <Route path="/listen" element={<Listen />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/daily" element={<Daily />} />
+          <Route path="/music/playlists" element={<div>Worship Playlists — Coming Soon</div>} />
+          <Route path="/music/ambient" element={<div>Ambient Sounds — Coming Soon</div>} />
+          <Route path="/music/sleep" element={<div>Sleep &amp; Rest — Coming Soon</div>} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
