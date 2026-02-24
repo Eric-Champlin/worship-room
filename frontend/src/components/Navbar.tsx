@@ -4,14 +4,20 @@ import { ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_LINKS = [
-  { label: 'Pray', to: '/pray' },
+  { label: 'Pray', to: '/scripture' },
   { label: 'Journal', to: '/journal' },
   { label: 'Meditate', to: '/meditate' },
-  { label: 'Music', to: '/music' },
-  { label: 'Prayer Wall', to: '/prayer-wall' },
+  { label: 'Listen', to: '/listen' },
 ] as const
 
-const CONNECT_LINKS = [
+const EXPLORE_LINKS = [
+  { label: 'Music', to: '/music' },
+  { label: 'Prayer Wall', to: '/prayer-wall' },
+  { label: 'Reflect', to: '/insights' },
+  { label: 'Daily Verse & Song', to: '/daily' },
+] as const
+
+const LOCAL_SUPPORT_LINKS = [
   { label: 'Churches', to: '/churches' },
   { label: 'Counselors', to: '/counselors' },
 ] as const
@@ -52,7 +58,7 @@ function NavbarLogo({ transparent }: { transparent: boolean }) {
   )
 }
 
-function ConnectDropdown({ transparent }: { transparent: boolean }) {
+function ExploreDropdown({ transparent }: { transparent: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -133,8 +139,8 @@ function ConnectDropdown({ transparent }: { transparent: boolean }) {
     }
   }, [])
 
-  // Check if any connect link is active
-  const isConnectActive = CONNECT_LINKS.some(
+  // Check if any explore or local support link is active
+  const isExploreActive = [...EXPLORE_LINKS, ...LOCAL_SUPPORT_LINKS].some(
     (link) => location.pathname === link.to
   )
 
@@ -154,7 +160,7 @@ function ConnectDropdown({ transparent }: { transparent: boolean }) {
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
           "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
           transparent ? 'after:bg-white' : 'after:bg-primary',
-          isConnectActive
+          isExploreActive
             ? cn(
                 'after:scale-x-100',
                 transparent ? 'text-white' : 'text-primary'
@@ -166,12 +172,12 @@ function ConnectDropdown({ transparent }: { transparent: boolean }) {
                   : 'text-text-dark hover:text-primary'
               )
         )}
-        aria-haspopup="menu"
+        aria-haspopup="true"
         aria-expanded={isOpen}
-        aria-controls={isOpen ? 'connect-dropdown' : undefined}
+        aria-controls={isOpen ? 'explore-dropdown' : undefined}
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        Local Support
+        Explore
         <ChevronDown
           className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
           aria-hidden="true"
@@ -179,9 +185,9 @@ function ConnectDropdown({ transparent }: { transparent: boolean }) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full w-44 pt-2">
+        <div className="absolute left-0 top-full min-w-[220px] pt-2">
         <ul
-          id="connect-dropdown"
+          id="explore-dropdown"
           className={cn(
             'rounded-md py-1 shadow-lg',
             transparent
@@ -189,13 +195,40 @@ function ConnectDropdown({ transparent }: { transparent: boolean }) {
               : 'bg-white ring-1 ring-black/5'
           )}
         >
-          {CONNECT_LINKS.map((link) => (
+          {EXPLORE_LINKS.map((link) => (
             <li key={link.to}>
               <NavLink
                 to={link.to}
                 className={({ isActive }) =>
                   cn(
-                    'block px-4 py-2 text-sm transition-colors',
+                    'min-h-[44px] flex items-center px-4 py-2 text-sm transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+                    transparent
+                      ? isActive
+                        ? 'text-white bg-white/10'
+                        : 'text-white/90 hover:text-white hover:bg-white/10'
+                      : isActive
+                        ? 'bg-primary/5 text-primary'
+                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                  )
+                }
+              >
+                {link.label}
+              </NavLink>
+            </li>
+          ))}
+          <li role="separator" className="mx-3 my-1 border-t border-gray-200 pt-2">
+            <span className="block px-1 text-xs font-semibold uppercase tracking-wider text-text-light">
+              Local Support
+            </span>
+          </li>
+          {LOCAL_SUPPORT_LINKS.map((link) => (
+            <li key={link.to}>
+              <NavLink
+                to={link.to}
+                className={({ isActive }) =>
+                  cn(
+                    'min-h-[44px] flex items-center px-4 py-2 text-sm transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
                     transparent
                       ? isActive
@@ -226,7 +259,7 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
           {link.label}
         </NavLink>
       ))}
-      <ConnectDropdown transparent={transparent} />
+      <ExploreDropdown transparent={transparent} />
     </div>
   )
 }
@@ -306,6 +339,38 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               </NavLink>
             ))}
 
+            {/* Explore section */}
+            <div
+              className="mt-2 border-t border-gray-100 pt-2"
+              role="group"
+              aria-labelledby="explore-heading"
+            >
+              <span
+                id="explore-heading"
+                className="px-3 text-xs font-semibold uppercase tracking-wider text-text-dark"
+              >
+                Explore
+              </span>
+              {EXPLORE_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    cn(
+                      'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                      isActive
+                        ? 'bg-primary/5 text-primary'
+                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                    )
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+
             {/* Local Support section */}
             <div
               className="mt-2 border-t border-gray-100 pt-2"
@@ -318,7 +383,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               >
                 Local Support
               </span>
-              {CONNECT_LINKS.map((link) => (
+              {LOCAL_SUPPORT_LINKS.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
