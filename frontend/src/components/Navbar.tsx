@@ -198,12 +198,7 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
         <div className="absolute left-0 top-full min-w-[180px] pt-2">
           <ul
             id="daily-dropdown"
-            className={cn(
-              'rounded-md py-1 shadow-lg',
-              transparent
-                ? 'bg-white/[0.08] backdrop-blur-xl saturate-[1.8] border border-white/25 ring-0'
-                : 'bg-white ring-1 ring-black/5'
-            )}
+            className="animate-dropdown-in rounded-xl bg-white py-1.5 shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10"
           >
             {DAILY_LINKS.map((link) => (
               <li key={link.to}>
@@ -211,19 +206,25 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
                   to={link.to}
                   className={({ isActive }) =>
                     cn(
-                      'min-h-[44px] flex items-center px-4 py-2 text-sm transition-colors',
+                      'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      transparent
-                        ? isActive
-                          ? 'text-white bg-white/10'
-                          : 'text-white/90 hover:text-white hover:bg-white/10'
-                        : isActive
-                          ? 'bg-primary/5 text-primary'
-                          : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                      isActive ? 'text-primary' : 'text-text-dark hover:text-primary'
                     )
                   }
                 >
-                  {link.label}
+                  {({ isActive }) => (
+                    <span
+                      className={cn(
+                        'relative pb-0.5',
+                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        isActive
+                          ? 'after:scale-x-100'
+                          : 'after:scale-x-0 group-hover:after:scale-x-100'
+                      )}
+                    >
+                      {link.label}
+                    </span>
+                  )}
                 </NavLink>
               </li>
             ))}
@@ -376,12 +377,7 @@ function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
         <div className="absolute left-0 top-full min-w-[200px] pt-2">
           <ul
             id="local-support-dropdown"
-            className={cn(
-              'rounded-md py-1 shadow-lg',
-              transparent
-                ? 'bg-white/[0.08] backdrop-blur-xl saturate-[1.8] border border-white/25 ring-0'
-                : 'bg-white ring-1 ring-black/5'
-            )}
+            className="animate-dropdown-in rounded-xl bg-white py-1.5 shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10"
           >
             {LOCAL_SUPPORT_LINKS.map((link) => (
               <li key={link.to}>
@@ -389,19 +385,25 @@ function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
                   to={link.to}
                   className={({ isActive }) =>
                     cn(
-                      'min-h-[44px] flex items-center px-4 py-2 text-sm transition-colors',
+                      'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      transparent
-                        ? isActive
-                          ? 'text-white bg-white/10'
-                          : 'text-white/90 hover:text-white hover:bg-white/10'
-                        : isActive
-                          ? 'bg-primary/5 text-primary'
-                          : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                      isActive ? 'text-primary' : 'text-text-dark hover:text-primary'
                     )
                   }
                 >
-                  {link.label}
+                  {({ isActive }) => (
+                    <span
+                      className={cn(
+                        'relative pb-0.5',
+                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                        isActive
+                          ? 'after:scale-x-100'
+                          : 'after:scale-x-0 group-hover:after:scale-x-100'
+                      )}
+                    >
+                      {link.label}
+                    </span>
+                  )}
                 </NavLink>
               </li>
             ))}

@@ -34,10 +34,15 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },
         },
+        'dropdown-in': {
+          '0%': { opacity: '0', transform: 'translateY(-4px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
         'cursor-blink': 'cursor-blink 1s step-end infinite',
+        'dropdown-in': 'dropdown-in 150ms ease-out',
       },
     },
   },
