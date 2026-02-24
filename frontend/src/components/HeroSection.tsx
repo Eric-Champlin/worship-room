@@ -14,7 +14,7 @@ export function HeroSection() {
       aria-label="Welcome to Worship Room"
       className={cn(
         'relative flex w-full flex-col items-center justify-start text-center',
-        'px-4 pt-32 pb-10 sm:pt-36 sm:pb-14 lg:pt-44 lg:pb-20',
+        'px-4 pt-44 pb-28 sm:pt-48 sm:pb-32 lg:pt-56 lg:pb-40',
         'antialiased'
       )}
       style={{
