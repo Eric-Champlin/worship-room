@@ -68,6 +68,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - ❌ Church partnership portal (post-MVP growth feature)
 - ❌ Apple Health / Google Fit integration (app-only, post-launch)
 - ❌ Standalone "Listen" page (audio features are distributed across Scripture, Meditation, and Journal pages)
+- ❌ Points / leaderboard / social features (post-launch growth feature requiring auth + friends system)
 
 ### Foundation
 
@@ -108,8 +109,8 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 
 22. **Audio Scripture Playback** - "Read Aloud" TTS on `/scripture` page (browser Speech Synthesis API for MVP, upgrade to OpenAI TTS or ElevenLabs later)
 23. **Audio Prayer Playback** - "Read Aloud" TTS on AI-generated prayers and reflections
-24. **Ambient Background Sounds** - Toggle on `/meditate` and `/journal` pages (nature sounds, gentle piano, rain)
-25. **Sleep & Bedtime Content** - Calming meditations with sleep timer and audio fade-out on `/meditate` page, "Wind Down" dimmed UI mode
+24. **Ambient Background Sounds** - Dedicated page under Music section (`/music/ambient`). Nature sounds, gentle piano, rain, ocean, forest soundscapes.
+25. **Sleep & Bedtime Content** - Dedicated page under Music section (`/music/sleep`). Calming narrated scripture with ambient sounds, sleep timer with audio fade-out, "Wind Down" dimmed UI mode.
 26. **Read Aloud Button** - Available on all text content (scriptures, prayers, reflections, meditations) for accessibility
 
 ### Community Features
@@ -175,6 +176,16 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 64. **Kids / Family Mode** - Simplified mood selector, age-appropriate scripture, bedtime Bible stories
 65. **Apple Health / Google Fit Sync** - Sync meditation minutes and prayer time (app only)
 66. **AI Pastoral Companion** - Persistent conversational AI with session memory, draws from mood history and journal patterns
+67. **Faith Points & Leaderboard** - Gamification system to encourage daily spiritual habits:
+    - **Points**: Earn points for completing activities (pray, journal, meditate, post to prayer wall, mark prayer answered, maintain streaks, etc.)
+    - **Point values**: Configurable per activity (e.g., daily prayer = 10 pts, journal entry = 15 pts, 7-day streak bonus = 50 pts)
+    - **Leaderboard**: Friends-only leaderboard (not global — keeps it encouraging, not competitive). Weekly and all-time views.
+    - **Friends system**: Add friends by username or invite link. See friends' points and streaks. No access to friends' private content (journals, mood data).
+    - **Profile badges**: Milestone badges ("First Prayer", "7-Day Streak", "100 Prayers", "Prayer Warrior" etc.)
+    - **Accessibility**: Leaderboard visible from Dashboard. NOT in main navbar (logged-in feature only).
+    - **Logged-out teaser**: Landing page or post-activity prompt shows a locked leaderboard preview: "Sign up to start earning Faith Points and see how you and your friends are growing together."
+    - **Requires**: Auth + friends system + points tracking table + leaderboard API
+    - **Tone**: Frame as mutual encouragement ("growing together"), never as competition. Avoid shame-based language for low scores.
 
 ---
 
@@ -183,10 +194,10 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 ### Desktop Navbar
 
 ```
-[Worship Room logo]   [Daily ▾]   Music   Prayer Wall   [Local Support ▾]   [Log In]  [Get Started]
+[Worship Room logo]   [Daily ▾]   [Music ▾]   Prayer Wall   [Local Support ▾]   [Log In]  [Get Started]
 ```
 
-**Top-level links (2):** Music, Prayer Wall — your key differentiators, always visible.
+**Top-level link (1):** Prayer Wall — your community differentiator, always visible.
 
 **"Daily" dropdown** (clickable label goes to `/daily`; dropdown expands on hover/click):
 ```
@@ -196,13 +207,25 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 ├── Verse & Song
 ```
 
+**"Music" dropdown** (clickable label goes to `/music`; dropdown expands on hover/click):
+```
+├── Worship Playlists
+├── Ambient Sounds
+├── Sleep & Rest
+```
+
 **"Local Support" dropdown** (clickable label goes to `/churches`; dropdown expands on hover/click):
 ```
 ├── Churches
 ├── Counselors
 ```
 
-**Design rationale:** This navbar highlights what makes Worship Room different from competitors — community prayer support (Prayer Wall) and real-world help (Local Support) are top-level and immediately visible. The daily healing activities (Pray, Journal, Meditate, Verse & Song) are grouped under "Daily" because they're habits you return to every day. Music gets its own top-level link because worship music is a distinct, recognizable experience. The navbar has only 4 visible items + auth, which is clean and comfortable at all screen sizes.
+**Design rationale:** The navbar uses a clean content-type separation. "Daily" groups the active daily habits (reading, writing, reflecting). "Music" groups everything audio-based (worship playlists, ambient soundscapes, sleep content). "Prayer Wall" stands alone as the community differentiator. "Local Support" groups real-world help. The rule is simple: if it involves reading/doing, it's under Daily. If it involves listening, it's under Music. 3 dropdowns + 1 standalone link + auth is clean and balanced at all screen sizes.
+
+**Content-type rule:**
+- **Meditate = reading.** Text-based guided devotionals, scripture soaking, breathing exercises, reading plans. Quiet, focused, screen-based.
+- **Music = listening.** Anything with audio — worship playlists, ambient soundscapes, sleep/bedtime content with narrated scripture.
+- **Exception:** "Read Aloud" TTS buttons on Scripture and Prayer pages are accessibility features that stay on those pages, not standalone audio content under Music.
 
 ### Mobile Drawer
 
@@ -213,7 +236,11 @@ DAILY
   Meditate
   Verse & Song
 ──────────────
-Music
+MUSIC
+  Worship Playlists
+  Ambient Sounds
+  Sleep & Rest
+──────────────
 Prayer Wall
 ──────────────
 LOCAL SUPPORT
@@ -250,8 +277,11 @@ Replace "Log In / Get Started" with user avatar dropdown:
 - `/scripture` - Mood selector (buttons + text input) → Scripture display → AI reflection → Prayer generator button → Read Aloud button
 - `/pray` - Standalone AI prayer generator
 - `/journal` - Journal editor with ambient sounds toggle (prompts login to save)
-- `/meditate` - Guided meditations with ambient sounds, sleep/bedtime content, sleep timer
-- `/music` - Spotify playlist page (embed + deep link)
+- `/meditate` - Guided text-based meditations organized by topic (devotionals, breathing exercises, scripture soaking, reading plans)
+- `/music` - Music hub: Worship Playlists, Ambient Sounds, Sleep & Rest
+- `/music/playlists` - Curated Spotify worship playlists (embed + deep link)
+- `/music/ambient` - Ambient soundscapes (rain, ocean, gentle piano, forest)
+- `/music/sleep` - Sleep & bedtime content (narrated scripture, sleep timer, wind-down mode)
 - `/prayer-wall` - Community prayer requests (view only when logged out)
 - `/daily` - Verse & Song of the Day
 - `/churches` - Church locator (Google Maps)
@@ -279,7 +309,7 @@ Replace "Log In / Get Started" with user avatar dropdown:
 The landing page sections render in this order:
 
 ```
-1. Navbar (transparent glassmorphic pill — Daily dropdown, Music, Prayer Wall, Local Support dropdown)
+1. Navbar (transparent glassmorphic pill — Daily dropdown, Music dropdown, Prayer Wall, Local Support dropdown)
 2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /scripture)
 3. Journey Section (6-step vertical timeline: Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
 4. Starting Point Quiz ("Not Sure Where to Start?" — 3-5 questions, Ramsey-style progress bar, routes to recommended feature)
@@ -314,7 +344,7 @@ The landing page sections render in this order:
 - **Session-only**: Mood/scripture shown in UI, stored in React state/memory only
 - **Privacy-first**: No cookies, no anonymous IDs, no IP persistence for logged-out users
 - **Rate limiting**: We may apply transient IP-based rate limiting at the edge for abuse prevention, but we do not persist or log IPs for logged-out users
-- **Conversion**: Prompts to "Create account to save" appear after feature use (non-intrusive)
+- **Conversion**: See "Logged-Out Conversion Strategy" section below for full details.
 
 ### Mood Selection & Scripture Display Flow
 
@@ -358,13 +388,14 @@ The landing page sections render in this order:
 ### Meditation Flow
 
 1. User navigates to `/meditate`
-2. Sees meditations organized by topic (Peace & Calm, Anxiety Relief, Healing, Gratitude, Sleep & Rest, etc.)
+2. Sees text-based meditations organized by topic (Peace & Calm, Anxiety Relief, Healing, Gratitude, Forgiveness, Trust, etc.)
 3. User selects a meditation → text displays with "Read Aloud" TTS button
-4. Optional: Ambient background sounds toggle (rain, ocean, gentle piano, forest)
-5. **Sleep & Bedtime content** available as a category:
-   - Calming scripture readings with ambient sounds
-   - Sleep timer: User sets duration (15, 30, 60 min) → audio fades out gradually
-   - "Wind Down" mode: Dimmed UI colors for bedtime use
+4. Content types on this page:
+   - **Guided Devotionals** — 5-10 minute scripture-based readings by topic
+   - **Breathing Exercise** — inhale/hold/exhale timer with scripture displayed during each phase
+   - **Scripture Soaking** — single verse in large text with a contemplation timer (2, 5, or 10 min)
+   - **Reading Plans** — 7-day and 21-day themed plans (structured meditation series)
+5. This page is text/reading focused. Audio content (ambient sounds, sleep/bedtime) lives under Music.
 
 ### Mood Tracking Flow
 
@@ -407,6 +438,62 @@ The landing page sections render in this order:
 6. **Safety**: If answers indicate distress → include crisis resource note on result page
 7. **Privacy**: 100% client-side (React state), no data persistence for logged-out users
 8. **If logged in**: Optionally save quiz results to inform future AI recommendations
+
+### Logged-Out Conversion Strategy
+
+**Core principle: Give the output, withhold the history.** Every feature works fully on first use. The account wall appears at the moment of *accumulation* — when someone would benefit from their history, patterns, progress, or community. People don't sign up for features. They sign up because they've invested something and don't want to lose it.
+
+**Model: Free to use, meaningful to keep.** The account isn't a gate — it's a gift. It turns a one-time moment of comfort into an ongoing journey with visible progress.
+
+**Rules:**
+- **Never gate the first use of any feature.** Every core action (pray, journal, meditate, read prayer wall, find churches) works without an account. The moment you block the first use, you lose the trust of someone who's hurting and just wants help.
+- **Never nag on the first visit.** Let them complete one full flow uninterrupted before any conversion prompt appears.
+- **Never use countdown timers, limited tries, or "3 free prayers" limits.** That's the Hallow/Glorify subscription model that users complain about. Our conversion model is generosity-first.
+- **All prompts are dismissible.** Never block the UI or force signup. Soft cards, overlays with close buttons, gentle nudges — never hard walls.
+- **Show prompts after value delivery, never before.** The user should already feel helped before we ask for anything.
+
+**Per-Feature Conversion Triggers:**
+
+**After Praying (Scripture Match):**
+- Full experience: scripture, reflection, prayer, Read Aloud — all free, no interruption.
+- After the result displays, show a soft card at the bottom: *"This is your 3rd prayer this week. Create an account to track your journey and see how God is meeting you over time."*
+- Include a small preview: mini mood chart with sample data, slightly blurred. The message: you already have a story building — don't you want to see it?
+- Track visit count in React state (session memory only, lost on refresh — no cookies).
+
+**After Journaling:**
+- Full experience: AI prompt, writing, ambient sounds — all free.
+- When they navigate away or try to close: *"You just wrote something meaningful. Sign up to save it — your words won't be here when you come back."*
+- This is a real loss. People don't want to lose something they just created. The conversion trigger is the fear of losing their own words, not a feature gate.
+
+**On the Prayer Wall:**
+- Full read access: browse all posts, see the community.
+- Conversion trigger: when they want to *participate* — post their own request or encourage someone else. *"Join the community to share your prayer or encourage someone."*
+- The desire to participate is the conversion trigger, not the desire to consume.
+
+**After 2-3 Visits (Streak & Points Teasers):**
+- After the 2nd or 3rd session (tracked in React state, session-only): *"You've been here 3 days in a row. That's a streak worth keeping. Sign up so we can track it for you."*
+- Show a small Faith Points preview: *"If you had an account, you'd have earned 45 Faith Points this week."* Make the invisible visible.
+
+**After Completing a Meditation:**
+- Full access to all meditations and ambient sounds.
+- After completing one, show: *"You just spent 8 minutes in God's Word. Imagine seeing a month of moments like this. Create an account to build your meditation history."*
+
+**On the Daily Page (Verse & Song):**
+- Verse & Song of the Day works for everyone, no gate.
+- Below the content, show a "Your Week at a Glance" section that's locked: blurred calendar with mood colors, blurred streak counter, blurred "3 prayers this week" stat. All sample data, clearly labeled as preview. The preview makes the abstract concrete.
+
+**On the Landing Page:**
+- In the Values Section or near the CTA, consider a "See What You're Building" interactive preview: a mock dashboard that fills in as someone scrolls, showing mood heatmap populating, streak counter climbing, Faith Points accumulating, journal entries stacking up.
+- This is aspirational. It says: this is what your spiritual life looks like when you show up consistently, and we'll help you see it.
+
+**Conversion Prompt Component (`ConversionPrompt.tsx`):**
+- Reusable component used across all pages.
+- Props: `message` (string), `previewType` (optional: "mood-chart" | "streak" | "points" | "blurred-dashboard" | none), `dismissible` (boolean, default true)
+- Renders as a soft card with warm styling (not aggressive banner). Matches design system.
+- "Create Account" button routes to `/register`.
+- "Maybe Later" dismisses for the session (stored in React state).
+- Once dismissed on a page, does not reappear during that session.
+- Never renders on a user's first interaction with a feature — only after they've received value at least once.
 
 ---
 
@@ -500,7 +587,8 @@ Use this workflow for all new features:
 - Build mood selector (5 buttons + text)
 - Wire up OpenAI API for scripture matching + prayer generation
 - Add TTS "Read Aloud" button to scripture display
-- Build `/meditate` page with ambient sounds
+- Build `/meditate` page (text-based devotionals, breathing exercises, scripture soaking)
+- Build `/music` hub page with sub-routes (playlists, ambient, sleep)
 
 **Phase 3 — Auth & Persistence**
 - Auth system (login/register)
