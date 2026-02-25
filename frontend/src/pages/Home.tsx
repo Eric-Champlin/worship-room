@@ -2,6 +2,7 @@ import { Navbar } from '@/components/Navbar'
 import { HeroSection } from '@/components/HeroSection'
 import { JourneySection } from '@/components/JourneySection'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
+import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 
 export function Home() {
   return (
@@ -11,8 +12,7 @@ export function Home() {
         <HeroSection />
         <JourneySection />
         <GrowthTeasersSection />
-        {/* Quiz placeholder — will be replaced by StartingPointQuiz component */}
-        <div id="quiz" />
+        <StartingPointQuiz />
       </main>
     </div>
   )
