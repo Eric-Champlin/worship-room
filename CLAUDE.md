@@ -174,16 +174,7 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 64. **Kids / Family Mode** - Simplified mood selector, age-appropriate scripture, bedtime Bible stories
 65. **Apple Health / Google Fit Sync** - Sync meditation minutes and prayer time (app only)
 66. **AI Pastoral Companion** - Persistent conversational AI with session memory, draws from mood history and journal patterns
-67. **Faith Points & Leaderboard** - Gamification system to encourage daily spiritual habits:
-    - **Points**: Earn points for completing activities (pray, journal, meditate, post to prayer wall, mark prayer answered, maintain streaks, etc.)
-    - **Point values**: Configurable per activity (e.g., daily prayer = 10 pts, journal entry = 15 pts, 7-day streak bonus = 50 pts)
-    - **Leaderboard**: Friends-only leaderboard (not global — keeps it encouraging, not competitive). Weekly and all-time views.
-    - **Friends system**: Add friends by username or invite link. See friends' points and streaks. No access to friends' private content (journals, mood data).
-    - **Profile badges**: Milestone badges ("First Prayer", "7-Day Streak", "100 Prayers", "Prayer Warrior" etc.)
-    - **Accessibility**: Leaderboard visible from Dashboard. NOT in main navbar (logged-in feature only).
-    - **Logged-out teaser**: Landing page or post-activity prompt shows a locked leaderboard preview: "Sign up to start earning Faith Points and see how you and your friends are growing together."
-    - **Requires**: Auth + friends system + points tracking table + leaderboard API
-    - **Tone**: Frame as mutual encouragement ("growing together"), never as competition. Avoid shame-based language for low scores.
+67. **Faith Points & Leaderboard** - Gamification: earn points for activities (pray, journal, meditate, prayer wall). Friends-only leaderboard (encouraging, not competitive). Milestone badges. Requires auth + friends system. Tone: mutual encouragement, never competition. Dashboard only, not in main navbar.
 
 ---
 
@@ -423,84 +414,16 @@ The landing page sections render in this order:
 
 ### Growth Teasers Section
 
-**Purpose:** Show logged-out visitors what they unlock with an account. Answers: "Why should I come back?" Sits between the Journey Section and the Starting Point Quiz.
+"See How You're Growing" — 3 blurred preview cards showing logged-out visitors what they unlock with an account. Sits between Journey Section and Starting Point Quiz.
 
-**Background:** Gradient transition from the white Journey Section background into dark purple (Hero Dark #0D0620). The top of the section fades from white/light → dark purple, so it feels like re-entering the immersive hero space. The cards and content sit on the dark purple portion.
-
-**Section heading:** "See How You're Growing" — with Caveat script accent on "Growing" (consistent with Journey Section heading style). Subheading below in Text Light: "Create a free account and unlock your personal dashboard."
-
-**3 preview cards, side-by-side on desktop, stacked on mobile:**
-
-1. **📊 Mood Insights**
-   - Title: "Mood Insights"
-   - Description: "See how God is meeting you over time."
-   - Preview: A CSS-rendered mini mood heatmap (7x4 grid of colored squares, like a GitHub contribution graph) + a simple trend line below it. Use sample data with mood colors (greens, yellows, occasional red). Apply a frosted glass blur overlay (backdrop-filter: blur) with ~60% opacity so it looks real but clearly locked.
-   - Icon: Lucide `BarChart3` or `TrendingUp` in Primary violet
-
-2. **🔥 Streaks & Faith Points**
-   - Title: "Streaks & Faith Points"
-   - Description: "Build daily habits and watch your faith grow."
-   - Preview: A streak counter showing "🔥 12 Days" in large text + a Faith Points badge showing "⭐ 145 pts" below it. Show 3 small milestone badges in a row ("First Prayer", "7-Day Streak", "Prayer Warrior") — some unlocked (colored), some locked (gray). Apply same frosted blur overlay.
-   - Icon: Lucide `Flame` or `Zap` in orange/amber
-
-3. **🏆 Friends & Leaderboard**
-   - Title: "Friends & Leaderboard"
-   - Description: "Grow together and encourage each other."
-   - Preview: A mini leaderboard table with 4 rows — blurred usernames, visible point totals (280, 245, 190, 145), small rank numbers (#1-#4). One row subtly highlighted as "You" at #4. Apply same frosted blur overlay.
-   - Icon: Lucide `Users` or `Trophy` in cyan (#00D4FF)
-
-**Card styling:**
-- Dark card background (#1a1030 or similar) with subtle border (1px solid #2a2040)
-- Rounded corners (16px), soft shadow
-- Preview area at top (~150px height), title + description below
-- Small lock icon (🔒 or Lucide `Lock`) in the corner of each preview overlay
-- Subtle hover animation: slight lift + blur decreases slightly (teasing what's underneath)
-
-**CTA below cards:** Centered button: "Create a Free Account" → routes to `/register`. Styled as primary button (Primary violet background, white text, rounded). Secondary text below: "It's free. No credit card. No catch."
-
-**Responsive:**
-- Desktop: 3 cards in a row (equal width)
-- Tablet: 3 cards in a row (slightly compressed) or 2+1 layout
-- Mobile: stacked vertically, full width
-
-**Animation:** Cards fade in with stagger animation on scroll (same pattern as Journey Section). The gradient background transition should feel smooth and natural.
-
-**Important:** The previews are 100% static CSS/HTML mockups — no real data, no API calls, no JavaScript logic. They just need to look like real dashboard previews that are blurred/locked.
+- Background: gradient from white → dark purple (#0D0620)
+- 3 cards: Mood Insights (heatmap), Streaks & Faith Points (counter + badges), Friends & Leaderboard (mini table). All have frosted glass blur overlay + lock icon.
+- CTA: "Create a Free Account" → /register
+- Full build details provided in the `/spec` prompt.
 
 ### Footer
 
-**Background:** Dark purple (#0D0620) matching the hero. Light text throughout.
-
-**Layout:** 3 grouped nav columns + crisis resources row + app download row + copyright bar. Responsive: columns side-by-side on desktop, stacked on mobile.
-
-**Nav columns:**
-
-| Daily | Music | Support |
-|-------|-------|---------|
-| Pray | Worship Playlists | Prayer Wall |
-| Journal | Ambient Sounds | Churches |
-| Meditate | Sleep & Rest | Counselors |
-| Verse & Song | | |
-
-Column headings in white bold (Inter 600). Links in muted light color (#9CA3AF or similar), hover to white. Each link routes to its page.
-
-**Crisis resources row:**
-- "If you're in crisis:" label
-- 988 Suicide & Crisis Lifeline: call or text 988 (tel: link)
-- Crisis Text Line: Text HOME to 741741
-- Styled subtly but always present — required per 01-ai-safety.md
-
-**App download row:**
-- Heading: "Take Worship Room With You" or "Get the App"
-- Two placeholder badges: App Store badge + Google Play badge (use standard badge SVGs/images)
-- Both link to "#" for now with a tooltip or small text: "Coming Soon"
-- Styled as recognizable download badges (black rounded rectangles with white text/icons)
-
-**Copyright bar (bottom):**
-- "© 2026 Worship Room. All rights reserved."
-- Small, muted text, centered or left-aligned
-
-**No social media links.** No newsletter signup. No mission statement. Keep it clean.
+Dark purple (#0D0620) background. 3 nav columns (Daily, Music, Support) + crisis resources + app download badges (Coming Soon placeholders) + copyright. Full build details in `/spec` prompt.
 
 ### Hero Quiz Teaser
 
@@ -513,155 +436,35 @@ Below the hero input box, add a secondary entry point:
 
 ### Starting Point Quiz Flow
 
-**Purpose:** Route new visitors to the best starting feature based on their answers. Purely a navigation tool — no AI, no backend, no data persistence.
+"Not Sure Where to Start?" — 5-question points-based quiz. `id="quiz"` for hero teaser scroll target. Sits below Growth Teasers, background transitions from dark purple back to white.
 
-**Location:** Section 5 on landing page, `id="quiz"`, sits below Growth Teasers section. Hero quiz teaser smooth-scrolls here.
-
-**Background:** Gradient transition from the dark purple Growth Teasers section back into white/light. Top of section fades from Hero Dark (#0D0620) → white (#FFFFFF). The quiz card and content sit on the white portion.
-
-**Layout:** Always visible inline on the landing page (not a modal). Shows one question at a time inside a card. Progress indicator shows "Question 1 of 5" so users know the commitment.
-
-**Heading:** "Not Sure Where to Start?" with Caveat script accent on "Start" (consistent with other section headings). Subheading: "Take a 30-second quiz and we’ll point you in the right direction."
-
-**Tone:** Gentle and guided, like a counselor intake. Warm but purposeful.
-
-**5 Questions (single-select, 4 options each):**
-
-Q1: "What brought you here today?"
-- Going through a hard time → +2 Pray, +1 Local Support
-- Want to grow my faith → +2 Meditate, +1 Journal
-- Feeling anxious or stressed → +2 Music, +1 Meditate
-- All of the above → +1 Pray, +1 Journal, +1 Meditate, +1 Music
-
-Q2: "How are you feeling right now?"
-- I need comfort → +2 Pray, +1 Music
-- I feel stuck in my faith → +2 Meditate, +1 Journal
-- I’m okay but want more → +2 Journal, +1 Prayer Wall
-- I’m doing well → +2 Prayer Wall, +1 Music
-
-Q3: "What sounds most helpful?"
-- Prayer and scripture → +3 Pray
-- Writing out my thoughts → +3 Journal
-- Quiet reflection → +3 Meditate
-- Worship music → +3 Music
-
-Q4: "When do you most need support?"
-- Mornings → +1 Pray, +1 Journal
-- During stressful moments → +1 Pray, +1 Music
-- At night / bedtime → +2 Sleep & Rest, +1 Music
-- Throughout the day → +1 Journal, +1 Prayer Wall
-
-Q5: "What’s your experience with faith practices?"
-- I practice regularly → +2 Prayer Wall, +1 Journal
-- I try but not consistent → +1 Meditate, +1 Music
-- I used to but stopped → +1 Pray, +1 Meditate
-- I’m brand new → +2 Pray, +1 Local Support
-
-**Scoring:** Each answer adds points to one or more features. After 5 questions, the feature with the highest total points is recommended. Tiebreaker: Pray wins ties (strongest first-time experience).
-
-**Possible destinations (7):**
-- **Pray** → /scripture — "Start with Prayer"
-- **Journal** → /journal — "Begin Journaling"
-- **Meditate** → /meditate — "Find Peace in Meditation"
-- **Music** → /music — "Worship Through Music"
-- **Sleep & Rest** → /music/sleep — "Rest & Restore"
-- **Prayer Wall** → /prayer-wall — "Join the Community"
-- **Local Support** → /churches — "Find Support Near You"
-
-**Result card (shown after Q5):**
-- Personalized headline: "We’d recommend starting with [Feature Name]"
-- 2-3 sentence explanation based on their answers (hardcoded per destination, not AI-generated)
-- Primary CTA button: "Go to [Feature]" → routes to the recommended page
-- Secondary link: "Or explore all features ←" (scrolls up to Journey Section)
-- A relevant encouraging scripture verse (hardcoded per destination)
-- "Retake Quiz" link to reset and start over
-
-**Result descriptions (one per destination):**
-- **Pray:** "It sounds like you could use a moment with God. Share what’s on your heart and receive a personalized scripture and prayer."
-- **Journal:** "Writing is a powerful way to process your thoughts. Let guided prompts help you reflect on what God is doing in your life."
-- **Meditate:** "A quiet moment of reflection can bring clarity and peace. Explore scripture-based meditations at your own pace."
-- **Music:** "Sometimes worship music speaks when words can’t. Let curated playlists meet you where you are."
-- **Sleep & Rest:** "Nighttime can be the hardest. Let calming scripture and gentle sounds help you find rest."
-- **Prayer Wall:** "You’re not alone in this. See what others are praying for and find encouragement in community."
-- **Local Support:** "Sometimes the next step is a real conversation. Find churches and Christian counselors near you."
-
-**Result scripture verses (one per destination):**
-- **Pray:** "Cast all your anxiety on him because he cares for you." — 1 Peter 5:7
-- **Journal:** "Search me, God, and know my heart; test me and know my anxious thoughts." — Psalm 139:23
-- **Meditate:** "Be still, and know that I am God." — Psalm 46:10
-- **Music:** "Sing to the Lord a new song, for he has done marvelous things." — Psalm 98:1
-- **Sleep & Rest:** "In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety." — Psalm 4:8
-- **Prayer Wall:** "Carry each other’s burdens, and in this way you will fulfill the law of Christ." — Galatians 6:2
-- **Local Support:** "Where two or three gather in my name, there am I with them." — Matthew 18:20
-
-**UI behavior:**
-- Progress bar at top of quiz card (fills as user progresses, Primary violet)
-- "Question X of 5" text indicator
-- Forward/back navigation buttons (Back disabled on Q1)
-- Single-select radio-style options (only one selectable per question)
-- Smooth slide/fade transition between questions
-- After Q5, slide transition to result card
-- "Retake Quiz" resets all state and returns to Q1
-
-**Privacy:** 100% client-side React state. No cookies, no analytics, no data persistence. Quiz state resets on page refresh.
-
-**If logged in (future):** Optionally save quiz result to `user_preferences` table to inform future AI recommendations. Not implemented for MVP.
+- 5 questions, 4 options each, single-select, auto-advance on selection
+- Points-based scoring: each answer adds points to features (Pray, Journal, Meditate, Music, Sleep & Rest, Prayer Wall, Local Support). Highest score wins. Tiebreaker: Pray.
+- Result card: headline, description, scripture verse, CTA to recommended page, "Retake Quiz" link
+- 100% client-side React state. No backend, no cookies, no persistence.
+- Tone: gentle and guided, like a counselor intake.
+- Full questions, point values, result descriptions, and scripture verses provided in the `/spec` prompt.
 
 ### Logged-Out Conversion Strategy
 
-**Core principle: Give the output, withhold the history.** Every feature works fully on first use. The account wall appears at the moment of *accumulation* — when someone would benefit from their history, patterns, progress, or community. People don't sign up for features. They sign up because they've invested something and don't want to lose it.
-
-**Model: Free to use, meaningful to keep.** The account isn't a gate — it's a gift. It turns a one-time moment of comfort into an ongoing journey with visible progress.
+**Core principle: "Free to use, meaningful to keep."** Give the output, withhold the history. Every feature works fully on first use. Conversion prompts appear only after value delivery.
 
 **Rules:**
-- **Never gate the first use of any feature.** Every core action (pray, journal, meditate, read prayer wall, find churches) works without an account. The moment you block the first use, you lose the trust of someone who's hurting and just wants help.
-- **Never nag on the first visit.** Let them complete one full flow uninterrupted before any conversion prompt appears.
-- **Never use countdown timers, limited tries, or "3 free prayers" limits.** That's the Hallow/Glorify subscription model that users complain about. Our conversion model is generosity-first.
-- **All prompts are dismissible.** Never block the UI or force signup. Soft cards, overlays with close buttons, gentle nudges — never hard walls.
-- **Show prompts after value delivery, never before.** The user should already feel helped before we ask for anything.
+- Never gate the first use of any feature
+- Never nag on the first visit
+- Never use countdown timers or limited tries
+- All prompts are dismissible (soft cards, never hard walls)
+- Show prompts after value delivery, never before
 
-**Per-Feature Conversion Triggers:**
+**Triggers (implemented in Phase 2+):**
+- After praying: blurred mood chart preview + "Track your journey"
+- After journaling: "Sign up to save — your words won't be here when you come back"
+- Prayer Wall: gate posting/encouraging, not reading
+- After 2-3 visits: streak teaser + Faith Points preview
+- After meditation: "Imagine a month of moments like this"
+- Daily page: blurred "Your Week at a Glance" preview
 
-**After Praying (Scripture Match):**
-- Full experience: scripture, reflection, prayer, Read Aloud — all free, no interruption.
-- After the result displays, show a soft card at the bottom: *"This is your 3rd prayer this week. Create an account to track your journey and see how God is meeting you over time."*
-- Include a small preview: mini mood chart with sample data, slightly blurred. The message: you already have a story building — don't you want to see it?
-- Track visit count in React state (session memory only, lost on refresh — no cookies).
-
-**After Journaling:**
-- Full experience: AI prompt, writing, ambient sounds — all free.
-- When they navigate away or try to close: *"You just wrote something meaningful. Sign up to save it — your words won't be here when you come back."*
-- This is a real loss. People don't want to lose something they just created. The conversion trigger is the fear of losing their own words, not a feature gate.
-
-**On the Prayer Wall:**
-- Full read access: browse all posts, see the community.
-- Conversion trigger: when they want to *participate* — post their own request or encourage someone else. *"Join the community to share your prayer or encourage someone."*
-- The desire to participate is the conversion trigger, not the desire to consume.
-
-**After 2-3 Visits (Streak & Points Teasers):**
-- After the 2nd or 3rd session (tracked in React state, session-only): *"You've been here 3 days in a row. That's a streak worth keeping. Sign up so we can track it for you."*
-- Show a small Faith Points preview: *"If you had an account, you'd have earned 45 Faith Points this week."* Make the invisible visible.
-
-**After Completing a Meditation:**
-- Full access to all meditations and ambient sounds.
-- After completing one, show: *"You just spent 8 minutes in God's Word. Imagine seeing a month of moments like this. Create an account to build your meditation history."*
-
-**On the Daily Page (Verse & Song):**
-- Verse & Song of the Day works for everyone, no gate.
-- Below the content, show a "Your Week at a Glance" section that's locked: blurred calendar with mood colors, blurred streak counter, blurred "3 prayers this week" stat. All sample data, clearly labeled as preview. The preview makes the abstract concrete.
-
-**On the Landing Page:**
-- In the Values Section or near the CTA, consider a "See What You're Building" interactive preview: a mock dashboard that fills in as someone scrolls, showing mood heatmap populating, streak counter climbing, Faith Points accumulating, journal entries stacking up.
-- This is aspirational. It says: this is what your spiritual life looks like when you show up consistently, and we'll help you see it.
-
-**Conversion Prompt Component (`ConversionPrompt.tsx`):**
-- Reusable component used across all pages.
-- Props: `message` (string), `previewType` (optional: "mood-chart" | "streak" | "points" | "blurred-dashboard" | none), `dismissible` (boolean, default true)
-- Renders as a soft card with warm styling (not aggressive banner). Matches design system.
-- "Create Account" button routes to `/register`.
-- "Maybe Later" dismisses for the session (stored in React state).
-- Once dismissed on a page, does not reappear during that session.
-- Never renders on a user's first interaction with a feature — only after they've received value at least once.
+**Reusable `ConversionPrompt.tsx` component** (Phase 2+): soft card, dismissible per session, routes to /register.
 
 ---
 
