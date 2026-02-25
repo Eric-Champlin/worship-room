@@ -6,7 +6,7 @@ import { HeroSection } from '@/components/HeroSection'
 
 function renderHero() {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <HeroSection />
     </MemoryRouter>
   )
@@ -56,7 +56,7 @@ describe('HeroSection', () => {
     const user = userEvent.setup()
 
     render(
-      <MemoryRouter initialEntries={['/']}>
+      <MemoryRouter initialEntries={['/']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<HeroSection />} />
           <Route

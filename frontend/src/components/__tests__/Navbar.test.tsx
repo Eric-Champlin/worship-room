@@ -6,7 +6,7 @@ import { Navbar } from '@/components/Navbar'
 
 function renderNavbar(initialRoute = '/') {
   return render(
-    <MemoryRouter initialEntries={[initialRoute]}>
+    <MemoryRouter initialEntries={[initialRoute]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Navbar />
       <Routes>
         <Route path="*" element={null} />

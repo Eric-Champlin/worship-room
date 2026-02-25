@@ -5,7 +5,7 @@ import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
 
 function renderGrowthTeasers() {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <GrowthTeasersSection />
     </MemoryRouter>
   )
