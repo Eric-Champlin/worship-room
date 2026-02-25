@@ -84,7 +84,7 @@ export function SiteFooter() {
             className="inline-block rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
             aria-label="Worship Room home"
           >
-            <span className="font-script text-4xl font-bold text-white">
+            <span className="font-script text-5xl font-bold text-white">
               Worship Room
             </span>
           </Link>

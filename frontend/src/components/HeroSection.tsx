@@ -27,7 +27,7 @@ export function HeroSection() {
       }}
     >
       <div className="mx-auto w-full max-w-3xl">
-        <h1 className="mb-4 font-sans text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <h1 className="mb-4 font-script text-5xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl">
           How&apos;re You Feeling Today?
         </h1>
 

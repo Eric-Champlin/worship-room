@@ -158,12 +158,9 @@ export function GrowthTeasersSection() {
         <div className="text-center">
           <h2
             id="growth-heading"
-            className="mb-3 font-sans text-[1.7rem] font-bold text-white sm:text-[2.1rem] lg:text-[2.625rem]"
+            className="mb-3 font-script text-[2.7rem] font-bold text-white sm:text-[3.4rem] lg:text-[4rem]"
           >
-            See How You&apos;re{' '}
-            <span className="font-script text-4xl text-white sm:text-5xl lg:text-6xl">
-              Growing
-            </span>
+            See How You&apos;re Growing
           </h2>
           <p className="text-base text-white sm:text-lg">
             Create a free account and unlock your personal dashboard.
