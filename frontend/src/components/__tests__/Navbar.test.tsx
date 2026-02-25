@@ -485,7 +485,7 @@ describe('Navbar', () => {
     it('active top-level link has active styling', () => {
       renderNavbar('/prayer-wall')
       const link = screen.getByRole('link', { name: 'Prayer Wall' })
-      expect(link.className).toContain('text-primary')
+      expect(link.className).toContain('text-white')
       expect(link.className).toContain('after:scale-x-100')
     })
 
