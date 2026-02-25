@@ -3,6 +3,7 @@ import { HeroSection } from '@/components/HeroSection'
 import { JourneySection } from '@/components/JourneySection'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
+import { SiteFooter } from '@/components/SiteFooter'
 
 export function Home() {
   return (
@@ -13,6 +14,7 @@ export function Home() {
         <JourneySection />
         <GrowthTeasersSection />
         <StartingPointQuiz />
+        <SiteFooter />
       </main>
     </div>
   )
