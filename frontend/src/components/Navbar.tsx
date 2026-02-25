@@ -222,7 +222,7 @@ function NavDropdown({
             className={cn(
               'animate-dropdown-in rounded-xl py-1.5',
               transparent
-                ? 'bg-hero-mid border border-white/15 shadow-lg'
+                ? 'bg-gradient-to-b from-[#351868] to-[#200b42] border border-white/10 shadow-[0_8px_32px_-4px_rgba(109,40,217,0.4)]'
                 : 'bg-white shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10'
             )}
           >
@@ -384,7 +384,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           ref={drawerRef}
           id="mobile-menu"
           aria-label="Mobile navigation"
-          className="relative z-50 mt-2 rounded-xl bg-hero-mid border border-white/15 shadow-lg animate-dropdown-in lg:hidden"
+          className="relative z-50 mt-2 rounded-xl bg-gradient-to-b from-[#351868] to-[#200b42] border border-white/10 shadow-[0_8px_32px_-4px_rgba(109,40,217,0.4)] animate-dropdown-in lg:hidden"
         >
           <div className="flex flex-col px-4 py-4">
             {/* Daily section */}
