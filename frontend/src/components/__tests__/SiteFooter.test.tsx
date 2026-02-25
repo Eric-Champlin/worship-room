@@ -64,16 +64,14 @@ describe('SiteFooter', () => {
     }
   })
 
-  it('renders App Store badge', () => {
+  it('renders App Store badge text', () => {
     renderSiteFooter()
-    const badge = screen.getByLabelText(/download on the app store/i)
-    expect(badge).toHaveAttribute('href', '#')
+    expect(screen.getByText('App Store')).toBeInTheDocument()
   })
 
-  it('renders Google Play badge', () => {
+  it('renders Google Play badge text', () => {
     renderSiteFooter()
-    const badge = screen.getByLabelText(/get it on google play/i)
-    expect(badge).toHaveAttribute('href', '#')
+    expect(screen.getByText('Google Play')).toBeInTheDocument()
   })
 
   it('renders app download heading', () => {

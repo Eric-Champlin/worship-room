@@ -27,11 +27,7 @@ const FOOTER_COLUMNS = [
 
 function AppStoreBadge() {
   return (
-    <a
-      href="#"
-      aria-label="Download on the App Store"
-      className="inline-flex h-[40px] items-center gap-2 rounded-md border border-white/20 bg-black px-3 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
-    >
+    <span className="inline-flex h-[40px] cursor-default items-center gap-2 rounded-md border border-white/20 bg-black px-3 opacity-60">
       <svg
         viewBox="0 0 24 24"
         className="h-6 w-6 fill-white"
@@ -43,17 +39,13 @@ function AppStoreBadge() {
         <span className="text-[9px] font-normal text-white/90">Download on the</span>
         <span className="mt-0.5 text-[17px] font-medium leading-tight text-white">App Store</span>
       </div>
-    </a>
+    </span>
   )
 }
 
 function GooglePlayBadge() {
   return (
-    <a
-      href="#"
-      aria-label="Get it on Google Play"
-      className="inline-flex h-[40px] items-center gap-2 rounded-md border border-white/20 bg-black px-3 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
-    >
+    <span className="inline-flex h-[40px] cursor-default items-center gap-2 rounded-md border border-white/20 bg-black px-3 opacity-60">
       <svg
         viewBox="0 0 24 24"
         className="h-6 w-6"
@@ -68,7 +60,7 @@ function GooglePlayBadge() {
         <span className="text-[9px] font-normal uppercase tracking-wider text-white/90">Get it on</span>
         <span className="mt-0.5 text-[17px] font-medium leading-tight text-white">Google Play</span>
       </div>
-    </a>
+    </span>
   )
 }
 
@@ -168,7 +160,8 @@ export function SiteFooter() {
         <p className="mx-auto mt-4 max-w-2xl text-center text-[11px] text-subtle-gray">
           Worship Room provides spiritual encouragement and support. It is not a
           substitute for professional medical, psychological, or psychiatric
-          care.
+          care. If you are in crisis, please call 988 (Suicide &amp; Crisis
+          Lifeline) or contact a licensed mental health professional.
         </p>
 
         {/* Copyright */}

@@ -62,7 +62,7 @@ describe('GrowthTeasersSection', () => {
   it('renders reassurance text', () => {
     renderGrowthTeasers()
     expect(
-      screen.getByText(/it's free\. no credit card\. no catch\./i)
+      screen.getByText(/it's free\. no catch\./i)
     ).toBeInTheDocument()
   })
 

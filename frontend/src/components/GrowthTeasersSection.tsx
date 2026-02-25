@@ -225,7 +225,7 @@ export function GrowthTeasersSection() {
             Create a Free Account
           </Link>
           <p className="mt-4 text-sm text-white/70">
-            It&apos;s free. No credit card. No catch.
+            It&apos;s free. No catch.
           </p>
         </div>
       </div>
