@@ -44,7 +44,7 @@ export function HeroSection() {
             onClick={() => {
               document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' })
             }}
-            className="font-semibold text-white underline underline-offset-2 transition-colors hover:text-white/80"
+            className="rounded font-semibold text-white underline underline-offset-2 transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
           >
             Take a 30-second quiz
           </button>{' '}

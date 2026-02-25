@@ -18,4 +18,11 @@
     box-shadow: 0 0 8px 2px rgba(0, 212, 255, 0.35),
       0 0 20px 4px rgba(139, 92, 246, 0.25);
   }
+  .animate-dropdown-in {
+    animation: none;
+  }
+  .animate-slide-from-right,
+  .animate-slide-from-left {
+    animation: none;
+  }
 }

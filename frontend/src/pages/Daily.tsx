@@ -13,10 +13,7 @@ export function Daily() {
             recommendation chosen just for you. A daily moment of peace
             and inspiration is on its way.
           </p>
-          <p
-            className="text-2xl text-primary sm:text-3xl"
-            style={{ fontFamily: "'Caveat', cursive" }}
-          >
+          <p className="font-script text-2xl text-primary sm:text-3xl">
             Coming Soon
           </p>
         </div>

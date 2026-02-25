@@ -13,9 +13,9 @@ function renderQuiz() {
   )
 }
 
+/** Select an answer and wait for auto-advance to the next question */
 const user = userEvent.setup()
 
-/** Select an answer and wait for auto-advance to the next question */
 async function selectAndAdvance(optionText: string, nextQuestionNum: number) {
   await user.click(
     screen.getByRole('button', { name: new RegExp(optionText, 'i') })

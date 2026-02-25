@@ -172,13 +172,7 @@ export function JourneySection() {
               className="mb-3 font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl"
             >
               Your Journey to{' '}
-              <span
-                className="text-3xl sm:text-4xl lg:text-5xl"
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  color: '#6D28D9',
-                }}
-              >
+              <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
                 Healing
               </span>
             </h2>
@@ -225,13 +219,7 @@ export function JourneySection() {
                   <div className={cn('pb-8', isLast && 'pb-0')}>
                     <h3 className="mb-1 font-sans text-lg font-semibold text-text-dark group-hover:text-primary sm:text-xl">
                       {step.prefix}{' '}
-                      <span
-                        className="text-2xl sm:text-3xl"
-                        style={{
-                          fontFamily: "'Caveat', cursive",
-                          color: '#6D28D9',
-                        }}
-                      >
+                      <span className="font-script text-2xl text-primary sm:text-3xl">
                         {step.highlight}
                       </span>
                     </h3>

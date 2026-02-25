@@ -99,10 +99,24 @@ describe('SiteFooter', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders copyright', () => {
+  it('renders SAMHSA helpline tel link', () => {
+    renderSiteFooter()
+    const link = screen.getByRole('link', { name: '1-800-662-4357' })
+    expect(link).toHaveAttribute('href', 'tel:1-800-662-4357')
+  })
+
+  it('renders medical disclaimer', () => {
     renderSiteFooter()
     expect(
-      screen.getByText(/© 2026 worship room\. all rights reserved\./i)
+      screen.getByText(/not a substitute for professional/i)
+    ).toBeInTheDocument()
+  })
+
+  it('renders copyright with current year', () => {
+    renderSiteFooter()
+    const year = new Date().getFullYear()
+    expect(
+      screen.getByText(new RegExp(`© ${year} worship room\\. all rights reserved\\.`, 'i'))
     ).toBeInTheDocument()
   })
 })

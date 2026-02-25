@@ -146,12 +146,12 @@ describe('Navbar', () => {
       expect(trigger).toHaveAttribute('aria-controls', 'daily-dropdown')
     })
 
-    it('dropdown panel uses ul/li with no ARIA role override', () => {
+    it('dropdown panel uses ul/li with role="list"', () => {
       renderNavbar()
       fireEvent.click(screen.getByRole('button', { name: /daily menu/i }))
       const dropdown = document.getElementById('daily-dropdown')!
       expect(dropdown.tagName).toBe('UL')
-      expect(dropdown).not.toHaveAttribute('role')
+      expect(dropdown).toHaveAttribute('role', 'list')
       const links = within(dropdown).getAllByRole('link')
       expect(links).toHaveLength(4)
     })
@@ -315,12 +315,12 @@ describe('Navbar', () => {
       expect(trigger).toHaveAttribute('aria-controls', 'music-dropdown')
     })
 
-    it('dropdown panel uses ul/li with no ARIA role override', () => {
+    it('dropdown panel uses ul/li with role="list"', () => {
       renderNavbar()
       fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
       const dropdown = document.getElementById('music-dropdown')!
       expect(dropdown.tagName).toBe('UL')
-      expect(dropdown).not.toHaveAttribute('role')
+      expect(dropdown).toHaveAttribute('role', 'list')
       const links = within(dropdown).getAllByRole('link')
       expect(links).toHaveLength(3)
     })
@@ -371,7 +371,7 @@ describe('Navbar', () => {
 
       const menu = document.getElementById('mobile-menu')!
       expect(menu).toBeInTheDocument()
-      expect(menu).toHaveAttribute('aria-label', 'Navigation menu')
+      expect(menu).toHaveAttribute('aria-label', 'Mobile navigation')
     })
 
     it('clicking X closes mobile menu', async () => {
@@ -439,7 +439,7 @@ describe('Navbar', () => {
       await user.click(screen.getByRole('button', { name: 'Open menu' }))
 
       const menu = document.getElementById('mobile-menu')!
-      expect(menu).toHaveAttribute('aria-label', 'Navigation menu')
+      expect(menu).toHaveAttribute('aria-label', 'Mobile navigation')
       expect(menu).toHaveAttribute('id', 'mobile-menu')
     })
 

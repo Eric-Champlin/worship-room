@@ -50,10 +50,9 @@ function NavbarLogo({ transparent }: { transparent: boolean }) {
     <Link to="/" className="flex items-center" aria-label="Worship Room home">
       <span
         className={cn(
-          'text-4xl font-bold',
+          'font-script text-4xl font-bold',
           transparent ? 'text-white' : 'text-primary'
         )}
-        style={{ fontFamily: "'Caveat', cursive" }}
       >
         Worship Room
       </span>
@@ -61,7 +60,23 @@ function NavbarLogo({ transparent }: { transparent: boolean }) {
   )
 }
 
-function DailyDropdown({ transparent }: { transparent: boolean }) {
+interface NavDropdownProps {
+  label: string
+  to: string
+  links: ReadonlyArray<{ label: string; to: string }>
+  dropdownId: string
+  transparent: boolean
+  extraActivePaths?: readonly string[]
+}
+
+function NavDropdown({
+  label,
+  to,
+  links,
+  dropdownId,
+  transparent,
+  extraActivePaths = [],
+}: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -142,9 +157,9 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
     }
   }, [])
 
-  const isDailyActive = DAILY_LINKS.some(
+  const isActive = links.some(
     (link) => location.pathname === link.to
-  )
+  ) || extraActivePaths.some((p) => location.pathname === p)
 
   return (
     <div
@@ -153,7 +168,7 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
         'relative flex items-center py-2',
         "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
         transparent ? 'after:bg-white' : 'after:bg-primary',
-        isDailyActive
+        isActive
           ? 'after:scale-x-100'
           : 'after:scale-x-0 hover:after:scale-x-100'
       )}
@@ -162,18 +177,18 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
       onBlur={handleBlur}
     >
       <NavLink
-        to="/daily"
+        to={to}
         className={cn(
           'text-sm font-medium transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
-          isDailyActive
+          isActive
             ? transparent ? 'text-white' : 'text-primary'
             : transparent
               ? 'text-white/90 hover:text-white'
               : 'text-text-dark hover:text-primary'
         )}
       >
-        Daily
+        {label}
       </NavLink>
       <button
         ref={triggerRef}
@@ -181,7 +196,7 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
         className={cn(
           'ml-0.5 rounded p-0.5 transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          isDailyActive
+          isActive
             ? transparent ? 'text-white' : 'text-primary'
             : transparent
               ? 'text-white/90 hover:text-white'
@@ -189,8 +204,8 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
         )}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        aria-controls={isOpen ? 'daily-dropdown' : undefined}
-        aria-label="Daily menu"
+        aria-controls={isOpen ? dropdownId : undefined}
+        aria-label={`${label} menu`}
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <ChevronDown
@@ -202,409 +217,36 @@ function DailyDropdown({ transparent }: { transparent: boolean }) {
       {isOpen && (
         <div className="absolute left-0 top-full min-w-[180px] pt-2">
           <ul
-            id="daily-dropdown"
+            id={dropdownId}
+            role="list"
             className={cn(
               'animate-dropdown-in rounded-xl py-1.5',
               transparent
-                ? 'bg-[#1E0B3E] border border-white/15 shadow-lg'
+                ? 'bg-hero-mid border border-white/15 shadow-lg'
                 : 'bg-white shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10'
             )}
           >
-            {DAILY_LINKS.map((link) => (
+            {links.map((link) => (
               <li key={link.to}>
                 <NavLink
                   to={link.to}
-                  className={({ isActive }) =>
+                  className={({ isActive: linkActive }) =>
                     cn(
                       'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      isActive
+                      linkActive
                         ? transparent ? 'text-white' : 'text-primary'
                         : transparent ? 'text-white/90 hover:text-white' : 'text-text-dark hover:text-primary'
                     )
                   }
                 >
-                  {({ isActive }) => (
+                  {({ isActive: linkActive }) => (
                     <span
                       className={cn(
                         'relative pb-0.5',
                         "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
                         transparent ? 'after:bg-white' : 'after:bg-primary',
-                        isActive
-                          ? 'after:scale-x-100'
-                          : 'after:scale-x-0 group-hover:after:scale-x-100'
-                      )}
-                    >
-                      {link.label}
-                    </span>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function MusicDropdown({ transparent }: { transparent: boolean }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const location = useLocation()
-
-  const open = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-    }
-    setIsOpen(true)
-  }, [])
-
-  const closeWithDelay = useCallback(() => {
-    closeTimerRef.current = setTimeout(() => {
-      setIsOpen(false)
-      closeTimerRef.current = null
-    }, 150)
-  }, [])
-
-  const close = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-    }
-    setIsOpen(false)
-  }, [])
-
-  // Close on route change
-  useEffect(() => {
-    close()
-  }, [location.pathname, close])
-
-  // Close on Escape and return focus to trigger
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        close()
-        triggerRef.current?.focus()
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, close])
-
-  // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        close()
-      }
-    }
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
-  }, [isOpen, close])
-
-  // Close on focus leaving the wrapper
-  const handleBlur = useCallback(
-    (e: React.FocusEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
-        close()
-      }
-    },
-    [close]
-  )
-
-  // Clean up timer on unmount
-  useEffect(() => {
-    return () => {
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current)
-      }
-    }
-  }, [])
-
-  const isMusicActive = MUSIC_LINKS.some(
-    (link) => location.pathname === link.to
-  ) || location.pathname === '/music'
-
-  return (
-    <div
-      ref={wrapperRef}
-      className={cn(
-        'relative flex items-center py-2',
-        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-        transparent ? 'after:bg-white' : 'after:bg-primary',
-        isMusicActive
-          ? 'after:scale-x-100'
-          : 'after:scale-x-0 hover:after:scale-x-100'
-      )}
-      onMouseEnter={open}
-      onMouseLeave={closeWithDelay}
-      onBlur={handleBlur}
-    >
-      <NavLink
-        to="/music"
-        className={cn(
-          'text-sm font-medium transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
-          isMusicActive
-            ? transparent ? 'text-white' : 'text-primary'
-            : transparent
-              ? 'text-white/90 hover:text-white'
-              : 'text-text-dark hover:text-primary'
-        )}
-      >
-        Music
-      </NavLink>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={cn(
-          'ml-0.5 rounded p-0.5 transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          isMusicActive
-            ? transparent ? 'text-white' : 'text-primary'
-            : transparent
-              ? 'text-white/90 hover:text-white'
-              : 'text-text-dark hover:text-primary'
-        )}
-        aria-haspopup="true"
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? 'music-dropdown' : undefined}
-        aria-label="Music menu"
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
-        <ChevronDown
-          className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
-          aria-hidden="true"
-        />
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 top-full min-w-[200px] pt-2">
-          <ul
-            id="music-dropdown"
-            className={cn(
-              'animate-dropdown-in rounded-xl py-1.5',
-              transparent
-                ? 'bg-[#1E0B3E] border border-white/15 shadow-lg'
-                : 'bg-white shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10'
-            )}
-          >
-            {MUSIC_LINKS.map((link) => (
-              <li key={link.to}>
-                <NavLink
-                  to={link.to}
-                  className={({ isActive }) =>
-                    cn(
-                      'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      isActive
-                        ? transparent ? 'text-white' : 'text-primary'
-                        : transparent ? 'text-white/90 hover:text-white' : 'text-text-dark hover:text-primary'
-                    )
-                  }
-                >
-                  {({ isActive }) => (
-                    <span
-                      className={cn(
-                        'relative pb-0.5',
-                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                        transparent ? 'after:bg-white' : 'after:bg-primary',
-                        isActive
-                          ? 'after:scale-x-100'
-                          : 'after:scale-x-0 group-hover:after:scale-x-100'
-                      )}
-                    >
-                      {link.label}
-                    </span>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const location = useLocation()
-
-  const open = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-    }
-    setIsOpen(true)
-  }, [])
-
-  const closeWithDelay = useCallback(() => {
-    closeTimerRef.current = setTimeout(() => {
-      setIsOpen(false)
-      closeTimerRef.current = null
-    }, 150)
-  }, [])
-
-  const close = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-    }
-    setIsOpen(false)
-  }, [])
-
-  // Close on route change
-  useEffect(() => {
-    close()
-  }, [location.pathname, close])
-
-  // Close on Escape and return focus to trigger
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        close()
-        triggerRef.current?.focus()
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, close])
-
-  // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        close()
-      }
-    }
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
-  }, [isOpen, close])
-
-  // Close on focus leaving the wrapper
-  const handleBlur = useCallback(
-    (e: React.FocusEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
-        close()
-      }
-    },
-    [close]
-  )
-
-  // Clean up timer on unmount
-  useEffect(() => {
-    return () => {
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current)
-      }
-    }
-  }, [])
-
-  const isLocalSupportActive = LOCAL_SUPPORT_LINKS.some(
-    (link) => location.pathname === link.to
-  )
-
-  return (
-    <div
-      ref={wrapperRef}
-      className={cn(
-        'relative flex items-center py-2',
-        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-        transparent ? 'after:bg-white' : 'after:bg-primary',
-        isLocalSupportActive
-          ? 'after:scale-x-100'
-          : 'after:scale-x-0 hover:after:scale-x-100'
-      )}
-      onMouseEnter={open}
-      onMouseLeave={closeWithDelay}
-      onBlur={handleBlur}
-    >
-      <NavLink
-        to="/churches"
-        className={cn(
-          'text-sm font-medium transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
-          isLocalSupportActive
-            ? transparent ? 'text-white' : 'text-primary'
-            : transparent
-              ? 'text-white/90 hover:text-white'
-              : 'text-text-dark hover:text-primary'
-        )}
-      >
-        Local Support
-      </NavLink>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={cn(
-          'ml-0.5 rounded p-0.5 transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          isLocalSupportActive
-            ? transparent ? 'text-white' : 'text-primary'
-            : transparent
-              ? 'text-white/90 hover:text-white'
-              : 'text-text-dark hover:text-primary'
-        )}
-        aria-haspopup="true"
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? 'local-support-dropdown' : undefined}
-        aria-label="Local Support menu"
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
-        <ChevronDown
-          className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
-          aria-hidden="true"
-        />
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 top-full min-w-[200px] pt-2">
-          <ul
-            id="local-support-dropdown"
-            className={cn(
-              'animate-dropdown-in rounded-xl py-1.5',
-              transparent
-                ? 'bg-[#1E0B3E] border border-white/15 shadow-lg'
-                : 'bg-white shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10'
-            )}
-          >
-            {LOCAL_SUPPORT_LINKS.map((link) => (
-              <li key={link.to}>
-                <NavLink
-                  to={link.to}
-                  className={({ isActive }) =>
-                    cn(
-                      'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      isActive
-                        ? transparent ? 'text-white' : 'text-primary'
-                        : transparent ? 'text-white/90 hover:text-white' : 'text-text-dark hover:text-primary'
-                    )
-                  }
-                >
-                  {({ isActive }) => (
-                    <span
-                      className={cn(
-                        'relative pb-0.5',
-                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                        transparent ? 'after:bg-white' : 'after:bg-primary',
-                        isActive
+                        linkActive
                           ? 'after:scale-x-100'
                           : 'after:scale-x-0 group-hover:after:scale-x-100'
                       )}
@@ -625,14 +267,33 @@ function LocalSupportDropdown({ transparent }: { transparent: boolean }) {
 function DesktopNav({ transparent }: { transparent: boolean }) {
   return (
     <div className="hidden items-center gap-6 lg:flex">
-      <DailyDropdown transparent={transparent} />
-      <MusicDropdown transparent={transparent} />
+      <NavDropdown
+        label="Daily"
+        to="/daily"
+        links={DAILY_LINKS}
+        dropdownId="daily-dropdown"
+        transparent={transparent}
+      />
+      <NavDropdown
+        label="Music"
+        to="/music"
+        links={MUSIC_LINKS}
+        dropdownId="music-dropdown"
+        transparent={transparent}
+        extraActivePaths={['/music']}
+      />
       {NAV_LINKS.map((link) => (
         <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
           {link.label}
         </NavLink>
       ))}
-      <LocalSupportDropdown transparent={transparent} />
+      <NavDropdown
+        label="Local Support"
+        to="/churches"
+        links={LOCAL_SUPPORT_LINKS}
+        dropdownId="local-support-dropdown"
+        transparent={transparent}
+      />
     </div>
   )
 }
@@ -674,6 +335,38 @@ interface MobileDrawerProps {
 }
 
 function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
+  const drawerRef = useRef<HTMLElement>(null)
+
+  // Focus trap: keep Tab within the drawer while open
+  useEffect(() => {
+    if (!isOpen || !drawerRef.current) return
+
+    const drawer = drawerRef.current
+    const focusableSelector =
+      'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+
+      const focusable = drawer.querySelectorAll<HTMLElement>(focusableSelector)
+      if (focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
+
   return (
     <>
       {/* Backdrop */}
@@ -687,9 +380,10 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
       {/* Drawer panel */}
       {isOpen && (
-        <div
+        <nav
+          ref={drawerRef}
           id="mobile-menu"
-          aria-label="Navigation menu"
+          aria-label="Mobile navigation"
           className="relative z-50 border-t border-gray-100 lg:hidden"
         >
           <div className="flex flex-col px-4 py-4">
@@ -830,7 +524,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               </Link>
             </div>
           </div>
-        </div>
+        </nav>
       )}
     </>
   )

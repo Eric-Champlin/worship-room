@@ -13,10 +13,7 @@ export function Insights() {
             See how far you've come — this space will help you reflect on
             what God is doing in your life.
           </p>
-          <p
-            className="text-2xl text-primary sm:text-3xl"
-            style={{ fontFamily: "'Caveat', cursive" }}
-          >
+          <p className="font-script text-2xl text-primary sm:text-3xl">
             Coming Soon
           </p>
         </div>

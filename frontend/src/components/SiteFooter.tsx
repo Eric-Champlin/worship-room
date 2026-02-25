@@ -74,7 +74,7 @@ function GooglePlayBadge() {
 
 export function SiteFooter() {
   return (
-    <footer style={{ backgroundColor: '#0D0620' }}>
+    <footer className="bg-hero-dark">
       {/* Gradient transition from quiz white to footer dark purple */}
       <div
         className="h-32 sm:h-40"
@@ -92,10 +92,7 @@ export function SiteFooter() {
             className="inline-block rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
             aria-label="Worship Room home"
           >
-            <span
-              className="text-4xl font-bold text-white"
-              style={{ fontFamily: "'Caveat', cursive" }}
-            >
+            <span className="font-script text-4xl font-bold text-white">
               Worship Room
             </span>
           </Link>
@@ -114,7 +111,7 @@ export function SiteFooter() {
                     <li key={link.to}>
                       <Link
                         to={link.to}
-                        className="text-sm text-[#9CA3AF] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark rounded"
+                        className="text-sm text-muted-gray transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark rounded"
                       >
                         {link.label}
                       </Link>
@@ -127,7 +124,7 @@ export function SiteFooter() {
         </nav>
 
         {/* Divider */}
-        <hr className="my-8 border-[#2a2040]" />
+        <hr className="my-8 border-dark-border" />
 
         {/* App Download Row */}
         <div className="flex flex-col items-center gap-4">
@@ -141,26 +138,42 @@ export function SiteFooter() {
         </div>
 
         {/* Divider */}
-        <hr className="my-8 border-[#2a2040]" />
+        <hr className="my-8 border-dark-border" />
 
         {/* Crisis Resources */}
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[13px] text-[#9CA3AF]">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[13px] text-muted-gray">
           <span>If you&apos;re in crisis:</span>
           <span>
             988 Suicide &amp; Crisis Lifeline:{' '}
             <a
               href="tel:988"
-              className="underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark rounded"
+              className="rounded underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
             >
               988
             </a>
           </span>
           <span>Crisis Text Line: Text HOME to 741741</span>
+          <span>
+            SAMHSA Helpline:{' '}
+            <a
+              href="tel:1-800-662-4357"
+              className="rounded underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
+            >
+              1-800-662-4357
+            </a>
+          </span>
         </div>
 
+        {/* Disclaimer */}
+        <p className="mx-auto mt-4 max-w-2xl text-center text-[11px] text-subtle-gray">
+          Worship Room provides spiritual encouragement and support. It is not a
+          substitute for professional medical, psychological, or psychiatric
+          care.
+        </p>
+
         {/* Copyright */}
-        <p className="mt-6 text-center text-xs text-[#6B7280]">
-          &copy; 2026 Worship Room. All rights reserved.
+        <p className="mt-4 text-center text-xs text-subtle-gray">
+          &copy; {new Date().getFullYear()} Worship Room. All rights reserved.
         </p>
       </div>
     </footer>

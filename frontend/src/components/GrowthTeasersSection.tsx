@@ -30,7 +30,7 @@ function FrostedOverlay() {
 
 function MoodInsightsPreview() {
   return (
-    <div className="relative h-[150px] overflow-hidden rounded-t-2xl p-4">
+    <div className="relative h-[150px] overflow-hidden rounded-t-2xl p-4" aria-hidden="true">
       <div className="grid grid-cols-7 gap-1">
         {HEATMAP_COLORS.map((color, i) => (
           <div
@@ -60,7 +60,7 @@ function MoodInsightsPreview() {
 
 function StreaksPreview() {
   return (
-    <div className="relative flex h-[150px] flex-col items-center justify-center gap-1 overflow-hidden rounded-t-2xl p-4">
+    <div className="relative flex h-[150px] flex-col items-center justify-center gap-1 overflow-hidden rounded-t-2xl p-4" aria-hidden="true">
       <p className="text-2xl font-bold text-white" aria-hidden="true">
         🔥 12 Days
       </p>
@@ -74,7 +74,7 @@ function StreaksPreview() {
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
           <Check className="h-4 w-4 text-white" aria-hidden="true" />
         </span>
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2a2040]">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-dark-border">
           <Lock className="h-3 w-3 text-white/30" aria-hidden="true" />
         </span>
       </div>
@@ -85,7 +85,7 @@ function StreaksPreview() {
 
 function LeaderboardPreview() {
   return (
-    <div className="relative flex h-[150px] flex-col justify-center gap-2 overflow-hidden rounded-t-2xl px-5 py-4">
+    <div className="relative flex h-[150px] flex-col justify-center gap-2 overflow-hidden rounded-t-2xl px-5 py-4" aria-hidden="true">
       {LEADERBOARD_ROWS.map((row) => (
         <div
           key={row.rank}
@@ -152,8 +152,7 @@ export function GrowthTeasersSection() {
 
       {/* Content area — solid hero purple background */}
       <div
-        className="px-4 pt-12 pb-20 sm:px-6 sm:pt-16 sm:pb-24"
-        style={{ background: '#251248' }}
+        className="bg-hero-deep px-4 pt-12 pb-20 sm:px-6 sm:pt-16 sm:pb-24"
       >
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
@@ -162,13 +161,7 @@ export function GrowthTeasersSection() {
             className="mb-3 font-sans text-[1.7rem] font-bold text-white sm:text-[2.1rem] lg:text-[2.625rem]"
           >
             See How You&apos;re{' '}
-            <span
-              className="text-4xl sm:text-5xl lg:text-6xl"
-              style={{
-                fontFamily: "'Caveat', cursive",
-                color: '#FFFFFF',
-              }}
-            >
+            <span className="font-script text-4xl text-white sm:text-5xl lg:text-6xl">
               Growing
             </span>
           </h2>
@@ -190,7 +183,7 @@ export function GrowthTeasersSection() {
                 key={card.title}
                 data-testid="growth-card"
                 className={cn(
-                  'overflow-hidden rounded-2xl border transition-all duration-300',
+                  'overflow-hidden rounded-2xl border border-dark-border transition-all duration-300',
                   'hover:-translate-y-1 hover:shadow-xl',
                   inView
                     ? 'translate-y-0 opacity-100'
@@ -198,7 +191,6 @@ export function GrowthTeasersSection() {
                 )}
                 style={{
                   background: '#1a1030',
-                  borderColor: '#2a2040',
                   transitionDelay: inView ? `${index * 200}ms` : '0ms',
                 }}
               >
@@ -212,7 +204,7 @@ export function GrowthTeasersSection() {
                   <h3 className="text-base font-semibold text-white">
                     {card.title}
                   </h3>
-                  <p className="mt-1 text-sm text-white/60">
+                  <p className="mt-1 text-sm text-white/70">
                     {card.description}
                   </p>
                 </div>
@@ -232,8 +224,8 @@ export function GrowthTeasersSection() {
           >
             Create a Free Account
           </Link>
-          <p className="mt-4 text-sm text-white/50">
-            It&apos;s free. No catch.
+          <p className="mt-4 text-sm text-white/70">
+            It&apos;s free. No credit card. No catch.
           </p>
         </div>
       </div>

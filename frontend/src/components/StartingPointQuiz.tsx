@@ -98,13 +98,7 @@ export function StartingPointQuiz() {
               className="mb-3 font-sans text-[1.7rem] font-bold text-text-dark sm:text-[2.1rem] lg:text-[2.625rem]"
             >
               Not Sure Where to{' '}
-              <span
-                className="text-4xl sm:text-5xl lg:text-6xl"
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  color: '#6D28D9',
-                }}
-              >
+              <span className="font-script text-4xl text-primary sm:text-5xl lg:text-6xl">
                 Start?
               </span>
             </h2>
@@ -115,7 +109,7 @@ export function StartingPointQuiz() {
           </div>
 
           {/* Quiz card */}
-          <div className="mx-auto max-w-[600px] overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-md">
+          <div className="mx-auto max-w-[600px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
             {/* Progress bar — hidden on result */}
             {!showResult && (
               <div>
@@ -143,12 +137,11 @@ export function StartingPointQuiz() {
             <div className="relative overflow-hidden">
               <div
                 key={currentQuestion}
-                className={cn(
-                  'animate-slide-in',
+                className={
                   slideDirection === 'left'
-                    ? 'slide-from-right'
-                    : 'slide-from-left'
-                )}
+                    ? 'animate-slide-from-right'
+                    : 'animate-slide-from-left'
+                }
               >
                 {showResult && destination ? (
                   <ResultCard
@@ -170,23 +163,6 @@ export function StartingPointQuiz() {
         </div>
       </div>
 
-      {/* Inline keyframes for slide animations */}
-      <style>{`
-        .slide-from-right {
-          animation: slideFromRight 300ms ease-out forwards;
-        }
-        .slide-from-left {
-          animation: slideFromLeft 300ms ease-out forwards;
-        }
-        @keyframes slideFromRight {
-          from { transform: translateX(40px); opacity: 0; }
-          to   { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideFromLeft {
-          from { transform: translateX(-40px); opacity: 0; }
-          to   { transform: translateX(0); opacity: 1; }
-        }
-      `}</style>
     </section>
   )
 }
@@ -212,6 +188,7 @@ function QuestionCard({
       <div className="px-6 pt-4">
         {questionIndex > 0 ? (
           <button
+            type="button"
             onClick={onBack}
             className="inline-flex items-center gap-1 text-sm text-text-light transition-colors hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
           >
@@ -313,8 +290,7 @@ function ResultCard({ destination, onRetake, onExploreAll }: ResultCardProps) {
       <div className="mt-2 mb-6">
         <button
           onClick={onRetake}
-          className="text-base font-normal text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-          style={{ fontFamily: "'Caveat', cursive" }}
+          className="font-script text-base font-normal text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
         >
           Retake Quiz
         </button>

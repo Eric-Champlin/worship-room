@@ -1,4 +1,4 @@
-export { ExampleForm } from './ExampleForm'
+export { GrowthTeasersSection } from './GrowthTeasersSection'
 export { HeroSection } from './HeroSection'
 export { JourneySection } from './JourneySection'
 export { Layout } from './Layout'
