@@ -155,11 +155,8 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 ### Landing Page Sections
 
 51. **Growth Teasers Section** - "See How You're Growing" — 3 blurred preview cards (Mood Insights, Streaks & Faith Points, Friends & Leaderboard) showing logged-out visitors what they unlock with an account. Dark purple gradient background with frosted glass card previews. CTA to register.
-52. **Starting Point Quiz** - 3-5 question quiz ("Not Sure Where to Start?") that recommends a personalized entry point based on user's emotional state, spiritual background, and preferences. Client-side only, no data persistence for logged-out users. Includes crisis resource note if answers indicate distress.
-53. **Values Section** - "Why Worship Room?" — 4 value cards: Always Free, Privacy-First, Built with Safety, Grounded in Scripture (replaces testimonials for new site)
-54. **Impact Counter** - Growing stats (scriptures matched, prayers generated, community prayer requests)
-55. **CTA Section** - Bottom call-to-action repeating hero input or "Get Started Free" button
-56. **Footer** - Nav links, crisis resources, mission statement, disclaimers
+52. **Starting Point Quiz** - 5-question points-based quiz ("Not Sure Where to Start?") that recommends a personalized entry point. Client-side only, no data persistence for logged-out users.
+53. **Footer** - Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), copyright.
 
 ### Polish & Launch Prep
 
@@ -313,12 +310,9 @@ The landing page sections render in this order:
 1. Navbar (transparent glassmorphic pill — Daily dropdown, Music dropdown, Prayer Wall, Local Support dropdown)
 2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /scripture, quiz teaser link scrolls to #quiz)
 3. Journey Section (6-step vertical timeline: Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
-4. Growth Teasers Section ("See How You're Growing" — 3 blurred preview cards: Mood Insights, Streaks & Faith Points, Friends & Leaderboard. Dark purple gradient background.)
-5. Starting Point Quiz (id="quiz" — "Not Sure Where to Start?" — 3-5 questions, Ramsey-style progress bar, routes to recommended feature)
-6. Values Section ("Why Worship Room?" — 4 cards: Always Free, Privacy-First, Built with Safety, Grounded in Scripture)
-7. Impact Counter (growing stats: scriptures matched, prayers generated, community prayer requests)
-8. CTA Section (repeat hero input or "Get Started Free" button)
-9. Footer (nav links, crisis resources, mission statement, disclaimers)
+4. Growth Teasers Section ("See How You're Growing" — 3 blurred preview cards: Mood Insights, Streaks & Faith Points, Friends & Leaderboard. Dark purple gradient background. CTA: "Create a Free Account")
+5. Starting Point Quiz (id="quiz" — "Not Sure Where to Start?" — 5 questions, points-based scoring, result card routes to recommended feature)
+6. Footer (nav columns, crisis resources, app download badges, copyright)
 ```
 
 ### Journey Steps (6 Steps)
@@ -472,6 +466,41 @@ The landing page sections render in this order:
 **Animation:** Cards fade in with stagger animation on scroll (same pattern as Journey Section). The gradient background transition should feel smooth and natural.
 
 **Important:** The previews are 100% static CSS/HTML mockups — no real data, no API calls, no JavaScript logic. They just need to look like real dashboard previews that are blurred/locked.
+
+### Footer
+
+**Background:** Dark purple (#0D0620) matching the hero. Light text throughout.
+
+**Layout:** 3 grouped nav columns + crisis resources row + app download row + copyright bar. Responsive: columns side-by-side on desktop, stacked on mobile.
+
+**Nav columns:**
+
+| Daily | Music | Support |
+|-------|-------|---------|
+| Pray | Worship Playlists | Prayer Wall |
+| Journal | Ambient Sounds | Churches |
+| Meditate | Sleep & Rest | Counselors |
+| Verse & Song | | |
+
+Column headings in white bold (Inter 600). Links in muted light color (#9CA3AF or similar), hover to white. Each link routes to its page.
+
+**Crisis resources row:**
+- "If you're in crisis:" label
+- 988 Suicide & Crisis Lifeline: call or text 988 (tel: link)
+- Crisis Text Line: Text HOME to 741741
+- Styled subtly but always present — required per 01-ai-safety.md
+
+**App download row:**
+- Heading: "Take Worship Room With You" or "Get the App"
+- Two placeholder badges: App Store badge + Google Play badge (use standard badge SVGs/images)
+- Both link to "#" for now with a tooltip or small text: "Coming Soon"
+- Styled as recognizable download badges (black rounded rectangles with white text/icons)
+
+**Copyright bar (bottom):**
+- "© 2026 Worship Room. All rights reserved."
+- Small, muted text, centered or left-aligned
+
+**No social media links.** No newsletter signup. No mission statement. Keep it clean.
 
 ### Hero Quiz Teaser
 
@@ -716,12 +745,9 @@ Use this workflow for all new features:
 - Update Navbar (Daily dropdown + Music dropdown + Prayer Wall + Local Support dropdown)
 - Keep JourneySection at 6 steps (Pray, Journal, Meditate, Music, Prayer Wall, Local Support) — update descriptions if needed
 - Add hero quiz teaser (smooth scroll link to #quiz)
-- Build GrowthTeasers section (3 blurred preview cards, dark purple gradient background)
-- Build StartingPointQuiz (Ramsey-style quiz, id="quiz")
-- Build ValuesSection (4 value cards)
-- Build ImpactCounter (growing stats)
-- Build CTASection (bottom call-to-action)
-- Build Footer (nav links, crisis resources, mission statement)
+- Build GrowthTeasers section (3 blurred preview cards, dark purple gradient background, CTA to register)
+- Build StartingPointQuiz (5-question points-based quiz, id="quiz")
+- Build Footer (nav columns, crisis resources, app download badges, copyright)
 
 **Phase 2 — Core Product Experience**
 - Build `/scripture` page (mood selector → AI scripture match → reflection → prayer → Read Aloud)

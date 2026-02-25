@@ -166,7 +166,7 @@ export function GrowthTeasersSection() {
               className="text-4xl sm:text-5xl lg:text-6xl"
               style={{
                 fontFamily: "'Caveat', cursive",
-                color: '#8B5CF6',
+                color: '#FFFFFF',
               }}
             >
               Growing
