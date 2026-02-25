@@ -562,14 +562,11 @@ export function Navbar({ transparent = false }: NavbarProps) {
     <nav
       className={cn(
         'top-0 z-50',
-        transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-gradient-to-b from-hero-dark to-hero-mid'
+        transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-gradient-to-b from-[#2d1055] to-hero-mid'
       )}
       aria-label="Main navigation"
     >
-      <div className={cn(
-        'mx-auto max-w-6xl px-4 pb-2 sm:px-6',
-        transparent ? 'pt-5' : 'pt-3'
-      )}>
+      <div className="mx-auto max-w-6xl px-4 pt-5 pb-2 sm:px-6">
         <div
           className="rounded-2xl bg-white/[0.08] shadow-lg backdrop-blur-xl saturate-[1.8] border border-white/25"
         >
