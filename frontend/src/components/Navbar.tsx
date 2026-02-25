@@ -384,14 +384,14 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           ref={drawerRef}
           id="mobile-menu"
           aria-label="Mobile navigation"
-          className="relative z-50 border-t border-gray-100 lg:hidden"
+          className="relative z-50 mt-2 rounded-xl bg-hero-mid border border-white/15 shadow-lg animate-dropdown-in lg:hidden"
         >
           <div className="flex flex-col px-4 py-4">
             {/* Daily section */}
             <div role="group" aria-labelledby="daily-heading">
               <span
                 id="daily-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-text-dark"
+                className="px-3 text-xs font-semibold uppercase tracking-wider text-white/50"
               >
                 Daily
               </span>
@@ -405,8 +405,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
-                        ? 'bg-primary/5 text-primary'
-                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                        ? 'text-white'
+                        : 'text-white/90 hover:text-white'
                     )
                   }
                 >
@@ -417,13 +417,13 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
             {/* Music section */}
             <div
-              className="mt-2 border-t border-gray-100 pt-2"
+              className="mt-2 border-t border-white/15 pt-2"
               role="group"
               aria-labelledby="music-heading"
             >
               <span
                 id="music-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-text-dark"
+                className="px-3 text-xs font-semibold uppercase tracking-wider text-white/50"
               >
                 Music
               </span>
@@ -437,8 +437,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
-                        ? 'bg-primary/5 text-primary'
-                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                        ? 'text-white'
+                        : 'text-white/90 hover:text-white'
                     )
                   }
                 >
@@ -448,7 +448,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             </div>
 
             {/* Standalone link: Prayer Wall */}
-            <div className="mt-2 border-t border-gray-100 pt-2">
+            <div className="mt-2 border-t border-white/15 pt-2">
               {NAV_LINKS.map((link) => (
                 <NavLink
                   key={link.to}
@@ -459,8 +459,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
-                        ? 'bg-primary/5 text-primary'
-                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                        ? 'text-white'
+                        : 'text-white/90 hover:text-white'
                     )
                   }
                 >
@@ -471,13 +471,13 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
             {/* Local Support section */}
             <div
-              className="mt-2 border-t border-gray-100 pt-2"
+              className="mt-2 border-t border-white/15 pt-2"
               role="group"
               aria-labelledby="local-support-heading"
             >
               <span
                 id="local-support-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-text-dark"
+                className="px-3 text-xs font-semibold uppercase tracking-wider text-white/50"
               >
                 Local Support
               </span>
@@ -491,8 +491,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
-                        ? 'bg-primary/5 text-primary'
-                        : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                        ? 'text-white'
+                        : 'text-white/90 hover:text-white'
                     )
                   }
                 >
@@ -502,15 +502,15 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             </div>
 
             {/* Auth actions */}
-            <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-4">
+            <div className="mt-4 flex flex-col gap-2 border-t border-white/15 pt-4">
               <Link
                 to="/login"
                 onClick={onClose}
                 className={cn(
                   'relative min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium transition-colors',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                  "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                  'text-text-dark hover:text-primary after:scale-x-0 hover:after:scale-x-100'
+                  "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-white after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                  'text-white/90 hover:text-white after:scale-x-0 hover:after:scale-x-100'
                 )}
               >
                 Log In
@@ -518,7 +518,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               <Link
                 to="/register"
                 onClick={onClose}
-                className="min-h-[44px] flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="min-h-[44px] flex items-center justify-center rounded-full bg-white/20 border border-white/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Get Started
               </Link>
@@ -562,7 +562,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
     <nav
       className={cn(
         'top-0 z-50',
-        transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-neutral-bg'
+        transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-gradient-to-b from-hero-dark to-hero-mid'
       )}
       aria-label="Main navigation"
     >
@@ -571,17 +571,12 @@ export function Navbar({ transparent = false }: NavbarProps) {
         transparent ? 'pt-5' : 'pt-3'
       )}>
         <div
-          className={cn(
-            'rounded-2xl',
-            transparent
-              ? 'bg-white/[0.08] shadow-lg backdrop-blur-xl saturate-[1.8] border border-white/25'
-              : 'bg-white shadow-md'
-          )}
+          className="rounded-2xl bg-white/[0.08] shadow-lg backdrop-blur-xl saturate-[1.8] border border-white/25"
         >
           <div className="flex items-center justify-between px-6 py-3">
-            <NavbarLogo transparent={transparent} />
-            <DesktopNav transparent={transparent} />
-            <DesktopAuthActions transparent={transparent} />
+            <NavbarLogo transparent />
+            <DesktopNav transparent />
+            <DesktopAuthActions transparent />
 
             {/* Hamburger button — visible below lg */}
             <button
@@ -589,9 +584,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
               type="button"
               className={cn(
                 'inline-flex items-center justify-center rounded-md p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:hidden',
-                transparent
-                  ? 'text-white hover:bg-white/10 hover:text-white'
-                  : 'text-text-dark hover:bg-neutral-bg hover:text-primary'
+                'text-white hover:bg-white/10 hover:text-white'
               )}
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMenuOpen}
@@ -606,8 +599,9 @@ export function Navbar({ transparent = false }: NavbarProps) {
             </button>
           </div>
 
-          <MobileDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
         </div>
+
+        <MobileDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       </div>
     </nav>
   )
