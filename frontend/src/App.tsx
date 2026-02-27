@@ -5,6 +5,10 @@ import { Home } from './pages/Home'
 import { Health } from './pages/Health'
 import { Insights } from './pages/Insights'
 import { Daily } from './pages/Daily'
+import { PrayerWall } from './pages/PrayerWall'
+import { PrayerDetail } from './pages/PrayerDetail'
+import { PrayerWallProfile } from './pages/PrayerWallProfile'
+import { PrayerWallDashboard } from './pages/PrayerWallDashboard'
 import { Layout } from './components/Layout'
 
 function ComingSoon({ title }: { title: string }) {
@@ -63,7 +67,11 @@ function App() {
           <Route path="/music/playlists" element={<ComingSoon title="Worship Playlists" />} />
           <Route path="/music/ambient" element={<ComingSoon title="Ambient Sounds" />} />
           <Route path="/music/sleep" element={<ComingSoon title="Sleep & Rest" />} />
-          <Route path="/prayer-wall" element={<ComingSoon title="Prayer Wall" />} />
+          <Route path="/prayer-wall" element={<PrayerWall />} />
+          {/* Static segments must precede :id to avoid matching "dashboard"/"user" as a prayer ID */}
+          <Route path="/prayer-wall/dashboard" element={<PrayerWallDashboard />} />
+          <Route path="/prayer-wall/user/:id" element={<PrayerWallProfile />} />
+          <Route path="/prayer-wall/:id" element={<PrayerDetail />} />
           <Route path="/churches" element={<ComingSoon title="Churches" />} />
           <Route path="/counselors" element={<ComingSoon title="Counselors" />} />
           <Route path="/login" element={<ComingSoon title="Log In" />} />

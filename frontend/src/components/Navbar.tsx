@@ -215,7 +215,7 @@ function NavDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full min-w-[180px] pt-2">
+        <div className="absolute left-0 top-full z-50 min-w-[180px] pt-2">
           <ul
             id={dropdownId}
             role="list"
