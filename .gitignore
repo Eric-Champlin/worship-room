@@ -36,7 +36,11 @@ buildNumber.properties
 .DS_Store
 Thumbs.db
 
+# Playwright MCP artifacts
+.playwright-mcp/
+
 # Local screenshots/images
+screenshots/
 *.png
 *.jpg
 *.jpeg

@@ -1,15 +1,19 @@
 # Worship Room
 
-A full-stack web application for worship room management.
+A Christian emotional healing and worship web application that provides a safe, peaceful online space where users can find comfort, guidance, and spiritual support through AI-powered scripture matching, prayer generation, journaling, community prayer support, and worship music.
 
 ## Project Structure
 
 ```
 worship-room/
-├── frontend/          # React + TypeScript + Vite
-├── backend/           # Spring Boot + Maven + Java 21
+├── frontend/          # React 18 + TypeScript + Vite + TailwindCSS
+├── backend/           # Spring Boot 3 + Maven + Java 21
+├── _specs/            # Feature spec files (product requirements)
+├── _plans/            # Implementation plan files (technical plans)
+├── .claude/           # Claude Code rules and skills
 ├── justfile           # Task runner commands
 ├── docker-compose.yml # Docker orchestration
+├── CLAUDE.md          # Project guide and conventions
 └── README.md
 ```
 
@@ -88,22 +92,47 @@ just help            # Show all commands
 3. Click "Check Backend Health" link
 4. You should see successful responses from both `/api/health` and `/api/hello` endpoints
 
-## Frontend Features
+## Implemented Features
 
-- ⚡ Vite for fast development
-- 🎯 TypeScript with strict mode
-- 🧭 React Router for navigation
-- 🔌 Typed API client layer
-- 🎨 ESLint + Prettier configured
-- 🌍 Environment variable support
+### Landing Page (Complete)
+- Hero section with typewriter input and mood-to-scripture flow
+- 6-step Journey to Healing timeline
+- Growth Teasers section (3 blurred preview cards)
+- Starting Point Quiz (5-question recommendation engine)
+- Full footer with crisis resources
 
-## Backend Features
+### Prayer Wall (Frontend Complete — Mock Data)
+- Community prayer feed with inline composer and inline comments
+- Prayer cards with avatars, "Show more" in-place expand, interaction bar
+- Share dropdown (copy link, email, SMS, Facebook, X)
+- Public user profiles with tabs (Prayers, Replies, Reactions)
+- Private dashboard with tabs (My Prayers, Comments, Bookmarks, Reactions, Settings)
+- Auth modal for login/register gates
+- Report dialog, answered prayer badges, delete confirmation
+- Client-side crisis keyword detection on user input
+- 274 frontend tests passing
 
-- ☕ Java 21 + Spring Boot 3.2
-- 📦 Maven build system
-- 🌐 CORS configured for frontend origin
-- 📊 Actuator for health checks
-- ✅ Validation support built-in
+### Other Pages
+- Daily page (Verse & Song of the Day — placeholder)
+- Insights page (mood analytics — placeholder)
+
+## Frontend Stack
+
+- React 18 + TypeScript (strict) + Vite
+- TailwindCSS for styling
+- React Router for navigation
+- Vitest + React Testing Library for tests
+- ESLint + Prettier configured
+- Lucide React for icons
+
+## Backend Stack
+
+- Java 21 + Spring Boot 3.5
+- Maven build system
+- CORS configured for frontend origin
+- Actuator for health checks
+- Validation support built-in
+- Database, auth, AI integration, and remaining backend features are not yet implemented
 
 ## Development
 
@@ -113,6 +142,7 @@ just help            # Show all commands
 cd frontend
 pnpm dev      # Start dev server
 pnpm build    # Build for production
+pnpm test     # Run Vitest tests
 pnpm lint     # Run ESLint
 pnpm format   # Format with Prettier
 ```

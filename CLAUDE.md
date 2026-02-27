@@ -61,7 +61,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - ❌ Real-time chat or messaging
 - ❌ Spotify OAuth (just embed + deep link for MVP)
 - ❌ Mobile apps (web-responsive only for MVP; native app planned post-launch)
-- ❌ Complex user profiles (minimal profile for MVP)
+- ❌ Complex user profiles (prayer wall has basic public profiles and private dashboard; full user profiles with photo upload and stock photo library are post-MVP)
 - ❌ Multi-tenant / multiple admins / role systems (single-admin MVP)
 - ❌ Human-narrated audio content (AI TTS for MVP; human narration is a future enhancement)
 - ❌ Community prayer groups / small groups (post-MVP growth feature)
@@ -115,7 +115,7 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 
 ### Community Features
 
-27. **Prayer Wall** - Community forum for prayer requests
+27. **Prayer Wall** - Community prayer feed with inline composer, inline comments, share functionality, public user profiles (`/prayer-wall/user/:id`), private dashboard (`/prayer-wall/dashboard`), auth modal for login/register gates, report dialog, answered prayer tracking with testimony sharing, and standalone detail page (`/prayer-wall/:id`) for shared links. Frontend implemented with mock data (no backend wiring yet). No candle/light-a-candle feature.
 28. **AI Auto-Moderation** - Flag inappropriate content (profanity, abuse, spam)
 29. **Admin Moderation Interface** - Simple CRUD at `/admin/prayer-wall` for reviewing, editing, deleting posts
 30. **Email Notifications** - Send flagged posts to admin email from `ADMIN_EMAIL` env var
@@ -271,7 +271,9 @@ Replace "Log In / Get Started" with user avatar dropdown:
 - `/music/playlists` - Curated Spotify worship playlists (embed + deep link)
 - `/music/ambient` - Ambient soundscapes (rain, ocean, gentle piano, forest)
 - `/music/sleep` - Sleep & bedtime content (narrated scripture, sleep timer, wind-down mode)
-- `/prayer-wall` - Community prayer requests (view only when logged out)
+- `/prayer-wall` - Community prayer feed with inline composer, inline comments, share (logged-out: can read, react, share; logged-in: can post, comment, bookmark)
+- `/prayer-wall/:id` - Standalone prayer detail page (for shared links, direct navigation)
+- `/prayer-wall/user/:id` - Public user profile (prayers, replies, reactions tabs)
 - `/daily` - Verse & Song of the Day
 - `/churches` - Church locator (Google Maps)
 - `/counselors` - Counselor locator (Google Maps)
@@ -283,9 +285,8 @@ Replace "Log In / Get Started" with user avatar dropdown:
 - `/dashboard` - Personalized dashboard with widgets (daily verse/song, quick prayer, 7-day mood snapshot, streak counter, link to insights)
 - `/insights` - Mood tracking charts & trends (calendar heatmap, line graph, AI insights, correlations)
 - `/journal/my-entries` - Saved journal entries
-- `/prayers/my-requests` - User's own prayer wall posts (with answered prayer tracking)
+- `/prayer-wall/dashboard` - Private prayer wall dashboard (my prayers with mark-as-answered/delete, my comments, bookmarks, reactions, settings with notification preferences placeholder)
 - `/favorites` - Saved/bookmarked scriptures, prayers, and reflections
-- `/prayer-wall` - Community prayer requests (can post when logged in)
 
 ### Admin Routes (Requires `is_admin = true`)
 
@@ -402,15 +403,23 @@ The landing page sections render in this order:
 
 ### Prayer Wall Flow
 
-1. User navigates to `/prayer-wall`
-2. If logged out: Can view posts, prompted to login to post
-3. If logged in: Can create new prayer request
-4. **AI Safety Check** (backend): Run crisis detection (classifier; keywords fallback). Scan post for self-harm, abuse, spam, profanity
-5. If flagged: Email sent to `ADMIN_EMAIL`, post goes to moderation queue
-6. Users can report posts (adds to reports table)
-7. Users can "Mark as Answered" on their own posts → optional testimony sharing
-8. Admin can view flagged posts at `/admin/prayer-wall` and edit/delete
-9. Admin actions logged to `admin_audit_log`
+1. User navigates to `/prayer-wall` — sees hero section (purple gradient) + prayer card feed on neutral background
+2. **Logged-out users** can: read prayers, expand "Show more" text in-place, expand/read inline comments, tap "Praying for you" (session-only, anonymous), share prayers, view public profiles
+3. **Logged-out users cannot**: post prayers, post comments, bookmark (these open an auth modal instead of redirecting to `/login`)
+4. **Logged-in users** click "Share a Prayer Request" → inline composer slides down at top of feed (no separate `/prayer-wall/new` route)
+5. **Client-side crisis keyword check** runs on prayer text and comment text before submission (interim until backend API exists). If detected, a crisis resource banner with hotline numbers is shown and submission is blocked
+6. **AI Safety Check** (backend, Phase 3+): Run crisis detection (classifier; keywords fallback). Scan post for self-harm, abuse, spam, profanity
+7. If flagged: Email sent to `ADMIN_EMAIL`, post goes to moderation queue
+8. **Inline comments**: Expand/collapse per card. Comments show avatar, name, relative time, @mention styling. Logged-out users see "Log in to comment" placeholder
+9. **Share**: Desktop dropdown (copy link, email, SMS, Facebook, X); mobile uses Web Share API with fallback
+10. **Detail page** (`/prayer-wall/:id`): Full prayer with all comments expanded, owner actions (mark as answered, delete), report link, back navigation
+11. **Public profile** (`/prayer-wall/user/:id`): Avatar, name, bio, join date, tabs (Prayers, Replies, Reactions)
+12. **Private dashboard** (`/prayer-wall/dashboard`): Requires login (redirects to `/login` if not). Edit name/bio, tabs (My Prayers with mark-as-answered/delete, My Comments, Bookmarks, Reactions, Settings with notification preference placeholders)
+13. Users can report posts via report dialog (adds to reports table)
+14. Admin can view flagged posts at `/admin/prayer-wall` and edit/delete
+15. Admin actions logged to `admin_audit_log`
+
+**Current state**: Frontend fully implemented with mock data (274 tests). Backend API wiring is Phase 3+.
 
 ### Growth Teasers Section
 
@@ -564,7 +573,7 @@ Use this workflow for all new features:
 - Auth system (login/register)
 - Dashboard skeleton (with link to /insights)
 - Journaling with save + ambient sounds
-- Prayer wall with moderation
+- Prayer wall backend API wiring (the frontend UI redesign is complete with mock data — inline composer, inline comments, profiles, dashboard, share, auth modal, 274 tests)
 - Mood tracking to database
 
 **Phase 4 — Polish & Growth Features**
