@@ -219,12 +219,7 @@ function NavDropdown({
           <ul
             id={dropdownId}
             role="list"
-            className={cn(
-              'animate-dropdown-in rounded-xl py-1.5',
-              transparent
-                ? 'bg-gradient-to-b from-[#49177D] to-[#2B0E4A] border border-white/10 shadow-[0_8px_32px_-4px_rgba(109,40,217,0.4)]'
-                : 'bg-white shadow-[0_4px_24px_-4px_rgba(109,40,217,0.25)] ring-1 ring-primary/10'
-            )}
+            className="animate-dropdown-in rounded-xl bg-white border border-gray-200 shadow-lg py-1.5"
           >
             {links.map((link) => (
               <li key={link.to}>
@@ -235,8 +230,8 @@ function NavDropdown({
                       'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
                       linkActive
-                        ? transparent ? 'text-white' : 'text-primary'
-                        : transparent ? 'text-white/90 hover:text-white' : 'text-text-dark hover:text-primary'
+                        ? 'text-[#2B0E4A]'
+                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                     )
                   }
                 >
@@ -244,8 +239,7 @@ function NavDropdown({
                     <span
                       className={cn(
                         'relative pb-0.5',
-                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                        transparent ? 'after:bg-white' : 'after:bg-primary',
+                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
                         linkActive
                           ? 'after:scale-x-100'
                           : 'after:scale-x-0 group-hover:after:scale-x-100'
@@ -384,14 +378,14 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           ref={drawerRef}
           id="mobile-menu"
           aria-label="Mobile navigation"
-          className="relative z-50 mt-2 rounded-xl bg-gradient-to-b from-[#49177D] to-[#2B0E4A] border border-white/10 shadow-[0_8px_32px_-4px_rgba(109,40,217,0.4)] animate-dropdown-in lg:hidden"
+          className="relative z-50 mt-2 rounded-xl bg-white border border-gray-200 shadow-lg animate-dropdown-in lg:hidden"
         >
           <div className="flex flex-col px-4 py-4">
             {/* Daily section */}
             <div role="group" aria-labelledby="daily-heading">
               <span
                 id="daily-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-white/50"
+                className="px-3 text-xs font-semibold uppercase tracking-wider text-primary/50"
               >
                 Daily
               </span>
@@ -405,8 +399,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
-                        ? 'text-white'
-                        : 'text-white/90 hover:text-white'
+                        ? 'text-[#2B0E4A]'
+                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                     )
                   }
                 >
@@ -417,13 +411,13 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
             {/* Music section */}
             <div
-              className="mt-2 border-t border-white/15 pt-2"
+              className="mt-2 border-t border-gray-100 pt-2"
               role="group"
               aria-labelledby="music-heading"
             >
               <span
                 id="music-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-white/50"
+                className="px-3 text-xs font-semibold uppercase tracking-wider text-primary/50"
               >
                 Music
               </span>
@@ -437,8 +431,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
-                        ? 'text-white'
-                        : 'text-white/90 hover:text-white'
+                        ? 'text-[#2B0E4A]'
+                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                     )
                   }
                 >
@@ -448,7 +442,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             </div>
 
             {/* Standalone link: Prayer Wall */}
-            <div className="mt-2 border-t border-white/15 pt-2">
+            <div className="mt-2 border-t border-gray-100 pt-2">
               {NAV_LINKS.map((link) => (
                 <NavLink
                   key={link.to}
@@ -459,8 +453,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
-                        ? 'text-white'
-                        : 'text-white/90 hover:text-white'
+                        ? 'text-[#2B0E4A]'
+                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                     )
                   }
                 >
@@ -471,13 +465,13 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
             {/* Local Support section */}
             <div
-              className="mt-2 border-t border-white/15 pt-2"
+              className="mt-2 border-t border-gray-100 pt-2"
               role="group"
               aria-labelledby="local-support-heading"
             >
               <span
                 id="local-support-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-white/50"
+                className="px-3 text-xs font-semibold uppercase tracking-wider text-primary/50"
               >
                 Local Support
               </span>
@@ -491,8 +485,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
-                        ? 'text-white'
-                        : 'text-white/90 hover:text-white'
+                        ? 'text-[#2B0E4A]'
+                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                     )
                   }
                 >
@@ -502,15 +496,15 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             </div>
 
             {/* Auth actions */}
-            <div className="mt-4 flex flex-col gap-2 border-t border-white/15 pt-4">
+            <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-4">
               <Link
                 to="/login"
                 onClick={onClose}
                 className={cn(
                   'relative min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium transition-colors',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                  "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-white after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                  'text-white/90 hover:text-white after:scale-x-0 hover:after:scale-x-100'
+                  "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                  'text-[#2B0E4A] after:scale-x-0 hover:after:scale-x-100'
                 )}
               >
                 Log In
@@ -518,7 +512,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               <Link
                 to="/register"
                 onClick={onClose}
-                className="min-h-[44px] flex items-center justify-center rounded-full bg-white/20 border border-white/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="min-h-[44px] flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Get Started
               </Link>
