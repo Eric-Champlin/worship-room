@@ -39,6 +39,9 @@ Thumbs.db
 # Playwright MCP artifacts
 .playwright-mcp/
 
+# Test results
+test-results/
+
 # Local screenshots/images
 screenshots/
 *.png

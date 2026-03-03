@@ -70,6 +70,11 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 - ❌ Standalone "Listen" page (audio features are distributed across Scripture, Meditation, and Journal pages)
 - ❌ Points / leaderboard / social features (post-launch growth feature requiring auth + friends system)
 
+**Key Decisions:**
+
+- **Bible Translation**: WEB (World English Bible) — modern English, public domain, no licensing required
+- **Spotify Integration**: No Spotify API required. Song of the Day embed uses track IDs from the Worship Room playlist (https://open.spotify.com/playlist/5Ux99VLE8cG7W656CjR2si). "Follow our playlist on Spotify" CTA links to this URL.
+
 ### Foundation
 
 1. **Authentication System** - Spring Security + JWT, email/password login (Auth scaffolding early; core flows must work logged-out in demo mode)
@@ -84,7 +89,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 7. **Mood Selector** - 5 buttons (Terrible, Bad, Neutral, Good, Excellent) + text input for custom descriptions
 8. **Scripture Display** - AI-matched scripture with fade-in animation
 9. **AI Scripture Reflection** - AI-generated reflection notes below each verse
-10. **Scripture Database** - PostgreSQL with 100 seeded scriptures (20 per mood; translation TBD—must be legally usable)
+10. **Scripture Database** - PostgreSQL with 100 seeded scriptures (20 per mood; WEB translation — public domain)
 11. **AI Pre-Tagging** - OpenAI API to tag scriptures with mood/theme mappings
 12. **Mood Tracking** - Save mood selections with timestamp and scripture shown
 
@@ -93,7 +98,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 13. **Journal Page** - Text editor with save functionality
 14. **AI Journaling Prompts** - Auto-generated prompts based on mood
 15. **Saved Journal Entries** - View past entries at `/journal/my-entries`
-16. **Spotify Integration** - Embed player + "Open in Spotify" deep link
+16. **Spotify Integration** - Embed player + "Open in Spotify" deep link. Uses Worship Room playlist: https://open.spotify.com/playlist/5Ux99VLE8cG7W656CjR2si. No Spotify API required — iframe embeds with hardcoded track IDs.
 17. **Music Page** - Dedicated `/music` page with playlist
 
 ### AI-Powered Features
