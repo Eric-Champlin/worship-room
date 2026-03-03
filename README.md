@@ -110,11 +110,24 @@ just help            # Show all commands
 - Auth modal for login/register gates
 - Report dialog, answered prayer badges, delete confirmation
 - Client-side crisis keyword detection on user input
-- 274 frontend tests passing
+
+### Local Support (Frontend Complete — Mock Data)
+- Church Locator (`/local-support/churches`) with denomination filter
+- Christian Counselor Locator (`/local-support/counselors`) with specialty filter and disclaimer banner
+- Celebrate Recovery Locator (`/local-support/celebrate-recovery`) with CR explainer section
+- Search controls: geolocation, city/zip geocoding, radius slider (1–100 miles)
+- Leaflet map + list view with toggle (mobile) and side-by-side (desktop)
+- Listing cards with details expand, save to favorites (localStorage), share dropdown
+- Auth-gated search UI: logged-out users see hero with "Sign In to Search" CTA
+- Saved Locations tab with localStorage persistence
+- Proper ARIA tab pattern with keyboard navigation
+- Google Places API wiring is Phase 3+ (currently uses mock data)
 
 ### Other Pages
 - Daily page (Verse & Song of the Day — placeholder)
 - Insights page (mood analytics — placeholder)
+
+**Total: 331 frontend tests passing (43 test files)**
 
 ## Frontend Stack
 
@@ -123,6 +136,7 @@ just help            # Show all commands
 - React Router for navigation
 - Vitest + React Testing Library for tests
 - ESLint + Prettier configured
+- Leaflet + React Leaflet for maps
 - Lucide React for icons
 
 ## Backend Stack

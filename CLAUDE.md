@@ -124,9 +124,9 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 
 ### Locator Features
 
-33. **Church Locator** - Google Maps Places API real-time search at `/local-support/churches`
-34. **Christian Counselor Locator** - Google Maps Places API real-time search at `/local-support/counselors`
-35. **Celebrate Recovery Locator** - Google Maps Places API real-time search at `/local-support/celebrate-recovery`
+33. **Church Locator** - Google Maps Places API real-time search at `/local-support/churches`. Search UI is auth-gated; logged-out users see hero with "Sign In to Search" CTA. Frontend implemented with mock data and Leaflet map; Google Places API wiring is Phase 3+.
+34. **Christian Counselor Locator** - Google Maps Places API real-time search at `/local-support/counselors`. Same auth-gated pattern. Includes disclaimer banner.
+35. **Celebrate Recovery Locator** - Google Maps Places API real-time search at `/local-support/celebrate-recovery`. Same auth-gated pattern. Includes CR explainer section in hero.
 
 ### Content Features
 
