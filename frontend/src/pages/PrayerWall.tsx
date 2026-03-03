@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { LayoutDashboard } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
 import { PrayerWallHero } from '@/components/prayer-wall/PrayerWallHero'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
@@ -21,7 +22,8 @@ const PRAYERS_PER_PAGE = 20
 function PrayerWallContent() {
   const { isLoggedIn, user } = useAuth()
   const { showToast } = useToast()
-  const { openAuthModal } = useAuthModal()
+  const authModal = useAuthModal()
+  const openAuthModal = authModal?.openAuthModal
   const allPrayers = useMemo(() => getMockPrayers(), [])
 
   const [prayers, setPrayers] = useState<PrayerRequest[]>(() =>
@@ -114,7 +116,7 @@ function PrayerWallContent() {
   )
 
   return (
-    <div className="min-h-screen bg-neutral-bg font-sans">
+    <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
@@ -154,7 +156,7 @@ function PrayerWallContent() {
       />
       <main
         id="main-content"
-        className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
+        className="mx-auto max-w-[720px] flex-1 px-4 py-6 sm:py-8"
       >
 
         {/* Inline Composer */}
@@ -196,6 +198,7 @@ function PrayerWallContent() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   )
 }

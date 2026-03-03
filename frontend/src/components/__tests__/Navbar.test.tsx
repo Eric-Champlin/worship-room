@@ -187,10 +187,10 @@ describe('Navbar', () => {
   })
 
   describe('Local Support dropdown', () => {
-    it('"Local Support" label is a link to /churches', () => {
+    it('"Local Support" label is a link to /local-support/churches', () => {
       renderNavbar()
       const link = screen.getByRole('link', { name: 'Local Support' })
-      expect(link).toHaveAttribute('href', '/churches')
+      expect(link).toHaveAttribute('href', '/local-support/churches')
     })
 
     it('dropdown is closed by default', () => {
@@ -218,9 +218,10 @@ describe('Navbar', () => {
       fireEvent.click(screen.getByRole('button', { name: /local support menu/i }))
       const dropdown = document.getElementById('local-support-dropdown')!
       const links = within(dropdown).getAllByRole('link')
-      expect(links).toHaveLength(2)
-      expect(links[0]).toHaveAttribute('href', '/churches')
-      expect(links[1]).toHaveAttribute('href', '/counselors')
+      expect(links).toHaveLength(3)
+      expect(links[0]).toHaveAttribute('href', '/local-support/churches')
+      expect(links[1]).toHaveAttribute('href', '/local-support/counselors')
+      expect(links[2]).toHaveAttribute('href', '/local-support/celebrate-recovery')
     })
 
     it('chevron trigger has correct ARIA attributes', () => {

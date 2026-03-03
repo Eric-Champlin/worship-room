@@ -10,6 +10,9 @@ import { PrayerDetail } from './pages/PrayerDetail'
 import { PrayerWallProfile } from './pages/PrayerWallProfile'
 import { PrayerWallDashboard } from './pages/PrayerWallDashboard'
 import { Layout } from './components/Layout'
+import { Churches } from './pages/Churches'
+import { Counselors } from './pages/Counselors'
+import { CelebrateRecovery } from './pages/CelebrateRecovery'
 
 function ComingSoon({ title }: { title: string }) {
   return (
@@ -72,8 +75,9 @@ function App() {
           <Route path="/prayer-wall/dashboard" element={<PrayerWallDashboard />} />
           <Route path="/prayer-wall/user/:id" element={<PrayerWallProfile />} />
           <Route path="/prayer-wall/:id" element={<PrayerDetail />} />
-          <Route path="/churches" element={<ComingSoon title="Churches" />} />
-          <Route path="/counselors" element={<ComingSoon title="Counselors" />} />
+          <Route path="/local-support/churches" element={<Churches />} />
+          <Route path="/local-support/counselors" element={<Counselors />} />
+          <Route path="/local-support/celebrate-recovery" element={<CelebrateRecovery />} />
           <Route path="/login" element={<ComingSoon title="Log In" />} />
           <Route path="/register" element={<ComingSoon title="Get Started" />} />
           <Route path="*" element={<NotFound />} />

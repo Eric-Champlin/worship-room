@@ -42,11 +42,12 @@ const NOTIFICATION_TYPES = [
 ]
 
 function DashboardContent() {
-  const { isLoggedIn, user } = useAuth()
+  const { isLoggedIn } = useAuth()
   const { showToast } = useToast()
   const [activeTab, setActiveTab] = useState<DashboardTab>('prayers')
 
-  const dashboardUser = user ?? MOCK_CURRENT_USER
+  // TODO(phase-3): fetch real user profile from backend instead of mock data
+  const dashboardUser = MOCK_CURRENT_USER
   const [displayName, setDisplayName] = useState(dashboardUser.firstName)
   const [bio, setBio] = useState(dashboardUser.bio ?? '')
   const [editingName, setEditingName] = useState(false)

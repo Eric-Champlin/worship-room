@@ -67,14 +67,6 @@ function GooglePlayBadge() {
 export function SiteFooter() {
   return (
     <footer className="bg-hero-dark">
-      {/* Gradient transition from quiz white to footer dark purple */}
-      <div
-        className="h-32 sm:h-40"
-        style={{
-          background: 'linear-gradient(to bottom, #FFFFFF 0%, #0D0620 100%)',
-        }}
-      />
-
       {/* Content */}
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         {/* Logo */}
