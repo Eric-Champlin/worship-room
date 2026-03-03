@@ -21,8 +21,9 @@ const NAV_LINKS = [
 ] as const
 
 const LOCAL_SUPPORT_LINKS = [
-  { label: 'Churches', to: '/churches' },
-  { label: 'Counselors', to: '/counselors' },
+  { label: 'Churches', to: '/local-support/churches' },
+  { label: 'Counselors', to: '/local-support/counselors' },
+  { label: 'Celebrate Recovery', to: '/local-support/celebrate-recovery' },
 ] as const
 
 function getNavLinkClass(transparent: boolean) {
@@ -223,32 +224,25 @@ function NavDropdown({
           >
             {links.map((link) => (
               <li key={link.to}>
-                <NavLink
+                <Link
                   to={link.to}
-                  className={({ isActive: linkActive }) =>
-                    cn(
-                      'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                      linkActive
-                        ? 'text-[#2B0E4A]'
-                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
-                    )
-                  }
-                >
-                  {({ isActive: linkActive }) => (
-                    <span
-                      className={cn(
-                        'relative pb-0.5',
-                        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                        linkActive
-                          ? 'after:scale-x-100'
-                          : 'after:scale-x-0 group-hover:after:scale-x-100'
-                      )}
-                    >
-                      {link.label}
-                    </span>
+                  aria-current={location.pathname === link.to ? 'page' : undefined}
+                  className={cn(
+                    'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
+                    'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                   )}
-                </NavLink>
+                >
+                  <span
+                    className={cn(
+                      'relative pb-0.5',
+                      "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                      'after:scale-x-0 group-hover:after:scale-x-100'
+                    )}
+                  >
+                    {link.label}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
@@ -283,7 +277,7 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
       ))}
       <NavDropdown
         label="Local Support"
-        to="/churches"
+        to="/local-support/churches"
         links={LOCAL_SUPPORT_LINKS}
         dropdownId="local-support-dropdown"
         transparent={transparent}

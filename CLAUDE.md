@@ -124,57 +124,58 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 
 ### Locator Features
 
-33. **Church Locator** - Google Maps Places API real-time search at `/churches`
-34. **Christian Counselor Locator** - Google Maps Places API real-time search at `/counselors`
+33. **Church Locator** - Google Maps Places API real-time search at `/local-support/churches`
+34. **Christian Counselor Locator** - Google Maps Places API real-time search at `/local-support/counselors`
+35. **Celebrate Recovery Locator** - Google Maps Places API real-time search at `/local-support/celebrate-recovery`
 
 ### Content Features
 
-35. **Guided Meditations** - 20 text-based meditations organized by topic (with audio playback via TTS)
-36. **Verse of the Day** - Daily scripture on `/daily` page, homepage, and dashboard
-37. **Song of the Day** - Daily worship song recommendation on `/daily` page, homepage, and dashboard
-38. **Guided Reading Plans** - 7-day and 21-day themed plans ("Overcoming Anxiety," "Healing from Grief," etc.) with daily scripture + reflection + journal prompt + prayer
+36. **Guided Meditations** - 20 text-based meditations organized by topic (with audio playback via TTS)
+37. **Verse of the Day** - Daily scripture on `/daily` page, homepage, and dashboard
+38. **Song of the Day** - Daily worship song recommendation on `/daily` page, homepage, and dashboard
+39. **Guided Reading Plans** - 7-day and 21-day themed plans ("Overcoming Anxiety," "Healing from Grief," etc.) with daily scripture + reflection + journal prompt + prayer
 
 ### Analytics & Personalization
 
-39. **Mood History Dashboard** - 7-day snapshot on `/dashboard`
-40. **Mood Insights Page** - Full history with calendar heatmap and line charts at `/insights` (accessible from dashboard, not top-level nav)
-41. **Trend Analysis** - AI-generated insights ("Your mood is improving this week!")
-42. **Mood Correlations** - "You tend to feel better on days you journal"
-43. **Personalized Recommendations** - Scripture/music suggestions based on mood history
-44. **Monthly Mood Report** - Email or in-app summary of mood patterns
+40. **Mood History Dashboard** - 7-day snapshot on `/dashboard`
+41. **Mood Insights Page** - Full history with calendar heatmap and line charts at `/insights` (accessible from dashboard, not top-level nav)
+42. **Trend Analysis** - AI-generated insights ("Your mood is improving this week!")
+43. **Mood Correlations** - "You tend to feel better on days you journal"
+44. **Personalized Recommendations** - Scripture/music suggestions based on mood history
+45. **Monthly Mood Report** - Email or in-app summary of mood patterns
 
 ### Engagement & Retention
 
-45. **Daily Streak Tracking** - Consecutive days using any feature (prayer, journal, meditation, etc.) with visual streak display
-46. **Streak Recovery Grace Period** - Miss one day without losing streak
-47. **Weekly Summary** - "You prayed 5 times this week and journaled 3 times"
-48. **Shareable Scripture Cards** - Auto-generated branded images with verse text, share to social/messaging
-49. **Saved / Favorited Content** - Bookmark button on scriptures, prayers, reflections; "My Favorites" page
-50. **Dark Mode** - System-preference-aware toggle, auto-switch at bedtime
+46. **Daily Streak Tracking** - Consecutive days using any feature (prayer, journal, meditation, etc.) with visual streak display
+47. **Streak Recovery Grace Period** - Miss one day without losing streak
+48. **Weekly Summary** - "You prayed 5 times this week and journaled 3 times"
+49. **Shareable Scripture Cards** - Auto-generated branded images with verse text, share to social/messaging
+50. **Saved / Favorited Content** - Bookmark button on scriptures, prayers, reflections; "My Favorites" page
+51. **Dark Mode** - System-preference-aware toggle, auto-switch at bedtime
 
 ### Landing Page Sections
 
-51. **Growth Teasers Section** - "See How You're Growing" — 3 blurred preview cards (Mood Insights, Streaks & Faith Points, Friends & Leaderboard) showing logged-out visitors what they unlock with an account. Dark purple gradient background with frosted glass card previews. CTA to register.
-52. **Starting Point Quiz** - 5-question points-based quiz ("Not Sure Where to Start?") that recommends a personalized entry point. Client-side only, no data persistence for logged-out users.
-53. **Footer** - Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), copyright.
+52. **Growth Teasers Section** - "See How You're Growing" — 3 blurred preview cards (Mood Insights, Streaks & Faith Points, Friends & Leaderboard) showing logged-out visitors what they unlock with an account. Dark purple gradient background with frosted glass card previews. CTA to register.
+53. **Starting Point Quiz** - 5-question points-based quiz ("Not Sure Where to Start?") that recommends a personalized entry point. Client-side only, no data persistence for logged-out users.
+54. **Footer** - Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), copyright.
 
 ### Polish & Launch Prep
 
-56. **Personalized Onboarding Flow** - 3-5 question onboarding at signup to curate starting experience
-57. **Performance Optimization** - Lazy loading, code splitting, caching
-58. **Security Audit** - Vulnerability scanning, penetration testing
-59. **SEO Optimization** - Meta tags, sitemap, structured data
-60. **Production Deployment** - Production setup with CI/CD
-61. **User Testing** - Beta testing with real users
+57. **Personalized Onboarding Flow** - 3-5 question onboarding at signup to curate starting experience
+58. **Performance Optimization** - Lazy loading, code splitting, caching
+59. **Security Audit** - Vulnerability scanning, penetration testing
+60. **SEO Optimization** - Meta tags, sitemap, structured data
+61. **Production Deployment** - Production setup with CI/CD
+62. **User Testing** - Beta testing with real users
 
 ### Post-Launch Growth Features
 
-62. **Community Prayer Groups** - Private small groups (3-12 people) with group prayer requests, "I prayed for this" notifications, group streaks
-63. **Church Partnership Portal** - Church admin dashboard, congregation-wide prayer wall, weekly digest to pastor
-64. **Kids / Family Mode** - Simplified mood selector, age-appropriate scripture, bedtime Bible stories
-65. **Apple Health / Google Fit Sync** - Sync meditation minutes and prayer time (app only)
-66. **AI Pastoral Companion** - Persistent conversational AI with session memory, draws from mood history and journal patterns
-67. **Faith Points & Leaderboard** - Gamification: earn points for activities (pray, journal, meditate, prayer wall). Friends-only leaderboard (encouraging, not competitive). Milestone badges. Requires auth + friends system. Tone: mutual encouragement, never competition. Dashboard only, not in main navbar.
+63. **Community Prayer Groups** - Private small groups (3-12 people) with group prayer requests, "I prayed for this" notifications, group streaks
+64. **Church Partnership Portal** - Church admin dashboard, congregation-wide prayer wall, weekly digest to pastor
+65. **Kids / Family Mode** - Simplified mood selector, age-appropriate scripture, bedtime Bible stories
+66. **Apple Health / Google Fit Sync** - Sync meditation minutes and prayer time (app only)
+67. **AI Pastoral Companion** - Persistent conversational AI with session memory, draws from mood history and journal patterns
+68. **Faith Points & Leaderboard** - Gamification: earn points for activities (pray, journal, meditate, prayer wall). Friends-only leaderboard (encouraging, not competitive). Milestone badges. Requires auth + friends system. Tone: mutual encouragement, never competition. Dashboard only, not in main navbar.
 
 ---
 
@@ -203,10 +204,11 @@ Audio is a feature layer that enhances existing pages, not a standalone destinat
 ├── Sleep & Rest
 ```
 
-**"Local Support" dropdown** (clickable label goes to `/churches`; dropdown expands on hover/click):
+**"Local Support" dropdown** (clickable label goes to `/local-support/churches`; dropdown expands on hover/click):
 ```
 ├── Churches
 ├── Counselors
+├── Celebrate Recovery
 ```
 
 **Design rationale:** The navbar uses a clean content-type separation. "Daily" groups the active daily habits (reading, writing, reflecting). "Music" groups everything audio-based (worship playlists, ambient soundscapes, sleep content). "Prayer Wall" stands alone as the community differentiator. "Local Support" groups real-world help. The rule is simple: if it involves reading/doing, it's under Daily. If it involves listening, it's under Music. 3 dropdowns + 1 standalone link + auth is clean and balanced at all screen sizes.
@@ -235,6 +237,7 @@ Prayer Wall
 LOCAL SUPPORT
   Churches
   Counselors
+  Celebrate Recovery
 ──────────────
 [Log In]
 [Get Started]
@@ -275,8 +278,9 @@ Replace "Log In / Get Started" with user avatar dropdown:
 - `/prayer-wall/:id` - Standalone prayer detail page (for shared links, direct navigation)
 - `/prayer-wall/user/:id` - Public user profile (prayers, replies, reactions tabs)
 - `/daily` - Verse & Song of the Day
-- `/churches` - Church locator (Google Maps)
-- `/counselors` - Counselor locator (Google Maps)
+- `/local-support/churches` - Church locator (Google Maps)
+- `/local-support/counselors` - Counselor locator (Google Maps)
+- `/local-support/celebrate-recovery` - Celebrate Recovery locator (Google Maps)
 - `/login` - Login page
 - `/register` - Registration page
 
@@ -316,7 +320,7 @@ The landing page sections render in this order:
 | 3 | Meditate | Quiet your mind with guided meditations rooted in Biblical truth. Let peace settle in. | `/meditate` |
 | 4 | Music | Let music carry you deeper. Curated worship playlists matched to where you are right now. | `/music` |
 | 5 | Prayer Wall | You're not alone. Share prayer requests and lift others up in a safe, supportive community. | `/prayer-wall` |
-| 6 | Local Support | Find churches and Christian counselors near you. The next step in your healing may be just around the corner. | `/churches` |
+| 6 | Local Support | Find churches and Christian counselors near you. The next step in your healing may be just around the corner. | `/local-support/churches` |
 
 **The flow tells a story:** Start with God (Pray) → Process internally (Journal, Meditate) → Worship (Music) → Connect with others (Prayer Wall) → Get real-world help (Local Support).
 
