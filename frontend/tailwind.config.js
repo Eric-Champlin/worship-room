@@ -52,6 +52,22 @@ export default {
           from: { transform: 'translateX(-40px)', opacity: '0' },
           to: { transform: 'translateX(0)', opacity: '1' },
         },
+        'golden-glow': {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(251, 191, 36, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(251, 191, 36, 0.6)' },
+        },
+        'breathe-expand': {
+          '0%': { transform: 'scale(0.6)', opacity: '0.7' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'breathe-contract': {
+          '0%': { transform: 'scale(1)', opacity: '1' },
+          '100%': { transform: 'scale(0.6)', opacity: '0.7' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -59,6 +75,10 @@ export default {
         'dropdown-in': 'dropdown-in 150ms ease-out',
         'slide-from-right': 'slide-from-right 300ms ease-out forwards',
         'slide-from-left': 'slide-from-left 300ms ease-out forwards',
+        'golden-glow': 'golden-glow 2s ease-in-out infinite',
+        'breathe-expand': 'breathe-expand 4s ease-in-out forwards',
+        'breathe-contract': 'breathe-contract 8s ease-in-out forwards',
+        'fade-in': 'fade-in 500ms ease-out forwards',
       },
     },
   },

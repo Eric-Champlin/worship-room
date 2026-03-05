@@ -146,7 +146,7 @@ function PrayerWallContent() {
           ) : (
             <button
               type="button"
-              onClick={openAuthModal}
+              onClick={() => openAuthModal?.()}
               className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             >
               Share a Prayer Request

@@ -42,26 +42,32 @@ describe('SiteFooter', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders all 10 nav links with correct hrefs', () => {
+  it('renders all 11 nav links with correct hrefs', () => {
     renderSiteFooter()
 
     const expectedLinks = [
-      { name: 'Pray', href: '/scripture' },
+      { name: 'Pray', href: '/pray' },
       { name: 'Journal', href: '/journal' },
       { name: 'Meditate', href: '/meditate' },
-      { name: 'Verse & Song', href: '/daily' },
+      { name: 'Daily Hub', href: '/daily' },
       { name: 'Worship Playlists', href: '/music/playlists' },
       { name: 'Ambient Sounds', href: '/music/ambient' },
       { name: 'Sleep & Rest', href: '/music/sleep' },
       { name: 'Prayer Wall', href: '/prayer-wall' },
-      { name: 'Churches', href: '/churches' },
-      { name: 'Counselors', href: '/counselors' },
+      { name: 'Churches', href: '/local-support/churches' },
+      { name: 'Counselors', href: '/local-support/counselors' },
+      { name: 'Celebrate Recovery', href: '/local-support/celebrate-recovery' },
     ]
 
     for (const { name, href } of expectedLinks) {
       const link = screen.getByRole('link', { name })
       expect(link).toHaveAttribute('href', href)
     }
+  })
+
+  it('renders Spotify badge', () => {
+    renderSiteFooter()
+    expect(screen.getByText('Spotify')).toBeInTheDocument()
   })
 
   it('renders App Store badge text', () => {

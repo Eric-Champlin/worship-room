@@ -150,7 +150,7 @@ export const QUIZ_DESTINATIONS: QuizDestination[] = [
   {
     key: 'pray',
     name: 'Prayer',
-    route: '/scripture',
+    route: '/pray',
     ctaLabel: 'Prayer',
     description:
       "It sounds like you could use a moment with God. Share what's on your heart and receive a personalized scripture and prayer.",
@@ -210,7 +210,7 @@ export const QUIZ_DESTINATIONS: QuizDestination[] = [
   {
     key: 'localSupport',
     name: 'Local Support',
-    route: '/churches',
+    route: '/local-support/churches',
     ctaLabel: 'Local Support',
     description:
       'Sometimes the next step is a real conversation. Find churches and Christian counselors near you.',

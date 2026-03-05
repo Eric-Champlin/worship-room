@@ -1,10 +1,21 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/query-client'
 import { Home } from './pages/Home'
 import { Health } from './pages/Health'
 import { Insights } from './pages/Insights'
-import { Daily } from './pages/Daily'
+import { DailyHub } from './pages/DailyHub'
+import { Pray } from './pages/Pray'
+import { Journal } from './pages/Journal'
+import { MeditateLanding } from './pages/MeditateLanding'
+import { BreathingExercise } from './pages/meditate/BreathingExercise'
+import { ScriptureSoaking } from './pages/meditate/ScriptureSoaking'
+import { GratitudeReflection } from './pages/meditate/GratitudeReflection'
+import { ActsPrayerWalk } from './pages/meditate/ActsPrayerWalk'
+import { PsalmReading } from './pages/meditate/PsalmReading'
+import { ExamenReflection } from './pages/meditate/ExamenReflection'
+import { SharedVerse } from './pages/SharedVerse'
+import { SharedPrayer } from './pages/SharedPrayer'
 import { PrayerWall } from './pages/PrayerWall'
 import { PrayerDetail } from './pages/PrayerDetail'
 import { PrayerWallProfile } from './pages/PrayerWallProfile'
@@ -62,10 +73,19 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/health" element={<Health />} />
           <Route path="/insights" element={<Insights />} />
-          <Route path="/daily" element={<Daily />} />
-          <Route path="/scripture" element={<ComingSoon title="Pray" />} />
-          <Route path="/journal" element={<ComingSoon title="Journal" />} />
-          <Route path="/meditate" element={<ComingSoon title="Meditate" />} />
+          <Route path="/daily" element={<DailyHub />} />
+          <Route path="/pray" element={<Pray />} />
+          <Route path="/journal" element={<Journal />} />
+          <Route path="/meditate" element={<MeditateLanding />} />
+          <Route path="/meditate/breathing" element={<BreathingExercise />} />
+          <Route path="/meditate/soaking" element={<ScriptureSoaking />} />
+          <Route path="/meditate/gratitude" element={<GratitudeReflection />} />
+          <Route path="/meditate/acts" element={<ActsPrayerWalk />} />
+          <Route path="/meditate/psalms" element={<PsalmReading />} />
+          <Route path="/meditate/examen" element={<ExamenReflection />} />
+          <Route path="/verse/:id" element={<SharedVerse />} />
+          <Route path="/prayer/:id" element={<SharedPrayer />} />
+          <Route path="/scripture" element={<Navigate to="/pray" replace />} />
           <Route path="/music" element={<ComingSoon title="Music" />} />
           <Route path="/music/playlists" element={<ComingSoon title="Worship Playlists" />} />
           <Route path="/music/ambient" element={<ComingSoon title="Ambient Sounds" />} />

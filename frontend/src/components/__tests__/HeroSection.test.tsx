@@ -52,7 +52,7 @@ describe('HeroSection', () => {
     ).toBeInTheDocument()
   })
 
-  it('navigates to /scripture on submit', async () => {
+  it('navigates to /pray on submit', async () => {
     const user = userEvent.setup()
 
     render(
@@ -60,8 +60,8 @@ describe('HeroSection', () => {
         <Routes>
           <Route path="/" element={<HeroSection />} />
           <Route
-            path="/scripture"
-            element={<div data-testid="scripture-page" />}
+            path="/pray"
+            element={<div data-testid="pray-page" />}
           />
         </Routes>
       </MemoryRouter>
@@ -74,7 +74,7 @@ describe('HeroSection', () => {
       screen.getByRole('button', { name: /submit your question/i })
     )
 
-    expect(screen.getByTestId('scripture-page')).toBeInTheDocument()
+    expect(screen.getByTestId('pray-page')).toBeInTheDocument()
   })
 
   it('renders the quiz teaser text', () => {

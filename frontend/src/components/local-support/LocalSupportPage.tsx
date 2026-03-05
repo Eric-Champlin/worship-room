@@ -217,7 +217,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
           !isLoggedIn ? (
             <button
               type="button"
-              onClick={authModal?.openAuthModal}
+              onClick={() => authModal?.openAuthModal()}
               className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
             >
               Sign In to Search

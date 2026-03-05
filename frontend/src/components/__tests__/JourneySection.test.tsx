@@ -99,12 +99,12 @@ describe('JourneySection', () => {
     it('each step links to its correct route', () => {
       renderJourney()
       const expectedRoutes = [
-        '/scripture',
+        '/pray',
         '/journal',
         '/meditate',
         '/music',
         '/prayer-wall',
-        '/churches',
+        '/local-support/churches',
       ]
       const links = screen.getAllByRole('link')
       const hrefs = links.map((link) => link.getAttribute('href'))

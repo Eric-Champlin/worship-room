@@ -1,6 +1,6 @@
 ---
 description: Verify frontend and backend changes using Playwright browser automation — visual rendering, interactive flows, responsive breakpoints, and console errors
-argument-hint: Route or component to verify (e.g. /local-support/churches, /prayer-wall, "the new modal")
+argument-hint: Route or component to verify, optionally followed by plan file path (e.g. /prayer-wall, /prayer-wall _plans/2026-02-21-prayer-wall.md)
 user-invokable: true
 name: verify-with-playwright
 ---
@@ -38,10 +38,19 @@ From `$ARGUMENTS`, determine what to verify:
 - A component description: `"the auth modal"`, `"the new share dropdown"`, `"the hero section on the landing page"`
 - A feature area: `"Local Support churches page with search and map"`
 
+**`plan_path`** (optional) — If a second argument is provided that looks like a path to a `_plans/` file, read it. This enables **plan-aware mode**:
+- Cross-reference what was built against what the plan specified
+- Verify that plan guardrails (DO NOT items) were respected
+- Check that edge case decisions from the plan's Edge Cases & Decisions table are reflected in the UI
+- Include a **Plan Compliance** section in the verification report
+
+If no plan path is provided, run a standard verification.
+
 If `$ARGUMENTS` is empty or unclear, ask the user:
 
 ```
 What would you like me to verify? Provide a route (e.g. /prayer-wall) or describe the component/feature.
+Optionally include a plan file path for plan-aware verification.
 ```
 
 **Stop** until the user clarifies.
@@ -208,9 +217,10 @@ const BREAKPOINTS = {
   desktop: { width: 1280, height: 900 },  // Standard desktop
 };
 
-// Collect console errors
+// Collect console errors and network failures
 const consoleErrors: string[] = [];
 const consoleWarnings: string[] = [];
+const networkFailures: { url: string; status: number; method: string; error?: string }[] = [];
 
 test.describe('<Target> Verification', () => {
 
@@ -228,6 +238,27 @@ test.describe('<Target> Verification', () => {
     // Listen for uncaught exceptions
     page.on('pageerror', (error) => {
       consoleErrors.push(`[UNCAUGHT] ${error.message}`);
+    });
+
+    // Listen for failed network requests
+    page.on('response', (response) => {
+      if (response.status() >= 400) {
+        networkFailures.push({
+          url: response.url(),
+          status: response.status(),
+          method: response.request().method(),
+        });
+      }
+    });
+
+    // Listen for request failures (network errors, CORS, timeouts)
+    page.on('requestfailed', (request) => {
+      networkFailures.push({
+        url: request.url(),
+        status: 0,
+        method: request.method(),
+        error: request.failure()?.errorText || 'unknown',
+      });
     });
   });
 
@@ -353,7 +384,52 @@ These screenshots are the verification evidence. They will be referenced in the 
 
 ---
 
-## Step 7: Generate the Verification Report
+## Step 7: Diagnose Issues
+
+If any tests failed, network requests failed, or console errors were captured, perform targeted diagnosis for each issue before generating the report.
+
+**For console errors:**
+- Identify the originating component/module from the stack trace if visible
+- Classify: React error boundary? Unhandled promise rejection? Type error? Network-related?
+- Is it pre-existing (appears on page load before any interaction) or caused by the new feature?
+
+**For network failures:**
+- Capture: URL, method, status code, and error text
+- Classify: API contract mismatch? Auth issue? CORS? Timeout? Server error? Backend not running?
+- If plan-aware: does the request URL/method match the API contract from the plan?
+
+**For DOM/UI failures:**
+- Is the element present but hidden? Present but wrong content? Absent entirely?
+- Classify: Rendering issue? State management issue? Timing/race condition?
+
+**For flaky failures:**
+- If any failure seems inconsistent, re-run that specific test 2 more times
+- Document whether the failure is consistent or intermittent
+- If intermittent: note what varies between runs (timing, network response order)
+
+**For each diagnosed issue, prepare:**
+
+```
+Issue: <title>
+Observed in: <which test / step>
+Pre-existing or new: <PRE-EXISTING if it appears before any new-feature interaction, NEW if introduced by the change>
+Severity: BLOCKING / NON-BLOCKING
+Deterministic: YES / NO (flaky)
+
+Evidence:
+- <console output, network details, or DOM state>
+
+Root cause hypothesis:
+- <what's likely wrong — based on evidence, not guessing>
+- <which component/file is likely responsible>
+
+Suggested investigation:
+- <where to look — specific file, component, API client>
+```
+
+---
+
+## Step 8: Generate the Verification Report
 
 After running all tests, produce a structured report:
 
@@ -406,6 +482,23 @@ After running all tests, produce a structured report:
 ### Warnings (non-blocking)
 <list each warning, or "None">
 
+## Network
+
+### Failed Requests
+| URL | Method | Status | Error | Pre-existing? |
+|-----|--------|--------|-------|---------------|
+| <url> | GET/POST | <status> | <error text> | YES / NO |
+
+(or "No failed requests")
+
+## Plan Compliance (only if plan-aware mode)
+
+| Plan Item | Status | Details |
+|-----------|--------|---------|
+| Guardrail: <DO NOT item> | ✅ Respected / ❌ Violated | <evidence> |
+| Edge case: <decision> | ✅ Implemented / ❌ Missing | <evidence> |
+| Expected element: <element from plan> | ✅ Present / ❌ Missing | <evidence> |
+
 ---
 
 ## Screenshots Captured
@@ -419,21 +512,24 @@ After running all tests, produce a structured report:
 
 ---
 
-## Issues Found
+## Pre-existing Issues (existed before this change)
+<numbered list, or "None — clean baseline">
+
+## New Issues (introduced by this change)
 
 ### Blocking (must fix)
-<numbered list, or "None">
+<numbered list with diagnosis from Step 7, or "None">
 
 ### Non-Blocking (should fix)
-<numbered list, or "None">
+<numbered list with diagnosis from Step 7, or "None">
 
-### Notes
+## Notes
 <any observations, auth-state limitations, backend dependency notes>
 ````
 
 ---
 
-## Step 8: Clean Up
+## Step 9: Clean Up
 
 After generating the report:
 
@@ -447,6 +543,8 @@ After generating the report:
 3. **Do NOT stop dev servers** that were started by this skill. The user may still be working.
 
 4. **Do NOT modify any source code.** This skill is read-only verification. If issues are found, report them — the user or `/execute-plan` handles fixes.
+
+5. **If plan-aware mode was used**, do NOT update the plan's Execution Log. That's `/execute-plan`'s job. This skill is read-only.
 
 ---
 
