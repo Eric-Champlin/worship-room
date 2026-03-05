@@ -3,13 +3,6 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const DAILY_LINKS = [
-  { label: 'Pray', to: '/scripture' },
-  { label: 'Journal', to: '/journal' },
-  { label: 'Meditate', to: '/meditate' },
-  { label: 'Verse & Song', to: '/daily' },
-] as const
-
 const MUSIC_LINKS = [
   { label: 'Worship Playlists', to: '/music/playlists' },
   { label: 'Ambient Sounds', to: '/music/ambient' },
@@ -17,6 +10,7 @@ const MUSIC_LINKS = [
 ] as const
 
 const NAV_LINKS = [
+  { label: 'Daily Hub', to: '/daily' },
   { label: 'Prayer Wall', to: '/prayer-wall' },
 ] as const
 
@@ -255,13 +249,11 @@ function NavDropdown({
 function DesktopNav({ transparent }: { transparent: boolean }) {
   return (
     <div className="hidden items-center gap-6 lg:flex">
-      <NavDropdown
-        label="Daily"
-        to="/daily"
-        links={DAILY_LINKS}
-        dropdownId="daily-dropdown"
-        transparent={transparent}
-      />
+      {NAV_LINKS.map((link) => (
+        <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
+          {link.label}
+        </NavLink>
+      ))}
       <NavDropdown
         label="Music"
         to="/music"
@@ -270,11 +262,6 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
         transparent={transparent}
         extraActivePaths={['/music']}
       />
-      {NAV_LINKS.map((link) => (
-        <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
-          {link.label}
-        </NavLink>
-      ))}
       <NavDropdown
         label="Local Support"
         to="/local-support/churches"
@@ -375,33 +362,25 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           className="relative z-50 mt-2 rounded-xl bg-white border border-gray-200 shadow-lg animate-dropdown-in lg:hidden"
         >
           <div className="flex flex-col px-4 py-4">
-            {/* Daily section */}
-            <div role="group" aria-labelledby="daily-heading">
-              <span
-                id="daily-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-primary/50"
+            {/* Standalone links: Daily Hub + Prayer Wall */}
+            {NAV_LINKS.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  cn(
+                    'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                    isActive
+                      ? 'text-[#2B0E4A]'
+                      : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
+                  )
+                }
               >
-                Daily
-              </span>
-              {DAILY_LINKS.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    cn(
-                      'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                      isActive
-                        ? 'text-[#2B0E4A]'
-                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
-                    )
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </div>
+                {link.label}
+              </NavLink>
+            ))}
 
             {/* Music section */}
             <div
@@ -423,28 +402,6 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   className={({ isActive }) =>
                     cn(
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                      isActive
-                        ? 'text-[#2B0E4A]'
-                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
-                    )
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </div>
-
-            {/* Standalone link: Prayer Wall */}
-            <div className="mt-2 border-t border-gray-100 pt-2">
-              {NAV_LINKS.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    cn(
-                      'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isActive
                         ? 'text-[#2B0E4A]'

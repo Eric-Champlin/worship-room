@@ -69,7 +69,11 @@ function BackgroundSquiggle() {
   )
 }
 
-export function StartingPointQuiz() {
+interface StartingPointQuizProps {
+  hideTopGradient?: boolean
+}
+
+export function StartingPointQuiz({ hideTopGradient = false }: StartingPointQuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<(number | null)[]>(
     () => Array(QUIZ_QUESTIONS.length).fill(null) as (number | null)[]
@@ -134,12 +138,14 @@ export function StartingPointQuiz() {
   return (
     <section id="quiz" aria-labelledby="quiz-heading">
       {/* Gradient transition from GrowthTeasers dark purple into white */}
-      <div
-        className="h-32 sm:h-40"
-        style={{
-          background: 'linear-gradient(to bottom, #251248 0%, #FFFFFF 100%)',
-        }}
-      />
+      {!hideTopGradient && (
+        <div
+          className="h-32 sm:h-40"
+          style={{
+            background: 'linear-gradient(to bottom, #251248 0%, #FFFFFF 100%)',
+          }}
+        />
+      )}
 
       {/* White content area */}
       <div className="relative bg-white px-4 pt-12 pb-20 sm:px-6 sm:pt-16 sm:pb-24">

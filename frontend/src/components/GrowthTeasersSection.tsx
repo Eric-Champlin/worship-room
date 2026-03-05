@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { BarChart3, Flame, Users, Lock, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useInView } from '@/hooks/useInView'
+import { useElementWidth } from '@/hooks/useElementWidth'
+import { HeadingDivider } from '@/components/HeadingDivider'
 
 const HEATMAP_COLORS = [
   '#27AE60', '#6BCB77', '#27AE60', '#2a2040', '#F39C12', '#27AE60', '#6BCB77',
@@ -140,6 +142,8 @@ export function GrowthTeasersSection() {
     rootMargin: '0px 0px -50px 0px',
   })
 
+  const { ref: headingRef, width: headingWidth } = useElementWidth<HTMLHeadingElement>()
+
   return (
     <section aria-labelledby="growth-heading">
       {/* Gradient transition from JourneySection's light bg into hero purple */}
@@ -157,12 +161,16 @@ export function GrowthTeasersSection() {
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <h2
+            ref={headingRef}
             id="growth-heading"
-            className="mb-3 font-script text-[2.7rem] font-bold text-white sm:text-[3.4rem] lg:text-[4rem]"
+            className="inline-block font-script text-[2.7rem] font-bold text-white sm:text-[3.4rem] lg:text-[4rem]"
           >
             See How You&apos;re Growing
           </h2>
-          <p className="text-base text-white sm:text-lg">
+          <div className="mt-1 flex justify-center">
+            <HeadingDivider width={headingWidth} />
+          </div>
+          <p className="mt-3 text-base text-white sm:text-lg">
             Create a free account and unlock your personal dashboard.
           </p>
         </div>

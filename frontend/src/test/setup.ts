@@ -35,3 +35,24 @@ Object.defineProperty(window, 'IntersectionObserver', {
   configurable: true,
   value: MockIntersectionObserver,
 })
+
+class MockResizeObserver {
+  private callback: ResizeObserverCallback
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback
+  }
+  observe(target: Element) {
+    this.callback(
+      [{ target, contentRect: target.getBoundingClientRect() } as ResizeObserverEntry],
+      this as unknown as ResizeObserver
+    )
+  }
+  unobserve() {}
+  disconnect() {}
+}
+
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  configurable: true,
+  value: MockResizeObserver,
+})

@@ -62,7 +62,7 @@ export function CommentsSection({
           prayerId={prayerId}
           onSubmit={onSubmitComment}
           initialValue={replyTo}
-          onLoginClick={authModal?.openAuthModal}
+          onLoginClick={() => authModal?.openAuthModal()}
         />
       </div>
     </div>

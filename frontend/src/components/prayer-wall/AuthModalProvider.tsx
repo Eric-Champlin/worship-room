@@ -4,22 +4,29 @@ import { AuthModal } from './AuthModal'
 import { useToast } from '@/components/ui/Toast'
 
 interface AuthModalContextValue {
-  openAuthModal: () => void
+  openAuthModal: (subtitle?: string) => void
 }
 
 const AuthModalContext = createContext<AuthModalContextValue | null>(null)
 
 export function AuthModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [subtitle, setSubtitle] = useState<string | undefined>()
   const { showToast } = useToast()
 
-  const openAuthModal = useCallback(() => setIsOpen(true), [])
-  const closeAuthModal = useCallback(() => setIsOpen(false), [])
+  const openAuthModal = useCallback((sub?: string) => {
+    setSubtitle(sub)
+    setIsOpen(true)
+  }, [])
+  const closeAuthModal = useCallback(() => {
+    setIsOpen(false)
+    setSubtitle(undefined)
+  }, [])
 
   return (
     <AuthModalContext.Provider value={{ openAuthModal }}>
       {children}
-      <AuthModal isOpen={isOpen} onClose={closeAuthModal} onShowToast={showToast} />
+      <AuthModal isOpen={isOpen} onClose={closeAuthModal} onShowToast={showToast} subtitle={subtitle} />
     </AuthModalContext.Provider>
   )
 }

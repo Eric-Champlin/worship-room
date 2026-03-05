@@ -101,7 +101,7 @@ export function InteractionBar({
       ) : authModal ? (
         <button
           type="button"
-          onClick={authModal.openAuthModal}
+          onClick={() => authModal.openAuthModal()}
           className={cn(btnBase, 'text-text-light hover:text-primary')}
           aria-label="Log in to bookmark"
         >

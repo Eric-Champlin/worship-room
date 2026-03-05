@@ -25,4 +25,18 @@
   .animate-slide-from-left {
     animation: none;
   }
+  .animate-golden-glow {
+    animation: none;
+  }
+  .animate-breathe-expand,
+  .animate-breathe-contract {
+    animation: none;
+    transform: scale(1);
+    opacity: 1;
+  }
+  .animate-fade-in {
+    animation: none;
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

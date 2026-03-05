@@ -243,7 +243,7 @@ describe('StartingPointQuiz', () => {
       await answerAllQuestions()
 
       const ctaLink = screen.getByRole('link', { name: /go to prayer/i })
-      expect(ctaLink).toHaveAttribute('href', '/scripture')
+      expect(ctaLink).toHaveAttribute('href', '/pray')
     })
 
     it('result card "explore all features" scrolls to journey', async () => {
@@ -297,6 +297,28 @@ describe('StartingPointQuiz', () => {
       expect(
         screen.queryByText(/question \d of 5/i)
       ).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Props', () => {
+    it('hides top gradient when hideTopGradient is true', () => {
+      render(
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <StartingPointQuiz hideTopGradient />
+        </MemoryRouter>
+      )
+      const section = document.getElementById('quiz')!
+      // First child should be the white content area, not the gradient
+      const firstChild = section.firstElementChild as HTMLElement
+      expect(firstChild.style.background).toBe('')
+    })
+
+    it('shows top gradient by default', () => {
+      renderQuiz()
+      const section = document.getElementById('quiz')!
+      // First child of the section should be the gradient div
+      const firstChild = section.firstElementChild as HTMLElement
+      expect(firstChild.style.background).toContain('linear-gradient')
     })
   })
 

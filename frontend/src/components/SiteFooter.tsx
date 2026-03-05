@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
+import { SpotifyBadge } from '@/components/SpotifyBadge'
 
 const FOOTER_DAILY_LINKS = [
-  { label: 'Pray', to: '/scripture' },
+  { label: 'Pray', to: '/pray' },
   { label: 'Journal', to: '/journal' },
   { label: 'Meditate', to: '/meditate' },
-  { label: 'Verse & Song', to: '/daily' },
+  { label: 'Daily Hub', to: '/daily' },
 ]
 
 const FOOTER_MUSIC_LINKS = [
@@ -15,8 +16,9 @@ const FOOTER_MUSIC_LINKS = [
 
 const FOOTER_SUPPORT_LINKS = [
   { label: 'Prayer Wall', to: '/prayer-wall' },
-  { label: 'Churches', to: '/churches' },
-  { label: 'Counselors', to: '/counselors' },
+  { label: 'Churches', to: '/local-support/churches' },
+  { label: 'Counselors', to: '/local-support/counselors' },
+  { label: 'Celebrate Recovery', to: '/local-support/celebrate-recovery' },
 ]
 
 const FOOTER_COLUMNS = [
@@ -115,9 +117,10 @@ export function SiteFooter() {
           <p className="text-lg font-medium text-white">
             Take Worship Room With You
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             <AppStoreBadge />
             <GooglePlayBadge />
+            <SpotifyBadge />
           </div>
         </div>
 

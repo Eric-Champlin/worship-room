@@ -15,9 +15,10 @@ interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
   onShowToast: (message: string) => void
+  subtitle?: string
 }
 
-export function AuthModal({ isOpen, onClose, onShowToast }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalProps) {
   const [view, setView] = useState<AuthView>('login')
   const [resetEmail, setResetEmail] = useState('')
   const containerRef = useFocusTrap(isOpen, onClose)
@@ -69,6 +70,7 @@ export function AuthModal({ isOpen, onClose, onShowToast }: AuthModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
+        aria-describedby={subtitle && view === 'login' ? 'auth-modal-subtitle' : undefined}
         className="mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
@@ -86,6 +88,12 @@ export function AuthModal({ isOpen, onClose, onShowToast }: AuthModalProps) {
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
+
+        {subtitle && view === 'login' && (
+          <p id="auth-modal-subtitle" className="mt-2 text-center text-sm text-text-light">
+            {subtitle}
+          </p>
+        )}
 
         {view === 'forgot-password' ? (
           <>

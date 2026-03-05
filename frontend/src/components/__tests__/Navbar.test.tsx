@@ -25,16 +25,14 @@ describe('Navbar', () => {
   })
 
   describe('Desktop nav links', () => {
-    it('renders 1 top-level nav link', () => {
+    it('renders 2 top-level nav links', () => {
       renderNavbar()
+      expect(screen.getByRole('link', { name: 'Daily Hub' })).toHaveAttribute('href', '/daily')
       expect(screen.getByRole('link', { name: 'Prayer Wall' })).toBeInTheDocument()
     })
 
-    it('renders "Daily", "Music", and "Local Support" dropdown triggers', () => {
+    it('renders "Music" and "Local Support" dropdown triggers', () => {
       renderNavbar()
-      expect(
-        screen.getByRole('button', { name: /daily menu/i })
-      ).toBeInTheDocument()
       expect(
         screen.getByRole('button', { name: /music menu/i })
       ).toBeInTheDocument()
@@ -61,128 +59,6 @@ describe('Navbar', () => {
         (el) => el.getAttribute('href') === '/register'
       )
       expect(desktopCta).toBeDefined()
-    })
-  })
-
-  describe('Daily dropdown', () => {
-    it('"Daily" label is a link to /daily', () => {
-      renderNavbar()
-      const link = screen.getByRole('link', { name: 'Daily' })
-      expect(link).toHaveAttribute('href', '/daily')
-    })
-
-    it('dropdown is closed by default', () => {
-      renderNavbar()
-      expect(document.getElementById('daily-dropdown')).not.toBeInTheDocument()
-    })
-
-    it('clicking the chevron opens the dropdown', () => {
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /daily menu/i }))
-      expect(document.getElementById('daily-dropdown')).toBeInTheDocument()
-    })
-
-    it('clicking the chevron again closes the dropdown', () => {
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /daily menu/i })
-      fireEvent.click(trigger)
-      expect(document.getElementById('daily-dropdown')).toBeInTheDocument()
-      fireEvent.click(trigger)
-      expect(document.getElementById('daily-dropdown')).not.toBeInTheDocument()
-    })
-
-    it('dropdown links point to correct routes', () => {
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /daily menu/i }))
-      const dropdown = document.getElementById('daily-dropdown')!
-      const links = within(dropdown).getAllByRole('link')
-      expect(links).toHaveLength(4)
-      expect(links[0]).toHaveAttribute('href', '/scripture')
-      expect(links[1]).toHaveAttribute('href', '/journal')
-      expect(links[2]).toHaveAttribute('href', '/meditate')
-      expect(links[3]).toHaveAttribute('href', '/daily')
-    })
-
-    it('Escape key closes the dropdown', async () => {
-      const user = userEvent.setup()
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /daily menu/i }))
-      expect(document.getElementById('daily-dropdown')).toBeInTheDocument()
-      await user.keyboard('{Escape}')
-      expect(document.getElementById('daily-dropdown')).not.toBeInTheDocument()
-    })
-
-    it('Escape key returns focus to the chevron trigger', async () => {
-      const user = userEvent.setup()
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /daily menu/i })
-      fireEvent.click(trigger)
-      await user.keyboard('{Escape}')
-      expect(document.activeElement).toBe(trigger)
-    })
-
-    it('outside click closes the dropdown', () => {
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /daily menu/i }))
-      expect(document.getElementById('daily-dropdown')).toBeInTheDocument()
-      fireEvent.mouseDown(screen.getByLabelText('Main navigation'))
-      expect(document.getElementById('daily-dropdown')).not.toBeInTheDocument()
-    })
-
-    it('chevron trigger has aria-haspopup="true" and correct aria-expanded', () => {
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /daily menu/i })
-      expect(trigger).toHaveAttribute('aria-haspopup', 'true')
-      expect(trigger).toHaveAttribute('aria-expanded', 'false')
-      fireEvent.click(trigger)
-      expect(trigger).toHaveAttribute('aria-expanded', 'true')
-    })
-
-    it('aria-controls is only set when dropdown is open', () => {
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /daily menu/i })
-      expect(trigger).not.toHaveAttribute('aria-controls')
-      fireEvent.click(trigger)
-      expect(trigger).toHaveAttribute('aria-controls', 'daily-dropdown')
-    })
-
-    it('dropdown panel uses ul/li with role="list"', () => {
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /daily menu/i }))
-      const dropdown = document.getElementById('daily-dropdown')!
-      expect(dropdown.tagName).toBe('UL')
-      expect(dropdown).toHaveAttribute('role', 'list')
-      const links = within(dropdown).getAllByRole('link')
-      expect(links).toHaveLength(4)
-    })
-
-    it('hovering over the wrapper opens the dropdown', async () => {
-      const user = userEvent.setup()
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /daily menu/i })
-      const wrapper = trigger.closest('.relative')!
-      await user.hover(wrapper)
-      expect(document.getElementById('daily-dropdown')).toBeInTheDocument()
-    })
-
-    it('unhovering the wrapper closes the dropdown after delay', async () => {
-      vi.useFakeTimers({ shouldAdvanceTime: true })
-      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-      try {
-        renderNavbar()
-        const trigger = screen.getByRole('button', { name: /daily menu/i })
-        const wrapper = trigger.closest('.relative')!
-        await user.hover(wrapper)
-        expect(document.getElementById('daily-dropdown')).toBeInTheDocument()
-        await user.unhover(wrapper)
-        expect(document.getElementById('daily-dropdown')).toBeInTheDocument()
-        act(() => {
-          vi.advanceTimersByTime(200)
-        })
-        expect(document.getElementById('daily-dropdown')).not.toBeInTheDocument()
-      } finally {
-        vi.useRealTimers()
-      }
     })
   })
 
@@ -452,16 +328,14 @@ describe('Navbar', () => {
 
       const menu = document.getElementById('mobile-menu')!
       const allLabels = [
-        'Pray',
-        'Journal',
-        'Meditate',
-        'Verse & Song',
+        'Daily Hub',
+        'Prayer Wall',
         'Worship Playlists',
         'Ambient Sounds',
         'Sleep & Rest',
-        'Prayer Wall',
         'Churches',
         'Counselors',
+        'Celebrate Recovery',
       ]
       for (const label of allLabels) {
         expect(within(menu).getByText(label)).toBeInTheDocument()
@@ -477,7 +351,7 @@ describe('Navbar', () => {
 
       // Click a nav link inside the drawer to trigger route change
       const menu = document.getElementById('mobile-menu')!
-      await user.click(within(menu).getByText('Pray'))
+      await user.click(within(menu).getByText('Daily Hub'))
       expect(document.getElementById('mobile-menu')).not.toBeInTheDocument()
     })
   })

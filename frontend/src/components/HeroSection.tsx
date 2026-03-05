@@ -6,7 +6,7 @@ export function HeroSection() {
   const navigate = useNavigate()
 
   const handleInputSubmit = (value: string) => {
-    navigate(`/scripture?q=${encodeURIComponent(value)}`)
+    navigate(`/pray?q=${encodeURIComponent(value)}`)
   }
 
   return (

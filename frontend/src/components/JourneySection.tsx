@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useInView } from '@/hooks/useInView'
+import { BackgroundSquiggle } from '@/components/BackgroundSquiggle'
 
 interface JourneyStep {
   number: number
@@ -17,7 +18,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     highlight: 'Pray',
     description:
       "Begin with what\u2019s on your heart. Share your feelings and receive a personalized prayer grounded in Scripture.",
-    to: '/scripture',
+    to: '/pray',
   },
   {
     number: 2,
@@ -57,70 +58,9 @@ const JOURNEY_STEPS: JourneyStep[] = [
     highlight: 'Local Support',
     description:
       'Find churches and Christian counselors near you. The next step in your healing may be just around the corner.',
-    to: '/churches',
+    to: '/local-support/churches',
   },
 ]
-
-function BackgroundSquiggle() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full"
-      viewBox="0 0 1200 1350"
-      preserveAspectRatio="none"
-      fill="none"
-    >
-      {/* Wide central brushstroke */}
-      <path
-        d="M400,0 C550,50 300,120 500,200 C700,280 250,370 500,450 C750,530 300,620 550,700 C800,780 350,870 500,960 C650,1050 350,1140 500,1230 L500,1350"
-        stroke="#D6D3D1"
-        strokeWidth="100"
-        strokeLinecap="round"
-        opacity="0.25"
-      />
-      {/* Right sweeping stroke */}
-      <path
-        d="M700,0 C850,80 600,170 800,260 C1000,350 650,440 850,530 C1050,620 700,710 900,800 C1100,890 750,960 900,1050 C1050,1140 800,1230 950,1350"
-        stroke="#D6D3D1"
-        strokeWidth="80"
-        strokeLinecap="round"
-        opacity="0.18"
-      />
-      {/* Left sweeping stroke */}
-      <path
-        d="M200,50 C350,130 100,220 300,310 C500,400 150,490 350,580 C550,670 200,760 350,850 C500,940 250,1030 350,1120 C500,1210 250,1280 350,1350"
-        stroke="#E7E5E4"
-        strokeWidth="90"
-        strokeLinecap="round"
-        opacity="0.22"
-      />
-      {/* Thin central accent for depth */}
-      <path
-        d="M550,20 C700,100 400,190 600,280 C800,370 450,460 650,550 C850,640 500,730 680,820 C860,910 550,1000 680,1090 C810,1180 550,1270 650,1350"
-        stroke="#D6D3D1"
-        strokeWidth="30"
-        strokeLinecap="round"
-        opacity="0.15"
-      />
-      {/* Far-left thin accent */}
-      <path
-        d="M80,80 C200,160 0,250 150,340 C300,430 50,520 200,610 C350,700 100,790 200,880 C300,970 100,1060 200,1150 C300,1240 120,1300 200,1350"
-        stroke="#E7E5E4"
-        strokeWidth="45"
-        strokeLinecap="round"
-        opacity="0.15"
-      />
-      {/* Far-right thin accent */}
-      <path
-        d="M1000,30 C1120,110 900,200 1050,290 C1200,380 950,470 1080,560 C1210,650 980,740 1080,830 C1180,920 1000,1010 1080,1100 C1180,1190 1000,1280 1080,1350"
-        stroke="#E7E5E4"
-        strokeWidth="45"
-        strokeLinecap="round"
-        opacity="0.15"
-      />
-    </svg>
-  )
-}
 
 function StepCircle({ number }: { number: number }) {
   return (

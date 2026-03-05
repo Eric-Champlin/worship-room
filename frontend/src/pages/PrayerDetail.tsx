@@ -165,7 +165,7 @@ function PrayerDetailContent() {
               prayerId={prayer.id}
               onSubmit={handleSubmitComment}
               initialValue={replyTo}
-              onLoginClick={authModal?.openAuthModal}
+              onLoginClick={() => authModal?.openAuthModal()}
             />
           </div>
 
