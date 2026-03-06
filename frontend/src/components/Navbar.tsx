@@ -101,10 +101,10 @@ function NavDropdown({
     setIsOpen(false)
   }, [])
 
-  // Close on route change
+  // Close on any navigation (path or query param change, e.g. /daily?tab=...)
   useEffect(() => {
     close()
-  }, [location.pathname, close])
+  }, [location.pathname, location.search, close])
 
   // Close on Escape and return focus to trigger
   useEffect(() => {
@@ -362,8 +362,8 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           className="relative z-50 mt-2 rounded-xl bg-white border border-gray-200 shadow-lg animate-dropdown-in lg:hidden"
         >
           <div className="flex flex-col px-4 py-4">
-            {/* Standalone links: Daily Hub + Prayer Wall */}
-            {NAV_LINKS.map((link) => (
+            {/* Standalone links: Daily Hub, Prayer Wall */}
+            {NAV_LINKS.map((link, index) => (
               <NavLink
                 key={link.to}
                 to={link.to}
@@ -372,6 +372,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   cn(
                     'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                    index > 0 && 'mt-2 border-t border-gray-100 pt-2',
                     isActive
                       ? 'text-[#2B0E4A]'
                       : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'

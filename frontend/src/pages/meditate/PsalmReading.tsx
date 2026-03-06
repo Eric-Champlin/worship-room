@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -8,11 +9,18 @@ import {
   getPsalms,
   getPsalm119Sections,
 } from '@/mocks/daily-experience-psalms'
+import { useAuth } from '@/hooks/useAuth'
 import type { PsalmInfo, Psalm119Section } from '@/types/daily-experience'
 
 type Screen = 'selection' | 'reading' | 'section-selection' | 'complete'
 
 export function PsalmReading() {
+  const { isLoggedIn } = useAuth()
+  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  return <PsalmReadingContent />
+}
+
+function PsalmReadingContent() {
   const psalms = getPsalms()
   const psalm119Sections = getPsalm119Sections()
 
@@ -59,9 +67,9 @@ export function PsalmReading() {
       <Layout hero={<PageHero title="Psalm Reading" />}>
         <CompletionScreen
           ctas={[
-            { label: 'Try a different meditation', to: '/meditate', primary: true },
-            { label: 'Continue to Pray \u2192', to: '/pray' },
-            { label: 'Continue to Journal \u2192', to: '/journal' },
+            { label: 'Try a different meditation', to: '/daily?tab=meditate', primary: true },
+            { label: 'Continue to Pray \u2192', to: '/daily?tab=pray' },
+            { label: 'Continue to Journal \u2192', to: '/daily?tab=journal' },
             { label: 'Visit the Prayer Wall \u2192', to: '/prayer-wall' },
           ]}
         />

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -8,8 +9,15 @@ import {
   getGratitudeAffirmation,
   getGratitudeVerses,
 } from '@/mocks/daily-experience-mock-data'
+import { useAuth } from '@/hooks/useAuth'
 
 export function GratitudeReflection() {
+  const { isLoggedIn } = useAuth()
+  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  return <GratitudeReflectionContent />
+}
+
+function GratitudeReflectionContent() {
   const [items, setItems] = useState(['', '', ''])
   const [isComplete, setIsComplete] = useState(false)
   const [completionVerse] = useState(() => {
@@ -67,9 +75,9 @@ export function GratitudeReflection() {
         </div>
         <CompletionScreen
           ctas={[
-            { label: 'Try a different meditation', to: '/meditate', primary: true },
-            { label: 'Continue to Pray \u2192', to: '/pray' },
-            { label: 'Continue to Journal \u2192', to: '/journal' },
+            { label: 'Try a different meditation', to: '/daily?tab=meditate', primary: true },
+            { label: 'Continue to Pray \u2192', to: '/daily?tab=pray' },
+            { label: 'Continue to Journal \u2192', to: '/daily?tab=journal' },
             { label: 'Visit the Prayer Wall \u2192', to: '/prayer-wall' },
           ]}
         />

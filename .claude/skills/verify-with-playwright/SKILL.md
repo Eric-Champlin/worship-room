@@ -1,208 +1,200 @@
 ---
-description: Verify frontend and backend changes using Playwright browser automation — visual rendering, interactive flows, responsive breakpoints, and console errors
-argument-hint: Route or component to verify, optionally followed by plan file path (e.g. /prayer-wall, /prayer-wall _plans/2026-02-21-prayer-wall.md)
+description: Runtime UI verification using Playwright — visual rendering, interactive flows, responsive breakpoints (6 sizes), accessibility, console/network diagnostics, and optional prod comparison
+argument-hint: Route to verify, optionally followed by plan file path and/or --compare-prod URL (e.g. /daily, /daily _plans/2026-03-03-daily-experience.md, /daily --compare-prod https://worshiproom.app/daily)
 user-invokable: true
 name: verify-with-playwright
 ---
 
-You are running browser-based verification for **Worship Room** — a Christian emotional healing web app built with React 18 + TypeScript (Vite), Spring Boot (Java), TailwindCSS, and PostgreSQL.
+# verify-with-playwright
+
+Runtime UI verification and diagnosis for **Worship Room** — a Christian emotional healing web app built with React 18 + TypeScript (Vite), Spring Boot (Java), TailwindCSS, and PostgreSQL.
 
 User input: $ARGUMENTS
 
----
+## Usage
 
-## Overview
+```bash
+# Standard verification
+/verify-with-playwright /daily
 
-This skill uses Playwright to verify that a specific page or component renders correctly, handles interactions properly, responds at all breakpoints, and produces no console errors. It is invoked as a standalone `/verify` command.
+# Plan-aware verification
+/verify-with-playwright /daily _plans/2026-03-03-daily-experience.md
+
+# Side-by-side comparison against production
+/verify-with-playwright /daily --compare-prod https://worshiproom.app/daily
+
+# Plan-aware with auto-detected prod URL (from recon report)
+/verify-with-playwright /daily _plans/2026-03-03-daily-experience.md
+```
 
 **What this verifies:**
-1. **Visual rendering** — elements are visible, layout is correct, text content is present
-2. **Interactive flows** — clicks, form inputs, navigation, modals, dropdowns, expand/collapse
-3. **Responsive breakpoints** — mobile (< 640px), tablet (640–1024px), desktop (> 1024px)
-4. **Console errors** — no uncaught JS errors or React errors in the browser console
+1. **Visual rendering** — elements visible, layout correct, text content present
+2. **Interactive flows** — clicks, form inputs, navigation, modals, tabs, expand/collapse
+3. **Responsive breakpoints** — 6 viewports (375, 428, 768, 1024, 1440, 1920)
+4. **Console/network** — no uncaught errors, no failed requests, no CORS issues
+5. **Accessibility** — labels, keyboard nav, focus indicators, ARIA
+6. **Design compliance** — computed styles vs recon report or plan specs (if available)
+7. **Prod comparison** — side-by-side style comparison against production (if --compare-prod)
 
 **What this does NOT do:**
-- Run unit tests (use `pnpm test` for that)
-- Perform accessibility audits (use `/code-review` for that)
-- Test backend API logic in isolation (use `./mvnw test` for that)
-- Regression-test the entire app (scope is limited to the requested page/component)
+- Run unit tests (use `pnpm test`)
+- Perform full accessibility audits (use `/code-review`)
+- Test backend API logic (use `./mvnw test`)
+- Modify any code
+
+**CRITICAL: This command is read-only. It does NOT modify code, commit, push, or perform any git operations.**
 
 ---
 
 ## Step 1: Parse Arguments
 
-From `$ARGUMENTS`, determine what to verify:
+From `$ARGUMENTS`, determine:
 
-**`target`** — The route, page, or component to verify. Examples:
-- A route: `/local-support/churches`, `/prayer-wall`, `/`, `/prayer-wall/dashboard`
-- A component description: `"the auth modal"`, `"the new share dropdown"`, `"the hero section on the landing page"`
-- A feature area: `"Local Support churches page with search and map"`
+**`target`** — Route, page, or component to verify (e.g., `/daily`, `/prayer-wall`, `"the auth modal"`)
 
-**`plan_path`** (optional) — If a second argument is provided that looks like a path to a `_plans/` file, read it. This enables **plan-aware mode**:
-- Cross-reference what was built against what the plan specified
-- Verify that plan guardrails (DO NOT items) were respected
-- Check that edge case decisions from the plan's Edge Cases & Decisions table are reflected in the UI
-- Include a **Plan Compliance** section in the verification report
+**`plan_path`** (optional) — Path to a plan file. Enables plan-aware mode:
+- Cross-reference UI against plan specifications
+- Verify guardrails (DO NOT items) were respected
+- Check edge case decisions are reflected in UI
 
-If no plan path is provided, run a standard verification.
+**`--compare-prod {URL}`** (optional) — Production URL for side-by-side comparison.
 
-If `$ARGUMENTS` is empty or unclear, ask the user:
+**Auto-detect prod URL:** If a plan file references a recon report with a Source URL, and `--compare-prod` was NOT explicitly passed, automatically enable comparison mode:
 
-```
-What would you like me to verify? Provide a route (e.g. /prayer-wall) or describe the component/feature.
-Optionally include a plan file path for plan-aware verification.
+```text
+Auto-detected prod URL from recon report: {source URL}
+Running in --compare-prod mode automatically.
+To skip, re-run with --no-compare-prod flag.
 ```
 
-**Stop** until the user clarifies.
+If `$ARGUMENTS` is empty, ask the user what to verify and **stop**.
 
 ---
 
-## Step 2: Ensure Playwright Is Installed
-
-Check if Playwright is available in the project. If not, install it.
-
-```bash
-# Check if playwright is installed
-cd frontend
-npx playwright --version 2>/dev/null
-
-# If not installed, install it
-npm install -D @playwright/test
-npx playwright install chromium
-```
-
-**Only install Chromium** — we don't need Firefox or WebKit for verification. This saves time and disk space.
-
-If Playwright is already installed, skip this step.
-
----
-
-## Step 3: Ensure Dev Servers Are Running
+## Step 2: Ensure Servers Are Running
 
 ### Frontend (port 5173)
 
 ```bash
-# Check if frontend dev server is running
 curl -s -o /dev/null -w "%{http_code}" http://localhost:5173
 ```
 
-- If response is `200`: Frontend is running. Continue.
-- If no response / connection refused: Start it.
+- If `200`: Continue.
+- If no response: Start it:
 
 ```bash
 cd frontend
 nohup pnpm dev > /tmp/worship-room-frontend.log 2>&1 &
-FRONTEND_PID=$!
-echo "Started frontend dev server (PID: $FRONTEND_PID)"
-
-# Wait for it to be ready (up to 30 seconds)
-for i in $(seq 1 30); do
-  if curl -s -o /dev/null -w "%{http_code}" http://localhost:5173 | grep -q "200"; then
-    echo "Frontend ready on http://localhost:5173"
-    break
-  fi
-  sleep 1
-done
+# Wait up to 30 seconds for ready
 ```
 
-If frontend fails to start after 30 seconds:
-```
-Error: Frontend dev server failed to start on port 5173.
-Check /tmp/worship-room-frontend.log for details.
-```
-**Stop.**
+If fails after 30 seconds: **Stop** with error.
 
 ### Backend (port 8080)
 
 ```bash
-# Check if backend is running
 curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api/health
 ```
 
-- If response is `200`: Backend is running. Continue.
-- If no response / connection refused: Start it.
+- If `200`: Continue.
+- If no response: Start it:
 
 ```bash
 cd backend
 nohup ./mvnw spring-boot:run > /tmp/worship-room-backend.log 2>&1 &
-BACKEND_PID=$!
-echo "Started backend (PID: $BACKEND_PID)"
-
-# Wait for it to be ready (up to 60 seconds — Spring Boot takes longer)
-for i in $(seq 1 60); do
-  if curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api/health | grep -q "200"; then
-    echo "Backend ready on http://localhost:8080"
-    break
-  fi
-  sleep 1
-done
+# Wait up to 60 seconds
 ```
 
-If backend fails to start after 60 seconds:
-```
-Warning: Backend did not start on port 8080. Proceeding with frontend-only verification.
-Some features that depend on backend API calls may not work correctly.
-```
+If fails: **Warning** — proceed with frontend-only verification. Note limitation in report.
 
-**Do NOT stop.** Continue with frontend-only verification. Note the limitation in the report.
-
-### Track What We Started
-
-Keep track of which servers this skill started (vs. were already running) so we can report it but **do NOT stop servers when done** — the user may want to continue working.
+Track which servers were started (don't stop them when done).
 
 ---
 
-## Step 4: Plan the Verification
+## Step 3: Capture Diagnostic Baseline
 
-Before writing any test code, plan what to verify based on the target. Read relevant source files to understand:
+Navigate to the target URL. Before testing anything, capture the initial state:
 
-1. **What route/URL to navigate to**
-2. **What elements should be visible** (headings, buttons, cards, sections)
-3. **What interactions to test** (clicks, inputs, toggles, modals, expand/collapse)
-4. **What states to check** (empty state, loaded state, error state, logged-in vs logged-out)
-5. **Auth state** — Check `frontend/src/hooks/useAuth.ts` to determine if the page requires auth. If the page is auth-gated:
-   - First verify the logged-out experience (hero + CTA visible, search UI hidden)
-   - Note in the report that logged-in state requires temporarily toggling `useAuth()` to return `{ isLoggedIn: true }`
+**Console:** All errors, warnings, uncaught exceptions, unhandled promise rejections.
 
-**Reconnaissance checklist:**
-- Read the component file(s) for the target page
-- Identify key `data-testid` attributes, ARIA labels, or text content to assert on
-- Identify CSS classes or Tailwind utilities that indicate layout (e.g., `flex`, `grid`, `hidden`, `md:block`)
-- Check for conditional rendering (auth gates, loading states, empty states)
-- Identify interactive elements (buttons, links, inputs, dropdowns, modals)
+**Network:** Failed requests (4xx, 5xx), CORS errors, slow requests (>2s), pending requests.
 
-**Output a brief plan before proceeding:**
+**DOM/UI:** Page title, key visible elements, any visible error messages.
 
+**Screenshot:** Full-page screenshot at desktop (1440px).
+
+```text
+## Baseline Capture: {URL}
+
+### Page State
+- Title: {page title}
+- Key elements visible: {list}
+- Visible errors: {any error messages in UI}
+
+### Console
+- Errors: {count} — {summary or "none"}
+- Warnings: {count} — {summary or "none"}
+- Uncaught exceptions: {count} — {summary or "none"}
+
+### Network
+- Failed requests: {count} — {summary or "none"}
+- Slow requests (>2s): {count} — {summary or "none"}
+- CORS/blocked: {count} — {summary or "none"}
+
+### Pre-existing Issues
+- {anything broken BEFORE testing — document but don't investigate}
 ```
-Verification plan for: <target>
-URL: <route>
-Auth required: <yes/no>
 
-Visual checks:
-- <element 1 should be visible>
-- <element 2 should contain text "...">
-
-Interactions to test:
-- <click X, expect Y>
-- <type into input, expect Z>
-
-Breakpoints to check:
-- Desktop (1280px): <what to verify>
-- Tablet (768px): <what to verify>
-- Mobile (375px): <what to verify>
-
-Console: Capture all errors/warnings during the above.
-
-Proceeding...
-```
+**If critical baseline issues (page crash, blank screen): STOP and report.**
 
 ---
 
-## Step 5: Write and Run the Playwright Test
+## Step 4: Build Verification Script
 
-Create a temporary Playwright test file at `frontend/playwright-verify.spec.ts`.
+Plan what to verify. Read relevant source files for reconnaissance:
+
+1. What elements should be visible (headings, buttons, cards, sections)
+2. What interactions to test (clicks, inputs, toggles, modals, tabs)
+3. What states to check (empty, loaded, error, logged-in vs logged-out)
+4. Auth state — check `useAuth.ts` for gating behavior
+
+**If plan-aware:** Pull flows from the plan's implementation steps, edge cases, and design context.
+
+**Form-specific flows (if page has forms):**
+- Fill each text input, verify it accepts values
+- Cycle through EVERY dropdown option (not just the first)
+- Trigger conditional fields (e.g., "Other" revealing a text input)
+- Tab through all fields — verify focus order
+- Submit with valid data — verify outcome
+- Submit empty — verify validation errors
+
+**Display the script before executing:**
+
+```text
+## Verification Script
+
+### Flow 1: {description}
+| Step | Action | Expected Outcome | Check |
+|------|--------|------------------|-------|
+| 1 | Navigate to {route} | Page loads, {element} visible | DOM |
+| 2 | Click {button} | {expected change} | DOM |
+| ... | ... | ... | ... |
+
+### Flow 2: {description}
+| ... | ... | ... | ... |
+
+Proceed? (yes / modify)
+```
+
+**Wait for user confirmation before executing.**
+
+---
+
+## Step 5: Execute Verification Flows
 
 ### Test Structure
+
+Create a temporary test at `frontend/playwright-verify.spec.ts`:
 
 ```typescript
 import { test, expect, type Page, type ConsoleMessage } from '@playwright/test';
@@ -210,407 +202,336 @@ import { test, expect, type Page, type ConsoleMessage } from '@playwright/test';
 const BASE_URL = 'http://localhost:5173';
 const SCREENSHOT_DIR = 'playwright-screenshots';
 
-// Breakpoints matching Worship Room design system
+// 6 breakpoints matching Worship Room design system + industry standards
 const BREAKPOINTS = {
-  mobile: { width: 375, height: 812 },   // iPhone-sized
-  tablet: { width: 768, height: 1024 },  // iPad-sized
-  desktop: { width: 1280, height: 900 },  // Standard desktop
+  mobileS:    { width: 375, height: 812 },   // iPhone SE / 13 mini
+  mobileL:    { width: 428, height: 926 },   // iPhone 14 Pro Max
+  tablet:     { width: 768, height: 1024 },  // iPad portrait
+  tabletL:    { width: 1024, height: 768 },  // iPad landscape
+  desktop:    { width: 1440, height: 900 },  // Standard laptop
+  desktopXL:  { width: 1920, height: 1080 }, // Full HD monitor
 };
 
-// Collect console errors and network failures
+// Console/network capture
 const consoleErrors: string[] = [];
 const consoleWarnings: string[] = [];
 const networkFailures: { url: string; status: number; method: string; error?: string }[] = [];
 
-test.describe('<Target> Verification', () => {
-
-  test.beforeEach(async ({ page }) => {
-    // Listen for console errors
-    page.on('console', (msg: ConsoleMessage) => {
-      if (msg.type() === 'error') {
-        consoleErrors.push(`[ERROR] ${msg.text()}`);
-      }
-      if (msg.type() === 'warning' && !msg.text().includes('DevTools')) {
-        consoleWarnings.push(`[WARN] ${msg.text()}`);
-      }
-    });
-
-    // Listen for uncaught exceptions
-    page.on('pageerror', (error) => {
-      consoleErrors.push(`[UNCAUGHT] ${error.message}`);
-    });
-
-    // Listen for failed network requests
-    page.on('response', (response) => {
-      if (response.status() >= 400) {
-        networkFailures.push({
-          url: response.url(),
-          status: response.status(),
-          method: response.request().method(),
-        });
-      }
-    });
-
-    // Listen for request failures (network errors, CORS, timeouts)
-    page.on('requestfailed', (request) => {
-      networkFailures.push({
-        url: request.url(),
-        status: 0,
-        method: request.method(),
-        error: request.failure()?.errorText || 'unknown',
-      });
-    });
-  });
-
-  // --- VISUAL RENDERING ---
-  test('renders key elements at desktop', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await page.goto(`${BASE_URL}<route>`);
-    await page.waitForLoadState('networkidle');
-
-    // Screenshot: desktop full page
-    await page.screenshot({
-      path: `${SCREENSHOT_DIR}/desktop-full.png`,
-      fullPage: true
-    });
-
-    // Assert key elements
-    // ... (generated based on reconnaissance)
-  });
-
-  // --- RESPONSIVE BREAKPOINTS ---
-  for (const [name, size] of Object.entries(BREAKPOINTS)) {
-    test(`renders correctly at ${name} (${size.width}x${size.height})`, async ({ page }) => {
-      await page.setViewportSize(size);
-      await page.goto(`${BASE_URL}<route>`);
-      await page.waitForLoadState('networkidle');
-
-      await page.screenshot({
-        path: `${SCREENSHOT_DIR}/${name}-full.png`,
-        fullPage: true
-      });
-
-      // Breakpoint-specific assertions
-      // ... (generated based on reconnaissance)
-    });
-  }
-
-  // --- INTERACTIVE FLOWS ---
-  test('interactions work correctly', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await page.goto(`${BASE_URL}<route>`);
-    await page.waitForLoadState('networkidle');
-
-    // Test interactions
-    // ... (generated based on reconnaissance)
-
-    // Screenshot after interactions
-    await page.screenshot({
-      path: `${SCREENSHOT_DIR}/desktop-after-interaction.png`,
-      fullPage: true
-    });
-  });
-
-  // --- CONSOLE ERRORS ---
-  test('no console errors', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await page.goto(`${BASE_URL}<route>`);
-    await page.waitForLoadState('networkidle');
-
-    // Navigate around the page to trigger any lazy-loaded errors
-    // ... (scroll, click interactive elements)
-
-    // Report but don't necessarily fail on warnings
-    if (consoleWarnings.length > 0) {
-      console.log('Console warnings detected (non-blocking):');
-      consoleWarnings.forEach(w => console.log(`  ${w}`));
-    }
-
-    // Fail on errors
-    expect(consoleErrors, 'Console errors detected').toHaveLength(0);
-  });
-});
+// Filter noise
+const IGNORE_PATTERNS = ['DevTools', 'HMR', '[vite]', 'favicon.ico', 'chrome-extension://'];
 ```
 
-### Playwright Configuration
+**For each step in the flow:**
 
-If `frontend/playwright.config.ts` does not exist, create a minimal one:
+1. Execute the action (click, fill, navigate, wait)
+2. Capture state after action: new console errors, new network requests, DOM changes
+3. Validate against expected outcome:
 
-```typescript
-import { defineConfig } from '@playwright/test';
+```text
+### Step {N}: {action}
 
-export default defineConfig({
-  testDir: '.',
-  testMatch: 'playwright-verify.spec.ts',
-  timeout: 30000,
-  expect: { timeout: 5000 },
-  use: {
-    baseURL: 'http://localhost:5173',
-    headless: true,
-    screenshot: 'on',
-    trace: 'on-first-retry',
-  },
-  reporter: [['list']],
-  retries: 0,
-});
+**Action:** {what was done}
+**Expected:** {from script}
+**Actual:** {what happened}
+**Verdict:** PASS / FAIL / UNEXPECTED
+
+**Console (new since last step):** {errors or "clean"}
+**Network (new since last step):** {request — status — duration}
+**DOM changes:** {elements appeared/disappeared/changed}
 ```
 
-### Screenshot Directory
+4. If a step fails: document exactly what happened, capture console/network state, **continue** to next step unless page is unresponsive
+5. Between flows: reset state (navigate back, clear forms, refresh)
 
-```bash
-mkdir -p frontend/playwright-screenshots
-```
-
-### Run the Test
+### Run
 
 ```bash
 cd frontend
+mkdir -p playwright-screenshots
 npx playwright test playwright-verify.spec.ts --reporter=list
 ```
 
-**Capture the full output** — both passing and failing tests.
+---
+
+## Step 6: Design Compliance Check (if recon report or plan with design specs)
+
+### 6a: Recon Style Verification (if CSS Mapping Table exists)
+
+Extract computed styles from every element in the mapping table and compare:
+
+| Element | Property | Recon Value | Built Value | Match? |
+|---------|----------|------------|-------------|--------|
+| {elem}  | {prop}   | {expected} | {actual}    | YES/NO |
+
+**Match rate:** {X}/{Y} ({percentage}%)
+
+### 6b: Prod Comparison (if --compare-prod provided)
+
+For each major component, extract computed styles from BOTH local and prod at the same viewport, and compare:
+
+| Component | Property | Prod Value | Local Value | Match? |
+|-----------|----------|-----------|-------------|--------|
+| {comp}    | {prop}   | {value}   | {value}     | YES/NO |
+
+Flag any mismatches with exact values.
 
 ---
 
-## Step 6: Collect Screenshots
+## Step 7: Accessibility Smoke Check
 
-After the test run completes (pass or fail), list all screenshots taken:
+```text
+## Accessibility Smoke Check
 
-```bash
-ls -la frontend/playwright-screenshots/
+### Form Elements
+- All inputs have associated labels: YES / NO — {details}
+- All buttons have accessible names: YES / NO — {details}
+- Required fields indicated: YES / NO — {details}
+
+### Keyboard Navigation
+- Tab order follows visual order: YES / NO — {details}
+- Focus indicators visible: YES / NO — {details}
+- No focus traps: YES / NO — {details}
+
+### ARIA
+- Dynamic content changes announced: YES / NO / N/A
+- Error messages associated with inputs: YES / NO — {details}
+- Loading states communicated: YES / NO — {details}
+
+### Issues Found
+- {specific issue and element}
 ```
 
-These screenshots are the verification evidence. They will be referenced in the report.
+**This is a smoke check, not a full audit.**
 
 ---
 
-## Step 7: Diagnose Issues
+## Step 8: Responsive Verification
 
-If any tests failed, network requests failed, or console errors were captured, perform targeted diagnosis for each issue before generating the report.
+Screenshot at ALL 6 breakpoints:
 
-**For console errors:**
-- Identify the originating component/module from the stack trace if visible
-- Classify: React error boundary? Unhandled promise rejection? Type error? Network-related?
-- Is it pre-existing (appears on page load before any interaction) or caused by the new feature?
+| Breakpoint | Width | Height | Filename |
+|-----------|-------|--------|----------|
+| Mobile S | 375 | 812 | `{page}-375x812.png` |
+| Mobile L | 428 | 926 | `{page}-428x926.png` |
+| Tablet P | 768 | 1024 | `{page}-768x1024.png` |
+| Tablet L | 1024 | 768 | `{page}-1024x768.png` |
+| Desktop | 1440 | 900 | `{page}-1440x900.png` |
+| Desktop XL | 1920 | 1080 | `{page}-1920x1080.png` |
 
-**For network failures:**
-- Capture: URL, method, status code, and error text
-- Classify: API contract mismatch? Auth issue? CORS? Timeout? Server error? Backend not running?
-- If plan-aware: does the request URL/method match the API contract from the plan?
+At each viewport, run JavaScript to inspect computed styles on key layout elements and flag:
 
-**For DOM/UI failures:**
-- Is the element present but hidden? Present but wrong content? Absent entirely?
-- Classify: Rendering issue? State management issue? Timing/race condition?
+- **Horizontal overflow** (element wider than viewport → horizontal scrollbar)
+- **Text overflow** (cut off, overlapping, outside container)
+- **Flex/grid wrapping** (layouts not wrapping on smaller screens)
+- **Font size scaling** (identical on mobile and desktop)
+- **Disproportionate spacing** (padding/margins too large/small for viewport)
+- **Touch targets** (interactive elements < 44x44px on mobile)
+- **Image/embed scaling** (not scaling down on small screens)
+- **Hidden elements** (should be visible but aren't, or vice versa)
+- **Navigation** (mobile drawer works, desktop nav displays correctly)
 
-**For flaky failures:**
-- If any failure seems inconsistent, re-run that specific test 2 more times
-- Document whether the failure is consistent or intermittent
-- If intermittent: note what varies between runs (timing, network response order)
+```text
+## Responsive Verification
 
-**For each diagnosed issue, prepare:**
+### Breakpoint Results
+| Viewport | Screenshot | Issues |
+|----------|-----------|--------|
+| 375x812 (Mobile S) | {file} | {count — summary or "clean"} |
+| 428x926 (Mobile L) | {file} | {count — summary or "clean"} |
+| 768x1024 (Tablet P) | {file} | {count — summary or "clean"} |
+| 1024x768 (Tablet L) | {file} | {count — summary or "clean"} |
+| 1440x900 (Desktop) | {file} | {count — summary or "clean"} |
+| 1920x1080 (Desktop XL) | {file} | {count — summary or "clean"} |
 
+### Responsive Issues
+| # | Viewport | Element | Issue | Severity |
+|---|----------|---------|-------|----------|
+| 1 | 375x812 | {selector} | {description} | BLOCKING/NON-BLOCKING |
 ```
-Issue: <title>
-Observed in: <which test / step>
-Pre-existing or new: <PRE-EXISTING if it appears before any new-feature interaction, NEW if introduced by the change>
-Severity: BLOCKING / NON-BLOCKING
-Deterministic: YES / NO (flaky)
 
-Evidence:
-- <console output, network details, or DOM state>
+---
 
-Root cause hypothesis:
-- <what's likely wrong — based on evidence, not guessing>
-- <which component/file is likely responsible>
+## Step 9: Worship Room-Specific Checks
 
-Suggested investigation:
-- <where to look — specific file, component, API client>
+**Always run these, regardless of flags:**
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Crisis resources in footer | PRESENT / MISSING | {details} |
+| Auth modal appears for gated actions (not redirect) | CORRECT / WRONG | {details} |
+| Purple gradient hero renders correctly | YES / NO | {details} |
+| Lucide icons render (not broken images) | YES / NO | {details} |
+| Design system colors match (primary violet, neutral bg) | YES / NO | {details} |
+| Spotify embed loads (if on page) | YES / NO | {details} |
+| No `dangerouslySetInnerHTML` on user content | SAFE / FLAGGED | {details} |
+| Squiggle background matches across tabs | CONSISTENT / MISMATCHED | {details} |
+| White decorative dividers render under headings | YES / NO / N/A | {details} |
+
+---
+
+## Step 10: Diagnose Issues (only if issues found)
+
+For each FAIL or UNEXPECTED result:
+
+**Console errors:** Identify originating component, classify (React error? Promise rejection? Type error?), determine if pre-existing or new.
+
+**Network failures:** Capture URL, method, status, timing. Classify (API mismatch? Auth? CORS? Timeout?).
+
+**DOM/UI issues:** Identify selector, classify (rendering? state management? timing?). Is element present but hidden, wrong content, or absent?
+
+**Flakiness detection:** If any failure seems intermittent, re-run 2-3 times. Document whether consistent or flaky. If flaky, note what varies between runs.
+
+```text
+### Issue {N}: {title}
+
+**Observed in:** Flow {X}, Step {Y}
+**Severity:** BLOCKING / NON-BLOCKING
+**Deterministic:** YES / NO (flaky)
+**Pre-existing or new:** PRE-EXISTING / NEW
+
+**Evidence:**
+- {console output, network details, or DOM state}
+
+**Root cause hypothesis:**
+- {what's likely wrong — evidence-based, not guessing}
+- {which component/file is likely responsible}
+
+**Suggested investigation:**
+- {where to look — specific file, component}
+- {what to check — state management, conditional rendering}
 ```
 
----
-
-## Step 8: Generate the Verification Report
-
-After running all tests, produce a structured report:
-
-````
-# Verification Report: <target>
-
-**Route:** `<route>`
-**Date:** YYYY-MM-DD HH:MM
-**Servers:** Frontend ✅ (was already running / started by verify) | Backend ✅ / ⚠️ not running
+**DO NOT suggest code fixes. Diagnosis only.**
 
 ---
 
-## Results Summary
+## Step 11: Produce Verification Report
 
-| Category | Status | Details |
-|----------|--------|---------|
-| Visual Rendering | ✅ PASS / ❌ FAIL | <summary> |
-| Interactive Flows | ✅ PASS / ❌ FAIL | <summary> |
-| Responsive (Mobile) | ✅ PASS / ❌ FAIL | <summary> |
-| Responsive (Tablet) | ✅ PASS / ❌ FAIL | <summary> |
-| Responsive (Desktop) | ✅ PASS / ❌ FAIL | <summary> |
-| Console Errors | ✅ PASS / ❌ FAIL | <count> errors, <count> warnings |
+```text
+# UI Verification Report: {URL}
 
----
+## Summary
+- **URL verified:** {URL}
+- **Servers:** Frontend ✅ | Backend ✅ / ⚠️ not running
+- **Flows executed:** {count}
+- **Total steps:** {count}
+- **Passed:** {count}
+- **Failed:** {count}
+- **Unexpected:** {count}
+- **Overall verdict:** PASS / FAIL / PARTIAL
 
-## Visual Rendering
+## Flow Results
 
-<what was checked and what was found>
+### Flow 1: {description}
+| Step | Action | Verdict |
+|------|--------|---------|
+| 1 | {action} | PASS/FAIL |
 
-## Interactive Flows
+## Console Summary
+- Pre-existing errors: {count}
+- New errors during testing: {count}
+- Critical: {list or "none"}
 
-<what interactions were tested and results>
+## Network Summary
+- Failed requests: {count} — {URLs}
+- Slow requests: {count} — {URLs and durations}
 
-## Responsive Breakpoints
+## Design Compliance
+{from Step 6, or "No recon report / prod URL provided"}
 
-### Desktop (1280px)
-<findings + screenshot reference>
+## Accessibility
+{from Step 7}
 
-### Tablet (768px)
-<findings + screenshot reference>
+## Responsive
+- **Viewports tested:** 6 (375, 428, 768, 1024, 1440, 1920)
+- **Issues found:** {count or "none"}
+{from Step 8}
 
-### Mobile (375px)
-<findings + screenshot reference>
+## Worship Room Checks
+{from Step 9}
 
-## Console Output
+## Plan Compliance (if plan-aware)
+| Plan Item | Status | Evidence |
+|-----------|--------|----------|
+| Guardrail: {item} | ✅ Respected / ❌ Violated | {evidence} |
+| Edge case: {decision} | ✅ Implemented / ❌ Missing | {evidence} |
 
-### Errors (blocking)
-<list each error, or "None">
+## Issues Found
+| # | Issue | Severity | Flow/Step | Deterministic |
+|---|-------|----------|-----------|---------------|
+| 1 | {title} | BLOCKING/NON-BLOCKING | Flow {X} Step {Y} | YES/NO |
 
-### Warnings (non-blocking)
-<list each warning, or "None">
-
-## Network
-
-### Failed Requests
-| URL | Method | Status | Error | Pre-existing? |
-|-----|--------|--------|-------|---------------|
-| <url> | GET/POST | <status> | <error text> | YES / NO |
-
-(or "No failed requests")
-
-## Plan Compliance (only if plan-aware mode)
-
-| Plan Item | Status | Details |
-|-----------|--------|---------|
-| Guardrail: <DO NOT item> | ✅ Respected / ❌ Violated | <evidence> |
-| Edge case: <decision> | ✅ Implemented / ❌ Missing | <evidence> |
-| Expected element: <element from plan> | ✅ Present / ❌ Missing | <evidence> |
-
----
+## Diagnosed Issues (details)
+{from Step 10}
 
 ## Screenshots Captured
-
 | Screenshot | Breakpoint | Description |
-|------------|-----------|-------------|
-| `playwright-screenshots/desktop-full.png` | Desktop | Full page render |
-| `playwright-screenshots/tablet-full.png` | Tablet | Full page render |
-| `playwright-screenshots/mobile-full.png` | Mobile | Full page render |
-| `playwright-screenshots/desktop-after-interaction.png` | Desktop | After interaction flow |
+|-----------|-----------|-------------|
+| {file} | {breakpoint} | {description} |
+
+## Confidence Assessment
+- **Overall:** HIGH / MEDIUM / LOW
+- **Reasoning:** {specific evidence}
+
+## Recommended Next Steps
+- {investigation actions for issues found}
+- {whether to re-verify after fixes}
+```
+
+**STOP. Do not modify any code. Verification is complete.**
 
 ---
 
-## Pre-existing Issues (existed before this change)
-<numbered list, or "None — clean baseline">
+## Step 12: Clean Up
 
-## New Issues (introduced by this change)
-
-### Blocking (must fix)
-<numbered list with diagnosis from Step 7, or "None">
-
-### Non-Blocking (should fix)
-<numbered list with diagnosis from Step 7, or "None">
-
-## Notes
-<any observations, auth-state limitations, backend dependency notes>
-````
-
----
-
-## Step 9: Clean Up
-
-After generating the report:
-
-1. **Delete the temporary test file:**
-   ```bash
-   rm frontend/playwright-verify.spec.ts
-   ```
-
-2. **Keep the screenshots** — do NOT delete `frontend/playwright-screenshots/`. The user may want to review them.
-
-3. **Do NOT stop dev servers** that were started by this skill. The user may still be working.
-
-4. **Do NOT modify any source code.** This skill is read-only verification. If issues are found, report them — the user or `/execute-plan` handles fixes.
-
-5. **If plan-aware mode was used**, do NOT update the plan's Execution Log. That's `/execute-plan`'s job. This skill is read-only.
+1. **Delete** the temporary test file: `rm frontend/playwright-verify.spec.ts`
+2. **Keep** screenshots in `frontend/playwright-screenshots/`
+3. **Do NOT stop** dev servers
+4. **Do NOT modify** source code
+5. **Do NOT update** plan execution logs
 
 ---
 
 ## Rules
 
 ### Scope
-- **Only verify what was requested.** Do not test unrelated pages or components.
-- **Do not fix issues.** Report them. Fixing is the user's or `/execute-plan`'s job.
-- **Do not modify source code.** The only files this skill creates are the temporary test file (deleted after) and screenshots (kept).
-- **Do not run unit tests.** This skill is for browser-based visual/interaction verification only.
+- Only verify what was requested — don't test unrelated pages
+- Do not fix issues — report them
+- Do not modify source code (only temp test file, deleted after)
 
 ### Screenshots
-- **Always capture screenshots** — at every breakpoint, before and after interactions.
-- Screenshots are saved to `frontend/playwright-screenshots/` and organized by breakpoint and state.
-- On each new `/verify` run, clear the previous screenshots first:
-  ```bash
-  rm -rf frontend/playwright-screenshots/*
-  ```
-- Screenshot filenames should be descriptive: `desktop-full.png`, `mobile-hero-section.png`, `tablet-after-search.png`, `desktop-modal-open.png`.
+- Always capture at all 6 breakpoints + before/after interactions
+- Clear previous screenshots on each run: `rm -rf frontend/playwright-screenshots/*`
+- Descriptive filenames: `desktop-1440-full.png`, `mobile-375-after-tab-switch.png`
 
 ### Assertions
-- **Be specific but not brittle.** Assert on text content, element visibility, and layout — not pixel positions or exact CSS values.
-- **Use `data-testid` when available.** Fall back to ARIA labels, roles, or text content selectors.
-- **Prefer `toBeVisible()` over `toBeInTheDocument()`** — we care about what the user sees, not just DOM presence.
-- **Check element counts** when verifying lists (e.g., "at least 3 prayer cards should be visible").
-
-### Responsive Verification
-- **Desktop (1280×900):** Verify full side-by-side layouts, hover states, dropdown menus.
-- **Tablet (768×1024):** Verify that layouts adapt (e.g., columns collapse, nav becomes hamburger if applicable).
-- **Mobile (375×812):** Verify mobile-specific UI (hamburger menu, stacked layouts, toggle views instead of side-by-side, touch-friendly tap targets).
-- **Key things to check per breakpoint:**
-  - Elements that should be hidden at certain sizes (`hidden md:block`, `lg:flex`, etc.)
-  - Layout direction changes (`flex-col` vs `flex-row`)
-  - Navigation (desktop dropdown vs mobile drawer)
-  - Map/list toggle vs side-by-side
+- Be specific but not brittle — assert on text, visibility, layout, not pixel positions
+- Use `data-testid` when available, fall back to ARIA labels, roles, text content
+- Prefer `toBeVisible()` over `toBeInTheDocument()`
+- Check element counts for lists
 
 ### Console Error Handling
-- **Fail on `console.error` and uncaught exceptions.** These are bugs.
-- **Report but don't fail on `console.warn`.** Warnings are informational.
-- **Ignore** React DevTools messages, Vite HMR messages, and browser extension noise.
-- **Filter patterns to ignore:**
-  - Messages containing `DevTools`
-  - Messages containing `HMR`
-  - Messages containing `[vite]`
-  - Messages containing `favicon.ico`
-  - Messages containing `chrome-extension://`
+- **Fail** on `console.error` and uncaught exceptions
+- **Report** but don't fail on `console.warn`
+- **Ignore:** DevTools, HMR, `[vite]`, `favicon.ico`, `chrome-extension://`
 
-### Auth State Awareness
-- If the page being verified has auth-gated content, the skill should:
-  1. First verify the **logged-out experience** (what visitors see)
-  2. Note in the report that verifying the logged-in experience requires temporarily modifying `useAuth()` in `frontend/src/hooks/useAuth.ts`
-  3. Do NOT modify `useAuth()` automatically — that's a source code change
+### Auth State
+- First verify logged-out experience
+- Note that logged-in verification requires temporarily modifying `useAuth()`
+- Do NOT modify `useAuth()` automatically
 
 ### Error Handling
-- If Playwright installation fails → **Stop** with error details
-- If dev server won't start → **Stop** with log file location
-- If a test times out → Report as failure, capture whatever screenshot is possible, continue other tests
-- If the route returns 404 → Report as failure ("Route not found — verify React Router config")
-- If Playwright crashes → Report raw error, suggest `npx playwright install chromium`
+- Playwright install fails → **Stop**
+- Dev server won't start → **Stop**
+- Test timeout → Report as failure, capture screenshot, continue other tests
+- Route returns 404 → Report as failure
+- Playwright crashes → Report raw error
 
-### Worship Room–Specific Checks
-When verifying Worship Room pages, always include these checks if relevant to the target:
+### Flakiness
+- If any failure seems intermittent, re-run 2-3 times
+- Document whether consistent or flaky
+- If flaky: note what varies between runs
 
-- **Crisis resources in footer** — verify the footer renders with crisis hotline info on pages that should have it
-- **Auth modal** — if testing an auth-gated interaction, verify the modal appears (not a redirect to `/login`)
-- **Purple gradient heroes** — verify hero sections use the dark-to-violet gradient background
-- **Lucide icons** — verify icons render (not broken image placeholders)
-- **Design system colors** — spot-check that primary violet (`#6D28D9`), neutral background (`#F5F5F5`), and text colors match the design system
-- **No `dangerouslySetInnerHTML`** — if the page renders user content, flag it in the report as a security concern (this is a code-level check, not Playwright, but worth noting if spotted during reconnaissance)
+## Philosophy
+
+The browser is the ultimate test environment. Unit tests prove components work in isolation. Playwright proves the assembled UI works as a system — catching integration issues, timing bugs, responsive breakage, and invisible failures that no unit test can find. Trust what the browser shows you at EVERY viewport size, document everything, and let the developer decide what to fix.

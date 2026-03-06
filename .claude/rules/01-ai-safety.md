@@ -55,12 +55,7 @@
 ### Data Privacy & Safety
 - **User Data**: Never share user's personal information, mood data, or journal entries with third parties
 - **AI Training**: Do not use user data to train AI models (per OpenAI API terms)
-- **Encryption**: Encrypt sensitive private content at the application layer before writing to database (not only disk-level encryption)
-  - **Journal Entries**: Always encrypted (private content)
-  - **Prayer Wall Posts**: NOT encrypted (public by design for community sharing)
-  - **Mood Selections**: NOT encrypted (analytics data). MVP: only persisted for logged-in users
-  - **Key Management**: Encryption keys stored in env/secret manager; rotate keys periodically; never commit keys to repository
-  - **Important**: Encrypt/decrypt only on backend; frontend never sees encryption keys
+- **Encryption**: See [05-database.md](05-database.md) for encryption policies (journal entries encrypted, prayer wall posts not, encrypt/decrypt on backend only)
 - **Anonymization**: Mood tracking analytics should be anonymized
 
 ### Disclaimers (Required on Site)
@@ -70,19 +65,8 @@
   - Small disclaimer below AI-generated prayers/reflections: "AI-generated content for encouragement. Not professional advice."
 
 ### Data Retention & Deletion
-- **Account Deletion**: User can delete their account via profile settings
-  - **Journal Entries**: Hard deleted (permanently removed from database)
-  - **Mood Selections**: Hard deleted OR anonymized (user_id set to NULL, description cleared if present)
-  - **Prayer Wall Posts**: Soft deleted with precise definition:
-    - `is_deleted = true`
-    - `content` replaced with `"[deleted]"` or empty string
-    - `title` replaced with `"[deleted]"`
-    - `user_id` set to NULL
-    - Timestamps retained (`created_at`, `updated_at`)
-    - Post remains in database for audit/moderation history but content is unrecoverable
-  - **Audit Logs**: Retained indefinitely (does not contain journal content, only admin actions)
-- **Backups**: Database backups retained for 30 days, then purged
-- **Data Export**: User can export their data (journal entries, mood history) before deletion (future feature)
+
+See [05-database.md](05-database.md) for full data retention and deletion policies. Key principle: journals hard-deleted, prayer wall posts soft-deleted (content replaced, user_id nulled), audit logs retained indefinitely.
 
 ### Crisis Resources (Hardcoded Constants)
 ```typescript

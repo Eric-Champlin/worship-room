@@ -8,9 +8,9 @@ interface MiniHubCardsProps {
 }
 
 const practices = [
-  { label: 'Pray', to: '/pray', icon: HandMetal },
-  { label: 'Journal', to: '/journal', icon: PenLine },
-  { label: 'Meditate', to: '/meditate', icon: Wind },
+  { label: 'Pray', to: '/daily?tab=pray', icon: HandMetal },
+  { label: 'Journal', to: '/daily?tab=journal', icon: PenLine },
+  { label: 'Meditate', to: '/daily?tab=meditate', icon: Wind },
 ] as const
 
 export function MiniHubCards({ className }: MiniHubCardsProps) {

@@ -1,10 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
 import { CompletionScreen } from '@/components/daily/CompletionScreen'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { getBreathingVerses } from '@/mocks/daily-experience-mock-data'
 import { BREATHING_PHASES, DURATION_OPTIONS } from '@/constants/daily-experience'
+import { useAuth } from '@/hooks/useAuth'
 import { playChime } from '@/lib/audio'
 import { cn } from '@/lib/utils'
 
@@ -28,6 +30,12 @@ function speakPhase(label: string) {
 }
 
 export function BreathingExercise() {
+  const { isLoggedIn } = useAuth()
+  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  return <BreathingExerciseContent />
+}
+
+function BreathingExerciseContent() {
   const [screen, setScreen] = useState<Screen>('prestart')
   const [duration, setDuration] = useState<number | null>(null)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
@@ -146,9 +154,9 @@ export function BreathingExercise() {
         <CompletionScreen
           ctas={[
             { label: 'Meditate more', to: '/meditate/breathing' },
-            { label: 'Try a different meditation', to: '/meditate' },
-            { label: 'Continue to Pray \u2192', to: '/pray' },
-            { label: 'Continue to Journal \u2192', to: '/journal' },
+            { label: 'Try a different meditation', to: '/daily?tab=meditate' },
+            { label: 'Continue to Pray \u2192', to: '/daily?tab=pray' },
+            { label: 'Continue to Journal \u2192', to: '/daily?tab=journal' },
             { label: 'Visit the Prayer Wall \u2192', to: '/prayer-wall' },
           ]}
         />

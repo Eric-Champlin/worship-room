@@ -1,12 +1,20 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, SkipForward } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
 import { CompletionScreen } from '@/components/daily/CompletionScreen'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
+import { useAuth } from '@/hooks/useAuth'
 import { getExamenSteps } from '@/mocks/daily-experience-mock-data'
 
 export function ExamenReflection() {
+  const { isLoggedIn } = useAuth()
+  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  return <ExamenReflectionContent />
+}
+
+function ExamenReflectionContent() {
   const steps = getExamenSteps()
   const [currentStep, setCurrentStep] = useState(0)
   const [notes, setNotes] = useState<Record<number, string>>({})
@@ -24,9 +32,9 @@ export function ExamenReflection() {
       <Layout hero={<PageHero title="Examen Reflection" />}>
         <CompletionScreen
           ctas={[
-            { label: 'Try a different meditation', to: '/meditate', primary: true },
-            { label: 'Continue to Pray \u2192', to: '/pray' },
-            { label: 'Continue to Journal \u2192', to: '/journal' },
+            { label: 'Try a different meditation', to: '/daily?tab=meditate', primary: true },
+            { label: 'Continue to Pray \u2192', to: '/daily?tab=pray' },
+            { label: 'Continue to Journal \u2192', to: '/daily?tab=journal' },
             { label: 'Visit the Prayer Wall \u2192', to: '/prayer-wall' },
           ]}
         />

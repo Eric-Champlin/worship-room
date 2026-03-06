@@ -1,11 +1,31 @@
-import { Link } from 'react-router-dom'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { useSearchParams, useLocation } from 'react-router-dom'
 import { Heart, PenLine, Wind, Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { PrayTabContent } from '@/components/daily/PrayTabContent'
+import { JournalTabContent } from '@/components/daily/JournalTabContent'
+import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
+import { cn } from '@/lib/utils'
+import type { PrayContext } from '@/types/daily-experience'
+
+const TABS = [
+  { id: 'pray', label: 'Pray', icon: Heart },
+  { id: 'journal', label: 'Journal', icon: PenLine },
+  { id: 'meditate', label: 'Meditate', icon: Wind },
+] as const
+
+type TabId = (typeof TABS)[number]['id']
+
+function isValidTab(value: string | null): value is TabId {
+  return value === 'pray' || value === 'journal' || value === 'meditate'
+}
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -14,34 +34,47 @@ function getGreeting(): string {
   return 'Good Evening'
 }
 
-const PRACTICE_CARDS = [
-  {
-    label: 'Pray',
-    to: '/pray',
-    icon: Heart,
-    preview: "What're you feeling? Let's pray about it",
-    completionKey: 'pray' as const,
-  },
-  {
-    label: 'Journal',
-    to: '/journal',
-    icon: PenLine,
-    preview: "What's weighing on your heart today?",
-    completionKey: 'journal' as const,
-  },
-  {
-    label: 'Meditate',
-    to: '/meditate',
-    icon: Wind,
-    preview: 'Start with a breathing exercise',
-    completionKey: 'meditate' as const,
-  },
-]
+function DailyHubContent() {
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const rawTab = searchParams.get('tab')
+  const activeTab: TabId = isValidTab(rawTab) ? rawTab : 'pray'
 
-export function DailyHub() {
   const { user, isLoggedIn } = useAuth()
   const { isPrayComplete, isJournalComplete, isMeditateComplete } =
     useCompletionTracking()
+
+  const [prayContext, setPrayContext] = useState<PrayContext | null>(null)
+
+  // Sticky tab bar shadow on scroll
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const [isSticky, setIsSticky] = useState(false)
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsSticky(!entry.isIntersecting),
+      { threshold: 0 },
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
+
+  const switchTab = useCallback(
+    (tab: TabId) => {
+      setSearchParams({ tab }, { replace: true })
+    },
+    [setSearchParams],
+  )
+
+  const handleSwitchToJournal = useCallback(
+    (topic: string) => {
+      setPrayContext({ from: 'pray', topic })
+      setSearchParams({ tab: 'journal' }, { replace: true })
+    },
+    [setSearchParams],
+  )
 
   const greeting = getGreeting()
   const displayName = user ? `${greeting}, ${user.firstName}!` : `${greeting}!`
@@ -51,6 +84,40 @@ export function DailyHub() {
     journal: isJournalComplete,
     meditate: isMeditateComplete,
   }
+
+  // Tab underline position
+  const activeTabIndex = TABS.findIndex((t) => t.id === activeTab)
+
+  // Screen-reader announcement for auth redirects from meditation sub-pages
+  const [srMessage, setSrMessage] = useState('')
+  useEffect(() => {
+    const msg = (location.state as { authRedirectMessage?: string } | null)
+      ?.authRedirectMessage
+    if (msg) {
+      setSrMessage('')
+      requestAnimationFrame(() => setSrMessage(msg))
+      // Clear state so back-navigation doesn't re-announce
+      window.history.replaceState({}, '', window.location.href)
+    }
+  }, [location.state])
+
+  // Arrow key navigation for tab bar (WAI-ARIA Tabs pattern)
+  const tabButtonRefs = useRef<(HTMLButtonElement | null)[]>([])
+  const handleTabKeyDown = useCallback(
+    (e: React.KeyboardEvent, currentIndex: number) => {
+      let nextIndex: number | null = null
+      if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % TABS.length
+      else if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + TABS.length) % TABS.length
+      else if (e.key === 'Home') nextIndex = 0
+      else if (e.key === 'End') nextIndex = TABS.length - 1
+      if (nextIndex !== null) {
+        e.preventDefault()
+        switchTab(TABS[nextIndex].id)
+        tabButtonRefs.current[nextIndex]?.focus()
+      }
+    },
+    [switchTab],
+  )
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
@@ -76,7 +143,6 @@ export function DailyHub() {
             backgroundSize: '100% 100%',
           }}
         >
-          {/* Greeting */}
           <h1
             id="daily-hub-heading"
             className="mb-1 font-script text-5xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl"
@@ -91,7 +157,9 @@ export function DailyHub() {
             <button
               type="button"
               onClick={() => {
-                document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' })
+                document
+                  .getElementById('quiz')
+                  ?.scrollIntoView({ behavior: 'smooth' })
               }}
               className="rounded font-semibold text-white underline underline-offset-2 transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             >
@@ -101,38 +169,112 @@ export function DailyHub() {
           </p>
         </section>
 
-        {/* Practice Cards */}
-        <section
-          aria-label="Daily practices"
-          className="mx-auto max-w-5xl px-4 py-10 sm:py-14"
+        {/* Sentinel for sticky tab bar shadow */}
+        <div ref={sentinelRef} aria-hidden="true" />
+
+        {/* Sticky Tab Bar */}
+        <div
+          className={cn(
+            'sticky top-0 z-40 bg-neutral-bg transition-shadow',
+            isSticky && 'shadow-md',
+          )}
         >
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            {PRACTICE_CARDS.map(({ label, to, icon: Icon, preview, completionKey }) => {
-              const isComplete = completionMap[completionKey]
-              return (
-                <Link
-                  key={to}
-                  to={to}
-                  className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md sm:p-8"
-                >
-                  <div className="mb-1 flex items-center gap-2">
-                    <Icon className="h-8 w-8 text-primary sm:h-10 sm:w-10" />
-                    <h3 className="font-script text-3xl text-primary sm:text-4xl">
-                      {label}
-                    </h3>
-                    {isLoggedIn && isComplete && (
-                      <span className="ml-auto flex items-center gap-1 text-sm font-medium text-success">
-                        <Check className="h-5 w-5" aria-hidden="true" />
-                        <span className="sr-only">{label} completed</span>
-                      </span>
+          <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-gray-200">
+            <div
+              className="relative flex w-full"
+              role="tablist"
+              aria-label="Daily practices"
+            >
+              {TABS.map((tab, index) => {
+                const isActive = activeTab === tab.id
+                const Icon = tab.icon
+                const isComplete = completionMap[tab.id]
+                return (
+                  <button
+                    key={tab.id}
+                    ref={(el) => { tabButtonRefs.current[index] = el }}
+                    type="button"
+                    role="tab"
+                    id={`tab-${tab.id}`}
+                    aria-selected={isActive}
+                    aria-controls={`tabpanel-${tab.id}`}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => switchTab(tab.id)}
+                    onKeyDown={(e) => handleTabKeyDown(e, index)}
+                    className={cn(
+                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:py-4 sm:text-base',
+                      isActive
+                        ? 'text-primary'
+                        : 'text-text-light hover:text-text-dark',
                     )}
-                  </div>
-                  <p className="text-base text-text-light sm:text-lg">{preview}</p>
-                </Link>
-              )
-            })}
+                  >
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                    {tab.label}
+                    {isLoggedIn && isComplete && (
+                      <>
+                        <Check
+                          className="h-4 w-4 text-success"
+                          aria-hidden="true"
+                        />
+                        <span className="sr-only">, completed today</span>
+                      </>
+                    )}
+                  </button>
+                )
+              })}
+              {/* Animated underline */}
+              <div
+                className="absolute bottom-0 h-0.5 bg-primary transition-transform duration-200 ease-in-out"
+                style={{
+                  width: `${100 / TABS.length}%`,
+                  transform: `translateX(${activeTabIndex * 100}%)`,
+                }}
+                aria-hidden="true"
+              />
+            </div>
           </div>
-        </section>
+        </div>
+
+        {/* Screen-reader announcement for auth redirects */}
+        <div role="status" aria-live="polite" className="sr-only">
+          {srMessage}
+        </div>
+
+        {/* Tab Panels — all mounted, CSS show/hide for state preservation */}
+        <div
+          role="tabpanel"
+          id="tabpanel-pray"
+          aria-labelledby="tab-pray"
+          tabIndex={0}
+          hidden={activeTab !== 'pray'}
+        >
+          <PrayTabContent
+            onSwitchToJournal={handleSwitchToJournal}
+          />
+        </div>
+
+        <div
+          role="tabpanel"
+          id="tabpanel-journal"
+          aria-labelledby="tab-journal"
+          tabIndex={0}
+          hidden={activeTab !== 'journal'}
+        >
+          <JournalTabContent
+            prayContext={prayContext}
+            onSwitchTab={switchTab}
+          />
+        </div>
+
+        <div
+          role="tabpanel"
+          id="tabpanel-meditate"
+          aria-labelledby="tab-meditate"
+          tabIndex={0}
+          hidden={activeTab !== 'meditate'}
+        >
+          <MeditateTabContent />
+        </div>
 
         {/* Today's Song Pick */}
         <SongPickSection />
@@ -143,5 +285,15 @@ export function DailyHub() {
 
       <SiteFooter />
     </div>
+  )
+}
+
+export function DailyHub() {
+  return (
+    <ToastProvider>
+      <AuthModalProvider>
+        <DailyHubContent />
+      </AuthModalProvider>
+    </ToastProvider>
   )
 }

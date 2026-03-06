@@ -2,6 +2,8 @@
 paths: ["backend/**"]
 ---
 
+**Status: Phase 3 — not yet implemented.** Backend is planned but not built. Frontend is fully implemented with mock data.
+
 ## Tech Stack
 
 ### Backend
@@ -99,10 +101,12 @@ paths: ["backend/**"]
 - **Rate Limiting**: 20 AI requests per hour per user (backend enforcement)
 - **Safety**: Always check inputs for crisis keywords, inappropriate content
 
-### Google Maps Integration
+### Google Maps Integration (Phase 3+)
 - **API**: Google Maps Places API
 - **Use Cases**:
-  - Church locator at `/churches`
-  - Christian counselor locator at `/counselors`
+  - Church locator at `/local-support/churches`
+  - Christian counselor locator at `/local-support/counselors`
+  - Celebrate Recovery locator at `/local-support/celebrate-recovery`
+- **Current State**: Frontend built with Leaflet map + mock data. Google Places API wiring is Phase 3+.
 - **Implementation**: Real-time search (no database caching)
 - **API Key**: Store in environment variables

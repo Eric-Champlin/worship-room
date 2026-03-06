@@ -9,7 +9,7 @@ export function BackgroundSquiggle() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 h-full w-full"
       viewBox="0 0 1800 1350"
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid slice"
       fill="none"
     >
       {/* Wide central brushstroke */}

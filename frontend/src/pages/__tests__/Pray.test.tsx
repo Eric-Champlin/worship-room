@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { Pray } from '../Pray'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { DAILY_COMPLETION_KEY } from '@/constants/daily-experience'
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -29,27 +31,33 @@ beforeEach(() => {
   }))
 })
 
-function renderPage() {
+function renderComponent(props: {
+  onSwitchToJournal?: (topic: string) => void
+} = {}) {
   return render(
     <MemoryRouter
-      initialEntries={['/pray']}
+      initialEntries={['/daily?tab=pray']}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
-      <Pray />
+      <ToastProvider>
+        <AuthModalProvider>
+          <PrayTabContent {...props} />
+        </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }
 
-describe('Pray', () => {
+describe('PrayTabContent', () => {
   it('renders textarea with placeholder', () => {
-    renderPage()
+    renderComponent()
     expect(
       screen.getByPlaceholderText(/start typing here/i),
     ).toBeInTheDocument()
   })
 
   it('renders styled heading', () => {
-    renderPage()
+    renderComponent()
     expect(screen.getByText('Heart?')).toBeInTheDocument()
     expect(
       screen.getByText(/what's on your/i),
@@ -57,7 +65,7 @@ describe('Pray', () => {
   })
 
   it('renders 3 default starter chips', () => {
-    renderPage()
+    renderComponent()
     expect(screen.getByText("I'm struggling with...")).toBeInTheDocument()
     expect(screen.getByText('Help me forgive...')).toBeInTheDocument()
     expect(screen.getByText('I feel lost about...')).toBeInTheDocument()
@@ -65,7 +73,7 @@ describe('Pray', () => {
 
   it('chip fills textarea and hides other chips', async () => {
     const user = userEvent.setup()
-    renderPage()
+    renderComponent()
     await user.click(screen.getByText("I'm struggling with..."))
 
     const textarea = screen.getByPlaceholderText(
@@ -81,7 +89,7 @@ describe('Pray', () => {
 
   it('shows nudge when submitting empty', async () => {
     const user = userEvent.setup()
-    renderPage()
+    renderComponent()
     await user.click(screen.getByText('Generate Prayer'))
     expect(
       screen.getByText(/tell god what's on your heart/i),
@@ -91,7 +99,7 @@ describe('Pray', () => {
   it('shows loading then prayer after generating', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    renderPage()
+    renderComponent()
 
     const textarea = screen.getByPlaceholderText(
       /start typing here/i,
@@ -118,7 +126,7 @@ describe('Pray', () => {
   it('"Pray about something else" resets the page', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    renderPage()
+    renderComponent()
 
     const textarea = screen.getByPlaceholderText(
       /start typing here/i,
@@ -141,14 +149,14 @@ describe('Pray', () => {
     vi.useRealTimers()
   })
 
-  it('classic prayers section is hidden behind feature flag', () => {
-    renderPage()
+  it('classic prayers section is hidden', () => {
+    renderComponent()
     expect(screen.queryByText('Classic Prayers')).not.toBeInTheDocument()
   })
 
   it('crisis banner shows for "suicide" keyword', async () => {
     const user = userEvent.setup()
-    renderPage()
+    renderComponent()
     const textarea = screen.getByPlaceholderText(
       /start typing here/i,
     )
@@ -158,7 +166,7 @@ describe('Pray', () => {
 
   it('no crisis banner for normal text', async () => {
     const user = userEvent.setup()
-    renderPage()
+    renderComponent()
     const textarea = screen.getByPlaceholderText(
       /start typing here/i,
     )
@@ -169,7 +177,7 @@ describe('Pray', () => {
   it('writes pray completion to localStorage after generating', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    renderPage()
+    renderComponent()
 
     const textarea = screen.getByPlaceholderText(
       /start typing here/i,
@@ -188,25 +196,32 @@ describe('Pray', () => {
     vi.useRealTimers()
   })
 
-  it('renders Song Pick section', () => {
-    renderPage()
-    expect(
-      screen.getByRole('heading', { name: /today's song pick/i }),
-    ).toBeInTheDocument()
-  })
+  it('calls onSwitchToJournal with topic when clicking "Journal about this"', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const onSwitchToJournal = vi.fn()
+    renderComponent({ onSwitchToJournal })
 
-  it('renders Journey section', () => {
-    renderPage()
-    expect(
-      screen.getByText(/your journey to/i),
-    ).toBeInTheDocument()
+    const textarea = screen.getByPlaceholderText(/start typing here/i)
+    await user.type(textarea, 'I have anxiety about work')
+    await user.click(screen.getByText('Generate Prayer'))
+    vi.advanceTimersByTime(2000)
+
+    await waitFor(() => {
+      expect(screen.getByText('Dear')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText(/journal about this/i))
+    expect(onSwitchToJournal).toHaveBeenCalledWith('anxiety')
+
+    vi.useRealTimers()
   })
 
   describe('auth gate', () => {
     it('shows auth modal when logged out and clicking Generate Prayer', async () => {
       mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
       const user = userEvent.setup()
-      renderPage()
+      renderComponent()
 
       const textarea = screen.getByPlaceholderText(
         /start typing here/i,
@@ -229,7 +244,7 @@ describe('Pray', () => {
     it('save button works when logged in (no auth modal)', async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true })
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-      renderPage()
+      renderComponent()
 
       const textarea = screen.getByPlaceholderText(
         /start typing here/i,
@@ -251,7 +266,7 @@ describe('Pray', () => {
 
     it('classic prayers section is hidden when logged out', () => {
       mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
-      renderPage()
+      renderComponent()
       expect(screen.queryByText('Classic Prayers')).not.toBeInTheDocument()
     })
   })

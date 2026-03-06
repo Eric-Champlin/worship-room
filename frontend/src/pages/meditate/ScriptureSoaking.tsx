@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
 import { Pause, Play } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -7,12 +8,19 @@ import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { getSoakingVerses } from '@/mocks/daily-experience-mock-data'
 import { DURATION_OPTIONS } from '@/constants/daily-experience'
 import { playChime } from '@/lib/audio'
+import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import type { DailyVerse } from '@/types/daily-experience'
 
 type Screen = 'prestart' | 'exercise' | 'complete'
 
 export function ScriptureSoaking() {
+  const { isLoggedIn } = useAuth()
+  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  return <ScriptureSoakingContent />
+}
+
+function ScriptureSoakingContent() {
   const verses = getSoakingVerses()
   const [screen, setScreen] = useState<Screen>('prestart')
   const [duration, setDuration] = useState<number | null>(null)
@@ -99,9 +107,9 @@ export function ScriptureSoaking() {
       <Layout hero={<PageHero title="Scripture Soaking" />}>
         <CompletionScreen
           ctas={[
-            { label: 'Try a different meditation', to: '/meditate', primary: true },
-            { label: 'Continue to Pray \u2192', to: '/pray' },
-            { label: 'Continue to Journal \u2192', to: '/journal' },
+            { label: 'Try a different meditation', to: '/daily?tab=meditate', primary: true },
+            { label: 'Continue to Pray \u2192', to: '/daily?tab=pray' },
+            { label: 'Continue to Journal \u2192', to: '/daily?tab=journal' },
             { label: 'Visit the Prayer Wall \u2192', to: '/prayer-wall' },
           ]}
         />
