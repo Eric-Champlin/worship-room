@@ -53,7 +53,21 @@ Before writing any content, switch to a new Git branch using the `branch_name` d
 
 ---
 
-## Step 4: Draft the Spec Content
+## Step 4: Read Existing Context
+
+**Before drafting the spec, read the following to understand the current state of the project:**
+
+1. **CLAUDE.md** — project overview, feature list, navigation structure, routes, implementation phases. Understand what's already built and what's planned.
+2. **`.claude/rules/02-security.md`** — auth gating requirements. Know which actions require login so the spec can explicitly define auth behavior for every interactive element.
+3. **`.claude/rules/09-design-system.md`** — component inventory, color palette, typography, hooks. Know what shared components already exist so the spec can reference them (e.g., "use the existing PageHero component" or "use the same auth modal pattern as Prayer Wall").
+4. **`.claude/rules/01-ai-safety.md`** — crisis detection rules. If the feature involves user text input, the spec must address crisis keyword handling.
+5. **Existing specs in `_specs/`** — read them to match the depth, tone, and format of specs already written for this project. The Daily Experience spec is the gold standard for thoroughness.
+
+**This context reading is mandatory, not optional.** Specs written without understanding the existing codebase produce plans that conflict with reality.
+
+---
+
+## Step 5: Draft the Spec Content
 
 Create a markdown spec document that `/plan` can use directly. Save it to `_specs/<feature_slug>.md`.
 
@@ -64,14 +78,77 @@ Use the exact structure from `_specs/template.md`. When filling it in:
 - **Requirements**: Reference relevant rules from `.claude/rules/` where applicable (e.g. AI safety, security, accessibility)
 - **AI Safety Considerations**: Always fill this section — never leave it blank. This app deals with emotional well-being; safety is mandatory
 - **Auth & Persistence**: Apply the demo-mode zero-persistence rule for logged-out users. Refer to the database schema in `.claude/rules/05-database.md` for table names
-- **Design Notes**: Reference the design system (colors, typography, breakpoints) from `CLAUDE.md`
-- **Out of Scope**: Explicitly call out anything excluded, especially items in the Non-Goals for MVP list
 
-Do **not** include technical implementation details such as code examples, file paths, or component names. The spec is a product/design document, not a technical plan — that comes next via `/plan`.
+### Auth Gating (MANDATORY for every spec)
+
+**Every interactive element in the feature must have its auth behavior explicitly defined.** The spec must include a section that clearly states:
+
+- What logged-out users CAN do (view, browse, type, interact with UI)
+- What logged-out users CANNOT do (actions that show the auth modal)
+- What the auth modal message says for each gated action
+- What logged-in users can do
+
+**Do NOT leave auth behavior implicit or assumed.** If the spec says "user can generate a prayer," it must also say whether a logged-out user can do this or not, and what happens if they try. This prevents the #1 class of bugs in this project: features shipping without auth gates because the spec didn't mention them.
+
+### Responsive Behavior (MANDATORY for UI features)
+
+**Every UI feature must include responsive behavior notes:**
+
+- How the layout adapts at mobile (< 640px), tablet (640-1024px), and desktop (> 1024px)
+- Which elements stack, hide, resize, or change between breakpoints
+- Any mobile-specific interactions (hamburger menu, swipeable elements, touch targets)
+
+**Do NOT assume responsive behavior will be figured out during implementation.** If the spec doesn't define it, it won't be built correctly.
+
+### Completion & Navigation
+
+For features that are part of the Daily Hub tabbed experience:
+
+- How does completing this feature signal to the completion tracking system?
+- What CTAs appear after completion? (switch tabs, visit other pages)
+- How does context pass to/from other tabs?
+
+### Design Notes
+
+- Reference the design system (colors, typography, breakpoints) from `.claude/rules/09-design-system.md`
+- Reference existing components by name when the feature should reuse them (e.g., "use BackgroundSquiggle for decorative background", "use HeadingDivider for section dividers")
+- If the feature introduces a new visual pattern, describe it in enough detail that the planner can specify exact CSS values
+
+### Acceptance Criteria (MANDATORY)
+
+**Every spec must end with a checkbox list of acceptance criteria.** These are used by `/code-review --spec` to verify the implementation is complete. Each criterion should be specific and testable:
+
+- ✅ Good: "Logged-out user clicking 'Generate Prayer' sees auth modal with message 'Sign in to generate a prayer'"
+- ❌ Bad: "Auth works correctly"
+- ✅ Good: "On mobile (375px), meditation cards display in a 2-column grid"
+- ❌ Bad: "Responsive design works"
+
+### Out of Scope
+
+- Explicitly call out anything excluded, especially items in the Non-Goals for MVP list
+- Call out future enhancements that are intentionally deferred
+- Call out backend/API work that is Phase 3+
 
 ---
 
-## Step 5: Final Output to the User
+## Step 6: Self-Review Checklist
+
+**Before saving the spec, verify it passes these checks:**
+
+- [ ] Auth behavior is explicitly defined for every interactive element (not just "requires login" but the specific modal message and logged-out experience)
+- [ ] Responsive behavior is defined for at least 3 breakpoints
+- [ ] Crisis detection is addressed if the feature has user text input
+- [ ] Existing shared components are referenced by name where applicable
+- [ ] Acceptance criteria are specific and testable (not vague)
+- [ ] Out of scope section exists and is specific
+- [ ] No technical implementation details (file paths, component names, code) — that's `/plan`'s job
+- [ ] The spec is detailed enough that someone unfamiliar with the project could understand the feature
+
+If any check fails, fix the spec before saving.
+
+---
+
+## Step 7: Final Output to the User
 
 After the file is saved, respond with a short summary in this exact format:
 
@@ -79,8 +156,24 @@ After the file is saved, respond with a short summary in this exact format:
 Branch:    <branch_name>
 Spec file: _specs/<feature_slug>.md
 Title:     <feature_title>
+Auth gates: <N> actions explicitly gated
+Responsive: defined for <N> breakpoints
 
 Next step: Run /plan _specs/<feature_slug>.md to generate an implementation plan.
 ```
 
 Do not repeat the full spec in the chat output unless the user explicitly asks to see it. Do not enter Plan Mode. Do not generate a plan. The `/spec` command's only job is to capture requirements — planning is a separate step.
+
+---
+
+## Rules
+
+- **Stay in Act mode.** Do not enter Plan Mode. You need file write access.
+- **Do not implement anything.** This command produces a spec, not code.
+- **Do not generate a plan.** That's `/plan`'s job.
+- **Do not perform git operations beyond the branch switch in Step 3.**
+- **The spec is a product/design document.** No file paths, component names, code examples, or technical implementation details. Those come from `/plan`.
+- **Auth gating is mandatory.** Every interactive element must have its auth behavior defined. Vague specs produce ungated features.
+- **Responsive behavior is mandatory.** Every UI feature must define breakpoint behavior. Vague specs produce broken mobile layouts.
+- **Read existing context first.** Specs written without understanding the codebase conflict with reality and waste planning/execution time.
+- **Acceptance criteria are mandatory.** `/code-review --spec` uses them to verify the implementation. No criteria = no verification.

@@ -25,3 +25,18 @@
   - Test crisis resource display
   - Test AI content moderation
   - Test inappropriate input handling
+
+### Definition of Done (For Any Feature)
+
+Before considering a feature "complete", ensure:
+
+- UI implemented + responsive (mobile, tablet, desktop)
+- Backend endpoint implemented (if needed)
+- Tests added/updated (frontend + backend)
+- Rate limiting + logging on AI endpoints (if applicable)
+- Error states + loading states handled
+- Accessibility basics (labels, keyboard nav, ARIA where needed)
+- No secrets committed (API keys, passwords, etc.)
+- AI safety checks implemented (if user input involved)
+- Audio playback tested if applicable (TTS, ambient sounds)
+- Documentation updated (if public-facing feature or API change)

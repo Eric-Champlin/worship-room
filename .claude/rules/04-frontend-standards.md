@@ -30,42 +30,7 @@ paths: ["frontend/**"]
 
 ## Design System
 
-### Color Palette
-- **Primary**: `#6D28D9` (deep violet)
-- **Primary Light**: `#8B5CF6` (lighter violet accent)
-- **Hero Dark**: `#0D0620` (dark purple for hero gradient)
-- **Glow Cyan**: `#00D4FF` (cyan for input glow effects)
-- **Neutral Background**: `#F5F5F5` (warm off-white)
-- **White**: `#FFFFFF`
-- **Text Dark**: `#2C3E50` (dark gray-blue)
-- **Text Light**: `#7F8C8D` (medium gray)
-- **Success**: `#27AE60` (green for positive moods)
-- **Warning**: `#F39C12` (orange for neutral moods)
-- **Danger**: `#E74C3C` (red for negative moods/flags)
-
-### Typography
-- **Body Font**: Inter (sans-serif)
-  - Regular: 400
-  - Medium: 500
-  - Semi-bold: 600
-  - Bold: 700
-- **Scripture Font**: Lora (serif)
-  - Regular: 400
-  - Italic: 400 italic
-  - Bold: 700
-- **Decorative Font**: Caveat (cursive) — script emphasis in headings and branding
-- **Font Sizes**:
-  - Hero: 3rem (mobile: 2rem)
-  - H1: 2.5rem (mobile: 1.75rem)
-  - H2: 2rem (mobile: 1.5rem)
-  - H3: 1.5rem (mobile: 1.25rem)
-  - Body: 1rem
-  - Small: 0.875rem
-
-### Responsive Breakpoints (TailwindCSS defaults)
-- **Mobile**: < 640px (sm)
-- **Tablet**: 640px - 1024px (sm to lg)
-- **Desktop**: > 1024px (lg+)
+See **[09-design-system.md](09-design-system.md)** for the comprehensive design reference including color palette (with Tailwind custom names), typography, breakpoints, custom animations, component inventory, hooks, utilities, constants, and types.
 
 ### Responsive Design Requirements
 - **Mobile-first approach**: Design for mobile, enhance for larger screens

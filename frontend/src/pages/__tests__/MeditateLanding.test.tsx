@@ -1,33 +1,65 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { MeditateLanding } from '../MeditateLanding'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
+
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return { ...actual, useNavigate: () => mockNavigate }
+})
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn(() => ({ user: null, isLoggedIn: true })),
+}))
+
+const { useAuth } = await import('@/hooks/useAuth')
+const mockUseAuth = vi.mocked(useAuth)
 
 beforeEach(() => {
   localStorage.clear()
+  vi.resetAllMocks()
+  mockNavigate.mockReset()
+  mockUseAuth.mockReturnValue({ user: null, isLoggedIn: true })
+  vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }))
 })
 
-function renderPage() {
+function renderComponent() {
   return render(
     <MemoryRouter
-      initialEntries={['/meditate']}
+      initialEntries={['/daily?tab=meditate']}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
-      <MeditateLanding />
+      <ToastProvider>
+        <AuthModalProvider>
+          <MeditateTabContent />
+        </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }
 
-describe('MeditateLanding', () => {
-  it('renders intro text', () => {
-    renderPage()
-    expect(
-      screen.getByText(/take a moment to slow down/i),
-    ).toBeInTheDocument()
+describe('MeditateTabContent', () => {
+  it('renders styled heading with "Spirit?"', () => {
+    renderComponent()
+    expect(screen.getByText('Spirit?')).toBeInTheDocument()
+    expect(screen.getByText(/what's on your/i)).toBeInTheDocument()
   })
 
   it('renders 6 meditation cards', () => {
-    renderPage()
+    renderComponent()
     expect(screen.getByText('Breathing Exercise')).toBeInTheDocument()
     expect(screen.getByText('Scripture Soaking')).toBeInTheDocument()
     expect(screen.getByText('Gratitude Reflection')).toBeInTheDocument()
@@ -36,29 +68,37 @@ describe('MeditateLanding', () => {
     expect(screen.getByText('Examen')).toBeInTheDocument()
   })
 
-  it('meditation cards link to sub-routes', () => {
-    renderPage()
-    const links = screen.getAllByRole('link')
-    const hrefs = links.map((l) => l.getAttribute('href'))
-    expect(hrefs).toContain('/meditate/breathing')
-    expect(hrefs).toContain('/meditate/soaking')
-    expect(hrefs).toContain('/meditate/gratitude')
-    expect(hrefs).toContain('/meditate/acts')
-    expect(hrefs).toContain('/meditate/psalms')
-    expect(hrefs).toContain('/meditate/examen')
+  it('logged-in user clicking card navigates to route', async () => {
+    const user = userEvent.setup()
+    renderComponent()
+    await user.click(screen.getByText('Breathing Exercise'))
+    expect(mockNavigate).toHaveBeenCalledWith('/meditate/breathing')
+  })
+
+  it('logged-out user clicking card opens auth modal', async () => {
+    mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+    const user = userEvent.setup()
+    renderComponent()
+    await user.click(screen.getByText('Breathing Exercise'))
+
+    expect(mockNavigate).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(
+      screen.getByText('Sign in to start meditating'),
+    ).toBeInTheDocument()
   })
 
   it('does not show all-6-complete celebration when none completed', () => {
-    renderPage()
+    renderComponent()
     expect(
       screen.queryByText(/you completed all 6 meditations/i),
     ).not.toBeInTheDocument()
   })
 
   it('does not show checkmarks when logged out', () => {
-    renderPage()
-    // useAuth returns isLoggedIn: false by default — no checkmarks should render
-    const checkmarks = screen.queryAllByLabelText(/completed/i)
+    mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+    renderComponent()
+    const checkmarks = screen.queryAllByText(/completed/i)
     expect(checkmarks).toHaveLength(0)
   })
 })

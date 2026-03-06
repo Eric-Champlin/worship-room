@@ -1,25 +1,14 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import {
   Copy,
   Bookmark,
   MoreHorizontal,
   ChevronDown,
   ChevronUp,
-  PenLine,
-  Wind,
 } from 'lucide-react'
-import { Navbar } from '@/components/Navbar'
-import { PageHero } from '@/components/PageHero'
-import { SiteFooter } from '@/components/SiteFooter'
-import { SongPickSection } from '@/components/SongPickSection'
-import { JourneySection } from '@/components/JourneySection'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
-import { ToastProvider, useToast } from '@/components/ui/Toast'
-import {
-  AuthModalProvider,
-  useAuthModal,
-} from '@/components/prayer-wall/AuthModalProvider'
+import { useToast } from '@/components/ui/Toast'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { ReadAloudButton } from '@/components/daily/ReadAloudButton'
 import { KaraokeText } from '@/components/daily/KaraokeText'
 import { ShareButton } from '@/components/daily/ShareButton'
@@ -33,10 +22,11 @@ import {
 } from '@/mocks/daily-experience-mock-data'
 import type { MockPrayer, ClassicPrayer } from '@/types/daily-experience'
 
-const SHOW_CLASSIC_PRAYERS = false
+interface PrayTabContentProps {
+  onSwitchToJournal?: (topic: string) => void
+}
 
-
-function PrayContent() {
+export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const { showToast } = useToast()
   const authModal = useAuthModal()
   const { isLoggedIn } = useAuth()
@@ -88,7 +78,6 @@ function PrayContent() {
     setSelectedChip(chip)
     setText(chip)
     setNudge(false)
-    // Focus textarea and place cursor at end
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus()
@@ -111,7 +100,6 @@ function PrayContent() {
     setNudge(false)
     setIsLoading(true)
 
-    // Simulated loading delay (1-2 seconds)
     setTimeout(() => {
       const result = getMockPrayer(text)
       setPrayer(result)
@@ -144,7 +132,6 @@ function PrayContent() {
       authModal?.openAuthModal('Sign in to save your prayers')
       return
     }
-    // TODO: Phase 3 — persist to backend
     showToast('Save feature coming soon')
   }
 
@@ -157,7 +144,6 @@ function PrayContent() {
     }
   }
 
-  // Extract topic from input for context passing to Journal
   const extractTopic = () => {
     if (!text.trim()) return 'prayer'
     const lower = text.toLowerCase()
@@ -177,27 +163,16 @@ function PrayContent() {
   const showChips = !selectedChip && !text
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
-      >
-        Skip to content
-      </a>
-      <Navbar transparent />
-      <PageHero title="Pray" subtitle="Share it with God." />
-
-      <main id="main-content" className="flex-1">
-        <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
-          <div className="relative">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              style={SQUIGGLE_MASK_STYLE}
-            >
-              <BackgroundSquiggle />
-            </div>
-            <div className="relative">
+    <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+      <div className="relative">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={SQUIGGLE_MASK_STYLE}
+        >
+          <BackgroundSquiggle />
+        </div>
+        <div className="relative">
 
           {/* Loading State */}
           <div aria-live="polite">
@@ -229,7 +204,6 @@ function PrayContent() {
 
               {/* Action Buttons */}
               <div className="mb-6 flex items-center gap-2">
-                {/* Copy */}
                 <button
                   type="button"
                   onClick={handleCopy}
@@ -240,13 +214,11 @@ function PrayContent() {
                   <span className="hidden sm:inline">Copy</span>
                 </button>
 
-                {/* Read Aloud */}
                 <ReadAloudButton
                   text={prayer.text}
                   onWordIndexChange={setPrayerWordIndex}
                 />
 
-                {/* Save */}
                 <button
                   type="button"
                   onClick={handleSave}
@@ -296,13 +268,13 @@ function PrayContent() {
 
               {/* Secondary CTAs */}
               <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                <Link
-                  to="/journal"
-                  state={{ from: 'pray', topic: extractTopic() }}
+                <button
+                  type="button"
+                  onClick={() => onSwitchToJournal?.(extractTopic())}
                   className="text-sm font-medium text-primary transition-colors hover:text-primary-light"
                 >
                   Journal about this &rarr;
-                </Link>
+                </button>
                 <button
                   type="button"
                   onClick={handleReset}
@@ -317,7 +289,6 @@ function PrayContent() {
           {/* Input Section (hidden when prayer is displayed or loading) */}
           {!prayer && !isLoading && (
             <>
-              {/* Styled Heading */}
               <h2 className="mb-6 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
                 What&apos;s On Your{' '}
                 <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
@@ -325,7 +296,6 @@ function PrayContent() {
                 </span>
               </h2>
 
-              {/* Starter Chips */}
               {showChips && (
                 <div className="mb-6 flex flex-wrap justify-center gap-2">
                   {DEFAULT_PRAYER_CHIPS.map((chip) => (
@@ -354,7 +324,7 @@ function PrayContent() {
                   placeholder="Start typing here..."
                   maxLength={500}
                   rows={3}
-                  className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white px-4 py-3 text-text-dark placeholder:text-text-light/60 animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white px-4 py-3 text-text-dark placeholder:text-text-light/60 animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                   aria-label="Prayer request"
                   aria-describedby="pray-char-count"
                 />
@@ -363,10 +333,8 @@ function PrayContent() {
                 </span>
               </div>
 
-              {/* Crisis Banner */}
               <CrisisBanner text={text} />
 
-              {/* Nudge */}
               {nudge && (
                 <p className="mb-4 text-sm text-warning" role="alert">
                   Tell God what&apos;s on your heart &mdash; even a few words is
@@ -374,12 +342,11 @@ function PrayContent() {
                 </p>
               )}
 
-              {/* Generate Button */}
               <div className="text-center">
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-light"
+                  className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
                   Generate Prayer
                 </button>
@@ -387,8 +354,8 @@ function PrayContent() {
             </>
           )}
 
-          {/* Classic Prayers Section — hidden behind flag, can be re-enabled */}
-          {SHOW_CLASSIC_PRAYERS && (
+          {/* Classic Prayers Section — hidden; re-enable by removing false guard */}
+          {false && (
           <div className="mt-12 border-t border-b border-gray-200 pt-8 pb-8">
             <button
               type="button"
@@ -427,48 +394,8 @@ function PrayContent() {
             )}
           </div>
           )}
-
-          {/* Navigation Cards */}
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Link
-              to="/journal"
-              className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md sm:p-8"
-            >
-              <div className="mb-1 flex items-center gap-2">
-                <PenLine className="h-8 w-8 text-primary sm:h-10 sm:w-10" />
-                <h3 className="font-script text-3xl text-primary sm:text-4xl">
-                  Journal
-                </h3>
-              </div>
-              <p className="text-base text-text-light sm:text-lg">
-                Put your thoughts into words. Guided prompts help you reflect on what God is doing in your life.
-              </p>
-            </Link>
-            <Link
-              to="/meditate"
-              className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md sm:p-8"
-            >
-              <div className="mb-1 flex items-center gap-2">
-                <Wind className="h-8 w-8 text-primary sm:h-10 sm:w-10" />
-                <h3 className="font-script text-3xl text-primary sm:text-4xl">
-                  Meditate
-                </h3>
-              </div>
-              <p className="text-base text-text-light sm:text-lg">
-                Quiet your mind with guided meditations rooted in Biblical truth. Let peace settle in.
-              </p>
-            </Link>
-          </div>
-            </div>
-          </div>
         </div>
-
-        {/* Full-width sections */}
-        <SongPickSection />
-        <JourneySection />
-      </main>
-
-      <SiteFooter />
+      </div>
     </div>
   )
 }
@@ -514,15 +441,5 @@ function ClassicPrayerCard({
         />
       </div>
     </div>
-  )
-}
-
-export function Pray() {
-  return (
-    <ToastProvider>
-      <AuthModalProvider>
-        <PrayContent />
-      </AuthModalProvider>
-    </ToastProvider>
   )
 }

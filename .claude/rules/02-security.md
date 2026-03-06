@@ -1,5 +1,31 @@
 ## Rate Limiting & Security
 
+### Demo Mode (Logged-Out Experience) Data Policy
+
+**Critical Privacy Rule**: Logged-out users can use all features (mood selection, scripture, prayers, journaling prompts, audio playback, quiz), but **zero data persistence**.
+
+- **No database writes** for logged-out users (no mood tracking, no journal saves, no prayer saves)
+- **Session-only**: Mood/scripture shown in UI, stored in React state/memory only
+- **Privacy-first**: No cookies, no anonymous IDs, no IP persistence for logged-out users
+- **Rate limiting**: We may apply transient IP-based rate limiting at the edge for abuse prevention, but we do not persist or log IPs for logged-out users
+
+### Auth Gating Strategy (Current State — Phase 2)
+
+Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is a **UI shell only** — it displays "Sign in to [action]" with login/register options but does not perform real authentication. Real auth (Spring Security + JWT) is Phase 3.
+
+**What requires login (triggers auth modal when logged out):**
+- AI prayer generation, journal entry saving, journal AI reflection
+- Meditation: card clicks in MeditateTabContent (auth modal) + route-level redirect on all 6 sub-pages (`/meditate/*` → `/daily?tab=meditate` via `<Navigate>` when logged out)
+- Prayer Wall posting, commenting, bookmarking
+- Prayer saving
+- Local Support search, Local Support bookmarking
+
+**What works without login:**
+- Browsing Daily Hub, switching tabs, typing in textareas (but can't submit/save)
+- Draft auto-save to localStorage (Journal)
+- Reading Prayer Wall, expanding comments, sharing
+- Landing page, quiz, all navigation
+
 ### Rate Limiting
 - **Backend**: Per-user rate limiting on AI endpoints to prevent abuse and control costs
   - **AI Requests**: 20 requests per hour per user (scripture matching, prayers, reflections, prompts) - configurable via environment variables (dev vs prod)

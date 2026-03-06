@@ -163,6 +163,10 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   }, [userCoords, page, radius, config.searchKeyword])
 
   const handleToggleBookmark = useCallback((placeId: string) => {
+    if (!isLoggedIn) {
+      authModal?.openAuthModal('Sign in to bookmark listings')
+      return
+    }
     setBookmarkedIds((prev) => {
       const next = new Set(prev)
       if (next.has(placeId)) {
@@ -172,7 +176,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
       }
       return next
     })
-  }, [])
+  }, [isLoggedIn, authModal])
 
   const handleRetry = useCallback(() => {
     if (userCoords) {

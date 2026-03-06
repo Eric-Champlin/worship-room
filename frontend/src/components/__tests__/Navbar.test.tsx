@@ -25,7 +25,7 @@ describe('Navbar', () => {
   })
 
   describe('Desktop nav links', () => {
-    it('renders 2 top-level nav links', () => {
+    it('renders Daily Hub and Prayer Wall links', () => {
       renderNavbar()
       expect(screen.getByRole('link', { name: 'Daily Hub' })).toHaveAttribute('href', '/daily')
       expect(screen.getByRole('link', { name: 'Prayer Wall' })).toBeInTheDocument()

@@ -30,7 +30,7 @@ last_login_at (TIMESTAMP)
 id (UUID, primary key)
 reference (VARCHAR, e.g., "John 3:16", "Psalm 23:1-4")
 text (TEXT, the verse content)
-translation (VARCHAR, not null) -- Translation TBD; must be legally usable (WEB, KJV, or licensed)
+translation (VARCHAR, not null) -- WEB (World English Bible) — public domain, no licensing required
 themes (JSONB, e.g., ["hope", "peace", "comfort"])
 mood_tags (JSONB, e.g., ["terrible", "bad", "neutral"])
 created_at (TIMESTAMP)
