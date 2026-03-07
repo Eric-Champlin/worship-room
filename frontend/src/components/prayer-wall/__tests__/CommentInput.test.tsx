@@ -1,26 +1,32 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '../AuthModalProvider'
 import { CommentInput } from '../CommentInput'
 
 function renderInput(overrides?: { onLoginClick?: () => void }) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ToastProvider>
+      <AuthModalProvider>
       <CommentInput
         prayerId="prayer-1"
         onSubmit={vi.fn()}
         onLoginClick={overrides?.onLoginClick}
       />
+      </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }
 
 describe('CommentInput', () => {
-  it('shows "Log in to comment" link when logged out (no onLoginClick)', () => {
+  it('shows "Log in to comment" button when logged out (no onLoginClick)', () => {
     renderInput()
-    const link = screen.getByText('Log in to comment')
-    expect(link).toBeInTheDocument()
-    expect(link).toHaveAttribute('href', '/login')
+    const btn = screen.getByText('Log in to comment')
+    expect(btn).toBeInTheDocument()
+    expect(btn.tagName).toBe('BUTTON')
   })
 
   it('shows "Log in to comment" button when logged out (with onLoginClick)', () => {

@@ -4,12 +4,8 @@ import { useElementWidth } from '@/hooks/useElementWidth'
 import { cn } from '@/lib/utils'
 
 const HERO_BG_STYLE = {
-  backgroundImage: [
-    'radial-gradient(ellipse 100% 80% at 50% 0%, #3B0764 0%, transparent 60%)',
-    'linear-gradient(to bottom, #0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #F5F5F5 100%)',
-  ].join(', '),
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: '100% 100%',
+  backgroundImage:
+    'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #F5F5F5 100%)',
 } as const
 
 interface PageHeroProps {

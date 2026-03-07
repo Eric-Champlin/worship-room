@@ -3,11 +3,17 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { HeroSection } from '@/components/HeroSection'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 
 function renderHero() {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <HeroSection />
+      <ToastProvider>
+        <AuthModalProvider>
+          <HeroSection />
+        </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>
   )
 }
@@ -52,18 +58,41 @@ describe('HeroSection', () => {
     ).toBeInTheDocument()
   })
 
-  it('navigates to /pray on submit', async () => {
+  it('shows auth modal when logged-out user submits', async () => {
+    const user = userEvent.setup()
+    renderHero()
+
+    const input = screen.getByRole('textbox')
+    await user.click(input)
+    await user.type(input, 'I need prayer')
+    await user.click(
+      screen.getByRole('button', { name: /submit your question/i })
+    )
+
+    expect(
+      screen.getByRole('dialog', { name: /log in/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Sign in to get AI-powered guidance')
+    ).toBeInTheDocument()
+  })
+
+  it('does not navigate when logged-out user submits', async () => {
     const user = userEvent.setup()
 
     render(
       <MemoryRouter initialEntries={['/']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Routes>
-          <Route path="/" element={<HeroSection />} />
-          <Route
-            path="/pray"
-            element={<div data-testid="pray-page" />}
-          />
-        </Routes>
+        <ToastProvider>
+          <AuthModalProvider>
+            <Routes>
+              <Route path="/" element={<HeroSection />} />
+              <Route
+                path="/pray"
+                element={<div data-testid="pray-page" />}
+              />
+            </Routes>
+          </AuthModalProvider>
+        </ToastProvider>
       </MemoryRouter>
     )
 
@@ -74,7 +103,7 @@ describe('HeroSection', () => {
       screen.getByRole('button', { name: /submit your question/i })
     )
 
-    expect(screen.getByTestId('pray-page')).toBeInTheDocument()
+    expect(screen.queryByTestId('pray-page')).not.toBeInTheDocument()
   })
 
   it('renders the quiz teaser text', () => {

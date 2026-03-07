@@ -2,11 +2,17 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 
 function renderGrowthTeasers() {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ToastProvider>
+      <AuthModalProvider>
       <GrowthTeasersSection />
+      </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>
   )
 }
@@ -53,10 +59,10 @@ describe('GrowthTeasersSection', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders CTA button linking to /register', () => {
+  it('renders CTA button that opens auth modal', () => {
     renderGrowthTeasers()
-    const link = screen.getByRole('link', { name: /create a free account/i })
-    expect(link).toHaveAttribute('href', '/register')
+    const button = screen.getByRole('button', { name: /create a free account/i })
+    expect(button).toBeInTheDocument()
   })
 
   it('renders reassurance text', () => {

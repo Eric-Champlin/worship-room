@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 
 const MUSIC_LINKS = [
   { label: 'Worship Playlists', to: '/music/playlists' },
@@ -197,7 +198,6 @@ function NavDropdown({
               ? 'text-white/90 hover:text-white'
               : 'text-text-dark hover:text-primary'
         )}
-        aria-haspopup="true"
         aria-expanded={isOpen}
         aria-controls={isOpen ? dropdownId : undefined}
         aria-label={`${label} menu`}
@@ -274,10 +274,12 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
 }
 
 function DesktopAuthActions({ transparent }: { transparent: boolean }) {
+  const authModal = useAuthModal()
   return (
     <div className="hidden items-center gap-4 lg:flex">
-      <Link
-        to="/login"
+      <button
+        type="button"
+        onClick={() => authModal?.openAuthModal(undefined, 'login')}
         className={cn(
           'relative py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
           "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
@@ -288,9 +290,10 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
         )}
       >
         Log In
-      </Link>
-      <Link
-        to="/register"
+      </button>
+      <button
+        type="button"
+        onClick={() => authModal?.openAuthModal(undefined, 'register')}
         className={cn(
           'inline-flex items-center rounded-full px-5 py-2 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           transparent
@@ -299,7 +302,7 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
         )}
       >
         Get Started
-      </Link>
+      </button>
     </div>
   )
 }
@@ -310,6 +313,7 @@ interface MobileDrawerProps {
 }
 
 function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
+  const authModal = useAuthModal()
   const drawerRef = useRef<HTMLElement>(null)
 
   // Focus trap: keep Tab within the drawer while open
@@ -449,9 +453,9 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
             {/* Auth actions */}
             <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-4">
-              <Link
-                to="/login"
-                onClick={onClose}
+              <button
+                type="button"
+                onClick={() => { authModal?.openAuthModal(undefined, 'login'); onClose() }}
                 className={cn(
                   'relative min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium transition-colors',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
@@ -460,14 +464,14 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                 )}
               >
                 Log In
-              </Link>
-              <Link
-                to="/register"
-                onClick={onClose}
+              </button>
+              <button
+                type="button"
+                onClick={() => { authModal?.openAuthModal(undefined, 'register'); onClose() }}
                 className="min-h-[44px] flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Get Started
-              </Link>
+              </button>
             </div>
           </div>
         </nav>
@@ -508,7 +512,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
     <nav
       className={cn(
         'top-0 z-50',
-        transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-gradient-to-b from-[#2d1055] to-hero-mid'
+        transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-hero-dark'
       )}
       aria-label="Main navigation"
     >

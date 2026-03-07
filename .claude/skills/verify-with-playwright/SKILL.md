@@ -248,7 +248,7 @@ const IGNORE_PATTERNS = ['DevTools', 'HMR', '[vite]', 'favicon.ico', 'chrome-ext
 ```bash
 cd frontend
 mkdir -p playwright-screenshots
-npx playwright test playwright-verify.spec.ts --reporter=list
+npx playwright test playwright-verify.spec.ts --reporter=list --headed=false
 ```
 
 ---

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { QUIZ_QUESTIONS } from '@/components/quiz-data'
 
@@ -14,7 +14,7 @@ function renderQuiz() {
 }
 
 /** Select an answer and wait for auto-advance to the next question */
-const user = userEvent.setup()
+let user: ReturnType<typeof userEvent.setup>
 
 async function selectAndAdvance(optionText: string, nextQuestionNum: number) {
   await user.click(
@@ -45,6 +45,10 @@ async function answerAllQuestions() {
 }
 
 describe('StartingPointQuiz', () => {
+  beforeEach(() => {
+    user = userEvent.setup()
+  })
+
   describe('Structure & Semantics', () => {
     it('renders as a named section landmark', () => {
       renderQuiz()
@@ -246,7 +250,7 @@ describe('StartingPointQuiz', () => {
       expect(ctaLink).toHaveAttribute('href', '/pray')
     })
 
-    it('result card "explore all features" scrolls to journey', async () => {
+    it('result card "explore all features" scrolls to journey on homepage', async () => {
       renderQuiz()
 
       await answerAllQuestions()
@@ -263,6 +267,24 @@ describe('StartingPointQuiz', () => {
 
       expect(document.getElementById).toHaveBeenCalledWith('journey-heading')
       expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'smooth' })
+
+      vi.restoreAllMocks()
+    })
+
+    it('result card "explore all features" scrolls to top when journey heading absent', async () => {
+      renderQuiz()
+
+      await answerAllQuestions()
+
+      vi.spyOn(document, 'getElementById').mockReturnValue(null)
+      const scrollToMock = vi.fn()
+      vi.spyOn(window, 'scrollTo').mockImplementation(scrollToMock)
+
+      await user.click(
+        screen.getByRole('button', { name: /explore all features/i })
+      )
+
+      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
 
       vi.restoreAllMocks()
     })

@@ -9,8 +9,7 @@ import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { MarkAsAnsweredForm } from '@/components/prayer-wall/MarkAsAnsweredForm'
 import { DeletePrayerDialog } from '@/components/prayer-wall/DeletePrayerDialog'
 import { Button } from '@/components/ui/Button'
-import { ToastProvider, useToast } from '@/components/ui/Toast'
-import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
 import { useAuth } from '@/hooks/useAuth'
@@ -454,11 +453,5 @@ function DashboardContent() {
 }
 
 export function PrayerWallDashboard() {
-  return (
-    <ToastProvider>
-      <AuthModalProvider>
-        <DashboardContent />
-      </AuthModalProvider>
-    </ToastProvider>
-  )
+  return <DashboardContent />
 }

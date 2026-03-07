@@ -10,8 +10,7 @@ import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
 import { useOpenSet } from '@/hooks/useOpenSet'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
-import { ToastProvider, useToast } from '@/components/ui/Toast'
-import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { useToast } from '@/components/ui/Toast'
 import {
   getMockUser,
   getMockPrayers,
@@ -266,11 +265,5 @@ function PrayerWallProfileContent() {
 }
 
 export function PrayerWallProfile() {
-  return (
-    <ToastProvider>
-      <AuthModalProvider>
-        <PrayerWallProfileContent />
-      </AuthModalProvider>
-    </ToastProvider>
-  )
+  return <PrayerWallProfileContent />
 }

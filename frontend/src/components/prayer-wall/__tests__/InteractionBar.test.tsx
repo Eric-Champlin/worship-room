@@ -79,10 +79,10 @@ describe('InteractionBar', () => {
     expect(onToggleComments).toHaveBeenCalledOnce()
   })
 
-  it('Bookmark renders as Link to /login when logged out', () => {
+  it('Bookmark renders as button when logged out', () => {
     renderBar()
-    const bookmarkLink = screen.getByLabelText(/log in to bookmark/i)
-    expect(bookmarkLink).toHaveAttribute('href', '/login')
+    const bookmarkBtn = screen.getByLabelText(/log in to bookmark/i)
+    expect(bookmarkBtn.tagName).toBe('BUTTON')
   })
 
   it('Share button opens share dropdown on click (desktop)', async () => {

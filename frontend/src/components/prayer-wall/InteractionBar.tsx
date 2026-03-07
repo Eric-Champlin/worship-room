@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
 import { HandHelping, MessageCircle, Bookmark, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
@@ -98,23 +97,15 @@ export function InteractionBar({
         >
           <Bookmark className={cn('h-4 w-4', isBookmarked && 'fill-primary')} aria-hidden="true" />
         </button>
-      ) : authModal ? (
+      ) : (
         <button
           type="button"
-          onClick={() => authModal.openAuthModal()}
+          onClick={() => authModal?.openAuthModal()}
           className={cn(btnBase, 'text-text-light hover:text-primary')}
           aria-label="Log in to bookmark"
         >
           <Bookmark className="h-4 w-4" aria-hidden="true" />
         </button>
-      ) : (
-        <Link
-          to="/login"
-          className={cn(btnBase, 'text-text-light hover:text-primary')}
-          aria-label="Log in to bookmark"
-        >
-          <Bookmark className="h-4 w-4" aria-hidden="true" />
-        </Link>
       )}
 
       {/* Share button */}

@@ -5,8 +5,6 @@ import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
-import { ToastProvider } from '@/components/ui/Toast'
-import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
@@ -135,12 +133,8 @@ function DailyHubContent() {
           aria-labelledby="daily-hub-heading"
           className="relative flex w-full flex-col items-center px-4 pb-10 pt-32 text-center antialiased sm:pb-12 sm:pt-36 lg:pb-14 lg:pt-40"
           style={{
-            backgroundImage: [
-              'radial-gradient(ellipse 100% 80% at 50% 0%, #3B0764 0%, transparent 60%)',
-              'linear-gradient(to bottom, #0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #F5F5F5 100%)',
-            ].join(', '),
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '100% 100%',
+            backgroundImage:
+              'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #F5F5F5 100%)',
           }}
         >
           <h1
@@ -289,11 +283,5 @@ function DailyHubContent() {
 }
 
 export function DailyHub() {
-  return (
-    <ToastProvider>
-      <AuthModalProvider>
-        <DailyHubContent />
-      </AuthModalProvider>
-    </ToastProvider>
-  )
+  return <DailyHubContent />
 }

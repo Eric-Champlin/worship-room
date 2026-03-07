@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom'
 import { BarChart3, Flame, Users, Lock, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useInView } from '@/hooks/useInView'
 import { useElementWidth } from '@/hooks/useElementWidth'
 import { HeadingDivider } from '@/components/HeadingDivider'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 
 const HEATMAP_COLORS = [
   '#27AE60', '#6BCB77', '#27AE60', '#2a2040', '#F39C12', '#27AE60', '#6BCB77',
@@ -137,6 +137,7 @@ const CARDS = [
 ]
 
 export function GrowthTeasersSection() {
+  const authModal = useAuthModal()
   const [gridRef, inView] = useInView<HTMLDivElement>({
     threshold: 0.1,
     rootMargin: '0px 0px -50px 0px',
@@ -219,8 +220,9 @@ export function GrowthTeasersSection() {
         </div>
 
         <div className="mt-12 text-center sm:mt-16">
-          <Link
-            to="/register"
+          <button
+            type="button"
+            onClick={() => authModal?.openAuthModal(undefined, 'register')}
             className={cn(
               'inline-flex items-center rounded-full bg-primary px-8 py-3 text-base font-medium text-white',
               'transition-all hover:bg-primary-lt hover:shadow-lg',
@@ -228,7 +230,7 @@ export function GrowthTeasersSection() {
             )}
           >
             Create a Free Account
-          </Link>
+          </button>
           <p className="mt-4 text-sm text-white/70">
             It&apos;s free. No catch.
           </p>

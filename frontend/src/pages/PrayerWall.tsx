@@ -9,12 +9,12 @@ import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { InlineComposer } from '@/components/prayer-wall/InlineComposer'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { Button } from '@/components/ui/Button'
-import { ToastProvider, useToast } from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useOpenSet } from '@/hooks/useOpenSet'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
 import { getMockPrayers, getMockComments } from '@/mocks/prayer-wall-mock-data'
-import { AuthModalProvider, useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 
 const PRAYERS_PER_PAGE = 20
@@ -204,11 +204,5 @@ function PrayerWallContent() {
 }
 
 export function PrayerWall() {
-  return (
-    <ToastProvider>
-      <AuthModalProvider>
-        <PrayerWallContent />
-      </AuthModalProvider>
-    </ToastProvider>
-  )
+  return <PrayerWallContent />
 }

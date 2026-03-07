@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerWall } from '../PrayerWall'
 
 function renderPage() {
@@ -10,7 +12,11 @@ function renderPage() {
       initialEntries={['/prayer-wall']}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
+      <ToastProvider>
+      <AuthModalProvider>
       <PrayerWall />
+      </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }

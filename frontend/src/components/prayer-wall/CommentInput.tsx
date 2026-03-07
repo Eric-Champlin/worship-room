@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
+import { useAuthModal } from './AuthModalProvider'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
 
 const MAX_COMMENT_LENGTH = 500
@@ -16,6 +16,7 @@ interface CommentInputProps {
 
 export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginClick }: CommentInputProps) {
   const { isLoggedIn } = useAuth()
+  const authModal = useAuthModal()
   const [value, setValue] = useState(initialValue)
   const [crisisDetected, setCrisisDetected] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -28,24 +29,14 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
   }, [initialValue])
 
   if (!isLoggedIn) {
-    if (onLoginClick) {
-      return (
-        <button
-          type="button"
-          onClick={onLoginClick}
-          className="mt-3 block w-full rounded-lg border border-gray-200 px-3 py-2 text-left text-sm text-text-light transition-colors hover:border-primary"
-        >
-          Log in to comment
-        </button>
-      )
-    }
     return (
-      <Link
-        to="/login"
-        className="mt-3 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-light transition-colors hover:border-primary"
+      <button
+        type="button"
+        onClick={onLoginClick ?? (() => authModal?.openAuthModal())}
+        className="mt-3 block w-full rounded-lg border border-gray-200 px-3 py-2 text-left text-sm text-text-light transition-colors hover:border-primary"
       >
         Log in to comment
-      </Link>
+      </button>
     )
   }
 
@@ -87,6 +78,8 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
           placeholder="Write a comment..."
           className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Write a comment"
+          aria-invalid={crisisDetected || undefined}
+          aria-describedby={crisisDetected ? 'comment-crisis-banner' : undefined}
         />
         <button
           type="button"
@@ -102,7 +95,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
         </button>
       </div>
       {crisisDetected && (
-        <div role="alert" className="mt-3 rounded-lg border border-danger/30 bg-red-50 p-3">
+        <div id="comment-crisis-banner" role="alert" className="mt-3 rounded-lg border border-danger/30 bg-red-50 p-3">
           <p className="mb-1 text-xs font-semibold text-danger">
             If you are in crisis, please reach out for help:
           </p>

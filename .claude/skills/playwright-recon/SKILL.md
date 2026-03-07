@@ -511,7 +511,7 @@ Before capturing anything, verify the URL is accessible:
 
 ```javascript
 const { chromium } = require('playwright');
-const browser = await chromium.launch();
+const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage();
 const response = await page.goto(URL);
 ```

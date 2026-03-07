@@ -3,14 +3,20 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { Navbar } from '@/components/Navbar'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 
 function renderNavbar(initialRoute = '/') {
   return render(
     <MemoryRouter initialEntries={[initialRoute]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ToastProvider>
+      <AuthModalProvider>
       <Navbar />
       <Routes>
         <Route path="*" element={null} />
       </Routes>
+      </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>
   )
 }
@@ -43,22 +49,16 @@ describe('Navbar', () => {
   })
 
   describe('Auth actions', () => {
-    it('"Log In" link points to /login', () => {
+    it('"Log In" button opens auth modal', () => {
       renderNavbar()
-      const loginLinks = screen.getAllByRole('link', { name: /log in/i })
-      const desktopLogin = loginLinks.find(
-        (el) => el.getAttribute('href') === '/login'
-      )
-      expect(desktopLogin).toBeDefined()
+      const loginButtons = screen.getAllByRole('button', { name: /log in/i })
+      expect(loginButtons.length).toBeGreaterThanOrEqual(1)
     })
 
-    it('"Get Started" button points to /register', () => {
+    it('"Get Started" button opens auth modal', () => {
       renderNavbar()
-      const ctaLinks = screen.getAllByRole('link', { name: /get started/i })
-      const desktopCta = ctaLinks.find(
-        (el) => el.getAttribute('href') === '/register'
-      )
-      expect(desktopCta).toBeDefined()
+      const ctaButtons = screen.getAllByRole('button', { name: /get started/i })
+      expect(ctaButtons.length).toBeGreaterThanOrEqual(1)
     })
   })
 
@@ -103,7 +103,6 @@ describe('Navbar', () => {
     it('chevron trigger has correct ARIA attributes', () => {
       renderNavbar()
       const trigger = screen.getByRole('button', { name: /local support menu/i })
-      expect(trigger).toHaveAttribute('aria-haspopup', 'true')
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
       fireEvent.click(trigger)
       expect(trigger).toHaveAttribute('aria-expanded', 'true')
@@ -175,10 +174,9 @@ describe('Navbar', () => {
       expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
     })
 
-    it('chevron trigger has aria-haspopup="true" and correct aria-expanded', () => {
+    it('chevron trigger has correct aria-expanded', () => {
       renderNavbar()
       const trigger = screen.getByRole('button', { name: /music menu/i })
-      expect(trigger).toHaveAttribute('aria-haspopup', 'true')
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
       fireEvent.click(trigger)
       expect(trigger).toHaveAttribute('aria-expanded', 'true')

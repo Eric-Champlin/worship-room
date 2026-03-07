@@ -48,4 +48,76 @@ describe('SearchControls', () => {
     expect(screen.getByText('1')).toBeInTheDocument()
     expect(screen.getByText('100')).toBeInTheDocument()
   })
+
+  describe('onInteractionBlocked', () => {
+    it('calls onInteractionBlocked when Use My Location is clicked', async () => {
+      const user = userEvent.setup()
+      const blocked = vi.fn()
+      render(
+        <SearchControls
+          onSearch={vi.fn()}
+          onGeocode={mockGeocode}
+          isLoading={false}
+          onInteractionBlocked={blocked}
+        />,
+      )
+
+      await user.click(screen.getByLabelText('Use my current location'))
+      expect(blocked).toHaveBeenCalledTimes(1)
+    })
+
+    it('calls onInteractionBlocked when search form is submitted', async () => {
+      const user = userEvent.setup()
+      const blocked = vi.fn()
+      const onSearch = vi.fn()
+      render(
+        <SearchControls
+          onSearch={onSearch}
+          onGeocode={mockGeocode}
+          isLoading={false}
+          onInteractionBlocked={blocked}
+        />,
+      )
+
+      const input = screen.getByPlaceholderText('City or zip code')
+      await user.type(input, 'Nashville')
+      await user.click(screen.getByRole('button', { name: /search/i }))
+
+      expect(blocked).toHaveBeenCalled()
+      expect(onSearch).not.toHaveBeenCalled()
+    })
+
+    it('calls onInteractionBlocked on input click', async () => {
+      const user = userEvent.setup()
+      const blocked = vi.fn()
+      render(
+        <SearchControls
+          onSearch={vi.fn()}
+          onGeocode={mockGeocode}
+          isLoading={false}
+          onInteractionBlocked={blocked}
+        />,
+      )
+
+      await user.click(screen.getByPlaceholderText('City or zip code'))
+      expect(blocked).toHaveBeenCalledTimes(1)
+    })
+
+    it('calls onInteractionBlocked when radius slider is clicked', () => {
+      const blocked = vi.fn()
+      render(
+        <SearchControls
+          onSearch={vi.fn()}
+          onGeocode={mockGeocode}
+          isLoading={false}
+          onInteractionBlocked={blocked}
+        />,
+      )
+
+      const slider = screen.getByRole('slider', { name: 'Search radius' })
+      fireEvent.click(slider)
+
+      expect(blocked).toHaveBeenCalled()
+    })
+  })
 })

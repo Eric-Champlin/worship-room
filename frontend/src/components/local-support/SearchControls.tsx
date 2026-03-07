@@ -8,6 +8,7 @@ interface SearchControlsProps {
   initialLng?: number
   initialRadius?: number
   isLoading: boolean
+  onInteractionBlocked?: () => void
 }
 
 const MILE_MARKERS = [1, 25, 50, 75, 100]
@@ -19,6 +20,7 @@ export function SearchControls({
   initialLng,
   initialRadius,
   isLoading,
+  onInteractionBlocked,
 }: SearchControlsProps) {
   const [locationInput, setLocationInput] = useState('')
   const [radius, setRadius] = useState(initialRadius ?? 25)
@@ -107,10 +109,10 @@ export function SearchControls({
   return (
     <div className="space-y-4">
       {/* Location input row */}
-      <form onSubmit={handleSearchSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <form onSubmit={onInteractionBlocked ? (e) => { e.preventDefault(); onInteractionBlocked() } : handleSearchSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <button
           type="button"
-          onClick={handleUseMyLocation}
+          onClick={onInteractionBlocked ?? handleUseMyLocation}
           disabled={isGeolocating}
           aria-label="Use my current location"
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50"
@@ -135,6 +137,10 @@ export function SearchControls({
               placeholder="City or zip code"
               value={locationInput}
               onChange={(e) => setLocationInput(e.target.value)}
+              readOnly={!!onInteractionBlocked}
+              onClick={onInteractionBlocked ? () => onInteractionBlocked() : undefined}
+              aria-disabled={onInteractionBlocked ? true : undefined}
+              {...(onInteractionBlocked ? { autoComplete: 'off', 'data-1p-ignore': true, 'data-lpignore': true } as React.InputHTMLAttributes<HTMLInputElement> : {})}
               className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
             />
           </div>
@@ -169,7 +175,15 @@ export function SearchControls({
           max={100}
           step={1}
           value={radius}
-          onChange={(e) => handleRadiusChange(Number(e.target.value))}
+          onChange={onInteractionBlocked ? (e) => e.preventDefault() : (e) => handleRadiusChange(Number(e.target.value))}
+          onClick={onInteractionBlocked ? () => onInteractionBlocked() : undefined}
+          onKeyDown={onInteractionBlocked ? (e) => {
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+              e.preventDefault()
+              onInteractionBlocked()
+            }
+          } : undefined}
+          aria-disabled={onInteractionBlocked ? true : undefined}
           aria-valuenow={radius}
           aria-valuemin={1}
           aria-valuemax={100}

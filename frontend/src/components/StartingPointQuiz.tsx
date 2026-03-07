@@ -127,9 +127,12 @@ export function StartingPointQuiz({ hideTopGradient = false }: StartingPointQuiz
   }, [])
 
   const handleExploreAll = useCallback(() => {
-    document
-      .getElementById('journey-heading')
-      ?.scrollIntoView({ behavior: 'smooth' })
+    const journeyEl = document.getElementById('journey-heading')
+    if (journeyEl) {
+      journeyEl.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }, [])
 
   const showResult = currentQuestion >= QUIZ_QUESTIONS.length
@@ -293,6 +296,7 @@ function QuestionCard({
           const isSelected = selectedAnswer === index
           return (
             <button
+              type="button"
               key={index}
               onClick={() => onSelect(index)}
               aria-pressed={isSelected}
@@ -361,6 +365,7 @@ function ResultCard({ destination, onRetake, onExploreAll }: ResultCardProps) {
 
       <div className="mt-4">
         <button
+          type="button"
           onClick={onExploreAll}
           className="text-sm text-text-dark transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
         >
@@ -370,8 +375,9 @@ function ResultCard({ destination, onRetake, onExploreAll }: ResultCardProps) {
 
       <div className="mt-2 mb-6">
         <button
+          type="button"
           onClick={onRetake}
-          className="font-script text-base font-normal text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+          className="font-script text-xl font-normal text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
         >
           Retake Quiz
         </button>

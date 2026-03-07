@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
-import { ToastProvider } from '@/components/ui/Toast'
-import { AuthModalProvider, useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { createLocalSupportService } from '@/services/local-support-service'
 import { calculateDistanceMiles } from '@/lib/geo'
 import type { LocalSupportPlace, LocalSupportCategory, SortOption } from '@/types/local-support'
+import { getMockPlacesByCategory } from '@/mocks/local-support-mock-data'
 import { SiteFooter } from '@/components/SiteFooter'
 import { LocalSupportHero } from './LocalSupportHero'
 import { SearchControls } from './SearchControls'
@@ -33,6 +33,7 @@ interface LocalSupportPageProps {
 }
 
 const service = createLocalSupportService()
+const MOCK_DATA_CENTER = { lat: 35.6151, lng: -87.0353 }
 
 function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   const { isLoggedIn } = useAuth()
@@ -40,15 +41,21 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Search state
-  const [searchResults, setSearchResults] = useState<LocalSupportPlace[]>([])
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [searchResults, setSearchResults] = useState<LocalSupportPlace[]>(() =>
+    isLoggedIn ? [] : getMockPlacesByCategory(config.category),
+  )
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() =>
+    isLoggedIn ? null : MOCK_DATA_CENTER,
+  )
   const [radius, setRadius] = useState(25)
   const [sortOption, setSortOption] = useState<SortOption>('distance')
   const [filterValue, setFilterValue] = useState<string | null>(null)
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'search' | 'saved'>('search')
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
-  const [searchState, setSearchState] = useState<'idle' | 'loading' | 'error' | 'success'>('idle')
+  const [searchState, setSearchState] = useState<'idle' | 'loading' | 'error' | 'success'>(() =>
+    isLoggedIn ? 'idle' : 'success',
+  )
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
@@ -200,7 +207,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
     return m
   }, [searchResults, userCoords])
 
-  const mapCenter = userCoords ?? { lat: 35.6151, lng: -87.0353 }
+  const mapCenter = userCoords ?? MOCK_DATA_CENTER
   const currentPlaces = activeTab === 'saved' ? savedPlaces : searchResults
 
   return (
@@ -217,20 +224,8 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
         title={config.title}
         subtitle={config.subtitle}
         extraContent={config.extraHeroContent}
-        action={
-          !isLoggedIn ? (
-            <button
-              type="button"
-              onClick={() => authModal?.openAuthModal()}
-              className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
-            >
-              Sign In to Search
-            </button>
-          ) : undefined
-        }
       />
 
-      {isLoggedIn ? (
         <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">
           {/* Disclaimer (A9) */}
           {config.disclaimer && (
@@ -247,10 +242,15 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
           <SearchControls
             onSearch={handleSearch}
             onGeocode={handleGeocode}
-            initialLat={initialLat}
-            initialLng={initialLng}
-            initialRadius={initialRadius}
+            initialLat={isLoggedIn ? initialLat : undefined}
+            initialLng={isLoggedIn ? initialLng : undefined}
+            initialRadius={isLoggedIn ? initialRadius : undefined}
             isLoading={searchState === 'loading'}
+            onInteractionBlocked={
+              !isLoggedIn
+                ? () => authModal?.openAuthModal('Sign in to search for local support')
+                : undefined
+            }
           />
 
           {/* Tabs (A2: role="tablist" + role="tab" + aria-selected + keyboard nav) */}
@@ -265,7 +265,13 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                 aria-selected={activeTab === tab}
                 aria-controls="ls-tabpanel"
                 tabIndex={activeTab === tab ? 0 : -1}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  if (tab === 'saved' && !isLoggedIn) {
+                    authModal?.openAuthModal('Sign in to save and view bookmarked listings')
+                    return
+                  }
+                  setActiveTab(tab)
+                }}
                 onKeyDown={(e) => {
                   let nextIndex = index
                   if (e.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length
@@ -274,7 +280,12 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                   else if (e.key === 'End') nextIndex = tabs.length - 1
                   else return
                   e.preventDefault()
-                  setActiveTab(tabs[nextIndex])
+                  const nextTab = tabs[nextIndex]
+                  if (nextTab === 'saved' && !isLoggedIn) {
+                    authModal?.openAuthModal('Sign in to save and view bookmarked listings')
+                    return
+                  }
+                  setActiveTab(nextTab)
                   tabRefs.current[nextIndex]?.focus()
                 }}
                 className={cn(
@@ -423,20 +434,11 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
             </div>
           )}
         </main>
-      ) : (
-        <main id="main-content" className="flex-1" />
-      )}
       <SiteFooter />
     </div>
   )
 }
 
 export function LocalSupportPage({ config }: LocalSupportPageProps) {
-  return (
-    <ToastProvider>
-      <AuthModalProvider>
-        <LocalSupportPageContent config={config} />
-      </AuthModalProvider>
-    </ToastProvider>
-  )
+  return <LocalSupportPageContent config={config} />
 }

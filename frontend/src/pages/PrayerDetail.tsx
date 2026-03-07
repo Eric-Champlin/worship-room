@@ -9,8 +9,8 @@ import { CommentInput } from '@/components/prayer-wall/CommentInput'
 import { MarkAsAnsweredForm } from '@/components/prayer-wall/MarkAsAnsweredForm'
 import { DeletePrayerDialog } from '@/components/prayer-wall/DeletePrayerDialog'
 import { ReportDialog } from '@/components/prayer-wall/ReportDialog'
-import { ToastProvider, useToast } from '@/components/ui/Toast'
-import { AuthModalProvider, useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { useToast } from '@/components/ui/Toast'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
 import { getMockPrayers, getMockComments } from '@/mocks/prayer-wall-mock-data'
@@ -180,11 +180,5 @@ function PrayerDetailContent() {
 }
 
 export function PrayerDetail() {
-  return (
-    <ToastProvider>
-      <AuthModalProvider>
-        <PrayerDetailContent />
-      </AuthModalProvider>
-    </ToastProvider>
-  )
+  return <PrayerDetailContent />
 }

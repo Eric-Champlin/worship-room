@@ -18,6 +18,8 @@ import { PrayerDetail } from './pages/PrayerDetail'
 import { PrayerWallProfile } from './pages/PrayerWallProfile'
 import { PrayerWallDashboard } from './pages/PrayerWallDashboard'
 import { Layout } from './components/Layout'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { Churches } from './pages/Churches'
 import { Counselors } from './pages/Counselors'
 import { CelebrateRecovery } from './pages/CelebrateRecovery'
@@ -66,6 +68,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <ToastProvider>
+        <AuthModalProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/health" element={<Health />} />
@@ -99,6 +103,8 @@ function App() {
           <Route path="/register" element={<ComingSoon title="Get Started" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </AuthModalProvider>
+        </ToastProvider>
       </BrowserRouter>
     </QueryClientProvider>
   )

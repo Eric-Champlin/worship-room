@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { Counselors } from '../Counselors'
 
 function renderPage() {
@@ -9,7 +11,11 @@ function renderPage() {
       initialEntries={['/local-support/counselors']}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
+      <ToastProvider>
+      <AuthModalProvider>
       <Counselors />
+      </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }
@@ -22,13 +28,13 @@ describe('Counselors', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows "Sign In to Search" CTA for logged-out users', () => {
+  it('renders search controls for logged-out users in teaser mode', () => {
     renderPage()
-    expect(screen.getByRole('button', { name: 'Sign In to Search' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Use my current location')).toBeInTheDocument()
   })
 
-  it('does not render search controls for logged-out users', () => {
+  it('renders mock listing cards for logged-out users', () => {
     renderPage()
-    expect(screen.queryByRole('button', { name: /use my location/i })).not.toBeInTheDocument()
+    expect(screen.getAllByText('Restoration Christian Counseling').length).toBeGreaterThan(0)
   })
 })

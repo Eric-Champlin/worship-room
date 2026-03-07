@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerWallDashboard } from '../PrayerWallDashboard'
 
 // Mock useAuth to return a logged-in user for dashboard testing
@@ -23,9 +25,13 @@ function renderDashboard() {
       initialEntries={['/prayer-wall/dashboard']}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
+      <ToastProvider>
+      <AuthModalProvider>
       <Routes>
         <Route path="/prayer-wall/dashboard" element={<PrayerWallDashboard />} />
       </Routes>
+      </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }

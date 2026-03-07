@@ -88,7 +88,7 @@ export function JourneySection() {
       aria-labelledby="journey-heading"
       className="px-4 pt-8 pb-16 sm:px-6 sm:pt-12 sm:pb-20 lg:pb-24"
       style={{
-        background: 'linear-gradient(to bottom, #EDE9FE 0%, #F5F5F5 15%)',
+        background: '#F5F5F5',
       }}
     >
       <div className="mx-auto max-w-2xl">

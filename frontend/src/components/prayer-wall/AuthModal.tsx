@@ -16,10 +16,11 @@ interface AuthModalProps {
   onClose: () => void
   onShowToast: (message: string) => void
   subtitle?: string
+  initialView?: 'login' | 'register'
 }
 
-export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalProps) {
-  const [view, setView] = useState<AuthView>('login')
+export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView = 'login' }: AuthModalProps) {
+  const [view, setView] = useState<AuthView>(initialView)
   const [resetEmail, setResetEmail] = useState('')
   const containerRef = useFocusTrap(isOpen, onClose)
 
@@ -30,13 +31,14 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalP
     }
   }, [isOpen])
 
-  // Reset view and fields when closing
+  // Set view from initialView on open; clear fields on close
   useEffect(() => {
-    if (!isOpen) {
-      setView('login')
+    if (isOpen) {
+      setView(initialView)
+    } else {
       setResetEmail('')
     }
-  }, [isOpen])
+  }, [isOpen, initialView])
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -63,20 +65,19 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalP
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={onClose}
-      role="presentation"
     >
       <div
         ref={containerRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        aria-describedby={subtitle && view === 'login' ? 'auth-modal-subtitle' : undefined}
+        aria-describedby={subtitle && view !== 'forgot-password' ? 'auth-modal-subtitle' : undefined}
         className="mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="relative flex items-center justify-center">
-          <h2 id="auth-modal-title" className="text-center font-script text-4xl font-bold text-primary sm:text-5xl">
+          <h2 id="auth-modal-title" className="text-center font-script text-4xl font-bold text-[#2B0E4A] sm:text-5xl">
             {VIEW_TITLES[view]}
           </h2>
           <button
@@ -89,7 +90,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalP
           </button>
         </div>
 
-        {subtitle && view === 'login' && (
+        {subtitle && view !== 'forgot-password' && (
           <p id="auth-modal-subtitle" className="mt-2 text-center text-sm text-text-light">
             {subtitle}
           </p>
@@ -126,7 +127,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalP
               <button
                 type="button"
                 onClick={() => setView('login')}
-                className="font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="font-medium text-[#2B0E4A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
               >
                 Back to Log In
               </button>
@@ -210,7 +211,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalP
                 <button
                   type="button"
                   onClick={() => setView('forgot-password')}
-                  className="mb-3 text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                  className="mb-3 text-sm text-[#2B0E4A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                 >
                   Forgot password?
                 </button>
@@ -249,7 +250,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalP
                   <button
                     type="button"
                     onClick={() => setView('register')}
-                    className="font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="font-medium text-[#2B0E4A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                   >
                     Create one!
                   </button>
@@ -260,7 +261,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle }: AuthModalP
                   <button
                     type="button"
                     onClick={() => setView('login')}
-                    className="font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="font-medium text-[#2B0E4A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                   >
                     Log in
                   </button>

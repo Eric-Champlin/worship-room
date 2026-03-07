@@ -1,12 +1,20 @@
 import { useNavigate } from 'react-router-dom'
 import { TypewriterInput } from './TypewriterInput'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/hooks/useAuth'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 
 export function HeroSection() {
   const navigate = useNavigate()
+  const { isLoggedIn } = useAuth()
+  const authModal = useAuthModal()
 
   const handleInputSubmit = (value: string) => {
-    navigate(`/pray?q=${encodeURIComponent(value)}`)
+    if (!isLoggedIn) {
+      authModal?.openAuthModal('Sign in to get AI-powered guidance')
+      return
+    }
+    navigate(`/daily?tab=pray&q=${encodeURIComponent(value)}`)
   }
 
   return (
@@ -18,10 +26,7 @@ export function HeroSection() {
         'antialiased'
       )}
       style={{
-        backgroundImage: [
-          'radial-gradient(ellipse 100% 60% at 50% 0%, #3B0764 0%, transparent 70%)',
-          'linear-gradient(to bottom, #0D0620 0%, #1E0B3E 35%, #4A1D96 52%, #EDE9FE 100%)',
-        ].join(', '),
+        backgroundImage: 'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #F5F5F5 100%)',
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 100%',
       }}

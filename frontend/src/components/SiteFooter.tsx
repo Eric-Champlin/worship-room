@@ -29,7 +29,7 @@ const FOOTER_COLUMNS = [
 
 function AppStoreBadge() {
   return (
-    <span className="inline-flex h-[40px] cursor-default items-center gap-2 rounded-md border border-white/20 bg-black px-3 opacity-60">
+    <span className="inline-flex h-[40px] cursor-default items-center gap-2 rounded-md border border-white/20 bg-black px-3">
       <svg
         viewBox="0 0 24 24"
         className="h-6 w-6 fill-white"
@@ -47,7 +47,7 @@ function AppStoreBadge() {
 
 function GooglePlayBadge() {
   return (
-    <span className="inline-flex h-[40px] cursor-default items-center gap-2 rounded-md border border-white/20 bg-black px-3 opacity-60">
+    <span className="inline-flex h-[40px] cursor-default items-center gap-2 rounded-md border border-white/20 bg-black px-3">
       <svg
         viewBox="0 0 24 24"
         className="h-6 w-6"

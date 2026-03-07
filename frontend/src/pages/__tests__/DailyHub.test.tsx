@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { DailyHub } from '../DailyHub'
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -33,7 +35,11 @@ function renderPage(initialEntry = '/daily') {
       initialEntries={[initialEntry]}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
+      <ToastProvider>
+      <AuthModalProvider>
       <DailyHub />
+      </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }
