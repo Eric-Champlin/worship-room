@@ -22,3 +22,20 @@ export interface SoundCategoryGroup {
   label: string
   sounds: Sound[]
 }
+
+export type SceneAnimationCategory = 'drift' | 'pulse' | 'glow'
+
+export interface ScenePreset {
+  id: string
+  name: string
+  description: string
+  artworkFilename: string
+  sounds: { soundId: string; volume: number }[]
+  tags: {
+    mood: SoundMood[]
+    activity: SoundActivity[]
+    intensity: SoundIntensity
+    scriptureTheme?: string[]
+  }
+  animationCategory: SceneAnimationCategory
+}

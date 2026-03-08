@@ -64,3 +64,4 @@ export type AudioAction =
   | { type: 'START_ROUTINE'; payload: AudioRoutine }
   | { type: 'ADVANCE_ROUTINE_STEP' }
   | { type: 'SKIP_ROUTINE_STEP' }
+  | { type: 'SET_SCENE_NAME'; payload: { sceneName: string | null } }

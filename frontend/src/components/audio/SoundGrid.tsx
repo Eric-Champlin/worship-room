@@ -7,6 +7,7 @@ interface SoundGridProps {
   loadingSoundIds: Set<string>
   errorSoundIds: Set<string>
   onToggle: (sound: Sound) => void
+  sounds?: Sound[]
 }
 
 export function SoundGrid({
@@ -14,10 +15,18 @@ export function SoundGrid({
   loadingSoundIds,
   errorSoundIds,
   onToggle,
+  sounds,
 }: SoundGridProps) {
+  const categories = sounds
+    ? SOUND_CATEGORIES.map((g) => ({
+        ...g,
+        sounds: g.sounds.filter((s) => sounds.some((fs) => fs.id === s.id)),
+      })).filter((g) => g.sounds.length > 0)
+    : SOUND_CATEGORIES
+
   return (
     <div className="space-y-8">
-      {SOUND_CATEGORIES.map((group) => {
+      {categories.map((group) => {
         const headerId = `category-${group.category}`
         return (
           <section key={group.category} aria-labelledby={headerId}>

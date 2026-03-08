@@ -225,6 +225,10 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
       }
     }
 
+    case 'SET_SCENE_NAME': {
+      return { ...state, currentSceneName: action.payload.sceneName }
+    }
+
     default:
       return state
   }

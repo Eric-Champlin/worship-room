@@ -2,19 +2,47 @@ import { Play, Pause } from 'lucide-react'
 import { useAudioState, useAudioDispatch } from './AudioProvider'
 import { VolumeSlider } from './VolumeSlider'
 import { ForegroundProgressBar } from './ForegroundProgressBar'
+import { SCENE_PRESETS } from '@/data/scenes'
+import { cn } from '@/lib/utils'
+
+const ANIMATION_CLASS: Record<string, string> = {
+  drift: 'motion-safe:animate-artwork-drift',
+  pulse: 'motion-safe:animate-scene-pulse',
+  glow: 'motion-safe:animate-scene-glow',
+}
 
 export function DrawerNowPlaying() {
   const state = useAudioState()
   const dispatch = useAudioDispatch()
 
+  const activeScene = state.currentSceneName
+    ? SCENE_PRESETS.find((s) => s.name === state.currentSceneName) ?? null
+    : null
+
   return (
     <div className="space-y-4 px-4 pb-4 pt-2">
-      {/* Artwork placeholder */}
-      <div
-        className="mx-auto aspect-square w-full max-w-[200px] rounded-xl bg-gradient-to-br from-hero-mid to-primary/30 motion-safe:animate-artwork-drift"
-        style={{ backgroundSize: '120% 120%' }}
-        aria-hidden="true"
-      />
+      {/* Artwork */}
+      {activeScene ? (
+        <div
+          className="relative mx-auto aspect-square w-full max-w-[200px] overflow-hidden rounded-xl"
+          aria-hidden="true"
+        >
+          <img
+            src={`/audio/artwork/${activeScene.artworkFilename}`}
+            alt=""
+            className={cn(
+              'h-full w-full object-cover',
+              ANIMATION_CLASS[activeScene.animationCategory],
+            )}
+          />
+        </div>
+      ) : (
+        <div
+          className="mx-auto aspect-square w-full max-w-[200px] rounded-xl bg-gradient-to-br from-hero-mid to-primary/30 motion-safe:animate-artwork-drift"
+          style={{ backgroundSize: '120% 120%' }}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Play/Pause */}
       <div className="flex justify-center">

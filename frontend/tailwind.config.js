@@ -89,6 +89,14 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.02)' },
         },
+        'scene-pulse': {
+          '0%, 100%': { opacity: '0.85' },
+          '50%': { opacity: '1' },
+        },
+        'scene-glow': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.02)' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -105,6 +113,8 @@ export default {
         'waveform-bar-3': 'waveform-bar-3 1.4s ease-in-out infinite',
         'artwork-drift': 'artwork-drift 20s ease-in-out infinite',
         'sound-pulse': 'sound-pulse 3s ease-in-out infinite',
+        'scene-pulse': 'scene-pulse 4s ease-in-out infinite',
+        'scene-glow': 'scene-glow 8s ease-in-out infinite',
       },
     },
   },
