@@ -8,6 +8,38 @@
   }
 }
 
+/* Audio slider thumb/track styling (vendor-prefixed, can't use Tailwind) */
+.audio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6D28D9;
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+.audio-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6D28D9;
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+.audio-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+}
+
+.audio-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-cursor-blink {
     animation: none;
