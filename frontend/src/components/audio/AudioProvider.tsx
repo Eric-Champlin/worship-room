@@ -18,6 +18,7 @@ type AudioDispatch = (action: AudioAction) => void
 
 const AudioStateContext = createContext<AudioState | null>(null)
 const AudioDispatchContext = createContext<AudioDispatch | null>(null)
+const AudioEngineContext = createContext<AudioEngineService | null>(null)
 
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(audioReducer, initialAudioState)
@@ -41,9 +42,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const engine = getEngine()
 
     switch (action.type) {
-      case 'ADD_SOUND':
-        engine.addSound(action.payload.soundId, action.payload.url, action.payload.volume)
-        break
+      // ADD_SOUND: no engine call — useSoundToggle calls engine.addSound() directly
+      // and dispatches ADD_SOUND only after async load succeeds.
       case 'REMOVE_SOUND':
         engine.removeSound(action.payload.soundId)
         break
@@ -198,15 +198,17 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   return (
     <AudioStateContext.Provider value={state}>
       <AudioDispatchContext.Provider value={enhancedDispatch}>
-        {children}
-        <AudioPill />
-        <AudioDrawer />
-        <div
-          ref={ariaLiveRef}
-          aria-live="polite"
-          className="sr-only"
-          data-testid="audio-aria-live"
-        />
+        <AudioEngineContext.Provider value={getEngine()}>
+          {children}
+          <AudioPill />
+          <AudioDrawer />
+          <div
+            ref={ariaLiveRef}
+            aria-live="polite"
+            className="sr-only"
+            data-testid="audio-aria-live"
+          />
+        </AudioEngineContext.Provider>
       </AudioDispatchContext.Provider>
     </AudioStateContext.Provider>
   )
@@ -226,4 +228,8 @@ export function useAudioDispatch(): AudioDispatch {
     throw new Error('useAudioDispatch must be used within an AudioProvider')
   }
   return ctx
+}
+
+export function useAudioEngine(): AudioEngineService | null {
+  return useContext(AudioEngineContext)
 }

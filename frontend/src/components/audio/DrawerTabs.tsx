@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
+import { MixerTabContent } from './MixerTabContent'
 
 const TABS = ['Mixer', 'Timer', 'Saved'] as const
 type TabId = (typeof TABS)[number]
 
-const TAB_PLACEHOLDERS: Record<TabId, string> = {
-  Mixer: 'Add sounds from the Music page',
+const TAB_PLACEHOLDERS: Record<Exclude<TabId, 'Mixer'>, string> = {
   Timer: 'Set a sleep timer',
   Saved: 'Your saved mixes and routines',
 }
@@ -77,9 +77,17 @@ export function DrawerTabs() {
         role="tabpanel"
         aria-labelledby={`tab-${activeTab}`}
         tabIndex={0}
-        className="flex flex-1 items-center justify-center overflow-y-auto p-6"
+        className="flex flex-1 overflow-y-auto"
       >
-        <p className="text-sm text-white/50">{TAB_PLACEHOLDERS[activeTab]}</p>
+        {activeTab === 'Mixer' ? (
+          <MixerTabContent />
+        ) : (
+          <div className="flex flex-1 items-center justify-center p-6">
+            <p className="text-sm text-white/50">
+              {TAB_PLACEHOLDERS[activeTab]}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

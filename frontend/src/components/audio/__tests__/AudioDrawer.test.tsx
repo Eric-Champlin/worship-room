@@ -3,11 +3,13 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AudioProvider, useAudioDispatch } from '../AudioProvider'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 
 vi.mock('@/lib/audio-engine', () => {
   class MockAudioEngineService {
     ensureContext = vi.fn()
-    addSound = vi.fn()
+    addSound = vi.fn().mockResolvedValue(undefined)
     removeSound = vi.fn()
     setSoundVolume = vi.fn()
     setMasterVolume = vi.fn()
@@ -19,6 +21,7 @@ vi.mock('@/lib/audio-engine', () => {
     stopAll = vi.fn()
     getSoundCount = vi.fn(() => 0)
     getForegroundElement = vi.fn(() => null)
+    isBufferCached = vi.fn(() => false)
   }
   return { AudioEngineService: MockAudioEngineService }
 })
@@ -44,9 +47,13 @@ function OpenDrawerButton() {
 function renderDrawer() {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AudioProvider>
-        <OpenDrawerButton />
-      </AudioProvider>
+      <ToastProvider>
+        <AuthModalProvider>
+          <AudioProvider>
+            <OpenDrawerButton />
+          </AudioProvider>
+        </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }
@@ -120,15 +127,13 @@ describe('AudioDrawer', () => {
     expect(screen.getByRole('tab', { name: 'Saved' })).toBeInTheDocument()
   })
 
-  it('tab switching shows correct placeholder content', async () => {
+  it('tab switching shows correct content', async () => {
     const user = userEvent.setup()
     renderDrawer()
     await user.click(screen.getByTestId('open-drawer'))
 
-    // Default tab is Mixer
-    expect(
-      screen.getByText('Add sounds from the Music page'),
-    ).toBeInTheDocument()
+    // Default tab is Mixer — shows MixerTabContent with the active sound "Rain"
+    expect(screen.getByText('Rain')).toBeInTheDocument()
 
     // Switch to Timer
     await user.click(screen.getByRole('tab', { name: 'Timer' }))

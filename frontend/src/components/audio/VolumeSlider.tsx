@@ -1,14 +1,14 @@
 interface VolumeSliderProps {
   value: number // 0-100
   onChange: (value: number) => void
-  label: string
+  label?: string
   ariaLabel: string
 }
 
 export function VolumeSlider({ value, onChange, label, ariaLabel }: VolumeSliderProps) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs font-medium text-white/70">{label}</span>
+      {label && <span className="text-xs font-medium text-white/70">{label}</span>}
       <input
         type="range"
         min={0}

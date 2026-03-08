@@ -8,7 +8,7 @@ import { AudioProvider, useAudioState, useAudioDispatch } from '../AudioProvider
 vi.mock('@/lib/audio-engine', () => {
   class MockAudioEngineService {
     ensureContext = vi.fn()
-    addSound = vi.fn()
+    addSound = vi.fn().mockResolvedValue(undefined)
     removeSound = vi.fn()
     setSoundVolume = vi.fn()
     setMasterVolume = vi.fn()

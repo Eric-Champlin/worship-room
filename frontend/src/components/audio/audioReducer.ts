@@ -36,9 +36,12 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
       const filtered = state.activeSounds.filter(
         (s) => s.soundId !== action.payload.soundId,
       )
+      const hasContent = filtered.length > 0 || state.foregroundContent !== null
       return {
         ...state,
         activeSounds: filtered,
+        pillVisible: hasContent ? state.pillVisible : false,
+        isPlaying: hasContent ? state.isPlaying : false,
       }
     }
 

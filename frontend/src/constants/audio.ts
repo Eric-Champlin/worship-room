@@ -12,6 +12,9 @@ export const AUDIO_CONFIG = {
   DRAWER_ANIMATION_MS: 300,
   SLEEP_TIMER_OPTIONS: [15, 30, 45, 60, 90] as const,
   FADE_DURATION_OPTIONS: [5, 10, 15, 30] as const,
+  CROSSFADE_OVERLAP_MS: 1500,
+  LOAD_RETRY_MAX: 3,
+  LOAD_RETRY_DELAYS_MS: [1000, 2000, 4000] as const,
 } as const
 
 export const AUDIO_BASE_URL = import.meta.env.VITE_AUDIO_BASE_URL ?? '/audio/'

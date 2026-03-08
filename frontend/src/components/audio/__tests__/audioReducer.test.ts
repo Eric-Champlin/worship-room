@@ -62,6 +62,61 @@ describe('audioReducer', () => {
       })
       expect(result.activeSounds).toHaveLength(0)
     })
+
+    it('sets pillVisible=false when removing the last sound and no foreground content', () => {
+      const state = stateWith({
+        activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+        pillVisible: true,
+        isPlaying: true,
+        foregroundContent: null,
+      })
+      const result = audioReducer(state, {
+        type: 'REMOVE_SOUND',
+        payload: { soundId: 'rain' },
+      })
+      expect(result.pillVisible).toBe(false)
+      expect(result.isPlaying).toBe(false)
+    })
+
+    it('keeps pillVisible=true when foreground content is active', () => {
+      const state = stateWith({
+        activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+        pillVisible: true,
+        isPlaying: true,
+        foregroundContent: {
+          contentId: '1',
+          contentType: 'scripture',
+          title: 'Psalm 23',
+          duration: 120,
+          playbackPosition: 30,
+          isPlaying: true,
+        },
+      })
+      const result = audioReducer(state, {
+        type: 'REMOVE_SOUND',
+        payload: { soundId: 'rain' },
+      })
+      expect(result.pillVisible).toBe(true)
+      expect(result.isPlaying).toBe(true)
+    })
+
+    it('keeps isPlaying=true when other sounds remain', () => {
+      const state = stateWith({
+        activeSounds: [
+          { soundId: 'rain', volume: 0.6, label: 'Rain' },
+          { soundId: 'fire', volume: 0.5, label: 'Fireplace' },
+        ],
+        pillVisible: true,
+        isPlaying: true,
+      })
+      const result = audioReducer(state, {
+        type: 'REMOVE_SOUND',
+        payload: { soundId: 'rain' },
+      })
+      expect(result.activeSounds).toHaveLength(1)
+      expect(result.pillVisible).toBe(true)
+      expect(result.isPlaying).toBe(true)
+    })
   })
 
   describe('SET_SOUND_VOLUME', () => {

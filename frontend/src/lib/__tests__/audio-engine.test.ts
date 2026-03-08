@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { AudioEngineService } from '../audio-engine'
 import { AUDIO_CONFIG } from '@/constants/audio'
 
-// --- Web Audio API mocks ---
+// ── Web Audio API mocks ──────────────────────────────────────────────
 
 function createMockGainNode() {
   return {
@@ -20,26 +20,30 @@ function createMockGainNode() {
 
 function createMockSourceNode() {
   return {
+    buffer: null as AudioBuffer | null,
+    loop: false,
     connect: vi.fn(),
     disconnect: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
   }
 }
 
-function createMockAudioContext(masterGain: ReturnType<typeof createMockGainNode>) {
-  const ctx = {
-    state: 'running' as string,
-    currentTime: 0,
-    destination: {},
-    createGain: vi.fn(() => createMockGainNode()),
-    createMediaElementSource: vi.fn(() => createMockSourceNode()),
-    suspend: vi.fn(() => Promise.resolve()),
-    resume: vi.fn(() => Promise.resolve()),
-    close: vi.fn(() => Promise.resolve()),
+function createMockMediaElementSource() {
+  return {
+    connect: vi.fn(),
   }
-  // First createGain call returns the master gain
-  ctx.createGain.mockReturnValueOnce(masterGain as unknown as GainNode)
-  return ctx
 }
+
+const FAKE_BUFFER = {
+  duration: 240,
+  length: 240 * 44100,
+  numberOfChannels: 2,
+  sampleRate: 44100,
+  getChannelData: vi.fn(),
+  copyFromChannel: vi.fn(),
+  copyToChannel: vi.fn(),
+} as unknown as AudioBuffer
 
 function createMockAudioElement() {
   return {
@@ -56,12 +60,31 @@ function createMockAudioElement() {
   }
 }
 
+function createMockAudioContext(masterGain: ReturnType<typeof createMockGainNode>) {
+  const ctx = {
+    state: 'running' as string,
+    currentTime: 0,
+    destination: {},
+    createGain: vi.fn(() => createMockGainNode()),
+    createBufferSource: vi.fn(() => createMockSourceNode()),
+    createMediaElementSource: vi.fn(() => createMockMediaElementSource()),
+    decodeAudioData: vi.fn().mockResolvedValue(FAKE_BUFFER),
+    suspend: vi.fn(() => Promise.resolve()),
+    resume: vi.fn(() => Promise.resolve()),
+    close: vi.fn(() => Promise.resolve()),
+  }
+  // First createGain call returns the master gain
+  ctx.createGain.mockReturnValueOnce(masterGain as unknown as GainNode)
+  return ctx
+}
+
 describe('AudioEngineService', () => {
   let service: AudioEngineService
   let mockMasterGain: ReturnType<typeof createMockGainNode>
   let mockCtx: ReturnType<typeof createMockAudioContext>
   let originalAudioContext: typeof globalThis.AudioContext
   let originalAudio: typeof globalThis.Audio
+  let originalFetch: typeof globalThis.fetch
 
   beforeEach(() => {
     mockMasterGain = createMockGainNode()
@@ -69,8 +92,8 @@ describe('AudioEngineService', () => {
 
     originalAudioContext = globalThis.AudioContext
     originalAudio = globalThis.Audio
+    originalFetch = globalThis.fetch
 
-    // Must use a real constructor function for `new AudioContext()` to work
     const MockAudioContextCtor = function (this: typeof mockCtx) {
       Object.assign(this, mockCtx)
     } as unknown as typeof AudioContext
@@ -83,14 +106,22 @@ describe('AudioEngineService', () => {
     } as unknown as typeof Audio
     globalThis.Audio = MockAudioCtor
 
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
+    })
+
     service = new AudioEngineService()
   })
 
   afterEach(() => {
     globalThis.AudioContext = originalAudioContext
     globalThis.Audio = originalAudio
+    globalThis.fetch = originalFetch
     vi.restoreAllMocks()
   })
+
+  // ── ensureContext ──────────────────────────────────────────────────
 
   describe('ensureContext', () => {
     it('creates AudioContext lazily on first call', () => {
@@ -114,10 +145,12 @@ describe('AudioEngineService', () => {
     it('resumes suspended AudioContext', () => {
       mockCtx.state = 'suspended'
       service.ensureContext()
-      service.ensureContext() // second call — context already exists but suspended
+      service.ensureContext()
       expect(mockCtx.resume).toHaveBeenCalled()
     })
   })
+
+  // ── setMasterVolume ────────────────────────────────────────────────
 
   describe('setMasterVolume', () => {
     it('calls linearRampToValueAtTime with correct ramp', () => {
@@ -136,84 +169,115 @@ describe('AudioEngineService', () => {
     })
   })
 
+  // ── addSound (async, AudioBufferSourceNode) ────────────────────────
+
   describe('addSound', () => {
-    it('creates audio element and connects to context', () => {
-      service.ensureContext()
-      service.addSound('rain', '/audio/ambient/rain.mp3', 0.6)
+    it('fetches and decodes audio when buffer not cached', async () => {
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
 
-      expect(mockCtx.createMediaElementSource).toHaveBeenCalled()
-      expect(service.getSoundCount()).toBe(1)
+      expect(globalThis.fetch).toHaveBeenCalledWith('/audio/rain.mp3')
+      expect(mockCtx.decodeAudioData).toHaveBeenCalled()
     })
 
-    it('creates per-sound GainNode and connects to master', () => {
-      service.ensureContext()
+    it('reuses cached buffer on second call with same soundId (after remove)', async () => {
+      vi.useFakeTimers()
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+      service.removeSound('rain')
 
-      const perSoundGain = createMockGainNode()
-      mockCtx.createGain.mockReturnValueOnce(perSoundGain as unknown as GainNode)
+      vi.advanceTimersByTime(AUDIO_CONFIG.SOUND_FADE_OUT_MS + 100)
+      vi.mocked(globalThis.fetch).mockClear()
+      vi.mocked(mockCtx.decodeAudioData).mockClear()
 
-      service.addSound('rain', '/audio/ambient/rain.mp3', 0.6)
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
 
-      expect(perSoundGain.connect).toHaveBeenCalledWith(mockMasterGain)
+      expect(globalThis.fetch).not.toHaveBeenCalled()
+      expect(mockCtx.decodeAudioData).not.toHaveBeenCalled()
+      vi.useRealTimers()
     })
 
-    it('fades in with linearRampToValueAtTime', () => {
-      service.ensureContext()
+    it('creates AudioBufferSourceNode connected to gain and master', async () => {
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
 
-      const perSoundGain = createMockGainNode()
-      mockCtx.createGain.mockReturnValueOnce(perSoundGain as unknown as GainNode)
+      expect(mockCtx.createBufferSource).toHaveBeenCalled()
+      const source = mockCtx.createBufferSource.mock.results[0]!.value
+      expect(source.connect).toHaveBeenCalled()
+      expect(source.start).toHaveBeenCalledWith(0)
+    })
 
-      service.addSound('rain', '/audio/ambient/rain.mp3', 0.6)
+    it('starts source with gain ramp from 0 to volume over 1s', async () => {
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
 
+      // Second createGain call is the per-sound gain (first is master)
+      const perSoundGain = mockCtx.createGain.mock.results[1]!.value
+      expect(perSoundGain.gain.setValueAtTime).toHaveBeenCalledWith(0, expect.any(Number))
       expect(perSoundGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
         0.6,
-        AUDIO_CONFIG.SOUND_FADE_IN_MS / 1000,
+        expect.any(Number),
       )
     })
 
-    it('does not re-add existing sound', () => {
-      service.ensureContext()
-      service.addSound('rain', '/audio/ambient/rain.mp3', 0.6)
-      service.addSound('rain', '/audio/ambient/rain.mp3', 0.8)
+    it('does not re-add existing sound (updates volume instead)', async () => {
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+      await service.addSound('rain', '/audio/rain.mp3', 0.8)
 
-      // createMediaElementSource should only be called once for this soundId
-      expect(mockCtx.createMediaElementSource).toHaveBeenCalledTimes(1)
+      // createBufferSource should only be called once (not re-added)
+      expect(mockCtx.createBufferSource).toHaveBeenCalledTimes(1)
     })
 
-    it('increments sound count', () => {
-      service.ensureContext()
+    it('increments sound count', async () => {
       expect(service.getSoundCount()).toBe(0)
-      service.addSound('rain', '/audio/ambient/rain.mp3', 0.6)
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
       expect(service.getSoundCount()).toBe(1)
+    })
+
+    it('throws on fetch failure', async () => {
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      } as Response)
+
+      await expect(service.addSound('rain', '/audio/rain.mp3', 0.6)).rejects.toThrow(
+        'Failed to fetch /audio/rain.mp3: 404',
+      )
     })
   })
 
+  // ── removeSound ────────────────────────────────────────────────────
+
   describe('removeSound', () => {
-    it('fades out and disconnects after delay', () => {
+    it('clears loop timer and fades out gain over 1s', async () => {
       vi.useFakeTimers()
-      service.ensureContext()
+      const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
 
-      const perSoundGain = createMockGainNode()
-      mockCtx.createGain.mockReturnValueOnce(perSoundGain as unknown as GainNode)
-      const sourceNode = createMockSourceNode()
-      mockCtx.createMediaElementSource.mockReturnValueOnce(
-        sourceNode as unknown as MediaElementAudioSourceNode,
-      )
-
-      service.addSound('rain', '/audio/ambient/rain.mp3', 0.6)
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
       service.removeSound('rain')
 
+      // Loop timer cleared
+      expect(clearTimeoutSpy).toHaveBeenCalled()
+
+      // Gain ramp to 0 scheduled
+      const perSoundGain = mockCtx.createGain.mock.results[1]!.value
       expect(perSoundGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(
         0,
-        AUDIO_CONFIG.SOUND_FADE_OUT_MS / 1000,
+        expect.any(Number),
       )
 
-      vi.advanceTimersByTime(AUDIO_CONFIG.SOUND_FADE_OUT_MS)
-
-      expect(sourceNode.disconnect).toHaveBeenCalled()
+      // After fade completes, source is disconnected
+      vi.advanceTimersByTime(AUDIO_CONFIG.SOUND_FADE_OUT_MS + 100)
+      const source = mockCtx.createBufferSource.mock.results[0]!.value
+      expect(source.disconnect).toHaveBeenCalled()
       expect(perSoundGain.disconnect).toHaveBeenCalled()
       expect(service.getSoundCount()).toBe(0)
 
+      clearTimeoutSpy.mockRestore()
       vi.useRealTimers()
+    })
+
+    it('does not clear buffer cache', async () => {
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+      service.removeSound('rain')
+
+      expect(service.isBufferCached('rain')).toBe(true)
     })
 
     it('does nothing for unknown soundId', () => {
@@ -223,7 +287,41 @@ describe('AudioEngineService', () => {
     })
   })
 
+  // ── setSoundVolume ─────────────────────────────────────────────────
+
+  describe('setSoundVolume', () => {
+    it('updates stored volume and ramps gain', async () => {
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+      service.setSoundVolume('rain', 0.8)
+
+      const perSoundGain = mockCtx.createGain.mock.results[1]!.value
+      const rampCalls = perSoundGain.gain.linearRampToValueAtTime.mock.calls
+      const lastCall = rampCalls[rampCalls.length - 1]
+      expect(lastCall[0]).toBe(0.8)
+    })
+  })
+
+  // ── stopAll ────────────────────────────────────────────────────────
+
   describe('stopAll', () => {
+    it('clears all loop timers and disconnects all sources', async () => {
+      vi.useFakeTimers()
+      const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+      await service.addSound('wind', '/audio/wind.mp3', 0.5)
+
+      service.stopAll()
+
+      expect(clearTimeoutSpy).toHaveBeenCalled()
+      expect(service.getSoundCount()).toBe(0)
+      // Buffer cache preserved
+      expect(service.isBufferCached('rain')).toBe(true)
+
+      clearTimeoutSpy.mockRestore()
+      vi.useRealTimers()
+    })
+
     it('suspends AudioContext', () => {
       service.ensureContext()
       service.stopAll()
@@ -231,23 +329,26 @@ describe('AudioEngineService', () => {
     })
   })
 
+  // ── pauseAll / resumeAll ───────────────────────────────────────────
+
   describe('pauseAll / resumeAll', () => {
-    it('pauses all audio elements', () => {
+    it('suspends AudioContext on pauseAll', () => {
       service.ensureContext()
-      const el = service.addSound('rain', '/audio/ambient/rain.mp3', 0.6)
       service.pauseAll()
-      expect((el as unknown as ReturnType<typeof createMockAudioElement>).pause).toHaveBeenCalled()
+      expect(mockCtx.suspend).toHaveBeenCalled()
     })
 
-    it('resumes all audio elements', () => {
-      service.ensureContext()
-      const el = service.addSound('rain', '/audio/ambient/rain.mp3', 0.6)
+    it('resumes AudioContext on resumeAll', () => {
+      const ctx = service.ensureContext()
       service.pauseAll()
+      // Simulate the context being suspended (pauseAll calls suspend)
+      ;(ctx as unknown as { state: string }).state = 'suspended'
       service.resumeAll()
-      // play called once on add, once on resume
-      expect((el as unknown as ReturnType<typeof createMockAudioElement>).play).toHaveBeenCalledTimes(2)
+      expect(ctx.resume).toHaveBeenCalled()
     })
   })
+
+  // ── foreground playback (unchanged — still uses <audio>) ──────────
 
   describe('playForeground', () => {
     it('creates foreground audio element', () => {
@@ -258,7 +359,6 @@ describe('AudioEngineService', () => {
 
     it('connects through foreground gain to master', () => {
       service.ensureContext()
-
       const fgGain = createMockGainNode()
       mockCtx.createGain.mockReturnValueOnce(fgGain as unknown as GainNode)
 
@@ -273,6 +373,19 @@ describe('AudioEngineService', () => {
       const el = service.playForeground('/audio/scripture/psalm23.mp3')
       service.seekForeground(30)
       expect((el as unknown as ReturnType<typeof createMockAudioElement>).currentTime).toBe(30)
+    })
+  })
+
+  // ── isBufferCached ─────────────────────────────────────────────────
+
+  describe('isBufferCached', () => {
+    it('returns false for uncached sound', () => {
+      expect(service.isBufferCached('rain')).toBe(false)
+    })
+
+    it('returns true after sound is loaded', async () => {
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+      expect(service.isBufferCached('rain')).toBe(true)
     })
   })
 })

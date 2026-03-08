@@ -1,5 +1,6 @@
 import { createContext } from 'react'
 import type { AudioState, AudioAction } from '@/types/audio'
+import type { AudioEngineService } from '@/lib/audio-engine'
 import { initialAudioState } from '../audioReducer'
 
 export type AudioDispatch = (action: AudioAction) => void
@@ -14,3 +15,4 @@ export function createTestState(overrides: Partial<AudioState> = {}): AudioState
 // Contexts exported for test wrappers that need direct context control
 export const TestAudioStateContext = createContext<AudioState | null>(null)
 export const TestAudioDispatchContext = createContext<AudioDispatch | null>(null)
+export const TestAudioEngineContext = createContext<AudioEngineService | null>(null)
