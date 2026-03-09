@@ -48,9 +48,9 @@ export function AudioPill() {
 
       <WaveformBars isPlaying={state.isPlaying} />
 
-      {state.currentSceneName && (
+      {(state.foregroundContent?.title ?? state.currentSceneName) && (
         <span className="max-w-[150px] truncate text-sm font-medium text-white">
-          {state.currentSceneName}
+          {state.foregroundContent?.title ?? state.currentSceneName}
         </span>
       )}
     </div>

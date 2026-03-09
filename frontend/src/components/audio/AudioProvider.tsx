@@ -107,7 +107,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!('mediaSession' in navigator)) return
 
-    if (state.currentSceneName && state.pillVisible) {
+    if (state.foregroundContent && state.pillVisible) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: state.foregroundContent.title,
+        artist: 'Worship Room',
+        album:
+          state.foregroundContent.contentType === 'scripture'
+            ? 'Scripture Readings'
+            : 'Bedtime Stories',
+      })
+    } else if (state.currentSceneName && state.pillVisible) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: state.currentSceneName,
         artist: 'Worship Room',
@@ -123,20 +132,21 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.setActionHandler('nexttrack', () => {
       enhancedDispatch({ type: 'SKIP_ROUTINE_STEP' })
     })
-  }, [state.currentSceneName, state.pillVisible, enhancedDispatch])
+  }, [state.foregroundContent, state.currentSceneName, state.pillVisible, enhancedDispatch])
 
   // Browser tab title — capture the page's title before we override it
   useEffect(() => {
-    if (state.isPlaying && state.currentSceneName) {
+    const displayName = state.foregroundContent?.title ?? state.currentSceneName
+    if (state.isPlaying && displayName) {
       if (!originalTitleRef.current) {
         originalTitleRef.current = document.title
       }
-      document.title = `\u25B6 ${state.currentSceneName} \u2014 Worship Room`
-    } else if (!state.isPlaying && state.currentSceneName && state.pillVisible) {
+      document.title = `\u25B6 ${displayName} \u2014 Worship Room`
+    } else if (!state.isPlaying && displayName && state.pillVisible) {
       if (!originalTitleRef.current) {
         originalTitleRef.current = document.title
       }
-      document.title = `\u23F8 ${state.currentSceneName} \u2014 Worship Room`
+      document.title = `\u23F8 ${displayName} \u2014 Worship Room`
     } else {
       if (originalTitleRef.current) {
         document.title = originalTitleRef.current
@@ -149,7 +159,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         document.title = originalTitleRef.current
       }
     }
-  }, [state.isPlaying, state.currentSceneName, state.pillVisible])
+  }, [state.isPlaying, state.currentSceneName, state.foregroundContent, state.pillVisible])
 
   // Route change auto-collapse
   useEffect(() => {
@@ -171,9 +181,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     announcementTimerRef.current = setTimeout(() => {
       if (!ariaLiveRef.current) return
       const parts: string[] = []
+      if (state.foregroundContent) {
+        parts.push(
+          `Now playing: ${state.foregroundContent.title}.`,
+        )
+      }
       if (state.currentSceneName) {
         parts.push(
-          `Now playing: ${state.currentSceneName}.`,
+          `Scene: ${state.currentSceneName}.`,
         )
       }
       if (state.activeSounds.length > 0) {
@@ -189,6 +204,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
     return () => clearTimeout(announcementTimerRef.current)
   }, [
+    state.foregroundContent,
     state.currentSceneName,
     state.activeSounds.length,
     state.isPlaying,

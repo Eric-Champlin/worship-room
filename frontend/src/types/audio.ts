@@ -11,6 +11,9 @@ export interface ForegroundContent {
   duration: number
   playbackPosition: number
   isPlaying: boolean
+  scriptureReference?: string
+  voiceGender?: 'male' | 'female'
+  webText?: string
 }
 
 export interface SleepTimer {

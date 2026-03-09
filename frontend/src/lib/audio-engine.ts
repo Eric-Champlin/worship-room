@@ -305,6 +305,16 @@ export class AudioEngineService {
     return this.foregroundElement
   }
 
+  /** Smoothly ramp the foreground gain to 0 over the given duration. */
+  crossfadeOutForeground(durationMs: number): void {
+    if (!this.foregroundGainNode || !this.audioContext) return
+    const ctx = this.audioContext
+    const gain = this.foregroundGainNode
+    gain.gain.cancelScheduledValues(ctx.currentTime)
+    gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime)
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + durationMs / 1000)
+  }
+
   /** Check if a sound's audio data is already cached (no fetch needed). */
   isBufferCached(soundId: string): boolean {
     return this.bufferCache.has(soundId)

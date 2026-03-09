@@ -1,7 +1,9 @@
-import { Play, Pause } from 'lucide-react'
+import { useState } from 'react'
+import { Play, Pause, BookOpen } from 'lucide-react'
 import { useAudioState, useAudioDispatch } from './AudioProvider'
 import { VolumeSlider } from './VolumeSlider'
 import { ForegroundProgressBar } from './ForegroundProgressBar'
+import { ScriptureTextPanel } from './ScriptureTextPanel'
 import { SCENE_PRESETS } from '@/data/scenes'
 import { cn } from '@/lib/utils'
 
@@ -14,6 +16,7 @@ const ANIMATION_CLASS: Record<string, string> = {
 export function DrawerNowPlaying() {
   const state = useAudioState()
   const dispatch = useAudioDispatch()
+  const [isTextOpen, setIsTextOpen] = useState(false)
 
   const activeScene = state.currentSceneName
     ? SCENE_PRESETS.find((s) => s.name === state.currentSceneName) ?? null
@@ -70,6 +73,46 @@ export function DrawerNowPlaying() {
 
       {/* Foreground progress (conditional) */}
       <ForegroundProgressBar />
+
+      {/* Voice indicator + Scripture text toggle */}
+      {state.foregroundContent && (
+        <div className="flex items-center gap-2">
+          {state.foregroundContent.voiceGender && (
+            <span className="text-xs text-white/50">
+              {state.foregroundContent.voiceGender === 'male' ? 'Male' : 'Female'} voice
+            </span>
+          )}
+          {state.foregroundContent.contentType === 'scripture' &&
+            state.foregroundContent.webText && (
+              <button
+                type="button"
+                onClick={() => setIsTextOpen((prev) => !prev)}
+                aria-expanded={isTextOpen}
+                aria-controls="scripture-text-panel"
+                aria-label={isTextOpen ? 'Hide scripture text' : 'Show scripture text'}
+                className={cn(
+                  'ml-auto rounded-md p-1.5 transition-colors',
+                  isTextOpen
+                    ? 'bg-primary/20 text-primary-lt'
+                    : 'text-white/50 hover:text-white/80',
+                )}
+              >
+                <BookOpen size={16} />
+              </button>
+            )}
+        </div>
+      )}
+
+      {/* Scripture text panel (collapsible) */}
+      {isTextOpen &&
+        state.foregroundContent?.contentType === 'scripture' &&
+        state.foregroundContent.webText && (
+          <ScriptureTextPanel
+            webText={state.foregroundContent.webText}
+            currentPosition={state.foregroundContent.playbackPosition}
+            duration={state.foregroundContent.duration}
+          />
+        )}
 
       {/* Balance slider (conditional) */}
       {state.activeSounds.length > 0 && state.foregroundContent && (

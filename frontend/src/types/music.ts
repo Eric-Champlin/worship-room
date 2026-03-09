@@ -1,3 +1,35 @@
+export type VoiceGender = 'male' | 'female'
+export type LengthCategory = 'short' | 'medium' | 'long'
+
+export interface ScriptureReading {
+  id: string
+  title: string
+  scriptureReference: string
+  collectionId: string
+  webText: string
+  audioFilename: string
+  durationSeconds: number
+  voiceId: VoiceGender
+  tags: string[]
+}
+
+export interface ScriptureCollection {
+  id: string
+  name: string
+  readings: ScriptureReading[]
+}
+
+export interface BedtimeStory {
+  id: string
+  title: string
+  description: string
+  audioFilename: string
+  durationSeconds: number
+  voiceId: VoiceGender
+  lengthCategory: LengthCategory
+  tags: string[]
+}
+
 export type SoundCategory = 'nature' | 'environments' | 'spiritual' | 'instruments'
 export type SoundMood = 'peaceful' | 'uplifting' | 'contemplative' | 'restful'
 export type SoundActivity = 'prayer' | 'sleep' | 'study' | 'relaxation'

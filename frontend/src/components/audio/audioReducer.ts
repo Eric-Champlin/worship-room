@@ -112,8 +112,10 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
 
     case 'PAUSE_FOREGROUND': {
       if (!state.foregroundContent) return state
+      const hasAmbient = state.activeSounds.length > 0
       return {
         ...state,
+        isPlaying: hasAmbient ? state.isPlaying : false,
         foregroundContent: {
           ...state.foregroundContent,
           isPlaying: false,
