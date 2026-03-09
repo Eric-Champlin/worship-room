@@ -24,6 +24,7 @@ import { AudioProvider } from '@/components/audio/AudioProvider'
 import { Churches } from './pages/Churches'
 import { Counselors } from './pages/Counselors'
 import { CelebrateRecovery } from './pages/CelebrateRecovery'
+import { MusicPage } from './pages/MusicPage'
 
 function ComingSoon({ title }: { title: string }) {
   return (
@@ -89,10 +90,10 @@ function App() {
           <Route path="/verse/:id" element={<SharedVerse />} />
           <Route path="/prayer/:id" element={<SharedPrayer />} />
           <Route path="/scripture" element={<Navigate to="/daily?tab=pray" replace />} />
-          <Route path="/music" element={<ComingSoon title="Music" />} />
-          <Route path="/music/playlists" element={<ComingSoon title="Worship Playlists" />} />
-          <Route path="/music/ambient" element={<ComingSoon title="Ambient Sounds" />} />
-          <Route path="/music/sleep" element={<ComingSoon title="Sleep & Rest" />} />
+          <Route path="/music" element={<MusicPage />} />
+          <Route path="/music/playlists" element={<Navigate to="/music?tab=playlists" replace />} />
+          <Route path="/music/ambient" element={<Navigate to="/music?tab=ambient" replace />} />
+          <Route path="/music/sleep" element={<Navigate to="/music?tab=sleep" replace />} />
           <Route path="/prayer-wall" element={<PrayerWall />} />
           {/* Static segments must precede :id to avoid matching "dashboard"/"user" as a prayer ID */}
           <Route path="/prayer-wall/dashboard" element={<PrayerWallDashboard />} />
