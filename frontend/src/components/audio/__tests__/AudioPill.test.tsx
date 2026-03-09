@@ -4,6 +4,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AudioProvider, useAudioDispatch } from '../AudioProvider'
 
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+
 vi.mock('@/lib/audio-engine', () => {
   class MockAudioEngineService {
     ensureContext = vi.fn()

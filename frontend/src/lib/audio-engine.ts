@@ -319,4 +319,157 @@ export class AudioEngineService {
   isBufferCached(soundId: string): boolean {
     return this.bufferCache.has(soundId)
   }
+
+  /**
+   * Schedule smart fade: foreground fades over first 60% of duration,
+   * ambient starts fading at 40% and finishes at 100%.
+   * If only one lane is active, simple linear fade over full duration.
+   */
+  scheduleSleepFade(fadeDurationSec: number, hasForeground: boolean, hasAmbient: boolean): void {
+    if (!this.audioContext) return
+    const ctx = this.audioContext
+    const now = ctx.currentTime
+
+    if (hasForeground && hasAmbient) {
+      // Smart fade: foreground 0→60%, ambient 40%→100%
+      if (this.foregroundGainNode) {
+        const fg = this.foregroundGainNode.gain
+        fg.cancelScheduledValues(now)
+        fg.setValueAtTime(fg.value, now)
+        fg.linearRampToValueAtTime(0, now + fadeDurationSec * 0.6)
+      }
+      for (const entry of this.soundSources.values()) {
+        const g = entry.gainNode.gain
+        g.cancelScheduledValues(now)
+        g.setValueAtTime(g.value, now)
+        // Hold current value until 40%, then fade to 0 by 100%
+        g.setValueAtTime(g.value, now + fadeDurationSec * 0.4)
+        g.linearRampToValueAtTime(0, now + fadeDurationSec)
+      }
+    } else if (hasForeground) {
+      // Foreground only: linear fade
+      if (this.foregroundGainNode) {
+        const fg = this.foregroundGainNode.gain
+        fg.cancelScheduledValues(now)
+        fg.setValueAtTime(fg.value, now)
+        fg.linearRampToValueAtTime(0, now + fadeDurationSec)
+      }
+    } else if (hasAmbient) {
+      // Ambient only: linear fade
+      for (const entry of this.soundSources.values()) {
+        const g = entry.gainNode.gain
+        g.cancelScheduledValues(now)
+        g.setValueAtTime(g.value, now)
+        g.linearRampToValueAtTime(0, now + fadeDurationSec)
+      }
+    }
+  }
+
+  /**
+   * Cancel all scheduled fade ramps and freeze gain values at current levels.
+   * Returns the current gain values for foreground and all ambient sounds.
+   */
+  freezeFades(): { foregroundGain: number; ambientGains: Map<string, number> } {
+    const ambientGains = new Map<string, number>()
+    if (!this.audioContext) return { foregroundGain: 0, ambientGains }
+
+    const ctx = this.audioContext
+    const now = ctx.currentTime
+    let foregroundGain = 0
+
+    if (this.foregroundGainNode) {
+      const fg = this.foregroundGainNode.gain
+      foregroundGain = fg.value
+      fg.cancelScheduledValues(now)
+      fg.setValueAtTime(foregroundGain, now)
+    }
+
+    for (const [soundId, entry] of this.soundSources) {
+      const g = entry.gainNode.gain
+      const currentVal = g.value
+      ambientGains.set(soundId, currentVal)
+      g.cancelScheduledValues(now)
+      g.setValueAtTime(currentVal, now)
+    }
+
+    return { foregroundGain, ambientGains }
+  }
+
+  /**
+   * Resume fades from current gain levels. Reschedules ramps from
+   * current values to 0 over the remaining fade time.
+   */
+  resumeSleepFade(
+    remainingFadeMs: number,
+    fadeProgress: number,
+    hasForeground: boolean,
+    hasAmbient: boolean,
+  ): void {
+    if (!this.audioContext) return
+    const ctx = this.audioContext
+    const now = ctx.currentTime
+    const remainingSec = remainingFadeMs / 1000
+
+    if (hasForeground && hasAmbient) {
+      // Smart fade resume: figure out where each lane is in its schedule
+      if (this.foregroundGainNode) {
+        const fg = this.foregroundGainNode.gain
+        fg.cancelScheduledValues(now)
+        fg.setValueAtTime(fg.value, now)
+        if (fadeProgress < 0.6) {
+          // Foreground still fading — ramp to 0 over remaining portion
+          const fgRemainingSec = (0.6 - fadeProgress) * (remainingSec / (1 - fadeProgress))
+          fg.linearRampToValueAtTime(0, now + Math.max(0.1, fgRemainingSec))
+        }
+        // If fadeProgress >= 0.6, foreground is already at 0
+      }
+      for (const entry of this.soundSources.values()) {
+        const g = entry.gainNode.gain
+        g.cancelScheduledValues(now)
+        g.setValueAtTime(g.value, now)
+        if (fadeProgress < 0.4) {
+          // Ambient hasn't started fading yet — hold, then ramp
+          const holdSec = (0.4 - fadeProgress) * (remainingSec / (1 - fadeProgress))
+          g.setValueAtTime(g.value, now + holdSec)
+          g.linearRampToValueAtTime(0, now + remainingSec)
+        } else {
+          // Ambient is mid-fade — ramp to 0 over remaining time
+          g.linearRampToValueAtTime(0, now + remainingSec)
+        }
+      }
+    } else {
+      // Single lane: linear fade over remaining time
+      if (hasForeground && this.foregroundGainNode) {
+        const fg = this.foregroundGainNode.gain
+        fg.cancelScheduledValues(now)
+        fg.setValueAtTime(fg.value, now)
+        fg.linearRampToValueAtTime(0, now + remainingSec)
+      }
+      if (hasAmbient) {
+        for (const entry of this.soundSources.values()) {
+          const g = entry.gainNode.gain
+          g.cancelScheduledValues(now)
+          g.setValueAtTime(g.value, now)
+          g.linearRampToValueAtTime(0, now + remainingSec)
+        }
+      }
+    }
+  }
+
+  /**
+   * Ramp all ambient GainNodes to their configured (stored) volume
+   * over the given duration. Used when foreground ends naturally.
+   */
+  breatheUpAmbient(durationMs: number): void {
+    if (!this.audioContext) return
+    const ctx = this.audioContext
+    const now = ctx.currentTime
+
+    for (const entry of this.soundSources.values()) {
+      const g = entry.gainNode.gain
+      g.cancelScheduledValues(now)
+      g.setValueAtTime(g.value, now)
+      g.linearRampToValueAtTime(entry.volume, now + durationMs / 1000)
+    }
+  }
 }

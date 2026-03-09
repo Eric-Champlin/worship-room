@@ -13,11 +13,14 @@ import { audioReducer, initialAudioState } from './audioReducer'
 import { AudioEngineService } from '@/lib/audio-engine'
 import { AudioPill } from './AudioPill'
 import { AudioDrawer } from './AudioDrawer'
+import { useSleepTimer } from '@/hooks/useSleepTimer'
+import type { SleepTimerControls } from '@/hooks/useSleepTimer'
 
 type AudioDispatch = (action: AudioAction) => void
 
 const AudioStateContext = createContext<AudioState | null>(null)
 const AudioDispatchContext = createContext<AudioDispatch | null>(null)
+const SleepTimerControlsContext = createContext<SleepTimerControls | null>(null)
 const AudioEngineContext = createContext<AudioEngineService | null>(null)
 
 export function AudioProvider({ children }: { children: ReactNode }) {
@@ -215,9 +218,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     <AudioStateContext.Provider value={state}>
       <AudioDispatchContext.Provider value={enhancedDispatch}>
         <AudioEngineContext.Provider value={getEngine()}>
-          {children}
+          <SleepTimerBridge>
+            {children}
+            <AudioDrawer />
+          </SleepTimerBridge>
           <AudioPill />
-          <AudioDrawer />
           <div
             ref={ariaLiveRef}
             aria-live="polite"
@@ -227,6 +232,19 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         </AudioEngineContext.Provider>
       </AudioDispatchContext.Provider>
     </AudioStateContext.Provider>
+  )
+}
+
+/**
+ * Inner component that initializes useSleepTimer within the AudioProvider
+ * context tree, then provides its controls via SleepTimerControlsContext.
+ */
+function SleepTimerBridge({ children }: { children: ReactNode }) {
+  const controls = useSleepTimer()
+  return (
+    <SleepTimerControlsContext.Provider value={controls}>
+      {children}
+    </SleepTimerControlsContext.Provider>
   )
 }
 
@@ -248,4 +266,12 @@ export function useAudioDispatch(): AudioDispatch {
 
 export function useAudioEngine(): AudioEngineService | null {
   return useContext(AudioEngineContext)
+}
+
+export function useSleepTimerControls(): SleepTimerControls {
+  const ctx = useContext(SleepTimerControlsContext)
+  if (!ctx) {
+    throw new Error('useSleepTimerControls must be used within an AudioProvider')
+  }
+  return ctx
 }

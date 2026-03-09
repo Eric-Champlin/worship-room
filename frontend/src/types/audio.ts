@@ -18,8 +18,12 @@ export interface ForegroundContent {
 
 export interface SleepTimer {
   isActive: boolean
-  remainingSeconds: number
-  fadeDurationSeconds: number
+  isPaused: boolean
+  totalDurationMs: number
+  fadeDurationMs: number
+  startTime: number          // Date.now() when timer started (or last resumed)
+  pausedElapsedMs: number    // accumulated elapsed time before current running segment
+  phase: 'full-volume' | 'fading' | 'complete'
 }
 
 export interface RoutineStep {
@@ -62,6 +66,12 @@ export type AudioAction =
   | { type: 'SET_FOREGROUND_BACKGROUND_BALANCE'; payload: { balance: number } }
   | { type: 'SET_SLEEP_TIMER'; payload: SleepTimer | null }
   | { type: 'TICK_TIMER' }
+  | { type: 'START_SLEEP_TIMER'; payload: { totalDurationMs: number; fadeDurationMs: number } }
+  | { type: 'PAUSE_SLEEP_TIMER' }
+  | { type: 'RESUME_SLEEP_TIMER' }
+  | { type: 'CANCEL_SLEEP_TIMER' }
+  | { type: 'COMPLETE_SLEEP_TIMER' }
+  | { type: 'UPDATE_TIMER_PHASE'; payload: { phase: SleepTimer['phase'] } }
   | { type: 'OPEN_DRAWER' }
   | { type: 'CLOSE_DRAWER' }
   | { type: 'START_ROUTINE'; payload: AudioRoutine }

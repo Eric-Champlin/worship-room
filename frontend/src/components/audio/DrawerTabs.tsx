@@ -1,16 +1,14 @@
 import { useState, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
+import { useAudioState } from './AudioProvider'
 import { MixerTabContent } from './MixerTabContent'
+import { TimerTabContent } from './TimerTabContent'
 
 const TABS = ['Mixer', 'Timer', 'Saved'] as const
 type TabId = (typeof TABS)[number]
 
-const TAB_PLACEHOLDERS: Record<Exclude<TabId, 'Mixer'>, string> = {
-  Timer: 'Set a sleep timer',
-  Saved: 'Your saved mixes and routines',
-}
-
 export function DrawerTabs() {
+  const { sleepTimer } = useAudioState()
   const [activeTab, setActiveTab] = useState<TabId>('Mixer')
   const tabRefs = useRef<Map<TabId, HTMLButtonElement>>(new Map())
 
@@ -66,7 +64,19 @@ export function DrawerTabs() {
                 : 'text-text-light hover:text-white/70',
             )}
           >
-            {tab}
+            <span className="relative">
+              {tab}
+              {tab === 'Timer' && sleepTimer?.isActive && (
+                <>
+                  <span
+                    className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-primary"
+                    aria-hidden="true"
+                    data-testid="timer-notification-dot"
+                  />
+                  <span className="sr-only"> (timer active)</span>
+                </>
+              )}
+            </span>
           </button>
         ))}
       </div>
@@ -81,10 +91,12 @@ export function DrawerTabs() {
       >
         {activeTab === 'Mixer' ? (
           <MixerTabContent />
+        ) : activeTab === 'Timer' ? (
+          <TimerTabContent />
         ) : (
           <div className="flex flex-1 items-center justify-center p-6">
             <p className="text-sm text-white/50">
-              {TAB_PLACEHOLDERS[activeTab]}
+              Your saved mixes and routines
             </p>
           </div>
         )}

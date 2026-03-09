@@ -277,27 +277,191 @@ describe('audioReducer', () => {
     })
   })
 
-  describe('TICK_TIMER', () => {
-    it('decrements remaining seconds', () => {
+  describe('TICK_TIMER (legacy)', () => {
+    it('returns state unchanged (backward-compat no-op)', () => {
       const state = stateWith({
-        sleepTimer: { isActive: true, remainingSeconds: 10, fadeDurationSeconds: 5 },
+        sleepTimer: {
+          isActive: true,
+          isPaused: false,
+          totalDurationMs: 60000,
+          fadeDurationMs: 10000,
+          startTime: Date.now(),
+          pausedElapsedMs: 0,
+          phase: 'full-volume',
+        },
       })
       const result = audioReducer(state, { type: 'TICK_TIMER' })
-      expect(result.sleepTimer?.remainingSeconds).toBe(9)
+      expect(result).toBe(state)
+    })
+  })
+
+  describe('START_SLEEP_TIMER', () => {
+    it('creates active timer with correct fields', () => {
+      const before = Date.now()
+      const result = audioReducer(initialAudioState, {
+        type: 'START_SLEEP_TIMER',
+        payload: { totalDurationMs: 3600000, fadeDurationMs: 600000 },
+      })
+      expect(result.sleepTimer).not.toBeNull()
+      expect(result.sleepTimer!.isActive).toBe(true)
+      expect(result.sleepTimer!.isPaused).toBe(false)
+      expect(result.sleepTimer!.totalDurationMs).toBe(3600000)
+      expect(result.sleepTimer!.fadeDurationMs).toBe(600000)
+      expect(result.sleepTimer!.startTime).toBeGreaterThanOrEqual(before)
+      expect(result.sleepTimer!.pausedElapsedMs).toBe(0)
+      expect(result.sleepTimer!.phase).toBe('full-volume')
+    })
+  })
+
+  describe('PAUSE_SLEEP_TIMER', () => {
+    it('sets isPaused and accumulates elapsed time', () => {
+      const startTime = Date.now() - 5000
+      const state = stateWith({
+        sleepTimer: {
+          isActive: true,
+          isPaused: false,
+          totalDurationMs: 60000,
+          fadeDurationMs: 10000,
+          startTime,
+          pausedElapsedMs: 0,
+          phase: 'full-volume',
+        },
+      })
+      const result = audioReducer(state, { type: 'PAUSE_SLEEP_TIMER' })
+      expect(result.sleepTimer!.isPaused).toBe(true)
+      expect(result.sleepTimer!.pausedElapsedMs).toBeGreaterThanOrEqual(5000)
     })
 
-    it('stops everything when timer reaches 0', () => {
+    it('does nothing when no timer active', () => {
+      const result = audioReducer(initialAudioState, { type: 'PAUSE_SLEEP_TIMER' })
+      expect(result.sleepTimer).toBeNull()
+    })
+  })
+
+  describe('RESUME_SLEEP_TIMER', () => {
+    it('clears pause state and sets new startTime', () => {
       const state = stateWith({
-        sleepTimer: { isActive: true, remainingSeconds: 1, fadeDurationSeconds: 5 },
+        sleepTimer: {
+          isActive: true,
+          isPaused: true,
+          totalDurationMs: 60000,
+          fadeDurationMs: 10000,
+          startTime: Date.now() - 10000,
+          pausedElapsedMs: 8000,
+          phase: 'full-volume',
+        },
+      })
+      const before = Date.now()
+      const result = audioReducer(state, { type: 'RESUME_SLEEP_TIMER' })
+      expect(result.sleepTimer!.isPaused).toBe(false)
+      expect(result.sleepTimer!.startTime).toBeGreaterThanOrEqual(before)
+      expect(result.sleepTimer!.pausedElapsedMs).toBe(8000)
+    })
+
+    it('does nothing when not paused', () => {
+      const state = stateWith({
+        sleepTimer: {
+          isActive: true,
+          isPaused: false,
+          totalDurationMs: 60000,
+          fadeDurationMs: 10000,
+          startTime: Date.now(),
+          pausedElapsedMs: 0,
+          phase: 'full-volume',
+        },
+      })
+      const result = audioReducer(state, { type: 'RESUME_SLEEP_TIMER' })
+      expect(result.sleepTimer).toBe(state.sleepTimer)
+    })
+  })
+
+  describe('CANCEL_SLEEP_TIMER', () => {
+    it('clears sleepTimer to null', () => {
+      const state = stateWith({
+        sleepTimer: {
+          isActive: true,
+          isPaused: false,
+          totalDurationMs: 60000,
+          fadeDurationMs: 10000,
+          startTime: Date.now(),
+          pausedElapsedMs: 0,
+          phase: 'full-volume',
+        },
+      })
+      const result = audioReducer(state, { type: 'CANCEL_SLEEP_TIMER' })
+      expect(result.sleepTimer).toBeNull()
+    })
+  })
+
+  describe('COMPLETE_SLEEP_TIMER', () => {
+    it('clears timer, pauses audio, keeps pillVisible', () => {
+      const state = stateWith({
+        sleepTimer: {
+          isActive: true,
+          isPaused: false,
+          totalDurationMs: 60000,
+          fadeDurationMs: 10000,
+          startTime: Date.now() - 60000,
+          pausedElapsedMs: 0,
+          phase: 'fading',
+        },
         isPlaying: true,
         pillVisible: true,
         activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
       })
-      const result = audioReducer(state, { type: 'TICK_TIMER' })
+      const result = audioReducer(state, { type: 'COMPLETE_SLEEP_TIMER' })
       expect(result.sleepTimer).toBeNull()
       expect(result.isPlaying).toBe(false)
-      expect(result.pillVisible).toBe(false)
-      expect(result.activeSounds).toHaveLength(0)
+      expect(result.pillVisible).toBe(true)
+    })
+  })
+
+  describe('UPDATE_TIMER_PHASE', () => {
+    it('updates phase field', () => {
+      const state = stateWith({
+        sleepTimer: {
+          isActive: true,
+          isPaused: false,
+          totalDurationMs: 60000,
+          fadeDurationMs: 10000,
+          startTime: Date.now(),
+          pausedElapsedMs: 0,
+          phase: 'full-volume',
+        },
+      })
+      const result = audioReducer(state, {
+        type: 'UPDATE_TIMER_PHASE',
+        payload: { phase: 'fading' },
+      })
+      expect(result.sleepTimer!.phase).toBe('fading')
+    })
+
+    it('does nothing when no timer', () => {
+      const result = audioReducer(initialAudioState, {
+        type: 'UPDATE_TIMER_PHASE',
+        payload: { phase: 'fading' },
+      })
+      expect(result.sleepTimer).toBeNull()
+    })
+  })
+
+  describe('STOP_ALL clears sleepTimer', () => {
+    it('clears sleepTimer along with everything else', () => {
+      const state = stateWith({
+        sleepTimer: {
+          isActive: true,
+          isPaused: false,
+          totalDurationMs: 60000,
+          fadeDurationMs: 10000,
+          startTime: Date.now(),
+          pausedElapsedMs: 0,
+          phase: 'full-volume',
+        },
+        isPlaying: true,
+        pillVisible: true,
+      })
+      const result = audioReducer(state, { type: 'STOP_ALL' })
+      expect(result.sleepTimer).toBeNull()
     })
   })
 

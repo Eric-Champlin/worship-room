@@ -388,4 +388,104 @@ describe('AudioEngineService', () => {
       expect(service.isBufferCached('rain')).toBe(true)
     })
   })
+
+  // ── scheduleSleepFade ──────────────────────────────────────────────
+
+  describe('scheduleSleepFade', () => {
+    it('schedules smart fade on foreground + ambient', async () => {
+      service.ensureContext()
+      service.playForeground('/audio/scripture/psalm23.mp3')
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+
+      service.scheduleSleepFade(60, true, true)
+
+      // Foreground gain: ramp to 0 at 60% of 60s = 36s
+      const fgGain = mockCtx.createGain.mock.results[1]!.value
+      expect(fgGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0, 60 * 0.6)
+
+      // Ambient gain: hold at 40% (24s), ramp to 0 at 60s
+      const ambientGain = mockCtx.createGain.mock.results[2]!.value
+      const rampCalls = ambientGain.gain.linearRampToValueAtTime.mock.calls
+      const lastRamp = rampCalls[rampCalls.length - 1]
+      expect(lastRamp[0]).toBe(0)
+      expect(lastRamp[1]).toBe(60)
+    })
+
+    it('uses full-duration linear fade with only ambient', async () => {
+      service.ensureContext()
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+
+      service.scheduleSleepFade(30, false, true)
+
+      const ambientGain = mockCtx.createGain.mock.results[1]!.value
+      const rampCalls = ambientGain.gain.linearRampToValueAtTime.mock.calls
+      const lastRamp = rampCalls[rampCalls.length - 1]
+      expect(lastRamp[0]).toBe(0)
+      expect(lastRamp[1]).toBe(30)
+    })
+
+    it('uses full-duration linear fade with only foreground', () => {
+      service.ensureContext()
+      service.playForeground('/audio/scripture/psalm23.mp3')
+
+      service.scheduleSleepFade(30, true, false)
+
+      const fgGain = mockCtx.createGain.mock.results[1]!.value
+      expect(fgGain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0, 30)
+    })
+
+    it('does nothing if no audio context', () => {
+      // Don't call ensureContext
+      expect(() => service.scheduleSleepFade(30, true, true)).not.toThrow()
+    })
+  })
+
+  // ── freezeFades ────────────────────────────────────────────────────
+
+  describe('freezeFades', () => {
+    it('cancels scheduled values and returns current gains', async () => {
+      service.ensureContext()
+      service.playForeground('/audio/scripture/psalm23.mp3')
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+
+      const result = service.freezeFades()
+
+      // Foreground gain: cancelScheduledValues was called
+      const fgGain = mockCtx.createGain.mock.results[1]!.value
+      expect(fgGain.gain.cancelScheduledValues).toHaveBeenCalled()
+
+      // Ambient gain: cancelScheduledValues was called
+      const ambientGain = mockCtx.createGain.mock.results[2]!.value
+      expect(ambientGain.gain.cancelScheduledValues).toHaveBeenCalled()
+
+      expect(result.foregroundGain).toBeTypeOf('number')
+      expect(result.ambientGains).toBeInstanceOf(Map)
+      expect(result.ambientGains.has('rain')).toBe(true)
+    })
+  })
+
+  // ── breatheUpAmbient ───────────────────────────────────────────────
+
+  describe('breatheUpAmbient', () => {
+    it('ramps each sound to stored volume', async () => {
+      service.ensureContext()
+      await service.addSound('rain', '/audio/rain.mp3', 0.6)
+      await service.addSound('wind', '/audio/wind.mp3', 0.4)
+
+      service.breatheUpAmbient(5000)
+
+      // Each sound gain should ramp to its stored volume
+      const rainGain = mockCtx.createGain.mock.results[1]!.value
+      const rainRampCalls = rainGain.gain.linearRampToValueAtTime.mock.calls
+      const lastRainRamp = rainRampCalls[rainRampCalls.length - 1]
+      expect(lastRainRamp[0]).toBe(0.6)
+      expect(lastRainRamp[1]).toBe(5) // 5000ms / 1000
+
+      const windGain = mockCtx.createGain.mock.results[2]!.value
+      const windRampCalls = windGain.gain.linearRampToValueAtTime.mock.calls
+      const lastWindRamp = windRampCalls[windRampCalls.length - 1]
+      expect(lastWindRamp[0]).toBe(0.4)
+      expect(lastWindRamp[1]).toBe(5)
+    })
+  })
 })

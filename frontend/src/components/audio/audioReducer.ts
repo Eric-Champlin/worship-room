@@ -94,6 +94,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         drawerOpen: false,
         currentSceneName: null,
         activeRoutine: null,
+        sleepTimer: null,
       }
     }
 
@@ -160,24 +161,9 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
     }
 
     case 'TICK_TIMER': {
-      if (!state.sleepTimer || !state.sleepTimer.isActive) return state
-      const remaining = state.sleepTimer.remainingSeconds - 1
-      if (remaining <= 0) {
-        return {
-          ...state,
-          sleepTimer: null,
-          activeSounds: [],
-          foregroundContent: null,
-          isPlaying: false,
-          pillVisible: false,
-          drawerOpen: false,
-          currentSceneName: null,
-        }
-      }
-      return {
-        ...state,
-        sleepTimer: { ...state.sleepTimer, remainingSeconds: remaining },
-      }
+      // Legacy action kept for backward compat — no-op with new wall-clock timer.
+      // Timer logic now lives in useSleepTimer hook.
+      return state
     }
 
     case 'OPEN_DRAWER': {
@@ -229,6 +215,73 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
 
     case 'SET_SCENE_NAME': {
       return { ...state, currentSceneName: action.payload.sceneName }
+    }
+
+    case 'START_SLEEP_TIMER': {
+      return {
+        ...state,
+        sleepTimer: {
+          isActive: true,
+          isPaused: false,
+          totalDurationMs: action.payload.totalDurationMs,
+          fadeDurationMs: action.payload.fadeDurationMs,
+          startTime: Date.now(),
+          pausedElapsedMs: 0,
+          phase: 'full-volume',
+        },
+      }
+    }
+
+    case 'PAUSE_SLEEP_TIMER': {
+      if (!state.sleepTimer || !state.sleepTimer.isActive) return state
+      const now = Date.now()
+      return {
+        ...state,
+        sleepTimer: {
+          ...state.sleepTimer,
+          isPaused: true,
+          pausedElapsedMs:
+            state.sleepTimer.pausedElapsedMs + (now - state.sleepTimer.startTime),
+        },
+      }
+    }
+
+    case 'RESUME_SLEEP_TIMER': {
+      if (!state.sleepTimer || !state.sleepTimer.isActive || !state.sleepTimer.isPaused) return state
+      return {
+        ...state,
+        sleepTimer: {
+          ...state.sleepTimer,
+          isPaused: false,
+          startTime: Date.now(),
+        },
+      }
+    }
+
+    case 'CANCEL_SLEEP_TIMER': {
+      return { ...state, sleepTimer: null }
+    }
+
+    case 'COMPLETE_SLEEP_TIMER': {
+      return {
+        ...state,
+        sleepTimer: null,
+        isPlaying: false,
+        foregroundContent: state.foregroundContent
+          ? { ...state.foregroundContent, isPlaying: false }
+          : null,
+      }
+    }
+
+    case 'UPDATE_TIMER_PHASE': {
+      if (!state.sleepTimer) return state
+      return {
+        ...state,
+        sleepTimer: {
+          ...state.sleepTimer,
+          phase: action.payload.phase,
+        },
+      }
     }
 
     default:

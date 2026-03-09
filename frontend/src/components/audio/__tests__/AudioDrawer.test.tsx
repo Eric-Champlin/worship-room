@@ -135,9 +135,9 @@ describe('AudioDrawer', () => {
     // Default tab is Mixer — shows MixerTabContent with the active sound "Rain"
     expect(screen.getByText('Rain')).toBeInTheDocument()
 
-    // Switch to Timer
+    // Switch to Timer — shows TimerTabContent with setup UI
     await user.click(screen.getByRole('tab', { name: 'Timer' }))
-    expect(screen.getByText('Set a sleep timer')).toBeInTheDocument()
+    expect(screen.getByText('Sleep Timer')).toBeInTheDocument()
 
     // Switch to Saved
     await user.click(screen.getByRole('tab', { name: 'Saved' }))

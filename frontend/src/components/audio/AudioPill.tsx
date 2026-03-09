@@ -1,4 +1,4 @@
-import { Play, Pause } from 'lucide-react'
+import { Play, Pause, Clock } from 'lucide-react'
 import { useAudioState, useAudioDispatch } from './AudioProvider'
 import { WaveformBars } from './WaveformBars'
 import { ProgressArc } from './ProgressArc'
@@ -52,6 +52,10 @@ export function AudioPill() {
         <span className="max-w-[150px] truncate text-sm font-medium text-white">
           {state.foregroundContent?.title ?? state.currentSceneName}
         </span>
+      )}
+
+      {state.sleepTimer?.isActive && !state.sleepTimer.isPaused && (
+        <Clock size={14} className="shrink-0 text-white/50" aria-hidden="true" />
       )}
     </div>
   )
