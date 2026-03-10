@@ -18,11 +18,34 @@ let mockState: AudioState = {
   pillVisible: true,
   drawerOpen: true,
   currentSceneName: null,
+  currentSceneId: null,
 }
 
 vi.mock('../AudioProvider', () => ({
   useAudioState: () => mockState,
   useAudioDispatch: () => mockDispatch,
+}))
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+
+vi.mock('@/hooks/useSavedMixes', () => ({
+  useSavedMixes: () => ({
+    mixes: [],
+    saveMix: vi.fn(),
+    updateName: vi.fn(),
+    deleteMix: vi.fn(),
+    duplicateMix: vi.fn(),
+  }),
+}))
+
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
+}))
+
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
 }))
 
 // ── Tests ────────────────────────────────────────────────────────────

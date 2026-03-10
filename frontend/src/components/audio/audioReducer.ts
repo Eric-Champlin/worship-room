@@ -12,6 +12,7 @@ export const initialAudioState: AudioState = {
   pillVisible: false,
   drawerOpen: false,
   currentSceneName: null,
+  currentSceneId: null,
 }
 
 export function audioReducer(state: AudioState, action: AudioAction): AudioState {
@@ -93,6 +94,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         pillVisible: false,
         drawerOpen: false,
         currentSceneName: null,
+        currentSceneId: null,
         activeRoutine: null,
         sleepTimer: null,
       }
@@ -214,7 +216,11 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
     }
 
     case 'SET_SCENE_NAME': {
-      return { ...state, currentSceneName: action.payload.sceneName }
+      return {
+        ...state,
+        currentSceneName: action.payload.sceneName,
+        currentSceneId: action.payload.sceneId,
+      }
     }
 
     case 'START_SLEEP_TIMER': {

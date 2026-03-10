@@ -4,6 +4,25 @@ import { describe, it, expect, vi } from 'vitest'
 import { ScriptureSessionCard } from '../ScriptureSessionCard'
 import type { ScriptureReading } from '@/types/music'
 
+// ── Mocks for FavoriteButton dependencies ────────────────────────────
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
+}))
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+vi.mock('@/hooks/useFavorites', () => ({
+  useFavorites: () => ({
+    favorites: [],
+    isFavorite: () => false,
+    toggleFavorite: vi.fn(),
+    isLoading: false,
+  }),
+}))
+
 const MOCK_READING: ScriptureReading = {
   id: 'psalm-23',
   title: 'The Lord is My Shepherd',
@@ -51,5 +70,12 @@ describe('ScriptureSessionCard', () => {
   it('shows voice gender indicator', () => {
     render(<ScriptureSessionCard reading={MOCK_READING} onPlay={vi.fn()} />)
     expect(screen.getByText('Male voice')).toBeInTheDocument()
+  })
+
+  it('renders heart icon with type "sleep_session"', () => {
+    render(<ScriptureSessionCard reading={MOCK_READING} onPlay={vi.fn()} />)
+
+    const heartButton = screen.getByRole('button', { name: /favorites/ })
+    expect(heartButton).toBeInTheDocument()
   })
 })

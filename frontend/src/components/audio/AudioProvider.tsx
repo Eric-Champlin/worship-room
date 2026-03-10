@@ -13,6 +13,8 @@ import { audioReducer, initialAudioState } from './audioReducer'
 import { AudioEngineService } from '@/lib/audio-engine'
 import { AudioPill } from './AudioPill'
 import { AudioDrawer } from './AudioDrawer'
+import { ListeningLogger } from './ListeningLogger'
+import { SessionAutoSave } from './SessionAutoSave'
 import { useSleepTimer } from '@/hooks/useSleepTimer'
 import type { SleepTimerControls } from '@/hooks/useSleepTimer'
 
@@ -221,6 +223,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
           <SleepTimerBridge>
             {children}
             <AudioDrawer />
+            <ListeningLogger />
+            <SessionAutoSave />
           </SleepTimerBridge>
           <AudioPill />
           <div

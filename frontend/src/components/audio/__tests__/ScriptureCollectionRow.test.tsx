@@ -3,6 +3,18 @@ import { describe, it, expect, vi } from 'vitest'
 import { ScriptureCollectionRow } from '../ScriptureCollectionRow'
 import type { ScriptureCollection } from '@/types/music'
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
+}))
+
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+
 const MOCK_COLLECTION: ScriptureCollection = {
   id: 'psalms-of-peace',
   name: 'Psalms of Peace',

@@ -49,6 +49,7 @@ export interface AudioState {
   pillVisible: boolean
   drawerOpen: boolean
   currentSceneName: string | null
+  currentSceneId: string | null
 }
 
 export type AudioAction =
@@ -77,4 +78,4 @@ export type AudioAction =
   | { type: 'START_ROUTINE'; payload: AudioRoutine }
   | { type: 'ADVANCE_ROUTINE_STEP' }
   | { type: 'SKIP_ROUTINE_STEP' }
-  | { type: 'SET_SCENE_NAME'; payload: { sceneName: string | null } }
+  | { type: 'SET_SCENE_NAME'; payload: { sceneName: string | null; sceneId: string | null } }

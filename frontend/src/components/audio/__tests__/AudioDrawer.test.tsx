@@ -6,6 +6,10 @@ import { AudioProvider, useAudioDispatch } from '../AudioProvider'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+
 vi.mock('@/lib/audio-engine', () => {
   class MockAudioEngineService {
     ensureContext = vi.fn()
@@ -142,7 +146,7 @@ describe('AudioDrawer', () => {
     // Switch to Saved
     await user.click(screen.getByRole('tab', { name: 'Saved' }))
     expect(
-      screen.getByText('Your saved mixes and routines'),
+      screen.getByText('No saved mixes yet'),
     ).toBeInTheDocument()
   })
 

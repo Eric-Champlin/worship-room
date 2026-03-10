@@ -49,6 +49,7 @@ vi.mock('@/components/audio/AudioProvider', () => ({
     sleepTimer: null,
     activeRoutine: null,
     currentSceneName: null,
+    currentSceneId: null,
   }),
   useAudioDispatch: () => mockDispatch,
   useAudioEngine: () => mockEngine,

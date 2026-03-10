@@ -4,6 +4,7 @@ import { useAudioState, useAudioDispatch } from './AudioProvider'
 import { VolumeSlider } from './VolumeSlider'
 import { ForegroundProgressBar } from './ForegroundProgressBar'
 import { ScriptureTextPanel } from './ScriptureTextPanel'
+import { SaveMixButton } from './SaveMixButton'
 import { SCENE_PRESETS } from '@/data/scenes'
 import { cn } from '@/lib/utils'
 
@@ -60,6 +61,9 @@ export function DrawerNowPlaying() {
           {state.isPlaying ? <Pause size={24} /> : <Play size={24} />}
         </button>
       </div>
+
+      {/* Save Mix */}
+      <SaveMixButton />
 
       {/* Master Volume */}
       <VolumeSlider

@@ -88,7 +88,7 @@ export function useScenePlayer(): UseScenePlayerReturn {
       // 4. Load scene sounds with staggered fade-in
       setIsLoading(true)
       setActiveSceneId(scene.id)
-      dispatch({ type: 'SET_SCENE_NAME', payload: { sceneName: scene.name } })
+      dispatch({ type: 'SET_SCENE_NAME', payload: { sceneName: scene.name, sceneId: scene.id } })
 
       const loadPromises = scene.sounds.map((sceneSound, index) => {
         const catalogSound = SOUND_BY_ID.get(sceneSound.soundId)
@@ -187,7 +187,7 @@ export function useScenePlayer(): UseScenePlayerReturn {
     // Restore previous scene name (or null for manual mix)
     dispatch({
       type: 'SET_SCENE_NAME',
-      payload: { sceneName: prev.sceneName },
+      payload: { sceneName: prev.sceneName, sceneId: prev.sceneId },
     })
     setActiveSceneId(prev.sceneId)
 

@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { useAmbientSearch } from '@/hooks/useAmbientSearch'
 import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { useSoundToggle } from '@/hooks/useSoundToggle'
+import { useAuth } from '@/hooks/useAuth'
+import { useSavedMixes } from '@/hooks/useSavedMixes'
 import { useAudioState } from './AudioProvider'
 import { FEATURED_SCENE_IDS, SCENE_BY_ID } from '@/data/scenes'
 import { AmbientSearchBar } from './AmbientSearchBar'
@@ -11,6 +13,7 @@ import { SceneCard } from './SceneCard'
 import { SoundGrid } from './SoundGrid'
 import { SoundCard } from './SoundCard'
 import { SceneUndoToast } from './SceneUndoToast'
+import { SavedMixCard } from '@/components/music/SavedMixCard'
 import type { ScenePreset, Sound } from '@/types/music'
 
 function SearchResults({
@@ -96,6 +99,8 @@ export function AmbientBrowser() {
   const search = useAmbientSearch()
   const scenePlayer = useScenePlayer()
   const soundToggle = useSoundToggle()
+  const { isLoggedIn } = useAuth()
+  const { mixes } = useSavedMixes()
   const activeSounds = useAudioState().activeSounds
   const activeSoundIds = useMemo(
     () => new Set(activeSounds.map((s) => s.soundId)),
@@ -139,6 +144,22 @@ export function AmbientBrowser() {
         />
       ) : (
         <>
+          {/* Your Saved Mixes (logged-in users with mixes only) */}
+          {isLoggedIn && mixes.length > 0 && (
+            <section aria-label="Your saved mixes">
+              <h2 className="mb-3 text-sm font-semibold text-white">
+                Your Saved Mixes
+              </h2>
+              <div className="scrollbar-none flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
+                {mixes.map((mix) => (
+                  <div key={mix.id} className="min-w-[200px] flex-shrink-0 sm:min-w-0">
+                    <SavedMixCard mix={mix} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Featured Scenes */}
           <section aria-label="Featured scenes">
             <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">

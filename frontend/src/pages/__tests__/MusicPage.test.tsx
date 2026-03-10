@@ -18,6 +18,11 @@ vi.mock('@/components/audio/AudioProvider', () => ({
     pillVisible: false,
     drawerOpen: false,
   })),
+  useAudioDispatch: vi.fn(() => vi.fn()),
+  useAudioEngine: vi.fn(() => ({
+    addSound: vi.fn().mockResolvedValue(undefined),
+    removeSound: vi.fn(),
+  })),
 }))
 
 vi.mock('@/hooks/useMusicHints', () => ({
@@ -27,6 +32,42 @@ vi.mock('@/hooks/useMusicHints', () => ({
     dismissSoundGridHint: vi.fn(),
     dismissPillHint: vi.fn(),
   })),
+}))
+
+vi.mock('@/hooks/useScenePlayer', () => ({
+  useScenePlayer: vi.fn(() => ({
+    activeSceneId: null,
+    loadScene: vi.fn(),
+    isLoading: false,
+    undoAvailable: false,
+    undoSceneSwitch: vi.fn(),
+  })),
+}))
+
+vi.mock('@/hooks/useTimeOfDayRecommendations', () => ({
+  useTimeOfDayRecommendations: vi.fn(() => ({
+    heading: 'Suggested for You',
+    items: [],
+    timeBracket: 'morning',
+  })),
+}))
+
+vi.mock('@/services/storage-service', () => ({
+  storageService: {
+    setAuthState: vi.fn(),
+    decodeSharedMix: vi.fn(() => null),
+    getFavorites: vi.fn(() => []),
+    getSavedMixes: vi.fn(() => []),
+    getRecentSessions: vi.fn(() => []),
+    getListeningHistory: vi.fn(() => []),
+    getSessionState: vi.fn(() => null),
+    clearSessionState: vi.fn(),
+  },
+  StorageQuotaError: class StorageQuotaError extends Error {},
+}))
+
+vi.mock('@/data/sound-catalog', () => ({
+  SOUND_BY_ID: new Map(),
 }))
 
 vi.mock('@/components/audio/AmbientBrowser', () => ({

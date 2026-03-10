@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 import { useAudioState } from './AudioProvider'
 import { MixerTabContent } from './MixerTabContent'
 import { TimerTabContent } from './TimerTabContent'
+import { SavedTabContent } from './SavedTabContent'
 
 const TABS = ['Mixer', 'Timer', 'Saved'] as const
 type TabId = (typeof TABS)[number]
@@ -94,11 +95,7 @@ export function DrawerTabs() {
         ) : activeTab === 'Timer' ? (
           <TimerTabContent />
         ) : (
-          <div className="flex flex-1 items-center justify-center p-6">
-            <p className="text-sm text-white/50">
-              Your saved mixes and routines
-            </p>
-          </div>
+          <SavedTabContent />
         )}
       </div>
     </div>

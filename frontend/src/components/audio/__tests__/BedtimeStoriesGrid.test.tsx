@@ -2,6 +2,18 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { BedtimeStoriesGrid } from '../BedtimeStoriesGrid'
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
+}))
+
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+
 describe('BedtimeStoriesGrid', () => {
   it('renders "Bedtime Stories" heading', () => {
     render(<BedtimeStoriesGrid onPlay={vi.fn()} />)

@@ -73,11 +73,22 @@ vi.mock('../AudioProvider', () => ({
     sleepTimer: null,
     activeRoutine: null,
     currentSceneName: null,
+    currentSceneId: null,
   }),
 }))
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+
+vi.mock('@/hooks/useSavedMixes', () => ({
+  useSavedMixes: () => ({
+    mixes: [],
+    saveMix: vi.fn(),
+    updateName: vi.fn(),
+    deleteMix: vi.fn(),
+    duplicateMix: vi.fn(),
+  }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -86,6 +97,15 @@ vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
 
 vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
+}))
+
+vi.mock('@/hooks/useFavorites', () => ({
+  useFavorites: () => ({
+    favorites: [],
+    isFavorite: () => false,
+    toggleFavorite: vi.fn(),
+    isLoading: false,
+  }),
 }))
 
 // ── Tests ────────────────────────────────────────────────────────────
@@ -201,9 +221,9 @@ describe('AmbientBrowser', () => {
     render(<AmbientBrowser />)
 
     const allScenesSection = screen.getByLabelText('All scenes')
-    // Should have fewer than 8 scenes
+    // Each scene has 2 buttons (play + favorite), so multiply by 2
     const buttons = allScenesSection.querySelectorAll('button')
-    expect(buttons.length).toBe(peacefulScenes.length)
+    expect(buttons.length).toBe(peacefulScenes.length * 2)
     expect(peacefulScenes.length).toBeLessThan(8)
   })
 

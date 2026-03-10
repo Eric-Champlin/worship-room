@@ -37,6 +37,10 @@ vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
   useAuthModal: () => ({ openAuthModal: mockOpenAuthModal }),
 }))
 
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+
 vi.mock('@/components/audio/AudioProvider', () => ({
   useAudioState: () => ({
     activeSounds: [],
@@ -49,6 +53,7 @@ vi.mock('@/components/audio/AudioProvider', () => ({
     sleepTimer: null,
     activeRoutine: null,
     currentSceneName: null,
+    currentSceneId: null,
   }),
   useAudioDispatch: () => mockDispatch,
   useAudioEngine: () => mockEngine,

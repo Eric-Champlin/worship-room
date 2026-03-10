@@ -1,18 +1,28 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { PageHero } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
 import { AmbientBrowser } from '@/components/audio/AmbientBrowser'
-import { useAudioState } from '@/components/audio/AudioProvider'
+import { useAudioState, useAudioDispatch, useAudioEngine } from '@/components/audio/AudioProvider'
 import { SleepBrowse } from '@/components/audio/SleepBrowse'
 import { LofiCrossReference } from '@/components/music/LofiCrossReference'
 import { MusicHint } from '@/components/music/MusicHint'
 import { PersonalizationSection } from '@/components/music/PersonalizationSection'
+import { ResumePrompt } from '@/components/music/ResumePrompt'
 import { RecentlyAddedSection } from '@/components/music/RecentlyAddedSection'
+import { SharedMixHero } from '@/components/music/SharedMixHero'
+import { TimeOfDaySection } from '@/components/music/TimeOfDaySection'
 import { WorshipPlaylistsTab } from '@/components/music/WorshipPlaylistsTab'
 import { useMusicHints } from '@/hooks/useMusicHints'
+import { useScenePlayer } from '@/hooks/useScenePlayer'
+import { useTimeOfDayRecommendations } from '@/hooks/useTimeOfDayRecommendations'
+import { storageService } from '@/services/storage-service'
+import { SCENE_BY_ID } from '@/data/scenes'
+import { SOUND_BY_ID } from '@/data/sound-catalog'
+import { AUDIO_BASE_URL } from '@/constants/audio'
 import { cn } from '@/lib/utils'
+import type { SharedMixData } from '@/types/storage'
 
 const TABS = [
   { id: 'playlists', label: 'Worship Playlists', shortLabel: 'Playlists' },
@@ -29,7 +39,67 @@ function isValidTab(value: string | null): value is MusicTabId {
 export function MusicPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const rawTab = searchParams.get('tab')
-  const activeTab: MusicTabId = isValidTab(rawTab) ? rawTab : 'ambient'
+  const { timeBracket } = useTimeOfDayRecommendations()
+  const defaultTab: MusicTabId = timeBracket === 'night' ? 'sleep' : 'ambient'
+  const activeTab: MusicTabId = isValidTab(rawTab) ? rawTab : defaultTab
+
+  // Shared mix URL parsing
+  const dispatch = useAudioDispatch()
+  const engine = useAudioEngine()
+  const [sharedMixData, setSharedMixData] = useState<SharedMixData | null>(null)
+
+  const rawMix = searchParams.get('mix')
+  const decodedMix = useMemo(() => {
+    if (!rawMix) return null
+    const data = storageService.decodeSharedMix(rawMix)
+    if (!data) return null
+    // Validate all sound IDs exist
+    const allValid = data.sounds.every((s) => SOUND_BY_ID.has(s.id))
+    return allValid ? data : null
+  }, [rawMix])
+
+  useEffect(() => {
+    if (decodedMix) {
+      setSharedMixData(decodedMix)
+      // Force ambient tab when shared mix present
+      if (rawTab !== 'ambient') {
+        setSearchParams({ tab: 'ambient', mix: rawMix! }, { replace: true })
+      }
+    }
+  }, [decodedMix, rawTab, rawMix, setSearchParams])
+
+  function handlePlaySharedMix() {
+    if (!sharedMixData) return
+
+    // Stagger-add shared mix sounds
+    sharedMixData.sounds.forEach((s, index) => {
+      const catalogSound = SOUND_BY_ID.get(s.id)
+      if (!catalogSound) return
+
+      setTimeout(() => {
+        const url = AUDIO_BASE_URL + catalogSound.filename
+        engine?.addSound(s.id, url, s.v)
+        dispatch({
+          type: 'ADD_SOUND',
+          payload: {
+            soundId: s.id,
+            volume: s.v,
+            label: catalogSound.name,
+            url,
+          },
+        })
+      }, index * 200)
+    })
+
+    // Hide hero and clean URL
+    setSharedMixData(null)
+    setSearchParams({ tab: 'ambient' }, { replace: true })
+  }
+
+  function handleDismissSharedMix() {
+    setSharedMixData(null)
+    setSearchParams({ tab: 'ambient' }, { replace: true })
+  }
 
   // Sticky tab bar shadow on scroll
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -74,6 +144,19 @@ export function MusicPage() {
     [setSearchParams],
   )
 
+  // Scene player for time-of-day recommendations
+  const scenePlayer = useScenePlayer()
+
+  const handlePlayScene = useCallback(
+    (sceneId: string) => {
+      const scene = SCENE_BY_ID.get(sceneId)
+      if (!scene) return
+      switchTab('ambient')
+      scenePlayer.loadScene(scene)
+    },
+    [switchTab, scenePlayer],
+  )
+
   // Tab underline position
   const activeTabIndex = TABS.findIndex((t) => t.id === activeTab)
 
@@ -113,11 +196,20 @@ export function MusicPage() {
           subtitle="Worship, rest, and find peace in God's presence."
         />
 
+        {/* Resume prompt (logged-in with saved session only) */}
+        <ResumePrompt />
+
         {/* Personalization (logged-in with data only) */}
         <PersonalizationSection />
 
         {/* Recently Added (hidden at launch) */}
         <RecentlyAddedSection />
+
+        {/* Time-of-day recommendations */}
+        <TimeOfDaySection
+          onPlayScene={handlePlayScene}
+          onSwitchTab={switchTab}
+        />
 
         {/* Sentinel for sticky tab bar shadow */}
         <div ref={sentinelRef} aria-hidden="true" />
@@ -192,6 +284,13 @@ export function MusicPage() {
           aria-labelledby="tab-ambient"
           hidden={activeTab !== 'ambient'}
         >
+          {sharedMixData && (
+            <SharedMixHero
+              mixData={sharedMixData}
+              onPlay={handlePlaySharedMix}
+              onDismiss={handleDismissSharedMix}
+            />
+          )}
           <div className="bg-hero-dark px-4 py-8 sm:px-6">
             <div className="relative mx-auto max-w-6xl">
               {/* Sound grid hint */}

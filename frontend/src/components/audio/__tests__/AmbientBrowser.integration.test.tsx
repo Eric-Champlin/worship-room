@@ -48,6 +48,25 @@ vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: mockShowToast }),
 }))
 
+vi.mock('@/hooks/useSavedMixes', () => ({
+  useSavedMixes: () => ({
+    mixes: [],
+    saveMix: vi.fn(),
+    updateName: vi.fn(),
+    deleteMix: vi.fn(),
+    duplicateMix: vi.fn(),
+  }),
+}))
+
+vi.mock('@/hooks/useFavorites', () => ({
+  useFavorites: () => ({
+    favorites: [],
+    isFavorite: () => false,
+    toggleFavorite: vi.fn(),
+    isLoading: false,
+  }),
+}))
+
 vi.mock('../AudioProvider', () => ({
   useAudioState: () => ({
     activeSounds: mockActiveSounds,
@@ -60,6 +79,7 @@ vi.mock('../AudioProvider', () => ({
     sleepTimer: null,
     activeRoutine: null,
     currentSceneName: null,
+    currentSceneId: null,
   }),
   useAudioDispatch: () => mockDispatch,
   useAudioEngine: () => mockEngine,
@@ -215,8 +235,9 @@ describe('AmbientBrowser Integration', () => {
     render(<AmbientBrowser />)
 
     const allScenesSection = screen.getByLabelText('All scenes')
+    // Each scene has 2 buttons (play + favorite), so multiply by 2
     const sceneButtons = allScenesSection.querySelectorAll('button')
-    expect(sceneButtons.length).toBe(sleepScenes.length)
+    expect(sceneButtons.length).toBe(sleepScenes.length * 2)
     expect(sleepScenes.length).toBeLessThan(8)
   })
 

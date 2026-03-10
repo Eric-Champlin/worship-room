@@ -4,6 +4,25 @@ import { describe, it, expect, vi } from 'vitest'
 import { SceneCard } from '../SceneCard'
 import type { ScenePreset } from '@/types/music'
 
+// ── Mocks for FavoriteButton dependencies ────────────────────────────
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
+}))
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+vi.mock('@/hooks/useFavorites', () => ({
+  useFavorites: () => ({
+    favorites: [],
+    isFavorite: () => false,
+    toggleFavorite: vi.fn(),
+    isLoading: false,
+  }),
+}))
+
 const GARDEN_SCENE: ScenePreset = {
   id: 'garden-of-gethsemane',
   name: 'Garden of Gethsemane',
@@ -27,8 +46,8 @@ describe('SceneCard', () => {
   it('has role="button" and aria-label', () => {
     render(<SceneCard scene={GARDEN_SCENE} isActive={false} onPlay={vi.fn()} />)
 
-    const button = screen.getByRole('button')
-    expect(button).toHaveAttribute('aria-label', expect.stringContaining('Play Garden of Gethsemane'))
+    const button = screen.getByRole('button', { name: /Play Garden of Gethsemane/ })
+    expect(button).toBeInTheDocument()
   })
 
   it('calls onPlay when clicked', async () => {
@@ -36,15 +55,31 @@ describe('SceneCard', () => {
     const onPlay = vi.fn()
     render(<SceneCard scene={GARDEN_SCENE} isActive={false} onPlay={onPlay} />)
 
-    await user.click(screen.getByRole('button'))
+    await user.click(screen.getByRole('button', { name: /Play Garden of Gethsemane/ }))
     expect(onPlay).toHaveBeenCalledWith(GARDEN_SCENE)
   })
 
   it('shows active indicator when active', () => {
     render(<SceneCard scene={GARDEN_SCENE} isActive={true} onPlay={vi.fn()} />)
 
-    const button = screen.getByRole('button')
+    const button = screen.getByRole('button', { name: /Play Garden of Gethsemane/ })
     expect(button.className).toContain('ring-2')
     expect(button.className).toContain('ring-primary/60')
+  })
+
+  it('renders heart icon for favorites', () => {
+    render(<SceneCard scene={GARDEN_SCENE} isActive={false} onPlay={vi.fn()} />)
+
+    const heartButton = screen.getByRole('button', { name: /favorites/ })
+    expect(heartButton).toBeInTheDocument()
+  })
+
+  it('heart click does not trigger onPlay', async () => {
+    const user = userEvent.setup()
+    const onPlay = vi.fn()
+    render(<SceneCard scene={GARDEN_SCENE} isActive={false} onPlay={onPlay} />)
+
+    await user.click(screen.getByRole('button', { name: /favorites/ }))
+    expect(onPlay).not.toHaveBeenCalled()
   })
 })

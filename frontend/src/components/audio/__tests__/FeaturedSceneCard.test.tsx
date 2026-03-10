@@ -4,6 +4,25 @@ import { describe, it, expect, vi } from 'vitest'
 import { FeaturedSceneCard } from '../FeaturedSceneCard'
 import type { ScenePreset } from '@/types/music'
 
+// ── Mocks for FavoriteButton dependencies ────────────────────────────
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
+}))
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+vi.mock('@/hooks/useFavorites', () => ({
+  useFavorites: () => ({
+    favorites: [],
+    isFavorite: () => false,
+    toggleFavorite: vi.fn(),
+    isLoading: false,
+  }),
+}))
+
 const GARDEN_SCENE: ScenePreset = {
   id: 'garden-of-gethsemane',
   name: 'Garden of Gethsemane',
@@ -37,7 +56,7 @@ describe('FeaturedSceneCard', () => {
     const onPlay = vi.fn()
     render(<FeaturedSceneCard scene={GARDEN_SCENE} isActive={false} onPlay={onPlay} />)
 
-    await user.click(screen.getByRole('button'))
+    await user.click(screen.getByRole('button', { name: /Play Garden of Gethsemane/ }))
     expect(onPlay).toHaveBeenCalledWith(GARDEN_SCENE)
   })
 })

@@ -24,6 +24,7 @@ vi.mock('../AudioProvider', () => ({
     sleepTimer: null,
     activeRoutine: null,
     currentSceneName: null,
+    currentSceneId: null,
   }),
   useAudioDispatch: () => mockDispatch,
 }))
