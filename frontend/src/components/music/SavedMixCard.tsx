@@ -151,7 +151,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
               aria-label={`Actions for ${mix.name}`}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              className="rounded-md p-1 text-text-light transition-colors hover:bg-gray-100 hover:text-text-dark"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-text-light transition-colors hover:bg-gray-100 hover:text-text-dark"
             >
               <MoreVertical size={16} />
             </button>

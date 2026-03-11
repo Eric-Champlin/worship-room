@@ -469,6 +469,7 @@ describe('audioReducer', () => {
     const routineState = stateWith({
       activeRoutine: {
         routineId: 'r1',
+        routineName: 'Test Routine',
         currentStepIndex: 0,
         phase: 'playing' as const,
         sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
@@ -518,6 +519,7 @@ describe('audioReducer', () => {
     it('sets activeRoutine with phase playing', () => {
       const routine = {
         routineId: 'r1',
+        routineName: 'Test Routine',
         currentStepIndex: 0,
         phase: 'playing' as const,
         sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
@@ -538,6 +540,7 @@ describe('audioReducer', () => {
       const state = stateWith({
         activeRoutine: {
           routineId: 'r1',
+          routineName: 'Test Routine',
           currentStepIndex: 0,
           phase: 'playing' as const,
           sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
@@ -554,6 +557,7 @@ describe('audioReducer', () => {
       const state = stateWith({
         activeRoutine: {
           routineId: 'r1',
+          routineName: 'Test Routine',
           currentStepIndex: 0,
           phase: 'playing' as const,
           sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
@@ -577,6 +581,7 @@ describe('audioReducer', () => {
       const state = stateWith({
         activeRoutine: {
           routineId: 'r1',
+          routineName: 'Test Routine',
           currentStepIndex: 0,
           phase: 'playing' as const,
           sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
@@ -595,6 +600,7 @@ describe('audioReducer', () => {
       const state = stateWith({
         activeRoutine: {
           routineId: 'r1',
+          routineName: 'Test Routine',
           currentStepIndex: 0,
           phase: 'playing' as const,
           sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },

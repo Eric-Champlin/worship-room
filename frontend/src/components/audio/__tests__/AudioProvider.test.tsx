@@ -113,17 +113,22 @@ describe('AudioProvider', () => {
     expect(screen.getByTestId('pill-visible').textContent).toBe('true')
   })
 
-  it('renders aria-live region', () => {
+  it('renders aria-live regions (polite and assertive)', () => {
     render(
       <TestApp>
         <StateDisplay />
       </TestApp>,
     )
 
-    expect(screen.getByTestId('audio-aria-live')).toBeInTheDocument()
-    expect(screen.getByTestId('audio-aria-live')).toHaveAttribute(
+    expect(screen.getByTestId('announce-polite')).toBeInTheDocument()
+    expect(screen.getByTestId('announce-polite')).toHaveAttribute(
       'aria-live',
       'polite',
+    )
+    expect(screen.getByTestId('announce-assertive')).toBeInTheDocument()
+    expect(screen.getByTestId('announce-assertive')).toHaveAttribute(
+      'aria-live',
+      'assertive',
     )
   })
 

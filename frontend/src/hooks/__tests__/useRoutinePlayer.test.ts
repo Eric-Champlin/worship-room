@@ -133,6 +133,7 @@ describe('useRoutinePlayer', () => {
     mockAudioState = {
       activeRoutine: {
         routineId: 'r1',
+        routineName: 'Test Routine',
         currentStepIndex: 0,
         phase: 'playing',
         sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
@@ -156,6 +157,7 @@ describe('useRoutinePlayer', () => {
     mockAudioState = {
       activeRoutine: {
         routineId: 'r1',
+        routineName: 'Test Routine',
         currentStepIndex: 0,
         phase: 'playing',
         sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
@@ -179,6 +181,7 @@ describe('useRoutinePlayer', () => {
     mockAudioState = {
       activeRoutine: {
         routineId: 'r1',
+        routineName: 'Test Routine',
         currentStepIndex: 0,
         phase: 'playing',
         sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },

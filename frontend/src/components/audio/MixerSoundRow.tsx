@@ -19,21 +19,21 @@ export function MixerSoundRow({
   const Icon = getSoundIcon(iconName)
 
   return (
-    <div className="flex items-center gap-2">
+    <div role="listitem" className="flex items-center gap-2">
       <Icon size={16} className="shrink-0 text-white/70" aria-hidden="true" />
       <span className="min-w-0 truncate text-sm text-white/90">{sound.label}</span>
       <div className="ml-auto flex-1">
         <VolumeSlider
           value={Math.round(sound.volume * 100)}
           onChange={(v) => onVolumeChange(sound.soundId, v / 100)}
-          ariaLabel={`${sound.label} volume, ${Math.round(sound.volume * 100)}%`}
+          ariaLabel={`${sound.label} volume`}
         />
       </div>
       <button
         type="button"
         aria-label={`Remove ${sound.label}`}
         onClick={() => onRemove(sound.soundId)}
-        className="flex h-11 w-11 shrink-0 items-center justify-center text-white/40 transition-colors hover:text-white/70"
+        className="flex h-11 w-11 shrink-0 items-center justify-center text-white/60 transition-colors hover:text-white"
       >
         <X size={14} aria-hidden="true" />
       </button>

@@ -17,7 +17,8 @@ export function VolumeSlider({ value, onChange, label, ariaLabel }: VolumeSlider
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         aria-label={ariaLabel}
-        className="audio-slider h-1 w-full cursor-pointer appearance-none rounded-full"
+        aria-valuetext={`${value} percent`}
+        className="audio-slider h-1 min-h-[44px] w-full cursor-pointer appearance-none rounded-full"
         style={{
           background: `linear-gradient(to right, #6D28D9 0%, #6D28D9 ${value}%, #374151 ${value}%, #374151 100%)`,
         }}

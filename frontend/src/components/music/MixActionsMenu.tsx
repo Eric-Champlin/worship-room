@@ -46,6 +46,22 @@ export function MixActionsMenu({
     first?.focus()
   }, [])
 
+  function handleMenuKeyDown(e: React.KeyboardEvent) {
+    const menuItems = menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]')
+    if (!menuItems?.length) return
+    const current = Array.from(menuItems).indexOf(document.activeElement as HTMLElement)
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const next = (current + 1) % menuItems.length
+      menuItems[next].focus()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      const prev = (current - 1 + menuItems.length) % menuItems.length
+      menuItems[prev].focus()
+    }
+  }
+
   const items = [
     { label: 'Load', action: onLoad },
     { label: 'Edit Name', action: onEditName },
@@ -59,6 +75,7 @@ export function MixActionsMenu({
       ref={menuRef}
       role="menu"
       aria-label={`Actions for ${mixName}`}
+      onKeyDown={handleMenuKeyDown}
       className="absolute right-0 top-full z-20 mt-1 w-36 rounded-lg border border-white/15 bg-hero-mid py-1 shadow-lg"
     >
       {items.map((item) => (
@@ -67,7 +84,7 @@ export function MixActionsMenu({
           type="button"
           role="menuitem"
           onClick={() => item.action()}
-          className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 ${
+          className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-lt ${
             item.danger ? 'text-danger' : 'text-white/80'
           }`}
         >

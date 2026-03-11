@@ -31,9 +31,9 @@ export function MixerTabContent() {
 
   if (activeSounds.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <MousePointerClick className="text-white/30" size={32} />
-        <p className="text-sm text-white/50">
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center" role="status">
+        <MousePointerClick className="text-white/30" size={32} aria-hidden="true" />
+        <p className="text-sm text-white/60">
           Tap a sound on the Ambient Sounds page to start your mix
         </p>
       </div>
@@ -42,6 +42,7 @@ export function MixerTabContent() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
+      <div role="list" aria-label="Active sounds">
       {activeSounds.map((sound) => {
         const catalogEntry = SOUND_BY_ID.get(sound.soundId)
         return (
@@ -54,6 +55,7 @@ export function MixerTabContent() {
           />
         )
       })}
+      </div>
       <button
         type="button"
         className="mt-4 flex items-center gap-2 rounded text-sm text-primary-lt transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"

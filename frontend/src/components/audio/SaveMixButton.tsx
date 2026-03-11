@@ -46,7 +46,11 @@ export function SaveMixButton() {
 
   const [showInput, setShowInput] = useState(false)
   const [name, setName] = useState('')
+  const [announcement, setAnnouncement] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const announcementTimerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => () => clearTimeout(announcementTimerRef.current), [])
 
   const hasActiveSounds = state.activeSounds.length > 0
   const modified = isMixModified(state.activeSounds, state.currentSceneName)
@@ -83,6 +87,9 @@ export function SaveMixButton() {
       state.activeSounds.map((s) => ({ soundId: s.soundId, volume: s.volume })),
     )
     showToast('Mix saved!')
+    setAnnouncement(`Mix saved as ${trimmed}`)
+    clearTimeout(announcementTimerRef.current)
+    announcementTimerRef.current = setTimeout(() => setAnnouncement(''), 3000)
     setShowInput(false)
     setName('')
   }
@@ -103,6 +110,7 @@ export function SaveMixButton() {
 
   return (
     <div className="space-y-2">
+      <span className="sr-only" aria-live="polite">{announcement}</span>
       {!showInput && (
         <button
           type="button"
@@ -133,14 +141,14 @@ export function SaveMixButton() {
               type="button"
               onClick={handleSubmit}
               disabled={!name.trim()}
-              className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50"
+              className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
             >
               Save
             </button>
             <button
               type="button"
               onClick={handleCancel}
-              className="px-3 py-1.5 text-sm text-white/50 transition-colors hover:text-white/80"
+              className="px-3 py-1.5 text-sm text-white/50 transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
             >
               Cancel
             </button>

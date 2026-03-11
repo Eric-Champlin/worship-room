@@ -46,7 +46,7 @@ export function DrawerTabs() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Tab bar */}
-      <div className="flex border-b border-white/10" role="tablist">
+      <div className="flex border-b border-white/10" role="tablist" aria-label="Audio controls">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -87,7 +87,6 @@ export function DrawerTabs() {
         id={`panel-${activeTab}`}
         role="tabpanel"
         aria-labelledby={`tab-${activeTab}`}
-        tabIndex={0}
         className="flex flex-1 overflow-y-auto"
       >
         {activeTab === 'Mixer' ? (

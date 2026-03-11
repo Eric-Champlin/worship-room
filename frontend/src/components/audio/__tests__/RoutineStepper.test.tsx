@@ -18,6 +18,7 @@ vi.mock('../AudioProvider', () => ({
 
 const THREE_STEP_ROUTINE: AudioRoutine = {
   routineId: 'r1',
+  routineName: 'Test Routine',
   currentStepIndex: 0,
   phase: 'playing',
   sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },

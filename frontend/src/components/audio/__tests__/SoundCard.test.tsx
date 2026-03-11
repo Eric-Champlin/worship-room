@@ -63,9 +63,9 @@ describe('SoundCard', () => {
         onToggle={() => {}}
       />,
     )
-    // Loader2 renders with animate-spin class
+    // Loader2 renders with motion-safe:animate-spin class
     const btn = screen.getByRole('button')
-    expect(btn.querySelector('.animate-spin')).toBeInTheDocument()
+    expect(btn.querySelector('.motion-safe\\:animate-spin')).toBeInTheDocument()
   })
 
   it('shows orange error dot when hasError=true and not loading', () => {

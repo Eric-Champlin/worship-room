@@ -370,6 +370,7 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
       // Map RoutineDefinition to AudioRoutine
       const audioRoutine: AudioRoutine = {
         routineId: routine.id,
+        routineName: routine.name,
         currentStepIndex: 0,
         phase: 'playing',
         sleepTimerConfig: routine.sleepTimer,

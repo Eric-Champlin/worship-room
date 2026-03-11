@@ -243,6 +243,7 @@ describe('useForegroundPlayer', () => {
     mockIsLoggedIn = true
     mockActiveRoutine = {
       routineId: 'r1',
+      routineName: 'Test Routine',
       currentStepIndex: 0,
       phase: 'playing',
       sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },

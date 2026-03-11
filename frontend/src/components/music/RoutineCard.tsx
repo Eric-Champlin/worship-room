@@ -69,6 +69,22 @@ export function RoutineCard({
     onStart()
   }
 
+  function handleMenuKeyDown(e: React.KeyboardEvent) {
+    const items = menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]')
+    if (!items?.length) return
+    const current = Array.from(items).indexOf(document.activeElement as HTMLElement)
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const next = (current + 1) % items.length
+      items[next].focus()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      const prev = (current - 1 + items.length) % items.length
+      items[prev].focus()
+    }
+  }
+
   const handleClone = () => {
     setMenuOpen(false)
     if (!isLoggedIn) {
@@ -141,18 +157,24 @@ export function RoutineCard({
             aria-label="Routine options"
             aria-haspopup="menu"
             aria-expanded={menuOpen}
-            className="rounded-lg p-2 text-text-light transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-light transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           >
             <MoreVertical size={18} aria-hidden="true" />
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+            <div
+              role="menu"
+              aria-label="Routine options"
+              onKeyDown={handleMenuKeyDown}
+              className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+            >
               {routine.isTemplate ? (
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={handleClone}
-                  className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50"
+                  className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                 >
                   Clone &amp; Customize
                 </button>
@@ -161,11 +183,12 @@ export function RoutineCard({
                   {onEdit && (
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={() => {
                         setMenuOpen(false)
                         onEdit()
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50"
+                      className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                     >
                       Edit
                     </button>
@@ -173,11 +196,12 @@ export function RoutineCard({
                   {onDuplicate && (
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={() => {
                         setMenuOpen(false)
                         onDuplicate()
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50"
+                      className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                     >
                       Duplicate
                     </button>
@@ -185,11 +209,12 @@ export function RoutineCard({
                   {onDelete && (
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={() => {
                         setMenuOpen(false)
                         onDelete()
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-danger hover:bg-gray-50"
+                      className="w-full px-4 py-2 text-left text-sm text-danger hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                     >
                       Delete
                     </button>

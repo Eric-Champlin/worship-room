@@ -9,6 +9,7 @@ interface SoundCardProps {
   isLoading: boolean
   hasError: boolean
   onToggle: (sound: Sound) => void
+  tabIndex?: number
 }
 
 function getAriaLabel(sound: Sound, isActive: boolean, isLoading: boolean, hasError: boolean): string {
@@ -18,7 +19,7 @@ function getAriaLabel(sound: Sound, isActive: boolean, isLoading: boolean, hasEr
   return `${sound.name} — tap to add to mix`
 }
 
-export function SoundCard({ sound, isActive, isLoading, hasError, onToggle }: SoundCardProps) {
+export function SoundCard({ sound, isActive, isLoading, hasError, onToggle, tabIndex }: SoundCardProps) {
   const Icon = getSoundIcon(sound.lucideIcon)
 
   return (
@@ -27,6 +28,8 @@ export function SoundCard({ sound, isActive, isLoading, hasError, onToggle }: So
       aria-pressed={isActive}
       aria-busy={isLoading}
       aria-label={getAriaLabel(sound, isActive, isLoading, hasError)}
+      tabIndex={tabIndex}
+      data-sound-id={sound.id}
       onClick={() => onToggle(sound)}
       className={cn(
         'relative flex w-20 h-20 sm:w-[90px] sm:h-[90px] flex-col items-center justify-center gap-1 rounded-xl bg-[rgba(15,10,30,0.3)] transition-shadow',
@@ -53,7 +56,7 @@ export function SoundCard({ sound, isActive, isLoading, hasError, onToggle }: So
           <Loader2
             size={20}
             aria-hidden="true"
-            className="absolute animate-spin text-white/70"
+            className="absolute motion-safe:animate-spin text-white/70"
           />
         )}
       </div>

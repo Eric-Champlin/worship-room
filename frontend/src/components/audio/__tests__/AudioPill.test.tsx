@@ -138,7 +138,7 @@ describe('AudioPill', () => {
   it('does not render when pillVisible is false', () => {
     renderPill()
     expect(
-      screen.queryByRole('complementary', { name: /audio player controls/i }),
+      screen.queryByRole('button', { name: /open audio controls/i }),
     ).not.toBeInTheDocument()
   })
 
@@ -149,7 +149,7 @@ describe('AudioPill', () => {
     await user.click(screen.getByTestId('add-sound'))
 
     expect(
-      screen.getByRole('complementary', { name: /audio player controls/i }),
+      screen.getByRole('button', { name: /open audio controls/i }),
     ).toBeInTheDocument()
   })
 
@@ -198,9 +198,9 @@ describe('AudioPill', () => {
 
     await user.click(screen.getByTestId('add-sound'))
 
-    const pill = screen.getByRole('complementary')
+    const openBtn = screen.getByRole('button', { name: /open audio controls/i })
     // 3 bars are divs inside the waveform container (aria-hidden)
-    const barContainer = pill.querySelector('[aria-hidden="true"]')
+    const barContainer = openBtn.querySelector('[aria-hidden="true"]')
     expect(barContainer).toBeInTheDocument()
     expect(barContainer?.children).toHaveLength(3)
   })

@@ -72,7 +72,7 @@ export function DrawerNowPlaying() {
           dispatch({ type: 'SET_MASTER_VOLUME', payload: { volume: v / 100 } })
         }
         label="Volume"
-        ariaLabel={`Master volume, ${Math.round(state.masterVolume * 100)}%`}
+        ariaLabel="Master volume"
       />
 
       {/* Foreground progress (conditional) */}
@@ -82,7 +82,7 @@ export function DrawerNowPlaying() {
       {state.foregroundContent && (
         <div className="flex items-center gap-2">
           {state.foregroundContent.voiceGender && (
-            <span className="text-xs text-white/50">
+            <span className="text-xs text-white/60">
               {state.foregroundContent.voiceGender === 'male' ? 'Male' : 'Female'} voice
             </span>
           )}
@@ -95,10 +95,10 @@ export function DrawerNowPlaying() {
                 aria-controls="scripture-text-panel"
                 aria-label={isTextOpen ? 'Hide scripture text' : 'Show scripture text'}
                 className={cn(
-                  'ml-auto rounded-md p-1.5 transition-colors',
+                  'ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md transition-colors',
                   isTextOpen
                     ? 'bg-primary/20 text-primary-lt'
-                    : 'text-white/50 hover:text-white/80',
+                    : 'text-white/60 hover:text-white/80',
                 )}
               >
                 <BookOpen size={16} />
@@ -121,7 +121,7 @@ export function DrawerNowPlaying() {
       {/* Balance slider (conditional) */}
       {state.activeSounds.length > 0 && state.foregroundContent && (
         <div className="space-y-1">
-          <div className="flex justify-between text-xs text-white/50">
+          <div className="flex justify-between text-xs text-white/60">
             <span>Voice</span>
             <span>Ambient</span>
           </div>
@@ -134,7 +134,7 @@ export function DrawerNowPlaying() {
               })
             }
             label=""
-            ariaLabel={`Foreground background balance, ${Math.round(state.foregroundBackgroundBalance * 100)}%`}
+            ariaLabel="Voice and ambient balance"
           />
         </div>
       )}

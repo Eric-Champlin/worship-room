@@ -17,6 +17,7 @@ import { ListeningLogger } from './ListeningLogger'
 import { SessionAutoSave } from './SessionAutoSave'
 import { useSleepTimer } from '@/hooks/useSleepTimer'
 import type { SleepTimerControls } from '@/hooks/useSleepTimer'
+import { useAnnounce } from '@/hooks/useAnnounce'
 
 type AudioDispatch = (action: AudioAction) => void
 
@@ -29,8 +30,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(audioReducer, initialAudioState)
   const engineRef = useRef<AudioEngineService | null>(null)
   const originalTitleRef = useRef('')
-  const ariaLiveRef = useRef<HTMLDivElement>(null)
-  const announcementTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const { announce, AnnouncerRegion } = useAnnounce()
+  const stateRef = useRef(state)
+  stateRef.current = state
   const location = useLocation()
   const prevPathRef = useRef(location.pathname)
 
@@ -42,27 +44,43 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     return engineRef.current
   }
 
-  // Enhanced dispatch that syncs side effects to the audio engine
+  // Enhanced dispatch that syncs side effects to the audio engine + screen reader announcements
   const enhancedDispatch = useCallback<AudioDispatch>((action) => {
     const engine = getEngine()
+    const current = stateRef.current
 
     switch (action.type) {
       // ADD_SOUND: no engine call — useSoundToggle calls engine.addSound() directly
       // and dispatches ADD_SOUND only after async load succeeds.
-      case 'REMOVE_SOUND':
-        engine.removeSound(action.payload.soundId)
+      case 'ADD_SOUND': {
+        const count = current.activeSounds.length + 1
+        announce(`${action.payload.label} added to mix. ${count} of 6 sounds active.`)
         break
+      }
+      case 'REMOVE_SOUND': {
+        engine.removeSound(action.payload.soundId)
+        const removed = current.activeSounds.find((s) => s.soundId === action.payload.soundId)
+        const count = current.activeSounds.length - 1
+        if (removed) {
+          announce(`${removed.label} removed from mix. ${count} of 6 sounds active.`)
+        }
+        break
+      }
       case 'SET_SOUND_VOLUME':
         engine.setSoundVolume(action.payload.soundId, action.payload.volume)
+        // Do NOT announce volume changes during drag
         break
       case 'SET_MASTER_VOLUME':
         engine.setMasterVolume(action.payload.volume)
+        // Do NOT announce volume changes during drag
         break
       case 'PLAY_ALL':
         engine.resumeAll()
+        announce('Audio resumed.')
         break
       case 'PAUSE_ALL':
         engine.pauseAll()
+        announce('Audio paused.')
         break
       case 'STOP_ALL':
         engine.stopAll()
@@ -73,10 +91,61 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       case 'SET_FOREGROUND_BACKGROUND_BALANCE':
         engine.setForegroundBalance(action.payload.balance)
         break
+      case 'SET_SCENE_NAME':
+        if (action.payload.sceneName) {
+          const soundCount = current.activeSounds.length
+          announce(`Now playing: ${action.payload.sceneName}. ${soundCount} sound${soundCount === 1 ? '' : 's'} active.`)
+        }
+        break
+      case 'START_FOREGROUND':
+        announce(`Now playing: ${action.payload.title}.`)
+        break
+      case 'START_ROUTINE': {
+        const r = action.payload
+        const firstStep = r.steps[0]
+        announce(`${r.routineName} routine started. Step 1 of ${r.steps.length}: ${firstStep?.label ?? 'Unknown'}.`)
+        break
+      }
+      case 'ADVANCE_ROUTINE_STEP': {
+        const routine = current.activeRoutine
+        if (routine) {
+          const nextIdx = routine.currentStepIndex + 1
+          const step = routine.steps[nextIdx]
+          if (step) {
+            announce(`Step ${nextIdx + 1} of ${routine.steps.length}: ${step.label}.`)
+          }
+        }
+        break
+      }
+      case 'END_ROUTINE': {
+        const routine = current.activeRoutine
+        if (routine) {
+          announce(`${routine.routineName} routine complete. Ambient continuing with sleep timer.`)
+        }
+        break
+      }
+      case 'START_SLEEP_TIMER': {
+        const totalMin = Math.round(action.payload.totalDurationMs / 60000)
+        const fadeMin = Math.round(action.payload.fadeDurationMs / 60000)
+        announce(`Sleep timer set for ${totalMin} minutes with ${fadeMin} minute fade.`)
+        break
+      }
+      case 'COMPLETE_SLEEP_TIMER':
+        announce('Sleep timer complete. Audio paused.', 'assertive')
+        break
+      case 'UPDATE_TIMER_PHASE':
+        if (action.payload.phase === 'fading') {
+          const timer = current.sleepTimer
+          if (timer) {
+            const fadeMin = Math.round(timer.fadeDurationMs / 60000)
+            announce(`Sleep timer fading in ${fadeMin} minutes.`, 'assertive')
+          }
+        }
+        break
     }
 
     dispatch(action)
-  }, [])
+  }, [announce])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -174,47 +243,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     prevPathRef.current = location.pathname
   }, [location.pathname, state.drawerOpen])
 
-  // aria-live announcements (debounced)
-  useEffect(() => {
-    if (!ariaLiveRef.current) return
-    if (!state.pillVisible) {
-      ariaLiveRef.current.textContent = ''
-      return
-    }
-
-    clearTimeout(announcementTimerRef.current)
-    announcementTimerRef.current = setTimeout(() => {
-      if (!ariaLiveRef.current) return
-      const parts: string[] = []
-      if (state.foregroundContent) {
-        parts.push(
-          `Now playing: ${state.foregroundContent.title}.`,
-        )
-      }
-      if (state.currentSceneName) {
-        parts.push(
-          `Scene: ${state.currentSceneName}.`,
-        )
-      }
-      if (state.activeSounds.length > 0) {
-        parts.push(
-          `${state.activeSounds.length} sound${state.activeSounds.length === 1 ? '' : 's'} active.`,
-        )
-      }
-      if (!state.isPlaying && state.pillVisible) {
-        parts.push('Paused.')
-      }
-      ariaLiveRef.current.textContent = parts.join(' ')
-    }, 500)
-
-    return () => clearTimeout(announcementTimerRef.current)
-  }, [
-    state.foregroundContent,
-    state.currentSceneName,
-    state.activeSounds.length,
-    state.isPlaying,
-    state.pillVisible,
-  ])
+  // Screen reader announcements are now handled via useAnnounce in enhancedDispatch
 
   return (
     <AudioStateContext.Provider value={state}>
@@ -227,12 +256,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
             <SessionAutoSave />
           </SleepTimerBridge>
           <AudioPill />
-          <div
-            ref={ariaLiveRef}
-            aria-live="polite"
-            className="sr-only"
-            data-testid="audio-aria-live"
-          />
+          <AnnouncerRegion />
         </AudioEngineContext.Provider>
       </AudioDispatchContext.Provider>
     </AudioStateContext.Provider>

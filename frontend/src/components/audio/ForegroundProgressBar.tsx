@@ -30,8 +30,9 @@ export function ForegroundProgressBar() {
             payload: { position: Number(e.target.value) },
           })
         }
-        aria-label="Foreground audio progress"
-        className="audio-slider h-1 w-full cursor-pointer appearance-none rounded-full"
+        aria-label={`${title} playback progress`}
+        aria-valuetext={`${formatTime(playbackPosition)} of ${formatTime(duration)}`}
+        className="audio-slider h-1 min-h-[44px] w-full cursor-pointer appearance-none rounded-full"
         style={{
           background:
             duration > 0
@@ -39,7 +40,7 @@ export function ForegroundProgressBar() {
               : '#374151',
         }}
       />
-      <div className="flex justify-between text-xs tabular-nums text-white/50">
+      <div className="flex justify-between text-xs tabular-nums text-white/60">
         <span>{formatTime(playbackPosition)}</span>
         <span>{formatTime(remaining)}</span>
       </div>

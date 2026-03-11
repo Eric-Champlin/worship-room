@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
@@ -21,6 +21,14 @@ export function FavoriteButton({
   const { isLoggedIn } = useAuth()
   const { isFavorite, toggleFavorite } = useFavorites()
   const [bouncing, setBouncing] = useState(false)
+  const [announcement, setAnnouncement] = useState('')
+  const announcementTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const bounceTimerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => () => {
+    clearTimeout(announcementTimerRef.current)
+    clearTimeout(bounceTimerRef.current)
+  }, [])
 
   const favorited = isFavorite(type, targetId)
 
@@ -31,7 +39,15 @@ export function FavoriteButton({
 
     if (isLoggedIn) {
       setBouncing(true)
-      setTimeout(() => setBouncing(false), 100)
+      clearTimeout(bounceTimerRef.current)
+      bounceTimerRef.current = setTimeout(() => setBouncing(false), 100)
+      setAnnouncement(
+        favorited
+          ? `${targetName} removed from favorites`
+          : `${targetName} added to favorites`,
+      )
+      clearTimeout(announcementTimerRef.current)
+      announcementTimerRef.current = setTimeout(() => setAnnouncement(''), 3000)
     }
   }
 
@@ -42,7 +58,7 @@ export function FavoriteButton({
         type="button"
         aria-label={`Sign in to add ${targetName} to favorites`}
         className={cn(
-          'flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white/30',
+          'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/20 text-white/30',
           className,
         )}
         onClick={(e) => {
@@ -56,26 +72,29 @@ export function FavoriteButton({
   }
 
   return (
-    <button
-      type="button"
-      aria-pressed={favorited}
-      aria-label={
-        favorited
-          ? `Remove ${targetName} from favorites`
-          : `Add ${targetName} to favorites`
-      }
-      onClick={handleClick}
-      className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-full bg-black/20 transition-transform duration-100',
-        favorited ? 'text-danger' : 'text-white/50',
-        bouncing && 'scale-125',
-        className,
-      )}
-    >
-      <Heart
-        className="h-5 w-5"
-        fill={favorited ? 'currentColor' : 'none'}
-      />
-    </button>
+    <>
+      <button
+        type="button"
+        aria-pressed={favorited}
+        aria-label={
+          favorited
+            ? `Remove ${targetName} from favorites`
+            : `Add ${targetName} to favorites`
+        }
+        onClick={handleClick}
+        className={cn(
+          'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/20 transition-transform duration-100',
+          favorited ? 'text-danger' : 'text-white/50',
+          bouncing && 'scale-125',
+          className,
+        )}
+      >
+        <Heart
+          className="h-5 w-5"
+          fill={favorited ? 'currentColor' : 'none'}
+        />
+      </button>
+      <span className="sr-only" aria-live="polite">{announcement}</span>
+    </>
   )
 }

@@ -37,6 +37,7 @@ export interface RoutineStep {
 
 export interface AudioRoutine {
   routineId: string
+  routineName: string
   currentStepIndex: number
   steps: RoutineStep[]
   phase: 'playing' | 'transition-gap' | 'ambient-only'
