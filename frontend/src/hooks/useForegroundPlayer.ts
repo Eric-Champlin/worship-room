@@ -18,11 +18,18 @@ export interface PendingSwitch {
   newContent: ScriptureReading | BedtimeStory
 }
 
+export interface PendingRoutineInterrupt {
+  content: ScriptureReading | BedtimeStory
+}
+
 export interface UseForegroundPlayerReturn {
   startSession: (content: ScriptureReading | BedtimeStory) => void
   pendingSwitch: PendingSwitch | null
   confirmSwitch: () => void
   cancelSwitch: () => void
+  pendingRoutineInterrupt: PendingRoutineInterrupt | null
+  confirmRoutineInterrupt: () => void
+  cancelRoutineInterrupt: () => void
 }
 
 function isScriptureReading(
@@ -39,6 +46,8 @@ export function useForegroundPlayer(): UseForegroundPlayerReturn {
   const engine = useAudioEngine()
 
   const [pendingSwitch, setPendingSwitch] = useState<PendingSwitch | null>(null)
+  const [pendingRoutineInterrupt, setPendingRoutineInterrupt] =
+    useState<PendingRoutineInterrupt | null>(null)
   const listenerCleanupRef = useRef<(() => void) | null>(null)
 
   // Clean up event listeners on unmount
@@ -61,7 +70,7 @@ export function useForegroundPlayer(): UseForegroundPlayerReturn {
       }
 
       const onEnded = () => {
-        dispatch({ type: 'PAUSE_FOREGROUND' })
+        dispatch({ type: 'FOREGROUND_ENDED' })
       }
 
       audioElement.addEventListener('timeupdate', onTimeUpdate)
@@ -109,7 +118,13 @@ export function useForegroundPlayer(): UseForegroundPlayerReturn {
         return
       }
 
-      // 2. If foreground is already playing, show confirmation
+      // 2. If routine is active, prompt before playing
+      if (audioState.activeRoutine) {
+        setPendingRoutineInterrupt({ content })
+        return
+      }
+
+      // 3. If foreground is already playing, show confirmation
       if (audioState.foregroundContent) {
         const remaining =
           audioState.foregroundContent.duration -
@@ -123,11 +138,23 @@ export function useForegroundPlayer(): UseForegroundPlayerReturn {
         return
       }
 
-      // 3. No existing foreground — play directly
+      // 4. No existing foreground — play directly
       playContent(content)
     },
-    [isLoggedIn, authModal, audioState.foregroundContent, playContent],
+    [isLoggedIn, authModal, audioState.foregroundContent, audioState.activeRoutine, playContent],
   )
+
+  const confirmRoutineInterrupt = useCallback(() => {
+    if (!pendingRoutineInterrupt) return
+    dispatch({ type: 'END_ROUTINE' })
+    const { content } = pendingRoutineInterrupt
+    setPendingRoutineInterrupt(null)
+    playContent(content)
+  }, [pendingRoutineInterrupt, dispatch, playContent])
+
+  const cancelRoutineInterrupt = useCallback(() => {
+    setPendingRoutineInterrupt(null)
+  }, [])
 
   const confirmSwitch = useCallback(() => {
     if (!pendingSwitch || !engine) return
@@ -157,5 +184,8 @@ export function useForegroundPlayer(): UseForegroundPlayerReturn {
     pendingSwitch,
     confirmSwitch,
     cancelSwitch,
+    pendingRoutineInterrupt,
+    confirmRoutineInterrupt,
+    cancelRoutineInterrupt,
   }
 }

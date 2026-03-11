@@ -20,12 +20,19 @@ interface PreviousMix {
   sceneName: string | null
 }
 
+export interface PendingRoutineInterrupt {
+  scene: ScenePreset
+}
+
 export interface UseScenePlayerReturn {
   activeSceneId: string | null
   loadScene: (scene: ScenePreset) => void
   isLoading: boolean
   undoAvailable: boolean
   undoSceneSwitch: () => void
+  pendingRoutineInterrupt: PendingRoutineInterrupt | null
+  confirmRoutineInterrupt: () => void
+  cancelRoutineInterrupt: () => void
 }
 
 export function useScenePlayer(): UseScenePlayerReturn {
@@ -38,6 +45,8 @@ export function useScenePlayer(): UseScenePlayerReturn {
   const [activeSceneId, setActiveSceneId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [undoAvailable, setUndoAvailable] = useState(false)
+  const [pendingRoutineInterrupt, setPendingRoutineInterrupt] =
+    useState<PendingRoutineInterrupt | null>(null)
 
   const previousMixRef = useRef<PreviousMix | null>(null)
   const undoTimerRef = useRef<ReturnType<typeof setTimeout>>()
@@ -51,21 +60,16 @@ export function useScenePlayer(): UseScenePlayerReturn {
     }
   }, [])
 
-  const loadScene = useCallback(
+  // Shared scene-loading logic used by both loadScene and confirmRoutineInterrupt
+  const executeSceneLoad = useCallback(
     (scene: ScenePreset) => {
-      // 1. Auth gate
-      if (!isLoggedIn) {
-        authModal?.openAuthModal('Sign in to play ambient scenes')
-        return
-      }
-
-      // 2. If same scene is already active, toggle play/pause
+      // If same scene is already active, toggle play/pause
       if (activeSceneId === scene.id) {
         dispatch({ type: audioState.isPlaying ? 'PAUSE_ALL' : 'PLAY_ALL' })
         return
       }
 
-      // 3. If audio is currently playing, store previous mix for undo
+      // If audio is currently playing, store previous mix for undo
       const hasActiveSounds = audioState.activeSounds.length > 0
       if (hasActiveSounds) {
         previousMixRef.current = {
@@ -85,7 +89,7 @@ export function useScenePlayer(): UseScenePlayerReturn {
         }
       }
 
-      // 4. Load scene sounds with staggered fade-in
+      // Load scene sounds with staggered fade-in
       setIsLoading(true)
       setActiveSceneId(scene.id)
       dispatch({ type: 'SET_SCENE_NAME', payload: { sceneName: scene.name, sceneId: scene.id } })
@@ -125,9 +129,8 @@ export function useScenePlayer(): UseScenePlayerReturn {
           setIsLoading(false)
         })
 
-      // 5. If switching (had previous sounds), set up undo window
+      // If switching (had previous sounds), set up undo window
       if (hasActiveSounds) {
-        // Clear any existing undo timer
         if (undoTimerRef.current) {
           clearTimeout(undoTimerRef.current)
         }
@@ -139,8 +142,6 @@ export function useScenePlayer(): UseScenePlayerReturn {
       }
     },
     [
-      isLoggedIn,
-      authModal,
       activeSceneId,
       audioState.activeSounds,
       audioState.isPlaying,
@@ -150,6 +151,35 @@ export function useScenePlayer(): UseScenePlayerReturn {
       engine,
     ],
   )
+
+  const loadScene = useCallback(
+    (scene: ScenePreset) => {
+      if (!isLoggedIn) {
+        authModal?.openAuthModal('Sign in to play ambient scenes')
+        return
+      }
+
+      if (audioState.activeRoutine) {
+        setPendingRoutineInterrupt({ scene })
+        return
+      }
+
+      executeSceneLoad(scene)
+    },
+    [isLoggedIn, authModal, audioState.activeRoutine, executeSceneLoad],
+  )
+
+  const confirmRoutineInterrupt = useCallback(() => {
+    if (!pendingRoutineInterrupt) return
+    dispatch({ type: 'END_ROUTINE' })
+    const { scene } = pendingRoutineInterrupt
+    setPendingRoutineInterrupt(null)
+    executeSceneLoad(scene)
+  }, [pendingRoutineInterrupt, dispatch, executeSceneLoad])
+
+  const cancelRoutineInterrupt = useCallback(() => {
+    setPendingRoutineInterrupt(null)
+  }, [])
 
   const undoSceneSwitch = useCallback(() => {
     const prev = previousMixRef.current
@@ -200,5 +230,8 @@ export function useScenePlayer(): UseScenePlayerReturn {
     isLoading,
     undoAvailable,
     undoSceneSwitch,
+    pendingRoutineInterrupt,
+    confirmRoutineInterrupt,
+    cancelRoutineInterrupt,
   }
 }

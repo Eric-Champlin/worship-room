@@ -14,6 +14,7 @@ import { SoundGrid } from './SoundGrid'
 import { SoundCard } from './SoundCard'
 import { SceneUndoToast } from './SceneUndoToast'
 import { SavedMixCard } from '@/components/music/SavedMixCard'
+import { RoutineInterruptDialog } from './RoutineInterruptDialog'
 import type { ScenePreset, Sound } from '@/types/music'
 
 function SearchResults({
@@ -212,6 +213,13 @@ export function AmbientBrowser() {
         sceneName={activeSceneName}
         onUndo={scenePlayer.undoSceneSwitch}
       />
+
+      {scenePlayer.pendingRoutineInterrupt && (
+        <RoutineInterruptDialog
+          onConfirm={scenePlayer.confirmRoutineInterrupt}
+          onCancel={scenePlayer.cancelRoutineInterrupt}
+        />
+      )}
     </div>
   )
 }

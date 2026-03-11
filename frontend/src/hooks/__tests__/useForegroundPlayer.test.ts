@@ -28,6 +28,7 @@ const mockEngine = {
 
 let mockIsLoggedIn = false
 let mockForegroundContent: AudioState['foregroundContent'] = null
+let mockActiveRoutine: AudioState['activeRoutine'] = null
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
@@ -47,7 +48,7 @@ vi.mock('@/components/audio/AudioProvider', () => ({
     foregroundContent: mockForegroundContent,
     foregroundBackgroundBalance: 0.5,
     sleepTimer: null,
-    activeRoutine: null,
+    activeRoutine: mockActiveRoutine,
     currentSceneName: null,
     currentSceneId: null,
   }),
@@ -99,6 +100,7 @@ describe('useForegroundPlayer', () => {
     vi.clearAllMocks()
     mockIsLoggedIn = false
     mockForegroundContent = null
+    mockActiveRoutine = null
   })
 
   it('calls openAuthModal when isLoggedIn is false', () => {
@@ -235,5 +237,28 @@ describe('useForegroundPlayer', () => {
 
     expect(result.current.pendingSwitch).toBeNull()
     expect(mockEngine.playForeground).not.toHaveBeenCalled()
+  })
+
+  it('sets pendingRoutineInterrupt when routine is active', () => {
+    mockIsLoggedIn = true
+    mockActiveRoutine = {
+      routineId: 'r1',
+      currentStepIndex: 0,
+      phase: 'playing',
+      sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
+      steps: [
+        { stepId: 's1', type: 'scene', contentId: 'still-waters', label: 'Still Waters', icon: 'Mountain', transitionGapMinutes: 0 },
+      ],
+    }
+
+    const { result } = renderHook(() => useForegroundPlayer())
+
+    act(() => {
+      result.current.startSession(MOCK_SCRIPTURE)
+    })
+
+    expect(result.current.pendingRoutineInterrupt).not.toBeNull()
+    expect(mockEngine.playForeground).not.toHaveBeenCalled()
+    expect(mockDispatch).not.toHaveBeenCalled()
   })
 })

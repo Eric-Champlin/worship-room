@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { PersonalizationSection } from '../PersonalizationSection'
 
 // ── Mocks ────────────────────────────────────────────────────────────
@@ -78,7 +79,42 @@ vi.mock('@/data/sound-catalog', () => ({
   ]),
 }))
 
+const mockStartRoutine = vi.fn()
+
+vi.mock('@/hooks/useRoutinePlayer', () => ({
+  useRoutinePlayer: () => ({
+    startRoutine: mockStartRoutine,
+    skipStep: vi.fn(),
+    endRoutine: vi.fn(),
+    pendingInterrupt: null,
+    confirmInterrupt: vi.fn(),
+    cancelInterrupt: vi.fn(),
+    isRoutineActive: false,
+  }),
+}))
+
+let mockUserRoutines: { id: string; name: string; steps: { id: string; type: string; contentId: string; transitionGapMinutes: number }[]; sleepTimer: { durationMinutes: number; fadeDurationMinutes: number }; isTemplate: boolean; createdAt: string; updatedAt: string }[] = []
+
+vi.mock('@/services/storage-service', () => ({
+  storageService: {
+    getRoutines: () => mockUserRoutines,
+    setAuthState: vi.fn(),
+  },
+}))
+
+vi.mock('@/data/music/routines', () => ({
+  ROUTINE_TEMPLATES: [],
+}))
+
 // ── Tests ────────────────────────────────────────────────────────────
+
+function renderSection() {
+  return render(
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <PersonalizationSection />
+    </MemoryRouter>,
+  )
+}
 
 describe('PersonalizationSection', () => {
   beforeEach(() => {
@@ -86,16 +122,17 @@ describe('PersonalizationSection', () => {
     mockFavorites = []
     mockMixes = []
     mockLastSession = null
+    mockUserRoutines = []
   })
 
   it('hidden for logged-out users', () => {
-    const { container } = render(<PersonalizationSection />)
+    const { container } = renderSection()
     expect(container.innerHTML).toBe('')
   })
 
   it('hidden when logged in but no data', () => {
     mockIsLoggedIn = true
-    const { container } = render(<PersonalizationSection />)
+    const { container } = renderSection()
     expect(container.innerHTML).toBe('')
   })
 
@@ -110,7 +147,7 @@ describe('PersonalizationSection', () => {
       completed: false,
     }
 
-    render(<PersonalizationSection />)
+    renderSection()
     expect(screen.getByText('Continue Listening')).toBeInTheDocument()
     expect(screen.getByText('Morning Mist')).toBeInTheDocument()
     expect(screen.getByText('Ambient Scene')).toBeInTheDocument()
@@ -122,7 +159,7 @@ describe('PersonalizationSection', () => {
       { type: 'scene', targetId: 'morning-mist', createdAt: new Date().toISOString() },
     ]
 
-    render(<PersonalizationSection />)
+    renderSection()
     expect(screen.getByText('Your Favorites')).toBeInTheDocument()
     expect(screen.getByText('Morning Mist')).toBeInTheDocument()
     expect(screen.getByText('Scene')).toBeInTheDocument()
@@ -143,7 +180,7 @@ describe('PersonalizationSection', () => {
       },
     ]
 
-    render(<PersonalizationSection />)
+    renderSection()
     expect(screen.getByText('Your Saved Mixes')).toBeInTheDocument()
     expect(screen.getByText('Rainy Night')).toBeInTheDocument()
     expect(screen.getByText('Gentle Rain, Ocean Waves')).toBeInTheDocument()
@@ -160,9 +197,52 @@ describe('PersonalizationSection', () => {
       completed: false,
     }
 
-    render(<PersonalizationSection />)
+    renderSection()
     expect(
       screen.getByLabelText('Personalized recommendations'),
     ).toBeInTheDocument()
+  })
+
+  it('renders "Your Routines" for logged-in user with routines', () => {
+    mockIsLoggedIn = true
+    mockUserRoutines = [
+      {
+        id: 'r1',
+        name: 'My Routine',
+        steps: [
+          { id: 's1', type: 'scene', contentId: 'still-waters', transitionGapMinutes: 0 },
+        ],
+        sleepTimer: { durationMinutes: 30, fadeDurationMinutes: 10 },
+        isTemplate: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ]
+
+    renderSection()
+    expect(screen.getByText('Your Routines')).toBeInTheDocument()
+    expect(screen.getByText('My Routine')).toBeInTheDocument()
+    expect(screen.getByText('1 step')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Manage Routines' })).toHaveAttribute('href', '/music/routines')
+  })
+
+  it('hides "Your Routines" for logged-out user', () => {
+    mockIsLoggedIn = false
+    mockUserRoutines = [
+      {
+        id: 'r1',
+        name: 'My Routine',
+        steps: [
+          { id: 's1', type: 'scene', contentId: 'still-waters', transitionGapMinutes: 0 },
+        ],
+        sleepTimer: { durationMinutes: 30, fadeDurationMinutes: 10 },
+        isTemplate: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ]
+
+    const { container } = renderSection()
+    expect(container.innerHTML).toBe('')
   })
 })

@@ -13,6 +13,7 @@ export const initialAudioState: AudioState = {
   drawerOpen: false,
   currentSceneName: null,
   currentSceneId: null,
+  foregroundEndedCounter: 0,
 }
 
 export function audioReducer(state: AudioState, action: AudioAction): AudioState {
@@ -126,6 +127,20 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
       }
     }
 
+    case 'FOREGROUND_ENDED': {
+      if (!state.foregroundContent) return state
+      const hasAmbientSounds = state.activeSounds.length > 0
+      return {
+        ...state,
+        isPlaying: hasAmbientSounds ? state.isPlaying : false,
+        foregroundContent: {
+          ...state.foregroundContent,
+          isPlaying: false,
+        },
+        foregroundEndedCounter: state.foregroundEndedCounter + 1,
+      }
+    }
+
     case 'SEEK_FOREGROUND': {
       if (!state.foregroundContent) return state
       return {
@@ -179,7 +194,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
     case 'START_ROUTINE': {
       return {
         ...state,
-        activeRoutine: action.payload,
+        activeRoutine: { ...action.payload, phase: 'playing' },
         isPlaying: true,
         pillVisible: true,
       }
@@ -196,6 +211,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         activeRoutine: {
           ...state.activeRoutine,
           currentStepIndex: nextIndex,
+          phase: 'playing',
         },
       }
     }
@@ -211,8 +227,21 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         activeRoutine: {
           ...state.activeRoutine,
           currentStepIndex: skipIndex,
+          phase: 'playing',
         },
       }
+    }
+
+    case 'SET_ROUTINE_PHASE': {
+      if (!state.activeRoutine) return state
+      return {
+        ...state,
+        activeRoutine: { ...state.activeRoutine, phase: action.payload.phase },
+      }
+    }
+
+    case 'END_ROUTINE': {
+      return { ...state, activeRoutine: null }
     }
 
     case 'SET_SCENE_NAME': {

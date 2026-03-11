@@ -16,6 +16,7 @@ import { TimeOfDaySection } from '@/components/music/TimeOfDaySection'
 import { WorshipPlaylistsTab } from '@/components/music/WorshipPlaylistsTab'
 import { useMusicHints } from '@/hooks/useMusicHints'
 import { useScenePlayer } from '@/hooks/useScenePlayer'
+import { RoutineInterruptDialog } from '@/components/audio/RoutineInterruptDialog'
 import { useTimeOfDayRecommendations } from '@/hooks/useTimeOfDayRecommendations'
 import { storageService } from '@/services/storage-service'
 import { SCENE_BY_ID } from '@/data/scenes'
@@ -330,6 +331,13 @@ export function MusicPage() {
       </main>
 
       <SiteFooter />
+
+      {scenePlayer.pendingRoutineInterrupt && (
+        <RoutineInterruptDialog
+          onConfirm={scenePlayer.confirmRoutineInterrupt}
+          onCancel={scenePlayer.cancelRoutineInterrupt}
+        />
+      )}
 
       {/* Pill hint — fixed near the bottom where the pill appears */}
       {showPillHint && audioState.pillVisible && (

@@ -470,9 +470,11 @@ describe('audioReducer', () => {
       activeRoutine: {
         routineId: 'r1',
         currentStepIndex: 0,
+        phase: 'playing' as const,
+        sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
         steps: [
-          { stepId: 's1', label: 'Step 1', icon: 'play' },
-          { stepId: 's2', label: 'Step 2', icon: 'play' },
+          { stepId: 's1', type: 'scene' as const, contentId: 'still-waters', label: 'Step 1', icon: 'play', transitionGapMinutes: 0 },
+          { stepId: 's2', type: 'scripture' as const, contentId: 'psalm-23', label: 'Step 2', icon: 'play', transitionGapMinutes: 2 },
         ],
       },
     })
@@ -493,6 +495,116 @@ describe('audioReducer', () => {
     it('skip behaves same as advance', () => {
       const result = audioReducer(routineState, { type: 'SKIP_ROUTINE_STEP' })
       expect(result.activeRoutine?.currentStepIndex).toBe(1)
+    })
+
+    it('ADVANCE_ROUTINE_STEP resets phase to playing', () => {
+      const gapState = stateWith({
+        activeRoutine: { ...routineState.activeRoutine!, phase: 'transition-gap' as const },
+      })
+      const result = audioReducer(gapState, { type: 'ADVANCE_ROUTINE_STEP' })
+      expect(result.activeRoutine?.phase).toBe('playing')
+    })
+
+    it('SKIP_ROUTINE_STEP resets phase to playing', () => {
+      const gapState = stateWith({
+        activeRoutine: { ...routineState.activeRoutine!, phase: 'transition-gap' as const },
+      })
+      const result = audioReducer(gapState, { type: 'SKIP_ROUTINE_STEP' })
+      expect(result.activeRoutine?.phase).toBe('playing')
+    })
+  })
+
+  describe('START_ROUTINE', () => {
+    it('sets activeRoutine with phase playing', () => {
+      const routine = {
+        routineId: 'r1',
+        currentStepIndex: 0,
+        phase: 'playing' as const,
+        sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
+        steps: [
+          { stepId: 's1', type: 'scene' as const, contentId: 'still-waters', label: 'Step 1', icon: 'play', transitionGapMinutes: 0 },
+        ],
+      }
+      const result = audioReducer(initialAudioState, { type: 'START_ROUTINE', payload: routine })
+      expect(result.activeRoutine).not.toBeNull()
+      expect(result.activeRoutine?.phase).toBe('playing')
+      expect(result.isPlaying).toBe(true)
+      expect(result.pillVisible).toBe(true)
+    })
+  })
+
+  describe('SET_ROUTINE_PHASE', () => {
+    it('updates phase to transition-gap', () => {
+      const state = stateWith({
+        activeRoutine: {
+          routineId: 'r1',
+          currentStepIndex: 0,
+          phase: 'playing' as const,
+          sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
+          steps: [
+            { stepId: 's1', type: 'scene' as const, contentId: 'still-waters', label: 'Step 1', icon: 'play', transitionGapMinutes: 0 },
+          ],
+        },
+      })
+      const result = audioReducer(state, { type: 'SET_ROUTINE_PHASE', payload: { phase: 'transition-gap' } })
+      expect(result.activeRoutine?.phase).toBe('transition-gap')
+    })
+
+    it('updates phase to ambient-only', () => {
+      const state = stateWith({
+        activeRoutine: {
+          routineId: 'r1',
+          currentStepIndex: 0,
+          phase: 'playing' as const,
+          sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
+          steps: [
+            { stepId: 's1', type: 'scene' as const, contentId: 'still-waters', label: 'Step 1', icon: 'play', transitionGapMinutes: 0 },
+          ],
+        },
+      })
+      const result = audioReducer(state, { type: 'SET_ROUTINE_PHASE', payload: { phase: 'ambient-only' } })
+      expect(result.activeRoutine?.phase).toBe('ambient-only')
+    })
+
+    it('returns state unchanged when no routine active', () => {
+      const result = audioReducer(initialAudioState, { type: 'SET_ROUTINE_PHASE', payload: { phase: 'transition-gap' } })
+      expect(result).toBe(initialAudioState)
+    })
+  })
+
+  describe('END_ROUTINE', () => {
+    it('clears activeRoutine', () => {
+      const state = stateWith({
+        activeRoutine: {
+          routineId: 'r1',
+          currentStepIndex: 0,
+          phase: 'playing' as const,
+          sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
+          steps: [
+            { stepId: 's1', type: 'scene' as const, contentId: 'still-waters', label: 'Step 1', icon: 'play', transitionGapMinutes: 0 },
+          ],
+        },
+      })
+      const result = audioReducer(state, { type: 'END_ROUTINE' })
+      expect(result.activeRoutine).toBeNull()
+    })
+  })
+
+  describe('STOP_ALL clears activeRoutine', () => {
+    it('nulls activeRoutine on STOP_ALL', () => {
+      const state = stateWith({
+        activeRoutine: {
+          routineId: 'r1',
+          currentStepIndex: 0,
+          phase: 'playing' as const,
+          sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
+          steps: [
+            { stepId: 's1', type: 'scene' as const, contentId: 'still-waters', label: 'Step 1', icon: 'play', transitionGapMinutes: 0 },
+          ],
+        },
+      })
+      const result = audioReducer(state, { type: 'STOP_ALL' })
+      expect(result.activeRoutine).toBeNull()
     })
   })
 })

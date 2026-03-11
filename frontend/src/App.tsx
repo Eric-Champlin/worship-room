@@ -25,6 +25,7 @@ import { Churches } from './pages/Churches'
 import { Counselors } from './pages/Counselors'
 import { CelebrateRecovery } from './pages/CelebrateRecovery'
 import { MusicPage } from './pages/MusicPage'
+import { RoutinesPage } from './pages/RoutinesPage'
 
 function ComingSoon({ title }: { title: string }) {
   return (
@@ -94,6 +95,7 @@ function App() {
           <Route path="/music/playlists" element={<Navigate to="/music?tab=playlists" replace />} />
           <Route path="/music/ambient" element={<Navigate to="/music?tab=ambient" replace />} />
           <Route path="/music/sleep" element={<Navigate to="/music?tab=sleep" replace />} />
+          <Route path="/music/routines" element={<RoutinesPage />} />
           <Route path="/prayer-wall" element={<PrayerWall />} />
           {/* Static segments must precede :id to avoid matching "dashboard"/"user" as a prayer ID */}
           <Route path="/prayer-wall/dashboard" element={<PrayerWallDashboard />} />

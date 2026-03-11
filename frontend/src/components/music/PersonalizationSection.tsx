@@ -1,8 +1,12 @@
 import { Play } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useSavedMixes } from '@/hooks/useSavedMixes'
 import { useListeningHistory } from '@/hooks/useListeningHistory'
+import { useRoutinePlayer } from '@/hooks/useRoutinePlayer'
+import { storageService } from '@/services/storage-service'
+import { ROUTINE_TEMPLATES } from '@/data/music/routines'
 import { useAudioDispatch, useAudioEngine } from '@/components/audio/AudioProvider'
 import { SCENE_BY_ID } from '@/data/scenes'
 import { SCRIPTURE_READING_BY_ID } from '@/data/music/scripture-readings'
@@ -65,13 +69,18 @@ export function PersonalizationSection() {
   const dispatch = useAudioDispatch()
   const engine = useAudioEngine()
 
+  const { startRoutine } = useRoutinePlayer()
+
   if (!isLoggedIn) return null
 
   const lastSession = getLastSession()
   const hasFavorites = favorites.length > 0
   const hasSavedMixes = mixes.length > 0
+  const userRoutines = storageService.getRoutines()
+  const allRoutines = [...ROUTINE_TEMPLATES, ...userRoutines]
+  const hasRoutines = allRoutines.length > 0
 
-  if (!lastSession && !hasFavorites && !hasSavedMixes) return null
+  if (!lastSession && !hasFavorites && !hasSavedMixes && !hasRoutines) return null
 
   function handleResumeLastSession() {
     if (!lastSession) return
@@ -211,6 +220,46 @@ export function PersonalizationSection() {
                 <span className="mt-1 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                   Mix
                 </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {hasRoutines && (
+        <div className="mt-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-text-dark">
+              Your Routines
+            </h2>
+            <Link
+              to="/music/routines"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Manage Routines
+            </Link>
+          </div>
+          <div className="scrollbar-none flex gap-3 overflow-x-auto pb-1">
+            {allRoutines.slice(0, 5).map((routine) => (
+              <div
+                key={routine.id}
+                className="flex min-w-[160px] flex-shrink-0 flex-col rounded-xl border border-gray-200 bg-white p-3 shadow-sm"
+              >
+                <p className="text-sm font-medium text-text-dark">
+                  {routine.name}
+                </p>
+                <p className="mt-0.5 text-xs text-text-light">
+                  {routine.steps.length} step{routine.steps.length !== 1 ? 's' : ''}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => startRoutine(routine)}
+                  aria-label={`Start ${routine.name}`}
+                  className="mt-2 flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+                >
+                  <Play size={10} fill="currentColor" />
+                  Start
+                </button>
               </div>
             ))}
           </div>

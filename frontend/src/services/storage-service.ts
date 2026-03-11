@@ -2,6 +2,7 @@ import type {
   Favorite,
   FavoriteType,
   ListeningSession,
+  RoutineDefinition,
   SavedMix,
   SessionState,
   SharedMixData,
@@ -13,6 +14,7 @@ const KEYS = {
   savedMixes: 'wr_saved_mixes',
   listeningHistory: 'wr_listening_history',
   sessionState: 'wr_session_state',
+  routines: 'wr_routines',
 } as const
 
 const LISTENING_HISTORY_CAP = 100
@@ -53,6 +55,13 @@ export interface StorageService {
   getSessionState(): SessionState | null
   saveSessionState(state: SessionState): void
   clearSessionState(): void
+
+  // Routines
+  getRoutines(): RoutineDefinition[]
+  saveRoutine(routine: RoutineDefinition): void
+  updateRoutine(routine: RoutineDefinition): void
+  deleteRoutine(id: string): void
+  duplicateRoutine(id: string): RoutineDefinition | null
 
   // Sharing (read-only, no auth needed)
   createShareableLink(sounds: { soundId: string; volume: number }[]): string
@@ -244,6 +253,57 @@ export class LocalStorageService implements StorageService {
 
   clearSessionState(): void {
     localStorage.removeItem(KEYS.sessionState)
+  }
+
+  // ── Routines ────────────────────────────────────────────────────
+  getRoutines(): RoutineDefinition[] {
+    if (!this._isLoggedIn) return []
+    return readJSON<RoutineDefinition[]>(KEYS.routines, [])
+  }
+
+  saveRoutine(routine: RoutineDefinition): void {
+    this.requireAuth('save routine')
+    const routines = readJSON<RoutineDefinition[]>(KEYS.routines, [])
+    routines.push(routine)
+    writeJSON(KEYS.routines, routines)
+  }
+
+  updateRoutine(routine: RoutineDefinition): void {
+    this.requireAuth('update routine')
+    const routines = readJSON<RoutineDefinition[]>(KEYS.routines, [])
+    const idx = routines.findIndex((r) => r.id === routine.id)
+    if (idx === -1) return
+    routines[idx] = { ...routine, updatedAt: new Date().toISOString() }
+    writeJSON(KEYS.routines, routines)
+  }
+
+  deleteRoutine(id: string): void {
+    this.requireAuth('delete routine')
+    const routines = readJSON<RoutineDefinition[]>(KEYS.routines, []).filter(
+      (r) => r.id !== id,
+    )
+    writeJSON(KEYS.routines, routines)
+  }
+
+  duplicateRoutine(id: string): RoutineDefinition | null {
+    this.requireAuth('duplicate routine')
+    const routines = readJSON<RoutineDefinition[]>(KEYS.routines, [])
+    const original = routines.find((r) => r.id === id)
+    if (!original) return null
+
+    const now = new Date().toISOString()
+    const copy: RoutineDefinition = {
+      ...original,
+      id: crypto.randomUUID(),
+      name: `${original.name} Copy`,
+      isTemplate: false,
+      steps: original.steps.map((s) => ({ ...s, id: crypto.randomUUID() })),
+      createdAt: now,
+      updatedAt: now,
+    }
+    routines.push(copy)
+    writeJSON(KEYS.routines, routines)
+    return copy
   }
 
   // ── Sharing (no auth required) ──────────────────────────────────

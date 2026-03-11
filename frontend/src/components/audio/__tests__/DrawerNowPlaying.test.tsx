@@ -19,6 +19,7 @@ let mockState: AudioState = {
   drawerOpen: true,
   currentSceneName: null,
   currentSceneId: null,
+  foregroundEndedCounter: 0,
 }
 
 vi.mock('../AudioProvider', () => ({

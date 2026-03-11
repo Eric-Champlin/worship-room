@@ -275,6 +275,68 @@ describe('LocalStorageService', () => {
     })
   })
 
+  // ── Routines ────────────────────────────────────────────────────
+  describe('Routines', () => {
+    const ROUTINE: RoutineDefinition = {
+      id: 'routine-1',
+      name: 'My Routine',
+      isTemplate: false,
+      steps: [
+        { id: 's1', type: 'scene', contentId: 'still-waters', transitionGapMinutes: 0 },
+        { id: 's2', type: 'scripture', contentId: 'psalm-23', transitionGapMinutes: 2 },
+      ],
+      sleepTimer: { durationMinutes: 30, fadeDurationMinutes: 10 },
+      createdAt: '2026-03-10T00:00:00Z',
+      updatedAt: '2026-03-10T00:00:00Z',
+    }
+
+    it('getRoutines returns [] when logged out', () => {
+      expect(service.getRoutines()).toEqual([])
+    })
+
+    it('saveRoutine persists to localStorage', () => {
+      service.setAuthState(true)
+      service.saveRoutine(ROUTINE)
+      const routines = service.getRoutines()
+      expect(routines).toHaveLength(1)
+      expect(routines[0].name).toBe('My Routine')
+    })
+
+    it('deleteRoutine removes from localStorage', () => {
+      service.setAuthState(true)
+      service.saveRoutine(ROUTINE)
+      service.deleteRoutine(ROUTINE.id)
+      expect(service.getRoutines()).toEqual([])
+    })
+
+    it('duplicateRoutine creates copy with " Copy" suffix', () => {
+      service.setAuthState(true)
+      service.saveRoutine(ROUTINE)
+
+      vi.mocked(crypto.randomUUID)
+        .mockReturnValueOnce('dup-uuid' as `${string}-${string}-${string}-${string}-${string}`)
+        .mockReturnValueOnce('step-uuid-1' as `${string}-${string}-${string}-${string}-${string}`)
+        .mockReturnValueOnce('step-uuid-2' as `${string}-${string}-${string}-${string}-${string}`)
+
+      const copy = service.duplicateRoutine(ROUTINE.id)
+      expect(copy).not.toBeNull()
+      expect(copy!.name).toBe('My Routine Copy')
+      expect(copy!.id).toBe('dup-uuid')
+      expect(copy!.isTemplate).toBe(false)
+      expect(copy!.steps).toHaveLength(2)
+      expect(service.getRoutines()).toHaveLength(2)
+    })
+
+    it('updateRoutine overwrites existing and updates updatedAt', () => {
+      service.setAuthState(true)
+      service.saveRoutine(ROUTINE)
+      service.updateRoutine({ ...ROUTINE, name: 'Renamed' })
+      const routines = service.getRoutines()
+      expect(routines[0].name).toBe('Renamed')
+      expect(routines[0].updatedAt).not.toBe(ROUTINE.updatedAt)
+    })
+  })
+
   // ── QuotaExceededError ────────────────────────────────────────────
   describe('QuotaExceededError handling', () => {
     it('throws StorageQuotaError when localStorage is full', () => {
@@ -293,5 +355,5 @@ describe('LocalStorageService', () => {
   })
 })
 
-// Import needed for Session State tests
-import type { SessionState } from '@/types/storage'
+// Import needed for Session State & Routine tests
+import type { RoutineDefinition, SessionState } from '@/types/storage'

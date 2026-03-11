@@ -34,3 +34,19 @@ export interface SessionState {
 export interface SharedMixData {
   sounds: { id: string; v: number }[]
 }
+
+export interface RoutineDefinition {
+  id: string
+  name: string
+  description?: string
+  isTemplate: boolean
+  steps: {
+    id: string
+    type: 'scene' | 'scripture' | 'story'
+    contentId: string
+    transitionGapMinutes: number
+  }[]
+  sleepTimer: { durationMinutes: number; fadeDurationMinutes: number }
+  createdAt: string
+  updatedAt: string
+}

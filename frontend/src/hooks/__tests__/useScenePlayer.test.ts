@@ -20,6 +20,7 @@ let mockActiveSounds: AudioState['activeSounds'] = []
 let mockIsPlaying = false
 let mockCurrentSceneName: string | null = null
 let mockForegroundContent: AudioState['foregroundContent'] = null
+let mockActiveRoutine: AudioState['activeRoutine'] = null
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
@@ -39,7 +40,7 @@ vi.mock('@/components/audio/AudioProvider', () => ({
     foregroundContent: mockForegroundContent,
     foregroundBackgroundBalance: 0.5,
     sleepTimer: null,
-    activeRoutine: null,
+    activeRoutine: mockActiveRoutine,
     currentSceneName: mockCurrentSceneName,
   }),
   useAudioDispatch: () => mockDispatch,
@@ -88,6 +89,7 @@ describe('useScenePlayer', () => {
     mockIsPlaying = false
     mockCurrentSceneName = null
     mockForegroundContent = null
+    mockActiveRoutine = null
     mockEngine.addSound.mockResolvedValue(undefined)
   })
 
@@ -226,5 +228,28 @@ describe('useScenePlayer', () => {
     )
     expect(sceneNameCalls).toHaveLength(1)
     expect(sceneNameCalls[0][0].payload.sceneName).toBe('Still Waters')
+  })
+
+  it('sets pendingRoutineInterrupt when routine is active', () => {
+    mockIsLoggedIn = true
+    mockActiveRoutine = {
+      routineId: 'r1',
+      currentStepIndex: 0,
+      phase: 'playing',
+      sleepTimerConfig: { durationMinutes: 30, fadeDurationMinutes: 10 },
+      steps: [
+        { stepId: 's1', type: 'scene', contentId: 'still-waters', label: 'Still Waters', icon: 'Mountain', transitionGapMinutes: 0 },
+      ],
+    }
+
+    const { result } = renderHook(() => useScenePlayer())
+
+    act(() => {
+      result.current.loadScene(GARDEN_SCENE)
+    })
+
+    expect(result.current.pendingRoutineInterrupt).not.toBeNull()
+    expect(result.current.pendingRoutineInterrupt?.scene.id).toBe('garden-of-gethsemane')
+    expect(mockDispatch).not.toHaveBeenCalled()
   })
 })

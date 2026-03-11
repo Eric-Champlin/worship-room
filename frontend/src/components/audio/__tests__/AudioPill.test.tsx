@@ -8,6 +8,46 @@ vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
 }))
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isLoggedIn: false }),
+}))
+
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
+}))
+
+vi.mock('@/hooks/useRoutinePlayer', () => ({
+  useRoutinePlayer: () => ({
+    startRoutine: vi.fn(),
+    skipStep: vi.fn(),
+    endRoutine: vi.fn(),
+    pendingInterrupt: null,
+    confirmInterrupt: vi.fn(),
+    cancelInterrupt: vi.fn(),
+    isRoutineActive: false,
+  }),
+}))
+
+vi.mock('@/services/storage-service', () => ({
+  storageService: {
+    getRoutines: vi.fn().mockReturnValue([]),
+    getRecentSessions: vi.fn().mockReturnValue([]),
+    logListeningSession: vi.fn(),
+    setAuthState: vi.fn(),
+    getSessionState: vi.fn().mockReturnValue(null),
+    saveSessionState: vi.fn(),
+    clearSessionState: vi.fn(),
+  },
+}))
+
+vi.mock('@/hooks/useListeningHistory', () => ({
+  useListeningHistory: () => ({
+    logSession: vi.fn(),
+    sessions: [],
+    recentSessions: [],
+  }),
+}))
+
 vi.mock('@/lib/audio-engine', () => {
   class MockAudioEngineService {
     ensureContext = vi.fn()

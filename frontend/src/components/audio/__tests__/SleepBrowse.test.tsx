@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { SleepBrowse } from '../SleepBrowse'
 import type { AudioState } from '@/types/audio'
@@ -61,6 +62,14 @@ vi.mock('@/components/audio/AudioProvider', () => ({
 
 // ── Tests ────────────────────────────────────────────────────────────
 
+function renderSleepBrowse() {
+  return render(
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <SleepBrowse />
+    </MemoryRouter>,
+  )
+}
+
 describe('SleepBrowse Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -69,13 +78,13 @@ describe('SleepBrowse Integration', () => {
   })
 
   it('renders Tonight\'s Scripture section', () => {
-    render(<SleepBrowse />)
+    renderSleepBrowse()
 
     expect(screen.getByText("Tonight's Scripture")).toBeInTheDocument()
   })
 
   it('renders all 4 scripture collection headings', () => {
-    render(<SleepBrowse />)
+    renderSleepBrowse()
 
     expect(screen.getByRole('heading', { name: 'Psalms of Peace' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Comfort & Rest' })).toBeInTheDocument()
@@ -84,7 +93,7 @@ describe('SleepBrowse Integration', () => {
   })
 
   it('renders Bedtime Stories section with 12 cards', () => {
-    render(<SleepBrowse />)
+    renderSleepBrowse()
 
     expect(
       screen.getByRole('heading', { name: 'Bedtime Stories' }),
@@ -95,7 +104,7 @@ describe('SleepBrowse Integration', () => {
 
   it('clicking a scripture play button when logged out triggers auth modal', async () => {
     mockIsLoggedIn = false
-    render(<SleepBrowse />)
+    renderSleepBrowse()
 
     // Click the first scripture card play button
     const playButtons = screen.getAllByLabelText(/^Play .+/)
@@ -108,7 +117,7 @@ describe('SleepBrowse Integration', () => {
 
   it('clicking a bedtime story play button when logged out triggers auth modal', async () => {
     mockIsLoggedIn = false
-    render(<SleepBrowse />)
+    renderSleepBrowse()
 
     // Find a story card button (full aria-label includes metadata)
     const storyPlayButton = screen.getByLabelText(/^Play Noah and the Great Flood/)
@@ -117,5 +126,21 @@ describe('SleepBrowse Integration', () => {
     expect(mockOpenAuthModal).toHaveBeenCalledWith(
       'Sign in to listen to sleep content',
     )
+  })
+
+  it('renders "Build a Bedtime Routine" CTA', () => {
+    renderSleepBrowse()
+
+    expect(screen.getByText('Build a Bedtime Routine')).toBeInTheDocument()
+    expect(
+      screen.getByText('Chain scenes, scripture, and stories into one seamless sleep experience'),
+    ).toBeInTheDocument()
+  })
+
+  it('routine CTA links to /music/routines', () => {
+    renderSleepBrowse()
+
+    const link = screen.getByRole('link', { name: 'Create a Routine' })
+    expect(link).toHaveAttribute('href', '/music/routines')
   })
 })
