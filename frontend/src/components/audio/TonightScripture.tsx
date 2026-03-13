@@ -20,19 +20,19 @@ export function TonightScripture({ onPlay }: TonightScriptureProps) {
 
   return (
     <section aria-label="Tonight's featured scripture" className="space-y-2">
-      <p className="text-sm font-medium uppercase tracking-wide text-primary-lt">
+      <p className="text-sm font-medium uppercase tracking-wide text-primary">
         Tonight&apos;s Scripture
       </p>
-      <div className="rounded-xl border-2 border-primary/60 bg-gradient-to-br from-hero-mid/50 to-primary/10 p-6">
+      <div className="rounded-xl border-2 border-primary/40 bg-white p-6 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-lg font-semibold text-white">{reading.title}</p>
-            <p className="mt-1 text-sm text-white/60">{reading.scriptureReference}</p>
+            <p className="text-lg font-semibold text-text-dark">{reading.title}</p>
+            <p className="mt-1 text-sm text-text-light">{reading.scriptureReference}</p>
             <div className="mt-3 flex items-center gap-2">
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
+              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-text-light">
                 {formatDuration(reading.durationSeconds)}
               </span>
-              <span className="text-xs text-white/50">
+              <span className="text-xs text-text-light">
                 {reading.voiceId === 'male' ? 'Male' : 'Female'} voice
               </span>
             </div>

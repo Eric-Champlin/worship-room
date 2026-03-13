@@ -6,8 +6,9 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSavedMixes } from '@/hooks/useSavedMixes'
 import { useAudioState } from './AudioProvider'
 import { FEATURED_SCENE_IDS, SCENE_BY_ID } from '@/data/scenes'
-import { AmbientSearchBar } from './AmbientSearchBar'
-import { AmbientFilterBar } from './AmbientFilterBar'
+// Removed in visual polish — keeping for potential re-enable
+// import { AmbientSearchBar } from './AmbientSearchBar'
+// import { AmbientFilterBar } from './AmbientFilterBar'
 import { FeaturedSceneCard } from './FeaturedSceneCard'
 import { SceneCard } from './SceneCard'
 import { SoundGrid } from './SoundGrid'
@@ -41,19 +42,19 @@ function SearchResults({
   return (
     <div className="space-y-6">
       {!hasResults && (
-        <p className="text-center text-sm text-white/50">
+        <p className="text-center text-sm text-text-light">
           No sounds or scenes match &apos;{query}&apos;
         </p>
       )}
       {scenes.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-white/50">Scenes</h3>
+          <h3 className="text-sm font-medium text-text-light">Scenes</h3>
           {scenes.map((scene) => (
             <button
               key={scene.id}
               type="button"
               onClick={() => onPlayScene(scene)}
-              className="flex w-full items-center gap-3 rounded-lg bg-[rgba(15,10,30,0.3)] p-3 text-left transition-colors hover:bg-[rgba(15,10,30,0.5)]"
+              className="flex w-full items-center gap-3 rounded-lg bg-gray-50 p-3 text-left transition-colors hover:bg-gray-100"
               aria-label={`Play ${scene.name} — ${scene.description}`}
             >
               <img
@@ -62,8 +63,8 @@ function SearchResults({
                 className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
               />
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">{scene.name}</p>
-                <p className="truncate text-xs text-white/50">{scene.description}</p>
+                <p className="truncate text-sm font-semibold text-text-dark">{scene.name}</p>
+                <p className="truncate text-xs text-text-light">{scene.description}</p>
               </div>
             </button>
           ))}
@@ -71,7 +72,7 @@ function SearchResults({
       )}
       {sounds.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-white/50">Sounds</h3>
+          <h3 className="text-sm font-medium text-text-light">Sounds</h3>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
             {sounds.map((sound) => (
               <SoundCard
@@ -86,9 +87,9 @@ function SearchResults({
           </div>
         </div>
       )}
-      <p className="text-center text-xs text-white/50">
+      <p className="text-center text-xs text-text-light">
         Not finding it?{' '}
-        <span className="text-primary-lt/50">
+        <span className="text-primary/50">
           Search all music (coming soon)
         </span>
       </p>
@@ -118,19 +119,7 @@ export function AmbientBrowser() {
 
   return (
     <div className="space-y-8">
-      <AmbientSearchBar
-        searchQuery={search.searchQuery}
-        onSearchChange={search.setSearchQuery}
-        onClear={search.clearSearch}
-      />
-
-      <AmbientFilterBar
-        filters={search.filters}
-        onToggleFilter={search.toggleFilter}
-        activeFilterCount={search.activeFilterCount}
-        isFilterPanelOpen={search.isFilterPanelOpen}
-        onSetFilterPanelOpen={search.setFilterPanelOpen}
-      />
+      {/* Search and filter hidden in visual polish — keeping for future re-enable */}
 
       {search.hasActiveSearch ? (
         <SearchResults
@@ -148,7 +137,7 @@ export function AmbientBrowser() {
           {/* Your Saved Mixes (logged-in users with mixes only) */}
           {isLoggedIn && mixes.length > 0 && (
             <section aria-label="Your saved mixes">
-              <h2 className="mb-3 text-sm font-semibold text-white">
+              <h2 className="mb-3 text-sm font-semibold text-text-dark">
                 Your Saved Mixes
               </h2>
               <div className="scrollbar-none flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
@@ -178,7 +167,7 @@ export function AmbientBrowser() {
           {/* All Scenes Grid */}
           {search.filteredScenes.length > 0 && (
             <section aria-label="All scenes">
-              <h2 className="mb-4 text-base font-medium text-white">All Scenes</h2>
+              <h2 className="mb-4 text-base font-medium text-text-dark">All Scenes</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {search.filteredScenes.map((scene) => (
                   <SceneCard
@@ -195,14 +184,16 @@ export function AmbientBrowser() {
           {/* Build Your Own Mix */}
           {search.filteredSounds.length > 0 && (
             <section aria-label="Build your own mix">
-              <h2 className="mb-4 text-base font-medium text-white">Build Your Own Mix</h2>
-              <SoundGrid
-                activeSoundIds={activeSoundIds}
-                loadingSoundIds={soundToggle.loadingSoundIds}
-                errorSoundIds={soundToggle.errorSoundIds}
-                onToggle={soundToggle.toggleSound}
-                sounds={search.hasActiveFilters ? search.filteredSounds : undefined}
-              />
+              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="mb-4 text-base font-medium text-text-dark">Build Your Own Mix</h2>
+                <SoundGrid
+                  activeSoundIds={activeSoundIds}
+                  loadingSoundIds={soundToggle.loadingSoundIds}
+                  errorSoundIds={soundToggle.errorSoundIds}
+                  onToggle={soundToggle.toggleSound}
+                  sounds={search.hasActiveFilters ? search.filteredSounds : undefined}
+                />
+              </div>
             </section>
           )}
         </>

@@ -22,27 +22,27 @@ export function BedtimeStoryCard({ story, onPlay }: BedtimeStoryCardProps) {
         type="button"
         aria-label={`Play ${story.title}, ${capitalize(story.lengthCategory)}, ${formatDuration(story.durationSeconds)}, ${story.voiceId} voice`}
         onClick={() => onPlay(story)}
-        className="w-full cursor-pointer rounded-xl border border-white/10 bg-gradient-to-br from-hero-mid/50 to-primary/10 p-4 pr-12 text-left transition-colors hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+        className="w-full cursor-pointer rounded-xl border border-gray-200 bg-white p-4 pr-12 text-left shadow-sm transition-colors hover:border-gray-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
       >
-        <p className="text-sm font-medium text-white">{story.title}</p>
-        <p className="mt-1 line-clamp-2 text-xs text-white/60">{story.description}</p>
+        <p className="text-sm font-medium text-text-dark">{story.title}</p>
+        <p className="mt-1 line-clamp-2 text-xs text-text-light">{story.description}</p>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-text-light">
             {formatDuration(story.durationSeconds)}
           </span>
-          <span className="text-xs font-medium text-white/60">
+          <span className="text-xs font-medium text-text-light">
             {capitalize(story.lengthCategory)}
           </span>
-          <span className="text-xs text-white/50">
+          <span className="text-xs text-text-light">
             {story.voiceId === 'male' ? 'Male voice' : 'Female voice'}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/20 px-2 py-0.5 text-xs text-indigo-300">
+          <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700">
             <Moon size={10} aria-hidden="true" />
             Story
           </span>
           <span
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-primary/80 text-white"
+            className="ml-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white"
             aria-hidden="true"
           >
             <Play size={14} fill="currentColor" />

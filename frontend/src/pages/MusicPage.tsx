@@ -4,26 +4,28 @@ import { Navbar } from '@/components/Navbar'
 import { PageHero } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
 import { AmbientBrowser } from '@/components/audio/AmbientBrowser'
-import { useAudioState, useAudioDispatch, useAudioEngine } from '@/components/audio/AudioProvider'
+import { useAudioDispatch, useAudioEngine } from '@/components/audio/AudioProvider'
 import { SleepBrowse } from '@/components/audio/SleepBrowse'
-import { LofiCrossReference } from '@/components/music/LofiCrossReference'
-import { MusicHint } from '@/components/music/MusicHint'
-import { PersonalizationSection } from '@/components/music/PersonalizationSection'
-import { ResumePrompt } from '@/components/music/ResumePrompt'
-import { RecentlyAddedSection } from '@/components/music/RecentlyAddedSection'
 import { SharedMixHero } from '@/components/music/SharedMixHero'
-import { TimeOfDaySection } from '@/components/music/TimeOfDaySection'
 import { WorshipPlaylistsTab } from '@/components/music/WorshipPlaylistsTab'
-import { useMusicHints } from '@/hooks/useMusicHints'
 import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { RoutineInterruptDialog } from '@/components/audio/RoutineInterruptDialog'
-import { useTimeOfDayRecommendations } from '@/hooks/useTimeOfDayRecommendations'
 import { storageService } from '@/services/storage-service'
-import { SCENE_BY_ID } from '@/data/scenes'
+// import { SCENE_BY_ID } from '@/data/scenes'
 import { SOUND_BY_ID } from '@/data/sound-catalog'
 import { AUDIO_BASE_URL } from '@/constants/audio'
 import { cn } from '@/lib/utils'
 import type { SharedMixData } from '@/types/storage'
+
+// Removed in visual polish — keeping for potential re-enable
+// import { LofiCrossReference } from '@/components/music/LofiCrossReference'
+// import { MusicHint } from '@/components/music/MusicHint'
+// import { PersonalizationSection } from '@/components/music/PersonalizationSection'
+// import { ResumePrompt } from '@/components/music/ResumePrompt'
+// import { RecentlyAddedSection } from '@/components/music/RecentlyAddedSection'
+// import { TimeOfDaySection } from '@/components/music/TimeOfDaySection'
+// import { useMusicHints } from '@/hooks/useMusicHints'
+// import { useTimeOfDayRecommendations } from '@/hooks/useTimeOfDayRecommendations'
 
 const TABS = [
   { id: 'playlists', label: 'Worship Playlists', shortLabel: 'Playlists' },
@@ -40,8 +42,7 @@ function isValidTab(value: string | null): value is MusicTabId {
 export function MusicPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const rawTab = searchParams.get('tab')
-  const { timeBracket } = useTimeOfDayRecommendations()
-  const defaultTab: MusicTabId = timeBracket === 'night' ? 'sleep' : 'ambient'
+  const defaultTab: MusicTabId = 'ambient'
   const activeTab: MusicTabId = isValidTab(rawTab) ? rawTab : defaultTab
 
   // Shared mix URL parsing
@@ -117,27 +118,6 @@ export function MusicPage() {
     return () => observer.disconnect()
   }, [])
 
-  // First-time hints
-  const audioState = useAudioState()
-  const { showSoundGridHint, showPillHint, dismissSoundGridHint, dismissPillHint } =
-    useMusicHints()
-  const prevSoundCountRef = useRef(audioState.activeSounds.length)
-
-  // Dismiss sound grid hint when first sound is added
-  useEffect(() => {
-    if (prevSoundCountRef.current === 0 && audioState.activeSounds.length > 0) {
-      dismissSoundGridHint()
-    }
-    prevSoundCountRef.current = audioState.activeSounds.length
-  }, [audioState.activeSounds.length, dismissSoundGridHint])
-
-  // Dismiss pill hint when drawer opens
-  useEffect(() => {
-    if (audioState.drawerOpen) {
-      dismissPillHint()
-    }
-  }, [audioState.drawerOpen, dismissPillHint])
-
   const switchTab = useCallback(
     (tab: MusicTabId) => {
       setSearchParams({ tab }, { replace: true })
@@ -145,18 +125,8 @@ export function MusicPage() {
     [setSearchParams],
   )
 
-  // Scene player for time-of-day recommendations
+  // Scene player for routine interrupt dialog
   const scenePlayer = useScenePlayer()
-
-  const handlePlayScene = useCallback(
-    (sceneId: string) => {
-      const scene = SCENE_BY_ID.get(sceneId)
-      if (!scene) return
-      switchTab('ambient')
-      scenePlayer.loadScene(scene)
-    },
-    [switchTab, scenePlayer],
-  )
 
   // Tab underline position
   const activeTabIndex = TABS.findIndex((t) => t.id === activeTab)
@@ -195,21 +165,6 @@ export function MusicPage() {
         <PageHero
           title="Music"
           subtitle="Worship, rest, and find peace in God's presence."
-        />
-
-        {/* Resume prompt (logged-in with saved session only) */}
-        <ResumePrompt />
-
-        {/* Personalization (logged-in with data only) */}
-        <PersonalizationSection />
-
-        {/* Recently Added (hidden at launch) */}
-        <RecentlyAddedSection />
-
-        {/* Time-of-day recommendations */}
-        <TimeOfDaySection
-          onPlayScene={handlePlayScene}
-          onSwitchTab={switchTab}
         />
 
         {/* Sentinel for sticky tab bar shadow */}
@@ -292,30 +247,9 @@ export function MusicPage() {
               onDismiss={handleDismissSharedMix}
             />
           )}
-          <div className="bg-hero-dark px-4 py-8 sm:px-6">
+          <div className="px-4 py-8 sm:px-6">
             <div className="relative mx-auto max-w-6xl">
-              {/* Sound grid hint */}
-              <MusicHint
-                text="Tap any sound to add it to your mix"
-                visible={showSoundGridHint && activeTab === 'ambient'}
-                position="above"
-                onDismiss={dismissSoundGridHint}
-              />
               <AmbientBrowser />
-            </div>
-            <div className="mx-auto mt-8 max-w-6xl pb-8">
-              <LofiCrossReference
-                onNavigate={() => {
-                  switchTab('playlists')
-                  requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                      document
-                        .getElementById('lofi-embed')
-                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                    })
-                  })
-                }}
-              />
             </div>
           </div>
         </div>
@@ -339,17 +273,6 @@ export function MusicPage() {
         />
       )}
 
-      {/* Pill hint — fixed near the bottom where the pill appears */}
-      {showPillHint && audioState.pillVisible && (
-        <div className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2">
-          <MusicHint
-            text="Your mix lives here — tap to expand"
-            visible
-            position="above"
-            onDismiss={dismissPillHint}
-          />
-        </div>
-      )}
     </div>
   )
 }

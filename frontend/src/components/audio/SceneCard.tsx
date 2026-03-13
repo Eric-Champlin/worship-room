@@ -2,6 +2,7 @@ import { Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatTagValue } from './AmbientFilterBar'
 import { FavoriteButton } from '@/components/music/FavoriteButton'
+import { getSceneBackground } from '@/data/scene-backgrounds'
 import type { ScenePreset } from '@/types/music'
 
 interface SceneCardProps {
@@ -17,23 +18,21 @@ export function SceneCard({ scene, isActive, onPlay }: SceneCardProps) {
     scene.tags.activity[0],
   ].filter(Boolean)
 
+  const bgStyle = getSceneBackground(scene.id)
+
   return (
     <div className="relative">
       <button
         type="button"
         aria-label={`Play ${scene.name} — ${scene.description}`}
         onClick={() => onPlay(scene)}
+        style={bgStyle}
         className={cn(
           'group relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt',
           isActive && 'ring-2 ring-primary/60',
         )}
       >
-        <img
-          src={`/audio/artwork/${scene.artworkFilename}`}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <h3 className="text-sm font-semibold text-white">{scene.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">

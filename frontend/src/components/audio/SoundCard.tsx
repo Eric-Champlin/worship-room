@@ -32,8 +32,8 @@ export function SoundCard({ sound, isActive, isLoading, hasError, onToggle, tabI
       data-sound-id={sound.id}
       onClick={() => onToggle(sound)}
       className={cn(
-        'relative flex w-20 h-20 sm:w-[90px] sm:h-[90px] flex-col items-center justify-center gap-1 rounded-xl bg-[rgba(15,10,30,0.3)] transition-shadow',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(15,10,30,0.3)]',
+        'relative flex w-20 h-20 sm:w-[90px] sm:h-[90px] flex-col items-center justify-center gap-1 rounded-xl bg-gray-100 transition-shadow',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-gray-100',
         isActive && 'shadow-[0_0_12px_rgba(147,51,234,0.4)] motion-safe:animate-sound-pulse',
       )}
     >
@@ -49,20 +49,20 @@ export function SoundCard({ sound, isActive, isLoading, hasError, onToggle, tabI
           aria-hidden="true"
           className={cn(
             'transition-colors',
-            isActive ? 'text-white' : 'text-white/50',
+            isActive ? 'text-primary' : 'text-text-light',
           )}
         />
         {isLoading && (
           <Loader2
             size={20}
             aria-hidden="true"
-            className="absolute motion-safe:animate-spin text-white/70"
+            className="absolute motion-safe:animate-spin text-text-light"
           />
         )}
       </div>
 
       {/* Sound name */}
-      <span className="mt-0.5 line-clamp-2 text-center text-xs leading-tight text-white/70">
+      <span className="mt-0.5 line-clamp-2 text-center text-xs leading-tight text-text-dark">
         {sound.name}
       </span>
     </button>

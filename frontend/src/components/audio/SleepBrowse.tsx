@@ -19,7 +19,7 @@ export function SleepBrowse() {
   } = useForegroundPlayer()
 
   return (
-    <div className="min-h-screen bg-hero-dark px-4 py-8 sm:px-6">
+    <div className="px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-6xl space-y-8">
         <TonightScripture onPlay={startSession} />
 
@@ -33,11 +33,11 @@ export function SleepBrowse() {
 
         <BedtimeStoriesGrid onPlay={startSession} />
 
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <h3 className="mb-2 text-base font-semibold text-white">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
+          <h3 className="mb-2 text-base font-semibold text-text-dark">
             Build a Bedtime Routine
           </h3>
-          <p className="mb-4 text-sm text-white/60">
+          <p className="mb-4 text-sm text-text-light">
             Chain scenes, scripture, and stories into one seamless sleep experience
           </p>
           <Link

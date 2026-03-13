@@ -13,7 +13,7 @@ export function ScriptureCollectionRow({
 }: ScriptureCollectionRowProps) {
   return (
     <section className="space-y-3">
-      <h3 className="text-xl font-semibold text-white">{collection.name}</h3>
+      <h3 className="text-xl font-semibold text-text-dark">{collection.name}</h3>
       <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scrollbar-none">
         {collection.readings.map((reading) => (
           <ScriptureSessionCard

@@ -53,7 +53,7 @@ export function AmbientFilterBar({
             'flex min-h-[44px] flex-shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm',
             isFilterActive
               ? 'border-primary bg-primary text-white'
-              : 'border-white/30 bg-transparent text-white/85',
+              : 'border-gray-300 bg-white text-text-dark',
           )}
         >
           <SlidersHorizontal size={16} />
@@ -79,7 +79,7 @@ export function AmbientFilterBar({
                 'min-h-[44px] flex-shrink-0 rounded-full px-4 py-2 text-sm',
                 isActive
                   ? 'bg-primary text-white'
-                  : 'border border-white/30 bg-transparent text-white/85',
+                  : 'border border-gray-300 bg-white text-text-dark',
               )}
             >
               {formatTagValue(activity)}
@@ -93,11 +93,11 @@ export function AmbientFilterBar({
         <div
           role="region"
           aria-label="Content filters"
-          className="mt-2 animate-fade-in space-y-4 rounded-xl border border-white/15 bg-[rgba(15,10,30,0.5)] p-4"
+          className="mt-2 animate-fade-in space-y-4 rounded-xl border border-gray-200 bg-white p-4"
         >
           {FILTER_DIMENSIONS.map((dim) => (
             <div key={dim.key}>
-              <div className="mb-2 text-xs font-medium uppercase tracking-wider text-white/50">
+              <div className="mb-2 text-xs font-medium uppercase tracking-wider text-text-light">
                 {dim.label}
               </div>
               <div className="flex flex-wrap gap-2">
@@ -114,7 +114,7 @@ export function AmbientFilterBar({
                         'min-h-[44px] rounded-full px-4 py-2 text-sm',
                         isActive
                           ? 'bg-primary text-white'
-                          : 'border border-white/30 bg-transparent text-white/85',
+                          : 'border border-gray-300 bg-white text-text-dark',
                       )}
                     >
                       {formatTagValue(value)}

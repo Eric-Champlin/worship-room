@@ -25,15 +25,6 @@ vi.mock('@/components/audio/AudioProvider', () => ({
   })),
 }))
 
-vi.mock('@/hooks/useMusicHints', () => ({
-  useMusicHints: vi.fn(() => ({
-    showSoundGridHint: false,
-    showPillHint: false,
-    dismissSoundGridHint: vi.fn(),
-    dismissPillHint: vi.fn(),
-  })),
-}))
-
 vi.mock('@/hooks/useScenePlayer', () => ({
   useScenePlayer: vi.fn(() => ({
     activeSceneId: null,
@@ -41,14 +32,6 @@ vi.mock('@/hooks/useScenePlayer', () => ({
     isLoading: false,
     undoAvailable: false,
     undoSceneSwitch: vi.fn(),
-  })),
-}))
-
-vi.mock('@/hooks/useTimeOfDayRecommendations', () => ({
-  useTimeOfDayRecommendations: vi.fn(() => ({
-    heading: 'Suggested for You',
-    items: [],
-    timeBracket: 'morning',
   })),
 }))
 
@@ -231,5 +214,23 @@ describe('MusicPage', () => {
     expect(
       screen.queryByLabelText('Personalized recommendations'),
     ).not.toBeInTheDocument()
+  })
+
+  it('default tab is always ambient regardless of time', () => {
+    // No time-of-day override — always defaults to ambient
+    renderPage('/music')
+    const ambientTab = screen.getByRole('tab', { name: /ambient/i })
+    expect(ambientTab).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('does not render time-of-day section', () => {
+    renderPage()
+    expect(screen.queryByText(/Suggested for You/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Great for Focus/i)).not.toBeInTheDocument()
+  })
+
+  it('does not render lofi references', () => {
+    renderPage()
+    expect(screen.queryByText(/lofi/i)).not.toBeInTheDocument()
   })
 })

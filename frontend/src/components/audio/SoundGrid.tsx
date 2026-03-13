@@ -98,7 +98,7 @@ export function SoundGrid({
           <section key={group.category} aria-labelledby={headerId}>
             <h3
               id={headerId}
-              className="mb-3 text-base font-medium text-white"
+              className="mb-3 text-base font-medium text-text-dark"
             >
               {group.label}
             </h3>
