@@ -73,7 +73,7 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 14. **AI Journaling Prompts** - Auto-generated prompts based on mood
 15. **Saved Journal Entries** - View past entries at `/journal/my-entries`
 16. **Spotify Integration** - Embed player + "Open in Spotify" deep link. Uses Worship Room playlist: https://open.spotify.com/playlist/5Ux99VLE8cG7W656CjR2si. No Spotify API required — iframe embeds with hardcoded track IDs.
-17. **Music Page** - Dedicated `/music` page with 3 tabs: Worship Playlists, Ambient Sounds (default), Sleep & Rest
+17. **Music Page** - Dedicated `/music` page with 3 tabs: Worship Playlists (default), Ambient Sounds, Sleep & Rest. All tabs use light `#F5F5F5` background with dark text on light card patterns.
 
 ### AI-Powered Features
 
@@ -84,17 +84,17 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 
 ### Audio Features — Music Page (`/music`)
 
-The Music page is a fully built 3-tab experience with global audio infrastructure:
+The Music page is a fully built 3-tab experience with global audio infrastructure. All 3 tabs use the light `#F5F5F5` (`bg-neutral-bg`) background with dark-on-light card styling. The AudioDrawer, AudioPill, and overlay components remain dark-themed.
 
 22. **Audio Infrastructure** — Global `AudioProvider` wrapping the app with split contexts (`AudioStateContext`, `AudioDispatchContext`, `AudioEngineContext`, `SleepTimerControlsContext`). `AudioEngineService` using Web Audio API with `<audio>` elements for foreground content and `AudioBufferSourceNode` for ambient mixing with crossfade looping. Floating `AudioPill` with waveform bars and progress arc. Slide-up `AudioDrawer` (bottom sheet mobile, side panel desktop) with `DrawerNowPlaying` and `DrawerTabs` (Mixer, Timer, Saved).
-23. **Ambient Sound Mixer** — 24 sounds across 4 categories (Nature, Environments, Spiritual, Instruments). Icon grid (3-col mobile, 4-col tablet, 6-col desktop). Tap-to-toggle with 60% default volume, crossfade looping, 6-sound hard limit with toast. `SoundGrid` with roving tabindex arrow key navigation.
-24. **Ambient Scene Presets** — 8 curated scene presets (Garden of Gethsemane, Still Waters, Midnight Rain, Ember & Stone, Morning Mist, The Upper Room, Starfield, Mountain Refuge). Featured scene carousel, scene grid, search bar, tag filtering (mood/activity/intensity/scriptureTheme — OR within dimension, AND across). Scene crossfade transitions with 5-second undo toast. Scene artwork in drawer with CSS animations (drift/pulse/glow) respecting `prefers-reduced-motion`.
-25. **Sleep & Rest Content** — 24 scripture readings (WEB translation) across 4 collections (Psalms of Peace, Comfort & Rest, Trust in God, God's Promises) with male/female voice alternation. 12 bedtime stories (4 short, 5 medium, 3 long). "Tonight's Scripture" daily rotation. Foreground audio via `<audio>` element with progress bar, scrub, and scripture text toggle with verse-level highlighting. Content switching confirmation dialog. Currently using placeholder MP3s — real TTS audio sourced via Spec 10 content guide.
+23. **Ambient Sound Mixer** — 24 sounds across 4 categories (Nature, Environments, Spiritual, Instruments). Icon grid (3-col mobile, 4-col tablet, 6-col desktop) on light background with dark text/icons. Tap-to-toggle with 60% default volume, crossfade looping, 6-sound hard limit with toast. `SoundGrid` with roving tabindex arrow key navigation. "Build Your Own Mix" section wrapped in white card container.
+24. **Ambient Scene Presets** — 8 curated scene presets (Garden of Gethsemane, Still Waters, Midnight Rain, Ember & Stone, Morning Mist, The Upper Room, Starfield, Mountain Refuge). Square scene card grid with nature-themed CSS background patterns unique to each scene (CSS-only, no images). Scene crossfade transitions with 5-second undo toast (light-themed). Scene artwork in drawer with CSS animations (drift/pulse/glow) respecting `prefers-reduced-motion`. Search and tag filtering built but hidden from UI (components kept in codebase for re-enable).
+25. **Sleep & Rest Content** — 24 scripture readings (WEB translation) across 4 collections (Psalms of Peace, Comfort & Rest, Trust in God, God's Promises) with male/female voice alternation. 12 bedtime stories (4 short, 5 medium, 3 long). "Tonight's Scripture" daily rotation. All cards use white background with dark text, purple accent badges. Foreground audio via `<audio>` element with progress bar, scrub, and scripture text toggle with verse-level highlighting. Content switching confirmation dialog. Currently using placeholder MP3s — real TTS audio sourced via Spec 10 content guide.
 26. **Sleep Timer** — Preset durations (15/30/45/60/90 min) + custom (5-480 min). Configurable fade (5/10/15/30 min, default 10). Smart fade: foreground fades over first 60% of fade period, ambient starts at 40%. Self-correcting wall-clock timer using `Date.now()`. SVG progress ring. Pause/resume during fade with gain freeze/restore. Timer tab with notification dot. `SleepTimerControlsContext` running in AudioProvider for persistence across drawer close.
-27. **Worship Playlists** — 8 Spotify playlist embeds (4 Worship & Praise + 4 Explore) via `<iframe>` with lazy loading and error fallback. Hero playlist at 500px height with follower count. Spotify auto-pause detection with manual fallback toggle. Lofi cross-reference card on Ambient tab linking to Playlists tab.
-28. **User Features (localStorage)** — `StorageService` abstraction with `LocalStorageService` implementation (keys prefixed `wr_`). Favorites (heart icon on scene/sleep cards, optimistic UI with revert on error). Saved mixes (inline drawer input, 50-char max, edit/delete/duplicate/share via three-dot menu). Shareable mix URLs (Base64url-encoded sound IDs + volumes in query params, "Play This Mix" hero). Session persistence (60s auto-save + `beforeunload`, resume prompt within 24h). Listening analytics (capped 100 entries). Time-of-day recommendations (4 brackets: morning/afternoon/evening/night). Personalization section (Continue Listening, Favorites, Saved Mixes).
+27. **Worship Playlists** — 7 Spotify playlist embeds via `<iframe>` with lazy loading and error fallback. "Featured Playlists" section with 1 hero playlist (Top Christian Hits 2026) at 500px height. "Explore Playlists" section with 6 playlists in 2-column grid. Headings use split styling: accent word in `font-script` (Caveat) purple + "Playlists" in regular dark text. No Lofi playlist. No Spotify auto-pause feature (hook kept in codebase). No follower count.
+28. **User Features (localStorage)** — `StorageService` abstraction with `LocalStorageService` implementation (keys prefixed `wr_`). Favorites (heart icon on scene/sleep cards, optimistic UI with revert on error). Saved mixes (inline drawer input, 50-char max, edit/delete/duplicate/share via three-dot menu). Shareable mix URLs (Base64url-encoded sound IDs + volumes in query params, "Play This Mix" hero). Session persistence (60s auto-save + `beforeunload`, resume prompt built but not rendered). Listening analytics (capped 100 entries). Time-of-day recommendations and personalization section built but not rendered (components kept in codebase).
 29. **Bedtime Routines** — `/music/routines` dedicated page (NOT in nav dropdown). 3 pre-built templates (Evening Peace, Scripture & Sleep, Deep Rest). Visual step builder with up/down reorder buttons, content picker modal, transition gap inputs, sleep timer config. `useRoutinePlayer` hook orchestrating sequential step execution with scene loading, foreground playback, transition gaps with ambient breathe-up, error retry (3x with backoff then skip), and sleep timer start at routine end. Enhanced `RoutineStepper` in drawer with content type icons and ARIA progressbar. Pill routine shortcut mode. Routine interrupt dialog when manually loading content during active routine.
-30. **Accessibility Audit** — `useAnnounce` hook with dual live regions (polite 300ms debounce, assertive immediate). Full ARIA coverage: `aria-valuetext` on sliders, `role="list"`/`role="listitem"` on mixer, Arrow key menu navigation, SoundGrid roving tabindex grid navigation, AudioPill keyboard activation. 44px minimum touch targets on all interactive elements. Color contrast fixes (`text-white/40` → `text-white/60` minimum on dark backgrounds). Reduced motion: all music animations in `@media (prefers-reduced-motion: reduce)` CSS block + `motion-safe:` Tailwind prefix. Focus management: drawer returns focus to pill, dialogs return focus to trigger.
+30. **Accessibility Audit** — `useAnnounce` hook with dual live regions (polite 300ms debounce, assertive immediate). Full ARIA coverage: `aria-valuetext` on sliders, `role="list"`/`role="listitem"` on mixer, Arrow key menu navigation, SoundGrid roving tabindex grid navigation, AudioPill keyboard activation. 44px minimum touch targets on all interactive elements. Color contrast verified for light backgrounds. Reduced motion: all music animations in `@media (prefers-reduced-motion: reduce)` CSS block + `motion-safe:` Tailwind prefix. Focus management: drawer returns focus to pill, dialogs return focus to trigger.
 31. **Read Aloud Button** - Available on all text content (scriptures, prayers, reflections, meditations) for accessibility
 
 ### Community Features
@@ -220,39 +220,39 @@ Replace "Log In / Get Started" with user avatar dropdown:
 
 ### Public Routes (No Authentication Required)
 
-| Route                               | Component                         | Status | Description                                                                                                                                                              |
-| ----------------------------------- | --------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/`                                 | `Home`                            | Built  | Landing page (hero, journey timeline, growth teasers, quiz, footer)                                                                                                      |
-| `/daily`                            | `DailyHub`                        | Built  | Tabbed daily experience: Pray \| Journal \| Meditate (default: `?tab=pray`)                                                                                              |
-| `/pray`                             | Redirect → `/daily?tab=pray`      | Built  | Legacy route redirect                                                                                                                                                    |
-| `/journal`                          | Redirect → `/daily?tab=journal`   | Built  | Legacy route redirect                                                                                                                                                    |
-| `/meditate`                         | Redirect → `/daily?tab=meditate`  | Built  | Legacy route redirect                                                                                                                                                    |
-| `/scripture`                        | Redirect → `/daily?tab=pray`      | Built  | Legacy route redirect                                                                                                                                                    |
-| `/meditate/breathing`               | `BreathingExercise`               | Built  | 4-7-8 breathing with scripture phases                                                                                                                                    |
-| `/meditate/soaking`                 | `ScriptureSoaking`                | Built  | Single verse contemplation timer                                                                                                                                         |
-| `/meditate/gratitude`               | `GratitudeReflection`             | Built  | Gratitude journaling with affirmations                                                                                                                                   |
-| `/meditate/acts`                    | `ActsPrayerWalk`                  | Built  | ACTS prayer framework walkthrough                                                                                                                                        |
-| `/meditate/psalms`                  | `PsalmReading`                    | Built  | Psalm reading with historical context                                                                                                                                    |
-| `/meditate/examen`                  | `ExamenReflection`                | Built  | Ignatian Examen daily reflection                                                                                                                                         |
-| `/verse/:id`                        | `SharedVerse`                     | Built  | Shareable verse card (social sharing)                                                                                                                                    |
-| `/prayer/:id`                       | `SharedPrayer`                    | Built  | Shareable prayer card (social sharing)                                                                                                                                   |
-| `/prayer-wall`                      | `PrayerWall`                      | Built  | Community prayer feed (mock data, 274 tests)                                                                                                                             |
-| `/prayer-wall/:id`                  | `PrayerDetail`                    | Built  | Standalone prayer detail page                                                                                                                                            |
-| `/prayer-wall/user/:id`             | `PrayerWallProfile`               | Built  | Public user profile                                                                                                                                                      |
-| `/prayer-wall/dashboard`            | `PrayerWallDashboard`             | Built  | Private prayer wall dashboard                                                                                                                                            |
-| `/local-support/churches`           | `Churches`                        | Built  | Church locator (Leaflet map, mock data)                                                                                                                                  |
-| `/local-support/counselors`         | `Counselors`                      | Built  | Counselor locator (Leaflet map, mock data)                                                                                                                               |
-| `/local-support/celebrate-recovery` | `CelebrateRecovery`               | Built  | CR locator (Leaflet map, mock data)                                                                                                                                      |
-| `/music`                            | `MusicPage`                       | Built  | 3-tab music hub: Worship Playlists, Ambient Sounds (default), Sleep & Rest. Tab state via `?tab=playlists\|ambient\|sleep`. Night mode (10pm-6am) defaults to sleep tab. |
-| `/music/playlists`                  | Redirect → `/music?tab=playlists` | Built  | Legacy route redirect                                                                                                                                                    |
-| `/music/ambient`                    | Redirect → `/music?tab=ambient`   | Built  | Legacy route redirect                                                                                                                                                    |
-| `/music/sleep`                      | Redirect → `/music?tab=sleep`     | Built  | Legacy route redirect                                                                                                                                                    |
-| `/music/routines`                   | `RoutinesPage`                    | Built  | Bedtime routine builder and templates (NOT in nav dropdown, accessed via direct links)                                                                                   |
-| `/login`                            | `ComingSoon`                      | Stub   | Login page placeholder                                                                                                                                                   |
-| `/register`                         | `ComingSoon`                      | Stub   | Registration page placeholder                                                                                                                                            |
-| `/health`                           | `Health`                          | Built  | Backend health check (dev utility)                                                                                                                                       |
-| `/insights`                         | `Insights`                        | Stub   | Mood insights placeholder ("Reflect — Coming Soon")                                                                                                                      |
-| `*`                                 | `NotFound`                        | Built  | 404 page                                                                                                                                                                 |
+| Route                               | Component                         | Status | Description                                                                                                                                               |
+| ----------------------------------- | --------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                 | `Home`                            | Built  | Landing page (hero, journey timeline, growth teasers, quiz, footer)                                                                                       |
+| `/daily`                            | `DailyHub`                        | Built  | Tabbed daily experience: Pray \| Journal \| Meditate (default: `?tab=pray`)                                                                               |
+| `/pray`                             | Redirect → `/daily?tab=pray`      | Built  | Legacy route redirect                                                                                                                                     |
+| `/journal`                          | Redirect → `/daily?tab=journal`   | Built  | Legacy route redirect                                                                                                                                     |
+| `/meditate`                         | Redirect → `/daily?tab=meditate`  | Built  | Legacy route redirect                                                                                                                                     |
+| `/scripture`                        | Redirect → `/daily?tab=pray`      | Built  | Legacy route redirect                                                                                                                                     |
+| `/meditate/breathing`               | `BreathingExercise`               | Built  | 4-7-8 breathing with scripture phases                                                                                                                     |
+| `/meditate/soaking`                 | `ScriptureSoaking`                | Built  | Single verse contemplation timer                                                                                                                          |
+| `/meditate/gratitude`               | `GratitudeReflection`             | Built  | Gratitude journaling with affirmations                                                                                                                    |
+| `/meditate/acts`                    | `ActsPrayerWalk`                  | Built  | ACTS prayer framework walkthrough                                                                                                                         |
+| `/meditate/psalms`                  | `PsalmReading`                    | Built  | Psalm reading with historical context                                                                                                                     |
+| `/meditate/examen`                  | `ExamenReflection`                | Built  | Ignatian Examen daily reflection                                                                                                                          |
+| `/verse/:id`                        | `SharedVerse`                     | Built  | Shareable verse card (social sharing)                                                                                                                     |
+| `/prayer/:id`                       | `SharedPrayer`                    | Built  | Shareable prayer card (social sharing)                                                                                                                    |
+| `/prayer-wall`                      | `PrayerWall`                      | Built  | Community prayer feed (mock data, 274 tests)                                                                                                              |
+| `/prayer-wall/:id`                  | `PrayerDetail`                    | Built  | Standalone prayer detail page                                                                                                                             |
+| `/prayer-wall/user/:id`             | `PrayerWallProfile`               | Built  | Public user profile                                                                                                                                       |
+| `/prayer-wall/dashboard`            | `PrayerWallDashboard`             | Built  | Private prayer wall dashboard                                                                                                                             |
+| `/local-support/churches`           | `Churches`                        | Built  | Church locator (Leaflet map, mock data)                                                                                                                   |
+| `/local-support/counselors`         | `Counselors`                      | Built  | Counselor locator (Leaflet map, mock data)                                                                                                                |
+| `/local-support/celebrate-recovery` | `CelebrateRecovery`               | Built  | CR locator (Leaflet map, mock data)                                                                                                                       |
+| `/music`                            | `MusicPage`                       | Built  | 3-tab music hub: Worship Playlists (default), Ambient Sounds, Sleep & Rest. Tab state via `?tab=playlists\|ambient\|sleep`. Light background on all tabs. |
+| `/music/playlists`                  | Redirect → `/music?tab=playlists` | Built  | Legacy route redirect                                                                                                                                     |
+| `/music/ambient`                    | Redirect → `/music?tab=ambient`   | Built  | Legacy route redirect                                                                                                                                     |
+| `/music/sleep`                      | Redirect → `/music?tab=sleep`     | Built  | Legacy route redirect                                                                                                                                     |
+| `/music/routines`                   | `RoutinesPage`                    | Built  | Bedtime routine builder and templates (NOT in nav dropdown, accessed via direct links)                                                                    |
+| `/login`                            | `ComingSoon`                      | Stub   | Login page placeholder                                                                                                                                    |
+| `/register`                         | `ComingSoon`                      | Stub   | Registration page placeholder                                                                                                                             |
+| `/health`                           | `Health`                          | Built  | Backend health check (dev utility)                                                                                                                        |
+| `/insights`                         | `Insights`                        | Stub   | Mood insights placeholder ("Reflect — Coming Soon")                                                                                                       |
+| `*`                                 | `NotFound`                        | Built  | 404 page                                                                                                                                                  |
 
 ### Protected Routes (Phase 3+)
 
@@ -294,6 +294,12 @@ The global `AudioProvider` wraps the entire app (between `AuthModalProvider` and
 
 **AudioEngineService** manages a single `AudioContext` (suspend/resume, never destroy/recreate). Ambient sounds use `AudioBufferSourceNode` with crossfade looping (double-buffer, 1.5s overlap). Foreground content uses `<audio>` elements via `MediaElementAudioSourceNode` for mobile background survival. Smart fade uses `linearRampToValueAtTime` on the Web Audio API timeline.
 
+### Visual Theme
+
+All 3 Music page tabs use light `#F5F5F5` (`bg-neutral-bg`) background with dark-on-light card styling (`bg-white rounded-xl border border-gray-200 shadow-sm`). Scene cards use nature-themed CSS gradient patterns on darker backgrounds with white text overlay. The AudioDrawer, AudioPill, and all overlay/dialog components remain dark-themed (`rgba(15,10,30,0.85)` with white text).
+
+Components built but not currently rendered (kept in codebase for potential re-enable): `TimeOfDaySection`, `PersonalizationSection`, `RecentlyAddedSection`, `ResumePrompt`, `MusicHint`, `LofiCrossReference`, `AmbientSearchBar`, `AmbientFilterBar`. Hooks kept but not used: `useSpotifyAutoPause`, `useMusicHints`, `useTimeOfDayRecommendations`.
+
 ### Key Audio Components
 
 | Component          | Location            | Description                                                                                                               |
@@ -302,8 +308,8 @@ The global `AudioProvider` wraps the entire app (between `AuthModalProvider` and
 | `AudioDrawer`      | `components/audio/` | Bottom sheet (70vh mobile) / side panel (400px desktop). Focus-trapped. Contains DrawerNowPlaying + DrawerTabs.           |
 | `DrawerNowPlaying` | `components/audio/` | Scene artwork with animations, play/pause, master volume, foreground progress bar, scripture text toggle, balance slider. |
 | `DrawerTabs`       | `components/audio/` | Mixer \| Timer \| Saved. ARIA tablist with roving tabindex. Timer tab shows notification dot when active.                 |
-| `AmbientBrowser`   | `components/audio/` | Search bar, filter chips, featured scenes, scene grid, sound grid, lofi cross-reference.                                  |
-| `SleepBrowse`      | `components/audio/` | Tonight's Scripture, 4 scripture collection rows, bedtime stories grid, routine CTA.                                      |
+| `AmbientBrowser`   | `components/audio/` | Scene grid with CSS patterns, "Build Your Own Mix" card with sound grid. Search/filter hidden but in codebase.            |
+| `SleepBrowse`      | `components/audio/` | Tonight's Scripture, 4 scripture collection rows, bedtime stories grid, routine CTA. Light-themed cards.                  |
 | `RoutineStepper`   | `components/audio/` | Horizontal step progress with content type icons, ARIA progressbar.                                                       |
 
 ### Key Audio Hooks
@@ -315,19 +321,20 @@ The global `AudioProvider` wraps the entire app (between `AuthModalProvider` and
 | `useForegroundPlayer` | `hooks/` | Foreground playback with content-switch dialog, routine interrupt check. Dispatches `FOREGROUND_ENDED` on natural end. |
 | `useSleepTimer`       | `hooks/` | Wall-clock timer, phase tracking, smart fade scheduling via Web Audio API timeline. Runs in AudioProvider.             |
 | `useRoutinePlayer`    | `hooks/` | Routine step sequencing, transition gaps, error retry, sleep timer start.                                              |
-| `useAmbientSearch`    | `hooks/` | Client-side search + tag filtering (OR within dimension, AND across).                                                  |
+| `useAmbientSearch`    | `hooks/` | Client-side search + tag filtering (OR within dimension, AND across). Built but not rendered.                          |
 | `useAnnounce`         | `hooks/` | Dual aria-live regions (polite debounced, assertive immediate) for screen reader announcements.                        |
 
 ### Data Files
 
-| File                    | Location      | Contents                                                          |
-| ----------------------- | ------------- | ----------------------------------------------------------------- |
-| `sound-catalog.ts`      | `data/`       | 24 sounds, `SOUND_BY_ID` Map, `SOUND_CATEGORIES` grouped array    |
-| `scenes.ts`             | `data/`       | 8 scene presets, `SCENE_BY_ID` Map, `FEATURED_SCENE_IDS`          |
-| `scripture-readings.ts` | `data/music/` | 24 WEB scripture readings across 4 collections                    |
-| `bedtime-stories.ts`    | `data/music/` | 12 bedtime stories (4 short, 5 medium, 3 long)                    |
-| `playlists.ts`          | `data/music/` | 8 Spotify playlists (4 Worship & Praise, 4 Explore)               |
-| `routines.ts`           | `data/music/` | 3 template routines (Evening Peace, Scripture & Sleep, Deep Rest) |
+| File                    | Location      | Contents                                                               |
+| ----------------------- | ------------- | ---------------------------------------------------------------------- |
+| `sound-catalog.ts`      | `data/`       | 24 sounds, `SOUND_BY_ID` Map, `SOUND_CATEGORIES` grouped array         |
+| `scenes.ts`             | `data/`       | 8 scene presets, `SCENE_BY_ID` Map, `FEATURED_SCENE_IDS`               |
+| `scene-backgrounds.ts`  | `data/`       | CSS background patterns for each scene, `getSceneBackground()` utility |
+| `scripture-readings.ts` | `data/music/` | 24 WEB scripture readings across 4 collections                         |
+| `bedtime-stories.ts`    | `data/music/` | 12 bedtime stories (4 short, 5 medium, 3 long)                         |
+| `playlists.ts`          | `data/music/` | 8 Spotify playlists (7 rendered — Lofi excluded at component level)    |
+| `routines.ts`           | `data/music/` | 3 template routines (Evening Peace, Scripture & Sleep, Deep Rest)      |
 
 ### Storage Service
 
@@ -351,8 +358,8 @@ Placeholder silent MP3s in `public/audio/` (gitignored). Subdirectories: `ambien
 
 ### Known Issues
 
-- **1024x768 horizontal overflow**: `FeaturedSceneCard` `sm:min-w-[340px]` causes 1px overflow at exactly 1024px viewport. Fix: remove `sm:min-w-[340px]` or change `lg:grid-cols-3` to `xl:grid-cols-3`.
 - **Footer touch targets**: Crisis resource links (988, SAMHSA) are undersized on mobile. Pre-existing, not Music-specific.
+- **Spotify embed loading**: Embeds may show "Player couldn't load" fallback in headless/restricted environments. Works in real browsers with Spotify access.
 
 ---
 
@@ -401,12 +408,13 @@ Use this workflow for all new features:
 - Scene presets: 8 scenes, crossfade transitions, search, tag filtering (Spec 3)
 - Sleep & rest: 24 scripture readings, 12 bedtime stories, foreground audio, content switching (Spec 4)
 - Sleep timer: smart fade, self-correcting wall-clock timer, pause/resume during fade (Spec 5)
-- Music page shell: 3-tab page, Spotify playlists, nav update, time-of-day recommendations (Spec 6)
+- Music page shell: 3-tab page, Spotify playlists, nav update (Spec 6)
 - User features: favorites, saved mixes, sharing, analytics, session persistence (Spec 7)
 - Bedtime routines: builder, playback engine, 3 templates, routine interrupt (Spec 8)
 - Accessibility audit: ARIA, focus management, reduced motion, touch targets, contrast, announcements (Spec 9)
+- Visual polish: light theme on all tabs, playlist restructure, scene CSS patterns, layout cleanup (Visual Polish)
 - Content guide: TTS generation, Cloudflare R2 setup, sound sourcing reference (Spec 10 — manual reference)
-- 959+ frontend tests passing across 100+ test files
+- 960+ frontend tests passing across 100+ test files
 
 **Phase 3 — Auth & Backend Wiring** (NEXT)
 
@@ -422,6 +430,7 @@ Use this workflow for all new features:
 
 - Dark mode, streaks, shareable scripture cards, expanded insights
 - Real TTS audio (replace placeholder MP3s using Spec 10 guide)
+- Re-enable personalization section, time-of-day recommendations, resume prompt when auth is wired
 - Performance optimization, SEO, production deployment
 
 ---
