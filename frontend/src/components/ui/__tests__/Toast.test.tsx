@@ -47,9 +47,26 @@ describe('Toast', () => {
     vi.useRealTimers()
   })
 
-  it('renders toast container with role="status"', () => {
-    renderWithProvider()
-    expect(screen.getByRole('status')).toBeInTheDocument()
+  it('success toast has role="status" and error toast has role="alert"', () => {
+    function RoleTestComponent() {
+      const { showToast } = useToast()
+      return (
+        <>
+          <button onClick={() => showToast('Success msg', 'success')}>Success</button>
+          <button onClick={() => showToast('Error msg', 'error')}>Error</button>
+        </>
+      )
+    }
+    render(
+      <ToastProvider>
+        <RoleTestComponent />
+      </ToastProvider>,
+    )
+    act(() => { screen.getByText('Success').click() })
+    expect(screen.getByRole('status')).toHaveTextContent('Success msg')
+
+    act(() => { screen.getByText('Error').click() })
+    expect(screen.getByRole('alert')).toHaveTextContent('Error msg')
   })
 
   it('limits to 3 toasts visible at once', () => {
@@ -79,8 +96,7 @@ describe('Toast', () => {
       screen.getByText('Show Many').click()
     })
 
-    const statusContainer = screen.getByRole('status')
-    const toasts = statusContainer.querySelectorAll('div > p')
+    const toasts = screen.getAllByRole('status')
     expect(toasts.length).toBeLessThanOrEqual(3)
   })
 })

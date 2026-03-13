@@ -20,9 +20,12 @@ import { PrayerWallDashboard } from './pages/PrayerWallDashboard'
 import { Layout } from './components/Layout'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { AudioProvider } from '@/components/audio/AudioProvider'
 import { Churches } from './pages/Churches'
 import { Counselors } from './pages/Counselors'
 import { CelebrateRecovery } from './pages/CelebrateRecovery'
+import { MusicPage } from './pages/MusicPage'
+import { RoutinesPage } from './pages/RoutinesPage'
 
 function ComingSoon({ title }: { title: string }) {
   return (
@@ -70,6 +73,7 @@ function App() {
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ToastProvider>
         <AuthModalProvider>
+        <AudioProvider>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/health" element={<Health />} />
@@ -87,10 +91,11 @@ function App() {
           <Route path="/verse/:id" element={<SharedVerse />} />
           <Route path="/prayer/:id" element={<SharedPrayer />} />
           <Route path="/scripture" element={<Navigate to="/daily?tab=pray" replace />} />
-          <Route path="/music" element={<ComingSoon title="Music" />} />
-          <Route path="/music/playlists" element={<ComingSoon title="Worship Playlists" />} />
-          <Route path="/music/ambient" element={<ComingSoon title="Ambient Sounds" />} />
-          <Route path="/music/sleep" element={<ComingSoon title="Sleep & Rest" />} />
+          <Route path="/music" element={<MusicPage />} />
+          <Route path="/music/playlists" element={<Navigate to="/music?tab=playlists" replace />} />
+          <Route path="/music/ambient" element={<Navigate to="/music?tab=ambient" replace />} />
+          <Route path="/music/sleep" element={<Navigate to="/music?tab=sleep" replace />} />
+          <Route path="/music/routines" element={<RoutinesPage />} />
           <Route path="/prayer-wall" element={<PrayerWall />} />
           {/* Static segments must precede :id to avoid matching "dashboard"/"user" as a prayer ID */}
           <Route path="/prayer-wall/dashboard" element={<PrayerWallDashboard />} />
@@ -103,6 +108,7 @@ function App() {
           <Route path="/register" element={<ComingSoon title="Get Started" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </AudioProvider>
         </AuthModalProvider>
         </ToastProvider>
       </BrowserRouter>

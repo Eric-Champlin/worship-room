@@ -4,15 +4,10 @@ import { ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 
-const MUSIC_LINKS = [
-  { label: 'Worship Playlists', to: '/music/playlists' },
-  { label: 'Ambient Sounds', to: '/music/ambient' },
-  { label: 'Sleep & Rest', to: '/music/sleep' },
-] as const
-
 const NAV_LINKS = [
   { label: 'Daily Hub', to: '/daily' },
   { label: 'Prayer Wall', to: '/prayer-wall' },
+  { label: 'Music', to: '/music' },
 ] as const
 
 const LOCAL_SUPPORT_LINKS = [
@@ -255,14 +250,6 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
         </NavLink>
       ))}
       <NavDropdown
-        label="Music"
-        to="/music"
-        links={MUSIC_LINKS}
-        dropdownId="music-dropdown"
-        transparent={transparent}
-        extraActivePaths={['/music']}
-      />
-      <NavDropdown
         label="Local Support"
         to="/local-support/churches"
         links={LOCAL_SUPPORT_LINKS}
@@ -386,38 +373,6 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                 {link.label}
               </NavLink>
             ))}
-
-            {/* Music section */}
-            <div
-              className="mt-2 border-t border-gray-100 pt-2"
-              role="group"
-              aria-labelledby="music-heading"
-            >
-              <span
-                id="music-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-primary/50"
-              >
-                Music
-              </span>
-              {MUSIC_LINKS.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    cn(
-                      'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                      isActive
-                        ? 'text-[#2B0E4A]'
-                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
-                    )
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </div>
 
             {/* Local Support section */}
             <div

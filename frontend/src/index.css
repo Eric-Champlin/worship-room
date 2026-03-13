@@ -8,6 +8,38 @@
   }
 }
 
+/* Audio slider thumb/track styling (vendor-prefixed, can't use Tailwind) */
+.audio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #6D28D9;
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+.audio-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #6D28D9;
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+.audio-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+}
+
+.audio-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-cursor-blink {
     animation: none;
@@ -38,5 +70,24 @@
     animation: none;
     opacity: 1;
     transform: translateY(0);
+  }
+  /* Music-specific animations */
+  .animate-waveform-bar-1,
+  .animate-waveform-bar-2,
+  .animate-waveform-bar-3 {
+    animation: none;
+    height: 10px; /* freeze at mid-height */
+  }
+  .animate-sound-pulse {
+    animation: none;
+  }
+  .animate-artwork-drift {
+    animation: none;
+  }
+  .animate-scene-pulse {
+    animation: none;
+  }
+  .animate-scene-glow {
+    animation: none;
   }
 }

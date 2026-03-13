@@ -1,0 +1,52 @@
+import { Play } from 'lucide-react'
+import { ALL_SCRIPTURE_READINGS } from '@/data/music/scripture-readings'
+import type { ScriptureReading } from '@/types/music'
+
+interface TonightScriptureProps {
+  onPlay: (reading: ScriptureReading) => void
+}
+
+function getTonightReading(): ScriptureReading {
+  const todayIndex = Math.floor(Date.now() / 86400000) % ALL_SCRIPTURE_READINGS.length
+  return ALL_SCRIPTURE_READINGS[todayIndex]
+}
+
+function formatDuration(seconds: number): string {
+  return `${Math.round(seconds / 60)} min`
+}
+
+export function TonightScripture({ onPlay }: TonightScriptureProps) {
+  const reading = getTonightReading()
+
+  return (
+    <section aria-label="Tonight's featured scripture" className="space-y-2">
+      <p className="text-sm font-medium uppercase tracking-wide text-primary">
+        Tonight&apos;s Scripture
+      </p>
+      <div className="rounded-xl border-2 border-primary/40 bg-white p-6 shadow-sm">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-lg font-semibold text-text-dark">{reading.title}</p>
+            <p className="mt-1 text-sm text-text-light">{reading.scriptureReference}</p>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-text-light">
+                {formatDuration(reading.durationSeconds)}
+              </span>
+              <span className="text-xs text-text-light">
+                {reading.voiceId === 'male' ? 'Male' : 'Female'} voice
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onPlay(reading)}
+            aria-label={`Play ${reading.title}`}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+          >
+            <Play size={20} fill="currentColor" />
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}

@@ -36,6 +36,12 @@ buildNumber.properties
 .DS_Store
 Thumbs.db
 
+# Audio files (too large for git)
+frontend/public/audio/**/*.mp3
+frontend/public/audio/**/*.wav
+frontend/public/audio/**/*.ogg
+frontend/public/audio/**/*.webm
+
 # Playwright MCP artifacts
 .playwright-mcp/
 

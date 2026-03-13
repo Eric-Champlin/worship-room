@@ -1,7 +1,7 @@
-import { render, screen, within, fireEvent, act } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { Navbar } from '@/components/Navbar'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
@@ -37,11 +37,16 @@ describe('Navbar', () => {
       expect(screen.getByRole('link', { name: 'Prayer Wall' })).toBeInTheDocument()
     })
 
-    it('renders "Music" and "Local Support" dropdown triggers', () => {
+    it('renders "Music" as a direct link (no dropdown)', () => {
       renderNavbar()
+      expect(screen.getByRole('link', { name: 'Music' })).toHaveAttribute('href', '/music')
       expect(
-        screen.getByRole('button', { name: /music menu/i })
-      ).toBeInTheDocument()
+        screen.queryByRole('button', { name: /music menu/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it('renders "Local Support" dropdown trigger', () => {
+      renderNavbar()
       expect(
         screen.getByRole('button', { name: /local support menu/i })
       ).toBeInTheDocument()
@@ -110,123 +115,24 @@ describe('Navbar', () => {
     })
   })
 
-  describe('Music dropdown', () => {
-    it('"Music" label is a link to /music', () => {
+  describe('Music link', () => {
+    it('"Music" is a direct NavLink to /music', () => {
       renderNavbar()
       const link = screen.getByRole('link', { name: 'Music' })
       expect(link).toHaveAttribute('href', '/music')
     })
 
-    it('dropdown is closed by default', () => {
+    it('no Music dropdown chevron exists', () => {
       renderNavbar()
-      expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('button', { name: /music menu/i })
+      ).not.toBeInTheDocument()
     })
 
-    it('clicking the chevron opens the dropdown', () => {
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
-      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
-    })
-
-    it('clicking the chevron again closes the dropdown', () => {
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /music menu/i })
-      fireEvent.click(trigger)
-      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
-      fireEvent.click(trigger)
-      expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
-    })
-
-    it('dropdown links point to correct routes', () => {
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
-      const dropdown = document.getElementById('music-dropdown')!
-      const links = within(dropdown).getAllByRole('link')
-      expect(links).toHaveLength(3)
-      expect(links[0]).toHaveAttribute('href', '/music/playlists')
-      expect(links[1]).toHaveAttribute('href', '/music/ambient')
-      expect(links[2]).toHaveAttribute('href', '/music/sleep')
-    })
-
-    it('Escape key closes the dropdown', async () => {
-      const user = userEvent.setup()
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
-      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
-      await user.keyboard('{Escape}')
-      expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
-    })
-
-    it('Escape key returns focus to the chevron trigger', async () => {
-      const user = userEvent.setup()
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /music menu/i })
-      fireEvent.click(trigger)
-      await user.keyboard('{Escape}')
-      expect(document.activeElement).toBe(trigger)
-    })
-
-    it('outside click closes the dropdown', () => {
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
-      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
-      fireEvent.mouseDown(screen.getByLabelText('Main navigation'))
-      expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
-    })
-
-    it('chevron trigger has correct aria-expanded', () => {
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /music menu/i })
-      expect(trigger).toHaveAttribute('aria-expanded', 'false')
-      fireEvent.click(trigger)
-      expect(trigger).toHaveAttribute('aria-expanded', 'true')
-    })
-
-    it('aria-controls is only set when dropdown is open', () => {
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /music menu/i })
-      expect(trigger).not.toHaveAttribute('aria-controls')
-      fireEvent.click(trigger)
-      expect(trigger).toHaveAttribute('aria-controls', 'music-dropdown')
-    })
-
-    it('dropdown panel uses ul/li with role="list"', () => {
-      renderNavbar()
-      fireEvent.click(screen.getByRole('button', { name: /music menu/i }))
-      const dropdown = document.getElementById('music-dropdown')!
-      expect(dropdown.tagName).toBe('UL')
-      expect(dropdown).toHaveAttribute('role', 'list')
-      const links = within(dropdown).getAllByRole('link')
-      expect(links).toHaveLength(3)
-    })
-
-    it('hovering over the wrapper opens the dropdown', async () => {
-      const user = userEvent.setup()
-      renderNavbar()
-      const trigger = screen.getByRole('button', { name: /music menu/i })
-      const wrapper = trigger.closest('.relative')!
-      await user.hover(wrapper)
-      expect(document.getElementById('music-dropdown')).toBeInTheDocument()
-    })
-
-    it('unhovering the wrapper closes the dropdown after delay', async () => {
-      vi.useFakeTimers({ shouldAdvanceTime: true })
-      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-      try {
-        renderNavbar()
-        const trigger = screen.getByRole('button', { name: /music menu/i })
-        const wrapper = trigger.closest('.relative')!
-        await user.hover(wrapper)
-        expect(document.getElementById('music-dropdown')).toBeInTheDocument()
-        await user.unhover(wrapper)
-        expect(document.getElementById('music-dropdown')).toBeInTheDocument()
-        act(() => {
-          vi.advanceTimersByTime(200)
-        })
-        expect(document.getElementById('music-dropdown')).not.toBeInTheDocument()
-      } finally {
-        vi.useRealTimers()
-      }
+    it('"Music" link has active state on /music route', () => {
+      renderNavbar('/music')
+      const link = screen.getByRole('link', { name: 'Music' })
+      expect(link.className).toContain('after:scale-x-100')
     })
   })
 
@@ -328,9 +234,7 @@ describe('Navbar', () => {
       const allLabels = [
         'Daily Hub',
         'Prayer Wall',
-        'Worship Playlists',
-        'Ambient Sounds',
-        'Sleep & Rest',
+        'Music',
         'Churches',
         'Counselors',
         'Celebrate Recovery',
