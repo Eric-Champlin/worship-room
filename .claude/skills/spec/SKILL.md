@@ -49,7 +49,13 @@ If you cannot infer a sensible `feature_title` and `feature_slug` from `$ARGUMEN
  
 ## Step 3: Switch to a New Git Branch
  
-Before writing any content, switch to a new Git branch using the `branch_name` derived from `$ARGUMENTS`. If the branch name is already taken, append a version number: e.g. `claude/feature/landing-page-hero-01`.
+Before writing any content, switch to the default branch and pull latest:
+ 
+```bash
+git checkout main && git pull
+```
+ 
+Then create and switch to a new Git branch using the `branch_name` derived from `$ARGUMENTS`. If the branch name is already taken, append a version number: e.g. `claude/feature/landing-page-hero-01`.
  
 ---
  
@@ -72,7 +78,9 @@ Before writing any content, switch to a new Git branch using the `branch_name` d
  
 Create a markdown spec document that `/plan` can use directly. Save it to `_specs/<feature_slug>.md`.
  
-Use the exact structure from `_specs/template.md`. When filling it in:
+Use the exact structure from `_specs/template.md`. If `_specs/template.md` does not exist, use the section structure defined below as the template.
+ 
+When filling it in:
  
 - **Overview**: Frame the feature in terms of emotional healing and spiritual support (the app's mission)
 - **User Story**: Use the correct user role — `logged-out visitor`, `logged-in user`, or `admin`

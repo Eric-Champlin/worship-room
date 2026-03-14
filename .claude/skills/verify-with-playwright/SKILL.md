@@ -601,12 +601,12 @@ At each viewport, run JavaScript to inspect computed styles on key layout elemen
 |-------|--------|----------|
 | Crisis resources in footer | PRESENT / MISSING | {details} |
 | Auth modal appears for gated actions (not redirect) | CORRECT / WRONG | {details} |
-| Purple gradient hero renders correctly | YES / NO | {details} |
+| Hero section renders with dark bg, gradient headline, and video element (or static dark bg if reduced motion) | YES / NO | {details} |
 | Lucide icons render (not broken images) | YES / NO | {details} |
-| Design system colors match (primary violet, neutral bg) | YES / NO | {details} |
+| Design system colors match (primary violet for accents, hero-bg for landing page, neutral-bg for inner pages) | YES / NO | {details} |
 | Spotify embed loads (if on page) | YES / NO | {details} |
 | No `dangerouslySetInnerHTML` on user content | SAFE / FLAGGED | {details} |
-| Squiggle background matches across tabs | CONSISTENT / MISMATCHED | {details} |
+| Squiggle backgrounds render correctly (Music tabs: slice, JourneySection/StartingPointQuiz: none) | CONSISTENT / MISMATCHED | {details} |
 | White decorative dividers render under headings | YES / NO / N/A | {details} |
  
 ---

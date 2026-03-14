@@ -3,13 +3,19 @@ export const SQUIGGLE_MASK_STYLE = {
   WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
 } as const
 
-export function BackgroundSquiggle() {
+export function BackgroundSquiggle({
+  className,
+  aspectRatio = 'xMidYMid slice',
+}: {
+  className?: string
+  aspectRatio?: string
+}) {
   return (
     <svg
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full"
+      className={className ?? 'pointer-events-none absolute inset-0 h-full w-full'}
       viewBox="0 0 1800 1350"
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio={aspectRatio}
       fill="none"
     >
       {/* Wide central brushstroke */}

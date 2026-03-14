@@ -15,9 +15,10 @@ const PAUSE_BEFORE_NEXT_MS = 500
 
 interface TypewriterInputProps {
   onSubmit: (value: string) => void
+  variant?: 'glow' | 'glass'
 }
 
-export function TypewriterInput({ onSubmit }: TypewriterInputProps) {
+export function TypewriterInput({ onSubmit, variant = 'glow' }: TypewriterInputProps) {
   const [displayText, setDisplayText] = useState('')
   const [phase, setPhase] = useState<
     'typing' | 'pausing-complete' | 'deleting' | 'pausing-empty'
@@ -115,6 +116,7 @@ export function TypewriterInput({ onSubmit }: TypewriterInputProps) {
   }
 
   const inputValue = isFocused ? userValue : displayText
+  const isGlass = variant === 'glass'
 
   return (
     <form
@@ -135,12 +137,19 @@ export function TypewriterInput({ onSubmit }: TypewriterInputProps) {
       </div>
 
       <div
-        className="animate-glow-pulse rounded-2xl p-[2px]"
-        style={{
-          background: 'linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%)',
-        }}
+        className={cn(
+          'rounded-2xl',
+          isGlass ? 'liquid-glass overflow-hidden' : 'animate-glow-pulse p-[2px]'
+        )}
+        style={isGlass ? undefined : { background: 'linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%)' }}
       >
-        <div className="flex items-center rounded-[14px] bg-white px-4 py-1">
+        <div className={cn(
+          'flex items-center rounded-[14px] px-4 py-1',
+          'focus-within:ring-2 focus-within:ring-offset-0',
+          isGlass
+            ? 'bg-white/5 focus-within:ring-white/60'
+            : 'bg-white focus-within:ring-primary'
+        )}>
           <div className="relative flex min-h-[44px] flex-1 items-center">
             <input
               id="hero-input"
@@ -153,7 +162,12 @@ export function TypewriterInput({ onSubmit }: TypewriterInputProps) {
               onBlur={handleBlur}
               placeholder={prefersReducedMotion.current ? PHRASES[0] : ''}
               aria-label="Tell us how you're feeling or what you need"
-              className="w-full bg-transparent text-base text-text-dark outline-none placeholder:text-text-light"
+              className={cn(
+                'w-full bg-transparent text-base outline-none',
+                isGlass
+                  ? 'text-white placeholder:text-white/50'
+                  : 'text-text-dark placeholder:text-text-light'
+              )}
               autoComplete="off"
             />
           </div>
@@ -162,10 +176,12 @@ export function TypewriterInput({ onSubmit }: TypewriterInputProps) {
             type="submit"
             aria-label="Submit your question"
             className={cn(
-              'ml-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-primary p-2.5 text-white',
-              'transition-colors hover:bg-primary-lt',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
+              'ml-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2.5',
+              'transition-colors',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+              isGlass ? 'text-hero-bg hover:opacity-90' : 'bg-primary text-white hover:bg-primary-lt'
             )}
+            style={isGlass ? { background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)' } : undefined}
           >
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </button>
