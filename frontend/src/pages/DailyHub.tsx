@@ -274,7 +274,7 @@ function DailyHubContent() {
         <SongPickSection />
 
         {/* Starting Point Quiz */}
-        <StartingPointQuiz hideTopGradient />
+        <StartingPointQuiz variant="light" />
       </main>
 
       <SiteFooter />

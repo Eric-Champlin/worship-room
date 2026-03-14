@@ -209,7 +209,12 @@ function NavDropdown({
           <ul
             id={dropdownId}
             role="list"
-            className="animate-dropdown-in rounded-xl bg-white border border-gray-200 shadow-lg py-1.5"
+            className={cn(
+              'animate-dropdown-in rounded-xl shadow-lg py-1.5',
+              transparent
+                ? 'bg-hero-bg/95 backdrop-blur-xl border border-white/10'
+                : 'bg-white border border-gray-200'
+            )}
           >
             {links.map((link) => (
               <li key={link.to}>
@@ -219,13 +224,16 @@ function NavDropdown({
                   className={cn(
                     'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                    'text-[#2B0E4A] hover:bg-[#F5F3FF]'
+                    transparent
+                      ? 'text-white/80 hover:bg-white/5 hover:text-white'
+                      : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                   )}
                 >
                   <span
                     className={cn(
                       'relative pb-0.5',
-                      "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                      "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                      transparent ? 'after:bg-white' : 'after:bg-primary',
                       'after:scale-x-0 group-hover:after:scale-x-100'
                     )}
                   >
@@ -473,7 +481,12 @@ export function Navbar({ transparent = false }: NavbarProps) {
     >
       <div className="mx-auto max-w-6xl px-4 pt-5 pb-2 sm:px-6">
         <div
-          className="rounded-2xl bg-white/[0.08] shadow-lg backdrop-blur-xl saturate-[1.8] border border-white/25"
+          className={cn(
+            'rounded-2xl',
+            transparent
+              ? 'liquid-glass'
+              : 'bg-white/[0.08] shadow-lg backdrop-blur-xl saturate-[1.8] border border-white/25'
+          )}
         >
           <div className="flex items-center justify-between px-6 py-3">
             <NavbarLogo transparent />
@@ -502,6 +515,13 @@ export function Navbar({ transparent = false }: NavbarProps) {
           </div>
 
         </div>
+
+        {transparent && (
+          <div
+            className="mt-1 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            aria-hidden="true"
+          />
+        )}
 
         <MobileDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       </div>

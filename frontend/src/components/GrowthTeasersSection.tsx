@@ -1,8 +1,6 @@
 import { BarChart3, Flame, Users, Lock, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useInView } from '@/hooks/useInView'
-import { useElementWidth } from '@/hooks/useElementWidth'
-import { HeadingDivider } from '@/components/HeadingDivider'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 
 const HEATMAP_COLORS = [
@@ -143,35 +141,33 @@ export function GrowthTeasersSection() {
     rootMargin: '0px 0px -50px 0px',
   })
 
-  const { ref: headingRef, width: headingWidth } = useElementWidth<HTMLHeadingElement>()
-
   return (
     <section aria-labelledby="growth-heading">
-      {/* Gradient transition from JourneySection's light bg into hero purple */}
+      {/* Content area — solid dark background matching hero/journey */}
       <div
-        className="h-32 sm:h-40"
-        style={{
-          background: 'linear-gradient(to bottom, #F5F5F5 0%, #251248 100%)',
-        }}
-      />
-
-      {/* Content area — solid hero purple background */}
-      <div
-        className="bg-hero-deep px-4 pt-12 pb-20 sm:px-6 sm:pt-16 sm:pb-24"
+        className="bg-hero-bg px-4 pt-16 pb-20 sm:px-6 sm:pt-20 sm:pb-24"
       >
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <h2
-            ref={headingRef}
             id="growth-heading"
-            className="inline-block font-script text-[2.7rem] font-bold text-white sm:text-[3.4rem] lg:text-[4rem]"
+            className="font-sans text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl"
           >
-            See How You&apos;re Growing
+            See How You&apos;re
+            <br />
+            <span
+              className="inline-block pb-1 text-5xl sm:text-6xl lg:text-7xl"
+              style={{
+                background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Growing
+            </span>
           </h2>
-          <div className="mt-1 flex justify-center">
-            <HeadingDivider width={headingWidth} />
-          </div>
-          <p className="mt-3 text-base text-white sm:text-lg">
+          <p className="mt-3 text-base text-white/80 sm:text-lg">
             Create a free account and unlock your personal dashboard.
           </p>
         </div>
@@ -224,10 +220,13 @@ export function GrowthTeasersSection() {
             type="button"
             onClick={() => authModal?.openAuthModal(undefined, 'register')}
             className={cn(
-              'inline-flex items-center rounded-full bg-primary px-8 py-3 text-base font-medium text-white',
-              'transition-all hover:bg-primary-lt hover:shadow-lg',
+              'inline-flex items-center rounded-full px-8 py-3 text-base font-semibold text-hero-bg',
+              'transition-all hover:shadow-lg hover:brightness-110',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
             )}
+            style={{
+              background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+            }}
           >
             Create a Free Account
           </button>

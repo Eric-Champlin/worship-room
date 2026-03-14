@@ -323,24 +323,23 @@ describe('StartingPointQuiz', () => {
   })
 
   describe('Props', () => {
-    it('hides top gradient when hideTopGradient is true', () => {
+    it('renders with dark background by default', () => {
+      renderQuiz()
+      const section = document.getElementById('quiz')!
+      const contentArea = section.firstElementChild as HTMLElement
+      expect(contentArea.className).toContain('bg-hero-bg')
+    })
+
+    it('renders with light background when variant="light"', () => {
       render(
         <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <StartingPointQuiz hideTopGradient />
+          <StartingPointQuiz variant="light" />
         </MemoryRouter>
       )
       const section = document.getElementById('quiz')!
-      // First child should be the white content area, not the gradient
-      const firstChild = section.firstElementChild as HTMLElement
-      expect(firstChild.style.background).toBe('')
-    })
-
-    it('shows top gradient by default', () => {
-      renderQuiz()
-      const section = document.getElementById('quiz')!
-      // First child of the section should be the gradient div
-      const firstChild = section.firstElementChild as HTMLElement
-      expect(firstChild.style.background).toContain('linear-gradient')
+      const contentArea = section.firstElementChild as HTMLElement
+      expect(contentArea.className).toContain('bg-white')
+      expect(contentArea.className).not.toContain('bg-hero-bg')
     })
   })
 

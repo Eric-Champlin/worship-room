@@ -19,6 +19,7 @@ export default {
         'muted-gray': '#9CA3AF',
         'subtle-gray': '#6B7280',
         'dark-border': '#2a2040',
+        'hero-bg': '#08051A',
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],

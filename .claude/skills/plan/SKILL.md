@@ -54,6 +54,8 @@ Before writing any plan, explore the codebase to ground your plan in reality. Di
  
 If the Design System Reference does not exist, note it in the Assumptions section: "No design system reference found. UI styling values are based on codebase inspection and may not be pixel-perfect. Consider running `/playwright-recon --internal` before execution."
  
+**Recon staleness check:** If `_plans/recon/design-system.md` exists, check the date at the top of the file. If significant visual changes have been made since the recon was captured (check CLAUDE.md's Phase descriptions and Known Issues for recent redesigns), flag it: "⚠️ Design system recon may be stale (captured before recent visual redesign). Consider re-running `/playwright-recon --internal` to capture current values." A stale recon is worse than no recon — it gives false confidence in outdated values.
+ 
 **[UNVERIFIED] value marking:** When the spec introduces visual patterns not covered by any recon report or design system reference, or when a value is derived from codebase inspection rather than computed extraction, mark it as `[UNVERIFIED]` in the plan. Include a verification method and correction method for each:
  
 ```

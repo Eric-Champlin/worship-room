@@ -68,9 +68,12 @@ function StepCircle({ number }: { number: number }) {
       aria-hidden="true"
       className={cn(
         'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
-        'bg-primary text-sm font-bold text-white',
+        'text-sm font-bold text-hero-bg',
         'sm:h-12 sm:w-12 sm:text-base'
       )}
+      style={{
+        background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+      }}
     >
       {number}
     </span>
@@ -86,16 +89,13 @@ export function JourneySection() {
   return (
     <section
       aria-labelledby="journey-heading"
-      className="px-4 pt-8 pb-16 sm:px-6 sm:pt-12 sm:pb-20 lg:pb-24"
-      style={{
-        background: '#F5F5F5',
-      }}
+      className="bg-hero-bg px-4 pt-8 pb-16 sm:px-6 sm:pt-12 sm:pb-20 lg:pb-24"
     >
       <div className="mx-auto max-w-2xl">
         <div className="relative">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-x-0 top-0 -bottom-16 opacity-30"
             style={{
               maskImage:
                 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
@@ -103,20 +103,28 @@ export function JourneySection() {
                 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
             }}
           >
-            <BackgroundSquiggle />
+            <BackgroundSquiggle className="pointer-events-none absolute inset-0 h-full w-full" aspectRatio="none" />
           </div>
 
           <div className="relative mb-12 text-center sm:mb-16">
             <h2
               id="journey-heading"
-              className="mb-3 font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl"
+              className="mb-3 font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl"
             >
               Your Journey to{' '}
-              <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
+              <span
+                className="inline-block pb-1 pr-1 font-script text-3xl sm:text-4xl lg:text-5xl"
+                style={{
+                  background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
                 Healing
               </span>
             </h2>
-            <p className="text-base text-text-dark sm:text-lg">
+            <p className="text-base text-white/80 sm:text-lg">
               From prayer to community, every step draws you closer to peace.
             </p>
           </div>
@@ -142,7 +150,7 @@ export function JourneySection() {
                   to={step.to}
                   className={cn(
                     'group flex items-start gap-4 rounded-lg p-2 transition-all duration-200',
-                    'hover:bg-white hover:shadow-sm',
+                    'hover:bg-white/5',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
                   )}
                 >
@@ -150,20 +158,28 @@ export function JourneySection() {
                     <StepCircle number={step.number} />
                     {!isLast && (
                       <div
-                        className="mx-auto mt-1 w-0.5 flex-1 bg-primary/30"
+                        className="mx-auto mt-1 w-0.5 flex-1 bg-white/20"
                         aria-hidden="true"
                       />
                     )}
                   </div>
 
                   <div className={cn('pb-8', isLast && 'pb-0')}>
-                    <h3 className="mb-1 font-sans text-lg font-semibold text-text-dark group-hover:text-primary sm:text-xl">
+                    <h3 className="mb-1 font-sans text-lg font-semibold text-white group-hover:text-primary-lt sm:text-xl">
                       {step.prefix}{' '}
-                      <span className="font-script text-2xl text-primary sm:text-3xl">
+                      <span
+                        className="inline-block pb-1 pr-1 font-script text-2xl sm:text-3xl"
+                        style={{
+                          background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+                          backgroundClip: 'text',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}
+                      >
                         {step.highlight}
                       </span>
                     </h3>
-                    <p className="text-sm leading-relaxed text-text-dark sm:text-base">
+                    <p className="text-sm leading-relaxed text-white/70 sm:text-base">
                       {step.description}
                     </p>
                   </div>
