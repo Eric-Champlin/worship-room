@@ -26,6 +26,11 @@ import { Counselors } from './pages/Counselors'
 import { CelebrateRecovery } from './pages/CelebrateRecovery'
 import { MusicPage } from './pages/MusicPage'
 import { RoutinesPage } from './pages/RoutinesPage'
+import { lazy, Suspense } from 'react'
+
+const MoodCheckInPreview = lazy(() =>
+  import('./pages/MoodCheckInPreview').then((m) => ({ default: m.MoodCheckInPreview }))
+)
 
 function ComingSoon({ title }: { title: string }) {
   return (
@@ -104,6 +109,9 @@ function App() {
           <Route path="/local-support/churches" element={<Churches />} />
           <Route path="/local-support/counselors" element={<Counselors />} />
           <Route path="/local-support/celebrate-recovery" element={<CelebrateRecovery />} />
+          {import.meta.env.DEV && (
+            <Route path="/dev/mood-checkin" element={<Suspense><MoodCheckInPreview /></Suspense>} />
+          )}
           <Route path="/login" element={<ComingSoon title="Log In" />} />
           <Route path="/register" element={<ComingSoon title="Get Started" />} />
           <Route path="*" element={<NotFound />} />

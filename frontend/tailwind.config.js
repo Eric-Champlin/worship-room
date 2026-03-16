@@ -98,6 +98,10 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.02)' },
         },
+        'mood-pulse': {
+          '0%, 100%': { opacity: '0.7', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.05)' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -116,6 +120,7 @@ export default {
         'sound-pulse': 'sound-pulse 3s ease-in-out infinite',
         'scene-pulse': 'scene-pulse 4s ease-in-out infinite',
         'scene-glow': 'scene-glow 8s ease-in-out infinite',
+        'mood-pulse': 'mood-pulse 3s ease-in-out infinite',
       },
     },
   },
