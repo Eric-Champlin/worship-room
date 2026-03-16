@@ -85,6 +85,7 @@ If `$ARGUMENTS` contains a path to a plan file, read it and extract:
 - **Design Context** — UI specs that should be matched
 - **Execution Log** — what was actually implemented (including deviations)
 - **[UNVERIFIED] values** — any CSS or design values flagged as unverified during planning
+- **Master Spec Plan reference** — if present, read the master plan for shared data models and localStorage keys to verify consistency
  
 This is the contract the code should fulfill. Every planned change should appear in the diff, and nothing in the diff should contradict the plan.
  
@@ -167,6 +168,15 @@ Search the plan for any values marked `[UNVERIFIED]`. For each one, check:
 ```
  
 If the plan has no [UNVERIFIED] values: `**[UNVERIFIED] values:** None in plan — all values from recon.`
+ 
+### 3e: Shared Data Model Consistency (if master plan referenced)
+ 
+If the plan references a master spec plan, verify that shared data models are used consistently:
+ 
+| Data Model / Key | Master Plan Definition | Code Implementation | Match? |
+|-----------------|----------------------|--------------------| -------|
+| {interface name} | {field names/types from master plan} | {file}:{line} | YES / DEVIATES: {details} |
+| {localStorage key} | {expected key name} | {file}:{line} | YES / WRONG KEY |
  
 ## Step 4: Spec Compliance (only if --spec provided)
  
@@ -434,13 +444,18 @@ Consider how you (or a future you) will experience this diff:
  
 | Check | Status | Evidence |
 |-------|--------|----------|
-| Crisis detection on user text inputs (Pray, Journal, Prayer Wall) | OK / MISSING / BYPASSED | {file}:{line} |
+| Crisis detection on user text inputs (Pray, Journal, Prayer Wall, Mood Check-In) | OK / MISSING / BYPASSED / N/A | {file}:{line} |
 | No `dangerouslySetInnerHTML` on user content | OK / VIOLATION | {file}:{line} |
-| Demo mode: no database writes for logged-out users | OK / VIOLATION | {file}:{line} |
-| Auth modal triggers correctly for gated actions | OK / MISSING | {file}:{line} |
-| Journal drafts use localStorage, not sessionStorage | OK / WRONG STORAGE | {file}:{line} |
-| All scripture uses WEB translation | OK / WRONG TRANSLATION | {file}:{line} |
-| No unencrypted sensitive data persistence | OK / VIOLATION | {file}:{line} |
+| Demo mode: no database writes for logged-out users | OK / VIOLATION / N/A | {file}:{line} |
+| Auth modal triggers correctly for gated actions | OK / MISSING / N/A | {file}:{line} |
+| Journal drafts use localStorage, not sessionStorage | OK / WRONG STORAGE / N/A | {file}:{line} |
+| All scripture uses WEB translation | OK / WRONG TRANSLATION / N/A | {file}:{line} |
+| No unencrypted sensitive data persistence | OK / VIOLATION / N/A | {file}:{line} |
+| Mood data never exposed to friends (privacy) | OK / VIOLATION / N/A | {file}:{line} |
+| `recordActivity()` is auth-guarded (no-ops for logged-out) | OK / MISSING / N/A | {file}:{line} |
+| All `wr_*` localStorage keys use correct prefix | OK / WRONG PREFIX / N/A | {file}:{line} |
+| Streak reset messaging is gentle (not punitive) | OK / PUNITIVE LANGUAGE / N/A | {file}:{line} |
+| Faith points calculation uses correct multiplier tiers | OK / WRONG TIERS / N/A | {file}:{line} |
  
 **Worship Room-specific violations are ALWAYS Blocker severity.**
  
@@ -463,6 +478,7 @@ Consider how you (or a future you) will experience this diff:
 |----------|--------|----------|
 | Accuracy (vs plan) | {count or "N/A"} | {count} |
 | [UNVERIFIED] Values | {count or "N/A"} | {count} |
+| Shared Data Model Consistency | {count or "N/A"} | {count} |
 | Spec Compliance | {count or "N/A"} | {count} |
 | Pattern Consistency | {count} | {count} |
 | Cleanliness | {count} | {count} |
@@ -511,6 +527,9 @@ Consider how you (or a future you) will experience this diff:
  
 ### [UNVERIFIED] Values
 {from Step 3d, or "No plan provided" or "None in plan"}
+ 
+### Shared Data Model Consistency
+{from Step 3e, or "No master plan referenced"}
  
 ### Spec Compliance
 {from Step 4, or "No spec provided"}
@@ -577,16 +596,17 @@ If in plan-aware mode with deviations:
 - Every finding must reference a specific file and line number — no vague observations
 - Do not speculate about code not in the diff
 - Do not run formatting-only changes unless they fix a cited issue
-- Worship Room-specific issues (AI safety, crisis detection bypass, `dangerouslySetInnerHTML`, demo mode writes, unencrypted journal entries) are always **Blocker** severity
+- Worship Room-specific issues (AI safety, crisis detection bypass, `dangerouslySetInnerHTML`, demo mode writes, unencrypted journal entries, mood data privacy violations) are always **Blocker** severity
 - Plan deviations that violate a guardrail (DO NOT item) are always **Blocker** severity
 - Missing auth gates for spec-defined gated actions are always **Blocker** severity
+- Shared data model mismatches (wrong localStorage key names, wrong TypeScript interface fields vs master plan) are always **Major** severity
 - If the user provides a focus area in `$ARGUMENTS`, prioritize that area but still report blockers found elsewhere
 - Read `.claude/rules/` for project-specific standards before reviewing
  
 ## Severity Definitions
  
-- **Blocker:** Must fix. Includes: bugs, security vulnerabilities, Worship Room safety violations, missing auth gates, plan guardrail violations, sensitive data, debug artifacts in production code, unsafe database migrations.
-- **Major:** Should fix. Includes: accessibility issues (WCAG A/AA violations), missing error handling on external calls, unverified values not confirmed, logic errors that could cause silent failures.
+- **Blocker:** Must fix. Includes: bugs, security vulnerabilities, Worship Room safety violations, missing auth gates, plan guardrail violations, sensitive data, debug artifacts in production code, unsafe database migrations, mood data privacy violations.
+- **Major:** Should fix. Includes: accessibility issues (WCAG A/AA violations), missing error handling on external calls, unverified values not confirmed, shared data model mismatches, logic errors that could cause silent failures.
 - **Medium:** Recommended. Includes: inconsistent patterns, test quality issues, missing edge cases, minor accessibility enhancements, performance concerns.
 - **Minor / Nit:** Nice to have. Includes: naming preferences, import ordering, comment wording, whitespace.
  

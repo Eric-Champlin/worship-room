@@ -50,7 +50,7 @@ User input: $ARGUMENTS
  
 From `$ARGUMENTS`, determine:
  
-**`target`** — Route, page, or component to verify (e.g., `/daily`, `/prayer-wall`, `"the auth modal"`)
+**`target`** — Route, page, or component to verify (e.g., `/daily`, `/prayer-wall`, `"the auth modal"`, `/` for dashboard)
  
 **`plan_path`** (optional) — Path to a plan file. Enables plan-aware mode:
 - Cross-reference UI against plan specifications
@@ -70,6 +70,7 @@ Read the plan file and extract:
 - **Implementation Steps** — what components were created/modified
 - **Execution Log** — what was actually built (including deviations)
 - **[UNVERIFIED] values** — any values flagged as unverified that need extra scrutiny during comparison
+- **Master Spec Plan reference** — if present, read for shared data models and localStorage keys (useful for seeding test data)
  
 ### Auto-detect plan (if no plan path provided)
  
@@ -202,7 +203,7 @@ Plan what to verify. Read relevant source files for reconnaissance:
 1. What elements should be visible (headings, buttons, cards, sections)
 2. What interactions to test (clicks, inputs, toggles, modals, tabs)
 3. What states to check (empty, loaded, error, logged-in vs logged-out)
-4. Auth state — check `useAuth.ts` for gating behavior
+4. Auth state — check for simulated auth pattern (see Auth State section below)
  
 **If plan-aware:** Pull flows from the plan's implementation steps, edge cases, and design context.
  
@@ -214,7 +215,59 @@ Plan what to verify. Read relevant source files for reconnaissance:
 - Submit with valid data — verify outcome
 - Submit empty — verify validation errors
  
-**Display the script before executing:**
+### Auth State for Verification
+ 
+**If the project uses simulated auth via localStorage** (check for `wr_auth_simulated` key pattern in the codebase or plan):
+ 
+- Use `page.addInitScript()` to set localStorage values BEFORE navigating:
+  ```typescript
+  // Logged-in state
+  await page.addInitScript(() => {
+    localStorage.setItem('wr_auth_simulated', 'true');
+    localStorage.setItem('wr_user_name', 'Eric');
+  });
+  ```
+- Verify BOTH logged-out (default, no injection) AND logged-in states
+- Do NOT modify source code for auth testing — localStorage injection is sufficient
+ 
+**If the project uses real JWT auth:**
+- Note that logged-in verification requires auth token setup (manual or via API call)
+- Verify logged-out experience only unless user provides auth mechanism
+ 
+### Test Data Seeding (for localStorage-backed features)
+ 
+If the feature uses localStorage for data persistence (dashboard widgets, mood entries, friends, badges, streaks, etc.), verification needs BOTH empty and populated states:
+ 
+**Empty state verification:** Navigate without seeding — all widgets show empty states.
+ 
+**Populated state verification:** Use `page.addInitScript()` to inject seed data BEFORE navigation:
+ 
+```typescript
+await page.addInitScript(() => {
+  // Auth
+  localStorage.setItem('wr_auth_simulated', 'true');
+  localStorage.setItem('wr_user_name', 'Eric');
+  
+  // Seed data (use interfaces from master plan or plan's Shared Data Models)
+  localStorage.setItem('wr_mood_entries', JSON.stringify([
+    { id: '1', date: '2026-03-16', mood: 4, moodLabel: 'Good', timestamp: Date.now(), verseSeen: 'Psalm 107:1' },
+    { id: '2', date: '2026-03-15', mood: 3, moodLabel: 'Okay', timestamp: Date.now() - 86400000, verseSeen: 'Psalm 46:10' },
+    // ... 5-7 entries for a realistic 7-day chart
+  ]));
+  
+  localStorage.setItem('wr_streak', JSON.stringify({
+    currentStreak: 5, longestStreak: 14, lastActiveDate: '2026-03-16'
+  }));
+  
+  // ... additional seed data as needed
+});
+```
+ 
+**Document seed data in the verification report** so results are reproducible.
+ 
+**If the plan includes a "Shared Data Models" section or references a master plan:** Use those exact TypeScript interfaces to construct valid seed data. Invalid seed data (wrong field names, wrong types) will cause runtime errors that mask real issues.
+ 
+### Display the script before executing:
  
 ```text
 ## Verification Script
@@ -228,6 +281,11 @@ Plan what to verify. Read relevant source files for reconnaissance:
  
 ### Flow 2: {description}
 | ... | ... | ... | ... |
+ 
+### Auth States to Verify
+- Logged-out: {what should be visible/hidden}
+- Logged-in (empty data): {what should be visible}
+- Logged-in (seeded data): {what should be visible}
  
 Proceed? (yes / modify)
 ```
@@ -595,19 +653,60 @@ At each viewport, run JavaScript to inspect computed styles on key layout elemen
  
 ## Step 9: Worship Room-Specific Checks
  
-**Always run these, regardless of flags:**
+**Always run these, regardless of flags. Mark checks as N/A if they don't apply to the target page.**
+ 
+### Global Checks (all pages)
  
 | Check | Status | Evidence |
 |-------|--------|----------|
 | Crisis resources in footer | PRESENT / MISSING | {details} |
-| Auth modal appears for gated actions (not redirect) | CORRECT / WRONG | {details} |
-| Hero section renders with dark bg, gradient headline, and video element (or static dark bg if reduced motion) | YES / NO | {details} |
-| Lucide icons render (not broken images) | YES / NO | {details} |
-| Design system colors match (primary violet for accents, hero-bg for landing page, neutral-bg for inner pages) | YES / NO | {details} |
-| Spotify embed loads (if on page) | YES / NO | {details} |
+| Lucide icons render (not broken images) | YES / NO / N/A | {details} |
+| Design system colors match (primary violet for accents) | YES / NO / N/A | {details} |
 | No `dangerouslySetInnerHTML` on user content | SAFE / FLAGGED | {details} |
-| Squiggle backgrounds render correctly (Music tabs: slice, JourneySection/StartingPointQuiz: none) | CONSISTENT / MISMATCHED | {details} |
+ 
+### Landing Page Checks (if target is `/` logged-out)
+ 
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Hero section renders with dark bg, gradient headline | YES / NO / N/A | {details} |
+| Growth Teasers section renders 3 blurred preview cards | YES / NO / N/A | {details} |
+| Squiggle backgrounds render correctly | CONSISTENT / MISMATCHED / N/A | {details} |
 | White decorative dividers render under headings | YES / NO / N/A | {details} |
+ 
+### Dashboard Checks (if target is `/` logged-in)
+ 
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Mood check-in appears for first daily visit (no mood entry for today) | YES / NO / N/A | {details} |
+| Dashboard renders when mood already logged today | YES / NO / N/A | {details} |
+| Hero shows personalized greeting + streak + level | YES / NO / N/A | {details} |
+| Frosted glass cards render with backdrop-blur | YES / NO / N/A | {details} |
+| Widget cards are collapsible | YES / NO / N/A | {details} |
+| Activity checklist reflects current activity state | YES / NO / N/A | {details} |
+| Mood chart renders with correct mood-colored dots | YES / NO / N/A | {details} |
+ 
+### Navbar Checks (logged-in state)
+ 
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Notification bell shows in navbar | YES / NO / N/A | {details} |
+| Bell badge count matches unread notifications | YES / NO / N/A | {details} |
+| Avatar dropdown renders all menu items | YES / NO / N/A | {details} |
+| Log In / Get Started buttons hidden when authenticated | YES / NO / N/A | {details} |
+ 
+### Auth Modal Checks (if page has gated actions)
+ 
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Auth modal appears for gated actions (not redirect) | CORRECT / WRONG / N/A | {details} |
+ 
+### Music Page Checks (if target is `/music`)
+ 
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Spotify embed loads | YES / NO / N/A | {details} |
+| Squiggle backgrounds render correctly (Music tabs: slice) | CONSISTENT / MISMATCHED / N/A | {details} |
+| Light background on all tabs | YES / NO / N/A | {details} |
  
 ---
  
@@ -658,6 +757,7 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
  
 ## Summary
 - **URL verified:** {URL}
+- **Auth states tested:** {logged-out / logged-in (empty) / logged-in (seeded) / all}
 - **Servers:** Frontend ✅ | Backend ✅ / ⚠️ not running
 - **Flows executed:** {count}
 - **Total steps:** {count}
@@ -729,6 +829,10 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 |-----------|-----------|-------------|
 | {file} | {breakpoint} | {description} |
  
+## Test Data Used
+- **Auth state:** {logged-out / simulated via localStorage}
+- **Seed data:** {description of seeded data or "none — empty state only"}
+ 
 ## Confidence Assessment
 - **Overall:** HIGH / MEDIUM / LOW
 - **Reasoning:** {specific evidence}
@@ -785,9 +889,10 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 - **Ignore:** DevTools, HMR, `[vite]`, `favicon.ico`, `chrome-extension://`
  
 ### Auth State
-- First verify logged-out experience
-- Note that logged-in verification requires temporarily modifying `useAuth()`
-- Do NOT modify `useAuth()` automatically
+- Always verify logged-out experience first
+- Use localStorage injection (`page.addInitScript`) for logged-in verification when simulated auth is available
+- Do NOT modify source code for auth testing
+- Verify both empty and seeded data states when localStorage-backed features are involved
  
 ### Comparison Rules
 - **NO "CLOSE" verdict.** Every comparison is YES or NO.
@@ -831,3 +936,4 @@ The browser is the ultimate test environment. Unit tests prove components work i
 - `/execute-plan` — Execute all steps from a generated plan (has its own visual verification checkpoints)
 - `/code-review` — Pre-commit code review (run AFTER this verification passes)
 - `/spec` — Write a feature specification (upstream of /plan)
+ 

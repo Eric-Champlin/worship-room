@@ -15,8 +15,9 @@ Your job is to:
 1. Read and internalize a spec file
 2. Explore the codebase to understand existing patterns, components, and architecture
 3. Load the Design System Reference for exact styling values
-4. Generate a detailed, step-by-step implementation plan
-5. Save the plan to `_plans/` as a durable artifact
+4. Load the Master Spec Plan if this spec is part of a multi-spec feature
+5. Generate a detailed, step-by-step implementation plan
+6. Save the plan to `_plans/` as a durable artifact
  
 The plan is the source of truth for `/execute-plan`. It must be precise enough that execution requires no improvisation.
  
@@ -51,6 +52,12 @@ Before writing any plan, explore the codebase to ground your plan in reality. Di
 7. **Security rules** — read `.claude/rules/02-security.md` for auth gating requirements. Identify every action in the spec that requires login and ensure the plan includes auth checks for each one.
 8. **Design System Reference** — check if `_plans/recon/design-system.md` exists. If it does, read it for exact computed CSS values, color tokens, typography, spacing, and component patterns (heroes, cards, buttons, decorative elements). These exact values must be referenced in any UI step's Details section — not "match the hero" but "use `background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%)`, font: Lora 48px/1.2 bold, color: #FFFFFF`".
 9. **External Recon Report** — check if the spec references a recon report (e.g., `_plans/recon/{slug}.md`). If it does, read it for per-screen CSS Mapping Tables, Gradient tables, Vertical Rhythm tables, Image tables, Link inventories, States tables, Text Content Snapshots, and Responsive CSS Mapping Tables. These feed directly into implementation steps and are verified by `/verify-with-playwright`.
+10. **Master Spec Plan** — check if the spec references a master plan (e.g., `dashboard-growth-spec-plan-v2.md`). Also check CLAUDE.md for a multi-spec phase listing the current spec. If a master plan exists, read it for:
+    - Shared data models (TypeScript interfaces, localStorage keys)
+    - Cross-spec integration points (what this spec produces/consumes)
+    - Shared constants (mood colors, activity points, level thresholds, badge definitions)
+    - Prior spec decisions that this spec must respect
+    - Include relevant shared context in the Architecture Context section
  
 If the Design System Reference does not exist, note it in the Assumptions section: "No design system reference found. UI styling values are based on codebase inspection and may not be pixel-perfect. Consider running `/playwright-recon --internal` before execution."
  
@@ -84,6 +91,7 @@ Use this exact structure:
 **Branch:** 
 **Design System Reference:** `_plans/recon/design-system.md` (loaded / not found)
 **Recon Report:** `_plans/recon/{slug}.md` (loaded / not applicable)
+**Master Spec Plan:** `{path}` (loaded / not applicable)
  
 ---
  
@@ -96,6 +104,8 @@ Use this exact structure:
 - Database tables involved
 - Test patterns to match (including provider wrapping: AuthModalProvider, ToastProvider, etc.)
 - Auth gating patterns (useAuth + useAuthModal pattern, which actions are gated)
+- Shared data models from master plan (if applicable)
+- Cross-spec dependencies from master plan (if applicable)
  
 ---
  
@@ -137,8 +147,26 @@ This table is the executor's copy-paste reference for all styling. No guessing.
 - {e.g., Squiggle backgrounds use SQUIGGLE_MASK_STYLE for fade mask}
 - {e.g., All tabs share max-w-2xl container width}
 - {e.g., Hero gradients use 135deg angle consistently}
+- {e.g., Dashboard uses frosted glass cards: bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl}
+- {e.g., Mood colors: Struggling=#D97706, Heavy=#C2703E, Okay=#8B7FA8, Good=#2DD4BF, Thriving=#34D399}
  
 This block is displayed verbatim by `/execute-plan` Step 4d before each UI step to prevent mid-implementation drift back to default assumptions.
+ 
+---
+ 
+## Shared Data Models (from Master Plan)
+ 
+**If a master spec plan was loaded, include the shared data models this spec depends on or produces:**
+ 
+```typescript
+// Include relevant TypeScript interfaces from the master plan
+// that this spec needs to implement or consume
+```
+ 
+**localStorage keys this spec touches:**
+| Key | Read/Write | Description |
+|-----|-----------|-------------|
+|  | Read / Write / Both |  |
  
 ---
  
@@ -181,6 +209,7 @@ Before executing this plan, confirm:
 - [ ] Design system values are verified (from reference or codebase inspection)
 - [ ] All [UNVERIFIED] values are flagged with verification methods
 - [ ] Recon report loaded if available (for visual verification during execution)
+- [ ] Prior specs in the sequence are complete and committed (if multi-spec feature)
  
 ---
  
@@ -274,6 +303,7 @@ Before executing this plan, confirm:
 - **Mark uncertain values [UNVERIFIED].** Any value not confirmed by a recon report or design system reference must be marked `[UNVERIFIED]` with a verification method. `/execute-plan` displays these prominently, `/verify-with-playwright` gives them priority scrutiny, and `/code-review` audits whether they were resolved.
 - **Include vertical rhythm.** When the design system recon documents spacing between sections, include those values in the Vertical Rhythm section. `/verify-with-playwright` compares these — any gap difference >5px is a mismatch.
 - **Include the Design System Reminder.** If the project has UI quirks (custom fonts, spacing scales, decorative patterns), list them in the Design System Reminder block. `/execute-plan` displays this before every UI step to prevent drift.
+- **Include shared data models.** When a master spec plan exists, include the shared TypeScript interfaces and localStorage keys this spec depends on or produces. This prevents duplicate or conflicting data model definitions across specs.
  
 ---
  
@@ -288,6 +318,7 @@ Spec:       <path to spec>
 Auth gates: <N> actions gated
 Design ref: loaded / not found
 Recon:      loaded / not applicable
+Master plan: loaded / not applicable
 [UNVERIFIED] values: <N> (will be flagged during execution and verification)
  
 Pipeline:
@@ -313,6 +344,7 @@ Do not repeat the full plan in chat unless the user asks. The plan file is the a
 - **Design values are mandatory for UI.** If a Design System Reference exists, use its exact values. If not, cite the specific codebase file/line where you found each value.
 - **[UNVERIFIED] values must be explicit.** Never silently use a guessed value. Mark it `[UNVERIFIED]` with verification and correction methods. This is how the downstream pipeline catches visual mismatches early instead of after all steps are complete.
 - **Recon data flows downstream.** If a recon report exists, its CSS Mapping Tables, Gradient tables, Vertical Rhythm tables, Link inventories, States tables, and Text Content Snapshots are consumed by `/execute-plan` (visual verification checkpoints) and `/verify-with-playwright` (design compliance checks). Reference the recon report path in the plan header so downstream skills can auto-load it.
+- **Master plan data flows into Architecture Context.** If a master spec plan exists, its shared data models, localStorage keys, cross-spec integration points, and constants must appear in the Architecture Context and Shared Data Models sections. This prevents specs from inventing conflicting interfaces.
  
 ---
  

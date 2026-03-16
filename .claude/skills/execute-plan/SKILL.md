@@ -44,15 +44,17 @@ Before doing anything, read and internalize:
  
 2. **Design System Reference** — Check if `_plans/recon/design-system.md` exists. If it does, read it and internalize the full design system: color tokens, typography scale, spacing values, component patterns (hero, card, button, section, decorative elements), and the CSS Mapping Table. **This is the single source of truth for all UI styling.** When the plan says "match the existing hero" or "use the same card style," look up the exact computed values from this file — do NOT inspect other components at build time or guess. If the design system file does not exist, proceed without it but flag to the user: "No design system reference found at `_plans/recon/design-system.md`. Consider running `/playwright-recon --internal` to generate one for more accurate UI implementation."
  
-3. **Assumptions & Pre-Execution Checklist** — If this is the first run (no steps marked [COMPLETE] in the Execution Log), verify the checklist:
+3. **Master Spec Plan** — Check the plan header for a "Master Spec Plan" reference. If one exists, read it for shared data models, localStorage keys, cross-spec integration points, and constants. When implementing data models or storage keys, use the exact interfaces and key names from the master plan — do not invent alternatives.
+ 
+4. **Assumptions & Pre-Execution Checklist** — If this is the first run (no steps marked [COMPLETE] in the Execution Log), verify the checklist:
    - Display the checklist to the user
    - Ask: "Have you reviewed and confirmed these assumptions? (yes/no)"
    - **DO NOT proceed until the user confirms**
    - If the user says an assumption is wrong, **STOP** and inform them to update the plan
  
-4. **Edge Cases & Decisions table** — Know the explicit decisions so you don't re-decide them during implementation.
+5. **Edge Cases & Decisions table** — Know the explicit decisions so you don't re-decide them during implementation.
  
-5. **[UNVERIFIED] values** — Scan the plan for any `[UNVERIFIED]` flags. Know which values are provisional before you start implementing. These get extra scrutiny during visual verification (Step 4g).
+6. **[UNVERIFIED] values** — Scan the plan for any `[UNVERIFIED]` flags. Know which values are provisional before you start implementing. These get extra scrutiny during visual verification (Step 4g).
  
 ---
  
@@ -206,10 +208,11 @@ Execute the step following the plan's exact specifications.
 **Hierarchy of authority:**
  
 1. **The plan's explicit instructions** — file paths, method signatures, patterns, guardrails
-2. **Design System Reference** (`_plans/recon/design-system.md`) — exact computed CSS values, color tokens, typography, component patterns
-3. **Architecture Context** — patterns from reconnaissance
-4. **CLAUDE.md and `.claude/rules/`** — project standards
-5. **General best practices** — only when the above are silent
+2. **Master Spec Plan** — shared data models, localStorage keys, cross-spec interfaces
+3. **Design System Reference** (`_plans/recon/design-system.md`) — exact computed CSS values, color tokens, typography, component patterns
+4. **Architecture Context** — patterns from reconnaissance
+5. **CLAUDE.md and `.claude/rules/`** — project standards
+6. **General best practices** — only when the above are silent
  
 **Requirements:**
  
@@ -218,6 +221,7 @@ Execute the step following the plan's exact specifications.
 - Respect DO NOT guardrails — check each action against them before proceeding
 - Match design specs — use exact colors, spacing, typography from the Design System Reference or plan's Architecture Context. Do not approximate.
 - Match test patterns — use the same naming, assertion style, and setup patterns from Architecture Context
+- Use shared data models exactly as defined — when the master plan specifies a TypeScript interface or localStorage key, use it verbatim. Do not rename fields or invent alternative keys.
  
 **Logging best practices:**
 - Don't fetch additional data just for logging
@@ -290,7 +294,20 @@ This applies when:
    - **Hover/focus states:** If the recon includes States tables, hover each button and verify background-color/shadow changes match. Focus each input and verify border/outline changes match. Missing hover/focus styles are a mismatch.
    - **Conditional content:** If the recon documents conditional/dynamic content (e.g., a field that appears when a tab is selected), trigger the condition and verify the content appears with correct styling.
  
-8. **Produce a comparison table:**
+8. **Auth state verification for dashboard/logged-in features:**
+   If the component requires logged-in state and the project uses simulated auth via localStorage (`wr_auth_simulated`):
+   - Inject auth state via Playwright's `page.addInitScript()` BEFORE navigating:
+     ```typescript
+     await page.addInitScript(() => {
+       localStorage.setItem('wr_auth_simulated', 'true');
+       localStorage.setItem('wr_user_name', 'Eric');
+     });
+     ```
+   - Verify BOTH logged-out state (default, no injection) AND logged-in state
+   - If the step also needs seed data (mood entries, friends, badges, etc.), inject it via the same mechanism using the data models from the master plan
+   - Do NOT modify source code for auth or data seeding
+ 
+9. **Produce a comparison table:**
  
 ```text
 ## Visual Verification: Step <N> — <component name>
@@ -300,8 +317,8 @@ This applies when:
 | {elem}  | {prop}   | {expected}    | {actual}    | YES/NO | {Tailwind class if NO} |
 ```
  
-9. **If all values match:** Proceed to 4h
-10. **If mismatches found:**
+10. **If all values match:** Proceed to 4h
+11. **If mismatches found:**
    - Fix using exact values from the CSS Mapping Table or Fix Hint
    - Re-screenshot and re-compare
    - After **two failed fix attempts**, STOP entirely:
@@ -427,6 +444,7 @@ All <N> steps executed successfully.
  
 **Plan Authority:**
 - The plan is the source of truth — follow it precisely
+- The master spec plan is the authority for shared data models and localStorage keys
 - If the plan conflicts with general best practices, follow the plan (it was written with codebase-specific knowledge)
 - If the plan conflicts with reality (files don't exist, interfaces don't match), STOP and flag it
 - If you need to deviate, get user approval first and document the deviation in the Execution Log

@@ -50,6 +50,7 @@ test-results/
 
 # Local screenshots/images
 screenshots/
+frontend/playwright-screenshots/
 *.png
 *.jpg
 *.jpeg

@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-**Worship Room** is a Christian emotional healing and worship web application that provides a safe, peaceful online space where users can find comfort, guidance, and spiritual support through AI-powered scripture matching, prayer generation, journaling, audio content, community support, and worship music.
+**Worship Room** is a Christian emotional healing and worship web application (with native mobile apps on the roadmap) that provides a safe, peaceful online space where users can find comfort, guidance, and spiritual support through AI-powered scripture matching, prayer generation, journaling, audio content, community support, worship music, and personal growth tracking.
 
 ### Mission
 
-Create an accessible platform where anyone (especially Christians) can find emotional healing through worship, scripture, prayer, and community support.
+Create an accessible platform where anyone (especially Christians) can find emotional healing through worship, scripture, prayer, community support, and measurable spiritual growth.
 
 ---
 
@@ -37,35 +37,42 @@ Full launch targets a complete feature set; features may ship incrementally (alp
 
 - **AI features** require: safety checks + rate limiting + logging + backend crisis detection
 - **Community features** (prayer wall) require: auth + moderation + admin audit log + email notifications
-- **Analytics** require: mood tracking persisted to database
+- **Analytics** require: mood tracking persisted to database (localStorage for frontend-first build)
 - **Audio features** require: TTS API integration (OpenAI TTS or browser Speech Synthesis for MVP)
 - **Email notifications** require: SMTP configured + failure handling
 - **Data encryption** require: key management + env/secret manager
+- **Dashboard & Growth features** require: mood check-in system + localStorage (frontend-first), API persistence in Phase 3+
+- **Friends & Leaderboard** require: user auth + friend data model (mock data for frontend-first build)
 
-**Non-Goals for MVP**: No multi-language, no payments, no OAuth (email/password only), no real-time chat, no Spotify OAuth, no mobile apps (web-responsive only), no complex user profiles, no multi-admin, no human-narrated audio (TTS only), no prayer groups, no church portal, no Apple Health/Google Fit, no standalone Listen page, no points/leaderboard.
+**Non-Goals for MVP**: No multi-language, no payments, no OAuth (email/password only), no real-time chat, no Spotify OAuth, no complex user profiles, no multi-admin, no human-narrated audio (TTS only), no prayer groups, no church portal, no Apple Health/Google Fit, no standalone Listen page.
+
+**Future Platform Goals** (post-MVP):
+
+- **Native iOS & Android apps** — on the roadmap. Web app is the primary platform; native apps will add phone contacts friend discovery, push notifications, and native audio background playback. Architecture decisions should be made with native apps in mind (API-first data layer, platform-agnostic friend system).
 
 **Key Decisions:**
 
 - **Bible Translation**: WEB (World English Bible) — modern English, public domain, no licensing required
 - **Spotify Integration**: No Spotify API required. Song of the Day embed uses track IDs from the Worship Room playlist (https://open.spotify.com/playlist/5Ux99VLE8cG7W656CjR2si). "Follow our playlist on Spotify" CTA links to this URL.
+- **Gamification Philosophy**: "Gentle gamification" — celebrate presence, never punish absence. Framing is encouragement and growth, not competition or guilt. Mood data is always private; only engagement data (streaks, points, level) is visible to friends.
 
 ### Foundation
 
 1. **Authentication System** - Spring Security + JWT, email/password login (Auth scaffolding early; core flows must work logged-out in demo mode)
 2. **React Router Setup** - Protected routes, public routes
 3. **Landing Page** - Full marketing site (hero, Journey to Healing timeline, starting point quiz, values section, impact counter, CTA, footer)
-4. **Dashboard Skeleton** - Logged-in user view with widgets
+4. **Dashboard** - Logged-in user home at `/` (replaces landing page when authenticated). Dark theme with frosted glass cards and vibrant accent colors for charts/data.
 5. **PostgreSQL + Docker** - Database setup with Docker Compose
 6. **Design System** - Colors, typography, responsive components
 
 ### Core Features
 
-7. **Mood Selector** - 5 buttons (Terrible, Bad, Neutral, Good, Excellent) + text input for custom descriptions
+7. **Daily Mood Check-In** - Full-screen takeover on first daily visit. "How are you feeling today, [Name]?" with 5 mood buttons using soft labels: Struggling, Heavy, Okay, Good, Thriving. Optional text input ("Want to share what's on your heart?"). Skippable via "Not right now" link. Once per day (resets at midnight). Transitions to dashboard with brief scripture encouragement matching selected mood. Dark background, warm typography, gentle animations.
 8. **Scripture Display** - AI-matched scripture with fade-in animation
 9. **AI Scripture Reflection** - AI-generated reflection notes below each verse
 10. **Scripture Database** - PostgreSQL with 100 seeded scriptures (20 per mood; WEB translation — public domain)
 11. **AI Pre-Tagging** - OpenAI API to tag scriptures with mood/theme mappings
-12. **Mood Tracking** - Save mood selections with timestamp and scripture shown
+12. **Mood Tracking** - Save mood selections with timestamp, selected mood level, optional text, and scripture shown. localStorage for frontend-first build, API persistence in Phase 3+.
 
 ### Journaling & Music
 
@@ -97,75 +104,200 @@ The Music page is a fully built 3-tab experience with global audio infrastructur
 30. **Accessibility Audit** — `useAnnounce` hook with dual live regions (polite 300ms debounce, assertive immediate). Full ARIA coverage: `aria-valuetext` on sliders, `role="list"`/`role="listitem"` on mixer, Arrow key menu navigation, SoundGrid roving tabindex grid navigation, AudioPill keyboard activation. 44px minimum touch targets on all interactive elements. Color contrast verified for light backgrounds. Reduced motion: all music animations in `@media (prefers-reduced-motion: reduce)` CSS block + `motion-safe:` Tailwind prefix. Focus management: drawer returns focus to pill, dialogs return focus to trigger.
 31. **Read Aloud Button** - Available on all text content (scriptures, prayers, reflections, meditations) for accessibility
 
+### Dashboard & Growth Features — Personal Dashboard (`/`)
+
+The Dashboard is the logged-in user's home page (replaces the landing page at `/` when authenticated). All-dark theme matching the Growth Teasers section aesthetic — dark purple gradient background, frosted glass cards, vibrant accent colors for data visualization. Fixed layout with collapsible/expandable cards.
+
+**Dashboard Layout:**
+
+- **Hero section (dark)**: Personalized greeting ("Good morning, [Name]"), current streak with flame animation, faith level with progress indicator, faith points count
+- **Widget grid below hero (frosted glass cards, priority order)**:
+  1. Streak & Faith Points summary card
+  2. 7-day mood chart (line chart with mood-colored dots, "See More" → `/insights`)
+  3. Today's activity checklist with progress ring (6 trackable activities)
+  4. Friends activity feed / leaderboard preview ("See all" → `/friends`)
+  5. Quick-action buttons (Pray, Journal, Meditate, Music) — navigation shortcuts
+- **Desktop**: 2-column layout below hero (~60% left for data, ~40% right for social)
+- **Mobile**: Single-column stack in priority order
+
+**Mood Color Palette** (for charts, heatmap, check-in accents):
+
+- Struggling → Deep red/warm amber
+- Heavy → Muted orange/copper
+- Okay → Neutral gray-purple
+- Good → Soft teal/green
+- Thriving → Vibrant green/gold
+
+32. **Mood Insights Widget** — 7-day snapshot on dashboard showing mood trend line with colored dots. Links to full `/insights` page via "See More."
+
+33. **Mood Insights Page (`/insights`)** — Single scrolling page (no tabs). Default 30-day view with toggles for 90/180/365/all-time. Sections in order: GitHub-style calendar heatmap (colored squares per day) → line chart (mood trend over time) → AI insight cards → activity correlations → scripture connections. Dark theme matching dashboard.
+
+34. **AI Mood Insights** — Four types of AI-generated insight (mock data for frontend-first build, real AI in Phase 3+):
+
+- **Trend summaries**: "You felt better this week" — mood trajectory analysis
+- **Activity correlations**: "Your mood improves on days you journal" — cross-referencing mood with activity data
+- **Scripture connections**: "You found peace in Psalms" — linking mood improvements to scripture engagement
+- **Monthly mood report**: Email summary + in-app interactive report at `/insights/monthly`. Email drives re-engagement with "View full report" CTA. Report includes: days active, level-ups, mood trends, top activities, scripture highlights.
+
+35. **Streak System** — Consecutive days performing any trackable activity. No grace period; streak resets on missed days with gentle messaging ("Every day is a new beginning. Start fresh today."). Tracks "current streak" and "longest streak" (record persists even when current resets). Visual flame animation on dashboard.
+
+Six trackable activities (any one keeps the streak alive for that day):
+
+- Logged mood (daily check-in)
+- Prayed (used the Pray tab)
+- Journaled (saved a journal entry)
+- Meditated (completed a meditation)
+- Listened to music/ambient sounds
+- Visited the Prayer Wall (prayed for someone)
+
+36. **Faith Points System** — Weighted + tiered point system rewarding both depth and breadth of engagement. Visible number paired with visual growth metaphor.
+
+**Base activity points (weighted by depth):**
+
+- Mood check-in: 5 pts
+- Prayed: 10 pts
+- Listened to music/ambient: 10 pts
+- Visited Prayer Wall (prayed for someone): 15 pts
+- Meditated (completed): 20 pts
+- Journaled (saved entry): 25 pts
+
+**Daily multiplier tiers (breadth bonus):**
+
+- 1 activity: 1x (base points)
+- 2–3 activities: 1.25x
+- 4–5 activities: 1.5x
+- All 6 activities: 2x ("Full Worship Day" — bonus celebration)
+
+**Maximum daily earning**: ~170 pts (all 6 activities at 2x). Typical engaged user: ~50-100 pts/day.
+
+37. **Faith Levels** — Growth-themed progression tied to cumulative faith points:
+
+| Level | Name        | Points      | Meaning                              | Approx. Timeline |
+| ----- | ----------- | ----------- | ------------------------------------ | ---------------- |
+| 1     | Seedling    | 0–99        | "You've planted something beautiful" | Days 1–2         |
+| 2     | Sprout      | 100–499     | "Your roots are growing deeper"      | ~3–7 days        |
+| 3     | Blooming    | 500–1,499   | "Your faith is coming alive"         | ~1–2 weeks       |
+| 4     | Flourishing | 1,500–3,999 | "You're bearing fruit"               | ~3–4 weeks       |
+| 5     | Oak         | 4,000–9,999 | "Strong and deeply rooted"           | ~2–3 months      |
+| 6     | Lighthouse  | 10,000+     | "Your light shines for others"       | ~6+ months       |
+
+38. **Badge & Milestone System** — Six badge categories with scaled celebration animations (toast for minor milestones, full-screen moment for major ones like level-ups and 100-day streaks):
+
+- **Streak milestones**: 7, 14, 30, 60, 90, 180, 365 days
+- **Level-up badges**: One per level achieved (Seedling through Lighthouse)
+- **Activity milestones**: 50th journal entry, 100th prayer, etc.
+- **"Full Worship Day" badge**: All 6 activities completed in one day
+- **First-time badges**: First prayer, first journal entry, first meditation, etc.
+- **Community badges**: 10 friends, 50 encouragements sent, etc.
+- **Welcome badge**: "Welcome to Worship Room" — earned on signup so badge collection never starts at zero
+
+39. **Friends System (`/friends`)** — Dedicated friends page accessible from dashboard leaderboard widget ("See all") and avatar dropdown. Mutual friend model (request + accept, like Facebook). Privacy-first: mood data is never visible to friends; only engagement data (streak, points, level, badges) is shared.
+
+**Friend discovery methods (web-first build):**
+
+- Search by username/display name
+- Invite-by-link (shareable personal invite URL for texting, WhatsApp, church groups)
+- Invite-by-email (type a friend's email; they get a notification on signup)
+- "People you may know" from Prayer Wall interactions (prayed for, commented on)
+
+**Future native app additions:** Phone contacts sync, push notification invites, "Share to Instagram Stories" for milestones.
+
+**Friends page sections:** Search bar → pending friend requests → friend list (name, level, streak, last active) → invite mechanisms (link, email)
+
+40. **Leaderboard** — Two views: friends-only (default) and global (optional toggle).
+
+- **Friends leaderboard**: Shows weekly faith points + current streak + level/badge for each friend. Weekly + all-time toggle.
+- **Global leaderboard**: Weekly faith points only (resets every Monday). Display names only, no profile photos. Tap name to see level and public badge collection. Weekly reset ensures new users can compete immediately — prevents "I can never catch up" discouragement.
+
+41. **Social Interactions** — Four friend interaction types:
+
+- **Quick-tap encouragements**: Pre-set messages ("🙏 Praying for you", "🌟 Keep going", "💪 Proud of you"). Low-effort to send, show as notifications to recipient.
+- **Milestone feed**: Lightweight activity stream on friends section of dashboard ("🔥 Sarah hit a 30-day streak!", "🌱 James leveled up to Sprout!", "📖 Maria completed her 100th journal entry!")
+- **Nudges**: Gentle, warm-toned nudge when a friend has been away ("❤️ Sarah is thinking of you"). User controls who can send nudges in privacy settings.
+- **Weekly community recap**: Monday notification/card — "Last week, your friend group prayed 23 times, journaled 15 entries, and completed 8 meditations together. You contributed 34% of the group's growth."
+
+42. **Notification System** — Four channels, all user-controllable in settings:
+
+- **In-app notification bell**: Navbar icon with unread badge count. Dropdown panel showing recent notifications grouped by type (encouragements, friend requests, milestones, recaps). "Mark all as read" link. Mock notification data for frontend-first build.
+- **Toast/snackbar**: Real-time in-app events (badge earned, encouragement received, level-up).
+- **Push notifications**: Browser (web) and native (future mobile apps). Engagement-driving: friend requests, encouragements, milestone celebrations.
+- **Email digests**: Weekly summary emails. Monthly mood report emails with "View full report" CTA.
+
+43. **Profile & Avatars** — Public profile page showing display name + level + badge collection + streak. Two avatar options: preset faith-themed avatars (dove, cross, flame, tree, etc.) OR photo upload. Initials as fallback. Some preset avatars unlockable via badges (light gamification). Photo uploads require moderation pipeline in Phase 3+.
+
+44. **Settings Page (`/settings`)** — Full dedicated page linked from avatar dropdown. Four sections:
+
+- **Profile**: Display name, avatar selection/upload, favorite verse (optional)
+- **Notifications**: Per-channel toggles (in-app bell, push, email), frequency controls for email digests
+- **Privacy**: Toggle leaderboard visibility (hide from global), toggle activity status (appear offline), control who can send nudges, control who can see streak/level, block/remove friends
+- **Account**: Email, password change, delete account
+
+45. **Empty States** — Every empty widget shows a preview of what it'll look like filled + one clear CTA to start:
+
+- **Empty mood chart**: Faded/ghosted example chart + "Your mood journey starts today" + check-in prompt
+- **Empty streak**: "Day 1 — every journey begins with a single step" + subtle animation
+- **Empty friends/leaderboard**: "Faith grows stronger together" + invite button + "You vs. Yesterday" self-comparison
+- **Empty badges**: Grid of locked badge silhouettes with one unlocked ("Welcome to Worship Room" — earned on signup)
+- **Empty activity checklist**: All 6 items unchecked with gentle encouragement to start
+
 ### Community Features
 
-27. **Prayer Wall** - Community prayer feed with inline composer, inline comments, share functionality, public user profiles (`/prayer-wall/user/:id`), private dashboard (`/prayer-wall/dashboard`), auth modal for login/register gates, report dialog, answered prayer tracking with testimony sharing, and standalone detail page (`/prayer-wall/:id`) for shared links. Frontend implemented with mock data (no backend wiring yet). No candle/light-a-candle feature.
-28. **AI Auto-Moderation** - Flag inappropriate content (profanity, abuse, spam)
-29. **Admin Moderation Interface** - Simple CRUD at `/admin/prayer-wall` for reviewing, editing, deleting posts
-30. **Email Notifications** - Send flagged posts to admin email from `ADMIN_EMAIL` env var
-31. **User Reporting** - Report button on each prayer post
-32. **Answered Prayer Tracking** - "Mark as Answered" button, answered prayers log / gratitude journal, optional testimony sharing to prayer wall
+46. **Prayer Wall** - Community prayer feed with inline composer, inline comments, share functionality, public user profiles (`/prayer-wall/user/:id`), private dashboard (`/prayer-wall/dashboard`), auth modal for login/register gates, report dialog, answered prayer tracking with testimony sharing, and standalone detail page (`/prayer-wall/:id`) for shared links. Frontend implemented with mock data (no backend wiring yet). No candle/light-a-candle feature.
+47. **AI Auto-Moderation** - Flag inappropriate content (profanity, abuse, spam)
+48. **Admin Moderation Interface** - Simple CRUD at `/admin/prayer-wall` for reviewing, editing, deleting posts
+49. **Email Notifications** - Send flagged posts to admin email from `ADMIN_EMAIL` env var
+50. **User Reporting** - Report button on each prayer post
+51. **Answered Prayer Tracking** - "Mark as Answered" button, answered prayers log / gratitude journal, optional testimony sharing to prayer wall
 
 ### Locator Features
 
-33. **Church Locator** - Google Maps Places API real-time search at `/local-support/churches`. Search UI is auth-gated; logged-out users see hero with "Sign In to Search" CTA. Frontend implemented with mock data and Leaflet map; Google Places API wiring is Phase 3+.
-34. **Christian Counselor Locator** - Google Maps Places API real-time search at `/local-support/counselors`. Same auth-gated pattern. Includes disclaimer banner.
-35. **Celebrate Recovery Locator** - Google Maps Places API real-time search at `/local-support/celebrate-recovery`. Same auth-gated pattern. Includes CR explainer section in hero.
+52. **Church Locator** - Google Maps Places API real-time search at `/local-support/churches`. Search UI is auth-gated; logged-out users see hero with "Sign In to Search" CTA. Frontend implemented with mock data and Leaflet map; Google Places API wiring is Phase 3+.
+53. **Christian Counselor Locator** - Google Maps Places API real-time search at `/local-support/counselors`. Same auth-gated pattern. Includes disclaimer banner.
+54. **Celebrate Recovery Locator** - Google Maps Places API real-time search at `/local-support/celebrate-recovery`. Same auth-gated pattern. Includes CR explainer section in hero.
 
 ### Content Features
 
-36. **Guided Meditations** - 6 text-based meditations (Breathing, Scripture Soaking, Gratitude, ACTS, Psalm Reading, Examen) with audio playback via TTS
-37. **Verse of the Day** - Daily scripture on `/daily` page, homepage, and dashboard
-38. **Song of the Day** - Daily worship song recommendation on `/daily` page with Spotify embed
-39. **Guided Reading Plans** - 7-day and 21-day themed plans ("Overcoming Anxiety," "Healing from Grief," etc.) with daily scripture + reflection + journal prompt + prayer
+55. **Guided Meditations** - 6 text-based meditations (Breathing, Scripture Soaking, Gratitude, ACTS, Psalm Reading, Examen) with audio playback via TTS
+56. **Verse of the Day** - Daily scripture on `/daily` page, homepage, and dashboard
+57. **Song of the Day** - Daily worship song recommendation on `/daily` page with Spotify embed
+58. **Guided Reading Plans** - 7-day and 21-day themed plans ("Overcoming Anxiety," "Healing from Grief," etc.) with daily scripture + reflection + journal prompt + prayer
 
-### Analytics & Personalization
+### Additional Engagement Features
 
-40. **Mood History Dashboard** - 7-day snapshot on `/dashboard`
-41. **Mood Insights Page** - Full history with calendar heatmap and line charts at `/insights` (accessible from dashboard, not top-level nav)
-42. **Trend Analysis** - AI-generated insights ("Your mood is improving this week!")
-43. **Mood Correlations** - "You tend to feel better on days you journal"
-44. **Personalized Recommendations** - Scripture/music suggestions based on mood history
-45. **Monthly Mood Report** - Email or in-app summary of mood patterns
-
-### Engagement & Retention
-
-46. **Daily Streak Tracking** - Consecutive days using any feature (prayer, journal, meditation, etc.) with visual streak display
-47. **Streak Recovery Grace Period** - Miss one day without losing streak
-48. **Weekly Summary** - "You prayed 5 times this week and journaled 3 times"
-49. **Shareable Scripture Cards** - Auto-generated branded images with verse text, share to social/messaging
-50. **Saved / Favorited Content** - Bookmark button on scriptures, prayers, reflections; "My Favorites" page
-51. **Dark Mode** - System-preference-aware toggle, auto-switch at bedtime
+59. **Shareable Scripture Cards** - Auto-generated branded images with verse text, share to social/messaging
+60. **Saved / Favorited Content** - Bookmark button on scriptures, prayers, reflections; "My Favorites" page
+61. **Dark Mode** - System-preference-aware toggle, auto-switch at bedtime
 
 ### Landing Page Sections
 
-52. **Growth Teasers Section** - "See How You're Growing" — 3 blurred preview cards (Mood Insights, Streaks & Faith Points, Friends & Leaderboard) showing logged-out visitors what they unlock with an account. Dark purple gradient background with frosted glass card previews. CTA to register.
-53. **Starting Point Quiz** - 5-question points-based quiz ("Not Sure Where to Start?") that recommends a personalized entry point. Client-side only, no data persistence for logged-out users.
-54. **Footer** - Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), "Listen on Spotify" badge, copyright.
+62. **Growth Teasers Section** - "See How You're Growing" — 3 blurred preview cards (Mood Insights, Streaks & Faith Points, Friends & Leaderboard) showing logged-out visitors what they unlock with an account. Dark purple gradient background with frosted glass card previews. CTA: "Create a Free Account". These teasers preview the real dashboard features built in Phase 2.75.
+63. **Starting Point Quiz** - 5-question points-based quiz ("Not Sure Where to Start?") that recommends a personalized entry point. Client-side only, no data persistence for logged-out users.
+64. **Footer** - Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), "Listen on Spotify" badge, copyright.
 
 ### Polish & Launch Prep
 
-57. **Personalized Onboarding Flow** - 3-5 question onboarding at signup to curate starting experience
-58. **Performance Optimization** - Lazy loading, code splitting, caching
-59. **Security Audit** - Vulnerability scanning, penetration testing
-60. **SEO Optimization** - Meta tags, sitemap, structured data
-61. **Production Deployment** - Production setup with CI/CD
-62. **User Testing** - Beta testing with real users
+65. **Personalized Onboarding Flow** - 3-5 question onboarding at signup to curate starting experience
+66. **Performance Optimization** - Lazy loading, code splitting, caching
+67. **Security Audit** - Vulnerability scanning, penetration testing
+68. **SEO Optimization** - Meta tags, sitemap, structured data
+69. **Production Deployment** - Production setup with CI/CD
+70. **User Testing** - Beta testing with real users
 
 ### Post-Launch Growth Features
 
-63. **Community Prayer Groups** — Private small groups with group prayer requests
-64. **Church Partnership Portal** — Church admin dashboard, congregation-wide prayer wall
-65. **Kids / Family Mode** — Age-appropriate scripture, bedtime Bible stories
-66. **Apple Health / Google Fit Sync** — Sync meditation minutes (app only)
-67. **AI Pastoral Companion** — Persistent conversational AI with session memory
-68. **Faith Points & Leaderboard** — Gamification with encouraging tone, friends-only leaderboard
+71. **Community Prayer Groups** — Private small groups with group prayer requests
+72. **Church Partnership Portal** — Church admin dashboard, congregation-wide prayer wall
+73. **Kids / Family Mode** — Age-appropriate scripture, bedtime Bible stories
+74. **Apple Health / Google Fit Sync** — Sync meditation minutes (native app only)
+75. **AI Pastoral Companion** — Persistent conversational AI with session memory
+76. **Native iOS & Android Apps** — Phone contacts friend discovery, push notifications, native audio background playback, App Store/Play Store distribution
+77. **Social Platform OAuth** — Facebook/Google friend import for enhanced friend discovery (native apps)
 
 ---
 
 ## Navigation Structure
 
-### Desktop Navbar
+### Desktop Navbar (Logged Out)
 
 ```
 [Worship Room logo]   Daily Hub   Prayer Wall   Music   [Local Support ▾]   [Log In]  [Get Started]
@@ -181,7 +313,29 @@ The Music page is a fully built 3-tab experience with global audio infrastructur
 ├── Celebrate Recovery
 ```
 
-### Mobile Drawer
+### Desktop Navbar (Logged In)
+
+```
+[Worship Room logo]   Daily Hub   Prayer Wall   Music   [Local Support ▾]   [🔔]  [Avatar ▾]
+```
+
+**Notification bell** (🔔): Badge count for unread notifications. Click opens dropdown panel with recent notifications grouped by type.
+
+**Avatar dropdown**:
+
+```
+├── Dashboard
+├── Friends
+├── My Journal Entries
+├── My Prayer Requests
+├── My Favorites
+├── Mood Insights
+├── Settings
+├── ─────────────────
+└── Log Out
+```
+
+### Mobile Drawer (Logged Out)
 
 ```
 Daily Hub
@@ -199,19 +353,31 @@ LOCAL SUPPORT
 [Get Started]
 ```
 
-### Post-Login Navbar
-
-Replace "Log In / Get Started" with user avatar dropdown:
+### Mobile Drawer (Logged In)
 
 ```
-├── Dashboard
-├── My Journal Entries
-├── My Prayer Requests
-├── My Favorites
-├── Mood Insights
-├── Settings
-├── ─────────────────
-└── Log Out
+Dashboard
+──────────────
+Daily Hub
+──────────────
+Prayer Wall
+──────────────
+Music
+──────────────
+LOCAL SUPPORT
+  Churches
+  Counselors
+  Celebrate Recovery
+──────────────
+Friends
+Mood Insights
+My Journal Entries
+My Prayer Requests
+My Favorites
+Settings
+──────────────
+[🔔 Notifications]
+[Log Out]
 ```
 
 ---
@@ -220,45 +386,49 @@ Replace "Log In / Get Started" with user avatar dropdown:
 
 ### Public Routes (No Authentication Required)
 
-| Route                               | Component                         | Status | Description                                                                                                                                               |
-| ----------------------------------- | --------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                 | `Home`                            | Built  | Landing page (hero, journey timeline, growth teasers, quiz, footer)                                                                                       |
-| `/daily`                            | `DailyHub`                        | Built  | Tabbed daily experience: Pray \| Journal \| Meditate (default: `?tab=pray`)                                                                               |
-| `/pray`                             | Redirect → `/daily?tab=pray`      | Built  | Legacy route redirect                                                                                                                                     |
-| `/journal`                          | Redirect → `/daily?tab=journal`   | Built  | Legacy route redirect                                                                                                                                     |
-| `/meditate`                         | Redirect → `/daily?tab=meditate`  | Built  | Legacy route redirect                                                                                                                                     |
-| `/scripture`                        | Redirect → `/daily?tab=pray`      | Built  | Legacy route redirect                                                                                                                                     |
-| `/meditate/breathing`               | `BreathingExercise`               | Built  | 4-7-8 breathing with scripture phases                                                                                                                     |
-| `/meditate/soaking`                 | `ScriptureSoaking`                | Built  | Single verse contemplation timer                                                                                                                          |
-| `/meditate/gratitude`               | `GratitudeReflection`             | Built  | Gratitude journaling with affirmations                                                                                                                    |
-| `/meditate/acts`                    | `ActsPrayerWalk`                  | Built  | ACTS prayer framework walkthrough                                                                                                                         |
-| `/meditate/psalms`                  | `PsalmReading`                    | Built  | Psalm reading with historical context                                                                                                                     |
-| `/meditate/examen`                  | `ExamenReflection`                | Built  | Ignatian Examen daily reflection                                                                                                                          |
-| `/verse/:id`                        | `SharedVerse`                     | Built  | Shareable verse card (social sharing)                                                                                                                     |
-| `/prayer/:id`                       | `SharedPrayer`                    | Built  | Shareable prayer card (social sharing)                                                                                                                    |
-| `/prayer-wall`                      | `PrayerWall`                      | Built  | Community prayer feed (mock data, 274 tests)                                                                                                              |
-| `/prayer-wall/:id`                  | `PrayerDetail`                    | Built  | Standalone prayer detail page                                                                                                                             |
-| `/prayer-wall/user/:id`             | `PrayerWallProfile`               | Built  | Public user profile                                                                                                                                       |
-| `/prayer-wall/dashboard`            | `PrayerWallDashboard`             | Built  | Private prayer wall dashboard                                                                                                                             |
-| `/local-support/churches`           | `Churches`                        | Built  | Church locator (Leaflet map, mock data)                                                                                                                   |
-| `/local-support/counselors`         | `Counselors`                      | Built  | Counselor locator (Leaflet map, mock data)                                                                                                                |
-| `/local-support/celebrate-recovery` | `CelebrateRecovery`               | Built  | CR locator (Leaflet map, mock data)                                                                                                                       |
-| `/music`                            | `MusicPage`                       | Built  | 3-tab music hub: Worship Playlists (default), Ambient Sounds, Sleep & Rest. Tab state via `?tab=playlists\|ambient\|sleep`. Light background on all tabs. |
-| `/music/playlists`                  | Redirect → `/music?tab=playlists` | Built  | Legacy route redirect                                                                                                                                     |
-| `/music/ambient`                    | Redirect → `/music?tab=ambient`   | Built  | Legacy route redirect                                                                                                                                     |
-| `/music/sleep`                      | Redirect → `/music?tab=sleep`     | Built  | Legacy route redirect                                                                                                                                     |
-| `/music/routines`                   | `RoutinesPage`                    | Built  | Bedtime routine builder and templates (NOT in nav dropdown, accessed via direct links)                                                                    |
-| `/login`                            | `ComingSoon`                      | Stub   | Login page placeholder                                                                                                                                    |
-| `/register`                         | `ComingSoon`                      | Stub   | Registration page placeholder                                                                                                                             |
-| `/health`                           | `Health`                          | Built  | Backend health check (dev utility)                                                                                                                        |
-| `/insights`                         | `Insights`                        | Stub   | Mood insights placeholder ("Reflect — Coming Soon")                                                                                                       |
-| `*`                                 | `NotFound`                        | Built  | 404 page                                                                                                                                                  |
+| Route                               | Component                         | Status                             | Description                                                                                                                                               |
+| ----------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                 | `Home` / `Dashboard`              | Built (Home) / Planned (Dashboard) | Landing page for logged-out users; Dashboard for logged-in users                                                                                          |
+| `/daily`                            | `DailyHub`                        | Built                              | Tabbed daily experience: Pray \| Journal \| Meditate (default: `?tab=pray`)                                                                               |
+| `/pray`                             | Redirect → `/daily?tab=pray`      | Built                              | Legacy route redirect                                                                                                                                     |
+| `/journal`                          | Redirect → `/daily?tab=journal`   | Built                              | Legacy route redirect                                                                                                                                     |
+| `/meditate`                         | Redirect → `/daily?tab=meditate`  | Built                              | Legacy route redirect                                                                                                                                     |
+| `/scripture`                        | Redirect → `/daily?tab=pray`      | Built                              | Legacy route redirect                                                                                                                                     |
+| `/meditate/breathing`               | `BreathingExercise`               | Built                              | 4-7-8 breathing with scripture phases                                                                                                                     |
+| `/meditate/soaking`                 | `ScriptureSoaking`                | Built                              | Single verse contemplation timer                                                                                                                          |
+| `/meditate/gratitude`               | `GratitudeReflection`             | Built                              | Gratitude journaling with affirmations                                                                                                                    |
+| `/meditate/acts`                    | `ActsPrayerWalk`                  | Built                              | ACTS prayer framework walkthrough                                                                                                                         |
+| `/meditate/psalms`                  | `PsalmReading`                    | Built                              | Psalm reading with historical context                                                                                                                     |
+| `/meditate/examen`                  | `ExamenReflection`                | Built                              | Ignatian Examen daily reflection                                                                                                                          |
+| `/verse/:id`                        | `SharedVerse`                     | Built                              | Shareable verse card (social sharing)                                                                                                                     |
+| `/prayer/:id`                       | `SharedPrayer`                    | Built                              | Shareable prayer card (social sharing)                                                                                                                    |
+| `/prayer-wall`                      | `PrayerWall`                      | Built                              | Community prayer feed (mock data, 274 tests)                                                                                                              |
+| `/prayer-wall/:id`                  | `PrayerDetail`                    | Built                              | Standalone prayer detail page                                                                                                                             |
+| `/prayer-wall/user/:id`             | `PrayerWallProfile`               | Built                              | Public user profile                                                                                                                                       |
+| `/prayer-wall/dashboard`            | `PrayerWallDashboard`             | Built                              | Private prayer wall dashboard                                                                                                                             |
+| `/local-support/churches`           | `Churches`                        | Built                              | Church locator (Leaflet map, mock data)                                                                                                                   |
+| `/local-support/counselors`         | `Counselors`                      | Built                              | Counselor locator (Leaflet map, mock data)                                                                                                                |
+| `/local-support/celebrate-recovery` | `CelebrateRecovery`               | Built                              | CR locator (Leaflet map, mock data)                                                                                                                       |
+| `/music`                            | `MusicPage`                       | Built                              | 3-tab music hub: Worship Playlists (default), Ambient Sounds, Sleep & Rest. Tab state via `?tab=playlists\|ambient\|sleep`. Light background on all tabs. |
+| `/music/playlists`                  | Redirect → `/music?tab=playlists` | Built                              | Legacy route redirect                                                                                                                                     |
+| `/music/ambient`                    | Redirect → `/music?tab=ambient`   | Built                              | Legacy route redirect                                                                                                                                     |
+| `/music/sleep`                      | Redirect → `/music?tab=sleep`     | Built                              | Legacy route redirect                                                                                                                                     |
+| `/music/routines`                   | `RoutinesPage`                    | Built                              | Bedtime routine builder and templates (NOT in nav dropdown, accessed via direct links)                                                                    |
+| `/login`                            | `ComingSoon`                      | Stub                               | Login page placeholder                                                                                                                                    |
+| `/register`                         | `ComingSoon`                      | Stub                               | Registration page placeholder                                                                                                                             |
+| `/health`                           | `Health`                          | Built                              | Backend health check (dev utility)                                                                                                                        |
+| `*`                                 | `NotFound`                        | Built                              | 404 page                                                                                                                                                  |
 
-### Protected Routes (Phase 3+)
+### Protected Routes (Requires Authentication)
 
-- `/dashboard` - Personalized dashboard with widgets
-- `/journal/my-entries` - Saved journal entries
-- `/favorites` - Saved/bookmarked scriptures, prayers, and reflections
+| Route                 | Component             | Status  | Description                                                                                |
+| --------------------- | --------------------- | ------- | ------------------------------------------------------------------------------------------ |
+| `/insights`           | `MoodInsights`        | Planned | Full mood analytics: heatmap, line chart, AI insights, correlations, scripture connections |
+| `/insights/monthly`   | `MonthlyReport`       | Planned | Monthly mood report (in-app version of email report)                                       |
+| `/friends`            | `Friends`             | Planned | Friend management: search, requests, friend list, full leaderboard, invite mechanisms      |
+| `/settings`           | `Settings`            | Planned | Profile, notifications, privacy, account sections                                          |
+| `/journal/my-entries` | `SavedJournalEntries` | Planned | Saved journal entries                                                                      |
+| `/favorites`          | `Favorites`           | Planned | Saved/bookmarked scriptures, prayers, reflections                                          |
 
 ### Admin Routes (Phase 3+)
 
@@ -276,6 +446,24 @@ Replace "Log In / Get Started" with user avatar dropdown:
 5. Starting Point Quiz (id="quiz" — 5 questions, points-based scoring, result card routes to recommended feature)
 6. Footer (nav columns, crisis resources, app download badges, "Listen on Spotify" badge, copyright)
 ```
+
+---
+
+## Dashboard UX Flow (Logged-In Users)
+
+### Daily Mood Check-In → Dashboard Transition
+
+1. **Full-screen check-in appears** (once per day, resets at midnight). Dark background, soft gradient. "How are you feeling today, [Name]?" in warm serif typography. Five mood buttons horizontally: Struggling, Heavy, Okay, Good, Thriving — each with subtle icon and mood-colored glow. Gentle idle pulse animation. "Not right now" skip link at bottom (small, no guilt).
+
+2. **User taps a mood.** Selected button scales up with glow in its mood color. Others fade back. Optional text area slides in below: "Want to share what's on your heart?" + "Skip" link. Text saves with mood entry if provided.
+
+3. **Brief encouragement transition.** A short scripture matching the selected mood displays for 2–3 seconds. Examples: "The Lord is close to the brokenhearted" (Struggling), "This is the day the Lord has made" (Thriving). Graceful fade.
+
+4. **Dashboard arrives alive.** Streak counter animates from yesterday's number to today's. New mood dot fades onto the 7-day chart. If a badge was earned or level-up triggered, the scaled celebration fires. Activity checklist shows mood check-in as completed.
+
+### Returning Same Day
+
+If the user has already checked in today, they skip the check-in and go straight to the dashboard. The check-in only appears once per day.
 
 ---
 
@@ -345,6 +533,13 @@ Components built but not currently rendered (kept in codebase for potential re-e
 - `wr_listening_history` — listening sessions (capped 100)
 - `wr_session_state` — auto-saved session for resume (24h expiry)
 - `wr_routines` — user-created/cloned routine definitions
+- `wr_mood_entries` — daily mood check-in data (Phase 2.75, localStorage)
+- `wr_streak` — current streak count and longest streak record
+- `wr_faith_points` — cumulative faith points and current level
+- `wr_activity_log` — daily activity tracking for streak/points calculation
+- `wr_badges` — earned badges and milestone progress
+- `wr_friends` — friend list and pending requests (mock data)
+- `wr_notifications` — notification history (mock data)
 
 All writes are auth-gated. Abstraction designed to swap to API calls in Phase 3+ without changing consumers.
 
@@ -380,6 +575,7 @@ Use this workflow for all new features:
 
 1. **Build logged-out experience first** — All features work in "demo mode" without login. Prompt to create account when trying to save data. Implement AI safety from day one.
 2. **Then add authentication and personalization** — Spring Security + JWT, data saving, protected routes, mood tracking.
+3. **Dashboard & Growth features built frontend-first** — localStorage with mock data, same pattern as Music and Prayer Wall. Backend wiring in Phase 3+.
 
 ### Implementation Phases
 
@@ -416,22 +612,48 @@ Use this workflow for all new features:
 - Content guide: TTS generation, Cloudflare R2 setup, sound sourcing reference (Spec 10 — manual reference)
 - 960+ frontend tests passing across 100+ test files
 
-**Phase 3 — Auth & Backend Wiring** (NEXT)
+**Phase 2.75 — Dashboard & Growth Feature** (NEXT — 16 specs, frontend-first with localStorage/mock data)
+
+- Spec 1: **Mood Check-In System** — Full-screen daily check-in, mood data model, 5 soft labels (Struggling/Heavy/Okay/Good/Thriving), optional text input with crisis keyword detection, localStorage persistence, skip flow, shared `utils/date.ts` utilities
+- Spec 2: **Dashboard Shell** — Route switching (`/` renders Dashboard when authenticated, Home when not), `AuthProvider` context (frontend-first with simulated login), dark hero section (greeting + streak + level), widget grid with frosted glass cards, collapsible/expandable cards, navbar logged-in state globally (bell icon placeholder + avatar dropdown), responsive 2-column (desktop) / single-column (mobile) layout
+- Spec 3: **Mood Insights Dashboard Widget** — 7-day mood line chart using Recharts (new dependency), mood-colored dots, empty state, `useMoodChartData` hook
+- Spec 4: **`/insights` Full Page** — Single scrolling page with custom CSS Grid calendar heatmap + Recharts line chart + time range toggles (30d/90d/180d/1y/all) + AI insight card placeholders + activity correlation placeholders + scripture connection placeholders
+- Spec 5: **Streak & Faith Points Engine** — `useFaithPoints` hook, activity tracking data model (`wr_daily_activities`), weighted point calculation, daily multiplier tiers, streak logic (no grace period), level thresholds, 30-second listen timer for AudioProvider. No UI — engine only.
+- Spec 6: **Dashboard Widgets + Activity Integration** — Streak & Faith Points dashboard card, Today's Activity Checklist card with SVG progress ring, `recordActivity()` calls added to 5 existing components (Pray tab, Journal, Meditation, AudioProvider, Prayer Wall)
+- Spec 7: **Badge Definitions & Unlock Logic** — ~35 badges across 6 categories, badge data model with activity counters, `checkForNewBadges()` trigger detection, level-up verses (WEB translation), `newlyEarned` queue. No celebration UI — engine only.
+- Spec 8: **Celebrations & Badge Collection UI** — Toast system (extend existing or create `useToast`), full-screen celebration overlays with CSS confetti, scaled celebration tiers, streak reset gentle messaging, badge collection grid (earned vs locked), `newlyEarned` queue processing with 1.5s delay
+- Spec 9: **Friends System** — `/friends` page with two tabs (Friends + Leaderboard), mutual friend model (request + accept), friend discovery (search, invite-by-link, invite-by-email, Prayer Wall suggestions), 10 mock friends with varied data, configurable invite URL via `VITE_APP_URL`
+- Spec 10: **Leaderboard** — Friends leaderboard (default, weekly + all-time) + global leaderboard (weekly only, display names only), weekly reset logic, compact dashboard widget with top 3 + position, 50 mock global users
+- Spec 11: **Social Interactions** — Quick-tap encouragements (4 presets, 3/day/friend limit), milestone feed (mock events), gentle nudges (1/week, 3+ day inactive, "❤️ Sarah is thinking of you"), weekly community recap
+- Spec 12: **Notification System** — Bell dropdown panel behavior, notification data model, 7 notification types, mock notification data, toast/snackbar system, push notification stubs
+- Spec 13: **Settings & Privacy** — `/settings` page with 4 sections (Profile, Notifications, Privacy, Account), all 6 privacy toggles, per-channel notification controls, delete account clears all `wr_*` keys
+- Spec 14: **Profile & Avatars** — Public profile page at `/profile/:userId` (name + level + badges + streak), 16 preset faith-themed avatars + 4 unlockable + photo upload (200x200 resize), initials fallback
+- Spec 15: **AI Insights & Monthly Report** — Mock AI insight cards with daily rotation (11 cards across 4 types), monthly report page at `/insights/monthly` with 7 sections, email template component (stub)
+- Spec 16: **Empty States & Polish** — All empty state designs for every widget/page, check-in → dashboard transition animations, streak counter roll-up, mood dot chart animation, micro-interactions, `prefers-reduced-motion` compliance, visual polish checklist (WCAG AA, 44px touch targets, consistent frosted glass)
+
+**Phase 3 — Auth & Backend Wiring**
 
 - Spring Security + JWT auth system (login/register pages)
 - Real OpenAI API integration (replace mock data)
 - Backend crisis detection (classifier + keyword fallback, fail-closed)
 - Prayer Wall + Local Support backend API wiring
 - Journal entry persistence (encrypted database)
-- Mood tracking to database, Dashboard, Rate limiting
-- Swap StorageService from localStorage to API calls
+- Mood tracking to database
+- Dashboard & Growth data persistence (swap localStorage to API)
+- Friend system backend (user relationships, friend requests)
+- Leaderboard backend (weekly reset cron, ranking queries)
+- Notification backend (push notifications, email digests)
+- Photo upload with moderation pipeline
+- Rate limiting
 
-**Phase 4 — Polish**
+**Phase 4 — Polish & Native Prep**
 
-- Dark mode, streaks, shareable scripture cards, expanded insights
+- Dark mode system-preference toggle
 - Real TTS audio (replace placeholder MP3s using Spec 10 guide)
 - Re-enable personalization section, time-of-day recommendations, resume prompt when auth is wired
+- Real AI insights (replace mock insight cards with OpenAI-generated analysis)
 - Performance optimization, SEO, production deployment
+- Native app architecture planning (React Native or similar)
 
 ---
 
@@ -444,3 +666,5 @@ Use this workflow for all new features:
 - **Responsive + accessible** — test mobile/tablet/desktop; semantic HTML, ARIA labels, keyboard nav
 - **Security** — never commit API keys, sanitize all input, validate everything
 - **Empathy** — this app touches emotional/spiritual topics; approach with care and respect
+- **Gentle gamification** — celebrate presence, never punish absence; frame everything as encouragement, not competition
+- **Privacy by default** — mood data is always private; users control visibility of engagement data; provide full privacy controls
