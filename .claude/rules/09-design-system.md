@@ -4,7 +4,7 @@ paths: ["frontend/**"]
 
 ## Design System & Component Architecture
 
-This file is the comprehensive design reference for UI implementation. It covers the color palette, typography, component inventory, custom hooks, and utility libraries.
+This file is the comprehensive design reference for UI implementation. It covers the color palette, typography, component inventory, custom hooks, utility libraries, and feature-specific architecture.
 
 ### Color Palette
 
@@ -22,6 +22,25 @@ This file is the comprehensive design reference for UI implementation. It covers
 - **Warning**: `#F39C12` (orange for neutral moods) — Tailwind: `warning`
 - **Danger**: `#E74C3C` (red for negative moods/flags) — Tailwind: `danger`
 - **Borders**: `#2a2040` — Tailwind: `dark-border`, `#9CA3AF` — Tailwind: `muted-gray`, `#6B7280` — Tailwind: `subtle-gray`
+
+### Mood Color Palette (Dashboard & Growth — Phase 2.75)
+
+Used for check-in orbs, chart dots, heatmap squares, and data visualization accents:
+
+| Mood | Value | Color | Hex |
+|------|-------|-------|-----|
+| Struggling | 1 | Deep warm amber | `#D97706` |
+| Heavy | 2 | Muted copper/orange | `#C2703E` |
+| Okay | 3 | Neutral gray-purple | `#8B7FA8` |
+| Good | 4 | Soft teal | `#2DD4BF` |
+| Thriving | 5 | Vibrant green-gold | `#34D399` |
+
+### Dashboard Card Pattern (Phase 2.75)
+
+Frosted glass cards for the all-dark dashboard:
+- `bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl`
+- Padding: `p-4 md:p-6`
+- Collapsible with height transition (`overflow-hidden`)
 
 ### Typography
 
@@ -58,56 +77,42 @@ This file is the comprehensive design reference for UI implementation. It covers
 ### Layout Components
 
 - **Layout.tsx** — Wrapper: `<Navbar>` + content + `<SiteFooter>`. Passes `transparent` prop on landing page.
-- **Navbar.tsx** — Glassmorphic navigation. Desktop: dropdown panels. Mobile: hamburger drawer (`MobileDrawer`). `transparent` prop controls absolute vs relative positioning (visual style is always glassmorphic dark gradient).
+- **Navbar.tsx** — Glassmorphic navigation. Desktop: dropdown panels. Mobile: hamburger drawer (`MobileDrawer`). `transparent` prop controls absolute vs relative positioning. Logged-in state: replaces Log In/Get Started with notification bell + avatar dropdown (see `10-ux-flows.md` for nav structure).
 - **SiteFooter.tsx** — Dark purple footer. Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), "Listen on Spotify" badge, copyright.
 
 ### Design System Components
 
 - **PageHero.tsx** — Purple gradient header with title, subtitle, optional `HeadingDivider`. Used by Prayer Wall, Local Support pages.
-- **HeadingDivider.tsx** — White decorative SVG divider (short lines → dots → center line → dots → short lines) with fade gradients. Responsive via `useElementWidth()`.
+- **HeadingDivider.tsx** — White decorative SVG divider with fade gradients. Responsive via `useElementWidth()`.
 - **BackgroundSquiggle.tsx** — Decorative SVG squiggle. Exported `SQUIGGLE_MASK_STYLE` for consistent fade mask. Used by all 3 Daily Hub tabs.
-- **SongPickSection.tsx** — Spotify iframe embed (352px height) + "Follow Our Playlist on Spotify" button. Track ID rotated by day-of-year from the Worship Room playlist.
+- **SongPickSection.tsx** — Spotify iframe embed (352px height) + "Follow Our Playlist on Spotify" button.
 - **HeroSection.tsx** — Landing page hero: dark purple gradient, typewriter input, quiz teaser link.
-- **JourneySection.tsx** — 6-step vertical timeline (Pray → Journal → Meditate → Music → Prayer Wall → Local Support).
-- **GrowthTeasersSection.tsx** — 3 blurred preview cards (Mood Insights, Streaks, Leaderboard) with lock icons.
-- **StartingPointQuiz.tsx** — 5-question points-based quiz with result card. `id="quiz"` for scroll target.
+- **JourneySection.tsx** — 6-step vertical timeline.
+- **GrowthTeasersSection.tsx** — 3 blurred preview cards with lock icons.
+- **StartingPointQuiz.tsx** — 5-question quiz with result card. `id="quiz"` for scroll target.
 - **TypewriterInput.tsx** — Hero input with typewriter placeholder animation.
-- **SpotifyBadge.tsx** — "Listen on Spotify" badge link to the Worship Room playlist.
+- **SpotifyBadge.tsx** — "Listen on Spotify" badge link.
 
 ### Daily Experience Components (`components/daily/`)
 
-- **PrayTabContent.tsx** — Full Pray tab: textarea with chips, crisis banner, mock prayer generation, KaraokeText, Copy/ReadAloud/Save/Share buttons, "Journal about this" cross-tab CTA. Classic Prayers section hidden behind `false` guard.
-- **JournalTabContent.tsx** — Full Journal tab: Guided/Free Write toggle, Lora italic prompt card with refresh, draft auto-save to localStorage, crisis banner, saved entries list, AI reflection, "Done journaling" flow.
-- **MeditateTabContent.tsx** — Full Meditate tab: 6 auth-gated meditation cards in 2-col grid, completion checkmarks, all-6-complete celebration banner.
+- **PrayTabContent.tsx** — Full Pray tab: textarea with chips, crisis banner, mock prayer generation, KaraokeText, action buttons, cross-tab CTA.
+- **JournalTabContent.tsx** — Full Journal tab: Guided/Free Write toggle, prompt card, draft auto-save, crisis banner, saved entries, AI reflection.
+- **MeditateTabContent.tsx** — Full Meditate tab: 6 auth-gated meditation cards, completion checkmarks, celebration banner.
 - **MiniHubCards.tsx** — Small cards linking to Pray/Journal/Meditate with completion badges.
-- **ReadAloudButton.tsx** — TTS playback via browser Speech Synthesis API, word-index tracking for karaoke highlighting.
-- **KaraokeText.tsx** — Splits text into word `<span>`s, highlights current word during Read Aloud.
-- **ShareButton.tsx** — Web Share API with fallback dropdown (copy link, email, SMS, Facebook, X).
-- **CompletionScreen.tsx** — Celebration screen when meditation practice completes (chime, golden glow).
-- **CrisisBanner.tsx** — Checks text against `SELF_HARM_KEYWORDS` from `constants/crisis-resources.ts`, shows crisis resources alert banner with `role="alert"`.
+- **ReadAloudButton.tsx** — TTS playback via browser Speech Synthesis API.
+- **KaraokeText.tsx** — Word-by-word highlighting during Read Aloud.
+- **ShareButton.tsx** — Web Share API with fallback dropdown.
+- **CompletionScreen.tsx** — Meditation completion celebration.
+- **CrisisBanner.tsx** — Crisis keyword detection + resource alert banner with `role="alert"`.
 
 ### Prayer Wall Components (`components/prayer-wall/`)
 
-- **PrayerWallHero.tsx** — Hero section for prayer wall page.
-- **PrayerCard.tsx** — Individual prayer card with interactions.
-- **InlineComposer.tsx** — Text input for new prayer posts.
-- **CommentInput.tsx** / **CommentItem.tsx** / **CommentsSection.tsx** — Comment system.
-- **InteractionBar.tsx** — Like/reaction, bookmark, share buttons.
-- **Avatar.tsx** — User avatar circle.
-- **AnsweredBadge.tsx** — Badge for answered prayers.
-- **ShareDropdown.tsx** — Share menu for prayer cards.
-- **ReportDialog.tsx** / **DeletePrayerDialog.tsx** / **MarkAsAnsweredForm.tsx** — Modals and forms.
-- **PageShell.tsx** — Reusable page wrapper.
+- **PrayerWallHero.tsx**, **PrayerCard.tsx**, **InlineComposer.tsx**, **CommentInput.tsx**, **CommentItem.tsx**, **CommentsSection.tsx**, **InteractionBar.tsx**, **Avatar.tsx**, **AnsweredBadge.tsx**, **ShareDropdown.tsx**, **ReportDialog.tsx**, **DeletePrayerDialog.tsx**, **MarkAsAnsweredForm.tsx**, **PageShell.tsx**
 - **AuthModal.tsx** / **AuthModalProvider.tsx** — Auth prompt modal with `useAuthModal()` context. UI shell only (Phase 3 for real auth).
 
 ### Local Support Components (`components/local-support/`)
 
-- **LocalSupportPage.tsx** — Reusable page layout for all 3 locators.
-- **LocalSupportHero.tsx** — Hero section with auth-gated search CTA.
-- **SearchControls.tsx** — Search input and filters.
-- **ResultsList.tsx** / **ResultsMap.tsx** — List and Leaflet map views.
-- **ListingCard.tsx** / **ListingShareDropdown.tsx** — Individual listing display.
-- **SearchStates.tsx** — Loading, empty, error state displays.
+- **LocalSupportPage.tsx**, **LocalSupportHero.tsx**, **SearchControls.tsx**, **ResultsList.tsx**, **ResultsMap.tsx**, **ListingCard.tsx**, **ListingShareDropdown.tsx**, **SearchStates.tsx**
 
 ### UI Components (`components/ui/`)
 
@@ -115,18 +120,41 @@ This file is the comprehensive design reference for UI implementation. It covers
 - **Card.tsx** — Basic card wrapper.
 - **Button.tsx** — Reusable button component.
 
+### Dashboard & Growth Components (`components/dashboard/`) — Phase 2.75, Planned
+
+- **MoodCheckIn.tsx** — Full-screen daily check-in with mood orbs, text input, verse transition
+- **DashboardCard.tsx** — Reusable frosted glass card with collapsible behavior
+- **DashboardHero.tsx** — Dark gradient hero with greeting, streak, level
+- **MoodChart.tsx** — 7-day Recharts line chart with mood-colored dots
+- **ActivityChecklist.tsx** — 6-item checklist with SVG progress ring
+- **StreakCard.tsx** — Streak counter + faith points + level + recent badges
+- **FriendsPreview.tsx** — Top 3 friends + milestone feed + "See all" link
+- **QuickActions.tsx** — Navigation buttons to Pray/Journal/Meditate/Music
+- **BadgeGrid.tsx** — Earned (color) vs locked (silhouette) badge display
+- **NotificationBell.tsx** — Navbar bell icon with unread badge count
+- **NotificationPanel.tsx** — Dropdown panel with notification list
+- **CelebrationOverlay.tsx** — Full-screen level-up/milestone celebration with confetti
+
 ---
 
 ## Custom Hooks (`hooks/`)
 
+### Existing Hooks
+
 - **useAuth()** — Returns `{ user, isLoggedIn }`. Placeholder returning `{ user: null, isLoggedIn: false }` until Phase 3.
-- **useCompletionTracking()** — Daily practice completion per session. localStorage with date-based reset. Returns `isPrayComplete`, `isJournalComplete`, `completedMeditationTypes`, and mark methods.
-- **useReadAloud()** — Browser Speech Synthesis TTS. Play/pause/resume/stop, word index tracking for KaraokeText.
-- **useInView()** — Intersection Observer for lazy animations. Respects `prefers-reduced-motion`. Generic `<T extends HTMLElement>`.
-- **useFocusTrap()** — Keyboard focus trapping for modals. Tab/Shift+Tab wrapping, Escape key. Restores previous focus on unmount.
-- **useOpenSet()** — Manages a Set of open item IDs. Provides `toggle(id)` for expand/collapse patterns.
-- **usePrayerReactions()** — Prayer Wall reaction state (praying/bookmarked). Loads from mock data.
+- **useCompletionTracking()** — Daily practice completion per session. localStorage with date-based reset.
+- **useReadAloud()** — Browser Speech Synthesis TTS. Play/pause/resume/stop, word index tracking.
+- **useInView()** — Intersection Observer for lazy animations. Respects `prefers-reduced-motion`.
+- **useFocusTrap()** — Keyboard focus trapping for modals.
+- **useOpenSet()** — Manages a Set of open item IDs for expand/collapse patterns.
+- **usePrayerReactions()** — Prayer Wall reaction state.
 - **useElementWidth()** — ResizeObserver for responsive width measurement.
+
+### Dashboard & Growth Hooks (Phase 2.75, Planned)
+
+- **useFaithPoints()** — Core gamification hook. Returns `{ totalPoints, currentLevel, levelName, pointsToNextLevel, todayActivities, todayPoints, todayMultiplier, currentStreak, longestStreak, recordActivity(type) }`. Manages `wr_daily_activities`, `wr_faith_points`, `wr_streak` in localStorage.
+- **useMoodChartData(days)** — Returns mood entries for the last N days from `wr_mood_entries`. Used by dashboard widget (7 days) and `/insights` page (30/90/180/365 days).
+- **useToast()** — Extended toast system (Phase 2.75 extends existing `Toast.tsx` with celebration types). Returns `{ show(message, options), dismiss(id) }`.
 
 ---
 
@@ -135,25 +163,132 @@ This file is the comprehensive design reference for UI implementation. It covers
 - **utils.ts** — `cn()` classname utility (clsx + tailwind-merge).
 - **query-client.ts** — React Query client (5-min staleTime, refetchOnWindowFocus disabled).
 - **time.ts** — `timeAgo()` relative time, `formatFullDate()` date formatting.
-- **geo.ts** — `calculateDistanceMiles()` Haversine formula (3959 mi Earth radius).
-- **audio.ts** — `playChime()` Web Audio API 528 Hz sine wave with 0.5s envelope.
+- **geo.ts** — `calculateDistanceMiles()` Haversine formula.
+- **audio.ts** — `playChime()` Web Audio API 528 Hz sine wave.
+
+### Dashboard Utilities (Phase 2.75, Planned)
+
+- **utils/date.ts** — `getLocalDateString()`, `getYesterdayDateString()`, `getCurrentWeekStart()`. Shared across all dashboard specs. **Critical**: Never use `new Date().toISOString().split('T')[0]` — it returns UTC, not local time.
 
 ---
 
 ## Constants (`constants/`)
 
-- **crisis-resources.ts** — `CRISIS_RESOURCES` object (988, Crisis Text Line, SAMHSA), `SELF_HARM_KEYWORDS` array, `containsCrisisKeyword(text)` function.
-- **daily-experience.ts** — `DAILY_COMPLETION_KEY`, `JOURNAL_DRAFT_KEY`, `JOURNAL_MODE_KEY`, `SPOTIFY_PLAYLIST_URL`, `MEDITATION_TYPES` (6 types with metadata), `DEFAULT_PRAYER_CHIPS` (3 starter chips), breathing phases (4-7-8), duration options.
+- **crisis-resources.ts** — `CRISIS_RESOURCES` object, `SELF_HARM_KEYWORDS` array, `containsCrisisKeyword(text)` function.
+- **daily-experience.ts** — Completion keys, journal keys, Spotify URL, meditation types, prayer chips, breathing phases.
+
+### Dashboard Constants (Phase 2.75, Planned)
+
+- **dashboard/activity-points.ts** — `ACTIVITY_POINTS` (mood:5, pray:10, listen:10, prayerWall:15, meditate:20, journal:25), multiplier tiers (1x/1.25x/1.5x/2x).
+- **dashboard/levels.ts** — `LEVEL_THRESHOLDS` (Seedling:0, Sprout:100, Blooming:500, Flourishing:1500, Oak:4000, Lighthouse:10000).
+- **dashboard/badges.ts** — All ~35 badge definitions with IDs, triggers, celebration tiers.
+- **dashboard/mood-colors.ts** — `MOOD_COLORS` mapping mood values 1-5 to hex colors.
+- **dashboard/encouragements.ts** — 4 preset encouragement messages.
 
 ## Types (`types/`)
+
+### Existing Types
 
 - **daily-experience.ts** — `DailyVerse`, `DailySong`, `MockPrayer`, `ClassicPrayer`, `JournalPrompt`, `JournalReflection`, `MeditationType`, `DailyCompletion`, `JournalMode`, `SavedJournalEntry`, `PrayContext`.
 - **prayer-wall.ts** — `PrayerWallUser`, `PrayerRequest`, `PrayerComment`, `PrayerReaction`.
 - **local-support.ts** — `LocalSupportPlace`, `SearchParams`, `SearchResult`, `SortOption`.
 
+### Dashboard & Growth Types (Phase 2.75, Planned)
+
+- **dashboard.ts** — `MoodEntry`, `DailyActivityLog`, `StreakData`, `FaithPointsData`, `BadgeData`, `FriendProfile`, `FriendRequest`, `FriendsData`, `Notification`, `UserSettings`, `LeaderboardEntry`.
+
 ## Mock Data (`mocks/`)
 
 - **daily-experience-mock-data.ts** — 30 daily verses (WEB translation), songs, prayers, journal prompts, reflections, gratitude affirmations, ACTS steps, examen steps.
-- **daily-experience-psalms.ts** — 10 Psalms (23, 27, 34, 42, 46, 63, 91, 119, 121, 139) with full verses, intros, historical context. Full Psalm 119 acrostic sections.
+- **daily-experience-psalms.ts** — 10 Psalms with full verses, intros, historical context.
 - **prayer-wall-mock-data.ts** — 10 mock users, 18+ prayer requests, comments, reactions.
 - **local-support-mock-data.ts** — Churches, counselors, celebrate-recovery locations near Columbia, TN.
+
+### Dashboard Mock Data (Phase 2.75, Planned)
+
+- **dashboard-mock-data.ts** — 10 mock friends, mock milestone events, mock notifications, mock global leaderboard (50 users).
+
+---
+
+## Storage Service & localStorage Keys
+
+`StorageService` interface with `LocalStorageService` in `services/storage-service.ts`. All keys prefixed `wr_`:
+
+### Music Keys (Phase 2.5, Built)
+
+| Key | Description |
+|-----|-------------|
+| `wr_favorites` | Favorited scenes, sleep sessions, custom mixes |
+| `wr_saved_mixes` | User-created ambient sound mixes |
+| `wr_listening_history` | Listening sessions (capped 100) |
+| `wr_session_state` | Auto-saved session for resume (24h expiry) |
+| `wr_routines` | User-created/cloned routine definitions |
+
+### Dashboard & Growth Keys (Phase 2.75, Planned)
+
+| Key | Spec | Description |
+|-----|------|-------------|
+| `wr_auth_simulated` | 2 | Dev toggle for simulated login |
+| `wr_user_name` | 2 | Simulated user display name |
+| `wr_mood_entries` | 1 | Daily mood entries (max 365) |
+| `wr_daily_activities` | 5 | Activity log keyed by date |
+| `wr_faith_points` | 5 | Total points, level, progress |
+| `wr_streak` | 5 | Current streak, longest, last active |
+| `wr_badges` | 7 | Earned badges, newly earned queue, activity counters |
+| `wr_friends` | 9 | Friend list, requests, blocked |
+| `wr_leaderboard_global` | 10 | Mock global leaderboard |
+| `wr_social_interactions` | 11 | Encouragements, nudges, cooldowns |
+| `wr_milestone_feed` | 11 | Mock friend milestone events |
+| `wr_notifications` | 12 | Notification history + read state |
+| `wr_settings` | 13 | Profile, notification prefs, privacy |
+| `wr_dashboard_collapsed` | 2 | Widget collapse states |
+
+All writes auth-gated. Abstraction designed for API swap in Phase 3+. Full data models in `dashboard-growth-spec-plan-v2.md`.
+
+---
+
+## Music Feature — Technical Architecture
+
+### Audio Provider & Context System
+
+Global `AudioProvider` wraps the app (between `AuthModalProvider` and `Routes` in `App.tsx`). Exposes 4 contexts:
+
+- `AudioStateContext` — read-only state via `useAudioState()`
+- `AudioDispatchContext` — actions via `useAudioDispatch()`
+- `AudioEngineContext` — Web Audio API service via `useAudioEngine()`
+- `SleepTimerControlsContext` — timer controls via `useSleepTimerControls()`
+
+**AudioState** includes: `activeSounds`, `masterVolume`, `isPlaying`, `pillVisible`, `drawerOpen`, `currentSceneName`, `foregroundContent`, `sleepTimer`, `activeRoutine`.
+
+`AudioEngineService` manages a single `AudioContext` (suspend/resume, never destroy/recreate). Ambient: `AudioBufferSourceNode` with crossfade looping (double-buffer, 1.5s overlap). Foreground: `<audio>` elements via `MediaElementAudioSourceNode`. Smart fade: `linearRampToValueAtTime`.
+
+### Visual Theme
+
+Music tabs: light `#F5F5F5` (`bg-neutral-bg`) background with dark-on-light cards (`bg-white rounded-xl border border-gray-200 shadow-sm`). AudioDrawer/AudioPill/overlays: dark-themed (`rgba(15,10,30,0.85)` with white text).
+
+Components built but not rendered (kept for re-enable): `TimeOfDaySection`, `PersonalizationSection`, `RecentlyAddedSection`, `ResumePrompt`, `MusicHint`, `LofiCrossReference`, `AmbientSearchBar`, `AmbientFilterBar`. Hooks kept: `useSpotifyAutoPause`, `useMusicHints`, `useTimeOfDayRecommendations`.
+
+### Key Audio Components
+
+Audio components in `components/audio/`: `AudioPill`, `AudioDrawer`, `DrawerNowPlaying`, `DrawerTabs`, `AmbientBrowser`, `SleepBrowse`, `RoutineStepper`.
+
+### Key Audio Hooks
+
+In `hooks/`: `useSoundToggle`, `useScenePlayer`, `useForegroundPlayer`, `useSleepTimer`, `useRoutinePlayer`, `useAmbientSearch`, `useAnnounce`.
+
+### Music Data Files
+
+In `data/` and `data/music/`: `sound-catalog.ts` (24 sounds), `scenes.ts` (8 presets), `scene-backgrounds.ts` (CSS patterns), `scripture-readings.ts` (24 WEB readings), `bedtime-stories.ts` (12 stories), `playlists.ts` (8 Spotify playlists), `routines.ts` (3 templates).
+
+### Audio Constants
+
+In `constants/audio.ts`: `MAX_SIMULTANEOUS_SOUNDS: 6`, `DEFAULT_SOUND_VOLUME: 0.6`, `MASTER_VOLUME: 0.8`, `SCENE_CROSSFADE_MS: 3000`, `SOUND_FADE_IN_MS: 1000`, `SOUND_FADE_OUT_MS: 1000`, `LOAD_RETRY_MAX: 3`, `LOAD_RETRY_DELAYS_MS: [1000, 2000, 4000]`, `SLEEP_TIMER_OPTIONS: [15, 30, 45, 60, 90]`, `FADE_DURATION_OPTIONS: [5, 10, 15, 30]`.
+
+### Audio Files
+
+Placeholder silent MP3s in `public/audio/` (gitignored). Subdirectories: `ambient/`, `scripture/`, `stories/`, `artwork/`. Real TTS via Google Cloud TTS WaveNet (Male: en-US-Wavenet-D, Female: en-US-Wavenet-F). CDN: Cloudflare R2, base URL in `VITE_AUDIO_BASE_URL`.
+
+### Known Issues
+
+- **Footer touch targets**: Crisis resource links undersized on mobile. Pre-existing.
+- **Spotify embed loading**: May show fallback in headless/restricted environments.

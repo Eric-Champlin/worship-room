@@ -10,6 +10,25 @@ paths: ["backend/**", "**/*.sql"]
 - **ORM**: Spring Data JPA
 - **Migrations**: Flyway or Liquibase (TBD)
 
+## Phase 2.75 — Dashboard & Growth Data (localStorage, No Database)
+
+**Phase 2.75 uses localStorage exclusively — no new database tables.** All dashboard, growth, friends, and notification data is stored client-side via the `StorageService` abstraction (keys prefixed `wr_`). Phase 3 will add database tables and swap the `StorageService` implementation from `LocalStorageService` to API calls.
+
+**Phase 3 database tables to be added:**
+- `mood_check_ins` — daily mood entries (mood level 1-5, optional text, verse shown)
+- `daily_activities` — per-day activity completion flags + points earned
+- `streaks` — current streak, longest streak, last active date
+- `faith_points` — cumulative points, current level
+- `badges` — earned badges with timestamps, activity counters
+- `friendships` — mutual friend relationships (requester, accepter, status)
+- `friend_requests` — pending/declined requests
+- `encouragements` — quick-tap encouragements between friends
+- `notifications` — all notification types with read state
+- `user_settings` — profile, notification prefs, privacy controls
+- `user_profiles` — display name, avatar, bio (extends `users` table)
+
+These schemas will be finalized during Phase 3 planning. The localStorage data models in `dashboard-growth-spec-plan-v2.md` serve as the design reference.
+
 ## Database Schema
 
 ### users

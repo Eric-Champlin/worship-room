@@ -8,6 +8,191 @@ Detailed user experience flows for every major feature. Read this file before im
 
 ---
 
+## Navigation Structure
+
+### Desktop Navbar (Logged Out)
+
+```
+[Worship Room logo]   Daily Hub   Prayer Wall   Music   [Local Support ▾]   [Log In]  [Get Started]
+```
+
+**Top-level links (3):** Daily Hub, Prayer Wall, and Music — all always visible, no dropdowns. Music links directly to `/music`.
+
+**"Local Support" dropdown** (clickable label goes to `/local-support/churches`; dropdown expands on hover/click):
+
+```
+├── Churches
+├── Counselors
+├── Celebrate Recovery
+```
+
+### Desktop Navbar (Logged In)
+
+```
+[Worship Room logo]   Daily Hub   Prayer Wall   Music   [Local Support ▾]   [🔔]  [Avatar ▾]
+```
+
+**Notification bell** (🔔): Lucide `Bell` icon. Badge count for unread notifications (red circle, white text, top-right). Only shows when count > 0. Click opens dropdown panel (see Notification Flow below).
+
+**Avatar dropdown**:
+
+```
+├── Dashboard
+├── Friends
+├── My Journal Entries
+├── My Prayer Requests
+├── My Favorites
+├── Mood Insights
+├── Settings
+├── ─────────────────
+└── Log Out
+```
+
+### Mobile Drawer (Logged Out)
+
+```
+Daily Hub
+──────────────
+Prayer Wall
+──────────────
+Music
+──────────────
+LOCAL SUPPORT
+  Churches
+  Counselors
+  Celebrate Recovery
+──────────────
+[Log In]
+[Get Started]
+```
+
+### Mobile Drawer (Logged In)
+
+```
+Dashboard
+──────────────
+Daily Hub
+──────────────
+Prayer Wall
+──────────────
+Music
+──────────────
+LOCAL SUPPORT
+  Churches
+  Counselors
+  Celebrate Recovery
+──────────────
+Friends
+Mood Insights
+My Journal Entries
+My Prayer Requests
+My Favorites
+Settings
+──────────────
+[🔔 Notifications]
+[Log Out]
+```
+
+**Implementation:** The Navbar component checks `isAuthenticated` from the auth context and conditionally renders the appropriate button set. The logged-in state applies on ALL pages, not just the dashboard.
+
+---
+
+## Landing Page Structure
+
+```
+1. Navbar (transparent glassmorphic pill — Daily Hub link, Prayer Wall link, Music link, Local Support dropdown)
+2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /daily?tab=pray, quiz teaser link scrolls to #quiz)
+3. Journey Section (6-step vertical timeline: Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
+4. Growth Teasers Section ("See How You're Growing" — 3 blurred preview cards. Dark purple gradient. CTA: "Create a Free Account")
+5. Starting Point Quiz (id="quiz" — 5 questions, points-based scoring, result card routes to recommended feature)
+6. Footer (nav columns, crisis resources, app download badges, "Listen on Spotify" badge, copyright)
+```
+
+---
+
+## Dashboard UX Flow (Logged-In Users) — Phase 2.75
+
+**Full specifications in `dashboard-growth-spec-plan-v2.md`.**
+
+### Route Switching
+
+`/` renders `Dashboard` when `isAuthenticated` is true, `Home` (landing page) when false. Checked via `AuthProvider` context.
+
+### Daily Mood Check-In → Dashboard Transition
+
+1. **Full-screen check-in appears** (once per day, resets at midnight). Dark background, soft radial gradient. "How are you feeling today, [Name]?" in warm serif typography. Five mood buttons: Struggling, Heavy, Okay, Good, Thriving — abstract colored orbs (~56px mobile, ~64px desktop) with labels beneath. Horizontal row desktop, 2-row stacked mobile. Gentle pulse animation. "Not right now" skip link at bottom.
+
+2. **User taps a mood.** Selected orb scales up (1.15x) with glow. Others fade to 30% opacity. Optional textarea slides in: "Want to share what's on your heart?" — 280-char limit. Crisis keyword detection on text input (same pattern as Pray tab).
+
+3. **Encouragement verse** (3 seconds, auto-advance, no Continue button). One fixed verse per mood level (WEB translation):
+   - Struggling: Psalm 34:18 — "The Lord is near to the brokenhearted..."
+   - Heavy: Psalm 55:22 — "Cast your burden on the Lord..."
+   - Okay: Psalm 46:10 — "Be still, and know that I am God."
+   - Good: Psalm 107:1 — "Give thanks to the Lord, for he is good..."
+   - Thriving: Psalm 118:24 — "This is the day that the Lord has made..."
+
+4. **Dashboard arrives alive.** Streak counter animates (count-up 800ms). New mood dot fades onto 7-day chart. Activity checklist shows mood as completed. Badge celebrations fire after 1.5s delay.
+
+### Skip Behavior
+
+"Not right now" → skip directly to dashboard. No mood recorded. Does NOT re-appear later that day. Activity checklist shows "Log your mood" unchecked as the only gentle reminder.
+
+### Returning Same Day
+
+If mood already logged today, skip check-in and show dashboard directly.
+
+### Dashboard Layout
+
+**Hero section (dark gradient):** Time-of-day greeting + streak (🔥 + count) + level badge + faith points + progress bar.
+
+**Widget grid (frosted glass cards, priority order):**
+1. Streak & Faith Points (right column on desktop)
+2. 7-day Mood Chart (left column)
+3. Today's Activity Checklist with progress ring (left column)
+4. Friends & Leaderboard Preview (right column)
+5. Quick Actions — Pray, Journal, Meditate, Music (full width)
+
+Desktop: 2-column (60%/40%). Mobile: single column stacked. All cards collapsible.
+
+### Empty States (new users)
+
+- **Mood chart**: Ghosted example + "Your mood journey starts today"
+- **Streak**: "🔥 Day 1 — every journey begins with a single step"
+- **Badges**: Locked silhouettes + glowing "Welcome to Worship Room" badge (earned on signup)
+- **Friends/Leaderboard**: "Faith grows stronger together" + invite CTA + "You vs. Yesterday"
+- **Activity checklist**: All 6 unchecked + "A new day, a new opportunity to grow"
+
+---
+
+### Friends & Leaderboard Flow — Phase 2.75
+
+**Route:** `/friends` with two tabs: Friends (default) | Leaderboard (`?tab=friends|leaderboard`).
+
+**Friends tab:** Search bar → invite section (link + email) → pending requests → friend list → "People you may know" from Prayer Wall.
+
+**Leaderboard tab:** Friends (default, weekly + all-time toggle) | Global (weekly only, display names only, resets Monday). Current user highlighted. Dashboard widget shows top 3 + "See all."
+
+### Notification Flow — Phase 2.75
+
+**Bell icon in navbar** → dropdown panel (dark frosted glass, ~360px desktop, full-width mobile). 7 notification types: encouragement, friend_request, milestone, friend_milestone, nudge, weekly_recap, level_up. Each: icon + message + relative timestamp. Unread dot indicator. "Mark all as read" link.
+
+### Settings Flow — Phase 2.75
+
+**Route:** `/settings` (from avatar dropdown). Left sidebar desktop / top tabs mobile. 4 sections: Profile (name, avatar, bio stub), Notifications (per-channel toggles), Privacy (6 controls: global leaderboard visibility, activity status, nudge permissions, streak/level visibility, blocked users), Account (email, password, delete account).
+
+### Social Interactions — Phase 2.75
+
+- **Encouragements:** 4 presets ("🙏 Praying for you", "🌟 Keep going!", "💪 Proud of you", "❤️ Thinking of you"). 3/day/friend limit.
+- **Nudges:** 1/week, only for friends inactive 3+ days. Always gentle: "❤️ [Name] is thinking of you." Users can disable in privacy settings.
+- **Milestone feed:** "🔥 Sarah hit a 30-day streak!" in dashboard widget.
+- **Weekly recap:** Monday card: "Your friend group prayed 23 times... You contributed 34%."
+
+### Streak Reset Messaging Guidelines
+
+**Never punitive.** When streak resets: "Every day is a new beginning. Start fresh today." No mention of how many days were lost. No red/negative colors. The longest streak record persists as encouragement.
+
+---
+
 ### Demo Mode & Auth Gating
 
 See [02-security.md](02-security.md) for the canonical Demo Mode Data Policy and Auth Gating Strategy (what requires login, what works without login, implementation pattern).
@@ -50,8 +235,8 @@ The Daily Hub is a single-page tabbed experience at `/daily`. Old routes (`/pray
 - Quiz teaser: "Not sure where to start? Take a 30-second quiz..." → scrolls to `#quiz`
 
 **Below Tab Content (always visible):**
-1. **SongPickSection** — Today's Song Pick with Spotify 352px iframe embed + "Follow Our Playlist" CTA ("Join 117K+ other followers!")
-2. **StartingPointQuiz** — 5-question points-based quiz with `id="quiz"` scroll target
+1. **SongPickSection** — Today's Song Pick with Spotify 352px iframe embed + "Follow Our Playlist" CTA
+2. **StartingPointQuiz** — 5-question quiz with `id="quiz"` scroll target
 3. **SiteFooter** — Standard footer with "Listen on Spotify" badge
 
 **Heading Pattern (consistent across all 3 tabs):**
@@ -67,170 +252,97 @@ All 3 tabs share: `BackgroundSquiggle` decorative SVG, `max-w-2xl` container wid
 
 ### Prayer Generation Flow
 
-1. User lands on `/daily?tab=pray` (or is redirected from `/pray` or `/scripture`)
-2. Sees heading "What's On Your Heart?" with squiggle background
-3. 3 starter chips appear: "I'm struggling with...", "Help me forgive...", "I feel lost about..."
-4. Clicking a chip fills the textarea; chips disappear
-5. Textarea has cyan glow pulse animation, 500 char limit, auto-expanding
-6. **Client-side crisis keyword check**: `CrisisBanner` component checks input against `SELF_HARM_KEYWORDS`; if detected, shows crisis resources banner and blocks submission
-7. User clicks "Generate Prayer"
-8. If logged out: Auth modal opens ("Sign in to generate a prayer") — no generation
-9. If logged in: Loading state (3 bouncing dots), then mock prayer displays with:
-   - `KaraokeText` word-by-word highlighting for Read Aloud
-   - Copy, Read Aloud, Save, Share buttons
-   - "Journal about this →" CTA (switches to Journal tab with context)
-   - "Pray about something else" reset link
-10. Completion tracked: `markPrayComplete()` updates localStorage
-
-**Classic Prayers section** exists in code but is hidden behind a `false` guard. Can be re-enabled by removing the guard.
-
-**Phase 3+:** Replace mock prayer generation with real OpenAI API call + backend crisis detection.
+1. User lands on `/daily?tab=pray`
+2. 3 starter chips: "I'm struggling with...", "Help me forgive...", "I feel lost about..."
+3. Textarea: cyan glow pulse, 500 char limit, auto-expanding
+4. **Client-side crisis keyword check**: `CrisisBanner` shows crisis resources if detected
+5. "Generate Prayer" — auth-gated (logged out → auth modal)
+6. Loading state → mock prayer with KaraokeText, Copy/ReadAloud/Save/Share buttons
+7. "Journal about this →" CTA (switches to Journal tab with context)
+8. Completion tracked: `markPrayComplete()`
 
 ---
 
 ### Journaling Flow
 
-1. User lands on `/daily?tab=journal` (or is redirected from `/journal`)
-2. Sees heading "What's On Your Mind?" with squiggle background
-3. Mode toggle: **Guided** | **Free Write** (persisted to localStorage)
-4. **Guided mode**: Shows prompt card (Lora italic font, left border accent) with "Try a different prompt" refresh button. If coming from Pray tab, shows context-aware prompt.
-5. **Free Write mode**: Plain textarea with optional context banner from Pray tab
-6. Textarea: 5000 char limit, auto-expanding, cyan glow pulse
-7. **Draft auto-save**: Debounced 1-second save to localStorage; "Draft saved" indicator flashes for 2 seconds
-8. **Client-side crisis keyword check**: Same `CrisisBanner` pattern as Pray tab
-9. User clicks "Save Entry"
-10. If logged out: Auth modal opens ("Sign in to save your journal")
-11. If logged in: Entry saved to localStorage entries list (Phase 3+: encrypted database)
-12. After saving, shows saved entries list + "Write another" button + "Done journaling" toggle
-13. "Done journaling" reveals CTA cards: "Continue to Meditate" + "Visit Prayer Wall"
-14. "Reflect on my entry" button triggers AI reflection — auth-gated
-15. Completion tracked: `markJournalComplete()` updates localStorage
+1. User lands on `/daily?tab=journal`
+2. Mode toggle: **Guided** | **Free Write** (persisted to localStorage)
+3. Guided: prompt card (Lora italic) with refresh. Free Write: plain textarea
+4. Textarea: 5000 char limit, auto-expanding, cyan glow, draft auto-save (1s debounce)
+5. Crisis keyword check on input
+6. "Save Entry" — auth-gated
+7. After saving: entries list, "Write another", "Done journaling" toggle → CTA cards
+8. "Reflect on my entry" — auth-gated AI reflection
+9. Completion tracked: `markJournalComplete()`
 
 ---
 
 ### Meditation Flow
 
-1. User lands on `/daily?tab=meditate` (or is redirected from `/meditate`)
-2. Sees heading "What's On Your Spirit?" with squiggle background
-3. 6 meditation cards in 2-column grid, each with icon, title, description, time estimate:
-   - **Breathing Exercise** (Wind icon) → `/meditate/breathing` — 4-7-8 pattern with scripture phases
-   - **Scripture Soaking** (BookOpen icon) → `/meditate/soaking` — Single verse contemplation timer
-   - **Gratitude Reflection** (Heart icon) → `/meditate/gratitude` — Gratitude journaling with affirmations
-   - **ACTS Prayer Walk** (Footprints icon) → `/meditate/acts` — Adoration, Confession, Thanksgiving, Supplication
-   - **Psalm Reading** (Scroll icon) → `/meditate/psalms` — Psalms with historical context
-   - **Examen** (Search icon) → `/meditate/examen` — Ignatian daily reflection
-4. **Auth-gated**: Clicking any card when logged out opens auth modal ("Sign in to start meditating")
-5. When logged in: Clicking a card navigates to the meditation sub-page
-6. Green checkmark appears on completed meditation cards (logged-in only)
-7. All-6-complete celebration banner: "You completed all 6 meditations today!" (golden glow animation)
-8. Completion tracked per meditation type via `completedMeditationTypes` in localStorage
+1. User lands on `/daily?tab=meditate`
+2. 6 meditation cards in 2-column grid (Breathing, Soaking, Gratitude, ACTS, Psalms, Examen)
+3. **Auth-gated**: card click when logged out → auth modal
+4. Logged in: navigates to meditation sub-page
+5. Green checkmark on completed cards
+6. All-6-complete celebration banner (golden glow)
+7. Completion tracked per type
 
 ---
 
 ### Auth Gating — Implementation Details
 
-See [02-security.md](02-security.md) for the canonical auth gating list. Key implementation details for UX:
+See [02-security.md](02-security.md) for the canonical auth gating list.
 
 **Provider wrapping:** `AuthModalProvider` and `ToastProvider` wrap the Daily Hub and Prayer Wall pages.
 
-**Note:** Meditation auth gating is two-layered: card-click level in `MeditateTabContent` (opens auth modal) + route-level redirect on all 6 sub-pages (logged-out users are redirected to `/daily?tab=meditate` via `<Navigate>`).
+**Meditation auth gating is two-layered:** card-click level (auth modal) + route-level redirect on all 6 sub-pages.
 
 ---
 
 ### Mood Tracking Flow
 
-1. Every time user submits mood (button OR text input), save to `mood_selections` table:
-   - `user_id` (if logged in)
-   - `mood` (if button clicked)
-   - `description` (if text input used)
-   - `scripture_id` (scripture shown)
-   - `timestamp`
-2. On `/dashboard`: Show 7-day snapshot (mini chart) + streak counter
-3. On `/insights` (accessible from dashboard + user dropdown): Show full history with:
-   - Calendar heatmap (like GitHub contributions)
-   - Line chart showing mood over time
-   - Stats: "This week you felt Good 4 times, Terrible 2 times"
-   - AI insights: "Your mood is improving!" or "You've had a tough week"
-   - Correlations: "You tend to feel better on days you journal"
+1. Mood submitted → save to `mood_selections` table (Phase 3) or `wr_mood_entries` localStorage (Phase 2.75)
+2. Dashboard: 7-day snapshot + streak counter
+3. `/insights`: calendar heatmap, line chart, AI insights, correlations
 
 ---
 
 ### Prayer Wall Flow
 
-1. User navigates to `/prayer-wall` — sees hero section (purple gradient) + prayer card feed on neutral background
-2. **Logged-out users** can: read prayers, expand "Show more" text in-place, expand/read inline comments, tap "Praying for you" (session-only, anonymous), share prayers, view public profiles
-3. **Logged-out users cannot**: post prayers, post comments, bookmark (these open an auth modal instead of redirecting to `/login`)
-4. **Logged-in users** click "Share a Prayer Request" → inline composer slides down at top of feed (no separate `/prayer-wall/new` route)
-5. **Client-side crisis keyword check** runs on prayer text and comment text before submission (interim until backend API exists). If detected, a crisis resource banner with hotline numbers is shown and submission is blocked
-6. **AI Safety Check** (backend, Phase 3+): Run crisis detection (classifier; keywords fallback). Scan post for self-harm, abuse, spam, profanity
-7. If flagged: Email sent to `ADMIN_EMAIL`, post goes to moderation queue
-8. **Inline comments**: Expand/collapse per card. Comments show avatar, name, relative time, @mention styling. Logged-out users see "Log in to comment" placeholder
-9. **Share**: Desktop dropdown (copy link, email, SMS, Facebook, X); mobile uses Web Share API with fallback
-10. **Detail page** (`/prayer-wall/:id`): Full prayer with all comments expanded, owner actions (mark as answered, delete), report link, back navigation
-11. **Public profile** (`/prayer-wall/user/:id`): Avatar, name, bio, join date, tabs (Prayers, Replies, Reactions)
-12. **Private dashboard** (`/prayer-wall/dashboard`): Requires login (redirects to `/login` if not). Edit name/bio, tabs (My Prayers with mark-as-answered/delete, My Comments, Bookmarks, Reactions, Settings with notification preference placeholders)
-13. Users can report posts via report dialog (adds to reports table)
-14. Admin can view flagged posts at `/admin/prayer-wall` and edit/delete
-15. Admin actions logged to `admin_audit_log`
+1. Hero section + prayer card feed on neutral background
+2. **Logged-out**: read, expand comments, share, anonymous "Praying for you" (session-only)
+3. **Logged-out cannot**: post, comment, bookmark (→ auth modal)
+4. **Logged-in**: inline composer at top of feed
+5. Crisis keyword check on prayer/comment text
+6. Inline comments, share (Web Share API + fallback), detail page, public profiles, private dashboard
+7. Report dialog, admin moderation at `/admin/prayer-wall`
 
-**Current state**: Frontend fully implemented with mock data (274 tests). Backend API wiring is Phase 3+.
+**Current state**: Frontend with mock data (274 tests). Backend API wiring Phase 3+.
 
 ---
 
 ### Growth Teasers Section
 
-"See How You're Growing" — 3 blurred preview cards showing logged-out visitors what they unlock with an account. Sits between Journey Section and Starting Point Quiz on landing page.
-
-- Background: gradient from white → dark purple (#0D0620)
-- 3 cards: Mood Insights (heatmap), Streaks & Faith Points (counter + badges), Friends & Leaderboard (mini table). All have frosted glass blur overlay + lock icon.
-- CTA: "Create a Free Account" → /register
+3 blurred preview cards (Mood Insights, Streaks & Faith Points, Friends & Leaderboard) with lock icons. Dark purple gradient. CTA: "Create a Free Account" → `/register`. These preview the real dashboard features built in Phase 2.75.
 
 ---
 
 ### Footer
 
-Dark purple (#0D0620) background. 3 nav columns (Daily, Music, Support) + crisis resources + app download badges (Coming Soon placeholders) + "Listen on Spotify" badge + copyright.
-
----
-
-### Hero Quiz Teaser
-
-Below the hero input box, a secondary entry point:
-- Text: "Not sure where to start? Take a 30-second quiz and we'll help you find your path."
-- "Take the quiz" smooth-scrolls to the `#quiz` section further down the page.
-- Styling: subtle, secondary text (Text Light color, smaller font).
+Dark purple (#0D0620). 3 nav columns (Daily, Music, Support) + crisis resources + app download badges (Coming Soon) + "Listen on Spotify" badge + copyright.
 
 ---
 
 ### Starting Point Quiz Flow
 
-"Not Sure Where to Start?" — 5-question points-based quiz. `id="quiz"` for hero teaser scroll target. Sits below Growth Teasers, background transitions from dark purple back to white.
-
-- 5 questions, 4 options each, single-select, auto-advance on selection
-- Points-based scoring: each answer adds points to features (Pray, Journal, Meditate, Music, Sleep & Rest, Prayer Wall, Local Support). Highest score wins. Tiebreaker: Pray.
-- Result card: headline, description, scripture verse, CTA to recommended page, "Retake Quiz" link
-- 100% client-side React state. No backend, no cookies, no persistence.
-- Tone: gentle and guided, like a counselor intake.
+5-question points-based quiz. `id="quiz"` scroll target. Single-select, auto-advance. Points-based scoring → result card with CTA. 100% client-side, no persistence.
 
 ---
 
 ### Logged-Out Conversion Strategy
 
-**Core principle: "Free to use, meaningful to keep."** Give the output, withhold the history. Every feature works fully on first use. Conversion prompts appear only after value delivery.
+**Core principle: "Free to use, meaningful to keep."** Give the output, withhold the history.
 
-**Rules:**
-- Never gate the first use of any feature
-- Never nag on the first visit
-- Never use countdown timers or limited tries
-- All prompts are dismissible (soft cards, never hard walls)
-- Show prompts after value delivery, never before
+**Rules:** Never gate first use. Never nag on first visit. No countdown timers. All prompts dismissible. Show prompts after value delivery only.
 
-**Triggers (Phase 3+):**
-- After praying: blurred mood chart preview + "Track your journey"
-- After journaling: "Sign up to save — your words won't be here when you come back"
-- Prayer Wall: gate posting/encouraging, not reading
-- After 2-3 visits: streak teaser + Faith Points preview
-- After meditation: "Imagine a month of moments like this"
-- Daily page: blurred "Your Week at a Glance" preview
-
-**Reusable `ConversionPrompt.tsx` component** (Phase 3+): soft card, dismissible per session, routes to /register.
+**Triggers (Phase 3+):** Blurred mood chart after praying, save prompt after journaling, streak teaser after 2-3 visits, "Week at a Glance" preview on daily page.

@@ -26,6 +26,32 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - Reading Prayer Wall, expanding comments, sharing
 - Landing page, quiz, all navigation
 
+### Auth Gating — Dashboard & Growth Features (Phase 2.75)
+
+**Frontend-first auth via `AuthProvider` context.** Until real JWT auth in Phase 3, simulated auth uses localStorage:
+- `wr_auth_simulated`: `true`/`false` — dev toggle for simulated login
+- `wr_user_name`: simulated display name
+- `AuthProvider` exposes `{ isAuthenticated, user, login(), logout() }` context
+- "Simulate Login" button visible in dev mode only (`import.meta.env.DEV`)
+- `logout()` clears auth state but preserves ALL user data (mood, points, badges, friends, etc.)
+
+**What requires login (entire dashboard is auth-gated):**
+- Mood check-in: only appears for logged-in users (logged-out users see landing page)
+- Dashboard (`/`): only renders when `isAuthenticated` — otherwise renders `Home` (landing page)
+- All dashboard widget interactions (activity checklist, streak, points, badges)
+- `recordActivity()`: no-ops when user is not authenticated
+- Friends: all actions (add, accept, decline, block, encourage, nudge)
+- Leaderboard: participation requires login (global board viewable without, but user won't appear)
+- Settings (`/settings`): entire page auth-gated
+- Profile (`/profile/:userId`): viewable by anyone, but "Add Friend" / "Encourage" require login
+- Insights (`/insights`, `/insights/monthly`): auth-gated
+- Notifications: bell only visible when authenticated
+
+**Mood data privacy rule (MANDATORY):**
+- Mood data (check-in mood level, text, timestamps) is NEVER visible to friends
+- Only engagement data is shareable: streak count, faith points, level, badges
+- Privacy settings control visibility of engagement data (everyone / friends / only me)
+
 ### Rate Limiting
 - **Backend**: Per-user rate limiting on AI endpoints to prevent abuse and control costs
   - **AI Requests**: 20 requests per hour per user (scripture matching, prayers, reflections, prompts) - configurable via environment variables (dev vs prod)
@@ -99,3 +125,4 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
   - **Content Moderation**: AI output is pre-moderated by OpenAI, but implement profanity filter as additional safety layer
 - **Journal Entries**: Encrypt at rest (in addition to plain text policy)
 - **AI Prompts**: Check for injection attacks
+- **Mood Check-In Text**: 280-char limit, crisis keyword detection (see `01-ai-safety.md`)
