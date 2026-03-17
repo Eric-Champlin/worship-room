@@ -46,6 +46,14 @@ export const MOOD_OPTIONS: MoodOption[] = [
   },
 ];
 
+export const MOOD_LABELS: Record<MoodValue, string> = {
+  1: 'Struggling',
+  2: 'Heavy',
+  3: 'Okay',
+  4: 'Good',
+  5: 'Thriving',
+};
+
 export const MOOD_COLORS: Record<MoodValue, string> = {
   1: '#D97706',
   2: '#C2703E',
