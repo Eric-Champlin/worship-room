@@ -1,5 +1,6 @@
 import { CheckCircle2, Flame, Rocket, TrendingUp, Users } from 'lucide-react'
 import { DashboardCard } from './DashboardCard'
+import { MoodChart } from './MoodChart'
 import { QuickActions } from './QuickActions'
 
 function Placeholder({ text }: { text: string }) {
@@ -19,7 +20,7 @@ export function DashboardWidgetGrid() {
           action={{ label: 'See More', to: '/insights' }}
           className="order-2 lg:order-1 lg:col-span-3"
         >
-          <Placeholder text="Coming in Spec 3" />
+          <MoodChart />
         </DashboardCard>
 
         <DashboardCard

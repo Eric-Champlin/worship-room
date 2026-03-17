@@ -3,6 +3,16 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { DashboardWidgetGrid } from '../DashboardWidgetGrid'
+import { getLocalDateString } from '@/utils/date'
+import type { MoodEntry } from '@/types/dashboard'
+
+// Mock ResizeObserver for Recharts ResponsiveContainer
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
 
 beforeEach(() => {
   localStorage.clear()
@@ -16,6 +26,19 @@ function renderGrid() {
   )
 }
 
+function seedMoodEntries() {
+  const entry: MoodEntry = {
+    id: 'test-1',
+    date: getLocalDateString(),
+    mood: 4,
+    moodLabel: 'Good',
+    text: '',
+    timestamp: Date.now(),
+    verseSeen: 'Psalm 107:1',
+  }
+  localStorage.setItem('wr_mood_entries', JSON.stringify([entry]))
+}
+
 describe('DashboardWidgetGrid', () => {
   it('renders all 5 widget cards', () => {
     renderGrid()
@@ -23,9 +46,33 @@ describe('DashboardWidgetGrid', () => {
     expect(sections.length).toBe(5)
   })
 
-  it('placeholder text shows spec references', () => {
+  it('mood chart card no longer shows "Coming in Spec 3"', () => {
     renderGrid()
-    expect(screen.getByText('Coming in Spec 3')).toBeInTheDocument()
+    expect(screen.queryByText('Coming in Spec 3')).not.toBeInTheDocument()
+  })
+
+  it('mood chart card renders MoodChart component (empty state)', () => {
+    renderGrid()
+    expect(
+      screen.getByText('Your mood journey starts today'),
+    ).toBeInTheDocument()
+  })
+
+  it('mood chart card renders MoodChart with data', () => {
+    seedMoodEntries()
+    renderGrid()
+    expect(
+      screen.getByRole('img', { name: /your mood over the last 7 days/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('"See More" link still present in mood chart card header', () => {
+    renderGrid()
+    expect(screen.getByText('See More')).toBeInTheDocument()
+  })
+
+  it('other placeholder cards unchanged', () => {
+    renderGrid()
     expect(screen.getAllByText('Coming in Spec 6')).toHaveLength(2)
     expect(screen.getByText('Coming in Spec 9')).toBeInTheDocument()
   })

@@ -7,6 +7,14 @@ import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { getLocalDateString } from '@/utils/date'
 import type { MoodEntry } from '@/types/dashboard'
 
+// Mock ResizeObserver for Recharts ResponsiveContainer
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
+
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
     user: { name: 'Eric', id: 'test-id' },
@@ -57,5 +65,19 @@ describe('Dashboard', () => {
     seedTodayMoodEntry()
     renderDashboard()
     expect(screen.getByRole('main')).toBeInTheDocument()
+  })
+
+  it('renders mood chart with seeded data', () => {
+    seedTodayMoodEntry()
+    renderDashboard()
+    expect(
+      screen.getByRole('img', { name: /your mood over the last 7 days/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('old placeholder text no longer appears', () => {
+    seedTodayMoodEntry()
+    renderDashboard()
+    expect(screen.queryByText('Coming in Spec 3')).not.toBeInTheDocument()
   })
 })
