@@ -133,25 +133,53 @@ describe('StreakCard', () => {
     expect(bar).toHaveAttribute('aria-label', 'Faith points progress toward Blooming')
   })
 
-  it('recent badges render from localStorage', () => {
+  it('recent badges render from localStorage (object format)', () => {
     localStorage.setItem(
       'wr_badges',
       JSON.stringify({
-        earned: [
-          { name: 'Welcome', earnedAt: '2026-03-15T10:00:00Z' },
-          { name: 'First Prayer', earnedAt: '2026-03-14T10:00:00Z' },
-          { name: 'Streak Starter', earnedAt: '2026-03-13T10:00:00Z' },
-          { name: 'Old Badge', earnedAt: '2026-03-01T10:00:00Z' },
-        ],
+        earned: {
+          welcome: { earnedAt: '2026-03-15T10:00:00Z' },
+          first_prayer: { earnedAt: '2026-03-14T10:00:00Z' },
+          streak_7: { earnedAt: '2026-03-13T10:00:00Z' },
+          streak_14: { earnedAt: '2026-03-01T10:00:00Z' },
+        },
+        newlyEarned: [],
+        activityCounts: { pray: 0, journal: 0, meditate: 0, listen: 0, prayerWall: 0, encouragementsSent: 0, fullWorshipDays: 0 },
       }),
     )
     renderCard()
-    // Should show 3 most recent
-    expect(screen.getByText('W')).toBeInTheDocument()
-    expect(screen.getByText('F')).toBeInTheDocument()
-    expect(screen.getByText('S')).toBeInTheDocument()
+    // Should show 3 most recent badges as initial circles
+    const badges = document.querySelectorAll('.bg-primary\\/20')
+    expect(badges).toHaveLength(3)
+    // Verify names resolved from BADGE_MAP via title attributes
+    expect(screen.getByTitle('Welcome to Worship Room')).toBeInTheDocument()
+    expect(screen.getByTitle('First Prayer')).toBeInTheDocument()
+    expect(screen.getByTitle('First Flame')).toBeInTheDocument()
     // 4th badge should not render
-    expect(screen.queryByTitle('Old Badge')).not.toBeInTheDocument()
+    expect(screen.queryByTitle('Steady Flame')).not.toBeInTheDocument()
+  })
+
+  it('badge names resolved from BADGE_MAP', () => {
+    localStorage.setItem(
+      'wr_badges',
+      JSON.stringify({
+        earned: {
+          welcome: { earnedAt: '2026-03-15T10:00:00Z' },
+        },
+        newlyEarned: [],
+        activityCounts: { pray: 0, journal: 0, meditate: 0, listen: 0, prayerWall: 0, encouragementsSent: 0, fullWorshipDays: 0 },
+      }),
+    )
+    renderCard()
+    // BADGE_MAP resolves 'welcome' to 'Welcome to Worship Room'
+    expect(screen.getByTitle('Welcome to Worship Room')).toBeInTheDocument()
+  })
+
+  it('corrupted wr_badges shows no badges', () => {
+    localStorage.setItem('wr_badges', 'not valid json')
+    renderCard({ todayMultiplier: 1 })
+    const badgeCircles = document.querySelectorAll('.bg-primary\\/20')
+    expect(badgeCircles).toHaveLength(0)
   })
 
   it('no badges area when wr_badges is empty or absent', () => {

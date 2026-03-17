@@ -8,6 +8,7 @@ import {
   Landmark,
 } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
+import { BADGE_MAP } from '@/constants/dashboard/badges'
 
 interface StreakCardProps {
   currentStreak: number
@@ -39,14 +40,16 @@ function getRecentBadges(): { name: string; earnedAt: string }[] {
     const raw = localStorage.getItem('wr_badges')
     if (!raw) return []
     const data = JSON.parse(raw)
-    const earned = data?.earned ?? []
-    if (!Array.isArray(earned) || earned.length === 0) return []
-    return earned
-      .filter((b: { earnedAt?: string }) => b.earnedAt)
-      .sort(
-        (a: { earnedAt: string }, b: { earnedAt: string }) =>
-          new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime(),
-      )
+    const earned = data?.earned
+    if (!earned || typeof earned !== 'object' || Array.isArray(earned)) return []
+
+    return Object.entries(earned)
+      .filter(([, entry]: [string, unknown]) => (entry as { earnedAt?: string })?.earnedAt)
+      .map(([id, entry]: [string, unknown]) => ({
+        name: BADGE_MAP[id]?.name ?? id,
+        earnedAt: (entry as { earnedAt: string }).earnedAt,
+      }))
+      .sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime())
       .slice(0, 3)
   } catch {
     return []

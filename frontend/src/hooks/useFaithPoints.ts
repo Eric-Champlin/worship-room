@@ -10,10 +10,17 @@ import {
   updateStreak,
   persistAll,
   freshDailyActivities,
-  freshFaithPoints,
-  freshStreakData,
 } from '@/services/faith-points-storage';
 import { getLevelForPoints } from '@/constants/dashboard/levels';
+import {
+  getOrInitBadgeData,
+  incrementActivityCount,
+  addEarnedBadge,
+  saveBadgeData,
+  getFriendCount,
+  clearNewlyEarned as clearNewlyEarnedData,
+} from '@/services/badge-storage';
+import { checkForNewBadges } from '@/services/badge-engine';
 import type { ActivityType, DailyActivities } from '@/types/dashboard';
 
 interface FaithPointsState {
@@ -26,6 +33,7 @@ interface FaithPointsState {
   todayMultiplier: number;
   currentStreak: number;
   longestStreak: number;
+  newlyEarnedBadges: string[];
 }
 
 const DEFAULT_STATE: FaithPointsState = {
@@ -38,6 +46,7 @@ const DEFAULT_STATE: FaithPointsState = {
   todayMultiplier: 1,
   currentStreak: 0,
   longestStreak: 0,
+  newlyEarnedBadges: [],
 };
 
 function extractActivities(da: DailyActivities): Record<ActivityType, boolean> {
@@ -73,6 +82,9 @@ function loadState(): FaithPointsState {
   const faithPoints = getFaithPoints();
   const streak = getStreakData();
 
+  // Initialize badges if needed (first authenticated session)
+  const badgeData = getOrInitBadgeData(true);
+
   return {
     totalPoints: faithPoints.totalPoints,
     currentLevel: faithPoints.currentLevel,
@@ -83,10 +95,12 @@ function loadState(): FaithPointsState {
     todayMultiplier: todayEntry.multiplier,
     currentStreak: streak.currentStreak,
     longestStreak: streak.longestStreak,
+    newlyEarnedBadges: badgeData.newlyEarned,
   };
 }
 
 const noopRecordActivity = () => {};
+const noopClearNewlyEarned = () => {};
 
 export function useFaithPoints() {
   const { isAuthenticated } = useAuth();
@@ -132,10 +146,56 @@ export function useFaithPoints() {
     };
 
     // Update streak
-    const currentStreak = getStreakData();
-    const newStreak = updateStreak(today, currentStreak);
+    const currentStreakData = getStreakData();
+    const newStreak = updateStreak(today, currentStreakData);
 
-    // Persist all 3 keys
+    // --- Badge integration ---
+    // 1. Get current badge data
+    const badgeData = getOrInitBadgeData(true);
+
+    // 2. Determine if all 6 activities were true BEFORE this activity was set.
+    // Since the idempotency check above ensures todayEntry[type] was false before
+    // this call, all 6 couldn't have been true before. This flag is always false
+    // here, but it's kept as a parameter to checkForNewBadges for defense-in-depth.
+    const allActivitiesWereTrueBefore = false;
+
+    // 3. Increment activity count (only for types with counters)
+    let updatedBadgeData = incrementActivityCount(badgeData, type);
+
+    // 4. Check for new badges
+    const newBadgeIds = checkForNewBadges(
+      {
+        streak: newStreak,
+        level: levelInfo.level,
+        previousLevel: currentFaithPoints.currentLevel,
+        todayActivities: todayEntry,
+        activityCounts: updatedBadgeData.activityCounts,
+        friendCount: getFriendCount(),
+        allActivitiesWereTrueBefore,
+      },
+      updatedBadgeData.earned,
+    );
+
+    // 5. Award each new badge
+    for (const badgeId of newBadgeIds) {
+      updatedBadgeData = addEarnedBadge(updatedBadgeData, badgeId);
+    }
+
+    // 6. Handle Full Worship Day counter
+    if (newBadgeIds.includes('full_worship_day')) {
+      updatedBadgeData = {
+        ...updatedBadgeData,
+        activityCounts: {
+          ...updatedBadgeData.activityCounts,
+          fullWorshipDays: updatedBadgeData.activityCounts.fullWorshipDays + 1,
+        },
+      };
+    }
+
+    // 7. Persist badge data
+    saveBadgeData(updatedBadgeData);
+
+    // Persist all 3 keys (activities, faith points, streak)
     const success = persistAll(activityLog, newFaithPoints, newStreak);
     if (!success) return;
 
@@ -150,7 +210,16 @@ export function useFaithPoints() {
       todayMultiplier: newMultiplier,
       currentStreak: newStreak.currentStreak,
       longestStreak: newStreak.longestStreak,
+      newlyEarnedBadges: updatedBadgeData.newlyEarned,
     });
+  }, [isAuthenticated]);
+
+  const clearNewlyEarnedBadges = useCallback(() => {
+    if (!isAuthenticated) return;
+    const badgeData = getOrInitBadgeData(true);
+    const updated = clearNewlyEarnedData(badgeData);
+    saveBadgeData(updated);
+    setState((prev) => ({ ...prev, newlyEarnedBadges: [] }));
   }, [isAuthenticated]);
 
   // Listen for external activity recording (e.g., listen tracker)
@@ -166,8 +235,12 @@ export function useFaithPoints() {
   }, [isAuthenticated]);
 
   if (!isAuthenticated) {
-    return { ...DEFAULT_STATE, recordActivity: noopRecordActivity };
+    return {
+      ...DEFAULT_STATE,
+      recordActivity: noopRecordActivity,
+      clearNewlyEarnedBadges: noopClearNewlyEarned,
+    };
   }
 
-  return { ...state, recordActivity };
+  return { ...state, recordActivity, clearNewlyEarnedBadges };
 }

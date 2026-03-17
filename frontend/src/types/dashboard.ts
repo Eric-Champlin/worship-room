@@ -41,3 +41,39 @@ export interface StreakData {
   longestStreak: number;
   lastActiveDate: string | null;
 }
+
+// Badge types (Spec 7)
+
+export type CelebrationTier = 'toast' | 'toast-confetti' | 'special-toast' | 'full-screen';
+export type BadgeCategory = 'streak' | 'level' | 'activity' | 'community' | 'special';
+
+export interface BadgeEarnedEntry {
+  earnedAt: string;
+  count?: number;
+}
+
+export interface ActivityCounts {
+  pray: number;
+  journal: number;
+  meditate: number;
+  listen: number;
+  prayerWall: number;
+  encouragementsSent: number;
+  fullWorshipDays: number;
+}
+
+export interface BadgeData {
+  earned: Record<string, BadgeEarnedEntry>;
+  newlyEarned: string[];
+  activityCounts: ActivityCounts;
+}
+
+export interface BadgeDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: BadgeCategory;
+  celebrationTier: CelebrationTier;
+  repeatable?: boolean;
+  verse?: { text: string; reference: string };
+}

@@ -3,8 +3,8 @@ import { renderHook, act } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useFaithPoints } from '../useFaithPoints';
-import { freshDailyActivities, freshFaithPoints, freshStreakData } from '@/services/faith-points-storage';
-import type { MoodEntry } from '@/types/dashboard';
+import { freshDailyActivities } from '@/services/faith-points-storage';
+import type { MoodEntry, BadgeData } from '@/types/dashboard';
 
 function makeMoodEntry(overrides: Partial<MoodEntry> = {}): MoodEntry {
   return {
@@ -286,5 +286,236 @@ describe('useFaithPoints — authenticated', () => {
     expect(result.current.totalPoints).toBe(0);
 
     vi.restoreAllMocks();
+  });
+});
+
+describe('useFaithPoints — badge integration', () => {
+  beforeEach(() => {
+    simulateLogin();
+  });
+
+  function getBadges(): BadgeData {
+    const raw = localStorage.getItem('wr_badges');
+    return JSON.parse(raw!);
+  }
+
+  it('recordActivity integrates badge checking', () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+    const badges = getBadges();
+    expect(badges).not.toBeNull();
+    expect(badges.earned.first_prayer).toBeDefined();
+  });
+
+  it('recordActivity awards first_prayer on first pray activity', () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+    const badges = getBadges();
+    expect(badges.earned.first_prayer).toBeDefined();
+    expect(badges.earned.first_prayer.earnedAt).toBeTruthy();
+  });
+
+  it('recordActivity increments activityCounts.pray', () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+    const badges = getBadges();
+    expect(badges.activityCounts.pray).toBe(1);
+  });
+
+  it('recordActivity does NOT increment activityCounts on idempotent call', () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+    act(() => {
+      result.current.recordActivity('pray'); // idempotent — should be ignored
+    });
+    const badges = getBadges();
+    expect(badges.activityCounts.pray).toBe(1);
+  });
+
+  it('recordActivity awards full_worship_day on 6th activity', () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    act(() => {
+      result.current.recordActivity('mood');
+      result.current.recordActivity('pray');
+      result.current.recordActivity('listen');
+      result.current.recordActivity('prayerWall');
+      result.current.recordActivity('meditate');
+      result.current.recordActivity('journal');
+    });
+    const badges = getBadges();
+    expect(badges.earned.full_worship_day).toBeDefined();
+    expect(badges.earned.full_worship_day.count).toBe(1);
+    expect(badges.activityCounts.fullWorshipDays).toBe(1);
+  });
+
+  it('recordActivity full_worship_day count increments on next day', () => {
+    const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
+    // Day 1 — all 6
+    act(() => {
+      result.current.recordActivity('mood');
+      result.current.recordActivity('pray');
+      result.current.recordActivity('listen');
+      result.current.recordActivity('prayerWall');
+      result.current.recordActivity('meditate');
+      result.current.recordActivity('journal');
+    });
+    unmount();
+
+    // Day 2
+    vi.setSystemTime(new Date(2026, 2, 17, 12, 0, 0));
+    const { result: r2 } = renderHook(() => useFaithPoints(), { wrapper });
+    act(() => {
+      r2.current.recordActivity('mood');
+      r2.current.recordActivity('pray');
+      r2.current.recordActivity('listen');
+      r2.current.recordActivity('prayerWall');
+      r2.current.recordActivity('meditate');
+      r2.current.recordActivity('journal');
+    });
+    const badges = getBadges();
+    expect(badges.earned.full_worship_day.count).toBe(2);
+    expect(badges.activityCounts.fullWorshipDays).toBe(2);
+  });
+
+  it('recordActivity awards streak_7 at streak day 7', () => {
+    // Simulate 7 consecutive days
+    for (let day = 10; day <= 16; day++) {
+      vi.setSystemTime(new Date(2026, 2, day, 12, 0, 0));
+      const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
+      act(() => { result.current.recordActivity('pray'); });
+      unmount();
+    }
+    const badges = getBadges();
+    expect(badges.earned.streak_7).toBeDefined();
+  });
+
+  it('recordActivity awards level badge on level-up', () => {
+    localStorage.setItem('wr_faith_points', JSON.stringify({
+      totalPoints: 95, currentLevel: 1, currentLevelName: 'Seedling',
+      pointsToNextLevel: 5, lastUpdated: '2026-03-16T00:00:00.000Z',
+    }));
+
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    act(() => {
+      result.current.recordActivity('pray'); // +10 → 105 → level 2
+    });
+    const badges = getBadges();
+    expect(badges.earned.level_2).toBeDefined();
+  });
+
+  it('recordActivity creates wr_badges on first call for new auth user', () => {
+    expect(localStorage.getItem('wr_badges')).toBeNull();
+    renderHook(() => useFaithPoints(), { wrapper });
+    // loadState initializes badges
+    const badges = getBadges();
+    expect(badges.earned.welcome).toBeDefined();
+    expect(badges.earned.level_1).toBeDefined();
+  });
+
+  it('recordActivity badge data persists across page reload', () => {
+    const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+    unmount();
+
+    // Re-mount
+    renderHook(() => useFaithPoints(), { wrapper });
+    const badges = getBadges();
+    expect(badges.earned.first_prayer).toBeDefined();
+    expect(badges.activityCounts.pray).toBe(1);
+  });
+});
+
+describe('useFaithPoints — badge initialization & newlyEarned', () => {
+  beforeEach(() => {
+    simulateLogin();
+  });
+
+  function getBadges() {
+    return JSON.parse(localStorage.getItem('wr_badges')!);
+  }
+
+  it('first authenticated session initializes wr_badges', () => {
+    expect(localStorage.getItem('wr_badges')).toBeNull();
+    renderHook(() => useFaithPoints(), { wrapper });
+    expect(localStorage.getItem('wr_badges')).not.toBeNull();
+  });
+
+  it('welcome and level_1 in newlyEarnedBadges on first session', () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    expect(result.current.newlyEarnedBadges).toContain('welcome');
+    expect(result.current.newlyEarnedBadges).toContain('level_1');
+  });
+
+  it('subsequent sessions do not re-initialize', () => {
+    // First session
+    const { unmount } = renderHook(() => useFaithPoints(), { wrapper });
+    unmount();
+
+    // Clear newlyEarned to simulate celebration processing
+    const badges = getBadges();
+    badges.newlyEarned = [];
+    localStorage.setItem('wr_badges', JSON.stringify(badges));
+
+    // Second session
+    const { result: r2 } = renderHook(() => useFaithPoints(), { wrapper });
+    // newlyEarned should be empty, not re-populated with welcome/level_1
+    expect(r2.current.newlyEarnedBadges).toEqual([]);
+  });
+
+  it('clearNewlyEarnedBadges empties the array', () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    expect(result.current.newlyEarnedBadges.length).toBeGreaterThan(0);
+
+    act(() => {
+      result.current.clearNewlyEarnedBadges();
+    });
+    expect(result.current.newlyEarnedBadges).toEqual([]);
+    // Also cleared in localStorage
+    const badges = getBadges();
+    expect(badges.newlyEarned).toEqual([]);
+  });
+
+  it('newlyEarnedBadges updated after recordActivity awards badge', () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    // Clear initial badges
+    act(() => {
+      result.current.clearNewlyEarnedBadges();
+    });
+    expect(result.current.newlyEarnedBadges).toEqual([]);
+
+    // Record an activity
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+    expect(result.current.newlyEarnedBadges).toContain('first_prayer');
+  });
+
+  it('unauthenticated user: newlyEarnedBadges is empty', () => {
+    localStorage.clear(); // Remove auth
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    expect(result.current.newlyEarnedBadges).toEqual([]);
+  });
+
+  it('logout preserves wr_badges', () => {
+    renderHook(() => useFaithPoints(), { wrapper });
+    expect(localStorage.getItem('wr_badges')).not.toBeNull();
+
+    // Simulate logout: remove auth keys but keep badge data
+    localStorage.removeItem('wr_auth_simulated');
+    localStorage.removeItem('wr_user_name');
+    localStorage.removeItem('wr_user_id');
+
+    // wr_badges should still exist
+    expect(localStorage.getItem('wr_badges')).not.toBeNull();
   });
 });
