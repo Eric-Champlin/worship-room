@@ -108,5 +108,9 @@ function recordListenActivity(today: string, isAuthenticated: boolean): void {
   const currentStreak = getStreakData();
   const newStreak = updateStreak(today, currentStreak);
 
-  persistAll(activityLog, newFaithPoints, newStreak);
+  const success = persistAll(activityLog, newFaithPoints, newStreak);
+  if (success) {
+    // Notify other hooks (e.g., useFaithPoints on dashboard) of the state change
+    window.dispatchEvent(new CustomEvent('wr:activity-recorded', { detail: { type: 'listen' } }));
+  }
 }

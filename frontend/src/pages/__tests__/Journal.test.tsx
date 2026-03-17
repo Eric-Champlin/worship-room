@@ -16,6 +16,15 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn(() => ({ user: null, isAuthenticated: true })),
 }))
 
+vi.mock('@/hooks/useFaithPoints', () => ({
+  useFaithPoints: () => ({
+    totalPoints: 0, currentLevel: 1, levelName: 'Seedling', pointsToNextLevel: 100,
+    todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, meditate: false, journal: false },
+    todayPoints: 0, todayMultiplier: 1, currentStreak: 0, longestStreak: 0,
+    recordActivity: vi.fn(),
+  }),
+}))
+
 // C9: direct import after vi.mock (hoisted) — no top-level await needed
 import { useAuth } from '@/hooks/useAuth'
 const mockUseAuth = vi.mocked(useAuth)

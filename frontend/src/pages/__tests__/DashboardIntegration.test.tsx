@@ -18,6 +18,15 @@ vi.mock('@/hooks/useAuth', () => ({
   })),
 }))
 
+vi.mock('@/hooks/useFaithPoints', () => ({
+  useFaithPoints: () => ({
+    totalPoints: 0, currentLevel: 1, levelName: 'Seedling', pointsToNextLevel: 100,
+    todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, meditate: false, journal: false },
+    todayPoints: 0, todayMultiplier: 1, currentStreak: 0, longestStreak: 0,
+    recordActivity: vi.fn(),
+  }),
+}))
+
 const mockUseAuth = vi.mocked(useAuth)
 
 beforeEach(() => {

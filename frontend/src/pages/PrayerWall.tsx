@@ -11,6 +11,7 @@ import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useOpenSet } from '@/hooks/useOpenSet'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
 import { getMockPrayers, getMockComments } from '@/mocks/prayer-wall-mock-data'
@@ -22,6 +23,7 @@ const PRAYERS_PER_PAGE = 20
 function PrayerWallContent() {
   const { isAuthenticated, user } = useAuth()
   const { showToast } = useToast()
+  const { recordActivity } = useFaithPoints()
   const authModal = useAuthModal()
   const openAuthModal = authModal?.openAuthModal
   const allPrayers = useMemo(() => getMockPrayers(), [])
@@ -69,6 +71,9 @@ function PrayerWallContent() {
   const handleTogglePraying = useCallback(
     (prayerId: string) => {
       const wasPraying = togglePraying(prayerId)
+      if (!wasPraying) {
+        recordActivity('prayerWall')
+      }
       setPrayers((prev) =>
         prev.map((p) =>
           p.id === prayerId
@@ -77,7 +82,7 @@ function PrayerWallContent() {
         ),
       )
     },
-    [togglePraying],
+    [togglePraying, recordActivity],
   )
 
   const handleSubmitComment = useCallback(
@@ -110,9 +115,10 @@ function PrayerWallContent() {
             : p,
         ),
       )
+      recordActivity('prayerWall')
       showToast('Comment posted.')
     },
-    [isAuthenticated, showToast, user],
+    [isAuthenticated, showToast, user, recordActivity],
   )
 
   return (

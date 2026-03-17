@@ -6,6 +6,7 @@ import { PageHero } from '@/components/PageHero'
 import { CompletionScreen } from '@/components/daily/CompletionScreen'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { getACTSSteps } from '@/mocks/daily-experience-mock-data'
 
 export function ActsPrayerWalk() {
@@ -21,9 +22,11 @@ function ActsPrayerWalkContent() {
   const [showNotes, setShowNotes] = useState<Record<number, boolean>>({})
   const [isComplete, setIsComplete] = useState(false)
   const { markMeditationComplete } = useCompletionTracking()
+  const { recordActivity } = useFaithPoints()
 
   const handleComplete = () => {
     markMeditationComplete('acts')
+    recordActivity('meditate')
     setIsComplete(true)
   }
 

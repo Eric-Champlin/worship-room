@@ -9,6 +9,7 @@ import { getSoakingVerses } from '@/mocks/daily-experience-mock-data'
 import { DURATION_OPTIONS } from '@/constants/daily-experience'
 import { playChime } from '@/lib/audio'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { cn } from '@/lib/utils'
 import type { DailyVerse } from '@/types/daily-experience'
 
@@ -38,6 +39,7 @@ function ScriptureSoakingContent() {
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
 
   const { markMeditationComplete } = useCompletionTracking()
+  const { recordActivity } = useFaithPoints()
 
   const cleanup = useCallback(() => {
     cancelAnimationFrame(rafRef.current)
@@ -66,6 +68,7 @@ function ScriptureSoakingContent() {
           cleanup()
           playChime()
           markMeditationComplete('soaking')
+          recordActivity('meditate')
           setScreen('complete')
           return
         }
@@ -74,7 +77,7 @@ function ScriptureSoakingContent() {
       }
       rafRef.current = requestAnimationFrame(tick)
     },
-    [cleanup, markMeditationComplete],
+    [cleanup, markMeditationComplete, recordActivity],
   )
 
   const handleBegin = () => {

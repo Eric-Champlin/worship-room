@@ -10,6 +10,7 @@ import {
   getGratitudeVerses,
 } from '@/mocks/daily-experience-mock-data'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 
 export function GratitudeReflection() {
   const { isAuthenticated } = useAuth()
@@ -25,6 +26,7 @@ function GratitudeReflectionContent() {
     return verses[Math.floor(Math.random() * verses.length)]
   })
   const { markMeditationComplete } = useCompletionTracking()
+  const { recordActivity } = useFaithPoints()
 
   const lastInputRef = useRef<HTMLInputElement>(null)
   const prevItemCountRef = useRef(items.length)
@@ -54,6 +56,7 @@ function GratitudeReflectionContent() {
 
   const handleDone = () => {
     markMeditationComplete('gratitude')
+    recordActivity('meditate')
     setIsComplete(true)
   }
 

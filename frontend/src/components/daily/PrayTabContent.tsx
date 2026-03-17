@@ -15,6 +15,7 @@ import { ShareButton } from '@/components/daily/ShareButton'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { useAuth } from '@/hooks/useAuth'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { DEFAULT_PRAYER_CHIPS } from '@/constants/daily-experience'
 import {
   getMockPrayer,
@@ -31,6 +32,7 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const authModal = useAuthModal()
   const { isAuthenticated } = useAuth()
   const { markPrayComplete } = useCompletionTracking()
+  const { recordActivity } = useFaithPoints()
 
   const [text, setText] = useState('')
   const [selectedChip, setSelectedChip] = useState<string | null>(null)
@@ -105,6 +107,7 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
       setPrayer(result)
       setIsLoading(false)
       markPrayComplete()
+      recordActivity('pray')
     }, 1500)
   }
 

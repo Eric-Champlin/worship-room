@@ -28,6 +28,15 @@ export const MULTIPLIER_TIERS = [
 export const MAX_DAILY_BASE_POINTS = 85; // 5+10+10+15+20+25
 export const MAX_DAILY_POINTS = 170; // 85 × 2x
 
+export const ACTIVITY_CHECKLIST_NAMES: Record<ActivityType, string> = {
+  mood: 'Log your mood',
+  pray: 'Pray',
+  listen: 'Listen to worship',
+  prayerWall: 'Pray for someone',
+  meditate: 'Meditate',
+  journal: 'Journal',
+} as const;
+
 export const ALL_ACTIVITY_TYPES: ActivityType[] = [
   'mood', 'pray', 'listen', 'prayerWall', 'meditate', 'journal',
 ];

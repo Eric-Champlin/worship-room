@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLocalDateString } from '@/utils/date';
 import { getMoodEntries } from '@/services/mood-storage';
@@ -151,6 +151,18 @@ export function useFaithPoints() {
       currentStreak: newStreak.currentStreak,
       longestStreak: newStreak.longestStreak,
     });
+  }, [isAuthenticated]);
+
+  // Listen for external activity recording (e.g., listen tracker)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleExternalActivity = () => {
+      setState(loadState());
+    };
+
+    window.addEventListener('wr:activity-recorded', handleExternalActivity);
+    return () => window.removeEventListener('wr:activity-recorded', handleExternalActivity);
   }, [isAuthenticated]);
 
   if (!isAuthenticated) {

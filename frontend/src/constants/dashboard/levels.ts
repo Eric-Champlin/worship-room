@@ -13,6 +13,16 @@ export const LEVEL_THRESHOLDS: LevelDefinition[] = [
   { level: 6, name: 'Lighthouse', threshold: 10000 },
 ];
 
+// Lucide icon component names for each level (temporary — Spec 7/8 may introduce custom icons)
+export const LEVEL_ICON_NAMES: Record<number, string> = {
+  1: 'Sprout',       // Seedling level
+  2: 'Leaf',         // Sprout level
+  3: 'Flower2',      // Blooming level
+  4: 'TreePine',     // Flourishing level
+  5: 'Trees',        // Oak level
+  6: 'Landmark',     // Lighthouse level
+} as const;
+
 export function getLevelForPoints(points: number): {
   level: number;
   name: string;

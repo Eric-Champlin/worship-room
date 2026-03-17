@@ -1,7 +1,10 @@
 import { CheckCircle2, Flame, Rocket, TrendingUp, Users } from 'lucide-react'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { DashboardCard } from './DashboardCard'
 import { MoodChart } from './MoodChart'
 import { QuickActions } from './QuickActions'
+import { StreakCard } from './StreakCard'
+import { ActivityChecklist } from './ActivityChecklist'
 
 function Placeholder({ text }: { text: string }) {
   return (
@@ -10,6 +13,17 @@ function Placeholder({ text }: { text: string }) {
 }
 
 export function DashboardWidgetGrid() {
+  const {
+    currentStreak,
+    longestStreak,
+    totalPoints,
+    currentLevel,
+    levelName,
+    pointsToNextLevel,
+    todayActivities,
+    todayMultiplier,
+  } = useFaithPoints()
+
   return (
     <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
       <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-5">
@@ -29,7 +43,15 @@ export function DashboardWidgetGrid() {
           icon={<Flame className="h-5 w-5" />}
           className="order-1 lg:order-2 lg:col-span-2"
         >
-          <Placeholder text="Coming in Spec 6" />
+          <StreakCard
+            currentStreak={currentStreak}
+            longestStreak={longestStreak}
+            totalPoints={totalPoints}
+            currentLevel={currentLevel}
+            levelName={levelName}
+            pointsToNextLevel={pointsToNextLevel}
+            todayMultiplier={todayMultiplier}
+          />
         </DashboardCard>
 
         <DashboardCard
@@ -38,7 +60,10 @@ export function DashboardWidgetGrid() {
           icon={<CheckCircle2 className="h-5 w-5" />}
           className="order-3 lg:col-span-3"
         >
-          <Placeholder text="Coming in Spec 6" />
+          <ActivityChecklist
+            todayActivities={todayActivities}
+            todayMultiplier={todayMultiplier}
+          />
         </DashboardCard>
 
         <DashboardCard

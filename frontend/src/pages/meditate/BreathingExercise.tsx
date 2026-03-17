@@ -7,6 +7,7 @@ import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { getBreathingVerses } from '@/mocks/daily-experience-mock-data'
 import { BREATHING_PHASES, DURATION_OPTIONS } from '@/constants/daily-experience'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { playChime } from '@/lib/audio'
 import { cn } from '@/lib/utils'
 
@@ -52,6 +53,7 @@ function BreathingExerciseContent() {
   const totalDurationRef = useRef(0)
 
   const { markMeditationComplete } = useCompletionTracking()
+  const { recordActivity } = useFaithPoints()
 
   const cleanup = useCallback(() => {
     cancelAnimationFrame(rafRef.current)
@@ -101,6 +103,7 @@ function BreathingExerciseContent() {
         // Exercise complete
         cleanup()
         markMeditationComplete('breathing')
+        recordActivity('meditate')
         setScreen('complete')
         return
       }
@@ -146,7 +149,7 @@ function BreathingExerciseContent() {
     if (voiceEnabled) speakPhase(BREATHING_PHASES.breatheIn.label)
 
     rafRef.current = requestAnimationFrame(tick)
-  }, [duration, chimeEnabled, voiceEnabled, cleanup, markMeditationComplete])
+  }, [duration, chimeEnabled, voiceEnabled, cleanup, markMeditationComplete, recordActivity])
 
   if (screen === 'complete') {
     return (

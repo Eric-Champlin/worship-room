@@ -10,6 +10,7 @@ import {
   getPsalm119Sections,
 } from '@/mocks/daily-experience-psalms'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import type { PsalmInfo, Psalm119Section } from '@/types/daily-experience'
 
 type Screen = 'selection' | 'reading' | 'section-selection' | 'complete'
@@ -30,6 +31,7 @@ function PsalmReadingContent() {
     useState<Psalm119Section | null>(null)
   const [verseIndex, setVerseIndex] = useState(-1) // -1 = intro
   const { markMeditationComplete } = useCompletionTracking()
+  const { recordActivity } = useFaithPoints()
 
   const verses = selectedSection
     ? selectedSection.verses
@@ -59,6 +61,7 @@ function PsalmReadingContent() {
 
   const handleComplete = () => {
     markMeditationComplete('psalm')
+    recordActivity('meditate')
     setScreen('complete')
   }
 

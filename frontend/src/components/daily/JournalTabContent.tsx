@@ -7,6 +7,7 @@ import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { useAuth } from '@/hooks/useAuth'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import {
   JOURNAL_DRAFT_KEY,
   JOURNAL_MODE_KEY,
@@ -41,6 +42,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
   const authModal = useAuthModal()
   const { isAuthenticated } = useAuth()
   const { markJournalComplete } = useCompletionTracking()
+  const { recordActivity } = useFaithPoints()
 
   // Mode toggle
   const [mode, setMode] = useState<JournalMode>(() => {
@@ -135,6 +137,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
     setText('')
     localStorage.removeItem(JOURNAL_DRAFT_KEY)
     markJournalComplete()
+    recordActivity('journal')
     showToast('Entry saved')
   }
 

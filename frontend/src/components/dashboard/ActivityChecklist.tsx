@@ -1,0 +1,165 @@
+import { CircleCheck, Circle } from 'lucide-react'
+import { ACTIVITY_CHECKLIST_NAMES, ACTIVITY_POINTS } from '@/constants/dashboard/activity-points'
+import type { ActivityType } from '@/types/dashboard'
+
+interface ActivityChecklistProps {
+  todayActivities: Record<ActivityType, boolean>
+  // todayMultiplier is passed through for Spec 8 celebrations (multiplier tier-crossing animations)
+  todayMultiplier: number
+}
+
+// Ordered from lowest to highest points
+const ACTIVITY_ORDER: ActivityType[] = [
+  'mood',
+  'pray',
+  'listen',
+  'prayerWall',
+  'meditate',
+  'journal',
+]
+
+const RING_RADIUS = 24
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
+
+function getMultiplierPreview(completedCount: number): {
+  text: string
+  isCelebration: boolean
+} {
+  switch (completedCount) {
+    case 0:
+      return { text: 'Complete 2 activities for 1.25x bonus!', isCelebration: false }
+    case 1:
+      return { text: 'Complete 1 more for 1.25x bonus!', isCelebration: false }
+    case 2:
+      return { text: 'Complete 2 more for 1.5x bonus!', isCelebration: false }
+    case 3:
+      return { text: 'Complete 1 more for 1.5x bonus!', isCelebration: false }
+    case 4:
+      return { text: 'Complete 2 more for 2x Full Worship Day!', isCelebration: false }
+    case 5:
+      return { text: 'Complete 1 more for 2x Full Worship Day!', isCelebration: false }
+    case 6:
+      return { text: 'Full Worship Day! 2x points earned!', isCelebration: true }
+    default:
+      return { text: '', isCelebration: false }
+  }
+}
+
+export function ActivityChecklist({
+  todayActivities,
+  todayMultiplier,
+}: ActivityChecklistProps) {
+  const completedCount = ACTIVITY_ORDER.filter((t) => todayActivities[t]).length
+  const strokeDashoffset = RING_CIRCUMFERENCE * (1 - completedCount / 6)
+  const multiplierPreview = getMultiplierPreview(completedCount)
+
+  // Check for reduced motion preference
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+        {/* Progress ring */}
+        <div className="relative flex-shrink-0">
+          <svg
+            width="60"
+            height="60"
+            viewBox="0 0 60 60"
+            role="img"
+            aria-label={`${completedCount} of 6 daily activities completed`}
+          >
+            {/* Background circle */}
+            <circle
+              cx="30"
+              cy="30"
+              r={RING_RADIUS}
+              stroke="rgba(255,255,255,0.1)"
+              strokeWidth="6"
+              fill="none"
+            />
+            {/* Progress circle */}
+            <circle
+              cx="30"
+              cy="30"
+              r={RING_RADIUS}
+              stroke="#6D28D9"
+              strokeWidth="6"
+              fill="none"
+              strokeLinecap="round"
+              transform="rotate(-90 30 30)"
+              strokeDasharray={RING_CIRCUMFERENCE}
+              strokeDashoffset={strokeDashoffset}
+              style={
+                prefersReducedMotion
+                  ? undefined
+                  : { transition: 'stroke-dashoffset 500ms ease-out' }
+              }
+            />
+          </svg>
+          {/* Center text */}
+          <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
+            {completedCount}/6
+          </span>
+        </div>
+
+        {/* Activity list */}
+        <div className="w-full space-y-2">
+          {ACTIVITY_ORDER.map((type) => {
+            const completed = todayActivities[type]
+            const points = ACTIVITY_POINTS[type]
+            const name = ACTIVITY_CHECKLIST_NAMES[type]
+
+            return (
+              <div
+                key={type}
+                className="flex items-center gap-2"
+                aria-label={
+                  completed
+                    ? `${name} — completed, ${points} points earned`
+                    : `${name} — not yet completed, ${points} points available`
+                }
+              >
+                {completed ? (
+                  <CircleCheck className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
+                ) : (
+                  <Circle className="h-5 w-5 flex-shrink-0 text-white/20" aria-hidden="true" />
+                )}
+                <span
+                  className={
+                    completed ? 'text-sm text-white' : 'text-sm text-white/50'
+                  }
+                >
+                  {name}
+                </span>
+                <span
+                  className={
+                    completed
+                      ? 'ml-auto text-xs text-success'
+                      : 'ml-auto text-xs text-white/30'
+                  }
+                >
+                  +{points} pts
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Multiplier preview */}
+      <div className="border-t border-white/5 pt-3">
+        <p
+          className={
+            multiplierPreview.isCelebration
+              ? 'text-xs font-medium text-amber-300'
+              : 'text-xs text-white/60'
+          }
+        >
+          {multiplierPreview.text}
+        </p>
+      </div>
+    </div>
+  )
+}

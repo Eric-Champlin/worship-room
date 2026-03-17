@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getLevelForPoints, LEVEL_THRESHOLDS } from '../levels';
+import { getLevelForPoints, LEVEL_THRESHOLDS, LEVEL_ICON_NAMES } from '../levels';
 
 describe('LEVEL_THRESHOLDS', () => {
   it('has 6 levels', () => {
@@ -12,6 +12,24 @@ describe('LEVEL_THRESHOLDS', () => {
 
   it('ends at Lighthouse with threshold 10000', () => {
     expect(LEVEL_THRESHOLDS[5]).toEqual({ level: 6, name: 'Lighthouse', threshold: 10000 });
+  });
+});
+
+describe('LEVEL_ICON_NAMES', () => {
+  it('has all 6 levels', () => {
+    expect(Object.keys(LEVEL_ICON_NAMES)).toHaveLength(6);
+    for (let i = 1; i <= 6; i++) {
+      expect(LEVEL_ICON_NAMES[i]).toBeDefined();
+    }
+  });
+
+  it('maps correct Lucide icon names', () => {
+    expect(LEVEL_ICON_NAMES[1]).toBe('Sprout');
+    expect(LEVEL_ICON_NAMES[2]).toBe('Leaf');
+    expect(LEVEL_ICON_NAMES[3]).toBe('Flower2');
+    expect(LEVEL_ICON_NAMES[4]).toBe('TreePine');
+    expect(LEVEL_ICON_NAMES[5]).toBe('Trees');
+    expect(LEVEL_ICON_NAMES[6]).toBe('Landmark');
   });
 });
 

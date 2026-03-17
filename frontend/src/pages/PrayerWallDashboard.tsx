@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useOpenSet } from '@/hooks/useOpenSet'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
 import {
@@ -43,6 +44,7 @@ const NOTIFICATION_TYPES = [
 function DashboardContent() {
   const { isAuthenticated } = useAuth()
   const { showToast } = useToast()
+  const { recordActivity } = useFaithPoints()
   const [activeTab, setActiveTab] = useState<DashboardTab>('prayers')
 
   // TODO(phase-3): fetch real user profile from backend instead of mock data
@@ -57,6 +59,16 @@ function DashboardContent() {
   const { reactions, togglePraying, toggleBookmark } = usePrayerReactions()
   const [prayers, setPrayers] = useState<PrayerRequest[]>(allPrayers)
   const { openSet: openComments, toggle: handleToggleComments } = useOpenSet()
+
+  const handleTogglePraying = useCallback(
+    (prayerId: string) => {
+      const wasPraying = togglePraying(prayerId)
+      if (!wasPraying) {
+        recordActivity('prayerWall')
+      }
+    },
+    [togglePraying, recordActivity],
+  )
 
   const handleMarkAnswered = useCallback(
     (prayerId: string, praiseText: string) => {
@@ -99,9 +111,10 @@ function DashboardContent() {
             : p,
         ),
       )
+      recordActivity('prayerWall')
       showToast('Comment posted.')
     },
-    [showToast],
+    [showToast, recordActivity],
   )
 
   if (!isAuthenticated) {
@@ -299,7 +312,7 @@ function DashboardContent() {
                     <InteractionBar
                       prayer={prayer}
                       reactions={reactions[prayer.id]}
-                      onTogglePraying={() => togglePraying(prayer.id)}
+                      onTogglePraying={() => handleTogglePraying(prayer.id)}
                       onToggleComments={() => handleToggleComments(prayer.id)}
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
@@ -368,7 +381,7 @@ function DashboardContent() {
                     <InteractionBar
                       prayer={prayer}
                       reactions={reactions[prayer.id]}
-                      onTogglePraying={() => togglePraying(prayer.id)}
+                      onTogglePraying={() => handleTogglePraying(prayer.id)}
                       onToggleComments={() => handleToggleComments(prayer.id)}
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
@@ -398,7 +411,7 @@ function DashboardContent() {
                     <InteractionBar
                       prayer={prayer}
                       reactions={reactions[prayer.id]}
-                      onTogglePraying={() => togglePraying(prayer.id)}
+                      onTogglePraying={() => handleTogglePraying(prayer.id)}
                       onToggleComments={() => handleToggleComments(prayer.id)}
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}

@@ -6,6 +6,7 @@ import {
   MAX_DAILY_POINTS,
   ALL_ACTIVITY_TYPES,
   ACTIVITY_DISPLAY_NAMES,
+  ACTIVITY_CHECKLIST_NAMES,
 } from '../activity-points';
 
 describe('ACTIVITY_POINTS', () => {
@@ -66,5 +67,23 @@ describe('ACTIVITY_DISPLAY_NAMES', () => {
     expect(Object.keys(ACTIVITY_DISPLAY_NAMES)).toHaveLength(6);
     expect(ACTIVITY_DISPLAY_NAMES.mood).toBe('Logged mood');
     expect(ACTIVITY_DISPLAY_NAMES.journal).toBe('Journaled');
+  });
+});
+
+describe('ACTIVITY_CHECKLIST_NAMES', () => {
+  it('has all 6 activity types', () => {
+    expect(Object.keys(ACTIVITY_CHECKLIST_NAMES)).toHaveLength(6);
+    ALL_ACTIVITY_TYPES.forEach((type) => {
+      expect(ACTIVITY_CHECKLIST_NAMES[type]).toBeDefined();
+    });
+  });
+
+  it('uses imperative form (not past tense)', () => {
+    expect(ACTIVITY_CHECKLIST_NAMES.mood).toBe('Log your mood');
+    expect(ACTIVITY_CHECKLIST_NAMES.pray).toBe('Pray');
+    expect(ACTIVITY_CHECKLIST_NAMES.listen).toBe('Listen to worship');
+    expect(ACTIVITY_CHECKLIST_NAMES.prayerWall).toBe('Pray for someone');
+    expect(ACTIVITY_CHECKLIST_NAMES.meditate).toBe('Meditate');
+    expect(ACTIVITY_CHECKLIST_NAMES.journal).toBe('Journal');
   });
 });
