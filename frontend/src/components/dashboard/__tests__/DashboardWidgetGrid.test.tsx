@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ToastProvider } from '@/components/ui/Toast'
 import { DashboardWidgetGrid } from '../DashboardWidgetGrid'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { getLocalDateString } from '@/utils/date'
 import type { MoodEntry } from '@/types/dashboard'
 
@@ -22,11 +24,19 @@ beforeEach(() => {
   localStorage.setItem('wr_user_name', 'Eric')
 })
 
+// Wrapper component that provides faithPoints from the hook
+function GridWithFaithPoints() {
+  const faithPoints = useFaithPoints()
+  return <DashboardWidgetGrid faithPoints={faithPoints} />
+}
+
 function renderGrid() {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
-        <DashboardWidgetGrid />
+        <ToastProvider>
+          <GridWithFaithPoints />
+        </ToastProvider>
       </AuthProvider>
     </MemoryRouter>,
   )
@@ -54,14 +64,12 @@ describe('DashboardWidgetGrid', () => {
 
   it('renders StreakCard in streak-points card', () => {
     renderGrid()
-    // StreakCard renders streak message and level
     expect(screen.getByText('Start your streak today')).toBeInTheDocument()
     expect(screen.getByText('0 Faith Points')).toBeInTheDocument()
   })
 
   it('renders ActivityChecklist in activity-checklist card', () => {
     renderGrid()
-    // ActivityChecklist renders progress ring and activity names
     expect(screen.getByText('0/6')).toBeInTheDocument()
     expect(screen.getByText('Log your mood')).toBeInTheDocument()
   })
@@ -95,14 +103,12 @@ describe('DashboardWidgetGrid', () => {
     const user = userEvent.setup()
     const { unmount } = renderGrid()
 
-    // Collapse the first card (mood chart)
     const collapseButtons = screen.getAllByRole('button', { name: /collapse/i })
     await user.click(collapseButtons[0])
 
     unmount()
     renderGrid()
 
-    // First card's collapse button should show "Expand" now
     const expandButtons = screen.getAllByRole('button', { name: /expand/i })
     expect(expandButtons.length).toBeGreaterThanOrEqual(1)
   })

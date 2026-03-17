@@ -1,14 +1,9 @@
-import {
-  Flame,
-  Sprout,
-  Leaf,
-  Flower2,
-  TreePine,
-  Trees,
-  Landmark,
-} from 'lucide-react'
+import { useState } from 'react'
+import { Flame } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
+import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
+import { BadgeGrid } from './BadgeGrid'
 
 interface StreakCardProps {
   currentStreak: number
@@ -20,13 +15,13 @@ interface StreakCardProps {
   todayMultiplier: number
 }
 
-const LEVEL_ICONS: Record<number, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
-  1: Sprout,
-  2: Leaf,
-  3: Flower2,
-  4: TreePine,
-  5: Trees,
-  6: Landmark,
+const LEVEL_ICONS_MAP: Record<number, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  1: getBadgeIcon('level_1').icon,
+  2: getBadgeIcon('level_2').icon,
+  3: getBadgeIcon('level_3').icon,
+  4: getBadgeIcon('level_4').icon,
+  5: getBadgeIcon('level_5').icon,
+  6: getBadgeIcon('level_6').icon,
 }
 
 function getNextLevelInfo(currentLevel: number) {
@@ -35,7 +30,7 @@ function getNextLevelInfo(currentLevel: number) {
   return { threshold: next.threshold, name: next.name }
 }
 
-function getRecentBadges(): { name: string; earnedAt: string }[] {
+function getRecentBadges(): { id: string; name: string; earnedAt: string }[] {
   try {
     const raw = localStorage.getItem('wr_badges')
     if (!raw) return []
@@ -46,6 +41,7 @@ function getRecentBadges(): { name: string; earnedAt: string }[] {
     return Object.entries(earned)
       .filter(([, entry]: [string, unknown]) => (entry as { earnedAt?: string })?.earnedAt)
       .map(([id, entry]: [string, unknown]) => ({
+        id,
         name: BADGE_MAP[id]?.name ?? id,
         earnedAt: (entry as { earnedAt: string }).earnedAt,
       }))
@@ -65,7 +61,9 @@ export function StreakCard({
   pointsToNextLevel,
   todayMultiplier,
 }: StreakCardProps) {
-  const LevelIcon = LEVEL_ICONS[currentLevel] ?? Sprout
+  const [showBadgeGrid, setShowBadgeGrid] = useState(false)
+
+  const LevelIcon = LEVEL_ICONS_MAP[currentLevel] ?? getBadgeIcon('level_1').icon
   const nextLevel = getNextLevelInfo(currentLevel)
   const isMaxLevel = pointsToNextLevel === 0
   const currentThreshold =
@@ -80,8 +78,18 @@ export function StreakCard({
 
   const recentBadges = getRecentBadges()
 
+  // Streak reset: currentStreak <= 1 AND longestStreak > 1
+  const showStreakResetMsg = currentStreak <= 1 && longestStreak > 1
+
   return (
     <div className="space-y-4">
+      {/* Badge Grid Overlay */}
+      {showBadgeGrid && (
+        <div className="mb-4">
+          <BadgeGrid onClose={() => setShowBadgeGrid(false)} />
+        </div>
+      )}
+
       {/* Streak display */}
       <div>
         {currentStreak > 0 ? (
@@ -102,6 +110,11 @@ export function StreakCard({
               <p className="text-xs text-white/40">
                 Longest: {longestStreak} days
               </p>
+              {showStreakResetMsg && (
+                <p className="mt-1 text-sm italic text-white/50">
+                  Every day is a new beginning. Start fresh today.
+                </p>
+              )}
             </div>
           </div>
         ) : (
@@ -115,6 +128,11 @@ export function StreakCard({
               <p className="text-xs text-white/40">
                 Longest: {longestStreak} days
               </p>
+              {showStreakResetMsg && (
+                <p className="mt-1 text-sm italic text-white/50">
+                  Every day is a new beginning. Start fresh today.
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -168,18 +186,37 @@ export function StreakCard({
           )}
           {recentBadges.length > 0 && (
             <div className="flex items-center gap-1.5">
-              {recentBadges.map((badge, i) => (
-                <div
-                  key={i}
-                  className="flex h-7 w-7 items-center justify-center rounded-full border border-primary/30 bg-primary/20 text-xs font-medium text-primary-lt"
-                  title={badge.name}
-                >
-                  {badge.name.charAt(0).toUpperCase()}
-                </div>
-              ))}
+              {recentBadges.map((badge) => {
+                const iconConfig = getBadgeIcon(badge.id)
+                const BadgeIcon = iconConfig.icon
+                return (
+                  <button
+                    key={badge.id}
+                    onClick={() => setShowBadgeGrid(true)}
+                    className="flex h-11 w-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-white/50 sm:h-8 sm:w-8"
+                    style={{ backgroundColor: 'rgba(139,92,246,0.2)' }}
+                    title={badge.name}
+                    aria-label={`${badge.name} badge`}
+                    type="button"
+                  >
+                    <BadgeIcon className={`h-4 w-4 ${iconConfig.textColor}`} />
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
+      )}
+
+      {/* View all badges link */}
+      {recentBadges.length > 0 && !showBadgeGrid && (
+        <button
+          onClick={() => setShowBadgeGrid(true)}
+          className="text-xs text-primary hover:text-primary-lt focus-visible:ring-2 focus-visible:ring-white/50"
+          type="button"
+        >
+          View all badges
+        </button>
       )}
     </div>
   )

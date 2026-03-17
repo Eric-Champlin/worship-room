@@ -4,8 +4,10 @@ import { SiteFooter } from '@/components/SiteFooter'
 import { DashboardHero } from '@/components/dashboard/DashboardHero'
 import { DashboardWidgetGrid } from '@/components/dashboard/DashboardWidgetGrid'
 import { MoodCheckIn } from '@/components/dashboard/MoodCheckIn'
+import { CelebrationQueue } from '@/components/dashboard/CelebrationQueue'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { hasCheckedInToday } from '@/services/mood-storage'
 import type { MoodEntry } from '@/types/dashboard'
 
@@ -13,6 +15,8 @@ export function Dashboard() {
   const { user } = useAuth()
   const [showCheckIn, setShowCheckIn] = useState(() => !hasCheckedInToday())
   const checkedRef = useRef(false)
+
+  const faithPoints = useFaithPoints()
 
   useEffect(() => {
     if (!checkedRef.current) {
@@ -55,9 +59,13 @@ export function Dashboard() {
         className="animate-fade-in motion-reduce:animate-none"
       >
         <DashboardHero userName={user.name} />
-        <DashboardWidgetGrid />
+        <DashboardWidgetGrid faithPoints={faithPoints} />
       </main>
       <SiteFooter />
+      <CelebrationQueue
+        newlyEarnedBadges={faithPoints.newlyEarnedBadges}
+        clearNewlyEarnedBadges={faithPoints.clearNewlyEarnedBadges}
+      />
       {import.meta.env.DEV && <DevAuthToggle />}
     </div>
   )

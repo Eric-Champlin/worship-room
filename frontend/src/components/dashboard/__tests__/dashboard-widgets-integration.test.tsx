@@ -2,7 +2,9 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ToastProvider } from '@/components/ui/Toast'
 import { DashboardWidgetGrid } from '../DashboardWidgetGrid'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { getLocalDateString } from '@/utils/date'
 
 // Mock ResizeObserver for Recharts ResponsiveContainer
@@ -17,6 +19,12 @@ beforeEach(() => {
   localStorage.clear()
 })
 
+// Wrapper component that provides faithPoints from the hook
+function GridWithFaithPoints() {
+  const faithPoints = useFaithPoints()
+  return <DashboardWidgetGrid faithPoints={faithPoints} />
+}
+
 function renderWidgetGrid(authenticated = true) {
   if (authenticated) {
     localStorage.setItem('wr_auth_simulated', 'true')
@@ -25,7 +33,9 @@ function renderWidgetGrid(authenticated = true) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
-        <DashboardWidgetGrid />
+        <ToastProvider>
+          <GridWithFaithPoints />
+        </ToastProvider>
       </AuthProvider>
     </MemoryRouter>,
   )
@@ -125,13 +135,7 @@ describe('Dashboard widgets integration', () => {
       lastActiveDate: today,
     }))
 
-    render(
-      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <AuthProvider>
-          <DashboardWidgetGrid />
-        </AuthProvider>
-      </MemoryRouter>,
-    )
+    renderWidgetGrid()
 
     expect(screen.getByText('Lighthouse — Max Level')).toBeInTheDocument()
     expect(screen.getByText('12000 Faith Points')).toBeInTheDocument()

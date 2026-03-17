@@ -1,5 +1,5 @@
 import { CheckCircle2, Flame, Rocket, TrendingUp, Users } from 'lucide-react'
-import { useFaithPoints } from '@/hooks/useFaithPoints'
+import type { useFaithPoints } from '@/hooks/useFaithPoints'
 import { DashboardCard } from './DashboardCard'
 import { MoodChart } from './MoodChart'
 import { QuickActions } from './QuickActions'
@@ -12,7 +12,11 @@ function Placeholder({ text }: { text: string }) {
   )
 }
 
-export function DashboardWidgetGrid() {
+interface DashboardWidgetGridProps {
+  faithPoints: ReturnType<typeof useFaithPoints>
+}
+
+export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
   const {
     currentStreak,
     longestStreak,
@@ -22,7 +26,7 @@ export function DashboardWidgetGrid() {
     pointsToNextLevel,
     todayActivities,
     todayMultiplier,
-  } = useFaithPoints()
+  } = faithPoints
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
