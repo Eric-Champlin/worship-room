@@ -4,29 +4,29 @@ import { storageService } from '@/services/storage-service'
 import type { SessionState } from '@/types/storage'
 
 export function useSessionPersistence() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const [sessionState, setSessionState] = useState<SessionState | null>(null)
 
   // Load and auto-clear expired sessions on mount
   useEffect(() => {
-    storageService.setAuthState(isLoggedIn)
-    if (!isLoggedIn) {
+    storageService.setAuthState(isAuthenticated)
+    if (!isAuthenticated) {
       setSessionState(null)
       return
     }
     const state = storageService.getSessionState() // auto-clears expired
     setSessionState(state)
-  }, [isLoggedIn])
+  }, [isAuthenticated])
 
   const hasValidSession = sessionState !== null
 
   const saveSession = useCallback(
     (state: SessionState) => {
-      if (!isLoggedIn) return
+      if (!isAuthenticated) return
       storageService.saveSessionState(state)
       setSessionState(state)
     },
-    [isLoggedIn],
+    [isAuthenticated],
   )
 
   const clearSession = useCallback(() => {

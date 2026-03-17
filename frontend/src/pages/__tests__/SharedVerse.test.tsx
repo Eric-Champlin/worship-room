@@ -1,7 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { SharedVerse } from '../SharedVerse'
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
 import { getVerseOfTheDay } from '@/mocks/daily-experience-mock-data'
 
 function renderPage(id: string) {

@@ -5,6 +5,10 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '../AuthModalProvider'
 import { CommentInput } from '../CommentInput'
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
+
 function renderInput(overrides?: { onLoginClick?: () => void }) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

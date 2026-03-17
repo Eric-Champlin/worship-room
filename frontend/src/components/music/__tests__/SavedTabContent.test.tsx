@@ -13,7 +13,7 @@ const mockSaveMix = vi.fn()
 const mockDispatch = vi.fn()
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: true }),
+  useAuth: () => ({ user: null, isAuthenticated: true }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({

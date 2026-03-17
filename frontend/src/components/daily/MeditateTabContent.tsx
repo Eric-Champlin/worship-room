@@ -34,7 +34,7 @@ const ROUTE_MAP: Record<string, string> = {
 }
 
 export function MeditateTabContent() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { completedMeditationTypes } = useCompletionTracking()
   const allComplete = completedMeditationTypes.length === 6
   const navigate = useNavigate()
@@ -58,7 +58,7 @@ export function MeditateTabContent() {
             </span>
           </h2>
 
-          {isLoggedIn && allComplete && (
+          {isAuthenticated && allComplete && (
             <div className="mb-8 animate-golden-glow rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
               <p className="text-lg font-semibold text-text-dark">
                 You completed all 6 meditations today! What a beautiful time with
@@ -78,7 +78,7 @@ export function MeditateTabContent() {
                   key={type.id}
                   type="button"
                   onClick={() => {
-                    if (!isLoggedIn) {
+                    if (!isAuthenticated) {
                       authModal?.openAuthModal('Sign in to start meditating')
                       return
                     }
@@ -88,7 +88,7 @@ export function MeditateTabContent() {
                 >
                   <div className="mb-3 flex items-center justify-between">
                     {Icon && <Icon className="h-8 w-8 text-primary" />}
-                    {isLoggedIn && isComplete && (
+                    {isAuthenticated && isComplete && (
                       <>
                         <Check
                           className="h-5 w-5 text-success"

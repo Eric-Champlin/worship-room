@@ -44,14 +44,14 @@ function getSuggestedRoutine(): RoutineDefinition | null {
 export function AudioPill() {
   const state = useAudioState()
   const dispatch = useAudioDispatch()
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { startRoutine } = useRoutinePlayer()
 
   // Only compute suggestion when needed (no audio playing + logged in)
   const suggested = useMemo(() => {
-    if (state.pillVisible || !isLoggedIn) return null
+    if (state.pillVisible || !isAuthenticated) return null
     return getSuggestedRoutine()
-  }, [state.pillVisible, isLoggedIn])
+  }, [state.pillVisible, isAuthenticated])
 
   // Routine shortcut mode: no audio playing, logged in
   if (!state.pillVisible) {

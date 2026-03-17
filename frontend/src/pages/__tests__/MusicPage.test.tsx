@@ -7,7 +7,7 @@ import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { MusicPage } from '../MusicPage'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({ user: null, isLoggedIn: false })),
+  useAuth: vi.fn(() => ({ user: null, isAuthenticated: false })),
 }))
 
 vi.mock('@/components/audio/AudioProvider', () => ({

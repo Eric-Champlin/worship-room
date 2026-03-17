@@ -17,11 +17,11 @@ const mockEngine = {
   isBufferCached: vi.fn().mockReturnValue(false),
 }
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockActiveSounds: AudioState['activeSounds'] = []
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -67,21 +67,21 @@ const RAIN: Sound = {
 describe('useSoundToggle', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockActiveSounds = []
     mockEngine.addSound.mockResolvedValue(undefined)
     mockEngine.isBufferCached.mockReturnValue(false)
   })
 
   it('returns empty Sets initially', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useSoundToggle())
     expect(result.current.loadingSoundIds.size).toBe(0)
     expect(result.current.errorSoundIds.size).toBe(0)
   })
 
   it('calls openAuthModal when user is not logged in', () => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     const { result } = renderHook(() => useSoundToggle())
 
     act(() => {
@@ -92,7 +92,7 @@ describe('useSoundToggle', () => {
   })
 
   it('does not dispatch ADD_SOUND when user is not logged in', () => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     const { result } = renderHook(() => useSoundToggle())
 
     act(() => {
@@ -103,7 +103,7 @@ describe('useSoundToggle', () => {
   })
 
   it('dispatches REMOVE_SOUND when toggling an active sound', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveSounds = [{ soundId: 'gentle-rain', volume: 0.6, label: 'Gentle Rain' }]
 
     const { result } = renderHook(() => useSoundToggle())
@@ -119,7 +119,7 @@ describe('useSoundToggle', () => {
   })
 
   it('shows toast when mix is at 6-sound limit', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveSounds = Array.from({ length: 6 }, (_, i) => ({
       soundId: `sound-${i}`,
       volume: 0.6,
@@ -140,7 +140,7 @@ describe('useSoundToggle', () => {
   })
 
   it('sets loading state during sound load', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     // Make addSound hang so we can observe loading state
     let resolveAdd!: () => void
     mockEngine.addSound.mockReturnValue(
@@ -167,7 +167,7 @@ describe('useSoundToggle', () => {
   })
 
   it('dispatches ADD_SOUND on successful load', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
 
     const { result } = renderHook(() => useSoundToggle())
 
@@ -189,7 +189,7 @@ describe('useSoundToggle', () => {
 
   it('sets error state and shows toast on load failure after retries', async () => {
     vi.useFakeTimers()
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockEngine.addSound.mockRejectedValue(new Error('Network error'))
 
     const { result } = renderHook(() => useSoundToggle())
@@ -218,7 +218,7 @@ describe('useSoundToggle', () => {
   })
 
   it('clears error state when retrying an error sound', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
 
     // First load fails
     mockEngine.addSound.mockRejectedValueOnce(new Error('fail'))

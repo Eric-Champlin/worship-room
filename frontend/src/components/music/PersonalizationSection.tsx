@@ -62,7 +62,7 @@ function getContentTypeLabel(contentType: string): string {
 }
 
 export function PersonalizationSection() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { favorites } = useFavorites()
   const { mixes } = useSavedMixes()
   const { getLastSession } = useListeningHistory()
@@ -71,7 +71,7 @@ export function PersonalizationSection() {
 
   const { startRoutine } = useRoutinePlayer()
 
-  if (!isLoggedIn) return null
+  if (!isAuthenticated) return null
 
   const lastSession = getLastSession()
   const hasFavorites = favorites.length > 0

@@ -13,7 +13,7 @@ import {
 import type { PrayContext } from '@/types/daily-experience'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({ user: null, isLoggedIn: true })),
+  useAuth: vi.fn(() => ({ user: null, isAuthenticated: true })),
 }))
 
 // C9: direct import after vi.mock (hoisted) — no top-level await needed
@@ -23,7 +23,7 @@ const mockUseAuth = vi.mocked(useAuth)
 beforeEach(() => {
   localStorage.clear()
   vi.resetAllMocks()
-  mockUseAuth.mockReturnValue({ user: null, isLoggedIn: true })
+  mockUseAuth.mockReturnValue({ user: null, isAuthenticated: true, login: vi.fn(), logout: vi.fn() })
   vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
     matches: false,
     media: query,
@@ -223,7 +223,7 @@ describe('JournalTabContent', () => {
 
   describe('auth gate', () => {
     it('shows auth modal when logged out and clicking Save Entry', async () => {
-      mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+      mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
       const user = userEvent.setup()
       renderComponent()
 
@@ -251,7 +251,7 @@ describe('JournalTabContent', () => {
       await user.click(screen.getByText('Save Entry'))
 
       // Switch to logged out and trigger re-render via mode toggle
-      mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+      mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
       await user.click(screen.getByRole('button', { name: 'Free Write' }))
       await user.click(screen.getByRole('button', { name: 'Guided' }))
 
@@ -268,7 +268,7 @@ describe('JournalTabContent', () => {
     })
 
     it('auth modal can be dismissed', async () => {
-      mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+      mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
       const user = userEvent.setup()
       renderComponent()
 
@@ -284,7 +284,7 @@ describe('JournalTabContent', () => {
     })
 
     it('does not gate draft auto-save', async () => {
-      mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+      mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
       vi.useFakeTimers({ shouldAdvanceTime: true })
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       renderComponent()

@@ -26,12 +26,12 @@ const mockEngine = {
   foregroundGainNode: null,
 }
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockForegroundContent: AudioState['foregroundContent'] = null
 let mockActiveRoutine: AudioState['activeRoutine'] = null
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -98,13 +98,13 @@ const MOCK_OTHER_SCRIPTURE: ScriptureReading = {
 describe('useForegroundPlayer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockForegroundContent = null
     mockActiveRoutine = null
   })
 
-  it('calls openAuthModal when isLoggedIn is false', () => {
-    mockIsLoggedIn = false
+  it('calls openAuthModal when isAuthenticated is false', () => {
+    mockIsAuthenticated = false
     const { result } = renderHook(() => useForegroundPlayer())
 
     act(() => {
@@ -118,7 +118,7 @@ describe('useForegroundPlayer', () => {
   })
 
   it('dispatches START_FOREGROUND with correct metadata for scripture when logged in', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useForegroundPlayer())
 
     act(() => {
@@ -145,7 +145,7 @@ describe('useForegroundPlayer', () => {
   })
 
   it('dispatches START_FOREGROUND with correct metadata for story', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useForegroundPlayer())
 
     act(() => {
@@ -168,7 +168,7 @@ describe('useForegroundPlayer', () => {
   })
 
   it('sets pendingSwitch when foreground already playing', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockForegroundContent = {
       contentId: 'psalm-23',
       contentType: 'scripture',
@@ -193,7 +193,7 @@ describe('useForegroundPlayer', () => {
   })
 
   it('pendingSwitch contains correct remainingTime', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockForegroundContent = {
       contentId: 'psalm-23',
       contentType: 'scripture',
@@ -213,7 +213,7 @@ describe('useForegroundPlayer', () => {
   })
 
   it('cancelSwitch clears pendingSwitch without changing playback', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockForegroundContent = {
       contentId: 'psalm-23',
       contentType: 'scripture',
@@ -240,7 +240,7 @@ describe('useForegroundPlayer', () => {
   })
 
   it('sets pendingRoutineInterrupt when routine is active', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveRoutine = {
       routineId: 'r1',
       routineName: 'Test Routine',

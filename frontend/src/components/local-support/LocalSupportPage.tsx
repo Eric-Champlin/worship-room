@@ -36,16 +36,16 @@ const service = createLocalSupportService()
 const MOCK_DATA_CENTER = { lat: 35.6151, lng: -87.0353 }
 
 function LocalSupportPageContent({ config }: LocalSupportPageProps) {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Search state
   const [searchResults, setSearchResults] = useState<LocalSupportPlace[]>(() =>
-    isLoggedIn ? [] : getMockPlacesByCategory(config.category),
+    isAuthenticated ? [] : getMockPlacesByCategory(config.category),
   )
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() =>
-    isLoggedIn ? null : MOCK_DATA_CENTER,
+    isAuthenticated ? null : MOCK_DATA_CENTER,
   )
   const [radius, setRadius] = useState(25)
   const [sortOption, setSortOption] = useState<SortOption>('distance')
@@ -54,7 +54,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   const [activeTab, setActiveTab] = useState<'search' | 'saved'>('search')
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
   const [searchState, setSearchState] = useState<'idle' | 'loading' | 'error' | 'success'>(() =>
-    isLoggedIn ? 'idle' : 'success',
+    isAuthenticated ? 'idle' : 'success',
   )
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
@@ -66,7 +66,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
 
   // Bookmarks — only persist to localStorage for logged-in users (Q1: demo mode zero-persistence)
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(() => {
-    if (!isLoggedIn) return new Set()
+    if (!isAuthenticated) return new Set()
     try {
       const stored = localStorage.getItem(`worship-room-bookmarks-${config.category}`)
       if (stored) {
@@ -81,12 +81,12 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
 
   // Persist bookmarks to localStorage only for logged-in users
   useEffect(() => {
-    if (!isLoggedIn) return
+    if (!isAuthenticated) return
     localStorage.setItem(
       `worship-room-bookmarks-${config.category}`,
       JSON.stringify([...bookmarkedIds]),
     )
-  }, [bookmarkedIds, config.category, isLoggedIn])
+  }, [bookmarkedIds, config.category, isAuthenticated])
 
   // Read URL params on mount — validate bounds to prevent invalid API calls
   const initialLat = useMemo(() => {
@@ -170,7 +170,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   }, [userCoords, page, radius, config.searchKeyword])
 
   const handleToggleBookmark = useCallback((placeId: string) => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to bookmark listings')
       return
     }
@@ -183,7 +183,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
       }
       return next
     })
-  }, [isLoggedIn, authModal])
+  }, [isAuthenticated, authModal])
 
   const handleRetry = useCallback(() => {
     if (userCoords) {
@@ -242,12 +242,12 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
           <SearchControls
             onSearch={handleSearch}
             onGeocode={handleGeocode}
-            initialLat={isLoggedIn ? initialLat : undefined}
-            initialLng={isLoggedIn ? initialLng : undefined}
-            initialRadius={isLoggedIn ? initialRadius : undefined}
+            initialLat={isAuthenticated ? initialLat : undefined}
+            initialLng={isAuthenticated ? initialLng : undefined}
+            initialRadius={isAuthenticated ? initialRadius : undefined}
             isLoading={searchState === 'loading'}
             onInteractionBlocked={
-              !isLoggedIn
+              !isAuthenticated
                 ? () => authModal?.openAuthModal('Sign in to search for local support')
                 : undefined
             }
@@ -266,7 +266,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                 aria-controls="ls-tabpanel"
                 tabIndex={activeTab === tab ? 0 : -1}
                 onClick={() => {
-                  if (tab === 'saved' && !isLoggedIn) {
+                  if (tab === 'saved' && !isAuthenticated) {
                     authModal?.openAuthModal('Sign in to save and view bookmarked listings')
                     return
                   }
@@ -281,7 +281,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                   else return
                   e.preventDefault()
                   const nextTab = tabs[nextIndex]
-                  if (nextTab === 'saved' && !isLoggedIn) {
+                  if (nextTab === 'saved' && !isAuthenticated) {
                     authModal?.openAuthModal('Sign in to save and view bookmarked listings')
                     return
                   }

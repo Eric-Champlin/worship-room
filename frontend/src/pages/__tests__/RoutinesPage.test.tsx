@@ -10,10 +10,10 @@ const mockOpenAuthModal = vi.fn()
 const mockStartRoutine = vi.fn()
 const mockShowToast = vi.fn()
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -79,7 +79,7 @@ const renderPage = () =>
 
 describe('RoutinesPage', () => {
   beforeEach(() => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     vi.clearAllMocks()
   })
 

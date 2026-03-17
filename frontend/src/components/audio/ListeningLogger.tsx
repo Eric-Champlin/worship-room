@@ -12,14 +12,14 @@ interface SessionRef {
 }
 
 export function ListeningLogger() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { logSession } = useListeningHistory()
   const state = useAudioState()
   const sessionRef = useRef<SessionRef | null>(null)
   const wasPlayingRef = useRef(false)
 
   useEffect(() => {
-    if (!isLoggedIn) return
+    if (!isAuthenticated) return
 
     const isPlaying = state.isPlaying
 
@@ -70,7 +70,7 @@ export function ListeningLogger() {
 
     wasPlayingRef.current = isPlaying
   }, [
-    isLoggedIn,
+    isAuthenticated,
     state.isPlaying,
     state.foregroundContent,
     state.currentSceneId,

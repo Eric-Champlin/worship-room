@@ -31,7 +31,7 @@ export class StorageQuotaError extends Error {
 // ── Interface ─────────────────────────────────────────────────────────
 export interface StorageService {
   // Auth
-  setAuthState(isLoggedIn: boolean): void
+  setAuthState(isAuthenticated: boolean): void
 
   // Favorites
   getFavorites(): Favorite[]
@@ -104,21 +104,21 @@ function fromBase64Url(str: string): string {
 
 // ── localStorage Implementation ──────────────────────────────────────
 export class LocalStorageService implements StorageService {
-  private _isLoggedIn = false
+  private _isAuthenticated = false
 
-  setAuthState(isLoggedIn: boolean): void {
-    this._isLoggedIn = isLoggedIn
+  setAuthState(isAuthenticated: boolean): void {
+    this._isAuthenticated = isAuthenticated
   }
 
   private requireAuth(action: string): void {
-    if (!this._isLoggedIn) {
+    if (!this._isAuthenticated) {
       throw new Error(`Cannot ${action}: not logged in`)
     }
   }
 
   // ── Favorites ─────────────────────────────────────────────────────
   getFavorites(): Favorite[] {
-    if (!this._isLoggedIn) return []
+    if (!this._isAuthenticated) return []
     return readJSON<Favorite[]>(KEYS.favorites, [])
   }
 
@@ -139,7 +139,7 @@ export class LocalStorageService implements StorageService {
   }
 
   isFavorite(type: FavoriteType, targetId: string): boolean {
-    if (!this._isLoggedIn) return false
+    if (!this._isAuthenticated) return false
     return readJSON<Favorite[]>(KEYS.favorites, []).some(
       (f) => f.type === type && f.targetId === targetId,
     )
@@ -147,7 +147,7 @@ export class LocalStorageService implements StorageService {
 
   // ── Saved Mixes ──────────────────────────────────────────────────
   getSavedMixes(): SavedMix[] {
-    if (!this._isLoggedIn) return []
+    if (!this._isAuthenticated) return []
     return readJSON<SavedMix[]>(KEYS.savedMixes, [])
   }
 
@@ -207,7 +207,7 @@ export class LocalStorageService implements StorageService {
 
   // ── Listening History ─────────────────────────────────────────────
   getListeningHistory(): ListeningSession[] {
-    if (!this._isLoggedIn) return []
+    if (!this._isAuthenticated) return []
     return readJSON<ListeningSession[]>(KEYS.listeningHistory, [])
   }
 
@@ -225,14 +225,14 @@ export class LocalStorageService implements StorageService {
   }
 
   getRecentSessions(limit: number): ListeningSession[] {
-    if (!this._isLoggedIn) return []
+    if (!this._isAuthenticated) return []
     const history = readJSON<ListeningSession[]>(KEYS.listeningHistory, [])
     return history.slice(-limit)
   }
 
   // ── Session State ─────────────────────────────────────────────────
   getSessionState(): SessionState | null {
-    if (!this._isLoggedIn) return null
+    if (!this._isAuthenticated) return null
     const state = readJSON<SessionState | null>(KEYS.sessionState, null)
     if (!state) return null
 
@@ -257,7 +257,7 @@ export class LocalStorageService implements StorageService {
 
   // ── Routines ────────────────────────────────────────────────────
   getRoutines(): RoutineDefinition[] {
-    if (!this._isLoggedIn) return []
+    if (!this._isAuthenticated) return []
     return readJSON<RoutineDefinition[]>(KEYS.routines, [])
   }
 

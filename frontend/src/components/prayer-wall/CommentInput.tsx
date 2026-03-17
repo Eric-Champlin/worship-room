@@ -15,7 +15,7 @@ interface CommentInputProps {
 }
 
 export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginClick }: CommentInputProps) {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const [value, setValue] = useState(initialValue)
   const [crisisDetected, setCrisisDetected] = useState(false)
@@ -28,7 +28,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
     }
   }, [initialValue])
 
-  if (!isLoggedIn) {
+  if (!isAuthenticated) {
     return (
       <button
         type="button"

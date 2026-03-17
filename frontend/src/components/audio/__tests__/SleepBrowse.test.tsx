@@ -27,11 +27,11 @@ const mockEngine = {
   foregroundGainNode: null,
 }
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockForegroundContent: AudioState['foregroundContent'] = null
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -73,7 +73,7 @@ function renderSleepBrowse() {
 describe('SleepBrowse Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockForegroundContent = null
   })
 
@@ -103,7 +103,7 @@ describe('SleepBrowse Integration', () => {
   })
 
   it('clicking a scripture play button when logged out triggers auth modal', async () => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     renderSleepBrowse()
 
     // Click the first scripture card play button
@@ -116,7 +116,7 @@ describe('SleepBrowse Integration', () => {
   })
 
   it('clicking a bedtime story play button when logged out triggers auth modal', async () => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     renderSleepBrowse()
 
     // Find a story card button (full aria-label includes metadata)

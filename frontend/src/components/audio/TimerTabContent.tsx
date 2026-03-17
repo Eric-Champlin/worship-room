@@ -25,7 +25,7 @@ function formatMinutes(ms: number): string {
 }
 
 export function TimerTabContent() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { showToast } = useToast()
   const controls = useSleepTimerControls()
@@ -167,7 +167,7 @@ export function TimerTabContent() {
   const handleStart = () => {
     if (!effectiveDurationMin || effectiveDurationMin < 5) return
 
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to use the sleep timer')
       return
     }

@@ -6,7 +6,7 @@ import type { SessionState } from '@/types/storage'
 
 // ── Mocks ────────────────────────────────────────────────────────────
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockHasValidSession = false
 let mockSessionState: SessionState | null = null
 const mockClearSession = vi.fn()
@@ -14,7 +14,7 @@ const mockSaveSession = vi.fn()
 const mockDispatch = vi.fn()
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/hooks/useSessionPersistence', () => ({
@@ -55,7 +55,7 @@ const VALID_SESSION: SessionState = {
 describe('ResumePrompt', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockHasValidSession = false
     mockSessionState = null
   })
@@ -66,13 +66,13 @@ describe('ResumePrompt', () => {
   })
 
   it('not rendered when no session state', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { container } = render(<ResumePrompt />)
     expect(container.querySelector('[role="alert"]')).toBeNull()
   })
 
   it('not rendered when session > 24 hours old', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockHasValidSession = false
     mockSessionState = null
     const { container } = render(<ResumePrompt />)
@@ -80,7 +80,7 @@ describe('ResumePrompt', () => {
   })
 
   it('renders banner with "Welcome back!" text', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockHasValidSession = true
     mockSessionState = VALID_SESSION
 
@@ -91,7 +91,7 @@ describe('ResumePrompt', () => {
   })
 
   it('has role="alert"', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockHasValidSession = true
     mockSessionState = VALID_SESSION
 
@@ -100,7 +100,7 @@ describe('ResumePrompt', () => {
   })
 
   it('"Resume" button loads saved state', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockHasValidSession = true
     mockSessionState = VALID_SESSION
     const user = userEvent.setup()
@@ -116,7 +116,7 @@ describe('ResumePrompt', () => {
   })
 
   it('"Dismiss" clears state and hides', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockHasValidSession = true
     mockSessionState = VALID_SESSION
     const user = userEvent.setup()
@@ -128,7 +128,7 @@ describe('ResumePrompt', () => {
   })
 
   it('auto-focuses "Resume" button', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockHasValidSession = true
     mockSessionState = VALID_SESSION
 

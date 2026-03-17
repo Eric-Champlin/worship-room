@@ -4,6 +4,7 @@ import { JourneySection } from '@/components/JourneySection'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
+import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 
 export function Home() {
   return (
@@ -22,6 +23,7 @@ export function Home() {
         <StartingPointQuiz />
       </main>
       <SiteFooter />
+      {import.meta.env.DEV && <DevAuthToggle />}
     </div>
   )
 }

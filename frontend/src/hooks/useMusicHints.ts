@@ -37,30 +37,30 @@ function persistDismissed(
 }
 
 export function useMusicHints() {
-  const { user, isLoggedIn } = useAuth()
+  const { user, isAuthenticated } = useAuth()
 
   const [showSoundGridHint, setShowSoundGridHint] = useState(() => {
-    if (!isLoggedIn || !user?.id) return true
+    if (!isAuthenticated || !user?.id) return true
     return !isDismissed(getStorageKey(user.id), SOUND_GRID_HINT_KEY)
   })
   const [showPillHint, setShowPillHint] = useState(() => {
-    if (!isLoggedIn || !user?.id) return true
+    if (!isAuthenticated || !user?.id) return true
     return !isDismissed(getStorageKey(user.id), PILL_HINT_KEY)
   })
 
   const dismissSoundGridHint = useCallback(() => {
     setShowSoundGridHint(false)
-    if (isLoggedIn && user?.id) {
+    if (isAuthenticated && user?.id) {
       persistDismissed(getStorageKey(user.id), SOUND_GRID_HINT_KEY)
     }
-  }, [isLoggedIn, user?.id])
+  }, [isAuthenticated, user?.id])
 
   const dismissPillHint = useCallback(() => {
     setShowPillHint(false)
-    if (isLoggedIn && user?.id) {
+    if (isAuthenticated && user?.id) {
       persistDismissed(getStorageKey(user.id), PILL_HINT_KEY)
     }
-  }, [isLoggedIn, user?.id])
+  }, [isAuthenticated, user?.id])
 
   return {
     showSoundGridHint,

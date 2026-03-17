@@ -8,7 +8,7 @@ import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { DAILY_COMPLETION_KEY } from '@/constants/daily-experience'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({ user: null, isLoggedIn: true })),
+  useAuth: vi.fn(() => ({ user: null, isAuthenticated: true })),
 }))
 
 const { useAuth } = await import('@/hooks/useAuth')
@@ -17,7 +17,7 @@ const mockUseAuth = vi.mocked(useAuth)
 beforeEach(() => {
   localStorage.clear()
   vi.resetAllMocks()
-  mockUseAuth.mockReturnValue({ user: null, isLoggedIn: true })
+  mockUseAuth.mockReturnValue({ user: null, isAuthenticated: true, login: vi.fn(), logout: vi.fn() })
   // Restore matchMedia mock (resetAllMocks clears the setup.ts implementation)
   vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
     matches: false,
@@ -219,7 +219,7 @@ describe('PrayTabContent', () => {
 
   describe('auth gate', () => {
     it('shows auth modal when logged out and clicking Generate Prayer', async () => {
-      mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+      mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
       const user = userEvent.setup()
       renderComponent()
 
@@ -265,7 +265,7 @@ describe('PrayTabContent', () => {
     })
 
     it('classic prayers section is hidden when logged out', () => {
-      mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+      mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
       renderComponent()
       expect(screen.queryByText('Classic Prayers')).not.toBeInTheDocument()
     })

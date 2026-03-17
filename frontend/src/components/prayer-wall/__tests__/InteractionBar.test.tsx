@@ -5,6 +5,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { InteractionBar } from '../InteractionBar'
 import type { PrayerRequest, PrayerReaction } from '@/types/prayer-wall'
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
+
 const mockPrayer: PrayerRequest = {
   id: 'prayer-1',
   userId: 'user-1',

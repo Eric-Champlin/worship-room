@@ -101,7 +101,7 @@ export function AmbientBrowser() {
   const search = useAmbientSearch()
   const scenePlayer = useScenePlayer()
   const soundToggle = useSoundToggle()
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { mixes } = useSavedMixes()
   const activeSounds = useAudioState().activeSounds
   const activeSoundIds = useMemo(
@@ -135,7 +135,7 @@ export function AmbientBrowser() {
       ) : (
         <>
           {/* Your Saved Mixes (logged-in users with mixes only) */}
-          {isLoggedIn && mixes.length > 0 && (
+          {isAuthenticated && mixes.length > 0 && (
             <section aria-label="Your saved mixes">
               <h2 className="mb-3 text-sm font-semibold text-text-dark">
                 Your Saved Mixes

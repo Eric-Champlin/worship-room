@@ -7,10 +7,10 @@ import { storageService } from '@/services/storage-service'
 
 const mockOpenAuthModal = vi.fn()
 const mockShowToast = vi.fn()
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -34,7 +34,7 @@ describe('useSavedMixes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
   })
 
   it('returns empty mixes initially', () => {
@@ -56,7 +56,7 @@ describe('useSavedMixes', () => {
   })
 
   it('saveMix persists and returns new mix when logged in', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useSavedMixes())
 
     let mix: ReturnType<typeof result.current.saveMix>
@@ -71,7 +71,7 @@ describe('useSavedMixes', () => {
   })
 
   it('deleteMix removes from state and localStorage', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const saved = storageService.saveMix('My Mix', SOUNDS)
 
     const { result } = renderHook(() => useSavedMixes())
@@ -86,7 +86,7 @@ describe('useSavedMixes', () => {
   })
 
   it('duplicateMix creates " Copy" suffixed duplicate', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const saved = storageService.saveMix('Evening Calm', SOUNDS)
 
     const { result } = renderHook(() => useSavedMixes())
@@ -102,7 +102,7 @@ describe('useSavedMixes', () => {
   })
 
   it('updateName updates mix name', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const saved = storageService.saveMix('Old Name', SOUNDS)
 
     const { result } = renderHook(() => useSavedMixes())

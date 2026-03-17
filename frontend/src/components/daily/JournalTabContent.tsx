@@ -39,7 +39,7 @@ interface JournalTabContentProps {
 export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTabContentProps) {
   const { showToast } = useToast()
   const authModal = useAuthModal()
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { markJournalComplete } = useCompletionTracking()
 
   // Mode toggle
@@ -120,7 +120,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
 
   const handleSave = () => {
     if (!text.trim()) return
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to save your journal entries')
       return
     }
@@ -139,7 +139,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
   }
 
   const handleReflect = (entryId: string) => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to reflect on your entry')
       return
     }

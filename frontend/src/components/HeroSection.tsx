@@ -77,7 +77,7 @@ function useVideoFade(video: HTMLVideoElement | null) {
 
 export function HeroSection() {
   const navigate = useNavigate()
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null)
   const prefersReducedMotion = usePrefersReducedMotion()
@@ -85,7 +85,7 @@ export function HeroSection() {
   useVideoFade(videoEl)
 
   const handleInputSubmit = (value: string) => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to get AI-powered guidance')
       return
     }

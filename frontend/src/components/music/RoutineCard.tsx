@@ -33,7 +33,7 @@ export function RoutineCard({
   onDuplicate,
   onDelete,
 }: RoutineCardProps) {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -62,7 +62,7 @@ export function RoutineCard({
   }, [menuOpen])
 
   const handleStart = () => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to use bedtime routines')
       return
     }
@@ -87,7 +87,7 @@ export function RoutineCard({
 
   const handleClone = () => {
     setMenuOpen(false)
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to create bedtime routines')
       return
     }

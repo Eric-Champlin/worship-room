@@ -8,11 +8,11 @@ import { FavoriteButton } from '../FavoriteButton'
 const mockOpenAuthModal = vi.fn()
 const mockShowToast = vi.fn()
 const mockToggleFavorite = vi.fn()
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockIsFavorite = false
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -43,12 +43,12 @@ describe('FavoriteButton', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockIsFavorite = false
   })
 
   it('renders outlined heart when not favorited', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     render(<FavoriteButton {...defaultProps} />)
 
     const button = screen.getByRole('button')
@@ -59,7 +59,7 @@ describe('FavoriteButton', () => {
   })
 
   it('renders filled heart when favorited', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockIsFavorite = true
     render(<FavoriteButton {...defaultProps} />)
 
@@ -69,7 +69,7 @@ describe('FavoriteButton', () => {
   })
 
   it('shows aria-pressed="true" when favorited', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockIsFavorite = true
     render(<FavoriteButton {...defaultProps} />)
 
@@ -77,14 +77,14 @@ describe('FavoriteButton', () => {
   })
 
   it('shows aria-pressed="false" when not favorited', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     render(<FavoriteButton {...defaultProps} />)
 
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('has correct aria-label with item name when not favorited', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     render(<FavoriteButton {...defaultProps} />)
 
     expect(screen.getByRole('button')).toHaveAttribute(
@@ -94,7 +94,7 @@ describe('FavoriteButton', () => {
   })
 
   it('has correct aria-label with item name when favorited', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockIsFavorite = true
     render(<FavoriteButton {...defaultProps} />)
 
@@ -105,7 +105,7 @@ describe('FavoriteButton', () => {
   })
 
   it('calls toggleFavorite on click (logged-in)', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const user = userEvent.setup()
 
     render(<FavoriteButton {...defaultProps} />)
@@ -133,7 +133,7 @@ describe('FavoriteButton', () => {
   })
 
   it('click does not propagate to parent', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const user = userEvent.setup()
     const parentClick = vi.fn()
 

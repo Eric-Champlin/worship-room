@@ -7,10 +7,10 @@ import { storageService, StorageQuotaError } from '@/services/storage-service'
 
 const mockOpenAuthModal = vi.fn()
 const mockShowToast = vi.fn()
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -27,7 +27,7 @@ describe('useFavorites', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
   })
 
   it('returns empty favorites initially', () => {
@@ -48,7 +48,7 @@ describe('useFavorites', () => {
   })
 
   it('toggleFavorite adds favorite when logged in', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useFavorites())
 
     act(() => {
@@ -61,7 +61,7 @@ describe('useFavorites', () => {
   })
 
   it('toggleFavorite removes favorite when already favorited', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     storageService.addFavorite('scene', 'morning-mist')
 
     const { result } = renderHook(() => useFavorites())
@@ -75,7 +75,7 @@ describe('useFavorites', () => {
   })
 
   it('reverts on localStorage error with toast', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useFavorites())
 
     // Make addFavorite throw quota error
@@ -100,7 +100,7 @@ describe('useFavorites', () => {
   it('loads existing favorites on mount when logged in', () => {
     storageService.addFavorite('scene', 'morning-mist')
     storageService.addFavorite('sleep_session', 'psalm-23')
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
 
     const { result } = renderHook(() => useFavorites())
 

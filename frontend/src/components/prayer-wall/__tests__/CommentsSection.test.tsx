@@ -4,6 +4,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { CommentsSection } from '../CommentsSection'
 import type { PrayerComment } from '@/types/prayer-wall'
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
+
 const mockComments: PrayerComment[] = [
   {
     id: 'c1',

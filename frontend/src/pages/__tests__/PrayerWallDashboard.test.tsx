@@ -9,13 +9,10 @@ import { PrayerWallDashboard } from '../PrayerWallDashboard'
 // Mock useAuth to return a logged-in user for dashboard testing
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
-    isLoggedIn: true,
-    user: {
-      id: 'user-1',
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      email: 'sarah@example.com',
-    },
+    isAuthenticated: true,
+    user: { id: 'user-1', name: 'Sarah Johnson' },
+    login: vi.fn(),
+    logout: vi.fn(),
   }),
 }))
 

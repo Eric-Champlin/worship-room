@@ -78,7 +78,7 @@ vi.mock('../AudioProvider', () => ({
 }))
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: false }),
+  useAuth: () => ({ user: null, isAuthenticated: false }),
 }))
 
 vi.mock('@/hooks/useSavedMixes', () => ({

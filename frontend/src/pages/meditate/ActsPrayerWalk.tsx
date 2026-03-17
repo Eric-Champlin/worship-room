@@ -9,8 +9,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { getACTSSteps } from '@/mocks/daily-experience-mock-data'
 
 export function ActsPrayerWalk() {
-  const { isLoggedIn } = useAuth()
-  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
   return <ActsPrayerWalkContent />
 }
 

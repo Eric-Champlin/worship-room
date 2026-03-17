@@ -4,7 +4,7 @@ import { ScriptureCollectionRow } from '../ScriptureCollectionRow'
 import type { ScriptureCollection } from '@/types/music'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: false }),
+  useAuth: () => ({ user: null, isAuthenticated: false }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({

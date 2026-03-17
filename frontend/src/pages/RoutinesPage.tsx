@@ -14,7 +14,7 @@ import { storageService } from '@/services/storage-service'
 import type { RoutineDefinition } from '@/types/storage'
 
 export function RoutinesPage() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { startRoutine } = useRoutinePlayer()
   const { showToast } = useToast()
@@ -32,7 +32,7 @@ export function RoutinesPage() {
   }, [])
 
   const handleCreate = () => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to create bedtime routines')
       return
     }
@@ -41,7 +41,7 @@ export function RoutinesPage() {
   }
 
   const handleClone = (template: RoutineDefinition) => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to create bedtime routines')
       return
     }

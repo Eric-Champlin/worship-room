@@ -4,6 +4,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { AudioProvider, useAudioState, useAudioDispatch } from '../AudioProvider'
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
+
 // Mock Toast so SleepTimerBridge doesn't throw
 vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),

@@ -54,7 +54,7 @@ function resolveScriptureId(contentId: string): ScriptureReading | null {
 }
 
 export function useRoutinePlayer(): UseRoutinePlayerReturn {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const audioState = useAudioState()
   const dispatch = useAudioDispatch()
@@ -362,7 +362,7 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
   // ── Start a routine ─────────────────────────────────────────────────
   const startRoutine = useCallback(
     (routine: RoutineDefinition) => {
-      if (!isLoggedIn) {
+      if (!isAuthenticated) {
         authModal?.openAuthModal('Sign in to use bedtime routines')
         return
       }
@@ -390,7 +390,7 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
 
       dispatch({ type: 'START_ROUTINE', payload: audioRoutine })
     },
-    [isLoggedIn, authModal, dispatch],
+    [isAuthenticated, authModal, dispatch],
   )
 
   // ── Skip current step ───────────────────────────────────────────────

@@ -30,8 +30,8 @@ function speakPhase(label: string) {
 }
 
 export function BreathingExercise() {
-  const { isLoggedIn } = useAuth()
-  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
   return <BreathingExerciseContent />
 }
 

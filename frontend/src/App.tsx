@@ -21,11 +21,14 @@ import { Layout } from './components/Layout'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { AudioProvider } from '@/components/audio/AudioProvider'
+import { AuthProvider } from '@/contexts/AuthContext'
 import { Churches } from './pages/Churches'
 import { Counselors } from './pages/Counselors'
 import { CelebrateRecovery } from './pages/CelebrateRecovery'
 import { MusicPage } from './pages/MusicPage'
 import { RoutinesPage } from './pages/RoutinesPage'
+import { Dashboard } from './pages/Dashboard'
+import { useAuth } from '@/hooks/useAuth'
 import { lazy, Suspense } from 'react'
 
 const MoodCheckInPreview = lazy(() =>
@@ -72,15 +75,21 @@ function NotFound() {
   )
 }
 
+function RootRoute() {
+  const { isAuthenticated } = useAuth()
+  return isAuthenticated ? <Dashboard /> : <Home />
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <AuthProvider>
         <ToastProvider>
         <AuthModalProvider>
         <AudioProvider>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<RootRoute />} />
           <Route path="/health" element={<Health />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/daily" element={<DailyHub />} />
@@ -119,6 +128,7 @@ function App() {
         </AudioProvider>
         </AuthModalProvider>
         </ToastProvider>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   )

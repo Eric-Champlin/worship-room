@@ -36,7 +36,7 @@ export interface UseScenePlayerReturn {
 }
 
 export function useScenePlayer(): UseScenePlayerReturn {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const audioState = useAudioState()
   const dispatch = useAudioDispatch()
@@ -154,7 +154,7 @@ export function useScenePlayer(): UseScenePlayerReturn {
 
   const loadScene = useCallback(
     (scene: ScenePreset) => {
-      if (!isLoggedIn) {
+      if (!isAuthenticated) {
         authModal?.openAuthModal('Sign in to play ambient scenes')
         return
       }
@@ -166,7 +166,7 @@ export function useScenePlayer(): UseScenePlayerReturn {
 
       executeSceneLoad(scene)
     },
-    [isLoggedIn, authModal, audioState.activeRoutine, executeSceneLoad],
+    [isAuthenticated, authModal, audioState.activeRoutine, executeSceneLoad],
   )
 
   const confirmRoutineInterrupt = useCallback(() => {

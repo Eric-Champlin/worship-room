@@ -15,7 +15,7 @@ export interface UseSoundToggleReturn {
 }
 
 export function useSoundToggle(): UseSoundToggleReturn {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { showToast } = useToast()
   const audioState = useAudioState()
@@ -38,7 +38,7 @@ export function useSoundToggle(): UseSoundToggleReturn {
   const toggleSound = useCallback(
     (sound: Sound) => {
       // 1. Auth gate
-      if (!isLoggedIn) {
+      if (!isAuthenticated) {
         authModal?.openAuthModal('Sign in to play ambient sounds')
         return
       }
@@ -108,7 +108,7 @@ export function useSoundToggle(): UseSoundToggleReturn {
           pendingRef.current.delete(sound.id)
         })
     },
-    [isLoggedIn, authModal, audioState.activeSounds, dispatch, engine, showToast],
+    [isAuthenticated, authModal, audioState.activeSounds, dispatch, engine, showToast],
   )
 
   async function loadWithRetry(sound: Sound, url: string): Promise<void> {

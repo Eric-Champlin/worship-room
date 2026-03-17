@@ -6,21 +6,21 @@ import { storageService, StorageQuotaError } from '@/services/storage-service'
 import type { Favorite, FavoriteType } from '@/types/storage'
 
 export function useFavorites() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { showToast } = useToast()
   const [favorites, setFavorites] = useState<Favorite[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    storageService.setAuthState(isLoggedIn)
-    if (isLoggedIn) {
+    storageService.setAuthState(isAuthenticated)
+    if (isAuthenticated) {
       setFavorites(storageService.getFavorites())
     } else {
       setFavorites([])
     }
     setIsLoading(false)
-  }, [isLoggedIn])
+  }, [isAuthenticated])
 
   const isFavorite = useCallback(
     (type: FavoriteType, targetId: string) =>
@@ -30,7 +30,7 @@ export function useFavorites() {
 
   const toggleFavorite = useCallback(
     (type: FavoriteType, targetId: string) => {
-      if (!isLoggedIn) {
+      if (!isAuthenticated) {
         authModal?.openAuthModal('Sign in to save favorites')
         return
       }
@@ -65,7 +65,7 @@ export function useFavorites() {
         }
       }
     },
-    [isLoggedIn, favorites, authModal, showToast],
+    [isAuthenticated, favorites, authModal, showToast],
   )
 
   return { favorites, isFavorite, toggleFavorite, isLoading }

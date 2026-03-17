@@ -9,8 +9,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { getExamenSteps } from '@/mocks/daily-experience-mock-data'
 
 export function ExamenReflection() {
-  const { isLoggedIn } = useAuth()
-  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
   return <ExamenReflectionContent />
 }
 

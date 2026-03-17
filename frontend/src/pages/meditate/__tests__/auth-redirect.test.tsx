@@ -9,7 +9,7 @@ import { PsalmReading } from '../PsalmReading'
 import { ExamenReflection } from '../ExamenReflection'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({ user: null, isLoggedIn: false })),
+  useAuth: vi.fn(() => ({ user: null, isAuthenticated: false })),
 }))
 
 const { useAuth } = await import('@/hooks/useAuth')
@@ -18,7 +18,7 @@ const mockUseAuth = vi.mocked(useAuth)
 beforeEach(() => {
   localStorage.clear()
   vi.resetAllMocks()
-  mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+  mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
   vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
     matches: false,
     media: query,
@@ -66,7 +66,7 @@ describe('Meditation sub-page auth redirect', () => {
   it.each(subPages)(
     '$name renders content when logged in',
     ({ path, Component }) => {
-      mockUseAuth.mockReturnValue({ user: null, isLoggedIn: true })
+      mockUseAuth.mockReturnValue({ user: null, isAuthenticated: true, login: vi.fn(), logout: vi.fn() })
       renderWithRouter(path, Component)
       expect(screen.queryByTestId('daily-hub')).not.toBeInTheDocument()
       // Verify component actually rendered content (not an empty tree)

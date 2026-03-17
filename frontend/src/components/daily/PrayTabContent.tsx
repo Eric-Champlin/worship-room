@@ -29,7 +29,7 @@ interface PrayTabContentProps {
 export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const { showToast } = useToast()
   const authModal = useAuthModal()
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { markPrayComplete } = useCompletionTracking()
 
   const [text, setText] = useState('')
@@ -93,7 +93,7 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
       setNudge(true)
       return
     }
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to generate a prayer')
       return
     }
@@ -128,7 +128,7 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   }
 
   const handleSave = () => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to save your prayers')
       return
     }

@@ -7,7 +7,7 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: false }),
+  useAuth: () => ({ user: null, isAuthenticated: false }),
 }))
 
 vi.mock('@/lib/audio-engine', () => {

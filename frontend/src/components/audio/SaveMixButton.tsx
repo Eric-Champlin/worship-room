@@ -39,7 +39,7 @@ function getSuggestedName(
 
 export function SaveMixButton() {
   const state = useAudioState()
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { saveMix } = useSavedMixes()
   const { showToast } = useToast()
@@ -65,7 +65,7 @@ export function SaveMixButton() {
   if (!visible) return null
 
   function handleSaveClick() {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to save your mix')
       return
     }

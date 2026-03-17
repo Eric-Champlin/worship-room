@@ -8,7 +8,7 @@ import { AUDIO_BASE_URL } from '@/constants/audio'
 const STAGGER_MS = 200
 
 export function ResumePrompt() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { sessionState, hasValidSession, clearSession } = useSessionPersistence()
   const dispatch = useAudioDispatch()
   const engine = useAudioEngine()
@@ -20,7 +20,7 @@ export function ResumePrompt() {
     }
   }, [hasValidSession])
 
-  if (!isLoggedIn || !hasValidSession || !sessionState) return null
+  if (!isAuthenticated || !hasValidSession || !sessionState) return null
 
   function handleResume() {
     // Set master volume

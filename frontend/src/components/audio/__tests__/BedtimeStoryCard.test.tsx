@@ -6,7 +6,7 @@ import type { BedtimeStory } from '@/types/music'
 
 // ── Mocks for FavoriteButton dependencies ────────────────────────────
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: false }),
+  useAuth: () => ({ user: null, isAuthenticated: false }),
 }))
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
   useAuthModal: () => ({ openAuthModal: vi.fn() }),

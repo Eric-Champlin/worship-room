@@ -3,14 +3,14 @@ import { renderHook, act } from '@testing-library/react'
 import { useMusicHints } from '../useMusicHints'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({ user: null, isLoggedIn: false })),
+  useAuth: vi.fn(() => ({ user: null, isAuthenticated: false })),
 }))
 
 import { useAuth } from '@/hooks/useAuth'
 
 beforeEach(() => {
   localStorage.clear()
-  vi.mocked(useAuth).mockReturnValue({ user: null, isLoggedIn: false })
+  vi.mocked(useAuth).mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
 })
 
 describe('useMusicHints', () => {
@@ -29,8 +29,10 @@ describe('useMusicHints', () => {
 
   it('persists dismissal in localStorage for logged-in users', () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 'user-1', firstName: 'Test', lastName: 'User', email: 'test@example.com' },
-      isLoggedIn: true,
+      user: { id: 'user-1', name: 'Test User' },
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn(),
     })
 
     const { result } = renderHook(() => useMusicHints())

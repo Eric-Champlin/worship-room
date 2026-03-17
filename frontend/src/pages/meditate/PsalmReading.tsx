@@ -15,8 +15,8 @@ import type { PsalmInfo, Psalm119Section } from '@/types/daily-experience'
 type Screen = 'selection' | 'reading' | 'section-selection' | 'complete'
 
 export function PsalmReading() {
-  const { isLoggedIn } = useAuth()
-  if (!isLoggedIn) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/daily?tab=meditate" replace state={{ authRedirectMessage: 'Sign in to access guided meditations.' }} />
   return <PsalmReadingContent />
 }
 

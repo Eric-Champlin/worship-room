@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { BedtimeStoriesGrid } from '../BedtimeStoriesGrid'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: false }),
+  useAuth: () => ({ user: null, isAuthenticated: false }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({

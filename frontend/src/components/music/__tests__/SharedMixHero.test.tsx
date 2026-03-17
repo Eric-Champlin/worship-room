@@ -7,7 +7,7 @@ import type { SharedMixData } from '@/types/storage'
 // ── Mocks ────────────────────────────────────────────────────────────
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: false }),
+  useAuth: () => ({ user: null, isAuthenticated: false }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({

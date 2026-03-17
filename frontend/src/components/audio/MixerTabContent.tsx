@@ -9,7 +9,7 @@ import { MixerSoundRow } from './MixerSoundRow'
 export function MixerTabContent() {
   const { activeSounds } = useAudioState()
   const dispatch = useAudioDispatch()
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const navigate = useNavigate()
 
@@ -22,7 +22,7 @@ export function MixerTabContent() {
   }
 
   function handleAddSoundClick() {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to play ambient sounds')
       return
     }

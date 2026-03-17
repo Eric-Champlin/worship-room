@@ -1,10 +1,42 @@
 import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Navbar } from '@/components/Navbar'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { useAuth } from '@/hooks/useAuth'
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn(() => ({
+    user: null,
+    isAuthenticated: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+  })),
+}))
+
+const mockUseAuth = vi.mocked(useAuth)
+const mockLogout = vi.fn()
+
+beforeEach(() => {
+  mockUseAuth.mockReturnValue({
+    user: null,
+    isAuthenticated: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+  })
+  mockLogout.mockClear()
+})
+
+function setLoggedIn() {
+  mockUseAuth.mockReturnValue({
+    user: { name: 'Eric', id: 'test-id' },
+    isAuthenticated: true,
+    login: vi.fn(),
+    logout: mockLogout,
+  })
+}
 
 function renderNavbar(initialRoute = '/') {
   return render(
@@ -270,6 +302,187 @@ describe('Navbar', () => {
       renderNavbar('/prayer-wall')
       const link = screen.getByRole('link', { name: 'Prayer Wall' })
       expect(link).toHaveAttribute('aria-current', 'page')
+    })
+  })
+
+  describe('Logged-in desktop state', () => {
+    it('hides Log In and Get Started when logged in', () => {
+      setLoggedIn()
+      renderNavbar()
+      expect(screen.queryByText('Log In')).not.toBeInTheDocument()
+      expect(screen.queryByText('Get Started')).not.toBeInTheDocument()
+    })
+
+    it('shows notification bell when logged in', () => {
+      setLoggedIn()
+      renderNavbar()
+      expect(screen.getByLabelText('Notifications')).toBeInTheDocument()
+    })
+
+    it('bell not visible when logged out', () => {
+      renderNavbar()
+      expect(screen.queryByLabelText('Notifications')).not.toBeInTheDocument()
+    })
+
+    it('shows avatar with initial when logged in', () => {
+      setLoggedIn()
+      renderNavbar()
+      const avatar = screen.getByLabelText('User menu')
+      expect(avatar).toBeInTheDocument()
+      expect(avatar.textContent).toBe('E')
+    })
+
+    it('avatar not visible when logged out', () => {
+      renderNavbar()
+      expect(screen.queryByLabelText('User menu')).not.toBeInTheDocument()
+    })
+
+    it('avatar dropdown opens on click', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByLabelText('User menu'))
+      expect(screen.getByRole('menu')).toBeInTheDocument()
+    })
+
+    it('avatar dropdown has all menu items', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByLabelText('User menu'))
+
+      const menu = screen.getByRole('menu')
+      expect(within(menu).getByText('Dashboard')).toBeInTheDocument()
+      expect(within(menu).getByText('Friends')).toBeInTheDocument()
+      expect(within(menu).getByText('My Journal Entries')).toBeInTheDocument()
+      expect(within(menu).getByText('My Prayer Requests')).toBeInTheDocument()
+      expect(within(menu).getByText('My Favorites')).toBeInTheDocument()
+      expect(within(menu).getByText('Mood Insights')).toBeInTheDocument()
+      expect(within(menu).getByText('Settings')).toBeInTheDocument()
+      expect(within(menu).getByText('Log Out')).toBeInTheDocument()
+    })
+
+    it('dropdown closes on outside click', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByLabelText('User menu'))
+      expect(screen.getByRole('menu')).toBeInTheDocument()
+
+      await user.click(document.body)
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    })
+
+    it('dropdown closes on Escape', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByLabelText('User menu'))
+      expect(screen.getByRole('menu')).toBeInTheDocument()
+
+      await user.keyboard('{Escape}')
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    })
+
+    it('Log Out calls logout', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByLabelText('User menu'))
+      await user.click(within(screen.getByRole('menu')).getByText('Log Out'))
+      expect(mockLogout).toHaveBeenCalled()
+    })
+
+    it('avatar dropdown has aria-haspopup', () => {
+      setLoggedIn()
+      renderNavbar()
+      const avatar = screen.getByLabelText('User menu')
+      expect(avatar).toHaveAttribute('aria-haspopup', 'menu')
+    })
+  })
+
+  describe('Logged-in mobile drawer', () => {
+    it('shows avatar and name when logged in', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(within(menu).getByText('Eric')).toBeInTheDocument()
+    })
+
+    it('shows logged-in nav items', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(within(menu).getByText('Dashboard')).toBeInTheDocument()
+      expect(within(menu).getByText('Friends')).toBeInTheDocument()
+      expect(within(menu).getByText('Settings')).toBeInTheDocument()
+    })
+
+    it('shows Notifications item when logged in', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(within(menu).getByText('Notifications')).toBeInTheDocument()
+    })
+
+    it('shows Log Out when logged in', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(within(menu).getByText('Log Out')).toBeInTheDocument()
+    })
+
+    it('shows Log In / Get Started when logged out', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(within(menu).getByText('Log In')).toBeInTheDocument()
+      expect(within(menu).getByText('Get Started')).toBeInTheDocument()
+    })
+
+    it('shows Mood Insights after Friends in nav order', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      const links = within(menu).getAllByRole('link')
+      const labels = links.map((l) => l.textContent)
+      const friendsIdx = labels.indexOf('Friends')
+      const insightsIdx = labels.indexOf('Mood Insights')
+      expect(friendsIdx).toBeGreaterThan(-1)
+      expect(insightsIdx).toBe(friendsIdx + 1)
+    })
+
+    it('uses dark theme when logged in', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(menu.className).toContain('bg-hero-mid')
+      expect(menu.className).toContain('border-white/15')
     })
   })
 })

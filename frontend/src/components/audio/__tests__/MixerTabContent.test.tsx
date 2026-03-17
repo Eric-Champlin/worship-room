@@ -10,7 +10,7 @@ import type { AudioState } from '@/types/audio'
 const mockDispatch = vi.fn()
 const mockOpenAuthModal = vi.fn()
 let mockActiveSounds: AudioState['activeSounds'] = []
-let mockIsLoggedIn = true
+let mockIsAuthenticated = true
 
 vi.mock('../AudioProvider', () => ({
   useAudioState: () => ({
@@ -30,7 +30,7 @@ vi.mock('../AudioProvider', () => ({
 }))
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -43,7 +43,7 @@ describe('MixerTabContent', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockActiveSounds = []
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
   })
 
   it('shows empty state message when no active sounds', () => {
@@ -99,7 +99,7 @@ describe('MixerTabContent', () => {
   })
 
   it('"+ Add Sound" button triggers auth modal when logged out', async () => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockActiveSounds = [{ soundId: 'gentle-rain', volume: 0.6, label: 'Gentle Rain' }]
     const user = userEvent.setup()
     render(<MemoryRouter><MixerTabContent /></MemoryRouter>)

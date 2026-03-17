@@ -39,7 +39,7 @@ function isScriptureReading(
 }
 
 export function useForegroundPlayer(): UseForegroundPlayerReturn {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const audioState = useAudioState()
   const dispatch = useAudioDispatch()
@@ -113,7 +113,7 @@ export function useForegroundPlayer(): UseForegroundPlayerReturn {
   const startSession = useCallback(
     (content: ScriptureReading | BedtimeStory) => {
       // 1. Auth gate
-      if (!isLoggedIn) {
+      if (!isAuthenticated) {
         authModal?.openAuthModal('Sign in to listen to sleep content')
         return
       }
@@ -141,7 +141,7 @@ export function useForegroundPlayer(): UseForegroundPlayerReturn {
       // 4. No existing foreground — play directly
       playContent(content)
     },
-    [isLoggedIn, authModal, audioState.foregroundContent, audioState.activeRoutine, playContent],
+    [isAuthenticated, authModal, audioState.foregroundContent, audioState.activeRoutine, playContent],
   )
 
   const confirmRoutineInterrupt = useCallback(() => {

@@ -5,10 +5,10 @@ import { PersonalizationSection } from '../PersonalizationSection'
 
 // ── Mocks ────────────────────────────────────────────────────────────
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 let mockFavorites: { type: 'scene' | 'sleep_session' | 'custom_mix'; targetId: string; createdAt: string }[] = []
@@ -118,7 +118,7 @@ function renderSection() {
 
 describe('PersonalizationSection', () => {
   beforeEach(() => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockFavorites = []
     mockMixes = []
     mockLastSession = null
@@ -131,13 +131,13 @@ describe('PersonalizationSection', () => {
   })
 
   it('hidden when logged in but no data', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { container } = renderSection()
     expect(container.innerHTML).toBe('')
   })
 
   it('renders "Continue Listening" with last session', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockLastSession = {
       id: '1',
       contentType: 'scene',
@@ -154,7 +154,7 @@ describe('PersonalizationSection', () => {
   })
 
   it('renders "Your Favorites" with favorited items', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockFavorites = [
       { type: 'scene', targetId: 'morning-mist', createdAt: new Date().toISOString() },
     ]
@@ -166,7 +166,7 @@ describe('PersonalizationSection', () => {
   })
 
   it('renders "Your Saved Mixes" with saved mixes', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockMixes = [
       {
         id: 'mix-1',
@@ -187,7 +187,7 @@ describe('PersonalizationSection', () => {
   })
 
   it('has correct aria-label', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockLastSession = {
       id: '1',
       contentType: 'scene',
@@ -204,7 +204,7 @@ describe('PersonalizationSection', () => {
   })
 
   it('renders "Your Routines" for logged-in user with routines', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockUserRoutines = [
       {
         id: 'r1',
@@ -227,7 +227,7 @@ describe('PersonalizationSection', () => {
   })
 
   it('hides "Your Routines" for logged-out user', () => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockUserRoutines = [
       {
         id: 'r1',

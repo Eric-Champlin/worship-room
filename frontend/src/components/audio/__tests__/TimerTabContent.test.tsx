@@ -12,7 +12,7 @@ const mockCancel = vi.fn()
 const mockShowToast = vi.fn()
 const mockOpenAuthModal = vi.fn()
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockControls: Record<string, unknown> = {}
 
 vi.mock('../AudioProvider', () => ({
@@ -20,7 +20,7 @@ vi.mock('../AudioProvider', () => ({
 }))
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ isLoggedIn: mockIsLoggedIn, user: null }),
+  useAuth: () => ({ isAuthenticated: mockIsAuthenticated, user: null }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -70,7 +70,7 @@ function activeControls(overrides: Record<string, unknown> = {}) {
 describe('TimerTabContent', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockControls = inactiveControls()
   })
 
@@ -181,7 +181,7 @@ describe('TimerTabContent', () => {
 
   describe('Auth gating', () => {
     it('triggers auth modal when logged out', async () => {
-      mockIsLoggedIn = false
+      mockIsAuthenticated = false
       const user = userEvent.setup()
       render(<TimerTabContent />)
 
@@ -194,7 +194,7 @@ describe('TimerTabContent', () => {
     })
 
     it('calls start when logged in', async () => {
-      mockIsLoggedIn = true
+      mockIsAuthenticated = true
       const user = userEvent.setup()
       render(<TimerTabContent />)
 

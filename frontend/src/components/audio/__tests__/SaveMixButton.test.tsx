@@ -8,13 +8,13 @@ import { SaveMixButton } from '../SaveMixButton'
 const mockOpenAuthModal = vi.fn()
 const mockShowToast = vi.fn()
 const mockSaveMix = vi.fn()
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 
 let mockActiveSounds: { soundId: string; volume: number; label: string }[] = []
 let mockCurrentSceneName: string | null = null
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -80,7 +80,7 @@ vi.mock('@/data/sound-catalog', () => ({
 describe('SaveMixButton', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockActiveSounds = []
     mockCurrentSceneName = null
   })
@@ -135,7 +135,7 @@ describe('SaveMixButton', () => {
   })
 
   it('shows inline input when clicked (logged in)', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveSounds = [
       { soundId: 'gentle-rain', volume: 0.7, label: 'Gentle Rain' },
     ]
@@ -148,7 +148,7 @@ describe('SaveMixButton', () => {
   })
 
   it('pre-populates name from scene name', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveSounds = [
       { soundId: 'gentle-rain', volume: 0.3, label: 'Gentle Rain' },
       { soundId: 'birdsong', volume: 0.5, label: 'Birdsong' },
@@ -165,7 +165,7 @@ describe('SaveMixButton', () => {
   })
 
   it('pre-populates name from sound names when no scene', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveSounds = [
       { soundId: 'gentle-rain', volume: 0.7, label: 'Gentle Rain' },
       { soundId: 'fireplace', volume: 0.5, label: 'Fireplace' },
@@ -181,7 +181,7 @@ describe('SaveMixButton', () => {
   })
 
   it('limits name to 50 characters', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveSounds = [
       { soundId: 'gentle-rain', volume: 0.7, label: 'Gentle Rain' },
     ]
@@ -195,7 +195,7 @@ describe('SaveMixButton', () => {
   })
 
   it('calls saveMix and shows toast on save', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveSounds = [
       { soundId: 'gentle-rain', volume: 0.7, label: 'Gentle Rain' },
     ]
@@ -214,7 +214,7 @@ describe('SaveMixButton', () => {
   })
 
   it('cancel hides the input', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveSounds = [
       { soundId: 'gentle-rain', volume: 0.7, label: 'Gentle Rain' },
     ]

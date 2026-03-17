@@ -38,7 +38,7 @@ function DailyHubContent() {
   const rawTab = searchParams.get('tab')
   const activeTab: TabId = isValidTab(rawTab) ? rawTab : 'pray'
 
-  const { user, isLoggedIn } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const { isPrayComplete, isJournalComplete, isMeditateComplete } =
     useCompletionTracking()
 
@@ -75,7 +75,7 @@ function DailyHubContent() {
   )
 
   const greeting = getGreeting()
-  const displayName = user ? `${greeting}, ${user.firstName}!` : `${greeting}!`
+  const displayName = user ? `${greeting}, ${user.name}!` : `${greeting}!`
 
   const completionMap: Record<string, boolean> = {
     pray: isPrayComplete,
@@ -204,7 +204,7 @@ function DailyHubContent() {
                   >
                     <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                     {tab.label}
-                    {isLoggedIn && isComplete && (
+                    {isAuthenticated && isComplete && (
                       <>
                         <Check
                           className="h-4 w-4 text-success"

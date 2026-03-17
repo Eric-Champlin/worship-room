@@ -18,7 +18,7 @@ export function FavoriteButton({
   targetName,
   className,
 }: FavoriteButtonProps) {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { isFavorite, toggleFavorite } = useFavorites()
   const [bouncing, setBouncing] = useState(false)
   const [announcement, setAnnouncement] = useState('')
@@ -37,7 +37,7 @@ export function FavoriteButton({
 
     toggleFavorite(type, targetId)
 
-    if (isLoggedIn) {
+    if (isAuthenticated) {
       setBouncing(true)
       clearTimeout(bounceTimerRef.current)
       bounceTimerRef.current = setTimeout(() => setBouncing(false), 100)
@@ -52,7 +52,7 @@ export function FavoriteButton({
   }
 
   // Logged-out: visible but triggers auth modal on click
-  if (!isLoggedIn) {
+  if (!isAuthenticated) {
     return (
       <button
         type="button"

@@ -17,7 +17,7 @@ const mockEngine = {
   isBufferCached: vi.fn().mockReturnValue(false),
 }
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockActiveSounds: AudioState['activeSounds'] = []
 
 let mockSearchState = {
@@ -37,7 +37,7 @@ let mockSearchState = {
 }
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -108,7 +108,7 @@ vi.mock('@/hooks/useAmbientSearch', () => ({
 describe('AmbientBrowser Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockActiveSounds = []
     mockSearchState = {
       searchQuery: '',
@@ -123,7 +123,7 @@ describe('AmbientBrowser Integration', () => {
   })
 
   it('shows auth modal when logged-out user clicks a scene', () => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     render(<AmbientBrowser />)
 
     const gardenScene = SCENE_PRESETS[0]
@@ -138,7 +138,7 @@ describe('AmbientBrowser Integration', () => {
 
   it('loads scene sounds at preset volumes when logged in', async () => {
     vi.useFakeTimers()
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     render(<AmbientBrowser />)
 
     const gardenScene = SCENE_PRESETS[0]
@@ -178,7 +178,7 @@ describe('AmbientBrowser Integration', () => {
 
   it('scene name is set after loading', async () => {
     vi.useFakeTimers()
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     render(<AmbientBrowser />)
 
     const scene = SCENE_PRESETS[1] // Still Waters

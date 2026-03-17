@@ -22,11 +22,11 @@ const mockEngine = {
   getForegroundElement: vi.fn().mockReturnValue(null),
 }
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockAudioState: Partial<AudioState> = {}
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -89,7 +89,7 @@ const TEST_ROUTINE: RoutineDefinition = {
 
 describe('useRoutinePlayer', () => {
   beforeEach(() => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockAudioState = {}
     vi.clearAllMocks()
   })
@@ -108,7 +108,7 @@ describe('useRoutinePlayer', () => {
   })
 
   it('dispatches START_ROUTINE when logged in', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
 
     const { result } = renderHook(() => useRoutinePlayer())
 
@@ -129,7 +129,7 @@ describe('useRoutinePlayer', () => {
   })
 
   it('endRoutine dispatches END_ROUTINE', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockAudioState = {
       activeRoutine: {
         routineId: 'r1',
@@ -153,7 +153,7 @@ describe('useRoutinePlayer', () => {
   })
 
   it('skipStep calls advanceToNextStep', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockAudioState = {
       activeRoutine: {
         routineId: 'r1',
@@ -201,7 +201,7 @@ describe('useRoutinePlayer', () => {
   })
 
   it('START_ROUTINE payload maps step labels and icons correctly', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
 
     const { result } = renderHook(() => useRoutinePlayer())
 

@@ -15,7 +15,7 @@ const mockEngine = {
   isBufferCached: vi.fn().mockReturnValue(false),
 }
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 let mockActiveSounds: AudioState['activeSounds'] = []
 let mockIsPlaying = false
 let mockCurrentSceneName: string | null = null
@@ -23,7 +23,7 @@ let mockForegroundContent: AudioState['foregroundContent'] = null
 let mockActiveRoutine: AudioState['activeRoutine'] = null
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -84,7 +84,7 @@ describe('useScenePlayer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockActiveSounds = []
     mockIsPlaying = false
     mockCurrentSceneName = null
@@ -98,7 +98,7 @@ describe('useScenePlayer', () => {
   })
 
   it('opens auth modal when user is not logged in', () => {
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     const { result } = renderHook(() => useScenePlayer())
 
     act(() => {
@@ -110,7 +110,7 @@ describe('useScenePlayer', () => {
   })
 
   it('loads scene sounds at preset volumes (not default 0.6)', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useScenePlayer())
 
     act(() => {
@@ -135,7 +135,7 @@ describe('useScenePlayer', () => {
   })
 
   it('dispatches SET_SCENE_NAME with scene name', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useScenePlayer())
 
     act(() => {
@@ -151,7 +151,7 @@ describe('useScenePlayer', () => {
   })
 
   it('undo is available for 5 seconds after scene switch', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     // Simulate existing active sounds (a scene switch scenario)
     mockActiveSounds = [
       { soundId: 'gentle-wind', volume: 0.5, label: 'Gentle Wind' },
@@ -179,7 +179,7 @@ describe('useScenePlayer', () => {
   })
 
   it('undo restores previous mix and scene name', async () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockCurrentSceneName = 'Still Waters'
     mockActiveSounds = [
       { soundId: 'gentle-wind', volume: 0.5, label: 'Gentle Wind' },
@@ -231,7 +231,7 @@ describe('useScenePlayer', () => {
   })
 
   it('sets pendingRoutineInterrupt when routine is active', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockActiveRoutine = {
       routineId: 'r1',
       routineName: 'Test Routine',

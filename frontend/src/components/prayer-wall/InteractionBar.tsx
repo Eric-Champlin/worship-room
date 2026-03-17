@@ -26,7 +26,7 @@ export function InteractionBar({
   onToggleBookmark,
   isCommentsOpen,
 }: InteractionBarProps) {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const isPraying = reactions?.isPraying ?? false
   const isBookmarked = reactions?.isBookmarked ?? false
@@ -82,7 +82,7 @@ export function InteractionBar({
       </button>
 
       {/* Bookmark button */}
-      {isLoggedIn ? (
+      {isAuthenticated ? (
         <button
           type="button"
           onClick={onToggleBookmark}

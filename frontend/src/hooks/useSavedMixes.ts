@@ -6,23 +6,23 @@ import { storageService, StorageQuotaError } from '@/services/storage-service'
 import type { SavedMix } from '@/types/storage'
 
 export function useSavedMixes() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { showToast } = useToast()
   const [mixes, setMixes] = useState<SavedMix[]>([])
 
   useEffect(() => {
-    storageService.setAuthState(isLoggedIn)
-    if (isLoggedIn) {
+    storageService.setAuthState(isAuthenticated)
+    if (isAuthenticated) {
       setMixes(storageService.getSavedMixes())
     } else {
       setMixes([])
     }
-  }, [isLoggedIn])
+  }, [isAuthenticated])
 
   const saveMix = useCallback(
     (name: string, sounds: { soundId: string; volume: number }[]) => {
-      if (!isLoggedIn) {
+      if (!isAuthenticated) {
         authModal?.openAuthModal('Sign in to save your mix')
         return null
       }
@@ -38,12 +38,12 @@ export function useSavedMixes() {
         return null
       }
     },
-    [isLoggedIn, authModal, showToast],
+    [isAuthenticated, authModal, showToast],
   )
 
   const updateName = useCallback(
     (id: string, name: string) => {
-      if (!isLoggedIn) return
+      if (!isAuthenticated) return
 
       try {
         storageService.updateMixName(id, name)
@@ -54,21 +54,21 @@ export function useSavedMixes() {
         }
       }
     },
-    [isLoggedIn, showToast],
+    [isAuthenticated, showToast],
   )
 
   const deleteMix = useCallback(
     (id: string) => {
-      if (!isLoggedIn) return
+      if (!isAuthenticated) return
       storageService.deleteMix(id)
       setMixes(storageService.getSavedMixes())
     },
-    [isLoggedIn],
+    [isAuthenticated],
   )
 
   const duplicateMix = useCallback(
     (id: string) => {
-      if (!isLoggedIn) return null
+      if (!isAuthenticated) return null
 
       try {
         const copy = storageService.duplicateMix(id)
@@ -83,7 +83,7 @@ export function useSavedMixes() {
         return null
       }
     },
-    [isLoggedIn, showToast],
+    [isAuthenticated, showToast],
   )
 
   return { mixes, saveMix, updateName, deleteMix, duplicateMix }

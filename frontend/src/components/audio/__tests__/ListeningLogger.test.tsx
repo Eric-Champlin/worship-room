@@ -4,14 +4,14 @@ import { ListeningLogger } from '../ListeningLogger'
 
 // ── Mocks ────────────────────────────────────────────────────────────
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 const mockLogSession = vi.fn()
 let mockIsPlaying = false
 let mockCurrentSceneName: string | null = null
 let mockCurrentSceneId: string | null = null
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 vi.mock('@/hooks/useListeningHistory', () => ({
@@ -43,7 +43,7 @@ vi.mock('../AudioProvider', () => ({
 describe('ListeningLogger', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
     mockIsPlaying = false
     mockCurrentSceneName = null
     mockCurrentSceneId = null
@@ -60,7 +60,7 @@ describe('ListeningLogger', () => {
   })
 
   it('creates session when playback starts and logs when stopped', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockIsPlaying = false
 
     const { rerender } = render(<ListeningLogger />)
@@ -88,7 +88,7 @@ describe('ListeningLogger', () => {
   })
 
   it('does not log sessions shorter than 5 seconds', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockIsPlaying = false
 
     const { rerender } = render(<ListeningLogger />)
@@ -108,7 +108,7 @@ describe('ListeningLogger', () => {
   })
 
   it('detects scene content type', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     mockIsPlaying = false
     mockCurrentSceneName = 'Morning Mist'
     mockCurrentSceneId = 'morning-mist'

@@ -20,7 +20,7 @@ import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 const PRAYERS_PER_PAGE = 20
 
 function PrayerWallContent() {
-  const { isLoggedIn, user } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { showToast } = useToast()
   const authModal = useAuthModal()
   const openAuthModal = authModal?.openAuthModal
@@ -42,12 +42,12 @@ function PrayerWallContent() {
 
   const handleComposerSubmit = useCallback(
     (content: string, isAnonymous: boolean) => {
-      if (!isLoggedIn) return
+      if (!isAuthenticated) return
 
       const newPrayer: PrayerRequest = {
         id: `prayer-new-${Date.now()}`,
         userId: isAnonymous ? null : (user?.id ?? null),
-        authorName: isAnonymous ? 'Anonymous' : (user?.firstName ?? 'You'),
+        authorName: isAnonymous ? 'Anonymous' : (user?.name ?? 'You'),
         authorAvatarUrl: null,
         isAnonymous,
         content,
@@ -63,7 +63,7 @@ function PrayerWallContent() {
       setComposerOpen(false)
       showToast('Your prayer has been shared.')
     },
-    [user, isLoggedIn, showToast],
+    [user, isAuthenticated, showToast],
   )
 
   const handleTogglePraying = useCallback(
@@ -85,12 +85,12 @@ function PrayerWallContent() {
     // and refresh comments from the API response.
     // Crisis detection MUST run on the backend. See .claude/rules/01-ai-safety.md.
     (prayerId: string, content: string) => {
-      if (!isLoggedIn) return
+      if (!isAuthenticated) return
       const newComment: PrayerComment = {
         id: `comment-local-${Date.now()}`,
         prayerId,
         userId: user?.id ?? 'anonymous',
-        authorName: user?.firstName ?? 'You',
+        authorName: user?.name ?? 'You',
         authorAvatarUrl: null,
         content,
         createdAt: new Date().toISOString(),
@@ -112,7 +112,7 @@ function PrayerWallContent() {
       )
       showToast('Comment posted.')
     },
-    [isLoggedIn, showToast, user],
+    [isAuthenticated, showToast, user],
   )
 
   return (
@@ -126,7 +126,7 @@ function PrayerWallContent() {
       <Navbar transparent />
       <PrayerWallHero
         action={
-          isLoggedIn ? (
+          isAuthenticated ? (
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
               <button
                 type="button"

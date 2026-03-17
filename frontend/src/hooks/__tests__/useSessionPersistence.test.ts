@@ -6,10 +6,10 @@ import type { SessionState } from '@/types/storage'
 
 // ── Mocks ────────────────────────────────────────────────────────────
 
-let mockIsLoggedIn = false
+let mockIsAuthenticated = false
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isLoggedIn: mockIsLoggedIn }),
+  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
 }))
 
 // ── Test data ────────────────────────────────────────────────────────
@@ -36,18 +36,18 @@ describe('useSessionPersistence', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
   })
 
   it('hasValidSession is false when no session', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useSessionPersistence())
     expect(result.current.hasValidSession).toBe(false)
     expect(result.current.sessionState).toBeNull()
   })
 
   it('hasValidSession is false when session > 24h old', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     storageService.saveSessionState(EXPIRED_STATE)
 
     const { result } = renderHook(() => useSessionPersistence())
@@ -55,7 +55,7 @@ describe('useSessionPersistence', () => {
   })
 
   it('auto-clears expired session on mount', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     storageService.saveSessionState(EXPIRED_STATE)
 
     renderHook(() => useSessionPersistence())
@@ -65,7 +65,7 @@ describe('useSessionPersistence', () => {
   })
 
   it('loads valid session on mount when logged in', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     storageService.saveSessionState(VALID_STATE)
 
     const { result } = renderHook(() => useSessionPersistence())
@@ -75,7 +75,7 @@ describe('useSessionPersistence', () => {
 
   it('returns null session when logged out', () => {
     storageService.saveSessionState(VALID_STATE)
-    mockIsLoggedIn = false
+    mockIsAuthenticated = false
 
     const { result } = renderHook(() => useSessionPersistence())
     expect(result.current.hasValidSession).toBe(false)
@@ -83,7 +83,7 @@ describe('useSessionPersistence', () => {
   })
 
   it('saveSession persists state', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     const { result } = renderHook(() => useSessionPersistence())
 
     act(() => {
@@ -95,7 +95,7 @@ describe('useSessionPersistence', () => {
   })
 
   it('clearSession removes state', () => {
-    mockIsLoggedIn = true
+    mockIsAuthenticated = true
     storageService.saveSessionState(VALID_STATE)
 
     const { result } = renderHook(() => useSessionPersistence())

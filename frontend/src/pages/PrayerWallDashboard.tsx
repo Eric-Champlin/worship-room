@@ -41,7 +41,7 @@ const NOTIFICATION_TYPES = [
 ]
 
 function DashboardContent() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { showToast } = useToast()
   const [activeTab, setActiveTab] = useState<DashboardTab>('prayers')
 
@@ -104,7 +104,7 @@ function DashboardContent() {
     [showToast],
   )
 
-  if (!isLoggedIn) {
+  if (!isAuthenticated) {
     return <Navigate to="/login?returnTo=/prayer-wall/dashboard" replace />
   }
 

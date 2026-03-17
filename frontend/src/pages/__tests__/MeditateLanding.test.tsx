@@ -13,7 +13,7 @@ vi.mock('react-router-dom', async () => {
 })
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({ user: null, isLoggedIn: true })),
+  useAuth: vi.fn(() => ({ user: null, isAuthenticated: true })),
 }))
 
 const { useAuth } = await import('@/hooks/useAuth')
@@ -23,7 +23,7 @@ beforeEach(() => {
   localStorage.clear()
   vi.resetAllMocks()
   mockNavigate.mockReset()
-  mockUseAuth.mockReturnValue({ user: null, isLoggedIn: true })
+  mockUseAuth.mockReturnValue({ user: null, isAuthenticated: true, login: vi.fn(), logout: vi.fn() })
   vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
     matches: false,
     media: query,
@@ -76,7 +76,7 @@ describe('MeditateTabContent', () => {
   })
 
   it('logged-out user clicking card opens auth modal', async () => {
-    mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+    mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
     const user = userEvent.setup()
     renderComponent()
     await user.click(screen.getByText('Breathing Exercise'))
@@ -96,7 +96,7 @@ describe('MeditateTabContent', () => {
   })
 
   it('does not show checkmarks when logged out', () => {
-    mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false })
+    mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
     renderComponent()
     const checkmarks = screen.queryAllByText(/completed/i)
     expect(checkmarks).toHaveLength(0)

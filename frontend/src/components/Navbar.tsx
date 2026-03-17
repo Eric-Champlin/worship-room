@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
-import { ChevronDown, Menu, X } from 'lucide-react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { Bell, ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { useAuth } from '@/hooks/useAuth'
 
 const NAV_LINKS = [
   { label: 'Daily Hub', to: '/daily' },
@@ -302,6 +303,131 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
   )
 }
 
+const AVATAR_MENU_LINKS = [
+  { label: 'Dashboard', to: '/' },
+  { label: 'Friends', to: '/friends' },
+  { label: 'My Journal Entries', to: '/journal/my-entries' },
+  { label: 'My Prayer Requests', to: '/prayer-wall/dashboard' },
+  { label: 'My Favorites', to: '/favorites' },
+  { label: 'Mood Insights', to: '/insights' },
+  { label: 'Settings', to: '/settings' },
+] as const
+
+// Mobile drawer uses a different order: Mood Insights right after Friends per spec
+const MOBILE_DRAWER_EXTRA_LINKS = [
+  { label: 'Friends', to: '/friends' },
+  { label: 'Mood Insights', to: '/insights' },
+  { label: 'My Journal Entries', to: '/journal/my-entries' },
+  { label: 'My Prayer Requests', to: '/prayer-wall/dashboard' },
+  { label: 'My Favorites', to: '/favorites' },
+  { label: 'Settings', to: '/settings' },
+] as const
+
+function DesktopUserActions() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const [isOpen, setIsOpen] = useState(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const location = useLocation()
+
+  // Close on route change
+  useEffect(() => {
+    setIsOpen(false)
+  }, [location.pathname, location.search])
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false)
+        triggerRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
+
+  // Close on outside click
+  useEffect(() => {
+    if (!isOpen) return
+    const handleMouseDown = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [isOpen])
+
+  const handleLogout = () => {
+    logout()
+    setIsOpen(false)
+    navigate('/')
+  }
+
+  const initial = user?.name.charAt(0).toUpperCase() ?? '?'
+
+  return (
+    <div className="hidden items-center gap-3 lg:flex" ref={wrapperRef}>
+      <button
+        type="button"
+        aria-label="Notifications"
+        className="rounded-lg p-1.5 text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        <Bell className="h-5 w-5" aria-hidden="true" />
+      </button>
+
+      <div className="relative">
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-haspopup="menu"
+          aria-expanded={isOpen}
+          aria-controls={isOpen ? 'user-menu-dropdown' : undefined}
+          aria-label="User menu"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          {initial}
+        </button>
+
+        {isOpen && (
+          <div className="absolute right-0 top-full z-50 min-w-[200px] pt-2">
+            <div
+              id="user-menu-dropdown"
+              role="menu"
+              className="animate-dropdown-in rounded-xl border border-white/15 bg-hero-mid py-1.5 shadow-lg"
+            >
+              {AVATAR_MENU_LINKS.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  role="menuitem"
+                  onClick={() => setIsOpen(false)}
+                  className="flex min-h-[44px] items-center rounded px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <hr className="my-1 border-white/15" />
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleLogout}
+                className="flex w-full min-h-[44px] items-center rounded px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white"
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 interface MobileDrawerProps {
   isOpen: boolean
   onClose: () => void
@@ -309,6 +435,8 @@ interface MobileDrawerProps {
 
 function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
   const authModal = useAuthModal()
+  const { isAuthenticated, user, logout } = useAuth()
+  const navigate = useNavigate()
   const drawerRef = useRef<HTMLElement>(null)
 
   // Focus trap: keep Tab within the drawer while open
@@ -358,10 +486,45 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           ref={drawerRef}
           id="mobile-menu"
           aria-label="Mobile navigation"
-          className="relative z-50 mt-2 rounded-xl bg-white border border-gray-200 shadow-lg animate-dropdown-in lg:hidden"
+          className={cn(
+            'relative z-50 mt-2 rounded-xl shadow-lg animate-dropdown-in lg:hidden',
+            isAuthenticated
+              ? 'bg-hero-mid border border-white/15'
+              : 'bg-white border border-gray-200'
+          )}
         >
           <div className="flex flex-col px-4 py-4">
-            {/* Standalone links: Daily Hub, Prayer Wall */}
+            {/* Logged-in: avatar + name at top */}
+            {isAuthenticated && user && (
+              <div className="mb-3 flex items-center gap-3 px-3 pb-3 border-b border-white/15">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-sm font-medium text-white">{user.name}</span>
+              </div>
+            )}
+
+            {/* Logged-in: Dashboard link first */}
+            {isAuthenticated && (
+              <NavLink
+                to="/"
+                end
+                onClick={onClose}
+                className={({ isActive }) =>
+                  cn(
+                    'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                    isActive
+                      ? 'text-white'
+                      : 'text-white/80 hover:bg-white/5 hover:text-white'
+                  )
+                }
+              >
+                Dashboard
+              </NavLink>
+            )}
+
+            {/* Common nav links */}
             {NAV_LINKS.map((link, index) => (
               <NavLink
                 key={link.to}
@@ -371,10 +534,10 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   cn(
                     'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                    index > 0 && 'mt-2 border-t border-gray-100 pt-2',
-                    isActive
-                      ? 'text-[#2B0E4A]'
-                      : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
+                    (index > 0 || isAuthenticated) && (isAuthenticated ? 'mt-2 border-t border-white/15 pt-2' : 'mt-2 border-t border-gray-100 pt-2'),
+                    isAuthenticated
+                      ? isActive ? 'text-white' : 'text-white/80 hover:bg-white/5 hover:text-white'
+                      : isActive ? 'text-[#2B0E4A]' : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                   )
                 }
               >
@@ -384,13 +547,19 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
             {/* Local Support section */}
             <div
-              className="mt-2 border-t border-gray-100 pt-2"
+              className={cn(
+                'mt-2 pt-2',
+                isAuthenticated ? 'border-t border-white/15' : 'border-t border-gray-100'
+              )}
               role="group"
               aria-labelledby="local-support-heading"
             >
               <span
                 id="local-support-heading"
-                className="px-3 text-xs font-semibold uppercase tracking-wider text-primary/50"
+                className={cn(
+                  'px-3 text-xs font-semibold uppercase tracking-wider',
+                  isAuthenticated ? 'text-white/50' : 'text-primary/50'
+                )}
               >
                 Local Support
               </span>
@@ -403,9 +572,9 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                     cn(
                       'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                      isActive
-                        ? 'text-[#2B0E4A]'
-                        : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
+                      isAuthenticated
+                        ? isActive ? 'text-white' : 'text-white/80 hover:bg-white/5 hover:text-white'
+                        : isActive ? 'text-[#2B0E4A]' : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
                     )
                   }
                 >
@@ -414,28 +583,72 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               ))}
             </div>
 
-            {/* Auth actions */}
-            <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-4">
-              <button
-                type="button"
-                onClick={() => { authModal?.openAuthModal(undefined, 'login'); onClose() }}
-                className={cn(
-                  'relative min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                  "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                  'text-[#2B0E4A] after:scale-x-0 hover:after:scale-x-100'
-                )}
-              >
-                Log In
-              </button>
-              <button
-                type="button"
-                onClick={() => { authModal?.openAuthModal(undefined, 'register'); onClose() }}
-                className="min-h-[44px] flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              >
-                Get Started
-              </button>
-            </div>
+            {/* Logged-in: extra nav items */}
+            {isAuthenticated && (
+              <div className="mt-2 border-t border-white/15 pt-2">
+                {MOBILE_DRAWER_EXTRA_LINKS.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    onClick={onClose}
+                    className={({ isActive }) =>
+                      cn(
+                        'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                        isActive
+                          ? 'text-white'
+                          : 'text-white/80 hover:bg-white/5 hover:text-white'
+                      )
+                    }
+                  >
+                    {link.label}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+
+            {/* Bottom section: auth actions or log out */}
+            {isAuthenticated ? (
+              <div className="mt-4 flex flex-col gap-2 border-t border-white/15 pt-4">
+                <button
+                  type="button"
+                  aria-label="Notifications"
+                  className="min-h-[44px] flex items-center justify-center gap-2 rounded-md px-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <Bell className="h-4 w-4" aria-hidden="true" />
+                  Notifications
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { logout(); navigate('/'); onClose() }}
+                  className="min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  Log Out
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-4">
+                <button
+                  type="button"
+                  onClick={() => { authModal?.openAuthModal(undefined, 'login'); onClose() }}
+                  className={cn(
+                    'relative min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                    "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                    'text-[#2B0E4A] after:scale-x-0 hover:after:scale-x-100'
+                  )}
+                >
+                  Log In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { authModal?.openAuthModal(undefined, 'register'); onClose() }}
+                  className="min-h-[44px] flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  Get Started
+                </button>
+              </div>
+            )}
           </div>
         </nav>
       )}
@@ -448,6 +661,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ transparent = false }: NavbarProps) {
+  const { isAuthenticated } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const hamburgerRef = useRef<HTMLButtonElement>(null)
   const location = useLocation()
@@ -491,7 +705,11 @@ export function Navbar({ transparent = false }: NavbarProps) {
           <div className="flex items-center justify-between px-6 py-3">
             <NavbarLogo transparent />
             <DesktopNav transparent />
-            <DesktopAuthActions transparent />
+            {isAuthenticated ? (
+              <DesktopUserActions />
+            ) : (
+              <DesktopAuthActions transparent />
+            )}
 
             {/* Hamburger button — visible below lg */}
             <button

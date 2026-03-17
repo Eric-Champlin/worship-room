@@ -20,7 +20,7 @@ function buildSessionState(state: AudioState) {
 }
 
 export function SessionAutoSave() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { saveSession } = useSessionPersistence()
   const state = useAudioState()
   const intervalRef = useRef<ReturnType<typeof setInterval>>()
@@ -38,7 +38,7 @@ export function SessionAutoSave() {
 
   // Periodic auto-save when playing
   useEffect(() => {
-    if (!isLoggedIn || !state.isPlaying) {
+    if (!isAuthenticated || !state.isPlaying) {
       clearInterval(intervalRef.current)
       return
     }
@@ -48,11 +48,11 @@ export function SessionAutoSave() {
     }, AUTO_SAVE_INTERVAL_MS)
 
     return () => clearInterval(intervalRef.current)
-  }, [isLoggedIn, state.isPlaying])
+  }, [isAuthenticated, state.isPlaying])
 
   // Save on beforeunload
   useEffect(() => {
-    if (!isLoggedIn) return
+    if (!isAuthenticated) return
 
     function handleBeforeUnload() {
       if (stateRef.current.activeSounds.length > 0) {
@@ -62,15 +62,15 @@ export function SessionAutoSave() {
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [isLoggedIn])
+  }, [isAuthenticated])
 
   // Save on sleep timer complete
   useEffect(() => {
-    if (!isLoggedIn) return
+    if (!isAuthenticated) return
     if (state.sleepTimer?.phase === 'complete' && state.activeSounds.length > 0) {
       saveSession(buildSessionState(state))
     }
-  }, [isLoggedIn, state.sleepTimer?.phase, state.activeSounds.length, saveSession, state])
+  }, [isAuthenticated, state.sleepTimer?.phase, state.activeSounds.length, saveSession, state])
 
   return null
 }

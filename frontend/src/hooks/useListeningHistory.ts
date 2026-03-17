@@ -1,34 +1,35 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { storageService } from '@/services/storage-service'
 import type { ListeningSession } from '@/types/storage'
 
 export function useListeningHistory() {
-  const { isLoggedIn } = useAuth()
+  const { isAuthenticated } = useAuth()
 
-  // Sync auth state with storageService
-  storageService.setAuthState(isLoggedIn)
+  useEffect(() => {
+    storageService.setAuthState(isAuthenticated)
+  }, [isAuthenticated])
 
   const logSession = useCallback(
     (session: Omit<ListeningSession, 'id'>) => {
-      if (!isLoggedIn) return
+      if (!isAuthenticated) return
       storageService.logListeningSession(session)
     },
-    [isLoggedIn],
+    [isAuthenticated],
   )
 
   const getLastSession = useCallback((): ListeningSession | null => {
-    if (!isLoggedIn) return null
+    if (!isAuthenticated) return null
     const sessions = storageService.getRecentSessions(1)
     return sessions.length > 0 ? sessions[0] : null
-  }, [isLoggedIn])
+  }, [isAuthenticated])
 
   const getRecentSessions = useCallback(
     (limit: number): ListeningSession[] => {
-      if (!isLoggedIn) return []
+      if (!isAuthenticated) return []
       return storageService.getRecentSessions(limit)
     },
-    [isLoggedIn],
+    [isAuthenticated],
   )
 
   return { logSession, getLastSession, getRecentSessions }
