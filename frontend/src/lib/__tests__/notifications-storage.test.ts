@@ -10,23 +10,23 @@ describe('notifications-storage', () => {
   describe('getNotifications', () => {
     it('returns mock data and seeds when key is missing', () => {
       const result = getNotifications()
-      expect(result).toHaveLength(12)
+      expect(result).toHaveLength(13)
       expect(localStorage.getItem('wr_notifications')).not.toBeNull()
     })
 
     it('re-seeds on corrupt JSON', () => {
       localStorage.setItem('wr_notifications', '{invalid json!!')
       const result = getNotifications()
-      expect(result).toHaveLength(12)
+      expect(result).toHaveLength(13)
       // localStorage should be re-seeded
       const stored = JSON.parse(localStorage.getItem('wr_notifications')!)
-      expect(stored).toHaveLength(12)
+      expect(stored).toHaveLength(13)
     })
 
     it('re-seeds when stored value is not an array', () => {
       localStorage.setItem('wr_notifications', JSON.stringify({ notAnArray: true }))
       const result = getNotifications()
-      expect(result).toHaveLength(12)
+      expect(result).toHaveLength(13)
     })
 
     it('returns stored notifications when valid', () => {
@@ -72,10 +72,10 @@ describe('notifications-storage', () => {
   })
 
   describe('seedNotificationsIfNeeded', () => {
-    it('creates 12 mocks when key does not exist', () => {
+    it('creates 13 mocks when key does not exist', () => {
       seedNotificationsIfNeeded()
       const stored = JSON.parse(localStorage.getItem('wr_notifications')!)
-      expect(stored).toHaveLength(12)
+      expect(stored).toHaveLength(13)
     })
 
     it('does not overwrite existing data', () => {
@@ -87,10 +87,10 @@ describe('notifications-storage', () => {
   })
 
   describe('mock data integrity', () => {
-    it('has 5 unread and 7 read', () => {
+    it('has 6 unread and 7 read', () => {
       const unread = MOCK_NOTIFICATIONS.filter((n) => !n.read)
       const read = MOCK_NOTIFICATIONS.filter((n) => n.read)
-      expect(unread).toHaveLength(5)
+      expect(unread).toHaveLength(6)
       expect(read).toHaveLength(7)
     })
 
@@ -103,6 +103,7 @@ describe('notifications-storage', () => {
       expect(types.has('nudge')).toBe(true)
       expect(types.has('weekly_recap')).toBe(true)
       expect(types.has('level_up')).toBe(true)
+      expect(types.has('monthly_report')).toBe(true)
     })
 
     it('friend_request has actionData.friendRequestId', () => {

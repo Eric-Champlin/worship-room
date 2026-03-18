@@ -5,7 +5,7 @@ function daysAgo(days: number): string {
 }
 
 /**
- * 12 mock notifications spanning 7 days. 5 unread, 7 read.
+ * 13 mock notifications spanning 7 days. 6 unread, 7 read.
  * Names reference friends from friends-mock-data.ts.
  */
 export const MOCK_NOTIFICATIONS: NotificationEntry[] = [
@@ -25,6 +25,14 @@ export const MOCK_NOTIFICATIONS: NotificationEntry[] = [
     timestamp: daysAgo(0),
     actionUrl: '/friends',
     actionData: { friendRequestId: 'friend-david-r' },
+  },
+  {
+    id: 'notif-13',
+    type: 'monthly_report',
+    message: 'Your February Faith Journey is ready!',
+    read: false,
+    timestamp: daysAgo(0),
+    actionUrl: '/insights/monthly',
   },
   {
     id: 'notif-3',

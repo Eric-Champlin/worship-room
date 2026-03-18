@@ -1,10 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
+import { InsightCards } from '../InsightCards'
 import {
-  InsightCards,
-  getInsightsForDay,
-  INSIGHT_VARIANTS,
-} from '../InsightCards'
+  AI_INSIGHT_CARDS,
+  getDayOfYear,
+  getInsightCardsForDay,
+} from '@/constants/dashboard/ai-insights'
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -13,29 +14,50 @@ afterEach(() => {
 describe('InsightCards', () => {
   it('renders 4 insight cards with data', () => {
     const { container } = render(<InsightCards hasData={true} />)
-    // 4 cards in the grid
     const grid = container.querySelector('.lg\\:grid-cols-2')
     const cards = grid?.querySelectorAll('.rounded-2xl')
     expect(cards?.length).toBe(4)
   })
 
-  it('each card has icon, title, and text', () => {
+  it('displays category labels from expected set', () => {
     render(<InsightCards hasData={true} />)
-    expect(screen.getByText('Trend Summary')).toBeInTheDocument()
-    expect(screen.getByText('Activity Insight')).toBeInTheDocument()
-    expect(screen.getByText('Scripture Connection')).toBeInTheDocument()
-    expect(screen.getByText('Weekly Summary')).toBeInTheDocument()
+    const validLabels = ['Trend', 'Activity', 'Scripture', 'Recommendation']
+    const day = getDayOfYear()
+    const cards = getInsightCardsForDay(day, 4, 0)
+
+    // All rendered labels should be from the valid set
+    for (const card of cards) {
+      expect(validLabels).toContain(card.categoryLabel)
+    }
+
+    // Each label that appears should render at least once
+    const uniqueLabels = [...new Set(cards.map((c) => c.categoryLabel))]
+    for (const label of uniqueLabels) {
+      expect(screen.getAllByText(label).length).toBeGreaterThan(0)
+    }
   })
 
   it('rotation changes with different days', () => {
-    const day1Insights = getInsightsForDay(0)
-    const day2Insights = getInsightsForDay(1)
+    const day0Cards = getInsightCardsForDay(0, 4, 0)
+    const day1Cards = getInsightCardsForDay(1, 4, 0)
 
-    // At least one insight should have different text for different days
-    const hasDifference = day1Insights.some(
-      (insight, i) => insight.text !== day2Insights[i].text,
+    const hasDifference = day0Cards.some(
+      (card, i) => card.id !== day1Cards[i].id,
     )
     expect(hasDifference).toBe(true)
+  })
+
+  it('offset produces different cards than default', () => {
+    const dayOfYear = 100
+    const defaultCards = getInsightCardsForDay(dayOfYear, 4, 0)
+    const offsetCards = getInsightCardsForDay(dayOfYear, 3, 5)
+
+    // At least one card should differ
+    const defaultIds = defaultCards.map((c) => c.id)
+    const offsetIds = offsetCards.map((c) => c.id)
+    const allSame = offsetIds.every((id) => defaultIds.includes(id))
+    // With offset=5 and count=3 vs offset=0 and count=4, they should differ
+    expect(allSame).toBe(false)
   })
 
   it('shows empty state when no entries', () => {
@@ -58,17 +80,26 @@ describe('InsightCards', () => {
     expect(grid).toBeInTheDocument()
   })
 
-  it('text tone is always encouraging', () => {
-    const allTexts = Object.values(INSIGHT_VARIANTS)
-      .flat()
-      .map((v) => v.text)
-
-    const negativeWords = ['bad', 'failure', 'terrible', 'worst', 'pathetic', 'disgrace']
-    for (const text of allTexts) {
-      const lower = text.toLowerCase()
+  it('all 11 cards have encouraging tone (no negative words)', () => {
+    const negativeWords = [
+      'bad',
+      'failure',
+      'terrible',
+      'worst',
+      'pathetic',
+      'disgrace',
+      'hopeless',
+      'worthless',
+    ]
+    for (const card of AI_INSIGHT_CARDS) {
+      const lower = card.text.toLowerCase()
       for (const word of negativeWords) {
         expect(lower).not.toContain(word)
       }
     }
+  })
+
+  it('AI_INSIGHT_CARDS has 11 cards', () => {
+    expect(AI_INSIGHT_CARDS).toHaveLength(11)
   })
 })

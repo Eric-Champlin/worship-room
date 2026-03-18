@@ -18,7 +18,7 @@ describe('useNotifications', () => {
 
   it('unreadCount matches notifications with read: false', () => {
     const { result } = renderHook(() => useNotifications())
-    expect(result.current.unreadCount).toBe(5)
+    expect(result.current.unreadCount).toBe(6)
   })
 
   it('markAsRead sets specific notification to read', () => {
@@ -33,7 +33,7 @@ describe('useNotifications', () => {
     expect(target?.read).toBe(true)
     // Others unchanged
     const otherUnread = result.current.notifications.filter((n) => !n.read && n.id !== targetId)
-    expect(otherUnread).toHaveLength(4)
+    expect(otherUnread).toHaveLength(5)
   })
 
   it('markAllAsRead sets all to read', () => {
@@ -76,7 +76,7 @@ describe('useNotifications', () => {
 
     expect(result.current.notifications[0].message).toBe('Test notification')
     expect(result.current.notifications[0].id).toBeTruthy()
-    expect(result.current.notifications).toHaveLength(13)
+    expect(result.current.notifications).toHaveLength(14)
   })
 
   it('addNotification enforces 50-cap', () => {

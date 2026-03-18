@@ -4,6 +4,7 @@ import { queryClient } from './lib/query-client'
 import { Home } from './pages/Home'
 import { Health } from './pages/Health'
 import { Insights } from './pages/Insights'
+import { MonthlyReport } from './pages/MonthlyReport'
 import { Friends } from './pages/Friends'
 import { DailyHub } from './pages/DailyHub'
 import { BreathingExercise } from './pages/meditate/BreathingExercise'
@@ -95,6 +96,7 @@ function App() {
           <Route path="/" element={<RootRoute />} />
           <Route path="/health" element={<Health />} />
           <Route path="/insights" element={<Insights />} />
+          <Route path="/insights/monthly" element={<MonthlyReport />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/daily" element={<DailyHub />} />

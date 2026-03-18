@@ -194,7 +194,7 @@ describe('Insights — full page integration', () => {
   it('reduced motion: sections have motion-reduce classes', () => {
     const { container } = renderInsights()
     const animatedSections = container.querySelectorAll('.motion-reduce\\:animate-none')
-    expect(animatedSections.length).toBe(5)
+    expect(animatedSections.length).toBe(6)
   })
 
   it('time range change updates heatmap and chart', async () => {

@@ -237,6 +237,16 @@ export function Insights() {
         <AnimatedSection index={4}>
           <ScriptureConnections hasData={hasData} />
         </AnimatedSection>
+        <AnimatedSection index={5}>
+          <div className="pt-2 text-center">
+            <Link
+              to="/insights/monthly"
+              className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              View Monthly Report
+            </Link>
+          </div>
+        </AnimatedSection>
       </main>
 
       <SiteFooter />

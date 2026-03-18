@@ -161,7 +161,8 @@ export type NotificationType =
   | 'friend_milestone'
   | 'nudge'
   | 'weekly_recap'
-  | 'level_up';
+  | 'level_up'
+  | 'monthly_report';
 
 export interface NotificationEntry {
   id: string;

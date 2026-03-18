@@ -46,11 +46,11 @@ describe('NotificationPanel', () => {
     vi.restoreAllMocks()
   })
 
-  it('renders all 12 mock notifications', () => {
+  it('renders all 13 mock notifications', () => {
     renderPanel()
     const list = screen.getByRole('list')
     const items = within(list).getAllByRole('listitem')
-    expect(items).toHaveLength(12)
+    expect(items).toHaveLength(13)
   })
 
   it('renders correct icon for each notification type', () => {
@@ -72,7 +72,7 @@ describe('NotificationPanel', () => {
   })
 
   it('read notifications have transparent background', () => {
-    renderPanel({ notifications: [MOCK_NOTIFICATIONS[5]] })
+    renderPanel({ notifications: [MOCK_NOTIFICATIONS[6]] })
     const item = screen.getByRole('listitem')
     expect(item.className).not.toContain('bg-white/10')
   })

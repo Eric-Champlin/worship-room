@@ -313,6 +313,7 @@ const AVATAR_MENU_LINKS = [
   { label: 'My Prayer Requests', to: '/prayer-wall/dashboard' },
   { label: 'My Favorites', to: '/favorites' },
   { label: 'Mood Insights', to: '/insights' },
+  { label: 'Monthly Report', to: '/insights/monthly' },
   { label: 'Settings', to: '/settings' },
 ] as const
 
@@ -320,6 +321,7 @@ const AVATAR_MENU_LINKS = [
 const MOBILE_DRAWER_EXTRA_LINKS = [
   { label: 'Friends', to: '/friends' },
   { label: 'Mood Insights', to: '/insights' },
+  { label: 'Monthly Report', to: '/insights/monthly' },
   { label: 'My Journal Entries', to: '/journal/my-entries' },
   { label: 'My Prayer Requests', to: '/prayer-wall/dashboard' },
   { label: 'My Favorites', to: '/favorites' },

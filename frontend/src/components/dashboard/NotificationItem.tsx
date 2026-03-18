@@ -12,6 +12,7 @@ const NOTIFICATION_ICONS: Record<NotificationType, string> = {
   nudge: '❤️',
   weekly_recap: '📊',
   level_up: '⬆️',
+  monthly_report: '📋',
 }
 
 interface NotificationItemProps {
