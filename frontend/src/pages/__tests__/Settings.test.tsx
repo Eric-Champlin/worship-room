@@ -61,7 +61,7 @@ describe('Settings Page', () => {
   it('redirects to / when not authenticated', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: false,
-      user: null,
+      user: null as unknown as { name: string; id: string },
       login: vi.fn(),
       logout: vi.fn(),
     })

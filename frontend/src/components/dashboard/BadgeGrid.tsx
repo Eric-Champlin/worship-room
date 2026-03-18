@@ -183,7 +183,7 @@ export function BadgeGrid({ onClose }: BadgeGridProps) {
                   <BadgeCell
                     key={id}
                     badge={badge}
-                    earned={badgeData.earned[id]}
+                    earned={(badgeData.earned as Record<string, BadgeEarnedEntry>)[id]}
                   />
                 )
               })}

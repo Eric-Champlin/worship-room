@@ -8,7 +8,6 @@ import {
   AVATAR_CATEGORIES,
   AVATAR_CATEGORY_LABELS,
   UNLOCKABLE_AVATARS,
-  isUnlockableAvatar,
 } from '@/constants/dashboard/avatars'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { ProfileAvatar } from './ProfileAvatar'

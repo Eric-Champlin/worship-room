@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { MoodChart } from '../MoodChart';
 import { getLocalDateString } from '@/utils/date';
 import { MOOD_COLORS } from '@/constants/dashboard/mood';
-import type { MoodEntry, MoodValue } from '@/types/dashboard';
+import type { MoodEntry } from '@/types/dashboard';
 
 // Mock ResizeObserver for Recharts ResponsiveContainer
 class ResizeObserverMock {

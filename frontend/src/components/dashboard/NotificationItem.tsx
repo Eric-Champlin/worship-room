@@ -28,7 +28,7 @@ interface NotificationItemProps {
 
 export function NotificationItem({
   notification,
-  onMarkAsRead,
+  onMarkAsRead: _onMarkAsRead,
   onDismiss,
   onAcceptFriend,
   onDeclineFriend,

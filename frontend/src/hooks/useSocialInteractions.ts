@@ -36,7 +36,7 @@ export function useSocialInteractions(): UseSocialInteractions {
   const userName = user?.name ?? 'Someone'
 
   const sendEncouragement = useCallback(
-    (toUserId: string, toName: string, message: string) => {
+    (toUserId: string, _toName: string, message: string) => {
       if (!isAuthenticated || !userId) return
       if (!storageCanEncourage(userId, toUserId)) return
 
@@ -81,7 +81,7 @@ export function useSocialInteractions(): UseSocialInteractions {
   )
 
   const sendNudge = useCallback(
-    (toUserId: string, toName: string) => {
+    (toUserId: string, _toName: string) => {
       if (!isAuthenticated || !userId) return
       if (!storageCanNudge(userId, toUserId)) return
 

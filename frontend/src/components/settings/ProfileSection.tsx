@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
 import { ProfileAvatar } from '@/components/shared/ProfileAvatar'
 import { AvatarPickerModal } from '@/components/shared/AvatarPickerModal'
@@ -18,7 +17,6 @@ interface ProfileSectionProps {
 }
 
 export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSectionProps) {
-  const { showToast } = useToast()
   const { user } = useAuth()
   const userId = user?.id || ''
   const [displayName, setDisplayName] = useState(profile.displayName || userName || '')

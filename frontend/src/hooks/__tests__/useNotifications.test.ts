@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useNotifications } from '../useNotifications'
 import { MOCK_NOTIFICATIONS } from '@/mocks/notifications-mock-data'

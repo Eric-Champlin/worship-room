@@ -3,7 +3,6 @@ import { renderHook, act } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useFaithPoints } from '@/hooks/useFaithPoints';
-import { freshDailyActivities } from '@/services/faith-points-storage';
 import type { ActivityType } from '@/types/dashboard';
 
 function simulateLogin() {

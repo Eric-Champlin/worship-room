@@ -191,7 +191,7 @@ export function MoodTrendChart({ rangeDays }: MoodTrendChartProps) {
     moodValues.length > 0
       ? Math.round(moodValues.reduce((a, b) => a + b, 0) / moodValues.length)
       : 3
-  const averageMoodLabel = MOOD_LABELS[averageMood] ?? 'Okay'
+  const averageMoodLabel = MOOD_LABELS[averageMood as MoodValue] ?? 'Okay'
 
   const tickInterval = Math.max(1, Math.floor(rangeDays / 6))
 

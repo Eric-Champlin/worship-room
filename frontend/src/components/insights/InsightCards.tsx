@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { Lightbulb, Sparkles } from 'lucide-react'
 import {
-  AI_INSIGHT_CARDS,
   getDayOfYear,
   getInsightCardsForDay,
 } from '@/constants/dashboard/ai-insights'

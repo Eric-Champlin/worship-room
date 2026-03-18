@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import type { SocialInteractionsData, Nudge } from '@/types/dashboard';
 import {
   SOCIAL_KEY,
@@ -15,15 +15,11 @@ import {
   isRecapDismissedThisWeek,
   addNotification,
 } from '../social-storage';
-import { getLocalDateString, getCurrentWeekStart } from '@/utils/date';
+import { getCurrentWeekStart } from '@/utils/date';
 
 const USER_ID = 'current-user';
 const FRIEND_A = 'friend-sarah-m';
 const FRIEND_B = 'friend-james-k';
-
-function hoursAgo(hours: number): string {
-  return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
-}
 
 function daysAgo(days: number): string {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();

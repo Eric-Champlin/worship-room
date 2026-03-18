@@ -64,7 +64,7 @@ describe('useSocialInteractions', () => {
   it('no-ops when not authenticated', () => {
     mockAuth.mockReturnValue({
       isAuthenticated: false,
-      user: null,
+      user: null as unknown as { name: string; id: string },
       login: vi.fn(),
       logout: vi.fn(),
     })

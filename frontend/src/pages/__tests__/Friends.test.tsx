@@ -56,7 +56,7 @@ describe('Friends Page', () => {
   it('redirects to / when not authenticated', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: false,
-      user: null,
+      user: null as unknown as { name: string; id: string },
       login: vi.fn(),
       logout: vi.fn(),
     })
@@ -176,9 +176,8 @@ describe('Friends Page', () => {
     expect(screen.getByText('Sarah M.')).toBeInTheDocument()
 
     // Open three-dot menu for Sarah M.
-    const menuBtns = screen.getAllByLabelText(/Options for/)
     // Sarah M. should be in the list — find her menu button
-    const sarahRow = screen.getByText('Sarah M.').closest('[role="listitem"]')!
+    const sarahRow = screen.getByText('Sarah M.').closest('[role="listitem"]') as HTMLElement
     const sarahMenuBtn = within(sarahRow).getByLabelText(/Options for/)
     await user.click(sarahMenuBtn)
 

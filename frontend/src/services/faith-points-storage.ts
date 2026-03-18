@@ -1,7 +1,6 @@
 import type { DailyActivityLog, DailyActivities, FaithPointsData, StreakData, ActivityType } from '@/types/dashboard';
 import { getLocalDateString, getYesterdayDateString } from '@/utils/date';
 import { ACTIVITY_POINTS, MULTIPLIER_TIERS } from '@/constants/dashboard/activity-points';
-import { getLevelForPoints } from '@/constants/dashboard/levels';
 
 const ACTIVITIES_KEY = 'wr_daily_activities';
 const POINTS_KEY = 'wr_faith_points';

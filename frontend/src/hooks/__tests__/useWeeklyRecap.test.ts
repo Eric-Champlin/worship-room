@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, cleanup } from '@testing-library/react'
 import { useWeeklyRecap } from '../useWeeklyRecap'
-import { SOCIAL_KEY, NOTIFICATIONS_KEY } from '@/services/social-storage'
+import { SOCIAL_KEY } from '@/services/social-storage'
 import { FRIENDS_KEY } from '@/services/friends-storage'
 import { getCurrentWeekStart } from '@/utils/date'
 import type { FriendsData, FriendProfile } from '@/types/dashboard'

@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { NotificationPanel } from '../NotificationPanel'
 import { MOCK_NOTIFICATIONS } from '@/mocks/notifications-mock-data'
-import type { NotificationEntry } from '@/types/dashboard'
 
 // Mock prefers-reduced-motion so animations are instant (no setTimeout in dismiss)
 const mockMatchMedia = vi.fn().mockImplementation((query: string) => ({

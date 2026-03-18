@@ -18,7 +18,7 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
   const [activeIndex, setActiveIndex] = useState(-1)
   const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
-  const internalInputRef = useRef<HTMLInputElement>(null)
+  const internalInputRef = useRef<HTMLInputElement | null>(null)
   const effectiveInputRef = inputRef || internalInputRef
   const optionRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -106,7 +106,7 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
           aria-hidden="true"
         />
         <input
-          ref={effectiveInputRef}
+          ref={effectiveInputRef as React.Ref<HTMLInputElement>}
           type="text"
           role="combobox"
           aria-label="Search for friends"

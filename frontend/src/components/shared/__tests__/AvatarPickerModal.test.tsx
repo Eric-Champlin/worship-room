@@ -20,7 +20,7 @@ const DEFAULT_PROPS = {
   userId: 'user-1',
 }
 
-function renderModal(overrides?: Partial<typeof DEFAULT_PROPS>) {
+function renderModal(overrides?: Partial<typeof DEFAULT_PROPS & { currentAvatarUrl: string }>) {
   return render(<AvatarPickerModal {...DEFAULT_PROPS} {...overrides} />)
 }
 

@@ -49,7 +49,7 @@ function getMultiplierPreview(completedCount: number): {
 
 export function ActivityChecklist({
   todayActivities,
-  todayMultiplier,
+  todayMultiplier: _todayMultiplier,
   animate = false,
 }: ActivityChecklistProps) {
   const completedCount = ACTIVITY_ORDER.filter((t) => todayActivities[t]).length

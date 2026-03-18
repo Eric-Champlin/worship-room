@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { NotificationPanel } from '../NotificationPanel'
-import { NotificationBell } from '../NotificationBell'
 import { MOCK_NOTIFICATIONS } from '@/mocks/notifications-mock-data'
 
 // Mock prefers-reduced-motion

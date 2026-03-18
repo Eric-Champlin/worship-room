@@ -17,7 +17,7 @@ const FRESH_BADGES: BadgeData = {
   activityCounts: { ...FRESH_ACTIVITY_COUNTS },
 }
 
-function renderAvatar(overrides?: Partial<typeof DEFAULT_PROPS & { avatarUrl?: string; badges?: BadgeData }>) {
+function renderAvatar(overrides?: Partial<{ avatarId: string; displayName: string; userId: string; size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'; avatarUrl?: string; badges?: BadgeData }>) {
   return render(<ProfileAvatar {...DEFAULT_PROPS} {...overrides} />)
 }
 

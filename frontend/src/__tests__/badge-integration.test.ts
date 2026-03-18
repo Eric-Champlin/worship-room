@@ -260,7 +260,7 @@ describe('Badge Integration — Persistence', () => {
     unmount();
 
     // Re-mount — badges should still be there
-    const { result: r2 } = renderHook(() => useFaithPoints(), { wrapper });
+    renderHook(() => useFaithPoints(), { wrapper });
     const earnedAfter = getBadges().earned;
     expect(earnedAfter.first_prayer).toBeDefined();
     expect(earnedAfter.first_journal).toBeDefined();

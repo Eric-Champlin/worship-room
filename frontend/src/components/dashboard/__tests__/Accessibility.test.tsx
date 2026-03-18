@@ -1,11 +1,9 @@
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Dashboard } from '@/pages/Dashboard'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
-import { useAuth } from '@/hooks/useAuth'
 import { getLocalDateString } from '@/utils/date'
 import type { MoodEntry } from '@/types/dashboard'
 

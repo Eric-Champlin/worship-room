@@ -208,7 +208,7 @@ export function useToast(): ToastContextValue {
 
 const NOOP_TOAST: ToastContextValue = {
   showToast: () => {},
-  showCelebrationToast: () => {},
+  showCelebrationToast: async () => {},
 }
 
 /**

@@ -1,5 +1,4 @@
 import type {
-  Encouragement,
   MilestoneEvent,
   NotificationEntry,
   Nudge,

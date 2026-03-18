@@ -97,7 +97,7 @@ describe('FriendList', () => {
   it('does not show streak of 0', () => {
     renderFriendList()
     // James K. has 0 streak, should not show a streak indicator
-    const jamesRow = screen.getByText('James K.').closest('[role="listitem"]')!
+    const jamesRow = screen.getByText('James K.').closest('[role="listitem"]') as HTMLElement
     expect(within(jamesRow).queryByText('0')).not.toBeInTheDocument()
   })
 
