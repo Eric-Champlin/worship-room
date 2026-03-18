@@ -1,5 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useToast } from '@/components/ui/Toast'
+import { useAuth } from '@/hooks/useAuth'
+import { ProfileAvatar } from '@/components/shared/ProfileAvatar'
+import { AvatarPickerModal } from '@/components/shared/AvatarPickerModal'
+import { getBadgeData } from '@/services/badge-storage'
 import type { UserSettingsProfile } from '@/types/settings'
 
 const NAME_PATTERN = /^[a-zA-Z0-9 ]+$/
@@ -15,6 +19,8 @@ interface ProfileSectionProps {
 
 export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSectionProps) {
   const { showToast } = useToast()
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [displayName, setDisplayName] = useState(profile.displayName || userName || '')
   const [nameError, setNameError] = useState('')
   const [nameSaved, setNameSaved] = useState(false)
@@ -22,6 +28,8 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
   const previousNameRef = useRef(displayName)
 
   const [bio, setBio] = useState(profile.bio || '')
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const badgeData = useMemo(() => getBadgeData(), [])
 
   // Sync when profile changes externally (e.g. cross-tab)
   useEffect(() => {
@@ -75,28 +83,42 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
     onUpdateProfile({ bio })
   }
 
-  const avatarInitial = (displayName || userName || '?').charAt(0).toUpperCase()
-
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6">
       <h2 className="text-base font-semibold text-white md:text-lg mb-6">Profile</h2>
 
       {/* Avatar */}
       <div className="flex items-center gap-4 mb-6">
-        <div
-          className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/20 text-2xl font-semibold text-white"
-          aria-hidden="true"
-        >
-          {avatarInitial}
-        </div>
+        <ProfileAvatar
+          avatarId={profile.avatarId}
+          avatarUrl={profile.avatarUrl}
+          displayName={displayName || userName || ''}
+          userId={userId}
+          size="sm"
+          badges={badgeData}
+          aria-hidden
+        />
         <button
           type="button"
-          onClick={() => showToast('Avatar picker coming soon')}
+          onClick={() => setPickerOpen(true)}
           className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2"
         >
           Change
         </button>
       </div>
+
+      <AvatarPickerModal
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        currentAvatarId={profile.avatarId}
+        currentAvatarUrl={profile.avatarUrl}
+        badges={badgeData}
+        displayName={displayName || userName || ''}
+        userId={userId}
+        onSave={(avatarId, avatarUrl) => {
+          onUpdateProfile({ avatarId, avatarUrl })
+        }}
+      />
 
       {/* Display Name */}
       <div className="space-y-4">

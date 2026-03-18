@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Flame, Sprout, Leaf, Flower2, TreePine, Trees, Landmark } from 'lucide-react'
 import type { FriendProfile } from '@/types/dashboard'
 import { Avatar } from '@/components/prayer-wall/Avatar'
@@ -29,11 +30,23 @@ interface LeaderboardRowProps {
 }
 
 export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index, showEncourage }: LeaderboardRowProps) {
+  const navigate = useNavigate()
   const { first, last } = splitDisplayName(friend.displayName)
   const LevelIcon = LEVEL_ICONS[friend.level] || Sprout
   const points = metric === 'weekly' ? friend.weeklyPoints : friend.faithPoints
   const rankColor = RANK_COLORS[rank] || 'text-white/70'
   const delay = Math.min(index * 50, 500)
+
+  const handleRowClick = () => {
+    navigate(`/profile/${friend.id}`)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      navigate(`/profile/${friend.id}`)
+    }
+  }
 
   return (
     <li
@@ -43,7 +56,13 @@ export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index, sho
       style={{ animationDelay: `${delay}ms`, animationDuration: '300ms' }}
       aria-label={isCurrentUser ? `Your position: rank ${rank}` : undefined}
     >
-      <div className="flex cursor-default items-center gap-3 rounded-xl p-3 transition-colors hover:bg-white/5">
+      <div
+        className="flex cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors hover:bg-white/5"
+        onClick={handleRowClick}
+        onKeyDown={handleKeyDown}
+        role="link"
+        tabIndex={0}
+      >
         {/* Rank */}
         <span className={`min-w-[40px] text-center text-lg font-bold ${rankColor}`}>
           {rank}

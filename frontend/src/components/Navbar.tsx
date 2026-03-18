@@ -442,6 +442,16 @@ function DesktopUserActions() {
               role="menu"
               className="animate-dropdown-in rounded-xl border border-white/15 bg-hero-mid py-1.5 shadow-lg"
             >
+              {user && (
+                <Link
+                  to={`/profile/${user.id}`}
+                  role="menuitem"
+                  onClick={() => setIsAvatarOpen(false)}
+                  className="flex min-h-[44px] items-center rounded px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  My Profile
+                </Link>
+              )}
               {AVATAR_MENU_LINKS.map((link) => (
                 <Link
                   key={link.to}
@@ -627,8 +637,23 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
             </div>
 
             {/* Logged-in: extra nav items */}
-            {isAuthenticated && (
+            {isAuthenticated && user && (
               <div className="mt-2 border-t border-white/15 pt-2">
+                <NavLink
+                  to={`/profile/${user.id}`}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    cn(
+                      'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                      isActive
+                        ? 'text-white'
+                        : 'text-white/80 hover:bg-white/5 hover:text-white'
+                    )
+                  }
+                >
+                  My Profile
+                </NavLink>
                 {MOBILE_DRAWER_EXTRA_LINKS.map((link) => (
                   <NavLink
                     key={link.to}

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import type { MilestoneEvent, MilestoneEventType } from '@/types/dashboard'
+import { Link } from 'react-router-dom'
+import type { MilestoneEvent } from '@/types/dashboard'
 import { getMilestoneFeed, saveMilestoneFeed } from '@/services/social-storage'
 import { createMockMilestoneEvents } from '@/mocks/social-mock-data'
 import { timeAgo } from '@/lib/time'
@@ -57,12 +58,14 @@ export function MilestoneFeed({ maxItems = 3 }: MilestoneFeedProps) {
             className="flex items-start gap-2 motion-safe:opacity-0 motion-safe:animate-fade-in"
             style={{ animationDelay: `${delay}ms`, animationDuration: '300ms' }}
           >
-            <div
-              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/40 text-[10px] font-semibold text-white"
-              aria-hidden="true"
-            >
-              {getInitials(event.displayName)}
-            </div>
+            <Link to={`/profile/${event.userId}`} className="flex-shrink-0">
+              <div
+                className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/40 text-[10px] font-semibold text-white"
+                aria-hidden="true"
+              >
+                {getInitials(event.displayName)}
+              </div>
+            </Link>
             <div className="min-w-0 flex-1">
               <p className="text-xs text-white/60">{formatMilestone(event)}</p>
               <p className="text-xs text-white/40">{timeAgo(event.timestamp)}</p>

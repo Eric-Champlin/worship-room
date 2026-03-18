@@ -77,15 +77,35 @@ export function FriendsPreview() {
         return (
           <div key={entry.id} className="flex items-center gap-2">
             <span className={`min-w-[24px] text-xs font-bold ${rankColor}`}>#{rank}</span>
-            <div
-              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/40 text-[10px] font-semibold text-white"
-              aria-hidden="true"
-            >
-              {first.charAt(0)}{last.charAt(0)}
-            </div>
-            <span className="min-w-0 max-w-[120px] flex-1 truncate text-sm font-medium text-white">
-              {isUser ? 'You' : entry.displayName}
-            </span>
+            {isUser ? (
+              <div
+                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/40 text-[10px] font-semibold text-white"
+                aria-hidden="true"
+              >
+                {first.charAt(0)}{last.charAt(0)}
+              </div>
+            ) : (
+              <Link to={`/profile/${entry.id}`} className="flex-shrink-0">
+                <div
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/40 text-[10px] font-semibold text-white"
+                  aria-hidden="true"
+                >
+                  {first.charAt(0)}{last.charAt(0)}
+                </div>
+              </Link>
+            )}
+            {isUser ? (
+              <span className="min-w-0 max-w-[120px] flex-1 truncate text-sm font-medium text-white">
+                You
+              </span>
+            ) : (
+              <Link
+                to={`/profile/${entry.id}`}
+                className="min-w-0 max-w-[120px] flex-1 truncate text-sm font-medium text-white hover:underline"
+              >
+                {entry.displayName}
+              </Link>
+            )}
             <span className="text-xs text-white/50">{entry.weeklyPoints} pts</span>
           </div>
         )

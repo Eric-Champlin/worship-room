@@ -30,6 +30,7 @@ import { MusicPage } from './pages/MusicPage'
 import { RoutinesPage } from './pages/RoutinesPage'
 import { Dashboard } from './pages/Dashboard'
 import { Settings } from './pages/Settings'
+import { GrowthProfile } from './pages/GrowthProfile'
 import { useAuth } from '@/hooks/useAuth'
 import { lazy, Suspense } from 'react'
 
@@ -121,6 +122,7 @@ function App() {
           <Route path="/prayer-wall/:id" element={<PrayerDetail />} />
           <Route path="/local-support/churches" element={<Churches />} />
           <Route path="/local-support/counselors" element={<Counselors />} />
+          <Route path="/profile/:userId" element={<GrowthProfile />} />
           <Route path="/local-support/celebrate-recovery" element={<CelebrateRecovery />} />
           {import.meta.env.DEV && (
             <Route path="/dev/mood-checkin" element={<Suspense><MoodCheckInPreview /></Suspense>} />

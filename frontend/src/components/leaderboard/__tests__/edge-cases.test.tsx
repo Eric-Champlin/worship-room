@@ -118,15 +118,17 @@ describe('Edge Cases', () => {
         displayName: 'Bartholomew Fitzwilliam-Henderson III.',
       })
       render(
-        <ol>
-          <LeaderboardRow
-            rank={1}
-            friend={longNameFriend}
-            isCurrentUser={false}
-            metric="weekly"
-            index={0}
-          />
-        </ol>,
+        <MemoryRouter>
+          <ol>
+            <LeaderboardRow
+              rank={1}
+              friend={longNameFriend}
+              isCurrentUser={false}
+              metric="weekly"
+              index={0}
+            />
+          </ol>
+        </MemoryRouter>,
       )
       const nameEl = screen.getByText('Bartholomew Fitzwilliam-Henderson III.')
       expect(nameEl.className).toContain('truncate')
@@ -173,9 +175,11 @@ describe('Edge Cases', () => {
     it('staggered fade-in uses motion-safe guard', () => {
       const friend = makeFriend({ displayName: 'Test F.' })
       render(
-        <ol>
-          <LeaderboardRow rank={1} friend={friend} isCurrentUser={false} metric="weekly" index={0} />
-        </ol>,
+        <MemoryRouter>
+          <ol>
+            <LeaderboardRow rank={1} friend={friend} isCurrentUser={false} metric="weekly" index={0} />
+          </ol>
+        </MemoryRouter>,
       )
       const li = screen.getByRole('listitem')
       expect(li.className).toContain('motion-safe:animate-fade-in')

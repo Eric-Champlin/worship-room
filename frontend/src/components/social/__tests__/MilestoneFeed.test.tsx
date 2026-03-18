@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, within, cleanup } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { MilestoneFeed } from '../MilestoneFeed'
 import { MILESTONE_KEY } from '@/services/social-storage'
 import type { MilestoneEvent } from '@/types/dashboard'
@@ -26,7 +27,7 @@ describe('MilestoneFeed', () => {
   afterEach(resetState)
 
   it('renders mock events on first load (no wr_milestone_feed)', () => {
-    render(<MilestoneFeed />)
+    render(<MemoryRouter><MilestoneFeed /></MemoryRouter>)
     // Should render something (mock data seeded internally)
     const list = screen.getByRole('list', { name: /friend milestones/i })
     expect(list).toBeInTheDocument()
@@ -36,45 +37,45 @@ describe('MilestoneFeed', () => {
 
   it('shows maxItems entries', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify(MOCK_EVENTS))
-    render(<MilestoneFeed maxItems={3} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={3} /></MemoryRouter>)
     const items = within(screen.getByRole('list')).getAllByRole('listitem')
     expect(items).toHaveLength(3)
   })
 
   it('formats streak_milestone correctly', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify([MOCK_EVENTS[0]]))
-    render(<MilestoneFeed maxItems={5} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={5} /></MemoryRouter>)
     expect(screen.getByText('Maria L. hit a 90-day streak!')).toBeInTheDocument()
   })
 
   it('formats level_up correctly', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify([MOCK_EVENTS[1]]))
-    render(<MilestoneFeed maxItems={5} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={5} /></MemoryRouter>)
     expect(screen.getByText('James K. leveled up to Blooming!')).toBeInTheDocument()
   })
 
   it('formats badge_earned correctly', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify([MOCK_EVENTS[2]]))
-    render(<MilestoneFeed maxItems={5} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={5} /></MemoryRouter>)
     expect(screen.getByText('Grace H. earned Burning Bright!')).toBeInTheDocument()
   })
 
   it('formats points_milestone correctly', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify([MOCK_EVENTS[3]]))
-    render(<MilestoneFeed maxItems={5} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={5} /></MemoryRouter>)
     expect(screen.getByText('Joshua B. reached 12,000 Faith Points!')).toBeInTheDocument()
   })
 
   it('shows relative timestamps', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify([MOCK_EVENTS[0]]))
-    render(<MilestoneFeed maxItems={5} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={5} /></MemoryRouter>)
     // Should show "2 hours ago" for an event 2 hours old
     expect(screen.getByText('2 hours ago')).toBeInTheDocument()
   })
 
   it('shows 24px avatars with initials', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify([MOCK_EVENTS[0]]))
-    render(<MilestoneFeed maxItems={5} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={5} /></MemoryRouter>)
     const avatar = screen.getByText('ML')
     expect(avatar.className).toContain('h-6')
     expect(avatar.className).toContain('w-6')
@@ -83,7 +84,7 @@ describe('MilestoneFeed', () => {
 
   it('uses semantic list markup (ol > li)', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify(MOCK_EVENTS))
-    render(<MilestoneFeed maxItems={3} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={3} /></MemoryRouter>)
     const list = screen.getByRole('list', { name: /friend milestones/i })
     expect(list.tagName).toBe('OL')
     const items = within(list).getAllByRole('listitem')
@@ -92,7 +93,7 @@ describe('MilestoneFeed', () => {
 
   it('prefers-reduced-motion: uses motion-safe prefix', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify([MOCK_EVENTS[0]]))
-    render(<MilestoneFeed maxItems={5} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={5} /></MemoryRouter>)
     const items = within(screen.getByRole('list')).getAllByRole('listitem')
     expect(items[0].className).toContain('motion-safe:')
   })
@@ -103,7 +104,7 @@ describe('MilestoneFeed', () => {
       { ...MOCK_EVENTS[0], timestamp: hoursAgo(1) },   // newest
     ]
     localStorage.setItem(MILESTONE_KEY, JSON.stringify(events))
-    render(<MilestoneFeed maxItems={5} />)
+    render(<MemoryRouter><MilestoneFeed maxItems={5} /></MemoryRouter>)
     const items = within(screen.getByRole('list')).getAllByRole('listitem')
     // First item should be the newest
     expect(within(items[0]).getByText(/maria l/i)).toBeInTheDocument()
@@ -111,7 +112,7 @@ describe('MilestoneFeed', () => {
 
   it('defaults maxItems to 3', () => {
     localStorage.setItem(MILESTONE_KEY, JSON.stringify(MOCK_EVENTS))
-    render(<MilestoneFeed />)
+    render(<MemoryRouter><MilestoneFeed /></MemoryRouter>)
     const items = within(screen.getByRole('list')).getAllByRole('listitem')
     expect(items).toHaveLength(3)
   })

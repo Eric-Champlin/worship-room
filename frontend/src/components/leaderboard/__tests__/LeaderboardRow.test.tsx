@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import type { FriendProfile } from '@/types/dashboard'
 import { LeaderboardRow } from '../LeaderboardRow'
 
@@ -17,16 +18,18 @@ const mockFriend: FriendProfile = {
 
 function renderRow(overrides: Partial<Parameters<typeof LeaderboardRow>[0]> = {}) {
   return render(
-    <ol>
-      <LeaderboardRow
-        rank={1}
-        friend={mockFriend}
-        isCurrentUser={false}
-        metric="weekly"
-        index={0}
-        {...overrides}
-      />
-    </ol>,
+    <MemoryRouter>
+      <ol>
+        <LeaderboardRow
+          rank={1}
+          friend={mockFriend}
+          isCurrentUser={false}
+          metric="weekly"
+          index={0}
+          {...overrides}
+        />
+      </ol>
+    </MemoryRouter>,
   )
 }
 

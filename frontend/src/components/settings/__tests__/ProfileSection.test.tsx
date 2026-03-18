@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ProfileSection } from '../ProfileSection'
 import { DEFAULT_SETTINGS } from '@/services/settings-storage'
@@ -10,13 +11,15 @@ const defaultProfile = { ...DEFAULT_SETTINGS.profile, displayName: 'Eric' }
 function renderProfile(props: Partial<Parameters<typeof ProfileSection>[0]> = {}) {
   const onUpdateProfile = vi.fn()
   const result = render(
-    <ToastProvider>
-      <ProfileSection
-        profile={props.profile ?? defaultProfile}
-        userName={props.userName ?? 'Eric'}
-        onUpdateProfile={props.onUpdateProfile ?? onUpdateProfile}
-      />
-    </ToastProvider>,
+    <AuthProvider>
+      <ToastProvider>
+        <ProfileSection
+          profile={props.profile ?? defaultProfile}
+          userName={props.userName ?? 'Eric'}
+          onUpdateProfile={props.onUpdateProfile ?? onUpdateProfile}
+        />
+      </ToastProvider>
+    </AuthProvider>,
   )
   return { ...result, onUpdateProfile: props.onUpdateProfile ?? onUpdateProfile }
 }
@@ -102,17 +105,18 @@ describe('ProfileSection', () => {
 
   // --- Avatar ---
 
-  it('avatar shows first letter', () => {
+  it('avatar renders ProfileAvatar component', () => {
     renderProfile()
-    // Avatar div has "E" for "Eric"
-    expect(screen.getByText('E')).toBeInTheDocument()
+    // ProfileAvatar renders the preset avatar (default is 'default' which maps to nature-dove)
+    const avatarContainer = screen.getByRole('button', { name: 'Change' }).parentElement
+    expect(avatarContainer).toBeInTheDocument()
   })
 
-  it('avatar Change button shows toast', async () => {
+  it('avatar Change button opens avatar picker modal', async () => {
     const user = userEvent.setup()
     renderProfile()
     await user.click(screen.getByRole('button', { name: 'Change' }))
-    expect(screen.getByText('Avatar picker coming soon')).toBeInTheDocument()
+    expect(screen.getByText('Choose Your Avatar')).toBeInTheDocument()
   })
 
   // --- Bio ---
