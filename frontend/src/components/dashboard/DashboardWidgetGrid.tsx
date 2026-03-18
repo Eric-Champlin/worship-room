@@ -1,17 +1,20 @@
-import { CheckCircle2, Flame, Rocket, TrendingUp, Users } from 'lucide-react'
+import { BarChart3, CheckCircle2, Flame, Rocket, TrendingUp, Users } from 'lucide-react'
 import type { useFaithPoints } from '@/hooks/useFaithPoints'
+import { useWeeklyRecap } from '@/hooks/useWeeklyRecap'
 import { DashboardCard } from './DashboardCard'
 import { MoodChart } from './MoodChart'
 import { QuickActions } from './QuickActions'
 import { StreakCard } from './StreakCard'
 import { ActivityChecklist } from './ActivityChecklist'
 import { FriendsPreview } from './FriendsPreview'
+import { WeeklyRecap } from './WeeklyRecap'
 
 interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
 }
 
 export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
+  const { isVisible: recapVisible, hasFriends: recapHasFriends } = useWeeklyRecap()
   const {
     currentStreak,
     longestStreak,
@@ -75,11 +78,24 @@ export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
           <FriendsPreview />
         </DashboardCard>
 
+        {/* Weekly Recap — only shown when visible or has no friends (CTA) */}
+        {(recapVisible || !recapHasFriends) && (
+          <DashboardCard
+            id="weekly-recap"
+            title="Weekly Recap"
+            icon={<BarChart3 className="h-5 w-5" />}
+            collapsible={false}
+            className="order-5 lg:col-span-5"
+          >
+            <WeeklyRecap />
+          </DashboardCard>
+        )}
+
         <DashboardCard
           id="quick-actions"
           title="Quick Actions"
           icon={<Rocket className="h-5 w-5" />}
-          className="order-5 lg:col-span-5"
+          className="order-6 lg:col-span-5"
         >
           <QuickActions />
         </DashboardCard>

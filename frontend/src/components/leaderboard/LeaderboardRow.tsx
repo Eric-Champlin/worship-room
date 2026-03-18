@@ -1,6 +1,7 @@
 import { Flame, Sprout, Leaf, Flower2, TreePine, Trees, Landmark } from 'lucide-react'
 import type { FriendProfile } from '@/types/dashboard'
 import { Avatar } from '@/components/prayer-wall/Avatar'
+import { EncourageButton } from '@/components/social/EncourageButton'
 import { splitDisplayName } from '@/components/friends/utils'
 
 const LEVEL_ICONS: Record<number, React.ElementType> = {
@@ -24,9 +25,10 @@ interface LeaderboardRowProps {
   isCurrentUser: boolean
   metric: 'weekly' | 'allTime'
   index: number
+  showEncourage?: boolean
 }
 
-export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index }: LeaderboardRowProps) {
+export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index, showEncourage }: LeaderboardRowProps) {
   const { first, last } = splitDisplayName(friend.displayName)
   const LevelIcon = LEVEL_ICONS[friend.level] || Sprout
   const points = metric === 'weekly' ? friend.weeklyPoints : friend.faithPoints
@@ -35,7 +37,7 @@ export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index }: L
 
   return (
     <li
-      className={`motion-safe:opacity-0 motion-safe:animate-fade-in ${
+      className={`group motion-safe:opacity-0 motion-safe:animate-fade-in ${
         isCurrentUser ? 'rounded-lg border-l-2 border-primary bg-primary/10' : ''
       }`}
       style={{ animationDelay: `${delay}ms`, animationDuration: '300ms' }}
@@ -93,6 +95,17 @@ export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index }: L
             <Flame className="h-3.5 w-3.5" aria-hidden="true" />
             {friend.currentStreak}
           </span>
+        )}
+
+        {/* Encourage — Friends board only, not current user */}
+        {showEncourage && !isCurrentUser && (
+          <div className="sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+            <EncourageButton
+              friendId={friend.id}
+              friendName={friend.displayName}
+              iconOnly
+            />
+          </div>
         )}
       </div>
     </li>

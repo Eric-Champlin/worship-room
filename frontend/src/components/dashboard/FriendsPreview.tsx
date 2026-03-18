@@ -5,18 +5,13 @@ import { useFriends } from '@/hooks/useFriends'
 import { sortByWeeklyPoints, getWeeklyPoints } from '@/utils/leaderboard'
 import { getActivityLog, getFaithPoints } from '@/services/faith-points-storage'
 import { splitDisplayName } from '@/components/friends/utils'
+import { MilestoneFeed } from '@/components/social/MilestoneFeed'
 
 const RANK_COLORS: Record<number, string> = {
   1: 'text-[#FFD700]',
   2: 'text-[#C0C0C0]',
   3: 'text-[#CD7F32]',
 }
-
-const MOCK_MILESTONES = [
-  { id: 'm1', text: 'Maria L. reached Oak level', time: '2h ago' },
-  { id: 'm2', text: 'Grace H. earned 7-Day Streak badge', time: '1d ago' },
-  { id: 'm3', text: 'Joshua B. hit 12,000 Faith Points', time: '3d ago' },
-]
 
 export function FriendsPreview() {
   const { friends } = useFriends()
@@ -108,13 +103,7 @@ export function FriendsPreview() {
 
       {/* Milestone feed */}
       <div className="border-t border-white/10 my-2" />
-      <div className="space-y-1.5">
-        {MOCK_MILESTONES.slice(0, 2).map((milestone) => (
-          <p key={milestone.id} className="text-xs text-white/40">
-            {milestone.text} &middot; {milestone.time}
-          </p>
-        ))}
-      </div>
+      <MilestoneFeed maxItems={3} />
     </div>
   )
 }

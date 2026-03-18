@@ -5,6 +5,23 @@ import { MemoryRouter } from 'react-router-dom'
 import type { FriendProfile } from '@/types/dashboard'
 import { FriendList } from '../FriendList'
 
+// FriendRow now uses EncourageButton which requires AuthProvider + ToastProvider
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    user: { name: 'Test', id: 'test-user' },
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
+}))
+
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({
+    showToast: vi.fn(),
+    showCelebrationToast: vi.fn(),
+  }),
+}))
+
 const FRIENDS: FriendProfile[] = [
   {
     id: 'friend-1',

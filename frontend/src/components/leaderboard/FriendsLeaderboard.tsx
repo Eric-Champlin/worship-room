@@ -76,6 +76,7 @@ export function FriendsLeaderboard() {
             isCurrentUser={entry.id === user?.id}
             metric={timeRange === 'weekly' ? 'weekly' : 'allTime'}
             index={index}
+            showEncourage
           />
         ))}
       </ol>

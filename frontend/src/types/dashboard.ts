@@ -118,3 +118,46 @@ export interface LeaderboardEntry {
   levelName: string;
   badgeCount: number;
 }
+
+// Social Interactions types (Spec 11)
+
+export type MilestoneEventType = 'streak_milestone' | 'level_up' | 'badge_earned' | 'points_milestone';
+
+export interface MilestoneEvent {
+  id: string;
+  type: MilestoneEventType;
+  userId: string;
+  displayName: string;
+  avatar: string;
+  detail: string;
+  timestamp: string;
+}
+
+export interface Encouragement {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface Nudge {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  timestamp: string;
+}
+
+export interface SocialInteractionsData {
+  encouragements: Encouragement[];
+  nudges: Nudge[];
+  recapDismissals: string[];
+}
+
+export interface NotificationEntry {
+  id: string;
+  type: 'encouragement' | 'nudge' | 'friend_milestone' | 'weekly_recap' | 'friend_request' | 'milestone' | 'level_up';
+  message: string;
+  timestamp: string;
+  read: boolean;
+}

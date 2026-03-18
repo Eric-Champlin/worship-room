@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Flame, MoreVertical, Sprout, Leaf, Flower2, TreePine, Trees, Landmark } from 'lucide-react'
 import type { FriendProfile } from '@/types/dashboard'
 import { Avatar } from '@/components/prayer-wall/Avatar'
+import { EncourageButton } from '@/components/social/EncourageButton'
+import { NudgeButton } from '@/components/social/NudgeButton'
 import { FriendMenu } from './FriendMenu'
 import { splitDisplayName, formatFriendActivity } from './utils'
 
@@ -96,7 +98,18 @@ export function FriendRow({ friend, onRemove, onBlock }: FriendRowProps) {
             )}
             <span className="text-white/40">{activityText}</span>
           </div>
+          {/* Nudge — only for inactive friends */}
+          <NudgeButton
+            friendId={friend.id}
+            friendName={friend.displayName}
+            lastActive={friend.lastActive}
+          />
         </div>
+        {/* Encourage button */}
+        <EncourageButton
+          friendId={friend.id}
+          friendName={friend.displayName}
+        />
         {/* Three-dot menu trigger */}
         <div className="relative flex-shrink-0">
           <button
