@@ -65,7 +65,7 @@ describe('DashboardWidgetGrid', () => {
 
   it('renders StreakCard in streak-points card', () => {
     renderGrid()
-    expect(screen.getByText('Start your streak today')).toBeInTheDocument()
+    expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
     expect(screen.getByText('0 Faith Points')).toBeInTheDocument()
   })
 

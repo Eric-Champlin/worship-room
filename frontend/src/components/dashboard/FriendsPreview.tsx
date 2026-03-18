@@ -4,8 +4,10 @@ import { UserPlus } from 'lucide-react'
 import { useFriends } from '@/hooks/useFriends'
 import { sortByWeeklyPoints, getWeeklyPoints } from '@/utils/leaderboard'
 import { getActivityLog, getFaithPoints } from '@/services/faith-points-storage'
+import { getLocalDateString, getYesterdayDateString } from '@/utils/date'
 import { splitDisplayName } from '@/components/friends/utils'
 import { MilestoneFeed } from '@/components/social/MilestoneFeed'
+import { CircleNetwork } from './CircleNetwork'
 
 const RANK_COLORS: Record<number, string> = {
   1: 'text-[#FFD700]',
@@ -48,17 +50,43 @@ export function FriendsPreview() {
     return { topThree: top, userRank: rank, userWeeklyPoints: weeklyPts }
   }, [friends])
 
+  // "You vs. Yesterday" data — used in empty state
+  const youVsYesterday = useMemo(() => {
+    const activities = getActivityLog()
+    const todayKey = getLocalDateString()
+    const yesterdayKey = getYesterdayDateString()
+    const todayPts = activities[todayKey]?.pointsEarned ?? 0
+    const yesterdayPts = activities[yesterdayKey]?.pointsEarned ?? 0
+    return { todayPts, yesterdayPts }
+  }, [])
+
   if (friends.length === 0) {
+    const { todayPts, yesterdayPts } = youVsYesterday
+    const arrow = todayPts > yesterdayPts ? '↑' : todayPts < yesterdayPts ? '↓' : '→'
+
     return (
-      <div className="flex flex-col items-center py-4 text-center">
-        <p className="mb-3 text-sm text-white/50">Add friends to see your leaderboard</p>
+      <div className="flex flex-col items-center gap-4 py-4 text-center">
+        <CircleNetwork size="small" />
+        <p className="text-sm text-white/60">Faith grows stronger together</p>
         <Link
           to="/friends?tab=friends"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt"
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
         >
           <UserPlus className="h-4 w-4" aria-hidden="true" />
           Invite a friend
         </Link>
+
+        {/* You vs. Yesterday */}
+        <div className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/50">You vs. Yesterday</p>
+          <div className="flex items-center justify-center gap-4 text-sm text-white/70">
+            <span>Today: {todayPts} pts</span>
+            <span className="text-lg" aria-label={todayPts > yesterdayPts ? 'Up from yesterday' : todayPts < yesterdayPts ? 'Down from yesterday' : 'Same as yesterday'}>
+              {arrow}
+            </span>
+            <span>Yesterday: {yesterdayPts} pts</span>
+          </div>
+        </div>
       </div>
     )
   }

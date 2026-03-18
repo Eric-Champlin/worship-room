@@ -130,6 +130,14 @@ export default {
           '50%': { transform: 'rotate(-10deg)' },
           '75%': { transform: 'rotate(5deg)' },
         },
+        'streak-bump': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.1)' },
+        },
+        'check-fill': {
+          '0%': { fillOpacity: '0' },
+          '100%': { fillOpacity: '1' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -155,6 +163,8 @@ export default {
         'confetti-burst': 'confetti-burst 1.5s ease-out forwards',
         'continue-fade-in': 'continue-fade-in 400ms ease-in forwards',
         'bell-ring': 'bell-ring 300ms ease-in-out',
+        'streak-bump': 'streak-bump 300ms ease-out',
+        'check-fill': 'check-fill 200ms ease-out forwards',
       },
     },
   },

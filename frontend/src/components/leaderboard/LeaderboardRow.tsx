@@ -50,7 +50,7 @@ export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index, sho
 
   return (
     <li
-      className={`group motion-safe:opacity-0 motion-safe:animate-fade-in ${
+      className={`group motion-safe:opacity-0 motion-safe:animate-fade-in transition-transform duration-300 ease-in-out motion-reduce:transition-none ${
         isCurrentUser ? 'rounded-lg border-l-2 border-primary bg-primary/10' : ''
       }`}
       style={{ animationDelay: `${delay}ms`, animationDuration: '300ms' }}

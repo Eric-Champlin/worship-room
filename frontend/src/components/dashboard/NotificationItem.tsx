@@ -139,7 +139,7 @@ export function NotificationItem({
       {/* Content */}
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-white/90 line-clamp-2">{notification.message}</p>
-        <p className="mt-0.5 text-xs text-white/40">{timeAgo(notification.timestamp)}</p>
+        <p className="mt-0.5 text-xs text-white/50">{timeAgo(notification.timestamp)}</p>
 
         {/* Friend request actions */}
         {isFriendRequest && !isAlreadyFriend && (
@@ -166,7 +166,7 @@ export function NotificationItem({
         )}
 
         {isFriendRequest && isAlreadyFriend && (
-          <p className="mt-2 text-xs text-white/40">Already friends</p>
+          <p className="mt-2 text-xs text-white/50">Already friends</p>
         )}
       </div>
 

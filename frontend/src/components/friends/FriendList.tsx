@@ -1,6 +1,6 @@
-import { Users } from 'lucide-react'
 import type { FriendProfile } from '@/types/dashboard'
 import { FriendRow } from './FriendRow'
+import { CircleNetwork } from '@/components/dashboard/CircleNetwork'
 
 interface FriendListProps {
   friends: FriendProfile[]
@@ -21,9 +21,11 @@ export function FriendList({
     return (
       <section aria-label="Friends list">
         <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 py-12 text-center">
-          <Users className="mb-4 h-12 w-12 text-white/20" aria-hidden="true" />
+          <div className="mb-4">
+            <CircleNetwork size="large" />
+          </div>
           <h3 className="mb-2 text-lg font-semibold text-white">
-            Your faith community starts here
+            Invite someone to grow together
           </h3>
           <p className="mb-6 text-sm text-white/50">
             Invite friends or search for people you know

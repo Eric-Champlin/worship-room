@@ -68,7 +68,7 @@ export function DashboardCard({
     <section
       aria-labelledby={titleId}
       className={cn(
-        'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6',
+        'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6 transition-colors duration-150 hover:border-white/20 motion-reduce:transition-none',
         className,
       )}
     >

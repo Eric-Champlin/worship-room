@@ -123,6 +123,15 @@
   }
 }
 
+/* Dark-themed thin scrollbar for dashboard panels */
+.dark-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.dark-scrollbar::-webkit-scrollbar { width: 6px; }
+.dark-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.dark-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+
 @media (forced-colors: active) {
   .hero-gradient-text {
     -webkit-text-fill-color: CanvasText;

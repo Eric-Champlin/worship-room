@@ -93,12 +93,10 @@ export function NotificationPanel({
       {/* Notification list or empty state */}
       {notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[200px] px-4 py-8">
-          <span className="text-3xl mb-3" aria-hidden="true">🎉</span>
-          <p className="text-white text-lg font-medium">All caught up!</p>
-          <p className="text-white/40 text-sm mt-1">We'll let you know when something happens</p>
+          <p className="text-lg text-white/60">All caught up! 🎉</p>
         </div>
       ) : (
-        <div role="list" className="overflow-y-auto flex-1 divide-y divide-white/10" style={{ scrollbarGutter: 'stable' }}>
+        <div role="list" className="dark-scrollbar overflow-y-auto flex-1 divide-y divide-white/10" style={{ scrollbarGutter: 'stable' }}>
           {notifications.map((notification) => (
             <NotificationItem
               key={notification.id}

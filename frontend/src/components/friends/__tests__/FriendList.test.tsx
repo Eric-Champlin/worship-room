@@ -140,7 +140,7 @@ describe('FriendList', () => {
 
   it('empty state renders when no friends', () => {
     renderFriendList([])
-    expect(screen.getByText('Your faith community starts here')).toBeInTheDocument()
+    expect(screen.getByText('Invite someone to grow together')).toBeInTheDocument()
     expect(screen.getByText('Invite a Friend')).toBeInTheDocument()
     expect(screen.getByText('Search for friends')).toBeInTheDocument()
   })

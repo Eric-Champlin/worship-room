@@ -204,7 +204,7 @@ describe('Friends Page', () => {
     localStorage.setItem(FRIENDS_KEY, JSON.stringify(emptyData))
 
     renderFriends()
-    expect(screen.getByText('Your faith community starts here')).toBeInTheDocument()
+    expect(screen.getByText('Invite someone to grow together')).toBeInTheDocument()
     expect(screen.getByText('Invite a Friend')).toBeInTheDocument()
   })
 

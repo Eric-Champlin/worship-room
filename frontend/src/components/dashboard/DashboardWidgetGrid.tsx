@@ -11,9 +11,11 @@ import { WeeklyRecap } from './WeeklyRecap'
 
 interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
+  justCompletedCheckIn?: boolean
+  onRequestCheckIn?: () => void
 }
 
-export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
+export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false, onRequestCheckIn }: DashboardWidgetGridProps) {
   const { isVisible: recapVisible, hasFriends: recapHasFriends } = useWeeklyRecap()
   const {
     currentStreak,
@@ -36,7 +38,7 @@ export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
           action={{ label: 'See More', to: '/insights' }}
           className="order-2 lg:order-1 lg:col-span-3"
         >
-          <MoodChart />
+          <MoodChart onRequestCheckIn={onRequestCheckIn} />
         </DashboardCard>
 
         <DashboardCard
@@ -53,6 +55,7 @@ export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
             levelName={levelName}
             pointsToNextLevel={pointsToNextLevel}
             todayMultiplier={todayMultiplier}
+            animate={justCompletedCheckIn}
           />
         </DashboardCard>
 
@@ -65,6 +68,7 @@ export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
           <ActivityChecklist
             todayActivities={todayActivities}
             todayMultiplier={todayMultiplier}
+            animate={justCompletedCheckIn}
           />
         </DashboardCard>
 

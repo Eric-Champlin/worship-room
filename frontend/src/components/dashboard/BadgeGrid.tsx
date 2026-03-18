@@ -103,6 +103,7 @@ function BadgeCell({ badge, earned }: BadgeCellProps) {
           'h-14 w-14 sm:h-16 sm:w-16 lg:h-20 lg:w-20',
           isEarned ? config.bgColor : 'bg-white/5',
           !isEarned && 'opacity-40 grayscale',
+          isEarned && badge.id === 'welcome' && 'motion-safe:animate-golden-glow',
         )}
         style={isEarned ? { boxShadow: `0 0 12px ${config.glowColor}` } : undefined}
       >
@@ -168,10 +169,10 @@ export function BadgeGrid({ onClose }: BadgeGridProps) {
       </div>
 
       {/* Sections */}
-      <div className="max-h-[60vh] overflow-y-auto">
+      <div className="dark-scrollbar max-h-[60vh] overflow-y-auto">
         {BADGE_GRID_SECTIONS.map((section) => (
           <div key={section.label} className="mb-6 last:mb-0">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/40">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/50">
               {section.label}
             </p>
             <div className="grid grid-cols-4 gap-3 sm:grid-cols-5 lg:grid-cols-6">
@@ -190,6 +191,13 @@ export function BadgeGrid({ onClose }: BadgeGridProps) {
           </div>
         ))}
       </div>
+
+      {/* Encouragement when few badges earned */}
+      {earnedCount <= 1 && (
+        <p className="mt-4 text-center text-sm text-white/60">
+          Your collection is just beginning
+        </p>
+      )}
     </div>
   )
 }

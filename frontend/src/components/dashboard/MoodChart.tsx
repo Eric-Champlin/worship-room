@@ -94,7 +94,11 @@ const EMPTY_STATE_DATA: MoodChartDataPoint[] = [
   { date: '', dayLabel: 'Sun', mood: 5, moodLabel: 'Thriving', color: '#34D399' },
 ];
 
-function MoodChartEmptyState() {
+interface MoodChartEmptyStateProps {
+  onRequestCheckIn?: () => void;
+}
+
+function MoodChartEmptyState({ onRequestCheckIn }: MoodChartEmptyStateProps) {
   return (
     <div className="relative">
       <div className="opacity-[0.15]" aria-hidden="true">
@@ -130,14 +134,27 @@ function MoodChartEmptyState() {
           </ResponsiveContainer>
         </div>
       </div>
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
         <p className="text-sm text-white/50">Your mood journey starts today</p>
+        {onRequestCheckIn && (
+          <button
+            type="button"
+            onClick={onRequestCheckIn}
+            className="text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+          >
+            Check in now
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-export function MoodChart() {
+interface MoodChartProps {
+  onRequestCheckIn?: () => void;
+}
+
+export function MoodChart({ onRequestCheckIn }: MoodChartProps) {
   const data = useMoodChartData(7);
   const hasData = data.some((d) => d.mood !== null);
 
@@ -154,7 +171,7 @@ export function MoodChart() {
   }, []);
 
   if (!hasData) {
-    return <MoodChartEmptyState />;
+    return <MoodChartEmptyState onRequestCheckIn={onRequestCheckIn} />;
   }
 
   const checkedInCount = data.filter((d) => d.mood !== null).length;

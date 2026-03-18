@@ -136,12 +136,13 @@ describe('FriendsPreview', () => {
     expect(milestoneList).toBeInTheDocument()
   })
 
-  it('shows empty state with CTA when no friends', () => {
+  it('shows empty state with circle network, message, CTA, and "You vs. Yesterday" when no friends', () => {
     seedFriends([])
     renderPreview()
-    expect(screen.getByText('Add friends to see your leaderboard')).toBeInTheDocument()
+    expect(screen.getByText('Faith grows stronger together')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Invite a friend/i })
     expect(link).toHaveAttribute('href', '/friends?tab=friends')
+    expect(screen.getByText('You vs. Yesterday')).toBeInTheDocument()
   })
 
   it('works with friends who have 0 weekly points', () => {

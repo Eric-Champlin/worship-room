@@ -38,9 +38,10 @@ describe('StreakCard', () => {
     expect(screen.getByText('day streak')).toBeInTheDocument()
   })
 
-  it('shows "Start your streak today" when streak is 0', () => {
+  it('shows "A new streak starts today" when streak is 0', () => {
     renderCard({ currentStreak: 0 })
-    expect(screen.getByText('Start your streak today')).toBeInTheDocument()
+    expect(screen.getByText('0')).toBeInTheDocument()
+    expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
     const flame = document.querySelector('.text-white\\/30')
     expect(flame).toBeInTheDocument()
   })
@@ -243,35 +244,36 @@ describe('StreakCard', () => {
     expect(screen.queryByText('Badge Collection')).not.toBeInTheDocument()
   })
 
-  it('streak reset message shows when currentStreak=0 and longestStreak=14', () => {
+  it('shows "A new streak starts today" when currentStreak=0 regardless of longestStreak', () => {
     renderCard({ currentStreak: 0, longestStreak: 14 })
-    expect(screen.getByText('Every day is a new beginning. Start fresh today.')).toBeInTheDocument()
+    expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
   })
 
-  it('streak reset message shows when currentStreak=1 and longestStreak=14', () => {
+  it('shows "Every day is a new beginning" when streak=1, longest>1 (returning user)', () => {
     renderCard({ currentStreak: 1, longestStreak: 14 })
     expect(screen.getByText('Every day is a new beginning. Start fresh today.')).toBeInTheDocument()
   })
 
-  it('no reset message when currentStreak=2 and longestStreak=14', () => {
+  it('no encouragement message when currentStreak >= 2', () => {
     renderCard({ currentStreak: 2, longestStreak: 14 })
     expect(screen.queryByText(/Every day is a new beginning/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Every journey begins/)).not.toBeInTheDocument()
   })
 
-  it('no reset message for new users (currentStreak=0, longestStreak=0)', () => {
+  it('shows "A new streak starts today" for new users (currentStreak=0, longestStreak=0)', () => {
     renderCard({ currentStreak: 0, longestStreak: 0 })
-    expect(screen.queryByText(/Every day is a new beginning/)).not.toBeInTheDocument()
+    expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
   })
 
-  it('no reset message for new users (currentStreak=1, longestStreak=1)', () => {
+  it('shows "Every journey begins" for first-time streak=1 (longestStreak=1)', () => {
     renderCard({ currentStreak: 1, longestStreak: 1 })
-    expect(screen.queryByText(/Every day is a new beginning/)).not.toBeInTheDocument()
+    expect(screen.getByText('Every journey begins with a single step')).toBeInTheDocument()
   })
 
-  it('longest streak still displays alongside reset message', () => {
+  it('longest streak still displays alongside encouragement message', () => {
     renderCard({ currentStreak: 0, longestStreak: 14 })
     expect(screen.getByText('Longest: 14 days')).toBeInTheDocument()
-    expect(screen.getByText('Every day is a new beginning. Start fresh today.')).toBeInTheDocument()
+    expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
   })
 
   it('badge names resolved from BADGE_MAP', () => {

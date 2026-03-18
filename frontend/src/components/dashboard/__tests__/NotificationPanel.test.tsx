@@ -139,8 +139,7 @@ describe('NotificationPanel', () => {
 
   it('empty state renders when no notifications', () => {
     renderPanel({ notifications: [], unreadCount: 0 })
-    expect(screen.getByText('All caught up!')).toBeInTheDocument()
-    expect(screen.getByText("We'll let you know when something happens")).toBeInTheDocument()
+    expect(screen.getByText(/All caught up!/)).toBeInTheDocument()
   })
 
   it('panel has role="dialog" and aria-label', () => {

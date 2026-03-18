@@ -8,34 +8,60 @@ import { CelebrationQueue } from '@/components/dashboard/CelebrationQueue'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { hasCheckedInToday } from '@/services/mood-storage'
 import type { MoodEntry } from '@/types/dashboard'
 
+type DashboardPhase = 'check_in' | 'dashboard_enter' | 'dashboard'
+
+const DASHBOARD_ENTER_DURATION_MS = 800
+
 export function Dashboard() {
   const { user } = useAuth()
-  const [showCheckIn, setShowCheckIn] = useState(() => !hasCheckedInToday())
+  const prefersReduced = useReducedMotion()
   const checkedRef = useRef(false)
+
+  const [phase, setPhase] = useState<DashboardPhase>(() =>
+    hasCheckedInToday() ? 'dashboard' : 'check_in',
+  )
 
   const faithPoints = useFaithPoints()
 
   useEffect(() => {
     if (!checkedRef.current) {
       checkedRef.current = true
-      setShowCheckIn(!hasCheckedInToday())
+      setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
     }
   }, [])
 
+  // Auto-advance from dashboard_enter to dashboard
+  useEffect(() => {
+    if (phase !== 'dashboard_enter') return
+    if (prefersReduced) {
+      setPhase('dashboard')
+      return
+    }
+    const timer = setTimeout(() => {
+      setPhase('dashboard')
+    }, DASHBOARD_ENTER_DURATION_MS)
+    return () => clearTimeout(timer)
+  }, [phase, prefersReduced])
+
   const handleCheckInComplete = (_entry: MoodEntry) => {
-    setShowCheckIn(false)
+    setPhase(prefersReduced ? 'dashboard' : 'dashboard_enter')
   }
 
   const handleCheckInSkip = () => {
-    setShowCheckIn(false)
+    setPhase('dashboard')
+  }
+
+  const handleRequestCheckIn = () => {
+    setPhase('check_in')
   }
 
   if (!user) return null
 
-  if (showCheckIn) {
+  if (phase === 'check_in') {
     return (
       <MoodCheckIn
         userName={user.name}
@@ -44,6 +70,8 @@ export function Dashboard() {
       />
     )
   }
+
+  const justCompletedCheckIn = phase === 'dashboard_enter'
 
   return (
     <div className="min-h-screen bg-[#0f0a1e]">
@@ -56,10 +84,21 @@ export function Dashboard() {
       <Navbar transparent />
       <main
         id="main-content"
-        className="animate-fade-in motion-reduce:animate-none"
+        className="motion-safe:animate-fade-in motion-reduce:animate-none"
       >
-        <DashboardHero userName={user.name} />
-        <DashboardWidgetGrid faithPoints={faithPoints} />
+        <DashboardHero
+          userName={user.name}
+          currentStreak={faithPoints.currentStreak}
+          levelName={faithPoints.levelName}
+          totalPoints={faithPoints.totalPoints}
+          pointsToNextLevel={faithPoints.pointsToNextLevel}
+          currentLevel={faithPoints.currentLevel}
+        />
+        <DashboardWidgetGrid
+          faithPoints={faithPoints}
+          justCompletedCheckIn={justCompletedCheckIn}
+          onRequestCheckIn={handleRequestCheckIn}
+        />
       </main>
       <SiteFooter />
       <CelebrationQueue

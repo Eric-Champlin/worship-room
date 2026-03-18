@@ -88,7 +88,7 @@ describe('Dashboard widgets integration', () => {
   it('fresh user: shows 0/6, Start your streak, 0 Faith Points, Seedling', () => {
     renderWidgetGrid()
     expect(screen.getByText('0/6')).toBeInTheDocument()
-    expect(screen.getByText('Start your streak today')).toBeInTheDocument()
+    expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
     expect(screen.getByText('0 Faith Points')).toBeInTheDocument()
     expect(screen.getByText('Seedling')).toBeInTheDocument()
     expect(screen.getByText('Complete 2 activities for 1.25x bonus!')).toBeInTheDocument()
@@ -138,7 +138,7 @@ describe('Dashboard widgets integration', () => {
     renderWidgetGrid()
 
     expect(screen.getByText('Lighthouse — Max Level')).toBeInTheDocument()
-    expect(screen.getByText('12000 Faith Points')).toBeInTheDocument()
+    expect(screen.getByText('12,000 Faith Points')).toBeInTheDocument()
     const progressBar = screen.getByRole('progressbar', { name: /maximum level/i })
     expect(progressBar).toBeInTheDocument()
   })
@@ -146,7 +146,7 @@ describe('Dashboard widgets integration', () => {
   it('unauthenticated: shows default state', () => {
     renderWidgetGrid(false)
     expect(screen.getByText('0/6')).toBeInTheDocument()
-    expect(screen.getByText('Start your streak today')).toBeInTheDocument()
+    expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
     expect(screen.getByText('0 Faith Points')).toBeInTheDocument()
   })
 })

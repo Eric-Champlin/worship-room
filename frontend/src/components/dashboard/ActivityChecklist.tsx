@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { CircleCheck, Circle } from 'lucide-react'
 import { ACTIVITY_CHECKLIST_NAMES, ACTIVITY_POINTS } from '@/constants/dashboard/activity-points'
 import type { ActivityType } from '@/types/dashboard'
@@ -6,6 +7,7 @@ interface ActivityChecklistProps {
   todayActivities: Record<ActivityType, boolean>
   // todayMultiplier is passed through for Spec 8 celebrations (multiplier tier-crossing animations)
   todayMultiplier: number
+  animate?: boolean
 }
 
 // Ordered from lowest to highest points
@@ -48,15 +50,33 @@ function getMultiplierPreview(completedCount: number): {
 export function ActivityChecklist({
   todayActivities,
   todayMultiplier,
+  animate = false,
 }: ActivityChecklistProps) {
   const completedCount = ACTIVITY_ORDER.filter((t) => todayActivities[t]).length
-  const strokeDashoffset = RING_CIRCUMFERENCE * (1 - completedCount / 6)
+  const targetOffset = RING_CIRCUMFERENCE * (1 - completedCount / 6)
   const multiplierPreview = getMultiplierPreview(completedCount)
 
   // Check for reduced motion preference
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  // Animate progress ring from 0% on entry
+  const [ringOffset, setRingOffset] = useState(
+    animate && !prefersReducedMotion ? RING_CIRCUMFERENCE : targetOffset,
+  )
+
+  useEffect(() => {
+    if (animate && !prefersReducedMotion) {
+      // Brief delay then animate to current value
+      const timer = requestAnimationFrame(() => {
+        setRingOffset(targetOffset)
+      })
+      return () => cancelAnimationFrame(timer)
+    }
+  }, [animate, prefersReducedMotion, targetOffset])
+
+  const strokeDashoffset = ringOffset
 
   return (
     <div className="space-y-3">
@@ -147,6 +167,13 @@ export function ActivityChecklist({
           })}
         </div>
       </div>
+
+      {/* New day encouragement (when all unchecked) */}
+      {completedCount === 0 && (
+        <p className="text-center text-sm text-white/50 sm:text-left">
+          A new day, a new opportunity to grow
+        </p>
+      )}
 
       {/* Multiplier preview */}
       <div className="border-t border-white/5 pt-3">

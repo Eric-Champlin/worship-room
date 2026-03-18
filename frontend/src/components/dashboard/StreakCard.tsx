@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Flame } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
+import { AnimatedCounter } from './AnimatedCounter'
 import { BadgeGrid } from './BadgeGrid'
 
 interface StreakCardProps {
@@ -13,6 +14,7 @@ interface StreakCardProps {
   levelName: string
   pointsToNextLevel: number
   todayMultiplier: number
+  animate?: boolean
 }
 
 const LEVEL_ICONS_MAP: Record<number, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
@@ -60,8 +62,31 @@ export function StreakCard({
   levelName,
   pointsToNextLevel,
   todayMultiplier,
+  animate = false,
 }: StreakCardProps) {
   const [showBadgeGrid, setShowBadgeGrid] = useState(false)
+
+  // Track previous points for live animation (not initial render, not during entry animate)
+  const prevPointsRef = useRef(totalPoints)
+  const isInitialRender = useRef(true)
+  const [liveFrom, setLiveFrom] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false
+      prevPointsRef.current = totalPoints
+      return
+    }
+    if (animate) {
+      // Entry animation handles this case
+      prevPointsRef.current = totalPoints
+      return
+    }
+    if (totalPoints !== prevPointsRef.current) {
+      setLiveFrom(prevPointsRef.current)
+      prevPointsRef.current = totalPoints
+    }
+  }, [totalPoints, animate])
 
   const LevelIcon = LEVEL_ICONS_MAP[currentLevel] ?? getBadgeIcon('level_1').icon
   const nextLevel = getNextLevelInfo(currentLevel)
@@ -78,8 +103,15 @@ export function StreakCard({
 
   const recentBadges = getRecentBadges()
 
-  // Streak reset: currentStreak <= 1 AND longestStreak > 1
-  const showStreakResetMsg = currentStreak <= 1 && longestStreak > 1
+  // Streak encouragement messages
+  function getStreakMessage(): string | null {
+    if (currentStreak === 0) return 'A new streak starts today'
+    if (currentStreak === 1 && longestStreak <= 1) return 'Every journey begins with a single step'
+    if (currentStreak === 1 && longestStreak > 1) return 'Every day is a new beginning. Start fresh today.'
+    return null
+  }
+
+  const streakMessage = getStreakMessage()
 
   return (
     <div className="space-y-4">
@@ -100,19 +132,23 @@ export function StreakCard({
             />
             <div>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-3xl font-bold text-white md:text-4xl">
-                  {currentStreak}
+                <span className={`text-3xl font-bold text-white md:text-4xl ${animate && currentStreak === 1 ? 'motion-safe:animate-streak-bump' : ''}`}>
+                  {animate ? (
+                    <AnimatedCounter from={0} to={currentStreak} duration={800} />
+                  ) : (
+                    currentStreak
+                  )}
                 </span>
                 <span className="text-sm text-white/60">
                   {currentStreak === 1 ? 'day streak' : 'days streak'}
                 </span>
               </div>
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-white/50">
                 Longest: {longestStreak} days
               </p>
-              {showStreakResetMsg && (
-                <p className="mt-1 text-sm italic text-white/50">
-                  Every day is a new beginning. Start fresh today.
+              {streakMessage && (
+                <p className="mt-1 text-sm text-white/60">
+                  {streakMessage}
                 </p>
               )}
             </div>
@@ -124,13 +160,18 @@ export function StreakCard({
               aria-hidden="true"
             />
             <div>
-              <p className="text-lg text-white/70">Start your streak today</p>
-              <p className="text-xs text-white/40">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-bold text-white md:text-4xl">
+                  0
+                </span>
+                <span className="text-sm text-white/60">day streak</span>
+              </div>
+              <p className="text-xs text-white/50">
                 Longest: {longestStreak} days
               </p>
-              {showStreakResetMsg && (
-                <p className="mt-1 text-sm italic text-white/50">
-                  Every day is a new beginning. Start fresh today.
+              {streakMessage && (
+                <p className="mt-1 text-sm text-white/60">
+                  {streakMessage}
                 </p>
               )}
             </div>
@@ -142,7 +183,13 @@ export function StreakCard({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold text-white">
-            {totalPoints} Faith Points
+            {animate ? (
+              <><AnimatedCounter from={0} to={totalPoints} duration={600} /> Faith Points</>
+            ) : liveFrom !== null ? (
+              <><AnimatedCounter from={liveFrom} to={totalPoints} duration={600} key={totalPoints} /> Faith Points</>
+            ) : (
+              <>{totalPoints.toLocaleString()} Faith Points</>
+            )}
           </p>
           <div className="flex items-center gap-1.5">
             <LevelIcon className="h-5 w-5 text-primary-lt" aria-hidden="true" />
@@ -169,7 +216,7 @@ export function StreakCard({
           />
         </div>
 
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-white/50">
           {isMaxLevel
             ? 'Lighthouse — Max Level'
             : `${totalPoints} / ${nextThreshold} to ${nextLevel?.name}`}

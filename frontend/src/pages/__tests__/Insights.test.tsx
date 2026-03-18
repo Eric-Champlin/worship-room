@@ -173,9 +173,9 @@ describe('Insights — full page integration', () => {
   it('all sections show empty states when no data', () => {
     renderInsights()
 
-    // Trend chart empty
+    // Zero-data empty state replaces charts
     expect(
-      screen.getByText('Start checking in to see your mood trend'),
+      screen.getByText('Start checking in to unlock your mood insights'),
     ).toBeInTheDocument()
     // Insight cards empty
     expect(
@@ -194,7 +194,8 @@ describe('Insights — full page integration', () => {
   it('reduced motion: sections have motion-reduce classes', () => {
     const { container } = renderInsights()
     const animatedSections = container.querySelectorAll('.motion-reduce\\:animate-none')
-    expect(animatedSections.length).toBe(6)
+    // 5 sections when no data: empty state + insight cards + correlations + scripture + monthly link
+    expect(animatedSections.length).toBe(5)
   })
 
   it('time range change updates heatmap and chart', async () => {

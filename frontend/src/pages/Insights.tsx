@@ -222,22 +222,46 @@ export function Insights() {
         id="insights-content"
         className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6"
       >
-        <AnimatedSection index={0}>
-          <CalendarHeatmap rangeDays={rangeDays} />
-        </AnimatedSection>
-        <AnimatedSection index={1}>
-          <MoodTrendChart rangeDays={rangeDays} />
-        </AnimatedSection>
-        <AnimatedSection index={2}>
+        {/* Insufficient data banner (1-6 entries) */}
+        {entries.length > 0 && entries.length < 7 && (
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-sm text-white/60 backdrop-blur-sm">
+            After 7 days, you&apos;ll see trends emerge
+          </div>
+        )}
+
+        {/* Zero-data empty state */}
+        {entries.length === 0 && (
+          <AnimatedSection index={0}>
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 py-16 text-center backdrop-blur-sm">
+              <p className="text-sm text-white/50">
+                Start checking in to unlock your mood insights
+              </p>
+            </div>
+          </AnimatedSection>
+        )}
+
+        {/* Charts (only when data exists) */}
+        {entries.length > 0 && (
+          <>
+            <AnimatedSection index={0}>
+              <CalendarHeatmap rangeDays={rangeDays} />
+            </AnimatedSection>
+            <AnimatedSection index={1}>
+              <MoodTrendChart rangeDays={rangeDays} />
+            </AnimatedSection>
+          </>
+        )}
+
+        <AnimatedSection index={entries.length > 0 ? 2 : 1}>
           <InsightCards hasData={hasData} />
         </AnimatedSection>
-        <AnimatedSection index={3}>
+        <AnimatedSection index={entries.length > 0 ? 3 : 2}>
           <ActivityCorrelations hasData={hasData} />
         </AnimatedSection>
-        <AnimatedSection index={4}>
+        <AnimatedSection index={entries.length > 0 ? 4 : 3}>
           <ScriptureConnections hasData={hasData} />
         </AnimatedSection>
-        <AnimatedSection index={5}>
+        <AnimatedSection index={entries.length > 0 ? 5 : 4}>
           <div className="pt-2 text-center">
             <Link
               to="/insights/monthly"
