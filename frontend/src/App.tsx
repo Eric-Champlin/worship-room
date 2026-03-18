@@ -29,6 +29,7 @@ import { CelebrateRecovery } from './pages/CelebrateRecovery'
 import { MusicPage } from './pages/MusicPage'
 import { RoutinesPage } from './pages/RoutinesPage'
 import { Dashboard } from './pages/Dashboard'
+import { Settings } from './pages/Settings'
 import { useAuth } from '@/hooks/useAuth'
 import { lazy, Suspense } from 'react'
 
@@ -94,6 +95,7 @@ function App() {
           <Route path="/health" element={<Health />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/friends" element={<Friends />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/daily" element={<DailyHub />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />
           <Route path="/journal" element={<Navigate to="/daily?tab=journal" replace />} />
