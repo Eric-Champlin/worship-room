@@ -124,6 +124,12 @@ export default {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        'bell-ring': {
+          '0%, 100%': { transform: 'rotate(0)' },
+          '25%': { transform: 'rotate(10deg)' },
+          '50%': { transform: 'rotate(-10deg)' },
+          '75%': { transform: 'rotate(5deg)' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -148,6 +154,7 @@ export default {
         'confetti-fall': 'confetti-fall var(--confetti-duration, 3s) ease-in forwards',
         'confetti-burst': 'confetti-burst 1.5s ease-out forwards',
         'continue-fade-in': 'continue-fade-in 400ms ease-in forwards',
+        'bell-ring': 'bell-ring 300ms ease-in-out',
       },
     },
   },

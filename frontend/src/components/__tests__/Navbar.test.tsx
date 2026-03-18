@@ -316,12 +316,12 @@ describe('Navbar', () => {
     it('shows notification bell when logged in', () => {
       setLoggedIn()
       renderNavbar()
-      expect(screen.getByLabelText('Notifications')).toBeInTheDocument()
+      expect(screen.getByLabelText(/^Notifications/)).toBeInTheDocument()
     })
 
     it('bell not visible when logged out', () => {
       renderNavbar()
-      expect(screen.queryByLabelText('Notifications')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText(/^Notifications/)).not.toBeInTheDocument()
     })
 
     it('shows avatar with initial when logged in', () => {

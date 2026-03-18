@@ -4,6 +4,9 @@ import { Bell, ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
+import { useNotificationActions } from '@/hooks/useNotificationActions'
+import { NotificationBell } from '@/components/dashboard/NotificationBell'
+import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
 
 const NAV_LINKS = [
   { label: 'Daily Hub', to: '/daily' },
@@ -326,44 +329,69 @@ const MOBILE_DRAWER_EXTRA_LINKS = [
 function DesktopUserActions() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false)
+  const [isBellOpen, setIsBellOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
+  const avatarTriggerRef = useRef<HTMLButtonElement>(null)
+  const bellRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
 
-  // Close on route change
+  const closeBell = useCallback(() => setIsBellOpen(false), [])
+  const {
+    notifications, unreadCount, markAsRead, markAllAsRead, dismiss,
+    handleTap, handleAcceptFriend, handleDeclineFriend, checkIsAlreadyFriend,
+  } = useNotificationActions(closeBell)
+
+  // Close all on route change
   useEffect(() => {
-    setIsOpen(false)
+    setIsAvatarOpen(false)
+    setIsBellOpen(false)
   }, [location.pathname, location.search])
 
-  // Close on Escape
+  // Close on Escape — return focus to the relevant trigger
   useEffect(() => {
-    if (!isOpen) return
+    if (!isAvatarOpen && !isBellOpen) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsOpen(false)
-        triggerRef.current?.focus()
+        if (isBellOpen) {
+          setIsBellOpen(false)
+          bellRef.current?.querySelector('button')?.focus()
+        } else if (isAvatarOpen) {
+          setIsAvatarOpen(false)
+          avatarTriggerRef.current?.focus()
+        }
       }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen])
+  }, [isAvatarOpen, isBellOpen])
 
   // Close on outside click
   useEffect(() => {
-    if (!isOpen) return
+    if (!isAvatarOpen && !isBellOpen) return
     const handleMouseDown = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
+        setIsAvatarOpen(false)
+        setIsBellOpen(false)
       }
     }
     document.addEventListener('mousedown', handleMouseDown)
     return () => document.removeEventListener('mousedown', handleMouseDown)
-  }, [isOpen])
+  }, [isAvatarOpen, isBellOpen])
+
+  const toggleBell = () => {
+    setIsBellOpen((prev) => !prev)
+    setIsAvatarOpen(false)
+  }
+
+  const toggleAvatar = () => {
+    setIsAvatarOpen((prev) => !prev)
+    setIsBellOpen(false)
+  }
 
   const handleLogout = () => {
     logout()
-    setIsOpen(false)
+    setIsAvatarOpen(false)
     navigate('/')
   }
 
@@ -371,29 +399,43 @@ function DesktopUserActions() {
 
   return (
     <div className="hidden items-center gap-3 lg:flex" ref={wrapperRef}>
-      <button
-        type="button"
-        aria-label="Notifications"
-        className="rounded-lg p-1.5 text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      >
-        <Bell className="h-5 w-5" aria-hidden="true" />
-      </button>
+      <div ref={bellRef} className="relative">
+        <NotificationBell
+          unreadCount={unreadCount}
+          isOpen={isBellOpen}
+          onToggle={toggleBell}
+        />
+        <NotificationPanel
+          isOpen={isBellOpen}
+          onClose={() => setIsBellOpen(false)}
+          isMobile={false}
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
+          onDismiss={dismiss}
+          onAcceptFriend={handleAcceptFriend}
+          onDeclineFriend={handleDeclineFriend}
+          onTapNotification={handleTap}
+          isAlreadyFriend={checkIsAlreadyFriend}
+        />
+      </div>
 
       <div className="relative">
         <button
-          ref={triggerRef}
+          ref={avatarTriggerRef}
           type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={toggleAvatar}
           aria-haspopup="menu"
-          aria-expanded={isOpen}
-          aria-controls={isOpen ? 'user-menu-dropdown' : undefined}
+          aria-expanded={isAvatarOpen}
+          aria-controls={isAvatarOpen ? 'user-menu-dropdown' : undefined}
           aria-label="User menu"
           className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           {initial}
         </button>
 
-        {isOpen && (
+        {isAvatarOpen && (
           <div className="absolute right-0 top-full z-50 min-w-[200px] pt-2">
             <div
               id="user-menu-dropdown"
@@ -405,7 +447,7 @@ function DesktopUserActions() {
                   key={link.to}
                   to={link.to}
                   role="menuitem"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setIsAvatarOpen(false)}
                   className="flex min-h-[44px] items-center rounded px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white"
                 >
                   {link.label}
@@ -431,9 +473,10 @@ function DesktopUserActions() {
 interface MobileDrawerProps {
   isOpen: boolean
   onClose: () => void
+  onBellTap?: () => void
 }
 
-function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
+function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
   const authModal = useAuthModal()
   const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
@@ -613,6 +656,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                 <button
                   type="button"
                   aria-label="Notifications"
+                  onClick={() => { onClose(); onBellTap?.() }}
                   className="min-h-[44px] flex items-center justify-center gap-2 rounded-md px-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
                   <Bell className="h-4 w-4" aria-hidden="true" />
@@ -660,15 +704,52 @@ interface NavbarProps {
   transparent?: boolean
 }
 
+/**
+ * Auth-gated mobile notification bottom sheet.
+ * Keeps useNotificationActions (and its localStorage reads/writes) out of
+ * the always-rendered Navbar, satisfying the demo-mode "zero persistence" rule.
+ */
+function MobileNotificationSheet({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const {
+    notifications, unreadCount, markAsRead, markAllAsRead, dismiss,
+    handleTap, handleAcceptFriend, handleDeclineFriend, checkIsAlreadyFriend,
+  } = useNotificationActions(onClose)
+
+  return (
+    <NotificationPanel
+      isOpen={isOpen}
+      onClose={onClose}
+      isMobile={true}
+      notifications={notifications}
+      unreadCount={unreadCount}
+      onMarkAsRead={markAsRead}
+      onMarkAllAsRead={markAllAsRead}
+      onDismiss={dismiss}
+      onAcceptFriend={handleAcceptFriend}
+      onDeclineFriend={handleDeclineFriend}
+      onTapNotification={handleTap}
+      isAlreadyFriend={checkIsAlreadyFriend}
+    />
+  )
+}
+
 export function Navbar({ transparent = false }: NavbarProps) {
   const { isAuthenticated } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMobileBellOpen, setIsMobileBellOpen] = useState(false)
   const hamburgerRef = useRef<HTMLButtonElement>(null)
   const location = useLocation()
 
   // Close mobile menu on route change
   useEffect(() => {
     setIsMenuOpen(false)
+    setIsMobileBellOpen(false)
   }, [location.pathname])
 
   // Close mobile menu on Escape and return focus to hamburger
@@ -741,8 +822,20 @@ export function Navbar({ transparent = false }: NavbarProps) {
           />
         )}
 
-        <MobileDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+        <MobileDrawer
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          onBellTap={() => setIsMobileBellOpen(true)}
+        />
       </div>
+
+      {/* Mobile notification bottom sheet — auth-gated to prevent localStorage writes for logged-out users */}
+      {isAuthenticated && (
+        <MobileNotificationSheet
+          isOpen={isMobileBellOpen}
+          onClose={() => setIsMobileBellOpen(false)}
+        />
+      )}
     </nav>
   )
 }

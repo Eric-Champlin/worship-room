@@ -154,10 +154,25 @@ export interface SocialInteractionsData {
   recapDismissals: string[];
 }
 
+export type NotificationType =
+  | 'encouragement'
+  | 'friend_request'
+  | 'milestone'
+  | 'friend_milestone'
+  | 'nudge'
+  | 'weekly_recap'
+  | 'level_up';
+
 export interface NotificationEntry {
   id: string;
-  type: 'encouragement' | 'nudge' | 'friend_milestone' | 'weekly_recap' | 'friend_request' | 'milestone' | 'level_up';
+  type: NotificationType;
   message: string;
-  timestamp: string;
   read: boolean;
+  timestamp: string;
+  actionUrl?: string;
+  actionData?: {
+    friendRequestId?: string;
+    badgeName?: string;
+    [key: string]: unknown;
+  };
 }

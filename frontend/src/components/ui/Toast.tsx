@@ -196,7 +196,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   )
 }
 
-// --- Hook ---
+// --- Hooks ---
 
 export function useToast(): ToastContextValue {
   const context = useContext(ToastContext)
@@ -204,4 +204,19 @@ export function useToast(): ToastContextValue {
     throw new Error('useToast must be used within a ToastProvider')
   }
   return context
+}
+
+const NOOP_TOAST: ToastContextValue = {
+  showToast: () => {},
+  showCelebrationToast: () => {},
+}
+
+/**
+ * Safe variant of useToast that returns no-ops when outside ToastProvider.
+ * Use in components that may render outside the provider tree (e.g., Navbar
+ * rendered inside Layout which doesn't always have ToastProvider).
+ */
+export function useToastSafe(): ToastContextValue {
+  const context = useContext(ToastContext)
+  return context ?? NOOP_TOAST
 }
