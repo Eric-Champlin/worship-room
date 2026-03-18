@@ -1,0 +1,1 @@
+export { LeaderboardTab } from './LeaderboardTab'

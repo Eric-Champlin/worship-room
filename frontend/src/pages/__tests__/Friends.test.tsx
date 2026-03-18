@@ -7,17 +7,25 @@ import { FRIENDS_KEY } from '@/services/friends-storage'
 import type { FriendsData } from '@/types/dashboard'
 import { Friends } from '../Friends'
 
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({
+const { mockAuthFn } = vi.hoisted(() => {
+  const mockAuthFn = vi.fn(() => ({
     isAuthenticated: true,
     user: { name: 'Test User', id: 'test-user-id' },
     login: vi.fn(),
     logout: vi.fn(),
-  })),
+  }))
+  return { mockAuthFn }
+})
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: mockAuthFn,
 }))
 
-import { useAuth } from '@/hooks/useAuth'
-const mockUseAuth = vi.mocked(useAuth)
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: mockAuthFn,
+}))
+
+const mockUseAuth = mockAuthFn
 
 function renderFriends(initialEntry = '/friends') {
   return render(
@@ -73,11 +81,14 @@ describe('Friends Page', () => {
     expect(leaderboardTab).toHaveAttribute('aria-selected', 'false')
   })
 
-  it('tab switching shows leaderboard placeholder', async () => {
+  it('tab switching shows leaderboard content', async () => {
     const user = userEvent.setup()
     renderFriends()
     await user.click(screen.getByRole('tab', { name: 'Leaderboard' }))
-    expect(screen.getByText('Leaderboard coming soon')).toBeInTheDocument()
+    // Real leaderboard content renders (board selector with Friends/Global segments)
+    const tablist = screen.getAllByRole('tablist')
+    // Page-level tablist + board selector tablist
+    expect(tablist.length).toBeGreaterThanOrEqual(2)
   })
 
   it('back link navigates to dashboard', () => {

@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Trophy } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
@@ -13,6 +13,7 @@ import {
 } from '@/components/friends'
 import { useAuth } from '@/hooks/useAuth'
 import { useFriends } from '@/hooks/useFriends'
+import { LeaderboardTab } from '@/components/leaderboard'
 
 type FriendsTab = 'friends' | 'leaderboard'
 
@@ -21,14 +22,6 @@ const TAB_CONFIG: { id: FriendsTab; label: string }[] = [
   { id: 'leaderboard', label: 'Leaderboard' },
 ]
 
-function LeaderboardPlaceholder() {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <Trophy className="mb-4 h-12 w-12 text-white/20" aria-hidden="true" />
-      <p className="text-white/40">Leaderboard coming soon</p>
-    </div>
-  )
-}
 
 export function Friends() {
   const { isAuthenticated } = useAuth()
@@ -166,7 +159,7 @@ export function Friends() {
           aria-labelledby="tab-leaderboard"
           hidden={activeTab !== 'leaderboard'}
         >
-          {activeTab === 'leaderboard' && <LeaderboardPlaceholder />}
+          {activeTab === 'leaderboard' && <LeaderboardTab />}
         </div>
       </main>
 

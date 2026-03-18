@@ -69,7 +69,7 @@ export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
           id="friends-preview"
           title="Friends & Leaderboard"
           icon={<Users className="h-5 w-5" />}
-          action={{ label: 'See all', to: '/friends' }}
+          action={{ label: 'See all', to: '/friends?tab=leaderboard' }}
           className="order-4 lg:col-span-2"
         >
           <FriendsPreview />

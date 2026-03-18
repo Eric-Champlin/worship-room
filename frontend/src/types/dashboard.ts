@@ -106,3 +106,15 @@ export interface FriendsData {
   pendingOutgoing: FriendRequest[];
   blocked: string[];
 }
+
+// Leaderboard types (Spec 10)
+
+export interface LeaderboardEntry {
+  id: string;
+  displayName: string;
+  weeklyPoints: number;
+  totalPoints: number;
+  level: number;
+  levelName: string;
+  badgeCount: number;
+}
