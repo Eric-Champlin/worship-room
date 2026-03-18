@@ -77,3 +77,32 @@ export interface BadgeDefinition {
   repeatable?: boolean;
   verse?: { text: string; reference: string };
 }
+
+// Friends types (Spec 9)
+
+export interface FriendProfile {
+  id: string;
+  displayName: string;
+  avatar: string;
+  level: number;
+  levelName: string;
+  currentStreak: number;
+  faithPoints: number;
+  weeklyPoints: number;
+  lastActive: string;
+}
+
+export interface FriendRequest {
+  id: string;
+  from: FriendProfile;
+  to: FriendProfile;
+  sentAt: string;
+  message?: string;
+}
+
+export interface FriendsData {
+  friends: FriendProfile[];
+  pendingIncoming: FriendRequest[];
+  pendingOutgoing: FriendRequest[];
+  blocked: string[];
+}

@@ -226,15 +226,15 @@ describe('getFriendCount', () => {
     expect(getFriendCount()).toBe(0);
   });
 
-  it('counts accepted friends', () => {
+  it('counts all friends in friends array', () => {
     localStorage.setItem('wr_friends', JSON.stringify({
       friends: [
-        { id: '1', status: 'accepted' },
-        { id: '2', status: 'accepted' },
-        { id: '3', status: 'pending' },
+        { id: '1', displayName: 'A' },
+        { id: '2', displayName: 'B' },
+        { id: '3', displayName: 'C' },
       ],
     }));
-    expect(getFriendCount()).toBe(2);
+    expect(getFriendCount()).toBe(3);
   });
 });
 

@@ -5,12 +5,7 @@ import { MoodChart } from './MoodChart'
 import { QuickActions } from './QuickActions'
 import { StreakCard } from './StreakCard'
 import { ActivityChecklist } from './ActivityChecklist'
-
-function Placeholder({ text }: { text: string }) {
-  return (
-    <p className="py-8 text-center text-sm italic text-white/30">{text}</p>
-  )
-}
+import { FriendsPreview } from './FriendsPreview'
 
 interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
@@ -77,7 +72,7 @@ export function DashboardWidgetGrid({ faithPoints }: DashboardWidgetGridProps) {
           action={{ label: 'See all', to: '/friends' }}
           className="order-4 lg:col-span-2"
         >
-          <Placeholder text="Coming in Spec 9" />
+          <FriendsPreview />
         </DashboardCard>
 
         <DashboardCard

@@ -165,10 +165,7 @@ export function getFriendCount(): number {
     if (!raw) return 0;
     const parsed = JSON.parse(raw);
     if (!parsed || !Array.isArray(parsed.friends)) return 0;
-    // Count mutual friends (status === 'accepted')
-    return parsed.friends.filter(
-      (f: { status?: string }) => f.status === 'accepted',
-    ).length;
+    return parsed.friends.length;
   } catch {
     return 0;
   }

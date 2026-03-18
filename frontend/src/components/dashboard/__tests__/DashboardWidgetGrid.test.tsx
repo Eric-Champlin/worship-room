@@ -74,9 +74,13 @@ describe('DashboardWidgetGrid', () => {
     expect(screen.getByText('Log your mood')).toBeInTheDocument()
   })
 
-  it('friends-preview card still shows placeholder', () => {
+  it('friends-preview card shows FriendsPreview widget', () => {
     renderGrid()
-    expect(screen.getByText('Coming in Spec 9')).toBeInTheDocument()
+    // Mock data auto-seeds 10 friends; preview shows top 3 by lastActive
+    // Joshua B. (15m ago), Maria L. (30m ago), Grace H. (1h ago)
+    expect(screen.getByText('Joshua B.')).toBeInTheDocument()
+    expect(screen.getByText('Maria L.')).toBeInTheDocument()
+    expect(screen.getByText('Grace H.')).toBeInTheDocument()
   })
 
   it('mood chart card renders MoodChart component (empty state)', () => {
