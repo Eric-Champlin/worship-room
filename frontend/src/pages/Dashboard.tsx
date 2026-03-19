@@ -12,6 +12,9 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { hasCheckedInToday } from '@/services/mood-storage'
 import { isOnboardingComplete } from '@/services/onboarding-storage'
 import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
+import { TooltipCallout } from '@/components/ui/TooltipCallout'
+import { useTooltipCallout } from '@/hooks/useTooltipCallout'
+import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import type { MoodEntry } from '@/types/dashboard'
 
 type DashboardPhase = 'onboarding' | 'check_in' | 'dashboard_enter' | 'dashboard'
@@ -70,6 +73,10 @@ export function Dashboard() {
     setPhase('check_in')
   }
 
+  // Tooltip for Quick Actions widget
+  const quickActionsRef = useRef<HTMLDivElement>(null)
+  const quickActionsTooltip = useTooltipCallout('dashboard-quick-actions', quickActionsRef)
+
   if (!user) return null
 
   if (phase === 'onboarding') {
@@ -118,8 +125,19 @@ export function Dashboard() {
           faithPoints={faithPoints}
           justCompletedCheckIn={justCompletedCheckIn}
           onRequestCheckIn={handleRequestCheckIn}
+          quickActionsRef={quickActionsRef}
+          quickActionsTooltipVisible={quickActionsTooltip.shouldShow}
         />
       </main>
+      {quickActionsTooltip.shouldShow && (
+        <TooltipCallout
+          targetRef={quickActionsRef}
+          message={TOOLTIP_DEFINITIONS['dashboard-quick-actions'].message}
+          tooltipId="dashboard-quick-actions"
+          position={TOOLTIP_DEFINITIONS['dashboard-quick-actions'].position}
+          onDismiss={quickActionsTooltip.dismiss}
+        />
+      )}
       <SiteFooter />
       <CelebrationQueue
         newlyEarnedBadges={faithPoints.newlyEarnedBadges}

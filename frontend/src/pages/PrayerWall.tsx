@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { LayoutDashboard } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
@@ -16,6 +16,9 @@ import { useOpenSet } from '@/hooks/useOpenSet'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
 import { getMockPrayers, getMockComments } from '@/mocks/prayer-wall-mock-data'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { useTooltipCallout } from '@/hooks/useTooltipCallout'
+import { TooltipCallout } from '@/components/ui/TooltipCallout'
+import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 
 const PRAYERS_PER_PAGE = 20
@@ -35,6 +38,10 @@ function PrayerWallContent() {
   const { openSet: openComments, toggle: handleToggleComments } = useOpenSet()
   const [composerOpen, setComposerOpen] = useState(false)
   const [localComments, setLocalComments] = useState<Record<string, PrayerComment[]>>({})
+
+  // Tooltip for composer
+  const composerRef = useRef<HTMLDivElement>(null)
+  const composerTooltip = useTooltipCallout('prayer-wall-composer', composerRef)
 
   const hasMore = prayers.length < allPrayers.length
 
@@ -133,7 +140,11 @@ function PrayerWallContent() {
       <PrayerWallHero
         action={
           isAuthenticated ? (
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
+            <div
+              ref={composerRef}
+              className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4"
+              {...(composerTooltip.shouldShow ? { 'aria-describedby': 'prayer-wall-composer' } : {})}
+            >
               <button
                 type="button"
                 onClick={() => setComposerOpen(!composerOpen)}
@@ -205,6 +216,15 @@ function PrayerWallContent() {
         )}
       </main>
       <SiteFooter />
+      {composerTooltip.shouldShow && (
+        <TooltipCallout
+          targetRef={composerRef}
+          message={TOOLTIP_DEFINITIONS['prayer-wall-composer'].message}
+          tooltipId="prayer-wall-composer"
+          position={TOOLTIP_DEFINITIONS['prayer-wall-composer'].position}
+          onDismiss={composerTooltip.dismiss}
+        />
+      )}
     </div>
   )
 }

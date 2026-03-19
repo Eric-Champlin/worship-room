@@ -10,6 +10,9 @@ import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
+import { useTooltipCallout } from '@/hooks/useTooltipCallout'
+import { TooltipCallout } from '@/components/ui/TooltipCallout'
+import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { cn } from '@/lib/utils'
 import type { PrayContext } from '@/types/daily-experience'
 
@@ -43,6 +46,10 @@ function DailyHubContent() {
     useCompletionTracking()
 
   const [prayContext, setPrayContext] = useState<PrayContext | null>(null)
+
+  // Tooltip for tab bar
+  const tabBarRef = useRef<HTMLDivElement>(null)
+  const tabBarTooltip = useTooltipCallout('daily-hub-tabs', tabBarRef)
 
   // Sticky tab bar shadow on scroll
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -175,9 +182,11 @@ function DailyHubContent() {
         >
           <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-gray-200">
             <div
+              ref={tabBarRef}
               className="relative flex w-full"
               role="tablist"
               aria-label="Daily practices"
+              {...(tabBarTooltip.shouldShow ? { 'aria-describedby': 'daily-hub-tabs' } : {})}
             >
               {TABS.map((tab, index) => {
                 const isActive = activeTab === tab.id
@@ -278,6 +287,15 @@ function DailyHubContent() {
       </main>
 
       <SiteFooter />
+      {tabBarTooltip.shouldShow && (
+        <TooltipCallout
+          targetRef={tabBarRef}
+          message={TOOLTIP_DEFINITIONS['daily-hub-tabs'].message}
+          tooltipId="daily-hub-tabs"
+          position={TOOLTIP_DEFINITIONS['daily-hub-tabs'].position}
+          onDismiss={tabBarTooltip.dismiss}
+        />
+      )}
     </div>
   )
 }

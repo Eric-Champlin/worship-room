@@ -14,6 +14,9 @@ import { storageService } from '@/services/storage-service'
 // import { SCENE_BY_ID } from '@/data/scenes'
 import { SOUND_BY_ID } from '@/data/sound-catalog'
 import { AUDIO_BASE_URL } from '@/constants/audio'
+import { useTooltipCallout } from '@/hooks/useTooltipCallout'
+import { TooltipCallout } from '@/components/ui/TooltipCallout'
+import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { cn } from '@/lib/utils'
 import type { SharedMixData } from '@/types/storage'
 
@@ -103,6 +106,10 @@ export function MusicPage() {
     setSearchParams({ tab: 'ambient' }, { replace: true })
   }
 
+  // Tooltip for tab bar
+  const tabBarRef = useRef<HTMLDivElement>(null)
+  const tabBarTooltip = useTooltipCallout('music-ambient-tab', tabBarRef)
+
   // Sticky tab bar shadow on scroll
   const sentinelRef = useRef<HTMLDivElement>(null)
   const [isSticky, setIsSticky] = useState(false)
@@ -179,9 +186,11 @@ export function MusicPage() {
         >
           <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-gray-200">
             <div
+              ref={tabBarRef}
               className="relative flex w-full"
               role="tablist"
               aria-label="Music sections"
+              {...(tabBarTooltip.shouldShow ? { 'aria-describedby': 'music-ambient-tab' } : {})}
             >
               {TABS.map((tab, index) => {
                 const isActive = activeTab === tab.id
@@ -273,6 +282,15 @@ export function MusicPage() {
         />
       )}
 
+      {tabBarTooltip.shouldShow && (
+        <TooltipCallout
+          targetRef={tabBarRef}
+          message={TOOLTIP_DEFINITIONS['music-ambient-tab'].message}
+          tooltipId="music-ambient-tab"
+          position={TOOLTIP_DEFINITIONS['music-ambient-tab'].position}
+          onDismiss={tabBarTooltip.dismiss}
+        />
+      )}
     </div>
   )
 }

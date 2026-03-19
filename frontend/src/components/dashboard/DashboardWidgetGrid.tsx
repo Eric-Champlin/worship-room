@@ -13,9 +13,11 @@ interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
   justCompletedCheckIn?: boolean
   onRequestCheckIn?: () => void
+  quickActionsRef?: React.RefObject<HTMLDivElement>
+  quickActionsTooltipVisible?: boolean
 }
 
-export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false, onRequestCheckIn }: DashboardWidgetGridProps) {
+export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false, onRequestCheckIn, quickActionsRef, quickActionsTooltipVisible }: DashboardWidgetGridProps) {
   const { isVisible: recapVisible, hasFriends: recapHasFriends } = useWeeklyRecap()
   const {
     currentStreak,
@@ -101,14 +103,19 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
           </DashboardCard>
         )}
 
-        <DashboardCard
-          id="quick-actions"
-          title="Quick Actions"
-          icon={<Rocket className="h-5 w-5" />}
+        <div
+          ref={quickActionsRef}
           className="order-6 lg:col-span-5"
+          {...(quickActionsTooltipVisible ? { 'aria-describedby': 'dashboard-quick-actions' } : {})}
         >
-          <QuickActions />
-        </DashboardCard>
+          <DashboardCard
+            id="quick-actions"
+            title="Quick Actions"
+            icon={<Rocket className="h-5 w-5" />}
+          >
+            <QuickActions />
+          </DashboardCard>
+        </div>
       </div>
     </div>
   )
