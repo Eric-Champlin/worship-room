@@ -10,9 +10,11 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { hasCheckedInToday } from '@/services/mood-storage'
+import { isOnboardingComplete } from '@/services/onboarding-storage'
+import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
 import type { MoodEntry } from '@/types/dashboard'
 
-type DashboardPhase = 'check_in' | 'dashboard_enter' | 'dashboard'
+type DashboardPhase = 'onboarding' | 'check_in' | 'dashboard_enter' | 'dashboard'
 
 const DASHBOARD_ENTER_DURATION_MS = 800
 
@@ -21,16 +23,21 @@ export function Dashboard() {
   const prefersReduced = useReducedMotion()
   const checkedRef = useRef(false)
 
-  const [phase, setPhase] = useState<DashboardPhase>(() =>
-    hasCheckedInToday() ? 'dashboard' : 'check_in',
-  )
+  const [phase, setPhase] = useState<DashboardPhase>(() => {
+    if (!isOnboardingComplete()) return 'onboarding'
+    return hasCheckedInToday() ? 'dashboard' : 'check_in'
+  })
 
   const faithPoints = useFaithPoints()
 
   useEffect(() => {
     if (!checkedRef.current) {
       checkedRef.current = true
-      setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
+      if (!isOnboardingComplete()) {
+        setPhase('onboarding')
+      } else {
+        setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
+      }
     }
   }, [])
 
@@ -47,6 +54,10 @@ export function Dashboard() {
     return () => clearTimeout(timer)
   }, [phase, prefersReduced])
 
+  const handleOnboardingComplete = () => {
+    setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
+  }
+
   const handleCheckInComplete = (_entry: MoodEntry) => {
     setPhase(prefersReduced ? 'dashboard' : 'dashboard_enter')
   }
@@ -60,6 +71,15 @@ export function Dashboard() {
   }
 
   if (!user) return null
+
+  if (phase === 'onboarding') {
+    return (
+      <WelcomeWizard
+        userName={user.name}
+        onComplete={handleOnboardingComplete}
+      />
+    )
+  }
 
   if (phase === 'check_in') {
     return (
