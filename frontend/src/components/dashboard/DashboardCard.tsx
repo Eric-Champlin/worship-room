@@ -2,6 +2,7 @@ import { ChevronDown } from 'lucide-react'
 import { useCallback, useId, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { getInitialCollapsed, setCollapseState } from '@/services/dashboard-collapse-storage'
 
 interface DashboardCardProps {
   id: string
@@ -12,31 +13,6 @@ interface DashboardCardProps {
   action?: { label: string; to: string }
   children: ReactNode
   className?: string
-}
-
-function getCollapseState(): Record<string, boolean> {
-  try {
-    const raw = localStorage.getItem('wr_dashboard_collapsed')
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
-}
-
-function setCollapseState(id: string, collapsed: boolean) {
-  try {
-    const state = getCollapseState()
-    state[id] = collapsed
-    localStorage.setItem('wr_dashboard_collapsed', JSON.stringify(state))
-  } catch {
-    // localStorage unavailable
-  }
-}
-
-function getInitialCollapsed(id: string, defaultCollapsed: boolean): boolean {
-  const persisted = getCollapseState()
-  if (id in persisted) return persisted[id]
-  return defaultCollapsed
 }
 
 export function DashboardCard({

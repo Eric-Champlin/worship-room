@@ -17,6 +17,8 @@ import { AUDIO_BASE_URL } from '@/constants/audio'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
+import { useAuth } from '@/hooks/useAuth'
+import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/getting-started-storage'
 import { cn } from '@/lib/utils'
 import type { SharedMixData } from '@/types/storage'
 
@@ -47,6 +49,14 @@ export function MusicPage() {
   const rawTab = searchParams.get('tab')
   const defaultTab: MusicTabId = 'ambient'
   const activeTab: MusicTabId = isValidTab(rawTab) ? rawTab : defaultTab
+
+  // Getting Started checklist: flag ambient visit
+  const { isAuthenticated } = useAuth()
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'ambient' && !isGettingStartedComplete()) {
+      setGettingStartedFlag('ambient_visited', true)
+    }
+  }, [isAuthenticated, activeTab])
 
   // Shared mix URL parsing
   const dispatch = useAudioDispatch()

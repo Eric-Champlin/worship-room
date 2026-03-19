@@ -5,9 +5,12 @@ import { DashboardHero } from '@/components/dashboard/DashboardHero'
 import { DashboardWidgetGrid } from '@/components/dashboard/DashboardWidgetGrid'
 import { MoodCheckIn } from '@/components/dashboard/MoodCheckIn'
 import { CelebrationQueue } from '@/components/dashboard/CelebrationQueue'
+import { GettingStartedCard } from '@/components/dashboard/GettingStartedCard'
+import { GettingStartedCelebration } from '@/components/dashboard/GettingStartedCelebration'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { useGettingStarted } from '@/hooks/useGettingStarted'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { hasCheckedInToday } from '@/services/mood-storage'
 import { isOnboardingComplete } from '@/services/onboarding-storage'
@@ -32,6 +35,20 @@ export function Dashboard() {
   })
 
   const faithPoints = useFaithPoints()
+
+  // Getting Started checklist
+  const gettingStarted = useGettingStarted(faithPoints.todayActivities)
+  const [showGettingStartedCelebration, setShowGettingStartedCelebration] = useState(false)
+  const [gettingStartedCardDismissed, setGettingStartedCardDismissed] = useState(false)
+  const celebrationFiredRef = useRef(false)
+
+  // Trigger celebration when all items complete (only once)
+  useEffect(() => {
+    if (gettingStarted.allComplete && gettingStarted.isVisible && !celebrationFiredRef.current) {
+      celebrationFiredRef.current = true
+      setShowGettingStartedCelebration(true)
+    }
+  }, [gettingStarted.allComplete, gettingStarted.isVisible])
 
   useEffect(() => {
     if (!checkedRef.current) {
@@ -71,6 +88,18 @@ export function Dashboard() {
 
   const handleRequestCheckIn = () => {
     setPhase('check_in')
+  }
+
+  // Getting Started handlers
+  const handleGettingStartedDismiss = () => {
+    gettingStarted.dismiss()
+    setGettingStartedCardDismissed(true)
+  }
+
+  const handleGettingStartedCelebrationDismiss = () => {
+    setShowGettingStartedCelebration(false)
+    gettingStarted.dismiss()
+    setGettingStartedCardDismissed(true)
   }
 
   // Tooltip for Quick Actions widget
@@ -121,6 +150,16 @@ export function Dashboard() {
           pointsToNextLevel={faithPoints.pointsToNextLevel}
           currentLevel={faithPoints.currentLevel}
         />
+        {gettingStarted.isVisible && !gettingStartedCardDismissed && (
+          <div className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6">
+            <GettingStartedCard
+              items={gettingStarted.items}
+              completedCount={gettingStarted.completedCount}
+              onDismiss={handleGettingStartedDismiss}
+              onRequestCheckIn={handleRequestCheckIn}
+            />
+          </div>
+        )}
         <DashboardWidgetGrid
           faithPoints={faithPoints}
           justCompletedCheckIn={justCompletedCheckIn}
@@ -143,6 +182,9 @@ export function Dashboard() {
         newlyEarnedBadges={faithPoints.newlyEarnedBadges}
         clearNewlyEarnedBadges={faithPoints.clearNewlyEarnedBadges}
       />
+      {showGettingStartedCelebration && (
+        <GettingStartedCelebration onDismiss={handleGettingStartedCelebrationDismiss} />
+      )}
       {import.meta.env.DEV && <DevAuthToggle />}
     </div>
   )

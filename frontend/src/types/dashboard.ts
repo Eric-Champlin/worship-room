@@ -186,3 +186,14 @@ export interface NotificationEntry {
     [key: string]: unknown;
   };
 }
+
+// Getting Started Checklist types (Onboarding Spec 3)
+
+export interface GettingStartedData {
+  mood_done: boolean;
+  pray_done: boolean;
+  journal_done: boolean;
+  meditate_done: boolean;
+  ambient_visited: boolean;
+  prayer_wall_visited: boolean;
+}

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { LayoutDashboard } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
@@ -19,6 +19,7 @@ import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
+import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/getting-started-storage'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 
 const PRAYERS_PER_PAGE = 20
@@ -38,6 +39,13 @@ function PrayerWallContent() {
   const { openSet: openComments, toggle: handleToggleComments } = useOpenSet()
   const [composerOpen, setComposerOpen] = useState(false)
   const [localComments, setLocalComments] = useState<Record<string, PrayerComment[]>>({})
+
+  // Getting Started checklist: flag prayer wall visit
+  useEffect(() => {
+    if (isAuthenticated && !isGettingStartedComplete()) {
+      setGettingStartedFlag('prayer_wall_visited', true)
+    }
+  }, [isAuthenticated])
 
   // Tooltip for composer
   const composerRef = useRef<HTMLDivElement>(null)

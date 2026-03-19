@@ -33,6 +33,8 @@ const mockUseAuth = vi.mocked(useAuth)
 
 beforeEach(() => {
   localStorage.clear()
+  // Required since Welcome Wizard checks onboarding state
+  localStorage.setItem('wr_onboarding_complete', 'true')
   mockUseAuth.mockReturnValue({
     user: { name: 'Eric', id: 'test-id' },
     isAuthenticated: true,

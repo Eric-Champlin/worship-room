@@ -37,6 +37,8 @@ vi.mock('@/hooks/useFaithPoints', () => ({
 
 beforeEach(() => {
   localStorage.clear()
+  // Required since Welcome Wizard checks onboarding state
+  localStorage.setItem('wr_onboarding_complete', 'true')
 })
 
 function seedTodayMoodEntry() {
