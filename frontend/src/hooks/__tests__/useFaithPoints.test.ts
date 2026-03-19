@@ -435,6 +435,63 @@ describe('useFaithPoints — badge integration', () => {
   });
 });
 
+describe('useFaithPoints — streak capture on reset', () => {
+  beforeEach(() => {
+    simulateLogin();
+  });
+
+  it('captures previousStreak when streak resets (gap day)', () => {
+    // Set up a 5-day streak, last active 2 days ago (March 14)
+    localStorage.setItem('wr_streak', JSON.stringify({
+      currentStreak: 5, longestStreak: 5, lastActiveDate: '2026-03-14',
+    }));
+
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    expect(result.current.currentStreak).toBe(5);
+
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+
+    // Streak resets to 1 (missed March 15)
+    expect(result.current.currentStreak).toBe(1);
+
+    // previousStreak captured in wr_streak_repairs
+    const repairs = JSON.parse(localStorage.getItem('wr_streak_repairs')!);
+    expect(repairs.previousStreak).toBe(5);
+  });
+
+  it('does NOT capture previousStreak on first-ever activity', () => {
+    // No streak data — fresh user
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    expect(result.current.currentStreak).toBe(0);
+
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+
+    expect(result.current.currentStreak).toBe(1);
+    expect(localStorage.getItem('wr_streak_repairs')).toBeNull();
+  });
+
+  it('does NOT capture previousStreak when streak continues (consecutive day)', () => {
+    // Streak of 5, last active yesterday (March 15)
+    localStorage.setItem('wr_streak', JSON.stringify({
+      currentStreak: 5, longestStreak: 5, lastActiveDate: '2026-03-15',
+    }));
+
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+
+    act(() => {
+      result.current.recordActivity('pray');
+    });
+
+    // Streak continues to 6
+    expect(result.current.currentStreak).toBe(6);
+    expect(localStorage.getItem('wr_streak_repairs')).toBeNull();
+  });
+});
+
 describe('useFaithPoints — badge initialization & newlyEarned', () => {
   beforeEach(() => {
     simulateLogin();

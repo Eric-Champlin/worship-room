@@ -154,6 +154,15 @@ export interface SocialInteractionsData {
   recapDismissals: string[];
 }
 
+// Streak Repair types (Streak Repair & Grace spec)
+
+export interface StreakRepairData {
+  previousStreak: number | null;
+  lastFreeRepairDate: string | null;
+  repairsUsedThisWeek: number;
+  weekStartDate: string;
+}
+
 export type NotificationType =
   | 'encouragement'
   | 'friend_request'

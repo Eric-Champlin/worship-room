@@ -96,7 +96,8 @@ describe('Empty States — New User Dashboard', () => {
       pointsToNextLevel: 100, todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, meditate: false, journal: false },
       todayPoints: 0, todayMultiplier: 1, currentStreak: 0, longestStreak: 0,
       newlyEarnedBadges: [], clearNewlyEarnedBadges: () => {},
-      recordActivity: () => {},
+      recordActivity: () => {}, repairStreak: () => {},
+      previousStreak: null, isFreeRepairAvailable: false,
     }
 
     render(

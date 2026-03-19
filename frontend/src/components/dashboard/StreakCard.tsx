@@ -3,6 +3,7 @@ import { Flame } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
+import { useToastSafe } from '@/components/ui/Toast'
 import { AnimatedCounter } from './AnimatedCounter'
 import { BadgeGrid } from './BadgeGrid'
 
@@ -15,6 +16,9 @@ interface StreakCardProps {
   pointsToNextLevel: number
   todayMultiplier: number
   animate?: boolean
+  previousStreak?: number | null
+  isFreeRepairAvailable?: boolean
+  onRepairStreak?: (useFreeRepair: boolean) => void
 }
 
 const LEVEL_ICONS_MAP: Record<number, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
@@ -63,8 +67,16 @@ export function StreakCard({
   pointsToNextLevel,
   todayMultiplier,
   animate = false,
+  previousStreak = null,
+  isFreeRepairAvailable = false,
+  onRepairStreak,
 }: StreakCardProps) {
   const [showBadgeGrid, setShowBadgeGrid] = useState(false)
+  const { showCelebrationToast } = useToastSafe()
+
+  // Repair animation state
+  const [justRepaired, setJustRepaired] = useState(false)
+  const preRepairStreakRef = useRef(currentStreak)
 
   // Track previous points for live animation (not initial render, not during entry animate)
   const prevPointsRef = useRef(totalPoints)
@@ -113,6 +125,26 @@ export function StreakCard({
 
   const streakMessage = getStreakMessage()
 
+  // Repair availability
+  const canShowRepair = previousStreak !== null && previousStreak > 1 &&
+    currentStreak <= 1 && longestStreak > 1
+  const hasPaidOption = !isFreeRepairAvailable && totalPoints >= 50
+
+  function handleRepair(useFree: boolean) {
+    if (!previousStreak || !onRepairStreak) return
+    const streakValue = previousStreak
+    preRepairStreakRef.current = currentStreak
+    setJustRepaired(true)
+    onRepairStreak(useFree)
+    showCelebrationToast(
+      'Streak Restored!',
+      `${streakValue}-day streak is back!`,
+      'celebration-confetti',
+    )
+    // Reset after animation completes
+    setTimeout(() => setJustRepaired(false), 800)
+  }
+
   return (
     <div className="space-y-4">
       {/* Badge Grid Overlay */}
@@ -131,10 +163,10 @@ export function StreakCard({
               aria-hidden="true"
             />
             <div>
-              <div className="flex items-baseline gap-1.5">
+              <div className="flex items-baseline gap-1.5" aria-live="polite">
                 <span className={`text-3xl font-bold text-white md:text-4xl ${animate && currentStreak === 1 ? 'motion-safe:animate-streak-bump' : ''}`}>
-                  {animate ? (
-                    <AnimatedCounter from={0} to={currentStreak} duration={800} />
+                  {(animate || justRepaired) ? (
+                    <AnimatedCounter from={justRepaired ? preRepairStreakRef.current : 0} to={currentStreak} duration={800} />
                   ) : (
                     currentStreak
                   )}
@@ -146,11 +178,42 @@ export function StreakCard({
               <p className="text-xs text-white/50">
                 Longest: {longestStreak} days
               </p>
-              {streakMessage && (
+              {canShowRepair ? (
+                <div className="mt-2 space-y-2">
+                  <p className="text-sm italic text-white/60">
+                    Everyone misses a day. Grace is built into your journey.
+                  </p>
+                  {isFreeRepairAvailable ? (
+                    <>
+                      <button
+                        onClick={() => handleRepair(true)}
+                        className="min-h-[44px] w-full rounded-lg bg-amber-500/20 px-4 py-2.5 text-sm font-medium text-amber-300 transition-all hover:bg-amber-500/30 motion-safe:hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-amber-400/50 sm:w-auto"
+                        type="button"
+                      >
+                        Restore Streak
+                      </button>
+                      <p className="text-xs text-white/50">1 free repair per week</p>
+                    </>
+                  ) : hasPaidOption ? (
+                    <>
+                      <button
+                        onClick={() => handleRepair(false)}
+                        className="min-h-[44px] w-full rounded-lg bg-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition-all hover:bg-white/15 motion-safe:hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-white/30 sm:w-auto"
+                        type="button"
+                      >
+                        Repair with 50 points
+                      </button>
+                      <p className="text-xs text-white/50">Free repair resets Monday</p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-white/50">Free repair resets Monday</p>
+                  )}
+                </div>
+              ) : streakMessage ? (
                 <p className="mt-1 text-sm text-white/60">
                   {streakMessage}
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
         ) : (

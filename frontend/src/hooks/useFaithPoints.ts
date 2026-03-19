@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getLocalDateString } from '@/utils/date';
+import { getLocalDateString, getCurrentWeekStart } from '@/utils/date';
 import { getMoodEntries } from '@/services/mood-storage';
 import {
   getActivityLog,
@@ -11,6 +11,12 @@ import {
   persistAll,
   freshDailyActivities,
 } from '@/services/faith-points-storage';
+import {
+  capturePreviousStreak,
+  getRepairData,
+  isFreeRepairAvailable as isFreeRepairAvailableFn,
+  saveRepairData,
+} from '@/services/streak-repair-storage';
 import { getLevelForPoints } from '@/constants/dashboard/levels';
 import {
   getOrInitBadgeData,
@@ -21,7 +27,7 @@ import {
   clearNewlyEarned as clearNewlyEarnedData,
 } from '@/services/badge-storage';
 import { checkForNewBadges } from '@/services/badge-engine';
-import type { ActivityType, DailyActivities } from '@/types/dashboard';
+import type { ActivityType, DailyActivities, FaithPointsData, StreakData, StreakRepairData } from '@/types/dashboard';
 
 interface FaithPointsState {
   totalPoints: number;
@@ -34,6 +40,8 @@ interface FaithPointsState {
   currentStreak: number;
   longestStreak: number;
   newlyEarnedBadges: string[];
+  previousStreak: number | null;
+  isFreeRepairAvailable: boolean;
 }
 
 const DEFAULT_STATE: FaithPointsState = {
@@ -47,6 +55,8 @@ const DEFAULT_STATE: FaithPointsState = {
   currentStreak: 0,
   longestStreak: 0,
   newlyEarnedBadges: [],
+  previousStreak: null,
+  isFreeRepairAvailable: false,
 };
 
 function extractActivities(da: DailyActivities): Record<ActivityType, boolean> {
@@ -85,6 +95,8 @@ function loadState(): FaithPointsState {
   // Initialize badges if needed (first authenticated session)
   const badgeData = getOrInitBadgeData(true);
 
+  const repairData = getRepairData();
+
   return {
     totalPoints: faithPoints.totalPoints,
     currentLevel: faithPoints.currentLevel,
@@ -96,11 +108,14 @@ function loadState(): FaithPointsState {
     currentStreak: streak.currentStreak,
     longestStreak: streak.longestStreak,
     newlyEarnedBadges: badgeData.newlyEarned,
+    previousStreak: repairData.previousStreak,
+    isFreeRepairAvailable: isFreeRepairAvailableFn(),
   };
 }
 
 const noopRecordActivity = () => {};
 const noopClearNewlyEarned = () => {};
+const noopRepairStreak = (_useFreeRepair: boolean) => {};
 
 export function useFaithPoints() {
   const { isAuthenticated } = useAuth();
@@ -148,6 +163,11 @@ export function useFaithPoints() {
     // Update streak
     const currentStreakData = getStreakData();
     const newStreak = updateStreak(today, currentStreakData);
+
+    // Capture previous streak if reset occurred
+    if (currentStreakData.currentStreak > 1 && newStreak.currentStreak === 1) {
+      capturePreviousStreak(currentStreakData.currentStreak);
+    }
 
     // --- Badge integration ---
     // 1. Get current badge data
@@ -200,6 +220,7 @@ export function useFaithPoints() {
     if (!success) return;
 
     // Update React state
+    const repairInfo = getRepairData();
     setState({
       totalPoints: newTotalPoints,
       currentLevel: levelInfo.level,
@@ -211,6 +232,8 @@ export function useFaithPoints() {
       currentStreak: newStreak.currentStreak,
       longestStreak: newStreak.longestStreak,
       newlyEarnedBadges: updatedBadgeData.newlyEarned,
+      previousStreak: repairInfo.previousStreak,
+      isFreeRepairAvailable: isFreeRepairAvailableFn(),
     });
   }, [isAuthenticated]);
 
@@ -220,6 +243,89 @@ export function useFaithPoints() {
     const updated = clearNewlyEarnedData(badgeData);
     saveBadgeData(updated);
     setState((prev) => ({ ...prev, newlyEarnedBadges: [] }));
+  }, [isAuthenticated]);
+
+  const repairStreak = useCallback((useFreeRepair: boolean) => {
+    if (!isAuthenticated) return;
+
+    const repairData = getRepairData();
+    if (repairData.previousStreak === null || repairData.previousStreak <= 1) return;
+
+    // Defense-in-depth: validate free repair availability
+    if (useFreeRepair && !isFreeRepairAvailableFn()) return;
+
+    const today = getLocalDateString();
+    const currentWeekStart = getCurrentWeekStart();
+
+    if (!useFreeRepair) {
+      // Paid repair — check points
+      const currentFP = getFaithPoints();
+      if (currentFP.totalPoints < 50) return;
+
+      // Deduct 50 points
+      const newTotal = currentFP.totalPoints - 50;
+      const levelInfo = getLevelForPoints(newTotal);
+      const newFP: FaithPointsData = {
+        totalPoints: newTotal,
+        currentLevel: levelInfo.level,
+        currentLevelName: levelInfo.name,
+        pointsToNextLevel: levelInfo.pointsToNextLevel,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      // Save old value for rollback if streak write fails
+      const oldFaithPointsJson = localStorage.getItem('wr_faith_points');
+
+      try {
+        localStorage.setItem('wr_faith_points', JSON.stringify(newFP));
+      } catch { return; }
+
+      // Restore streak — rollback faith points on failure
+      const streak = getStreakData();
+      const restoredStreak: StreakData = {
+        currentStreak: repairData.previousStreak,
+        longestStreak: Math.max(streak.longestStreak, repairData.previousStreak),
+        lastActiveDate: today,
+      };
+
+      try {
+        localStorage.setItem('wr_streak', JSON.stringify(restoredStreak));
+      } catch {
+        // Rollback faith points
+        try {
+          if (oldFaithPointsJson !== null) {
+            localStorage.setItem('wr_faith_points', oldFaithPointsJson);
+          } else {
+            localStorage.removeItem('wr_faith_points');
+          }
+        } catch { /* best-effort rollback */ }
+        return;
+      }
+    } else {
+      // Free repair — no points involved
+      const streak = getStreakData();
+      const restoredStreak: StreakData = {
+        currentStreak: repairData.previousStreak,
+        longestStreak: Math.max(streak.longestStreak, repairData.previousStreak),
+        lastActiveDate: today,
+      };
+
+      try {
+        localStorage.setItem('wr_streak', JSON.stringify(restoredStreak));
+      } catch { return; }
+    }
+
+    // Update repair tracking
+    const updatedRepair: StreakRepairData = {
+      previousStreak: null,
+      lastFreeRepairDate: useFreeRepair ? today : repairData.lastFreeRepairDate,
+      repairsUsedThisWeek: repairData.repairsUsedThisWeek + 1,
+      weekStartDate: currentWeekStart,
+    };
+    saveRepairData(updatedRepair);
+
+    // Refresh React state
+    setState(loadState());
   }, [isAuthenticated]);
 
   // Listen for external activity recording (e.g., listen tracker)
@@ -239,8 +345,9 @@ export function useFaithPoints() {
       ...DEFAULT_STATE,
       recordActivity: noopRecordActivity,
       clearNewlyEarnedBadges: noopClearNewlyEarned,
+      repairStreak: noopRepairStreak,
     };
   }
 
-  return { ...state, recordActivity, clearNewlyEarnedBadges };
+  return { ...state, recordActivity, clearNewlyEarnedBadges, repairStreak };
 }

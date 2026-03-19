@@ -26,6 +26,9 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
     pointsToNextLevel,
     todayActivities,
     todayMultiplier,
+    previousStreak,
+    isFreeRepairAvailable,
+    repairStreak,
   } = faithPoints
 
   return (
@@ -56,6 +59,9 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
             pointsToNextLevel={pointsToNextLevel}
             todayMultiplier={todayMultiplier}
             animate={justCompletedCheckIn}
+            previousStreak={previousStreak}
+            isFreeRepairAvailable={isFreeRepairAvailable}
+            onRepairStreak={repairStreak}
           />
         </DashboardCard>
 
