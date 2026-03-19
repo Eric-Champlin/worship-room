@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PrayerRequest } from '@/types/prayer-wall'
 import { Avatar } from './Avatar'
 import { AnsweredBadge } from './AnsweredBadge'
+import { CategoryBadge } from './CategoryBadge'
 import { formatFullDate } from '@/lib/time'
 
 const TRUNCATE_LENGTH = 150
@@ -11,10 +13,11 @@ const TRUNCATE_LENGTH = 150
 interface PrayerCardProps {
   prayer: PrayerRequest
   showFull?: boolean
+  onCategoryClick?: (category: PrayerCategory) => void
   children?: ReactNode
 }
 
-export function PrayerCard({ prayer, showFull = false, children }: PrayerCardProps) {
+export function PrayerCard({ prayer, showFull = false, onCategoryClick, children }: PrayerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const needsTruncation = !showFull && prayer.content.length > TRUNCATE_LENGTH
 
@@ -76,6 +79,12 @@ export function PrayerCard({ prayer, showFull = false, children }: PrayerCardPro
           >
             {formatFullDate(prayer.createdAt)}
           </time>
+          <div className="mt-1">
+            <CategoryBadge
+              category={prayer.category}
+              onClick={onCategoryClick}
+            />
+          </div>
         </div>
       </header>
 

@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { PrayerCard } from '../PrayerCard'
+import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PrayerRequest } from '@/types/prayer-wall'
 
 const SHORT_PRAYER: PrayerRequest = {
@@ -12,6 +13,7 @@ const SHORT_PRAYER: PrayerRequest = {
   authorAvatarUrl: 'https://i.pravatar.cc/150?u=user1',
   isAnonymous: false,
   content: 'Please pray for my family.',
+  category: 'family',
   isAnswered: false,
   answeredText: null,
   answeredAt: null,
@@ -45,23 +47,23 @@ const ANSWERED_PRAYER: PrayerRequest = {
   answeredAt: '2026-02-20T16:00:00Z',
 }
 
-function renderCard(prayer: PrayerRequest, showFull = false) {
+function renderCard(prayer: PrayerRequest, options?: { showFull?: boolean; onCategoryClick?: (category: PrayerCategory) => void }) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <PrayerCard prayer={prayer} showFull={showFull} />
+      <PrayerCard prayer={prayer} showFull={options?.showFull} onCategoryClick={options?.onCategoryClick} />
     </MemoryRouter>,
   )
 }
 
 describe('PrayerCard', () => {
   it('renders author name and formatted date', () => {
-    renderCard(SHORT_PRAYER)
+    renderCard(SHORT_PRAYER, {})
     expect(screen.getByText('Sarah')).toBeInTheDocument()
     expect(screen.getByText('Feb 24, 2026')).toBeInTheDocument()
   })
 
   it('truncates long prayer text and shows "Show more" button', () => {
-    renderCard(LONG_PRAYER)
+    renderCard(LONG_PRAYER, {})
     expect(screen.getByText('Show more')).toBeInTheDocument()
     // Text should be truncated
     expect(screen.queryByText(LONG_PRAYER.content)).not.toBeInTheDocument()
@@ -69,7 +71,7 @@ describe('PrayerCard', () => {
 
   it('expands text on "Show more" click, shows "Show less"', async () => {
     const user = userEvent.setup()
-    renderCard(LONG_PRAYER)
+    renderCard(LONG_PRAYER, {})
 
     await user.click(screen.getByText('Show more'))
     expect(screen.getByText(LONG_PRAYER.content)).toBeInTheDocument()
@@ -77,12 +79,12 @@ describe('PrayerCard', () => {
   })
 
   it('does NOT show "Show more" for short prayers (< 150 chars)', () => {
-    renderCard(SHORT_PRAYER)
+    renderCard(SHORT_PRAYER, {})
     expect(screen.queryByText('Show more')).not.toBeInTheDocument()
   })
 
   it('renders "Anonymous" for anonymous prayers without profile link', () => {
-    renderCard(ANONYMOUS_PRAYER)
+    renderCard(ANONYMOUS_PRAYER, {})
     expect(screen.getByText('Anonymous')).toBeInTheDocument()
     // No link to profile
     const links = screen.queryAllByRole('link')
@@ -91,23 +93,42 @@ describe('PrayerCard', () => {
   })
 
   it('renders AnsweredBadge when prayer.isAnswered is true', () => {
-    renderCard(ANSWERED_PRAYER)
+    renderCard(ANSWERED_PRAYER, {})
     expect(screen.getByText('Answered Prayer')).toBeInTheDocument()
     expect(screen.getByText('God answered our prayer! So grateful.')).toBeInTheDocument()
   })
 
   it('does not truncate when showFull is true', () => {
-    renderCard(LONG_PRAYER, true)
+    renderCard(LONG_PRAYER, { showFull: true })
     expect(screen.getByText(LONG_PRAYER.content)).toBeInTheDocument()
     expect(screen.queryByText('Show more')).not.toBeInTheDocument()
   })
 
   it('renders profile link for non-anonymous prayers', () => {
-    renderCard(SHORT_PRAYER)
+    renderCard(SHORT_PRAYER, {})
     const links = screen.getAllByRole('link')
     const profileLinks = links.filter((l) =>
       l.getAttribute('href')?.includes('/prayer-wall/user/user-1'),
     )
     expect(profileLinks.length).toBeGreaterThan(0)
+  })
+
+  it('renders category badge', () => {
+    renderCard(SHORT_PRAYER, {})
+    expect(screen.getByText('Family')).toBeInTheDocument()
+  })
+
+  it('badge click calls onCategoryClick', async () => {
+    const user = userEvent.setup()
+    const onCategoryClick = vi.fn()
+    renderCard(SHORT_PRAYER, { onCategoryClick })
+    await user.click(screen.getByText('Family'))
+    expect(onCategoryClick).toHaveBeenCalledWith('family')
+  })
+
+  it('badge renders as span without onCategoryClick', () => {
+    renderCard(SHORT_PRAYER, {})
+    const badge = screen.getByText('Family')
+    expect(badge.tagName).toBe('SPAN')
   })
 })

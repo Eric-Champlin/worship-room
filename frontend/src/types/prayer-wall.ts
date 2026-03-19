@@ -1,3 +1,5 @@
+import type { PrayerCategory } from '@/constants/prayer-categories'
+
 export interface PrayerWallUser {
   id: string
   firstName: string
@@ -14,6 +16,7 @@ export interface PrayerRequest {
   authorAvatarUrl: string | null
   isAnonymous: boolean
   content: string
+  category: PrayerCategory
   isAnswered: boolean
   answeredText: string | null
   answeredAt: string | null

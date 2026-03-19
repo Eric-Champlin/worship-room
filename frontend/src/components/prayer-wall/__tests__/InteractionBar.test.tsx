@@ -16,6 +16,7 @@ const mockPrayer: PrayerRequest = {
   authorAvatarUrl: null,
   isAnonymous: false,
   content: 'Test prayer',
+  category: 'health',
   isAnswered: false,
   answeredText: null,
   answeredAt: null,

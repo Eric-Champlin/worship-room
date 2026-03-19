@@ -2,16 +2,19 @@ import { useState, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
+import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 
 interface InlineComposerProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (content: string, isAnonymous: boolean) => void
+  onSubmit: (content: string, isAnonymous: boolean, category: PrayerCategory) => void
 }
 
 export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProps) {
   const [content, setContent] = useState('')
   const [isAnonymous, setIsAnonymous] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<PrayerCategory | null>(null)
+  const [showCategoryError, setShowCategoryError] = useState(false)
   const [crisisDetected, setCrisisDetected] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -26,22 +29,30 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
   // See .claude/rules/01-ai-safety.md — backend check is mandatory before production.
   const handleSubmit = useCallback(() => {
     if (!content.trim()) return
+    if (!selectedCategory) {
+      setShowCategoryError(true)
+      return
+    }
     if (containsCrisisKeyword(content)) {
       setCrisisDetected(true)
       return
     }
-    onSubmit(content.trim(), isAnonymous)
+    onSubmit(content.trim(), isAnonymous, selectedCategory)
     setContent('')
     setIsAnonymous(false)
+    setSelectedCategory(null)
+    setShowCategoryError(false)
     setCrisisDetected(false)
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
-  }, [content, isAnonymous, onSubmit])
+  }, [content, isAnonymous, selectedCategory, onSubmit])
 
   const handleCancel = useCallback(() => {
     setContent('')
     setIsAnonymous(false)
+    setSelectedCategory(null)
+    setShowCategoryError(false)
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
@@ -52,7 +63,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
     <div
       className={cn(
         'overflow-hidden transition-all duration-300 ease-in-out',
-        isOpen ? 'visible mb-4 max-h-[600px] opacity-100' : 'invisible max-h-0 opacity-0',
+        isOpen ? 'visible mb-4 max-h-[800px] opacity-100' : 'invisible max-h-0 opacity-0',
       )}
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
@@ -73,6 +84,33 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           aria-label="Prayer request"
           aria-describedby={content.length >= 500 ? 'composer-char-count' : undefined}
         />
+
+        <fieldset className="mt-3">
+          <legend className="mb-2 text-sm font-medium text-text-dark">Category</legend>
+          <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
+            {PRAYER_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => { setSelectedCategory(cat); setShowCategoryError(false) }}
+                className={cn(
+                  'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 ease-in-out whitespace-nowrap',
+                  selectedCategory === cat
+                    ? 'border-primary/40 bg-primary/10 text-primary'
+                    : 'border-gray-200 bg-white text-text-dark hover:bg-gray-50',
+                )}
+                aria-pressed={selectedCategory === cat}
+              >
+                {CATEGORY_LABELS[cat]}
+              </button>
+            ))}
+          </div>
+          {showCategoryError && (
+            <p className="mt-2 text-sm text-warning" role="alert">
+              Please choose a category
+            </p>
+          )}
+        </fieldset>
 
         <label className="mt-3 flex items-center gap-2">
           <input

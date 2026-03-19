@@ -102,6 +102,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'Please pray for my mother who was just diagnosed with cancer. She starts chemo next week and we are all scared but trusting in God. She has been the rock of our family for 40 years and I cannot imagine life without her strength and love. We need a miracle.',
+    category: 'health',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -118,6 +119,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'Our church is going through a difficult transition with our lead pastor retiring. Please pray for unity, wisdom for the elders, and that God would send the right person to shepherd our congregation.',
+    category: 'other',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -134,6 +136,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: true,
     content:
       'I am struggling with addiction and feel so alone. I know God can help me but I keep falling. Please pray that I find the strength to reach out for help and that God would surround me with people who care.',
+    category: 'health',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -149,6 +152,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=user3',
     isAnonymous: false,
     content: 'Pray for my finals this week. Trusting God with the results.',
+    category: 'work',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -165,6 +169,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'Praise God! After two years of infertility, my daughter and her husband are expecting their first child! Thank you to everyone who prayed with us. God is faithful.',
+    category: 'praise',
     isAnswered: true,
     answeredText:
       'We prayed for two years and God answered in His perfect timing. Baby is due in July. Our family is overjoyed and so grateful for this community.',
@@ -182,6 +187,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'One of my students lost their parent this week. Please pray for comfort and peace for the whole family. They need to know they are not alone.',
+    category: 'grief',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -197,6 +203,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=user6',
     isAnonymous: false,
     content: 'Starting a new job Monday. Nervous but grateful.',
+    category: 'work',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -213,6 +220,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'My husband lost his job last month and we are struggling to make ends meet. We have three young children and the bills are piling up. I am trying to trust God but the anxiety is overwhelming. Please pray for provision and for my husband to find work soon. We need doors to open.',
+    category: 'family',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -229,6 +237,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'Feeling disconnected from God lately. Please pray that I can find my way back. I used to feel His presence so strongly and now everything feels quiet.',
+    category: 'other',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -245,6 +254,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'Thank you, Lord, for another beautiful day with my grandchildren. Praying for all the grandparents out there raising little ones. You are not forgotten.',
+    category: 'gratitude',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -260,6 +270,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     authorAvatarUrl: null,
     isAnonymous: true,
     content: 'Pray for my marriage. We need God to intervene.',
+    category: 'relationships',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -276,6 +287,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'God answered! My son got accepted into his dream college with a full scholarship. We have been praying about this for over a year. God is so good!',
+    category: 'praise',
     isAnswered: true,
     answeredText:
       'After months of waiting and praying, the acceptance letter came today. Full ride. We are in tears. Thank you to everyone who lifted us up.',
@@ -293,6 +305,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'Please lift up our worship team. We have a big Easter service coming up and we want every note to glorify God. Pray for unity and anointing.',
+    category: 'work',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -308,6 +321,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=user5',
     isAnonymous: false,
     content: 'Grateful for this community. You all lift me up.',
+    category: 'gratitude',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -324,6 +338,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'My roommate is going through a really hard time and I do not know how to help. She is not a believer but she is open to prayer. Please pray that God opens her heart and that I can be the friend she needs right now without being pushy.',
+    category: 'relationships',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -340,6 +355,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'UPDATE: My husband got a job offer today! It is even better than his last position. God provided exactly when we needed it most. Thank you all for praying with us!',
+    category: 'family',
     isAnswered: true,
     answeredText:
       'Three weeks of uncertainty and God came through. Better pay, better hours, closer to home. He truly works all things for good.',
@@ -357,6 +373,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'Pray for the persecuted church around the world. So many believers are suffering for their faith. May God strengthen them and protect them.',
+    category: 'other',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -373,6 +390,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content:
       'Just got baptized last Sunday! Best decision of my life. Thank you to this community for helping me find my way to faith. I never thought I would be here but God had other plans.',
+    category: 'gratitude',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -19,10 +19,10 @@ vi.mock('@/hooks/useFaithPoints', () => ({
   }),
 }))
 
-function renderPage() {
+function renderPage(initialEntry = '/prayer-wall') {
   return render(
     <MemoryRouter
-      initialEntries={['/prayer-wall']}
+      initialEntries={[initialEntry]}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <ToastProvider>
@@ -82,5 +82,38 @@ describe('PrayerWall', () => {
   it('renders skip to content link', () => {
     renderPage()
     expect(screen.getByText('Skip to content')).toBeInTheDocument()
+  })
+
+  it('renders filter bar with "All" and category pills', () => {
+    renderPage()
+    expect(screen.getByRole('toolbar', { name: /filter prayers by category/i })).toBeInTheDocument()
+    expect(screen.getByText('All')).toBeInTheDocument()
+  })
+
+  it('clicking a filter pill reduces visible prayer cards', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const allArticlesBefore = screen.getAllByRole('article').length
+
+    // Click "Health" filter — should show only health prayers (2 out of 18)
+    await user.click(screen.getByRole('button', { name: 'Health' }))
+    const allArticlesAfter = screen.getAllByRole('article').length
+    expect(allArticlesAfter).toBeLessThan(allArticlesBefore)
+  })
+
+  it('filter bar pills include "All"', () => {
+    renderPage()
+    const allBtn = screen.getByRole('button', { name: 'All' })
+    expect(allBtn).toBeInTheDocument()
+    expect(allBtn).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('URL param pre-selects filter', () => {
+    renderPage('/prayer-wall?category=health')
+    const toolbar = screen.getByRole('toolbar')
+    const healthPill = within(toolbar).getByRole('button', { name: /Health/i })
+    expect(healthPill).toHaveAttribute('aria-pressed', 'true')
+    const allPill = within(toolbar).getByRole('button', { name: 'All' })
+    expect(allPill).toHaveAttribute('aria-pressed', 'false')
   })
 })

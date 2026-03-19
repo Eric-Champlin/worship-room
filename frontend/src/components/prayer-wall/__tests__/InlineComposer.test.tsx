@@ -2,8 +2,9 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { InlineComposer } from '../InlineComposer'
+import type { PrayerCategory } from '@/constants/prayer-categories'
 
-function renderComposer(overrides?: { isOpen?: boolean; onClose?: () => void; onSubmit?: (content: string, isAnonymous: boolean) => void }) {
+function renderComposer(overrides?: { isOpen?: boolean; onClose?: () => void; onSubmit?: (content: string, isAnonymous: boolean, category: PrayerCategory) => void }) {
   return render(
     <InlineComposer
       isOpen={overrides?.isOpen ?? true}
@@ -50,13 +51,14 @@ describe('InlineComposer', () => {
     expect(onClose).toHaveBeenCalledOnce()
   })
 
-  it('submit calls onSubmit with content and anonymous flag', async () => {
+  it('submit calls onSubmit with content, anonymous flag, and category', async () => {
     const user = userEvent.setup()
     const onSubmit = vi.fn()
     renderComposer({ onSubmit })
     await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
+    await user.click(screen.getByText('Health'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', false)
+    expect(onSubmit).toHaveBeenCalledWith('My prayer', false, 'health')
   })
 
   it('submit with anonymous checked', async () => {
@@ -64,8 +66,69 @@ describe('InlineComposer', () => {
     const onSubmit = vi.fn()
     renderComposer({ onSubmit })
     await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
+    await user.click(screen.getByText('Health'))
     await user.click(screen.getByLabelText('Post anonymously'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', true)
+    expect(onSubmit).toHaveBeenCalledWith('My prayer', true, 'health')
+  })
+
+  // Category-specific tests
+  it('renders 8 category pills when open', () => {
+    renderComposer()
+    const pills = ['Health', 'Family', 'Work', 'Grief', 'Gratitude', 'Praise', 'Relationships', 'Other']
+    for (const label of pills) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  })
+
+  it('selecting a pill highlights it (aria-pressed)', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    const healthPill = screen.getByText('Health')
+    expect(healthPill).toHaveAttribute('aria-pressed', 'false')
+    await user.click(healthPill)
+    expect(healthPill).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('only one pill can be selected at a time', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    await user.click(screen.getByText('Health'))
+    expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'true')
+
+    await user.click(screen.getByText('Grief'))
+    expect(screen.getByText('Grief')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('submit without category shows validation error', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn()
+    renderComposer({ onSubmit })
+    await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
+    await user.click(screen.getByText('Submit Prayer Request'))
+    expect(screen.getByText('Please choose a category')).toBeInTheDocument()
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('validation error clears when category selected', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
+    await user.click(screen.getByText('Submit Prayer Request'))
+    expect(screen.getByText('Please choose a category')).toBeInTheDocument()
+
+    await user.click(screen.getByText('Family'))
+    expect(screen.queryByText('Please choose a category')).not.toBeInTheDocument()
+  })
+
+  it('cancel resets category selection', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    await user.click(screen.getByText('Health'))
+    expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'true')
+
+    await user.click(screen.getByText('Cancel'))
+    expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'false')
   })
 })
