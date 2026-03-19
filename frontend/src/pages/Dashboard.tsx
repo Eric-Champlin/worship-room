@@ -4,6 +4,7 @@ import { SiteFooter } from '@/components/SiteFooter'
 import { DashboardHero } from '@/components/dashboard/DashboardHero'
 import { DashboardWidgetGrid } from '@/components/dashboard/DashboardWidgetGrid'
 import { MoodCheckIn } from '@/components/dashboard/MoodCheckIn'
+import { MoodRecommendations } from '@/components/dashboard/MoodRecommendations'
 import { CelebrationQueue } from '@/components/dashboard/CelebrationQueue'
 import { GettingStartedCard } from '@/components/dashboard/GettingStartedCard'
 import { GettingStartedCelebration } from '@/components/dashboard/GettingStartedCelebration'
@@ -20,7 +21,7 @@ import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import type { MoodEntry } from '@/types/dashboard'
 
-type DashboardPhase = 'onboarding' | 'check_in' | 'dashboard_enter' | 'dashboard'
+type DashboardPhase = 'onboarding' | 'check_in' | 'recommendations' | 'dashboard_enter' | 'dashboard'
 
 const DASHBOARD_ENTER_DURATION_MS = 800
 
@@ -33,6 +34,7 @@ export function Dashboard() {
     if (!isOnboardingComplete()) return 'onboarding'
     return hasCheckedInToday() ? 'dashboard' : 'check_in'
   })
+  const [lastMoodEntry, setLastMoodEntry] = useState<MoodEntry | null>(null)
 
   const faithPoints = useFaithPoints()
 
@@ -78,8 +80,13 @@ export function Dashboard() {
     setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
   }
 
-  const handleCheckInComplete = (_entry: MoodEntry) => {
-    setPhase(prefersReduced ? 'dashboard' : 'dashboard_enter')
+  const handleCheckInComplete = (entry: MoodEntry) => {
+    setLastMoodEntry(entry)
+    setPhase(prefersReduced ? 'dashboard' : 'recommendations')
+  }
+
+  const handleRecommendationsAdvance = () => {
+    setPhase('dashboard_enter')
   }
 
   const handleCheckInSkip = () => {
@@ -123,6 +130,15 @@ export function Dashboard() {
         userName={user.name}
         onComplete={handleCheckInComplete}
         onSkip={handleCheckInSkip}
+      />
+    )
+  }
+
+  if (phase === 'recommendations' && lastMoodEntry) {
+    return (
+      <MoodRecommendations
+        moodValue={lastMoodEntry.mood}
+        onAdvanceToDashboard={handleRecommendationsAdvance}
       />
     )
   }
