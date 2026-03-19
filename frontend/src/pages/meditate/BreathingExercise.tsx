@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { playChime } from '@/lib/audio'
 import { cn } from '@/lib/utils'
+import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 
 type Phase = 'breatheIn' | 'hold' | 'breatheOut'
 type Screen = 'prestart' | 'exercise' | 'complete'
@@ -154,6 +155,9 @@ function BreathingExerciseContent() {
   if (screen === 'complete') {
     return (
       <Layout hero={<PageHero title="Breathing Exercise" />}>
+        <div className="mx-auto max-w-lg px-4 pt-10 sm:pt-14">
+          <AmbientSoundPill context="breathing" />
+        </div>
         <CompletionScreen
           ctas={[
             { label: 'Meditate more', to: '/meditate/breathing' },
@@ -225,6 +229,7 @@ function BreathingExerciseContent() {
   return (
     <Layout hero={<PageHero title="Breathing Exercise" subtitle="Follow a 4-7-8 breathing pattern with scripture to focus your mind." />}>
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
+        <AmbientSoundPill context="breathing" />
         {/* Duration selector */}
         <div className="mb-6">
           <p className="mb-3 text-center text-sm font-medium text-text-dark">

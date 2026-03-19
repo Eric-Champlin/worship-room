@@ -11,6 +11,7 @@ import { playChime } from '@/lib/audio'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { cn } from '@/lib/utils'
+import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { DailyVerse } from '@/types/daily-experience'
 
 type Screen = 'prestart' | 'exercise' | 'complete'
@@ -168,6 +169,7 @@ function ScriptureSoakingContent() {
   return (
     <Layout hero={<PageHero title="Scripture Soaking" subtitle="Sit quietly with a single verse. No analyzing — just being present with God's word." />}>
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
+        <AmbientSoundPill context="soaking" />
 
         <div className="mb-6 text-center">
           <button

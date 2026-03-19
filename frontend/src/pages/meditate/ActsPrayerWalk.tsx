@@ -7,6 +7,7 @@ import { CompletionScreen } from '@/components/daily/CompletionScreen'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { getACTSSteps } from '@/mocks/daily-experience-mock-data'
 
 export function ActsPrayerWalk() {
@@ -51,6 +52,7 @@ function ActsPrayerWalkContent() {
   return (
     <Layout hero={<PageHero title="ACTS Prayer Walk" />}>
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
+        <AmbientSoundPill context="other-meditation" />
 
         {/* Progress indicator */}
         <p className="mb-6 text-center text-sm font-medium text-text-light">

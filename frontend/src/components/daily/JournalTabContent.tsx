@@ -17,6 +17,7 @@ import {
   getJournalReflection,
 } from '@/mocks/daily-experience-mock-data'
 import { cn } from '@/lib/utils'
+import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { JournalMode, SavedJournalEntry, PrayContext } from '@/types/daily-experience'
 
 function formatDateTime(date: Date) {
@@ -180,10 +181,12 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
         <div className="relative">
 
           {/* Heading */}
-          <h2 className="mb-6 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
+          <h2 className="mb-4 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
             What&apos;s On Your{' '}
             <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">Mind?</span>
           </h2>
+
+          <AmbientSoundPill context="journal" />
 
           {/* Mode Toggle */}
           <div className="mb-6 flex justify-center">

@@ -12,6 +12,7 @@ import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/Background
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
+import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { MEDITATION_TYPES } from '@/constants/daily-experience'
 import type { MeditationType } from '@/types/daily-experience'
 
@@ -51,12 +52,14 @@ export function MeditateTabContent() {
           <BackgroundSquiggle />
         </div>
         <div className="relative">
-          <h2 className="mb-6 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
+          <h2 className="mb-4 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
             What&apos;s On Your{' '}
             <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
               Spirit?
             </span>
           </h2>
+
+          <AmbientSoundPill context="meditate" />
 
           {isAuthenticated && allComplete && (
             <div className="mb-8 animate-golden-glow rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">

@@ -16,6 +16,39 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn(() => ({ user: null, isAuthenticated: true })),
 }))
 
+// Mock AudioProvider (needed by AmbientSoundPill embedded in MeditateTabContent)
+vi.mock('@/components/audio/AudioProvider', () => ({
+  useAudioState: () => ({
+    activeSounds: [],
+    isPlaying: false,
+    currentSceneName: null,
+    currentSceneId: null,
+    pillVisible: false,
+    drawerOpen: false,
+    foregroundContent: null,
+    sleepTimer: null,
+    activeRoutine: null,
+    masterVolume: 0.8,
+    foregroundBackgroundBalance: 0.5,
+    foregroundEndedCounter: 0,
+  }),
+  useAudioDispatch: () => vi.fn(),
+}))
+
+// Mock useScenePlayer (needed by AmbientSoundPill)
+vi.mock('@/hooks/useScenePlayer', () => ({
+  useScenePlayer: () => ({
+    activeSceneId: null,
+    loadScene: vi.fn(),
+    isLoading: false,
+    undoAvailable: false,
+    undoSceneSwitch: vi.fn(),
+    pendingRoutineInterrupt: null,
+    confirmRoutineInterrupt: vi.fn(),
+    cancelRoutineInterrupt: vi.fn(),
+  }),
+}))
+
 const { useAuth } = await import('@/hooks/useAuth')
 const mockUseAuth = vi.mocked(useAuth)
 

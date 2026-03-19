@@ -11,6 +11,7 @@ import {
 } from '@/mocks/daily-experience-psalms'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { PsalmInfo, Psalm119Section } from '@/types/daily-experience'
 
 type Screen = 'selection' | 'reading' | 'section-selection' | 'complete'
@@ -184,6 +185,7 @@ function PsalmReadingContent() {
   return (
     <Layout hero={<PageHero title="Psalm Reading" subtitle="Choose a Psalm to read slowly, one verse at a time." />}>
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+        <AmbientSoundPill context="other-meditation" />
 
         <div className="space-y-3">
           {psalms.map((psalm) => (

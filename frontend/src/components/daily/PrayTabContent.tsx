@@ -16,6 +16,7 @@ import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { useAuth } from '@/hooks/useAuth'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { DEFAULT_PRAYER_CHIPS } from '@/constants/daily-experience'
 import {
   getMockPrayer,
@@ -292,12 +293,14 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
           {/* Input Section (hidden when prayer is displayed or loading) */}
           {!prayer && !isLoading && (
             <>
-              <h2 className="mb-6 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
+              <h2 className="mb-4 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
                 What&apos;s On Your{' '}
                 <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
                   Heart?
                 </span>
               </h2>
+
+              <AmbientSoundPill context="pray" />
 
               {showChips && (
                 <div className="mb-6 flex flex-wrap justify-center gap-2">

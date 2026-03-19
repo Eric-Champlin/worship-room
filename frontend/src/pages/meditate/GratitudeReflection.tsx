@@ -11,6 +11,7 @@ import {
 } from '@/mocks/daily-experience-mock-data'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 
 export function GratitudeReflection() {
   const { isAuthenticated } = useAuth()
@@ -91,6 +92,7 @@ function GratitudeReflectionContent() {
   return (
     <Layout hero={<PageHero title="Gratitude Reflection" subtitle="Name the things you're thankful for today." />}>
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
+        <AmbientSoundPill context="other-meditation" />
 
         <div className="space-y-4">
           {items.map((item, index) => (
