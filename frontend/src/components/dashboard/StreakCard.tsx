@@ -3,6 +3,7 @@ import { Flame } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useToastSafe } from '@/components/ui/Toast'
 import { AnimatedCounter } from './AnimatedCounter'
 import { BadgeGrid } from './BadgeGrid'
@@ -78,10 +79,14 @@ export function StreakCard({
   const [justRepaired, setJustRepaired] = useState(false)
   const preRepairStreakRef = useRef(currentStreak)
 
+  const prefersReduced = useReducedMotion()
+
   // Track previous points for live animation (not initial render, not during entry animate)
   const prevPointsRef = useRef(totalPoints)
   const isInitialRender = useRef(true)
   const [liveFrom, setLiveFrom] = useState<number | null>(null)
+  const [glowColor, setGlowColor] = useState<string | null>(null)
+  const glowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (isInitialRender.current) {
@@ -96,9 +101,28 @@ export function StreakCard({
     }
     if (totalPoints !== prevPointsRef.current) {
       setLiveFrom(prevPointsRef.current)
+
+      // Direction-aware glow
+      if (!prefersReduced) {
+        const isIncrease = totalPoints > prevPointsRef.current
+        setGlowColor(
+          isIncrease
+            ? '0 0 8px rgba(139, 92, 246, 0.4)'  // violet
+            : '0 0 8px rgba(217, 119, 6, 0.3)'   // amber
+        )
+        if (glowTimerRef.current) clearTimeout(glowTimerRef.current)
+        glowTimerRef.current = setTimeout(() => setGlowColor(null), 600)
+      }
+
       prevPointsRef.current = totalPoints
     }
-  }, [totalPoints, animate])
+  }, [totalPoints, animate, prefersReduced])
+
+  useEffect(() => {
+    return () => {
+      if (glowTimerRef.current) clearTimeout(glowTimerRef.current)
+    }
+  }, [])
 
   const LevelIcon = LEVEL_ICONS_MAP[currentLevel] ?? getBadgeIcon('level_1').icon
   const nextLevel = getNextLevelInfo(currentLevel)
@@ -274,8 +298,14 @@ export function StreakCard({
           className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
         >
           <div
-            className="h-full rounded-full bg-primary transition-all duration-500 ease-out motion-reduce:transition-none"
-            style={{ width: `${Math.min(progressPercent, 100)}%` }}
+            className="h-full rounded-full bg-primary"
+            style={{
+              width: `${Math.min(progressPercent, 100)}%`,
+              boxShadow: glowColor ?? 'none',
+              transition: prefersReduced
+                ? 'none'
+                : 'width 600ms ease-out, box-shadow 300ms ease-out',
+            }}
           />
         </div>
 

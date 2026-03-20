@@ -19,6 +19,7 @@ import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
+import { cn } from '@/lib/utils'
 import type { MoodEntry } from '@/types/dashboard'
 
 type DashboardPhase = 'onboarding' | 'check_in' | 'recommendations' | 'dashboard_enter' | 'dashboard'
@@ -29,6 +30,8 @@ export function Dashboard() {
   const { user } = useAuth()
   const prefersReduced = useReducedMotion()
   const checkedRef = useRef(false)
+  const hasAnimatedRef = useRef(false)
+  const [animateEntrance, setAnimateEntrance] = useState(false)
 
   const [phase, setPhase] = useState<DashboardPhase>(() => {
     if (!isOnboardingComplete()) return 'onboarding'
@@ -75,6 +78,14 @@ export function Dashboard() {
     }, DASHBOARD_ENTER_DURATION_MS)
     return () => clearTimeout(timer)
   }, [phase, prefersReduced])
+
+  // Trigger entrance animation on first dashboard render
+  useEffect(() => {
+    if (phase === 'dashboard' && !hasAnimatedRef.current) {
+      hasAnimatedRef.current = true
+      setAnimateEntrance(true)
+    }
+  }, [phase])
 
   const handleOnboardingComplete = () => {
     setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
@@ -144,6 +155,8 @@ export function Dashboard() {
   }
 
   const justCompletedCheckIn = phase === 'dashboard_enter'
+  const showGettingStarted = gettingStarted.isVisible && !gettingStartedCardDismissed
+  const shouldAnimate = animateEntrance && !prefersReduced
 
   return (
     <div className="min-h-screen bg-[#0f0a1e]">
@@ -158,16 +171,27 @@ export function Dashboard() {
         id="main-content"
         className="motion-safe:animate-fade-in motion-reduce:animate-none"
       >
-        <DashboardHero
-          userName={user.name}
-          currentStreak={faithPoints.currentStreak}
-          levelName={faithPoints.levelName}
-          totalPoints={faithPoints.totalPoints}
-          pointsToNextLevel={faithPoints.pointsToNextLevel}
-          currentLevel={faithPoints.currentLevel}
-        />
-        {gettingStarted.isVisible && !gettingStartedCardDismissed && (
-          <div className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6">
+        <div
+          className={shouldAnimate ? 'motion-safe:animate-widget-enter' : undefined}
+          style={shouldAnimate ? { animationDelay: '0ms' } : undefined}
+        >
+          <DashboardHero
+            userName={user.name}
+            currentStreak={faithPoints.currentStreak}
+            levelName={faithPoints.levelName}
+            totalPoints={faithPoints.totalPoints}
+            pointsToNextLevel={faithPoints.pointsToNextLevel}
+            currentLevel={faithPoints.currentLevel}
+          />
+        </div>
+        {showGettingStarted && (
+          <div
+            className={cn(
+              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
+              shouldAnimate && 'motion-safe:animate-widget-enter',
+            )}
+            style={shouldAnimate ? { animationDelay: '100ms' } : undefined}
+          >
             <GettingStartedCard
               items={gettingStarted.items}
               completedCount={gettingStarted.completedCount}
@@ -182,6 +206,8 @@ export function Dashboard() {
           onRequestCheckIn={handleRequestCheckIn}
           quickActionsRef={quickActionsRef}
           quickActionsTooltipVisible={quickActionsTooltip.shouldShow}
+          animateEntrance={shouldAnimate}
+          staggerStartIndex={showGettingStarted ? 2 : 1}
         />
       </main>
       {quickActionsTooltip.shouldShow && (

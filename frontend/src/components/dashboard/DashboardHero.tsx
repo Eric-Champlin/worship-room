@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Flame } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { AnimatedCounter } from './AnimatedCounter'
 
 interface DashboardHeroProps {
@@ -28,11 +29,14 @@ export function DashboardHero({
   currentLevel = 1,
 }: DashboardHeroProps) {
   const greeting = getGreeting()
+  const prefersReduced = useReducedMotion()
 
   // Track previous points for live animation
   const prevPointsRef = useRef(totalPoints)
   const isInitialRender = useRef(true)
   const [liveFrom, setLiveFrom] = useState<number | null>(null)
+  const [glowColor, setGlowColor] = useState<string | null>(null)
+  const glowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (isInitialRender.current) {
@@ -42,9 +46,28 @@ export function DashboardHero({
     }
     if (totalPoints !== prevPointsRef.current) {
       setLiveFrom(prevPointsRef.current)
+
+      // Direction-aware glow
+      if (!prefersReduced) {
+        const isIncrease = totalPoints > prevPointsRef.current
+        setGlowColor(
+          isIncrease
+            ? '0 0 8px rgba(139, 92, 246, 0.4)'  // violet
+            : '0 0 8px rgba(217, 119, 6, 0.3)'   // amber
+        )
+        if (glowTimerRef.current) clearTimeout(glowTimerRef.current)
+        glowTimerRef.current = setTimeout(() => setGlowColor(null), 600)
+      }
+
       prevPointsRef.current = totalPoints
     }
-  }, [totalPoints])
+  }, [totalPoints, prefersReduced])
+
+  useEffect(() => {
+    return () => {
+      if (glowTimerRef.current) clearTimeout(glowTimerRef.current)
+    }
+  }, [])
 
   const currentThreshold =
     LEVEL_THRESHOLDS.find((l) => l.level === currentLevel)?.threshold ?? 0
@@ -109,8 +132,14 @@ export function DashboardHero({
                 }
               >
                 <div
-                  className="h-full rounded-full bg-primary transition-all duration-500 motion-reduce:transition-none"
-                  style={{ width: `${Math.min(progressPercent, 100)}%` }}
+                  className="h-full rounded-full bg-primary"
+                  style={{
+                    width: `${Math.min(progressPercent, 100)}%`,
+                    boxShadow: glowColor ?? 'none',
+                    transition: prefersReduced
+                      ? 'none'
+                      : 'width 600ms ease-out, box-shadow 300ms ease-out',
+                  }}
                 />
               </div>
             </div>

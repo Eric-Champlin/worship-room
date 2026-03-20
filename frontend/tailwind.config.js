@@ -69,6 +69,10 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        'widget-enter': {
+          '0%': { opacity: '0', transform: 'translateY(12px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         'waveform-bar-1': {
           '0%, 100%': { height: '4px' },
           '50%': { height: '16px' },
@@ -181,6 +185,7 @@ export default {
         'pray-icon-pulse': 'pray-icon-pulse 300ms ease-out forwards',
         'pray-ripple': 'pray-ripple 600ms ease-out forwards',
         'pray-float-text': 'pray-float-text 500ms ease-out forwards',
+        'widget-enter': 'widget-enter 400ms ease-out both',
       },
     },
   },

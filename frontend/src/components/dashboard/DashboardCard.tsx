@@ -13,6 +13,7 @@ interface DashboardCardProps {
   action?: { label: string; to: string }
   children: ReactNode
   className?: string
+  style?: React.CSSProperties
 }
 
 export function DashboardCard({
@@ -24,6 +25,7 @@ export function DashboardCard({
   action,
   children,
   className,
+  style,
 }: DashboardCardProps) {
   const [collapsed, setCollapsed] = useState(() =>
     getInitialCollapsed(id, defaultCollapsed),
@@ -47,6 +49,7 @@ export function DashboardCard({
         'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6 transition-colors duration-150 hover:border-white/20 motion-reduce:transition-none',
         className,
       )}
+      style={style}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
