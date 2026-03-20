@@ -155,6 +155,10 @@ export default {
           '0%': { transform: 'translateY(0)', opacity: '1' },
           '100%': { transform: 'translateY(-20px)', opacity: '0' },
         },
+        'mic-pulse': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.1)' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -185,6 +189,7 @@ export default {
         'pray-icon-pulse': 'pray-icon-pulse 300ms ease-out forwards',
         'pray-ripple': 'pray-ripple 600ms ease-out forwards',
         'pray-float-text': 'pray-float-text 500ms ease-out forwards',
+        'mic-pulse': 'mic-pulse 1s ease-in-out infinite',
         'widget-enter': 'widget-enter 400ms ease-out both',
       },
     },

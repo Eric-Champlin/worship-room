@@ -5,7 +5,7 @@ import { CONFETTI_COLORS } from '@/constants/dashboard/badge-icons'
 
 // --- Types ---
 
-type StandardToastType = 'success' | 'error'
+type StandardToastType = 'success' | 'error' | 'warning'
 type CelebrationToastType = 'celebration' | 'celebration-confetti' | 'special-celebration'
 export type ToastType = StandardToastType | CelebrationToastType
 
@@ -139,11 +139,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={toast.id}
             role={toast.type === 'error' ? 'alert' : 'status'}
             aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+            data-toast-type={toast.type}
             className={cn(
               'animate-slide-from-right rounded-lg border bg-white px-4 py-3 shadow-lg',
               toast.type === 'success'
                 ? 'border-l-4 border-l-success'
-                : 'border-l-4 border-l-danger',
+                : toast.type === 'warning'
+                  ? 'border-l-4 border-l-warning'
+                  : 'border-l-4 border-l-danger',
             )}
           >
             <p className="text-sm text-text-dark">{toast.message}</p>

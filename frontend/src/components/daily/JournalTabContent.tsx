@@ -1,11 +1,13 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowUpDown, BookOpen, RefreshCw, Search, X } from 'lucide-react'
+import { ArrowUpDown, BookOpen, Mic, MicOff, RefreshCw, Search, X } from 'lucide-react'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { useAuth } from '@/hooks/useAuth'
+import { useVoiceInput } from '@/hooks/useVoiceInput'
+import { useAnnounce } from '@/hooks/useAnnounce'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import {
@@ -66,6 +68,49 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
   const [text, setText] = useState(() => {
     return localStorage.getItem(JOURNAL_DRAFT_KEY) ?? ''
   })
+
+  // Voice input
+  const { announce, AnnouncerRegion } = useAnnounce()
+
+  const {
+    isSupported: isVoiceSupported,
+    isListening,
+    isPermissionDenied,
+    startListening,
+    stopListening,
+  } = useVoiceInput({
+    onTranscript: (transcript) => {
+      setText((prev) => {
+        const separator = prev && !prev.endsWith(' ') ? ' ' : ''
+        return prev + separator + transcript
+      })
+    },
+    maxLength: 5000 - text.length,
+    onMaxLengthReached: () => {
+      showToast('Character limit reached.', 'warning')
+    },
+  })
+
+  const handleVoiceToggle = () => {
+    if (isListening) {
+      stopListening()
+      showToast('Voice captured.', 'success')
+      announce('Recording stopped')
+    } else {
+      startListening()
+      showToast('Listening... speak your heart.', 'success')
+      announce('Recording started')
+    }
+  }
+
+  // Permission denied toast — fire once
+  const prevPermissionDenied = useRef(false)
+  useEffect(() => {
+    if (isPermissionDenied && !prevPermissionDenied.current) {
+      showToast('Microphone access is needed for voice input. Check your browser settings.', 'error')
+      prevPermissionDenied.current = true
+    }
+  }, [isPermissionDenied, showToast])
 
   // Prompt
   const allPrompts = useMemo(() => getJournalPrompts(), [])
@@ -275,6 +320,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+      <AnnouncerRegion />
 
       {/* Squiggle background wrapper */}
       <div className="relative">
@@ -397,18 +443,49 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
               placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
               maxLength={5000}
               rows={6}
-              className="min-h-[200px] w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-3 font-serif text-lg leading-relaxed text-text-dark placeholder:text-text-light/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="min-h-[200px] w-full resize-none rounded-lg border border-gray-200 bg-white px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-text-dark placeholder:text-text-light/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
               aria-label="Journal entry"
               aria-describedby="journal-char-count"
             />
             <span
               id="journal-char-count"
-              className="absolute bottom-2 right-3 text-xs text-text-light/60"
+              className="absolute bottom-2 left-3 text-xs text-text-light/60"
               aria-live={text.length >= 4500 ? 'polite' : 'off'}
               role="status"
             >
               {text.length.toLocaleString()}/5,000
             </span>
+            {isAuthenticated && isVoiceSupported && (
+              <button
+                type="button"
+                onClick={handleVoiceToggle}
+                disabled={isPermissionDenied}
+                className={cn(
+                  'absolute bottom-2 right-2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                  isPermissionDenied
+                    ? 'cursor-not-allowed opacity-40'
+                    : isListening
+                      ? 'bg-red-500/20 text-red-400 motion-safe:animate-mic-pulse'
+                      : 'bg-black/5 text-black/30 hover:bg-black/10 hover:text-black/50',
+                )}
+                aria-label={
+                  isPermissionDenied
+                    ? 'Voice input unavailable — microphone access denied'
+                    : isListening
+                      ? 'Stop voice input'
+                      : 'Start voice input'
+                }
+              >
+                {isListening ? (
+                  <>
+                    <MicOff className="h-5 w-5" />
+                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500" />
+                  </>
+                ) : (
+                  <Mic className="h-5 w-5" />
+                )}
+              </button>
+            )}
           </div>
 
           {/* Draft Saved Indicator */}
