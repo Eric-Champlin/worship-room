@@ -11,6 +11,8 @@ import {
 } from '@/mocks/daily-experience-mock-data'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
+import { getLocalDateString } from '@/utils/date'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 
 export function GratitudeReflection() {
@@ -28,7 +30,9 @@ function GratitudeReflectionContent() {
   })
   const { markMeditationComplete } = useCompletionTracking()
   const { recordActivity } = useFaithPoints()
+  const [sessionDuration, setSessionDuration] = useState<number | null>(null)
 
+  const startTimeRef = useRef(Date.now())
   const lastInputRef = useRef<HTMLInputElement>(null)
   const prevItemCountRef = useRef(items.length)
 
@@ -56,8 +60,18 @@ function GratitudeReflectionContent() {
   }
 
   const handleDone = () => {
+    const elapsedMs = Date.now() - startTimeRef.current
+    const minutes = Math.max(1, Math.round(elapsedMs / 60000))
     markMeditationComplete('gratitude')
     recordActivity('meditate')
+    setSessionDuration(minutes)
+    saveMeditationSession({
+      id: crypto.randomUUID(),
+      type: 'gratitude',
+      date: getLocalDateString(),
+      durationMinutes: minutes,
+      completedAt: new Date().toISOString(),
+    })
     setIsComplete(true)
   }
 
@@ -76,6 +90,21 @@ function GratitudeReflectionContent() {
           <p className="mb-8 text-sm text-text-light">
             {completionVerse.reference} WEB
           </p>
+          {sessionDuration !== null && (() => {
+            const weeklyTotal = getMeditationMinutesForWeek()
+            return (
+              <div className="mb-6 animate-fade-in">
+                <p className="font-serif text-lg text-text-dark">
+                  You meditated for {sessionDuration} {sessionDuration === 1 ? 'minute' : 'minutes'}
+                </p>
+                <p className="mt-1 text-sm text-text-light">
+                  {weeklyTotal === sessionDuration
+                    ? 'Your first meditation this week \u2014 great start!'
+                    : `Total this week: ${weeklyTotal} ${weeklyTotal === 1 ? 'minute' : 'minutes'}`}
+                </p>
+              </div>
+            )
+          })()}
         </div>
         <CompletionScreen
           ctas={[

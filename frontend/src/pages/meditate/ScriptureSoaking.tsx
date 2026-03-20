@@ -11,6 +11,8 @@ import { DURATION_OPTIONS } from '@/constants/daily-experience'
 import { playChime } from '@/lib/audio'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
+import { getLocalDateString } from '@/utils/date'
 import { cn } from '@/lib/utils'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { DailyVerse } from '@/types/daily-experience'
@@ -34,6 +36,7 @@ function ScriptureSoakingContent() {
   const [progress, setProgress] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [referenceVisible, setReferenceVisible] = useState(false)
+  const [sessionDuration, setSessionDuration] = useState<number | null>(null)
 
   const rafRef = useRef<number>(0)
   const startTimeRef = useRef(0)
@@ -72,6 +75,14 @@ function ScriptureSoakingContent() {
           playChime()
           markMeditationComplete('soaking')
           recordActivity('meditate')
+          setSessionDuration(duration!)
+          saveMeditationSession({
+            id: crypto.randomUUID(),
+            type: 'soaking',
+            date: getLocalDateString(),
+            durationMinutes: duration!,
+            completedAt: new Date().toISOString(),
+          })
           setScreen('complete')
           return
         }
@@ -110,8 +121,21 @@ function ScriptureSoakingContent() {
   }
 
   if (screen === 'complete') {
+    const weeklyTotal = getMeditationMinutesForWeek()
     return (
       <Layout hero={<PageHero title="Scripture Soaking" />}>
+        {sessionDuration !== null && (
+          <div className="mx-auto max-w-lg animate-fade-in px-4 pt-10 text-center">
+            <p className="font-serif text-lg text-text-dark">
+              You meditated for {sessionDuration} {sessionDuration === 1 ? 'minute' : 'minutes'}
+            </p>
+            <p className="mt-1 text-sm text-text-light">
+              {weeklyTotal === sessionDuration
+                ? 'Your first meditation this week \u2014 great start!'
+                : `Total this week: ${weeklyTotal} ${weeklyTotal === 1 ? 'minute' : 'minutes'}`}
+            </p>
+          </div>
+        )}
         <CompletionScreen
           ctas={[
             { label: 'Try a different meditation', to: '/daily?tab=meditate', primary: true },

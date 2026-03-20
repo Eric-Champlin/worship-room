@@ -8,6 +8,7 @@ import { CalendarHeatmap } from '@/components/insights/CalendarHeatmap'
 import { InsightCards } from '@/components/insights/InsightCards'
 import { MoodTrendChart } from '@/components/insights/MoodTrendChart'
 import { ScriptureConnections } from '@/components/insights/ScriptureConnections'
+import { MeditationHistory } from '@/components/insights/MeditationHistory'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import { getMoodEntries } from '@/services/mood-storage'
@@ -262,6 +263,9 @@ export function Insights() {
           <ScriptureConnections hasData={hasData} />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 5 : 4}>
+          <MeditationHistory rangeDays={rangeDays} />
+        </AnimatedSection>
+        <AnimatedSection index={entries.length > 0 ? 6 : 5}>
           <div className="pt-2 text-center">
             <Link
               to="/insights/monthly"

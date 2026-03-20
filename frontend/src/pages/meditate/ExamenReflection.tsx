@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Navigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, SkipForward } from 'lucide-react'
 import { Layout } from '@/components/Layout'
@@ -7,6 +7,8 @@ import { CompletionScreen } from '@/components/daily/CompletionScreen'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
+import { getLocalDateString } from '@/utils/date'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { getExamenSteps } from '@/mocks/daily-experience-mock-data'
 
@@ -22,18 +24,43 @@ function ExamenReflectionContent() {
   const [notes, setNotes] = useState<Record<number, string>>({})
   const [showNotes, setShowNotes] = useState<Record<number, boolean>>({})
   const [isComplete, setIsComplete] = useState(false)
+  const [sessionDuration, setSessionDuration] = useState<number | null>(null)
   const { markMeditationComplete } = useCompletionTracking()
   const { recordActivity } = useFaithPoints()
+  const startTimeRef = useRef(Date.now())
 
   const handleComplete = () => {
+    const elapsedMs = Date.now() - startTimeRef.current
+    const minutes = Math.max(1, Math.round(elapsedMs / 60000))
     markMeditationComplete('examen')
     recordActivity('meditate')
+    setSessionDuration(minutes)
+    saveMeditationSession({
+      id: crypto.randomUUID(),
+      type: 'examen',
+      date: getLocalDateString(),
+      durationMinutes: minutes,
+      completedAt: new Date().toISOString(),
+    })
     setIsComplete(true)
   }
 
   if (isComplete) {
+    const weeklyTotal = getMeditationMinutesForWeek()
     return (
       <Layout hero={<PageHero title="Examen Reflection" />}>
+        {sessionDuration !== null && (
+          <div className="mx-auto max-w-lg animate-fade-in px-4 pt-10 text-center">
+            <p className="font-serif text-lg text-text-dark">
+              You meditated for {sessionDuration} {sessionDuration === 1 ? 'minute' : 'minutes'}
+            </p>
+            <p className="mt-1 text-sm text-text-light">
+              {weeklyTotal === sessionDuration
+                ? 'Your first meditation this week \u2014 great start!'
+                : `Total this week: ${weeklyTotal} ${weeklyTotal === 1 ? 'minute' : 'minutes'}`}
+            </p>
+          </div>
+        )}
         <CompletionScreen
           ctas={[
             { label: 'Try a different meditation', to: '/daily?tab=meditate', primary: true },

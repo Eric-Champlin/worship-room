@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Navigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Layout } from '@/components/Layout'
@@ -11,6 +11,8 @@ import {
 } from '@/mocks/daily-experience-psalms'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
+import { getLocalDateString } from '@/utils/date'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { PsalmInfo, Psalm119Section } from '@/types/daily-experience'
 
@@ -31,8 +33,10 @@ function PsalmReadingContent() {
   const [selectedSection, setSelectedSection] =
     useState<Psalm119Section | null>(null)
   const [verseIndex, setVerseIndex] = useState(-1) // -1 = intro
+  const [sessionDuration, setSessionDuration] = useState<number | null>(null)
   const { markMeditationComplete } = useCompletionTracking()
   const { recordActivity } = useFaithPoints()
+  const startTimeRef = useRef(0)
 
   const verses = selectedSection
     ? selectedSection.verses
@@ -50,6 +54,7 @@ function PsalmReadingContent() {
     }
     setSelectedPsalm(psalm)
     setVerseIndex(-1)
+    startTimeRef.current = Date.now()
     setScreen('reading')
   }
 
@@ -57,18 +62,42 @@ function PsalmReadingContent() {
     setSelectedSection(section)
     setSelectedPsalm(null)
     setVerseIndex(0) // No intro for sections
+    startTimeRef.current = Date.now()
     setScreen('reading')
   }
 
   const handleComplete = () => {
+    const elapsedMs = Date.now() - startTimeRef.current
+    const minutes = Math.max(1, Math.round(elapsedMs / 60000))
     markMeditationComplete('psalm')
     recordActivity('meditate')
+    setSessionDuration(minutes)
+    saveMeditationSession({
+      id: crypto.randomUUID(),
+      type: 'psalm',
+      date: getLocalDateString(),
+      durationMinutes: minutes,
+      completedAt: new Date().toISOString(),
+    })
     setScreen('complete')
   }
 
   if (screen === 'complete') {
+    const weeklyTotal = getMeditationMinutesForWeek()
     return (
       <Layout hero={<PageHero title="Psalm Reading" />}>
+        {sessionDuration !== null && (
+          <div className="mx-auto max-w-lg animate-fade-in px-4 pt-10 text-center">
+            <p className="font-serif text-lg text-text-dark">
+              You meditated for {sessionDuration} {sessionDuration === 1 ? 'minute' : 'minutes'}
+            </p>
+            <p className="mt-1 text-sm text-text-light">
+              {weeklyTotal === sessionDuration
+                ? 'Your first meditation this week \u2014 great start!'
+                : `Total this week: ${weeklyTotal} ${weeklyTotal === 1 ? 'minute' : 'minutes'}`}
+            </p>
+          </div>
+        )}
         <CompletionScreen
           ctas={[
             { label: 'Try a different meditation', to: '/daily?tab=meditate', primary: true },

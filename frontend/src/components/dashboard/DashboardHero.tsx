@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Flame } from 'lucide-react'
+import { Flame, Wind } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { AnimatedCounter } from './AnimatedCounter'
@@ -11,6 +11,7 @@ interface DashboardHeroProps {
   totalPoints?: number
   pointsToNextLevel?: number
   currentLevel?: number
+  meditationMinutesThisWeek?: number
 }
 
 function getGreeting(): string {
@@ -27,6 +28,7 @@ export function DashboardHero({
   totalPoints = 0,
   pointsToNextLevel = 100,
   currentLevel = 1,
+  meditationMinutesThisWeek = 0,
 }: DashboardHeroProps) {
   const greeting = getGreeting()
   const prefersReduced = useReducedMotion()
@@ -106,6 +108,16 @@ export function DashboardHero({
                 {currentStreak > 0
                   ? `${currentStreak} day${currentStreak !== 1 ? 's' : ''} streak`
                   : 'Start your streak today'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Wind
+                className="h-5 w-5 text-white/60"
+                aria-hidden="true"
+              />
+              <span className="text-sm text-white/60">
+                {meditationMinutesThisWeek} min this week
               </span>
             </div>
 

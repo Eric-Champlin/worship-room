@@ -8,6 +8,8 @@ import { getBreathingVerses } from '@/mocks/daily-experience-mock-data'
 import { BREATHING_PHASES, DURATION_OPTIONS } from '@/constants/daily-experience'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
+import { getLocalDateString } from '@/utils/date'
 import { playChime } from '@/lib/audio'
 import { cn } from '@/lib/utils'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
@@ -46,6 +48,7 @@ function BreathingExerciseContent() {
   const [countdown, setCountdown] = useState(0)
   const [verseText, setVerseText] = useState('')
   const [verseRef, setVerseRef] = useState('')
+  const [sessionDuration, setSessionDuration] = useState<number | null>(null)
 
   const rafRef = useRef<number>(0)
   const startTimeRef = useRef(0)
@@ -105,6 +108,14 @@ function BreathingExerciseContent() {
         cleanup()
         markMeditationComplete('breathing')
         recordActivity('meditate')
+        setSessionDuration(duration!)
+        saveMeditationSession({
+          id: crypto.randomUUID(),
+          type: 'breathing',
+          date: getLocalDateString(),
+          durationMinutes: duration!,
+          completedAt: new Date().toISOString(),
+        })
         setScreen('complete')
         return
       }
@@ -153,11 +164,24 @@ function BreathingExerciseContent() {
   }, [duration, chimeEnabled, voiceEnabled, cleanup, markMeditationComplete, recordActivity])
 
   if (screen === 'complete') {
+    const weeklyTotal = getMeditationMinutesForWeek()
     return (
       <Layout hero={<PageHero title="Breathing Exercise" />}>
         <div className="mx-auto max-w-lg px-4 pt-10 sm:pt-14">
           <AmbientSoundPill context="breathing" />
         </div>
+        {sessionDuration !== null && (
+          <div className="mx-auto max-w-lg animate-fade-in px-4 pt-10 text-center">
+            <p className="font-serif text-lg text-text-dark">
+              You meditated for {sessionDuration} {sessionDuration === 1 ? 'minute' : 'minutes'}
+            </p>
+            <p className="mt-1 text-sm text-text-light">
+              {weeklyTotal === sessionDuration
+                ? 'Your first meditation this week \u2014 great start!'
+                : `Total this week: ${weeklyTotal} ${weeklyTotal === 1 ? 'minute' : 'minutes'}`}
+            </p>
+          </div>
+        )}
         <CompletionScreen
           ctas={[
             { label: 'Meditate more', to: '/meditate/breathing' },

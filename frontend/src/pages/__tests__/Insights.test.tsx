@@ -194,8 +194,8 @@ describe('Insights — full page integration', () => {
   it('reduced motion: sections have motion-reduce classes', () => {
     const { container } = renderInsights()
     const animatedSections = container.querySelectorAll('.motion-reduce\\:animate-none')
-    // 5 sections when no data: empty state + insight cards + correlations + scripture + monthly link
-    expect(animatedSections.length).toBe(5)
+    // 6 sections when no data: empty state + insight cards + correlations + scripture + meditation history + monthly link
+    expect(animatedSections.length).toBe(6)
   })
 
   it('time range change updates heatmap and chart', async () => {

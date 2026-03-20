@@ -14,6 +14,7 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useGettingStarted } from '@/hooks/useGettingStarted'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { hasCheckedInToday } from '@/services/mood-storage'
+import { getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { isOnboardingComplete } from '@/services/onboarding-storage'
 import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
@@ -182,6 +183,7 @@ export function Dashboard() {
             totalPoints={faithPoints.totalPoints}
             pointsToNextLevel={faithPoints.pointsToNextLevel}
             currentLevel={faithPoints.currentLevel}
+            meditationMinutesThisWeek={getMeditationMinutesForWeek()}
           />
         </div>
         {showGettingStarted && (
