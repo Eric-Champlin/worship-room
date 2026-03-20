@@ -138,6 +138,19 @@ export default {
           '0%': { fillOpacity: '0' },
           '100%': { fillOpacity: '1' },
         },
+        'pray-icon-pulse': {
+          '0%': { transform: 'scale(1)', filter: 'drop-shadow(0 0 0px rgba(109, 40, 217, 0))' },
+          '50%': { transform: 'scale(1.3)', filter: 'drop-shadow(0 0 8px rgba(109, 40, 217, 0.6))' },
+          '100%': { transform: 'scale(1)', filter: 'drop-shadow(0 0 0px rgba(109, 40, 217, 0))' },
+        },
+        'pray-ripple': {
+          '0%': { transform: 'scale(1)', opacity: '0.3' },
+          '100%': { transform: 'scale(2.5)', opacity: '0' },
+        },
+        'pray-float-text': {
+          '0%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(-20px)', opacity: '0' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -165,6 +178,9 @@ export default {
         'bell-ring': 'bell-ring 300ms ease-in-out',
         'streak-bump': 'streak-bump 300ms ease-out',
         'check-fill': 'check-fill 200ms ease-out forwards',
+        'pray-icon-pulse': 'pray-icon-pulse 300ms ease-out forwards',
+        'pray-ripple': 'pray-ripple 600ms ease-out forwards',
+        'pray-float-text': 'pray-float-text 500ms ease-out forwards',
       },
     },
   },

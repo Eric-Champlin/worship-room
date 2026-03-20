@@ -42,6 +42,7 @@ function renderSection(overrides?: {
   isOpen?: boolean
   comments?: PrayerComment[]
   totalCount?: number
+  prayerContent?: string
 }) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -51,6 +52,7 @@ function renderSection(overrides?: {
         comments={overrides?.comments ?? mockComments}
         totalCount={overrides?.totalCount ?? mockComments.length}
         onSubmitComment={vi.fn()}
+        prayerContent={overrides?.prayerContent}
       />
     </MemoryRouter>,
   )
@@ -93,5 +95,51 @@ describe('CommentsSection', () => {
   it('renders the comment input', () => {
     renderSection()
     expect(screen.getByText('Log in to comment')).toBeInTheDocument()
+  })
+
+  describe('cross-feature CTAs', () => {
+    it('CTA links render when comments are open and prayerContent provided', () => {
+      renderSection({ isOpen: true, prayerContent: 'Please pray for my family' })
+      expect(screen.getByText(/Pray about this/)).toBeInTheDocument()
+      expect(screen.getByText(/Journal about this/)).toBeInTheDocument()
+    })
+
+    it('CTA links not rendered when prayerContent is empty', () => {
+      renderSection({ isOpen: true, prayerContent: '' })
+      expect(screen.queryByText(/Pray about this/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Journal about this/)).not.toBeInTheDocument()
+    })
+
+    it('CTA links not rendered when prayerContent is omitted', () => {
+      renderSection({ isOpen: true })
+      expect(screen.queryByText(/Pray about this/)).not.toBeInTheDocument()
+    })
+
+    it('"Pray about this" links to /daily?tab=pray', () => {
+      renderSection({ isOpen: true, prayerContent: 'Test prayer' })
+      const prayLink = screen.getByText(/Pray about this/)
+      expect(prayLink.closest('a')).toHaveAttribute('href', '/daily?tab=pray')
+    })
+
+    it('"Journal about this" links to /daily?tab=journal', () => {
+      renderSection({ isOpen: true, prayerContent: 'Test prayer' })
+      const journalLink = screen.getByText(/Journal about this/)
+      expect(journalLink.closest('a')).toHaveAttribute('href', '/daily?tab=journal')
+    })
+
+    it('CTA container has responsive flex classes', () => {
+      renderSection({ isOpen: true, prayerContent: 'Test prayer' })
+      const prayLink = screen.getByText(/Pray about this/)
+      const ctaContainer = prayLink.parentElement!
+      expect(ctaContainer.className).toContain('flex-col')
+      expect(ctaContainer.className).toContain('sm:flex-row')
+    })
+
+    it('CTAs work for logged-out users', () => {
+      // useAuth is already mocked as logged out
+      renderSection({ isOpen: true, prayerContent: 'Test prayer' })
+      const prayLink = screen.getByText(/Pray about this/)
+      expect(prayLink.closest('a')).toBeInTheDocument()
+    })
   })
 })

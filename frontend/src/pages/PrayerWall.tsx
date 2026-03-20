@@ -29,7 +29,7 @@ const PRAYERS_PER_PAGE = 20
 
 function PrayerWallContent() {
   const { isAuthenticated, user } = useAuth()
-  const { showToast } = useToast()
+  const { showToast, showCelebrationToast } = useToast()
   const { recordActivity } = useFaithPoints()
   const authModal = useAuthModal()
   const openAuthModal = authModal?.openAuthModal
@@ -97,6 +97,15 @@ function PrayerWallContent() {
   const composerRef = useRef<HTMLDivElement>(null)
   const composerTooltip = useTooltipCallout('prayer-wall-composer', composerRef)
 
+  // Ceremony toast timeouts — cleaned up on unmount and rapid toggle
+  const ceremonyTimeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  useEffect(() => {
+    return () => {
+      ceremonyTimeoutRefs.current.forEach(clearTimeout)
+    }
+  }, [])
+
   const hasMore = prayers.length < allPrayers.length
 
   const loadMore = useCallback(() => {
@@ -132,10 +141,35 @@ function PrayerWallContent() {
 
   const handleTogglePraying = useCallback(
     (prayerId: string) => {
+      // Clear any pending ceremony timeouts (rapid toggle protection)
+      ceremonyTimeoutRefs.current.forEach(clearTimeout)
+      ceremonyTimeoutRefs.current = []
+
       const wasPraying = togglePraying(prayerId)
       if (!wasPraying) {
         recordActivity('prayerWall')
+
+        // Success toast after 600ms ceremony
+        const successTimeout = setTimeout(() => {
+          showToast('Your prayer has been lifted up')
+        }, 600)
+        ceremonyTimeoutRefs.current.push(successTimeout)
+
+        // Author notification: check if prayer author is the logged-in user
+        const prayer = prayers.find((p) => p.id === prayerId)
+        if (prayer?.userId && prayer.userId === user?.id) {
+          const authorTimeout = setTimeout(() => {
+            showCelebrationToast(
+              '',
+              '\u{1F64F} Someone is praying for your request',
+              'celebration',
+            )
+          }, 800)
+          ceremonyTimeoutRefs.current.push(authorTimeout)
+        }
       }
+      // No toast on untoggle
+
       setPrayers((prev) =>
         prev.map((p) =>
           p.id === prayerId
@@ -144,7 +178,7 @@ function PrayerWallContent() {
         ),
       )
     },
-    [togglePraying, recordActivity],
+    [togglePraying, recordActivity, showToast, showCelebrationToast, prayers, user],
   )
 
   const handleSubmitComment = useCallback(
@@ -280,6 +314,7 @@ function PrayerWallContent() {
                 comments={[...(localComments[prayer.id] ?? []), ...getMockComments(prayer.id)]}
                 totalCount={prayer.commentCount}
                 onSubmitComment={handleSubmitComment}
+                prayerContent={prayer.content}
               />
             </PrayerCard>
           ))}

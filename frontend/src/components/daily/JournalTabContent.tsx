@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { useToast } from '@/components/ui/Toast'
@@ -44,6 +44,9 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
   const { isAuthenticated } = useAuth()
   const { markJournalComplete } = useCompletionTracking()
   const { recordActivity } = useFaithPoints()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
 
   // Mode toggle
   const [mode, setMode] = useState<JournalMode>(() => {
@@ -103,6 +106,24 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
     }
   }, [prayContext])
 
+  // Prayer Wall context: switch to guided mode with contextual prompt
+  // Guard: only consume prayWallContext when this tab is active — all tabs are
+  // always mounted, so without the guard PrayTabContent's effect clears
+  // location.state before this effect can read it.
+  const activeTab = new URLSearchParams(location.search).get('tab') || 'pray'
+  const [prayWallPrompt, setPrayWallPrompt] = useState<string | null>(null)
+  useEffect(() => {
+    if (prayWallContext && activeTab === 'journal') {
+      setMode('guided')
+      setPrayWallPrompt(
+        `Reflect on this prayer request: "${prayWallContext}". What feelings does it stir in you?`,
+      )
+      setContextDismissed(false)
+      // Clear location state so back-navigation doesn't re-trigger
+      navigate(location.pathname + location.search, { replace: true, state: null })
+    }
+  }, [prayWallContext, activeTab, navigate, location.pathname, location.search])
+
   const handleModeChange = useCallback((newMode: JournalMode) => {
     setMode(newMode)
     localStorage.setItem(JOURNAL_MODE_KEY, newMode)
@@ -117,9 +138,11 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
     setPromptIndex(next)
   }
 
-  const currentPrompt = prayContext?.from === 'pray' && !contextDismissed
-    ? `Reflect on your prayer about ${prayContext.topic ?? 'what you shared'}. How did it feel to bring that before God? What comes up as you sit with it?`
-    : allPrompts[promptIndex]?.text ?? ''
+  const currentPrompt = prayWallPrompt && !contextDismissed
+    ? prayWallPrompt
+    : prayContext?.from === 'pray' && !contextDismissed
+      ? `Reflect on your prayer about ${prayContext.topic ?? 'what you shared'}. How did it feel to bring that before God? What comes up as you sit with it?`
+      : allPrompts[promptIndex]?.text ?? ''
 
   const handleSave = () => {
     if (!text.trim()) return

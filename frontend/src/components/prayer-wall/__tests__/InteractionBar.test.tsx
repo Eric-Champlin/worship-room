@@ -96,4 +96,47 @@ describe('InteractionBar', () => {
     await user.click(screen.getByLabelText(/share this prayer/i))
     expect(screen.getByText('Copy link')).toBeInTheDocument()
   })
+
+  describe('ceremony animation', () => {
+    it('animation elements appear on pray click when not praying', async () => {
+      const user = userEvent.setup()
+      renderBar()
+      await user.click(screen.getByLabelText(/pray for this request/i))
+
+      const floatText = screen.getByText('+1 prayer')
+      expect(floatText).toBeInTheDocument()
+      expect(floatText).toHaveAttribute('aria-hidden', 'true')
+      expect(floatText.className).toContain('pointer-events-none')
+    })
+
+    it('no animation elements on untoggle (isPraying=true)', async () => {
+      const user = userEvent.setup()
+      renderBar({ isPraying: true })
+      await user.click(screen.getByLabelText(/stop praying for this request/i))
+
+      expect(screen.queryByText('+1 prayer')).not.toBeInTheDocument()
+    })
+
+    it('ripple and float text have aria-hidden', async () => {
+      const user = userEvent.setup()
+      renderBar()
+      await user.click(screen.getByLabelText(/pray for this request/i))
+
+      const wrapper = screen.getByText('+1 prayer').parentElement!
+      const hiddenSpans = wrapper.querySelectorAll('span[aria-hidden="true"]')
+      // At least ripple + float text = 2 aria-hidden spans
+      expect(hiddenSpans.length).toBeGreaterThanOrEqual(2)
+    })
+
+    it('pray button preserves aria-pressed after animation click', async () => {
+      const user = userEvent.setup()
+      renderBar()
+      const btn = screen.getByLabelText(/pray for this request/i)
+      expect(btn).toHaveAttribute('aria-pressed', 'false')
+
+      await user.click(btn)
+      // aria-pressed is controlled by isPraying prop, not animation state
+      expect(btn).toHaveAttribute('aria-pressed', 'false')
+    })
+  })
 })

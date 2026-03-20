@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Copy,
   Bookmark,
@@ -34,6 +35,9 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const { isAuthenticated } = useAuth()
   const { markPrayComplete } = useCompletionTracking()
   const { recordActivity } = useFaithPoints()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
 
   const [text, setText] = useState('')
   const [selectedChip, setSelectedChip] = useState<string | null>(null)
@@ -69,6 +73,21 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
       document.removeEventListener('keydown', handleKey)
     }
   }, [mobileMenuOpen])
+
+  // Pre-fill textarea when navigating from Prayer Wall
+  // Guard: only consume prayWallContext when this tab is active — all tabs are
+  // always mounted, so without the guard the first effect to fire clears
+  // location.state before the target tab can read it.
+  const activeTab = new URLSearchParams(location.search).get('tab') || 'pray'
+  useEffect(() => {
+    if (prayWallContext && activeTab === 'pray') {
+      setText(prayWallContext)
+      setSelectedChip(null)
+      setNudge(false)
+      // Clear location state so back-navigation doesn't re-fill
+      navigate(location.pathname + location.search, { replace: true, state: null })
+    }
+  }, [prayWallContext, activeTab, navigate, location.pathname, location.search])
 
   const classicPrayers = useMemo(() => getClassicPrayers(), [])
 

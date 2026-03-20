@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { HandHelping, MessageCircle, Bookmark, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
@@ -31,6 +31,37 @@ export function InteractionBar({
   const isPraying = reactions?.isPraying ?? false
   const isBookmarked = reactions?.isBookmarked ?? false
 
+  const [isAnimating, setIsAnimating] = useState(false)
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handlePrayClick = useCallback(() => {
+    if (isPraying) {
+      // Untoggle — cancel any running ceremony animation
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current)
+        animationTimeoutRef.current = null
+      }
+      setIsAnimating(false)
+      onTogglePraying()
+      return
+    }
+    // Toggle ON — start ceremony
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current)
+    }
+    setIsAnimating(true)
+    onTogglePraying()
+    animationTimeoutRef.current = setTimeout(() => {
+      setIsAnimating(false)
+    }, 600)
+  }, [isPraying, onTogglePraying])
+
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current)
+    }
+  }, [])
+
   const [shareOpen, setShareOpen] = useState(false)
 
   const handleShareClick = useCallback(async () => {
@@ -54,20 +85,46 @@ export function InteractionBar({
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-3 sm:gap-4">
-      {/* Pray button */}
-      <button
-        type="button"
-        onClick={onTogglePraying}
-        className={cn(
-          btnBase,
-          isPraying ? 'font-medium text-primary' : 'text-text-light hover:text-primary',
+      {/* Pray button wrapper — relative for absolute-positioned animation elements */}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={handlePrayClick}
+          className={cn(
+            btnBase,
+            isPraying ? 'font-medium text-primary' : 'text-text-light hover:text-primary',
+          )}
+          aria-label={isPraying ? `Stop praying for this request (${prayer.prayingCount} praying)` : `Pray for this request (${prayer.prayingCount} praying)`}
+          aria-pressed={isPraying}
+        >
+          <HandHelping
+            className={cn(
+              'h-4 w-4',
+              isAnimating && 'motion-safe:animate-pray-icon-pulse',
+            )}
+            aria-hidden="true"
+          />
+          <span>({prayer.prayingCount})</span>
+        </button>
+
+        {/* Ripple — absolutely positioned circle behind button */}
+        {isAnimating && (
+          <span
+            className="pointer-events-none absolute inset-0 motion-safe:animate-pray-ripple rounded-full bg-primary/30"
+            aria-hidden="true"
+          />
         )}
-        aria-label={isPraying ? `Stop praying for this request (${prayer.prayingCount} praying)` : `Pray for this request (${prayer.prayingCount} praying)`}
-        aria-pressed={isPraying}
-      >
-        <HandHelping className="h-4 w-4" aria-hidden="true" />
-        <span>({prayer.prayingCount})</span>
-      </button>
+
+        {/* Floating "+1 prayer" text */}
+        {isAnimating && (
+          <span
+            className="pointer-events-none absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-sans text-primary motion-safe:animate-pray-float-text"
+            aria-hidden="true"
+          >
+            +1 prayer
+          </span>
+        )}
+      </div>
 
       {/* Comment button */}
       <button
