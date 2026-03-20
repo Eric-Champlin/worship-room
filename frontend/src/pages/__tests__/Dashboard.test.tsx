@@ -127,8 +127,9 @@ describe('Dashboard — Recommendations Phase', () => {
       vi.advanceTimersByTime(3500)
     })
 
-    // Should now show recommendations heading
-    expect(screen.getByText(/based on how you're feeling/i)).toBeInTheDocument()
+    // Should now show recommendations heading (text split by KaraokeTextReveal)
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading.textContent).toMatch(/based on how you're feeling/i)
     // Should show Good mood suggestions
     expect(screen.getByText('Give Thanks')).toBeInTheDocument()
     expect(screen.getByText('Encourage Someone')).toBeInTheDocument()

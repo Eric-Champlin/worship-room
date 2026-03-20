@@ -1,17 +1,20 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
+import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { getVerseById, getSongOfTheDay } from '@/mocks/daily-experience-mock-data'
 import {
   SPOTIFY_EMBED_BASE,
   SPOTIFY_PLAYLIST_URL,
 } from '@/constants/daily-experience'
+import { cn } from '@/lib/utils'
 
 export function SharedVerse() {
   const { id } = useParams<{ id: string }>()
   const verse = id ? getVerseById(id) : undefined
   const song = getSongOfTheDay(new Date().getDate())
+  const [referenceVisible, setReferenceVisible] = useState(false)
 
   useEffect(() => {
     if (verse) {
@@ -73,9 +76,18 @@ export function SharedVerse() {
             Worship Room
           </p>
           <blockquote className="mx-auto max-w-2xl font-serif text-xl leading-relaxed text-white sm:text-2xl lg:text-3xl">
-            &ldquo;{verse.text}&rdquo;
+            &ldquo;<KaraokeTextReveal
+              text={verse.text}
+              revealDuration={2500}
+              onRevealComplete={() => setReferenceVisible(true)}
+            />&rdquo;
           </blockquote>
-          <p className="mt-3 text-sm text-white/80">
+          <p
+            className={cn(
+              'mt-3 text-sm text-white/80 transition-opacity duration-300',
+              referenceVisible ? 'opacity-100' : 'opacity-0',
+            )}
+          >
             {verse.reference} WEB
           </p>
         </section>

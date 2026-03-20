@@ -36,7 +36,9 @@ describe('MoodRecommendations', () => {
   describe('Rendering', () => {
     it('renders heading text', () => {
       renderRecommendations()
-      expect(screen.getByText(/based on how you're feeling/i)).toBeInTheDocument()
+      // Text is split across spans by KaraokeTextReveal
+      const heading = screen.getByRole('heading', { level: 2 })
+      expect(heading.textContent).toMatch(/based on how you're feeling/i)
     })
 
     it('renders 3 suggestion cards for mood 1 (Struggling)', () => {
@@ -131,7 +133,7 @@ describe('MoodRecommendations', () => {
   describe('Accessibility', () => {
     it('focus moves to heading on mount', () => {
       renderRecommendations()
-      const heading = screen.getByText(/based on how you're feeling/i)
+      const heading = screen.getByRole('heading', { level: 2 })
       expect(heading).toHaveFocus()
     })
 
@@ -182,6 +184,36 @@ describe('MoodRecommendations', () => {
       expect(links[0]).toHaveStyle({ animationDelay: '0ms' })
       expect(links[1]).toHaveStyle({ animationDelay: '150ms' })
       expect(links[2]).toHaveStyle({ animationDelay: '300ms' })
+    })
+  })
+
+  describe('KaraokeTextReveal Integration', () => {
+    it('heading renders via KaraokeTextReveal', () => {
+      renderRecommendations()
+      // Each word of the heading should be in the DOM
+      expect(screen.getByText('Based')).toBeInTheDocument()
+      expect(screen.getByText("you're")).toBeInTheDocument()
+      expect(screen.getByText('feeling...')).toBeInTheDocument()
+    })
+
+    it('reduced motion shows heading immediately', () => {
+      vi.mocked(useReducedMotion).mockReturnValue(true)
+      renderRecommendations()
+
+      // All heading words visible immediately
+      const words = "Based on how you're feeling...".split(/\s+/)
+      for (const word of words) {
+        expect(screen.getByText(word).style.opacity).toBe('1')
+      }
+    })
+
+    it('existing card stagger animations unchanged', () => {
+      vi.mocked(useReducedMotion).mockReturnValue(false)
+      renderRecommendations()
+      const links = screen.getAllByRole('link')
+      for (const link of links) {
+        expect(link.className).toContain('motion-safe:animate-fade-in')
+      }
     })
   })
 })

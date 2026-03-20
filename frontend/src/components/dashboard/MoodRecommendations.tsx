@@ -20,6 +20,7 @@ import { MOOD_RECOMMENDATIONS } from '@/constants/dashboard/recommendations'
 import { MOOD_COLORS } from '@/constants/dashboard/mood'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
+import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   HandHeart,
@@ -90,9 +91,12 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
         <h2
           ref={headingRef}
           tabIndex={-1}
-          className="mb-6 text-center font-serif italic text-xl text-white/80 outline-none motion-safe:animate-fade-in md:text-2xl"
+          className="mb-6 text-center font-serif italic text-xl text-white/80 outline-none md:text-2xl"
         >
-          Based on how you're feeling...
+          <KaraokeTextReveal
+            text="Based on how you're feeling..."
+            revealDuration={1500}
+          />
         </h2>
 
         <div className="flex w-full flex-col gap-3 sm:gap-4 lg:flex-row lg:gap-4">

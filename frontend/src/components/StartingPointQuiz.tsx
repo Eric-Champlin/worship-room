@@ -4,6 +4,7 @@ import { ArrowLeft, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useInView } from '@/hooks/useInView'
 import { QUIZ_QUESTIONS, calculateResult } from '@/components/quiz-data'
+import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 
 function BackgroundSquiggle({ isDark }: { isDark: boolean }) {
   const stroke1 = isDark ? '#FFFFFF' : '#D6D3D1'
@@ -365,6 +366,8 @@ interface ResultCardProps {
 }
 
 function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardProps) {
+  const [referenceVisible, setReferenceVisible] = useState(false)
+
   return (
     <div className="text-center">
       <h3 className={cn('px-6 pt-6 text-xl font-bold', isDark ? 'text-white' : 'text-text-dark')}>
@@ -376,8 +379,18 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
       </p>
 
       <blockquote className={cn('mt-4 px-6 font-serif italic', isDark ? 'text-white/80' : 'text-text-dark')}>
-        &ldquo;{destination.verse}&rdquo;
-        <footer className={cn('mt-1 font-sans text-sm not-italic', isDark ? 'text-white/50' : 'text-text-light')}>
+        &ldquo;<KaraokeTextReveal
+          text={destination.verse}
+          revealDuration={2000}
+          onRevealComplete={() => setReferenceVisible(true)}
+        />&rdquo;
+        <footer
+          className={cn(
+            'mt-1 font-sans text-sm not-italic transition-opacity duration-300',
+            referenceVisible ? 'opacity-100' : 'opacity-0',
+            isDark ? 'text-white/50' : 'text-text-light',
+          )}
+        >
           &mdash; {destination.verseReference}
         </footer>
       </blockquote>

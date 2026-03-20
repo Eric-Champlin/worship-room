@@ -1,9 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { QUIZ_QUESTIONS } from '@/components/quiz-data'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+
+vi.mock('@/hooks/useReducedMotion')
 
 function renderQuiz() {
   return render(
@@ -47,6 +50,11 @@ async function answerAllQuestions() {
 describe('StartingPointQuiz', () => {
   beforeEach(() => {
     user = userEvent.setup()
+    vi.mocked(useReducedMotion).mockReturnValue(false)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   describe('Structure & Semantics', () => {
@@ -235,9 +243,9 @@ describe('StartingPointQuiz', () => {
 
       await answerAllQuestions()
 
-      expect(
-        screen.getByText(/cast all your anxiety on him/i)
-      ).toBeInTheDocument()
+      // Verse text split across spans by KaraokeTextReveal
+      expect(screen.getByText('Cast')).toBeInTheDocument()
+      expect(screen.getByText('anxiety')).toBeInTheDocument()
       expect(screen.getByText(/1 peter 5:7/i)).toBeInTheDocument()
     })
 
@@ -362,6 +370,64 @@ describe('StartingPointQuiz', () => {
         name: /quiz progress/i,
       })
       expect(progressbar).toBeInTheDocument()
+    })
+  })
+
+  describe('KaraokeTextReveal Integration', () => {
+    it('result verse renders via KaraokeTextReveal', async () => {
+      renderQuiz()
+      await answerAllQuestions()
+
+      // Each verse word should be in the DOM (split by KaraokeTextReveal)
+      expect(screen.getByText('Cast')).toBeInTheDocument()
+      expect(screen.getByText('you.')).toBeInTheDocument()
+    })
+
+    it('verse reference hidden until reveal completes', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+
+      renderQuiz()
+      await answerAllQuestions()
+
+      // Reference should start hidden
+      const reference = screen.getByText(/1 peter 5:7/i)
+      expect(reference).toHaveClass('opacity-0')
+    })
+
+    it('verse reference visible after reveal', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+
+      renderQuiz()
+      await answerAllQuestions()
+
+      // After reveal duration (2000ms + 200ms buffer)
+      act(() => {
+        vi.advanceTimersByTime(2201)
+      })
+
+      const reference = screen.getByText(/1 peter 5:7/i)
+      expect(reference).toHaveClass('opacity-100')
+    })
+
+    it('reduced motion shows verse and reference immediately', async () => {
+      vi.mocked(useReducedMotion).mockReturnValue(true)
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+
+      renderQuiz()
+      await answerAllQuestions()
+
+      // All verse words visible immediately
+      expect(screen.getByText('Cast').style.opacity).toBe('1')
+
+      // onRevealComplete fires on next tick → reference visible
+      act(() => {
+        vi.advanceTimersByTime(1)
+      })
+      const reference = screen.getByText(/1 peter 5:7/i)
+      expect(reference).toHaveClass('opacity-100')
     })
   })
 })

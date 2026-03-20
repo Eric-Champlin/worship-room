@@ -10,6 +10,8 @@ import {
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources';
 import { saveMoodEntry } from '@/services/mood-storage';
 import { getLocalDateString } from '@/utils/date';
+import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal';
+import { cn } from '@/lib/utils';
 
 type CheckInPhase = 'idle' | 'mood_selected' | 'verse_display' | 'crisis_banner';
 
@@ -24,6 +26,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
   const [selectedMood, setSelectedMood] = useState<MoodOption | null>(null);
   const [text, setText] = useState('');
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const [verseRevealed, setVerseRevealed] = useState(false);
   const orbRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const savedEntryRef = useRef<MoodEntry | null>(null);
   const verseRef = useRef<HTMLDivElement | null>(null);
@@ -74,6 +77,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
     if (text.trim() && containsCrisisKeyword(text)) {
       setPhase('crisis_banner');
     } else {
+      setVerseRevealed(false);
       setPhase('verse_display');
     }
   }, [selectedMood, text]);
@@ -233,12 +237,22 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
             ref={verseRef}
             tabIndex={-1}
             aria-live="polite"
-            className="flex flex-col items-center outline-none motion-safe:animate-fade-in"
+            className="flex flex-col items-center outline-none"
           >
-            <p className="max-w-lg text-center font-serif text-xl italic text-white/90 md:text-2xl">
-              &ldquo;{selectedMood.verse}&rdquo;
-            </p>
-            <p className="mt-3 text-center font-sans text-sm text-white/50">
+            <div className="max-w-lg text-center font-serif text-xl italic text-white/90 md:text-2xl">
+              &ldquo;<KaraokeTextReveal
+                text={selectedMood.verse}
+                revealDuration={2500}
+                onRevealComplete={() => setVerseRevealed(true)}
+                className="inline"
+              />&rdquo;
+            </div>
+            <p
+              className={cn(
+                'mt-3 text-center font-sans text-sm text-white/50 transition-opacity duration-300',
+                verseRevealed ? 'opacity-100' : 'opacity-0'
+              )}
+            >
               {selectedMood.verseReference}
             </p>
           </div>

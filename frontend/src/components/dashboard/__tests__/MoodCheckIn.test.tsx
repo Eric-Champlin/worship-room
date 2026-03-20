@@ -3,6 +3,9 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MoodCheckIn } from '../MoodCheckIn';
 import { MOOD_OPTIONS } from '@/constants/dashboard/mood';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+
+vi.mock('@/hooks/useReducedMotion');
 
 const mockOnComplete = vi.fn();
 const mockOnSkip = vi.fn();
@@ -20,6 +23,7 @@ function renderCheckIn(userName = 'Eric') {
 beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
+  vi.mocked(useReducedMotion).mockReturnValue(false);
 });
 
 afterEach(() => {
@@ -126,7 +130,9 @@ describe('MoodCheckIn', () => {
       await userEvent.click(orbs[2]); // Okay
       await userEvent.click(screen.getByRole('button', { name: /continue/i }));
 
-      expect(screen.getByText(/Be still, and know that I am God/)).toBeInTheDocument();
+      // Verse text is split across spans by KaraokeTextReveal
+      expect(screen.getByText('Be')).toBeInTheDocument();
+      expect(screen.getByText('God.')).toBeInTheDocument();
       expect(screen.getByText('Psalm 46:10')).toBeInTheDocument();
     });
 
@@ -139,7 +145,9 @@ describe('MoodCheckIn', () => {
       fireEvent.change(textarea, { target: { value: 'Feeling blessed today' } });
       await userEvent.click(screen.getByRole('button', { name: /continue/i }));
 
-      expect(screen.getByText(/Give thanks to the Lord/)).toBeInTheDocument();
+      // Verse text is split across spans by KaraokeTextReveal
+      expect(screen.getByText('Give')).toBeInTheDocument();
+      expect(screen.getByText('Lord,')).toBeInTheDocument();
       expect(screen.getByText('Psalm 107:1')).toBeInTheDocument();
     });
 
@@ -186,7 +194,8 @@ describe('MoodCheckIn', () => {
       await userEvent.click(orbs[0]);
       await userEvent.click(screen.getByRole('button', { name: /continue/i }));
 
-      const liveRegion = screen.getByText(/The Lord is near/).closest('[aria-live]');
+      // Verse text split across spans — find a word and traverse to aria-live container
+      const liveRegion = screen.getByText('Lord').closest('[aria-live]');
       expect(liveRegion).toHaveAttribute('aria-live', 'polite');
     });
   });
@@ -257,7 +266,8 @@ describe('MoodCheckIn', () => {
 
       // Should show verse, not crisis banner
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-      expect(screen.getByText(/The Lord is near/)).toBeInTheDocument();
+      // Verse text split across spans by KaraokeTextReveal
+      expect(screen.getByText('brokenhearted,')).toBeInTheDocument();
     });
   });
 
@@ -416,6 +426,64 @@ describe('MoodCheckIn', () => {
       renderCheckIn(longName);
       const greeting = screen.getByText(new RegExp(`How are you feeling today, ${longName}`));
       expect(greeting).toBeInTheDocument();
+    });
+  });
+
+  describe('KaraokeTextReveal Integration', () => {
+    it('verse text renders via KaraokeTextReveal', async () => {
+      renderCheckIn();
+      const orbs = screen.getAllByRole('radio');
+      await userEvent.click(orbs[2]); // Okay
+      await userEvent.click(screen.getByRole('button', { name: /continue/i }));
+
+      // Each word of the verse should be present in the DOM
+      const verseWords = MOOD_OPTIONS[2].verse.split(/\s+/);
+      for (const word of verseWords) {
+        expect(screen.getByText(word)).toBeInTheDocument();
+      }
+    });
+
+    it('verse reference hidden until reveal completes', () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      renderCheckIn();
+
+      const orbs = screen.getAllByRole('radio');
+      fireEvent.click(orbs[2]); // Okay
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+
+      // Reference should start hidden
+      const reference = screen.getByText('Psalm 46:10');
+      expect(reference).toHaveClass('opacity-0');
+
+      // After full reveal (2500ms + 200ms buffer)
+      act(() => {
+        vi.advanceTimersByTime(2701);
+      });
+
+      expect(reference).toHaveClass('opacity-100');
+    });
+
+    it('reduced motion shows verse and reference immediately', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.mocked(useReducedMotion).mockReturnValue(true);
+
+      renderCheckIn();
+      const orbs = screen.getAllByRole('radio');
+      fireEvent.click(orbs[2]); // Okay
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+
+      // All verse words visible immediately
+      const verseWords = MOOD_OPTIONS[2].verse.split(/\s+/);
+      for (const word of verseWords) {
+        expect(screen.getByText(word).style.opacity).toBe('1');
+      }
+
+      // onRevealComplete fires on next tick → reference visible
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+      const reference = screen.getByText('Psalm 46:10');
+      expect(reference).toHaveClass('opacity-100');
     });
   });
 });

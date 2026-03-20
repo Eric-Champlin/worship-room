@@ -4,6 +4,7 @@ import { Pause, Play } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
 import { CompletionScreen } from '@/components/daily/CompletionScreen'
+import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { getSoakingVerses } from '@/mocks/daily-experience-mock-data'
 import { DURATION_OPTIONS } from '@/constants/daily-experience'
@@ -32,6 +33,7 @@ function ScriptureSoakingContent() {
   const [selectedVerse, setSelectedVerse] = useState<DailyVerse | null>(null)
   const [progress, setProgress] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [referenceVisible, setReferenceVisible] = useState(false)
 
   const rafRef = useRef<number>(0)
   const startTimeRef = useRef(0)
@@ -84,6 +86,7 @@ function ScriptureSoakingContent() {
   const handleBegin = () => {
     if (!duration) return
     setSelectedVerse(verses[verseIndex])
+    setReferenceVisible(false)
     setScreen('exercise')
     navigator.wakeLock
       ?.request('screen')
@@ -126,9 +129,19 @@ function ScriptureSoakingContent() {
       <Layout hero={<PageHero title="Scripture Soaking" />}>
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-10 text-center">
           <blockquote className="mx-auto max-w-2xl font-serif text-2xl leading-relaxed text-text-dark sm:text-3xl lg:text-4xl">
-            &ldquo;{selectedVerse.text}&rdquo;
+            &ldquo;<KaraokeTextReveal
+              text={selectedVerse.text}
+              msPerWord={300}
+              onRevealComplete={() => setReferenceVisible(true)}
+              key={selectedVerse.reference}
+            />&rdquo;
           </blockquote>
-          <p className="mt-4 text-sm text-text-light">
+          <p
+            className={cn(
+              'mt-4 text-sm text-text-light transition-opacity duration-300',
+              referenceVisible ? 'opacity-100' : 'opacity-0',
+            )}
+          >
             {selectedVerse.reference} WEB
           </p>
 
