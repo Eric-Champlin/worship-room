@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { RefreshCw } from 'lucide-react'
+import { ArrowUpDown, BookOpen, RefreshCw, Search, X } from 'lucide-react'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
@@ -10,6 +10,7 @@ import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import {
   JOURNAL_DRAFT_KEY,
+  JOURNAL_MILESTONES_KEY,
   JOURNAL_MODE_KEY,
 } from '@/constants/daily-experience'
 import {
@@ -33,13 +34,20 @@ function formatDateTime(date: Date) {
   return `${dayName}, ${month} ${day}, ${year} \u2014 ${time}`
 }
 
+const JOURNAL_MILESTONES: Record<number, string> = {
+  10: '10 entries! Your journal is becoming a treasure.',
+  25: '25 entries! You\'re building a beautiful record of growth.',
+  50: '50 entries! Half a hundred conversations with God.',
+  100: '100 entries! What an incredible journey of reflection.',
+}
+
 interface JournalTabContentProps {
   prayContext?: PrayContext | null
   onSwitchTab?: (tab: 'pray' | 'journal' | 'meditate') => void
 }
 
 export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTabContentProps) {
-  const { showToast } = useToast()
+  const { showToast, showCelebrationToast } = useToast()
   const authModal = useAuthModal()
   const { isAuthenticated } = useAuth()
   const { markJournalComplete } = useCompletionTracking()
@@ -75,6 +83,53 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
   // Saved entries
   const [savedEntries, setSavedEntries] = useState<SavedJournalEntry[]>([])
   const [isDoneJournaling, setIsDoneJournaling] = useState(false)
+
+  // Search & filter state (ephemeral — not persisted)
+  const [searchText, setSearchText] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [modeFilter, setModeFilter] = useState<'all' | JournalMode>('all')
+  const [sortDirection, setSortDirection] = useState<'newest' | 'oldest'>('newest')
+
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(searchText)
+    }, 300)
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    }
+  }, [searchText])
+
+  const filteredEntries = useMemo(() => {
+    let entries = savedEntries
+
+    if (debouncedSearch.trim()) {
+      const query = debouncedSearch.toLowerCase()
+      entries = entries.filter(
+        (e) =>
+          e.content.toLowerCase().includes(query) ||
+          (e.promptText && e.promptText.toLowerCase().includes(query)),
+      )
+    }
+
+    if (modeFilter !== 'all') {
+      entries = entries.filter((e) => e.mode === modeFilter)
+    }
+
+    if (sortDirection === 'oldest') {
+      entries = [...entries].reverse()
+    }
+
+    return entries
+  }, [savedEntries, debouncedSearch, modeFilter, sortDirection])
+
+  const clearFilters = () => {
+    setSearchText('')
+    setDebouncedSearch('')
+    setModeFilter('all')
+    setSortDirection('newest')
+  }
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -163,6 +218,35 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
     markJournalComplete()
     recordActivity('journal')
     showToast('Entry saved')
+
+    // Milestone celebration check
+    // savedEntries still reflects the pre-update array (state update is batched),
+    // so savedEntries.length + 1 gives us the correct post-save total.
+    const newCount = savedEntries.length + 1
+    const milestoneMessage = JOURNAL_MILESTONES[newCount]
+    if (milestoneMessage) {
+      let celebrated: number[] = []
+      try {
+        celebrated = JSON.parse(localStorage.getItem(JOURNAL_MILESTONES_KEY) ?? '[]')
+      } catch {
+        celebrated = []
+      }
+      if (!celebrated.includes(newCount)) {
+        celebrated.push(newCount)
+        localStorage.setItem(JOURNAL_MILESTONES_KEY, JSON.stringify(celebrated))
+        const milestoneIcon = (
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
+            <BookOpen className="h-4 w-4 text-primary-lt" />
+          </div>
+        )
+        showCelebrationToast(
+          'Journal Milestone',
+          milestoneMessage,
+          'celebration-confetti',
+          milestoneIcon,
+        )
+      }
+    }
   }
 
   const handleReflect = (entryId: string) => {
@@ -405,8 +489,86 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
             </div>
           )}
 
+          {/* Search & Filter Bar */}
+          {savedEntries.length >= 2 && (
+            <div className="rounded-xl border border-gray-200 bg-white/80 p-3 backdrop-blur-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                {/* Search input */}
+                <div className="relative flex-1 sm:max-w-none lg:max-w-sm">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-light" aria-hidden="true" />
+                  <input
+                    type="text"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    placeholder="Search your entries..."
+                    aria-label="Search your entries"
+                    className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-9 pr-8 text-sm text-text-dark placeholder:text-text-light/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+                  />
+                  {searchText && (
+                    <button
+                      type="button"
+                      onClick={() => { setSearchText(''); setDebouncedSearch('') }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Mode pills + Sort toggle row */}
+                <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-4">
+                  {/* Mode filter pills */}
+                  <div role="group" aria-label="Filter by journal mode" className="flex gap-1.5">
+                    {(['all', 'guided', 'free'] as const).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setModeFilter(m)}
+                        aria-pressed={modeFilter === m}
+                        className={cn(
+                          'min-h-[44px] rounded-full px-3 py-1 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                          modeFilter === m
+                            ? 'bg-primary/20 text-primary'
+                            : 'bg-gray-100 text-text-dark hover:bg-gray-200',
+                        )}
+                      >
+                        {m === 'all' ? 'All' : m === 'guided' ? 'Guided' : 'Free Write'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Sort toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setSortDirection((d) => d === 'newest' ? 'oldest' : 'newest')}
+                    aria-label={`Sort order: ${sortDirection === 'newest' ? 'newest first' : 'oldest first'}. Click to change.`}
+                    className="inline-flex min-h-[44px] items-center gap-1 text-sm text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    <ArrowUpDown className="h-3.5 w-3.5" />
+                    {sortDirection === 'newest' ? 'Newest first' : 'Oldest first'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Empty filter state */}
+          {filteredEntries.length === 0 && savedEntries.length >= 2 && (
+            <div className="rounded-xl border border-gray-200 bg-white/80 p-6 text-center backdrop-blur-sm" role="status">
+              <p className="text-sm text-text-light">No entries match your search</p>
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="mt-2 text-sm text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+
           {/* Entry Cards */}
-          {savedEntries.map((entry) => (
+          {filteredEntries.map((entry) => (
             <article
               key={entry.id}
               className="rounded-lg border border-gray-200 bg-white p-4"

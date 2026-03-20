@@ -1,5 +1,6 @@
 export const DAILY_COMPLETION_KEY = 'worship-room-daily-completion'
 export const JOURNAL_DRAFT_KEY = 'worship-room-journal-draft'
+export const JOURNAL_MILESTONES_KEY = 'wr_journal_milestones'
 export const JOURNAL_MODE_KEY = 'worship-room-journal-mode'
 export const SPOTIFY_PLAYLIST_URL =
   'https://open.spotify.com/playlist/5Ux99VLE8cG7W656CjR2si'
