@@ -104,9 +104,9 @@ Fully built 3-tab experience. See `09-design-system.md` for Music architecture d
 30. **Accessibility Audit** — `useAnnounce`, full ARIA, 44px touch targets, `prefers-reduced-motion`.
 31. **Read Aloud Button** — TTS for all text content.
 
-### Dashboard & Growth Features — Personal Dashboard (`/`)
+### Dashboard & Growth Features — Personal Dashboard (`/`) ✅ COMPLETE
 
-The Dashboard is the logged-in user's home page (replaces the landing page at `/` when authenticated). All-dark theme with frosted glass cards and vibrant accent colors. Fixed layout with collapsible/expandable cards. 2-column desktop, single-column mobile.
+The Dashboard is the logged-in user's home page (replaces the landing page at `/` when authenticated). All-dark theme with frosted glass cards and vibrant accent colors. Fixed layout with collapsible/expandable cards. 2-column desktop, single-column mobile. Built across 16 specs with 2000+ tests.
 
 **Full specifications in `dashboard-growth-spec-plan-v2.md`.** See `10-ux-flows.md` for dashboard UX flow.
 
@@ -114,7 +114,7 @@ The Dashboard is the logged-in user's home page (replaces the landing page at `/
 33. **Mood Insights Widget** — 7-day mood line chart on dashboard (Recharts), "See More" → `/insights`.
 34. **Mood Insights Page (`/insights`)** — Heatmap + line chart + AI insight cards + correlations. Default 30-day.
 35. **AI Mood Insights** — Trend summaries, activity correlations, scripture connections, monthly report. Mock data for frontend-first.
-36. **Streak System** — 6 trackable activities. No grace period. Gentle reset messaging. Current + longest streak.
+36. **Streak System** — 6 trackable activities. Grace-based streak repair (1 free/week, 50 pts for additional). Gentle reset messaging.
 37. **Faith Points** — Weighted points (5-25) + daily multiplier tiers (1x/1.25x/1.5x/2x). ~170 pts/day max.
 38. **Faith Levels** — 6 levels: Seedling (0) → Sprout (100) → Blooming (500) → Flourishing (1,500) → Oak (4,000) → Lighthouse (10,000+).
 39. **Badges** — ~35 badges across 6 categories. Welcome badge on signup. Scaled celebrations.
@@ -128,7 +128,7 @@ The Dashboard is the logged-in user's home page (replaces the landing page at `/
 
 ### Community Features
 
-47. **Prayer Wall** - Community prayer feed, inline composer/comments, public profiles, auth modal gates. Frontend with mock data (274 tests).
+47. **Prayer Wall** - Community prayer feed, inline composer/comments, public profiles, auth modal gates. Category filtering (8 categories), ceremony animation on "Pray for this", cross-feature CTAs. Frontend with mock data.
 48. **AI Auto-Moderation** - Flag inappropriate content
 49. **Admin Moderation Interface** - `/admin/prayer-wall`
 50. **Email Notifications** - Flagged posts to admin
@@ -143,7 +143,7 @@ The Dashboard is the logged-in user's home page (replaces the landing page at `/
 
 ### Content Features
 
-56. **Guided Meditations** - 6 text-based meditations with TTS
+56. **Guided Meditations** - 6 text-based meditations with TTS, meditation minutes tracking + history
 57. **Verse of the Day** - Daily scripture on `/daily`, homepage, dashboard
 58. **Song of the Day** - Daily worship song with Spotify embed
 59. **Guided Reading Plans** - 7-day and 21-day themed plans
@@ -162,7 +162,7 @@ The Dashboard is the logged-in user's home page (replaces the landing page at `/
 
 ### Polish & Launch Prep
 
-66. **Personalized Onboarding Flow** — 3-5 questions at signup
+66. **Personalized Onboarding Flow** — Welcome wizard (4 screens: greeting, avatar, quiz, results), progressive disclosure tooltips, getting started checklist
 67. **Performance Optimization** — Lazy loading, code splitting, caching
 68. **Security Audit** — Vulnerability scanning, penetration testing
 69. **SEO Optimization** — Meta tags, sitemap, structured data
@@ -185,50 +185,50 @@ The Dashboard is the logged-in user's home page (replaces the landing page at `/
 
 ### Public Routes (No Authentication Required)
 
-| Route | Component | Status | Description |
-|-------|-----------|--------|-------------|
-| `/` | `Home` / `Dashboard` | Built / Planned | Landing (logged-out) / Dashboard (logged-in) |
-| `/daily` | `DailyHub` | Built | Tabbed: Pray \| Journal \| Meditate |
-| `/pray` | Redirect → `/daily?tab=pray` | Built | Legacy redirect |
-| `/journal` | Redirect → `/daily?tab=journal` | Built | Legacy redirect |
-| `/meditate` | Redirect → `/daily?tab=meditate` | Built | Legacy redirect |
-| `/scripture` | Redirect → `/daily?tab=pray` | Built | Legacy redirect |
-| `/meditate/breathing` | `BreathingExercise` | Built | 4-7-8 breathing |
-| `/meditate/soaking` | `ScriptureSoaking` | Built | Verse contemplation |
-| `/meditate/gratitude` | `GratitudeReflection` | Built | Gratitude journaling |
-| `/meditate/acts` | `ActsPrayerWalk` | Built | ACTS framework |
-| `/meditate/psalms` | `PsalmReading` | Built | Psalm reading |
-| `/meditate/examen` | `ExamenReflection` | Built | Ignatian Examen |
-| `/verse/:id` | `SharedVerse` | Built | Shareable verse card |
-| `/prayer/:id` | `SharedPrayer` | Built | Shareable prayer card |
-| `/prayer-wall` | `PrayerWall` | Built | Community prayer feed |
-| `/prayer-wall/:id` | `PrayerDetail` | Built | Prayer detail page |
-| `/prayer-wall/user/:id` | `PrayerWallProfile` | Built | Public prayer profile |
-| `/prayer-wall/dashboard` | `PrayerWallDashboard` | Built | Private prayer dashboard |
-| `/local-support/churches` | `Churches` | Built | Church locator |
-| `/local-support/counselors` | `Counselors` | Built | Counselor locator |
-| `/local-support/celebrate-recovery` | `CelebrateRecovery` | Built | CR locator |
-| `/music` | `MusicPage` | Built | 3-tab music hub |
-| `/music/playlists` | Redirect → `/music?tab=playlists` | Built | Legacy redirect |
-| `/music/ambient` | Redirect → `/music?tab=ambient` | Built | Legacy redirect |
-| `/music/sleep` | Redirect → `/music?tab=sleep` | Built | Legacy redirect |
-| `/music/routines` | `RoutinesPage` | Built | Bedtime routines |
-| `/login` | `ComingSoon` | Stub | Login placeholder |
-| `/register` | `ComingSoon` | Stub | Register placeholder |
-| `/health` | `Health` | Built | Backend health check |
-| `*` | `NotFound` | Built | 404 page |
+| Route                               | Component                         | Status | Description                                  |
+| ----------------------------------- | --------------------------------- | ------ | -------------------------------------------- |
+| `/`                                 | `Home` / `Dashboard`              | Built  | Landing (logged-out) / Dashboard (logged-in) |
+| `/daily`                            | `DailyHub`                        | Built  | Tabbed: Pray \| Journal \| Meditate          |
+| `/pray`                             | Redirect → `/daily?tab=pray`      | Built  | Legacy redirect                              |
+| `/journal`                          | Redirect → `/daily?tab=journal`   | Built  | Legacy redirect                              |
+| `/meditate`                         | Redirect → `/daily?tab=meditate`  | Built  | Legacy redirect                              |
+| `/scripture`                        | Redirect → `/daily?tab=pray`      | Built  | Legacy redirect                              |
+| `/meditate/breathing`               | `BreathingExercise`               | Built  | 4-7-8 breathing                              |
+| `/meditate/soaking`                 | `ScriptureSoaking`                | Built  | Verse contemplation                          |
+| `/meditate/gratitude`               | `GratitudeReflection`             | Built  | Gratitude journaling                         |
+| `/meditate/acts`                    | `ActsPrayerWalk`                  | Built  | ACTS framework                               |
+| `/meditate/psalms`                  | `PsalmReading`                    | Built  | Psalm reading                                |
+| `/meditate/examen`                  | `ExamenReflection`                | Built  | Ignatian Examen                              |
+| `/verse/:id`                        | `SharedVerse`                     | Built  | Shareable verse card                         |
+| `/prayer/:id`                       | `SharedPrayer`                    | Built  | Shareable prayer card                        |
+| `/prayer-wall`                      | `PrayerWall`                      | Built  | Community prayer feed                        |
+| `/prayer-wall/:id`                  | `PrayerDetail`                    | Built  | Prayer detail page                           |
+| `/prayer-wall/user/:id`             | `PrayerWallProfile`               | Built  | Public prayer profile                        |
+| `/prayer-wall/dashboard`            | `PrayerWallDashboard`             | Built  | Private prayer dashboard                     |
+| `/local-support/churches`           | `Churches`                        | Built  | Church locator                               |
+| `/local-support/counselors`         | `Counselors`                      | Built  | Counselor locator                            |
+| `/local-support/celebrate-recovery` | `CelebrateRecovery`               | Built  | CR locator                                   |
+| `/music`                            | `MusicPage`                       | Built  | 3-tab music hub                              |
+| `/music/playlists`                  | Redirect → `/music?tab=playlists` | Built  | Legacy redirect                              |
+| `/music/ambient`                    | Redirect → `/music?tab=ambient`   | Built  | Legacy redirect                              |
+| `/music/sleep`                      | Redirect → `/music?tab=sleep`     | Built  | Legacy redirect                              |
+| `/music/routines`                   | `RoutinesPage`                    | Built  | Bedtime routines                             |
+| `/login`                            | `ComingSoon`                      | Stub   | Login placeholder                            |
+| `/register`                         | `ComingSoon`                      | Stub   | Register placeholder                         |
+| `/health`                           | `Health`                          | Built  | Backend health check                         |
+| `*`                                 | `NotFound`                        | Built  | 404 page                                     |
 
 ### Protected Routes (Requires Authentication)
 
-| Route | Component | Status | Description |
-|-------|-----------|--------|-------------|
-| `/insights` | `MoodInsights` | Planned | Full mood analytics |
-| `/insights/monthly` | `MonthlyReport` | Planned | Monthly mood report |
-| `/friends` | `Friends` | Planned | Friends + Leaderboard tabs |
-| `/profile/:userId` | `GrowthProfile` | Planned | Public growth profile |
-| `/settings` | `Settings` | Planned | User settings (4 sections) |
-| `/journal/my-entries` | `SavedJournalEntries` | Planned | Saved journal entries |
-| `/favorites` | `Favorites` | Planned | Bookmarked content |
+| Route                 | Component             | Status  | Description                              |
+| --------------------- | --------------------- | ------- | ---------------------------------------- |
+| `/insights`           | `MoodInsights`        | Built   | Full mood analytics + meditation history |
+| `/insights/monthly`   | `MonthlyReport`       | Built   | Monthly mood report                      |
+| `/friends`            | `Friends`             | Built   | Friends + Leaderboard tabs               |
+| `/profile/:userId`    | `GrowthProfile`       | Built   | Public growth profile                    |
+| `/settings`           | `Settings`            | Built   | User settings (4 sections)               |
+| `/journal/my-entries` | `SavedJournalEntries` | Planned | Saved journal entries                    |
+| `/favorites`          | `Favorites`           | Planned | Bookmarked content                       |
 
 ### Admin Routes (Phase 3+)
 
@@ -269,9 +269,11 @@ Use this workflow for all new features:
 
 - 10 specs: Audio infrastructure, ambient mixer, scenes, sleep content, sleep timer, music page shell, user features, bedtime routines, accessibility, visual polish. 960+ tests across 100+ test files.
 
-**Phase 2.75 — Dashboard & Growth Feature** (NEXT — 16 specs, frontend-first with localStorage/mock data)
+**Phase 2.75 — Dashboard & Growth Feature** ✅ COMPLETE
 
-**Full spec details in `dashboard-growth-spec-plan-v2.md`.** Summary:
+16 specs delivered across mood check-in, dashboard shell, insights, streaks/points, badges, celebrations, friends, leaderboard, social interactions, notifications, settings, profiles, AI insights, monthly report, and empty states polish. 2000+ tests. All features frontend-first with localStorage/mock data.
+
+**Full spec details in `dashboard-growth-spec-plan-v2.md`.**
 
 - Specs 1-2: Mood check-in, dashboard shell + auth provider + navbar logged-in state
 - Specs 3-4: Mood insights widget + `/insights` full page
@@ -282,7 +284,34 @@ Use this workflow for all new features:
 - Specs 13-14: Settings/privacy + profile/avatars
 - Specs 15-16: AI insights/monthly report + empty states/polish
 
-**Phase 3 — Auth & Backend Wiring**
+**Phase 2.85 — UX Polish & Enhancement** ✅ COMPLETE
+
+14 specs driven by competitive analysis against Hallow, Glorify, Abide, Pray.com, Soultime, and 10+ other Christian wellness apps. Focused on polishing existing features for better usability, delight, and engagement.
+
+- Spec 1: Streak repair & grace mechanic — free weekly repair + paid repair (50 pts), gentle messaging
+- Spec 2: Welcome wizard onboarding — 4-screen flow (greeting, avatar, quiz, personalized results)
+- Spec 3: Progressive disclosure tooltips — contextual first-time tooltips on dashboard, Daily Hub, Prayer Wall, Music
+- Spec 4: Getting started checklist — 6-item dashboard widget with auto-completion tracking, celebration on finish
+- Spec 5: Mood-to-content personalized recommendations — post-check-in activity suggestions based on mood
+- Spec 6: Ambient sound cross-pollination — "Enhance with sound" pill on Pray, Journal, Meditate tabs with contextual scene suggestions
+- Spec 7: Prayer Wall category filtering — 8 categories, composer selector, feed filter bar, URL-based filter state
+- Spec 8: "Pray for this" ceremony animation — glow pulse, ripple, floating text, author notification toast, cross-feature CTAs
+- Spec 9: Dashboard staggered entrance animations — widget fade-in stagger + faith points progress bar fill animation
+- Spec 10: KaraokeText scripture reveal — word-by-word verse reveal across mood check-in, quiz, soaking, shared verse, completions
+- Spec 11: Journal search/filter — text search, mode filter, sort toggle, journal entry milestones (10/25/50/100)
+- Spec 12: Journal voice input — Web Speech API microphone button, real-time transcription, interim results
+- Spec 13: Meditation minutes tracking + history — session logging, dashboard stat, /insights bar chart, completion screen display
+- Spec 14: Prayer generation experience enhancement — ambient auto-play, KaraokeText reveal, post-prayer reflection prompt
+
+**Phase 2.9 — Content & Feature Expansion** (IN PROGRESS)
+
+18 specs adding major new features identified through competitive analysis. Bible reader, daily devotionals, reading plans, personal prayer list, audio-guided prayer, and more. All frontend-first with localStorage/mock data.
+
+**Phase 2.95 — Vision Expansion** (PLANNED)
+
+17 specs adding community challenges, AI Bible chat, push notifications, kids/family content, teaching courses, visual growth metaphor, and platform infrastructure (PWA, SEO). All frontend-first.
+
+**Phase 3 — Auth & Backend Wiring** (NEXT after frontend features)
 
 - Spring Security + JWT, OpenAI API, backend crisis detection, Prayer Wall + Local Support API wiring, journal encryption, mood tracking to DB, dashboard data persistence (localStorage → API), friends backend, leaderboard backend, notifications backend, photo moderation, rate limiting
 
