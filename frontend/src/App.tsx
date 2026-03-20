@@ -33,6 +33,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Settings } from './pages/Settings'
 import { GrowthProfile } from './pages/GrowthProfile'
 import { DevotionalPage } from './pages/DevotionalPage'
+import { MyPrayers } from './pages/MyPrayers'
 import { useAuth } from '@/hooks/useAuth'
 import { lazy, Suspense } from 'react'
 
@@ -100,6 +101,7 @@ function App() {
           <Route path="/insights/monthly" element={<MonthlyReport />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/my-prayers" element={<MyPrayers />} />
           <Route path="/daily" element={<DailyHub />} />
           <Route path="/devotional" element={<DevotionalPage />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />

@@ -358,6 +358,7 @@ describe('Navbar', () => {
       expect(within(menu).getByText('Friends')).toBeInTheDocument()
       expect(within(menu).getByText('My Journal Entries')).toBeInTheDocument()
       expect(within(menu).getByText('My Prayer Requests')).toBeInTheDocument()
+      expect(within(menu).getByText('My Prayers')).toBeInTheDocument()
       expect(within(menu).getByText('My Favorites')).toBeInTheDocument()
       expect(within(menu).getByText('Mood Insights')).toBeInTheDocument()
       expect(within(menu).getByText('Settings')).toBeInTheDocument()
