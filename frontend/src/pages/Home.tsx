@@ -4,6 +4,7 @@ import { JourneySection } from '@/components/JourneySection'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
 import { TodaysVerseSection } from '@/components/TodaysVerseSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
+import { DevotionalTeaser } from '@/components/DevotionalTeaser'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 
@@ -21,6 +22,7 @@ export function Home() {
         <HeroSection />
         <JourneySection />
         <TodaysVerseSection />
+        <DevotionalTeaser />
         <GrowthTeasersSection />
         <StartingPointQuiz />
       </main>

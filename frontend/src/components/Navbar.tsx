@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, ChevronDown, Menu, X } from 'lucide-react'
+import { Bell, ChevronDown, Menu, Sparkles, X } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
@@ -8,11 +9,12 @@ import { useNotificationActions } from '@/hooks/useNotificationActions'
 import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
 
-const NAV_LINKS = [
+const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon?: LucideIcon }> = [
   { label: 'Daily Hub', to: '/daily' },
+  { label: 'Daily Devotional', to: '/devotional', icon: Sparkles },
   { label: 'Prayer Wall', to: '/prayer-wall' },
   { label: 'Music', to: '/music' },
-] as const
+]
 
 const LOCAL_SUPPORT_LINKS = [
   { label: 'Churches', to: '/local-support/churches' },
@@ -258,6 +260,7 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
     <div className="hidden items-center gap-6 lg:flex">
       {NAV_LINKS.map((link) => (
         <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
+          {link.icon && <link.icon size={14} className="mr-1 inline-block" />}
           {link.label}
         </NavLink>
       ))}
@@ -596,6 +599,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
                   )
                 }
               >
+                {link.icon && <link.icon size={16} className="mr-2 inline-block" />}
                 {link.label}
               </NavLink>
             ))}

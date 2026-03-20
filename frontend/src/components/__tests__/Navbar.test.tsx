@@ -485,4 +485,48 @@ describe('Navbar', () => {
       expect(menu.className).toContain('border-white/15')
     })
   })
+
+  describe('Daily Devotional nav link', () => {
+    it('"Daily Devotional" link present in desktop nav', () => {
+      renderNavbar()
+      expect(screen.getByRole('link', { name: /Daily Devotional/ })).toBeInTheDocument()
+    })
+
+    it('"Daily Devotional" links to /devotional', () => {
+      renderNavbar()
+      expect(screen.getByRole('link', { name: /Daily Devotional/ })).toHaveAttribute(
+        'href',
+        '/devotional',
+      )
+    })
+
+    it('link order: Daily Hub, Daily Devotional, Prayer Wall, Music', () => {
+      renderNavbar()
+      const nav = screen.getByRole('navigation', { name: /main navigation/i })
+      const links = within(nav).getAllByRole('link')
+      const labels = links.map((l) => l.textContent?.trim())
+      const dailyIdx = labels.indexOf('Daily Hub')
+      const devIdx = labels.findIndex((l) => l?.includes('Daily Devotional'))
+      const prayerIdx = labels.indexOf('Prayer Wall')
+      const musicIdx = labels.indexOf('Music')
+      expect(dailyIdx).toBeLessThan(devIdx)
+      expect(devIdx).toBeLessThan(prayerIdx)
+      expect(prayerIdx).toBeLessThan(musicIdx)
+    })
+
+    it('sparkle icon renders with the link', () => {
+      renderNavbar()
+      const link = screen.getByRole('link', { name: /Daily Devotional/ })
+      const svg = link.querySelector('svg')
+      expect(svg).toBeInTheDocument()
+    })
+
+    it('mobile drawer includes "Daily Devotional"', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(within(menu).getByText(/Daily Devotional/)).toBeInTheDocument()
+    })
+  })
 })

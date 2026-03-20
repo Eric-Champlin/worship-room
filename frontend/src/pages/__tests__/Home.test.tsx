@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { Home } from '@/pages/Home'
+import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
@@ -10,7 +12,11 @@ vi.mock('@/hooks/useAuth', () => ({
 function renderHome() {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Home />
+      <ToastProvider>
+        <AuthModalProvider>
+          <Home />
+        </AuthModalProvider>
+      </ToastProvider>
     </MemoryRouter>
   )
 }
@@ -43,7 +49,7 @@ describe('Home', () => {
 
   it('renders the footer', () => {
     renderHome()
-    expect(screen.getByRole('contentinfo')).toBeInTheDocument()
+    expect(screen.getAllByRole('contentinfo').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders all landing page sections', () => {
@@ -64,5 +70,35 @@ describe('Home', () => {
     expect(
       screen.getByRole('region', { name: /not sure where to start/i })
     ).toBeInTheDocument()
+  })
+
+  describe('DevotionalTeaser', () => {
+    it('renders "Daily Devotional" label in teaser section', () => {
+      renderHome()
+      // Scope to the teaser section (not the navbar link)
+      const headings = screen.getAllByText('Daily Devotional')
+      // At least one should be in the teaser section (p element with uppercase label style)
+      const teaserLabel = headings.find((el) => el.tagName === 'P')
+      expect(teaserLabel).toBeInTheDocument()
+    })
+
+    it('renders "Start Each Morning with God" heading', () => {
+      renderHome()
+      expect(
+        screen.getByRole('heading', { name: /Start Each Morning with God/i })
+      ).toBeInTheDocument()
+    })
+
+    it('shows today\'s devotional title', () => {
+      renderHome()
+      expect(screen.getByText(/^Today:/)).toBeInTheDocument()
+    })
+
+    it('CTA links to /devotional', () => {
+      renderHome()
+      expect(
+        screen.getByRole('link', { name: /Read Today/i })
+      ).toHaveAttribute('href', '/devotional')
+    })
   })
 })
