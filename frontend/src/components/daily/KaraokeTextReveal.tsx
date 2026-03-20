@@ -11,6 +11,8 @@ interface KaraokeTextRevealProps {
   msPerWord?: number
   /** Fired after the last word is fully revealed */
   onRevealComplete?: () => void
+  /** When set to true, instantly reveals all words and fires onRevealComplete */
+  forceComplete?: boolean
   /** Applied to the container element for font styling inheritance */
   className?: string
 }
@@ -22,6 +24,7 @@ export function KaraokeTextReveal({
   revealDuration,
   msPerWord,
   onRevealComplete,
+  forceComplete,
   className,
 }: KaraokeTextRevealProps) {
   const prefersReduced = useReducedMotion()
@@ -80,6 +83,18 @@ export function KaraokeTextReveal({
       lastTextRef.current = ''
     }
   }, [text, prefersReduced, msPerWord, revealDuration])
+
+  // Force-complete: instantly reveal all words and fire callback
+  useEffect(() => {
+    if (forceComplete && text) {
+      const currentWords = text.split(/\s+/)
+      timeoutIdsRef.current.forEach(clearTimeout)
+      timeoutIdsRef.current = []
+      setRevealedCount(currentWords.length)
+      const id = setTimeout(() => completeCallbackRef.current?.(), 0)
+      timeoutIdsRef.current.push(id)
+    }
+  }, [forceComplete, text])
 
   if (!text) return null
 

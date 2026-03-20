@@ -6,17 +6,26 @@ import {
   MoreHorizontal,
   ChevronDown,
   ChevronUp,
+  Heart,
+  RefreshCw,
+  PenLine,
 } from 'lucide-react'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { ReadAloudButton } from '@/components/daily/ReadAloudButton'
 import { KaraokeText } from '@/components/daily/KaraokeText'
+import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { ShareButton } from '@/components/daily/ShareButton'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { useAuth } from '@/hooks/useAuth'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useAudioState, useAudioDispatch } from '@/components/audio/AudioProvider'
+import { useScenePlayer } from '@/hooks/useScenePlayer'
+import { SCENE_BY_ID } from '@/data/scenes'
+import { cn } from '@/lib/utils'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { DEFAULT_PRAYER_CHIPS } from '@/constants/daily-experience'
 import {
@@ -35,6 +44,10 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const { isAuthenticated } = useAuth()
   const { markPrayComplete } = useCompletionTracking()
   const { recordActivity } = useFaithPoints()
+  const prefersReduced = useReducedMotion()
+  const audioState = useAudioState()
+  const audioDispatch = useAudioDispatch()
+  const { loadScene } = useScenePlayer()
   const location = useLocation()
   const navigate = useNavigate()
   const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
@@ -51,9 +64,19 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   )
   const [classicWordIndex, setClassicWordIndex] = useState(-1)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [autoPlayedAudio, setAutoPlayedAudio] = useState(false)
+  const [revealComplete, setRevealComplete] = useState(false)
+  const [forceRevealComplete, setForceRevealComplete] = useState(false)
+  const [reflectionVisible, setReflectionVisible] = useState(false)
+  const [reflectionDismissed, setReflectionDismissed] = useState(false)
+  const [resonatedMessage, setResonatedMessage] = useState(false)
+  const [resonatedFading, setResonatedFading] = useState(false)
+  const [sectionFading, setSectionFading] = useState(false)
+  const [retryPrompt, setRetryPrompt] = useState<string | null>(null)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const resonatedTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   // Close mobile overflow menu on outside click or Escape
   useEffect(() => {
@@ -89,6 +112,14 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
     }
   }, [prayWallContext, activeTab, navigate, location.pathname, location.search])
 
+  // Show reflection prompt after reveal completes
+  useEffect(() => {
+    if (revealComplete && prayer && !reflectionDismissed) {
+      const timer = setTimeout(() => setReflectionVisible(true), 500)
+      return () => clearTimeout(timer)
+    }
+  }, [revealComplete, prayer, reflectionDismissed])
+
   const classicPrayers = useMemo(() => getClassicPrayers(), [])
 
   const autoExpand = useCallback((el: HTMLTextAreaElement) => {
@@ -120,7 +151,33 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
       return
     }
     setNudge(false)
+
+    // Auto-play ambient sound if no audio playing and no reduced motion
+    if (
+      !prefersReduced &&
+      audioState.activeSounds.length === 0 &&
+      !audioState.pillVisible &&
+      !audioState.activeRoutine
+    ) {
+      audioDispatch({ type: 'SET_MASTER_VOLUME', payload: { volume: 0.4 } })
+      const upperRoom = SCENE_BY_ID.get('the-upper-room')
+      if (upperRoom) {
+        loadScene(upperRoom)
+        setAutoPlayedAudio(true)
+      }
+    } else {
+      setAutoPlayedAudio(false)
+    }
+
+    clearResonatedTimers()
     setIsLoading(true)
+    setRevealComplete(false)
+    setForceRevealComplete(false)
+    setReflectionVisible(false)
+    setReflectionDismissed(false)
+    setResonatedMessage(false)
+    setResonatedFading(false)
+    setSectionFading(false)
 
     setTimeout(() => {
       const result = getMockPrayer(text)
@@ -132,12 +189,22 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   }
 
   const handleReset = () => {
+    clearResonatedTimers()
     setPrayer(null)
     setText('')
     setSelectedChip(null)
     setNudge(false)
     setPrayerWordIndex(-1)
     setMobileMenuOpen(false)
+    setAutoPlayedAudio(false)
+    setRevealComplete(false)
+    setForceRevealComplete(false)
+    setReflectionVisible(false)
+    setReflectionDismissed(false)
+    setResonatedMessage(false)
+    setResonatedFading(false)
+    setSectionFading(false)
+    setRetryPrompt(null)
   }
 
   const handleCopy = async () => {
@@ -165,6 +232,51 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
     } catch {
       showToast('Failed to copy', 'error')
     }
+  }
+
+  const clearResonatedTimers = () => {
+    resonatedTimersRef.current.forEach(clearTimeout)
+    resonatedTimersRef.current = []
+  }
+
+  const handleResonated = () => {
+    clearResonatedTimers()
+    setResonatedMessage(true)
+    resonatedTimersRef.current.push(
+      setTimeout(() => setResonatedFading(true), 3000),
+      setTimeout(() => setSectionFading(true), 3500),
+      setTimeout(() => {
+        setReflectionDismissed(true)
+        setReflectionVisible(false)
+        setResonatedMessage(false)
+        setResonatedFading(false)
+        setSectionFading(false)
+      }, 4000),
+    )
+  }
+
+  const handleSomethingDifferent = () => {
+    clearResonatedTimers()
+    setReflectionDismissed(true)
+    setPrayer(null)
+    setText('')
+    setSelectedChip(null)
+    setNudge(false)
+    setPrayerWordIndex(-1)
+    setRevealComplete(false)
+    setForceRevealComplete(false)
+    setReflectionVisible(false)
+    setAutoPlayedAudio(false)
+    setRetryPrompt('Try describing what\'s on your heart differently.')
+    setTimeout(() => {
+      textareaRef.current?.focus()
+      textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 100)
+  }
+
+  const handleJournalReflection = () => {
+    setReflectionDismissed(true)
+    onSwitchToJournal?.(extractTopic())
   }
 
   const extractTopic = () => {
@@ -218,12 +330,63 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
                 Your prayer:
               </p>
               <div className="mb-6 rounded-lg bg-primary/5 p-6">
-                <KaraokeText
-                  text={prayer.text}
-                  currentWordIndex={prayerWordIndex}
-                  className="font-serif text-lg leading-relaxed text-text-dark"
-                />
+                {revealComplete ? (
+                  <KaraokeText
+                    text={prayer.text}
+                    currentWordIndex={prayerWordIndex}
+                    className="font-serif text-lg leading-relaxed text-text-dark"
+                  />
+                ) : (
+                  <KaraokeTextReveal
+                    text={prayer.text}
+                    msPerWord={80}
+                    forceComplete={forceRevealComplete}
+                    onRevealComplete={() => setRevealComplete(true)}
+                    className="font-serif text-lg leading-relaxed text-text-dark"
+                  />
+                )}
               </div>
+
+              {/* Skip link during reveal */}
+              {!revealComplete && (
+                <div className="mb-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setForceRevealComplete(true)}
+                    className="text-xs text-subtle-gray underline transition-colors hover:text-text-dark"
+                  >
+                    Skip
+                  </button>
+                </div>
+              )}
+
+              {/* Sound Indicator */}
+              {autoPlayedAudio && audioState.activeSounds.length > 0 && (
+                <div className="mb-4 text-center sm:text-left">
+                  <span className="text-xs text-subtle-gray">
+                    Sound: The Upper Room
+                    <span className="mx-1 text-subtle-gray/50">&middot;</span>
+                    <button
+                      type="button"
+                      onClick={() => audioDispatch({ type: audioState.drawerOpen ? 'CLOSE_DRAWER' : 'OPEN_DRAWER' })}
+                      className="text-xs text-subtle-gray underline transition-colors hover:text-text-dark"
+                    >
+                      Change
+                    </button>
+                    <span className="mx-1 text-subtle-gray/50">&middot;</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        audioDispatch({ type: 'STOP_ALL' })
+                        setAutoPlayedAudio(false)
+                      }}
+                      className="text-xs text-subtle-gray underline transition-colors hover:text-text-dark"
+                    >
+                      Stop
+                    </button>
+                  </span>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="mb-6 flex items-center gap-2">
@@ -237,10 +400,15 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
                   <span className="hidden sm:inline">Copy</span>
                 </button>
 
-                <ReadAloudButton
-                  text={prayer.text}
-                  onWordIndexChange={setPrayerWordIndex}
-                />
+                <span
+                  role="presentation"
+                  onClickCapture={() => { if (!revealComplete) setForceRevealComplete(true) }}
+                >
+                  <ReadAloudButton
+                    text={prayer.text}
+                    onWordIndexChange={setPrayerWordIndex}
+                  />
+                </span>
 
                 <button
                   type="button"
@@ -289,6 +457,60 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
                 </div>
               </div>
 
+              {/* Post-prayer reflection prompt */}
+              {reflectionVisible && !reflectionDismissed && (
+                <div className={cn(
+                  'mb-4 mt-6',
+                  !sectionFading && 'animate-fade-in',
+                  sectionFading && 'opacity-0 transition-opacity duration-500',
+                )}>
+                  <p className="mb-3 text-sm font-medium text-text-dark">
+                    How did that prayer land?
+                  </p>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                    <button
+                      type="button"
+                      onClick={handleResonated}
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gray-200 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      aria-label="It resonated — show encouraging message"
+                    >
+                      <Heart className="h-4 w-4" aria-hidden="true" />
+                      It resonated
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSomethingDifferent}
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gray-200 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      aria-label="Something different — try a new prayer"
+                    >
+                      <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                      Something different
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleJournalReflection}
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gray-200 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      aria-label="Journal about this prayer"
+                    >
+                      <PenLine className="h-4 w-4" aria-hidden="true" />
+                      Journal about this
+                    </button>
+                  </div>
+
+                  {resonatedMessage && (
+                    <p
+                      className={cn(
+                        'mt-3 text-center text-sm italic text-text-light transition-opacity duration-300',
+                        resonatedFading ? 'opacity-0' : 'opacity-100',
+                      )}
+                      aria-live="polite"
+                    >
+                      We&apos;re glad. Carry this prayer with you today.
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Secondary CTAs */}
               <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                 <button
@@ -321,6 +543,12 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
 
               <AmbientSoundPill context="pray" />
 
+              {retryPrompt && (
+                <p className="mb-2 text-center text-sm text-text-light">
+                  {retryPrompt}
+                </p>
+              )}
+
               {showChips && (
                 <div className="mb-6 flex flex-wrap justify-center gap-2">
                   {DEFAULT_PRAYER_CHIPS.map((chip) => (
@@ -343,6 +571,7 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
                   onChange={(e) => {
                     setText(e.target.value)
                     setNudge(false)
+                    if (retryPrompt) setRetryPrompt(null)
                     autoExpand(e.target)
                   }}
                   onInput={(e) => autoExpand(e.target as HTMLTextAreaElement)}

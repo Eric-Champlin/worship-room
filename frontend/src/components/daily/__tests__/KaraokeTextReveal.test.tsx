@@ -256,6 +256,75 @@ describe('KaraokeTextReveal', () => {
     expect(onComplete).toHaveBeenCalledTimes(1)
   })
 
+  it('forceComplete skips remaining words', () => {
+    const revealDuration = 5000
+    const { rerender } = render(
+      <KaraokeTextReveal text={TEST_TEXT} revealDuration={revealDuration} forceComplete={false} />,
+    )
+
+    // Only advance a little — some words still hidden
+    act(() => {
+      vi.advanceTimersByTime(500)
+    })
+
+    // Force complete
+    rerender(
+      <KaraokeTextReveal text={TEST_TEXT} revealDuration={revealDuration} forceComplete={true} />,
+    )
+
+    // All words should be visible immediately
+    for (const word of TEST_WORDS) {
+      expect(screen.getByText(word).style.opacity).toBe('1')
+    }
+  })
+
+  it('forceComplete fires onRevealComplete', () => {
+    const onComplete = vi.fn()
+    const { rerender } = render(
+      <KaraokeTextReveal
+        text={TEST_TEXT}
+        revealDuration={5000}
+        forceComplete={false}
+        onRevealComplete={onComplete}
+      />,
+    )
+
+    // Force complete
+    rerender(
+      <KaraokeTextReveal
+        text={TEST_TEXT}
+        revealDuration={5000}
+        forceComplete={true}
+        onRevealComplete={onComplete}
+      />,
+    )
+
+    // Callback fires on next tick
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+    expect(onComplete).toHaveBeenCalledTimes(1)
+  })
+
+  it('forceComplete=false has no effect on normal reveal', () => {
+    const revealDuration = 2500
+    const perWordDelay = revealDuration / TEST_WORD_COUNT
+
+    render(
+      <KaraokeTextReveal text={TEST_TEXT} revealDuration={revealDuration} forceComplete={false} />,
+    )
+
+    // Words start hidden
+    expect(screen.getByText(TEST_WORDS[0]).style.opacity).toBe('0')
+
+    // After one word delay, first word revealed (normal behavior)
+    act(() => {
+      vi.advanceTimersByTime(perWordDelay + 1)
+    })
+    expect(screen.getByText(TEST_WORDS[0]).style.opacity).toBe('1')
+    expect(screen.getByText(TEST_WORDS[1]).style.opacity).toBe('0')
+  })
+
   it('no font styles applied to spans', () => {
     render(<KaraokeTextReveal text={TEST_TEXT} />)
     for (const word of TEST_WORDS) {

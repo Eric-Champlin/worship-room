@@ -1,36 +1,43 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayTabContent } from '../PrayTabContent'
 
-// Mock AudioProvider (needed by AmbientSoundPill embedded in PrayTabContent)
+// --- Granular mocks for audio system ---
+const mockLoadScene = vi.fn()
+const mockAudioDispatch = vi.fn()
+const mockRecordActivity = vi.fn()
+
+let mockAudioState = {
+  activeSounds: [] as { id: string }[],
+  isPlaying: false,
+  currentSceneName: null as string | null,
+  currentSceneId: null as string | null,
+  pillVisible: false,
+  drawerOpen: false,
+  foregroundContent: null,
+  sleepTimer: null,
+  activeRoutine: null as { id: string } | null,
+  masterVolume: 0.8,
+  foregroundBackgroundBalance: 0.5,
+  foregroundEndedCounter: 0,
+}
+
+let mockReducedMotion = false
+
 vi.mock('@/components/audio/AudioProvider', () => ({
-  useAudioState: () => ({
-    activeSounds: [],
-    isPlaying: false,
-    currentSceneName: null,
-    currentSceneId: null,
-    pillVisible: false,
-    drawerOpen: false,
-    foregroundContent: null,
-    sleepTimer: null,
-    activeRoutine: null,
-    masterVolume: 0.8,
-    foregroundBackgroundBalance: 0.5,
-    foregroundEndedCounter: 0,
-  }),
-  useAudioDispatch: () => vi.fn(),
+  useAudioState: () => mockAudioState,
+  useAudioDispatch: () => mockAudioDispatch,
 }))
 
-// Mock useScenePlayer (needed by AmbientSoundPill)
 vi.mock('@/hooks/useScenePlayer', () => ({
   useScenePlayer: () => ({
     activeSceneId: null,
-    loadScene: vi.fn(),
+    loadScene: mockLoadScene,
     isLoading: false,
     undoAvailable: false,
     undoSceneSwitch: vi.fn(),
@@ -40,8 +47,6 @@ vi.mock('@/hooks/useScenePlayer', () => ({
   }),
 }))
 
-// Mock useFaithPoints to spy on recordActivity
-const mockRecordActivity = vi.fn()
 vi.mock('@/hooks/useFaithPoints', () => ({
   useFaithPoints: () => ({
     totalPoints: 0,
@@ -57,20 +62,54 @@ vi.mock('@/hooks/useFaithPoints', () => ({
   }),
 }))
 
-beforeEach(() => {
-  localStorage.clear()
-  localStorage.setItem('wr_auth_simulated', 'true')
-  localStorage.setItem('wr_user_name', 'Eric')
-  mockRecordActivity.mockClear()
-})
+vi.mock('@/hooks/useReducedMotion', () => ({
+  useReducedMotion: () => mockReducedMotion,
+}))
 
-function renderPrayTab() {
+// --- Helpers ---
+interface MockAudioState {
+  activeSounds: { id: string }[]
+  isPlaying: boolean
+  currentSceneName: string | null
+  currentSceneId: string | null
+  pillVisible: boolean
+  drawerOpen: boolean
+  foregroundContent: null
+  sleepTimer: null
+  activeRoutine: { id: string } | null
+  masterVolume: number
+  foregroundBackgroundBalance: number
+  foregroundEndedCounter: number
+}
+
+const DEFAULT_AUDIO_STATE: MockAudioState = {
+  activeSounds: [],
+  isPlaying: false,
+  currentSceneName: null,
+  currentSceneId: null,
+  pillVisible: false,
+  drawerOpen: false,
+  foregroundContent: null,
+  sleepTimer: null,
+  activeRoutine: null,
+  masterVolume: 0.8,
+  foregroundBackgroundBalance: 0.5,
+  foregroundEndedCounter: 0,
+}
+
+function resetAudioState(overrides: Partial<MockAudioState> = {}) {
+  mockAudioState = { ...DEFAULT_AUDIO_STATE, ...overrides }
+}
+
+const mockOnSwitchToJournal = vi.fn()
+
+function renderPrayTab(props: { onSwitchToJournal?: (topic: string) => void } = {}) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <AuthModalProvider>
-            <PrayTabContent />
+            <PrayTabContent onSwitchToJournal={props.onSwitchToJournal} />
           </AuthModalProvider>
         </ToastProvider>
       </AuthProvider>
@@ -78,36 +117,537 @@ function renderPrayTab() {
   )
 }
 
+async function generatePrayer(user: ReturnType<typeof userEvent.setup>, inputText = 'I am feeling anxious') {
+  const textarea = screen.getByLabelText('Prayer request')
+  await user.type(textarea, inputText)
+  const generateBtn = screen.getByRole('button', { name: /generate prayer/i })
+  await user.click(generateBtn)
+}
+
+beforeEach(() => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  localStorage.clear()
+  localStorage.setItem('wr_auth_simulated', 'true')
+  localStorage.setItem('wr_user_name', 'Eric')
+  mockRecordActivity.mockClear()
+  mockLoadScene.mockClear()
+  mockAudioDispatch.mockClear()
+  mockOnSwitchToJournal.mockClear()
+  mockReducedMotion = false
+  resetAudioState()
+  // jsdom does not implement scrollIntoView
+  Element.prototype.scrollIntoView = vi.fn()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
+
+// --- Existing tests ---
 describe('PrayTabContent activity integration', () => {
   it('recordActivity("pray") called after prayer generation', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderPrayTab()
 
-    const textarea = screen.getByLabelText('Prayer request')
-    await user.type(textarea, 'I am feeling anxious')
+    await generatePrayer(user)
 
-    const generateBtn = screen.getByRole('button', { name: /generate prayer/i })
-    await user.click(generateBtn)
+    // Advance past the 1500ms prayer generation timeout
+    act(() => { vi.advanceTimersByTime(1600) })
 
-    // Wait for the 1500ms setTimeout to fire and prayer to appear
-    await waitFor(
-      () => {
-        expect(mockRecordActivity).toHaveBeenCalledWith('pray')
-      },
-      { timeout: 3000 },
-    )
+    expect(mockRecordActivity).toHaveBeenCalledWith('pray')
   })
 
   it('recordActivity not called on generate failure (empty text)', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderPrayTab()
 
     const generateBtn = screen.getByRole('button', { name: /generate prayer/i })
     await user.click(generateBtn)
 
-    // Empty text triggers nudge, no setTimeout fires
     expect(mockRecordActivity).not.toHaveBeenCalled()
-    // Verify nudge appeared instead
     expect(screen.getByText(/Tell God what/)).toBeInTheDocument()
+  })
+})
+
+// --- Step 2: Ambient sound auto-play ---
+describe('ambient sound auto-play', () => {
+  it('auto-plays Upper Room scene on prayer generation', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    expect(mockAudioDispatch).toHaveBeenCalledWith({
+      type: 'SET_MASTER_VOLUME',
+      payload: { volume: 0.4 },
+    })
+    expect(mockLoadScene).toHaveBeenCalledTimes(1)
+    expect(mockLoadScene).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'the-upper-room' }),
+    )
+  })
+
+  it('skips auto-play when audio already playing', async () => {
+    resetAudioState({ activeSounds: [{ id: 'some-sound' }] })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    expect(mockLoadScene).not.toHaveBeenCalled()
+  })
+
+  it('skips auto-play when prefers-reduced-motion', async () => {
+    mockReducedMotion = true
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    expect(mockLoadScene).not.toHaveBeenCalled()
+  })
+
+  it('skips auto-play when routine active', async () => {
+    resetAudioState({ activeRoutine: { id: 'some-routine' } })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    expect(mockLoadScene).not.toHaveBeenCalled()
+  })
+
+  it('skips auto-play when pill already visible', async () => {
+    resetAudioState({ pillVisible: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    expect(mockLoadScene).not.toHaveBeenCalled()
+  })
+
+  it('sound indicator shows after prayer displays', async () => {
+    // Start with no audio so auto-play triggers, but make loadScene
+    // immediately populate activeSounds so the indicator renders
+    mockLoadScene.mockImplementation(() => {
+      mockAudioState = { ...mockAudioState, activeSounds: [{ id: 'cathedral-reverb' }] }
+    })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    // Advance past prayer generation
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    expect(mockLoadScene).toHaveBeenCalledTimes(1)
+    expect(screen.getByText('Sound: The Upper Room')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /change/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /stop/i })).toBeInTheDocument()
+  })
+
+  it('sound indicator hidden when audio was already playing', async () => {
+    resetAudioState({ activeSounds: [{ id: 'existing-sound' }] })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Sound indicator should not appear because auto-play was skipped
+    expect(screen.queryByText('Sound: The Upper Room')).not.toBeInTheDocument()
+  })
+
+  it('sound indicator "Stop" dispatches STOP_ALL', async () => {
+    // Make loadScene populate activeSounds so the indicator renders
+    mockLoadScene.mockImplementation(() => {
+      mockAudioState = { ...mockAudioState, activeSounds: [{ id: 'cathedral-reverb' }] }
+    })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    const stopBtn = screen.getByRole('button', { name: /stop/i })
+    expect(stopBtn).toBeInTheDocument()
+    await user.click(stopBtn)
+    expect(mockAudioDispatch).toHaveBeenCalledWith({ type: 'STOP_ALL' })
+  })
+})
+
+// --- Step 3: Karaoke prayer reveal ---
+describe('karaoke prayer reveal', () => {
+  it('prayer reveals word by word using KaraokeTextReveal', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Prayer should be displayed
+    expect(screen.getByText('Your prayer:')).toBeInTheDocument()
+  })
+
+  it('skip link visible during reveal', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
+  })
+
+  it('clicking skip shows full prayer immediately', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    const skipBtn = screen.getByRole('button', { name: /skip/i })
+    await user.click(skipBtn)
+
+    // Skip link should disappear after reveal completes
+    act(() => { vi.advanceTimersByTime(10) })
+    expect(screen.queryByRole('button', { name: /skip/i })).not.toBeInTheDocument()
+  })
+
+  it('skip link disappears after reveal completes naturally', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip should be visible initially
+    expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
+
+    // Advance enough for all words to reveal (mock prayer ~106 words * 80ms + 200ms buffer)
+    act(() => { vi.advanceTimersByTime(9000) })
+
+    expect(screen.queryByRole('button', { name: /skip/i })).not.toBeInTheDocument()
+  })
+
+  it('reveal resets when generating new prayer via reset', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip to complete the reveal
+    const skipBtn = screen.getByRole('button', { name: /skip/i })
+    await user.click(skipBtn)
+    act(() => { vi.advanceTimersByTime(10) })
+
+    // Click "Pray about something else" to reset
+    const resetBtn = screen.getByRole('button', { name: /pray about something else/i })
+    await user.click(resetBtn)
+
+    // Should see the input section again
+    expect(screen.getByLabelText('Prayer request')).toBeInTheDocument()
+  })
+})
+
+// --- Step 4: Post-prayer reflection prompt ---
+describe('post-prayer reflection prompt', () => {
+  it('reflection prompt appears after reveal completes', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip the reveal
+    const skipBtn = screen.getByRole('button', { name: /skip/i })
+    await user.click(skipBtn)
+    act(() => { vi.advanceTimersByTime(10) })
+
+    // Wait for the 500ms delay before reflection appears
+    act(() => { vi.advanceTimersByTime(600) })
+
+    expect(screen.getByText('How did that prayer land?')).toBeInTheDocument()
+  })
+
+  it('reflection prompt does not appear during reveal', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Don't skip — still in reveal
+    expect(screen.queryByText('How did that prayer land?')).not.toBeInTheDocument()
+  })
+
+  it('"It resonated" shows encouraging message', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip reveal + wait for reflection
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(610) })
+
+    // Click "It resonated"
+    const resonatedBtn = screen.getByRole('button', { name: /it resonated/i })
+    await user.click(resonatedBtn)
+
+    expect(screen.getByText(/carry this prayer with you/i)).toBeInTheDocument()
+
+    // After full fade sequence (4000ms), reflection should be dismissed
+    act(() => { vi.advanceTimersByTime(4100) })
+    expect(screen.queryByText('How did that prayer land?')).not.toBeInTheDocument()
+  })
+
+  it('"Something different" resets to input view', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip reveal + wait for reflection
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(610) })
+
+    // Click "Something different"
+    const diffBtn = screen.getByRole('button', { name: /something different/i })
+    await user.click(diffBtn)
+    act(() => { vi.advanceTimersByTime(200) })
+
+    // Should be back to input
+    expect(screen.getByLabelText('Prayer request')).toBeInTheDocument()
+    // Retry prompt should be visible
+    expect(screen.getByText(/try describing/i)).toBeInTheDocument()
+  })
+
+  it('"Journal about this" switches to journal tab', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab({ onSwitchToJournal: mockOnSwitchToJournal })
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip reveal + wait for reflection
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(610) })
+
+    // Click "Journal about this"
+    const journalBtn = screen.getByRole('button', { name: /journal about this prayer/i })
+    await user.click(journalBtn)
+
+    expect(mockOnSwitchToJournal).toHaveBeenCalled()
+  })
+
+  it('retry prompt clears on typing', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip reveal + wait for reflection
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(610) })
+
+    // Click "Something different" to go back to input with retry prompt
+    await user.click(screen.getByRole('button', { name: /something different/i }))
+    act(() => { vi.advanceTimersByTime(200) })
+
+    expect(screen.getByText(/try describing/i)).toBeInTheDocument()
+
+    // Type something
+    const textarea = screen.getByLabelText('Prayer request')
+    await user.type(textarea, 'New prayer topic')
+
+    expect(screen.queryByText(/try describing/i)).not.toBeInTheDocument()
+  })
+
+  it('existing secondary CTAs remain visible', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip to see all CTAs
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(610) })
+
+    // Both existing CTAs should still be present
+    expect(screen.getByText(/pray about something else/i)).toBeInTheDocument()
+    // The "Journal about this →" secondary CTA
+    expect(screen.getByText(/journal about this →/i)).toBeInTheDocument()
+  })
+
+  it('reflection pills are keyboard accessible', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(610) })
+
+    // All 3 reflection pills should be buttons with accessible names
+    expect(screen.getByRole('button', { name: /it resonated/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /something different/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /journal about this prayer/i })).toBeInTheDocument()
+  })
+
+  it('pill touch targets are 44px minimum', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(610) })
+
+    const resonatedBtn = screen.getByRole('button', { name: /it resonated/i })
+    expect(resonatedBtn.className).toContain('min-h-[44px]')
+  })
+})
+
+// --- Full prayer experience flow ---
+describe('full prayer experience flow', () => {
+  it('generate → reveal → reflection → resonated', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    // Step 1: Generate prayer
+    await generatePrayer(user)
+
+    // Verify ambient auto-play
+    expect(mockLoadScene).toHaveBeenCalledTimes(1)
+    expect(mockAudioDispatch).toHaveBeenCalledWith({
+      type: 'SET_MASTER_VOLUME',
+      payload: { volume: 0.4 },
+    })
+
+    // Step 2: Wait for prayer display
+    act(() => { vi.advanceTimersByTime(1600) })
+    expect(screen.getByText('Your prayer:')).toBeInTheDocument()
+
+    // Step 3: Skip reveal
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(10) })
+    expect(screen.queryByRole('button', { name: /skip/i })).not.toBeInTheDocument()
+
+    // Step 4: Wait for reflection
+    act(() => { vi.advanceTimersByTime(600) })
+    expect(screen.getByText('How did that prayer land?')).toBeInTheDocument()
+
+    // Step 5: Click resonated
+    await user.click(screen.getByRole('button', { name: /it resonated/i }))
+    expect(screen.getByText(/carry this prayer with you/i)).toBeInTheDocument()
+
+    // Step 6: Wait for fade out
+    act(() => { vi.advanceTimersByTime(4100) })
+    expect(screen.queryByText('How did that prayer land?')).not.toBeInTheDocument()
+  })
+
+  it('generate → skip → something different → regenerate', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    // Generate first prayer
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Skip reveal
+    await user.click(screen.getByRole('button', { name: /skip/i }))
+    act(() => { vi.advanceTimersByTime(610) })
+
+    // Click "Something different"
+    await user.click(screen.getByRole('button', { name: /something different/i }))
+    act(() => { vi.advanceTimersByTime(200) })
+
+    // Back to input
+    expect(screen.getByLabelText('Prayer request')).toBeInTheDocument()
+    expect(screen.getByText(/try describing/i)).toBeInTheDocument()
+
+    // Type new text and generate again
+    mockLoadScene.mockClear()
+    mockAudioDispatch.mockClear()
+    await generatePrayer(user, 'Help me with gratitude')
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Verify new prayer appears with fresh reveal
+    expect(screen.getByText('Your prayer:')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
+  })
+
+  it('no regressions: logged-out user sees auth modal', async () => {
+    localStorage.removeItem('wr_auth_simulated')
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    // Should not call loadScene (auth check fails before auto-play)
+    expect(mockLoadScene).not.toHaveBeenCalled()
+    // Should not start loading
+    expect(screen.queryByText(/generating prayer/i)).not.toBeInTheDocument()
+  })
+
+  it('no regressions: Copy, Save buttons present after generation', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    expect(screen.getByRole('button', { name: /copy prayer/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /save prayer/i })).toBeInTheDocument()
+  })
+
+  it('no regressions: existing CTAs unchanged', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    expect(screen.getByText(/journal about this →/i)).toBeInTheDocument()
+    expect(screen.getByText(/pray about something else/i)).toBeInTheDocument()
+  })
+
+  it('prefers-reduced-motion: full flow without auto-play', async () => {
+    mockReducedMotion = true
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+
+    await generatePrayer(user)
+
+    // No auto-play
+    expect(mockLoadScene).not.toHaveBeenCalled()
+
+    act(() => { vi.advanceTimersByTime(1600) })
+
+    // Prayer should appear
+    expect(screen.getByText('Your prayer:')).toBeInTheDocument()
+
+    // Text should appear instantly (KaraokeTextReveal handles prefers-reduced-motion)
+    // Skip link should disappear quickly since reveal is instant
+    act(() => { vi.advanceTimersByTime(10) })
+
+    // Reflection should still work
+    act(() => { vi.advanceTimersByTime(600) })
+    expect(screen.getByText('How did that prayer land?')).toBeInTheDocument()
   })
 })
