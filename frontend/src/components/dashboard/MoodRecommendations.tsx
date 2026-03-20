@@ -16,8 +16,12 @@ import {
   HeartHandshake,
 } from 'lucide-react'
 import type { MoodValue } from '@/types/dashboard'
+import type { MoodRecommendation } from '@/constants/dashboard/recommendations'
 import { MOOD_RECOMMENDATIONS } from '@/constants/dashboard/recommendations'
 import { MOOD_COLORS } from '@/constants/dashboard/mood'
+import { THEME_TO_MOOD } from '@/constants/dashboard/devotional-integration'
+import { getTodaysDevotional } from '@/data/devotionals'
+import { getLocalDateString } from '@/utils/date'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
@@ -50,8 +54,36 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const navigatedRef = useRef(false)
 
-  const recommendations = MOOD_RECOMMENDATIONS[moodValue]
   const moodColor = MOOD_COLORS[moodValue]
+
+  // Check if today's devotional theme matches the user's mood
+  const devotional = getTodaysDevotional()
+  const themeMatchesMood = THEME_TO_MOOD[devotional.theme]?.includes(moodValue) ?? false
+
+  // Check if user has already read today's devotional
+  const todayStr = getLocalDateString()
+  let devotionalReads: string[] = []
+  try {
+    devotionalReads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
+  } catch {
+    // Malformed localStorage — treat as unread
+  }
+  const hasReadToday = devotionalReads.includes(todayStr)
+
+  // Build recommendations list: prepend devotional if relevant & unread
+  const baseRecommendations = MOOD_RECOMMENDATIONS[moodValue]
+  const showDevotional = themeMatchesMood && !hasReadToday
+
+  const devotionalRec: MoodRecommendation = {
+    title: "Read Today's Devotional",
+    description: devotional.title,
+    icon: 'BookOpen',
+    route: '/devotional',
+  }
+
+  const recommendations = showDevotional
+    ? [devotionalRec, ...baseRecommendations]
+    : baseRecommendations
 
   // Focus heading on mount for screen readers
   useEffect(() => {

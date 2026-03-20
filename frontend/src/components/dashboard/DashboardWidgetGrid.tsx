@@ -10,6 +10,7 @@ import { ActivityChecklist } from './ActivityChecklist'
 import { FriendsPreview } from './FriendsPreview'
 import { VerseOfTheDayCard } from './VerseOfTheDayCard'
 import { WeeklyRecap } from './WeeklyRecap'
+import { TodaysDevotionalCard } from './TodaysDevotionalCard'
 
 interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
@@ -52,6 +53,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
 
   const moodAnim = getAnimProps()
   const verseAnim = getAnimProps()
+  const devotionalAnim = getAnimProps()
   const streakAnim = getAnimProps()
   const activityAnim = getAnimProps()
   const friendsAnim = getAnimProps()
@@ -80,6 +82,16 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
           style={verseAnim.style}
         >
           <VerseOfTheDayCard />
+        </DashboardCard>
+
+        <DashboardCard
+          id="todays-devotional"
+          title="Today's Devotional"
+          icon={<BookOpen className="h-5 w-5" />}
+          className={cn('order-4 lg:col-span-3', devotionalAnim.className)}
+          style={devotionalAnim.style}
+        >
+          <TodaysDevotionalCard />
         </DashboardCard>
 
         <DashboardCard

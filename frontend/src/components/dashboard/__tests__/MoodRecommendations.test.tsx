@@ -9,6 +9,25 @@ import type { MoodValue } from '@/types/dashboard'
 
 const mockOnAdvance = vi.fn()
 
+// Default mock: theme 'gratitude' maps to moods [4,5] — won't interfere with mood 1/2/3 tests
+const MOCK_DEVOTIONAL = {
+  id: 'devotional-02',
+  dayIndex: 1,
+  title: 'A Heart Full of Thanks',
+  theme: 'gratitude' as const,
+  quote: { text: 'Test quote', attribution: 'Author' },
+  passage: { reference: 'Psalm 100:1-5', verses: [] },
+  reflection: ['First paragraph.'],
+  prayer: 'Test prayer',
+  reflectionQuestion: 'Test question?',
+}
+
+vi.mock('@/data/devotionals', () => ({
+  getTodaysDevotional: vi.fn(() => MOCK_DEVOTIONAL),
+}))
+
+import { getTodaysDevotional } from '@/data/devotionals'
+
 vi.mock('@/hooks/useReducedMotion', () => ({
   useReducedMotion: vi.fn(() => false),
 }))
@@ -25,6 +44,7 @@ function renderRecommendations(moodValue: MoodValue = 3) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  localStorage.clear()
   vi.useFakeTimers({ shouldAdvanceTime: true })
 })
 
@@ -184,6 +204,111 @@ describe('MoodRecommendations', () => {
       expect(links[0]).toHaveStyle({ animationDelay: '0ms' })
       expect(links[1]).toHaveStyle({ animationDelay: '150ms' })
       expect(links[2]).toHaveStyle({ animationDelay: '300ms' })
+    })
+  })
+
+  describe('Devotional Recommendation Integration', () => {
+    it('shows devotional card when theme matches mood and unread', () => {
+      // theme 'trust' maps to moods [1,2]
+      vi.mocked(getTodaysDevotional).mockReturnValue({
+        ...MOCK_DEVOTIONAL,
+        theme: 'trust',
+        title: 'Anchored in Trust',
+      })
+      renderRecommendations(1)
+      const links = screen.getAllByRole('link')
+      expect(links).toHaveLength(4)
+      expect(screen.getByText("Read Today's Devotional")).toBeInTheDocument()
+    })
+
+    it('devotional card is first in list', () => {
+      vi.mocked(getTodaysDevotional).mockReturnValue({
+        ...MOCK_DEVOTIONAL,
+        theme: 'trust',
+        title: 'Anchored in Trust',
+      })
+      renderRecommendations(1)
+      const links = screen.getAllByRole('link')
+      expect(links[0]).toHaveTextContent("Read Today's Devotional")
+    })
+
+    it('devotional card description is devotional title', () => {
+      vi.mocked(getTodaysDevotional).mockReturnValue({
+        ...MOCK_DEVOTIONAL,
+        theme: 'trust',
+        title: 'Anchored in Trust',
+      })
+      renderRecommendations(1)
+      expect(screen.getByText('Anchored in Trust')).toBeInTheDocument()
+    })
+
+    it('devotional card links to /devotional', () => {
+      vi.mocked(getTodaysDevotional).mockReturnValue({
+        ...MOCK_DEVOTIONAL,
+        theme: 'trust',
+        title: 'Anchored in Trust',
+      })
+      renderRecommendations(1)
+      const links = screen.getAllByRole('link')
+      expect(links[0]).toHaveAttribute('href', '/devotional')
+    })
+
+    it('does NOT show devotional when theme does not match mood', () => {
+      // theme 'gratitude' maps to [4,5], mood 1 is not in that list
+      vi.mocked(getTodaysDevotional).mockReturnValue(MOCK_DEVOTIONAL)
+      renderRecommendations(1)
+      const links = screen.getAllByRole('link')
+      expect(links).toHaveLength(3)
+      expect(screen.queryByText("Read Today's Devotional")).not.toBeInTheDocument()
+    })
+
+    it('does NOT show devotional when already read', () => {
+      vi.mocked(getTodaysDevotional).mockReturnValue({
+        ...MOCK_DEVOTIONAL,
+        theme: 'trust',
+        title: 'Anchored in Trust',
+      })
+      const today = new Date()
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+      localStorage.setItem('wr_devotional_reads', JSON.stringify([todayStr]))
+      renderRecommendations(1)
+      const links = screen.getAllByRole('link')
+      expect(links).toHaveLength(3)
+    })
+
+    it('shows 3 existing cards unchanged when no devotional match', () => {
+      vi.mocked(getTodaysDevotional).mockReturnValue(MOCK_DEVOTIONAL)
+      renderRecommendations(1)
+      expect(screen.getByText('Talk to God')).toBeInTheDocument()
+      expect(screen.getByText('Find Comfort in Scripture')).toBeInTheDocument()
+      expect(screen.getByText("You're Not Alone")).toBeInTheDocument()
+    })
+
+    it('handles missing wr_devotional_reads gracefully', () => {
+      // No localStorage key set — should treat as unread
+      vi.mocked(getTodaysDevotional).mockReturnValue({
+        ...MOCK_DEVOTIONAL,
+        theme: 'trust',
+        title: 'Anchored in Trust',
+      })
+      renderRecommendations(1)
+      expect(screen.getByText("Read Today's Devotional")).toBeInTheDocument()
+    })
+
+    it('layout handles 4 cards without breakage', () => {
+      vi.mocked(getTodaysDevotional).mockReturnValue({
+        ...MOCK_DEVOTIONAL,
+        theme: 'trust',
+        title: 'Anchored in Trust',
+      })
+      renderRecommendations(1)
+      const links = screen.getAllByRole('link')
+      expect(links).toHaveLength(4)
+      // All 4 cards render with correct structure
+      for (const link of links) {
+        expect(link).toHaveClass('rounded-xl')
+        expect(link.querySelector('svg')).toBeTruthy()
+      }
     })
   })
 

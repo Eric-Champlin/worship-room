@@ -8,8 +8,10 @@ import { MoodRecommendations } from '@/components/dashboard/MoodRecommendations'
 import { CelebrationQueue } from '@/components/dashboard/CelebrationQueue'
 import { GettingStartedCard } from '@/components/dashboard/GettingStartedCard'
 import { GettingStartedCelebration } from '@/components/dashboard/GettingStartedCelebration'
+import { WeeklyGodMoments } from '@/components/dashboard/WeeklyGodMoments'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
+import { useWeeklyGodMoments } from '@/hooks/useWeeklyGodMoments'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useGettingStarted } from '@/hooks/useGettingStarted'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -41,6 +43,7 @@ export function Dashboard() {
   const [lastMoodEntry, setLastMoodEntry] = useState<MoodEntry | null>(null)
 
   const faithPoints = useFaithPoints()
+  const godMoments = useWeeklyGodMoments()
 
   // Getting Started checklist
   const gettingStarted = useGettingStarted(faithPoints.todayActivities)
@@ -186,13 +189,24 @@ export function Dashboard() {
             meditationMinutesThisWeek={getMeditationMinutesForWeek()}
           />
         </div>
-        {showGettingStarted && (
+        {godMoments.isVisible && (
           <div
             className={cn(
               'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
               shouldAnimate && 'motion-safe:animate-widget-enter',
             )}
             style={shouldAnimate ? { animationDelay: '100ms' } : undefined}
+          >
+            <WeeklyGodMoments {...godMoments} />
+          </div>
+        )}
+        {showGettingStarted && (
+          <div
+            className={cn(
+              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
+              shouldAnimate && 'motion-safe:animate-widget-enter',
+            )}
+            style={shouldAnimate ? { animationDelay: godMoments.isVisible ? '200ms' : '100ms' } : undefined}
           >
             <GettingStartedCard
               items={gettingStarted.items}
@@ -209,7 +223,7 @@ export function Dashboard() {
           quickActionsRef={quickActionsRef}
           quickActionsTooltipVisible={quickActionsTooltip.shouldShow}
           animateEntrance={shouldAnimate}
-          staggerStartIndex={showGettingStarted ? 2 : 1}
+          staggerStartIndex={1 + (godMoments.isVisible ? 1 : 0) + (showGettingStarted ? 1 : 0)}
         />
       </main>
       {quickActionsTooltip.shouldShow && (
