@@ -2,6 +2,7 @@ import { Navbar } from '@/components/Navbar'
 import { HeroSection } from '@/components/HeroSection'
 import { JourneySection } from '@/components/JourneySection'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
+import { TodaysVerseSection } from '@/components/TodaysVerseSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
@@ -19,6 +20,7 @@ export function Home() {
       <main id="main-content">
         <HeroSection />
         <JourneySection />
+        <TodaysVerseSection />
         <GrowthTeasersSection />
         <StartingPointQuiz />
       </main>

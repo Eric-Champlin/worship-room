@@ -8,6 +8,7 @@ import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
+import { VerseOfTheDayBanner } from '@/components/daily/VerseOfTheDayBanner'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
@@ -169,6 +170,11 @@ function DailyHubContent() {
             and we&apos;ll help you find your path.
           </p>
         </section>
+
+        {/* Verse of the Day Banner */}
+        <div className="bg-gradient-to-b from-primary to-neutral-bg">
+          <VerseOfTheDayBanner />
+        </div>
 
         {/* Sentinel for sticky tab bar shadow */}
         <div ref={sentinelRef} aria-hidden="true" />

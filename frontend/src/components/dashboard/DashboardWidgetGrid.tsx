@@ -1,4 +1,4 @@
-import { BarChart3, CheckCircle2, Flame, Rocket, TrendingUp, Users } from 'lucide-react'
+import { BarChart3, BookOpen, CheckCircle2, Flame, Rocket, TrendingUp, Users } from 'lucide-react'
 import type { useFaithPoints } from '@/hooks/useFaithPoints'
 import { cn } from '@/lib/utils'
 import { useWeeklyRecap } from '@/hooks/useWeeklyRecap'
@@ -8,6 +8,7 @@ import { QuickActions } from './QuickActions'
 import { StreakCard } from './StreakCard'
 import { ActivityChecklist } from './ActivityChecklist'
 import { FriendsPreview } from './FriendsPreview'
+import { VerseOfTheDayCard } from './VerseOfTheDayCard'
 import { WeeklyRecap } from './WeeklyRecap'
 
 interface DashboardWidgetGridProps {
@@ -50,6 +51,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
   }
 
   const moodAnim = getAnimProps()
+  const verseAnim = getAnimProps()
   const streakAnim = getAnimProps()
   const activityAnim = getAnimProps()
   const friendsAnim = getAnimProps()
@@ -71,10 +73,20 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
         </DashboardCard>
 
         <DashboardCard
+          id="verse-of-the-day"
+          title="Verse of the Day"
+          icon={<BookOpen className="h-5 w-5" />}
+          className={cn('order-3 lg:order-2 lg:col-span-3', verseAnim.className)}
+          style={verseAnim.style}
+        >
+          <VerseOfTheDayCard />
+        </DashboardCard>
+
+        <DashboardCard
           id="streak-points"
           title="Streak & Faith Points"
           icon={<Flame className="h-5 w-5" />}
-          className={cn('order-1 lg:order-2 lg:col-span-2', streakAnim.className)}
+          className={cn('order-1 lg:order-3 lg:col-span-2', streakAnim.className)}
           style={streakAnim.style}
         >
           <StreakCard
@@ -96,7 +108,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
           id="activity-checklist"
           title="Today's Activity"
           icon={<CheckCircle2 className="h-5 w-5" />}
-          className={cn('order-3 lg:col-span-3', activityAnim.className)}
+          className={cn('order-4 lg:col-span-3', activityAnim.className)}
           style={activityAnim.style}
         >
           <ActivityChecklist
@@ -111,7 +123,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
           title="Friends & Leaderboard"
           icon={<Users className="h-5 w-5" />}
           action={{ label: 'See all', to: '/friends?tab=leaderboard' }}
-          className={cn('order-4 lg:col-span-2', friendsAnim.className)}
+          className={cn('order-5 lg:col-span-2', friendsAnim.className)}
           style={friendsAnim.style}
         >
           <FriendsPreview />
@@ -124,7 +136,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
             title="Weekly Recap"
             icon={<BarChart3 className="h-5 w-5" />}
             collapsible={false}
-            className={cn('order-5 lg:col-span-5', recapAnim.className)}
+            className={cn('order-6 lg:col-span-5', recapAnim.className)}
             style={recapAnim.style}
           >
             <WeeklyRecap />
@@ -133,7 +145,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
 
         <div
           ref={quickActionsRef}
-          className={cn('order-6 lg:col-span-5', quickAnim.className)}
+          className={cn('order-7 lg:col-span-5', quickAnim.className)}
           style={quickAnim.style}
           {...(quickActionsTooltipVisible ? { 'aria-describedby': 'dashboard-quick-actions' } : {})}
         >
