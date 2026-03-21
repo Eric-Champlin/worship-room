@@ -9,6 +9,7 @@ interface PlanCardProps {
   status: 'unstarted' | 'active' | 'paused' | 'completed'
   progress?: PlanProgress
   onStart: (planId: string) => void
+  isCustom?: boolean
 }
 
 function StatusButton({
@@ -50,7 +51,7 @@ function StatusButton({
   )
 }
 
-export function PlanCard({ plan, status, progress, onStart }: PlanCardProps) {
+export function PlanCard({ plan, status, progress, onStart, isCustom }: PlanCardProps) {
   return (
     <Link
       to={`/reading-plans/${plan.id}`}
@@ -59,6 +60,12 @@ export function PlanCard({ plan, status, progress, onStart }: PlanCardProps) {
       <div className="mb-3 text-4xl" aria-hidden="true">
         {plan.coverEmoji}
       </div>
+
+      {isCustom && (
+        <span className="mb-2 inline-block rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary-lt">
+          Created for you
+        </span>
+      )}
 
       <h3 className="text-lg font-bold text-text-dark">{plan.title}</h3>
 

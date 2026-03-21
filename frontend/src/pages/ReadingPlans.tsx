@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Sparkles } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
+import { CreatePlanFlow } from '@/components/reading-plans/CreatePlanFlow'
 import { FilterBar } from '@/components/reading-plans/FilterBar'
 import { PlanCard } from '@/components/reading-plans/PlanCard'
 import { useAuth } from '@/hooks/useAuth'
@@ -10,6 +12,7 @@ import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLANS } from '@/data/reading-plans'
+import { getCustomPlanIds } from '@/utils/custom-plans-storage'
 import type { PlanDifficulty, ReadingPlan } from '@/types/reading-plans'
 
 function ConfirmDialog({
@@ -69,6 +72,7 @@ export function ReadingPlans() {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { getProgress, getActivePlanId, startPlan, getPlanStatus } =
     useReadingPlanProgress()
 
@@ -77,7 +81,17 @@ export function ReadingPlans() {
     useState<PlanDifficulty | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<string | null>(null)
 
+  const showCreateFlow = searchParams.get('create') === 'true'
+  const customPlanIds = isAuthenticated ? getCustomPlanIds() : []
   const activePlanId = getActivePlanId()
+
+  const handleCreatePlan = useCallback(() => {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to create a personalized reading plan')
+      return
+    }
+    setSearchParams({ create: 'true' })
+  }, [isAuthenticated, authModal, setSearchParams])
 
   const filteredPlans = useMemo(() => {
     return READING_PLANS.filter((plan) => {
@@ -148,12 +162,38 @@ export function ReadingPlans() {
     : null
   const activeProgress = activePlanId ? getProgress(activePlanId) : undefined
 
+  if (showCreateFlow) {
+    return <CreatePlanFlow onClose={() => setSearchParams({})} />
+  }
+
   return (
     <Layout>
       <PageHero title="Reading Plans" subtitle="Guided journeys through Scripture" />
 
       <section className="bg-neutral-bg px-4 py-8 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
+          {/* Create Your Own Plan card */}
+          <div className="mb-6 rounded-xl border border-primary/10 bg-white p-6 shadow-sm">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-text-dark">Create Your Own Plan</h3>
+                <p className="mt-1 text-sm text-text-light">
+                  Tell us what you&apos;re going through and we&apos;ll create a personalized Scripture journey just for you.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCreatePlan}
+                className="min-h-[44px] w-full rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-lt sm:w-auto"
+              >
+                Create Plan
+              </button>
+            </div>
+          </div>
+
           <FilterBar
             selectedDuration={selectedDuration}
             selectedDifficulty={selectedDifficulty}
@@ -170,6 +210,7 @@ export function ReadingPlans() {
                   status={getPlanStatus(plan.id)}
                   progress={getProgress(plan.id)}
                   onStart={handleStartOrContinue}
+                  isCustom={customPlanIds.includes(plan.id)}
                 />
               ))}
             </div>

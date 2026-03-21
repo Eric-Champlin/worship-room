@@ -1,6 +1,7 @@
 import type { PlanDifficulty, PlanTheme } from '@/types/reading-plans'
 
 export const READING_PLAN_PROGRESS_KEY = 'wr_reading_plan_progress'
+export const CUSTOM_PLANS_KEY = 'wr_custom_plans'
 
 export const PLAN_THEMES = [
   'anxiety',
