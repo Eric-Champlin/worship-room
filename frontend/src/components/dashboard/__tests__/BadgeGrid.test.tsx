@@ -92,7 +92,7 @@ describe('BadgeGrid', () => {
     expect(fwdBtn).toBeInTheDocument()
   })
 
-  it('renders all badge cells (29 total from BADGE_DEFINITIONS)', () => {
+  it('renders all badge cells (32 total from BADGE_DEFINITIONS)', () => {
     render(<BadgeGrid />)
 
     // Count all badge cell buttons (buttons with aria-labels)

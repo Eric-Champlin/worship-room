@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -8,7 +8,6 @@ import { WeeklyGodMoments } from '../WeeklyGodMoments'
 import { DashboardWidgetGrid } from '../DashboardWidgetGrid'
 import { MoodRecommendations } from '../MoodRecommendations'
 import { getLocalDateString } from '@/utils/date'
-import type { DailyActivities } from '@/types/dashboard'
 
 // Mock devotional data
 const MOCK_DEVOTIONAL_TRUST = {
@@ -60,6 +59,7 @@ const mockFaithPoints = {
     pray: false,
     listen: false,
     prayerWall: false,
+    readingPlan: false,
     meditate: false,
     journal: false,
     pointsEarned: 5,
@@ -96,7 +96,9 @@ function renderWidgetGrid() {
 function renderRecommendations(mood: 1 | 2 | 3 | 4 | 5 = 1) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <MoodRecommendations moodValue={mood} onAdvanceToDashboard={vi.fn()} />
+      <AuthProvider>
+        <MoodRecommendations moodValue={mood} onAdvanceToDashboard={vi.fn()} />
+      </AuthProvider>
     </MemoryRouter>,
   )
 }
@@ -104,6 +106,8 @@ function renderRecommendations(mood: 1 | 2 | 3 | 4 | 5 = 1) {
 beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
+  localStorage.setItem('wr_auth_simulated', 'true')
+  localStorage.setItem('wr_user_name', 'TestUser')
   vi.useFakeTimers({ shouldAdvanceTime: true })
 })
 

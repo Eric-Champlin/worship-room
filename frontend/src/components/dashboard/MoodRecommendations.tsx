@@ -21,6 +21,8 @@ import { MOOD_RECOMMENDATIONS } from '@/constants/dashboard/recommendations'
 import { MOOD_COLORS } from '@/constants/dashboard/mood'
 import { THEME_TO_MOOD } from '@/constants/dashboard/devotional-integration'
 import { getTodaysDevotional } from '@/data/devotionals'
+import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
+import { getReadingPlan } from '@/data/reading-plans'
 import { getLocalDateString } from '@/utils/date'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
@@ -70,6 +72,24 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
   }
   const hasReadToday = devotionalReads.includes(todayStr)
 
+  // Check for active reading plan
+  const { getActivePlanId, getProgress } = useReadingPlanProgress()
+  const activePlanId = getActivePlanId()
+  const activePlan = activePlanId ? getReadingPlan(activePlanId) : undefined
+  const activeProgress = activePlanId ? getProgress(activePlanId) : undefined
+
+  // Check if user already completed a reading today
+  let hasReadPlanToday = false
+  try {
+    const activityLog = JSON.parse(localStorage.getItem('wr_daily_activities') || '{}')
+    const todayActivities = activityLog[todayStr]
+    hasReadPlanToday = todayActivities?.readingPlan === true
+  } catch {
+    // ignore
+  }
+
+  const showReadingPlan = !!activePlan && !!activeProgress && !hasReadPlanToday
+
   // Build recommendations list: prepend devotional if relevant & unread
   const baseRecommendations = MOOD_RECOMMENDATIONS[moodValue]
   const showDevotional = themeMatchesMood && !hasReadToday
@@ -81,9 +101,21 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
     route: '/devotional',
   }
 
-  const recommendations = showDevotional
-    ? [devotionalRec, ...baseRecommendations]
-    : baseRecommendations
+  const readingPlanRec: MoodRecommendation | null =
+    showReadingPlan && activePlan && activeProgress
+      ? {
+          title: 'Continue Your Reading Plan',
+          description: `Day ${activeProgress.currentDay}: ${activePlan.days.find((d) => d.dayNumber === activeProgress.currentDay)?.title ?? ''}`,
+          icon: 'BookOpen',
+          route: `/reading-plans/${activePlanId}`,
+        }
+      : null
+
+  const recommendations = [
+    ...(showDevotional ? [devotionalRec] : []),
+    ...(readingPlanRec ? [readingPlanRec] : []),
+    ...baseRecommendations,
+  ]
 
   // Focus heading on mount for screen readers
   useEffect(() => {

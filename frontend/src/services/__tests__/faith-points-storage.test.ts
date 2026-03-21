@@ -186,11 +186,18 @@ describe('calculateDailyPoints', () => {
     expect(result).toEqual({ points: 90, multiplier: 1.5 });
   });
 
-  it('6 activities = 85 × 2x = 170 (Full Worship Day)', () => {
+  it('6 activities = base × 2x (Full Worship Day)', () => {
     const result = calculateDailyPoints(makeActivities({
       mood: true, pray: true, listen: true, prayerWall: true, meditate: true, journal: true,
     }));
     expect(result).toEqual({ points: 170, multiplier: 2 });
+  });
+
+  it('7 activities = 100 × 2x = 200 (all activities including readingPlan)', () => {
+    const result = calculateDailyPoints(makeActivities({
+      mood: true, pray: true, listen: true, prayerWall: true, readingPlan: true, meditate: true, journal: true,
+    }));
+    expect(result).toEqual({ points: 200, multiplier: 2 });
   });
 
   it('verify rounding (Math.round)', () => {

@@ -28,8 +28,8 @@ describe('BADGE_DEFINITIONS', () => {
 
   it('total unique badge IDs count is 29', () => {
     const ids = BADGE_DEFINITIONS.map((b) => b.id);
-    // 7 streak + 6 level + 9 activity + 1 full_worship_day + 5 community/first-time + 1 welcome
-    expect(new Set(ids).size).toBe(29);
+    // 7 streak + 6 level + 9 activity milestones + 3 reading plan + 1 full_worship_day + 5 community/first-time + 1 welcome
+    expect(new Set(ids).size).toBe(32);
   });
 });
 
@@ -81,9 +81,9 @@ describe('activity milestone badges', () => {
     for (const id of expectedIds) {
       expect(BADGE_MAP[id]).toBeDefined();
     }
-    // Check count of activity category badges (9 milestones + first_prayerwall = 10 activity badges)
+    // Check count of activity category badges (9 milestones + first_prayerwall + 3 reading plan = 13 activity badges)
     const activityBadges = BADGE_DEFINITIONS.filter((b) => b.category === 'activity');
-    expect(activityBadges).toHaveLength(10);
+    expect(activityBadges).toHaveLength(13);
   });
 
   it('celebration tiers: activity milestones at count 1 = toast, higher = toast-confetti', () => {
@@ -110,6 +110,31 @@ describe('full_worship_day badge', () => {
 
   it('has special-toast celebration tier', () => {
     expect(BADGE_MAP['full_worship_day'].celebrationTier).toBe('special-toast');
+  });
+});
+
+describe('reading plan badges', () => {
+  it('3 definitions with correct IDs', () => {
+    const expectedIds = ['first_plan', 'plans_3', 'plans_10'];
+    for (const id of expectedIds) {
+      expect(BADGE_MAP[id]).toBeDefined();
+    }
+  });
+
+  it('first_plan has toast-confetti tier', () => {
+    expect(BADGE_MAP['first_plan'].celebrationTier).toBe('toast-confetti');
+  });
+
+  it('plans_3 has toast-confetti tier', () => {
+    expect(BADGE_MAP['plans_3'].celebrationTier).toBe('toast-confetti');
+  });
+
+  it('plans_10 has full-screen tier with verse', () => {
+    const badge = BADGE_MAP['plans_10'];
+    expect(badge.celebrationTier).toBe('full-screen');
+    expect(badge.verse).toBeDefined();
+    expect(badge.verse!.text).toBe('Your word is a lamp to my feet, and a light for my path.');
+    expect(badge.verse!.reference).toBe('Psalm 119:105 WEB');
   });
 });
 
@@ -189,6 +214,7 @@ describe('FRESH_BADGE_DATA', () => {
       meditate: 0,
       listen: 0,
       prayerWall: 0,
+      readingPlan: 0,
       encouragementsSent: 0,
       fullWorshipDays: 0,
     });
@@ -196,7 +222,7 @@ describe('FRESH_BADGE_DATA', () => {
 
   it('FRESH_ACTIVITY_COUNTS has all zero values', () => {
     const keys = Object.keys(FRESH_ACTIVITY_COUNTS);
-    expect(keys).toHaveLength(7);
+    expect(keys).toHaveLength(8);
     for (const key of keys) {
       expect(FRESH_ACTIVITY_COUNTS[key as keyof typeof FRESH_ACTIVITY_COUNTS]).toBe(0);
     }

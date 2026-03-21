@@ -11,7 +11,7 @@ export interface MoodEntry {
   verseSeen: string;
 }
 
-export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal';
+export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan';
 
 export interface DailyActivities {
   mood: boolean;
@@ -20,6 +20,7 @@ export interface DailyActivities {
   prayerWall: boolean;
   meditate: boolean;
   journal: boolean;
+  readingPlan: boolean;
   pointsEarned: number;
   multiplier: number;
 }
@@ -58,6 +59,7 @@ export interface ActivityCounts {
   meditate: number;
   listen: number;
   prayerWall: number;
+  readingPlan: number;
   encouragementsSent: number;
   fullWorshipDays: number;
 }

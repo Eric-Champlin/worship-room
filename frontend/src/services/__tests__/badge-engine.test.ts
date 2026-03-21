@@ -20,7 +20,7 @@ function makeContext(overrides: Partial<BadgeCheckContext> = {}): BadgeCheckCont
 function allTrueActivities(): DailyActivities {
   return {
     mood: true, pray: true, listen: true,
-    prayerWall: true, meditate: true, journal: true,
+    prayerWall: true, readingPlan: true, meditate: true, journal: true,
     pointsEarned: 170, multiplier: 2,
   };
 }
@@ -145,6 +145,35 @@ describe('checkForNewBadges — full worship day', () => {
     const result = checkForNewBadges(ctx, {});
     expect(result).not.toContain('full_worship_day');
   });
+
+  it('full_worship_day triggers with 6 activities when no active plan', () => {
+    // No wr_reading_plan_progress in localStorage
+    const activities = allTrueActivities();
+    activities.readingPlan = false;
+    const ctx = makeContext({ todayActivities: activities });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('full_worship_day');
+  });
+
+  it('full_worship_day requires 7 activities when active plan exists', () => {
+    localStorage.setItem('wr_reading_plan_progress', JSON.stringify({
+      'plan-1': { startedAt: '2026-01-01', completedAt: null },
+    }));
+    const activities = allTrueActivities();
+    activities.readingPlan = false;
+    const ctx = makeContext({ todayActivities: activities });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('full_worship_day');
+  });
+
+  it('full_worship_day triggers with 7 activities when active plan exists', () => {
+    localStorage.setItem('wr_reading_plan_progress', JSON.stringify({
+      'plan-1': { startedAt: '2026-01-01', completedAt: null },
+    }));
+    const ctx = makeContext({ todayActivities: allTrueActivities() });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('full_worship_day');
+  });
 });
 
 describe('checkForNewBadges — community badges', () => {
@@ -171,6 +200,64 @@ describe('checkForNewBadges — community badges', () => {
     expect(result).not.toContain('friends_10');
     expect(result).not.toContain('encourage_10');
     expect(result).not.toContain('encourage_50');
+  });
+});
+
+describe('checkForNewBadges — reading plan badges', () => {
+  it('awards first_plan when 1 plan completed', () => {
+    localStorage.setItem('wr_reading_plan_progress', JSON.stringify({
+      'plan-1': { startedAt: '2026-01-01', currentDay: 7, completedDays: [1, 2, 3, 4, 5, 6, 7], completedAt: '2026-01-07' },
+    }));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('first_plan');
+  });
+
+  it('awards plans_3 when 3 plans completed', () => {
+    const progress: Record<string, { startedAt: string; completedAt: string | null }> = {};
+    for (let i = 1; i <= 3; i++) {
+      progress[`plan-${i}`] = { startedAt: '2026-01-01', completedAt: '2026-01-07' };
+    }
+    localStorage.setItem('wr_reading_plan_progress', JSON.stringify(progress));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('plans_3');
+  });
+
+  it('awards plans_10 when 10 plans completed', () => {
+    const progress: Record<string, { startedAt: string; completedAt: string | null }> = {};
+    for (let i = 1; i <= 10; i++) {
+      progress[`plan-${i}`] = { startedAt: '2026-01-01', completedAt: '2026-01-07' };
+    }
+    localStorage.setItem('wr_reading_plan_progress', JSON.stringify(progress));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('plans_10');
+  });
+
+  it('does not award if already earned', () => {
+    localStorage.setItem('wr_reading_plan_progress', JSON.stringify({
+      'plan-1': { startedAt: '2026-01-01', completedAt: '2026-01-07' },
+    }));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, { first_plan: { earnedAt: '2026-01-07' } });
+    expect(result).not.toContain('first_plan');
+  });
+
+  it('does not award when no plans completed', () => {
+    localStorage.setItem('wr_reading_plan_progress', JSON.stringify({
+      'plan-1': { startedAt: '2026-01-01', completedAt: null },
+    }));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('first_plan');
+  });
+
+  it('handles malformed localStorage gracefully', () => {
+    localStorage.setItem('wr_reading_plan_progress', 'not valid json');
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('first_plan');
   });
 });
 

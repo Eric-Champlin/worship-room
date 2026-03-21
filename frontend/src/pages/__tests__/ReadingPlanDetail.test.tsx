@@ -41,6 +41,7 @@ vi.mock('@/hooks/useFaithPoints', () => ({
       pray: false,
       listen: false,
       prayerWall: false,
+      readingPlan: false,
       meditate: false,
       journal: false,
     },
@@ -206,7 +207,7 @@ describe('ReadingPlanDetail', () => {
     expect(darkBg).toBeInTheDocument()
   })
 
-  it('renders celebration when plan is completed and on last day', () => {
+  it('does not show inline celebration when revisiting completed plan', () => {
     mockAuth.isAuthenticated = true
     localStorage.setItem(
       READING_PLAN_PROGRESS_KEY,
@@ -221,11 +222,7 @@ describe('ReadingPlanDetail', () => {
     )
     renderPage('finding-peace-in-anxiety')
 
-    // Navigate to day 7 (should default to currentDay=7)
-    expect(
-      screen.getByText(
-        "You've completed Finding Peace in Anxiety! What a journey.",
-      ),
-    ).toBeInTheDocument()
+    // No inline celebration on re-visit (only shows on fresh completion via IO)
+    expect(screen.queryByText(/Day \d+ Complete/)).not.toBeInTheDocument()
   })
 })

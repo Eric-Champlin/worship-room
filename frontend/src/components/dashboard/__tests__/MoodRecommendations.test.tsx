@@ -22,6 +22,10 @@ const MOCK_DEVOTIONAL = {
   reflectionQuestion: 'Test question?',
 }
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ isAuthenticated: true, user: { name: 'Test' } }),
+}))
+
 vi.mock('@/data/devotionals', () => ({
   getTodaysDevotional: vi.fn(() => MOCK_DEVOTIONAL),
 }))

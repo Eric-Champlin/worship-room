@@ -27,6 +27,7 @@ vi.mock('@/hooks/useFaithPoints', () => ({
       pray: false,
       listen: false,
       prayerWall: false,
+      readingPlan: false,
       meditate: false,
       journal: false,
     },

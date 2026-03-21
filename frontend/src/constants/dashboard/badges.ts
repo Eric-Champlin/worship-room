@@ -109,11 +109,39 @@ const activityMilestoneBadges: BadgeDefinition[] = [
 const fullWorshipDayBadge: BadgeDefinition = {
   id: 'full_worship_day',
   name: 'Full Worship Day',
-  description: 'All 6 activities completed in a single day',
+  description: 'All daily activities completed in a single day',
   category: 'special',
   celebrationTier: 'special-toast',
   repeatable: true,
 };
+
+const readingPlanBadges: BadgeDefinition[] = [
+  {
+    id: 'first_plan',
+    name: 'First Plan',
+    description: 'Completed your first reading plan',
+    category: 'activity',
+    celebrationTier: 'toast-confetti',
+  },
+  {
+    id: 'plans_3',
+    name: 'Dedicated Reader',
+    description: 'Completed 3 reading plans',
+    category: 'activity',
+    celebrationTier: 'toast-confetti',
+  },
+  {
+    id: 'plans_10',
+    name: 'Scripture Scholar',
+    description: 'Completed all 10 reading plans',
+    category: 'activity',
+    celebrationTier: 'full-screen',
+    verse: {
+      text: 'Your word is a lamp to my feet, and a light for my path.',
+      reference: 'Psalm 119:105 WEB',
+    },
+  },
+];
 
 const communityBadges: BadgeDefinition[] = [
   { id: 'first_prayerwall', name: 'First Prayer Wall', description: '1st prayer wall post or reaction', category: 'activity', celebrationTier: 'toast' },
@@ -135,6 +163,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   ...streakBadges,
   ...levelBadges,
   ...activityMilestoneBadges,
+  ...readingPlanBadges,
   fullWorshipDayBadge,
   ...communityBadges,
   welcomeBadge,
@@ -152,6 +181,7 @@ export const FRESH_ACTIVITY_COUNTS: ActivityCounts = {
   meditate: 0,
   listen: 0,
   prayerWall: 0,
+  readingPlan: 0,
   encouragementsSent: 0,
   fullWorshipDays: 0,
 };

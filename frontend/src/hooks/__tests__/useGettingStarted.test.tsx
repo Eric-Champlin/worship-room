@@ -11,6 +11,7 @@ const ALL_FALSE: Record<ActivityType, boolean> = {
   pray: false,
   listen: false,
   prayerWall: false,
+  readingPlan: false,
   meditate: false,
   journal: false,
 }

@@ -19,7 +19,7 @@ vi.mock('@/hooks/useAuth', () => ({
 vi.mock('@/hooks/useFaithPoints', () => ({
   useFaithPoints: () => ({
     totalPoints: 0, currentLevel: 1, levelName: 'Seedling', pointsToNextLevel: 100,
-    todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, meditate: false, journal: false },
+    todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, readingPlan: false, meditate: false, journal: false },
     todayPoints: 0, todayMultiplier: 1, currentStreak: 0, longestStreak: 0,
     newlyEarnedBadges: [],
     recordActivity: vi.fn(),
@@ -62,6 +62,7 @@ vi.mock('@/hooks/useScenePlayer', () => ({
 
 beforeEach(() => {
   localStorage.clear()
+  localStorage.setItem('wr_onboarding_complete', 'true')
   // Seed mood entry so dashboard shows (not check-in)
   const entry: MoodEntry = {
     id: 'test-1',

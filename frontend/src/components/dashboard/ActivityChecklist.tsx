@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { CircleCheck, Circle } from 'lucide-react'
+import { BookOpen, CircleCheck, Circle } from 'lucide-react'
 import { ACTIVITY_CHECKLIST_NAMES, ACTIVITY_POINTS } from '@/constants/dashboard/activity-points'
+import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import type { ActivityType } from '@/types/dashboard'
 
 interface ActivityChecklistProps {
@@ -10,8 +11,8 @@ interface ActivityChecklistProps {
   animate?: boolean
 }
 
-// Ordered from lowest to highest points
-const ACTIVITY_ORDER: ActivityType[] = [
+// Base 6 activities ordered from lowest to highest points
+const BASE_ACTIVITY_ORDER: ActivityType[] = [
   'mood',
   'pray',
   'listen',
@@ -23,10 +24,16 @@ const ACTIVITY_ORDER: ActivityType[] = [
 const RING_RADIUS = 24
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
-function getMultiplierPreview(completedCount: number): {
+function getMultiplierPreview(
+  completedCount: number,
+  totalActivities: number,
+): {
   text: string
   isCelebration: boolean
 } {
+  if (completedCount >= 6) {
+    return { text: 'Full Worship Day! 2x points earned!', isCelebration: true }
+  }
   switch (completedCount) {
     case 0:
       return { text: 'Complete 2 activities for 1.25x bonus!', isCelebration: false }
@@ -39,9 +46,7 @@ function getMultiplierPreview(completedCount: number): {
     case 4:
       return { text: 'Complete 2 more for 2x Full Worship Day!', isCelebration: false }
     case 5:
-      return { text: 'Complete 1 more for 2x Full Worship Day!', isCelebration: false }
-    case 6:
-      return { text: 'Full Worship Day! 2x points earned!', isCelebration: true }
+      return { text: `Complete ${totalActivities > 6 ? '2 more' : '1 more'} for 2x Full Worship Day!`, isCelebration: false }
     default:
       return { text: '', isCelebration: false }
   }
@@ -52,9 +57,18 @@ export function ActivityChecklist({
   todayMultiplier: _todayMultiplier,
   animate = false,
 }: ActivityChecklistProps) {
-  const completedCount = ACTIVITY_ORDER.filter((t) => todayActivities[t]).length
-  const targetOffset = RING_CIRCUMFERENCE * (1 - completedCount / 6)
-  const multiplierPreview = getMultiplierPreview(completedCount)
+  const { getActivePlanId } = useReadingPlanProgress()
+  const hasActivePlan = !!getActivePlanId()
+
+  // Build activity list: base 6 + optional readingPlan
+  const activityList: ActivityType[] = hasActivePlan
+    ? [...BASE_ACTIVITY_ORDER.slice(0, 4), 'readingPlan', ...BASE_ACTIVITY_ORDER.slice(4)]
+    : BASE_ACTIVITY_ORDER
+
+  const totalActivities = activityList.length
+  const completedCount = activityList.filter((t) => todayActivities[t]).length
+  const targetOffset = RING_CIRCUMFERENCE * (1 - completedCount / totalActivities)
+  const multiplierPreview = getMultiplierPreview(completedCount, totalActivities)
 
   // Check for reduced motion preference
   const prefersReducedMotion =
@@ -88,7 +102,7 @@ export function ActivityChecklist({
             height="60"
             viewBox="0 0 60 60"
             role="img"
-            aria-label={`${completedCount} of 6 daily activities completed`}
+            aria-label={`${completedCount} of ${totalActivities} daily activities completed`}
           >
             {/* Background circle */}
             <circle
@@ -120,16 +134,17 @@ export function ActivityChecklist({
           </svg>
           {/* Center text */}
           <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
-            {completedCount}/6
+            {completedCount}/{totalActivities}
           </span>
         </div>
 
         {/* Activity list */}
         <div className="w-full space-y-2">
-          {ACTIVITY_ORDER.map((type) => {
+          {activityList.map((type) => {
             const completed = todayActivities[type]
             const points = ACTIVITY_POINTS[type]
             const name = ACTIVITY_CHECKLIST_NAMES[type]
+            const isReadingPlan = type === 'readingPlan'
 
             return (
               <div
@@ -142,7 +157,13 @@ export function ActivityChecklist({
                 }
               >
                 {completed ? (
-                  <CircleCheck className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
+                  isReadingPlan ? (
+                    <BookOpen className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
+                  ) : (
+                    <CircleCheck className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
+                  )
+                ) : isReadingPlan ? (
+                  <BookOpen className="h-5 w-5 flex-shrink-0 text-white/20" aria-hidden="true" />
                 ) : (
                   <Circle className="h-5 w-5 flex-shrink-0 text-white/20" aria-hidden="true" />
                 )}

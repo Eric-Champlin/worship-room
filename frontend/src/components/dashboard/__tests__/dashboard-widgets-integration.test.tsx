@@ -48,6 +48,7 @@ function seedActivities(activities: Record<string, boolean>) {
     pray: false,
     listen: false,
     prayerWall: false,
+    readingPlan: false,
     meditate: false,
     journal: false,
     pointsEarned: 0,
@@ -56,7 +57,7 @@ function seedActivities(activities: Record<string, boolean>) {
   }
 
   // Calculate points
-  const points: Record<string, number> = { mood: 5, pray: 10, listen: 10, prayerWall: 15, meditate: 20, journal: 25 }
+  const points: Record<string, number> = { mood: 5, pray: 10, listen: 10, prayerWall: 15, readingPlan: 15, meditate: 20, journal: 25 }
   let total = 0
   for (const [key, val] of Object.entries(activities)) {
     if (val && key in points) total += points[key]
@@ -104,7 +105,7 @@ describe('Dashboard widgets integration', () => {
   it('6/6 complete: shows Full Worship Day message and 2x badge', () => {
     seedActivities({
       mood: true, pray: true, listen: true,
-      prayerWall: true, meditate: true, journal: true,
+      prayerWall: true, readingPlan: true, meditate: true, journal: true,
     })
     renderWidgetGrid()
     expect(screen.getByText('6/6')).toBeInTheDocument()
@@ -119,7 +120,7 @@ describe('Dashboard widgets integration', () => {
     localStorage.setItem('wr_daily_activities', JSON.stringify({
       [today]: {
         mood: true, pray: false, listen: false, prayerWall: false,
-        meditate: false, journal: false, pointsEarned: 5, multiplier: 1,
+        readingPlan: false, meditate: false, journal: false, pointsEarned: 5, multiplier: 1,
       },
     }))
     localStorage.setItem('wr_faith_points', JSON.stringify({

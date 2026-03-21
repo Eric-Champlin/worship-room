@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
+import { DayCompletionCelebration } from '@/components/reading-plans/DayCompletionCelebration'
 import { DayContent } from '@/components/reading-plans/DayContent'
 import { DaySelector } from '@/components/reading-plans/DaySelector'
+import { PlanCompletionOverlay } from '@/components/reading-plans/PlanCompletionOverlay'
 import { PlanNotFound } from '@/components/reading-plans/PlanNotFound'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { getReadingPlan } from '@/data/reading-plans'
 import { PLAN_DIFFICULTY_LABELS } from '@/constants/reading-plans'
+import type { ActivityType } from '@/types/dashboard'
 import { cn } from '@/lib/utils'
 
 const DETAIL_HERO_STYLE = {
@@ -21,16 +25,22 @@ const DETAIL_HERO_STYLE = {
 
 export function ReadingPlanDetail() {
   const { planId } = useParams<{ planId: string }>()
+  const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
-  const { getProgress, getPlanStatus, completeDay } = useReadingPlanProgress()
+  const { getProgress, completeDay } = useReadingPlanProgress()
+  const { recordActivity, todayActivities } = useFaithPoints()
 
   const plan = planId ? getReadingPlan(planId) : undefined
   const progress = planId ? getProgress(planId) : undefined
-  const status = planId ? getPlanStatus(planId) : 'unstarted'
 
   const initialDay = progress?.currentDay ?? 1
   const [selectedDay, setSelectedDay] = useState(initialDay)
+  const [justCompletedDay, setJustCompletedDay] = useState<number | null>(null)
+  const [showPlanOverlay, setShowPlanOverlay] = useState(false)
+
+  // Track whether readingPlan activity was already done today BEFORE this completion
+  const pointsAlreadyAwardedRef = useRef(false)
 
   const actionStepRef = useRef<HTMLDivElement>(null)
 
@@ -44,7 +54,11 @@ export function ReadingPlanDetail() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          // Capture whether points were already awarded today before recording
+          pointsAlreadyAwardedRef.current = todayActivities.readingPlan
           completeDay(planId, selectedDay)
+          recordActivity('readingPlan' as ActivityType)
+          setJustCompletedDay(selectedDay)
           observer.disconnect()
         }
       },
@@ -52,7 +66,22 @@ export function ReadingPlanDetail() {
     )
     if (actionStepRef.current) observer.observe(actionStepRef.current)
     return () => observer.disconnect()
-  }, [isAuthenticated, planId, selectedDay, progress, completeDay])
+  }, [isAuthenticated, planId, selectedDay, progress, completeDay, recordActivity, todayActivities.readingPlan])
+
+  // Trigger plan completion overlay after 1.5s when final day is just completed
+  useEffect(() => {
+    if (justCompletedDay === null) return
+    if (!plan) return
+    if (justCompletedDay !== plan.durationDays) return
+    // Verify plan is now completed (completeDay already ran)
+    const currentProgress = planId ? getProgress(planId) : undefined
+    if (!currentProgress?.completedAt) return
+
+    const timer = setTimeout(() => {
+      setShowPlanOverlay(true)
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [justCompletedDay, plan, planId, getProgress])
 
   const currentDayContent = useMemo(() => {
     if (!plan) return undefined
@@ -101,10 +130,7 @@ export function ReadingPlanDetail() {
     ? Math.round((progress.completedDays.length / plan.durationDays) * 100)
     : 0
 
-  const isCompleted = status === 'completed'
   const isLastDay = selectedDay === plan.durationDays
-  const showCelebration =
-    isCompleted && isLastDay && progress?.completedDays.includes(selectedDay)
 
   return (
     <Layout>
@@ -162,15 +188,18 @@ export function ReadingPlanDetail() {
           <DayContent day={currentDayContent} ref={actionStepRef} />
         )}
 
-        {/* Celebration message */}
-        {showCelebration && (
-          <div className="animate-fade-in mt-6 text-center">
-            <div className="text-4xl" aria-hidden="true">
-              🎉
-            </div>
-            <p className="mt-2 text-lg font-medium text-white">
-              You&apos;ve completed {plan.title}! What a journey.
-            </p>
+        {/* Day completion celebration */}
+        {justCompletedDay === selectedDay && (
+          <div className="mx-auto max-w-2xl px-4 sm:px-6">
+            <DayCompletionCelebration
+              dayNumber={selectedDay}
+              pointsAwarded={!pointsAlreadyAwardedRef.current}
+              isLastDay={isLastDay}
+              onContinue={() => {
+                setJustCompletedDay(null)
+                handleNextDay()
+              }}
+            />
           </div>
         )}
 
@@ -221,6 +250,16 @@ export function ReadingPlanDetail() {
           </div>
         </div>
       </div>
+
+      {/* Plan completion overlay */}
+      {showPlanOverlay && (
+        <PlanCompletionOverlay
+          planTitle={plan.title}
+          totalDays={plan.durationDays}
+          onDismiss={() => setShowPlanOverlay(false)}
+          onBrowsePlans={() => navigate('/reading-plans')}
+        />
+      )}
     </Layout>
   )
 }

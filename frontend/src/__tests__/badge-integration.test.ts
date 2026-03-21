@@ -164,7 +164,7 @@ describe('Badge Integration — Activity Count Precision', () => {
       newlyEarned: [],
       activityCounts: {
         pray: 99, journal: 0, meditate: 0, listen: 0,
-        prayerWall: 0, encouragementsSent: 0, fullWorshipDays: 0,
+        prayerWall: 0, readingPlan: 0, encouragementsSent: 0, fullWorshipDays: 0,
       },
     };
     localStorage.setItem('wr_badges', JSON.stringify(seedBadges));
@@ -191,7 +191,7 @@ describe('Badge Integration — Multiple Badges Single Call', () => {
       newlyEarned: [],
       activityCounts: {
         pray: 10, journal: 99, meditate: 5, listen: 5,
-        prayerWall: 5, encouragementsSent: 0, fullWorshipDays: 0,
+        prayerWall: 5, readingPlan: 0, encouragementsSent: 0, fullWorshipDays: 0,
       },
     };
     localStorage.setItem('wr_badges', JSON.stringify(seedBadges));
@@ -199,7 +199,7 @@ describe('Badge Integration — Multiple Badges Single Call', () => {
     // Set up today with 5 activities already done
     const activities = {
       mood: true, pray: true, listen: true,
-      prayerWall: true, meditate: true, journal: false,
+      prayerWall: true, readingPlan: false, meditate: true, journal: false,
       pointsEarned: 120, multiplier: 1.5,
     };
     localStorage.setItem('wr_daily_activities', JSON.stringify({ '2026-03-16': activities }));

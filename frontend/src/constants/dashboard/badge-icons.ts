@@ -209,6 +209,26 @@ const BADGE_ICON_MAP: Record<string, BadgeIconConfig> = {
     glowColor: 'rgba(20,184,166,0.4)',
   },
 
+  // Reading plan badges
+  first_plan: {
+    icon: BookOpen,
+    bgColor: 'bg-blue-500/20',
+    textColor: 'text-blue-400',
+    glowColor: 'rgba(96,165,250,0.3)',
+  },
+  plans_3: {
+    icon: BookOpen,
+    bgColor: 'bg-blue-500/20',
+    textColor: 'text-blue-400',
+    glowColor: 'rgba(96,165,250,0.3)',
+  },
+  plans_10: {
+    icon: BookOpen,
+    bgColor: 'bg-blue-500/20',
+    textColor: 'text-blue-400',
+    glowColor: 'rgba(96,165,250,0.4)',
+  },
+
   // Prayer wall badge
   first_prayerwall: {
     icon: HandHeart,

@@ -25,7 +25,7 @@ const BADGE_GRID_SECTIONS = [
   },
   {
     label: 'Activity Milestones',
-    badgeIds: ['prayer_100', 'journal_50', 'journal_100', 'meditate_25', 'listen_50'],
+    badgeIds: ['prayer_100', 'journal_50', 'journal_100', 'meditate_25', 'listen_50', 'first_plan', 'plans_3', 'plans_10'],
   },
   {
     label: 'First Steps',

@@ -66,13 +66,27 @@ export function checkForNewBadges(
   }
 
   // 4. Full Worship Day
-  const allTrue =
+  const baseAllTrue =
     context.todayActivities.mood &&
     context.todayActivities.pray &&
     context.todayActivities.listen &&
     context.todayActivities.prayerWall &&
     context.todayActivities.meditate &&
     context.todayActivities.journal;
+
+  // If user has an active reading plan, Full Worship Day requires readingPlan too
+  let hasActivePlan = false;
+  try {
+    const progressJson = localStorage.getItem('wr_reading_plan_progress');
+    if (progressJson) {
+      const progressMap = JSON.parse(progressJson) as Record<string, { completedAt: string | null }>;
+      hasActivePlan = Object.values(progressMap).some(p => p.completedAt == null);
+    }
+  } catch { /* ignore */ }
+
+  const allTrue = hasActivePlan
+    ? baseAllTrue && context.todayActivities.readingPlan
+    : baseAllTrue;
 
   if (allTrue && !context.allActivitiesWereTrueBefore) {
     result.push('full_worship_day');
@@ -91,6 +105,28 @@ export function checkForNewBadges(
     if (badgeId && context.activityCounts.encouragementsSent >= threshold && !earned[badgeId]) {
       result.push(badgeId);
     }
+  }
+
+  // 6. Reading plan completion badges
+  const READING_PLAN_BADGES: Record<number, string> = {
+    1: 'first_plan',
+    3: 'plans_3',
+    10: 'plans_10',
+  };
+
+  try {
+    const progressJson = localStorage.getItem('wr_reading_plan_progress');
+    if (progressJson) {
+      const progressMap = JSON.parse(progressJson) as Record<string, { completedAt: string | null }>;
+      const completedCount = Object.values(progressMap).filter(p => p.completedAt != null).length;
+      for (const [threshold, badgeId] of Object.entries(READING_PLAN_BADGES)) {
+        if (completedCount >= Number(threshold) && !earned[badgeId]) {
+          result.push(badgeId);
+        }
+      }
+    }
+  } catch {
+    // Malformed localStorage — skip reading plan badge check
   }
 
   return result;

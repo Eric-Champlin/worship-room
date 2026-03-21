@@ -9,6 +9,9 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useToast } from '@/components/ui/Toast'
 import { useReadAloud } from '@/hooks/useReadAloud'
+import { RelatedPlanCallout } from '@/components/devotional/RelatedPlanCallout'
+import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
+import { READING_PLANS } from '@/data/reading-plans'
 import type { Devotional } from '@/types/devotional'
 
 function buildReadAloudText(devotional: Devotional): string {
@@ -31,7 +34,16 @@ export function DevotionalPage() {
   const authModal = useAuthModal()
   const { showToast } = useToast()
   const readAloud = useReadAloud()
+  const { getPlanStatus } = useReadingPlanProgress()
   const [isCompleted, setIsCompleted] = useState(false)
+
+  // Find matching reading plan by theme (strict equality)
+  const matchingPlan = READING_PLANS.find(
+    (p) => (p.theme as string) === (devotional.theme as string),
+  )
+  const matchingPlanStatus = matchingPlan ? getPlanStatus(matchingPlan.id) : 'completed'
+  const showPlanCallout =
+    matchingPlan && matchingPlanStatus !== 'completed'
 
   // Check existing completion state on mount / auth change
   useEffect(() => {
@@ -227,6 +239,16 @@ export function DevotionalPage() {
               </p>
             </div>
           </div>
+
+          {/* Related reading plan callout */}
+          {showPlanCallout && (
+            <RelatedPlanCallout
+              planId={matchingPlan.id}
+              planTitle={matchingPlan.title}
+              planDuration={matchingPlan.durationDays}
+              planStatus={matchingPlanStatus as 'unstarted' | 'active' | 'paused'}
+            />
+          )}
 
           {/* Action buttons */}
           <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:justify-center">

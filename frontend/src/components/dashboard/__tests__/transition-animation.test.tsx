@@ -65,6 +65,7 @@ beforeEach(() => {
   localStorage.clear()
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'Eric')
+  localStorage.setItem('wr_onboarding_complete', 'true')
 })
 
 afterEach(() => {

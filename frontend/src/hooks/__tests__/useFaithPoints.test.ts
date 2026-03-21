@@ -51,7 +51,7 @@ describe('useFaithPoints — unauthenticated', () => {
     expect(result.current.longestStreak).toBe(0);
     expect(result.current.todayActivities).toEqual({
       mood: false, pray: false, listen: false,
-      prayerWall: false, meditate: false, journal: false,
+      prayerWall: false, readingPlan: false, meditate: false, journal: false,
     });
   });
 

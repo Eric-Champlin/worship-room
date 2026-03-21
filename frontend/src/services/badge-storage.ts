@@ -10,6 +10,7 @@ const ACTIVITY_TYPE_TO_COUNT_KEY: Partial<Record<ActivityType, keyof ActivityCou
   meditate: 'meditate',
   listen: 'listen',
   prayerWall: 'prayerWall',
+  readingPlan: 'readingPlan',
   // mood has no counter
 };
 
@@ -24,6 +25,7 @@ function fillActivityCounts(partial: Partial<ActivityCounts>): ActivityCounts {
     meditate: typeof partial.meditate === 'number' ? partial.meditate : 0,
     listen: typeof partial.listen === 'number' ? partial.listen : 0,
     prayerWall: typeof partial.prayerWall === 'number' ? partial.prayerWall : 0,
+    readingPlan: typeof partial.readingPlan === 'number' ? partial.readingPlan : 0,
     encouragementsSent: typeof partial.encouragementsSent === 'number' ? partial.encouragementsSent : 0,
     fullWorshipDays: typeof partial.fullWorshipDays === 'number' ? partial.fullWorshipDays : 0,
   };

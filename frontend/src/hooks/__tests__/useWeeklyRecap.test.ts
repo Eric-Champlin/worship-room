@@ -105,6 +105,7 @@ describe('useWeeklyRecap', () => {
           pray: true,
           listen: false,
           prayerWall: false,
+          readingPlan: false,
           meditate: false,
           journal: false,
           pointsEarned: 15,
