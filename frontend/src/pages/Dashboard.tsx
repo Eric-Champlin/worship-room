@@ -15,6 +15,7 @@ import { useWeeklyGodMoments } from '@/hooks/useWeeklyGodMoments'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useGettingStarted } from '@/hooks/useGettingStarted'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { usePrayerReminders } from '@/hooks/usePrayerReminders'
 import { hasCheckedInToday } from '@/services/mood-storage'
 import { getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { isOnboardingComplete } from '@/services/onboarding-storage'
@@ -44,6 +45,7 @@ export function Dashboard() {
 
   const faithPoints = useFaithPoints()
   const godMoments = useWeeklyGodMoments()
+  usePrayerReminders(phase === 'dashboard')
 
   // Getting Started checklist
   const gettingStarted = useGettingStarted(faithPoints.todayActivities)

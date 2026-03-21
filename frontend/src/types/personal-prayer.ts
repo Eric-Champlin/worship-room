@@ -11,6 +11,8 @@ export interface PersonalPrayer {
   answeredAt: string | null
   answeredNote: string | null
   lastPrayedAt: string | null
+  reminderEnabled?: boolean
+  reminderTime?: string
 }
 
 export type PrayerListFilter = 'all' | 'active' | 'answered'

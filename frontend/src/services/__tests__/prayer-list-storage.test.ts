@@ -7,6 +7,11 @@ import {
   markAnswered,
   markPrayed,
   getPrayerCounts,
+  updateReminder,
+  getActivePrayersWithReminders,
+  getAnsweredThisMonth,
+  hasShownRemindersToday,
+  markRemindersShown,
   MAX_PRAYERS,
 } from '../prayer-list-storage'
 import type { PersonalPrayer } from '@/types/personal-prayer'
@@ -190,5 +195,156 @@ describe('getPrayerCounts', () => {
 
   it('returns zeros when no prayers', () => {
     expect(getPrayerCounts()).toEqual({ all: 0, active: 0, answered: 0 })
+  })
+})
+
+describe('updateReminder', () => {
+  it('sets reminderEnabled and default time on toggle on', () => {
+    const prayer = makePrayer()
+    localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify([prayer]))
+
+    updateReminder(prayer.id, true)
+
+    const stored = getPrayers()
+    expect(stored[0].reminderEnabled).toBe(true)
+    expect(stored[0].reminderTime).toBe('09:00')
+  })
+
+  it('preserves reminderTime when toggling off', () => {
+    const prayer = makePrayer({ reminderEnabled: true, reminderTime: '14:00' })
+    localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify([prayer]))
+
+    updateReminder(prayer.id, false)
+
+    const stored = getPrayers()
+    expect(stored[0].reminderEnabled).toBe(false)
+    expect(stored[0].reminderTime).toBe('14:00')
+  })
+
+  it('sets custom time when provided', () => {
+    const prayer = makePrayer()
+    localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify([prayer]))
+
+    updateReminder(prayer.id, true, '07:30')
+
+    const stored = getPrayers()
+    expect(stored[0].reminderEnabled).toBe(true)
+    expect(stored[0].reminderTime).toBe('07:30')
+  })
+
+  it('does not overwrite existing time when toggling on without time arg', () => {
+    const prayer = makePrayer({ reminderEnabled: false, reminderTime: '14:00' })
+    localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify([prayer]))
+
+    updateReminder(prayer.id, true)
+
+    const stored = getPrayers()
+    expect(stored[0].reminderTime).toBe('14:00')
+  })
+})
+
+describe('getActivePrayersWithReminders', () => {
+  it('returns only active prayers with reminders enabled', () => {
+    const prayers = [
+      makePrayer({ id: '1', status: 'active', reminderEnabled: true }),
+      makePrayer({ id: '2', status: 'active', reminderEnabled: false }),
+      makePrayer({ id: '3', status: 'answered', reminderEnabled: true }),
+      makePrayer({ id: '4', status: 'active' }), // no reminderEnabled field
+    ]
+    localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify(prayers))
+
+    const result = getActivePrayersWithReminders()
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1')
+  })
+
+  it('returns empty array when no reminders enabled', () => {
+    const prayers = [makePrayer({ status: 'active' })]
+    localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify(prayers))
+
+    expect(getActivePrayersWithReminders()).toEqual([])
+  })
+})
+
+describe('getAnsweredThisMonth', () => {
+  it('counts prayers answered in current month', () => {
+    const now = new Date()
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 15).toISOString()
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 15).toISOString()
+
+    const prayers = [
+      makePrayer({ id: '1', status: 'answered', answeredAt: thisMonth }),
+      makePrayer({ id: '2', status: 'answered', answeredAt: thisMonth }),
+      makePrayer({ id: '3', status: 'answered', answeredAt: lastMonth }),
+      makePrayer({ id: '4', status: 'active', answeredAt: null }),
+    ]
+    localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify(prayers))
+
+    expect(getAnsweredThisMonth()).toBe(2)
+  })
+
+  it('returns 0 when no answered prayers', () => {
+    expect(getAnsweredThisMonth()).toBe(0)
+  })
+})
+
+describe('hasShownRemindersToday', () => {
+  it('returns false when no data', () => {
+    expect(hasShownRemindersToday()).toBe(false)
+  })
+
+  it('returns true when shown today', () => {
+    markRemindersShown(['id1', 'id2'])
+    expect(hasShownRemindersToday()).toBe(true)
+  })
+
+  it('returns false for a different date', () => {
+    localStorage.setItem(
+      'wr_prayer_reminders_shown',
+      JSON.stringify({ date: '2020-01-01', shownPrayerIds: ['id1'] }),
+    )
+    expect(hasShownRemindersToday()).toBe(false)
+  })
+})
+
+describe('markRemindersShown', () => {
+  it('stores date and prayer IDs', () => {
+    markRemindersShown(['a', 'b'])
+
+    const raw = localStorage.getItem('wr_prayer_reminders_shown')
+    expect(raw).toBeTruthy()
+    const data = JSON.parse(raw!)
+    expect(data.shownPrayerIds).toEqual(['a', 'b'])
+    expect(data.date).toBeTruthy()
+  })
+})
+
+describe('backwards compatibility', () => {
+  it('existing prayers without reminder fields work in all functions', () => {
+    // Prayer without reminderEnabled or reminderTime (pre-Spec 19 format)
+    const oldPrayer = {
+      id: 'old-1',
+      title: 'Old Prayer',
+      description: 'Before reminders existed',
+      category: 'health',
+      status: 'active',
+      createdAt: '2026-03-01T10:00:00.000Z',
+      updatedAt: '2026-03-01T10:00:00.000Z',
+      answeredAt: null,
+      answeredNote: null,
+      lastPrayedAt: null,
+    }
+    localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify([oldPrayer]))
+
+    // All existing functions should work
+    expect(getPrayers()).toHaveLength(1)
+    expect(getPrayerCounts()).toEqual({ all: 1, active: 1, answered: 0 })
+    expect(getActivePrayersWithReminders()).toEqual([])
+
+    // Can update reminder on old prayer
+    updateReminder('old-1', true)
+    const stored = getPrayers()
+    expect(stored[0].reminderEnabled).toBe(true)
+    expect(stored[0].reminderTime).toBe('09:00')
   })
 })

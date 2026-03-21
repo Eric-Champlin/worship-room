@@ -3,15 +3,18 @@ import { CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { timeAgo, formatFullDate } from '@/lib/time'
 import { CATEGORY_LABELS } from '@/constants/prayer-categories'
+import { ReminderToggle } from './ReminderToggle'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 
 interface PrayerItemCardProps {
   prayer: PersonalPrayer
   children?: ReactNode
   glowing?: boolean
+  onToggleReminder?: (enabled: boolean) => void
+  onReminderTimeChange?: (time: string) => void
 }
 
-export function PrayerItemCard({ prayer, children, glowing }: PrayerItemCardProps) {
+export function PrayerItemCard({ prayer, children, glowing, onToggleReminder, onReminderTimeChange }: PrayerItemCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const needsTruncation = prayer.description.length > 150
 
@@ -79,6 +82,16 @@ export function PrayerItemCard({ prayer, children, glowing }: PrayerItemCardProp
             </p>
           )}
         </div>
+      )}
+
+      {/* Reminder toggle (active prayers only) */}
+      {prayer.status === 'active' && onToggleReminder && onReminderTimeChange && (
+        <ReminderToggle
+          enabled={prayer.reminderEnabled ?? false}
+          time={prayer.reminderTime ?? '09:00'}
+          onToggle={onToggleReminder}
+          onTimeChange={onReminderTimeChange}
+        />
       )}
 
       {/* Action buttons (passed as children) */}

@@ -3,7 +3,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
-import { addPrayer, MAX_PRAYERS } from '@/services/prayer-list-storage'
+import { addPrayer, markAnswered, MAX_PRAYERS } from '@/services/prayer-list-storage'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 import { MyPrayers } from '../MyPrayers'
 
@@ -179,11 +179,71 @@ describe('MyPrayers Page', () => {
       await user.type(screen.getByLabelText('Testimony note'), 'God provided!')
       await user.click(screen.getByText('Confirm'))
 
+      // Dismiss celebration overlay first
+      await user.click(screen.getByText('Praise God!'))
+
       // Switch to "Answered" filter to see the prayer
       await user.click(screen.getByText(/^Answered/))
       expect(screen.getByText('Answered Prayer')).toBeInTheDocument()
       expect(screen.getByText('Answered')).toBeInTheDocument()
       expect(screen.getByText('God provided!')).toBeInTheDocument()
+    })
+  })
+
+  // --- Answered Prayers Counter ---
+
+  describe('Answered prayers counter', () => {
+    it('is hidden when 0 answered', () => {
+      seedPrayer({ title: 'Active Prayer' })
+      renderMyPrayers()
+
+      expect(screen.queryByTestId('answered-count')).not.toBeInTheDocument()
+    })
+
+    it('shows count when >= 1 answered', () => {
+      const prayer = seedPrayer({ title: 'Answered One' })
+      if (prayer) {
+        markAnswered(prayer.id, 'Done')
+      }
+      renderMyPrayers()
+
+      expect(screen.getByTestId('answered-count')).toHaveTextContent('1')
+      expect(screen.getByText('prayer answered')).toBeInTheDocument()
+    })
+
+    it('uses plural for multiple answered', () => {
+      for (let i = 0; i < 3; i++) {
+        const p = seedPrayer({ title: `Prayer ${i}` })
+        if (p) markAnswered(p.id)
+      }
+      renderMyPrayers()
+
+      expect(screen.getByTestId('answered-count')).toHaveTextContent('3')
+      expect(screen.getByText('prayers answered')).toBeInTheDocument()
+    })
+
+    it('shows encouraging message at 5+ answered', () => {
+      for (let i = 0; i < 5; i++) {
+        const p = seedPrayer({ title: `Prayer ${i}` })
+        if (p) markAnswered(p.id)
+      }
+      renderMyPrayers()
+
+      expect(
+        screen.getByText('God is faithful. Keep bringing your requests to Him.'),
+      ).toBeInTheDocument()
+    })
+
+    it('does not show encouraging message below 5', () => {
+      for (let i = 0; i < 4; i++) {
+        const p = seedPrayer({ title: `Prayer ${i}` })
+        if (p) markAnswered(p.id)
+      }
+      renderMyPrayers()
+
+      expect(
+        screen.queryByText('God is faithful. Keep bringing your requests to Him.'),
+      ).not.toBeInTheDocument()
     })
   })
 

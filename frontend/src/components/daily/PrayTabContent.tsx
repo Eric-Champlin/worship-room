@@ -9,6 +9,8 @@ import {
   Heart,
   RefreshCw,
   PenLine,
+  ListPlus,
+  Check,
 } from 'lucide-react'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { useToast } from '@/components/ui/Toast'
@@ -18,6 +20,8 @@ import { KaraokeText } from '@/components/daily/KaraokeText'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { ShareButton } from '@/components/daily/ShareButton'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { SaveToPrayerListForm } from '@/components/daily/SaveToPrayerListForm'
+import { getPrayers, MAX_PRAYERS } from '@/services/prayer-list-storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
@@ -73,6 +77,8 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const [resonatedFading, setResonatedFading] = useState(false)
   const [sectionFading, setSectionFading] = useState(false)
   const [retryPrompt, setRetryPrompt] = useState<string | null>(null)
+  const [saveToListOpen, setSaveToListOpen] = useState(false)
+  const [savedToList, setSavedToList] = useState(false)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
@@ -205,6 +211,8 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
     setResonatedFading(false)
     setSectionFading(false)
     setRetryPrompt(null)
+    setSaveToListOpen(false)
+    setSavedToList(false)
   }
 
   const handleCopy = async () => {
@@ -223,6 +231,21 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
       return
     }
     showToast('Save feature coming soon')
+  }
+
+  const handleSaveToList = () => {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to save prayers to your list.')
+      return
+    }
+    if (getPrayers().length >= MAX_PRAYERS) {
+      showToast(
+        "You've reached the 200 prayer limit. Consider archiving answered prayers to make room.",
+        'error',
+      )
+      return
+    }
+    setSaveToListOpen(true)
   }
 
   const handleCopyClassic = async (p: ClassicPrayer) => {
@@ -420,6 +443,24 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
                   <span className="hidden sm:inline">Save</span>
                 </button>
 
+                {/* Save to prayer list */}
+                {!savedToList ? (
+                  <button
+                    type="button"
+                    onClick={handleSaveToList}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50"
+                    aria-label="Save to prayer list"
+                  >
+                    <ListPlus className="h-4 w-4" />
+                    <span className="hidden sm:inline">Save to List</span>
+                  </button>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-success">
+                    <Check className="h-4 w-4" />
+                    <span className="hidden sm:inline">Saved</span>
+                  </span>
+                )}
+
                 {/* Mobile overflow menu */}
                 <div ref={mobileMenuRef} className="relative sm:hidden">
                   <button
@@ -437,6 +478,20 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
                       aria-label="More actions"
                       className="absolute right-0 top-full z-10 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
                     >
+                      {!savedToList && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMobileMenuOpen(false)
+                            handleSaveToList()
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-dark hover:bg-gray-50"
+                        >
+                          <ListPlus className="h-4 w-4" />
+                          Save to List
+                        </button>
+                      )}
                       <ShareButton
                         shareUrl={`/prayer/${prayer.id}`}
                         shareTitle="A Prayer from Worship Room"
@@ -456,6 +511,20 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
                   />
                 </div>
               </div>
+
+              {/* Save to prayer list form */}
+              {saveToListOpen && prayer && (
+                <SaveToPrayerListForm
+                  topicText={text}
+                  prayerText={prayer.text}
+                  onSave={() => {
+                    setSaveToListOpen(false)
+                    setSavedToList(true)
+                    showToast('Added to your prayer list.')
+                  }}
+                  onCancel={() => setSaveToListOpen(false)}
+                />
+              )}
 
               {/* Post-prayer reflection prompt */}
               {reflectionVisible && !reflectionDismissed && (

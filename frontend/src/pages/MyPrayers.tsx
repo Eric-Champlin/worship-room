@@ -14,6 +14,7 @@ import { EditPrayerForm } from '@/components/my-prayers/EditPrayerForm'
 import { MarkAnsweredForm } from '@/components/my-prayers/MarkAnsweredForm'
 import { DeletePrayerDialog } from '@/components/my-prayers/DeletePrayerDialog'
 import { PrayerListEmptyState } from '@/components/my-prayers/PrayerListEmptyState'
+import { PrayerAnsweredCelebration } from '@/components/my-prayers/PrayerAnsweredCelebration'
 import {
   getPrayers,
   addPrayer,
@@ -21,6 +22,7 @@ import {
   deletePrayer,
   markAnswered,
   markPrayed,
+  updateReminder,
 } from '@/services/prayer-list-storage'
 import type { PersonalPrayer, PrayerListFilter } from '@/types/personal-prayer'
 import type { PrayerCategory } from '@/constants/prayer-categories'
@@ -36,6 +38,7 @@ export function MyPrayers() {
   const [answeringId, setAnsweringId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [glowingId, setGlowingId] = useState<string | null>(null)
+  const [celebrationPrayer, setCelebrationPrayer] = useState<{ title: string; note?: string } | null>(null)
 
   // Load prayers from localStorage on mount
   useEffect(() => {
@@ -104,12 +107,16 @@ export function MyPrayers() {
 
   const handleMarkAnswered = useCallback(
     (id: string, note: string) => {
+      // Capture prayer title before updating status
+      const prayer = prayers.find((p) => p.id === id)
+      const title = prayer?.title ?? 'Prayer'
+
       markAnswered(id, note || undefined)
       refreshPrayers()
       setAnsweringId(null)
-      showToast('Prayer marked as answered', 'success')
+      setCelebrationPrayer({ title, note: note || undefined })
     },
-    [refreshPrayers, showToast],
+    [prayers, refreshPrayers],
   )
 
   const handlePray = useCallback(
@@ -129,6 +136,22 @@ export function MyPrayers() {
     [refreshPrayers],
   )
 
+  const handleToggleReminder = useCallback(
+    (id: string, enabled: boolean) => {
+      updateReminder(id, enabled)
+      refreshPrayers()
+    },
+    [refreshPrayers],
+  )
+
+  const handleReminderTimeChange = useCallback(
+    (id: string, time: string) => {
+      updateReminder(id, true, time)
+      refreshPrayers()
+    },
+    [refreshPrayers],
+  )
+
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
   }
@@ -137,6 +160,22 @@ export function MyPrayers() {
     <div className="min-h-screen bg-neutral-bg">
       <Navbar />
       <PageHero title="My Prayers" subtitle="Your personal conversation with God." />
+
+      {counts.answered > 0 && (
+        <div className="bg-gradient-to-b from-[#4A1D96] to-neutral-bg pb-6 text-center">
+          <p className="text-base text-white/85">
+            <span className="font-semibold text-emerald-400" data-testid="answered-count">
+              {counts.answered}
+            </span>{' '}
+            {counts.answered === 1 ? 'prayer answered' : 'prayers answered'}
+          </p>
+          {counts.answered >= 5 && (
+            <p className="mx-auto mt-2 max-w-md font-serif text-sm italic text-white/70">
+              God is faithful. Keep bringing your requests to Him.
+            </p>
+          )}
+        </div>
+      )}
 
       <PrayerListActionBar
         filter={filter}
@@ -175,6 +214,8 @@ export function MyPrayers() {
                     <PrayerItemCard
                       prayer={prayer}
                       glowing={glowingId === prayer.id}
+                      onToggleReminder={(enabled) => handleToggleReminder(prayer.id, enabled)}
+                      onReminderTimeChange={(time) => handleReminderTimeChange(prayer.id, time)}
                     >
                       {answeringId === prayer.id ? (
                         <MarkAnsweredForm
@@ -215,6 +256,14 @@ export function MyPrayers() {
       />
 
       <SiteFooter />
+
+      {celebrationPrayer && (
+        <PrayerAnsweredCelebration
+          prayerTitle={celebrationPrayer.title}
+          testimonyNote={celebrationPrayer.note}
+          onDismiss={() => setCelebrationPrayer(null)}
+        />
+      )}
     </div>
   )
 }
