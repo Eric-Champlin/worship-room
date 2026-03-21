@@ -1,0 +1,226 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+
+import { Layout } from '@/components/Layout'
+import { DayContent } from '@/components/reading-plans/DayContent'
+import { DaySelector } from '@/components/reading-plans/DaySelector'
+import { PlanNotFound } from '@/components/reading-plans/PlanNotFound'
+import { useAuth } from '@/hooks/useAuth'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
+import { getReadingPlan } from '@/data/reading-plans'
+import { PLAN_DIFFICULTY_LABELS } from '@/constants/reading-plans'
+import { cn } from '@/lib/utils'
+
+const DETAIL_HERO_STYLE = {
+  backgroundImage:
+    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0D0620 100%)',
+  backgroundSize: '100% 100%',
+} as const
+
+export function ReadingPlanDetail() {
+  const { planId } = useParams<{ planId: string }>()
+  const { isAuthenticated } = useAuth()
+  const authModal = useAuthModal()
+  const { getProgress, getPlanStatus, completeDay } = useReadingPlanProgress()
+
+  const plan = planId ? getReadingPlan(planId) : undefined
+  const progress = planId ? getProgress(planId) : undefined
+  const status = planId ? getPlanStatus(planId) : 'unstarted'
+
+  const initialDay = progress?.currentDay ?? 1
+  const [selectedDay, setSelectedDay] = useState(initialDay)
+
+  const actionStepRef = useRef<HTMLDivElement>(null)
+
+  // Intersection Observer for day completion tracking
+  useEffect(() => {
+    if (!isAuthenticated) return
+    if (!planId || !progress) return
+    if (selectedDay !== progress.currentDay) return
+    if (progress.completedDays.includes(selectedDay)) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          completeDay(planId, selectedDay)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.5 },
+    )
+    if (actionStepRef.current) observer.observe(actionStepRef.current)
+    return () => observer.disconnect()
+  }, [isAuthenticated, planId, selectedDay, progress, completeDay])
+
+  const currentDayContent = useMemo(() => {
+    if (!plan) return undefined
+    return plan.days.find((d) => d.dayNumber === selectedDay)
+  }, [plan, selectedDay])
+
+  const isDayAccessible = useCallback(
+    (day: number): boolean => {
+      if (day === 1) return true
+      if (!isAuthenticated) return false
+      if (!progress) return false
+      if (progress.completedDays.includes(day)) return true
+      return day <= progress.currentDay
+    },
+    [isAuthenticated, progress],
+  )
+
+  const handleDayChange = useCallback(
+    (day: number) => {
+      if (!isDayAccessible(day)) {
+        if (!isAuthenticated) {
+          authModal?.openAuthModal('Sign in to start this reading plan')
+          return
+        }
+        return
+      }
+      setSelectedDay(day)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    [isDayAccessible, isAuthenticated, authModal],
+  )
+
+  const handlePreviousDay = useCallback(() => {
+    if (selectedDay <= 1) return
+    handleDayChange(selectedDay - 1)
+  }, [selectedDay, handleDayChange])
+
+  const handleNextDay = useCallback(() => {
+    if (!plan || selectedDay >= plan.durationDays) return
+    handleDayChange(selectedDay + 1)
+  }, [selectedDay, plan, handleDayChange])
+
+  if (!plan) return <PlanNotFound />
+
+  const completionPercent = progress
+    ? Math.round((progress.completedDays.length / plan.durationDays) * 100)
+    : 0
+
+  const isCompleted = status === 'completed'
+  const isLastDay = selectedDay === plan.durationDays
+  const showCelebration =
+    isCompleted && isLastDay && progress?.completedDays.includes(selectedDay)
+
+  return (
+    <Layout>
+      <div className="min-h-screen bg-hero-dark">
+        {/* Hero section */}
+        <section
+          className="relative flex w-full flex-col items-center px-4 pt-32 pb-10 text-center antialiased sm:pt-36 sm:pb-14"
+          style={DETAIL_HERO_STYLE}
+        >
+          <div className="text-5xl sm:text-6xl" aria-hidden="true">
+            {plan.coverEmoji}
+          </div>
+
+          <h1 className="mt-4 font-script text-5xl font-bold text-white sm:text-6xl lg:text-7xl">
+            {plan.title}
+          </h1>
+
+          <p className="mx-auto mt-3 max-w-xl text-base text-white/85 sm:text-lg">
+            {plan.description}
+          </p>
+
+          <div className="mt-4 inline-flex gap-2">
+            <span className="rounded-full bg-white/10 px-4 py-1 text-sm text-white">
+              {plan.durationDays} days
+            </span>
+            <span className="rounded-full bg-white/10 px-4 py-1 text-sm text-white">
+              {PLAN_DIFFICULTY_LABELS[plan.difficulty]}
+            </span>
+          </div>
+
+          {progress && !progress.completedAt && (
+            <div className="mx-auto mt-4 w-full max-w-xs">
+              <div
+                className="h-2 rounded-full bg-white/10"
+                role="progressbar"
+                aria-valuenow={completionPercent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`${completionPercent}% complete`}
+              >
+                <div
+                  className="h-2 rounded-full bg-primary transition-all duration-500"
+                  style={{ width: `${completionPercent}%` }}
+                />
+              </div>
+              <p className="mt-1 text-sm text-white/50">
+                {completionPercent}% complete
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* Day content */}
+        {currentDayContent && (
+          <DayContent day={currentDayContent} ref={actionStepRef} />
+        )}
+
+        {/* Celebration message */}
+        {showCelebration && (
+          <div className="animate-fade-in mt-6 text-center">
+            <div className="text-4xl" aria-hidden="true">
+              🎉
+            </div>
+            <p className="mt-2 text-lg font-medium text-white">
+              You&apos;ve completed {plan.title}! What a journey.
+            </p>
+          </div>
+        )}
+
+        {/* Day navigation */}
+        <div className="mx-auto max-w-2xl px-4 pb-12 sm:px-6">
+          <div className="mt-8 flex flex-col items-center gap-4 sm:mt-10">
+            <DaySelector
+              totalDays={plan.durationDays}
+              selectedDay={selectedDay}
+              progress={progress}
+              dayTitles={plan.days.map((d) => d.title)}
+              onSelectDay={handleDayChange}
+            />
+
+            <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+              <button
+                type="button"
+                onClick={handlePreviousDay}
+                disabled={selectedDay <= 1}
+                aria-label="Go to previous day"
+                className={cn(
+                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors',
+                  selectedDay <= 1
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'hover:bg-white/15',
+                )}
+              >
+                <ChevronLeft size={16} />
+                Previous Day
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNextDay}
+                disabled={selectedDay >= plan.durationDays}
+                aria-label="Go to next day"
+                className={cn(
+                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors',
+                  selectedDay >= plan.durationDays
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'hover:bg-white/15',
+                )}
+              >
+                Next Day
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  )
+}

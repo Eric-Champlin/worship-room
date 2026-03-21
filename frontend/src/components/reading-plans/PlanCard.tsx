@@ -1,0 +1,92 @@
+import { Link } from 'react-router-dom'
+
+import { cn } from '@/lib/utils'
+import { PLAN_DIFFICULTY_LABELS, PLAN_THEME_LABELS } from '@/constants/reading-plans'
+import type { ReadingPlan, PlanProgress } from '@/types/reading-plans'
+
+interface PlanCardProps {
+  plan: ReadingPlan
+  status: 'unstarted' | 'active' | 'paused' | 'completed'
+  progress?: PlanProgress
+  onStart: (planId: string) => void
+}
+
+function StatusButton({
+  status,
+  planId,
+  onStart,
+}: {
+  status: PlanCardProps['status']
+  planId: string
+  onStart: (planId: string) => void
+}) {
+  if (status === 'completed') {
+    return (
+      <span className="inline-flex items-center rounded-full bg-success/10 px-4 py-2 text-sm font-medium text-success">
+        Completed
+      </span>
+    )
+  }
+
+  const label =
+    status === 'active'
+      ? 'Continue'
+      : status === 'paused'
+        ? 'Resume'
+        : 'Start Plan'
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        onStart(planId)
+      }}
+      className="min-h-[44px] w-full rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-lt"
+    >
+      {label}
+    </button>
+  )
+}
+
+export function PlanCard({ plan, status, progress, onStart }: PlanCardProps) {
+  return (
+    <Link
+      to={`/reading-plans/${plan.id}`}
+      className="block rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+    >
+      <div className="mb-3 text-4xl" aria-hidden="true">
+        {plan.coverEmoji}
+      </div>
+
+      <h3 className="text-lg font-bold text-text-dark">{plan.title}</h3>
+
+      <p className="mt-1 line-clamp-2 text-sm text-text-light">
+        {plan.description}
+      </p>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-text-dark">
+          {plan.durationDays} days
+        </span>
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-text-dark">
+          {PLAN_DIFFICULTY_LABELS[plan.difficulty]}
+        </span>
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-text-dark">
+          {PLAN_THEME_LABELS[plan.theme]}
+        </span>
+      </div>
+
+      {progress && !progress.completedAt && (
+        <p className="mt-2 text-sm text-text-light">
+          Day {progress.currentDay} of {plan.durationDays}
+        </p>
+      )}
+
+      <div className={cn('mt-4', status === 'completed' && 'text-center')}>
+        <StatusButton status={status} planId={plan.id} onStart={onStart} />
+      </div>
+    </Link>
+  )
+}

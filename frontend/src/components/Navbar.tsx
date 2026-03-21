@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, ChevronDown, Menu, Sparkles, X } from 'lucide-react'
+import { Bell, BookOpen, ChevronDown, Menu, Sparkles, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
@@ -12,6 +12,7 @@ import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
 const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon?: LucideIcon }> = [
   { label: 'Daily Hub', to: '/daily' },
   { label: 'Daily Devotional', to: '/devotional', icon: Sparkles },
+  { label: 'Reading Plans', to: '/reading-plans', icon: BookOpen },
   { label: 'Prayer Wall', to: '/prayer-wall' },
   { label: 'Music', to: '/music' },
 ]
