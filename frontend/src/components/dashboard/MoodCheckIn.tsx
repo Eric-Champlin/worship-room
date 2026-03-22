@@ -69,6 +69,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
       text: text.trim() || undefined,
       timestamp: Date.now(),
       verseSeen: selectedMood.verseReference,
+      timeOfDay: 'morning',
     };
 
     saveMoodEntry(entry);

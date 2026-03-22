@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   CartesianGrid,
+  Customized,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -62,6 +63,49 @@ function CustomActiveDot({ cx, cy, payload }: DotProps) {
   );
 }
 
+function EveningDot({ cx, cy, payload }: DotProps) {
+  if (!payload?.eveningColor || cx == null || cy == null) return null;
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={5} fill={payload.eveningColor} />
+      <circle cx={cx} cy={cy} r={5} fill="none" stroke="white" strokeWidth={2} />
+    </g>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ConnectingLines(props: any) {
+  const items = props.formattedGraphicalItems;
+  if (!items || items.length < 2) return null;
+
+  const morningPoints = items[0]?.props?.points;
+  const eveningPoints = items[1]?.props?.points;
+  if (!morningPoints || !eveningPoints) return null;
+
+  return (
+    <g>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      {morningPoints.map((mp: any, i: number) => {
+        const ep = eveningPoints[i];
+        if (!mp?.payload || !ep) return null;
+        if (mp.payload.mood == null || mp.payload.eveningMood == null) return null;
+        if (!Number.isFinite(mp.y) || !Number.isFinite(ep.y)) return null;
+        return (
+          <line
+            key={i}
+            x1={mp.x}
+            y1={mp.y}
+            x2={ep.x}
+            y2={ep.y}
+            stroke="rgba(255,255,255,0.15)"
+            strokeWidth={1}
+          />
+        );
+      })}
+    </g>
+  );
+}
+
 interface TooltipPayloadItem {
   payload?: MoodChartDataPoint;
 }
@@ -85,13 +129,13 @@ function MoodTooltip({ active, payload }: MoodTooltipProps) {
 }
 
 const EMPTY_STATE_DATA: MoodChartDataPoint[] = [
-  { date: '', dayLabel: 'Mon', mood: 3, moodLabel: 'Okay', color: '#8B7FA8' },
-  { date: '', dayLabel: 'Tue', mood: 4, moodLabel: 'Good', color: '#2DD4BF' },
-  { date: '', dayLabel: 'Wed', mood: 2, moodLabel: 'Heavy', color: '#C2703E' },
-  { date: '', dayLabel: 'Thu', mood: 5, moodLabel: 'Thriving', color: '#34D399' },
-  { date: '', dayLabel: 'Fri', mood: 3, moodLabel: 'Okay', color: '#8B7FA8' },
-  { date: '', dayLabel: 'Sat', mood: 4, moodLabel: 'Good', color: '#2DD4BF' },
-  { date: '', dayLabel: 'Sun', mood: 5, moodLabel: 'Thriving', color: '#34D399' },
+  { date: '', dayLabel: 'Mon', mood: 3, moodLabel: 'Okay', color: '#8B7FA8', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+  { date: '', dayLabel: 'Tue', mood: 4, moodLabel: 'Good', color: '#2DD4BF', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+  { date: '', dayLabel: 'Wed', mood: 2, moodLabel: 'Heavy', color: '#C2703E', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+  { date: '', dayLabel: 'Thu', mood: 5, moodLabel: 'Thriving', color: '#34D399', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+  { date: '', dayLabel: 'Fri', mood: 3, moodLabel: 'Okay', color: '#8B7FA8', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+  { date: '', dayLabel: 'Sat', mood: 4, moodLabel: 'Good', color: '#2DD4BF', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+  { date: '', dayLabel: 'Sun', mood: 5, moodLabel: 'Thriving', color: '#34D399', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
 ];
 
 interface MoodChartEmptyStateProps {
@@ -216,6 +260,7 @@ export function MoodChart({ onRequestCheckIn }: MoodChartProps) {
               width={80}
             />
             <Tooltip content={<MoodTooltip />} />
+            <Customized component={ConnectingLines} />
             <Line
               type="monotone"
               dataKey="mood"
@@ -224,6 +269,16 @@ export function MoodChart({ onRequestCheckIn }: MoodChartProps) {
               connectNulls={false}
               dot={<CustomDot />}
               activeDot={<CustomActiveDot />}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="eveningMood"
+              stroke="rgba(139, 92, 246, 0.3)"
+              strokeWidth={0}
+              connectNulls={false}
+              dot={<EveningDot />}
+              activeDot={false}
               isAnimationActive={false}
             />
           </LineChart>

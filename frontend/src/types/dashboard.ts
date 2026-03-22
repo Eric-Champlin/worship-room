@@ -9,9 +9,10 @@ export interface MoodEntry {
   text?: string;
   timestamp: number;
   verseSeen: string;
+  timeOfDay?: 'morning' | 'evening';
 }
 
-export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan' | 'gratitude';
+export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan' | 'gratitude' | 'reflection';
 
 export interface DailyActivities {
   mood: boolean;
@@ -22,6 +23,7 @@ export interface DailyActivities {
   journal: boolean;
   readingPlan: boolean;
   gratitude: boolean;
+  reflection: boolean;
   pointsEarned: number;
   multiplier: number;
 }
@@ -62,6 +64,7 @@ export interface ActivityCounts {
   prayerWall: number;
   readingPlan: number;
   gratitude: number;
+  reflection: number;
   encouragementsSent: number;
   fullWorshipDays: number;
 }

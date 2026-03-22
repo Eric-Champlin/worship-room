@@ -1,11 +1,26 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { InsightCards } from '../InsightCards'
 import {
   AI_INSIGHT_CARDS,
   getDayOfYear,
   getInsightCardsForDay,
 } from '@/constants/dashboard/ai-insights'
+import type { MoodEntry } from '@/types/dashboard'
+
+function makeMoodEntry(overrides: Partial<MoodEntry> & { date: string; mood: MoodEntry['mood']; moodLabel: MoodEntry['moodLabel'] }): MoodEntry {
+  return {
+    id: `test-${overrides.date}-${overrides.timeOfDay ?? 'morning'}`,
+    text: '',
+    timestamp: Date.now(),
+    verseSeen: 'Psalm 34:18',
+    ...overrides,
+  }
+}
+
+beforeEach(() => {
+  localStorage.clear()
+})
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -101,5 +116,54 @@ describe('InsightCards', () => {
 
   it('AI_INSIGHT_CARDS has 11 cards', () => {
     expect(AI_INSIGHT_CARDS).toHaveLength(11)
+  })
+
+  it('shows mood change insight when 5+ dual-entry days exist (improve)', () => {
+    // 5 days where evening mood > morning mood
+    const entries: MoodEntry[] = []
+    for (let i = 0; i < 5; i++) {
+      const date = `2026-03-${String(10 + i).padStart(2, '0')}`
+      entries.push(makeMoodEntry({ date, mood: 2, moodLabel: 'Heavy', timeOfDay: 'morning' }))
+      entries.push(makeMoodEntry({ date, mood: 4, moodLabel: 'Good', timeOfDay: 'evening' }))
+    }
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries))
+    render(<InsightCards hasData={true} />)
+    expect(screen.getByText(/mood tends to improve by evening/i)).toBeInTheDocument()
+  })
+
+  it('shows mood change insight when mood dips', () => {
+    const entries: MoodEntry[] = []
+    for (let i = 0; i < 5; i++) {
+      const date = `2026-03-${String(10 + i).padStart(2, '0')}`
+      entries.push(makeMoodEntry({ date, mood: 4, moodLabel: 'Good', timeOfDay: 'morning' }))
+      entries.push(makeMoodEntry({ date, mood: 2, moodLabel: 'Heavy', timeOfDay: 'evening' }))
+    }
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries))
+    render(<InsightCards hasData={true} />)
+    expect(screen.getByText(/mood tends to dip by evening/i)).toBeInTheDocument()
+  })
+
+  it('shows steady mood insight when difference is small', () => {
+    const entries: MoodEntry[] = []
+    for (let i = 0; i < 5; i++) {
+      const date = `2026-03-${String(10 + i).padStart(2, '0')}`
+      entries.push(makeMoodEntry({ date, mood: 3, moodLabel: 'Okay', timeOfDay: 'morning' }))
+      entries.push(makeMoodEntry({ date, mood: 3, moodLabel: 'Okay', timeOfDay: 'evening' }))
+    }
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries))
+    render(<InsightCards hasData={true} />)
+    expect(screen.getByText(/mood stays steady/i)).toBeInTheDocument()
+  })
+
+  it('does not show mood change insight with fewer than 5 dual days', () => {
+    const entries: MoodEntry[] = []
+    for (let i = 0; i < 3; i++) {
+      const date = `2026-03-${String(10 + i).padStart(2, '0')}`
+      entries.push(makeMoodEntry({ date, mood: 2, moodLabel: 'Heavy', timeOfDay: 'morning' }))
+      entries.push(makeMoodEntry({ date, mood: 5, moodLabel: 'Thriving', timeOfDay: 'evening' }))
+    }
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries))
+    render(<InsightCards hasData={true} />)
+    expect(screen.queryByText(/Morning vs Evening/i)).not.toBeInTheDocument()
   })
 })

@@ -216,6 +216,7 @@ describe('FRESH_BADGE_DATA', () => {
       prayerWall: 0,
       readingPlan: 0,
       gratitude: 0,
+      reflection: 0,
       encouragementsSent: 0,
       fullWorshipDays: 0,
     });
@@ -223,7 +224,7 @@ describe('FRESH_BADGE_DATA', () => {
 
   it('FRESH_ACTIVITY_COUNTS has all zero values', () => {
     const keys = Object.keys(FRESH_ACTIVITY_COUNTS);
-    expect(keys).toHaveLength(9);
+    expect(keys).toHaveLength(10);
     for (const key of keys) {
       expect(FRESH_ACTIVITY_COUNTS[key as keyof typeof FRESH_ACTIVITY_COUNTS]).toBe(0);
     }

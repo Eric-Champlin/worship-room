@@ -202,11 +202,18 @@ describe('calculateDailyPoints', () => {
     expect(result).toEqual({ points: 180, multiplier: 2 });
   });
 
-  it('8 activities = 105 × 2x = 210 (all activities including readingPlan)', () => {
+  it('8 activities = 105 × 2x = 210 (all activities except reflection)', () => {
     const result = calculateDailyPoints(makeActivities({
       mood: true, pray: true, listen: true, prayerWall: true, readingPlan: true, meditate: true, journal: true, gratitude: true,
     }));
     expect(result).toEqual({ points: 210, multiplier: 2 });
+  });
+
+  it('9 activities = 115 × 2x = 230 (all activities including reflection)', () => {
+    const result = calculateDailyPoints(makeActivities({
+      mood: true, pray: true, listen: true, prayerWall: true, readingPlan: true, meditate: true, journal: true, gratitude: true, reflection: true,
+    }));
+    expect(result).toEqual({ points: 230, multiplier: 2 });
   });
 
   it('verify rounding (Math.round)', () => {
@@ -304,5 +311,23 @@ describe('persistAll', () => {
     expect(result).toBe(false);
 
     vi.restoreAllMocks();
+  });
+});
+
+// --- freshDailyActivities ---
+
+describe('freshDailyActivities', () => {
+  it('includes reflection: false', () => {
+    const fresh = freshDailyActivities();
+    expect(fresh.reflection).toBe(false);
+  });
+
+  it('has all 9 activity boolean fields', () => {
+    const fresh = freshDailyActivities();
+    const boolKeys = Object.entries(fresh)
+      .filter(([_, v]) => typeof v === 'boolean')
+      .map(([k]) => k);
+    expect(boolKeys).toHaveLength(9);
+    expect(boolKeys).toContain('reflection');
   });
 });

@@ -28,6 +28,7 @@ function fillActivityCounts(partial: Partial<ActivityCounts>): ActivityCounts {
     prayerWall: typeof partial.prayerWall === 'number' ? partial.prayerWall : 0,
     readingPlan: typeof partial.readingPlan === 'number' ? partial.readingPlan : 0,
     gratitude: typeof partial.gratitude === 'number' ? partial.gratitude : 0,
+    reflection: typeof partial.reflection === 'number' ? partial.reflection : 0,
     encouragementsSent: typeof partial.encouragementsSent === 'number' ? partial.encouragementsSent : 0,
     fullWorshipDays: typeof partial.fullWorshipDays === 'number' ? partial.fullWorshipDays : 0,
   };

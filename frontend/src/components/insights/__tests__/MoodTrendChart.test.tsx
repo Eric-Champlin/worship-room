@@ -112,10 +112,10 @@ describe('MoodTrendChart', () => {
 describe('computeMovingAverage', () => {
   it('handles nulls in window', () => {
     const data: MoodChartDataPoint[] = [
-      { date: '2026-03-01', dayLabel: 'Mon', mood: 4, moodLabel: 'Good', color: '#2DD4BF' },
-      { date: '2026-03-02', dayLabel: 'Tue', mood: null, moodLabel: null, color: null },
-      { date: '2026-03-03', dayLabel: 'Wed', mood: null, moodLabel: null, color: null },
-      { date: '2026-03-04', dayLabel: 'Thu', mood: 2, moodLabel: 'Heavy', color: '#C2703E' },
+      { date: '2026-03-01', dayLabel: 'Mon', mood: 4, moodLabel: 'Good', color: '#2DD4BF', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+      { date: '2026-03-02', dayLabel: 'Tue', mood: null, moodLabel: null, color: null, eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+      { date: '2026-03-03', dayLabel: 'Wed', mood: null, moodLabel: null, color: null, eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+      { date: '2026-03-04', dayLabel: 'Thu', mood: 2, moodLabel: 'Heavy', color: '#C2703E', eveningMood: null, eveningMoodLabel: null, eveningColor: null },
     ]
     const result = computeMovingAverage(data)
 
@@ -131,8 +131,8 @@ describe('computeMovingAverage', () => {
 
   it('returns null when all values in window are null', () => {
     const data: MoodChartDataPoint[] = [
-      { date: '2026-03-01', dayLabel: 'Mon', mood: null, moodLabel: null, color: null },
-      { date: '2026-03-02', dayLabel: 'Tue', mood: null, moodLabel: null, color: null },
+      { date: '2026-03-01', dayLabel: 'Mon', mood: null, moodLabel: null, color: null, eveningMood: null, eveningMoodLabel: null, eveningColor: null },
+      { date: '2026-03-02', dayLabel: 'Tue', mood: null, moodLabel: null, color: null, eveningMood: null, eveningMoodLabel: null, eveningColor: null },
     ]
     const result = computeMovingAverage(data)
     expect(result[0].movingAvg).toBeNull()

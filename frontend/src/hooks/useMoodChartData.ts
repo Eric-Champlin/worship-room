@@ -10,6 +10,9 @@ export interface MoodChartDataPoint {
   mood: number | null;
   moodLabel: MoodLabel | null;
   color: string | null;
+  eveningMood: number | null;
+  eveningMoodLabel: MoodLabel | null;
+  eveningColor: string | null;
 }
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -19,7 +22,17 @@ export function useMoodChartData(days: number = 7): MoodChartDataPoint[] {
 
   return useMemo(() => {
     const entries = getMoodEntries();
-    const entryMap = new Map(entries.map((e) => [e.date, e]));
+
+    // Group entries by date, separating morning and evening
+    const morningMap = new Map<string, typeof entries[0]>();
+    const eveningMap = new Map<string, typeof entries[0]>();
+    for (const e of entries) {
+      const isEvening = e.timeOfDay === 'evening';
+      const map = isEvening ? eveningMap : morningMap;
+      if (!map.has(e.date)) {
+        map.set(e.date, e);
+      }
+    }
 
     const result: MoodChartDataPoint[] = [];
 
@@ -28,14 +41,18 @@ export function useMoodChartData(days: number = 7): MoodChartDataPoint[] {
       d.setDate(d.getDate() - i);
       const dateStr = getLocalDateString(d);
       const dayOfWeek = d.getDay();
-      const entry = entryMap.get(dateStr);
+      const morning = morningMap.get(dateStr);
+      const evening = eveningMap.get(dateStr);
 
       result.push({
         date: dateStr,
         dayLabel: DAY_LABELS[dayOfWeek],
-        mood: entry ? entry.mood : null,
-        moodLabel: entry ? entry.moodLabel : null,
-        color: entry ? MOOD_COLORS[entry.mood as MoodValue] : null,
+        mood: morning ? morning.mood : null,
+        moodLabel: morning ? morning.moodLabel : null,
+        color: morning ? MOOD_COLORS[morning.mood as MoodValue] : null,
+        eveningMood: evening ? evening.mood : null,
+        eveningMoodLabel: evening ? evening.moodLabel : null,
+        eveningColor: evening ? MOOD_COLORS[evening.mood as MoodValue] : null,
       });
     }
 

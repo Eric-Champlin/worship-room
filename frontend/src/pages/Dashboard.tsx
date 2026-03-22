@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DashboardHero } from '@/components/dashboard/DashboardHero'
@@ -9,6 +9,8 @@ import { CelebrationQueue } from '@/components/dashboard/CelebrationQueue'
 import { GettingStartedCard } from '@/components/dashboard/GettingStartedCard'
 import { GettingStartedCelebration } from '@/components/dashboard/GettingStartedCelebration'
 import { WeeklyGodMoments } from '@/components/dashboard/WeeklyGodMoments'
+import { EveningReflectionBanner } from '@/components/dashboard/EveningReflectionBanner'
+import { EveningReflection } from '@/components/dashboard/EveningReflection'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import { useWeeklyGodMoments } from '@/hooks/useWeeklyGodMoments'
@@ -19,6 +21,7 @@ import { usePrayerReminders } from '@/hooks/usePrayerReminders'
 import { hasCheckedInToday } from '@/services/mood-storage'
 import { getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { isOnboardingComplete } from '@/services/onboarding-storage'
+import { isEveningTime, hasReflectedToday, markReflectionDone, hasAnyActivityToday } from '@/services/evening-reflection-storage'
 import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
@@ -126,6 +129,30 @@ export function Dashboard() {
     setGettingStartedCardDismissed(true)
   }
 
+  // Evening reflection banner state (check once on mount)
+  const [showReflectionOverlay, setShowReflectionOverlay] = useState(false)
+  const [eveningBannerDismissed, setEveningBannerDismissed] = useState(false)
+  const showEveningBanner = useMemo(() => {
+    if (eveningBannerDismissed) return false
+    return isEveningTime() && !hasReflectedToday() && hasAnyActivityToday(faithPoints.todayActivities)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eveningBannerDismissed])
+
+  const handleDismissReflection = () => {
+    markReflectionDone()
+    setEveningBannerDismissed(true)
+  }
+
+  const handleReflectionComplete = () => {
+    setShowReflectionOverlay(false)
+    setEveningBannerDismissed(true)
+  }
+
+  const handleReflectionDismiss = () => {
+    setShowReflectionOverlay(false)
+    setEveningBannerDismissed(true)
+  }
+
   // Tooltip for Quick Actions widget
   const quickActionsRef = useRef<HTMLDivElement>(null)
   const quickActionsTooltip = useTooltipCallout('dashboard-quick-actions', quickActionsRef)
@@ -218,6 +245,20 @@ export function Dashboard() {
             />
           </div>
         )}
+        {showEveningBanner && (
+          <div
+            className={cn(
+              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
+              shouldAnimate && 'motion-safe:animate-widget-enter',
+            )}
+            style={shouldAnimate ? { animationDelay: `${100 * (1 + (godMoments.isVisible ? 1 : 0) + (showGettingStarted ? 1 : 0))}ms` } : undefined}
+          >
+            <EveningReflectionBanner
+              onReflectNow={() => setShowReflectionOverlay(true)}
+              onDismiss={handleDismissReflection}
+            />
+          </div>
+        )}
         <DashboardWidgetGrid
           faithPoints={faithPoints}
           justCompletedCheckIn={justCompletedCheckIn}
@@ -225,7 +266,7 @@ export function Dashboard() {
           quickActionsRef={quickActionsRef}
           quickActionsTooltipVisible={quickActionsTooltip.shouldShow}
           animateEntrance={shouldAnimate}
-          staggerStartIndex={1 + (godMoments.isVisible ? 1 : 0) + (showGettingStarted ? 1 : 0)}
+          staggerStartIndex={1 + (godMoments.isVisible ? 1 : 0) + (showGettingStarted ? 1 : 0) + (showEveningBanner ? 1 : 0)}
         />
       </main>
       {quickActionsTooltip.shouldShow && (
@@ -244,6 +285,16 @@ export function Dashboard() {
       />
       {showGettingStartedCelebration && (
         <GettingStartedCelebration onDismiss={handleGettingStartedCelebrationDismiss} />
+      )}
+      {showReflectionOverlay && (
+        <EveningReflection
+          onComplete={handleReflectionComplete}
+          onDismiss={handleReflectionDismiss}
+          todayActivities={faithPoints.todayActivities}
+          todayPoints={faithPoints.todayPoints}
+          currentStreak={faithPoints.currentStreak}
+          recordActivity={faithPoints.recordActivity}
+        />
       )}
       {import.meta.env.DEV && <DevAuthToggle />}
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   CartesianGrid,
+  Customized,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -84,6 +85,49 @@ function CustomActiveDot({ cx, cy, payload }: DotProps) {
   )
 }
 
+function EveningDot({ cx, cy, payload }: DotProps) {
+  if (!payload?.eveningColor || cx == null || cy == null) return null
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={5} fill={payload.eveningColor} />
+      <circle cx={cx} cy={cy} r={5} fill="none" stroke="white" strokeWidth={2} />
+    </g>
+  )
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ConnectingLines(props: any) {
+  const items = props.formattedGraphicalItems
+  if (!items || items.length < 2) return null
+
+  const morningPoints = items[0]?.props?.points
+  const eveningPoints = items[1]?.props?.points
+  if (!morningPoints || !eveningPoints) return null
+
+  return (
+    <g>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      {morningPoints.map((mp: any, i: number) => {
+        const ep = eveningPoints[i]
+        if (!mp?.payload || !ep) return null
+        if (mp.payload.mood == null || mp.payload.eveningMood == null) return null
+        if (!Number.isFinite(mp.y) || !Number.isFinite(ep.y)) return null
+        return (
+          <line
+            key={i}
+            x1={mp.x}
+            y1={mp.y}
+            x2={ep.x}
+            y2={ep.y}
+            stroke="rgba(255,255,255,0.15)"
+            strokeWidth={1}
+          />
+        )
+      })}
+    </g>
+  )
+}
+
 interface TooltipPayloadItem {
   payload?: ExtendedDataPoint
 }
@@ -124,6 +168,9 @@ const EMPTY_STATE_DATA: MoodChartDataPoint[] = Array.from({ length: 14 }, (_, i)
     mood: moods[i],
     moodLabel: labels[i],
     color: colors[i],
+    eveningMood: null,
+    eveningMoodLabel: null,
+    eveningColor: null,
   }
 })
 
@@ -275,6 +322,7 @@ export function MoodTrendChart({ rangeDays }: MoodTrendChartProps) {
                   width={80}
                 />
                 <Tooltip content={<ChartTooltip />} />
+                <Customized component={ConnectingLines} />
                 <Line
                   type="monotone"
                   dataKey="mood"
@@ -283,6 +331,16 @@ export function MoodTrendChart({ rangeDays }: MoodTrendChartProps) {
                   connectNulls={false}
                   dot={<CustomDot />}
                   activeDot={<CustomActiveDot />}
+                  isAnimationActive={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="eveningMood"
+                  stroke="rgba(139, 92, 246, 0.3)"
+                  strokeWidth={0}
+                  connectNulls={false}
+                  dot={<EveningDot />}
+                  activeDot={false}
                   isAnimationActive={false}
                 />
                 {showAverage && (

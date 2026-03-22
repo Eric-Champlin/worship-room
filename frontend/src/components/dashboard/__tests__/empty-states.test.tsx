@@ -93,7 +93,7 @@ describe('Empty States — New User Dashboard', () => {
     const onRequestCheckIn = () => {}
     const faithPoints = {
       totalPoints: 0, currentLevel: 1, levelName: 'Seedling',
-      pointsToNextLevel: 100, todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, readingPlan: false, gratitude: false, meditate: false, journal: false },
+      pointsToNextLevel: 100, todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, readingPlan: false, gratitude: false, meditate: false, journal: false, reflection: false },
       todayPoints: 0, todayMultiplier: 1, currentStreak: 0, longestStreak: 0,
       newlyEarnedBadges: [], clearNewlyEarnedBadges: () => {},
       recordActivity: () => {}, repairStreak: () => {},

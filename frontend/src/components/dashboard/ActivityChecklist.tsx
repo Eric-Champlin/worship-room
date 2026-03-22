@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
-import { BookOpen, CircleCheck, Circle } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { BookOpen, CircleCheck, Circle, Moon } from 'lucide-react'
 import { ACTIVITY_CHECKLIST_NAMES, ACTIVITY_POINTS } from '@/constants/dashboard/activity-points'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
+import { isEveningTime } from '@/services/evening-reflection-storage'
 import type { ActivityType } from '@/types/dashboard'
 
 interface ActivityChecklistProps {
@@ -49,7 +50,7 @@ function getMultiplierPreview(
     case 5:
       return { text: 'Complete 2 more for 2x Full Worship Day!', isCelebration: false }
     case 6:
-      return { text: `Complete ${totalActivities > 7 ? '2 more' : '1 more'} for 2x Full Worship Day!`, isCelebration: false }
+      return { text: 'Complete 1 more for 2x Full Worship Day!', isCelebration: false }
     default:
       return { text: '', isCelebration: false }
   }
@@ -63,10 +64,19 @@ export function ActivityChecklist({
   const { getActivePlanId } = useReadingPlanProgress()
   const hasActivePlan = !!getActivePlanId()
 
-  // Build activity list: base 7 + optional readingPlan
-  const activityList: ActivityType[] = hasActivePlan
-    ? [...BASE_ACTIVITY_ORDER.slice(0, 4), 'readingPlan', ...BASE_ACTIVITY_ORDER.slice(4)]
-    : BASE_ACTIVITY_ORDER
+  // Check once on mount whether to show reflection (after 6 PM)
+  const showReflection = useMemo(() => isEveningTime(), [])
+
+  // Build activity list: base 7 + optional readingPlan + conditional reflection
+  const activityList: ActivityType[] = (() => {
+    const list: ActivityType[] = hasActivePlan
+      ? [...BASE_ACTIVITY_ORDER.slice(0, 4), 'readingPlan', ...BASE_ACTIVITY_ORDER.slice(4)]
+      : [...BASE_ACTIVITY_ORDER]
+    if (showReflection) {
+      list.push('reflection')
+    }
+    return list
+  })()
 
   const totalActivities = activityList.length
   const completedCount = activityList.filter((t) => todayActivities[t]).length
@@ -148,6 +158,21 @@ export function ActivityChecklist({
             const points = ACTIVITY_POINTS[type]
             const name = ACTIVITY_CHECKLIST_NAMES[type]
             const isReadingPlan = type === 'readingPlan'
+            const isReflection = type === 'reflection'
+
+            const iconColor = completed ? 'text-success' : 'text-white/20'
+            let Icon
+            if (isReadingPlan) {
+              Icon = <BookOpen className={`h-5 w-5 flex-shrink-0 ${iconColor}`} aria-hidden="true" />
+            } else if (isReflection) {
+              Icon = completed
+                ? <CircleCheck className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
+                : <Moon className="h-5 w-5 flex-shrink-0 text-indigo-300/50" aria-hidden="true" />
+            } else {
+              Icon = completed
+                ? <CircleCheck className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
+                : <Circle className="h-5 w-5 flex-shrink-0 text-white/20" aria-hidden="true" />
+            }
 
             return (
               <div
@@ -159,17 +184,7 @@ export function ActivityChecklist({
                     : `${name} — not yet completed, ${points} points available`
                 }
               >
-                {completed ? (
-                  isReadingPlan ? (
-                    <BookOpen className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
-                  ) : (
-                    <CircleCheck className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
-                  )
-                ) : isReadingPlan ? (
-                  <BookOpen className="h-5 w-5 flex-shrink-0 text-white/20" aria-hidden="true" />
-                ) : (
-                  <Circle className="h-5 w-5 flex-shrink-0 text-white/20" aria-hidden="true" />
-                )}
+                {Icon}
                 <span
                   className={
                     completed ? 'text-sm text-white' : 'text-sm text-white/50'

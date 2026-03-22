@@ -157,4 +157,44 @@ describe('useMoodChartData', () => {
     expect(todayPoint?.color).toBe(MOOD_COLORS[4]);
     expect(todayPoint?.color).toBe('#2DD4BF');
   });
+
+  it('returns evening data when timeOfDay: evening entries exist', () => {
+    const today = getLocalDateString();
+    seedEntries([
+      makeMoodEntry({ date: today, mood: 3, moodLabel: 'Okay', timeOfDay: 'morning' }),
+      makeMoodEntry({ date: today, mood: 5, moodLabel: 'Thriving', timeOfDay: 'evening' }),
+    ]);
+
+    const { result } = renderHook(() => useMoodChartData());
+    const todayPoint = result.current.find((d) => d.date === today);
+    expect(todayPoint?.mood).toBe(3);
+    expect(todayPoint?.eveningMood).toBe(5);
+    expect(todayPoint?.eveningMoodLabel).toBe('Thriving');
+    expect(todayPoint?.eveningColor).toBe(MOOD_COLORS[5]);
+  });
+
+  it('backward compatible — no timeOfDay treated as morning', () => {
+    const today = getLocalDateString();
+    seedEntries([
+      makeMoodEntry({ date: today, mood: 4, moodLabel: 'Good' }),
+    ]);
+
+    const { result } = renderHook(() => useMoodChartData());
+    const todayPoint = result.current.find((d) => d.date === today);
+    expect(todayPoint?.mood).toBe(4);
+    expect(todayPoint?.eveningMood).toBeNull();
+    expect(todayPoint?.eveningColor).toBeNull();
+  });
+
+  it('single morning entry — no evening fields populated', () => {
+    const today = getLocalDateString();
+    seedEntries([
+      makeMoodEntry({ date: today, mood: 2, moodLabel: 'Heavy', timeOfDay: 'morning' }),
+    ]);
+
+    const { result } = renderHook(() => useMoodChartData());
+    const todayPoint = result.current.find((d) => d.date === today);
+    expect(todayPoint?.mood).toBe(2);
+    expect(todayPoint?.eveningMood).toBeNull();
+  });
 });

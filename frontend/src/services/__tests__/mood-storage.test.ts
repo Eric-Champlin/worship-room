@@ -65,6 +65,47 @@ describe('hasCheckedInToday', () => {
   it('returns false for empty entries', () => {
     expect(hasCheckedInToday()).toBe(false);
   });
+
+  it('returns true for morning when timeOfDay is morning', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 16, 12, 0, 0));
+    const entries = [makeMoodEntry({ date: '2026-03-16', timeOfDay: 'morning' })];
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries));
+    expect(hasCheckedInToday('morning')).toBe(true);
+  });
+
+  it('returns false for evening when only morning entry exists', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 16, 12, 0, 0));
+    const entries = [makeMoodEntry({ date: '2026-03-16', timeOfDay: 'morning' })];
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries));
+    expect(hasCheckedInToday('evening')).toBe(false);
+  });
+
+  it('returns true for evening when evening entry exists', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 16, 12, 0, 0));
+    const entries = [makeMoodEntry({ date: '2026-03-16', timeOfDay: 'evening' })];
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries));
+    expect(hasCheckedInToday('evening')).toBe(true);
+  });
+
+  it('treats missing timeOfDay as morning (backward compat)', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 16, 12, 0, 0));
+    const entries = [makeMoodEntry({ date: '2026-03-16' })];
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries));
+    expect(hasCheckedInToday('morning')).toBe(true);
+    expect(hasCheckedInToday('evening')).toBe(false);
+  });
+
+  it('returns true with no args for any entry today (backward compat)', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 2, 16, 12, 0, 0));
+    const entries = [makeMoodEntry({ date: '2026-03-16', timeOfDay: 'evening' })];
+    localStorage.setItem('wr_mood_entries', JSON.stringify(entries));
+    expect(hasCheckedInToday()).toBe(true);
+  });
 });
 
 describe('saveMoodEntry', () => {

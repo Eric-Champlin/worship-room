@@ -16,10 +16,10 @@ export function getMoodEntries(): MoodEntry[] {
   }
 }
 
-export function hasCheckedInToday(): boolean {
+export function hasCheckedInToday(timeOfDay?: 'morning' | 'evening'): boolean {
   const today = getLocalDateString();
   const entries = getMoodEntries();
-  return entries.some((e) => e.date === today);
+  return entries.some((e) => e.date === today && (!timeOfDay || (e.timeOfDay ?? 'morning') === timeOfDay));
 }
 
 export function saveMoodEntry(entry: MoodEntry): void {

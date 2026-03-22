@@ -18,6 +18,7 @@ const ALL_FALSE: Record<ActivityType, boolean> = {
   gratitude: false,
   meditate: false,
   journal: false,
+  reflection: false,
 }
 
 const ALL_TRUE: Record<ActivityType, boolean> = {
@@ -29,6 +30,7 @@ const ALL_TRUE: Record<ActivityType, boolean> = {
   gratitude: true,
   meditate: true,
   journal: true,
+  reflection: true,
 }
 
 beforeEach(() => {
