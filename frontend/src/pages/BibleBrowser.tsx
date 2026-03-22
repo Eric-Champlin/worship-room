@@ -3,8 +3,12 @@ import { useState } from 'react'
 import { Layout } from '@/components/Layout'
 import { BibleBooksMode } from '@/components/bible/BibleBooksMode'
 import { BibleSearchMode } from '@/components/bible/BibleSearchMode'
+import { HighlightsNotesSection } from '@/components/bible/HighlightsNotesSection'
 import { SegmentedControl } from '@/components/bible/SegmentedControl'
 import type { BibleBrowserMode } from '@/components/bible/SegmentedControl'
+import { useAuth } from '@/hooks/useAuth'
+import { useBibleHighlights } from '@/hooks/useBibleHighlights'
+import { useBibleNotes } from '@/hooks/useBibleNotes'
 
 const BIBLE_HERO_STYLE = {
   backgroundImage:
@@ -14,6 +18,13 @@ const BIBLE_HERO_STYLE = {
 
 export function BibleBrowser() {
   const [mode, setMode] = useState<BibleBrowserMode>('books')
+  const { isAuthenticated } = useAuth()
+  const { getAllHighlights } = useBibleHighlights()
+  const { getAllNotes } = useBibleNotes()
+
+  const highlights = getAllHighlights()
+  const notes = getAllNotes()
+  const hasAnnotations = highlights.length > 0 || notes.length > 0
 
   return (
     <Layout>
@@ -39,6 +50,14 @@ export function BibleBrowser() {
         <div className="mx-auto max-w-4xl px-4 pb-16">
           <SegmentedControl mode={mode} onModeChange={setMode} />
           {mode === 'books' ? <BibleBooksMode /> : <BibleSearchMode />}
+
+          {/* My Highlights & Notes section */}
+          {isAuthenticated && hasAnnotations && (
+            <HighlightsNotesSection
+              highlights={highlights}
+              notes={notes}
+            />
+          )}
         </div>
       </div>
     </Layout>

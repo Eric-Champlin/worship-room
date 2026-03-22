@@ -1,6 +1,17 @@
 import type { BibleBook, BibleCategory } from '@/types/bible'
 
 export const BIBLE_PROGRESS_KEY = 'wr_bible_progress'
+export const BIBLE_HIGHLIGHTS_KEY = 'wr_bible_highlights'
+export const BIBLE_NOTES_KEY = 'wr_bible_notes'
+export const MAX_HIGHLIGHTS = 500
+export const MAX_NOTES = 200
+export const NOTE_MAX_CHARS = 300
+export const HIGHLIGHT_COLORS = [
+  { name: 'Yellow', hex: '#FBBF24' },
+  { name: 'Green', hex: '#34D399' },
+  { name: 'Blue', hex: '#60A5FA' },
+  { name: 'Pink', hex: '#F472B6' },
+] as const
 
 export const BIBLE_CATEGORIES: ReadonlyArray<{
   key: BibleCategory

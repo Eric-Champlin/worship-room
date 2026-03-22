@@ -26,6 +26,30 @@ vi.mock('@/hooks/useNotificationActions', () => ({
   }),
 }))
 
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+
+vi.mock('@/hooks/useBibleHighlights', () => ({
+  useBibleHighlights: () => ({
+    getHighlightsForChapter: vi.fn().mockReturnValue([]),
+    getHighlightForVerse: vi.fn().mockReturnValue(undefined),
+    setHighlight: vi.fn(),
+    removeHighlight: vi.fn(),
+    getAllHighlights: vi.fn().mockReturnValue([]),
+  }),
+}))
+
+vi.mock('@/hooks/useBibleNotes', () => ({
+  useBibleNotes: () => ({
+    getNotesForChapter: vi.fn().mockReturnValue([]),
+    getNoteForVerse: vi.fn().mockReturnValue(undefined),
+    saveNote: vi.fn().mockReturnValue(true),
+    deleteNote: vi.fn(),
+    getAllNotes: vi.fn().mockReturnValue([]),
+  }),
+}))
+
 const mockMarkChapterRead = vi.fn()
 const mockIsChapterRead = vi.fn().mockReturnValue(false)
 

@@ -26,6 +26,26 @@ vi.mock('@/hooks/useNotificationActions', () => ({
   }),
 }))
 
+vi.mock('@/hooks/useBibleHighlights', () => ({
+  useBibleHighlights: () => ({
+    getHighlightsForChapter: vi.fn().mockReturnValue([]),
+    getHighlightForVerse: vi.fn().mockReturnValue(undefined),
+    setHighlight: vi.fn(),
+    removeHighlight: vi.fn(),
+    getAllHighlights: vi.fn().mockReturnValue([]),
+  }),
+}))
+
+vi.mock('@/hooks/useBibleNotes', () => ({
+  useBibleNotes: () => ({
+    getNotesForChapter: vi.fn().mockReturnValue([]),
+    getNoteForVerse: vi.fn().mockReturnValue(undefined),
+    saveNote: vi.fn().mockReturnValue(true),
+    deleteNote: vi.fn(),
+    getAllNotes: vi.fn().mockReturnValue([]),
+  }),
+}))
+
 function renderPage(route = '/bible') {
   return render(
     <MemoryRouter initialEntries={[route]}>

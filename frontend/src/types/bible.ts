@@ -53,3 +53,23 @@ export interface BibleSearchResult {
 
 /** Progress map: book slug -> array of completed chapter numbers */
 export type BibleProgressMap = Record<string, number[]>
+
+/** A single verse highlight annotation */
+export interface BibleHighlight {
+  book: string
+  chapter: number
+  verseNumber: number
+  color: string
+  createdAt: string
+}
+
+/** A personal note attached to a verse */
+export interface BibleNote {
+  id: string
+  book: string
+  chapter: number
+  verseNumber: number
+  text: string
+  createdAt: string
+  updatedAt: string
+}
