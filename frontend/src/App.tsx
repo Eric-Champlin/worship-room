@@ -36,6 +36,8 @@ import { DevotionalPage } from './pages/DevotionalPage'
 import { MyPrayers } from './pages/MyPrayers'
 import { ReadingPlans } from './pages/ReadingPlans'
 import { ReadingPlanDetail } from './pages/ReadingPlanDetail'
+import { BibleBrowser } from './pages/BibleBrowser'
+import { BibleReader } from './pages/BibleReader'
 import { useAuth } from '@/hooks/useAuth'
 import { lazy, Suspense } from 'react'
 
@@ -108,6 +110,8 @@ function App() {
           <Route path="/devotional" element={<DevotionalPage />} />
           <Route path="/reading-plans" element={<ReadingPlans />} />
           <Route path="/reading-plans/:planId" element={<ReadingPlanDetail />} />
+          <Route path="/bible" element={<BibleBrowser />} />
+          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />
           <Route path="/journal" element={<Navigate to="/daily?tab=journal" replace />} />
           <Route path="/meditate" element={<Navigate to="/daily?tab=meditate" replace />} />

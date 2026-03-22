@@ -1,0 +1,117 @@
+import { Link } from 'react-router-dom'
+
+import { escapeRegex, useBibleSearch } from '@/hooks/useBibleSearch'
+
+function HighlightedText({ text, query }: { text: string; query: string }) {
+  if (!query || query.length < 2) return <>{text}</>
+
+  const escaped = escapeRegex(query)
+  const splitRegex = new RegExp(`(${escaped})`, 'gi')
+  const testRegex = new RegExp(`^${escaped}$`, 'i')
+  const parts = text.split(splitRegex)
+
+  return (
+    <>
+      {parts.map((part, i) =>
+        testRegex.test(part) ? (
+          <mark
+            key={i}
+            className="rounded bg-primary/20 px-0.5 font-semibold text-white"
+          >
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  )
+}
+
+export function BibleSearchMode() {
+  const { query, setQuery, results, isSearching, isLoadingBooks } =
+    useBibleSearch()
+
+  return (
+    <div className="mt-6">
+      <div className="mx-auto max-w-2xl">
+        <label htmlFor="bible-search-input" className="sr-only">
+          Search the Bible
+        </label>
+        <input
+          id="bible-search-input"
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search the Bible..."
+          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50"
+        />
+        <p className="mt-2 text-center text-sm text-white/40">
+          Searching 20 of 66 books. More books coming soon.
+        </p>
+      </div>
+
+      <div className="mx-auto mt-6 max-w-2xl">
+        {query.length === 0 && (
+          <p className="text-center text-white/50">
+            Type to search across Scripture
+          </p>
+        )}
+
+        {query.length === 1 && (
+          <p className="text-center text-white/50">
+            Type at least 2 characters to search
+          </p>
+        )}
+
+        {query.length >= 2 && (isSearching || isLoadingBooks) && (
+          <p className="text-center text-white/50">Searching...</p>
+        )}
+
+        {query.length >= 2 &&
+          !isSearching &&
+          !isLoadingBooks &&
+          results.length === 0 && (
+            <p className="text-center text-white/50">
+              No verses found matching &ldquo;{query}&rdquo;. Try different
+              words or check spelling.
+            </p>
+          )}
+
+        {results.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-white/40">
+              {results.length >= 100
+                ? '100+ results found (showing first 100)'
+                : `${results.length} result${results.length === 1 ? '' : 's'} found`}
+            </p>
+            {results.map((result, i) => (
+              <Link
+                key={`${result.bookSlug}-${result.chapter}-${result.verseNumber}-${i}`}
+                to={`/bible/${result.bookSlug}/${result.chapter}#verse-${result.verseNumber}`}
+                className="block rounded-xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10"
+              >
+                <h3 className="font-semibold text-white">
+                  {result.bookName} {result.chapter}:{result.verseNumber}
+                </h3>
+                {result.contextBefore && (
+                  <p className="mt-2 text-sm text-white/40">
+                    {result.contextBefore}
+                  </p>
+                )}
+                <p className="mt-1 font-serif text-white/90">
+                  <HighlightedText text={result.verseText} query={query} />
+                </p>
+                {result.contextAfter && (
+                  <p className="mt-1 text-sm text-white/40">
+                    {result.contextAfter}
+                  </p>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
