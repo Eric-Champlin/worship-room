@@ -20,8 +20,8 @@ function makeContext(overrides: Partial<BadgeCheckContext> = {}): BadgeCheckCont
 function allTrueActivities(): DailyActivities {
   return {
     mood: true, pray: true, listen: true,
-    prayerWall: true, readingPlan: true, meditate: true, journal: true,
-    pointsEarned: 170, multiplier: 2,
+    prayerWall: true, readingPlan: true, gratitude: true, meditate: true, journal: true,
+    pointsEarned: 210, multiplier: 2,
   };
 }
 

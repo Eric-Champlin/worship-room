@@ -10,7 +10,7 @@ import {
 } from '../activity-points';
 
 describe('ACTIVITY_POINTS', () => {
-  it('has correct values for all 7 activity types', () => {
+  it('has correct values for all 8 activity types', () => {
     expect(ACTIVITY_POINTS.mood).toBe(5);
     expect(ACTIVITY_POINTS.pray).toBe(10);
     expect(ACTIVITY_POINTS.listen).toBe(10);
@@ -18,19 +18,20 @@ describe('ACTIVITY_POINTS', () => {
     expect(ACTIVITY_POINTS.readingPlan).toBe(15);
     expect(ACTIVITY_POINTS.meditate).toBe(20);
     expect(ACTIVITY_POINTS.journal).toBe(25);
+    expect(ACTIVITY_POINTS.gratitude).toBe(5);
   });
 
   it('sums to MAX_DAILY_BASE_POINTS', () => {
     const total = Object.values(ACTIVITY_POINTS).reduce((sum, v) => sum + v, 0);
     expect(total).toBe(MAX_DAILY_BASE_POINTS);
-    expect(total).toBe(100);
+    expect(total).toBe(105);
   });
 });
 
 describe('MULTIPLIER_TIERS', () => {
   it('has 4 tiers sorted by minActivities descending', () => {
     expect(MULTIPLIER_TIERS).toHaveLength(4);
-    expect(MULTIPLIER_TIERS[0].minActivities).toBe(6);
+    expect(MULTIPLIER_TIERS[0].minActivities).toBe(7);
     expect(MULTIPLIER_TIERS[1].minActivities).toBe(4);
     expect(MULTIPLIER_TIERS[2].minActivities).toBe(2);
     expect(MULTIPLIER_TIERS[3].minActivities).toBe(0);
@@ -47,13 +48,13 @@ describe('MULTIPLIER_TIERS', () => {
 describe('MAX_DAILY_POINTS', () => {
   it('equals MAX_DAILY_BASE_POINTS × 2x multiplier', () => {
     expect(MAX_DAILY_POINTS).toBe(MAX_DAILY_BASE_POINTS * 2);
-    expect(MAX_DAILY_POINTS).toBe(200);
+    expect(MAX_DAILY_POINTS).toBe(210);
   });
 });
 
 describe('ALL_ACTIVITY_TYPES', () => {
-  it('contains all 7 activity types', () => {
-    expect(ALL_ACTIVITY_TYPES).toHaveLength(7);
+  it('contains all 8 activity types', () => {
+    expect(ALL_ACTIVITY_TYPES).toHaveLength(8);
     expect(ALL_ACTIVITY_TYPES).toContain('mood');
     expect(ALL_ACTIVITY_TYPES).toContain('pray');
     expect(ALL_ACTIVITY_TYPES).toContain('listen');
@@ -61,20 +62,21 @@ describe('ALL_ACTIVITY_TYPES', () => {
     expect(ALL_ACTIVITY_TYPES).toContain('readingPlan');
     expect(ALL_ACTIVITY_TYPES).toContain('meditate');
     expect(ALL_ACTIVITY_TYPES).toContain('journal');
+    expect(ALL_ACTIVITY_TYPES).toContain('gratitude');
   });
 });
 
 describe('ACTIVITY_DISPLAY_NAMES', () => {
-  it('has display names for all 7 types', () => {
-    expect(Object.keys(ACTIVITY_DISPLAY_NAMES)).toHaveLength(7);
+  it('has display names for all 8 types', () => {
+    expect(Object.keys(ACTIVITY_DISPLAY_NAMES)).toHaveLength(8);
     expect(ACTIVITY_DISPLAY_NAMES.mood).toBe('Logged mood');
     expect(ACTIVITY_DISPLAY_NAMES.journal).toBe('Journaled');
   });
 });
 
 describe('ACTIVITY_CHECKLIST_NAMES', () => {
-  it('has all 7 activity types', () => {
-    expect(Object.keys(ACTIVITY_CHECKLIST_NAMES)).toHaveLength(7);
+  it('has all 8 activity types', () => {
+    expect(Object.keys(ACTIVITY_CHECKLIST_NAMES)).toHaveLength(8);
     ALL_ACTIVITY_TYPES.forEach((type) => {
       expect(ACTIVITY_CHECKLIST_NAMES[type]).toBeDefined();
     });

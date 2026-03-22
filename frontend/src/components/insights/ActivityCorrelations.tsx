@@ -19,6 +19,7 @@ const MOCK_CORRELATION_DATA = [
   { activity: 'Journaling', withActivity: 4.2, withoutActivity: 3.1 },
   { activity: 'Prayer', withActivity: 4.0, withoutActivity: 3.3 },
   { activity: 'Meditation', withActivity: 4.4, withoutActivity: 3.0 },
+  { activity: 'Gratitude', withActivity: 4.3, withoutActivity: 3.1 },
   { activity: 'Reading Plan', withActivity: 4.1, withoutActivity: 3.2 },
 ]
 

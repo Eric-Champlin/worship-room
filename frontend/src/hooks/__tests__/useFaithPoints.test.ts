@@ -51,7 +51,7 @@ describe('useFaithPoints — unauthenticated', () => {
     expect(result.current.longestStreak).toBe(0);
     expect(result.current.todayActivities).toEqual({
       mood: false, pray: false, listen: false,
-      prayerWall: false, readingPlan: false, meditate: false, journal: false,
+      prayerWall: false, readingPlan: false, meditate: false, journal: false, gratitude: false,
     });
   });
 
@@ -148,7 +148,7 @@ describe('useFaithPoints — authenticated', () => {
     expect(result.current.todayMultiplier).toBe(1.5);
   });
 
-  it('recordActivity with all 6 applies 2x = 170 points', () => {
+  it('recordActivity with all 7 base activities applies 2x = 180 points', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
@@ -158,9 +158,10 @@ describe('useFaithPoints — authenticated', () => {
       result.current.recordActivity('prayerWall');
       result.current.recordActivity('meditate');
       result.current.recordActivity('journal');
+      result.current.recordActivity('gratitude');
     });
 
-    expect(result.current.todayPoints).toBe(170);
+    expect(result.current.todayPoints).toBe(180);
     expect(result.current.todayMultiplier).toBe(2);
   });
 

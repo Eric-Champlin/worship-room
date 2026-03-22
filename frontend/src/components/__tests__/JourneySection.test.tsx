@@ -43,21 +43,22 @@ describe('JourneySection', () => {
       ).toBeInTheDocument()
     })
 
-    it('renders an ordered list with 6 items', () => {
+    it('renders an ordered list with 7 items', () => {
       renderJourney()
       const list = screen.getByRole('list')
       const items = within(list).getAllByRole('listitem')
-      expect(items).toHaveLength(6)
+      expect(items).toHaveLength(7)
     })
   })
 
   describe('Step Content', () => {
-    it('renders all 6 step title headings', () => {
+    it('renders all 7 step title headings', () => {
       renderJourney()
       const titles = [
         'Learn to Pray',
         'Learn to Journal',
         'Learn to Meditate',
+        'Give Thanks',
         'Listen to Music',
         'Write on the Prayer Wall',
         'Find Local Support',
@@ -69,9 +70,9 @@ describe('JourneySection', () => {
       }
     })
 
-    it('renders numbered circles 1-6', () => {
+    it('renders numbered circles 1-7', () => {
       renderJourney()
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 1; i <= 7; i++) {
         expect(screen.getByText(String(i))).toBeInTheDocument()
       }
     })
@@ -85,6 +86,9 @@ describe('JourneySection', () => {
         screen.getByText(/put your thoughts into words/i)
       ).toBeInTheDocument()
       expect(screen.getByText(/quiet your mind/i)).toBeInTheDocument()
+      expect(
+        screen.getByText(/count your blessings/i)
+      ).toBeInTheDocument()
       expect(
         screen.getByText(/let music carry you deeper/i)
       ).toBeInTheDocument()
@@ -102,6 +106,7 @@ describe('JourneySection', () => {
         '/pray',
         '/journal',
         '/meditate',
+        '/',
         '/music',
         '/prayer-wall',
         '/local-support/churches',
@@ -113,10 +118,10 @@ describe('JourneySection', () => {
       }
     })
 
-    it('all 6 links are keyboard-focusable', () => {
+    it('all 7 links are keyboard-focusable', () => {
       renderJourney()
       const links = screen.getAllByRole('link')
-      expect(links).toHaveLength(6)
+      expect(links).toHaveLength(7)
       for (const link of links) {
         expect(link).not.toHaveAttribute('tabindex', '-1')
       }
@@ -126,7 +131,7 @@ describe('JourneySection', () => {
   describe('Accessibility', () => {
     it('numbered circles are hidden from screen readers', () => {
       renderJourney()
-      const circles = screen.getAllByText(/^[1-6]$/)
+      const circles = screen.getAllByText(/^[1-7]$/)
       for (const circle of circles) {
         expect(circle).toHaveAttribute('aria-hidden', 'true')
       }

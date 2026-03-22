@@ -12,6 +12,7 @@ const makeDay = (pointsEarned: number) => ({
   listen: false,
   prayerWall: false,
   readingPlan: false,
+  gratitude: false,
   meditate: false,
   journal: false,
   pointsEarned,

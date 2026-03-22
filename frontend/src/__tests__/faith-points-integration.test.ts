@@ -27,10 +27,10 @@ afterEach(() => {
 });
 
 describe('Faith Points Integration — Full Day Simulation', () => {
-  it('full 6-activity day = 170 points, 2x multiplier', () => {
+  it('full 7-activity day = 180 points, 2x multiplier', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
-    const activities: ActivityType[] = ['mood', 'pray', 'listen', 'prayerWall', 'meditate', 'journal'];
+    const activities: ActivityType[] = ['mood', 'pray', 'listen', 'prayerWall', 'meditate', 'journal', 'gratitude'];
 
     act(() => {
       for (const activity of activities) {
@@ -38,9 +38,9 @@ describe('Faith Points Integration — Full Day Simulation', () => {
       }
     });
 
-    expect(result.current.todayPoints).toBe(170);
+    expect(result.current.todayPoints).toBe(180);
     expect(result.current.todayMultiplier).toBe(2);
-    expect(result.current.totalPoints).toBe(170);
+    expect(result.current.totalPoints).toBe(180);
     expect(result.current.currentStreak).toBe(1);
 
     // All activities should be true

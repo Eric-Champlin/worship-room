@@ -11,12 +11,13 @@ interface ActivityChecklistProps {
   animate?: boolean
 }
 
-// Base 6 activities ordered from lowest to highest points
+// Base 7 activities — gratitude placed after prayerWall per spec
 const BASE_ACTIVITY_ORDER: ActivityType[] = [
   'mood',
   'pray',
   'listen',
   'prayerWall',
+  'gratitude',
   'meditate',
   'journal',
 ]
@@ -31,7 +32,7 @@ function getMultiplierPreview(
   text: string
   isCelebration: boolean
 } {
-  if (completedCount >= 6) {
+  if (completedCount >= 7) {
     return { text: 'Full Worship Day! 2x points earned!', isCelebration: true }
   }
   switch (completedCount) {
@@ -44,9 +45,11 @@ function getMultiplierPreview(
     case 3:
       return { text: 'Complete 1 more for 1.5x bonus!', isCelebration: false }
     case 4:
-      return { text: 'Complete 2 more for 2x Full Worship Day!', isCelebration: false }
+      return { text: 'Complete 3 more for 2x Full Worship Day!', isCelebration: false }
     case 5:
-      return { text: `Complete ${totalActivities > 6 ? '2 more' : '1 more'} for 2x Full Worship Day!`, isCelebration: false }
+      return { text: 'Complete 2 more for 2x Full Worship Day!', isCelebration: false }
+    case 6:
+      return { text: `Complete ${totalActivities > 7 ? '2 more' : '1 more'} for 2x Full Worship Day!`, isCelebration: false }
     default:
       return { text: '', isCelebration: false }
   }
@@ -60,7 +63,7 @@ export function ActivityChecklist({
   const { getActivePlanId } = useReadingPlanProgress()
   const hasActivePlan = !!getActivePlanId()
 
-  // Build activity list: base 6 + optional readingPlan
+  // Build activity list: base 7 + optional readingPlan
   const activityList: ActivityType[] = hasActivePlan
     ? [...BASE_ACTIVITY_ORDER.slice(0, 4), 'readingPlan', ...BASE_ACTIVITY_ORDER.slice(4)]
     : BASE_ACTIVITY_ORDER

@@ -71,7 +71,7 @@ describe('DashboardWidgetGrid', () => {
 
   it('renders ActivityChecklist in activity-checklist card', () => {
     renderGrid()
-    expect(screen.getByText('0/6')).toBeInTheDocument()
+    expect(screen.getByText('0/7')).toBeInTheDocument()
     expect(screen.getByText('Log your mood')).toBeInTheDocument()
   })
 

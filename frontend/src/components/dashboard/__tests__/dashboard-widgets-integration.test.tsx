@@ -51,20 +51,21 @@ function seedActivities(activities: Record<string, boolean>) {
     readingPlan: false,
     meditate: false,
     journal: false,
+    gratitude: false,
     pointsEarned: 0,
     multiplier: 1,
     ...activities,
   }
 
   // Calculate points
-  const points: Record<string, number> = { mood: 5, pray: 10, listen: 10, prayerWall: 15, readingPlan: 15, meditate: 20, journal: 25 }
+  const points: Record<string, number> = { mood: 5, pray: 10, listen: 10, prayerWall: 15, readingPlan: 15, meditate: 20, journal: 25, gratitude: 5 }
   let total = 0
   for (const [key, val] of Object.entries(activities)) {
     if (val && key in points) total += points[key]
   }
   const completedCount = Object.values(activities).filter(Boolean).length
   let multiplier = 1
-  if (completedCount >= 6) multiplier = 2
+  if (completedCount >= 7) multiplier = 2
   else if (completedCount >= 4) multiplier = 1.5
   else if (completedCount >= 2) multiplier = 1.25
   entry.pointsEarned = Math.round(total * multiplier)
@@ -86,29 +87,29 @@ function seedActivities(activities: Record<string, boolean>) {
 }
 
 describe('Dashboard widgets integration', () => {
-  it('fresh user: shows 0/6, Start your streak, 0 Faith Points, Seedling', () => {
+  it('fresh user: shows 0/7, Start your streak, 0 Faith Points, Seedling', () => {
     renderWidgetGrid()
-    expect(screen.getByText('0/6')).toBeInTheDocument()
+    expect(screen.getByText('0/7')).toBeInTheDocument()
     expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
     expect(screen.getByText('0 Faith Points')).toBeInTheDocument()
     expect(screen.getByText('Seedling')).toBeInTheDocument()
     expect(screen.getByText('Complete 2 activities for 1.25x bonus!')).toBeInTheDocument()
   })
 
-  it('with 3 activities: shows 3/6, correct multiplier preview', () => {
+  it('with 3 activities: shows 3/7, correct multiplier preview', () => {
     seedActivities({ mood: true, pray: true, listen: true })
     renderWidgetGrid()
-    expect(screen.getByText('3/6')).toBeInTheDocument()
+    expect(screen.getByText('3/7')).toBeInTheDocument()
     expect(screen.getByText('Complete 1 more for 1.5x bonus!')).toBeInTheDocument()
   })
 
-  it('6/6 complete: shows Full Worship Day message and 2x badge', () => {
+  it('7/7 complete: shows Full Worship Day message and 2x badge', () => {
     seedActivities({
       mood: true, pray: true, listen: true,
-      prayerWall: true, readingPlan: true, meditate: true, journal: true,
+      prayerWall: true, meditate: true, journal: true, gratitude: true,
     })
     renderWidgetGrid()
-    expect(screen.getByText('6/6')).toBeInTheDocument()
+    expect(screen.getByText('7/7')).toBeInTheDocument()
     expect(screen.getByText('Full Worship Day! 2x points earned!')).toBeInTheDocument()
     expect(screen.getByText('2x bonus today!')).toBeInTheDocument()
   })
@@ -146,7 +147,7 @@ describe('Dashboard widgets integration', () => {
 
   it('unauthenticated: shows default state', () => {
     renderWidgetGrid(false)
-    expect(screen.getByText('0/6')).toBeInTheDocument()
+    expect(screen.getByText('0/7')).toBeInTheDocument()
     expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
     expect(screen.getByText('0 Faith Points')).toBeInTheDocument()
   })

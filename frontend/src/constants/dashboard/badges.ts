@@ -182,6 +182,7 @@ export const FRESH_ACTIVITY_COUNTS: ActivityCounts = {
   listen: 0,
   prayerWall: 0,
   readingPlan: 0,
+  gratitude: 0,
   encouragementsSent: 0,
   fullWorshipDays: 0,
 };

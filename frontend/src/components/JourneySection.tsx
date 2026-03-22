@@ -38,6 +38,14 @@ const JOURNEY_STEPS: JourneyStep[] = [
   },
   {
     number: 4,
+    prefix: 'Give',
+    highlight: 'Thanks',
+    description:
+      'Count your blessings and watch your perspective shift.',
+    to: '/',
+  },
+  {
+    number: 5,
     prefix: 'Listen to',
     highlight: 'Music',
     description:
@@ -45,7 +53,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     to: '/music',
   },
   {
-    number: 5,
+    number: 6,
     prefix: 'Write on the',
     highlight: 'Prayer Wall',
     description:
@@ -53,7 +61,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     to: '/prayer-wall',
   },
   {
-    number: 6,
+    number: 7,
     prefix: 'Find',
     highlight: 'Local Support',
     description:
