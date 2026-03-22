@@ -6,7 +6,7 @@ import { PRAYER_CATEGORIES, type PrayerCategory } from '@/constants/prayer-categ
 
 const zeroCounts: Record<PrayerCategory, number> = {
   health: 2, family: 2, work: 3, grief: 1,
-  gratitude: 3, praise: 2, relationships: 2, other: 3,
+  gratitude: 3, praise: 2, relationships: 2, other: 3, discussion: 0,
 }
 
 function renderBar(overrides?: {
@@ -25,10 +25,10 @@ function renderBar(overrides?: {
 }
 
 describe('CategoryFilterBar', () => {
-  it('renders "All" pill and 8 category pills', () => {
+  it('renders "All" pill and 9 category pills', () => {
     renderBar()
     const buttons = screen.getAllByRole('button')
-    expect(buttons).toHaveLength(9) // "All" + 8 categories
+    expect(buttons).toHaveLength(10) // "All" + 9 categories
     expect(screen.getByText('All')).toBeInTheDocument()
     for (const cat of PRAYER_CATEGORIES) {
       expect(screen.getByText(cat.charAt(0).toUpperCase() + cat.slice(1))).toBeInTheDocument()

@@ -17,6 +17,7 @@ export interface PrayerRequest {
   isAnonymous: boolean
   content: string
   category: PrayerCategory
+  qotdId?: string
   isAnswered: boolean
   answeredText: string | null
   answeredAt: string | null

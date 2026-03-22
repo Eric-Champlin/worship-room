@@ -10,6 +10,8 @@ import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { InlineComposer } from '@/components/prayer-wall/InlineComposer'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { CategoryFilterBar } from '@/components/prayer-wall/CategoryFilterBar'
+import { QuestionOfTheDay } from '@/components/prayer-wall/QuestionOfTheDay'
+import { QotdComposer } from '@/components/prayer-wall/QotdComposer'
 import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
@@ -23,6 +25,7 @@ import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/getting-started-storage'
 import { isValidCategory, PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
+import { getTodaysQuestion } from '@/constants/question-of-the-day'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 
 const PRAYERS_PER_PAGE = 20
@@ -43,6 +46,11 @@ function PrayerWallContent() {
   const [composerOpen, setComposerOpen] = useState(false)
   const [localComments, setLocalComments] = useState<Record<string, PrayerComment[]>>({})
 
+  // QOTD state
+  const todaysQuestion = useMemo(() => getTodaysQuestion(), [])
+  const [qotdComposerOpen, setQotdComposerOpen] = useState(false)
+  const firstQotdResponseRef = useRef<HTMLDivElement>(null)
+
   // Category filter via URL params
   const [searchParams, setSearchParams] = useSearchParams()
   const rawCategory = searchParams.get('category')
@@ -52,6 +60,11 @@ function PrayerWallContent() {
     if (!activeCategory) return prayers
     return allPrayers.filter(p => p.category === activeCategory)
   }, [allPrayers, prayers, activeCategory])
+
+  const firstQotdResponseIndex = useMemo(
+    () => filteredPrayers.findIndex(p => p.qotdId === todaysQuestion.id),
+    [filteredPrayers, todaysQuestion.id],
+  )
 
   const categoryCounts = useMemo(() => {
     const counts = {} as Record<PrayerCategory, number>
@@ -138,6 +151,57 @@ function PrayerWallContent() {
     },
     [user, isAuthenticated, showToast],
   )
+
+  // QOTD response count
+  const qotdResponseCount = useMemo(
+    () => allPrayers.filter(p => p.qotdId === todaysQuestion.id).length +
+      prayers.filter(p => p.qotdId === todaysQuestion.id && !allPrayers.some(a => a.id === p.id)).length,
+    [allPrayers, prayers, todaysQuestion.id],
+  )
+
+  // QOTD composer toggle with auth gating
+  const handleToggleQotdComposer = useCallback(() => {
+    if (!isAuthenticated) {
+      openAuthModal?.('Sign in to share your thoughts')
+      return
+    }
+    setQotdComposerOpen(prev => !prev)
+  }, [isAuthenticated, openAuthModal])
+
+  // QOTD response submission
+  const handleQotdSubmit = useCallback((content: string) => {
+    if (!isAuthenticated) return
+    const newResponse: PrayerRequest = {
+      id: `prayer-qotd-${Date.now()}`,
+      userId: user?.id ?? null,
+      authorName: user?.name ?? 'You',
+      authorAvatarUrl: null,
+      isAnonymous: false,
+      content,
+      category: 'discussion',
+      qotdId: todaysQuestion.id,
+      isAnswered: false,
+      answeredText: null,
+      answeredAt: null,
+      createdAt: new Date().toISOString(),
+      lastActivityAt: new Date().toISOString(),
+      prayingCount: 0,
+      commentCount: 0,
+    }
+    setPrayers(prev => [newResponse, ...prev])
+    setQotdComposerOpen(false)
+    recordActivity('prayerWall')
+    showToast('Your response has been shared.')
+  }, [isAuthenticated, user, todaysQuestion.id, recordActivity, showToast])
+
+  // Scroll to first QOTD response
+  const handleScrollToQotdResponses = useCallback(() => {
+    if (qotdResponseCount === 0) {
+      handleToggleQotdComposer()
+      return
+    }
+    firstQotdResponseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [qotdResponseCount, handleToggleQotdComposer])
 
   const handleTogglePraying = useCallback(
     (prayerId: string) => {
@@ -296,28 +360,48 @@ function PrayerWallContent() {
           onSubmit={handleComposerSubmit}
         />
 
+        {/* QOTD Card — always visible regardless of filter */}
+        <div className="mb-4">
+          <QuestionOfTheDay
+            responseCount={qotdResponseCount}
+            isComposerOpen={qotdComposerOpen}
+            onToggleComposer={handleToggleQotdComposer}
+            onScrollToResponses={handleScrollToQotdResponses}
+          />
+          <QotdComposer
+            isOpen={qotdComposerOpen}
+            onClose={() => setQotdComposerOpen(false)}
+            onSubmit={handleQotdSubmit}
+          />
+        </div>
+
         {/* Prayer cards feed */}
         <div className="flex flex-col gap-4">
-          {filteredPrayers.map((prayer) => (
-            <PrayerCard key={prayer.id} prayer={prayer} onCategoryClick={handleSelectCategory}>
-              <InteractionBar
-                prayer={prayer}
-                reactions={reactions[prayer.id]}
-                onTogglePraying={() => handleTogglePraying(prayer.id)}
-                onToggleComments={() => handleToggleComments(prayer.id)}
-                onToggleBookmark={() => toggleBookmark(prayer.id)}
-                isCommentsOpen={openComments.has(prayer.id)}
-              />
-              <CommentsSection
-                prayerId={prayer.id}
-                isOpen={openComments.has(prayer.id)}
-                comments={[...(localComments[prayer.id] ?? []), ...getMockComments(prayer.id)]}
-                totalCount={prayer.commentCount}
-                onSubmitComment={handleSubmitComment}
-                prayerContent={prayer.content}
-              />
-            </PrayerCard>
-          ))}
+          {filteredPrayers.map((prayer, index) => {
+            const isFirstQotd = index === firstQotdResponseIndex
+            return (
+              <div key={prayer.id} ref={isFirstQotd ? firstQotdResponseRef : undefined}>
+                <PrayerCard prayer={prayer} onCategoryClick={handleSelectCategory}>
+                  <InteractionBar
+                    prayer={prayer}
+                    reactions={reactions[prayer.id]}
+                    onTogglePraying={() => handleTogglePraying(prayer.id)}
+                    onToggleComments={() => handleToggleComments(prayer.id)}
+                    onToggleBookmark={() => toggleBookmark(prayer.id)}
+                    isCommentsOpen={openComments.has(prayer.id)}
+                  />
+                  <CommentsSection
+                    prayerId={prayer.id}
+                    isOpen={openComments.has(prayer.id)}
+                    comments={[...(localComments[prayer.id] ?? []), ...getMockComments(prayer.id)]}
+                    totalCount={prayer.commentCount}
+                    onSubmitComment={handleSubmitComment}
+                    prayerContent={prayer.content}
+                  />
+                </PrayerCard>
+              </div>
+            )
+          })}
         </div>
 
         {/* Empty state for filtered views */}

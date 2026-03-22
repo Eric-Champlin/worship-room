@@ -6,6 +6,7 @@ import type { PrayerRequest } from '@/types/prayer-wall'
 import { Avatar } from './Avatar'
 import { AnsweredBadge } from './AnsweredBadge'
 import { CategoryBadge } from './CategoryBadge'
+import { QotdBadge } from './QotdBadge'
 import { formatFullDate } from '@/lib/time'
 
 const TRUNCATE_LENGTH = 150
@@ -37,6 +38,11 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
       className="rounded-xl border border-gray-200 bg-white p-5 transition-shadow sm:p-6 lg:hover:shadow-md"
       aria-label={`Prayer by ${prayer.authorName}`}
     >
+      {prayer.qotdId && (
+        <div className="mb-1">
+          <QotdBadge />
+        </div>
+      )}
       <header className="mb-3 flex items-center gap-3">
         {authorLink ? (
           <Link to={authorLink} tabIndex={-1} aria-hidden="true">

@@ -4,6 +4,7 @@ import type {
   PrayerComment,
   PrayerReaction,
 } from '@/types/prayer-wall'
+import { getTodaysQuestion } from '@/constants/question-of-the-day'
 
 // --- Mock Users (10) ---
 
@@ -93,7 +94,65 @@ const MOCK_USERS: PrayerWallUser[] = [
 // --- Mock Prayers (18) ---
 // Pre-sorted by lastActivityAt DESC
 
+const todaysQuestionId = getTodaysQuestion().id
+
 const MOCK_PRAYERS: PrayerRequest[] = [
+  // --- QOTD Responses (3) ---
+  {
+    id: 'prayer-qotd-1',
+    userId: 'user-3',
+    authorName: 'Emily',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user3',
+    isAnonymous: false,
+    content:
+      'For me, it has been spending just 10 minutes every morning before I check my phone. Even on busy days, that quiet time sets the tone for everything else. It does not have to be long — just consistent.',
+    category: 'discussion',
+    qotdId: todaysQuestionId,
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-03-22T08:30:00Z',
+    lastActivityAt: '2026-03-22T09:00:00Z',
+    prayingCount: 5,
+    commentCount: 1,
+  },
+  {
+    id: 'prayer-qotd-2',
+    userId: 'user-4',
+    authorName: 'James',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user4',
+    isAnonymous: false,
+    content:
+      'After 30 years of ministry, I can honestly say the thing that has helped me the most is journaling my prayers. When I look back at old journals, I see how faithful God has been even when I could not see it in the moment.',
+    category: 'discussion',
+    qotdId: todaysQuestionId,
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-03-22T07:15:00Z',
+    lastActivityAt: '2026-03-22T07:15:00Z',
+    prayingCount: 8,
+    commentCount: 2,
+  },
+  {
+    id: 'prayer-qotd-3',
+    userId: 'user-7',
+    authorName: 'Grace',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user7',
+    isAnonymous: false,
+    content:
+      'Listening to worship music during my commute has been a game changer. It turns a stressful drive into a time of praise and prayer. Highly recommend it!',
+    category: 'discussion',
+    qotdId: todaysQuestionId,
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-03-22T06:45:00Z',
+    lastActivityAt: '2026-03-22T06:45:00Z',
+    prayingCount: 3,
+    commentCount: 0,
+  },
+  // --- Regular Prayer Requests ---
   {
     id: 'prayer-1',
     userId: 'user-1',

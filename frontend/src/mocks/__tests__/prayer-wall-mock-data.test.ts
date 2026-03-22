@@ -10,9 +10,9 @@ import {
 } from '../prayer-wall-mock-data'
 
 describe('getMockPrayers', () => {
-  it('returns 18 prayers', () => {
+  it('returns 21 prayers (18 regular + 3 QOTD)', () => {
     const prayers = getMockPrayers()
-    expect(prayers).toHaveLength(18)
+    expect(prayers).toHaveLength(21)
   })
 
   it('prayers are sorted by lastActivityAt DESC', () => {

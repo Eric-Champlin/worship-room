@@ -1,6 +1,6 @@
 export const PRAYER_CATEGORIES = [
   'health', 'family', 'work', 'grief',
-  'gratitude', 'praise', 'relationships', 'other',
+  'gratitude', 'praise', 'relationships', 'other', 'discussion',
 ] as const
 
 export type PrayerCategory = (typeof PRAYER_CATEGORIES)[number]
@@ -14,6 +14,7 @@ export const CATEGORY_LABELS: Record<PrayerCategory, string> = {
   praise: 'Praise',
   relationships: 'Relationships',
   other: 'Other',
+  discussion: 'Discussion',
 }
 
 export function isValidCategory(value: string | null): value is PrayerCategory {
