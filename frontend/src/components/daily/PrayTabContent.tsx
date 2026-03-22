@@ -21,7 +21,11 @@ import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { ShareButton } from '@/components/daily/ShareButton'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { SaveToPrayerListForm } from '@/components/daily/SaveToPrayerListForm'
+import { GuidedPrayerSection } from '@/components/daily/GuidedPrayerSection'
+import { GuidedPrayerPlayer } from '@/components/daily/GuidedPrayerPlayer'
 import { getPrayers, MAX_PRAYERS } from '@/services/prayer-list-storage'
+import { saveMeditationSession } from '@/services/meditation-storage'
+import { getLocalDateString } from '@/utils/date'
 import { useAuth } from '@/hooks/useAuth'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
@@ -37,6 +41,7 @@ import {
   getClassicPrayers,
 } from '@/mocks/daily-experience-mock-data'
 import type { MockPrayer, ClassicPrayer } from '@/types/daily-experience'
+import type { GuidedPrayerSession } from '@/types/guided-prayer'
 
 interface PrayTabContentProps {
   onSwitchToJournal?: (topic: string) => void
@@ -46,7 +51,7 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const { showToast } = useToast()
   const authModal = useAuthModal()
   const { isAuthenticated } = useAuth()
-  const { markPrayComplete } = useCompletionTracking()
+  const { markPrayComplete, markGuidedPrayerComplete } = useCompletionTracking()
   const { recordActivity } = useFaithPoints()
   const prefersReduced = useReducedMotion()
   const audioState = useAudioState()
@@ -79,6 +84,7 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const [retryPrompt, setRetryPrompt] = useState<string | null>(null)
   const [saveToListOpen, setSaveToListOpen] = useState(false)
   const [savedToList, setSavedToList] = useState(false)
+  const [activeGuidedSession, setActiveGuidedSession] = useState<GuidedPrayerSession | null>(null)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
@@ -316,6 +322,42 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
       'lost',
     ]
     return topics.find((t) => lower.includes(t)) ?? 'prayer'
+  }
+
+  // --- Guided Prayer handlers ---
+
+  const handleStartGuidedSession = (session: GuidedPrayerSession) => {
+    setActiveGuidedSession(session)
+  }
+
+  const handleGuidedSessionComplete = () => {
+    if (!activeGuidedSession) return
+    recordActivity('pray')
+    markGuidedPrayerComplete(activeGuidedSession.id)
+    saveMeditationSession({
+      id: `guided-prayer-${activeGuidedSession.id}-${Date.now()}`,
+      type: 'guided-prayer',
+      date: getLocalDateString(new Date()),
+      durationMinutes: activeGuidedSession.durationMinutes,
+      completedAt: new Date().toISOString(),
+    })
+  }
+
+  const handleGuidedPlayerClose = () => {
+    setActiveGuidedSession(null)
+  }
+
+  const handleGuidedJournal = () => {
+    const theme = activeGuidedSession?.theme ?? 'prayer'
+    setActiveGuidedSession(null)
+    onSwitchToJournal?.(theme)
+  }
+
+  const handleGuidedTryAnother = () => {
+    setActiveGuidedSession(null)
+    setTimeout(() => {
+      document.getElementById('guided-prayer-section')?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
   }
 
   const showChips = !selectedChip && !text
@@ -717,8 +759,24 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
             )}
           </div>
           )}
+
+          {/* Guided Prayer Sessions — always visible */}
+          <div className="mt-12">
+            <GuidedPrayerSection onStartSession={handleStartGuidedSession} />
+          </div>
         </div>
       </div>
+
+      {/* Player overlay (fixed positioning, visually covers full viewport) */}
+      {activeGuidedSession && (
+        <GuidedPrayerPlayer
+          session={activeGuidedSession}
+          onClose={handleGuidedPlayerClose}
+          onComplete={handleGuidedSessionComplete}
+          onJournalAboutThis={handleGuidedJournal}
+          onTryAnother={handleGuidedTryAnother}
+        />
+      )}
     </div>
   )
 }

@@ -79,6 +79,7 @@ export type MeditationType =
   | 'psalm'
   | 'examen'
   | 'bible-audio'
+  | 'guided-prayer'
 
 export interface DailyCompletion {
   date: string
@@ -88,6 +89,7 @@ export interface DailyCompletion {
     completed: boolean
     types: MeditationType[]
   }
+  guidedPrayer?: string[]
 }
 
 export type JournalMode = 'guided' | 'free'

@@ -651,3 +651,46 @@ describe('full prayer experience flow', () => {
     expect(screen.getByText('How did that prayer land?')).toBeInTheDocument()
   })
 })
+
+// --- Guided Prayer Section integration tests ---
+
+describe('PrayTabContent — Guided Prayer Section', () => {
+  beforeEach(() => {
+    vi.useRealTimers()
+    localStorage.clear()
+    resetAudioState()
+    mockReducedMotion = false
+    vi.clearAllMocks()
+  })
+
+  it('Guided Prayer Section renders within Pray tab', () => {
+    renderPrayTab()
+    expect(screen.getByText('Guided Prayer Sessions')).toBeInTheDocument()
+    expect(screen.getByText('Close your eyes and let God lead')).toBeInTheDocument()
+  })
+
+  it('all 8 session cards are visible', () => {
+    renderPrayTab()
+    expect(screen.getByText('Morning Offering')).toBeInTheDocument()
+    expect(screen.getByText('Evening Surrender')).toBeInTheDocument()
+    expect(screen.getByText('Finding Peace')).toBeInTheDocument()
+    expect(screen.getByText('Comfort in Sorrow')).toBeInTheDocument()
+    expect(screen.getByText('Gratitude Prayer')).toBeInTheDocument()
+    expect(screen.getByText('Forgiveness Release')).toBeInTheDocument()
+    expect(screen.getByText('Strength for Today')).toBeInTheDocument()
+    expect(screen.getByText('Healing Prayer')).toBeInTheDocument()
+  })
+
+  it('section visible alongside input area (not hidden by prayer state)', () => {
+    renderPrayTab()
+    // Input section heading is visible
+    expect(screen.getByText(/What's On Your/)).toBeInTheDocument()
+    // Guided prayer section is also visible
+    expect(screen.getByText('Guided Prayer Sessions')).toBeInTheDocument()
+  })
+
+  it('existing Generate Prayer button still present', () => {
+    renderPrayTab()
+    expect(screen.getByText('Generate Prayer')).toBeInTheDocument()
+  })
+})

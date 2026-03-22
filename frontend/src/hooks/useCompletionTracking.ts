@@ -12,6 +12,7 @@ function getEmptyCompletion(): DailyCompletion {
     pray: false,
     journal: false,
     meditate: { completed: false, types: [] },
+    guidedPrayer: [],
   }
 }
 
@@ -36,10 +37,13 @@ export interface CompletionTracking {
   markPrayComplete: () => void
   markJournalComplete: () => void
   markMeditationComplete: (type: MeditationType) => void
+  markGuidedPrayerComplete: (sessionId: string) => void
   isPrayComplete: boolean
   isJournalComplete: boolean
   isMeditateComplete: boolean
   completedMeditationTypes: MeditationType[]
+  completedGuidedPrayerSessions: string[]
+  isGuidedPrayerComplete: (sessionId: string) => boolean
 }
 
 export function useCompletionTracking(): CompletionTracking {
@@ -75,14 +79,37 @@ export function useCompletionTracking(): CompletionTracking {
     })
   }, [])
 
+  const markGuidedPrayerComplete = useCallback((sessionId: string) => {
+    setCompletion((prev) => {
+      const existing = prev.guidedPrayer ?? []
+      if (existing.includes(sessionId)) return prev
+      const next: DailyCompletion = {
+        ...prev,
+        guidedPrayer: [...existing, sessionId],
+      }
+      writeCompletion(next)
+      return next
+    })
+  }, [])
+
+  const completedGuidedPrayerSessions = completion.guidedPrayer ?? []
+
+  const isGuidedPrayerComplete = useCallback(
+    (sessionId: string) => completedGuidedPrayerSessions.includes(sessionId),
+    [completedGuidedPrayerSessions]
+  )
+
   return {
     completion,
     markPrayComplete,
     markJournalComplete,
     markMeditationComplete,
+    markGuidedPrayerComplete,
     isPrayComplete: completion.pray,
     isJournalComplete: completion.journal,
     isMeditateComplete: completion.meditate.completed,
     completedMeditationTypes: completion.meditate.types,
+    completedGuidedPrayerSessions,
+    isGuidedPrayerComplete,
   }
 }
