@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import { Layout } from '@/components/Layout'
+import { AudioControlBar } from '@/components/bible/AudioControlBar'
+import { BibleAmbientChip } from '@/components/bible/BibleAmbientChip'
 import { BookNotFound } from '@/components/bible/BookNotFound'
 import { ChapterNav } from '@/components/bible/ChapterNav'
 import { ChapterPlaceholder } from '@/components/bible/ChapterPlaceholder'
@@ -13,6 +15,7 @@ import { VerseShareMenu } from '@/components/bible/VerseShareMenu'
 import { HIGHLIGHT_COLORS } from '@/constants/bible'
 import { getBookBySlug, loadChapter } from '@/data/bible'
 import { useAuth } from '@/hooks/useAuth'
+import { useBibleAudio } from '@/hooks/useBibleAudio'
 import { useBibleHighlights } from '@/hooks/useBibleHighlights'
 import { useBibleNotes } from '@/hooks/useBibleNotes'
 import { useBibleProgress } from '@/hooks/useBibleProgress'
@@ -62,6 +65,25 @@ export function BibleReader() {
 
   const book = bookSlug ? getBookBySlug(bookSlug) : undefined
   const chapterNumber = chapterParam ? parseInt(chapterParam, 10) : NaN
+
+  const announce = useCallback((message: string) => {
+    if (announceRef.current) {
+      announceRef.current.textContent = message
+    }
+  }, [])
+
+  const bibleAudio = useBibleAudio({
+    verses,
+    bookSlug: bookSlug ?? '',
+    chapterNumber,
+    isAuthenticated,
+    hasFullText: book?.hasFullText ?? false,
+    isChapterAlreadyRead: bookSlug ? isChapterRead(bookSlug, chapterNumber) : false,
+    onChapterComplete: () => {
+      if (bookSlug) markChapterRead(bookSlug, chapterNumber)
+    },
+    onAnnounce: announce,
+  })
 
   // Reset state when chapter changes
   useEffect(() => {
@@ -219,12 +241,6 @@ export function BibleReader() {
     setShowShareMenu(false)
   }, [])
 
-  const announce = useCallback((message: string) => {
-    if (announceRef.current) {
-      announceRef.current.textContent = message
-    }
-  }, [])
-
   const handleSelectColor = useCallback(
     (color: string) => {
       if (!bookSlug || selectedVerse === null) return
@@ -380,6 +396,30 @@ export function BibleReader() {
           />
         </div>
 
+        {/* Audio control bar */}
+        {bibleAudio.isSupported && book.hasFullText && !isLoading && verses.length > 0 && (
+          <div className="mx-auto max-w-2xl px-4 sm:px-6">
+            <div className="mt-4">
+              <AudioControlBar
+                playbackState={bibleAudio.playbackState}
+                currentVerseIndex={bibleAudio.currentVerseIndex}
+                totalVerses={bibleAudio.totalVerses}
+                speed={bibleAudio.speed}
+                onSpeedChange={bibleAudio.setSpeed}
+                voiceGender={bibleAudio.voiceGender}
+                onVoiceGenderChange={bibleAudio.setVoiceGender}
+                availableVoiceCount={bibleAudio.availableVoiceCount}
+                onPlay={bibleAudio.play}
+                onPause={bibleAudio.pause}
+                onStop={bibleAudio.stop}
+              />
+              <div className="mt-2">
+                <BibleAmbientChip />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Content */}
         <div className="mx-auto max-w-2xl px-4 sm:px-6">
           {!book.hasFullText ? (
@@ -395,7 +435,7 @@ export function BibleReader() {
             </div>
           ) : (
             <div className="py-8 sm:py-12">
-              {verses.map((verse) => {
+              {verses.map((verse, index) => {
                 const highlight = chapterHighlights.find(
                   (h) => h.verseNumber === verse.number,
                 )
@@ -406,9 +446,17 @@ export function BibleReader() {
                   (n) => n.verseNumber === verse.number,
                 )
                 const isEditingThis = editingNoteVerse === verse.number
+                const isTtsActive = bibleAudio.currentVerseIndex === index
 
                 return (
-                  <div key={verse.number}>
+                  <div
+                    key={verse.number}
+                    className={cn(
+                      'motion-safe:transition-all motion-safe:duration-200',
+                      isTtsActive && 'border-l-2 border-primary bg-primary/5 pl-2',
+                    )}
+                    aria-current={isTtsActive ? 'true' : undefined}
+                  >
                     <span
                       id={`verse-${verse.number}`}
                       role="button"

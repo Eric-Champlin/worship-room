@@ -78,6 +78,7 @@ export type MeditationType =
   | 'acts'
   | 'psalm'
   | 'examen'
+  | 'bible-audio'
 
 export interface DailyCompletion {
   date: string

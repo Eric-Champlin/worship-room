@@ -28,6 +28,7 @@ const MEDITATION_TYPE_COLORS: Record<MeditationType, string> = {
   acts: '#F59E0B',
   psalm: '#22C55E',
   examen: '#3B82F6',
+  'bible-audio': '#6D28D9',
 }
 
 const MEDITATION_TYPE_LABELS: Record<MeditationType, string> = {
@@ -37,6 +38,7 @@ const MEDITATION_TYPE_LABELS: Record<MeditationType, string> = {
   acts: 'ACTS',
   psalm: 'Psalms',
   examen: 'Examen',
+  'bible-audio': 'Bible Audio',
 }
 
 const ALL_TYPES: MeditationType[] = [
@@ -46,6 +48,7 @@ const ALL_TYPES: MeditationType[] = [
   'acts',
   'psalm',
   'examen',
+  'bible-audio',
 ]
 
 function formatChartDate(dateStr: string, rangeDays: number): string {

@@ -8,6 +8,7 @@ export type AmbientContext =
   | 'breathing'
   | 'soaking'
   | 'other-meditation'
+  | 'bible-reading'
 
 const AMBIENT_SCENE_IDS: Record<AmbientContext, string[]> = {
   pray: ['the-upper-room', 'ember-and-stone', 'still-waters'],
@@ -16,6 +17,7 @@ const AMBIENT_SCENE_IDS: Record<AmbientContext, string[]> = {
   breathing: ['still-waters', 'morning-mist', 'garden-of-gethsemane'],
   soaking: ['the-upper-room', 'starfield', 'garden-of-gethsemane'],
   'other-meditation': ['garden-of-gethsemane', 'still-waters', 'mountain-refuge'],
+  'bible-reading': ['still-waters', 'the-upper-room', 'morning-mist'],
 }
 
 export function getSuggestedScenes(context: AmbientContext): ScenePreset[] {
