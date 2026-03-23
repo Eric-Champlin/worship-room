@@ -135,3 +135,56 @@ describe('getTodaysVerse', () => {
     expect(VALID_THEMES).toContain(verse.theme)
   })
 })
+
+describe('seasonal verse tagging', () => {
+  it('pool still has exactly 60 entries', () => {
+    expect(VERSE_OF_THE_DAY_POOL).toHaveLength(60)
+  })
+
+  it('20 verses have a season field', () => {
+    const tagged = VERSE_OF_THE_DAY_POOL.filter((v) => v.season)
+    expect(tagged).toHaveLength(20)
+  })
+
+  it('distribution: 5 advent, 5 lent, 4 easter, 3 christmas, 2 holy-week, 1 pentecost', () => {
+    const counts = new Map<string, number>()
+    VERSE_OF_THE_DAY_POOL.forEach((v) => {
+      if (v.season) {
+        counts.set(v.season, (counts.get(v.season) || 0) + 1)
+      }
+    })
+    expect(counts.get('advent')).toBe(5)
+    expect(counts.get('lent')).toBe(5)
+    expect(counts.get('easter')).toBe(4)
+    expect(counts.get('christmas')).toBe(3)
+    expect(counts.get('holy-week')).toBe(2)
+    expect(counts.get('pentecost')).toBe(1)
+  })
+
+  it('getTodaysVerse returns seasonal verse during Lent', () => {
+    // March 1, 2026 is in Lent (Ash Wed = Feb 18, Palm Sunday = March 29)
+    const lentDate = new Date(2026, 2, 1)
+    const verse = getTodaysVerse(lentDate)
+    expect(verse.season).toBe('lent')
+  })
+
+  it('getTodaysVerse returns verse during Ordinary Time (no seasonal filter)', () => {
+    // July 15, 2026 is Ordinary Time
+    const ordinaryDate = new Date(2026, 6, 15)
+    const verse = getTodaysVerse(ordinaryDate)
+    expect(verse).toBeDefined()
+    expect(verse.text).toBeTruthy()
+  })
+
+  it('seasonal verses cycle within season', () => {
+    // Two different Lent days should potentially give different verses
+    const day1 = new Date(2026, 2, 1)
+    const day2 = new Date(2026, 2, 2)
+    const verse1 = getTodaysVerse(day1)
+    const verse2 = getTodaysVerse(day2)
+    expect(verse1.season).toBe('lent')
+    expect(verse2.season).toBe('lent')
+    // With 5 lent verses, adjacent days should differ
+    expect(verse1.reference).not.toBe(verse2.reference)
+  })
+})

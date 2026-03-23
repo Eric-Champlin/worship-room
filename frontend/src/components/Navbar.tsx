@@ -1,13 +1,21 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, Book, BookOpen, ChevronDown, Menu, Sparkles, X } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import {
+  Bell, Book, BookOpen, ChevronDown, Menu, Sparkles, X,
+  Star, Gift, Heart, Cross, Sun, Flame, Leaf,
+} from 'lucide-react'
+import type { LucideIcon, LucideProps } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotificationActions } from '@/hooks/useNotificationActions'
+import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
+
+const SEASON_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
+  Star, Gift, Sparkles, Heart, Cross, Sun, Flame, Leaf,
+}
 
 const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon?: LucideIcon }> = [
   { label: 'Daily Hub', to: '/daily' },
@@ -45,8 +53,11 @@ function getNavLinkClass(transparent: boolean) {
 }
 
 function NavbarLogo({ transparent }: { transparent: boolean }) {
+  const { icon, themeColor, isNamedSeason } = useLiturgicalSeason()
+  const SeasonIcon = isNamedSeason ? SEASON_ICON_MAP[icon] : null
+
   return (
-    <Link to="/" className="flex items-center" aria-label="Worship Room home">
+    <Link to="/" className="flex items-center gap-1.5" aria-label="Worship Room home">
       <span
         className={cn(
           'font-script text-4xl font-bold',
@@ -55,6 +66,13 @@ function NavbarLogo({ transparent }: { transparent: boolean }) {
       >
         Worship Room
       </span>
+      {SeasonIcon && (
+        <SeasonIcon
+          className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+          style={{ color: `${themeColor}80` }}
+          aria-hidden="true"
+        />
+      )}
     </Link>
   )
 }

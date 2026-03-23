@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Flame, Wind } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { AnimatedCounter } from './AnimatedCounter'
 
 interface DashboardHeroProps {
@@ -32,6 +33,7 @@ export function DashboardHero({
 }: DashboardHeroProps) {
   const greeting = getGreeting()
   const prefersReduced = useReducedMotion()
+  const { greeting: seasonalGreeting, themeColor, isNamedSeason } = useLiturgicalSeason()
 
   // Track previous points for live animation
   const prevPointsRef = useRef(totalPoints)
@@ -96,6 +98,14 @@ export function DashboardHero({
             <span className="inline-block max-w-[70vw] truncate align-bottom md:max-w-none">
               {userName}
             </span>
+            {isNamedSeason && seasonalGreeting && (
+              <span
+                className="block text-lg md:inline md:text-2xl"
+                style={{ color: themeColor }}
+              >
+                {' — '}{seasonalGreeting}
+              </span>
+            )}
           </h1>
 
           <div className="mt-4 flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-6">

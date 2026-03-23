@@ -5,6 +5,7 @@ import {
   formatDevotionalDate,
 } from '@/data/devotionals'
 import type { DevotionalTheme } from '@/types/devotional'
+import type { LiturgicalSeasonId } from '@/constants/liturgical-calendar'
 
 const ALLOWED_THEMES: DevotionalTheme[] = [
   'trust',
@@ -19,27 +20,32 @@ const ALLOWED_THEMES: DevotionalTheme[] = [
   'community',
 ]
 
+const GENERAL_POOL = DEVOTIONAL_POOL.filter((d) => !d.season)
+const SEASONAL_POOL = DEVOTIONAL_POOL.filter((d) => d.season)
+
 describe('DEVOTIONAL_POOL', () => {
-  it('has exactly 30 entries', () => {
-    expect(DEVOTIONAL_POOL).toHaveLength(30)
+  it('has exactly 50 entries (30 general + 20 seasonal)', () => {
+    expect(DEVOTIONAL_POOL).toHaveLength(50)
+    expect(GENERAL_POOL).toHaveLength(30)
+    expect(SEASONAL_POOL).toHaveLength(20)
   })
 
-  it('has unique dayIndex values 0-29', () => {
-    const indices = DEVOTIONAL_POOL.map((d) => d.dayIndex)
+  it('general pool has unique dayIndex values 0-29', () => {
+    const indices = GENERAL_POOL.map((d) => d.dayIndex)
     expect(new Set(indices).size).toBe(30)
     expect(Math.min(...indices)).toBe(0)
     expect(Math.max(...indices)).toBe(29)
   })
 
-  it('each entry has a valid theme from allowed set', () => {
-    DEVOTIONAL_POOL.forEach((d) => {
+  it('general pool: each entry has a valid theme from allowed set', () => {
+    GENERAL_POOL.forEach((d) => {
       expect(ALLOWED_THEMES).toContain(d.theme)
     })
   })
 
-  it('theme distribution: 3 per theme', () => {
+  it('general pool: theme distribution is 3 per theme', () => {
     const themeCounts = new Map<string, number>()
-    DEVOTIONAL_POOL.forEach((d) => {
+    GENERAL_POOL.forEach((d) => {
       themeCounts.set(d.theme, (themeCounts.get(d.theme) || 0) + 1)
     })
     ALLOWED_THEMES.forEach((theme) => {
@@ -47,16 +53,16 @@ describe('DEVOTIONAL_POOL', () => {
     })
   })
 
-  it('no consecutive dayIndex values share a theme', () => {
-    const sorted = [...DEVOTIONAL_POOL].sort((a, b) => a.dayIndex - b.dayIndex)
+  it('general pool: no consecutive dayIndex values share a theme', () => {
+    const sorted = [...GENERAL_POOL].sort((a, b) => a.dayIndex - b.dayIndex)
     for (let i = 1; i < sorted.length; i++) {
       expect(sorted[i].theme).not.toBe(sorted[i - 1].theme)
     }
   })
 
-  it('each passage has 2-6 verses', () => {
+  it('each passage has 1-6 verses', () => {
     DEVOTIONAL_POOL.forEach((d) => {
-      expect(d.passage.verses.length).toBeGreaterThanOrEqual(2)
+      expect(d.passage.verses.length).toBeGreaterThanOrEqual(1)
       expect(d.passage.verses.length).toBeLessThanOrEqual(6)
     })
   })
@@ -96,34 +102,96 @@ describe('DEVOTIONAL_POOL', () => {
   })
 })
 
+describe('seasonal devotionals', () => {
+  it('has 20 seasonal devotionals', () => {
+    expect(SEASONAL_POOL).toHaveLength(20)
+  })
+
+  it('each seasonal devotional has a valid season field', () => {
+    const validSeasons: LiturgicalSeasonId[] = [
+      'advent', 'christmas', 'epiphany', 'lent', 'holy-week', 'easter', 'pentecost',
+    ]
+    SEASONAL_POOL.forEach((d) => {
+      expect(validSeasons).toContain(d.season)
+    })
+  })
+
+  it('distribution matches spec: 5 advent, 5 lent, 3 easter, 3 christmas, 2 holy-week, 2 pentecost', () => {
+    const counts = new Map<string, number>()
+    SEASONAL_POOL.forEach((d) => {
+      counts.set(d.season!, (counts.get(d.season!) || 0) + 1)
+    })
+    expect(counts.get('advent')).toBe(5)
+    expect(counts.get('lent')).toBe(5)
+    expect(counts.get('easter')).toBe(3)
+    expect(counts.get('christmas')).toBe(3)
+    expect(counts.get('holy-week')).toBe(2)
+    expect(counts.get('pentecost')).toBe(2)
+  })
+
+  it('all seasonal devotionals have WEB translation passages', () => {
+    SEASONAL_POOL.forEach((d) => {
+      expect(d.passage.reference).toBeTruthy()
+      expect(d.passage.verses.length).toBeGreaterThan(0)
+      d.passage.verses.forEach((v) => {
+        expect(v.text).toBeTruthy()
+      })
+    })
+  })
+
+  it('no duplicate scripture references with general pool', () => {
+    const generalRefs = new Set(GENERAL_POOL.map((d) => d.passage.reference))
+    SEASONAL_POOL.forEach((d) => {
+      expect(generalRefs.has(d.passage.reference)).toBe(false)
+    })
+  })
+})
+
 describe('getTodaysDevotional', () => {
-  it('returns correct devotional for a known date', () => {
-    const date = new Date(2026, 0, 1) // Jan 1, 2026 = day 1
+  it('returns seasonal devotional during Advent', () => {
+    // Dec 1, 2026 is in Advent (starts Nov 29, 2026)
+    const date = new Date(2026, 11, 1)
     const result = getTodaysDevotional(date)
-    const expectedIndex = 1 % 30
-    expect(result.dayIndex).toBe(expectedIndex)
+    expect(result.season).toBe('advent')
   })
 
-  it('with dayOffset navigates correctly', () => {
-    const date = new Date(2026, 0, 5) // Jan 5 = day 5
-    const resultToday = getTodaysDevotional(date, 0)
-    const resultYesterday = getTodaysDevotional(date, -1)
-    // Day 5 and Day 4 should give different devotionals
-    expect(resultToday.dayIndex).not.toBe(resultYesterday.dayIndex)
+  it('returns general devotional during Ordinary Time', () => {
+    // Jul 15, 2026 is Ordinary Time
+    const date = new Date(2026, 6, 15)
+    const result = getTodaysDevotional(date)
+    expect(result.season).toBeUndefined()
   })
 
-  it('wraps via modulo correctly', () => {
-    // Dec 31, 2026 = day 365 of 2026 → 365 % 30 = 5 → dayIndex 5
-    const dec31 = new Date(2026, 11, 31)
-    const result = getTodaysDevotional(dec31)
-    expect(result.dayIndex).toBe(365 % 30) // 5
+  it('cycles through seasonal devotionals within a season', () => {
+    // Advent 2026: Nov 29 to Dec 24 — 5 advent devotionals cycle
+    const day1 = getTodaysDevotional(new Date(2026, 10, 29))
+    const day2 = getTodaysDevotional(new Date(2026, 10, 30))
+    expect(day1.season).toBe('advent')
+    expect(day2.season).toBe('advent')
+    expect(day1.id).not.toBe(day2.id)
+  })
+
+  it('past-day navigation with dayOffset respects season of that past date', () => {
+    // From July 15, navigate back to Dec 1 of prior year (offset ~-226 days)
+    // Dec 1, 2025 — that year's Advent
+    const dec1_2025 = new Date(2025, 11, 1)
+    const result = getTodaysDevotional(dec1_2025)
+    expect(result.season).toBe('advent')
   })
 
   it('same date always returns same devotional (deterministic)', () => {
-    const date = new Date(2026, 2, 20) // March 20
+    const date = new Date(2026, 2, 20) // March 20 — Lent
     const first = getTodaysDevotional(date)
     const second = getTodaysDevotional(date)
     expect(first.id).toBe(second.id)
+  })
+
+  it('with dayOffset navigates correctly', () => {
+    // Use Ordinary Time dates to test general pool offset
+    const date = new Date(2026, 6, 15) // Jul 15
+    const resultToday = getTodaysDevotional(date, 0)
+    const resultYesterday = getTodaysDevotional(date, -1)
+    expect(resultToday.id).not.toBe(resultYesterday.id)
   })
 })
 

@@ -1,7 +1,11 @@
+import type { LiturgicalSeasonId } from '@/constants/liturgical-calendar'
+import { getLiturgicalSeason, getDayWithinSeason } from '@/constants/liturgical-calendar'
+
 export interface VerseOfTheDay {
   text: string
   reference: string
   theme: 'hope' | 'comfort' | 'strength' | 'praise' | 'trust' | 'peace'
+  season?: LiturgicalSeasonId
 }
 
 /**
@@ -20,6 +24,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: '"For I know the thoughts that I think toward you," says Yahweh, "thoughts of peace, and not of evil, to give you hope and a future."',
     reference: 'Jeremiah 29:11',
     theme: 'hope',
+    season: 'advent',
   },
   {
     text: 'He heals the broken in heart, and binds up their wounds.',
@@ -40,6 +45,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'But those who wait for Yahweh will renew their strength. They will mount up with wings like eagles. They will run, and not be weary. They will walk, and not faint.',
     reference: 'Isaiah 40:31',
     theme: 'strength',
+    season: 'advent',
   },
   {
     text: "Trust in Yahweh with all your heart, and don't lean on your own understanding. In all your ways acknowledge him, and he will make your paths straight.",
@@ -50,6 +56,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'Yahweh is near to those who have a broken heart, and saves those who have a crushed spirit.',
     reference: 'Psalm 34:18',
     theme: 'comfort',
+    season: 'lent',
   },
   {
     text: "Don't be grieved, for the joy of Yahweh is your strength.",
@@ -60,6 +67,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'bearing with one another, and forgiving each other, if any man has a complaint against any; even as Christ forgave you, so you also do.',
     reference: 'Colossians 3:13',
     theme: 'peace',
+    season: 'holy-week',
   },
   {
     text: "You will keep whoever's mind is steadfast in perfect peace, because he trusts in you.",
@@ -70,11 +78,13 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'Now may the God of hope fill you with all joy and peace in believing, that you may abound in hope in the power of the Holy Spirit.',
     reference: 'Romans 15:13',
     theme: 'hope',
+    season: 'christmas',
   },
   {
     text: 'But he was pierced for our transgressions. He was crushed for our iniquities. The punishment that brought our peace was on him; and by his wounds we are healed.',
     reference: 'Isaiah 53:5',
     theme: 'comfort',
+    season: 'holy-week',
   },
   {
     text: 'casting all your worries on him, because he cares for you.',
@@ -100,6 +110,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'He will wipe away every tear from their eyes. Death will be no more; neither will there be mourning, nor crying, nor pain any more. The first things have passed away.',
     reference: 'Revelation 21:4',
     theme: 'comfort',
+    season: 'easter',
   },
   {
     text: 'You will show me the path of life. In your presence is fullness of joy. In your right hand there are pleasures forever more.',
@@ -115,11 +126,13 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: "Peace I leave with you. My peace I give to you; not as the world gives, I give to you. Don't let your heart be troubled, neither let it be fearful.",
     reference: 'John 14:27',
     theme: 'peace',
+    season: 'christmas',
   },
   {
     text: 'We know that all things work together for good for those who love God, for those who are called according to his purpose.',
     reference: 'Romans 8:28',
     theme: 'hope',
+    season: 'easter',
   },
   {
     text: 'And the prayer of faith will heal him who is sick, and the Lord will raise him up. If he has committed sins, he will be forgiven.',
@@ -150,6 +163,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'My flesh and my heart fails, but God is the strength of my heart and my portion forever.',
     reference: 'Psalm 73:26',
     theme: 'comfort',
+    season: 'lent',
   },
   {
     text: 'rejoicing in hope, enduring in troubles, continuing steadfastly in prayer.',
@@ -160,6 +174,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: '"For if you forgive men their trespasses, your heavenly Father will also forgive you."',
     reference: 'Matthew 6:14',
     theme: 'peace',
+    season: 'lent',
   },
 
   // --- 30 New WEB Translation Verses (5 per theme) ---
@@ -169,26 +184,31 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'Why are you in despair, my soul? Why are you disturbed within me? Hope in God! For I shall still praise him, the saving health of my countenance, and my God.',
     reference: 'Psalm 42:11',
     theme: 'hope',
+    season: 'advent',
   },
   {
     text: 'Not only this, but we also rejoice in our sufferings, knowing that suffering produces perseverance; and perseverance, proven character; and proven character, hope.',
     reference: 'Romans 5:3-4',
     theme: 'hope',
+    season: 'lent',
   },
   {
     text: 'Now faith is assurance of things hoped for, proof of things not seen.',
     reference: 'Hebrews 11:1',
     theme: 'hope',
+    season: 'easter',
   },
   {
     text: 'I wait for Yahweh. My soul waits. I hope in his word.',
     reference: 'Psalm 130:5',
     theme: 'hope',
+    season: 'advent',
   },
   {
     text: '"There is hope for your latter end," says Yahweh. "Your children will come again to their own border."',
     reference: 'Jeremiah 31:17',
     theme: 'hope',
+    season: 'advent',
   },
 
   // Comfort (5)
@@ -206,6 +226,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'Blessed are those who mourn, for they shall be comforted.',
     reference: 'Matthew 5:4',
     theme: 'comfort',
+    season: 'lent',
   },
   {
     text: 'Sing, heavens, and be joyful, earth! Break out into singing, mountains! For Yahweh has comforted his people, and will have compassion on his afflicted.',
@@ -270,6 +291,7 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'Sing to Yahweh a new song! Sing to Yahweh, all the earth!',
     reference: 'Psalm 96:1',
     theme: 'praise',
+    season: 'christmas',
   },
 
   // Trust (5)
@@ -304,11 +326,13 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     text: 'I have told you these things, that in me you may have peace. In the world you have trouble; but cheer up! I have overcome the world.',
     reference: 'John 16:33',
     theme: 'peace',
+    season: 'easter',
   },
   {
     text: "for God's Kingdom is not eating and drinking, but righteousness, peace, and joy in the Holy Spirit.",
     reference: 'Romans 14:17',
     theme: 'peace',
+    season: 'pentecost',
   },
   {
     text: 'The work of righteousness will be peace, and the effect of righteousness, quietness and confidence forever.',
@@ -329,10 +353,21 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
 
 /**
  * Returns the Verse of the Day for a given date. Deterministic — same date always returns same verse.
- * Uses day-of-year modulo pool size. Resets at midnight local time.
+ * During named liturgical seasons, prioritizes seasonal verses (cycling within the season).
+ * Falls back to general pool rotation during Ordinary Time or if no seasonal verses exist.
  */
 export function getTodaysVerse(date: Date = new Date()): VerseOfTheDay {
-  // Extract local date components, then use UTC arithmetic to avoid DST issues
+  const { currentSeason, isNamedSeason } = getLiturgicalSeason(date)
+
+  if (isNamedSeason) {
+    const seasonalVerses = VERSE_OF_THE_DAY_POOL.filter((v) => v.season === currentSeason.id)
+    if (seasonalVerses.length > 0) {
+      const dayInSeason = getDayWithinSeason(currentSeason.id, date)
+      return seasonalVerses[dayInSeason % seasonalVerses.length]
+    }
+  }
+
+  // Fallback: general pool rotation
   const year = date.getFullYear()
   const dayOfYear = Math.floor(
     (Date.UTC(year, date.getMonth(), date.getDate()) - Date.UTC(year, 0, 0)) /

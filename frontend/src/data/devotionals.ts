@@ -1,4 +1,5 @@
 import type { Devotional } from '@/types/devotional'
+import { getLiturgicalSeason, getDayWithinSeason } from '@/constants/liturgical-calendar'
 
 export const DEVOTIONAL_POOL: Devotional[] = [
   // --- Index 0-9: First cycle of 10 themes ---
@@ -1068,22 +1069,742 @@ export const DEVOTIONAL_POOL: Devotional[] = [
     reflectionQuestion:
       'Something to think about today: How can you intentionally encourage someone in their faith this week?',
   },
+
+  // --- Seasonal Devotionals (20) ---
+
+  // Advent (5)
+  {
+    id: 'devotional-seasonal-advent-01',
+    dayIndex: 100,
+    title: 'The Hope of Advent',
+    theme: 'hope',
+    season: 'advent',
+    quote: {
+      text: 'He who has God and everything else has no more than he who has God only.',
+      attribution: 'C.S. Lewis',
+    },
+    passage: {
+      reference: 'Isaiah 9:6-7',
+      verses: [
+        {
+          number: 6,
+          text: 'For a child is born to us. A son is given to us; and the government will be on his shoulders. His name will be called Wonderful Counselor, Mighty God, Everlasting Father, Prince of Peace.',
+        },
+        {
+          number: 7,
+          text: 'Of the increase of his government and of peace there shall be no end, on David\'s throne, and on his kingdom, to establish it, and to uphold it with justice and with righteousness from that time on, even forever. The zeal of Yahweh of Armies will perform this.',
+        },
+      ],
+    },
+    reflection: [
+      'Advent is a season of expectation, a time when the church collectively holds its breath in anticipation of the coming King. Long before that first Christmas, these words from Isaiah painted a picture of a ruler unlike any the world had known.',
+      'The names given to this promised child reveal the nature of the One who is coming: Wonderful Counselor, Mighty God, Everlasting Father, Prince of Peace. Each name is a promise — wisdom, strength, eternal love, and lasting peace.',
+      'In the waiting of Advent, we remember that God is never late. The people of Israel waited centuries for this promise to be fulfilled, and when the time was right, God acted. Your waiting is not wasted either.',
+      'Today, let the hope of Advent rekindle your trust in God\'s timing. The same God who fulfilled this ancient promise is at work in your life right now.',
+    ],
+    prayer:
+      'Lord, in this season of Advent, fill my heart with hope. Help me to wait with patience and expectation, trusting that You are at work even when I cannot see it. Let the promises of Your Word anchor my soul. Amen.',
+    reflectionQuestion:
+      'Something to think about today: What are you waiting for God to do in your life, and how can Advent\'s hope sustain you in the waiting?',
+  },
+  {
+    id: 'devotional-seasonal-advent-02',
+    dayIndex: 101,
+    title: 'Waiting with Purpose',
+    theme: 'faithfulness',
+    season: 'advent',
+    quote: {
+      text: 'Patience is not simply the ability to wait — it is how we behave while we are waiting.',
+      attribution: 'Joyce Meyer',
+    },
+    passage: {
+      reference: 'Micah 5:2-4',
+      verses: [
+        {
+          number: 2,
+          text: 'But you, Bethlehem Ephrathah, being small among the clans of Judah, out of you one will come out to me who is to be ruler in Israel; whose goings out are from of old, from ancient days.',
+        },
+        {
+          number: 3,
+          text: 'Therefore he will give them up until the time that she who is in labor gives birth. Then the rest of his brothers will return to the children of Israel.',
+        },
+        {
+          number: 4,
+          text: 'He shall stand, and shall shepherd in the strength of Yahweh, in the majesty of the name of Yahweh his God. They will live, for then he will be great to the ends of the earth.',
+        },
+      ],
+    },
+    reflection: [
+      'The prophet Micah pointed to the smallest of towns — Bethlehem — as the birthplace of a ruler whose origins reach into eternity. God often chooses the humble and overlooked to accomplish His greatest purposes.',
+      'Advent reminds us that waiting is not passive. The prophets waited actively, proclaiming God\'s promises, preparing hearts, and living faithfully in the tension between promise and fulfillment.',
+      'In your own seasons of waiting, you are not merely passing time. You are being shaped, refined, and prepared for what God has ahead.',
+      'This Advent, let your waiting be purposeful. Pray, serve, love, and trust. The One whose "goings out are from of old" is coming — and He is worth the wait.',
+    ],
+    prayer:
+      'Father, teach me to wait with purpose and not with anxiety. As I walk through this Advent season, help me to prepare my heart for Your presence. Remind me that Your plans are bigger than anything I can imagine. Amen.',
+    reflectionQuestion:
+      'Something to think about today: How can you use this season of waiting to draw closer to God?',
+  },
+  {
+    id: 'devotional-seasonal-advent-03',
+    dayIndex: 102,
+    title: 'Prophecy Fulfilled',
+    theme: 'hope',
+    season: 'advent',
+    quote: {
+      text: 'God is not silent. It is the nature of God to speak.',
+      attribution: 'A.W. Tozer',
+    },
+    passage: {
+      reference: 'Isaiah 7:14',
+      verses: [
+        {
+          number: 14,
+          text: 'Therefore the Lord himself will give you a sign. Behold, the virgin will conceive, and bear a son, and shall call his name Immanuel.',
+        },
+      ],
+    },
+    reflection: [
+      'Centuries before the birth of Jesus, God spoke through Isaiah with a promise that must have seemed impossible: a virgin would conceive and bear a son called Immanuel — God with us.',
+      'The name Immanuel carries the deepest comfort of Advent. God did not remain distant. He came near. He entered our world, our pain, our humanity.',
+      'Every prophecy fulfilled in the Christmas story is evidence that God keeps His word. Not one promise has fallen to the ground.',
+      'This Advent, remember that the same faithful God who fulfilled every prophecy about the coming Messiah is the God who holds your future. His track record is perfect.',
+    ],
+    prayer:
+      'Lord, thank You for being a God who keeps every promise. As I reflect on the prophecies fulfilled in Jesus, strengthen my faith to trust the promises You have made for my life. You are Immanuel — God with us. Amen.',
+    reflectionQuestion:
+      'Something to think about today: Which promise of God do you most need to trust today?',
+  },
+  {
+    id: 'devotional-seasonal-advent-04',
+    dayIndex: 103,
+    title: 'Preparing the Way',
+    theme: 'faithfulness',
+    season: 'advent',
+    quote: {
+      text: 'The one concern of the devil is to keep Christians from praying.',
+      attribution: 'Samuel Chadwick',
+    },
+    passage: {
+      reference: 'Malachi 3:1-2',
+      verses: [
+        {
+          number: 1,
+          text: '"Behold, I send my messenger, and he will prepare the way before me! And the Lord, whom you seek, will suddenly come to his temple. And the messenger of the covenant, whom you desire, behold, he comes!" says Yahweh of Armies.',
+        },
+        {
+          number: 2,
+          text: '"But who can endure the day of his coming? And who will stand when he appears? For he is like a refiner\'s fire, and like launderers\' soap."',
+        },
+      ],
+    },
+    reflection: [
+      'Before the King arrives, a messenger prepares the way. In the story of Jesus, this messenger was John the Baptist — calling people to repentance and preparation.',
+      'Advent is our own season of preparation. It invites us to clear the clutter of our hearts, to make room for the holy, to examine what needs to change before the celebration of Christmas.',
+      'The refiner\'s fire image is not meant to frighten but to comfort. God refines us because He loves us and wants to bring out the gold in our lives.',
+      'What would it look like to truly prepare your heart for Christmas this year — not just decorating the house, but making room in your soul?',
+    ],
+    prayer:
+      'God, I want to prepare my heart for You this Advent. Show me what needs to be cleared away — anxiety, bitterness, distraction — so that I can receive You fully. Refine me, Lord, and make me ready. Amen.',
+    reflectionQuestion:
+      'Something to think about today: What is one thing you could let go of this Advent to make more room for God?',
+  },
+  {
+    id: 'devotional-seasonal-advent-05',
+    dayIndex: 104,
+    title: 'Joy in Anticipation',
+    theme: 'hope',
+    season: 'advent',
+    quote: {
+      text: 'Joy is the serious business of heaven.',
+      attribution: 'C.S. Lewis',
+    },
+    passage: {
+      reference: 'Zephaniah 3:17',
+      verses: [
+        {
+          number: 17,
+          text: 'Yahweh, your God, is among you, a mighty one who will save. He will rejoice over you with joy. He will calm you in his love. He will rejoice over you with singing.',
+        },
+      ],
+    },
+    reflection: [
+      'Of all the images of God in Scripture, this one from Zephaniah is among the most tender: God singing over His people with joy. Not anger, not disappointment — joy.',
+      'Advent builds toward a celebration, and joy is woven into every thread. The angels sang, the shepherds rejoiced, Mary magnified the Lord. Joy is the heartbeat of this season.',
+      'But Advent joy is not naive optimism. It is joy born from faith — the confidence that God is present, that He saves, that He delights in His children even in their imperfection.',
+      'Today, let this truth sink in: God rejoices over you. Not because you are perfect, but because you are His. That is the joy of Advent.',
+    ],
+    prayer:
+      'Father, fill me with Advent joy — not the shallow happiness the world offers, but the deep joy that comes from knowing You are with me and You delight in me. Help me to carry this joy into every interaction today. Amen.',
+    reflectionQuestion:
+      'Something to think about today: How does knowing that God rejoices over you change the way you see yourself?',
+  },
+
+  // Lent (5)
+  {
+    id: 'devotional-seasonal-lent-01',
+    dayIndex: 105,
+    title: 'A Season of Return',
+    theme: 'forgiveness',
+    season: 'lent',
+    quote: {
+      text: 'Repentance is not self-punishment; it is a turning to face the light.',
+      attribution: 'Richard Rohr',
+    },
+    passage: {
+      reference: 'Joel 2:12-13',
+      verses: [
+        {
+          number: 12,
+          text: '"Yet even now," says Yahweh, "turn to me with all your heart, and with fasting, and with weeping, and with mourning."',
+        },
+        {
+          number: 13,
+          text: 'Tear your heart, and not your garments, and turn to Yahweh, your God, for he is gracious and merciful, slow to anger, and abundant in loving kindness, and relents from sending calamity.',
+        },
+      ],
+    },
+    reflection: [
+      'Lent begins with an invitation, not a demand. "Turn to me," God says — with all your heart. This is not about religious performance or outward show. It is about the inner posture of the soul.',
+      '"Tear your heart, and not your garments" is one of the most powerful phrases in all of Scripture. God is not interested in appearances. He wants the real you — honest, vulnerable, and willing to return.',
+      'The beauty of this passage is what follows the call to repentance: God is gracious, merciful, slow to anger, and abundant in loving kindness. You are not returning to a judge, but to a Father.',
+      'This Lent, let repentance be a homecoming. Not a grim duty, but a joyful return to the arms of One who has been waiting for you all along.',
+    ],
+    prayer:
+      'Lord, I turn to You with all my heart this Lenten season. I come not with outward performance, but with honest vulnerability. Thank You for being gracious, merciful, and overflowing with love. Welcome me home. Amen.',
+    reflectionQuestion:
+      'Something to think about today: What does it mean to you to "tear your heart" rather than your garments before God?',
+  },
+  {
+    id: 'devotional-seasonal-lent-02',
+    dayIndex: 106,
+    title: 'The Gift of Fasting',
+    theme: 'faithfulness',
+    season: 'lent',
+    quote: {
+      text: 'Fasting is feasting on all that God is.',
+      attribution: 'John Piper',
+    },
+    passage: {
+      reference: 'Isaiah 58:6-7',
+      verses: [
+        {
+          number: 6,
+          text: '"Is not this the fast that I have chosen: to release the bonds of wickedness, to undo the straps of the yoke, to let the oppressed go free, and that you break every yoke?',
+        },
+        {
+          number: 7,
+          text: 'Is it not to distribute your bread to the hungry, and that you bring the poor who are cast out to your house? When you see the naked, that you cover him; and that you not hide yourself from your own flesh?"',
+        },
+      ],
+    },
+    reflection: [
+      'The fast God desires is not simply about food. It is about freedom — releasing oppression, sharing with the hungry, sheltering the homeless, and caring for your own family.',
+      'Lent challenges us to examine not just what we consume, but how we live. True fasting creates space — space that is then filled with compassion, generosity, and justice.',
+      'When we fast from something, we create a holy emptiness that reveals our dependence on God rather than on comfort, habit, or distraction.',
+      'This Lent, consider what you might fast from — and more importantly, what you will feast on instead. Let your fasting lead you toward love.',
+    ],
+    prayer:
+      'God, teach me the true meaning of fasting this Lent. Help me to release not just food, but anything that holds me back from loving You and loving others well. Fill the empty spaces with Your presence. Amen.',
+    reflectionQuestion:
+      'Something to think about today: What would a meaningful fast look like for you this Lenten season — what could you release to make room for more of God?',
+  },
+  {
+    id: 'devotional-seasonal-lent-03',
+    dayIndex: 107,
+    title: 'Humility Before God',
+    theme: 'identity',
+    season: 'lent',
+    quote: {
+      text: 'Humility is not thinking less of yourself, it is thinking of yourself less.',
+      attribution: 'C.S. Lewis',
+    },
+    passage: {
+      reference: 'Psalm 51:10-12',
+      verses: [
+        {
+          number: 10,
+          text: 'Create in me a clean heart, O God. Renew a right spirit within me.',
+        },
+        {
+          number: 11,
+          text: 'Do not throw me from your presence, and do not take your Holy Spirit from me.',
+        },
+        {
+          number: 12,
+          text: 'Restore to me the joy of your salvation. Uphold me with a willing spirit.',
+        },
+      ],
+    },
+    reflection: [
+      'David wrote this psalm after his greatest failure. It is a prayer of raw honesty — no excuses, no deflection, just a broken man asking God to start over in his heart.',
+      'Lent invites us into this same posture of humility. Not because God demands groveling, but because honest self-examination is the first step toward genuine renewal.',
+      '"Create in me a clean heart" is a request only God can fulfill. We cannot clean ourselves. We can only open our hands and ask the Creator to do what only He can do.',
+      'The promise at the end is beautiful: restored joy. Humility before God does not lead to despair — it leads to freedom and fresh starts.',
+    ],
+    prayer:
+      'Create in me a clean heart, O God. I come to You this Lent with honesty about my failures and my need. Renew a right spirit within me and restore the joy of knowing You. Amen.',
+    reflectionQuestion:
+      'Something to think about today: What area of your life needs a fresh start from God this Lenten season?',
+  },
+  {
+    id: 'devotional-seasonal-lent-04',
+    dayIndex: 108,
+    title: 'The Cost of Love',
+    theme: 'hope',
+    season: 'lent',
+    quote: {
+      text: 'To love at all is to be vulnerable.',
+      attribution: 'C.S. Lewis',
+    },
+    passage: {
+      reference: 'Isaiah 53:3-5',
+      verses: [
+        {
+          number: 3,
+          text: 'He was despised and rejected by men, a man of suffering and acquainted with disease. He was despised as one from whom men hide their face; and we did not respect him.',
+        },
+        {
+          number: 4,
+          text: 'Surely he has borne our sickness and carried our suffering; yet we considered him plagued, struck by God, and afflicted.',
+        },
+        {
+          number: 5,
+          text: 'But he was pierced for our transgressions. He was crushed for our iniquities. The punishment that brought our peace was on him; and by his wounds we are healed.',
+        },
+      ],
+    },
+    reflection: [
+      'Isaiah 53 is the heart of the Lenten journey. It describes a Suffering Servant who willingly bears the pain, rejection, and sin of others — not because He is weak, but because He is love.',
+      'Lent asks us to sit with the cost of love. Jesus did not avoid suffering; He walked toward it. His wounds became our healing.',
+      'There is a temptation to rush past the sorrow of Lent toward the joy of Easter. But the depth of Easter\'s celebration is proportional to the depth of Lent\'s reflection.',
+      'Today, simply sit with the weight of this passage. Let it soften your heart. Let the cost of His love deepen your gratitude.',
+    ],
+    prayer:
+      'Jesus, I am humbled by the depth of Your sacrifice. You were pierced for my transgressions and crushed for my iniquities. Help me not to rush past the weight of this truth, but to let it transform my heart with gratitude. Amen.',
+    reflectionQuestion:
+      'Something to think about today: How does reflecting on Christ\'s suffering change the way you approach your own struggles?',
+  },
+  {
+    id: 'devotional-seasonal-lent-05',
+    dayIndex: 109,
+    title: 'Renewal and New Growth',
+    theme: 'hope',
+    season: 'lent',
+    quote: {
+      text: 'God allows us to experience the low points of life in order to teach us lessons that we could learn in no other way.',
+      attribution: 'C.S. Lewis',
+    },
+    passage: {
+      reference: 'Ezekiel 36:26-27',
+      verses: [
+        {
+          number: 26,
+          text: 'I will also give you a new heart, and I will put a new spirit within you. I will take away the stony heart out of your flesh, and I will give you a heart of flesh.',
+        },
+        {
+          number: 27,
+          text: 'I will put my Spirit within you, and cause you to walk in my statutes. You will keep my ordinances and do them.',
+        },
+      ],
+    },
+    reflection: [
+      'The promise of a new heart is the ultimate Lenten hope. God does not just forgive — He transforms. He takes what is hard and makes it soft. He replaces stone with flesh.',
+      'Lent is a season of dying to the old and making room for the new. Like a garden in late winter, the ground must be broken and cleared before new life can emerge.',
+      'God promises to put His Spirit within us — not just around us or near us, but within. This is an intimate, interior renewal that changes us from the inside out.',
+      'As Lent moves toward Easter, carry this promise with you: God is making all things new, and that includes you.',
+    ],
+    prayer:
+      'Lord, give me a new heart this Lent. Remove what is hard and resistant in me, and replace it with tenderness and openness to Your Spirit. I trust You to do the transforming work that only You can do. Amen.',
+    reflectionQuestion:
+      'Something to think about today: Where in your life do you sense God wanting to bring new growth this season?',
+  },
+
+  // Easter (3)
+  {
+    id: 'devotional-seasonal-easter-01',
+    dayIndex: 110,
+    title: 'He Is Risen',
+    theme: 'hope',
+    season: 'easter',
+    quote: {
+      text: 'The resurrection gives my life meaning and direction and the opportunity to start over no matter what my circumstances.',
+      attribution: 'Robert Flatt',
+    },
+    passage: {
+      reference: 'Matthew 28:5-6',
+      verses: [
+        {
+          number: 5,
+          text: 'The angel answered the women, "Do not be afraid, for I know that you seek Jesus, who has been crucified.',
+        },
+        {
+          number: 6,
+          text: 'He is not here, for he has risen, just like he said. Come, see the place where the Lord was lying."',
+        },
+      ],
+    },
+    reflection: [
+      '"He is not here, for he has risen." These may be the most world-changing words ever spoken. The tomb is empty. Death did not have the final word.',
+      'The resurrection is not just a historical event — it is a present reality. The same power that raised Jesus from the dead is alive and at work in you today.',
+      'Notice the angel\'s first words: "Do not be afraid." The resurrection answers our deepest fears. Death, failure, loss, hopelessness — none of these are final for those who belong to the risen Christ.',
+      'Easter is the great exclamation point on the promises of God. He said He would rise, and He did. He says He will never leave you, and He will not.',
+    ],
+    prayer:
+      'Risen Lord, I celebrate Your victory over death today. Let the reality of Your resurrection fill me with courage and hope. Because You live, I can face anything. Thank You for the empty tomb. Amen.',
+    reflectionQuestion:
+      'Something to think about today: How does the reality of the resurrection change the way you face your biggest fear?',
+  },
+  {
+    id: 'devotional-seasonal-easter-02',
+    dayIndex: 111,
+    title: 'New Life in Christ',
+    theme: 'identity',
+    season: 'easter',
+    quote: {
+      text: 'Easter says you can put truth in a grave, but it will not stay there.',
+      attribution: 'Clarence W. Hall',
+    },
+    passage: {
+      reference: 'Romans 6:4-5',
+      verses: [
+        {
+          number: 4,
+          text: 'We were buried therefore with him through baptism into death, that just as Christ was raised from the dead through the glory of the Father, so we also might walk in newness of life.',
+        },
+        {
+          number: 5,
+          text: 'For if we have become united with him in the likeness of his death, we will also be part of his resurrection.',
+        },
+      ],
+    },
+    reflection: [
+      'Easter is not just about what happened to Jesus — it is about what happens to us. When Christ rose, He opened the door for all of us to walk in newness of life.',
+      'Paul says we are "united with him." The resurrection is not a spectator event. We are participants. The old has died with Christ, and the new has risen with Him.',
+      'Walking in newness of life is a daily choice. Every morning is a mini-resurrection — a chance to leave behind what was and step into what God is doing today.',
+      'This Easter season, embrace the new life that is yours in Christ. You are not defined by your past failures. You are defined by His risen life in you.',
+    ],
+    prayer:
+      'Jesus, thank You for making me a participant in Your resurrection. Help me to walk in the newness of life You have given me. I leave behind what was and embrace what You are doing today. Amen.',
+    reflectionQuestion:
+      'Something to think about today: What old pattern or mindset do you need to leave in the grave so you can walk in newness of life?',
+  },
+  {
+    id: 'devotional-seasonal-easter-03',
+    dayIndex: 112,
+    title: 'Victory Over Death',
+    theme: 'hope',
+    season: 'easter',
+    quote: {
+      text: 'Our Lord has written the promise of the resurrection, not in books alone, but in every leaf in springtime.',
+      attribution: 'Martin Luther',
+    },
+    passage: {
+      reference: '1 Corinthians 15:55-57',
+      verses: [
+        {
+          number: 55,
+          text: '"Death, where is your sting? Hades, where is your victory?"',
+        },
+        {
+          number: 56,
+          text: 'The sting of death is sin, and the power of sin is the law.',
+        },
+        {
+          number: 57,
+          text: 'But thanks be to God, who gives us the victory through our Lord Jesus Christ.',
+        },
+      ],
+    },
+    reflection: [
+      'Paul writes with triumphant defiance: "Death, where is your sting?" This is not wishful thinking — it is a declaration rooted in the resurrection of Jesus Christ.',
+      'For centuries, death had the final word in every human story. But Easter rewrote the ending. Death has been defeated, and its power has been broken.',
+      'The victory is not something we earn or achieve. It is given to us — "thanks be to God, who gives us the victory." This is pure grace.',
+      'In the Easter season, carry this victory with you. When fear whispers, when grief weighs heavy, when the darkness feels close — remember: death has lost its sting.',
+    ],
+    prayer:
+      'Father, thank You for the victory over death through Jesus Christ. When fear and grief press in, remind me that death has lost its sting. I live in the light of Your triumph. Amen.',
+    reflectionQuestion:
+      'Something to think about today: How does Easter\'s promise of victory over death bring comfort to something you are facing right now?',
+  },
+
+  // Christmas (3)
+  {
+    id: 'devotional-seasonal-christmas-01',
+    dayIndex: 113,
+    title: 'God With Us',
+    theme: 'hope',
+    season: 'christmas',
+    quote: {
+      text: 'The Son of God became a man to enable men to become sons of God.',
+      attribution: 'C.S. Lewis',
+    },
+    passage: {
+      reference: 'John 1:14',
+      verses: [
+        {
+          number: 14,
+          text: 'The Word became flesh and lived among us. We saw his glory, such glory as of the only born Son of the Father, full of grace and truth.',
+        },
+      ],
+    },
+    reflection: [
+      '"The Word became flesh." In these five words, John captures the most extraordinary event in human history. The eternal God — who spoke the universe into existence — chose to enter it as a baby.',
+      'Christmas is the festival of the Incarnation. God did not stay at a distance. He did not shout instructions from heaven. He came down. He lived among us.',
+      'John says they saw His glory — but it was a different kind of glory than anyone expected. Not the glory of a palace, but the glory of grace and truth. The glory of a servant.',
+      'This Christmas, may the wonder of the Incarnation overwhelm you afresh. The Creator of galaxies took on skin and bones — for you.',
+    ],
+    prayer:
+      'Lord Jesus, the mystery of Your incarnation fills me with awe. You became flesh and lived among us. Help me to never lose the wonder of Christmas — that the God of the universe came near to me. Amen.',
+    reflectionQuestion:
+      'Something to think about today: What does it mean to you personally that God chose to "live among us"?',
+  },
+  {
+    id: 'devotional-seasonal-christmas-02',
+    dayIndex: 114,
+    title: 'The Gift of God',
+    theme: 'gratitude',
+    season: 'christmas',
+    quote: {
+      text: 'The great gift of Christmas is what God has given us: Himself.',
+      attribution: 'Max Lucado',
+    },
+    passage: {
+      reference: 'Luke 2:10-11',
+      verses: [
+        {
+          number: 10,
+          text: 'The angel said to them, "Do not be afraid, for behold, I bring you good news of great joy which will be to all the people.',
+        },
+        {
+          number: 11,
+          text: 'For there is born to you today, in David\'s city, a Savior, who is Christ the Lord."',
+        },
+      ],
+    },
+    reflection: [
+      'Good news of great joy — for all the people. Not just for the religious, the powerful, or the prepared. The Christmas announcement went first to shepherds, the ordinary and overlooked.',
+      'The angel\'s words are worth savoring: "born to you." This is personal. The Savior was not born for an abstract purpose. He was born for you.',
+      'Christmas is, at its heart, about a gift. Not the gifts under the tree, but the Gift who lay in a manger. God gave Himself — freely, completely, lovingly.',
+      'Today, receive the gift. Not with guilt or obligation, but with the simple gratitude of a child opening a present from someone who loves them deeply.',
+    ],
+    prayer:
+      'Father, thank You for the gift of Your Son. In the midst of holiday busyness, bring me back to the simple truth: a Savior is born, and He was born for me. Fill my heart with gratitude and wonder. Amen.',
+    reflectionQuestion:
+      'Something to think about today: How can you receive God\'s gift of Himself more fully this Christmas season?',
+  },
+  {
+    id: 'devotional-seasonal-christmas-03',
+    dayIndex: 115,
+    title: 'Peace on Earth',
+    theme: 'hope',
+    season: 'christmas',
+    quote: {
+      text: 'Christmas is not as much about opening our presents as opening our hearts.',
+      attribution: 'Janice Maeditere',
+    },
+    passage: {
+      reference: 'Luke 2:13-14',
+      verses: [
+        {
+          number: 13,
+          text: 'Suddenly, there was with the angel a multitude of the heavenly army praising God and saying,',
+        },
+        {
+          number: 14,
+          text: '"Glory to God in the highest, on earth peace, good will toward men."',
+        },
+      ],
+    },
+    reflection: [
+      'The heavens erupted with praise on the night Jesus was born. "Glory to God in the highest, on earth peace, good will toward men." It is a declaration that heaven and earth are being reconciled.',
+      'The peace of Christmas is not the absence of conflict. It is the presence of God. In a world full of turmoil, the birth of Jesus announces that God is at work, making all things new.',
+      'Good will toward men — this is the posture of God toward humanity. Not anger, not indifference, but good will. Favor. Delight. Welcome.',
+      'As you celebrate Christmas, carry this peace with you. Share it with those who are lonely, anxious, or grieving. You are a bearer of the peace the angels sang about.',
+    ],
+    prayer:
+      'Prince of Peace, let Your peace fill my heart and overflow into the lives of those around me this Christmas. In a world that aches for peace, help me to be a carrier of the good news the angels proclaimed. Amen.',
+    reflectionQuestion:
+      'Something to think about today: Who in your life needs to experience the peace of Christmas, and how can you bring it to them?',
+  },
+
+  // Holy Week (2)
+  {
+    id: 'devotional-seasonal-holyweek-01',
+    dayIndex: 116,
+    title: 'The Road to the Cross',
+    theme: 'hope',
+    season: 'holy-week',
+    quote: {
+      text: 'The cross is the only ladder high enough to touch Heaven\'s threshold.',
+      attribution: 'George Muller',
+    },
+    passage: {
+      reference: 'Mark 10:33-34',
+      verses: [
+        {
+          number: 33,
+          text: '"Behold, we are going up to Jerusalem. The Son of Man will be delivered to the chief priests and the scribes. They will condemn him to death, and will deliver him to the Gentiles.',
+        },
+        {
+          number: 34,
+          text: 'They will mock him, spit on him, scourge him, and kill him. On the third day he will rise again."',
+        },
+      ],
+    },
+    reflection: [
+      'Jesus walked toward Jerusalem with full knowledge of what awaited Him. There was no ambiguity, no illusion. He knew the mocking, the scourging, the death — and He went anyway.',
+      'Holy Week invites us to walk this road with Jesus in our imagination and in our hearts. Not to rush to the resurrection, but to feel the weight of each step toward the cross.',
+      'The courage of Jesus in this passage is staggering. He did not run. He did not hide. He set His face toward the place of sacrifice because of His love for you.',
+      'Today, slow down. Walk with Jesus. Let the gravity of His journey deepen your understanding of how far love was willing to go.',
+    ],
+    prayer:
+      'Jesus, I am in awe of Your courage. You walked toward suffering and death because You loved me. During this Holy Week, help me to slow down, to walk with You, and to understand the depth of Your sacrifice. Amen.',
+    reflectionQuestion:
+      'Something to think about today: What does it mean to you that Jesus walked toward the cross willingly?',
+  },
+  {
+    id: 'devotional-seasonal-holyweek-02',
+    dayIndex: 117,
+    title: 'It Is Finished',
+    theme: 'forgiveness',
+    season: 'holy-week',
+    quote: {
+      text: 'The cross was two pieces of dead wood; and a helpless, unresisting Man was nailed to it; yet it was mightier than the world.',
+      attribution: 'Fulton J. Sheen',
+    },
+    passage: {
+      reference: 'John 19:28-30',
+      verses: [
+        {
+          number: 28,
+          text: 'After this, Jesus, seeing that all things were now finished, that the Scripture might be fulfilled, said, "I am thirsty."',
+        },
+        {
+          number: 29,
+          text: 'Now a vessel full of vinegar was set there; so they put a sponge full of the vinegar on hyssop, and held it at his mouth.',
+        },
+        {
+          number: 30,
+          text: 'When Jesus therefore had received the vinegar, he said, "It is finished." Then he bowed his head and gave up his spirit.',
+        },
+      ],
+    },
+    reflection: [
+      '"It is finished." Three words that changed everything. Not "I am finished" — as in defeated — but "It is finished" — as in accomplished. The work of salvation is complete.',
+      'In those final moments, Jesus fulfilled every prophecy, satisfied every demand of justice, and opened the way for every sinner to come home to God.',
+      'Holy Week confronts us with the cost of grace. It was not cheap. It was not easy. It cost Jesus everything. And He paid it willingly.',
+      'There is nothing you need to add to what Christ accomplished on the cross. It is finished. Rest in that truth today.',
+    ],
+    prayer:
+      'Lord Jesus, thank You for finishing the work of salvation on my behalf. I cannot add to what You have done. Help me to simply receive Your grace with a grateful and humble heart this Holy Week. It is finished. Amen.',
+    reflectionQuestion:
+      'Something to think about today: Are there areas where you are trying to earn what Christ has already freely given?',
+  },
+
+  // Pentecost (2)
+  {
+    id: 'devotional-seasonal-pentecost-01',
+    dayIndex: 118,
+    title: 'Filled with Fire',
+    theme: 'purpose',
+    season: 'pentecost',
+    quote: {
+      text: 'The Spirit-filled life is not a special, deluxe edition of Christianity. It is part and parcel of the total plan of God for His people.',
+      attribution: 'A.W. Tozer',
+    },
+    passage: {
+      reference: 'Acts 2:1-4',
+      verses: [
+        {
+          number: 1,
+          text: 'Now when the day of Pentecost had come, they were all with one accord in one place.',
+        },
+        {
+          number: 2,
+          text: 'Suddenly there came from the sky a sound like the rushing of a mighty wind, and it filled all the house where they were sitting.',
+        },
+        {
+          number: 3,
+          text: 'Tongues like fire appeared and were distributed to them, and one sat on each of them.',
+        },
+        {
+          number: 4,
+          text: 'They were all filled with the Holy Spirit, and began to speak with other languages, as the Spirit gave them the ability to speak.',
+        },
+      ],
+    },
+    reflection: [
+      'Pentecost is the birthday of the church — the day when God poured out His Spirit on ordinary people and turned them into a movement that would change the world.',
+      'The images are vivid: rushing wind, tongues of fire, new languages. The Holy Spirit is not subtle. He is powerful, transformative, and unmistakable.',
+      'But notice where the Spirit came: to people who were gathered together, in one accord, in one place. Community and unity are the conditions for the Spirit\'s fullest work.',
+      'On this Pentecost, ask God to fill you afresh with His Spirit. Not for your own benefit alone, but for the sake of the world that needs the love of God through you.',
+    ],
+    prayer:
+      'Holy Spirit, fill me afresh today. I want to be empowered not just for my own growth, but to be Your witness in the world. Set my heart on fire with love and purpose. Amen.',
+    reflectionQuestion:
+      'Something to think about today: How has the Holy Spirit empowered you recently, and how can you be more open to His work?',
+  },
+  {
+    id: 'devotional-seasonal-pentecost-02',
+    dayIndex: 119,
+    title: 'Empowered for Mission',
+    theme: 'community',
+    season: 'pentecost',
+    quote: {
+      text: 'The church is not a building; the church is not a steeple; the church is the people.',
+      attribution: 'Unknown',
+    },
+    passage: {
+      reference: 'Acts 1:8',
+      verses: [
+        {
+          number: 8,
+          text: 'But you will receive power when the Holy Spirit has come upon you. You will be witnesses to me in Jerusalem, in all Judea and Samaria, and to the uttermost parts of the earth.',
+        },
+      ],
+    },
+    reflection: [
+      'Before He ascended, Jesus gave His followers a promise and a mission: "You will receive power... You will be witnesses." The two are inseparable — the power of the Spirit is given for the purpose of witness.',
+      'Pentecost reminds us that the Christian life is not meant to be lived in isolation. The Spirit empowers us to go outward — to our neighborhoods, our cities, and to the ends of the earth.',
+      'Being a witness does not require eloquence or theological degrees. It requires simply telling what you have seen and experienced of God\'s goodness.',
+      'Today, remember that the same Spirit who empowered the first disciples empowers you. You have something to share — your story, your faith, your hope.',
+    ],
+    prayer:
+      'Lord, thank You for the gift of Your Holy Spirit. Empower me to be Your witness today — in my home, my workplace, and my community. Give me courage to share the hope I have found in You. Amen.',
+    reflectionQuestion:
+      'Something to think about today: Who in your life needs to hear about the hope you have found in Christ?',
+  },
 ]
 
 /**
  * Returns the devotional for a given date with optional day offset.
  * Deterministic — same date always returns same devotional.
- * Uses day-of-year modulo pool size. Matches verse-of-the-day.ts pattern.
+ * During named liturgical seasons, prioritizes seasonal devotionals (cycling within the season).
+ * Falls back to general pool rotation during Ordinary Time or if no seasonal devotionals exist.
  */
 export function getTodaysDevotional(date: Date = new Date(), dayOffset: number = 0): Devotional {
   const adjustedDate = new Date(date)
   adjustedDate.setDate(adjustedDate.getDate() + dayOffset)
+
+  const { currentSeason, isNamedSeason } = getLiturgicalSeason(adjustedDate)
+
+  if (isNamedSeason) {
+    const seasonalPool = DEVOTIONAL_POOL.filter((d) => d.season === currentSeason.id)
+    if (seasonalPool.length > 0) {
+      const dayInSeason = getDayWithinSeason(currentSeason.id, adjustedDate)
+      return seasonalPool[dayInSeason % seasonalPool.length]
+    }
+  }
+
+  // Fallback: general (non-seasonal) pool rotation
+  const generalPool = DEVOTIONAL_POOL.filter((d) => !d.season)
   const year = adjustedDate.getFullYear()
   const dayOfYear = Math.floor(
     (Date.UTC(year, adjustedDate.getMonth(), adjustedDate.getDate()) - Date.UTC(year, 0, 0)) /
       (1000 * 60 * 60 * 24),
   )
-  return DEVOTIONAL_POOL[dayOfYear % DEVOTIONAL_POOL.length]
+  return generalPool[dayOfYear % generalPool.length]
 }
 
 /**

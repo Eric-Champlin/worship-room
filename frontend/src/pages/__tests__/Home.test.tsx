@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { Home } from '@/pages/Home'
@@ -96,9 +96,10 @@ describe('Home', () => {
 
     it('CTA links to /devotional', () => {
       renderHome()
-      expect(
-        screen.getByRole('link', { name: /Read Today/i })
-      ).toHaveAttribute('href', '/devotional')
+      const heading = screen.getByRole('heading', { name: /Start Each Morning with God/i })
+      const section = heading.closest('section')!
+      const ctaLink = within(section).getByRole('link', { name: /Read Today/i })
+      expect(ctaLink).toHaveAttribute('href', '/devotional')
     })
   })
 })

@@ -35,4 +35,5 @@ export interface Devotional {
   reflection: string[]
   prayer: string
   reflectionQuestion: string
+  season?: import('@/constants/liturgical-calendar').LiturgicalSeasonId
 }

@@ -11,13 +11,14 @@ const VALID_THEMES: QuestionOfTheDay['theme'][] = [
 ]
 
 describe('QUESTION_OF_THE_DAY_POOL', () => {
-  it('has exactly 60 questions', () => {
-    expect(QUESTION_OF_THE_DAY_POOL).toHaveLength(60)
+  it('has exactly 72 questions (60 original + 12 liturgical)', () => {
+    expect(QUESTION_OF_THE_DAY_POOL).toHaveLength(72)
   })
 
-  it('has 10 questions per theme', () => {
+  it('original 60 have 10 questions per theme', () => {
+    const original60 = QUESTION_OF_THE_DAY_POOL.slice(0, 60)
     const counts: Record<string, number> = {}
-    for (const q of QUESTION_OF_THE_DAY_POOL) {
+    for (const q of original60) {
       counts[q.theme] = (counts[q.theme] || 0) + 1
     }
     for (const theme of VALID_THEMES) {
@@ -96,5 +97,55 @@ describe('getTodaysQuestion', () => {
     const question = getTodaysQuestion()
     expect(question).toBeDefined()
     expect(VALID_THEMES).toContain(question.theme)
+  })
+})
+
+describe('liturgical season questions', () => {
+  it('12 new questions have liturgicalSeason field', () => {
+    const liturgical = QUESTION_OF_THE_DAY_POOL.filter((q) => q.liturgicalSeason)
+    expect(liturgical).toHaveLength(12)
+  })
+
+  it('distribution: 3 advent, 3 lent, 3 easter, 3 christmas', () => {
+    const counts = new Map<string, number>()
+    QUESTION_OF_THE_DAY_POOL.forEach((q) => {
+      if (q.liturgicalSeason) {
+        counts.set(q.liturgicalSeason, (counts.get(q.liturgicalSeason) || 0) + 1)
+      }
+    })
+    expect(counts.get('advent')).toBe(3)
+    expect(counts.get('lent')).toBe(3)
+    expect(counts.get('easter')).toBe(3)
+    expect(counts.get('christmas')).toBe(3)
+  })
+
+  it('getTodaysQuestion returns seasonal during Advent day 0', () => {
+    // Advent 2026 starts Nov 29
+    const adventDay0 = new Date(2026, 10, 29)
+    const question = getTodaysQuestion(adventDay0)
+    expect(question.liturgicalSeason).toBe('advent')
+  })
+
+  it('falls back to general pool after seasonal questions exhausted', () => {
+    // Advent has 3 questions — day 3+ should fall back
+    // Advent 2026 starts Nov 29 → day 3 is Dec 2
+    const adventDay3 = new Date(2026, 11, 2)
+    const question = getTodaysQuestion(adventDay3)
+    // Should NOT be liturgical advent (exhausted)
+    expect(question.liturgicalSeason).not.toBe('advent')
+  })
+
+  it('returns general during Ordinary Time', () => {
+    // July 15, 2026 is Ordinary Time
+    const ordinaryDate = new Date(2026, 6, 15)
+    const question = getTodaysQuestion(ordinaryDate)
+    expect(question).toBeDefined()
+    expect(question.text).toBeTruthy()
+  })
+
+  it('all questions have unique IDs', () => {
+    const ids = QUESTION_OF_THE_DAY_POOL.map((q) => q.id)
+    const uniqueIds = new Set(ids)
+    expect(uniqueIds.size).toBe(ids.length)
   })
 })

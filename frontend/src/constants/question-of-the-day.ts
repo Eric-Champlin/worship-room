@@ -1,8 +1,12 @@
+import type { LiturgicalSeasonId } from '@/constants/liturgical-calendar'
+import { getLiturgicalSeason, getDayWithinSeason } from '@/constants/liturgical-calendar'
+
 export interface QuestionOfTheDay {
   id: string
   text: string
   theme: 'faith_journey' | 'practical' | 'reflective' | 'encouraging' | 'community' | 'seasonal'
   hint?: string
+  liturgicalSeason?: LiturgicalSeasonId
 }
 
 export const QUESTION_THEMES = [
@@ -356,10 +360,115 @@ export const QUESTION_OF_THE_DAY_POOL: QuestionOfTheDay[] = [
     text: 'What is one thing you want to surrender to God before this year ends?',
     theme: 'seasonal',
   },
+
+  // --- Liturgical Season Questions (12) ---
+
+  // Advent (3)
+  {
+    id: 'qotd-61',
+    text: 'What are you most anticipating about the coming of Christ this Advent season?',
+    theme: 'seasonal',
+    liturgicalSeason: 'advent',
+    hint: 'Advent is a season of waiting and hope.',
+  },
+  {
+    id: 'qotd-62',
+    text: 'How are you preparing your heart for Christmas this Advent?',
+    theme: 'seasonal',
+    liturgicalSeason: 'advent',
+  },
+  {
+    id: 'qotd-63',
+    text: 'What does the theme of hope mean to you during this Advent season?',
+    theme: 'seasonal',
+    liturgicalSeason: 'advent',
+    hint: 'Hope is one of the four Advent themes: hope, peace, joy, and love.',
+  },
+
+  // Lent (3)
+  {
+    id: 'qotd-64',
+    text: 'What spiritual practice are you taking on or giving up this Lenten season?',
+    theme: 'seasonal',
+    liturgicalSeason: 'lent',
+    hint: 'Lent is a season of self-examination and renewal.',
+  },
+  {
+    id: 'qotd-65',
+    text: 'How is God drawing you closer to Himself during this season of Lent?',
+    theme: 'seasonal',
+    liturgicalSeason: 'lent',
+  },
+  {
+    id: 'qotd-66',
+    text: 'What area of your life is God inviting you to surrender this Lent?',
+    theme: 'seasonal',
+    liturgicalSeason: 'lent',
+    hint: 'Surrender is not defeat — it is trust.',
+  },
+
+  // Easter (3)
+  {
+    id: 'qotd-67',
+    text: 'How does the resurrection of Jesus give you hope in your daily life?',
+    theme: 'seasonal',
+    liturgicalSeason: 'easter',
+    hint: 'Easter is not just a day — it is a season of celebration.',
+  },
+  {
+    id: 'qotd-68',
+    text: 'What area of your life feels like it needs resurrection right now?',
+    theme: 'seasonal',
+    liturgicalSeason: 'easter',
+  },
+  {
+    id: 'qotd-69',
+    text: 'How are you celebrating the new life that Easter represents?',
+    theme: 'seasonal',
+    liturgicalSeason: 'easter',
+    hint: 'New life can show up in unexpected places.',
+  },
+
+  // Christmas (3)
+  {
+    id: 'qotd-70',
+    text: 'What does the birth of Jesus mean for your life today?',
+    theme: 'seasonal',
+    liturgicalSeason: 'christmas',
+    hint: 'Christmas is the celebration of God entering our world.',
+  },
+  {
+    id: 'qotd-71',
+    text: 'How are you sharing the love of Christ with others this Christmas season?',
+    theme: 'seasonal',
+    liturgicalSeason: 'christmas',
+  },
+  {
+    id: 'qotd-72',
+    text: 'What gift of God are you most grateful for this Christmas?',
+    theme: 'seasonal',
+    liturgicalSeason: 'christmas',
+    hint: 'The greatest gift is not under the tree.',
+  },
 ]
 
 export function getTodaysQuestion(date: Date = new Date()): QuestionOfTheDay {
-  // Extract local date components, then use UTC arithmetic to avoid DST issues
+  const { currentSeason, isNamedSeason } = getLiturgicalSeason(date)
+
+  if (isNamedSeason) {
+    const seasonalQuestions = QUESTION_OF_THE_DAY_POOL.filter(
+      (q) => q.liturgicalSeason === currentSeason.id,
+    )
+    if (seasonalQuestions.length > 0) {
+      const dayInSeason = getDayWithinSeason(currentSeason.id, date)
+      // After all seasonal questions shown, fall back to general pool
+      if (dayInSeason < seasonalQuestions.length) {
+        return seasonalQuestions[dayInSeason]
+      }
+    }
+  }
+
+  // Fallback: general pool rotation
   const year = date.getFullYear()
   const dayOfYear = Math.floor(
     (Date.UTC(year, date.getMonth(), date.getDate()) - Date.UTC(year, 0, 0)) /
