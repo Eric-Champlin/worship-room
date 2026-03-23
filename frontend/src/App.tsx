@@ -39,6 +39,7 @@ import { ReadingPlanDetail } from './pages/ReadingPlanDetail'
 import { BibleBrowser } from './pages/BibleBrowser'
 import { BibleReader } from './pages/BibleReader'
 import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
+import { InstallBanner } from '@/components/pwa/InstallBanner'
 import { useAuth } from '@/hooks/useAuth'
 import { lazy, Suspense } from 'react'
 
@@ -100,6 +101,7 @@ function App() {
         <AuthModalProvider>
         <AudioProvider>
         <UpdatePrompt />
+        <InstallBanner />
         <Routes>
           <Route path="/" element={<RootRoute />} />
           <Route path="/health" element={<Health />} />

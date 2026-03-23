@@ -3,6 +3,8 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineMessage } from '@/components/pwa/OfflineMessage'
 
 interface InlineComposerProps {
   isOpen: boolean
@@ -11,6 +13,7 @@ interface InlineComposerProps {
 }
 
 export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProps) {
+  const { isOnline } = useOnlineStatus()
   const [content, setContent] = useState('')
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<PrayerCategory | null>(null)
@@ -73,6 +76,14 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           Share a Prayer Request
         </h2>
 
+        {!isOnline && (
+          <OfflineMessage
+            variant="light"
+            message="Posting prayers requires an internet connection"
+            className="mb-3 rounded-lg border border-gray-100"
+          />
+        )}
+
         <textarea
           ref={textareaRef}
           value={content}
@@ -133,7 +144,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           <Button
             type="button"
             variant="primary"
-            disabled={!content.trim() || content.length > 1000}
+            disabled={!isOnline || !content.trim() || content.length > 1000}
             onClick={handleSubmit}
           >
             Submit Prayer Request

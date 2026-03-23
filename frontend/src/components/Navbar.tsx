@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Bell, Book, BookOpen, ChevronDown, Menu, Sparkles, X,
+  Bell, Book, BookOpen, ChevronDown, Menu, Sparkles, WifiOff, X,
   Star, Gift, Heart, Cross, Sun, Flame, Leaf,
 } from 'lucide-react'
 import type { LucideIcon, LucideProps } from 'lucide-react'
@@ -12,6 +12,7 @@ import { useNotificationActions } from '@/hooks/useNotificationActions'
 import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 const SEASON_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   Star, Gift, Sparkles, Heart, Cross, Sun, Flame, Leaf,
@@ -297,8 +298,20 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
 
 function DesktopAuthActions({ transparent }: { transparent: boolean }) {
   const authModal = useAuthModal()
+  const { isOnline } = useOnlineStatus()
   return (
     <div className="hidden items-center gap-4 lg:flex">
+      {!isOnline && (
+        <div className="group relative" title="You're offline — some features are limited">
+          <WifiOff
+            className="h-4 w-4 text-white/40"
+            aria-label="You're offline — some features are limited"
+          />
+          <div className="absolute -bottom-8 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white group-hover:block">
+            You&apos;re offline
+          </div>
+        </div>
+      )}
       <button
         type="button"
         onClick={() => authModal?.openAuthModal(undefined, 'login')}
@@ -355,6 +368,7 @@ const MOBILE_DRAWER_EXTRA_LINKS = [
 
 function DesktopUserActions() {
   const { user, logout } = useAuth()
+  const { isOnline } = useOnlineStatus()
   const navigate = useNavigate()
   const [isAvatarOpen, setIsAvatarOpen] = useState(false)
   const [isBellOpen, setIsBellOpen] = useState(false)
@@ -426,6 +440,17 @@ function DesktopUserActions() {
 
   return (
     <div className="hidden items-center gap-3 lg:flex" ref={wrapperRef}>
+      {!isOnline && (
+        <div className="group relative" title="You're offline — some features are limited">
+          <WifiOff
+            className="h-4 w-4 text-white/40"
+            aria-label="You're offline — some features are limited"
+          />
+          <div className="absolute -bottom-8 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white group-hover:block">
+            You&apos;re offline
+          </div>
+        </div>
+      )}
       <div ref={bellRef} className="relative">
         <NotificationBell
           unreadCount={unreadCount}
@@ -516,6 +541,7 @@ interface MobileDrawerProps {
 function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
   const authModal = useAuthModal()
   const { isAuthenticated, user, logout } = useAuth()
+  const { isOnline } = useOnlineStatus()
   const navigate = useNavigate()
   const drawerRef = useRef<HTMLElement>(null)
 
@@ -574,6 +600,22 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
           )}
         >
           <div className="flex flex-col px-4 py-4">
+            {/* Offline indicator */}
+            {!isOnline && (
+              <div className={cn(
+                'mb-3 flex items-center gap-2 px-3 pb-3',
+                isAuthenticated ? 'border-b border-white/15' : 'border-b border-gray-100'
+              )}>
+                <WifiOff
+                  className={cn('h-4 w-4', isAuthenticated ? 'text-white/40' : 'text-text-light')}
+                  aria-label="You're offline — some features are limited"
+                />
+                <span className={cn('text-xs', isAuthenticated ? 'text-white/40' : 'text-text-light')}>
+                  You&apos;re offline
+                </span>
+              </div>
+            )}
+
             {/* Logged-in: avatar + name at top */}
             {isAuthenticated && user && (
               <div className="mb-3 flex items-center gap-3 px-3 pb-3 border-b border-white/15">

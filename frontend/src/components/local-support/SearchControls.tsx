@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { MapPin, Search, Loader2 } from 'lucide-react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineMessage } from '@/components/pwa/OfflineMessage'
 
 interface SearchControlsProps {
   onSearch: (lat: number, lng: number, radius: number) => void
@@ -22,6 +24,7 @@ export function SearchControls({
   isLoading,
   onInteractionBlocked,
 }: SearchControlsProps) {
+  const { isOnline } = useOnlineStatus()
   const [locationInput, setLocationInput] = useState('')
   const [radius, setRadius] = useState(initialRadius ?? 25)
   const [coordsRef, setCoordsRef] = useState<{ lat: number; lng: number } | null>(
@@ -105,6 +108,10 @@ export function SearchControls({
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [])
+
+  if (!isOnline) {
+    return <OfflineMessage variant="light" message="Search requires an internet connection" />
+  }
 
   return (
     <div className="space-y-4">

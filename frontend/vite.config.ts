@@ -64,6 +64,21 @@ export default defineConfig({
               },
             },
           },
+          // Audio files (ambient sounds) — cache on first play for offline use
+          {
+            urlPattern: /\.(?:mp3|wav|ogg|m4a)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'wr-audio-cache',
+              expiration: {
+                maxEntries: 10,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              rangeRequests: true,
+            },
+          },
           {
             urlPattern: ({ sameOrigin }) => sameOrigin,
             handler: 'NetworkFirst',
