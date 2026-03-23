@@ -36,6 +36,8 @@ import { DevotionalPage } from './pages/DevotionalPage'
 import { MyPrayers } from './pages/MyPrayers'
 import { ReadingPlans } from './pages/ReadingPlans'
 import { ReadingPlanDetail } from './pages/ReadingPlanDetail'
+import { Challenges } from './pages/Challenges'
+import { ChallengeDetail } from './pages/ChallengeDetail'
 import { BibleBrowser } from './pages/BibleBrowser'
 import { BibleReader } from './pages/BibleReader'
 import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
@@ -114,6 +116,8 @@ function App() {
           <Route path="/devotional" element={<DevotionalPage />} />
           <Route path="/reading-plans" element={<ReadingPlans />} />
           <Route path="/reading-plans/:planId" element={<ReadingPlanDetail />} />
+          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/challenges/:challengeId" element={<ChallengeDetail />} />
           <Route path="/bible" element={<BibleBrowser />} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />

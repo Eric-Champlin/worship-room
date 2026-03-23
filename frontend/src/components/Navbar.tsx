@@ -13,6 +13,7 @@ import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 
 const SEASON_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   Star, Gift, Sparkles, Heart, Cross, Sun, Flame, Leaf,
@@ -23,6 +24,7 @@ const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon?: LucideIcon }>
   { label: 'Bible', to: '/bible', icon: Book },
   { label: 'Daily Devotional', to: '/devotional', icon: Sparkles },
   { label: 'Reading Plans', to: '/reading-plans', icon: BookOpen },
+  { label: 'Challenges', to: '/challenges', icon: Flame },
   { label: 'Prayer Wall', to: '/prayer-wall' },
   { label: 'Music', to: '/music' },
 ]
@@ -277,12 +279,21 @@ function NavDropdown({
 }
 
 function DesktopNav({ transparent }: { transparent: boolean }) {
+  const activeChallengeInfo = getActiveChallengeInfo()
+
   return (
     <div className="hidden items-center gap-6 lg:flex">
       {NAV_LINKS.map((link) => (
         <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
           {link.icon && <link.icon size={14} className="mr-1 inline-block" />}
           {link.label}
+          {link.to === '/challenges' && activeChallengeInfo && (
+            <span
+              className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full animate-challenge-pulse"
+              style={{ backgroundColor: activeChallengeInfo.challenge.themeColor }}
+              aria-hidden="true"
+            />
+          )}
         </NavLink>
       ))}
       <NavDropdown
@@ -543,6 +554,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
   const { isAuthenticated, user, logout } = useAuth()
   const { isOnline } = useOnlineStatus()
   const navigate = useNavigate()
+  const activeChallengeInfo = getActiveChallengeInfo()
   const drawerRef = useRef<HTMLElement>(null)
 
   // Focus trap: keep Tab within the drawer while open
@@ -665,6 +677,13 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
               >
                 {link.icon && <link.icon size={16} className="mr-2 inline-block" />}
                 {link.label}
+                {link.to === '/challenges' && activeChallengeInfo && (
+                  <span
+                    className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full animate-challenge-pulse"
+                    style={{ backgroundColor: activeChallengeInfo.challenge.themeColor }}
+                    aria-hidden="true"
+                  />
+                )}
               </NavLink>
             ))}
 

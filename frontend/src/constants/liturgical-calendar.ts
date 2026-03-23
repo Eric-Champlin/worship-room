@@ -134,7 +134,7 @@ export function computeEasterDate(year: number): Date {
  * Returns the start date of Advent for the given year.
  * Advent begins on the nearest Sunday to November 30 (range: Nov 27–Dec 3).
  */
-function getAdventStart(year: number): Date {
+export function getAdventStart(year: number): Date {
   const nov30 = new Date(year, 10, 30) // Nov 30
   const dayOfWeek = nov30.getDay() // 0=Sun, 1=Mon, ...
   // Find nearest Sunday: if dayOfWeek <= 3, go back; if > 3, go forward

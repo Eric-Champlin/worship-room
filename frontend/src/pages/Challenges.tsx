@@ -1,0 +1,203 @@
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import { ActiveChallengeCard } from '@/components/challenges/ActiveChallengeCard'
+import { NextChallengeCountdown } from '@/components/challenges/NextChallengeCountdown'
+import { PastChallengeCard } from '@/components/challenges/PastChallengeCard'
+import { UpcomingChallengeCard } from '@/components/challenges/UpcomingChallengeCard'
+import { Layout } from '@/components/Layout'
+import { PageHero } from '@/components/PageHero'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { CHALLENGES } from '@/data/challenges'
+import { useAuth } from '@/hooks/useAuth'
+import { useChallengeProgress } from '@/hooks/useChallengeProgress'
+import {
+  compareDatesOnly,
+  getChallengeCalendarInfo,
+  type ChallengeCalendarInfo,
+} from '@/lib/challenge-calendar'
+import type { Challenge } from '@/types/challenges'
+
+// ---------------------------------------------------------------------------
+// Internal types for categorized challenges
+// ---------------------------------------------------------------------------
+
+interface CategorizedChallenge {
+  challenge: Challenge
+  info: ChallengeCalendarInfo
+}
+
+// ---------------------------------------------------------------------------
+// Challenges Page
+// ---------------------------------------------------------------------------
+
+export function Challenges() {
+  const { isAuthenticated } = useAuth()
+  const authModal = useAuthModal()
+  const navigate = useNavigate()
+  const { isChallengeJoined, isChallengeCompleted, joinChallenge, getReminders, toggleReminder, getProgress } =
+    useChallengeProgress()
+
+  const reminders = getReminders()
+
+  const categorized = useMemo(() => {
+    const today = new Date()
+    const active: CategorizedChallenge[] = []
+    const upcoming: CategorizedChallenge[] = []
+    const past: CategorizedChallenge[] = []
+
+    for (const challenge of CHALLENGES) {
+      const info = getChallengeCalendarInfo(challenge, today)
+      const entry: CategorizedChallenge = { challenge, info }
+
+      switch (info.status) {
+        case 'active':
+          active.push(entry)
+          break
+        case 'upcoming':
+          upcoming.push(entry)
+          break
+        case 'past':
+          past.push(entry)
+          break
+      }
+    }
+
+    // Sort upcoming by start date (soonest first)
+    upcoming.sort((a, b) => compareDatesOnly(a.info.startDate, b.info.startDate))
+
+    // Sort past by end date (most recent first)
+    past.sort((a, b) => compareDatesOnly(b.info.endDate, a.info.endDate))
+
+    return { active, upcoming, past }
+  }, [])
+
+  // The next upcoming challenge (for the countdown section)
+  const nextUpcoming = categorized.upcoming[0] ?? null
+
+  const hasAnyChallenges =
+    categorized.active.length > 0 ||
+    categorized.upcoming.length > 0 ||
+    categorized.past.length > 0
+
+  function handleJoin(challengeId: string) {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to join this challenge')
+      return
+    }
+    joinChallenge(challengeId)
+  }
+
+  function handleContinue(challengeId: string) {
+    navigate(`/challenges/${challengeId}`)
+  }
+
+  function handleToggleReminder(challengeId: string) {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to set a reminder')
+      return
+    }
+    toggleReminder(challengeId)
+  }
+
+  function handleChallengeClick(challengeId: string) {
+    navigate(`/challenges/${challengeId}`)
+  }
+
+  return (
+    <Layout>
+      <PageHero title="Community Challenges" subtitle="Grow together in faith" />
+      <section className="bg-neutral-bg px-4 py-8 sm:px-6 sm:py-10">
+      <div className="mx-auto max-w-4xl">
+        {/* Active Challenges */}
+        {categorized.active.length > 0 && (
+          <section className="mb-10" aria-label="Active challenges">
+            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-text-light">
+              Active Now
+            </h2>
+            <div className="space-y-6">
+              {categorized.active.map(({ challenge, info }) => {
+                const progress = getProgress(challenge.id)
+                return (
+                  <ActiveChallengeCard
+                    key={challenge.id}
+                    challenge={challenge}
+                    daysRemaining={info.daysRemaining ?? 0}
+                    calendarDay={info.calendarDay ?? 1}
+                    onJoin={() => handleJoin(challenge.id)}
+                    onContinue={() => handleContinue(challenge.id)}
+                    isJoined={isChallengeJoined(challenge.id)}
+                    isCompleted={isChallengeCompleted(challenge.id)}
+                    currentDay={progress?.currentDay}
+                  />
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Next Challenge Countdown (shown when no active challenges) */}
+        {categorized.active.length === 0 && nextUpcoming && (
+          <section className="mb-10" aria-label="Next challenge countdown">
+            <NextChallengeCountdown
+              challenge={nextUpcoming.challenge}
+              startDate={nextUpcoming.info.startDate}
+              isReminderSet={reminders.includes(nextUpcoming.challenge.id)}
+              onToggleReminder={() => handleToggleReminder(nextUpcoming.challenge.id)}
+            />
+          </section>
+        )}
+
+        {/* Upcoming Challenges */}
+        {categorized.upcoming.length > 0 && (
+          <section className="mb-10" aria-label="Upcoming challenges">
+            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-text-light">
+              Coming Up
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {categorized.upcoming.map(({ challenge, info }) => (
+                <UpcomingChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  startDate={info.startDate}
+                  isReminderSet={reminders.includes(challenge.id)}
+                  onToggleReminder={() => handleToggleReminder(challenge.id)}
+                  onClick={() => handleChallengeClick(challenge.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Past Challenges */}
+        {categorized.past.length > 0 && (
+          <section className="mb-10" aria-label="Past challenges">
+            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-text-light">
+              Past
+            </h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {categorized.past.map(({ challenge }) => (
+                <PastChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  isCompleted={isChallengeCompleted(challenge.id)}
+                  onClick={() => handleChallengeClick(challenge.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Empty state fallback */}
+        {!hasAnyChallenges && (
+          <div className="py-16 text-center">
+            <p className="text-lg text-text-light">
+              New challenges are coming soon. Check back during the next season.
+            </p>
+          </div>
+        )}
+      </div>
+      </section>
+    </Layout>
+  )
+}
