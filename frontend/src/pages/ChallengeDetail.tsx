@@ -9,6 +9,8 @@ import { ChallengeDaySelector } from '@/components/challenges/ChallengeDaySelect
 import { ChallengeNotFound } from '@/components/challenges/ChallengeNotFound'
 import { SwitchChallengeDialog } from '@/components/challenges/SwitchChallengeDialog'
 import { ChallengeCompletionOverlay } from '@/components/challenges/ChallengeCompletionOverlay'
+import { MilestoneCard } from '@/components/challenges/MilestoneCard'
+import { CommunityFeed } from '@/components/challenges/CommunityFeed'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useToastSafe } from '@/components/ui/Toast'
@@ -34,12 +36,13 @@ export function ChallengeDetail() {
   const authModal = useAuthModal()
   const {
     getProgress, joinChallenge, completeDay, getReminders, toggleReminder,
-    getActiveChallenge, pauseChallenge,
+    getActiveChallenge, pauseChallenge, markMilestoneShown, hasMilestoneBeenShown,
   } = useChallengeProgress()
   const [switchDialog, setSwitchDialog] = useState<{ activeId: string } | null>(null)
   const [completionOverlay, setCompletionOverlay] = useState<{
     title: string; themeColor: string; days: number; points: number; badgeName: string
   } | null>(null)
+  const [activeMilestone, setActiveMilestone] = useState<{ day: number; title: string } | null>(null)
 
   const faithPoints = useFaithPoints()
   const { showToast } = useToastSafe()
@@ -130,8 +133,23 @@ export function ChallengeDetail() {
         points: challenge.durationDays * 20 + result.bonusPoints,
         badgeName: badge?.name ?? 'Challenge Complete',
       })
+    } else {
+      // Check for milestone
+      const MILESTONES: Record<number, string> = {
+        7: 'Week 1 Complete!',
+        14: 'Two Weeks Strong!',
+        21: challenge.durationDays === 40 ? 'Halfway There!' : 'Three Weeks of Faithfulness!',
+        40: 'The Full Journey Complete!',
+      }
+      // 7-day challenges: no milestones (completion overlay from Spec 2 handles it)
+      if (challenge.durationDays > 7) {
+        const milestoneTitle = MILESTONES[selectedDay]
+        if (milestoneTitle && !hasMilestoneBeenShown(challengeId, selectedDay)) {
+          setActiveMilestone({ day: selectedDay, title: milestoneTitle })
+        }
+      }
     }
-  }, [challengeId, challenge, progress, selectedDay, completeDay, faithPoints.recordActivity])
+  }, [challengeId, challenge, progress, selectedDay, completeDay, faithPoints.recordActivity, hasMilestoneBeenShown])
 
   const handleJoin = useCallback(() => {
     if (!challengeId) return
@@ -345,6 +363,23 @@ export function ChallengeDetail() {
           )}
         </section>
 
+        {/* Milestone card */}
+        {activeMilestone && challengeId && challenge && (
+          <MilestoneCard
+            milestoneTitle={activeMilestone.title}
+            challengeTitle={challenge.title}
+            challengeId={challengeId}
+            themeColor={challenge.themeColor}
+            currentDay={activeMilestone.day}
+            totalDays={challenge.durationDays}
+            streak={progress?.streak ?? 0}
+            onDismiss={() => {
+              markMilestoneShown(challengeId, activeMilestone.day)
+              setActiveMilestone(null)
+            }}
+          />
+        )}
+
         {/* Day content */}
         {showDayContent && (
           <ChallengeDayContent
@@ -358,6 +393,19 @@ export function ChallengeDetail() {
             onMarkComplete={handleMarkComplete}
             actionRoute={ACTION_TYPE_ROUTES[currentDayContent.actionType]}
             actionLabel={ACTION_TYPE_LABELS[currentDayContent.actionType]}
+            challengeId={challenge.id}
+            challengeTitle={challenge.title}
+            completedDaysCount={progress?.completedDays.length ?? 0}
+            streak={progress?.streak ?? 0}
+            totalDays={challenge.durationDays}
+          />
+        )}
+
+        {/* Community feed */}
+        {challenge && (
+          <CommunityFeed
+            dayNumber={selectedDay}
+            challengeDuration={challenge.durationDays}
           />
         )}
 

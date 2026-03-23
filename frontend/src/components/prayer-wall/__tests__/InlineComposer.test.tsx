@@ -1,16 +1,28 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { InlineComposer } from '../InlineComposer'
 import type { PrayerCategory } from '@/constants/prayer-categories'
 
-function renderComposer(overrides?: { isOpen?: boolean; onClose?: () => void; onSubmit?: (content: string, isAnonymous: boolean, category: PrayerCategory) => void }) {
+vi.mock('@/lib/challenge-calendar', () => ({
+  getActiveChallengeInfo: () => null,
+}))
+
+vi.mock('@/data/challenges', () => ({
+  getChallenge: () => undefined,
+  CHALLENGES: [],
+}))
+
+function renderComposer(overrides?: { isOpen?: boolean; onClose?: () => void; onSubmit?: (content: string, isAnonymous: boolean, category: PrayerCategory, challengeId?: string) => void }) {
   return render(
-    <InlineComposer
-      isOpen={overrides?.isOpen ?? true}
-      onClose={overrides?.onClose ?? vi.fn()}
-      onSubmit={overrides?.onSubmit ?? vi.fn()}
-    />,
+    <MemoryRouter>
+      <InlineComposer
+        isOpen={overrides?.isOpen ?? true}
+        onClose={overrides?.onClose ?? vi.fn()}
+        onSubmit={overrides?.onSubmit ?? vi.fn()}
+      />
+    </MemoryRouter>,
   )
 }
 
@@ -58,7 +70,7 @@ describe('InlineComposer', () => {
     await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
     await user.click(screen.getByText('Health'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', false, 'health')
+    expect(onSubmit).toHaveBeenCalledWith('My prayer', false, 'health', undefined)
   })
 
   it('submit with anonymous checked', async () => {
@@ -69,7 +81,7 @@ describe('InlineComposer', () => {
     await user.click(screen.getByText('Health'))
     await user.click(screen.getByLabelText('Post anonymously'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', true, 'health')
+    expect(onSubmit).toHaveBeenCalledWith('My prayer', true, 'health', undefined)
   })
 
   // Category-specific tests

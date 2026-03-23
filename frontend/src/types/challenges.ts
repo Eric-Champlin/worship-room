@@ -39,6 +39,7 @@ export interface ChallengeProgress {
   streak: number
   missedDays: number[]
   status: ChallengeStatus
+  shownMilestones?: number[]
 }
 
 export type ChallengeProgressMap = Record<string, ChallengeProgress>

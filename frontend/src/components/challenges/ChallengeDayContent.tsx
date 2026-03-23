@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Brain, Heart, MessageSquare, Music2, PenLine, Smile, type LucideIcon } from 'lucide-react'
 
+import { ChallengeShareButton } from '@/components/challenges/ChallengeShareButton'
+import { getMusicDestination } from '@/data/challenge-prefills'
 import type { ChallengeActionType, DayChallengeContent } from '@/types/challenges'
 
 const ACTION_TYPE_ICONS: Record<ChallengeActionType, LucideIcon> = {
@@ -21,6 +23,11 @@ interface ChallengeDayContentProps {
   onMarkComplete: () => void
   actionRoute: string
   actionLabel: string
+  challengeId?: string
+  challengeTitle?: string
+  completedDaysCount?: number
+  streak?: number
+  totalDays?: number
 }
 
 export function ChallengeDayContent({
@@ -32,6 +39,11 @@ export function ChallengeDayContent({
   onMarkComplete,
   actionRoute,
   actionLabel,
+  challengeId,
+  challengeTitle,
+  completedDaysCount = 0,
+  streak = 0,
+  totalDays = 0,
 }: ChallengeDayContentProps) {
   const ActionIcon = ACTION_TYPE_ICONS[day.actionType]
   const reflectionParagraphs = day.reflection.split('\n\n')
@@ -90,12 +102,43 @@ export function ChallengeDayContent({
           )}
 
           <Link
-            to={actionRoute}
+            to={
+              day.actionType === 'prayerWall'
+                ? `${actionRoute}?challengePrayer=true`
+                : day.actionType === 'music'
+                  ? getMusicDestination(day.title)
+                  : actionRoute
+            }
+            state={
+              ['pray', 'journal', 'meditate'].includes(day.actionType)
+                ? {
+                    challengeContext: {
+                      challengeId,
+                      dayNumber: day.dayNumber,
+                      dayTitle: day.title,
+                      dailyAction: day.dailyAction,
+                      actionType: day.actionType,
+                    },
+                  }
+                : undefined
+            }
             className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium transition-opacity hover:opacity-80"
             style={{ color: themeColor }}
           >
             Go to {actionLabel} &rarr;
           </Link>
+
+          {isAuthenticated && challengeId && challengeTitle && completedDaysCount > 0 && (
+            <ChallengeShareButton
+              challengeTitle={challengeTitle}
+              challengeId={challengeId}
+              themeColor={themeColor}
+              currentDay={day.dayNumber}
+              totalDays={totalDays}
+              streak={streak}
+              completedDaysCount={completedDaysCount}
+            />
+          )}
         </div>
       </section>
     </div>

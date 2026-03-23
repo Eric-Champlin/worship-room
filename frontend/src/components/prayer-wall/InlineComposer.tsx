@@ -1,25 +1,36 @@
 import { useState, useRef, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
+import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
+import { getChallenge } from '@/data/challenges'
 
 interface InlineComposerProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (content: string, isAnonymous: boolean, category: PrayerCategory) => void
+  onSubmit: (content: string, isAnonymous: boolean, category: PrayerCategory, challengeId?: string) => void
 }
 
 export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProps) {
   const { isOnline } = useOnlineStatus()
+  const [searchParams] = useSearchParams()
   const [content, setContent] = useState('')
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<PrayerCategory | null>(null)
   const [showCategoryError, setShowCategoryError] = useState(false)
   const [crisisDetected, setCrisisDetected] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Challenge prayer checkbox
+  const activeChallengeInfo = getActiveChallengeInfo()
+  const activeChallenge = activeChallengeInfo ? getChallenge(activeChallengeInfo.challengeId) : null
+  const [isChallengePrayer, setIsChallengePrayer] = useState(
+    () => searchParams.get('challengePrayer') === 'true',
+  )
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
@@ -40,10 +51,11 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
       setCrisisDetected(true)
       return
     }
-    onSubmit(content.trim(), isAnonymous, selectedCategory)
+    onSubmit(content.trim(), isAnonymous, selectedCategory, isChallengePrayer && activeChallenge ? activeChallenge.id : undefined)
     setContent('')
     setIsAnonymous(false)
     setSelectedCategory(null)
+    setIsChallengePrayer(false)
     setShowCategoryError(false)
     setCrisisDetected(false)
     if (textareaRef.current) {
@@ -55,6 +67,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
     setContent('')
     setIsAnonymous(false)
     setSelectedCategory(null)
+    setIsChallengePrayer(false)
     setShowCategoryError(false)
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
@@ -95,6 +108,25 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           aria-label="Prayer request"
           aria-describedby={content.length >= 500 ? 'composer-char-count' : undefined}
         />
+
+        {activeChallenge && (
+          <label className="mt-3 flex items-center gap-2 text-sm text-text-dark" htmlFor="challenge-prayer-checkbox">
+            <input
+              type="checkbox"
+              checked={isChallengePrayer}
+              onChange={(e) => setIsChallengePrayer(e.target.checked)}
+              className="h-5 w-5 rounded border-gray-300"
+              id="challenge-prayer-checkbox"
+            />
+            <span>
+              This is a{' '}
+              <span style={{ color: activeChallenge.themeColor }} className="font-medium">
+                {activeChallenge.title}
+              </span>{' '}
+              prayer
+            </span>
+          </label>
+        )}
 
         <fieldset className="mt-3">
           <legend className="mb-2 text-sm font-medium text-text-dark">Category</legend>

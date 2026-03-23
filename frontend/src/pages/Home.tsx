@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/Navbar'
 import { SeasonalBanner } from '@/components/SeasonalBanner'
 import { HeroSection } from '@/components/HeroSection'
+import { ChallengeBanner } from '@/components/challenges/ChallengeBanner'
 import { JourneySection } from '@/components/JourneySection'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
 import { TodaysVerseSection } from '@/components/TodaysVerseSection'
@@ -22,6 +23,7 @@ export function Home() {
       <main id="main-content">
         <SeasonalBanner />
         <HeroSection />
+        <ChallengeBanner />
         <JourneySection />
         <TodaysVerseSection />
         <DevotionalTeaser />

@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { ActiveChallengeCard } from '@/components/challenges/ActiveChallengeCard'
+import { HallOfFame } from '@/components/challenges/HallOfFame'
 import { NextChallengeCountdown } from '@/components/challenges/NextChallengeCountdown'
 import { PastChallengeCard } from '@/components/challenges/PastChallengeCard'
 import { UpcomingChallengeCard } from '@/components/challenges/UpcomingChallengeCard'
@@ -228,6 +229,11 @@ export function Challenges() {
               ))}
             </div>
           </section>
+        )}
+
+        {/* Hall of Fame */}
+        {categorized.past.length > 0 && (
+          <HallOfFame pastChallenges={categorized.past} />
         )}
 
         {/* Empty state fallback */}

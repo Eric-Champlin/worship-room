@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Wind,
   BookOpen,
@@ -13,7 +13,9 @@ import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
+import { getMeditationSuggestion } from '@/data/challenge-prefills'
 import { MEDITATION_TYPES } from '@/constants/daily-experience'
+import type { ChallengeActionType } from '@/types/challenges'
 import type { MeditationType } from '@/types/daily-experience'
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -38,8 +40,19 @@ export function MeditateTabContent() {
   const { isAuthenticated } = useAuth()
   const { completedMeditationTypes } = useCompletionTracking()
   const allComplete = completedMeditationTypes.length === 6
+  const location = useLocation()
   const navigate = useNavigate()
   const authModal = useAuthModal()
+
+  // Challenge context: highlight a suggested meditation type
+  const challengeContext = (location.state as { challengeContext?: { actionType: string; dayTitle: string } } | null)?.challengeContext
+  const suggestedRoute = challengeContext
+    ? getMeditationSuggestion(challengeContext.actionType as ChallengeActionType, challengeContext.dayTitle)
+    : null
+  // Find the meditation id that matches the suggested route
+  const suggestedId = suggestedRoute
+    ? Object.entries(ROUTE_MAP).find(([, route]) => route === suggestedRoute)?.[0] ?? null
+    : null
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
@@ -76,6 +89,7 @@ export function MeditateTabContent() {
               const isComplete = completedMeditationTypes.includes(
                 type.id as MeditationType,
               )
+              const isSuggested = suggestedId === type.id
               return (
                 <button
                   key={type.id}
@@ -85,10 +99,19 @@ export function MeditateTabContent() {
                       authModal?.openAuthModal('Sign in to start meditating')
                       return
                     }
+                    // Clear challenge context on navigation
+                    if (challengeContext) {
+                      navigate(location.pathname + location.search, { replace: true, state: null })
+                    }
                     navigate(ROUTE_MAP[type.id])
                   }}
-                  className="group rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:p-5"
+                  className={`group rounded-xl border p-4 text-left shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:p-5 ${isSuggested ? 'border-primary bg-primary/5 ring-1 ring-primary/30' : 'border-gray-200 bg-white'}`}
                 >
+                  {isSuggested && (
+                    <span className="mb-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                      Suggested
+                    </span>
+                  )}
                   <div className="mb-3 flex items-center justify-between">
                     {Icon && <Icon className="h-8 w-8 text-primary" />}
                     {isAuthenticated && isComplete && (

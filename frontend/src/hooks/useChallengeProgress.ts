@@ -21,6 +21,7 @@ function migrateEntry(entry: ChallengeProgress): ChallengeProgress {
     streak: entry.streak ?? 0,
     missedDays: entry.missedDays ?? [],
     status: entry.status ?? (entry.completedAt ? 'completed' : 'active'),
+    shownMilestones: entry.shownMilestones ?? [],
   }
 }
 
@@ -321,6 +322,32 @@ export function useChallengeProgress() {
     [isAuthenticated, progress],
   )
 
+  const markMilestoneShown = useCallback(
+    (challengeId: string, dayNumber: number) => {
+      if (!isAuthenticated) return
+      setProgress((prev) => {
+        const entry = prev[challengeId]
+        if (!entry) return prev
+        const migrated = migrateEntry(entry)
+        const shown = migrated.shownMilestones ?? []
+        if (shown.includes(dayNumber)) return prev
+        const updated = { ...prev, [challengeId]: { ...migrated, shownMilestones: [...shown, dayNumber] } }
+        writeProgress(updated)
+        return updated
+      })
+    },
+    [isAuthenticated],
+  )
+
+  const hasMilestoneBeenShown = useCallback(
+    (challengeId: string, dayNumber: number): boolean => {
+      const entry = progress[challengeId]
+      if (!entry) return false
+      return (migrateEntry(entry).shownMilestones ?? []).includes(dayNumber)
+    },
+    [progress],
+  )
+
   const getReminders = useCallback((): string[] => {
     return reminders
   }, [reminders])
@@ -348,5 +375,7 @@ export function useChallengeProgress() {
     resumeChallenge,
     getReminders,
     toggleReminder,
+    markMilestoneShown,
+    hasMilestoneBeenShown,
   }
 }

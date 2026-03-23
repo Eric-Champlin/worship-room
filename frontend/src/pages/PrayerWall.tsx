@@ -26,6 +26,8 @@ import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/getting-started-storage'
 import { isValidCategory, PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 import { getTodaysQuestion } from '@/constants/question-of-the-day'
+import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
+import { getChallenge } from '@/data/challenges'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 
 const PRAYERS_PER_PAGE = 20
@@ -56,10 +58,29 @@ function PrayerWallContent() {
   const rawCategory = searchParams.get('category')
   const activeCategory: PrayerCategory | null = isValidCategory(rawCategory) ? rawCategory : null
 
+  // Challenge filter — computed once (pure functions, stable across renders)
+  const activeChallenge = useMemo(() => {
+    const info = getActiveChallengeInfo()
+    return info ? getChallenge(info.challengeId) ?? null : null
+  }, [])
+  const challengeFilter = useMemo(
+    () => activeChallenge ? { id: activeChallenge.id, title: activeChallenge.title.split(':')[0], color: activeChallenge.themeColor } : null,
+    [activeChallenge],
+  )
+  const [isChallengeFilterActive, setIsChallengeFilterActive] = useState(
+    () => searchParams.get('filter') === 'challenge',
+  )
+  const handleToggleChallengeFilter = useCallback(() => {
+    setIsChallengeFilterActive((prev) => !prev)
+  }, [])
+
   const filteredPrayers = useMemo(() => {
+    if (isChallengeFilterActive && activeChallenge) {
+      return allPrayers.filter(p => p.challengeId === activeChallenge.id)
+    }
     if (!activeCategory) return prayers
     return allPrayers.filter(p => p.category === activeCategory)
-  }, [allPrayers, prayers, activeCategory])
+  }, [allPrayers, prayers, activeCategory, isChallengeFilterActive, activeChallenge])
 
   const firstQotdResponseIndex = useMemo(
     () => filteredPrayers.findIndex(p => p.qotdId === todaysQuestion.id),
@@ -126,7 +147,7 @@ function PrayerWallContent() {
   }, [allPrayers])
 
   const handleComposerSubmit = useCallback(
-    (content: string, isAnonymous: boolean, category: PrayerCategory) => {
+    (content: string, isAnonymous: boolean, category: PrayerCategory, challengeId?: string) => {
       if (!isAuthenticated) return
 
       const newPrayer: PrayerRequest = {
@@ -137,6 +158,7 @@ function PrayerWallContent() {
         isAnonymous,
         content,
         category,
+        challengeId,
         isAnswered: false,
         answeredText: null,
         answeredAt: null,
@@ -338,14 +360,19 @@ function PrayerWallContent() {
           onSelectCategory={handleSelectCategory}
           categoryCounts={categoryCounts}
           showCounts={activeCategory !== null}
+          challengeFilter={challengeFilter}
+          isChallengeFilterActive={isChallengeFilterActive}
+          onToggleChallengeFilter={handleToggleChallengeFilter}
         />
       </div>
 
       {/* Screen reader announcement for filter changes */}
       <div className="sr-only" aria-live="polite">
-        {activeCategory
-          ? `Showing ${filteredPrayers.length} ${CATEGORY_LABELS[activeCategory]} prayers`
-          : `Showing all ${allPrayers.length} prayers`}
+        {isChallengeFilterActive && challengeFilter
+          ? `Showing ${filteredPrayers.length} ${challengeFilter.title} challenge prayers`
+          : activeCategory
+            ? `Showing ${filteredPrayers.length} ${CATEGORY_LABELS[activeCategory]} prayers`
+            : `Showing all ${allPrayers.length} prayers`}
       </div>
 
       <main

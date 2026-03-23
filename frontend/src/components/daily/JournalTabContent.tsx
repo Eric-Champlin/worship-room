@@ -57,6 +57,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
   const location = useLocation()
   const navigate = useNavigate()
   const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
+  const challengeContext = (location.state as { challengeContext?: { actionType: string; dailyAction: string } } | null)?.challengeContext
 
   // Mode toggle
   const [mode, setMode] = useState<JournalMode>(() => {
@@ -211,11 +212,11 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
   // always mounted, so without the guard PrayTabContent's effect clears
   // location.state before this effect can read it.
   const activeTab = new URLSearchParams(location.search).get('tab') || 'pray'
-  const [prayWallPrompt, setPrayWallPrompt] = useState<string | null>(null)
+  const [contextPrompt, setContextPrompt] = useState<string | null>(null)
   useEffect(() => {
     if (prayWallContext && activeTab === 'journal') {
       setMode('guided')
-      setPrayWallPrompt(
+      setContextPrompt(
         `Reflect on this prayer request: "${prayWallContext}". What feelings does it stir in you?`,
       )
       setContextDismissed(false)
@@ -223,6 +224,16 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
       navigate(location.pathname + location.search, { replace: true, state: null })
     }
   }, [prayWallContext, activeTab, navigate, location.pathname, location.search])
+
+  // Challenge context: switch to guided mode with daily action as prompt
+  useEffect(() => {
+    if (challengeContext && challengeContext.actionType === 'journal' && activeTab === 'journal') {
+      setMode('guided')
+      setContextPrompt(challengeContext.dailyAction)
+      setContextDismissed(false)
+      navigate(location.pathname + location.search, { replace: true, state: null })
+    }
+  }, [challengeContext, activeTab, navigate, location.pathname, location.search])
 
   const handleModeChange = useCallback((newMode: JournalMode) => {
     setMode(newMode)
@@ -238,8 +249,8 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
     setPromptIndex(next)
   }
 
-  const currentPrompt = prayWallPrompt && !contextDismissed
-    ? prayWallPrompt
+  const currentPrompt = contextPrompt && !contextDismissed
+    ? contextPrompt
     : prayContext?.from === 'pray' && !contextDismissed
       ? `Reflect on your prayer about ${prayContext.topic ?? 'what you shared'}. How did it feel to bring that before God? What comes up as you sit with it?`
       : allPrompts[promptIndex]?.text ?? ''

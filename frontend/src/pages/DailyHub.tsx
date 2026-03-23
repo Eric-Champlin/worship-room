@@ -9,6 +9,7 @@ import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
 import { VerseOfTheDayBanner } from '@/components/daily/VerseOfTheDayBanner'
+import { ChallengeStrip } from '@/components/challenges/ChallengeStrip'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
@@ -175,6 +176,9 @@ function DailyHubContent() {
         <div className="bg-gradient-to-b from-primary to-neutral-bg">
           <VerseOfTheDayBanner />
         </div>
+
+        {/* Challenge strip */}
+        <ChallengeStrip />
 
         {/* Sentinel for sticky tab bar shadow */}
         <div ref={sentinelRef} aria-hidden="true" />

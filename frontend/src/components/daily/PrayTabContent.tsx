@@ -36,6 +36,7 @@ import { SCENE_BY_ID } from '@/data/scenes'
 import { cn } from '@/lib/utils'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { DEFAULT_PRAYER_CHIPS } from '@/constants/daily-experience'
+import { getPrayerPrefill } from '@/data/challenge-prefills'
 import {
   getMockPrayer,
   getClassicPrayers,
@@ -60,6 +61,7 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
+  const challengeContext = (location.state as { challengeContext?: { actionType: string; dayTitle: string; dayNumber: number } } | null)?.challengeContext
 
   const [text, setText] = useState('')
   const [selectedChip, setSelectedChip] = useState<string | null>(null)
@@ -123,6 +125,16 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
       navigate(location.pathname + location.search, { replace: true, state: null })
     }
   }, [prayWallContext, activeTab, navigate, location.pathname, location.search])
+
+  // Pre-fill from challenge context
+  useEffect(() => {
+    if (challengeContext && challengeContext.actionType === 'pray' && activeTab === 'pray') {
+      setText(getPrayerPrefill(challengeContext.dayTitle, challengeContext.dayNumber))
+      setSelectedChip(null)
+      setNudge(false)
+      navigate(location.pathname + location.search, { replace: true, state: null })
+    }
+  }, [challengeContext, activeTab, navigate, location.pathname, location.search])
 
   // Show reflection prompt after reveal completes
   useEffect(() => {

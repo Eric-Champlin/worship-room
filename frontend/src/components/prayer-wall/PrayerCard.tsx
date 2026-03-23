@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PrayerRequest } from '@/types/prayer-wall'
+import { getChallenge } from '@/data/challenges'
 import { Avatar } from './Avatar'
 import { AnsweredBadge } from './AnsweredBadge'
 import { CategoryBadge } from './CategoryBadge'
@@ -20,6 +21,7 @@ interface PrayerCardProps {
 
 export function PrayerCard({ prayer, showFull = false, onCategoryClick, children }: PrayerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const challengeData = prayer.challengeId ? getChallenge(prayer.challengeId) : null
   const needsTruncation = !showFull && prayer.content.length > TRUNCATE_LENGTH
 
   const displayText =
@@ -85,11 +87,19 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
           >
             {formatFullDate(prayer.createdAt)}
           </time>
-          <div className="mt-1">
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <CategoryBadge
               category={prayer.category}
               onClick={onCategoryClick}
             />
+            {challengeData && (
+              <span
+                className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                style={{ backgroundColor: `${challengeData.themeColor}26`, color: challengeData.themeColor }}
+              >
+                {challengeData.title.split(':')[0]}
+              </span>
+            )}
           </div>
         </div>
       </header>
