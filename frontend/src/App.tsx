@@ -38,6 +38,7 @@ import { ReadingPlans } from './pages/ReadingPlans'
 import { ReadingPlanDetail } from './pages/ReadingPlanDetail'
 import { BibleBrowser } from './pages/BibleBrowser'
 import { BibleReader } from './pages/BibleReader'
+import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
 import { useAuth } from '@/hooks/useAuth'
 import { lazy, Suspense } from 'react'
 
@@ -98,6 +99,7 @@ function App() {
         <ToastProvider>
         <AuthModalProvider>
         <AudioProvider>
+        <UpdatePrompt />
         <Routes>
           <Route path="/" element={<RootRoute />} />
           <Route path="/health" element={<Health />} />

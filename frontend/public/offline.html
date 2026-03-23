@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worship Room - Offline</title>
+    <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #0f0a1e;
+        color: #ffffff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        text-align: center;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .container {
+        max-width: 600px;
+        width: 100%;
+      }
+
+      .icon {
+        margin-bottom: 1.5rem;
+      }
+
+      .icon svg {
+        width: 48px;
+        height: 48px;
+      }
+
+      .title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+      }
+
+      .message {
+        font-size: 1rem;
+        line-height: 1.6;
+        opacity: 0.8;
+        max-width: 500px;
+        margin: 0 auto 2rem;
+      }
+
+      .retry-button {
+        background-color: #6D28D9;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 32px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        min-height: 44px;
+        transition: background-color 0.2s;
+      }
+
+      .retry-button:hover {
+        background-color: #7C3AED;
+      }
+
+      .retry-button:focus-visible {
+        outline: 2px solid #7C3AED;
+        outline-offset: 2px;
+      }
+
+      @media (max-width: 640px) {
+        .title {
+          font-size: 1.5rem;
+        }
+
+        .message {
+          font-size: 0.9rem;
+        }
+
+        .retry-button {
+          width: 100%;
+          padding: 14px;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 1024px) {
+        .title {
+          font-size: 2rem;
+        }
+
+        .message {
+          max-width: 500px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+          <path d="M24 4v40M10 18h28" stroke="#6D28D9" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="title">Worship Room</h1>
+      <p class="message">You're offline right now. Some features need an internet connection, but your saved content is still available.</p>
+      <button class="retry-button" onclick="location.reload()">Try again</button>
+    </div>
+  </body>
+</html>

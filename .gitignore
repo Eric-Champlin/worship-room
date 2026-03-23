@@ -52,5 +52,7 @@ test-results/
 screenshots/
 frontend/playwright-screenshots/
 *.png
+!frontend/public/icon-*.png
+!frontend/public/apple-touch-icon.png
 *.jpg
 *.jpeg
