@@ -16,6 +16,7 @@ const makeDay = (pointsEarned: number) => ({
   meditate: false,
   journal: false,
   reflection: false,
+  challenge: false,
   pointsEarned,
   multiplier: 1,
 });

@@ -164,7 +164,7 @@ describe('Badge Integration — Activity Count Precision', () => {
       newlyEarned: [],
       activityCounts: {
         pray: 99, journal: 0, meditate: 0, listen: 0,
-        prayerWall: 0, readingPlan: 0, gratitude: 0, reflection: 0, encouragementsSent: 0, fullWorshipDays: 0,
+        prayerWall: 0, readingPlan: 0, gratitude: 0, reflection: 0, encouragementsSent: 0, fullWorshipDays: 0, challengesCompleted: 0,
       },
     };
     localStorage.setItem('wr_badges', JSON.stringify(seedBadges));
@@ -191,7 +191,7 @@ describe('Badge Integration — Multiple Badges Single Call', () => {
       newlyEarned: [],
       activityCounts: {
         pray: 10, journal: 99, meditate: 5, listen: 5,
-        prayerWall: 5, readingPlan: 0, gratitude: 0, reflection: 0, encouragementsSent: 0, fullWorshipDays: 0,
+        prayerWall: 5, readingPlan: 0, gratitude: 0, reflection: 0, encouragementsSent: 0, fullWorshipDays: 0, challengesCompleted: 0,
       },
     };
     localStorage.setItem('wr_badges', JSON.stringify(seedBadges));

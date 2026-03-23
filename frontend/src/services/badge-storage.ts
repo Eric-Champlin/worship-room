@@ -31,6 +31,7 @@ function fillActivityCounts(partial: Partial<ActivityCounts>): ActivityCounts {
     reflection: typeof partial.reflection === 'number' ? partial.reflection : 0,
     encouragementsSent: typeof partial.encouragementsSent === 'number' ? partial.encouragementsSent : 0,
     fullWorshipDays: typeof partial.fullWorshipDays === 'number' ? partial.fullWorshipDays : 0,
+    challengesCompleted: typeof partial.challengesCompleted === 'number' ? partial.challengesCompleted : 0,
   };
 }
 

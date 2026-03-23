@@ -15,6 +15,9 @@ import {
   Heart,
   Sparkles,
   Crown,
+  Target,
+  Sun,
+  Star,
 } from 'lucide-react'
 import { BADGE_DEFINITIONS, BADGE_MAP } from './badges'
 
@@ -59,6 +62,12 @@ const CATEGORY_DEFAULTS: Record<string, BadgeIconConfig> = {
     bgColor: 'bg-amber-400/20',
     textColor: 'text-amber-300',
     glowColor: 'rgba(252,211,77,0.5)',
+  },
+  challenge: {
+    icon: Target,
+    bgColor: 'bg-purple-500/20',
+    textColor: 'text-purple-400',
+    glowColor: 'rgba(168,85,247,0.4)',
   },
 }
 
@@ -268,6 +277,50 @@ const BADGE_ICON_MAP: Record<string, BadgeIconConfig> = {
   // Welcome badge
   welcome: {
     icon: Sparkles,
+    bgColor: 'bg-amber-400/20',
+    textColor: 'text-amber-300',
+    glowColor: 'rgba(252,211,77,0.5)',
+  },
+
+  // Challenge badges — season-specific
+  challenge_lent: {
+    icon: Heart,
+    bgColor: 'bg-purple-700/20',
+    textColor: 'text-purple-400',
+    glowColor: 'rgba(107,33,168,0.4)',
+  },
+  challenge_easter: {
+    icon: Sun,
+    bgColor: 'bg-amber-300/20',
+    textColor: 'text-amber-300',
+    glowColor: 'rgba(253,230,138,0.4)',
+  },
+  challenge_pentecost: {
+    icon: Flame,
+    bgColor: 'bg-red-500/20',
+    textColor: 'text-red-400',
+    glowColor: 'rgba(220,38,38,0.4)',
+  },
+  challenge_advent: {
+    icon: Star,
+    bgColor: 'bg-violet-500/20',
+    textColor: 'text-violet-400',
+    glowColor: 'rgba(124,58,237,0.4)',
+  },
+  challenge_newyear: {
+    icon: Leaf,
+    bgColor: 'bg-emerald-600/20',
+    textColor: 'text-emerald-400',
+    glowColor: 'rgba(5,150,105,0.4)',
+  },
+  challenge_first: {
+    icon: Target,
+    bgColor: 'bg-amber-400/20',
+    textColor: 'text-amber-300',
+    glowColor: 'rgba(252,211,77,0.4)',
+  },
+  challenge_master: {
+    icon: Crown,
     bgColor: 'bg-amber-400/20',
     textColor: 'text-amber-300',
     glowColor: 'rgba(252,211,77,0.5)',

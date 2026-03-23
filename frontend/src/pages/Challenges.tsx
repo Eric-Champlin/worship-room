@@ -1,10 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { ActiveChallengeCard } from '@/components/challenges/ActiveChallengeCard'
 import { NextChallengeCountdown } from '@/components/challenges/NextChallengeCountdown'
 import { PastChallengeCard } from '@/components/challenges/PastChallengeCard'
 import { UpcomingChallengeCard } from '@/components/challenges/UpcomingChallengeCard'
+import { SwitchChallengeDialog } from '@/components/challenges/SwitchChallengeDialog'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
@@ -35,8 +36,11 @@ export function Challenges() {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const navigate = useNavigate()
-  const { isChallengeJoined, isChallengeCompleted, joinChallenge, getReminders, toggleReminder, getProgress } =
-    useChallengeProgress()
+  const {
+    isChallengeJoined, isChallengeCompleted, joinChallenge, getReminders, toggleReminder, getProgress,
+    getActiveChallenge, pauseChallenge, resumeChallenge,
+  } = useChallengeProgress()
+  const [switchDialog, setSwitchDialog] = useState<{ activeId: string; targetId: string; isResume: boolean } | null>(null)
 
   const reminders = getReminders()
 
@@ -85,8 +89,43 @@ export function Challenges() {
       authModal?.openAuthModal('Sign in to join this challenge')
       return
     }
+    const active = getActiveChallenge()
+    if (active && active.challengeId !== challengeId) {
+      setSwitchDialog({ activeId: active.challengeId, targetId: challengeId, isResume: false })
+      return
+    }
     joinChallenge(challengeId)
   }
+
+  function handleResume(challengeId: string) {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to resume this challenge')
+      return
+    }
+    const active = getActiveChallenge()
+    if (active && active.challengeId !== challengeId) {
+      setSwitchDialog({ activeId: active.challengeId, targetId: challengeId, isResume: true })
+      return
+    }
+    resumeChallenge(challengeId)
+    navigate(`/challenges/${challengeId}`)
+  }
+
+  const handleSwitchConfirm = useCallback(() => {
+    if (!switchDialog) return
+    pauseChallenge(switchDialog.activeId)
+    if (switchDialog.isResume) {
+      resumeChallenge(switchDialog.targetId)
+    } else {
+      joinChallenge(switchDialog.targetId)
+    }
+    setSwitchDialog(null)
+    navigate(`/challenges/${switchDialog.targetId}`)
+  }, [switchDialog, pauseChallenge, resumeChallenge, joinChallenge, navigate])
+
+  const handleSwitchCancel = useCallback(() => {
+    setSwitchDialog(null)
+  }, [])
 
   function handleContinue(challengeId: string) {
     navigate(`/challenges/${challengeId}`)
@@ -118,6 +157,7 @@ export function Challenges() {
             <div className="space-y-6">
               {categorized.active.map(({ challenge, info }) => {
                 const progress = getProgress(challenge.id)
+                const isPaused = progress?.status === 'paused'
                 return (
                   <ActiveChallengeCard
                     key={challenge.id}
@@ -126,8 +166,10 @@ export function Challenges() {
                     calendarDay={info.calendarDay ?? 1}
                     onJoin={() => handleJoin(challenge.id)}
                     onContinue={() => handleContinue(challenge.id)}
+                    onResume={() => handleResume(challenge.id)}
                     isJoined={isChallengeJoined(challenge.id)}
                     isCompleted={isChallengeCompleted(challenge.id)}
+                    isPaused={isPaused}
                     currentDay={progress?.currentDay}
                   />
                 )
@@ -198,6 +240,24 @@ export function Challenges() {
         )}
       </div>
       </section>
+
+      {/* Switch challenge dialog */}
+      {switchDialog && (() => {
+        const activeChallenge = CHALLENGES.find((c) => c.id === switchDialog.activeId)
+        const targetChallenge = CHALLENGES.find((c) => c.id === switchDialog.targetId)
+        const activeProgress = getProgress(switchDialog.activeId)
+        return (
+          <SwitchChallengeDialog
+            isOpen
+            currentChallengeName={activeChallenge?.title ?? 'current challenge'}
+            currentDay={activeProgress?.currentDay ?? 1}
+            newChallengeTitle={targetChallenge?.title ?? 'new challenge'}
+            themeColor={targetChallenge?.themeColor ?? '#6D28D9'}
+            onConfirm={handleSwitchConfirm}
+            onCancel={handleSwitchCancel}
+          />
+        )
+      })()}
     </Layout>
   )
 }

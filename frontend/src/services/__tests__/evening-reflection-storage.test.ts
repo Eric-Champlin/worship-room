@@ -75,7 +75,7 @@ describe('hasAnyActivityToday', () => {
     expect(hasAnyActivityToday({
       mood: true, pray: false, listen: false,
       prayerWall: false, readingPlan: false, meditate: false,
-      journal: false, gratitude: false, reflection: false,
+      journal: false, gratitude: false, reflection: false, challenge: false,
       pointsEarned: 5, multiplier: 1,
     })).toBe(true);
   });
@@ -84,7 +84,7 @@ describe('hasAnyActivityToday', () => {
     expect(hasAnyActivityToday({
       mood: false, pray: false, listen: false,
       prayerWall: false, readingPlan: false, meditate: false,
-      journal: false, gratitude: false, reflection: false,
+      journal: false, gratitude: false, reflection: false, challenge: false,
       pointsEarned: 0, multiplier: 1,
     })).toBe(false);
   });
@@ -94,7 +94,7 @@ describe('hasAnyActivityToday', () => {
     expect(hasAnyActivityToday({
       mood: false, pray: false, listen: false,
       prayerWall: false, readingPlan: false, meditate: false,
-      journal: false, gratitude: false, reflection: false,
+      journal: false, gratitude: false, reflection: false, challenge: false,
       pointsEarned: 100, multiplier: 2,
     })).toBe(false);
   });
@@ -103,7 +103,7 @@ describe('hasAnyActivityToday', () => {
     expect(hasAnyActivityToday({
       mood: true, pray: true, listen: false,
       prayerWall: false, readingPlan: false, meditate: false,
-      journal: false, gratitude: false, reflection: false,
+      journal: false, gratitude: false, reflection: false, challenge: false,
       pointsEarned: 15, multiplier: 1.25,
     })).toBe(true);
   });

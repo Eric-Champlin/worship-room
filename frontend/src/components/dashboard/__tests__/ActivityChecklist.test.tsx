@@ -19,6 +19,7 @@ const ALL_FALSE: Record<ActivityType, boolean> = {
   meditate: false,
   journal: false,
   reflection: false,
+  challenge: false,
 }
 
 const ALL_TRUE: Record<ActivityType, boolean> = {
@@ -31,6 +32,7 @@ const ALL_TRUE: Record<ActivityType, boolean> = {
   meditate: true,
   journal: true,
   reflection: true,
+  challenge: true,
 }
 
 beforeEach(() => {
@@ -278,5 +280,12 @@ describe('ActivityChecklist', () => {
     const wrapper = document.querySelector('.flex.flex-col.items-center')
     expect(wrapper).toBeInTheDocument()
     expect(wrapper).toHaveClass('sm:flex-row')
+  })
+
+  it('does not show "Challenge" even when challenge activity is true', () => {
+    renderChecklist({
+      todayActivities: { ...ALL_FALSE, challenge: true },
+    })
+    expect(screen.queryByText('Challenge')).not.toBeInTheDocument()
   })
 })

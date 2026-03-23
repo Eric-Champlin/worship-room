@@ -14,6 +14,7 @@ import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
+import { CHALLENGES } from '@/data/challenges'
 
 const SEASON_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   Star, Gift, Sparkles, Heart, Cross, Sun, Flame, Leaf,
@@ -290,7 +291,7 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
           {link.to === '/challenges' && activeChallengeInfo && (
             <span
               className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full animate-challenge-pulse"
-              style={{ backgroundColor: activeChallengeInfo.challenge.themeColor }}
+              style={{ backgroundColor: CHALLENGES.find((c) => c.id === activeChallengeInfo.challengeId)?.themeColor }}
               aria-hidden="true"
             />
           )}
@@ -680,7 +681,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
                 {link.to === '/challenges' && activeChallengeInfo && (
                   <span
                     className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full animate-challenge-pulse"
-                    style={{ backgroundColor: activeChallengeInfo.challenge.themeColor }}
+                    style={{ backgroundColor: CHALLENGES.find((c) => c.id === activeChallengeInfo.challengeId)?.themeColor }}
                     aria-hidden="true"
                   />
                 )}

@@ -10,6 +10,7 @@ export const ACTIVITY_POINTS: Record<ActivityType, number> = {
   journal: 25,
   gratitude: 5,
   reflection: 10,
+  challenge: 20,
 } as const;
 
 export const ACTIVITY_DISPLAY_NAMES: Record<ActivityType, string> = {
@@ -22,6 +23,7 @@ export const ACTIVITY_DISPLAY_NAMES: Record<ActivityType, string> = {
   journal: 'Journaled',
   gratitude: 'Gave thanks',
   reflection: 'Evening reflection',
+  challenge: 'Challenge',
 } as const;
 
 export const MULTIPLIER_TIERS = [
@@ -31,8 +33,8 @@ export const MULTIPLIER_TIERS = [
   { minActivities: 0, multiplier: 1, label: '' },
 ] as const;
 
-export const MAX_DAILY_BASE_POINTS = 115; // 5+10+10+15+15+20+25+5+10
-export const MAX_DAILY_POINTS = 230; // 115 × 2x
+export const MAX_DAILY_BASE_POINTS = 135; // 5+10+10+15+15+20+25+5+10+20
+export const MAX_DAILY_POINTS = 270; // 135 × 2x
 
 export const ACTIVITY_CHECKLIST_NAMES: Record<ActivityType, string> = {
   mood: 'Log your mood',
@@ -44,8 +46,9 @@ export const ACTIVITY_CHECKLIST_NAMES: Record<ActivityType, string> = {
   journal: 'Journal',
   gratitude: 'Give thanks',
   reflection: 'Evening reflection',
+  challenge: 'Challenge',
 } as const;
 
 export const ALL_ACTIVITY_TYPES: ActivityType[] = [
-  'mood', 'pray', 'listen', 'prayerWall', 'readingPlan', 'meditate', 'journal', 'gratitude', 'reflection',
+  'mood', 'pray', 'listen', 'prayerWall', 'readingPlan', 'meditate', 'journal', 'gratitude', 'reflection', 'challenge',
 ];

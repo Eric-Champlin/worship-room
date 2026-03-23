@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DashboardHero } from '@/components/dashboard/DashboardHero'
@@ -18,6 +19,11 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useGettingStarted } from '@/hooks/useGettingStarted'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { usePrayerReminders } from '@/hooks/usePrayerReminders'
+import { useChallengeProgress } from '@/hooks/useChallengeProgress'
+import { useChallengeAutoDetect } from '@/hooks/useChallengeAutoDetect'
+import { useChallengeNudge } from '@/hooks/useChallengeNudge'
+import { ChallengeCompletionOverlay } from '@/components/challenges/ChallengeCompletionOverlay'
+import { useToastSafe } from '@/components/ui/Toast'
 import { hasCheckedInToday } from '@/services/mood-storage'
 import { getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { isOnboardingComplete } from '@/services/onboarding-storage'
@@ -26,6 +32,8 @@ import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
+import { CHALLENGES } from '@/data/challenges'
+import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { cn } from '@/lib/utils'
 import type { MoodEntry } from '@/types/dashboard'
 
@@ -49,6 +57,57 @@ export function Dashboard() {
   const faithPoints = useFaithPoints()
   const godMoments = useWeeklyGodMoments()
   usePrayerReminders(phase === 'dashboard')
+
+  // Challenge hooks
+  const challengeNavigate = useNavigate()
+  const { showToast: challengeShowToast } = useToastSafe()
+  const { getActiveChallenge, completeDay: challengeCompleteDay } = useChallengeProgress()
+  const [challengeCompletionOverlay, setChallengeCompletionOverlay] = useState<{
+    title: string; themeColor: string; days: number; points: number; badgeName: string
+  } | null>(null)
+
+  const handleAutoDetectComplete = useCallback((result: { isCompletion: boolean; bonusPoints: number; newBadgeIds: string[] }, challengeId: string) => {
+    if (!result.isCompletion) return
+    const challenge = CHALLENGES.find((c) => c.id === challengeId)
+    if (!challenge) return
+    const badgeId = result.newBadgeIds.find((id) => id.startsWith('challenge_') && !id.includes('first') && !id.includes('master'))
+    const badge = badgeId ? BADGE_MAP[badgeId] : undefined
+    setChallengeCompletionOverlay({
+      title: challenge.title,
+      themeColor: challenge.themeColor,
+      days: challenge.durationDays,
+      points: challenge.durationDays * 20 + result.bonusPoints,
+      badgeName: badge?.name ?? 'Challenge Complete',
+    })
+  }, [])
+
+  const { checkAndAutoComplete } = useChallengeAutoDetect({
+    isAuthenticated: !!user,
+    getActiveChallenge,
+    completeDay: challengeCompleteDay,
+    recordActivity: faithPoints.recordActivity,
+    showToast: challengeShowToast,
+  })
+
+  // Check for challenge completion from auto-detect on dashboard mount
+  useEffect(() => {
+    if (phase !== 'dashboard' || !user) return
+    const active = getActiveChallenge()
+    if (!active) return
+    const result = checkAndAutoComplete()
+    if (result) {
+      handleAutoDetectComplete(result, active.challengeId)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
+
+  useChallengeNudge({
+    isAuthenticated: !!user,
+    isDashboard: phase === 'dashboard',
+    getActiveChallenge,
+    showToast: challengeShowToast,
+    navigate: challengeNavigate,
+  })
 
   // Getting Started checklist
   const gettingStarted = useGettingStarted(faithPoints.todayActivities)
@@ -279,6 +338,16 @@ export function Dashboard() {
         />
       )}
       <SiteFooter />
+      {challengeCompletionOverlay && (
+        <ChallengeCompletionOverlay
+          challengeTitle={challengeCompletionOverlay.title}
+          themeColor={challengeCompletionOverlay.themeColor}
+          daysCompleted={challengeCompletionOverlay.days}
+          totalPointsEarned={challengeCompletionOverlay.points}
+          badgeName={challengeCompletionOverlay.badgeName}
+          onDismiss={() => setChallengeCompletionOverlay(null)}
+        />
+      )}
       <CelebrationQueue
         newlyEarnedBadges={faithPoints.newlyEarnedBadges}
         clearNewlyEarnedBadges={faithPoints.clearNewlyEarnedBadges}

@@ -167,6 +167,6 @@ describe('getActiveChallengeInfo', () => {
     // Feb 25, 2026 — Lent is active
     const result = getActiveChallengeInfo(new Date(2026, 1, 25))
     expect(result).not.toBeNull()
-    expect(result!.challenge.id).toBe('pray40-lenten-journey')
+    expect(result!.challengeId).toBe('pray40-lenten-journey')
   })
 })

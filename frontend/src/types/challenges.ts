@@ -29,11 +29,16 @@ export interface Challenge {
   communityGoal: string
 }
 
+export type ChallengeStatus = 'active' | 'completed' | 'paused' | 'abandoned'
+
 export interface ChallengeProgress {
   joinedAt: string
   currentDay: number
   completedDays: number[]
   completedAt: string | null
+  streak: number
+  missedDays: number[]
+  status: ChallengeStatus
 }
 
 export type ChallengeProgressMap = Record<string, ChallengeProgress>

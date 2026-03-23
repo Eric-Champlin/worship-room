@@ -209,11 +209,25 @@ describe('calculateDailyPoints', () => {
     expect(result).toEqual({ points: 210, multiplier: 2 });
   });
 
-  it('9 activities = 115 × 2x = 230 (all activities including reflection)', () => {
+  it('9 activities = 115 × 2x = 230 (all original activities including reflection)', () => {
     const result = calculateDailyPoints(makeActivities({
       mood: true, pray: true, listen: true, prayerWall: true, readingPlan: true, meditate: true, journal: true, gratitude: true, reflection: true,
     }));
     expect(result).toEqual({ points: 230, multiplier: 2 });
+  });
+
+  it('10 activities = 135 × 2x = 270 (all activities including challenge)', () => {
+    const result = calculateDailyPoints(makeActivities({
+      mood: true, pray: true, listen: true, prayerWall: true, readingPlan: true, meditate: true, journal: true, gratitude: true, reflection: true, challenge: true,
+    }));
+    expect(result).toEqual({ points: 270, multiplier: 2 });
+  });
+
+  it('challenge counts toward multiplier tier', () => {
+    // mood(5) + challenge(20) = 25 base, 2 activities → 1.25x = 31.25 → rounds to 31
+    const result = calculateDailyPoints(makeActivities({ mood: true, challenge: true }));
+    expect(result.multiplier).toBe(1.25);
+    expect(result.points).toBe(Math.round(25 * 1.25));
   });
 
   it('verify rounding (Math.round)', () => {
@@ -322,12 +336,13 @@ describe('freshDailyActivities', () => {
     expect(fresh.reflection).toBe(false);
   });
 
-  it('has all 9 activity boolean fields', () => {
+  it('has all 10 activity boolean fields', () => {
     const fresh = freshDailyActivities();
     const boolKeys = Object.entries(fresh)
       .filter(([_, v]) => typeof v === 'boolean')
       .map(([k]) => k);
-    expect(boolKeys).toHaveLength(9);
+    expect(boolKeys).toHaveLength(10);
     expect(boolKeys).toContain('reflection');
+    expect(boolKeys).toContain('challenge');
   });
 });

@@ -9,10 +9,16 @@ type StandardToastType = 'success' | 'error' | 'warning'
 type CelebrationToastType = 'celebration' | 'celebration-confetti' | 'special-celebration'
 export type ToastType = StandardToastType | CelebrationToastType
 
+export interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
 interface StandardToast {
   id: number
   message: string
   type: StandardToastType
+  action?: ToastAction
 }
 
 interface CelebrationToast {
@@ -24,7 +30,7 @@ interface CelebrationToast {
 }
 
 export interface ToastContextValue {
-  showToast: (message: string, type?: StandardToastType) => void
+  showToast: (message: string, type?: StandardToastType, action?: ToastAction) => void
   showCelebrationToast: (
     badgeName: string,
     message: string,
@@ -86,11 +92,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [celebrationToasts, setCelebrationToasts] = useState<CelebrationToast[]>([])
   const nextIdRef = useRef(0)
 
-  // Existing showToast — unchanged signature for success/error
-  const showToast = useCallback((message: string, type: StandardToastType = 'success') => {
+  const showToast = useCallback((message: string, type: StandardToastType = 'success', action?: ToastAction) => {
     const id = nextIdRef.current++
     setToasts((prev) => {
-      const updated = [...prev, { id, message, type }]
+      const updated = [...prev, { id, message, type, action }]
       return updated.slice(-3)
     })
 
@@ -149,7 +154,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   : 'border-l-4 border-l-danger',
             )}
           >
-            <p className="text-sm text-text-dark">{toast.message}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-text-dark">{toast.message}</p>
+              {toast.action && (
+                <button
+                  type="button"
+                  onClick={toast.action.onClick}
+                  className="ml-2 shrink-0 rounded-md bg-primary px-3 py-1 text-xs font-medium text-white hover:bg-primary-lt"
+                >
+                  {toast.action.label}
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>

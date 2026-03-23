@@ -7,10 +7,17 @@ import { ChallengeIcon } from '@/components/challenges/ChallengeIcon'
 import { ChallengeDayContent } from '@/components/challenges/ChallengeDayContent'
 import { ChallengeDaySelector } from '@/components/challenges/ChallengeDaySelector'
 import { ChallengeNotFound } from '@/components/challenges/ChallengeNotFound'
+import { SwitchChallengeDialog } from '@/components/challenges/SwitchChallengeDialog'
+import { ChallengeCompletionOverlay } from '@/components/challenges/ChallengeCompletionOverlay'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { useToastSafe } from '@/components/ui/Toast'
 import { useChallengeProgress } from '@/hooks/useChallengeProgress'
-import { getChallenge } from '@/data/challenges'
+import type { CompletionResult } from '@/hooks/useChallengeProgress'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { useChallengeAutoDetect } from '@/hooks/useChallengeAutoDetect'
+import { getChallenge, CHALLENGES } from '@/data/challenges'
+import { BADGE_MAP } from '@/constants/dashboard/badges'
 import {
   getParticipantCount,
   getCommunityGoalProgress,
@@ -25,7 +32,26 @@ export function ChallengeDetail() {
   const { challengeId } = useParams<{ challengeId: string }>()
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
-  const { getProgress, joinChallenge, completeDay, getReminders, toggleReminder } = useChallengeProgress()
+  const {
+    getProgress, joinChallenge, completeDay, getReminders, toggleReminder,
+    getActiveChallenge, pauseChallenge,
+  } = useChallengeProgress()
+  const [switchDialog, setSwitchDialog] = useState<{ activeId: string } | null>(null)
+  const [completionOverlay, setCompletionOverlay] = useState<{
+    title: string; themeColor: string; days: number; points: number; badgeName: string
+  } | null>(null)
+
+  const faithPoints = useFaithPoints()
+  const { showToast } = useToastSafe()
+
+  // Auto-detection: auto-complete challenge day if action already done
+  useChallengeAutoDetect({
+    isAuthenticated,
+    getActiveChallenge,
+    completeDay,
+    recordActivity: faithPoints.recordActivity,
+    showToast,
+  })
 
   const challenge = challengeId ? getChallenge(challengeId) : undefined
   const progress = challengeId ? getProgress(challengeId) : undefined
@@ -90,12 +116,22 @@ export function ChallengeDetail() {
     if (selectedDay !== progress.currentDay) return
     if (progress.completedDays.includes(selectedDay)) return
 
-    completeDay(challengeId, selectedDay)
+    const result: CompletionResult = completeDay(challengeId, selectedDay, faithPoints.recordActivity)
 
-    if (selectedDay === challenge.durationDays) {
+    if (result.isCompletion) {
       setJustCompletedFinalDay(true)
+      // Find the badge name for the completion overlay
+      const badgeId = result.newBadgeIds.find((id) => id.startsWith('challenge_') && !id.includes('first') && !id.includes('master'))
+      const badge = badgeId ? BADGE_MAP[badgeId] : undefined
+      setCompletionOverlay({
+        title: challenge.title,
+        themeColor: challenge.themeColor,
+        days: challenge.durationDays,
+        points: challenge.durationDays * 20 + result.bonusPoints,
+        badgeName: badge?.name ?? 'Challenge Complete',
+      })
     }
-  }, [challengeId, challenge, progress, selectedDay, completeDay])
+  }, [challengeId, challenge, progress, selectedDay, completeDay, faithPoints.recordActivity])
 
   const handleJoin = useCallback(() => {
     if (!challengeId) return
@@ -103,8 +139,24 @@ export function ChallengeDetail() {
       authModal?.openAuthModal('Sign in to join this challenge')
       return
     }
+    const active = getActiveChallenge()
+    if (active && active.challengeId !== challengeId) {
+      setSwitchDialog({ activeId: active.challengeId })
+      return
+    }
     joinChallenge(challengeId)
-  }, [challengeId, isAuthenticated, authModal, joinChallenge])
+  }, [challengeId, isAuthenticated, authModal, joinChallenge, getActiveChallenge])
+
+  const handleSwitchConfirm = useCallback(() => {
+    if (!challengeId || !switchDialog) return
+    pauseChallenge(switchDialog.activeId)
+    joinChallenge(challengeId)
+    setSwitchDialog(null)
+  }, [challengeId, switchDialog, pauseChallenge, joinChallenge])
+
+  const handleSwitchCancel = useCallback(() => {
+    setSwitchDialog(null)
+  }, [])
 
   if (!challenge) return <ChallengeNotFound />
 
@@ -374,6 +426,35 @@ export function ChallengeDetail() {
           </div>
         )}
       </div>
+
+      {/* Switch challenge dialog */}
+      {switchDialog && (() => {
+        const activeChallenge = CHALLENGES.find((c) => c.id === switchDialog.activeId)
+        const activeProgress = getProgress(switchDialog.activeId)
+        return (
+          <SwitchChallengeDialog
+            isOpen
+            currentChallengeName={activeChallenge?.title ?? 'current challenge'}
+            currentDay={activeProgress?.currentDay ?? 1}
+            newChallengeTitle={challenge.title}
+            themeColor={challenge.themeColor}
+            onConfirm={handleSwitchConfirm}
+            onCancel={handleSwitchCancel}
+          />
+        )
+      })()}
+
+      {/* Challenge completion celebration overlay */}
+      {completionOverlay && (
+        <ChallengeCompletionOverlay
+          challengeTitle={completionOverlay.title}
+          themeColor={completionOverlay.themeColor}
+          daysCompleted={completionOverlay.days}
+          totalPointsEarned={completionOverlay.points}
+          badgeName={completionOverlay.badgeName}
+          onDismiss={() => setCompletionOverlay(null)}
+        />
+      )}
     </Layout>
   )
 }

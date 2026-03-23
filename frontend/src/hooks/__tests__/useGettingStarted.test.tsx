@@ -16,6 +16,7 @@ const ALL_FALSE: Record<ActivityType, boolean> = {
   meditate: false,
   journal: false,
   reflection: false,
+  challenge: false,
 }
 
 let hookResult: ReturnType<typeof useGettingStarted>

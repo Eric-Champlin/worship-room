@@ -1,5 +1,24 @@
 import type { ChallengeActionType, ChallengeSeason } from '@/types/challenges'
 
+export const CHALLENGE_NUDGE_KEY = 'wr_challenge_nudge_shown'
+
+export const ACTION_TYPE_VERBS: Record<ChallengeActionType, string> = {
+  pray: 'prayed',
+  journal: 'journaled',
+  meditate: 'meditated',
+  music: 'listened to worship music',
+  gratitude: 'practiced gratitude',
+  prayerWall: 'prayed on the Prayer Wall',
+}
+
+export const CHALLENGE_BADGE_MAP: Record<string, string> = {
+  'pray40-lenten-journey': 'challenge_lent',
+  'easter-joy-resurrection-hope': 'challenge_easter',
+  'fire-of-pentecost': 'challenge_pentecost',
+  'advent-awaits': 'challenge_advent',
+  'new-year-new-heart': 'challenge_newyear',
+}
+
 export const CHALLENGE_PROGRESS_KEY = 'wr_challenge_progress'
 export const CHALLENGE_REMINDERS_KEY = 'wr_challenge_reminders'
 

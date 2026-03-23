@@ -103,6 +103,9 @@ describe('Accessibility', () => {
               currentDay: 2,
               completedDays: [1],
               completedAt: null,
+              streak: 0,
+              missedDays: [],
+              status: 'active',
             }}
             dayTitles={['A', 'B', 'C', 'D', 'E', 'F', 'G']}
             onSelectDay={vi.fn()}

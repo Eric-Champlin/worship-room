@@ -11,8 +11,10 @@ interface ActiveChallengeCardProps {
   calendarDay: number
   onJoin: () => void
   onContinue: () => void
+  onResume?: () => void
   isJoined: boolean
   isCompleted: boolean
+  isPaused?: boolean
   currentDay?: number
 }
 
@@ -22,8 +24,10 @@ export function ActiveChallengeCard({
   calendarDay,
   onJoin,
   onContinue,
+  onResume,
   isJoined,
   isCompleted,
+  isPaused = false,
   currentDay,
 }: ActiveChallengeCardProps) {
   const participantCount = getParticipantCount(challenge.id, calendarDay)
@@ -93,6 +97,15 @@ export function ActiveChallengeCard({
             <span className="inline-flex min-h-[44px] items-center rounded-full bg-success/10 px-6 py-2 text-sm font-semibold text-success">
               Completed
             </span>
+          ) : isPaused && onResume ? (
+            <button
+              type="button"
+              onClick={onResume}
+              className="inline-flex min-h-[44px] items-center rounded-full border-2 px-6 py-2 text-sm font-semibold transition-opacity hover:opacity-90"
+              style={{ borderColor: challenge.themeColor, color: getContrastSafeColor(challenge.themeColor) }}
+            >
+              Resume
+            </button>
           ) : isJoined ? (
             <button
               type="button"

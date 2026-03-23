@@ -151,6 +151,16 @@ const communityBadges: BadgeDefinition[] = [
   { id: 'encourage_50', name: 'Cheerleader', description: '50 encouragements sent', category: 'community', celebrationTier: 'toast-confetti' },
 ];
 
+const challengeBadges: BadgeDefinition[] = [
+  { id: 'challenge_lent', name: 'Lenten Warrior', description: 'Completed the Lenten Journey challenge', category: 'challenge', celebrationTier: 'full-screen' },
+  { id: 'challenge_easter', name: 'Easter Champion', description: 'Completed the Easter Joy challenge', category: 'challenge', celebrationTier: 'full-screen' },
+  { id: 'challenge_pentecost', name: 'Spirit-Filled', description: 'Completed the Pentecost challenge', category: 'challenge', celebrationTier: 'full-screen' },
+  { id: 'challenge_advent', name: 'Advent Faithful', description: 'Completed the Advent challenge', category: 'challenge', celebrationTier: 'full-screen' },
+  { id: 'challenge_newyear', name: 'New Year Renewed', description: 'Completed the New Year challenge', category: 'challenge', celebrationTier: 'full-screen' },
+  { id: 'challenge_first', name: 'Challenge Accepted', description: 'Completed your first community challenge', category: 'challenge', celebrationTier: 'toast-confetti' },
+  { id: 'challenge_master', name: 'Challenge Master', description: 'Completed all 5 community challenges', category: 'challenge', celebrationTier: 'full-screen' },
+];
+
 const welcomeBadge: BadgeDefinition = {
   id: 'welcome',
   name: 'Welcome to Worship Room',
@@ -166,6 +176,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   ...readingPlanBadges,
   fullWorshipDayBadge,
   ...communityBadges,
+  ...challengeBadges,
   welcomeBadge,
 ];
 
@@ -186,6 +197,7 @@ export const FRESH_ACTIVITY_COUNTS: ActivityCounts = {
   reflection: 0,
   encouragementsSent: 0,
   fullWorshipDays: 0,
+  challengesCompleted: 0,
 };
 
 export const FRESH_BADGE_DATA: BadgeData = {

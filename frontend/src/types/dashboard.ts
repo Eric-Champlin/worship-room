@@ -12,7 +12,7 @@ export interface MoodEntry {
   timeOfDay?: 'morning' | 'evening';
 }
 
-export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan' | 'gratitude' | 'reflection';
+export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan' | 'gratitude' | 'reflection' | 'challenge';
 
 export interface DailyActivities {
   mood: boolean;
@@ -24,6 +24,7 @@ export interface DailyActivities {
   readingPlan: boolean;
   gratitude: boolean;
   reflection: boolean;
+  challenge: boolean;
   pointsEarned: number;
   multiplier: number;
 }
@@ -49,7 +50,7 @@ export interface StreakData {
 // Badge types (Spec 7)
 
 export type CelebrationTier = 'toast' | 'toast-confetti' | 'special-toast' | 'full-screen';
-export type BadgeCategory = 'streak' | 'level' | 'activity' | 'community' | 'special';
+export type BadgeCategory = 'streak' | 'level' | 'activity' | 'community' | 'special' | 'challenge';
 
 export interface BadgeEarnedEntry {
   earnedAt: string;
@@ -67,6 +68,7 @@ export interface ActivityCounts {
   reflection: number;
   encouragementsSent: number;
   fullWorshipDays: number;
+  challengesCompleted: number;
 }
 
 export interface BadgeData {

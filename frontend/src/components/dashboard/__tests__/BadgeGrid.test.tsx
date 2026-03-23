@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BadgeGrid } from '../BadgeGrid'
-import { BADGE_DEFINITIONS } from '@/constants/dashboard/badges'
+// BadgeGrid renders from BADGE_GRID_SECTIONS (32 badges), not all of BADGE_DEFINITIONS (39)
 
 describe('BadgeGrid', () => {
   beforeEach(() => {
@@ -92,14 +92,15 @@ describe('BadgeGrid', () => {
     expect(fwdBtn).toBeInTheDocument()
   })
 
-  it('renders all badge cells (32 total from BADGE_DEFINITIONS)', () => {
+  it('renders all badge cells (32 total from BADGE_GRID_SECTIONS)', () => {
     render(<BadgeGrid />)
 
     // Count all badge cell buttons (buttons with aria-labels)
+    // BadgeGrid renders badges from BADGE_GRID_SECTIONS, not all of BADGE_DEFINITIONS
     const buttons = screen.getAllByRole('button').filter(
       (btn) => btn.getAttribute('aria-label') && btn.getAttribute('aria-label') !== 'Close badge collection',
     )
-    expect(buttons.length).toBe(BADGE_DEFINITIONS.length)
+    expect(buttons.length).toBe(32)
   })
 
   it('empty badge data does not crash — all badges locked', () => {
@@ -111,10 +112,11 @@ describe('BadgeGrid', () => {
 
     render(<BadgeGrid />)
 
+    // BadgeGrid renders badges from BADGE_GRID_SECTIONS (32), not all of BADGE_DEFINITIONS
     const buttons = screen.getAllByRole('button').filter(
       (btn) => btn.getAttribute('aria-label')?.includes('Locked'),
     )
-    expect(buttons.length).toBe(BADGE_DEFINITIONS.length)
+    expect(buttons.length).toBe(32)
   })
 
   it('corrupted localStorage data does not crash', () => {

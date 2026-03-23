@@ -21,15 +21,15 @@ describe('BADGE_DEFINITIONS', () => {
       expect(badge.description).toBeTruthy();
       expect(badge.category).toBeTruthy();
       expect(badge.celebrationTier).toBeTruthy();
-      expect(['streak', 'level', 'activity', 'community', 'special']).toContain(badge.category);
+      expect(['streak', 'level', 'activity', 'community', 'special', 'challenge']).toContain(badge.category);
       expect(['toast', 'toast-confetti', 'special-toast', 'full-screen']).toContain(badge.celebrationTier);
     }
   });
 
-  it('total unique badge IDs count is 29', () => {
+  it('total unique badge IDs count is 39', () => {
     const ids = BADGE_DEFINITIONS.map((b) => b.id);
-    // 7 streak + 6 level + 9 activity milestones + 3 reading plan + 1 full_worship_day + 5 community/first-time + 1 welcome
-    expect(new Set(ids).size).toBe(32);
+    // 7 streak + 6 level + 9 activity milestones + 3 reading plan + 1 full_worship_day + 5 community/first-time + 7 challenge + 1 welcome
+    expect(new Set(ids).size).toBe(39);
   });
 });
 
@@ -219,14 +219,50 @@ describe('FRESH_BADGE_DATA', () => {
       reflection: 0,
       encouragementsSent: 0,
       fullWorshipDays: 0,
+      challengesCompleted: 0,
     });
   });
 
   it('FRESH_ACTIVITY_COUNTS has all zero values', () => {
     const keys = Object.keys(FRESH_ACTIVITY_COUNTS);
-    expect(keys).toHaveLength(10);
+    expect(keys).toHaveLength(11);
     for (const key of keys) {
       expect(FRESH_ACTIVITY_COUNTS[key as keyof typeof FRESH_ACTIVITY_COUNTS]).toBe(0);
     }
+  });
+
+  it('FRESH_ACTIVITY_COUNTS has challengesCompleted', () => {
+    expect(FRESH_ACTIVITY_COUNTS.challengesCompleted).toBe(0);
+  });
+});
+
+describe('challenge badges', () => {
+  it('7 definitions with correct IDs', () => {
+    const challengeBadges = BADGE_DEFINITIONS.filter((b) => b.category === 'challenge');
+    expect(challengeBadges).toHaveLength(7);
+
+    const expectedIds = [
+      'challenge_lent', 'challenge_easter', 'challenge_pentecost',
+      'challenge_advent', 'challenge_newyear', 'challenge_first', 'challenge_master',
+    ];
+    for (const id of expectedIds) {
+      expect(challengeBadges.find((b) => b.id === id)).toBeDefined();
+    }
+  });
+
+  it('challenge-specific badges have full-screen tier', () => {
+    expect(BADGE_MAP['challenge_lent'].celebrationTier).toBe('full-screen');
+    expect(BADGE_MAP['challenge_easter'].celebrationTier).toBe('full-screen');
+    expect(BADGE_MAP['challenge_pentecost'].celebrationTier).toBe('full-screen');
+    expect(BADGE_MAP['challenge_advent'].celebrationTier).toBe('full-screen');
+    expect(BADGE_MAP['challenge_newyear'].celebrationTier).toBe('full-screen');
+  });
+
+  it('challenge_first has toast-confetti tier', () => {
+    expect(BADGE_MAP['challenge_first'].celebrationTier).toBe('toast-confetti');
+  });
+
+  it('challenge_master has full-screen tier', () => {
+    expect(BADGE_MAP['challenge_master'].celebrationTier).toBe('full-screen');
   });
 });

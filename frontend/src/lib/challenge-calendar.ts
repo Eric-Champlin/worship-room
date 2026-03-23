@@ -119,16 +119,31 @@ export function getChallengeCalendarInfo(
  */
 export function getActiveChallengeInfo(
   today: Date = new Date(),
-): { challenge: Challenge; daysRemaining: number; calendarDay: number } | null {
+): { challengeId: string; daysRemaining: number; calendarDay: number } | null {
   for (const challenge of CHALLENGES) {
     const info = getChallengeCalendarInfo(challenge, today)
     if (info.status === 'active' && info.daysRemaining != null && info.calendarDay != null) {
       return {
-        challenge,
+        challengeId: challenge.id,
         daysRemaining: info.daysRemaining,
         calendarDay: info.calendarDay,
       }
     }
   }
   return null
+}
+
+export function getNextChallengeInfo(
+  today: Date = new Date(),
+): { challengeId: string; startDate: Date } | null {
+  let nearest: { challengeId: string; startDate: Date } | null = null
+  for (const challenge of CHALLENGES) {
+    const info = getChallengeCalendarInfo(challenge, today)
+    if (info.status === 'upcoming') {
+      if (!nearest || info.startDate < nearest.startDate) {
+        nearest = { challengeId: challenge.id, startDate: info.startDate }
+      }
+    }
+  }
+  return nearest
 }

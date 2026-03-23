@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, CheckCircle2, Flame, Heart, Rocket, TrendingUp, Users } from 'lucide-react'
+import { BarChart3, BookOpen, CheckCircle2, Flame, Heart, Rocket, Target, TrendingUp, Users } from 'lucide-react'
 import type { useFaithPoints } from '@/hooks/useFaithPoints'
 import { cn } from '@/lib/utils'
 import { useWeeklyRecap } from '@/hooks/useWeeklyRecap'
@@ -14,6 +14,7 @@ import { TodaysDevotionalCard } from './TodaysDevotionalCard'
 import { PrayerListWidget } from './PrayerListWidget'
 import { ReadingPlanWidget } from './ReadingPlanWidget'
 import { GratitudeWidget } from './GratitudeWidget'
+import { ChallengeWidget } from './ChallengeWidget'
 
 interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
@@ -62,6 +63,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
   const gratitudeAnim = getAnimProps()
   const streakAnim = getAnimProps()
   const activityAnim = getAnimProps()
+  const challengeAnim = getAnimProps()
   const friendsAnim = getAnimProps()
   const recapAnim = showRecap ? getAnimProps() : {}
   const quickAnim = getAnimProps()
@@ -167,11 +169,21 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
         </DashboardCard>
 
         <DashboardCard
+          id="challenge"
+          title="Challenge"
+          icon={<Target className="h-5 w-5" />}
+          className={cn('order-9 lg:col-span-3', challengeAnim.className)}
+          style={challengeAnim.style}
+        >
+          <ChallengeWidget />
+        </DashboardCard>
+
+        <DashboardCard
           id="friends-preview"
           title="Friends & Leaderboard"
           icon={<Users className="h-5 w-5" />}
           action={{ label: 'See all', to: '/friends?tab=leaderboard' }}
-          className={cn('order-9 lg:col-span-2', friendsAnim.className)}
+          className={cn('order-10 lg:col-span-2', friendsAnim.className)}
           style={friendsAnim.style}
         >
           <FriendsPreview />
@@ -184,7 +196,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
             title="Weekly Recap"
             icon={<BarChart3 className="h-5 w-5" />}
             collapsible={false}
-            className={cn('order-10 lg:col-span-5', recapAnim.className)}
+            className={cn('order-11 lg:col-span-5', recapAnim.className)}
             style={recapAnim.style}
           >
             <WeeklyRecap />
@@ -193,7 +205,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
 
         <div
           ref={quickActionsRef}
-          className={cn('order-11 lg:col-span-5', quickAnim.className)}
+          className={cn('order-12 lg:col-span-5', quickAnim.className)}
           style={quickAnim.style}
           {...(quickActionsTooltipVisible ? { 'aria-describedby': 'dashboard-quick-actions' } : {})}
         >
