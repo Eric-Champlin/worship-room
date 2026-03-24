@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { ActivityCorrelations } from '@/components/insights/ActivityCorrelations'
+import { CommunityConnections } from '@/components/insights/CommunityConnections'
 import { CalendarHeatmap } from '@/components/insights/CalendarHeatmap'
 import { InsightCards } from '@/components/insights/InsightCards'
 import { MoodTrendChart } from '@/components/insights/MoodTrendChart'
@@ -261,15 +262,18 @@ export function Insights() {
           <ActivityCorrelations hasData={hasData} />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 4 : 3}>
-          <GratitudeStreak />
+          <CommunityConnections hasData={hasData} />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 5 : 4}>
-          <ScriptureConnections hasData={hasData} />
+          <GratitudeStreak />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 6 : 5}>
-          <MeditationHistory rangeDays={rangeDays} />
+          <ScriptureConnections hasData={hasData} />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 7 : 6}>
+          <MeditationHistory rangeDays={rangeDays} />
+        </AnimatedSection>
+        <AnimatedSection index={entries.length > 0 ? 8 : 7}>
           <div className="pt-2 text-center">
             <Link
               to="/insights/monthly"

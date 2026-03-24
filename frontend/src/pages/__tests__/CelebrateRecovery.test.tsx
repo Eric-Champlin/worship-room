@@ -9,6 +9,16 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
 }))
 
+vi.mock('@/hooks/useFaithPoints', () => ({
+  useFaithPoints: () => ({
+    totalPoints: 0, currentLevel: 1, levelName: 'Seedling', pointsToNextLevel: 100,
+    todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, meditate: false, journal: false, localVisit: false },
+    todayPoints: 0, todayMultiplier: 1, currentStreak: 0, longestStreak: 0,
+    recordActivity: vi.fn(), clearNewlyEarnedBadges: vi.fn(), repairStreak: vi.fn(),
+    newlyEarnedBadges: [], previousStreak: null, isFreeRepairAvailable: false,
+  }),
+}))
+
 function renderPage() {
   return render(
     <MemoryRouter

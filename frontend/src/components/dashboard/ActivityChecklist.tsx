@@ -67,11 +67,26 @@ export function ActivityChecklist({
   // Check once on mount whether to show reflection (after 6 PM)
   const showReflection = useMemo(() => isEveningTime(), [])
 
-  // Build activity list: base 7 + optional readingPlan + conditional reflection
+  // Check once on mount whether user has local visit history
+  const hasLocalVisits = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('wr_local_visits')
+      if (!raw) return false
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) && parsed.length > 0
+    } catch {
+      return false
+    }
+  }, [])
+
+  // Build activity list: base 7 + optional readingPlan + conditional localVisit + conditional reflection
   const activityList: ActivityType[] = (() => {
     const list: ActivityType[] = hasActivePlan
       ? [...BASE_ACTIVITY_ORDER.slice(0, 4), 'readingPlan', ...BASE_ACTIVITY_ORDER.slice(4)]
       : [...BASE_ACTIVITY_ORDER]
+    if (hasLocalVisits) {
+      list.push('localVisit')
+    }
     if (showReflection) {
       list.push('reflection')
     }

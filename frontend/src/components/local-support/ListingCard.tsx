@@ -1,5 +1,7 @@
 import { Bookmark, ChevronDown, ExternalLink, ImageOff, MapPin, Phone, Share2, Star } from 'lucide-react'
-import type { LocalSupportPlace } from '@/types/local-support'
+import type { LocalSupportPlace, LocalSupportCategory } from '@/types/local-support'
+import { VisitButton, VisitNote, useVisitState } from './VisitButton'
+import { ListingCTAs } from './ListingCTAs'
 import { cn } from '@/lib/utils'
 
 interface ListingCardProps {
@@ -7,7 +9,12 @@ interface ListingCardProps {
   distance: number | null
   isBookmarked: boolean
   isHighlighted: boolean
+  showBookmark?: boolean
+  showVisitButton?: boolean
   onToggleBookmark: (placeId: string) => void
+  onVisit?: (placeId: string, placeName: string) => void
+  placeType?: 'church' | 'counselor' | 'cr'
+  category?: LocalSupportCategory
   onShare: (placeId: string) => void
   onExpand: (placeId: string) => void
   isExpanded: boolean
@@ -42,13 +49,26 @@ export function ListingCard({
   distance,
   isBookmarked,
   isHighlighted,
+  showBookmark = true,
+  showVisitButton = false,
   onToggleBookmark,
+  onVisit,
+  placeType,
+  category,
   onShare,
   onExpand,
   isExpanded,
   listId,
 }: ListingCardProps) {
   const detailsId = listId ? `${listId}-${place.id}-details` : `${place.id}-details`
+
+  // Always call hook (React rules); renders are conditional
+  const visitState = useVisitState({
+    placeId: place.id,
+    placeName: place.name,
+    placeType: placeType ?? 'church',
+    onVisit: onVisit ?? (() => {}),
+  })
 
   return (
     <article
@@ -112,21 +132,23 @@ export function ListingCard({
       {/* Actions row */}
       <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            aria-pressed={isBookmarked}
-            aria-label={`Bookmark ${place.name}`}
-            onClick={() => onToggleBookmark(place.id)}
-            className="flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] transition-colors hover:bg-gray-100"
-          >
-            <Bookmark
-              size={18}
-              aria-hidden="true"
-              className={cn(
-                isBookmarked ? 'fill-success text-success' : 'text-text-light',
-              )}
-            />
-          </button>
+          {showBookmark && (
+            <button
+              type="button"
+              aria-pressed={isBookmarked}
+              aria-label={`Bookmark ${place.name}`}
+              onClick={() => onToggleBookmark(place.id)}
+              className="flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] transition-colors hover:bg-gray-100"
+            >
+              <Bookmark
+                size={18}
+                aria-hidden="true"
+                className={cn(
+                  isBookmarked ? 'fill-success text-success' : 'text-text-light',
+                )}
+              />
+            </button>
+          )}
           <button
             type="button"
             aria-label={`Share ${place.name}`}
@@ -135,6 +157,9 @@ export function ListingCard({
           >
             <Share2 size={18} className="text-text-light" aria-hidden="true" />
           </button>
+          {showVisitButton && onVisit && placeType && (
+            <VisitButton visitState={visitState} />
+          )}
         </div>
 
         <button
@@ -155,6 +180,11 @@ export function ListingCard({
           />
         </button>
       </div>
+
+      {/* Visit note — rendered outside actions row for full card width */}
+      {showVisitButton && onVisit && placeType && (
+        <VisitNote visitState={visitState} />
+      )}
 
       {/* Expanded details */}
       <div
@@ -218,6 +248,14 @@ export function ListingCard({
             <MapPin size={14} aria-hidden="true" />
             Get Directions
           </a>
+
+          {category && (
+            <ListingCTAs
+              placeName={place.name}
+              category={category}
+              onShareClick={() => onShare(place.id)}
+            />
+          )}
         </div>
       </div>
     </article>

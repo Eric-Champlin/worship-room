@@ -119,6 +119,21 @@ describe('ListingCard', () => {
     expect(bookmarkBtn).toHaveAttribute('aria-pressed', 'true')
   })
 
+  it('hides bookmark button when showBookmark is false', () => {
+    render(<ListingCard {...defaultProps} showBookmark={false} />)
+    expect(screen.queryByRole('button', { name: /bookmark/i })).not.toBeInTheDocument()
+  })
+
+  it('shows bookmark button when showBookmark is true', () => {
+    render(<ListingCard {...defaultProps} showBookmark={true} />)
+    expect(screen.getByRole('button', { name: /bookmark/i })).toBeInTheDocument()
+  })
+
+  it('shows bookmark button by default (showBookmark omitted)', () => {
+    render(<ListingCard {...defaultProps} />)
+    expect(screen.getByRole('button', { name: /bookmark/i })).toBeInTheDocument()
+  })
+
   it('highlighted card has ring', () => {
     const { container } = render(<ListingCard {...defaultProps} isHighlighted={true} />)
     const article = container.querySelector('article')

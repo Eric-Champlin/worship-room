@@ -49,6 +49,20 @@ function DailyHubContent() {
 
   const [prayContext, setPrayContext] = useState<PrayContext | null>(null)
 
+  // Read cross-feature URL params on mount (consumed once, then cleared)
+  const urlParamsConsumed = useRef(false)
+  const urlContext = useRef(searchParams.get('context'))
+  const urlPrompt = useRef(searchParams.get('prompt'))
+
+  useEffect(() => {
+    if (urlParamsConsumed.current) return
+    urlParamsConsumed.current = true
+    if (urlContext.current || urlPrompt.current) {
+      // Clean URL params after consuming, keep only tab
+      setSearchParams({ tab: activeTab }, { replace: true })
+    }
+  }, [activeTab, setSearchParams])
+
   // Tooltip for tab bar
   const tabBarRef = useRef<HTMLDivElement>(null)
   const tabBarTooltip = useTooltipCallout('daily-hub-tabs', tabBarRef)
@@ -263,6 +277,7 @@ function DailyHubContent() {
         >
           <PrayTabContent
             onSwitchToJournal={handleSwitchToJournal}
+            initialContext={urlContext.current}
           />
         </div>
 
@@ -276,6 +291,7 @@ function DailyHubContent() {
           <JournalTabContent
             prayContext={prayContext}
             onSwitchTab={switchTab}
+            urlPrompt={urlPrompt.current}
           />
         </div>
 

@@ -9,6 +9,16 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
 }))
 
+vi.mock('@/hooks/useFaithPoints', () => ({
+  useFaithPoints: () => ({
+    totalPoints: 0, currentLevel: 1, levelName: 'Seedling', pointsToNextLevel: 100,
+    todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, meditate: false, journal: false, localVisit: false },
+    todayPoints: 0, todayMultiplier: 1, currentStreak: 0, longestStreak: 0,
+    recordActivity: vi.fn(), clearNewlyEarnedBadges: vi.fn(), repairStreak: vi.fn(),
+    newlyEarnedBadges: [], previousStreak: null, isFreeRepairAvailable: false,
+  }),
+}))
+
 function renderPage() {
   return render(
     <MemoryRouter
@@ -32,7 +42,7 @@ describe('Churches', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders search controls for logged-out users in teaser mode', () => {
+  it('renders functional search controls for logged-out users', () => {
     renderPage()
     expect(screen.getByLabelText('Use my current location')).toBeInTheDocument()
   })
@@ -40,5 +50,20 @@ describe('Churches', () => {
   it('renders mock listing cards for logged-out users', () => {
     renderPage()
     expect(screen.getAllByText('First Baptist Church of Columbia').length).toBeGreaterThan(0)
+  })
+
+  it('does not show Saved tab for logged-out users', () => {
+    renderPage()
+    expect(screen.queryByRole('tab', { name: /saved/i })).not.toBeInTheDocument()
+  })
+
+  it('shows only Search Results tab for logged-out users', () => {
+    renderPage()
+    expect(screen.getByRole('tab', { name: /search results/i })).toBeInTheDocument()
+  })
+
+  it('does not show bookmark buttons for logged-out users', () => {
+    renderPage()
+    expect(screen.queryByRole('button', { name: /bookmark/i })).not.toBeInTheDocument()
   })
 })

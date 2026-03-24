@@ -20,6 +20,7 @@ const ALL_FALSE: Record<ActivityType, boolean> = {
   journal: false,
   reflection: false,
   challenge: false,
+  localVisit: false,
 }
 
 const ALL_TRUE: Record<ActivityType, boolean> = {
@@ -33,6 +34,7 @@ const ALL_TRUE: Record<ActivityType, boolean> = {
   journal: true,
   reflection: true,
   challenge: true,
+  localVisit: true,
 }
 
 beforeEach(() => {
@@ -287,5 +289,25 @@ describe('ActivityChecklist', () => {
       todayActivities: { ...ALL_FALSE, challenge: true },
     })
     expect(screen.queryByText('Challenge')).not.toBeInTheDocument()
+  })
+
+  it('shows "Visit local support" when wr_local_visits has entries', () => {
+    localStorage.setItem('wr_local_visits', JSON.stringify([
+      { id: '1', placeId: 'p1', placeName: 'Church', placeType: 'church', visitDate: '2026-03-24', note: '' },
+    ]))
+    renderChecklist()
+    expect(screen.getByText('Visit local support')).toBeInTheDocument()
+  })
+
+  it('hides "Visit local support" when wr_local_visits is empty', () => {
+    localStorage.removeItem('wr_local_visits')
+    renderChecklist()
+    expect(screen.queryByText('Visit local support')).not.toBeInTheDocument()
+  })
+
+  it('hides "Visit local support" when wr_local_visits is empty array', () => {
+    localStorage.setItem('wr_local_visits', JSON.stringify([]))
+    renderChecklist()
+    expect(screen.queryByText('Visit local support')).not.toBeInTheDocument()
   })
 })

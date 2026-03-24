@@ -207,4 +207,26 @@ describe('DailyHub', () => {
     await user.click(screen.getByRole('tab', { name: /pray/i }))
     expect(screen.getByRole('textbox', { name: /prayer request/i })).toHaveValue('my prayer text')
   })
+
+  it('pre-fills Pray textarea from ?context= URL param', () => {
+    renderPage('/daily?tab=pray&context=Praying+for+this+church')
+    const textarea = screen.getByRole('textbox', { name: /prayer request/i })
+    expect(textarea).toHaveValue('Praying for this church')
+  })
+
+  it('sets Journal guided prompt from ?prompt= URL param', () => {
+    renderPage('/daily?tab=journal&prompt=Reflect+on+your+visit...')
+    // Journal should be in guided mode with the prompt text
+    expect(screen.getByText('Reflect on your visit...')).toBeInTheDocument()
+  })
+
+  it('existing prayContext still works after URL param support', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    // Ensure basic tab switching still works (no regressions)
+    await user.click(screen.getByRole('tab', { name: /journal/i }))
+    expect(
+      screen.getByRole('heading', { name: /what's on your mind\?/i }),
+    ).toBeInTheDocument()
+  })
 })

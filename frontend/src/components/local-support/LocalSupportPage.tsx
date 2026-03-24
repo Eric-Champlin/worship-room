@@ -3,7 +3,9 @@ import { useSearchParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { createLocalSupportService } from '@/services/local-support-service'
+import { categoryToPlaceType } from '@/services/local-visit-storage'
 import { calculateDistanceMiles } from '@/lib/geo'
 import type { LocalSupportPlace, LocalSupportCategory, SortOption } from '@/types/local-support'
 import { getMockPlacesByCategory } from '@/mocks/local-support-mock-data'
@@ -38,7 +40,14 @@ const MOCK_DATA_CENTER = { lat: 35.6151, lng: -87.0353 }
 function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
+  const { recordActivity } = useFaithPoints()
   const [searchParams, setSearchParams] = useSearchParams()
+
+  const placeType = categoryToPlaceType(config.category)
+
+  const handleVisit = useCallback((_placeId: string, _placeName: string) => {
+    recordActivity('localVisit')
+  }, [recordActivity])
 
   // Search state
   const [searchResults, setSearchResults] = useState<LocalSupportPlace[]>(() =>
@@ -90,17 +99,23 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
 
   // Read URL params on mount — validate bounds to prevent invalid API calls
   const initialLat = useMemo(() => {
-    const v = Number(searchParams.get('lat'))
+    const raw = searchParams.get('lat')
+    if (raw === null) return undefined
+    const v = Number(raw)
     return isFinite(v) && v >= -90 && v <= 90 ? v : undefined
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const initialLng = useMemo(() => {
-    const v = Number(searchParams.get('lng'))
+    const raw = searchParams.get('lng')
+    if (raw === null) return undefined
+    const v = Number(raw)
     return isFinite(v) && v >= -180 && v <= 180 ? v : undefined
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const initialRadius = useMemo(() => {
-    const v = Number(searchParams.get('radius'))
+    const raw = searchParams.get('radius')
+    if (raw === null) return undefined
+    const v = Number(raw)
     return isFinite(v) && v > 0 && v <= 500 ? v : undefined
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -242,20 +257,15 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
           <SearchControls
             onSearch={handleSearch}
             onGeocode={handleGeocode}
-            initialLat={isAuthenticated ? initialLat : undefined}
-            initialLng={isAuthenticated ? initialLng : undefined}
-            initialRadius={isAuthenticated ? initialRadius : undefined}
+            initialLat={initialLat}
+            initialLng={initialLng}
+            initialRadius={initialRadius}
             isLoading={searchState === 'loading'}
-            onInteractionBlocked={
-              !isAuthenticated
-                ? () => authModal?.openAuthModal('Sign in to search for local support')
-                : undefined
-            }
           />
 
           {/* Tabs (A2: role="tablist" + role="tab" + aria-selected + keyboard nav) */}
           <div className="mt-6 mb-6 flex gap-2" role="tablist" aria-label="Results view">
-            {(['search', 'saved'] as const).map((tab, index, tabs) => (
+            {(isAuthenticated ? ['search', 'saved'] as const : ['search'] as const).map((tab, index, tabs) => (
               <button
                 key={tab}
                 ref={(el) => { tabRefs.current[index] = el }}
@@ -266,10 +276,6 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                 aria-controls="ls-tabpanel"
                 tabIndex={activeTab === tab ? 0 : -1}
                 onClick={() => {
-                  if (tab === 'saved' && !isAuthenticated) {
-                    authModal?.openAuthModal('Sign in to save and view bookmarked listings')
-                    return
-                  }
                   setActiveTab(tab)
                 }}
                 onKeyDown={(e) => {
@@ -280,12 +286,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                   else if (e.key === 'End') nextIndex = tabs.length - 1
                   else return
                   e.preventDefault()
-                  const nextTab = tabs[nextIndex]
-                  if (nextTab === 'saved' && !isAuthenticated) {
-                    authModal?.openAuthModal('Sign in to save and view bookmarked listings')
-                    return
-                  }
-                  setActiveTab(nextTab)
+                  setActiveTab(tabs[nextIndex])
                   tabRefs.current[nextIndex]?.focus()
                 }}
                 className={cn(
@@ -332,7 +333,10 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     sortOption={sortOption}
                     onSortChange={setSortOption}
                     selectedPlaceId={selectedPlaceId}
-
+                    showBookmark={isAuthenticated}
+                    showVisitButton={isAuthenticated}
+                    onVisit={handleVisit}
+                    placeType={placeType}
                     bookmarkedIds={bookmarkedIds}
                     onToggleBookmark={handleToggleBookmark}
                     hasMore={activeTab === 'search' ? hasMore : false}
@@ -398,7 +402,10 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     sortOption={sortOption}
                     onSortChange={setSortOption}
                     selectedPlaceId={selectedPlaceId}
-
+                    showBookmark={isAuthenticated}
+                    showVisitButton={isAuthenticated}
+                    onVisit={handleVisit}
+                    placeType={placeType}
                     bookmarkedIds={bookmarkedIds}
                     onToggleBookmark={handleToggleBookmark}
                     hasMore={activeTab === 'search' ? hasMore : false}

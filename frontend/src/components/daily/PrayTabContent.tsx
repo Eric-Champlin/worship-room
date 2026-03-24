@@ -46,9 +46,10 @@ import type { GuidedPrayerSession } from '@/types/guided-prayer'
 
 interface PrayTabContentProps {
   onSwitchToJournal?: (topic: string) => void
+  initialContext?: string | null
 }
 
-export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
+export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabContentProps) {
   const { showToast } = useToast()
   const authModal = useAuthModal()
   const { isAuthenticated } = useAuth()
@@ -125,6 +126,17 @@ export function PrayTabContent({ onSwitchToJournal }: PrayTabContentProps) {
       navigate(location.pathname + location.search, { replace: true, state: null })
     }
   }, [prayWallContext, activeTab, navigate, location.pathname, location.search])
+
+  // Pre-fill from URL context param (cross-feature CTA)
+  const initialContextConsumed = useRef(false)
+  useEffect(() => {
+    if (initialContext && !initialContextConsumed.current && activeTab === 'pray' && !text) {
+      initialContextConsumed.current = true
+      setText(initialContext)
+      setSelectedChip(null)
+      setNudge(false)
+    }
+  }, [initialContext, activeTab, text])
 
   // Pre-fill from challenge context
   useEffect(() => {

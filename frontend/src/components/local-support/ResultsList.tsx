@@ -12,6 +12,10 @@ interface ResultsListProps {
   sortOption: SortOption
   onSortChange: (sort: SortOption) => void
   selectedPlaceId: string | null
+  showBookmark?: boolean
+  showVisitButton?: boolean
+  onVisit?: (placeId: string, placeName: string) => void
+  placeType?: 'church' | 'counselor' | 'cr'
   bookmarkedIds: Set<string>
   onToggleBookmark: (placeId: string) => void
   hasMore: boolean
@@ -32,6 +36,10 @@ export function ResultsList({
   sortOption,
   onSortChange,
   selectedPlaceId,
+  showBookmark = true,
+  showVisitButton = false,
+  onVisit,
+  placeType,
   bookmarkedIds,
   onToggleBookmark,
   hasMore,
@@ -154,6 +162,11 @@ export function ResultsList({
               distance={distanceMap.get(place.id) ?? null}
               isBookmarked={bookmarkedIds.has(place.id)}
               isHighlighted={selectedPlaceId === place.id}
+              showBookmark={showBookmark}
+              showVisitButton={showVisitButton}
+              onVisit={onVisit}
+              placeType={placeType}
+              category={category}
               onToggleBookmark={onToggleBookmark}
               onShare={handleShare}
               onExpand={handleExpand}

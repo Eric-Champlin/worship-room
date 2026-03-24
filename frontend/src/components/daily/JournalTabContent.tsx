@@ -46,9 +46,10 @@ const JOURNAL_MILESTONES: Record<number, string> = {
 interface JournalTabContentProps {
   prayContext?: PrayContext | null
   onSwitchTab?: (tab: 'pray' | 'journal' | 'meditate') => void
+  urlPrompt?: string | null
 }
 
-export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTabContentProps) {
+export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }: JournalTabContentProps) {
   const { showToast, showCelebrationToast } = useToast()
   const authModal = useAuthModal()
   const { isAuthenticated } = useAuth()
@@ -234,6 +235,17 @@ export function JournalTabContent({ prayContext = null, onSwitchTab }: JournalTa
       navigate(location.pathname + location.search, { replace: true, state: null })
     }
   }, [challengeContext, activeTab, navigate, location.pathname, location.search])
+
+  // URL prompt param: switch to guided mode with prompt (cross-feature CTA)
+  const urlPromptConsumed = useRef(false)
+  useEffect(() => {
+    if (urlPrompt && !urlPromptConsumed.current && activeTab === 'journal') {
+      urlPromptConsumed.current = true
+      setMode('guided')
+      setContextPrompt(urlPrompt)
+      setContextDismissed(false)
+    }
+  }, [urlPrompt, activeTab])
 
   const handleModeChange = useCallback((newMode: JournalMode) => {
     setMode(newMode)
