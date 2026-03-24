@@ -7,6 +7,7 @@ import {
 } from '@/components/audio/AudioProvider'
 import { saveMeditationSession } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
+import { useAudioDucking } from './useAudioDucking'
 
 interface UseBibleAudioOptions {
   verses: BibleVerse[]
@@ -57,10 +58,16 @@ export function useBibleAudio({
   const engine = useAudioEngine()
   const sleepTimer = useSleepTimerControls()
 
+  const ducking = useAudioDucking({
+    engine,
+    activeSoundsCount: audioState.activeSounds.length,
+    masterVolume: audioState.masterVolume,
+    sleepTimerPhase: sleepTimer.phase,
+  })
+
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
   const interVerseTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const startTimeRef = useRef<number | null>(null)
-  const savedVolumeRef = useRef<number | null>(null)
   const autoScrollPausedRef = useRef(false)
   const scrollResumeTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const playbackStateRef = useRef(playbackState)
@@ -114,23 +121,6 @@ export function useBibleAudio({
       null
     )
   }, [isSupported])
-
-  // Ambient volume reduction
-  const reduceAmbientVolume = useCallback(() => {
-    if (!engine || audioState.activeSounds.length === 0) return
-    if (savedVolumeRef.current !== null) return // Already reduced
-    const currentVolume = audioState.masterVolume
-    savedVolumeRef.current = currentVolume
-    if (currentVolume > 0.3) {
-      engine.setMasterVolume(0.3)
-    }
-  }, [engine, audioState.activeSounds.length, audioState.masterVolume])
-
-  const restoreAmbientVolume = useCallback(() => {
-    if (!engine || savedVolumeRef.current === null) return
-    engine.setMasterVolume(savedVolumeRef.current)
-    savedVolumeRef.current = null
-  }, [engine])
 
   // Auto-scroll to verse
   const scrollToVerse = useCallback(
@@ -190,17 +180,25 @@ export function useBibleAudio({
       // Auto-scroll
       scrollToVerse(verses[index].number)
 
-      // Reduce ambient volume
-      reduceAmbientVolume()
+      // Duck ambient volume for this verse
+      ducking.duckForVerse()
+
+      // Sleep timer TTS volume fade: progressively reduce utterance volume
+      if (sleepTimerPhaseRef.current === 'fading' && sleepTimer.fadeDurationMs > 0) {
+        const fadeRatio = Math.max(0, sleepTimer.remainingMs / sleepTimer.fadeDurationMs)
+        utterance.volume = Math.max(0.05, fadeRatio)
+      }
 
       utterance.onend = () => {
+        // Unduck between verses
+        ducking.unduckForPause()
+
         // Check if we should stop (sleep timer fading/complete)
         const timerPhase = sleepTimerPhaseRef.current
-        if (timerPhase === 'fading' || timerPhase === 'complete') {
-          // Stop after current verse
+        if (timerPhase === 'complete') {
+          // Timer done — stop TTS
           setPlaybackState('idle')
           setCurrentVerseIndex(-1)
-          restoreAmbientVolume()
           utteranceRef.current = null
           onAnnounce?.('Reading stopped by sleep timer')
           return
@@ -218,7 +216,7 @@ export function useBibleAudio({
           // Chapter complete
           setPlaybackState('idle')
           setCurrentVerseIndex(-1)
-          restoreAmbientVolume()
+          ducking.unduckWithRamp()
           utteranceRef.current = null
 
           // Mark chapter read
@@ -246,7 +244,7 @@ export function useBibleAudio({
       utterance.onerror = () => {
         setPlaybackState('idle')
         setCurrentVerseIndex(-1)
-        restoreAmbientVolume()
+        ducking.unduckImmediate()
         utteranceRef.current = null
         startTimeRef.current = null
       }
@@ -258,8 +256,9 @@ export function useBibleAudio({
       verses,
       getVoice,
       scrollToVerse,
-      reduceAmbientVolume,
-      restoreAmbientVolume,
+      ducking,
+      sleepTimer.remainingMs,
+      sleepTimer.fadeDurationMs,
       isAuthenticated,
       isChapterAlreadyRead,
       onChapterComplete,
@@ -273,7 +272,7 @@ export function useBibleAudio({
     if (playbackState === 'paused') {
       window.speechSynthesis.resume()
       setPlaybackState('playing')
-      reduceAmbientVolume()
+      ducking.duckForVerse()
       onAnnounce?.('Reading resumed')
       return
     }
@@ -284,15 +283,15 @@ export function useBibleAudio({
     autoScrollPausedRef.current = false
     onAnnounce?.('Reading chapter aloud')
     speakVerse(0)
-  }, [isSupported, hasFullText, verses, playbackState, speakVerse, reduceAmbientVolume, onAnnounce])
+  }, [isSupported, hasFullText, verses, playbackState, speakVerse, ducking, onAnnounce])
 
   const pause = useCallback(() => {
     if (!isSupported) return
     window.speechSynthesis.pause()
     setPlaybackState('paused')
-    restoreAmbientVolume()
+    ducking.unduckImmediate()
     onAnnounce?.('Reading paused')
-  }, [isSupported, restoreAmbientVolume, onAnnounce])
+  }, [isSupported, ducking, onAnnounce])
 
   const stop = useCallback(() => {
     if (!isSupported) return
@@ -302,12 +301,12 @@ export function useBibleAudio({
     }
     setPlaybackState('idle')
     setCurrentVerseIndex(-1)
-    restoreAmbientVolume()
+    ducking.unduckWithRamp()
     utteranceRef.current = null
     startTimeRef.current = null
     autoScrollPausedRef.current = false
     onAnnounce?.('Reading stopped')
-  }, [isSupported, restoreAmbientVolume, onAnnounce])
+  }, [isSupported, ducking, onAnnounce])
 
   // Reset on chapter/book change
   useEffect(() => {
@@ -318,11 +317,11 @@ export function useBibleAudio({
     }
     setPlaybackState('idle')
     setCurrentVerseIndex(-1)
-    restoreAmbientVolume()
+    ducking.unduckImmediate()
     utteranceRef.current = null
     startTimeRef.current = null
     autoScrollPausedRef.current = false
-  }, [bookSlug, chapterNumber, isSupported, restoreAmbientVolume])
+  }, [bookSlug, chapterNumber, isSupported, ducking])
 
   // Cleanup on unmount
   useEffect(() => {

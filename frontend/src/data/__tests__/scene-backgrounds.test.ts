@@ -10,6 +10,9 @@ const SCENE_IDS = [
   'the-upper-room',
   'starfield',
   'mountain-refuge',
+  'peaceful-study',
+  'evening-scripture',
+  'sacred-space',
 ]
 
 describe('scene-backgrounds', () => {
@@ -39,7 +42,7 @@ describe('scene-backgrounds', () => {
     }
   })
 
-  it('has exactly 8 scene backgrounds', () => {
-    expect(Object.keys(SCENE_BACKGROUNDS)).toHaveLength(8)
+  it('has exactly 11 scene backgrounds', () => {
+    expect(Object.keys(SCENE_BACKGROUNDS)).toHaveLength(11)
   })
 })

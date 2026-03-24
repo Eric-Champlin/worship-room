@@ -89,6 +89,18 @@ vi.mock('@/components/audio/AudioProvider', () => ({
   useSleepTimerControls: () => mockSleepTimer,
 }))
 
+const mockDucking = {
+  duckForVerse: vi.fn(),
+  unduckForPause: vi.fn(),
+  unduckImmediate: vi.fn(),
+  unduckWithRamp: vi.fn(),
+  isDucked: false,
+}
+
+vi.mock('../useAudioDucking', () => ({
+  useAudioDucking: () => mockDucking,
+}))
+
 const mockSaveMeditationSession = vi.fn()
 vi.mock('@/services/meditation-storage', () => ({
   saveMeditationSession: (...args: unknown[]) => mockSaveMeditationSession(...args),
@@ -317,8 +329,8 @@ describe('useBibleAudio', () => {
     expect(mockSaveMeditationSession).not.toHaveBeenCalled()
   })
 
-  it('sleep timer fading stops playback after current verse', () => {
-    mockSleepTimer.phase = 'fading'
+  it('sleep timer complete stops playback after current verse', () => {
+    mockSleepTimer.phase = 'complete'
 
     const { result } = renderHook(() => useBibleAudio(defaultOptions))
 
@@ -326,7 +338,7 @@ describe('useBibleAudio', () => {
       result.current.play()
     })
 
-    // Complete first verse — sleep timer is fading
+    // Complete first verse — sleep timer is complete
     act(() => {
       lastUtterance?.onend?.()
     })

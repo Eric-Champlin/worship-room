@@ -13,6 +13,7 @@ import { SCENE_BY_ID } from '@/data/scenes'
 import { SCRIPTURE_READING_BY_ID, SCRIPTURE_COLLECTIONS } from '@/data/music/scripture-readings'
 import { BEDTIME_STORY_BY_ID } from '@/data/music/bedtime-stories'
 import { storageService } from '@/services/storage-service'
+import { getBookBySlug } from '@/data/bible'
 import type { RoutineDefinition } from '@/types/storage'
 import type { AudioRoutine, RoutineStep } from '@/types/audio'
 import type { ScriptureReading, BedtimeStory } from '@/types/music'
@@ -210,6 +211,14 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
 
         if (step.type === 'scene') {
           success = await loadSceneStep(step.contentId)
+        } else if (step.type === 'bible-navigate') {
+          // Navigate to a random chapter of the specified book
+          const book = getBookBySlug(step.contentId)
+          if (book) {
+            const randomChapter = Math.floor(Math.random() * book.chapters) + 1
+            window.location.href = `/bible/${book.slug}/${randomChapter}?autoplay=true`
+            success = true // Navigation initiated
+          }
         } else {
           success = await loadForegroundStep(step.contentId, step.type)
         }
@@ -466,7 +475,7 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
-function resolveStepLabel(type: 'scene' | 'scripture' | 'story', contentId: string): string {
+function resolveStepLabel(type: 'scene' | 'scripture' | 'story' | 'bible-navigate', contentId: string): string {
   if (type === 'scene') {
     return SCENE_BY_ID.get(contentId)?.name ?? 'Scene'
   }
@@ -474,10 +483,14 @@ function resolveStepLabel(type: 'scene' | 'scripture' | 'story', contentId: stri
     const reading = resolveScriptureId(contentId)
     return reading?.title ?? 'Scripture'
   }
+  if (type === 'bible-navigate') {
+    const book = getBookBySlug(contentId)
+    return book ? `Read ${book.name}` : 'Bible Reading'
+  }
   return BEDTIME_STORY_BY_ID.get(contentId)?.title ?? 'Story'
 }
 
-function stepTypeToIcon(type: 'scene' | 'scripture' | 'story'): string {
+function stepTypeToIcon(type: 'scene' | 'scripture' | 'story' | 'bible-navigate'): string {
   switch (type) {
     case 'scene':
       return 'Mountain'
@@ -485,5 +498,7 @@ function stepTypeToIcon(type: 'scene' | 'scripture' | 'story'): string {
       return 'BookOpen'
     case 'story':
       return 'Moon'
+    case 'bible-navigate':
+      return 'BookOpen'
   }
 }

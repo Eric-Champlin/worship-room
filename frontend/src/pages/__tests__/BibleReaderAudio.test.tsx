@@ -17,6 +17,14 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => mockAuth,
 }))
 
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => mockAuth,
+}))
+
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
+}))
+
 vi.mock('@/hooks/useNotificationActions', () => ({
   useNotificationActions: () => ({
     notifications: [],

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Pause, Play, Square, User, UserRound } from 'lucide-react'
+import { Pause, Play, Square, Timer, User, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SleepTimerProgressRing } from './SleepTimerProgressRing'
 
 interface AudioControlBarProps {
   playbackState: 'idle' | 'playing' | 'paused'
@@ -14,6 +15,11 @@ interface AudioControlBarProps {
   onPlay: () => void
   onPause: () => void
   onStop: () => void
+  onTimerClick?: () => void
+  isTimerActive?: boolean
+  isTimerPanelOpen?: boolean
+  timerRemainingMs?: number
+  timerTotalDurationMs?: number
 }
 
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5]
@@ -30,6 +36,11 @@ export function AudioControlBar({
   onPlay,
   onPause,
   onStop,
+  onTimerClick,
+  isTimerActive = false,
+  isTimerPanelOpen = false,
+  timerRemainingMs = 0,
+  timerTotalDurationMs = 0,
 }: AudioControlBarProps) {
   const [isStuck, setIsStuck] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -173,6 +184,31 @@ export function AudioControlBar({
               </button>
             </div>
           )}
+
+          {/* Sleep timer button + progress ring */}
+          <div className="flex items-center">
+            {isTimerActive && (
+              <SleepTimerProgressRing
+                remainingMs={timerRemainingMs}
+                totalDurationMs={timerTotalDurationMs}
+                onClick={onTimerClick ?? (() => {})}
+              />
+            )}
+            {!isTimerActive && (
+              <button
+                type="button"
+                onClick={onTimerClick}
+                aria-label="Sleep timer"
+                aria-expanded={isTimerPanelOpen}
+                className={cn(
+                  'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg transition-colors',
+                  isTimerActive ? 'text-primary' : 'text-white/40 hover:text-white/60',
+                )}
+              >
+                <Timer className="h-5 w-5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </>

@@ -8,6 +8,7 @@ const STEP_ICON_MAP = {
   scene: Mountain,
   scripture: BookOpen,
   story: Moon,
+  'bible-navigate': BookOpen,
 } as const
 
 interface RoutineCardProps {

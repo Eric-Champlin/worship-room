@@ -6,7 +6,12 @@ import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { getSuggestedScenes } from '@/constants/ambient-suggestions'
 import type { ScenePreset } from '@/types/music'
 
-export function BibleAmbientChip() {
+interface BibleAmbientChipProps {
+  onExpand?: () => void
+  forceCollapse?: boolean
+}
+
+export function BibleAmbientChip({ onExpand, forceCollapse }: BibleAmbientChipProps) {
   const [expanded, setExpanded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const pillButtonRef = useRef<HTMLButtonElement>(null)
@@ -57,6 +62,13 @@ export function BibleAmbientChip() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [expanded, collapse])
 
+  // Force collapse from parent (mutual exclusion with timer panel)
+  useEffect(() => {
+    if (forceCollapse && expanded) {
+      setExpanded(false)
+    }
+  }, [forceCollapse, expanded])
+
   // Focus first card on expand
   useEffect(() => {
     if (expanded) {
@@ -71,7 +83,11 @@ export function BibleAmbientChip() {
     if (hasActiveAudio) {
       dispatch({ type: audioState.drawerOpen ? 'CLOSE_DRAWER' : 'OPEN_DRAWER' })
     } else {
-      setExpanded(!expanded)
+      const willExpand = !expanded
+      setExpanded(willExpand)
+      if (willExpand) {
+        onExpand?.()
+      }
     }
   }
 

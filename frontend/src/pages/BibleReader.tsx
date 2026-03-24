@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { Layout } from '@/components/Layout'
 import { AudioControlBar } from '@/components/bible/AudioControlBar'
 import { BibleAmbientChip } from '@/components/bible/BibleAmbientChip'
+import { SleepTimerPanel } from '@/components/bible/SleepTimerPanel'
+import { useSleepTimerControls } from '@/components/audio/AudioProvider'
 import { BookNotFound } from '@/components/bible/BookNotFound'
 import { ChapterNav } from '@/components/bible/ChapterNav'
 import { ChapterPlaceholder } from '@/components/bible/ChapterPlaceholder'
@@ -57,11 +59,17 @@ export function BibleReader() {
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [editingNoteVerse, setEditingNoteVerse] = useState<number | null>(null)
   const [showDiscardPrompt, setShowDiscardPrompt] = useState<number | null>(null)
+  const [timerPanelOpen, setTimerPanelOpen] = useState(false)
+  const [ambientForceCollapse, setAmbientForceCollapse] = useState(false)
 
+  const sleepTimer = useSleepTimerControls()
   const sentinelRef = useRef<HTMLDivElement>(null)
   const hasMarkedRef = useRef(false)
   const announceRef = useRef<HTMLDivElement>(null)
   const noteEditorDirtyRef = useRef(false)
+
+  const [searchParams] = useSearchParams()
+  const autoplay = searchParams.get('autoplay') === 'true'
 
   const book = bookSlug ? getBookBySlug(bookSlug) : undefined
   const chapterNumber = chapterParam ? parseInt(chapterParam, 10) : NaN
@@ -84,6 +92,23 @@ export function BibleReader() {
     },
     onAnnounce: announce,
   })
+
+  // Autoplay: start TTS after 2s delay for authenticated users with ?autoplay=true
+  const autoplayFiredRef = useRef(false)
+  useEffect(() => {
+    if (!autoplay || !isAuthenticated || !bibleAudio.isSupported) return
+    if (isLoading || verses.length === 0) return
+    if (bibleAudio.playbackState !== 'idle') return
+    if (autoplayFiredRef.current) return
+
+    autoplayFiredRef.current = true
+    const timer = setTimeout(() => {
+      bibleAudio.play()
+    }, 2000)
+
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay, isAuthenticated, isLoading, verses.length, bibleAudio.isSupported])
 
   // Reset state when chapter changes
   useEffect(() => {
@@ -412,9 +437,25 @@ export function BibleReader() {
                 onPlay={bibleAudio.play}
                 onPause={bibleAudio.pause}
                 onStop={bibleAudio.stop}
+                onTimerClick={() => {
+                  setTimerPanelOpen((prev) => !prev)
+                  setAmbientForceCollapse(true)
+                  setTimeout(() => setAmbientForceCollapse(false), 0)
+                }}
+                isTimerActive={sleepTimer.isActive}
+                isTimerPanelOpen={timerPanelOpen}
+                timerRemainingMs={sleepTimer.remainingMs}
+                timerTotalDurationMs={sleepTimer.totalDurationMs}
+              />
+              <SleepTimerPanel
+                isOpen={timerPanelOpen}
+                onClose={() => setTimerPanelOpen(false)}
               />
               <div className="mt-2">
-                <BibleAmbientChip />
+                <BibleAmbientChip
+                  onExpand={() => setTimerPanelOpen(false)}
+                  forceCollapse={ambientForceCollapse}
+                />
               </div>
             </div>
           </div>

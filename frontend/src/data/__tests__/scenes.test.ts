@@ -3,8 +3,8 @@ import { SCENE_PRESETS, FEATURED_SCENE_IDS, SCENE_BY_ID } from '../scenes'
 import { SOUND_BY_ID } from '../sound-catalog'
 
 describe('SCENE_PRESETS', () => {
-  it('has exactly 8 scenes', () => {
-    expect(SCENE_PRESETS).toHaveLength(8)
+  it('has exactly 11 scenes', () => {
+    expect(SCENE_PRESETS).toHaveLength(11)
   })
 
   it('each scene has all required fields', () => {
@@ -56,7 +56,7 @@ describe('SCENE_PRESETS', () => {
 
   it('all tag structures are valid', () => {
     const validMoods = ['peaceful', 'uplifting', 'contemplative', 'restful']
-    const validActivities = ['prayer', 'sleep', 'study', 'relaxation']
+    const validActivities = ['prayer', 'sleep', 'study', 'relaxation', 'bible-reading']
     const validIntensities = ['very_calm', 'moderate', 'immersive']
 
     for (const scene of SCENE_PRESETS) {
@@ -103,13 +103,45 @@ describe('FEATURED_SCENE_IDS', () => {
 })
 
 describe('SCENE_BY_ID', () => {
-  it('contains all 8 scenes', () => {
-    expect(SCENE_BY_ID.size).toBe(8)
+  it('contains all 11 scenes', () => {
+    expect(SCENE_BY_ID.size).toBe(11)
   })
 
   it('maps IDs to correct scenes', () => {
     for (const scene of SCENE_PRESETS) {
       expect(SCENE_BY_ID.get(scene.id)).toBe(scene)
+    }
+  })
+})
+
+describe('Bible reading scenes', () => {
+  const BIBLE_SCENE_IDS = ['peaceful-study', 'evening-scripture', 'sacred-space']
+
+  it('all 3 Bible reading scenes exist in SCENE_BY_ID', () => {
+    for (const id of BIBLE_SCENE_IDS) {
+      expect(SCENE_BY_ID.has(id), `Scene "${id}" not found in SCENE_BY_ID`).toBe(true)
+    }
+  })
+
+  it('all 3 Bible reading scenes have bible-reading activity tag', () => {
+    for (const id of BIBLE_SCENE_IDS) {
+      const scene = SCENE_BY_ID.get(id)!
+      expect(
+        scene.tags.activity,
+        `Scene "${id}" missing bible-reading activity`,
+      ).toContain('bible-reading')
+    }
+  })
+
+  it('all 3 Bible reading scenes reference valid sound IDs', () => {
+    for (const id of BIBLE_SCENE_IDS) {
+      const scene = SCENE_BY_ID.get(id)!
+      for (const { soundId } of scene.sounds) {
+        expect(
+          SOUND_BY_ID.has(soundId),
+          `Bible scene "${id}" references unknown soundId "${soundId}"`,
+        ).toBe(true)
+      }
     }
   })
 })

@@ -74,9 +74,9 @@ describe('BibleAmbientChip', () => {
     renderChip()
 
     await user.click(screen.getByLabelText('Add background sounds'))
-    expect(screen.getByLabelText('Still Waters')).toBeInTheDocument()
-    expect(screen.getByLabelText('The Upper Room')).toBeInTheDocument()
-    expect(screen.getByLabelText('Morning Mist')).toBeInTheDocument()
+    expect(screen.getByLabelText('Peaceful Study')).toBeInTheDocument()
+    expect(screen.getByLabelText('Evening Scripture')).toBeInTheDocument()
+    expect(screen.getByLabelText('Sacred Space')).toBeInTheDocument()
   })
 
   it('panel collapses on Escape', async () => {
@@ -167,9 +167,9 @@ describe('BibleAmbientChip', () => {
     renderChip()
 
     await user.click(screen.getByLabelText('Add background sounds'))
-    await user.click(screen.getByLabelText('Still Waters'))
+    await user.click(screen.getByLabelText('Peaceful Study'))
 
     expect(mockLoadScene).toHaveBeenCalledTimes(1)
-    expect(mockLoadScene.mock.calls[0][0]).toHaveProperty('id', 'still-waters')
+    expect(mockLoadScene.mock.calls[0][0]).toHaveProperty('id', 'peaceful-study')
   })
 })

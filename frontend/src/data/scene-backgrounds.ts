@@ -140,6 +140,56 @@ export const SCENE_BACKGROUNDS: Record<string, CSSProperties> = {
       linear-gradient(135deg, #5a4a2a 0%, #7a6a4a 40%, #8a7a5a 100%)
     `,
   },
+  'peaceful-study': {
+    backgroundColor: '#2a5a6a',
+    backgroundImage: `
+      repeating-radial-gradient(
+        ellipse 150% 60% at 50% 80%,
+        rgba(255,255,255,0.06) 0px,
+        transparent 3px,
+        transparent 18px,
+        rgba(255,255,255,0.04) 20px,
+        transparent 22px
+      ),
+      radial-gradient(ellipse 70% 50% at 30% 40%, rgba(200,230,240,0.08) 0%, transparent 70%),
+      linear-gradient(180deg, #1a4a5a 0%, #2a6a7a 40%, #3a7a8a 100%)
+    `,
+  },
+  'evening-scripture': {
+    backgroundColor: '#7a4a1a',
+    backgroundImage: `
+      radial-gradient(circle 3px at 25% 35%, rgba(255,200,100,0.18) 0%, transparent 100%),
+      radial-gradient(circle 2px at 65% 25%, rgba(255,180,80,0.14) 0%, transparent 100%),
+      radial-gradient(circle 3px at 85% 55%, rgba(255,210,120,0.16) 0%, transparent 100%),
+      radial-gradient(circle 2px at 15% 75%, rgba(255,190,90,0.12) 0%, transparent 100%),
+      radial-gradient(circle 2px at 50% 65%, rgba(255,200,100,0.1) 0%, transparent 100%),
+      linear-gradient(135deg, #5a3010 0%, #8a5a2a 50%, #7a4a1a 100%)
+    `,
+  },
+  'sacred-space': {
+    backgroundColor: '#2a1a4a',
+    backgroundImage: `
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 40px,
+        rgba(200,180,240,0.05) 40px,
+        rgba(200,180,240,0.05) 42px,
+        transparent 42px,
+        transparent 80px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 50px,
+        rgba(200,180,240,0.03) 50px,
+        rgba(200,180,240,0.03) 52px,
+        transparent 52px,
+        transparent 100px
+      ),
+      linear-gradient(180deg, #1a1040 0%, #2a1a5a 50%, #3a2a6a 100%)
+    `,
+  },
 }
 
 export function getSceneBackground(sceneId: string): CSSProperties | undefined {

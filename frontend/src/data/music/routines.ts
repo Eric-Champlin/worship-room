@@ -73,4 +73,28 @@ export const ROUTINE_TEMPLATES: RoutineDefinition[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
   },
+  {
+    id: 'template-bible-before-bed',
+    name: 'Bible Before Bed',
+    description:
+      'Let the Psalms carry you to sleep. Warm ambient sounds set the mood while a Psalm is read aloud — a timeless way to end the day.',
+    isTemplate: true,
+    steps: [
+      {
+        id: 'bbb-step-1',
+        type: 'scene',
+        contentId: 'evening-scripture',
+        transitionGapMinutes: 0,
+      },
+      {
+        id: 'bbb-step-2',
+        type: 'bible-navigate',
+        contentId: 'psalms',
+        transitionGapMinutes: 0,
+      },
+    ],
+    sleepTimer: { durationMinutes: 30, fadeDurationMinutes: 10 },
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  },
 ]

@@ -160,6 +160,63 @@ export const SCENE_PRESETS: ScenePreset[] = [
     },
     animationCategory: 'drift',
   },
+  {
+    id: 'peaceful-study',
+    name: 'Peaceful Study',
+    description:
+      'A calm, non-distracting atmosphere for focused reading. Soft piano and gentle streams guide your mind into the Word.',
+    artworkFilename: 'peaceful-study.svg',
+    sounds: [
+      { soundId: 'soft-piano', volume: 0.3 },
+      { soundId: 'gentle-wind', volume: 0.2 },
+      { soundId: 'flowing-stream', volume: 0.25 },
+    ],
+    tags: {
+      mood: ['peaceful'],
+      activity: ['bible-reading', 'study'],
+      intensity: 'very_calm',
+      scriptureTheme: ['comfort'],
+    },
+    animationCategory: 'drift',
+  },
+  {
+    id: 'evening-scripture',
+    name: 'Evening Scripture',
+    description:
+      'A warm evening atmosphere for winding down with the Word. Crickets chirp softly as a fire crackles nearby.',
+    artworkFilename: 'evening-scripture.svg',
+    sounds: [
+      { soundId: 'night-crickets', volume: 0.25 },
+      { soundId: 'fireplace', volume: 0.3 },
+      { soundId: 'ambient-pads', volume: 0.2 },
+    ],
+    tags: {
+      mood: ['contemplative'],
+      activity: ['bible-reading', 'sleep'],
+      intensity: 'very_calm',
+      scriptureTheme: ['rest'],
+    },
+    animationCategory: 'pulse',
+  },
+  {
+    id: 'sacred-space',
+    name: 'Sacred Space',
+    description:
+      'A reverent, church-like atmosphere. Cathedral echoes and a distant choir hum fill the stillness around you.',
+    artworkFilename: 'sacred-space.svg',
+    sounds: [
+      { soundId: 'cathedral-reverb', volume: 0.2 },
+      { soundId: 'choir-hum', volume: 0.15 },
+      { soundId: 'church-bells', volume: 0.1 },
+    ],
+    tags: {
+      mood: ['contemplative'],
+      activity: ['bible-reading', 'prayer'],
+      intensity: 'immersive',
+      scriptureTheme: ['trust'],
+    },
+    animationCategory: 'glow',
+  },
 ]
 
 /** First 3 scenes are featured at the top of the browse area */

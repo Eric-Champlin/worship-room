@@ -42,7 +42,7 @@ export interface RoutineDefinition {
   isTemplate: boolean
   steps: {
     id: string
-    type: 'scene' | 'scripture' | 'story'
+    type: 'scene' | 'scripture' | 'story' | 'bible-navigate'
     contentId: string
     transitionGapMinutes: number
   }[]

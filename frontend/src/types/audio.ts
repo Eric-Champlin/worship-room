@@ -28,7 +28,7 @@ export interface SleepTimer {
 
 export interface RoutineStep {
   stepId: string
-  type: 'scene' | 'scripture' | 'story'
+  type: 'scene' | 'scripture' | 'story' | 'bible-navigate'
   contentId: string
   label: string
   icon: string

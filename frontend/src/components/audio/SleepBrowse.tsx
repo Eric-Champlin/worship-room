@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { SCRIPTURE_COLLECTIONS } from '@/data/music/scripture-readings'
 import { useForegroundPlayer } from '@/hooks/useForegroundPlayer'
+import { BibleSleepSection } from './BibleSleepSection'
 import { TonightScripture } from './TonightScripture'
 import { ScriptureCollectionRow } from './ScriptureCollectionRow'
 import { BedtimeStoriesGrid } from './BedtimeStoriesGrid'
@@ -21,6 +22,8 @@ export function SleepBrowse() {
   return (
     <div className="px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-6xl space-y-8">
+        <BibleSleepSection />
+
         <TonightScripture onPlay={startSession} />
 
         {SCRIPTURE_COLLECTIONS.map((collection) => (

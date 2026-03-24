@@ -90,17 +90,18 @@ describe('RoutinesPage', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders 3 templates when no user routines', () => {
+  it('renders 4 templates when no user routines', () => {
     renderPage()
     expect(screen.getByText('Evening Peace')).toBeInTheDocument()
     expect(screen.getByText('Scripture & Sleep')).toBeInTheDocument()
     expect(screen.getByText('Deep Rest')).toBeInTheDocument()
+    expect(screen.getByText('Bible Before Bed')).toBeInTheDocument()
   })
 
   it('all templates show Template badge', () => {
     renderPage()
     const badges = screen.getAllByText('Template')
-    expect(badges).toHaveLength(3)
+    expect(badges).toHaveLength(4)
   })
 
   it('Start button shows auth modal when logged out', async () => {

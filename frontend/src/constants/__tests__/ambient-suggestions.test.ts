@@ -9,6 +9,7 @@ const ALL_CONTEXTS: AmbientContext[] = [
   'breathing',
   'soaking',
   'other-meditation',
+  'bible-reading',
 ]
 
 describe('getSuggestedScenes', () => {
@@ -63,6 +64,12 @@ describe('getSuggestedScenes', () => {
     const scenes = getSuggestedScenes('other-meditation')
     const names = scenes.map((s) => s.name)
     expect(names).toEqual(['Garden of Gethsemane', 'Still Waters', 'Mountain Refuge'])
+  })
+
+  it('returns correct scenes for bible-reading context', () => {
+    const scenes = getSuggestedScenes('bible-reading')
+    const names = scenes.map((s) => s.name)
+    expect(names).toEqual(['Peaceful Study', 'Evening Scripture', 'Sacred Space'])
   })
 
   it('returns unique scenes (no duplicates) per context', () => {

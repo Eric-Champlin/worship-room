@@ -32,7 +32,7 @@ export interface BedtimeStory {
 
 export type SoundCategory = 'nature' | 'environments' | 'spiritual' | 'instruments'
 export type SoundMood = 'peaceful' | 'uplifting' | 'contemplative' | 'restful'
-export type SoundActivity = 'prayer' | 'sleep' | 'study' | 'relaxation'
+export type SoundActivity = 'prayer' | 'sleep' | 'study' | 'relaxation' | 'bible-reading'
 export type SoundIntensity = 'very_calm' | 'moderate' | 'immersive'
 
 export interface Sound {

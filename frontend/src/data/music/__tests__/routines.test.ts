@@ -3,13 +3,14 @@ import { ROUTINE_TEMPLATES } from '../routines'
 import { SCENE_PRESETS } from '@/data/scenes'
 import { SCRIPTURE_READING_BY_ID, SCRIPTURE_COLLECTIONS } from '../scripture-readings'
 import { BEDTIME_STORY_BY_ID } from '../bedtime-stories'
+import { getBookBySlug } from '@/data/bible'
 
 const SCENE_IDS = new Set(SCENE_PRESETS.map((s) => s.id))
 const COLLECTION_IDS = new Set(SCRIPTURE_COLLECTIONS.map((c) => c.id))
 
 describe('Routine Templates Data', () => {
-  it('has 3 templates', () => {
-    expect(ROUTINE_TEMPLATES).toHaveLength(3)
+  it('has 4 templates', () => {
+    expect(ROUTINE_TEMPLATES).toHaveLength(4)
   })
 
   it('all templates have isTemplate: true', () => {
@@ -21,7 +22,7 @@ describe('Routine Templates Data', () => {
   it('all template IDs are unique and prefixed with "template-"', () => {
     const ids = ROUTINE_TEMPLATES.map((t) => t.id)
     const uniqueIds = new Set(ids)
-    expect(uniqueIds.size).toBe(3)
+    expect(uniqueIds.size).toBe(4)
     for (const id of ids) {
       expect(id).toMatch(/^template-/)
     }
@@ -56,6 +57,9 @@ describe('Routine Templates Data', () => {
             break
           case 'story':
             expect(BEDTIME_STORY_BY_ID.has(step.contentId)).toBe(true)
+            break
+          case 'bible-navigate':
+            expect(getBookBySlug(step.contentId)).toBeDefined()
             break
         }
       }

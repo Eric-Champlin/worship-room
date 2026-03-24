@@ -56,7 +56,7 @@ describe('useAmbientSearch', () => {
 
     // Initially empty search — should return all
     expect(result.current.filteredSounds.length).toBe(24)
-    expect(result.current.filteredScenes.length).toBe(8)
+    expect(result.current.filteredScenes.length).toBe(11)
     expect(result.current.hasActiveSearch).toBe(false)
   })
 
@@ -108,7 +108,7 @@ describe('useAmbientSearch', () => {
       expect(scene.tags.scriptureTheme).toContain('trust')
     }
     expect(result.current.filteredScenes.length).toBeGreaterThan(0)
-    expect(result.current.filteredScenes.length).toBeLessThan(8)
+    expect(result.current.filteredScenes.length).toBeLessThan(11)
   })
 
   it('combined search + filter returns only matching items', () => {
@@ -143,7 +143,7 @@ describe('useAmbientSearch', () => {
 
     // All sounds should be back (no filters active)
     expect(result.current.filteredSounds.length).toBe(24)
-    expect(result.current.filteredScenes.length).toBe(8)
+    expect(result.current.filteredScenes.length).toBe(11)
     expect(result.current.hasActiveSearch).toBe(false)
   })
 
