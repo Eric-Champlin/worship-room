@@ -22,6 +22,7 @@ const SEASON_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
 
 const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon?: LucideIcon }> = [
   { label: 'Daily Hub', to: '/daily' },
+  { label: 'Ask', to: '/ask', icon: Sparkles },
   { label: 'Bible', to: '/bible', icon: Book },
   { label: 'Daily Devotional', to: '/devotional', icon: Sparkles },
   { label: 'Reading Plans', to: '/reading-plans', icon: BookOpen },

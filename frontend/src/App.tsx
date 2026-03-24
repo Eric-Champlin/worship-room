@@ -40,6 +40,7 @@ import { Challenges } from './pages/Challenges'
 import { ChallengeDetail } from './pages/ChallengeDetail'
 import { BibleBrowser } from './pages/BibleBrowser'
 import { BibleReader } from './pages/BibleReader'
+import { AskPage } from './pages/AskPage'
 import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
 import { InstallBanner } from '@/components/pwa/InstallBanner'
 import { useAuth } from '@/hooks/useAuth'
@@ -113,6 +114,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/my-prayers" element={<MyPrayers />} />
           <Route path="/daily" element={<DailyHub />} />
+          <Route path="/ask" element={<AskPage />} />
           <Route path="/devotional" element={<DevotionalPage />} />
           <Route path="/reading-plans" element={<ReadingPlans />} />
           <Route path="/reading-plans/:planId" element={<ReadingPlanDetail />} />

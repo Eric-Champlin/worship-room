@@ -86,10 +86,10 @@ export function HeroSection() {
 
   const handleInputSubmit = (value: string) => {
     if (!isAuthenticated) {
-      authModal?.openAuthModal('Sign in to get AI-powered guidance')
+      authModal?.openAuthModal('Sign in to ask questions')
       return
     }
-    navigate(`/daily?tab=pray&q=${encodeURIComponent(value)}`)
+    navigate(`/ask?q=${encodeURIComponent(value)}`)
   }
 
   return (

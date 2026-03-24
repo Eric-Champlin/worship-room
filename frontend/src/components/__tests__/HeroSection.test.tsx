@@ -77,7 +77,7 @@ describe('HeroSection', () => {
       screen.getByRole('dialog', { name: /log in/i })
     ).toBeInTheDocument()
     expect(
-      screen.getByText('Sign in to get AI-powered guidance')
+      screen.getByText('Sign in to ask questions')
     ).toBeInTheDocument()
   })
 
