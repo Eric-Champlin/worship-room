@@ -61,6 +61,41 @@ describe('ASK_RESPONSES', () => {
   )
 })
 
+describe('ASK_RESPONSES — followUpQuestions', () => {
+  it.each(ALL_TOPIC_IDS)('response "%s" has followUpQuestions array', (id) => {
+    const response = ASK_RESPONSES[id]
+    expect(response.followUpQuestions).toBeDefined()
+    expect(Array.isArray(response.followUpQuestions)).toBe(true)
+  })
+
+  it.each(ALL_TOPIC_IDS)(
+    'response "%s" has exactly 3 follow-up questions',
+    (id) => {
+      const response = ASK_RESPONSES[id]
+      expect(response.followUpQuestions).toHaveLength(3)
+    }
+  )
+
+  it.each(ALL_TOPIC_IDS)(
+    'response "%s" follow-up questions are all under 60 characters',
+    (id) => {
+      const response = ASK_RESPONSES[id]
+      for (const q of response.followUpQuestions) {
+        expect(q.length, `"${q}" is ${q.length} chars`).toBeLessThanOrEqual(60)
+      }
+    }
+  )
+
+  it('fallback response has generic follow-up questions', () => {
+    const fallback = ASK_RESPONSES.fallback
+    expect(fallback.followUpQuestions).toEqual([
+      'How do I hear God\'s voice?',
+      'What does it mean to have faith?',
+      'How can I trust God with my future?',
+    ])
+  })
+})
+
 describe('getAskResponse', () => {
   it('returns suffering response for "Why does God allow suffering?"', () => {
     const result = getAskResponse('Why does God allow suffering?')

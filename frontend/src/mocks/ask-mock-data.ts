@@ -88,6 +88,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Your pain matters to God, and he is closer to you right now than you may realize.',
     prayer:
       'Lord, I am hurting and I don\'t understand why. I bring my pain to you honestly, trusting that you are near to the brokenhearted. Comfort me with your presence. Help me to trust that you are working even in what I cannot see. Give me strength for today and hope for tomorrow. Amen.',
+    followUpQuestions: [
+      'What if my suffering doesn\'t end?',
+      'How did Jesus handle pain?',
+      'Can faith and therapy work together?',
+    ],
   },
   forgiveness: {
     id: 'forgiveness',
@@ -118,6 +123,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Choosing to forgive is one of the bravest things you can do — and God will give you the strength for it.',
     prayer:
       'Father, you know the hurt I carry. I want to forgive, but it feels so hard. Help me to release this bitterness and trust you with the justice I long for. Soften my heart and give me your perspective. I choose forgiveness today, even if I need to choose it again tomorrow. Thank you for forgiving me so freely. Amen.',
+    followUpQuestions: [
+      'What if I can\'t forgive myself?',
+      'Does forgiving mean forgetting?',
+      'How do I forgive someone who isn\'t sorry?',
+    ],
   },
   anxiety: {
     id: 'anxiety',
@@ -148,6 +158,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'You don\'t have to carry this weight alone — God is strong enough to hold what feels too heavy for you.',
     prayer:
       'God, my mind is racing and my heart feels heavy with worry. I bring every anxious thought to you right now. Help me to release what I cannot control and trust in your faithful care. Fill me with your peace that surpasses understanding. Calm my mind and steady my heart. I choose to trust you. Amen.',
+    followUpQuestions: [
+      'What if my anxiety doesn\'t go away?',
+      'How did Jesus handle stress?',
+      'Can faith and therapy work together?',
+    ],
   },
   purpose: {
     id: 'purpose',
@@ -178,6 +193,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'You don\'t need to have it all figured out — God is already at work in the steps you\'re taking today.',
     prayer:
       'Lord, I want to walk in your purpose for my life, but I\'m not sure which way to go. Give me wisdom and clarity. Help me to trust your timing and your plan, even when I can\'t see the full picture. Open the doors you want me to walk through and close the ones that aren\'t from you. I surrender my plans to you. Amen.',
+    followUpQuestions: [
+      'What if I can\'t hear God\'s voice?',
+      'How do I know if it\'s God or me?',
+      'What if I missed God\'s plan?',
+    ],
   },
   doubt: {
     id: 'doubt',
@@ -208,6 +228,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Your honest questions don\'t push God away — they draw you closer to the truth.',
     prayer:
       'God, I want to believe, but I\'m struggling. I bring my doubts to you honestly because I trust that you can handle them. Strengthen my faith where it feels weak. Give me wisdom and understanding. Help me to keep seeking you even when I don\'t have all the answers. I believe — help my unbelief. Amen.',
+    followUpQuestions: [
+      'Is it okay to question the Bible?',
+      'How did Thomas overcome his doubt?',
+      'What if my doubts never go away?',
+    ],
   },
   prayer: {
     id: 'prayer',
@@ -238,6 +263,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'There\'s no wrong way to talk to God — he\'s already listening and delighted that you want to connect with him.',
     prayer:
       'Father, thank you that I can come to you just as I am. Teach me to pray. Help me to be honest with you about what I\'m feeling and what I need. Quiet the voice that says I\'m not doing it right. I just want to know you more. Here I am — speak to my heart. Amen.',
+    followUpQuestions: [
+      'How do I know God hears me?',
+      'What do I do when prayer feels empty?',
+      'Can I pray about anything?',
+    ],
   },
   grief: {
     id: 'grief',
@@ -268,6 +298,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Your grief reflects the depth of your love, and God is holding both you and the one you\'ve lost.',
     prayer:
       'Lord, my heart is broken and the weight of this loss feels unbearable. I miss them so much. Please draw near to me in this grief. Comfort me with your presence. Help me to take it one day at a time. Give me the strength to keep going and the hope that I will see wholeness again. Hold me close. Amen.',
+    followUpQuestions: [
+      'How long should grief last?',
+      'Is it okay to be angry at God?',
+      'Will I see my loved one again?',
+    ],
   },
   loneliness: {
     id: 'loneliness',
@@ -298,6 +333,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Even in your loneliest moment, God is right there with you — and he is working to bring connection and community into your life.',
     prayer:
       'God, I feel so alone right now. The silence is heavy and I long for connection. Remind me that you are with me. Open my eyes to see the people you\'ve placed around me. Give me courage to reach out. Fill the empty spaces in my heart with your presence and lead me to meaningful community. I trust that you see me. Amen.',
+    followUpQuestions: [
+      'How do I find community as a Christian?',
+      'Did Jesus ever feel alone?',
+      'Is being alone the same as lonely?',
+    ],
   },
   anger: {
     id: 'anger',
@@ -328,6 +368,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'It\'s okay to feel angry — bring it to God honestly, and let him guide your next step.',
     prayer:
       'Lord, I\'m angry and I need your help. I don\'t want this anger to control me or hurt the people around me. Help me to be honest about what I\'m feeling without letting it lead me somewhere I\'ll regret. Give me patience, wisdom, and the self-control that comes from your Spirit. I release this anger to you. Amen.',
+    followUpQuestions: [
+      'Is it ever okay to be angry at God?',
+      'How do I control my temper?',
+      'What if someone keeps hurting me?',
+    ],
   },
   marriage: {
     id: 'marriage',
@@ -358,6 +403,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Every relationship has hard seasons — the fact that you\'re seeking wisdom shows how much you care.',
     prayer:
       'God, I need your help in this relationship. Give me patience when it\'s hard, humility to listen, and courage to love well even when it costs me something. Heal what is broken between us. Help me to see this person the way you see them. Bring unity, understanding, and grace into our relationship. Amen.',
+    followUpQuestions: [
+      'How do I rebuild broken trust?',
+      'When is it okay to walk away?',
+      'How do we pray together as a couple?',
+    ],
   },
   parenting: {
     id: 'parenting',
@@ -388,6 +438,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'You don\'t have to be a perfect parent — just a present one. God fills in the gaps.',
     prayer:
       'Lord, being a parent is harder than I ever imagined. Give me patience when I\'m exhausted, wisdom when I\'m unsure, and grace when I fall short. Help me to love my children the way you love me — unconditionally and faithfully. Protect their hearts and guide their steps. Thank you for trusting me with them. Amen.',
+    followUpQuestions: [
+      'How do I talk to my kids about God?',
+      'What if my child rejects faith?',
+      'How do I balance discipline and grace?',
+    ],
   },
   money: {
     id: 'money',
@@ -418,6 +473,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Your value is not defined by your finances — and the God who feeds the birds of the air knows exactly what you need.',
     prayer:
       'Father, I\'m stressed about money and it feels overwhelming. Help me to trust you as my provider. Give me wisdom to manage what I have and faith to believe you will supply what I need. Free me from the anxiety that comes with financial pressure. I choose to seek your kingdom first today. Amen.',
+    followUpQuestions: [
+      'Is it wrong to want financial success?',
+      'How do I tithe when money is tight?',
+      'Does God care about my career?',
+    ],
   },
   identity: {
     id: 'identity',
@@ -448,6 +508,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'You are not what others say about you — you are who God says you are: loved, chosen, and irreplaceable.',
     prayer:
       'God, I\'ve been listening to voices that tell me I\'m not enough. Replace those lies with your truth. Help me to see myself the way you see me — as your beloved child, fearfully and wonderfully made. Root my identity in who you say I am, not in my performance or others\' opinions. I am yours. Amen.',
+    followUpQuestions: [
+      'How do I stop comparing myself to others?',
+      'What does God say about my mistakes?',
+      'Can God use someone like me?',
+    ],
   },
   temptation: {
     id: 'temptation',
@@ -478,6 +543,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Every time you choose to resist, you grow stronger — and God is fighting with you, not against you.',
     prayer:
       'Lord, I\'m struggling with temptation and I need your help. I can\'t overcome this in my own strength. Give me the courage to take the way of escape you promise. Strengthen my resolve and fill me with your Spirit. I submit this struggle to you and trust that your grace is enough. Amen.',
+    followUpQuestions: [
+      'What if I keep falling into the same sin?',
+      'How do I find accountability?',
+      'Does God forgive the same sin twice?',
+    ],
   },
   afterlife: {
     id: 'afterlife',
@@ -508,6 +578,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Death is not the final word — for those who trust in Christ, the best is yet to come.',
     prayer:
       'God, I have questions about death and what comes next. Calm the fears that rise up in me. Help me to trust in the hope of the resurrection and the promise of eternal life. If I\'m grieving, comfort me with the assurance that death is not the end. Thank you for the victory over death through Jesus. Amen.',
+    followUpQuestions: [
+      'What will heaven be like?',
+      'Do our loved ones watch over us?',
+      'How can I be sure of eternal life?',
+    ],
   },
   fallback: {
     id: 'fallback',
@@ -538,6 +613,11 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       'Whatever you\'re facing, God\'s wisdom is available to you — all you need to do is ask.',
     prayer:
       'Lord, I need your wisdom today. I don\'t have all the answers, but I know you do. Guide my steps and give me clarity. Help me to trust you with the things I don\'t understand and to follow where you lead. Thank you for being a God who gives wisdom generously. Amen.',
+    followUpQuestions: [
+      'How do I hear God\'s voice?',
+      'What does it mean to have faith?',
+      'How can I trust God with my future?',
+    ],
   },
 }
 

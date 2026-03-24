@@ -11,6 +11,7 @@ export interface AskResponse {
   verses: AskVerse[] // 3 supporting verses
   encouragement: string // Closing encouragement (1 sentence)
   prayer: string // Suggested prayer (1 paragraph)
+  followUpQuestions: [string, string, string] // Always exactly 3
 }
 
 export interface AskFeedback {
