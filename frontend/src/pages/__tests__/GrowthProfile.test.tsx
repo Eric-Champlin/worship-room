@@ -104,4 +104,35 @@ describe('GrowthProfile', () => {
     const animated = container.querySelector('.motion-safe\\:animate-fade-in')
     expect(animated).toBeTruthy()
   })
+
+  describe('profile garden', () => {
+    it('renders garden on own profile', () => {
+      setOwnData()
+      renderProfilePage('/profile/my-user-id')
+      // Stage 3 (Blooming, 500 pts) — aria-label should reference blooming
+      const gardenSvg = screen.getByRole('img', { name: /your garden/i })
+      expect(gardenSvg).toBeInTheDocument()
+    })
+
+    it('garden uses sm size on profile', () => {
+      setOwnData()
+      const { container } = renderProfilePage('/profile/my-user-id')
+      const gardenWrapper = container.querySelector('.h-\\[150px\\]')
+      expect(gardenWrapper).toBeTruthy()
+    })
+
+    it('garden is static (no animation classes)', () => {
+      setOwnData()
+      const { container } = renderProfilePage('/profile/my-user-id')
+      const leafElements = container.querySelectorAll('.garden-leaf')
+      expect(leafElements.length).toBe(0)
+    })
+
+    it('renders garden for friend profile with visible stats', () => {
+      setOwnData()
+      renderProfilePage('/profile/friend-sarah-m')
+      const gardenSvg = screen.getByRole('img', { name: /your garden/i })
+      expect(gardenSvg).toBeInTheDocument()
+    })
+  })
 })

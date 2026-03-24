@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DashboardHero } from '@/components/dashboard/DashboardHero'
+import { GrowthGarden } from '@/components/dashboard/GrowthGarden'
 import { DashboardWidgetGrid } from '@/components/dashboard/DashboardWidgetGrid'
 import { MoodCheckIn } from '@/components/dashboard/MoodCheckIn'
 import { MoodRecommendations } from '@/components/dashboard/MoodRecommendations'
@@ -216,6 +217,30 @@ export function Dashboard() {
   const quickActionsRef = useRef<HTMLDivElement>(null)
   const quickActionsTooltip = useTooltipCallout('dashboard-quick-actions', quickActionsRef)
 
+  // Garden sparkle: trigger on faith points increase
+  const prevPointsRef = useRef(faithPoints.totalPoints)
+  const prevLevelRef = useRef(faithPoints.currentLevel)
+  const [gardenSparkle, setGardenSparkle] = useState(false)
+  const [gardenLevelUp, setGardenLevelUp] = useState(false)
+
+  useEffect(() => {
+    if (faithPoints.totalPoints > prevPointsRef.current) {
+      setGardenSparkle(true)
+      if (faithPoints.currentLevel > prevLevelRef.current) {
+        setGardenLevelUp(true)
+      }
+      prevLevelRef.current = faithPoints.currentLevel
+      prevPointsRef.current = faithPoints.totalPoints
+      const timer = setTimeout(() => {
+        setGardenSparkle(false)
+        setGardenLevelUp(false)
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+    prevPointsRef.current = faithPoints.totalPoints
+    prevLevelRef.current = faithPoints.currentLevel
+  }, [faithPoints.totalPoints, faithPoints.currentLevel])
+
   if (!user) return null
 
   if (phase === 'onboarding') {
@@ -275,6 +300,31 @@ export function Dashboard() {
             pointsToNextLevel={faithPoints.pointsToNextLevel}
             currentLevel={faithPoints.currentLevel}
             meditationMinutesThisWeek={getMeditationMinutesForWeek()}
+            gardenSlot={
+              <div>
+                <p className="text-xs text-white/40">Your Garden</p>
+                <div className="mt-1 lg:hidden">
+                  <GrowthGarden
+                    stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}
+                    animated={true}
+                    showSparkle={gardenSparkle}
+                    amplifiedSparkle={gardenLevelUp}
+                    streakActive={faithPoints.currentStreak > 0}
+                    size="md"
+                  />
+                </div>
+                <div className="mt-1 hidden lg:block">
+                  <GrowthGarden
+                    stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}
+                    animated={true}
+                    showSparkle={gardenSparkle}
+                    amplifiedSparkle={gardenLevelUp}
+                    streakActive={faithPoints.currentStreak > 0}
+                    size="lg"
+                  />
+                </div>
+              </div>
+            }
           />
         </div>
         {godMoments.isVisible && (

@@ -13,6 +13,7 @@ interface DashboardHeroProps {
   pointsToNextLevel?: number
   currentLevel?: number
   meditationMinutesThisWeek?: number
+  gardenSlot?: React.ReactNode
 }
 
 function getGreeting(): string {
@@ -30,6 +31,7 @@ export function DashboardHero({
   pointsToNextLevel = 100,
   currentLevel = 1,
   meditationMinutesThisWeek = 0,
+  gardenSlot,
 }: DashboardHeroProps) {
   const greeting = getGreeting()
   const prefersReduced = useReducedMotion()
@@ -92,6 +94,7 @@ export function DashboardHero({
       className="bg-gradient-to-b from-[#1a0533] to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        {gardenSlot}
         <div className="flex flex-col items-center text-center md:items-start md:text-left">
           <h1 className="font-serif text-2xl text-white/90 md:text-3xl">
             {greeting},{' '}

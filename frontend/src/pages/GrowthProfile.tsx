@@ -4,6 +4,7 @@ import { Layout } from '@/components/Layout'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileBadgeShowcase } from '@/components/profile/ProfileBadgeShowcase'
 import { ProfileStats } from '@/components/profile/ProfileStats'
+import { GrowthGarden } from '@/components/dashboard/GrowthGarden'
 import { useProfileData } from '@/hooks/useProfileData'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
@@ -119,6 +120,17 @@ export function GrowthProfile() {
             onAcceptRequest={handleAcceptRequest}
             canEncourageToday={canEncourageToday}
           />
+          {profileData.currentLevel !== null && (
+            <div className="mt-6 flex flex-col items-center">
+              <GrowthGarden
+                stage={(profileData.currentLevel ?? 1) as 1 | 2 | 3 | 4 | 5 | 6}
+                animated={false}
+                showSparkle={false}
+                streakActive={(profileData.currentStreak ?? 0) > 0}
+                size="sm"
+              />
+            </div>
+          )}
           <div className="mt-6">
             <ProfileBadgeShowcase
               badgeData={profileData.badgeData}

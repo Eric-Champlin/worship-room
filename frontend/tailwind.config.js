@@ -159,6 +159,37 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.1)' },
         },
+        'garden-leaf-sway': {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        },
+        'garden-butterfly-float': {
+          '0%': { transform: 'translate(0, 0)' },
+          '25%': { transform: 'translate(8px, -6px)' },
+          '50%': { transform: 'translate(16px, 0)' },
+          '75%': { transform: 'translate(8px, 6px)' },
+          '100%': { transform: 'translate(0, 0)' },
+        },
+        'garden-water-shimmer': {
+          '0%, 100%': { opacity: '0.6' },
+          '50%': { opacity: '1' },
+        },
+        'garden-glow-pulse': {
+          '0%, 100%': { opacity: '0.7' },
+          '50%': { opacity: '1' },
+        },
+        'garden-fade-out': {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
+        },
+        'garden-fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'garden-sparkle-rise': {
+          '0%': { opacity: '1', transform: 'translateY(0) translateX(0)' },
+          '100%': { opacity: '0', transform: 'translateY(-40px) translateX(var(--drift-x, 0px))' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -191,6 +222,13 @@ export default {
         'pray-float-text': 'pray-float-text 500ms ease-out forwards',
         'mic-pulse': 'mic-pulse 1s ease-in-out infinite',
         'widget-enter': 'widget-enter 400ms ease-out both',
+        'garden-leaf-sway': 'garden-leaf-sway 4s ease-in-out infinite alternate',
+        'garden-butterfly-float': 'garden-butterfly-float 6s ease-in-out infinite',
+        'garden-water-shimmer': 'garden-water-shimmer 3s ease-in-out infinite alternate',
+        'garden-glow-pulse': 'garden-glow-pulse 2s ease-in-out infinite alternate',
+        'garden-fade-out': 'garden-fade-out 2s ease-in-out forwards',
+        'garden-fade-in': 'garden-fade-in 2s ease-in-out forwards',
+        'garden-sparkle-rise': 'garden-sparkle-rise 1s ease-out forwards',
       },
     },
   },
