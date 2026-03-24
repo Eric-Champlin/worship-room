@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { SEO } from '@/components/SEO'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
@@ -115,6 +116,10 @@ function PrayerDetailContent() {
 
   return (
     <PageShell>
+      <SEO
+        title="Prayer Request"
+        description="A prayer request shared on the Worship Room community prayer wall."
+      />
       <main
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"

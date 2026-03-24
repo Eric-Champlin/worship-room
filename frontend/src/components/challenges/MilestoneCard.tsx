@@ -115,6 +115,7 @@ export function MilestoneCard({
             src={shareImageUrl}
             alt="Share preview"
             className="mx-auto mt-4 max-w-[240px] rounded-xl shadow-lg sm:max-w-xs"
+            loading="lazy"
           />
         )}
 

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/query-client'
 import { Home } from './pages/Home'
@@ -44,6 +45,7 @@ import { AskPage } from './pages/AskPage'
 import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
 import { InstallBanner } from '@/components/pwa/InstallBanner'
 import { useAuth } from '@/hooks/useAuth'
+import { SEO } from '@/components/SEO'
 import { lazy, Suspense } from 'react'
 
 const MoodCheckInPreview = lazy(() =>
@@ -53,6 +55,7 @@ const MoodCheckInPreview = lazy(() =>
 function ComingSoon({ title }: { title: string }) {
   return (
     <Layout>
+      <SEO title={title} description={`${title} — coming soon to Worship Room.`} noIndex />
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-md text-center">
           <h1 className="mb-4 text-3xl font-bold text-text-dark sm:text-4xl">
@@ -70,6 +73,7 @@ function ComingSoon({ title }: { title: string }) {
 function NotFound() {
   return (
     <Layout>
+      <SEO title="Page Not Found" description="The page you're looking for doesn't exist." noIndex />
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-md text-center">
           <h1 className="mb-4 text-3xl font-bold text-text-dark sm:text-4xl">
@@ -99,6 +103,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <HelmetProvider>
         <AuthProvider>
         <ToastProvider>
         <AuthModalProvider>
@@ -159,6 +164,7 @@ function App() {
         </AuthModalProvider>
         </ToastProvider>
         </AuthProvider>
+        </HelmetProvider>
       </BrowserRouter>
     </QueryClientProvider>
   )

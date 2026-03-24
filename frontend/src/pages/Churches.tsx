@@ -1,9 +1,21 @@
 import { LocalSupportPage } from '@/components/local-support/LocalSupportPage'
+import { SEO, SITE_URL } from '@/components/SEO'
 import { DENOMINATION_OPTIONS } from '@/types/local-support'
+const churchesBreadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Local Support', item: `${SITE_URL}/local-support/churches` },
+    { '@type': 'ListItem', position: 3, name: 'Churches' },
+  ],
+}
 
 export function Churches() {
   return (
-    <LocalSupportPage
+    <>
+      <SEO title="Find Churches Near You" description="Locate churches in your area with service times, directions, and contact information." jsonLd={churchesBreadcrumbs} />
+      <LocalSupportPage
       config={{
         category: 'churches',
         headingId: 'churches-heading',
@@ -15,5 +27,6 @@ export function Churches() {
         filterLabel: 'Denomination',
       }}
     />
+    </>
   )
 }

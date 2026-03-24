@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { Layout } from '@/components/Layout'
+import { SEO, SITE_URL } from '@/components/SEO'
 import { AudioControlBar } from '@/components/bible/AudioControlBar'
 import { BibleAmbientChip } from '@/components/bible/BibleAmbientChip'
 import { SleepTimerPanel } from '@/components/bible/SleepTimerPanel'
@@ -385,8 +386,31 @@ export function BibleReader() {
     ? document.getElementById(`verse-${selectedVerse}`)
     : null
 
+  const bookName = book.name
+  const chapter = chapterNumber
+  const breadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Bible', item: `${SITE_URL}/bible` },
+      { '@type': 'ListItem', position: 3, name: bookName, item: `${SITE_URL}/bible/${bookSlug}/1` },
+      { '@type': 'ListItem', position: 4, name: `Chapter ${chapter}` },
+    ],
+  }
+
   return (
     <Layout>
+      {isLoading ? (
+        <SEO title="Loading..." description="Loading Bible chapter..." />
+      ) : (
+        <SEO
+          title={`${bookName} Chapter ${chapter} (WEB)`}
+          description={`Read ${bookName} chapter ${chapter} from the World English Bible with highlights and notes.`}
+          canonical={`/bible/${bookSlug}/${chapter}`}
+          jsonLd={breadcrumbs}
+        />
+      )}
       <div className="min-h-screen bg-hero-dark">
         {/* Screen reader announcements */}
         <div

@@ -3,6 +3,7 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
+import { SEO } from '@/components/SEO'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import {
   FriendSearch,
@@ -65,6 +66,7 @@ export function Friends() {
 
   return (
     <div className="min-h-screen bg-[#0f0a1e]">
+      <SEO title="Friends & Leaderboard" description="Grow together in faith with friends, encouragement, and friendly accountability." noIndex />
       <a
         href="#friends-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

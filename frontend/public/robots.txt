@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+Disallow: /settings
+Disallow: /insights
+Disallow: /friends
+Disallow: /profile/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /health
+Disallow: /prayer-wall/dashboard
+Disallow: /journal/
+Disallow: /favorites
+Disallow: /my-prayers
+Disallow: /dev/
+
+Sitemap: https://worshiproom.com/sitemap.xml

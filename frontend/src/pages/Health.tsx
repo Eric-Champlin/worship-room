@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, CheckCircle, Loader2, XCircle } from 'lucide-react'
 import { apiClient, HealthResponse, HelloResponse } from '@/api/client'
 import { Layout } from '@/components/Layout'
+import { SEO } from '@/components/SEO'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
@@ -36,6 +37,7 @@ export function Health() {
 
   return (
     <Layout>
+      <SEO title="Health Check" description="System health status." noIndex />
       <Card className="mx-auto max-w-4xl">
         <CardHeader>
           <CardTitle>Backend Health Check</CardTitle>

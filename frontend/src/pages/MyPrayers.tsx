@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { PageHero } from '@/components/PageHero'
+import { SEO } from '@/components/SEO'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
 import { PrayerListActionBar } from '@/components/my-prayers/PrayerListActionBar'
@@ -158,6 +159,7 @@ export function MyPrayers() {
 
   return (
     <div className="min-h-screen bg-neutral-bg">
+      <SEO title="My Saved Prayers" description="Your saved prayers and prayer history on Worship Room." noIndex />
       <Navbar />
       <PageHero title="My Prayers" subtitle="Your personal conversation with God." />
 

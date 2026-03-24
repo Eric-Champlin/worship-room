@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
+import { SEO } from '@/components/SEO'
 import { SiteFooter } from '@/components/SiteFooter'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { getVerseById, getSongOfTheDay } from '@/mocks/daily-experience-mock-data'
@@ -15,12 +16,6 @@ export function SharedVerse() {
   const verse = id ? getVerseById(id) : undefined
   const song = getSongOfTheDay(new Date().getDate())
   const [referenceVisible, setReferenceVisible] = useState(false)
-
-  useEffect(() => {
-    if (verse) {
-      document.title = `${verse.reference} — Worship Room`
-    }
-  }, [verse])
 
   if (!verse) {
     return (
@@ -53,8 +48,18 @@ export function SharedVerse() {
     )
   }
 
+  const verseSuffix = ' — from the World English Bible.'
+  const maxTextLen = 155 - verseSuffix.length
+  const verseDescription = verse.text.length > maxTextLen
+    ? verse.text.slice(0, maxTextLen).trim() + '...' + verseSuffix
+    : verse.text + verseSuffix
+
   return (
     <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
+      <SEO
+        title={verse.reference}
+        description={verseDescription}
+      />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"

@@ -87,6 +87,7 @@ export function ListingCard({
               src={place.photoUrl}
               alt={`Photo of ${place.name}`}
               className="h-20 w-20 rounded-lg object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-100">

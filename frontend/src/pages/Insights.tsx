@@ -11,6 +11,7 @@ import { MoodTrendChart } from '@/components/insights/MoodTrendChart'
 import { ScriptureConnections } from '@/components/insights/ScriptureConnections'
 import { MeditationHistory } from '@/components/insights/MeditationHistory'
 import { GratitudeStreak } from '@/components/insights/GratitudeStreak'
+import { SEO } from '@/components/SEO'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import { getMoodEntries } from '@/services/mood-storage'
@@ -171,6 +172,7 @@ export function Insights() {
 
   return (
     <div className="min-h-screen bg-[#0f0a1e]">
+      <SEO title="Mood Insights & Spiritual Growth" description="Track your mood patterns, meditation minutes, and spiritual growth over time." noIndex />
       <a
         href="#insights-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

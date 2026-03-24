@@ -19,7 +19,16 @@ import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { useAuth } from '@/hooks/useAuth'
 import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/getting-started-storage'
+import { SEO, SITE_URL } from '@/components/SEO'
 import { cn } from '@/lib/utils'
+const musicBreadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Music' },
+  ],
+}
 import type { SharedMixData } from '@/types/storage'
 
 // Removed in visual polish — keeping for potential re-enable
@@ -169,6 +178,7 @@ export function MusicPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
+      <SEO title="Worship Music & Ambient Sounds" description="Listen to worship playlists, mix ambient sounds for prayer and meditation, and fall asleep to Scripture readings." jsonLd={musicBreadcrumbs} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"

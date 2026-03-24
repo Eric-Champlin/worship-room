@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
@@ -8,6 +8,7 @@ import { ProfileSection } from '@/components/settings/ProfileSection'
 import { NotificationsSection } from '@/components/settings/NotificationsSection'
 import { PrivacySection } from '@/components/settings/PrivacySection'
 import { AccountSection } from '@/components/settings/AccountSection'
+import { SEO } from '@/components/SEO'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
@@ -26,16 +27,13 @@ export function Settings() {
   const { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser } = useSettings()
   const [activeSection, setActiveSection] = useState<SettingsSection>('profile')
 
-  useEffect(() => {
-    document.title = 'Settings'
-  }, [])
-
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
   }
 
   return (
     <div className="min-h-screen bg-[#0f0a1e]">
+      <SEO title="Settings" description="Manage your Worship Room account, notifications, and privacy preferences." noIndex />
       <a
         href="#settings-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

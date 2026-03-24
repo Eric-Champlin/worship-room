@@ -15,6 +15,15 @@ import { useAuth } from '@/hooks/useAuth'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
+import { SEO, SITE_URL } from '@/components/SEO'
+const dailyHubBreadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Daily Hub' },
+  ],
+}
 import { cn } from '@/lib/utils'
 import type { PrayContext } from '@/types/daily-experience'
 
@@ -142,6 +151,7 @@ function DailyHubContent() {
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
+      <SEO title="Daily Prayer, Journal & Meditation" description="Start your day with AI-powered prayer, guided journaling, and Christian meditation rooted in Scripture." jsonLd={dailyHubBreadcrumbs} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"

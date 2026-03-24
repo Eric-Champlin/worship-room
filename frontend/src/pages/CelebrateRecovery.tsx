@@ -1,8 +1,20 @@
 import { LocalSupportPage } from '@/components/local-support/LocalSupportPage'
+import { SEO, SITE_URL } from '@/components/SEO'
+const crBreadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Local Support', item: `${SITE_URL}/local-support/churches` },
+    { '@type': 'ListItem', position: 3, name: 'Celebrate Recovery' },
+  ],
+}
 
 export function CelebrateRecovery() {
   return (
-    <LocalSupportPage
+    <>
+      <SEO title="Find Celebrate Recovery Near You" description="Locate Celebrate Recovery meetings in your area for faith-based addiction and hurt recovery support." jsonLd={crBreadcrumbs} />
+      <LocalSupportPage
       config={{
         category: 'celebrate-recovery',
         headingId: 'celebrate-recovery-heading',
@@ -25,5 +37,6 @@ export function CelebrateRecovery() {
         filterLabel: null,
       }}
     />
+    </>
   )
 }

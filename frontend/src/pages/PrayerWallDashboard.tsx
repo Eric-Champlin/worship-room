@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft, Pencil } from 'lucide-react'
+import { SEO } from '@/components/SEO'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
@@ -142,6 +143,7 @@ function DashboardContent() {
 
   return (
     <PageShell>
+      <SEO title="Prayer Dashboard" description="Your private prayer wall dashboard — track your requests and prayer activity." noIndex />
       <main
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"

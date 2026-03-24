@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
+import { SEO } from '@/components/SEO'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { getExamenSteps } from '@/mocks/daily-experience-mock-data'
 
@@ -78,6 +79,7 @@ function ExamenReflectionContent() {
 
   return (
     <Layout hero={<PageHero title="Examen Reflection" />}>
+      <SEO title="Examen Reflection" description="The Ignatian Examen — a reflective prayer reviewing your day with God." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />
 

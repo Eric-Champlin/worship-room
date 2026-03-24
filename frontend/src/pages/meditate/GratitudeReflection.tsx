@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
+import { SEO } from '@/components/SEO'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 
 export function GratitudeReflection() {
@@ -120,6 +121,7 @@ function GratitudeReflectionContent() {
 
   return (
     <Layout hero={<PageHero title="Gratitude Reflection" subtitle="Name the things you're thankful for today." />}>
+      <SEO title="Gratitude Reflection" description="A guided gratitude journaling meditation rooted in Scripture." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />
 

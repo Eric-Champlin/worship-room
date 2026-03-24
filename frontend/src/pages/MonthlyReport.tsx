@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
+import { SEO } from '@/components/SEO'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import {
@@ -85,6 +86,7 @@ export function MonthlyReport() {
 
   return (
     <div className="min-h-screen bg-[#0f0a1e]">
+      <SEO title="Monthly Mood Report" description="Your monthly spiritual growth and mood tracking summary." noIndex />
       <a
         href="#monthly-report-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

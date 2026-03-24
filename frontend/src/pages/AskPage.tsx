@@ -14,6 +14,7 @@ import { useToast } from '@/components/ui/Toast'
 import { ASK_TOPIC_CHIPS, ASK_MAX_LENGTH, ASK_CHAR_WARNING, ASK_CHAR_DANGER, ASK_LOADING_DELAY_MS, ASK_FEEDBACK_KEY } from '@/constants/ask'
 import { getAskResponse } from '@/mocks/ask-mock-data'
 import type { AskResponse, AskFeedback } from '@/types/ask'
+import { SEO } from '@/components/SEO'
 import { cn } from '@/lib/utils'
 
 interface ConversationPair {
@@ -189,6 +190,7 @@ export function AskPage() {
 
   return (
     <Layout>
+      <SEO title="Ask God's Word" description="Ask life questions and receive AI-powered answers grounded in Biblical wisdom and Scripture." />
       <PageHero title="Ask God's Word" showDivider>
         <p className="mx-auto max-w-xl font-serif italic text-base text-white/85 sm:text-lg">
           Bring your questions. Find wisdom in Scripture.

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Bell, BellOff, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
+import { SEO } from '@/components/SEO'
 import { ChallengeIcon } from '@/components/challenges/ChallengeIcon'
 import { ChallengeDayContent } from '@/components/challenges/ChallengeDayContent'
 import { ChallengeDaySelector } from '@/components/challenges/ChallengeDaySelector'
@@ -208,6 +209,10 @@ export function ChallengeDetail() {
 
   return (
     <Layout>
+      <SEO
+        title={`${challenge.title} | Community Challenges`}
+        description={challenge.description.slice(0, 155).trim()}
+      />
       <div className="min-h-screen bg-hero-dark">
         {/* Hero section */}
         <section

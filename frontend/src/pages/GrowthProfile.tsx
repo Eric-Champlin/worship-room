@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
+import { SEO } from '@/components/SEO'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileBadgeShowcase } from '@/components/profile/ProfileBadgeShowcase'
 import { ProfileStats } from '@/components/profile/ProfileStats'
@@ -25,16 +26,6 @@ export function GrowthProfile() {
   useEffect(() => {
     setRelationship(profileData.relationship)
   }, [profileData.relationship])
-
-  // Set document title
-  useEffect(() => {
-    if (profileData.found) {
-      document.title = `${profileData.displayName}'s Profile`
-    } else {
-      document.title = 'Profile Not Found'
-    }
-    return () => { document.title = 'Worship Room' }
-  }, [profileData.found, profileData.displayName])
 
   const canEncourageToday = userId ? canEncourage(userId) : false
 
@@ -111,6 +102,11 @@ export function GrowthProfile() {
 
   return (
     <Layout>
+      <SEO
+        title={`${profileData.displayName}'s Growth Profile`}
+        description={`See ${profileData.displayName}'s spiritual growth journey, badges, and encouragement on Worship Room.`}
+        noIndex
+      />
       <div className="min-h-screen bg-gradient-to-b from-hero-dark to-hero-mid">
         <div className="motion-safe:animate-fade-in mx-auto max-w-3xl px-4 pt-8 pb-12 sm:px-6 md:pt-12">
           <ProfileHeader

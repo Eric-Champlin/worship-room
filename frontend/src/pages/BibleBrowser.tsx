@@ -6,7 +6,16 @@ import { BibleSearchMode } from '@/components/bible/BibleSearchMode'
 import { HighlightsNotesSection } from '@/components/bible/HighlightsNotesSection'
 import { SegmentedControl } from '@/components/bible/SegmentedControl'
 import type { BibleBrowserMode } from '@/components/bible/SegmentedControl'
+import { SEO, SITE_URL } from '@/components/SEO'
 import { useAuth } from '@/hooks/useAuth'
+const bibleBreadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Bible' },
+  ],
+}
 import { useBibleHighlights } from '@/hooks/useBibleHighlights'
 import { useBibleNotes } from '@/hooks/useBibleNotes'
 
@@ -28,6 +37,7 @@ export function BibleBrowser() {
 
   return (
     <Layout>
+      <SEO title="Read the Bible (WEB)" description="Read the full World English Bible with highlighting, notes, and audio playback." jsonLd={bibleBreadcrumbs} />
       <div className="min-h-screen bg-hero-dark">
         {/* Hero section */}
         <section

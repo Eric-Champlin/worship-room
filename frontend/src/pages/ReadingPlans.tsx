@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
+import { SEO } from '@/components/SEO'
 import { CreatePlanFlow } from '@/components/reading-plans/CreatePlanFlow'
 import { FilterBar } from '@/components/reading-plans/FilterBar'
 import { PlanCard } from '@/components/reading-plans/PlanCard'
@@ -168,6 +169,7 @@ export function ReadingPlans() {
 
   return (
     <Layout>
+      <SEO title="Bible Reading Plans" description="Guided multi-day Scripture journeys through topics like anxiety, grief, gratitude, forgiveness, and hope." />
       <PageHero title="Reading Plans" subtitle="Guided journeys through Scripture" />
 
       <section className="bg-neutral-bg px-4 py-8 sm:px-6 sm:py-10">

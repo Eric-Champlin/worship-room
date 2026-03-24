@@ -26,7 +26,16 @@ import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/getting-started-storage'
 import { isValidCategory, PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 import { getTodaysQuestion } from '@/constants/question-of-the-day'
+import { SEO, SITE_URL } from '@/components/SEO'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
+const prayerWallBreadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Prayer Wall' },
+  ],
+}
 import { getChallenge } from '@/data/challenges'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 
@@ -305,6 +314,7 @@ function PrayerWallContent() {
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-neutral-bg font-sans">
+      <SEO title="Community Prayer Wall" description="Share prayer requests and pray for others in a supportive Christian community." jsonLd={prayerWallBreadcrumbs} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Layout } from '@/components/Layout'
+import { SEO } from '@/components/SEO'
 import { HeadingDivider } from '@/components/HeadingDivider'
 import { useElementWidth } from '@/hooks/useElementWidth'
 import { RoutineCard } from '@/components/music/RoutineCard'
@@ -106,6 +107,7 @@ export function RoutinesPage() {
 
   return (
     <Layout>
+      <SEO title="Bedtime Routines" description="Wind down with guided bedtime routines combining Scripture, ambient sounds, and gentle prayers." />
       {/* Hero */}
       <section
         className="px-4 pb-10 pt-32 text-center sm:pb-14 sm:pt-36"

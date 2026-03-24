@@ -23,6 +23,7 @@ import { usePrayerReminders } from '@/hooks/usePrayerReminders'
 import { useChallengeProgress } from '@/hooks/useChallengeProgress'
 import { useChallengeAutoDetect } from '@/hooks/useChallengeAutoDetect'
 import { useChallengeNudge } from '@/hooks/useChallengeNudge'
+import { SEO } from '@/components/SEO'
 import { ChallengeCompletionOverlay } from '@/components/challenges/ChallengeCompletionOverlay'
 import { useToastSafe } from '@/components/ui/Toast'
 import { hasCheckedInToday } from '@/services/mood-storage'
@@ -277,6 +278,10 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#0f0a1e]">
+      <SEO
+        title="Dashboard"
+        description="Your daily spiritual growth dashboard — mood tracking, streaks, faith points, and personalized encouragement."
+      />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

@@ -61,6 +61,7 @@ function SearchResults({
                 src={`/audio/artwork/${scene.artworkFilename}`}
                 alt=""
                 className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+                loading="lazy"
               />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-text-dark">{scene.name}</p>

@@ -1,6 +1,14 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
+// Mock react-helmet-async globally so Helmet is a no-op in tests
+// that don't wrap with HelmetProvider (most existing page tests).
+// Helmet renders to <head> not the component tree, so mock returns null.
+vi.mock('react-helmet-async', () => ({
+  Helmet: () => null,
+  HelmetProvider: ({ children }: { children?: React.ReactNode }) => children,
+}))
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({

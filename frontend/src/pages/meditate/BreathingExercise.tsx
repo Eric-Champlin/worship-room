@@ -12,6 +12,7 @@ import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/m
 import { getLocalDateString } from '@/utils/date'
 import { playChime } from '@/lib/audio'
 import { cn } from '@/lib/utils'
+import { SEO } from '@/components/SEO'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 
 type Phase = 'breatheIn' | 'hold' | 'breatheOut'
@@ -252,6 +253,7 @@ function BreathingExerciseContent() {
   // Pre-start screen
   return (
     <Layout hero={<PageHero title="Breathing Exercise" subtitle="Follow a 4-7-8 breathing pattern with scripture to focus your mind." />}>
+      <SEO title="Breathing Exercise" description="A calming 4-7-8 breathing exercise for peace and focus." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="breathing" />
         {/* Duration selector */}

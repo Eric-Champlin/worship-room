@@ -1,9 +1,21 @@
 import { LocalSupportPage } from '@/components/local-support/LocalSupportPage'
+import { SEO, SITE_URL } from '@/components/SEO'
 import { SPECIALTY_OPTIONS } from '@/types/local-support'
+const counselorsBreadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Local Support', item: `${SITE_URL}/local-support/churches` },
+    { '@type': 'ListItem', position: 3, name: 'Counselors' },
+  ],
+}
 
 export function Counselors() {
   return (
-    <LocalSupportPage
+    <>
+      <SEO title="Find Christian Counselors Near You" description="Locate Christian counselors and therapists in your area for professional faith-based support." jsonLd={counselorsBreadcrumbs} />
+      <LocalSupportPage
       config={{
         category: 'counselors',
         headingId: 'counselors-heading',
@@ -17,5 +29,6 @@ export function Counselors() {
           'Worship Room does not endorse or verify any counselor listed here. Please research any counselor before scheduling an appointment.',
       }}
     />
+    </>
   )
 }

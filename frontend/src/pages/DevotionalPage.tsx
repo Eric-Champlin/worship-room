@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useToast } from '@/components/ui/Toast'
 import { useReadAloud } from '@/hooks/useReadAloud'
+import { SEO, SITE_URL } from '@/components/SEO'
 import { RelatedPlanCallout } from '@/components/devotional/RelatedPlanCallout'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLANS } from '@/data/reading-plans'
@@ -120,6 +121,34 @@ export function DevotionalPage() {
 
   return (
     <Layout>
+      <SEO
+        title="Daily Devotional"
+        description="Start each morning with an inspiring quote, Bible passage, reflection, and prayer."
+        ogType="article"
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+              { '@type': 'ListItem', position: 2, name: 'Daily Devotional' },
+            ],
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: devotional.title,
+            datePublished: new Date().toLocaleDateString('en-CA'),
+            description: devotional.reflection[0]?.slice(0, 155) || '',
+            author: { '@type': 'Organization', name: 'Worship Room' },
+            publisher: {
+              '@type': 'Organization',
+              name: 'Worship Room',
+              logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon-512.png` },
+            },
+          },
+        ]}
+      />
       <div className="min-h-screen bg-hero-dark" {...swipeHandlers}>
         {/* Hero section */}
         <section

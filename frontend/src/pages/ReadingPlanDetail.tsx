@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
+import { SEO, SITE_URL } from '@/components/SEO'
 import { DayCompletionCelebration } from '@/components/reading-plans/DayCompletionCelebration'
 import { DayContent } from '@/components/reading-plans/DayContent'
 import { DaySelector } from '@/components/reading-plans/DaySelector'
@@ -132,8 +133,23 @@ export function ReadingPlanDetail() {
 
   const isLastDay = selectedDay === plan.durationDays
 
+  const breadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Reading Plans', item: `${SITE_URL}/reading-plans` },
+      { '@type': 'ListItem', position: 3, name: plan.title },
+    ],
+  }
+
   return (
     <Layout>
+      <SEO
+        title={`${plan.title} | Reading Plans`}
+        description={plan.description.slice(0, 155).trim()}
+        jsonLd={breadcrumbs}
+      />
       <div className="min-h-screen bg-hero-dark">
         {/* Hero section */}
         <section

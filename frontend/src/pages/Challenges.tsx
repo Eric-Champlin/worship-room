@@ -9,6 +9,7 @@ import { UpcomingChallengeCard } from '@/components/challenges/UpcomingChallenge
 import { SwitchChallengeDialog } from '@/components/challenges/SwitchChallengeDialog'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
+import { SEO } from '@/components/SEO'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { CHALLENGES } from '@/data/challenges'
 import { useAuth } from '@/hooks/useAuth'
@@ -146,6 +147,7 @@ export function Challenges() {
 
   return (
     <Layout>
+      <SEO title="Community Challenges" description="Join seasonal faith challenges with thousands of other believers during Lent, Advent, Easter, and more." />
       <PageHero title="Community Challenges" subtitle="Grow together in faith" />
       <section className="bg-neutral-bg px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
