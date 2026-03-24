@@ -16,26 +16,87 @@ export function getBooksByCategory(category: BibleCategory): BibleBook[] {
 type BookLoader = () => Promise<BibleChapter[]>
 
 const BOOK_LOADERS: Record<string, BookLoader> = {
-  genesis: () => import('./books/genesis').then((m) => m.genesisChapters),
-  exodus: () => import('./books/exodus').then((m) => m.exodusChapters),
-  psalms: () => import('./books/psalms').then((m) => m.psalmsChapters),
-  proverbs: () => import('./books/proverbs').then((m) => m.proverbsChapters),
-  ecclesiastes: () => import('./books/ecclesiastes').then((m) => m.ecclesiastesChapters),
-  isaiah: () => import('./books/isaiah').then((m) => m.isaiahChapters),
-  jeremiah: () => import('./books/jeremiah').then((m) => m.jeremiahChapters),
-  lamentations: () => import('./books/lamentations').then((m) => m.lamentationsChapters),
-  matthew: () => import('./books/matthew').then((m) => m.matthewChapters),
-  mark: () => import('./books/mark').then((m) => m.markChapters),
-  luke: () => import('./books/luke').then((m) => m.lukeChapters),
-  john: () => import('./books/john').then((m) => m.johnChapters),
-  acts: () => import('./books/acts').then((m) => m.actsChapters),
-  romans: () => import('./books/romans').then((m) => m.romansChapters),
-  '1-corinthians': () => import('./books/1-corinthians').then((m) => m.corinthians1Chapters),
-  '2-corinthians': () => import('./books/2-corinthians').then((m) => m.corinthians2Chapters),
-  galatians: () => import('./books/galatians').then((m) => m.galatiansChapters),
-  ephesians: () => import('./books/ephesians').then((m) => m.ephesiansChapters),
-  philippians: () => import('./books/philippians').then((m) => m.philippiansChapters),
-  revelation: () => import('./books/revelation').then((m) => m.revelationChapters),
+  genesis: () => import('./books/json/genesis.json').then((m) => m.default as BibleChapter[]),
+  exodus: () => import('./books/json/exodus.json').then((m) => m.default as BibleChapter[]),
+  leviticus: () => import('./books/json/leviticus.json').then((m) => m.default as BibleChapter[]),
+  numbers: () => import('./books/json/numbers.json').then((m) => m.default as BibleChapter[]),
+  deuteronomy: () =>
+    import('./books/json/deuteronomy.json').then((m) => m.default as BibleChapter[]),
+  joshua: () => import('./books/json/joshua.json').then((m) => m.default as BibleChapter[]),
+  judges: () => import('./books/json/judges.json').then((m) => m.default as BibleChapter[]),
+  ruth: () => import('./books/json/ruth.json').then((m) => m.default as BibleChapter[]),
+  '1-samuel': () => import('./books/json/1-samuel.json').then((m) => m.default as BibleChapter[]),
+  '2-samuel': () => import('./books/json/2-samuel.json').then((m) => m.default as BibleChapter[]),
+  '1-kings': () => import('./books/json/1-kings.json').then((m) => m.default as BibleChapter[]),
+  '2-kings': () => import('./books/json/2-kings.json').then((m) => m.default as BibleChapter[]),
+  '1-chronicles': () =>
+    import('./books/json/1-chronicles.json').then((m) => m.default as BibleChapter[]),
+  '2-chronicles': () =>
+    import('./books/json/2-chronicles.json').then((m) => m.default as BibleChapter[]),
+  ezra: () => import('./books/json/ezra.json').then((m) => m.default as BibleChapter[]),
+  nehemiah: () => import('./books/json/nehemiah.json').then((m) => m.default as BibleChapter[]),
+  esther: () => import('./books/json/esther.json').then((m) => m.default as BibleChapter[]),
+  job: () => import('./books/json/job.json').then((m) => m.default as BibleChapter[]),
+  psalms: () => import('./books/json/psalms.json').then((m) => m.default as BibleChapter[]),
+  proverbs: () => import('./books/json/proverbs.json').then((m) => m.default as BibleChapter[]),
+  ecclesiastes: () =>
+    import('./books/json/ecclesiastes.json').then((m) => m.default as BibleChapter[]),
+  'song-of-solomon': () =>
+    import('./books/json/song-of-solomon.json').then((m) => m.default as BibleChapter[]),
+  isaiah: () => import('./books/json/isaiah.json').then((m) => m.default as BibleChapter[]),
+  jeremiah: () => import('./books/json/jeremiah.json').then((m) => m.default as BibleChapter[]),
+  lamentations: () =>
+    import('./books/json/lamentations.json').then((m) => m.default as BibleChapter[]),
+  ezekiel: () => import('./books/json/ezekiel.json').then((m) => m.default as BibleChapter[]),
+  daniel: () => import('./books/json/daniel.json').then((m) => m.default as BibleChapter[]),
+  hosea: () => import('./books/json/hosea.json').then((m) => m.default as BibleChapter[]),
+  joel: () => import('./books/json/joel.json').then((m) => m.default as BibleChapter[]),
+  amos: () => import('./books/json/amos.json').then((m) => m.default as BibleChapter[]),
+  obadiah: () => import('./books/json/obadiah.json').then((m) => m.default as BibleChapter[]),
+  jonah: () => import('./books/json/jonah.json').then((m) => m.default as BibleChapter[]),
+  micah: () => import('./books/json/micah.json').then((m) => m.default as BibleChapter[]),
+  nahum: () => import('./books/json/nahum.json').then((m) => m.default as BibleChapter[]),
+  habakkuk: () => import('./books/json/habakkuk.json').then((m) => m.default as BibleChapter[]),
+  zephaniah: () => import('./books/json/zephaniah.json').then((m) => m.default as BibleChapter[]),
+  haggai: () => import('./books/json/haggai.json').then((m) => m.default as BibleChapter[]),
+  zechariah: () => import('./books/json/zechariah.json').then((m) => m.default as BibleChapter[]),
+  malachi: () => import('./books/json/malachi.json').then((m) => m.default as BibleChapter[]),
+  matthew: () => import('./books/json/matthew.json').then((m) => m.default as BibleChapter[]),
+  mark: () => import('./books/json/mark.json').then((m) => m.default as BibleChapter[]),
+  luke: () => import('./books/json/luke.json').then((m) => m.default as BibleChapter[]),
+  john: () => import('./books/json/john.json').then((m) => m.default as BibleChapter[]),
+  acts: () => import('./books/json/acts.json').then((m) => m.default as BibleChapter[]),
+  romans: () => import('./books/json/romans.json').then((m) => m.default as BibleChapter[]),
+  '1-corinthians': () =>
+    import('./books/json/1-corinthians.json').then((m) => m.default as BibleChapter[]),
+  '2-corinthians': () =>
+    import('./books/json/2-corinthians.json').then((m) => m.default as BibleChapter[]),
+  galatians: () => import('./books/json/galatians.json').then((m) => m.default as BibleChapter[]),
+  ephesians: () => import('./books/json/ephesians.json').then((m) => m.default as BibleChapter[]),
+  philippians: () =>
+    import('./books/json/philippians.json').then((m) => m.default as BibleChapter[]),
+  colossians: () =>
+    import('./books/json/colossians.json').then((m) => m.default as BibleChapter[]),
+  '1-thessalonians': () =>
+    import('./books/json/1-thessalonians.json').then((m) => m.default as BibleChapter[]),
+  '2-thessalonians': () =>
+    import('./books/json/2-thessalonians.json').then((m) => m.default as BibleChapter[]),
+  '1-timothy': () =>
+    import('./books/json/1-timothy.json').then((m) => m.default as BibleChapter[]),
+  '2-timothy': () =>
+    import('./books/json/2-timothy.json').then((m) => m.default as BibleChapter[]),
+  titus: () => import('./books/json/titus.json').then((m) => m.default as BibleChapter[]),
+  philemon: () => import('./books/json/philemon.json').then((m) => m.default as BibleChapter[]),
+  hebrews: () => import('./books/json/hebrews.json').then((m) => m.default as BibleChapter[]),
+  james: () => import('./books/json/james.json').then((m) => m.default as BibleChapter[]),
+  '1-peter': () => import('./books/json/1-peter.json').then((m) => m.default as BibleChapter[]),
+  '2-peter': () => import('./books/json/2-peter.json').then((m) => m.default as BibleChapter[]),
+  '1-john': () => import('./books/json/1-john.json').then((m) => m.default as BibleChapter[]),
+  '2-john': () => import('./books/json/2-john.json').then((m) => m.default as BibleChapter[]),
+  '3-john': () => import('./books/json/3-john.json').then((m) => m.default as BibleChapter[]),
+  jude: () => import('./books/json/jude.json').then((m) => m.default as BibleChapter[]),
+  revelation: () =>
+    import('./books/json/revelation.json').then((m) => m.default as BibleChapter[]),
 }
 
 export async function loadChapter(
@@ -53,9 +114,7 @@ export async function loadChapter(
   }
 }
 
-export async function loadAllBookText(
-  bookSlug: string,
-): Promise<BibleChapter[]> {
+export async function loadAllBookText(bookSlug: string): Promise<BibleChapter[]> {
   const loader = BOOK_LOADERS[bookSlug]
   if (!loader) return []
 

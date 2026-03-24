@@ -174,13 +174,6 @@ describe('BibleReader — Audio Integration', () => {
       })
     })
 
-    it('hidden on placeholder chapters', async () => {
-      renderReader('/bible/leviticus/1')
-      await waitFor(() => {
-        expect(screen.getByText('Full text coming soon')).toBeInTheDocument()
-      })
-      expect(screen.queryByLabelText('Play chapter')).not.toBeInTheDocument()
-    })
 
     it('hidden when TTS unsupported', async () => {
       mockBibleAudio.isSupported = false

@@ -19,9 +19,9 @@ describe('BIBLE_BOOKS', () => {
     expect(nt).toHaveLength(27)
   })
 
-  it('all 20 full-text books have hasFullText: true', () => {
+  it('all 66 full-text books have hasFullText: true', () => {
     const fullTextBooks = BIBLE_BOOKS.filter((b) => b.hasFullText)
-    expect(fullTextBooks).toHaveLength(20)
+    expect(fullTextBooks).toHaveLength(66)
     for (const book of fullTextBooks) {
       expect(BOOKS_WITH_FULL_TEXT.has(book.slug)).toBe(true)
     }

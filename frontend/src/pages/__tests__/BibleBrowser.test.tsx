@@ -157,13 +157,6 @@ describe('BibleBrowser', () => {
       expect(screen.getByText('John')).toBeInTheDocument()
     })
 
-    it('shows "Coming soon" badge for books without full text', () => {
-      renderPage()
-      // Leviticus doesn't have full text
-      const comingSoonBadges = screen.getAllByText('Coming soon')
-      expect(comingSoonBadges.length).toBeGreaterThan(0)
-    })
-
     it('shows progress for logged-in users with read chapters', () => {
       mockAuth.isAuthenticated = true
       localStorage.setItem(

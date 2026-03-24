@@ -248,25 +248,6 @@ describe('BibleReader', () => {
     })
   })
 
-  describe('Placeholder', () => {
-    it('shows placeholder for books without full text', async () => {
-      renderReader('/bible/leviticus/1')
-      await waitFor(() => {
-        expect(screen.getByText('Full text coming soon')).toBeInTheDocument()
-      })
-    })
-
-    it('BibleGateway link has correct URL and opens in new tab', async () => {
-      renderReader('/bible/leviticus/1')
-      await waitFor(() => {
-        const link = screen.getByRole('link', { name: 'Read on BibleGateway' })
-        expect(link).toHaveAttribute('href', expect.stringContaining('biblegateway.com'))
-        expect(link).toHaveAttribute('target', '_blank')
-        expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      })
-    })
-  })
-
   describe('Cross-feature CTAs', () => {
     it('links to correct Daily Hub tabs', async () => {
       renderReader('/bible/genesis/1')
