@@ -94,16 +94,16 @@ function PrayerDetailContent() {
         <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
           <Link
             to="/prayer-wall"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to Prayer Wall
           </Link>
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-            <p className="text-lg font-semibold text-text-dark">
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-8 text-center">
+            <p className="text-lg font-semibold text-white">
               Prayer not found
             </p>
-            <p className="mt-2 text-sm text-text-light">
+            <p className="mt-2 text-sm text-white/60">
               This prayer request may have been removed or the link is invalid.
             </p>
           </div>
@@ -144,14 +144,14 @@ function PrayerDetailContent() {
 
           {/* Owner actions */}
           {isOwner && !prayer.isAnswered && (
-            <div className="mt-3 flex items-center gap-4 border-t border-gray-100 pt-3">
+            <div className="mt-3 flex items-center gap-4 border-t border-white/10 pt-3">
               <MarkAsAnsweredForm onConfirm={handleMarkAnswered} />
               <DeletePrayerDialog onDelete={handleDelete} />
             </div>
           )}
 
           {/* All comments — no limit */}
-          <div className="mt-3 border-t border-gray-100 pt-3">
+          <div className="mt-3 border-t border-white/10 pt-3">
             {comments.length > 0 ? (
               comments.map((comment) => (
                 <CommentItem
@@ -161,7 +161,7 @@ function PrayerDetailContent() {
                 />
               ))
             ) : (
-              <p className="py-2 text-sm text-text-light">
+              <p className="py-2 text-sm text-white/50">
                 No comments yet. Be the first to encourage.
               </p>
             )}
@@ -175,7 +175,7 @@ function PrayerDetailContent() {
           </div>
 
           {/* Report link */}
-          <div className="mt-3 border-t border-gray-100 pt-3">
+          <div className="mt-3 border-t border-white/10 pt-3">
             <ReportDialog prayerId={prayer.id} />
           </div>
         </PrayerCard>

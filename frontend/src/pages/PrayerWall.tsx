@@ -313,7 +313,7 @@ function PrayerWallContent() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-neutral-bg font-sans">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-dashboard-dark font-sans">
       <SEO title="Community Prayer Wall" description="Share prayer requests and pray for others in a supportive Christian community." jsonLd={prayerWallBreadcrumbs} />
       <a
         href="#main-content"
@@ -444,7 +444,7 @@ function PrayerWallContent() {
         {/* Empty state for filtered views */}
         {filteredPrayers.length === 0 && activeCategory && (
           <div className="flex flex-col items-center py-16 text-center">
-            <p className="mb-4 text-lg text-text-light">
+            <p className="mb-4 text-lg text-white/60">
               No prayers in this category yet. Be the first to share.
             </p>
             <button

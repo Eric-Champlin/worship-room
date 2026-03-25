@@ -102,7 +102,7 @@ export function VisitButton({ visitState }: { visitState: VisitState }) {
         'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-colors min-h-[44px]',
         visited
           ? 'text-success'
-          : 'border border-gray-200 text-text-light hover:text-primary',
+          : 'border border-white/10 text-white/50 hover:text-primary',
       )}
     >
       {visited ? (
@@ -144,10 +144,10 @@ export function VisitNote({ visitState }: { visitState: VisitState }) {
         placeholder="How was your experience?"
         maxLength={300}
         rows={2}
-        className="w-full resize-none rounded-lg border border-gray-200 p-3 text-sm text-text-dark placeholder:text-text-light/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 lg:max-w-[60%]"
+        className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 lg:max-w-[60%]"
         aria-label={`Note about your visit to ${placeName}`}
       />
-      <span className="text-xs text-text-light/60">
+      <span className="text-xs text-white/40">
         {note.length}/300
       </span>
     </div>

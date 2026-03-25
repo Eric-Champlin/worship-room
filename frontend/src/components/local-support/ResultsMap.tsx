@@ -64,7 +64,7 @@ export function ResultsMap({
 }: ResultsMapProps) {
   return (
     <div
-      className="h-[400px] w-full overflow-hidden rounded-xl border border-gray-200 lg:h-full"
+      className="h-[400px] w-full overflow-hidden rounded-xl border border-white/10 lg:h-full"
       role="region"
       aria-label={`Map showing ${places.length} location${places.length !== 1 ? 's' : ''}`}
     >
@@ -75,8 +75,8 @@ export function ResultsMap({
         className="h-full w-full"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
         <MapUpdater center={center} />
         <SelectedMarkerOpener selectedPlaceId={selectedPlaceId} places={places} />
@@ -92,9 +92,9 @@ export function ResultsMap({
               }}
             >
               <Popup>
-                <div className="min-w-[160px] font-sans">
-                  <p className="text-sm font-semibold text-text-dark">{place.name}</p>
-                  <p className="mt-0.5 text-xs text-text-light">{place.address}</p>
+                <div className="min-w-[160px] font-sans text-white">
+                  <p className="text-sm font-semibold">{place.name}</p>
+                  <p className="mt-0.5 text-xs text-white/60">{place.address}</p>
                   {dist != null && (
                     <p className="mt-0.5 text-xs text-primary">
                       {dist.toFixed(1)} miles away

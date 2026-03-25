@@ -154,7 +154,7 @@ export function SearchControls({
               onClick={onInteractionBlocked ? () => onInteractionBlocked() : undefined}
               aria-disabled={onInteractionBlocked ? true : undefined}
               {...(onInteractionBlocked ? { autoComplete: 'off', 'data-1p-ignore': true, 'data-lpignore': true } as React.InputHTMLAttributes<HTMLInputElement> : {})}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
             />
           </div>
           <button
@@ -171,14 +171,14 @@ export function SearchControls({
 
       {/* Geolocation message */}
       {geoMessage && (
-        <p className="text-sm text-text-light" role="status">
+        <p className="text-sm text-white/60" role="status">
           {geoMessage}
         </p>
       )}
 
       {/* Radius slider */}
       <div>
-        <label htmlFor="radius-slider" className="mb-1 block text-sm font-medium text-text-dark">
+        <label htmlFor="radius-slider" className="mb-1 block text-sm font-medium text-white/70">
           Search radius: {radius} mile{radius !== 1 ? 's' : ''}
         </label>
         <input
@@ -203,7 +203,7 @@ export function SearchControls({
           aria-label="Search radius"
           className="w-full accent-primary"
         />
-        <div className="mt-1 flex justify-between text-xs text-text-light" aria-hidden="true">
+        <div className="mt-1 flex justify-between text-xs text-white/40" aria-hidden="true">
           {MILE_MARKERS.map((mark) => (
             <span key={mark}>{mark}</span>
           ))}

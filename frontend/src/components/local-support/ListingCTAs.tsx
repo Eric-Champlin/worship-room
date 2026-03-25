@@ -68,7 +68,7 @@ export function ListingCTAs({ placeName, category, onShareClick }: ListingCTAsPr
   const ctas = getCTAs(placeName, category, onShareClick)
 
   return (
-    <div className="border-t border-gray-200 pt-3">
+    <div className="border-t border-white/10 pt-3">
       <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 sm:gap-3 lg:flex lg:flex-row lg:gap-4">
         {ctas.map((cta) =>
           cta.to ? (

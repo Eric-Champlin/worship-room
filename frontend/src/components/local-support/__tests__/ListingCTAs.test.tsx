@@ -70,7 +70,7 @@ describe('ListingCTAs', () => {
 
   it('CTA divider (border-t) is present', () => {
     const { container } = renderCTAs({ placeName: 'Test', category: 'churches', onShareClick: vi.fn() })
-    const divider = container.querySelector('.border-t.border-gray-200')
+    const divider = container.querySelector('.border-t.border-white\\/10')
     expect(divider).toBeInTheDocument()
   })
 })

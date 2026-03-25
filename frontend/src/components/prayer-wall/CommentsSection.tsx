@@ -42,7 +42,7 @@ export function CommentsSection({
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
-      <div className="mt-3 border-t border-gray-100 pt-3">
+      <div className="mt-3 border-t border-white/10 pt-3">
         {visibleComments.map((comment) => (
           <CommentItem
             key={comment.id}
@@ -69,7 +69,7 @@ export function CommentsSection({
 
         {/* Cross-feature CTAs */}
         {prayerContent && (
-          <div className="mt-3 flex flex-col gap-2 border-t border-gray-100 pt-3 sm:flex-row sm:gap-3">
+          <div className="mt-3 flex flex-col gap-2 border-t border-white/10 pt-3 sm:flex-row sm:gap-3">
             <Link
               to="/daily?tab=pray"
               state={{ prayWallContext: prayerContent.slice(0, 100) }}

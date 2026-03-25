@@ -21,7 +21,7 @@ export function LocalSupportHero({
       className="relative flex w-full flex-col items-center px-4 pt-32 pb-10 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40 lg:pb-14"
       style={{
         backgroundImage:
-          'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #F5F5F5 100%)',
+          'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #0f0a1e 100%)',
       }}
     >
       <h1

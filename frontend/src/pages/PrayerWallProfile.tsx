@@ -65,16 +65,16 @@ function PrayerWallProfileContent() {
         <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
           <Link
             to="/prayer-wall"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to Prayer Wall
           </Link>
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-            <p className="text-lg font-semibold text-text-dark">
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-8 text-center">
+            <p className="text-lg font-semibold text-white">
               User not found
             </p>
-            <p className="mt-2 text-sm text-text-light">
+            <p className="mt-2 text-sm text-white/60">
               This profile doesn't exist or has been removed.
             </p>
           </div>
@@ -119,15 +119,15 @@ function PrayerWallProfileContent() {
             userId={user.id}
             alt={`${user.firstName}'s profile photo`}
           />
-          <h1 className="mt-3 text-xl font-semibold text-text-dark">
+          <h1 className="mt-3 text-xl font-semibold text-white">
             {user.firstName}
           </h1>
           {user.bio && (
-            <p className="mt-2 max-w-md font-serif italic text-text-light">
+            <p className="mt-2 max-w-md font-serif italic text-white/70">
               {user.bio}
             </p>
           )}
-          <p className="mt-1 text-sm text-text-light">
+          <p className="mt-1 text-sm text-white/60">
             Joined: {formatFullDate(user.joinedDate)}
           </p>
         </header>
@@ -136,7 +136,7 @@ function PrayerWallProfileContent() {
         <div
           role="tablist"
           aria-label="Profile tabs"
-          className="mb-6 flex border-b border-gray-200"
+          className="mb-6 flex border-b border-white/10"
         >
           {tabs.map((tab, index) => (
             <button
@@ -162,8 +162,8 @@ function PrayerWallProfileContent() {
               className={cn(
                 'px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 activeTab === tab.key
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-text-light hover:text-text-dark',
+                  ? 'border-b-2 border-primary text-white'
+                  : 'text-white/60 hover:text-white/80',
               )}
             >
               {tab.label}
@@ -200,7 +200,7 @@ function PrayerWallProfileContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-text-light">
+                <p className="py-8 text-center text-sm text-white/50">
                   No prayer requests yet.
                 </p>
               )}
@@ -213,9 +213,9 @@ function PrayerWallProfileContent() {
                 userComments.map((comment) => (
                   <div
                     key={comment.id}
-                    className="rounded-xl border border-gray-200 bg-white p-4"
+                    className="rounded-xl border border-white/10 bg-white/[0.06] p-4"
                   >
-                    <p className="whitespace-pre-wrap text-sm text-text-dark">
+                    <p className="whitespace-pre-wrap text-sm text-white/80">
                       {comment.content}
                     </p>
                     <Link
@@ -227,7 +227,7 @@ function PrayerWallProfileContent() {
                   </div>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-text-light">
+                <p className="py-8 text-center text-sm text-white/50">
                   No replies yet.
                 </p>
               )}
@@ -257,7 +257,7 @@ function PrayerWallProfileContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-text-light">
+                <p className="py-8 text-center text-sm text-white/50">
                   No reactions yet.
                 </p>
               )}

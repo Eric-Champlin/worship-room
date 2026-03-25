@@ -37,7 +37,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
 
   return (
     <article
-      className="rounded-xl border border-gray-200 bg-white p-5 transition-shadow sm:p-6 lg:hover:shadow-md"
+      className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20"
       aria-label={`Prayer by ${prayer.authorName}`}
     >
       {prayer.qotdId && (
@@ -71,19 +71,19 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
           {authorLink ? (
             <Link
               to={authorLink}
-              className="font-semibold text-text-dark hover:underline"
+              className="font-semibold text-white hover:underline"
             >
               {prayer.authorName}
             </Link>
           ) : (
-            <span className="font-semibold text-text-dark">
+            <span className="font-semibold text-white">
               {prayer.authorName}
             </span>
           )}
-          <span className="text-text-light"> &mdash; </span>
+          <span className="text-white/40"> &mdash; </span>
           <time
             dateTime={prayer.createdAt}
-            className="text-sm text-text-light"
+            className="text-sm text-white/40"
           >
             {formatFullDate(prayer.createdAt)}
           </time>
@@ -105,7 +105,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
       </header>
 
       <div className="mb-3">
-        <p className="whitespace-pre-wrap leading-relaxed text-text-dark">
+        <p className="whitespace-pre-wrap leading-relaxed text-white/80">
           {displayText}
         </p>
         {needsTruncation && (

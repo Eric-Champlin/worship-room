@@ -47,18 +47,18 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
             aria-modal="true"
             aria-labelledby="delete-dialog-title"
             aria-describedby="delete-dialog-desc"
-            className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
+            className="mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-[#1a0f2e] p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2
               id="delete-dialog-title"
-              className="text-lg font-semibold text-text-dark"
+              className="text-lg font-semibold text-white"
             >
               Delete Prayer Request
             </h2>
             <p
               id="delete-dialog-desc"
-              className="mt-2 text-sm text-text-light"
+              className="mt-2 text-sm text-white/60"
             >
               Are you sure you want to delete this prayer request? This action
               cannot be undone.

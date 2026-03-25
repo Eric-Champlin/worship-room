@@ -35,7 +35,7 @@ export function QuestionOfTheDay({
   return (
     <section
       aria-labelledby="qotd-heading"
-      className="rounded-2xl border border-primary/30 bg-hero-mid p-4 sm:p-5 lg:p-6"
+      className="rounded-2xl border border-primary/20 bg-primary/[0.12] p-4 sm:p-5 lg:p-6"
     >
       <MessageCircle className="h-6 w-6 text-primary" aria-hidden="true" />
 

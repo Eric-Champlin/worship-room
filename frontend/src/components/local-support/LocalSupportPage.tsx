@@ -226,7 +226,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   const currentPlaces = activeTab === 'saved' ? savedPlaces : searchResults
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
+    <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
@@ -247,7 +247,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
             <div
               role="note"
               aria-label="Disclaimer"
-              className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+              className="mb-6 rounded-lg border border-amber-500/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-200"
             >
               {config.disclaimer}
             </div>
@@ -292,8 +292,8 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                 className={cn(
                   'rounded-full px-4 py-2 text-sm font-medium transition-colors',
                   activeTab === tab
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-text-dark hover:bg-gray-200',
+                    ? 'bg-primary/20 text-white'
+                    : 'bg-white/10 text-white/60 hover:bg-white/15',
                 )}
               >
                 {tab === 'search' ? 'Search Results' : `Saved (${bookmarkedIds.size})`}
@@ -371,8 +371,8 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     className={cn(
                       'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                       mobileView === 'list'
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-100 text-text-dark hover:bg-gray-200',
+                        ? 'bg-primary/20 text-white'
+                        : 'bg-white/10 text-white/60 hover:bg-white/15',
                     )}
                   >
                     <List size={16} aria-hidden="true" />
@@ -385,8 +385,8 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     className={cn(
                       'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                       mobileView === 'map'
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-100 text-text-dark hover:bg-gray-200',
+                        ? 'bg-primary/20 text-white'
+                        : 'bg-white/10 text-white/60 hover:bg-white/15',
                     )}
                   >
                     <MapIcon size={16} aria-hidden="true" />
@@ -434,7 +434,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
           {/* Saved tab empty state */}
           {activeTab === 'saved' && savedPlaces.length === 0 && (
             <div className="flex flex-col items-center py-12 text-center">
-              <p className="text-base text-text-light">
+              <p className="text-base text-white/60">
                 No saved {config.category === 'celebrate-recovery' ? 'Celebrate Recovery groups' : config.category} yet.
                 Bookmark listings to see them here.
               </p>

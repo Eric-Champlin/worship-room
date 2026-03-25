@@ -125,7 +125,7 @@ export function ResultsList({
             id={sortSelectId}
             value={sortOption}
             onChange={(e) => onSortChange(e.target.value as SortOption)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+            className="rounded-lg border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
           >
             <option value="distance">Distance</option>
             <option value="rating">Rating</option>
@@ -140,7 +140,7 @@ export function ResultsList({
               id={filterSelectId}
               value={filterValue ?? ''}
               onChange={(e) => onFilterChange(e.target.value || null)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              className="rounded-lg border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
             >
               <option value="">All {filterLabel}s</option>
               {filterOptions.map((opt) => (
@@ -193,7 +193,7 @@ export function ResultsList({
             type="button"
             onClick={onLoadMore}
             disabled={isLoadingMore}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-text-dark transition-colors hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-6 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 disabled:opacity-50"
           >
             {isLoadingMore && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
             Load More
@@ -208,7 +208,7 @@ export function ResultsList({
 
       {/* Empty filtered state */}
       {sortedPlaces.length === 0 && places.length > 0 && (
-        <p className="py-8 text-center text-sm text-text-light">
+        <p className="py-8 text-center text-sm text-white/60">
           No results match the selected filter. Try selecting a different {filterLabel?.toLowerCase() ?? 'option'}.
         </p>
       )}

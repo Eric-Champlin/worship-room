@@ -150,7 +150,7 @@ function DashboardContent() {
       >
         <Link
           to="/prayer-wall"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to Prayer Wall
@@ -169,7 +169,7 @@ function DashboardContent() {
           <button
             type="button"
             disabled
-            className="mt-2 text-xs text-text-light"
+            className="mt-2 text-xs text-white/40"
             aria-label="Change photo (coming soon)"
           >
             Change Photo (coming soon)
@@ -181,7 +181,7 @@ function DashboardContent() {
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="rounded-lg border border-gray-200 px-3 py-1 text-xl font-semibold text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-1 text-xl font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Display name"
               />
               <Button
@@ -197,13 +197,13 @@ function DashboardContent() {
             </div>
           ) : (
             <div className="mt-3 flex items-center gap-2">
-              <h1 className="text-xl font-semibold text-text-dark">
+              <h1 className="text-xl font-semibold text-white">
                 {displayName}
               </h1>
               <button
                 type="button"
                 onClick={() => setEditingName(true)}
-                className="text-text-light hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="text-white/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                 aria-label="Edit name"
               >
                 <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
@@ -220,12 +220,12 @@ function DashboardContent() {
                     setBio(e.target.value)
                   }
                 }}
-                className="w-full resize-none rounded-lg border border-gray-200 p-3 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 rows={3}
                 aria-label="Bio"
               />
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-xs text-text-light">
+                <span className="text-xs text-white/40">
                   {bio.length}/500
                 </span>
                 <Button
@@ -242,7 +242,7 @@ function DashboardContent() {
             </div>
           ) : (
             <div className="mt-2 flex items-start gap-2">
-              <p className="max-w-md font-serif italic text-text-light">
+              <p className="max-w-md font-serif italic text-white/70">
                 {bio || 'Add a bio...'}
               </p>
               <button
@@ -256,7 +256,7 @@ function DashboardContent() {
             </div>
           )}
 
-          <p className="mt-1 text-sm text-text-light">
+          <p className="mt-1 text-sm text-white/60">
             Joined: {formatFullDate(MOCK_CURRENT_USER.joinedDate)}
           </p>
         </header>
@@ -265,7 +265,7 @@ function DashboardContent() {
         <div
           role="tablist"
           aria-label="Dashboard tabs"
-          className="mb-6 flex overflow-x-auto border-b border-gray-200"
+          className="mb-6 flex overflow-x-auto border-b border-white/10"
         >
           {tabs.map((tab, index) => (
             <button
@@ -291,8 +291,8 @@ function DashboardContent() {
               className={cn(
                 'whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 activeTab === tab.key
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-text-light hover:text-text-dark',
+                  ? 'border-b-2 border-primary text-white'
+                  : 'text-white/60 hover:text-white/80',
               )}
             >
               {tab.label}
@@ -327,7 +327,7 @@ function DashboardContent() {
                       onSubmitComment={handleSubmitComment}
                     />
                     {!prayer.isAnswered && (
-                      <div className="mt-3 flex items-center gap-4 border-t border-gray-100 pt-3">
+                      <div className="mt-3 flex items-center gap-4 border-t border-white/10 pt-3">
                         <MarkAsAnsweredForm
                           onConfirm={(praiseText) =>
                             handleMarkAnswered(prayer.id, praiseText)
@@ -341,7 +341,7 @@ function DashboardContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-text-light">
+                <p className="py-8 text-center text-sm text-white/50">
                   You haven't shared any prayer requests yet.
                 </p>
               )}
@@ -354,9 +354,9 @@ function DashboardContent() {
                 myComments.map((comment) => (
                   <div
                     key={comment.id}
-                    className="rounded-xl border border-gray-200 bg-white p-4"
+                    className="rounded-xl border border-white/10 bg-white/[0.06] p-4"
                   >
-                    <p className="whitespace-pre-wrap text-sm text-text-dark">
+                    <p className="whitespace-pre-wrap text-sm text-white/80">
                       {comment.content}
                     </p>
                     <Link
@@ -368,7 +368,7 @@ function DashboardContent() {
                   </div>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-text-light">
+                <p className="py-8 text-center text-sm text-white/50">
                   No comments yet.
                 </p>
               )}
@@ -398,7 +398,7 @@ function DashboardContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-text-light">
+                <p className="py-8 text-center text-sm text-white/50">
                   No bookmarked prayers.
                 </p>
               )}
@@ -428,7 +428,7 @@ function DashboardContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-text-light">
+                <p className="py-8 text-center text-sm text-white/50">
                   No reactions yet.
                 </p>
               )}
@@ -436,26 +436,26 @@ function DashboardContent() {
           )}
 
           {activeTab === 'settings' && (
-            <div className="rounded-xl border border-gray-200 bg-white p-5">
-              <h2 className="mb-4 text-lg font-semibold text-text-dark">
+            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
+              <h2 className="mb-4 text-lg font-semibold text-white">
                 Notification Preferences
               </h2>
-              <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                <p className="text-sm text-amber-800">
+              <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-900/20 p-3">
+                <p className="text-sm text-amber-200">
                   Notifications coming soon
                 </p>
               </div>
               {NOTIFICATION_TYPES.map((type) => (
                 <label
                   key={type.key}
-                  className="flex items-center justify-between border-b border-gray-100 py-3 last:border-0"
+                  className="flex items-center justify-between border-b border-white/10 py-3 last:border-0"
                 >
-                  <span className="text-sm text-text-dark">{type.label}</span>
+                  <span className="text-sm text-white/70">{type.label}</span>
                   <input
                     type="checkbox"
                     defaultChecked
                     disabled
-                    className="h-4 w-4 rounded border-gray-300 text-primary accent-primary"
+                    className="h-4 w-4 rounded border-white/20 text-primary accent-primary"
                   />
                 </label>
               ))}

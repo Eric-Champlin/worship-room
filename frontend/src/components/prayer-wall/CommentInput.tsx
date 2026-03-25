@@ -33,7 +33,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
       <button
         type="button"
         onClick={onLoginClick ?? (() => authModal?.openAuthModal())}
-        className="mt-3 block w-full rounded-lg border border-gray-200 px-3 py-2 text-left text-sm text-text-light transition-colors hover:border-primary"
+        className="mt-3 block w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-sm text-white/40 transition-colors hover:border-primary"
       >
         Log in to comment
       </button>
@@ -76,7 +76,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
           onKeyDown={handleKeyDown}
           maxLength={MAX_COMMENT_LENGTH}
           placeholder="Write a comment..."
-          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Write a comment"
           aria-invalid={crisisDetected || undefined}
           aria-describedby={crisisDetected ? 'comment-crisis-banner' : undefined}
@@ -87,7 +87,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
           disabled={!value.trim()}
           className={cn(
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded',
-            value.trim() ? 'text-primary hover:text-primary-lt' : 'text-gray-300',
+            value.trim() ? 'text-primary hover:text-primary-lt' : 'text-white/20',
           )}
           aria-label="Submit comment"
         >
@@ -95,11 +95,11 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
         </button>
       </div>
       {crisisDetected && (
-        <div id="comment-crisis-banner" role="alert" className="mt-3 rounded-lg border border-danger/30 bg-red-50 p-3">
+        <div id="comment-crisis-banner" role="alert" className="mt-3 rounded-lg border border-danger/30 bg-danger/10 p-3">
           <p className="mb-1 text-xs font-semibold text-danger">
             If you are in crisis, please reach out for help:
           </p>
-          <ul className="space-y-0.5 text-xs text-text-dark">
+          <ul className="space-y-0.5 text-xs text-white/90">
             <li>{CRISIS_RESOURCES.suicide_prevention.name}: <a href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`} className="font-medium text-primary underline">{CRISIS_RESOURCES.suicide_prevention.phone}</a></li>
             <li>{CRISIS_RESOURCES.crisis_text.name}: {CRISIS_RESOURCES.crisis_text.text}</li>
             <li>{CRISIS_RESOURCES.samhsa.name}: <a href={`tel:${CRISIS_RESOURCES.samhsa.phone}`} className="font-medium text-primary underline">{CRISIS_RESOURCES.samhsa.phone}</a></li>

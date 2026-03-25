@@ -85,8 +85,8 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
-      <div className="rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-text-dark">
+      <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm sm:p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">
           Share a Prayer Request
         </h2>
 
@@ -94,7 +94,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           <OfflineMessage
             variant="light"
             message="Posting prayers requires an internet connection"
-            className="mb-3 rounded-lg border border-gray-100"
+            className="mb-3 rounded-lg border border-white/10"
           />
         )}
 
@@ -104,19 +104,19 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           onChange={handleChange}
           placeholder="What's on your heart?"
           maxLength={PRAYER_POST_MAX_LENGTH}
-          className="w-full resize-none rounded-lg border border-gray-200 p-3 leading-relaxed text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 leading-relaxed text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
           style={{ minHeight: '120px' }}
           aria-label="Prayer request"
           aria-describedby={content.length >= PRAYER_POST_WARNING_THRESHOLD ? 'composer-char-count' : undefined}
         />
 
         {activeChallenge && (
-          <label className="mt-3 flex items-center gap-2 text-sm text-text-dark" htmlFor="challenge-prayer-checkbox">
+          <label className="mt-3 flex items-center gap-2 text-sm text-white/70" htmlFor="challenge-prayer-checkbox">
             <input
               type="checkbox"
               checked={isChallengePrayer}
               onChange={(e) => setIsChallengePrayer(e.target.checked)}
-              className="h-5 w-5 rounded border-gray-300"
+              className="h-5 w-5 rounded border-white/20 bg-white/[0.06] accent-primary"
               id="challenge-prayer-checkbox"
             />
             <span>
@@ -130,7 +130,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
         )}
 
         <fieldset className="mt-3">
-          <legend className="mb-2 text-sm font-medium text-text-dark">Category</legend>
+          <legend className="mb-2 text-sm font-medium text-white/70">Category</legend>
           <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
             {PRAYER_CATEGORIES.map((cat) => (
               <button
@@ -140,8 +140,8 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
                 className={cn(
                   'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 ease-in-out whitespace-nowrap',
                   selectedCategory === cat
-                    ? 'border-primary/40 bg-primary/10 text-primary'
-                    : 'border-gray-200 bg-white text-text-dark hover:bg-gray-50',
+                    ? 'border-primary/40 bg-primary/20 text-primary-lt'
+                    : 'border-white/10 bg-white/10 text-white/70 hover:bg-white/15',
                 )}
                 aria-pressed={selectedCategory === cat}
               >
@@ -161,12 +161,12 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
             type="checkbox"
             checked={isAnonymous}
             onChange={(e) => setIsAnonymous(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-primary focus-visible:ring-primary"
+            className="h-4 w-4 rounded border-white/20 bg-white/[0.06] text-primary accent-primary focus-visible:ring-primary"
           />
-          <span className="text-sm text-text-dark">Post anonymously</span>
+          <span className="text-sm text-white/70">Post anonymously</span>
         </label>
 
-        <p className="mt-3 text-xs text-text-light">
+        <p className="mt-3 text-xs text-white/40">
           Your prayer will be shared with the community. Be kind and respectful.
         </p>
 
@@ -188,21 +188,21 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           <p
             id="composer-char-count"
             aria-live="polite"
-            className={cn('mt-2 text-xs', content.length >= PRAYER_POST_MAX_LENGTH ? 'text-danger' : 'text-text-light')}
+            className={cn('mt-2 text-xs', content.length >= PRAYER_POST_MAX_LENGTH ? 'text-danger' : 'text-white/40')}
           >
             {content.length}/1,000
           </p>
         )}
 
         {crisisDetected && (
-          <div role="alert" className="mt-4 rounded-lg border border-danger/30 bg-red-50 p-4">
+          <div role="alert" className="mt-4 rounded-lg border border-danger/30 bg-danger/10 p-4">
             <p className="mb-2 text-sm font-semibold text-danger">
               It sounds like you may be going through a difficult time.
             </p>
-            <p className="mb-3 text-sm text-text-dark">
+            <p className="mb-3 text-sm text-white/90">
               If you or someone you know is in crisis, please reach out for help:
             </p>
-            <ul className="space-y-1 text-sm text-text-dark">
+            <ul className="space-y-1 text-sm text-white/90">
               <li>
                 <strong>{CRISIS_RESOURCES.suicide_prevention.name}:</strong>{' '}
                 <a href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`} className="font-medium text-primary underline">

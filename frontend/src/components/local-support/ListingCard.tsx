@@ -31,7 +31,7 @@ function StarRating({ rating }: { rating: number | null }) {
         size={14}
         aria-hidden="true"
         className={cn(
-          i <= Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'text-gray-300',
+          i <= Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'text-white/20',
         )}
       />,
     )
@@ -39,7 +39,7 @@ function StarRating({ rating }: { rating: number | null }) {
   return (
     <div className="flex items-center gap-0.5" role="img" aria-label={`${rating} out of 5 stars`}>
       {stars}
-      <span className="ml-1 text-xs text-text-light">{rating.toFixed(1)}</span>
+      <span className="ml-1 text-xs text-white/50">{rating.toFixed(1)}</span>
     </div>
   )
 }
@@ -74,7 +74,7 @@ export function ListingCard({
     <article
       aria-label={`${place.name} — ${place.address}`}
       className={cn(
-        'rounded-xl border border-gray-200 bg-white p-5 transition-shadow sm:p-6 lg:hover:shadow-md',
+        'rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20',
         isHighlighted && 'ring-2 ring-primary',
       )}
     >
@@ -90,8 +90,8 @@ export function ListingCard({
               loading="lazy"
             />
           ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-100">
-              <ImageOff size={24} className="text-gray-400" aria-hidden="true" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-white/[0.06]">
+              <ImageOff size={24} className="text-white/30" aria-hidden="true" />
             </div>
           )}
         </div>
@@ -99,22 +99,22 @@ export function ListingCard({
         {/* Info */}
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-lg font-semibold text-text-dark">{place.name}</h3>
+            <h3 className="text-lg font-semibold text-white">{place.name}</h3>
             {distance != null && (
-              <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white/50">
                 {distance.toFixed(1)} mi
               </span>
             )}
           </div>
 
-          <p className="mt-1 flex items-center gap-1 text-sm text-text-light">
+          <p className="mt-1 flex items-center gap-1 text-sm text-white/60">
             <MapPin size={14} className="shrink-0" aria-hidden="true" />
             {place.address}
           </p>
 
           {place.phone && (
             <p className="mt-1 flex items-center gap-1 text-sm">
-              <Phone size={14} className="shrink-0 text-text-light" aria-hidden="true" />
+              <Phone size={14} className="shrink-0 text-white/60" aria-hidden="true" />
               <a
                 href={`tel:${place.phone}`}
                 className="rounded text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary"
@@ -131,7 +131,7 @@ export function ListingCard({
       </div>
 
       {/* Actions row */}
-      <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+      <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
         <div className="flex items-center gap-2">
           {showBookmark && (
             <button
@@ -139,13 +139,13 @@ export function ListingCard({
               aria-pressed={isBookmarked}
               aria-label={`Bookmark ${place.name}`}
               onClick={() => onToggleBookmark(place.id)}
-              className="flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] transition-colors hover:bg-gray-100"
+              className="flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] transition-colors hover:bg-white/10"
             >
               <Bookmark
                 size={18}
                 aria-hidden="true"
                 className={cn(
-                  isBookmarked ? 'fill-success text-success' : 'text-text-light',
+                  isBookmarked ? 'fill-success text-success' : 'text-white/50',
                 )}
               />
             </button>
@@ -154,9 +154,9 @@ export function ListingCard({
             type="button"
             aria-label={`Share ${place.name}`}
             onClick={() => onShare(place.id)}
-            className="flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] transition-colors hover:bg-gray-100"
+            className="flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] transition-colors hover:bg-white/10"
           >
-            <Share2 size={18} className="text-text-light" aria-hidden="true" />
+            <Share2 size={18} className="text-white/50" aria-hidden="true" />
           </button>
           {showVisitButton && onVisit && placeType && (
             <VisitButton visitState={visitState} />
@@ -169,13 +169,13 @@ export function ListingCard({
           aria-controls={detailsId}
           aria-label={isExpanded ? `Collapse details for ${place.name}` : `Expand details for ${place.name}`}
           onClick={() => onExpand(place.id)}
-          className="flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] transition-colors hover:bg-gray-100"
+          className="flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] transition-colors hover:bg-white/10"
         >
           <ChevronDown
             size={18}
             aria-hidden="true"
             className={cn(
-              'text-text-light transition-transform duration-200',
+              'text-white/50 transition-transform duration-200',
               isExpanded && 'rotate-180',
             )}
           />
@@ -196,10 +196,10 @@ export function ListingCard({
           isExpanded ? 'mt-4 max-h-[500px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >
-        <div className="space-y-3 border-t border-gray-100 pt-4 text-sm">
+        <div className="space-y-3 border-t border-white/10 pt-4 text-sm">
           {place.website && (
             <p className="flex items-center gap-2">
-              <ExternalLink size={14} className="shrink-0 text-text-light" aria-hidden="true" />
+              <ExternalLink size={14} className="shrink-0 text-white/60" aria-hidden="true" />
               <a
                 href={place.website}
                 target="_blank"
@@ -213,8 +213,8 @@ export function ListingCard({
 
           {place.hoursOfOperation && place.hoursOfOperation.length > 0 && (
             <div>
-              <p className="mb-1 font-medium text-text-dark">Hours</p>
-              <ul className="space-y-0.5 text-text-light">
+              <p className="mb-1 font-medium text-white">Hours</p>
+              <ul className="space-y-0.5 text-white/60">
                 {place.hoursOfOperation.map((hours, i) => (
                   <li key={i}>{hours}</li>
                 ))}
@@ -224,20 +224,20 @@ export function ListingCard({
 
           {place.category === 'churches' && place.denomination && (
             <p>
-              <span className="font-medium text-text-dark">Denomination:</span>{' '}
-              <span className="text-text-light">{place.denomination}</span>
+              <span className="font-medium text-white">Denomination:</span>{' '}
+              <span className="text-white/60">{place.denomination}</span>
             </p>
           )}
 
           {place.category === 'counselors' && place.specialties && place.specialties.length > 0 && (
             <div>
-              <span className="font-medium text-text-dark">Specialties:</span>{' '}
-              <span className="text-text-light">{place.specialties.join(', ')}</span>
+              <span className="font-medium text-white">Specialties:</span>{' '}
+              <span className="text-white/60">{place.specialties.join(', ')}</span>
             </div>
           )}
 
           {place.description && (
-            <p className="text-text-light">{place.description}</p>
+            <p className="text-white/60">{place.description}</p>
           )}
 
           <a

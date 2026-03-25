@@ -13,7 +13,7 @@ export function CategoryBadge({ category, onClick }: CategoryBadgeProps) {
       <button
         type="button"
         onClick={() => onClick(category)}
-        className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
+        className="rounded-full bg-white/[0.06] px-2 py-0.5 text-xs text-white/40 transition-colors hover:bg-white/10 hover:text-white/60"
         aria-label={`Filter by ${label}`}
       >
         {label}
@@ -22,7 +22,7 @@ export function CategoryBadge({ category, onClick }: CategoryBadgeProps) {
   }
 
   return (
-    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+    <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-xs text-white/40">
       {label}
     </span>
   )

@@ -84,7 +84,7 @@ export function InteractionBar({
   }, [prayer.id, prayer.content])
 
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-3 sm:gap-4">
+    <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/10 pt-3 sm:gap-4">
       {/* Pray button wrapper — relative for absolute-positioned animation elements */}
       <div className="relative">
         <button
@@ -92,7 +92,7 @@ export function InteractionBar({
           onClick={handlePrayClick}
           className={cn(
             btnBase,
-            isPraying ? 'font-medium text-primary' : 'text-text-light hover:text-primary',
+            isPraying ? 'font-medium text-primary' : 'text-white/50 hover:text-primary',
           )}
           aria-label={isPraying ? `Stop praying for this request (${prayer.prayingCount} praying)` : `Pray for this request (${prayer.prayingCount} praying)`}
           aria-pressed={isPraying}
@@ -130,7 +130,7 @@ export function InteractionBar({
       <button
         type="button"
         onClick={onToggleComments}
-        className={cn(btnBase, 'text-text-light hover:text-text-dark')}
+        className={cn(btnBase, 'text-white/50 hover:text-white/70')}
         aria-label={`Comments, ${prayer.commentCount} ${prayer.commentCount === 1 ? 'comment' : 'comments'}`}
         aria-expanded={isCommentsOpen}
       >
@@ -147,7 +147,7 @@ export function InteractionBar({
             btnBase,
             isBookmarked
               ? 'text-primary'
-              : 'text-text-light hover:text-primary',
+              : 'text-white/50 hover:text-primary',
           )}
           aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark this prayer'}
           aria-pressed={isBookmarked}
@@ -158,7 +158,7 @@ export function InteractionBar({
         <button
           type="button"
           onClick={() => authModal?.openAuthModal()}
-          className={cn(btnBase, 'text-text-light hover:text-primary')}
+          className={cn(btnBase, 'text-white/50 hover:text-primary')}
           aria-label="Log in to bookmark"
         >
           <Bookmark className="h-4 w-4" aria-hidden="true" />
@@ -170,7 +170,7 @@ export function InteractionBar({
         <button
           type="button"
           onClick={handleShareClick}
-          className={cn(btnBase, 'text-text-light hover:text-text-dark')}
+          className={cn(btnBase, 'text-white/50 hover:text-white/70')}
           aria-label="Share this prayer"
           aria-haspopup="menu"
           aria-expanded={shareOpen}

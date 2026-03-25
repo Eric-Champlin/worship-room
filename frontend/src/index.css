@@ -123,6 +123,26 @@
   }
 }
 
+/* Dark theme for Leaflet popups */
+.leaflet-popup-content-wrapper {
+  background: #1a0f2e;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+.leaflet-popup-tip {
+  background: #1a0f2e;
+}
+.leaflet-popup-content-wrapper .leaflet-popup-content a {
+  color: #8B5CF6;
+}
+.leaflet-popup-close-button {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+.leaflet-popup-close-button:hover {
+  color: #fff !important;
+}
+
 /* Dark-themed thin scrollbar for dashboard panels */
 .dark-scrollbar {
   scrollbar-width: thin;

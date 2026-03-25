@@ -44,7 +44,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex min-h-[44px] items-center gap-1 px-2 text-xs text-text-light hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:rounded sm:min-h-0 sm:px-0"
+        className="flex min-h-[44px] items-center gap-1 px-2 text-xs text-white/40 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:rounded sm:min-h-0 sm:px-0"
       >
         <Flag className="h-3 w-3" aria-hidden="true" />
         Report
@@ -65,7 +65,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="report-dialog-title"
-            className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
+            className="mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-[#1a0f2e] p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             {submitted ? (
@@ -76,11 +76,11 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
               <>
                 <h2
                   id="report-dialog-title"
-                  className="text-lg font-semibold text-text-dark"
+                  className="text-lg font-semibold text-white"
                 >
                   Report Prayer Request
                 </h2>
-                <p className="mt-1 text-sm text-text-light">
+                <p className="mt-1 text-sm text-white/60">
                   Please describe why you are reporting this content (optional):
                 </p>
                 <textarea
@@ -88,7 +88,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Reason for reporting..."
-                  className="mt-3 w-full resize-none rounded-lg border border-gray-200 p-3 text-sm text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="mt-3 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   rows={3}
                   aria-label="Report reason"
                 />

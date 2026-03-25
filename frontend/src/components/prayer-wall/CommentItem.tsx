@@ -49,21 +49,21 @@ export function CommentItem({ comment, onReply }: CommentItemProps) {
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-sm font-semibold text-text-dark">
+          <span className="text-sm font-semibold text-white">
             {comment.authorName}
           </span>
-          <span className="text-xs text-text-light"> &mdash; </span>
-          <time dateTime={comment.createdAt} className="text-xs text-text-light">
+          <span className="text-xs text-white/40"> &mdash; </span>
+          <time dateTime={comment.createdAt} className="text-xs text-white/40">
             {timeAgo(comment.createdAt)}
           </time>
         </div>
-        <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed text-text-dark">
+        <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed text-white/70">
           {parseContent(comment.content)}
         </p>
         <button
           type="button"
           onClick={() => onReply(comment.authorName)}
-          className="mt-1 min-h-[44px] px-2 text-xs text-text-light hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded sm:min-h-0 sm:px-0"
+          className="mt-1 min-h-[44px] px-2 text-xs text-white/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded sm:min-h-0 sm:px-0"
         >
           Reply
         </button>
