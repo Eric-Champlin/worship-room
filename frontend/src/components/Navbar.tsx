@@ -555,6 +555,14 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
   const activeChallengeInfo = getActiveChallengeInfo()
   const drawerRef = useRef<HTMLElement>(null)
 
+  // Seasonal banner state for mobile drawer
+  const { isNamedSeason, seasonName, icon: seasonIcon, currentSeason } = useLiturgicalSeason()
+  const [seasonDismissed, setSeasonDismissed] = useState(() => {
+    try { return sessionStorage.getItem('wr_seasonal_banner_dismissed') === 'true' }
+    catch { return false }
+  })
+  const SeasonIcon = isNamedSeason ? SEASON_ICON_MAP[seasonIcon] : null
+
   // Focus trap: keep Tab within the drawer while open
   useEffect(() => {
     if (!isOpen || !drawerRef.current) return
@@ -610,6 +618,37 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
           )}
         >
           <div className="flex flex-col px-4 py-4">
+            {/* Seasonal banner — mobile drawer */}
+            {isNamedSeason && !seasonDismissed && (
+              <div className={cn(
+                'mb-3 flex items-center gap-2 px-3 pb-3 border-b',
+                isAuthenticated ? 'border-white/15' : 'border-gray-200'
+              )}>
+                {SeasonIcon && <SeasonIcon className={cn('h-3.5 w-3.5', isAuthenticated ? 'text-white/50' : 'text-gray-500')} aria-hidden="true" />}
+                <span className={cn('text-xs', isAuthenticated ? 'text-white/50' : 'text-gray-500')}>
+                  It&apos;s {seasonName} — a season of {currentSeason.themeWord}
+                </span>
+                <Link to="/devotional" onClick={onClose} className="text-xs text-primary-lt hover:underline">
+                  Read today&apos;s devotional
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    try { sessionStorage.setItem('wr_seasonal_banner_dismissed', 'true') }
+                    catch { /* sessionStorage unavailable */ }
+                    setSeasonDismissed(true)
+                  }}
+                  className={cn(
+                    'ml-auto rounded-full p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+                    isAuthenticated ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'
+                  )}
+                  aria-label="Dismiss seasonal message"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+
             {/* Offline indicator */}
             {!isOnline && (
               <div className={cn(
@@ -851,6 +890,40 @@ function MobileNotificationSheet({
   )
 }
 
+function SeasonalNavLine() {
+  const { isNamedSeason, seasonName, icon, currentSeason } = useLiturgicalSeason()
+  const [dismissed, setDismissed] = useState(() => {
+    try { return sessionStorage.getItem('wr_seasonal_banner_dismissed') === 'true' }
+    catch { return false }
+  })
+
+  if (!isNamedSeason || dismissed) return null
+
+  const SeasonIcon = SEASON_ICON_MAP[icon]
+
+  return (
+    <div className="flex items-center justify-center gap-2 px-4 py-1.5 text-xs text-white/50">
+      {SeasonIcon && <SeasonIcon className="h-3 w-3" aria-hidden="true" />}
+      <span>It&apos;s {seasonName} — a season of {currentSeason.themeWord}</span>
+      <Link to="/devotional" className="text-primary-lt hover:underline">
+        Read today&apos;s devotional
+      </Link>
+      <button
+        type="button"
+        onClick={() => {
+          try { sessionStorage.setItem('wr_seasonal_banner_dismissed', 'true') }
+          catch { /* sessionStorage unavailable */ }
+          setDismissed(true)
+        }}
+        className="ml-1 rounded-full p-1 text-white/30 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        aria-label="Dismiss seasonal message"
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </div>
+  )
+}
+
 export function Navbar({ transparent = false }: NavbarProps) {
   const { isAuthenticated } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -925,6 +998,10 @@ export function Navbar({ transparent = false }: NavbarProps) {
             </button>
           </div>
 
+          {/* Seasonal line — desktop only */}
+          <div className="hidden lg:block">
+            <SeasonalNavLine />
+          </div>
         </div>
 
         {transparent && (

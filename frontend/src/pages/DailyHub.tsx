@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useSearchParams, useLocation } from 'react-router-dom'
-import { Heart, PenLine, Wind, Check } from 'lucide-react'
+import { useSearchParams, useLocation, Link } from 'react-router-dom'
+import { Heart, PenLine, Wind, Check, Share2, ChevronRight } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -9,8 +9,10 @@ import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
-import { VerseOfTheDayBanner } from '@/components/daily/VerseOfTheDayBanner'
-import { ChallengeStrip } from '@/components/challenges/ChallengeStrip'
+import { VerseSharePanel } from '@/components/verse-of-the-day/VerseSharePanel'
+import { getTodaysVerse } from '@/constants/verse-of-the-day'
+import { getTodaysDevotional } from '@/data/devotionals'
+import { parseVerseReferences } from '@/lib/parse-verse-references'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
@@ -47,6 +49,13 @@ function getGreeting(): string {
   return 'Good Evening'
 }
 
+function formatTheme(theme: string): string {
+  return theme
+    .split('-')
+    .map(w => w === 'and' ? '&' : w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
 function DailyHubContent() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -58,6 +67,27 @@ function DailyHubContent() {
     useCompletionTracking()
 
   const [prayContext, setPrayContext] = useState<PrayContext | null>(null)
+
+  // Hero content data
+  const verse = getTodaysVerse()
+  const devotional = getTodaysDevotional()
+
+  const parsedRefs = parseVerseReferences(verse.reference)
+  const verseLink = parsedRefs.length > 0
+    ? `/bible/${parsedRefs[0].bookSlug}/${parsedRefs[0].chapter}`
+    : '/bible'
+
+  const hasReadDevotional = (() => {
+    if (!isAuthenticated) return false
+    try {
+      const reads: string[] = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]')
+      const todayStr = new Date().toLocaleDateString('en-CA')
+      return reads.includes(todayStr)
+    } catch { return false }
+  })()
+
+  const [sharePanelOpen, setSharePanelOpen] = useState(false)
+  const shareBtnRef = useRef<HTMLButtonElement>(null)
 
   // Read cross-feature URL params on mount (consumed once, then cleared)
   const urlParamsConsumed = useRef(false)
@@ -162,7 +192,7 @@ function DailyHubContent() {
       <Navbar transparent />
 
       <main id="main-content">
-        {/* Hero Section — Greeting */}
+        {/* Hero Section — Greeting + Content Cards */}
         <section
           aria-labelledby="daily-hub-heading"
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
@@ -174,10 +204,72 @@ function DailyHubContent() {
           >
             {displayName}
           </h1>
-          <p className="font-serif italic text-base text-white/60 sm:text-lg">
-            Start with any practice below.
-          </p>
-          <p className="mt-2 font-sans text-sm text-white/90">
+
+          {/* Two Content Cards */}
+          <div className="mt-6 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* Left Card — Today's Verse */}
+            <div className="relative">
+              <Link
+                to={verseLink}
+                className="block rounded-xl border border-white/10 bg-white/[0.08] p-5 text-left backdrop-blur-sm transition-colors hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:min-h-[140px]"
+              >
+                <p className="pr-6 font-serif italic text-lg text-white/90 line-clamp-3 sm:line-clamp-4">
+                  &ldquo;{verse.text}&rdquo;
+                </p>
+                <p className="mt-2 text-sm text-white/50">
+                  — {verse.reference}
+                </p>
+              </Link>
+              <button
+                ref={shareBtnRef}
+                type="button"
+                onClick={() => setSharePanelOpen(true)}
+                className="absolute bottom-5 right-5 rounded p-1 text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label="Share verse of the day"
+                aria-haspopup="menu"
+                aria-expanded={sharePanelOpen}
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+              <VerseSharePanel
+                verseText={verse.text}
+                verseReference={verse.reference}
+                isOpen={sharePanelOpen}
+                onClose={() => setSharePanelOpen(false)}
+                triggerRef={shareBtnRef}
+              />
+            </div>
+
+            {/* Right Card — Today's Devotional */}
+            <Link
+              to="/devotional"
+              className="block rounded-xl border border-white/10 bg-white/[0.08] p-5 text-left backdrop-blur-sm transition-colors hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:min-h-[140px]"
+            >
+              <p className="text-xs uppercase tracking-wide text-primary-lt">
+                Daily Devotional
+              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-white">
+                  {devotional.title}
+                </h2>
+                {hasReadDevotional && (
+                  <>
+                    <Check className="h-4 w-4 flex-shrink-0 text-success" aria-hidden="true" />
+                    <span className="sr-only">Already read today</span>
+                  </>
+                )}
+              </div>
+              <span className="mt-2 inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/50">
+                {formatTheme(devotional.theme)}
+              </span>
+              <p className="mt-3 flex items-center gap-1 text-sm text-primary-lt">
+                Read today&apos;s devotional <ChevronRight className="h-3 w-3" />
+              </p>
+            </Link>
+          </div>
+
+          {/* Quiz Teaser */}
+          <p className="mt-4 font-sans text-sm text-white/50">
             Not sure where to start?{' '}
             <button
               type="button"
@@ -186,21 +278,13 @@ function DailyHubContent() {
                   .getElementById('quiz')
                   ?.scrollIntoView({ behavior: 'smooth' })
               }}
-              className="rounded font-semibold text-white underline underline-offset-2 transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+              className="rounded font-semibold text-white/50 underline underline-offset-2 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             >
               Take a 30-second quiz
             </button>{' '}
             and we&apos;ll help you find your path.
           </p>
         </section>
-
-        {/* Verse of the Day Banner */}
-        <div className="bg-dashboard-dark">
-          <VerseOfTheDayBanner />
-        </div>
-
-        {/* Challenge strip */}
-        <ChallengeStrip />
 
         {/* Sentinel for sticky tab bar shadow */}
         <div ref={sentinelRef} aria-hidden="true" />

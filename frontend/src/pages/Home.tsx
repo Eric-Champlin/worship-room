@@ -1,12 +1,8 @@
 import { Navbar } from '@/components/Navbar'
-import { SeasonalBanner } from '@/components/SeasonalBanner'
 import { HeroSection } from '@/components/HeroSection'
-import { ChallengeBanner } from '@/components/challenges/ChallengeBanner'
 import { JourneySection } from '@/components/JourneySection'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
-import { TodaysVerseSection } from '@/components/TodaysVerseSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
-import { DevotionalTeaser } from '@/components/DevotionalTeaser'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { SEO, SITE_URL } from '@/components/SEO'
@@ -54,12 +50,8 @@ export function Home() {
       </a>
       <Navbar transparent />
       <main id="main-content">
-        <SeasonalBanner />
         <HeroSection />
-        <ChallengeBanner />
         <JourneySection />
-        <TodaysVerseSection />
-        <DevotionalTeaser />
         <GrowthTeasersSection />
         <StartingPointQuiz />
       </main>

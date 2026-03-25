@@ -93,11 +93,122 @@ describe('DailyHub', () => {
     expect(greeting).toBeInTheDocument()
   })
 
-  it('renders the subtitle', () => {
+  it('does not render the old subtitle', () => {
     renderPage()
-    expect(
-      screen.getByText(/start with any practice below/i),
-    ).toBeInTheDocument()
+    expect(screen.queryByText(/start with any practice below/i)).not.toBeInTheDocument()
+  })
+
+  it('renders verse card with today\'s verse text', () => {
+    renderPage()
+    // Verse text appears within quotes in the hero
+    const verseText = screen.getByText(/\u201c.+\u201d/)
+    expect(verseText).toBeInTheDocument()
+  })
+
+  it('renders verse reference with dash prefix', () => {
+    renderPage()
+    const ref = screen.getByText(/^—\s/)
+    expect(ref).toBeInTheDocument()
+  })
+
+  it('verse card links to Bible reader', () => {
+    renderPage()
+    // The verse card is a Link — find the link that points to /bible/
+    const verseLinks = screen.getAllByRole('link').filter(l => l.getAttribute('href')?.startsWith('/bible/'))
+    expect(verseLinks.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('renders devotional card with title', () => {
+    renderPage()
+    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+    const heading = hero.querySelector('h2')
+    expect(heading).toBeInTheDocument()
+    expect(heading!.textContent!.length).toBeGreaterThan(0)
+  })
+
+  it('devotional card links to /devotional', () => {
+    renderPage()
+    const devLinks = screen.getAllByRole('link').filter(l => l.getAttribute('href') === '/devotional')
+    expect(devLinks.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('shows "DAILY DEVOTIONAL" label in hero card', () => {
+    renderPage()
+    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+    const label = hero.querySelector('.uppercase')
+    expect(label).toBeInTheDocument()
+    expect(label!.textContent).toBe('Daily Devotional')
+  })
+
+  it('shows theme pill', () => {
+    renderPage()
+    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+    const pill = hero.querySelector('.rounded-full')
+    expect(pill).toBeInTheDocument()
+  })
+
+  it('does NOT show devotional checkmark when logged out', () => {
+    renderPage()
+    // No sr-only "Already read today" text when logged out
+    expect(screen.queryByText('Already read today')).not.toBeInTheDocument()
+  })
+
+  it('shows devotional checkmark when logged in and devotional read', () => {
+    const todayStr = new Date().toLocaleDateString('en-CA')
+    localStorage.setItem('wr_devotional_reads', JSON.stringify([todayStr]))
+    mockUseAuth.mockReturnValue({ user: { name: 'Eric', id: 'test-user' }, isAuthenticated: true, login: vi.fn(), logout: vi.fn() })
+    renderPage()
+    expect(screen.getByText('Already read today')).toBeInTheDocument()
+  })
+
+  it('share button opens VerseSharePanel', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const shareBtn = screen.getByLabelText('Share verse of the day')
+    await user.click(shareBtn)
+    // VerseSharePanel renders menu items when open
+    expect(shareBtn).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('does NOT render VerseOfTheDayBanner', () => {
+    renderPage()
+    // The old VOTD banner had a specific container — verify it's gone
+    // It would have had its own share panel and standalone verse display
+    // We check that no element with the old banner's class structure exists between hero and tabs
+    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')
+    const tablist = screen.getByRole('tablist')
+    // The hero's next sibling should be the sentinel or the tab bar's container
+    expect(hero?.parentElement).toBe(tablist.closest('main'))
+  })
+
+  it('does NOT render ChallengeStrip', () => {
+    renderPage()
+    // ChallengeStrip would render challenge-related content between hero and tabs
+    expect(screen.queryByText(/day challenge/i)).not.toBeInTheDocument()
+  })
+
+  it('share button has accessible label', () => {
+    renderPage()
+    const shareBtn = screen.getByLabelText('Share verse of the day')
+    expect(shareBtn).toBeInTheDocument()
+    expect(shareBtn).toHaveAttribute('aria-haspopup', 'menu')
+  })
+
+  it('verse card is keyboard navigable', () => {
+    renderPage()
+    const verseLinks = screen.getAllByRole('link').filter(l => l.getAttribute('href')?.startsWith('/bible/'))
+    expect(verseLinks[0]).toBeInTheDocument()
+    // Links are inherently focusable
+    expect(verseLinks[0].tagName).toBe('A')
+  })
+
+  it('tab bar still functions after hero redesign', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByRole('tab', { name: /journal/i }))
+    expect(screen.getByRole('heading', { name: /what's on your mind\?/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: /meditate/i }))
+    expect(screen.getByText('Breathing Exercise')).toBeInTheDocument()
   })
 
   it('renders tab bar with 3 tabs', () => {

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { Home } from '@/pages/Home'
@@ -72,34 +72,10 @@ describe('Home', () => {
     ).toBeInTheDocument()
   })
 
-  describe('DevotionalTeaser', () => {
-    it('renders "Daily Devotional" label in teaser section', () => {
-      renderHome()
-      // Scope to the teaser section (not the navbar link)
-      const headings = screen.getAllByText('Daily Devotional')
-      // At least one should be in the teaser section (p element with uppercase label style)
-      const teaserLabel = headings.find((el) => el.tagName === 'P')
-      expect(teaserLabel).toBeInTheDocument()
-    })
-
-    it('renders "Start Each Morning with God" heading', () => {
-      renderHome()
-      expect(
-        screen.getByRole('heading', { name: /Start Each Morning with God/i })
-      ).toBeInTheDocument()
-    })
-
-    it('shows today\'s devotional title', () => {
-      renderHome()
-      expect(screen.getByText(/^Today:/)).toBeInTheDocument()
-    })
-
-    it('CTA links to /devotional', () => {
-      renderHome()
-      const heading = screen.getByRole('heading', { name: /Start Each Morning with God/i })
-      const section = heading.closest('section')!
-      const ctaLink = within(section).getByRole('link', { name: /Read Today/i })
-      expect(ctaLink).toHaveAttribute('href', '/devotional')
-    })
+  it('does NOT render removed sections (DevotionalTeaser, TodaysVerse, ChallengeBanner, SeasonalBanner)', () => {
+    renderHome()
+    expect(screen.queryByRole('heading', { name: /Start Each Morning with God/i })).not.toBeInTheDocument()
+    expect(screen.queryByText(/Today's Verse/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Join the Challenge/i)).not.toBeInTheDocument()
   })
 })
