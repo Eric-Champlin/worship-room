@@ -15,7 +15,7 @@ function renderButton(conversation: typeof PAIR_1[]) {
   )
 }
 
-const writeTextMock = vi.fn<[string], Promise<void>>()
+const writeTextMock = vi.fn<(text: string) => Promise<void>>()
 
 beforeEach(() => {
   writeTextMock.mockClear().mockResolvedValue(undefined)

@@ -16,6 +16,7 @@ function makeActivityDay(overrides: Partial<DailyActivities> = {}): DailyActivit
     journal: false,
     reflection: false,
     challenge: false,
+    localVisit: false,
     pointsEarned: 5,
     multiplier: 1,
     ...overrides,

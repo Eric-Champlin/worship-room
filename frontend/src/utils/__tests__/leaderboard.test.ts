@@ -17,6 +17,7 @@ const makeDay = (pointsEarned: number) => ({
   journal: false,
   reflection: false,
   challenge: false,
+  localVisit: false,
   pointsEarned,
   multiplier: 1,
 });

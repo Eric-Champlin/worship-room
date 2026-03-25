@@ -5,15 +5,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ChallengeWidget } from '../ChallengeWidget'
 
 const mockChallengeProgress = {
-  getActiveChallenge: vi.fn(() => undefined),
-  getProgress: vi.fn(() => undefined),
+  getActiveChallenge: vi.fn().mockReturnValue(undefined),
+  getProgress: vi.fn().mockReturnValue(undefined),
   joinChallenge: vi.fn(),
   completeDay: vi.fn(),
-  isChallengeJoined: vi.fn(() => false),
-  isChallengeCompleted: vi.fn(() => false),
+  isChallengeJoined: vi.fn().mockReturnValue(false),
+  isChallengeCompleted: vi.fn().mockReturnValue(false),
   pauseChallenge: vi.fn(),
   resumeChallenge: vi.fn(),
-  getReminders: vi.fn(() => []),
+  getReminders: vi.fn().mockReturnValue([]),
   toggleReminder: vi.fn(),
 }
 

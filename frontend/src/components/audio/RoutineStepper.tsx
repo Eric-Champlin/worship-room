@@ -7,6 +7,7 @@ const STEP_ICONS: Record<RoutineStep['type'], typeof Mountain> = {
   scene: Mountain,
   scripture: BookOpen,
   story: Moon,
+  'bible-navigate': BookOpen,
 }
 
 export function RoutineStepper() {

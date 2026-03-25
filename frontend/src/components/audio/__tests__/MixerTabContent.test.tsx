@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { MixerTabContent } from '../MixerTabContent'
@@ -67,7 +67,6 @@ describe('MixerTabContent', () => {
 
   it('volume slider dispatches SET_SOUND_VOLUME on change', () => {
     mockActiveSounds = [{ soundId: 'gentle-rain', volume: 0.6, label: 'Gentle Rain' }]
-    const { fireEvent } = require('@testing-library/react')
     render(<MemoryRouter><MixerTabContent /></MemoryRouter>)
 
     const slider = screen.getByRole('slider')

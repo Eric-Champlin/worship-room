@@ -46,6 +46,7 @@ vi.stubGlobal(
     onerror: (() => void) | null = null
     constructor(text: string) {
       this.text = text
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       lastUtterance = this
     }
   },

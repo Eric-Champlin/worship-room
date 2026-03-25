@@ -33,13 +33,15 @@ function resolveContentName(type: StepType, contentId: string): string {
 export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProps) {
   const [name, setName] = useState(initial?.name ?? '')
   const [steps, setSteps] = useState<BuilderStep[]>(
-    initial?.steps.map((s) => ({
-      id: s.id,
-      type: s.type,
-      contentId: s.contentId,
-      contentName: resolveContentName(s.type, s.contentId),
-      transitionGapMinutes: s.transitionGapMinutes,
-    })) ?? [],
+    initial?.steps
+      .filter((s) => s.type !== 'bible-navigate')
+      .map((s) => ({
+        id: s.id,
+        type: s.type as StepType,
+        contentId: s.contentId,
+        contentName: resolveContentName(s.type as StepType, s.contentId),
+        transitionGapMinutes: s.transitionGapMinutes,
+      })) ?? [],
   )
   const [sleepDuration, setSleepDuration] = useState(
     initial?.sleepTimer.durationMinutes ?? 45,

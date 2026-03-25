@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { FriendProfile, FriendsData } from '@/types/dashboard'
+import type { FriendProfile, FriendRequest, FriendsData } from '@/types/dashboard'
 import { useAuth } from '@/hooks/useAuth'
 import {
   getOrInitFriendsData,

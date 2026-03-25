@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Copy, Mail, MessageSquare, Check } from 'lucide-react'
-import { FACEBOOK_SHARE_BASE, TWITTER_SHARE_BASE } from '@/constants/sharing'
+import { FACEBOOK_SHARE_BASE } from '@/constants/sharing'
 import { COPY_RESET_DELAY } from '@/constants/timing'
 import type { LocalSupportCategory } from '@/types/local-support'
 

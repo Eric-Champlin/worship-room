@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -7,9 +7,11 @@ import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { VerseCardActions } from '../VerseCardActions'
 import type { AskVerse } from '@/types/ask'
 import type { ParsedVerseReference } from '@/lib/parse-verse-references'
+import type { AuthContextValue } from '@/contexts/AuthContext'
+import type { BibleNote } from '@/types/bible'
 
 const { mockAuthFn } = vi.hoisted(() => {
-  const mockAuthFn = vi.fn(() => ({
+  const mockAuthFn = vi.fn((): AuthContextValue => ({
     isAuthenticated: false,
     user: null,
     login: vi.fn(),
@@ -27,7 +29,7 @@ vi.mock('@/contexts/AuthContext', () => ({
 }))
 
 const mockSaveNote = vi.fn(() => true)
-const mockGetNoteForVerse = vi.fn(() => undefined)
+const mockGetNoteForVerse = vi.fn((): BibleNote | undefined => undefined)
 
 vi.mock('@/hooks/useBibleNotes', () => ({
   useBibleNotes: () => ({

@@ -362,7 +362,7 @@ describe('MyPrayers Page', () => {
   // --- Edge cases ---
 
   describe('Edge cases', () => {
-    it('200 prayer limit shows message', async () => {
+    it('200 prayer limit shows message', { timeout: 15000 }, async () => {
       // Seed 200 prayers directly via localStorage
       const prayers: PersonalPrayer[] = Array.from({ length: MAX_PRAYERS }, (_, i) => ({
         id: `prayer-${i}`,

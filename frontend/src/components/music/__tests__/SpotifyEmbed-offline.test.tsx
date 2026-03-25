@@ -13,11 +13,10 @@ const mockUseOnlineStatus = vi.mocked(useOnlineStatus)
 const mockPlaylist: SpotifyPlaylist = {
   id: 'test-1',
   name: 'Test Playlist',
-  description: 'A test playlist',
   spotifyId: 'abc123',
   spotifyUrl: 'https://open.spotify.com/playlist/abc123',
-  trackCount: 10,
-  coverColor: '#6D28D9',
+  section: 'worship',
+  displaySize: 'standard',
 }
 
 describe('SpotifyEmbed offline handling', () => {

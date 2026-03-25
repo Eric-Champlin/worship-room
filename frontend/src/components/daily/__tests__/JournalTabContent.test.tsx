@@ -99,8 +99,8 @@ class MockSpeechRecognition {
   continuous = false
   interimResults = false
   lang = ''
-  onresult: ((event: any) => void) | null = null
-  onerror: ((event: any) => void) | null = null
+  onresult: ((event: unknown) => void) | null = null
+  onerror: ((event: unknown) => void) | null = null
   onend: (() => void) | null = null
   start = vi.fn()
   stop = vi.fn()
@@ -111,6 +111,7 @@ let lastRecognitionInstance: MockSpeechRecognition | null = null
 class TrackingMockSpeechRecognition extends MockSpeechRecognition {
   constructor() {
     super()
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     lastRecognitionInstance = this
   }
 }
@@ -124,8 +125,8 @@ function installSpeechRecognition() {
 }
 
 function removeSpeechRecognition() {
-  delete (window as any).SpeechRecognition
-  delete (window as any).webkitSpeechRecognition
+  delete (window as unknown as Record<string, unknown>).SpeechRecognition
+  delete (window as unknown as Record<string, unknown>).webkitSpeechRecognition
 }
 
 describe('Voice Input', () => {

@@ -21,7 +21,7 @@ function allTrueActivities(): DailyActivities {
   return {
     mood: true, pray: true, listen: true,
     prayerWall: true, readingPlan: true, gratitude: true, meditate: true, journal: true, reflection: true,
-    challenge: true,
+    challenge: true, localVisit: true,
     pointsEarned: 270, multiplier: 2,
   };
 }

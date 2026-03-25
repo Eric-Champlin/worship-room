@@ -10,14 +10,15 @@ class MockSpeechRecognition {
   continuous = false
   interimResults = false
   lang = ''
-  onresult: ((event: any) => void) | null = null
-  onerror: ((event: any) => void) | null = null
+  onresult: ((event: unknown) => void) | null = null
+  onerror: ((event: unknown) => void) | null = null
   onend: (() => void) | null = null
   start = vi.fn()
   stop = vi.fn()
   abort = vi.fn()
 
   constructor() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     lastInstance = this
   }
 }
@@ -37,12 +38,12 @@ describe('useVoiceInput', () => {
   })
 
   afterEach(() => {
-    delete (window as any).SpeechRecognition
-    delete (window as any).webkitSpeechRecognition
+    delete (window as unknown as Record<string, unknown>).SpeechRecognition
+    delete (window as unknown as Record<string, unknown>).webkitSpeechRecognition
   })
 
   it('returns isSupported=false when SpeechRecognition not available', () => {
-    delete (window as any).SpeechRecognition
+    delete (window as unknown as Record<string, unknown>).SpeechRecognition
 
     const { result } = renderHook(() =>
       useVoiceInput({ onTranscript: vi.fn() }),
@@ -60,7 +61,7 @@ describe('useVoiceInput', () => {
   })
 
   it('returns isSupported=true when webkitSpeechRecognition available', () => {
-    delete (window as any).SpeechRecognition
+    delete (window as unknown as Record<string, unknown>).SpeechRecognition
     Object.defineProperty(window, 'webkitSpeechRecognition', {
       value: MockSpeechRecognition,
       writable: true,

@@ -33,10 +33,11 @@ export const DEFAULT_SETTINGS: UserSettings = {
   },
 }
 
-function deepMerge<T extends Record<string, unknown>>(defaults: T, partial: DeepPartial<T>): T {
+function deepMerge<T extends object>(defaults: T, partial: DeepPartial<T>): T {
   const result = { ...defaults } as Record<string, unknown>
-  for (const key of Object.keys(defaults)) {
-    const defaultVal = defaults[key]
+  const defaultsRecord = defaults as Record<string, unknown>
+  for (const key of Object.keys(defaultsRecord)) {
+    const defaultVal = defaultsRecord[key]
     const partialVal = (partial as Record<string, unknown>)[key]
     if (partialVal === undefined) continue
     if (

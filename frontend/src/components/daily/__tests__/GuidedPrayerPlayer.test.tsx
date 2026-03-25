@@ -18,7 +18,7 @@ let mockPlayerState = {
   isPaused: false,
   isComplete: false,
   currentSegmentIndex: 0,
-  currentSegment: { type: 'narration' as const, text: 'Test narration text here.', durationSeconds: 10 },
+  currentSegment: { type: 'narration' as 'narration' | 'silence', text: 'Test narration text here.', durationSeconds: 10 },
   currentWordIndex: 0,
   ttsAvailable: true,
   elapsedSeconds: 30,
@@ -166,7 +166,7 @@ describe('GuidedPrayerPlayer — playback view', () => {
 
   it('shows "Be still..." during silence segment', () => {
     renderPlayer({
-      currentSegment: { type: 'silence', text: '', durationSeconds: 5 },
+      currentSegment: { type: 'silence' as const, text: '', durationSeconds: 5 },
     })
     expect(screen.getByText('Be still...')).toBeInTheDocument()
   })

@@ -9,6 +9,11 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ isAuthenticated: true, user: { name: 'Test' } }),
 }))
 
+// Mock evening time check so tests are time-independent
+vi.mock('@/services/evening-reflection-storage', () => ({
+  isEveningTime: () => false,
+}))
+
 const ALL_FALSE: Record<ActivityType, boolean> = {
   mood: false,
   pray: false,

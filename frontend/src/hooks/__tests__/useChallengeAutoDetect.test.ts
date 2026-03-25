@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CHALLENGES } from '@/data/challenges'
+
 import { freshDailyActivities } from '@/services/faith-points-storage'
 import type { ChallengeProgress } from '@/types/challenges'
 
@@ -18,9 +18,6 @@ vi.mock('@/services/faith-points-storage', async () => {
 
 import { getTodayActivities } from '@/services/faith-points-storage'
 const mockGetTodayActivities = vi.mocked(getTodayActivities)
-
-const lentChallenge = CHALLENGES.find((c) => c.id === 'pray40-lenten-journey')!
-const day1ActionType = lentChallenge.dailyContent[0].actionType // 'pray'
 
 function makeProgress(overrides: Partial<ChallengeProgress> = {}): ChallengeProgress {
   return {
@@ -137,9 +134,6 @@ describe('useChallengeAutoDetect', () => {
     // Day 1 is already completed, currentDay is 2
     // We set day 1's action to true but since day 1 is already in completedDays
     // and currentDay is 2, auto-detect checks day 2's actionType instead
-    const day2ActionType = lentChallenge.dailyContent[1]?.actionType ?? 'pray'
-    const activityKey = day2ActionType === 'music' ? 'listen' : day2ActionType
-
     // Don't set the activity for day 2 — so auto-detect should not fire
     mockGetActiveChallenge.mockReturnValue({
       challengeId: 'pray40-lenten-journey',

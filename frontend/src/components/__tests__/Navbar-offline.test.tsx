@@ -46,11 +46,21 @@ describe('Navbar offline indicator', () => {
       logout: vi.fn(),
     } as ReturnType<typeof useAuth>)
     mockUseLiturgicalSeason.mockReturnValue({
+      currentSeason: {
+        id: 'ordinary-time',
+        name: 'Ordinary Time',
+        themeColor: '#FFD700',
+        icon: 'Star',
+        greeting: 'Peace be with you',
+        suggestedContent: [],
+        themeWord: 'growth',
+      },
       icon: 'Star',
       themeColor: '#FFD700',
       isNamedSeason: false,
       seasonName: 'ordinary',
-      seasonLabel: 'Ordinary Time',
+      greeting: 'Peace be with you',
+      daysUntilNextSeason: 30,
     } as ReturnType<typeof useLiturgicalSeason>)
   })
 

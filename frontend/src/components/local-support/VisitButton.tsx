@@ -38,7 +38,7 @@ export function useVisitState({ placeId, placeName, placeType, onVisit }: VisitB
   })
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null!)
 
   const handleClick = useCallback(() => {
     if (visited) {
@@ -137,7 +137,7 @@ export function VisitNote({ visitState }: { visitState: VisitState }) {
       )}
     >
       <textarea
-        ref={textareaRef}
+        ref={textareaRef as React.RefObject<HTMLTextAreaElement>}
         value={note}
         onChange={(e) => setNote(e.target.value.slice(0, 300))}
         onBlur={saveNote}

@@ -369,9 +369,9 @@ describe('useFaithPoints — full repair flow (integration)', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     // Mock setItem to succeed for faith_points but fail for streak
-    let callCount = 0;
+    let _callCount = 0;
     const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation((key: string, value: string) => {
-      callCount++;
+      _callCount++;
       if (key === 'wr_streak') {
         throw new Error('QuotaExceededError');
       }

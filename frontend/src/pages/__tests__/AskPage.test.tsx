@@ -6,10 +6,11 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { AskPage } from '../AskPage'
 import { ASK_TOPIC_CHIPS } from '@/constants/ask'
+import type { AuthContextValue } from '@/contexts/AuthContext'
 
 // --- Auth mock setup ---
 const { mockAuthFn } = vi.hoisted(() => {
-  const mockAuthFn = vi.fn(() => ({
+  const mockAuthFn = vi.fn((): AuthContextValue => ({
     isAuthenticated: false,
     user: null,
     login: vi.fn(),

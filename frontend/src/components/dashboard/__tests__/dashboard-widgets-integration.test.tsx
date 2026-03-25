@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+
+// Mock evening time check so tests are time-independent
+vi.mock('@/services/evening-reflection-storage', () => ({
+  isEveningTime: () => false,
+}))
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { DashboardWidgetGrid } from '../DashboardWidgetGrid'

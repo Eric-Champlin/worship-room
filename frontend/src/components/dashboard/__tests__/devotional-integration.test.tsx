@@ -6,6 +6,7 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { TodaysDevotionalCard } from '../TodaysDevotionalCard'
 import { WeeklyGodMoments } from '../WeeklyGodMoments'
 import { DashboardWidgetGrid } from '../DashboardWidgetGrid'
+import type { useFaithPoints } from '@/hooks/useFaithPoints'
 import { MoodRecommendations } from '../MoodRecommendations'
 import { getLocalDateString } from '@/utils/date'
 
@@ -86,7 +87,7 @@ function renderWidgetGrid() {
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
-          <DashboardWidgetGrid faithPoints={mockFaithPoints as any} />
+          <DashboardWidgetGrid faithPoints={mockFaithPoints as unknown as ReturnType<typeof useFaithPoints>} />
         </ToastProvider>
       </AuthProvider>
     </MemoryRouter>,

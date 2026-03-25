@@ -68,7 +68,7 @@ class MockUtterance {
   }
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(globalThis as any).SpeechSynthesisUtterance = MockUtterance
+(globalThis as any).SpeechSynthesisUtterance = MockUtterance
 
 // Mock wake lock
 const mockRelease = vi.fn().mockResolvedValue(undefined)

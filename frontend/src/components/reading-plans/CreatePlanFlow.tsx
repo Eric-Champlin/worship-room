@@ -44,7 +44,7 @@ interface CreatePlanFlowProps {
 export function CreatePlanFlow({ onClose }: CreatePlanFlowProps) {
   const navigate = useNavigate()
   const { showToast } = useToast()
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null!)
 
   const [step, setStep] = useState(1)
   const [topicText, setTopicText] = useState('')
@@ -186,7 +186,7 @@ function StepOne({
         <CrisisBanner text={topicText} />
 
         <textarea
-          ref={textareaRef}
+          ref={textareaRef as React.RefObject<HTMLTextAreaElement>}
           value={topicText}
           onChange={(e) => onTopicChange(e.target.value)}
           maxLength={500}

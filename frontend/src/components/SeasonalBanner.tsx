@@ -22,7 +22,7 @@ export function SeasonalBanner() {
     }
   })
   const [hiding, setHiding] = useState(false)
-  const dismissTimerRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleDismiss = useCallback(() => {
     if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)

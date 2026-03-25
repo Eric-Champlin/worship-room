@@ -34,12 +34,6 @@ export function NudgeButton({ friendId, friendName, lastActive }: NudgeButtonPro
   const { showToast } = useToast()
   const { sendNudge, canNudge, wasNudged } = useSocialInteractions()
 
-  // Don't render if friend is active
-  if (!isInactive(lastActive)) return null
-
-  // Check privacy settings
-  if (!getNudgePermission()) return null
-
   const canSend = canNudge(friendId) && !nudgeSent
   const alreadyNudged = wasNudged(friendId)
 
@@ -63,6 +57,10 @@ export function NudgeButton({ friendId, friendName, lastActive }: NudgeButtonPro
   const handleCancel = useCallback(() => {
     setDialogOpen(false)
   }, [])
+
+  // Don't render if friend is active or privacy disallows
+  if (!isInactive(lastActive)) return null
+  if (!getNudgePermission()) return null
 
   if (alreadyNudged || nudgeSent) {
     return (

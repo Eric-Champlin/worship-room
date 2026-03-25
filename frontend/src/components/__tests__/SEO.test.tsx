@@ -13,7 +13,7 @@ const { SEO } = await import('../SEO')
 vi.stubEnv('VITE_SITE_URL', 'https://worshiproom.com')
 
 function renderSEO(props: React.ComponentProps<typeof SEO>, initialEntry = '/') {
-  const helmetContext = {} as { helmet?: { title?: { toString: () => string } } }
+  const helmetContext: Record<string, unknown> = {}
   return render(
     <HelmetProvider context={helmetContext}>
       <MemoryRouter
