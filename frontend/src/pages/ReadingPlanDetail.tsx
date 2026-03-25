@@ -17,12 +17,7 @@ import { getReadingPlan } from '@/data/reading-plans'
 import { PLAN_DIFFICULTY_LABELS } from '@/constants/reading-plans'
 import type { ActivityType } from '@/types/dashboard'
 import { cn } from '@/lib/utils'
-
-const DETAIL_HERO_STYLE = {
-  backgroundImage:
-    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)',
-  backgroundSize: '100% 100%',
-} as const
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 
 export function ReadingPlanDetail() {
   const { planId } = useParams<{ planId: string }>()
@@ -153,18 +148,18 @@ export function ReadingPlanDetail() {
       <div className="min-h-screen bg-[#0f0a1e]">
         {/* Hero section */}
         <section
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-10 text-center antialiased sm:pt-36 sm:pb-14"
-          style={DETAIL_HERO_STYLE}
+          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+          style={ATMOSPHERIC_HERO_BG}
         >
           <div className="text-5xl sm:text-6xl" aria-hidden="true">
             {plan.coverEmoji}
           </div>
 
-          <h1 className="mt-4 font-script text-5xl font-bold text-white sm:text-6xl lg:text-7xl">
+          <h1 className="mt-4 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
             {plan.title}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-xl text-base text-white/85 sm:text-lg">
+          <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
             {plan.description}
           </p>
 

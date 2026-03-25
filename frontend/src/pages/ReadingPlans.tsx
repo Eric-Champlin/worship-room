@@ -178,7 +178,7 @@ export function ReadingPlans() {
         Skip to content
       </a>
       <Navbar transparent />
-      <PageHero title="Reading Plans" subtitle="Guided journeys through Scripture" dark />
+      <PageHero title="Reading Plans" subtitle="Guided journeys through Scripture" />
 
       <section id="reading-plans-content" className="px-4 py-8 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">

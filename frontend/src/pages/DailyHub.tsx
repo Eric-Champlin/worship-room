@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams, useLocation } from 'react-router-dom'
 import { Heart, PenLine, Wind, Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
@@ -164,15 +165,16 @@ function DailyHubContent() {
         {/* Hero Section — Greeting */}
         <section
           aria-labelledby="daily-hub-heading"
-          className="relative flex w-full flex-col items-center bg-gradient-to-b from-dashboard-gradient to-dashboard-dark px-4 pb-10 pt-32 text-center antialiased sm:pb-12 sm:pt-36 lg:pb-14 lg:pt-40"
+          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+          style={ATMOSPHERIC_HERO_BG}
         >
           <h1
             id="daily-hub-heading"
-            className="mb-1 font-script text-5xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl"
+            className="mb-1 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
           >
             {displayName}
           </h1>
-          <p className="text-base text-white/80">
+          <p className="font-serif italic text-base text-white/60 sm:text-lg">
             Start with any practice below.
           </p>
           <p className="mt-2 font-sans text-sm text-white/90">

@@ -102,7 +102,7 @@ describe('ProfileHeader', () => {
   it('truncates long name with title attribute', () => {
     const longName = 'A'.repeat(35)
     renderHeader({ displayName: longName })
-    const heading = screen.getByRole('heading', { level: 1 })
+    const heading = screen.getByRole('heading', { level: 2 })
     expect(heading.textContent).toContain('...')
     expect(heading.getAttribute('title')).toBe(longName)
   })

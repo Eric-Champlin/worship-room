@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
@@ -95,47 +96,45 @@ export function MonthlyReport() {
       </a>
       <Navbar transparent />
 
-      {/* Page header */}
-      <header className="bg-gradient-to-b from-dashboard-gradient to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <Link
-            to="/insights"
-            className="mb-4 inline-flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/70"
+      {/* Hero section */}
+      <section
+        aria-labelledby="monthly-report-heading"
+        className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+        style={ATMOSPHERIC_HERO_BG}
+      >
+        <Link
+          to="/insights"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/70"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Mood Insights
+        </Link>
+        <h1
+          id="monthly-report-heading"
+          className="mb-3 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+        >
+          Monthly Report
+        </h1>
+        <div className="mt-2 flex items-center gap-3">
+          <button
+            onClick={goToPreviousMonth}
+            disabled={isAtEarliest}
+            aria-label="Previous month"
+            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/40 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Mood Insights
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={goToPreviousMonth}
-              disabled={isAtEarliest}
-              aria-label="Previous month"
-              className="min-h-[44px] min-w-[44px] rounded-full bg-white/10 p-2 text-white/60 transition-colors hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
-
-            <div className="flex-1">
-              <h1 className="font-serif text-2xl text-white/90 md:text-3xl">
-                Your {data.monthName} Faith Journey
-              </h1>
-              <p className="mt-1 text-sm text-white/60 md:text-base">
-                {data.dateRange}
-              </p>
-            </div>
-
-            <button
-              onClick={goToNextMonth}
-              disabled={isAtLatest}
-              aria-label="Next month"
-              className="min-h-[44px] min-w-[44px] rounded-full bg-white/10 p-2 text-white/60 transition-colors hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              <ChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </div>
+            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+          </button>
+          <span className="text-lg text-white/85 sm:text-xl">{data.monthName} {data.year}</span>
+          <button
+            onClick={goToNextMonth}
+            disabled={isAtLatest}
+            aria-label="Next month"
+            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/40 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ChevronRight className="h-5 w-5" aria-hidden="true" />
+          </button>
         </div>
-      </header>
+      </section>
 
       {/* Content area */}
       <main

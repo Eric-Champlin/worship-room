@@ -3,6 +3,7 @@ import { useCallback, useRef, useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, BookOpen, Share2, Volume2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Navbar } from '@/components/Navbar'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
 import { getTodaysDevotional, formatDevotionalDate } from '@/data/devotionals'
 import { useSwipe } from '@/hooks/useSwipe'
@@ -169,14 +170,10 @@ export function DevotionalPage() {
       />
         {/* Hero section */}
         <section
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-10 text-center antialiased sm:pt-36 sm:pb-14"
-          style={{
-            backgroundImage:
-              'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)',
-            backgroundSize: '100% 100%',
-          }}
+          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+          style={ATMOSPHERIC_HERO_BG}
         >
-          <h1 className="font-script text-5xl font-bold text-white sm:text-6xl lg:text-7xl">
+          <h1 className="font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
             Daily Devotional
           </h1>
           <div className="mt-4 flex items-center gap-3">

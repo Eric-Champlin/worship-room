@@ -7,6 +7,7 @@ import { HighlightsNotesSection } from '@/components/bible/HighlightsNotesSectio
 import { SegmentedControl } from '@/components/bible/SegmentedControl'
 import type { BibleBrowserMode } from '@/components/bible/SegmentedControl'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { useAuth } from '@/hooks/useAuth'
 const bibleBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -19,11 +20,6 @@ const bibleBreadcrumbs = {
 import { useBibleHighlights } from '@/hooks/useBibleHighlights'
 import { useBibleNotes } from '@/hooks/useBibleNotes'
 
-const BIBLE_HERO_STYLE = {
-  backgroundImage:
-    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)',
-  backgroundSize: '100% 100%',
-} as const
 
 export function BibleBrowser() {
   const [mode, setMode] = useState<BibleBrowserMode>('books')
@@ -42,16 +38,16 @@ export function BibleBrowser() {
         {/* Hero section */}
         <section
           aria-labelledby="bible-hero-heading"
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-10"
-          style={BIBLE_HERO_STYLE}
+          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+          style={ATMOSPHERIC_HERO_BG}
         >
           <h1
             id="bible-hero-heading"
-            className="font-script text-5xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl"
+            className="font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
           >
             Bible
           </h1>
-          <p className="mx-auto mt-3 max-w-xl font-serif text-base italic text-white/85 sm:text-lg lg:text-xl">
+          <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
             The Word of God
           </p>
         </section>

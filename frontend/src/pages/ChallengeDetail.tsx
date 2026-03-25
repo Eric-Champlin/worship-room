@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Bell, BellOff, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
 import { ChallengeIcon } from '@/components/challenges/ChallengeIcon'
 import { ChallengeDayContent } from '@/components/challenges/ChallengeDayContent'
@@ -194,8 +195,8 @@ export function ChallengeDetail() {
   const communityPercent = Math.min((communityProgress / goalNumber) * 100, 100)
 
   const heroStyle = {
-    backgroundImage: `radial-gradient(circle at 50% 30%, ${challenge.themeColor}20 0%, transparent 60%), radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)`,
-    backgroundSize: '100% 100%',
+    ...ATMOSPHERIC_HERO_BG,
+    backgroundImage: `radial-gradient(circle at 50% 30%, ${challenge.themeColor}20 0%, transparent 60%), ${ATMOSPHERIC_HERO_BG.backgroundImage}`,
   }
 
   // Days until a future challenge starts
@@ -216,7 +217,7 @@ export function ChallengeDetail() {
       <div className="min-h-screen bg-[#0f0a1e]">
         {/* Hero section */}
         <section
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-10 text-center antialiased sm:pt-36 sm:pb-14"
+          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
           style={heroStyle}
         >
           <ChallengeIcon
@@ -226,11 +227,11 @@ export function ChallengeDetail() {
             aria-hidden="true"
           />
 
-          <h1 className="mt-4 font-script text-5xl font-bold text-white sm:text-6xl lg:text-7xl">
+          <h1 className="mt-4 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
             {challenge.title}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-xl text-base text-white/85 sm:text-lg">
+          <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
             {challenge.description}
           </p>
 

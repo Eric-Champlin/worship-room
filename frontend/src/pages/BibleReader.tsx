@@ -24,13 +24,9 @@ import { useBibleNotes } from '@/hooks/useBibleNotes'
 import { useBibleProgress } from '@/hooks/useBibleProgress'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import type { BibleVerse } from '@/types/bible'
 
-const READER_BG_STYLE = {
-  backgroundImage:
-    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)',
-  backgroundSize: '100% 100%',
-} as const
 
 function hexToRgba(hex: string, opacity: number): string {
   const r = parseInt(hex.slice(1, 3), 16)
@@ -430,13 +426,14 @@ export function BibleReader() {
 
         {/* Hero section */}
         <section
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-10"
-          style={READER_BG_STYLE}
+          aria-labelledby="bible-reader-heading"
+          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+          style={ATMOSPHERIC_HERO_BG}
         >
-          <h1 className="font-script text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
+          <h1 id="bible-reader-heading" className="font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
             <Link
               to={`/bible?book=${book.slug}`}
-              className="text-white/70 underline transition-colors hover:text-white"
+              className="text-white/60 underline transition-colors hover:text-white"
             >
               {book.name}
             </Link>{' '}

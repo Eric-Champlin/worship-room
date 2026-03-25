@@ -66,14 +66,14 @@ describe('GrowthProfile', () => {
   it('renders own profile', () => {
     setOwnData()
     renderProfilePage('/profile/my-user-id')
-    expect(screen.getByText('Eric')).toBeTruthy()
+    expect(screen.getAllByText('Eric').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Edit Profile')).toBeTruthy()
   })
 
   it('renders friend profile', () => {
     setOwnData()
     renderProfilePage('/profile/friend-sarah-m')
-    expect(screen.getByText('Sarah M.')).toBeTruthy()
+    expect(screen.getAllByText('Sarah M.').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Send Encouragement')).toBeTruthy()
   })
 
@@ -90,7 +90,7 @@ describe('GrowthProfile', () => {
     renderProfilePage('/profile/my-user-id')
     // Title is managed by <SEO> (Helmet is globally mocked in test setup).
     // Title rendering is verified in SEO.test.tsx and Playwright; here we verify the page renders.
-    expect(screen.getByText('Eric')).toBeTruthy()
+    expect(screen.getAllByText('Eric').length).toBeGreaterThanOrEqual(1)
   })
 
   it('has correct background classes', () => {

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { ProfileSection } from '@/components/settings/ProfileSection'
@@ -42,19 +43,26 @@ export function Settings() {
       </a>
       <Navbar transparent />
 
-      {/* Page header */}
-      <header className="bg-gradient-to-b from-dashboard-gradient to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <Link
-            to="/"
-            className="mb-4 inline-flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/70"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Dashboard
-          </Link>
-          <h1 className="text-2xl font-bold text-white md:text-3xl">Settings</h1>
-        </div>
-      </header>
+      {/* Hero section */}
+      <section
+        aria-labelledby="settings-heading"
+        className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+        style={ATMOSPHERIC_HERO_BG}
+      >
+        <Link
+          to="/"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/70"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Dashboard
+        </Link>
+        <h1
+          id="settings-heading"
+          className="font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+        >
+          Settings
+        </h1>
+      </section>
 
       {/* Mobile tabs */}
       <div className="sm:hidden bg-white/[0.08] backdrop-blur-xl border-b border-white/10">

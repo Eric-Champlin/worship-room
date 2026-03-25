@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 
 interface LocalSupportHeroProps {
   headingId: string
@@ -18,19 +19,16 @@ export function LocalSupportHero({
   return (
     <section
       aria-labelledby={headingId}
-      className="relative flex w-full flex-col items-center px-4 pt-32 pb-10 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40 lg:pb-14"
-      style={{
-        backgroundImage:
-          'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #0f0a1e 100%)',
-      }}
+      className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+      style={ATMOSPHERIC_HERO_BG}
     >
       <h1
         id={headingId}
-        className="mb-3 font-script text-5xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl"
+        className="mb-3 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
       >
         {title}
       </h1>
-      <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+      <p className="mx-auto max-w-2xl font-serif italic text-base leading-relaxed text-white/60 sm:text-lg">
         {subtitle}
       </p>
       {extraContent && <div className="mt-4">{extraContent}</div>}

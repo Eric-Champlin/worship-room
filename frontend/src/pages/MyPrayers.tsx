@@ -160,7 +160,7 @@ export function MyPrayers() {
   return (
     <div className="min-h-screen bg-neutral-bg">
       <SEO title="My Saved Prayers" description="Your saved prayers and prayer history on Worship Room." noIndex />
-      <Navbar />
+      <Navbar transparent />
       <PageHero title="My Prayers" subtitle="Your personal conversation with God." />
 
       {counts.answered > 0 && (

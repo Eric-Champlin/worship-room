@@ -3,38 +3,33 @@ import { HeadingDivider } from '@/components/HeadingDivider'
 import { useElementWidth } from '@/hooks/useElementWidth'
 import { cn } from '@/lib/utils'
 
-const HERO_BG_STYLE = {
+export const ATMOSPHERIC_HERO_BG = {
+  backgroundColor: '#0f0a1e',
   backgroundImage:
-    'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #F5F5F5 100%)',
-} as const
-
-const HERO_BG_DARK_STYLE = {
-  backgroundImage:
-    'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #0f0a1e 100%)',
+    'radial-gradient(ellipse at top center, rgba(109, 40, 217, 0.15) 0%, transparent 70%)',
 } as const
 
 interface PageHeroProps {
   title: string
   subtitle?: string
   showDivider?: boolean
-  dark?: boolean
   children?: ReactNode
 }
 
-export function PageHero({ title, subtitle, showDivider, dark, children }: PageHeroProps) {
+export function PageHero({ title, subtitle, showDivider, children }: PageHeroProps) {
   const { ref: headingRef, width: headingWidth } = useElementWidth<HTMLHeadingElement>()
 
   return (
     <section
       aria-labelledby="page-hero-heading"
-      className="relative flex w-full flex-col items-center px-4 pt-32 pb-16 text-center antialiased sm:pt-36 sm:pb-20 lg:pt-40 lg:pb-24"
-      style={dark ? HERO_BG_DARK_STYLE : HERO_BG_STYLE}
+      className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+      style={ATMOSPHERIC_HERO_BG}
     >
       <h1
         ref={showDivider ? headingRef : undefined}
         id="page-hero-heading"
         className={cn(
-          'font-script text-5xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl',
+          'font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl',
           showDivider ? 'inline-block' : 'mb-3'
         )}
       >
@@ -46,7 +41,7 @@ export function PageHero({ title, subtitle, showDivider, dark, children }: PageH
         </div>
       )}
       {subtitle && (
-        <p className="mx-auto max-w-xl font-sans text-base text-white/85 sm:text-lg lg:text-xl">
+        <p className="mx-auto max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
           {subtitle}
         </p>
       )}

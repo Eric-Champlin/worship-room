@@ -1,6 +1,8 @@
 import { useEffect, useCallback, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
+import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
@@ -109,7 +111,31 @@ export function GrowthProfile() {
         description={`See ${profileData.displayName}'s spiritual growth journey, badges, and encouragement on Worship Room.`}
         noIndex
       />
-      <div className="motion-safe:animate-fade-in mx-auto max-w-3xl px-4 pt-8 pb-12 sm:px-6 md:pt-12">
+      <section
+        aria-labelledby="profile-heading"
+        className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+        style={ATMOSPHERIC_HERO_BG}
+      >
+        <Link
+          to="/friends"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/70"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back
+        </Link>
+        <h1
+          id="profile-heading"
+          className="mb-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+        >
+          {profileData.displayName}
+        </h1>
+        {profileData.levelName !== null && (
+          <p className="font-serif italic text-base text-white/60 sm:text-lg">
+            {profileData.levelName}
+          </p>
+        )}
+      </section>
+      <div className="motion-safe:animate-fade-in mx-auto max-w-3xl px-4 pt-4 pb-12 sm:px-6">
         <ProfileHeader
           profileData={displayData}
           onEncourage={handleEncourage}

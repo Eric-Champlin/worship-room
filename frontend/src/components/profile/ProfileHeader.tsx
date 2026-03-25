@@ -93,12 +93,12 @@ export function ProfileHeader({
       <div className="mt-4 flex flex-col items-center text-center lg:mt-0 lg:items-start lg:text-left">
         {/* Name + Friends badge */}
         <div className="flex items-center gap-2">
-          <h1
+          <h2
             className="text-2xl font-bold text-white md:text-3xl"
             title={profileData.displayName.length > 30 ? profileData.displayName : undefined}
           >
             {truncatedName}
-          </h1>
+          </h2>
           {profileData.relationship === 'friend' && (
             <span className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
               <Check className="h-3 w-3" /> Friends

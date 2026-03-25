@@ -77,7 +77,7 @@ describe('MonthlyReport — Auth Gate', () => {
 
   it('renders for authenticated users', () => {
     renderPage()
-    expect(screen.getByText(/faith journey/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /monthly report/i })).toBeInTheDocument()
   })
 })
 

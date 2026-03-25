@@ -199,8 +199,8 @@ export function AskPage() {
     <Layout>
       <SEO title="Ask God's Word" description="Ask life questions and receive AI-powered answers grounded in Biblical wisdom and Scripture." />
       <div className="min-h-screen bg-dashboard-dark">
-        <PageHero title="Ask God's Word" showDivider dark>
-          <p className="mx-auto max-w-xl font-serif italic text-base text-white/85 sm:text-lg">
+        <PageHero title="Ask God's Word" showDivider>
+          <p className="mx-auto max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
             Bring your questions. Find wisdom in Scripture.
           </p>
         </PageHero>
