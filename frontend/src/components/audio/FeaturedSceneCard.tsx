@@ -21,7 +21,7 @@ export function FeaturedSceneCard({ scene, isActive, onPlay }: FeaturedSceneCard
         onClick={() => onPlay(scene)}
         style={bgStyle}
         className={cn(
-          'group relative aspect-video w-full min-w-[280px] flex-shrink-0 cursor-pointer snap-start overflow-hidden rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt sm:min-w-[340px]',
+          'group relative aspect-video w-full min-w-[280px] flex-shrink-0 cursor-pointer snap-start overflow-hidden rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt sm:min-w-0',
           isActive && 'ring-2 ring-primary/60',
         )}
       >

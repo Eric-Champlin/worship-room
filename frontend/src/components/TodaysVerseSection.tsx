@@ -24,9 +24,9 @@ export function TodaysVerseSection() {
           <p className="mx-auto max-w-2xl font-serif italic text-lg leading-relaxed text-white sm:text-2xl">
             &ldquo;{verse.text}&rdquo;
           </p>
-          <footer className="mt-3 text-sm text-white/50">
+          <cite className="mt-3 block text-sm not-italic text-white/50">
             — {verse.reference}
-          </footer>
+          </cite>
         </blockquote>
         <div className="relative mt-8 inline-block">
           <button

@@ -384,15 +384,15 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           revealDuration={2000}
           onRevealComplete={() => setReferenceVisible(true)}
         />&rdquo;
-        <footer
+        <cite
           className={cn(
-            'mt-1 font-sans text-sm not-italic transition-opacity duration-300',
+            'mt-1 block font-sans text-sm not-italic transition-opacity duration-300',
             referenceVisible ? 'opacity-100' : 'opacity-0',
             isDark ? 'text-white/50' : 'text-text-light',
           )}
         >
           &mdash; {destination.verseReference}
-        </footer>
+        </cite>
       </blockquote>
 
       {isDark ? (

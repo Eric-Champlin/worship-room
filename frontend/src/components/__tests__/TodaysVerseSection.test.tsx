@@ -37,12 +37,12 @@ describe('TodaysVerseSection', () => {
     expect(verseText?.textContent).toBeTruthy()
   })
 
-  it('renders verse reference in footer element', () => {
+  it('renders verse reference in cite element', () => {
     renderSection()
 
-    const footer = document.querySelector('blockquote footer')
-    expect(footer).toBeInTheDocument()
-    expect(footer?.textContent).toMatch(/^—/)
+    const cite = document.querySelector('blockquote cite')
+    expect(cite).toBeInTheDocument()
+    expect(cite?.textContent).toMatch(/^—/)
   })
 
   it('"Today\'s Verse" label is visible', () => {

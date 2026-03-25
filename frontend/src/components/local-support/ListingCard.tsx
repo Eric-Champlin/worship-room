@@ -190,7 +190,7 @@ export function ListingCard({
       {/* Expanded details */}
       <div
         id={detailsId}
-        {...(!isExpanded ? { inert: true as unknown as boolean } : {})}
+        {...(!isExpanded ? { inert: '' as unknown as string } : {})}
         className={cn(
           'overflow-hidden transition-all duration-200',
           isExpanded ? 'mt-4 max-h-[500px] opacity-100' : 'max-h-0 opacity-0',

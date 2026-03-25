@@ -527,9 +527,9 @@ const Screen4Results = forwardRef<HTMLHeadingElement, Screen4Props>(
             </p>
             <blockquote className="mt-4 font-serif italic text-white/80">
               &ldquo;{quizResult.verse}&rdquo;
-              <footer className="mt-1 font-sans text-sm not-italic text-white/50">
+              <cite className="mt-1 block font-sans text-sm not-italic text-white/50">
                 &mdash; {quizResult.verseReference}
-              </footer>
+              </cite>
             </blockquote>
           </div>
         )}
