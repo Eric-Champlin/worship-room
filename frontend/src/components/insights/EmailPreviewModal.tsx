@@ -28,7 +28,7 @@ export function EmailPreviewModal({ isOpen, onClose, monthName }: EmailPreviewMo
           role="dialog"
           aria-modal="true"
           aria-labelledby="email-subject"
-          className="relative max-h-[85vh] w-full max-w-[600px] overflow-y-auto rounded-2xl bg-gray-100 shadow-xl"
+          className="relative max-h-[85vh] w-full max-w-[600px] overflow-y-auto rounded-2xl border border-white/10 bg-[#1a0f2e] shadow-xl"
         >
           {/* Close button */}
           <button

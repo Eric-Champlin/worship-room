@@ -2,7 +2,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useCallback, useRef, useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, BookOpen, Share2, Volume2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
 import { getTodaysDevotional, formatDevotionalDate } from '@/data/devotionals'
 import { useSwipe } from '@/hooks/useSwipe'
 import { useAuth } from '@/hooks/useAuth'
@@ -130,7 +131,14 @@ export function DevotionalPage() {
   }, [readAloud, devotional])
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-[#0f0a1e]" {...swipeHandlers}>
+      <a
+        href="#devotional-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+      >
+        Skip to content
+      </a>
+      <Navbar transparent />
       <SEO
         title="Daily Devotional"
         description="Start each morning with an inspiring quote, Bible passage, reflection, and prayer."
@@ -159,13 +167,12 @@ export function DevotionalPage() {
           },
         ]}
       />
-      <div className="min-h-screen bg-hero-dark" {...swipeHandlers}>
         {/* Hero section */}
         <section
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-10 text-center antialiased sm:pt-36 sm:pb-14"
           style={{
             backgroundImage:
-              'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0D0620 100%)',
+              'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)',
             backgroundSize: '100% 100%',
           }}
         >
@@ -226,19 +233,19 @@ export function DevotionalPage() {
               <span className="font-serif text-5xl leading-none text-white/20" aria-hidden="true">
                 &ldquo;
               </span>
-              <blockquote className="mt-2 font-serif text-xl italic leading-relaxed text-white sm:text-2xl">
+              <blockquote className="mt-2 font-serif text-xl italic leading-relaxed text-white/70 sm:text-2xl">
                 {devotional.quote.text}
               </blockquote>
-              <p className="mt-3 text-sm text-white/50">&mdash; {devotional.quote.attribution}</p>
+              <p className="mt-3 text-sm text-white/40">&mdash; {devotional.quote.attribution}</p>
             </div>
           </div>
 
           {/* Passage section */}
           <div className="border-t border-white/10 py-8 sm:py-10">
-            <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/40">
+            <p className="mb-4 text-xs font-medium uppercase tracking-widest text-primary-lt">
               {devotional.passage.reference}
             </p>
-            <p className="font-serif text-base italic leading-relaxed text-white/90 sm:text-lg">
+            <p className="font-serif text-base italic leading-relaxed text-white/70 sm:text-lg">
               {devotional.passage.verses.map((verse) => (
                 <span key={verse.number}>
                   <sup className="mr-1 align-super font-sans text-xs text-white/30">
@@ -264,14 +271,14 @@ export function DevotionalPage() {
             <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/40">
               Closing Prayer
             </p>
-            <p className="font-serif text-base italic leading-relaxed text-white/80">
+            <p className="font-serif text-base italic leading-relaxed text-white/60">
               {devotional.prayer}
             </p>
           </div>
 
           {/* Reflection question section */}
           <div className="border-t border-white/10 py-8 sm:py-10" ref={questionRef}>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-6">
+            <div className="rounded-2xl border border-white/10 border-l-2 border-l-primary bg-white/[0.06] p-4 backdrop-blur-sm sm:p-6">
               <p className="text-sm text-white/40">Something to think about today:</p>
               <p className="mt-2 text-lg font-medium text-white">
                 {devotional.reflectionQuestion.replace('Something to think about today: ', '')}
@@ -321,7 +328,7 @@ export function DevotionalPage() {
           {/* Bottom padding */}
           <div className="pb-16 sm:pb-20" />
         </div>
-      </div>
-    </Layout>
+      <SiteFooter />
+    </div>
   )
 }

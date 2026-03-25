@@ -93,10 +93,10 @@ describe('GrowthProfile', () => {
     expect(screen.getByText('Eric')).toBeTruthy()
   })
 
-  it('has correct background gradient classes', () => {
+  it('has correct background classes', () => {
     setOwnData()
     const { container } = renderProfilePage('/profile/my-user-id')
-    const bgDiv = container.querySelector('.bg-gradient-to-b')
+    const bgDiv = container.querySelector('.bg-\\[\\#0f0a1e\\]')
     expect(bgDiv).toBeTruthy()
   })
 

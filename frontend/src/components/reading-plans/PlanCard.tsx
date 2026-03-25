@@ -55,7 +55,7 @@ export function PlanCard({ plan, status, progress, onStart, isCustom }: PlanCard
   return (
     <Link
       to={`/reading-plans/${plan.id}`}
-      className="block rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+      className="block rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow lg:hover:shadow-md lg:hover:shadow-black/20"
     >
       <div className="mb-3 text-4xl" aria-hidden="true">
         {plan.coverEmoji}
@@ -67,26 +67,26 @@ export function PlanCard({ plan, status, progress, onStart, isCustom }: PlanCard
         </span>
       )}
 
-      <h3 className="text-lg font-bold text-text-dark">{plan.title}</h3>
+      <h3 className="text-lg font-bold text-white">{plan.title}</h3>
 
-      <p className="mt-1 line-clamp-2 text-sm text-text-light">
+      <p className="mt-1 line-clamp-2 text-sm text-white/60">
         {plan.description}
       </p>
 
       <div className="mt-3 flex flex-wrap gap-2">
-        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-text-dark">
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/50">
           {plan.durationDays} days
         </span>
-        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-text-dark">
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/50">
           {PLAN_DIFFICULTY_LABELS[plan.difficulty]}
         </span>
-        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-text-dark">
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/50">
           {PLAN_THEME_LABELS[plan.theme]}
         </span>
       </div>
 
       {progress && !progress.completedAt && (
-        <p className="mt-2 text-sm text-text-light">
+        <p className="mt-2 text-sm text-white/50">
           Day {progress.currentDay} of {plan.durationDays}
         </p>
       )}

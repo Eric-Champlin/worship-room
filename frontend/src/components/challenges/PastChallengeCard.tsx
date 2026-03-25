@@ -21,16 +21,16 @@ export function PastChallengeCard({ challenge, isCompleted, onClick }: PastChall
           onClick()
         }
       }}
-      className="min-h-[44px] cursor-pointer rounded-xl border border-gray-200 bg-gray-50 p-4 transition-shadow hover:shadow-sm"
+      className="min-h-[44px] cursor-pointer rounded-xl border border-white/[0.06] bg-white/[0.04] p-4 transition-shadow hover:shadow-sm"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ChallengeIcon
             name={challenge.icon}
-            className="h-5 w-5 shrink-0 text-text-light"
+            className="h-5 w-5 shrink-0 text-white/40"
             aria-hidden="true"
           />
-          <h3 className="font-semibold text-text-dark">{challenge.title}</h3>
+          <h3 className="font-semibold text-white/70">{challenge.title}</h3>
           <span
             className="shrink-0 rounded-full px-3 py-1 text-xs font-medium"
             style={{
@@ -47,7 +47,7 @@ export function PastChallengeCard({ challenge, isCompleted, onClick }: PastChall
             Completed
           </span>
         ) : (
-          <span className="rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-text-light">
+          <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/40">
             Missed
           </span>
         )}

@@ -112,8 +112,8 @@ function TimeRangePills({
             onClick={() => onChange(option.value)}
             className={
               selected
-                ? 'min-h-[44px] rounded-full bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-150 motion-reduce:transition-none'
-                : 'min-h-[44px] rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/60 transition-colors duration-150 hover:text-white/80 motion-reduce:transition-none'
+                ? 'min-h-[44px] rounded-full bg-primary/20 px-4 py-2 text-sm font-medium text-primary-lt transition-colors duration-150 motion-reduce:transition-none'
+                : 'min-h-[44px] rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors duration-150 hover:text-white/80 motion-reduce:transition-none'
             }
           >
             {option.label}
@@ -213,7 +213,7 @@ export function Insights() {
       {/* Time range pills - sticky */}
       {isSticky && (
         <div
-          className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-dashboard-dark/90 py-3 backdrop-blur-sm"
+          className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-white/[0.08] py-3 backdrop-blur-xl"
           aria-hidden="true"
         >
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -279,7 +279,7 @@ export function Insights() {
           <div className="pt-2 text-center">
             <Link
               to="/insights/monthly"
-              className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center rounded-lg bg-white/10 px-6 py-3 font-semibold text-white/70 transition-colors hover:bg-white/15"
             >
               View Monthly Report
             </Link>

@@ -1,16 +1,18 @@
 import { Link } from 'react-router-dom'
 
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
 
 export function ChallengeNotFound() {
   return (
-    <Layout>
+    <div className="min-h-screen bg-[#0f0a1e]">
+      <Navbar transparent />
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-md text-center">
-          <h1 className="mb-4 text-3xl font-bold text-text-dark sm:text-4xl">
+          <h1 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
             Challenge Not Found
           </h1>
-          <p className="mb-6 text-base text-text-light sm:text-lg">
+          <p className="mb-6 text-base text-white/60 sm:text-lg">
             The challenge you&apos;re looking for doesn&apos;t exist.
           </p>
           <Link
@@ -21,6 +23,7 @@ export function ChallengeNotFound() {
           </Link>
         </div>
       </div>
-    </Layout>
+      <SiteFooter />
+    </div>
   )
 }

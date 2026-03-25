@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileBadgeShowcase } from '@/components/profile/ProfileBadgeShowcase'
@@ -72,28 +73,28 @@ export function GrowthProfile() {
 
   if (!profileData.found) {
     return (
-      <Layout>
-        <div className="min-h-screen bg-gradient-to-b from-hero-dark to-hero-mid">
-          <div className="mx-auto max-w-3xl px-4 pt-8 pb-12 text-center sm:px-6 md:pt-12">
-            <h1 className="text-2xl font-bold text-white">Profile not found</h1>
-            <p className="mt-2 text-white/60">This user doesn't exist or may have been removed.</p>
-            <div className="mt-6 flex justify-center gap-4">
-              <Link
-                to="/friends"
-                className="rounded-lg bg-primary px-6 py-2 font-semibold text-white transition-colors hover:bg-primary/90"
-              >
-                Go to Friends
-              </Link>
-              <Link
-                to="/"
-                className="rounded-lg border border-white/20 bg-white/10 px-6 py-2 text-white transition-colors hover:bg-white/15"
-              >
-                Go Home
-              </Link>
-            </div>
+      <div className="min-h-screen bg-[#0f0a1e]">
+        <Navbar transparent />
+        <div className="mx-auto max-w-3xl px-4 pt-8 pb-12 text-center sm:px-6 md:pt-12">
+          <h1 className="text-2xl font-bold text-white">Profile not found</h1>
+          <p className="mt-2 text-white/60">This user doesn&apos;t exist or may have been removed.</p>
+          <div className="mt-6 flex justify-center gap-4">
+            <Link
+              to="/friends"
+              className="rounded-lg bg-primary px-6 py-2 font-semibold text-white transition-colors hover:bg-primary/90"
+            >
+              Go to Friends
+            </Link>
+            <Link
+              to="/"
+              className="rounded-lg border border-white/20 bg-white/10 px-6 py-2 text-white transition-colors hover:bg-white/15"
+            >
+              Go Home
+            </Link>
           </div>
         </div>
-      </Layout>
+        <SiteFooter />
+      </div>
     )
   }
 
@@ -101,43 +102,43 @@ export function GrowthProfile() {
   const displayData = { ...profileData, relationship }
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-[#0f0a1e]">
+      <Navbar transparent />
       <SEO
         title={`${profileData.displayName}'s Growth Profile`}
         description={`See ${profileData.displayName}'s spiritual growth journey, badges, and encouragement on Worship Room.`}
         noIndex
       />
-      <div className="min-h-screen bg-gradient-to-b from-hero-dark to-hero-mid">
-        <div className="motion-safe:animate-fade-in mx-auto max-w-3xl px-4 pt-8 pb-12 sm:px-6 md:pt-12">
-          <ProfileHeader
-            profileData={displayData}
-            onEncourage={handleEncourage}
-            onAddFriend={handleAddFriend}
-            onAcceptRequest={handleAcceptRequest}
-            canEncourageToday={canEncourageToday}
-          />
-          {profileData.currentLevel !== null && (
-            <div className="mt-6 flex flex-col items-center">
-              <GrowthGarden
-                stage={(profileData.currentLevel ?? 1) as 1 | 2 | 3 | 4 | 5 | 6}
-                animated={false}
-                showSparkle={false}
-                streakActive={(profileData.currentStreak ?? 0) > 0}
-                size="sm"
-              />
-            </div>
-          )}
-          <div className="mt-6">
-            <ProfileBadgeShowcase
-              badgeData={profileData.badgeData}
-              isOwnProfile={profileData.isOwnProfile}
+      <div className="motion-safe:animate-fade-in mx-auto max-w-3xl px-4 pt-8 pb-12 sm:px-6 md:pt-12">
+        <ProfileHeader
+          profileData={displayData}
+          onEncourage={handleEncourage}
+          onAddFriend={handleAddFriend}
+          onAcceptRequest={handleAcceptRequest}
+          canEncourageToday={canEncourageToday}
+        />
+        {profileData.currentLevel !== null && (
+          <div className="mt-6 flex flex-col items-center">
+            <GrowthGarden
+              stage={(profileData.currentLevel ?? 1) as 1 | 2 | 3 | 4 | 5 | 6}
+              animated={false}
+              showSparkle={false}
+              streakActive={(profileData.currentStreak ?? 0) > 0}
+              size="sm"
             />
           </div>
-          <div className="mt-6">
-            <ProfileStats profileData={profileData} />
-          </div>
+        )}
+        <div className="mt-6">
+          <ProfileBadgeShowcase
+            badgeData={profileData.badgeData}
+            isOwnProfile={profileData.isOwnProfile}
+          />
+        </div>
+        <div className="mt-6">
+          <ProfileStats profileData={profileData} />
         </div>
       </div>
-    </Layout>
+      <SiteFooter />
+    </div>
   )
 }

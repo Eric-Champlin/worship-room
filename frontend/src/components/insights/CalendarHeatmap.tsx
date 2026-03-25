@@ -274,7 +274,7 @@ export function CalendarHeatmap({ rangeDays }: CalendarHeatmapProps) {
                     className={
                       cell.entry
                         ? 'h-3 w-3 rounded-sm transition-[filter] duration-100 hover:brightness-125 motion-reduce:transition-none motion-reduce:hover:brightness-100 sm:h-4 sm:w-4'
-                        : 'h-3 w-3 rounded-sm bg-white/5 sm:h-4 sm:w-4'
+                        : 'h-3 w-3 rounded-sm bg-white/[0.04] sm:h-4 sm:w-4'
                     }
                     style={bgColor ? { backgroundColor: bgColor } : undefined}
                     aria-label={`${formatAriaDate(cell.date)}: ${cell.entry?.moodLabel ?? 'No check-in'}`}

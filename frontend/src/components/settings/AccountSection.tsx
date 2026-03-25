@@ -70,8 +70,8 @@ export function AccountSection({ email }: AccountSectionProps) {
         </div>
 
         {/* Delete Account */}
-        <div className="border-t border-white/10 mt-6 pt-6">
-          <p className="text-sm text-white/40 mb-4">
+        <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4">
+          <p className="text-sm text-red-400 mb-4">
             Permanently delete your account and all data.
           </p>
           <button

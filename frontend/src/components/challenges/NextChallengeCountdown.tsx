@@ -29,8 +29,8 @@ export function NextChallengeCountdown({
   })
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-      <div className="mb-4 flex items-center gap-2 text-text-light">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm sm:p-8">
+      <div className="mb-4 flex items-center gap-2 text-white/60">
         <Calendar className="h-5 w-5" aria-hidden="true" />
         <span className="text-sm font-medium uppercase tracking-wide">Next Challenge</span>
       </div>
@@ -41,29 +41,29 @@ export function NextChallengeCountdown({
           className="h-7 w-7 shrink-0"
           aria-hidden="true"
         />
-        <h2 className="text-xl font-bold text-text-dark sm:text-2xl">{challenge.title}</h2>
+        <h2 className="text-xl font-bold text-white sm:text-2xl">{challenge.title}</h2>
       </div>
 
-      <p className="mb-2 text-lg font-semibold text-text-dark">
+      <p className="mb-2 text-lg font-semibold text-white">
         Starts in{' '}
         <span style={{ color: getContrastSafeColor(challenge.themeColor) }}>
           {daysUntilStart} {daysUntilStart === 1 ? 'day' : 'days'}
         </span>
       </p>
 
-      <p className="mb-4 text-sm text-text-light">
+      <p className="mb-4 text-sm text-white/60">
         Begins {formattedStartDate} - {challenge.durationDays} days
       </p>
 
-      <p className="mb-6 text-text-light">{challenge.description}</p>
+      <p className="mb-6 text-white/60">{challenge.description}</p>
 
       <button
         type="button"
         onClick={onToggleReminder}
         className={
           isReminderSet
-            ? 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gray-100 px-5 py-2 text-sm font-medium text-text-light transition-colors'
-            : 'inline-flex min-h-[44px] items-center gap-2 rounded-full border border-gray-300 px-5 py-2 text-sm font-medium text-text-dark transition-colors hover:bg-gray-50'
+            ? 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/60 transition-colors'
+            : 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/15'
         }
         aria-label={isReminderSet ? 'Remove reminder' : 'Set reminder'}
         aria-pressed={isReminderSet}

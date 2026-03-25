@@ -98,7 +98,7 @@ describe('Settings Page', () => {
     renderSettings()
     const nav = screen.getByRole('navigation', { name: 'Settings' })
     const profileBtn = nav.querySelector('button')!
-    expect(profileBtn.className).toContain('bg-white/10')
+    expect(profileBtn.className).toContain('bg-primary/10')
   })
 
   // --- Mobile Tabs ---

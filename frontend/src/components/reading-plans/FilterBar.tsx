@@ -21,7 +21,7 @@ export function FilterBar({
   return (
     <div className="space-y-4" role="group" aria-label="Filter reading plans">
       <div>
-        <span className="mb-2 block text-sm font-medium text-text-light">
+        <span className="mb-2 block text-sm font-medium text-white/60">
           Duration
         </span>
         <div className="flex flex-wrap gap-2">
@@ -36,8 +36,8 @@ export function FilterBar({
                 className={cn(
                   'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-primary text-white'
-                    : 'border border-gray-200 bg-white text-text-dark hover:bg-gray-50',
+                    ? 'bg-primary/20 text-primary-lt'
+                    : 'bg-white/10 text-white/60 hover:bg-white/15',
                 )}
               >
                 {opt.label}
@@ -48,7 +48,7 @@ export function FilterBar({
       </div>
 
       <div>
-        <span className="mb-2 block text-sm font-medium text-text-light">
+        <span className="mb-2 block text-sm font-medium text-white/60">
           Difficulty
         </span>
         <div className="flex flex-wrap gap-2">
@@ -63,8 +63,8 @@ export function FilterBar({
                 className={cn(
                   'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-primary text-white'
-                    : 'border border-gray-200 bg-white text-text-dark hover:bg-gray-50',
+                    ? 'bg-primary/20 text-primary-lt'
+                    : 'bg-white/10 text-white/60 hover:bg-white/15',
                 )}
               >
                 {opt.label}

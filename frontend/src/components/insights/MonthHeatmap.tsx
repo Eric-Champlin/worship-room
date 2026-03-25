@@ -134,7 +134,7 @@ export function MonthHeatmap({ month, year, monthName, entries }: MonthHeatmapPr
                     <div
                       key={rowIdx}
                       className={`h-3 w-3 rounded-sm sm:h-4 sm:w-4 ${
-                        cell.entry ? '' : 'bg-white/10'
+                        cell.entry ? '' : 'bg-white/[0.04]'
                       }`}
                       style={bgColor ? { backgroundColor: bgColor } : undefined}
                       title={

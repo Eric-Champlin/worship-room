@@ -35,7 +35,7 @@ function CustomTooltip({
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-white/15 bg-hero-mid px-3 py-2 text-sm text-white shadow-lg">
+    <div className="rounded-lg border border-white/10 bg-[#1a0f2e] px-3 py-2 text-sm text-white shadow-lg">
       <p className="font-medium">{label}</p>
       <p className="text-white/70">{payload[0].value} times</p>
     </div>
@@ -69,7 +69,7 @@ export function ActivityBarChart({ activityCounts }: ActivityBarChartProps) {
 
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
             <XAxis
               dataKey="name"
               tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 12 }}

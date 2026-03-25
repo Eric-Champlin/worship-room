@@ -12,9 +12,10 @@ interface GlobalRowProps {
   entry: LeaderboardEntry
   isCurrentUser: boolean
   onClick: () => void
+  index?: number
 }
 
-export function GlobalRow({ rank, entry, isCurrentUser, onClick }: GlobalRowProps) {
+export function GlobalRow({ rank, entry, isCurrentUser, onClick, index = 0 }: GlobalRowProps) {
   const rankColor = RANK_COLORS[rank] || 'text-white/70'
 
   const handleKeyDown = useCallback(
@@ -33,8 +34,12 @@ export function GlobalRow({ rank, entry, isCurrentUser, onClick }: GlobalRowProp
       tabIndex={0}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className={`relative flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors hover:bg-white/5 ${
-        isCurrentUser ? 'rounded-lg border-l-2 border-primary bg-primary/10' : ''
+      className={`relative flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors hover:bg-white/10 ${
+        isCurrentUser
+          ? 'border-l-2 border-primary bg-primary/[0.08]'
+          : index % 2 === 0
+            ? 'bg-white/[0.04]'
+            : 'bg-white/[0.06]'
       }`}
     >
       {/* Rank */}

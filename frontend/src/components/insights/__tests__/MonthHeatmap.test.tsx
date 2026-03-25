@@ -48,7 +48,7 @@ describe('MonthHeatmap', () => {
     const { container } = render(
       <MonthHeatmap month={1} year={2026} monthName="February" entries={[]} />,
     )
-    const mutedCells = container.querySelectorAll('.bg-white\\/10')
+    const mutedCells = container.querySelectorAll('.bg-white\\/\\[0\\.04\\]')
     expect(mutedCells.length).toBeGreaterThan(0)
   })
 })

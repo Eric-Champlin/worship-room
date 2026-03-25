@@ -7,9 +7,10 @@ import { NextChallengeCountdown } from '@/components/challenges/NextChallengeCou
 import { PastChallengeCard } from '@/components/challenges/PastChallengeCard'
 import { UpcomingChallengeCard } from '@/components/challenges/UpcomingChallengeCard'
 import { SwitchChallengeDialog } from '@/components/challenges/SwitchChallengeDialog'
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
 import { PageHero } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
+import { SiteFooter } from '@/components/SiteFooter'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { CHALLENGES } from '@/data/challenges'
 import { useAuth } from '@/hooks/useAuth'
@@ -146,15 +147,22 @@ export function Challenges() {
   }
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-[#0f0a1e]">
       <SEO title="Community Challenges" description="Join seasonal faith challenges with thousands of other believers during Lent, Advent, Easter, and more." />
-      <PageHero title="Community Challenges" subtitle="Grow together in faith" />
-      <section className="bg-neutral-bg px-4 py-8 sm:px-6 sm:py-10">
+      <a
+        href="#challenges-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+      >
+        Skip to content
+      </a>
+      <Navbar transparent />
+      <PageHero title="Community Challenges" subtitle="Grow together in faith" dark />
+      <section id="challenges-content" className="px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
         {/* Active Challenges */}
         {categorized.active.length > 0 && (
           <section className="mb-10" aria-label="Active challenges">
-            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-text-light">
+            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-white/50">
               Active Now
             </h2>
             <div className="space-y-6">
@@ -196,7 +204,7 @@ export function Challenges() {
         {/* Upcoming Challenges */}
         {categorized.upcoming.length > 0 && (
           <section className="mb-10" aria-label="Upcoming challenges">
-            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-text-light">
+            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-white/50">
               Coming Up
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -217,7 +225,7 @@ export function Challenges() {
         {/* Past Challenges */}
         {categorized.past.length > 0 && (
           <section className="mb-10" aria-label="Past challenges">
-            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-text-light">
+            <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-white/50">
               Past
             </h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -241,7 +249,7 @@ export function Challenges() {
         {/* Empty state fallback */}
         {!hasAnyChallenges && (
           <div className="py-16 text-center">
-            <p className="text-lg text-text-light">
+            <p className="text-lg text-white/60">
               New challenges are coming soon. Check back during the next season.
             </p>
           </div>
@@ -266,6 +274,8 @@ export function Challenges() {
           />
         )
       })()}
-    </Layout>
+
+      <SiteFooter />
+    </div>
   )
 }

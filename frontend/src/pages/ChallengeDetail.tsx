@@ -194,7 +194,7 @@ export function ChallengeDetail() {
   const communityPercent = Math.min((communityProgress / goalNumber) * 100, 100)
 
   const heroStyle = {
-    backgroundImage: `radial-gradient(circle at 50% 30%, ${challenge.themeColor}20 0%, transparent 60%), radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0D0620 100%)`,
+    backgroundImage: `radial-gradient(circle at 50% 30%, ${challenge.themeColor}20 0%, transparent 60%), radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)`,
     backgroundSize: '100% 100%',
   }
 
@@ -213,7 +213,7 @@ export function ChallengeDetail() {
         title={`${challenge.title} | Community Challenges`}
         description={challenge.description.slice(0, 155).trim()}
       />
-      <div className="min-h-screen bg-hero-dark">
+      <div className="min-h-screen bg-[#0f0a1e]">
         {/* Hero section */}
         <section
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-10 text-center antialiased sm:pt-36 sm:pb-14"

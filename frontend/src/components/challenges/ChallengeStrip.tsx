@@ -31,7 +31,7 @@ export function ChallengeStrip() {
         aria-label={`Day ${active.progress.currentDay} of ${challenge.title}: ${dayContent.dailyAction}. Go to challenge.`}
       >
         <ChallengeIcon name={challenge.icon} className="h-4 w-4 shrink-0" style={{ color: themeColor }} aria-hidden="true" />
-        <span className="flex-1 truncate text-sm text-text-dark">
+        <span className="flex-1 truncate text-sm text-white">
           <span className="font-medium">Day {active.progress.currentDay}:</span>{' '}
           {dayContent.dailyAction}
         </span>

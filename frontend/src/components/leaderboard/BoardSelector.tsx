@@ -27,7 +27,7 @@ export function BoardSelector({ activeBoard, onBoardChange }: BoardSelectorProps
             onClick={() => onBoardChange(board.id)}
             className={`min-h-[44px] rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               isActive
-                ? 'bg-primary text-white'
+                ? 'bg-primary/20 text-primary-lt'
                 : 'text-white/60 hover:text-white/80'
             }`}
           >

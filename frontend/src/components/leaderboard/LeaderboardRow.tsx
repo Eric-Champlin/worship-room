@@ -50,8 +50,12 @@ export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index, sho
 
   return (
     <li
-      className={`group motion-safe:opacity-0 motion-safe:animate-fade-in transition-transform duration-300 ease-in-out motion-reduce:transition-none ${
-        isCurrentUser ? 'rounded-lg border-l-2 border-primary bg-primary/10' : ''
+      className={`group motion-safe:opacity-0 motion-safe:animate-fade-in transition-transform duration-300 ease-in-out motion-reduce:transition-none rounded-xl ${
+        isCurrentUser
+          ? 'border-l-2 border-primary bg-primary/[0.08]'
+          : index % 2 === 0
+            ? 'bg-white/[0.04]'
+            : 'bg-white/[0.06]'
       }`}
       style={{ animationDelay: `${delay}ms`, animationDuration: '300ms' }}
       aria-label={isCurrentUser ? `Your position: rank ${rank}` : undefined}

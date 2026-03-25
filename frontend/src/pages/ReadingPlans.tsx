@@ -2,9 +2,10 @@ import { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
 import { PageHero } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
+import { SiteFooter } from '@/components/SiteFooter'
 import { CreatePlanFlow } from '@/components/reading-plans/CreatePlanFlow'
 import { FilterBar } from '@/components/reading-plans/FilterBar'
 import { PlanCard } from '@/components/reading-plans/PlanCard'
@@ -168,21 +169,28 @@ export function ReadingPlans() {
   }
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-[#0f0a1e]">
       <SEO title="Bible Reading Plans" description="Guided multi-day Scripture journeys through topics like anxiety, grief, gratitude, forgiveness, and hope." />
-      <PageHero title="Reading Plans" subtitle="Guided journeys through Scripture" />
+      <a
+        href="#reading-plans-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+      >
+        Skip to content
+      </a>
+      <Navbar transparent />
+      <PageHero title="Reading Plans" subtitle="Guided journeys through Scripture" dark />
 
-      <section className="bg-neutral-bg px-4 py-8 sm:px-6 sm:py-10">
+      <section id="reading-plans-content" className="px-4 py-8 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
           {/* Create Your Own Plan card */}
-          <div className="mb-6 rounded-xl border border-primary/10 bg-white p-6 shadow-sm">
+          <div className="mb-6 rounded-xl border border-primary/20 bg-primary/[0.08] p-6">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 <Sparkles className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-text-dark">Create Your Own Plan</h3>
-                <p className="mt-1 text-sm text-text-light">
+                <h3 className="text-lg font-bold text-white">Create Your Own Plan</h3>
+                <p className="mt-1 text-sm text-white/60">
                   Tell us what you&apos;re going through and we&apos;ll create a personalized Scripture journey just for you.
                 </p>
               </div>
@@ -218,7 +226,7 @@ export function ReadingPlans() {
             </div>
           ) : (
             <div className="mt-12 text-center">
-              <p className="text-lg text-text-light">
+              <p className="text-lg text-white/60">
                 No reading plans match your filters.
               </p>
               <button
@@ -241,6 +249,8 @@ export function ReadingPlans() {
           onCancel={handleCancelSwitch}
         />
       )}
-    </Layout>
+
+      <SiteFooter />
+    </div>
   )
 }

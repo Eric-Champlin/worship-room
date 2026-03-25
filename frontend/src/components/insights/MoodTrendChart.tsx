@@ -154,7 +154,7 @@ function ChartTooltip({ active, payload }: MoodTooltipProps) {
   if (!data?.mood || !data.moodLabel) return null
 
   return (
-    <div className="rounded-lg border border-white/15 bg-hero-mid px-3 py-2 text-sm text-white shadow-lg">
+    <div className="rounded-lg border border-white/10 bg-[#1a0f2e] px-3 py-2 text-sm text-white shadow-lg">
       <p className="font-medium">{formatTooltipDate(data.date)}</p>
       <p className="text-white/70">{data.moodLabel}</p>
       {data.movingAvg !== null && data.movingAvg !== undefined && (
@@ -195,10 +195,10 @@ function MoodTrendEmptyState() {
               data={EMPTY_STATE_DATA}
               margin={{ top: 5, right: 5, bottom: 5, left: -15 }}
             >
-              <CartesianGrid stroke="rgba(255, 255, 255, 0.05)" />
+              <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" />
               <XAxis
                 dataKey="dayLabel"
-                tick={{ fill: 'rgba(255, 255, 255, 0.5)', fontSize: 11 }}
+                tick={{ fill: 'rgba(255, 255, 255, 0.4)', fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
               />
@@ -307,12 +307,12 @@ export function MoodTrendChart({ rangeDays }: MoodTrendChartProps) {
                   left: isMobile ? -15 : 0,
                 }}
               >
-                <CartesianGrid stroke="rgba(255, 255, 255, 0.05)" />
+                <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" />
                 <XAxis
                   dataKey="date"
                   tickFormatter={(v: string) => formatXAxisTick(v, rangeDays)}
                   tick={{
-                    fill: 'rgba(255, 255, 255, 0.5)',
+                    fill: 'rgba(255, 255, 255, 0.4)',
                     fontSize: 11,
                   }}
                   axisLine={false}
@@ -324,7 +324,7 @@ export function MoodTrendChart({ rangeDays }: MoodTrendChartProps) {
                   ticks={[1, 2, 3, 4, 5]}
                   tickFormatter={formatMoodLabel}
                   tick={{
-                    fill: 'rgba(255, 255, 255, 0.5)',
+                    fill: 'rgba(255, 255, 255, 0.4)',
                     fontSize: 12,
                   }}
                   axisLine={false}

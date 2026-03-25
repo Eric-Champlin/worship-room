@@ -57,7 +57,7 @@ export function Settings() {
       </header>
 
       {/* Mobile tabs */}
-      <div className="sm:hidden border-b border-white/10">
+      <div className="sm:hidden bg-white/[0.08] backdrop-blur-xl border-b border-white/10">
         <div className="mx-auto max-w-4xl px-4" role="tablist" aria-label="Settings sections">
           <div className="flex">
             {SECTIONS.map((s) => (
@@ -71,7 +71,7 @@ export function Settings() {
                   'flex-1 py-3 text-sm font-medium text-center transition-colors',
                   activeSection === s.id
                     ? 'text-white border-b-2 border-primary'
-                    : 'text-white/50',
+                    : 'text-white/60',
                 )}
               >
                 {s.label}
@@ -88,7 +88,7 @@ export function Settings() {
           <nav
             role="navigation"
             aria-label="Settings"
-            className="hidden sm:block w-[200px] lg:w-[240px] shrink-0"
+            className="hidden sm:block w-[200px] lg:w-[240px] shrink-0 bg-white/[0.04] border-r border-white/10 rounded-lg p-2"
           >
             {SECTIONS.map((s) => (
               <button
@@ -97,8 +97,8 @@ export function Settings() {
                 className={cn(
                   'w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors',
                   activeSection === s.id
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/60 hover:text-white/80 hover:bg-white/5',
+                    ? 'bg-primary/10 text-primary-lt'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
                 )}
               >
                 {s.label}

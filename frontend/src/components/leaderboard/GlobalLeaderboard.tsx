@@ -132,6 +132,7 @@ export function GlobalLeaderboard() {
                 entry={entry}
                 isCurrentUser={isCurrentUser}
                 onClick={() => handleRowClick(entry.id)}
+                index={index}
               />
               {popupEntryId === entry.id && popupEntry && (
                 <div className="relative">

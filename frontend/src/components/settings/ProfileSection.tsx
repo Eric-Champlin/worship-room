@@ -122,7 +122,7 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
       {/* Display Name */}
       <div className="space-y-4">
         <div>
-          <label htmlFor="settings-display-name" className="block text-sm font-medium text-white/80 mb-2">
+          <label htmlFor="settings-display-name" className="block text-sm font-medium text-white/70 mb-2">
             Display Name
           </label>
           <input
@@ -136,7 +136,7 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
             }}
             onBlur={handleNameBlur}
             maxLength={NAME_MAX}
-            className="w-full bg-white/10 border border-white/15 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:outline-none min-h-[44px]"
+            className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:outline-none min-h-[44px]"
             placeholder="Your display name"
           />
           <div className="mt-1 flex items-center justify-between">
@@ -150,7 +150,7 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
 
         {/* Bio */}
         <div>
-          <label htmlFor="settings-bio" className="block text-sm font-medium text-white/80 mb-2">
+          <label htmlFor="settings-bio" className="block text-sm font-medium text-white/70 mb-2">
             Bio
           </label>
           <textarea
@@ -161,7 +161,7 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
             }}
             onBlur={handleBioBlur}
             rows={3}
-            className="w-full bg-white/10 border border-white/15 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:outline-none resize-none"
+            className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:outline-none resize-none"
             placeholder="Tell your friends a little about yourself..."
           />
           <div className="mt-1 flex items-center justify-between">

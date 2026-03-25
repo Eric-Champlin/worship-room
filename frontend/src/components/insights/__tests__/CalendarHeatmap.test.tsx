@@ -68,9 +68,9 @@ describe('CalendarHeatmap', () => {
     render(<CalendarHeatmap rangeDays={30} />)
     const noCheckinSquares = screen.getAllByLabelText(/No check-in/)
     expect(noCheckinSquares.length).toBeGreaterThan(0)
-    // Should have bg-white/5 class
+    // Should have bg-white/[0.04] class
     noCheckinSquares.forEach((sq) => {
-      expect(sq.className).toContain('bg-white/5')
+      expect(sq.className).toContain('bg-white/[0.04]')
     })
   })
 

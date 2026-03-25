@@ -37,8 +37,7 @@ export function ActiveChallengeCard({
 
   return (
     <div
-      className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg sm:p-8"
-      style={{ borderTopWidth: '4px', borderTopColor: challenge.themeColor }}
+      className="rounded-2xl border-2 border-primary/30 bg-white/[0.06] p-6 backdrop-blur-sm sm:p-8"
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
@@ -48,27 +47,27 @@ export function ActiveChallengeCard({
               className="h-8 w-8 shrink-0"
               aria-hidden="true"
             />
-            <h2 className="text-2xl font-bold text-text-dark sm:text-3xl">{challenge.title}</h2>
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">{challenge.title}</h2>
           </div>
 
-          <p className="mb-4 text-text-light">{challenge.description}</p>
+          <p className="mb-4 text-white/70">{challenge.description}</p>
 
           <div className="mb-4 flex flex-wrap items-center gap-4">
             <span className="text-sm font-bold" style={{ color: getContrastSafeColor(challenge.themeColor) }}>
               {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining
             </span>
-            <span className="flex items-center gap-1 text-sm text-text-light">
+            <span className="flex items-center gap-1 text-sm text-white/50">
               <Users className="h-4 w-4" aria-hidden="true" />
               {participantCount.toLocaleString()} participants
             </span>
           </div>
 
           <div className="mb-4">
-            <p className="mb-1 text-xs text-text-light">
+            <p className="mb-1 text-xs text-white/50">
               Community goal: {challenge.communityGoal}
             </p>
             <div
-              className="h-2 w-full overflow-hidden rounded-full bg-gray-100"
+              className="h-2 w-full overflow-hidden rounded-full bg-white/10"
               role="progressbar"
               aria-valuenow={Math.round(progressPercent)}
               aria-valuemin={0}
@@ -86,7 +85,7 @@ export function ActiveChallengeCard({
           </div>
 
           {isJoined && currentDay != null && !isCompleted && (
-            <p className="text-sm font-medium text-text-dark">
+            <p className="text-sm font-medium text-white/70">
               Day {currentDay} of {challenge.durationDays}
             </p>
           )}
