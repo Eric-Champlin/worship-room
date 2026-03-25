@@ -21,7 +21,7 @@ import { useBibleNotes } from '@/hooks/useBibleNotes'
 
 const BIBLE_HERO_STYLE = {
   backgroundImage:
-    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0D0620 100%)',
+    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)',
   backgroundSize: '100% 100%',
 } as const
 
@@ -38,7 +38,7 @@ export function BibleBrowser() {
   return (
     <Layout>
       <SEO title="Read the Bible (WEB)" description="Read the full World English Bible with highlighting, notes, and audio playback." jsonLd={bibleBreadcrumbs} />
-      <div className="min-h-screen bg-hero-dark">
+      <div className="min-h-screen bg-dashboard-dark">
         {/* Hero section */}
         <section
           aria-labelledby="bible-hero-heading"

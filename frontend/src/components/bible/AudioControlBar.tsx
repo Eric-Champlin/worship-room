@@ -79,7 +79,7 @@ export function AudioControlBar({
 
       <div
         className={cn(
-          'sticky top-0 z-30 rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm transition-shadow',
+          'sticky top-0 z-30 rounded-xl border border-white/10 bg-white/[0.06] p-3 backdrop-blur-sm transition-shadow',
           isStuck && 'shadow-md',
         )}
       >
@@ -135,7 +135,7 @@ export function AudioControlBar({
                     'min-h-[44px] rounded-full px-3 py-1 text-xs transition-colors',
                     isSelected
                       ? 'bg-primary/20 font-medium text-primary'
-                      : 'text-white/50 hover:text-white/70',
+                      : 'text-white/70 hover:text-white',
                   )}
                 >
                   {s}x

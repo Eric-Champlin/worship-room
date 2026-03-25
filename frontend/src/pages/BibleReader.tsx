@@ -28,7 +28,7 @@ import type { BibleVerse } from '@/types/bible'
 
 const READER_BG_STYLE = {
   backgroundImage:
-    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0D0620 100%)',
+    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0f0a1e 100%)',
   backgroundSize: '100% 100%',
 } as const
 
@@ -419,7 +419,7 @@ export function BibleReader() {
           jsonLd={breadcrumbs}
         />
       )}
-      <div className="min-h-screen bg-hero-dark">
+      <div className="min-h-screen bg-dashboard-dark">
         {/* Screen reader announcements */}
         <div
           ref={announceRef}
@@ -538,7 +538,7 @@ export function BibleReader() {
                   (h) => h.verseNumber === verse.number,
                 )
                 const highlightStyle = highlight
-                  ? { backgroundColor: hexToRgba(highlight.color, 0.15) }
+                  ? { backgroundColor: hexToRgba(highlight.color, 0.20) }
                   : undefined
                 const note = chapterNotes.find(
                   (n) => n.verseNumber === verse.number,
@@ -585,7 +585,7 @@ export function BibleReader() {
                           onDelete={handleNoteDelete}
                         />
                       )}
-                      <span className="font-serif text-base leading-[1.8] text-white/90 sm:text-lg">
+                      <span className="font-serif text-base leading-[1.8] text-white/80 sm:text-lg">
                         {verse.text}
                       </span>{' '}
                     </span>

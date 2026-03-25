@@ -37,6 +37,6 @@ describe('PopularTopicsSection', () => {
     const card = screen.getByText('Understanding Suffering').closest('button')
     expect(card?.className).toContain('rounded-xl')
     expect(card?.className).toContain('border')
-    expect(card?.className).toContain('shadow-sm')
+    expect(card?.className).toContain('bg-white/[0.06]')
   })
 })

@@ -191,173 +191,175 @@ export function AskPage() {
       ? 'text-danger'
       : charCount >= ASK_CHAR_WARNING
         ? 'text-warning'
-        : 'text-text-light/60'
+        : 'text-white/40'
 
   const showInput = conversation.length === 0 && !isLoading
 
   return (
     <Layout>
       <SEO title="Ask God's Word" description="Ask life questions and receive AI-powered answers grounded in Biblical wisdom and Scripture." />
-      <PageHero title="Ask God's Word" showDivider>
-        <p className="mx-auto max-w-xl font-serif italic text-base text-white/85 sm:text-lg">
-          Bring your questions. Find wisdom in Scripture.
-        </p>
-      </PageHero>
+      <div className="min-h-screen bg-dashboard-dark">
+        <PageHero title="Ask God's Word" showDivider dark>
+          <p className="mx-auto max-w-xl font-serif italic text-base text-white/85 sm:text-lg">
+            Bring your questions. Find wisdom in Scripture.
+          </p>
+        </PageHero>
 
-      <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
-        <div className="relative">
-          <div style={SQUIGGLE_MASK_STYLE}>
-            <BackgroundSquiggle />
-          </div>
-
+        <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
           <div className="relative">
-            {/* Input section */}
-            {showInput && (
-              <>
-                {/* Textarea */}
-                <div className="relative mb-4">
-                  <label htmlFor="ask-input" className="sr-only">
-                    Your question
-                  </label>
-                  <textarea
-                    id="ask-input"
-                    value={text}
-                    onChange={(e) => {
-                      setText(e.target.value)
-                      autoExpand(e.target)
-                    }}
-                    placeholder="What's on your heart? Ask anything..."
-                    maxLength={ASK_MAX_LENGTH}
-                    rows={3}
-                    aria-describedby="ask-char-count"
-                    className={cn(
-                      'w-full resize-none rounded-lg border border-glow-cyan/30 bg-white py-3 px-4',
-                      'text-base text-text-dark placeholder:text-text-light/60',
-                      'motion-safe:animate-glow-pulse',
-                      'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
-                    )}
-                  />
-                  <span
-                    id="ask-char-count"
-                    className={cn('absolute bottom-2 right-3 text-xs', charCountColor)}
-                  >
-                    {charCount} / {ASK_MAX_LENGTH}
-                  </span>
-                </div>
-
-                {/* Crisis Banner */}
-                <CrisisBanner text={text} />
-
-                {/* Topic Chips */}
-                <div className="mb-6 flex flex-wrap justify-center gap-2">
-                  {ASK_TOPIC_CHIPS.map((chip) => (
-                    <button
-                      key={chip}
-                      type="button"
-                      onClick={() => handleChipClick(chip)}
-                      className={cn(
-                        'min-h-[44px] rounded-full border border-gray-200 bg-white px-4 py-2',
-                        'text-sm text-text-dark',
-                        'hover:border-primary hover:text-primary',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                        'transition-colors',
-                      )}
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Submit Button */}
-                <div className="flex justify-center">
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={!text.trim()}
-                    className={cn(
-                      'min-h-[44px] rounded-lg bg-primary py-3 px-8 font-semibold text-white',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                      'transition-colors hover:bg-primary-lt',
-                      !text.trim() && 'cursor-not-allowed opacity-50',
-                    )}
-                  >
-                    Find Answers
-                  </button>
-                </div>
-
-                {/* Popular Topics */}
-                <PopularTopicsSection onTopicClick={handleTopicClick} />
-              </>
-            )}
-
-            {/* Conversation thread + loading — aria-live announces new responses */}
-            <div aria-live="polite">
-              {conversation.map((pair, index) => (
-                <div
-                  key={index}
-                  id={index === conversation.length - 1 ? 'latest-response' : undefined}
-                >
-                  {index > 0 && <div className="my-8 border-t border-white/5" />}
-                  <UserQuestionBubble question={pair.question} />
-                  <div className="mt-6">
-                    <AskResponseDisplay
-                      response={pair.response}
-                      isFirstResponse={index === 0}
-                      onFollowUpClick={handleFollowUpClick}
-                      prefersReducedMotion={prefersReducedMotion}
-                      isLoading={isLoading}
-                      onAskAnother={handleAskAnother}
-                      onJournal={handleJournal}
-                      onPray={handlePray}
-                      onShare={handleShare}
-                      feedback={feedback}
-                      feedbackThanks={feedbackThanks}
-                      onFeedback={handleFeedback}
-                    />
-                  </div>
-                </div>
-              ))}
-
-              {/* Loading state — shown below pending question */}
-              {isLoading && (
-                <>
-                  {pendingQuestion && conversation.length > 0 && (
-                    <div className="my-8 border-t border-white/5" />
-                  )}
-                  {pendingQuestion && (
-                    <div className="mb-6">
-                      <UserQuestionBubble question={pendingQuestion} />
-                    </div>
-                  )}
-                  <div className="flex flex-col items-center justify-center py-16">
-                    <div className="mb-4 flex gap-1">
-                      <div className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary" />
-                      <div
-                        className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary"
-                        style={{ animationDelay: '150ms' }}
-                      />
-                      <div
-                        className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary"
-                        style={{ animationDelay: '300ms' }}
-                      />
-                    </div>
-                    <p className="text-text-light">Searching Scripture for wisdom...</p>
-                    <p className="mt-4 font-serif italic text-text-light">
-                      &ldquo;Your word is a lamp to my feet and a light for my path.&rdquo;
-                      <span className="mt-1 block text-sm not-italic">
-                        &mdash; Psalm 119:105 WEB
-                      </span>
-                    </p>
-                  </div>
-                </>
-              )}
+            <div style={SQUIGGLE_MASK_STYLE}>
+              <BackgroundSquiggle />
             </div>
 
-            {/* Save conversation button — after 2+ Q&A pairs */}
-            <SaveConversationButton conversation={conversation} />
+            <div className="relative">
+              {/* Input section */}
+              {showInput && (
+                <>
+                  {/* Textarea */}
+                  <div className="relative mb-4">
+                    <label htmlFor="ask-input" className="sr-only">
+                      Your question
+                    </label>
+                    <textarea
+                      id="ask-input"
+                      value={text}
+                      onChange={(e) => {
+                        setText(e.target.value)
+                        autoExpand(e.target)
+                      }}
+                      placeholder="What's on your heart? Ask anything..."
+                      maxLength={ASK_MAX_LENGTH}
+                      rows={3}
+                      aria-describedby="ask-char-count"
+                      className={cn(
+                        'w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] py-3 px-4',
+                        'text-base text-white placeholder:text-white/40',
+                        'motion-safe:animate-glow-pulse',
+                        'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
+                      )}
+                    />
+                    <span
+                      id="ask-char-count"
+                      className={cn('absolute bottom-2 right-3 text-xs', charCountColor)}
+                    >
+                      {charCount} / {ASK_MAX_LENGTH}
+                    </span>
+                  </div>
+
+                  {/* Crisis Banner */}
+                  <CrisisBanner text={text} />
+
+                  {/* Topic Chips */}
+                  <div className="mb-6 flex flex-wrap justify-center gap-2">
+                    {ASK_TOPIC_CHIPS.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => handleChipClick(chip)}
+                        className={cn(
+                          'min-h-[44px] rounded-full bg-white/10 border border-white/15 px-4 py-2',
+                          'text-sm text-white/70',
+                          'hover:bg-white/15 hover:text-white',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                          'transition-colors',
+                        )}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="flex justify-center">
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={!text.trim()}
+                      className={cn(
+                        'min-h-[44px] rounded-lg bg-primary py-3 px-8 font-semibold text-white',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                        'transition-colors hover:bg-primary-lt',
+                        !text.trim() && 'cursor-not-allowed opacity-50',
+                      )}
+                    >
+                      Find Answers
+                    </button>
+                  </div>
+
+                  {/* Popular Topics */}
+                  <PopularTopicsSection onTopicClick={handleTopicClick} />
+                </>
+              )}
+
+              {/* Conversation thread + loading — aria-live announces new responses */}
+              <div aria-live="polite">
+                {conversation.map((pair, index) => (
+                  <div
+                    key={index}
+                    id={index === conversation.length - 1 ? 'latest-response' : undefined}
+                  >
+                    {index > 0 && <div className="my-8 border-t border-white/5" />}
+                    <UserQuestionBubble question={pair.question} />
+                    <div className="mt-6">
+                      <AskResponseDisplay
+                        response={pair.response}
+                        isFirstResponse={index === 0}
+                        onFollowUpClick={handleFollowUpClick}
+                        prefersReducedMotion={prefersReducedMotion}
+                        isLoading={isLoading}
+                        onAskAnother={handleAskAnother}
+                        onJournal={handleJournal}
+                        onPray={handlePray}
+                        onShare={handleShare}
+                        feedback={feedback}
+                        feedbackThanks={feedbackThanks}
+                        onFeedback={handleFeedback}
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                {/* Loading state — shown below pending question */}
+                {isLoading && (
+                  <>
+                    {pendingQuestion && conversation.length > 0 && (
+                      <div className="my-8 border-t border-white/5" />
+                    )}
+                    {pendingQuestion && (
+                      <div className="mb-6">
+                        <UserQuestionBubble question={pendingQuestion} />
+                      </div>
+                    )}
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <div className="mb-4 flex gap-1">
+                        <div className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary" />
+                        <div
+                          className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary"
+                          style={{ animationDelay: '150ms' }}
+                        />
+                        <div
+                          className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary"
+                          style={{ animationDelay: '300ms' }}
+                        />
+                      </div>
+                      <p className="text-white/60">Searching Scripture for wisdom...</p>
+                      <p className="mt-4 font-serif italic text-white/60">
+                        &ldquo;Your word is a lamp to my feet and a light for my path.&rdquo;
+                        <span className="mt-1 block text-sm not-italic">
+                          &mdash; Psalm 119:105 WEB
+                        </span>
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Save conversation button — after 2+ Q&A pairs */}
+              <SaveConversationButton conversation={conversation} />
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </Layout>
   )
 }

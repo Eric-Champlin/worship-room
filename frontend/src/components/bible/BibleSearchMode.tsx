@@ -44,7 +44,7 @@ export function BibleSearchMode() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search the Bible..."
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50"
+          className="w-full rounded-xl border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder-white/40 outline-none transition-colors motion-safe:animate-glow-pulse focus:border-primary focus:ring-2 focus:ring-primary/50"
         />
         <p className="mt-2 text-center text-sm text-white/40">
           Searching all 66 books of the Bible

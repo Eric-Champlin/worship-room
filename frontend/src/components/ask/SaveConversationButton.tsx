@@ -41,8 +41,8 @@ export function SaveConversationButton({ conversation }: SaveConversationButtonP
         type="button"
         onClick={handleCopy}
         className={cn(
-          'inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 sm:w-auto',
-          'text-sm text-text-dark hover:bg-gray-50',
+          'inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/10 px-3 py-2 sm:w-auto',
+          'text-sm text-white/70 hover:bg-white/15',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           'transition-colors',
         )}

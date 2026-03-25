@@ -76,7 +76,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
         <button
           type="button"
           onClick={handleHighlight}
-          className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-text-light transition-colors hover:text-primary"
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
         >
           <Highlighter className="h-3.5 w-3.5" />
           Highlight in Bible
@@ -84,7 +84,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
         <button
           type="button"
           onClick={handleSaveNoteClick}
-          className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-text-light transition-colors hover:text-primary"
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
         >
           <StickyNote className="h-3.5 w-3.5" />
           Save note
@@ -104,20 +104,20 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
             maxLength={NOTE_MAX_CHARS}
             rows={3}
             className={cn(
-              'w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2',
-              'text-sm text-text-dark placeholder:text-text-light/60',
+              'w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2',
+              'text-sm text-white placeholder:text-white/40',
               'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
             )}
           />
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-xs text-text-light/60">
+            <span className="text-xs text-white/40">
               {noteText.length} / {NOTE_MAX_CHARS}
             </span>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="min-h-[44px] rounded-lg px-3 py-1 text-xs text-text-light transition-colors hover:text-text-dark"
+                className="min-h-[44px] rounded-lg px-3 py-1 text-xs text-white/40 transition-colors hover:text-white/60"
               >
                 Cancel
               </button>

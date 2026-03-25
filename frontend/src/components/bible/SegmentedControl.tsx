@@ -10,7 +10,7 @@ interface SegmentedControlProps {
 export function SegmentedControl({ mode, onModeChange }: SegmentedControlProps) {
   return (
     <div
-      className="mx-auto mt-6 flex w-fit rounded-full border border-white/15 bg-white/5 p-1"
+      className="mx-auto mt-6 flex w-fit rounded-full border border-white/10 bg-white/[0.08] p-1"
       role="tablist"
       aria-label="Bible browser mode"
     >
@@ -22,7 +22,7 @@ export function SegmentedControl({ mode, onModeChange }: SegmentedControlProps) 
           'min-h-[44px] rounded-full px-6 py-2 text-sm font-medium transition-colors',
           mode === 'books'
             ? 'bg-primary text-white'
-            : 'text-white/70 hover:text-white',
+            : 'text-white/60 hover:text-white',
         )}
       >
         Books
@@ -35,7 +35,7 @@ export function SegmentedControl({ mode, onModeChange }: SegmentedControlProps) 
           'min-h-[44px] rounded-full px-6 py-2 text-sm font-medium transition-colors',
           mode === 'search'
             ? 'bg-primary text-white'
-            : 'text-white/70 hover:text-white',
+            : 'text-white/60 hover:text-white',
         )}
       >
         Search

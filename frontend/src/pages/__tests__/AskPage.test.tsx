@@ -282,14 +282,14 @@ describe('AskPage — Response Display', () => {
     const verseCard = verseCards.find((el) => el.closest('.rounded-xl'))?.closest('.rounded-xl')
     expect(verseCard?.className).toContain('rounded-xl')
     expect(verseCard?.className).toContain('border')
-    expect(verseCard?.className).toContain('shadow-sm')
+    expect(verseCard?.className).toContain('backdrop-blur-sm')
   })
 
   it('encouragement callout has purple background + left border', () => {
     submitAndWait()
     const encouragement = screen.getByText(/Your pain matters to God/i).closest('div')
-    expect(encouragement?.className).toContain('bg-purple-50')
-    expect(encouragement?.className).toContain('border-l-4')
+    expect(encouragement?.className).toContain('bg-white/[0.06]')
+    expect(encouragement?.className).toContain('border-l-2')
     expect(encouragement?.className).toContain('border-primary')
   })
 

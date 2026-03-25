@@ -58,7 +58,7 @@ describe('AudioControlBar', () => {
 
     const unselected = screen.getByLabelText('Reading speed 1x')
     expect(unselected).toHaveAttribute('aria-checked', 'false')
-    expect(unselected.className).toContain('text-white/50')
+    expect(unselected.className).toContain('text-white/70')
   })
 
   it('voice toggle hidden when availableVoiceCount <= 1', () => {
