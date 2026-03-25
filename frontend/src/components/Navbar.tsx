@@ -24,7 +24,7 @@ const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon?: LucideIcon }>
   { label: 'Daily Hub', to: '/daily' },
   { label: 'Ask', to: '/ask', icon: Sparkles },
   { label: 'Bible', to: '/bible', icon: Book },
-  { label: 'Daily Devotional', to: '/devotional', icon: Sparkles },
+  { label: 'Daily Devotional', to: '/daily?tab=devotional', icon: Sparkles },
   { label: 'Reading Plans', to: '/reading-plans', icon: BookOpen },
   { label: 'Challenges', to: '/challenges', icon: Flame },
   { label: 'Prayer Wall', to: '/prayer-wall' },
@@ -628,7 +628,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
                 <span className={cn('text-xs', isAuthenticated ? 'text-white/50' : 'text-gray-500')}>
                   It&apos;s {seasonName} — a season of {currentSeason.themeWord}
                 </span>
-                <Link to="/devotional" onClick={onClose} className="text-xs text-primary-lt hover:underline">
+                <Link to="/daily?tab=devotional" onClick={onClose} className="text-xs text-primary-lt hover:underline">
                   Read today&apos;s devotional
                 </Link>
                 <button
@@ -905,7 +905,7 @@ function SeasonalNavLine() {
     <div className="flex items-center justify-center gap-2 px-4 py-1.5 text-xs text-white/50">
       {SeasonIcon && <SeasonIcon className="h-3 w-3" aria-hidden="true" />}
       <span>It&apos;s {seasonName} — a season of {currentSeason.themeWord}</span>
-      <Link to="/devotional" className="text-primary-lt hover:underline">
+      <Link to="/daily?tab=devotional" className="text-primary-lt hover:underline">
         Read today&apos;s devotional
       </Link>
       <button

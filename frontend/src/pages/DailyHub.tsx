@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams, useLocation, Link } from 'react-router-dom'
-import { Heart, PenLine, Wind, Check, Share2, ChevronRight } from 'lucide-react'
+import { Heart, PenLine, Wind, BookOpen, Check, Share2, ChevronRight } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -9,6 +9,7 @@ import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
+import { DevotionalTabContent } from '@/components/daily/DevotionalTabContent'
 import { VerseSharePanel } from '@/components/verse-of-the-day/VerseSharePanel'
 import { getTodaysVerse } from '@/constants/verse-of-the-day'
 import { getTodaysDevotional } from '@/data/devotionals'
@@ -31,15 +32,16 @@ import { cn } from '@/lib/utils'
 import type { PrayContext } from '@/types/daily-experience'
 
 const TABS = [
-  { id: 'pray', label: 'Pray', icon: Heart },
-  { id: 'journal', label: 'Journal', icon: PenLine },
-  { id: 'meditate', label: 'Meditate', icon: Wind },
+  { id: 'devotional', label: 'Devotional', mobileLabel: 'Devos', icon: BookOpen },
+  { id: 'pray', label: 'Pray', mobileLabel: 'Pray', icon: Heart },
+  { id: 'journal', label: 'Journal', mobileLabel: 'Journal', icon: PenLine },
+  { id: 'meditate', label: 'Meditate', mobileLabel: 'Meditate', icon: Wind },
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
 
 function isValidTab(value: string | null): value is TabId {
-  return value === 'pray' || value === 'journal' || value === 'meditate'
+  return value === 'devotional' || value === 'pray' || value === 'journal' || value === 'meditate'
 }
 
 function getGreeting(): string {
@@ -60,7 +62,7 @@ function DailyHubContent() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const rawTab = searchParams.get('tab')
-  const activeTab: TabId = isValidTab(rawTab) ? rawTab : 'pray'
+  const activeTab: TabId = isValidTab(rawTab) ? rawTab : 'devotional'
 
   const { user, isAuthenticated } = useAuth()
   const { isPrayComplete, isJournalComplete, isMeditateComplete } =
@@ -77,14 +79,18 @@ function DailyHubContent() {
     ? `/bible/${parsedRefs[0].bookSlug}/${parsedRefs[0].chapter}`
     : '/bible'
 
-  const hasReadDevotional = (() => {
+  const [hasReadDevotional, setHasReadDevotional] = useState(() => {
     if (!isAuthenticated) return false
     try {
       const reads: string[] = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]')
       const todayStr = new Date().toLocaleDateString('en-CA')
       return reads.includes(todayStr)
     } catch { return false }
-  })()
+  })
+
+  const handleDevotionalComplete = useCallback(() => {
+    setHasReadDevotional(true)
+  }, [])
 
   const [sharePanelOpen, setSharePanelOpen] = useState(false)
   const shareBtnRef = useRef<HTMLButtonElement>(null)
@@ -137,10 +143,27 @@ function DailyHubContent() {
     [setSearchParams],
   )
 
+  const handleSwitchToDevotionalJournal = useCallback(
+    (topic: string) => {
+      setPrayContext({ from: 'devotional', topic })
+      setSearchParams({ tab: 'journal' }, { replace: true })
+    },
+    [setSearchParams],
+  )
+
+  const handleSwitchToDevotionalPray = useCallback(
+    (context: string) => {
+      setPrayContext({ from: 'devotional', topic: context })
+      setSearchParams({ tab: 'pray' }, { replace: true })
+    },
+    [setSearchParams],
+  )
+
   const greeting = getGreeting()
   const displayName = user ? `${greeting}, ${user.name}!` : `${greeting}!`
 
   const completionMap: Record<string, boolean> = {
+    devotional: hasReadDevotional,
     pray: isPrayComplete,
     journal: isJournalComplete,
     meditate: isMeditateComplete,
@@ -241,9 +264,10 @@ function DailyHubContent() {
             </div>
 
             {/* Right Card — Today's Devotional */}
-            <Link
-              to="/devotional"
-              className="block rounded-xl border border-white/10 bg-white/[0.08] p-5 text-left backdrop-blur-sm transition-colors hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:min-h-[140px]"
+            <button
+              type="button"
+              onClick={() => switchTab('devotional')}
+              className="block w-full rounded-xl border border-white/10 bg-white/[0.08] p-5 text-left backdrop-blur-sm transition-colors hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:min-h-[140px]"
             >
               <p className="text-xs uppercase tracking-wide text-primary-lt">
                 Daily Devotional
@@ -265,7 +289,7 @@ function DailyHubContent() {
               <p className="mt-3 flex items-center gap-1 text-sm text-primary-lt">
                 Read today&apos;s devotional <ChevronRight className="h-3 w-3" />
               </p>
-            </Link>
+            </button>
           </div>
 
           {/* Quiz Teaser */}
@@ -328,7 +352,8 @@ function DailyHubContent() {
                     )}
                   >
                     <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                    {tab.label}
+                    <span className="hidden min-[400px]:inline">{tab.mobileLabel}</span>
+                    <span className="sr-only min-[400px]:hidden">{tab.label}</span>
                     {isAuthenticated && isComplete && (
                       <>
                         <Check
@@ -360,6 +385,20 @@ function DailyHubContent() {
         </div>
 
         {/* Tab Panels — all mounted, CSS show/hide for state preservation */}
+        <div
+          role="tabpanel"
+          id="tabpanel-devotional"
+          aria-labelledby="tab-devotional"
+          tabIndex={0}
+          hidden={activeTab !== 'devotional'}
+        >
+          <DevotionalTabContent
+            onSwitchToJournal={handleSwitchToDevotionalJournal}
+            onSwitchToPray={handleSwitchToDevotionalPray}
+            onComplete={handleDevotionalComplete}
+          />
+        </div>
+
         <div
           role="tabpanel"
           id="tabpanel-pray"

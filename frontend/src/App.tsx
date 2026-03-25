@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/query-client'
@@ -41,7 +41,7 @@ const RoutinesPage = lazy(() => import('./pages/RoutinesPage').then((m) => ({ de
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })))
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })))
 const GrowthProfile = lazy(() => import('./pages/GrowthProfile').then((m) => ({ default: m.GrowthProfile })))
-const DevotionalPage = lazy(() => import('./pages/DevotionalPage').then((m) => ({ default: m.DevotionalPage })))
+// DevotionalPage kept as file but no longer routed — content lives in DevotionalTabContent
 const MyPrayers = lazy(() => import('./pages/MyPrayers').then((m) => ({ default: m.MyPrayers })))
 const ReadingPlans = lazy(() => import('./pages/ReadingPlans').then((m) => ({ default: m.ReadingPlans })))
 const ReadingPlanDetail = lazy(() => import('./pages/ReadingPlanDetail').then((m) => ({ default: m.ReadingPlanDetail })))
@@ -109,6 +109,13 @@ function RootRoute() {
   return isAuthenticated ? <Dashboard /> : <Home />
 }
 
+function DevotionalRedirect() {
+  const [searchParams] = useSearchParams()
+  const day = searchParams.get('day')
+  const target = day ? `/daily?tab=devotional&day=${day}` : '/daily?tab=devotional'
+  return <Navigate to={target} replace />
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -132,7 +139,7 @@ function App() {
           <Route path="/my-prayers" element={<MyPrayers />} />
           <Route path="/daily" element={<DailyHub />} />
           <Route path="/ask" element={<AskPage />} />
-          <Route path="/devotional" element={<DevotionalPage />} />
+          <Route path="/devotional" element={<DevotionalRedirect />} />
           <Route path="/reading-plans" element={<ReadingPlans />} />
           <Route path="/reading-plans/:planId" element={<ReadingPlanDetail />} />
           <Route path="/challenges" element={<Challenges />} />

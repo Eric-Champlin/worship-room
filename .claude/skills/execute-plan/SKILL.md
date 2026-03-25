@@ -56,6 +56,8 @@ Before doing anything, read and internalize:
  
 6. **[UNVERIFIED] values** — Scan the plan for any `[UNVERIFIED]` flags. Know which values are provisional before you start implementing. These get extra scrutiny during visual verification (Step 4g).
  
+7. **Record the starting file set** — Run `git diff --name-only HEAD 2>/dev/null` and store the list of already-changed files. This is used in Step 4a to distinguish pre-existing changes from changes made by this execution session.
+ 
 ---
  
 ## Step 3: Find the Starting Point
@@ -91,15 +93,18 @@ All steps have been executed successfully.
 If this is the first execution (no steps marked [COMPLETE] in the Execution Log):
  
 ```bash
-git branch backup/pre-execute-$(date +%Y%m%d%H%M%S) 2>/dev/null || true
+BACKUP_BRANCH="backup/pre-execute-$(date +%Y%m%d%H%M%S)"
+git branch "$BACKUP_BRANCH" 2>/dev/null || true
 ```
  
 ```text
-✅ Safety backup created: backup/pre-execute-{timestamp}
+✅ Safety backup created: {BACKUP_BRANCH}
  
 If execution goes badly, you can restore with:
-  git reset --hard backup/pre-execute-{timestamp}
+  git reset --hard {BACKUP_BRANCH}
 ```
+ 
+Store the backup branch name for consistent reference throughout the session.
  
 If this is a re-run (some steps already [COMPLETE]), skip the backup — the user may have committed intermediate progress.
  
@@ -113,18 +118,22 @@ For each incomplete step in order:
  
 ### 4a: Pre-Execution Safety Check
  
-**CRITICAL: Before executing ANY step that modifies or reverts files, check for uncommitted changes:**
+**CRITICAL: Before executing ANY step that modifies or reverts files, check for uncommitted changes that predate this execution session:**
  
 ```bash
 git status --porcelain
 ```
  
-**If there are uncommitted changes:**
+Compare the list of changed files against:
+1. Files listed in any completed step's "Files to create/modify" (changes from this session — expected)
+2. The starting file set recorded in Step 2.7 (changes that predate this session — unexpected)
+ 
+**If there are uncommitted changes to files NOT created/modified by any completed step in this session AND NOT in the starting file set:**
  
 ```text
-⚠️  UNCOMMITTED CHANGES DETECTED
+⚠️  UNCOMMITTED CHANGES DETECTED (not from this execution session)
  
-The following files have uncommitted changes:
+The following files have uncommitted changes that predate this run:
 - {file list}
  
 The plan may include operations that overwrite files.
@@ -139,7 +148,7 @@ Which option? (1/2/3)
  
 **NEVER run `git checkout`, `git restore`, or any file-reverting command on files with uncommitted changes without explicit user approval.** This is a destructive operation. Wait for the user to choose.
  
-**If no uncommitted changes:** Proceed normally.
+**If all uncommitted changes are from completed steps in this session:** Proceed normally — these are expected work-in-progress files.
  
 ### 4b: Check Dependencies
  
@@ -186,7 +195,9 @@ checkpoint (4g) should specifically compare these against the design system or e
  
 ### 4d: Design System Reminder (UI steps only)
  
-**Before implementing any step that touches UI, check the plan for a "Design System Reminder" block.** If present, display it:
+**Before implementing any step that touches UI, do two things:**
+ 
+**1. Display the Design System Reminder from the plan (if present):**
  
 ```text
 ⚠️  DESIGN SYSTEM REMINDER:
@@ -197,9 +208,9 @@ checkpoint (4g) should specifically compare these against the design system or e
 All styling for this step must account for these patterns.
 ```
  
-Also reference the Design System Reference (`_plans/recon/design-system.md`) if loaded in Step 2. Use exact values from it — do not approximate.
+**2. Re-read the relevant section of the Design System Reference** (`_plans/recon/design-system.md`) for the specific component being built in this step. Do not rely on values memorized from Step 2 — re-read fresh to ensure accuracy. Look up the exact values for this component's colors, typography, spacing, gradients, and hover states.
  
-**If no Design System Reminder in the plan:** Skip this sub-step.
+**If no Design System Reminder in the plan:** Skip the reminder display, but still re-read the design system reference for this component.
  
 ### 4e: Implement
  
@@ -264,12 +275,15 @@ This applies when:
 - The step changes any visible UI element
 - The plan references a recon report or design specs
  
+**Skip visual verification for purely backend steps with no UI impact.**
+ 
 **Verification process:**
  
 1. Start the dev server if not already running
-2. **Screenshot the built component at multiple breakpoints** using Playwright. Use breakpoints from the plan's Responsive Structure section, or defaults: 375px, 768px, 1440px.
-3. **Compare against the recon report screenshots** for that component (if available)
-4. **Extract computed styles** and compare against the CSS Mapping Table from the Design System Reference (if available). Use the **exhaustive property list** — compare ALL of these for every element:
+2. **Wait for render:** After navigation, wait for `networkidle` AND verify key elements are visible before taking screenshots. For components with async data (Spotify embeds, API calls, lazy images), wait for the loading state to resolve. Do NOT screenshot a loading spinner or partially-rendered page.
+3. **Screenshot the built component at multiple breakpoints** using Playwright. Use breakpoints from the plan's Responsive Structure section, or defaults: 375px, 768px, 1440px.
+4. **Compare against the recon report screenshots** for that component (if available)
+5. **Extract computed styles** and compare against the CSS Mapping Table from the Design System Reference (if available). Use the **exhaustive property list** — compare ALL of these for every element:
    - Dimensions: width, height, max-width, min-width, min-height
    - Spacing: padding (all sides), margin (all sides), gap
    - Borders: border-top, border-right, border-bottom, border-left, border-radius
@@ -278,15 +292,15 @@ This applies when:
    - Layout: display, flex-direction, align-items, justify-content
    - Effects: box-shadow, opacity
  
-5. **Matching tolerance: There is NO "CLOSE" verdict.** Every comparison is YES or NO:
+6. **Matching tolerance: There is NO "CLOSE" verdict.** Every comparison is YES or NO:
    - Numeric values differ by ≤2px → YES
    - Numeric values differ by >2px → NO
    - Colors differ at all → NO
    - Any other difference → NO
  
-6. **If any [UNVERIFIED] values exist in this step**, compare them FIRST against the recon or existing UI and flag if the guess was wrong.
+7. **If any [UNVERIFIED] values exist in this step**, compare them FIRST against the recon or existing UI and flag if the guess was wrong.
  
-7. **Additional checks (if the recon/plan includes these tables):**
+8. **Additional checks (if the recon/plan includes these tables):**
    - **Gradients:** Compare the full background-image gradient string. If the gradient angle or cutoff position differs by >5px, flag as a mismatch.
    - **Vertical rhythm:** Measure the gap between adjacent sections and compare against the recon's Vertical Rhythm table. Any gap difference >5px is a mismatch.
    - **Images:** Compare rendered width/height of images against the recon's Image tables.
@@ -294,7 +308,7 @@ This applies when:
    - **Hover/focus states:** If the recon includes States tables, hover each button and verify background-color/shadow changes match. Focus each input and verify border/outline changes match. Missing hover/focus styles are a mismatch.
    - **Conditional content:** If the recon documents conditional/dynamic content (e.g., a field that appears when a tab is selected), trigger the condition and verify the content appears with correct styling.
  
-8. **Auth state verification for dashboard/logged-in features:**
+9. **Auth state verification for dashboard/logged-in features:**
    If the component requires logged-in state and the project uses simulated auth via localStorage (`wr_auth_simulated`):
    - Inject auth state via Playwright's `page.addInitScript()` BEFORE navigating:
      ```typescript
@@ -307,7 +321,7 @@ This applies when:
    - If the step also needs seed data (mood entries, friends, badges, etc.), inject it via the same mechanism using the data models from the master plan
    - Do NOT modify source code for auth or data seeding
  
-9. **Produce a comparison table:**
+10. **Produce a comparison table:**
  
 ```text
 ## Visual Verification: Step <N> — <component name>
@@ -317,31 +331,35 @@ This applies when:
 | {elem}  | {prop}   | {expected}    | {actual}    | YES/NO | {Tailwind class if NO} |
 ```
  
-10. **If all values match:** Proceed to 4h
-11. **If mismatches found:**
-   - Fix using exact values from the CSS Mapping Table or Fix Hint
-   - Re-screenshot and re-compare
-   - After **two failed fix attempts**, STOP entirely:
+11. **If all values match:** Proceed to 4h
+12. **If mismatches found:**
+ 
+   First, classify each mismatch:
+   - **(a) Value mismatch** — wrong color, size, spacing, font, etc. Fix: apply the exact value from the CSS Mapping Table or Fix Hint.
+   - **(b) Structural mismatch** — wrong HTML nesting, missing wrapper div, wrong flexbox direction, missing element entirely. Fix: review DOM structure against the plan's expected component structure.
+   - **(c) Behavioral mismatch** — wrong state, missing hover effect, interaction not working. Fix: review component logic, event handlers, and state management.
+ 
+   Then fix using the appropriate strategy for the mismatch type. Re-screenshot and re-compare.
+   
+   After **two failed fix attempts**, STOP entirely:
  
 ```text
 [WARNING] Visual verification failed for Step <N> after 2 fix attempts.
  
 Mismatches remaining:
-| Element | Property | Expected | Actual |
-|---------|----------|----------|--------|
-| {elem}  | {prop}   | {val}    | {val}  |
+| Element | Property | Expected | Actual | Type |
+|---------|----------|----------|--------|------|
+| {elem}  | {prop}   | {val}    | {val}  | value / structural / behavioral |
  
 Options:
 1. I'll fix it manually and re-run /execute-plan
 2. Show me the component code so I can guide you
 3. Skip visual verification and continue (not recommended)
 4. Run /verify-with-playwright for a more comprehensive visual check
-5. Restore from backup: git reset --hard backup/pre-execute-{timestamp}
+5. Restore from backup: git reset --hard {BACKUP_BRANCH}
 ```
  
 **If no recon report or Design System Reference exists:** Do a basic browser sanity check instead — navigate to the page, verify key elements are visible, layout is correct, no console errors, interactions work. Check at mobile and desktop. This catches obvious visual/behavioral issues that unit tests miss.
- 
-**Skip visual verification for purely backend steps with no UI impact.**
  
 ### 4h: Verify Expected State
  
@@ -371,7 +389,7 @@ Options:
 1. I'll fix it manually and re-run /execute-plan
 2. Show me what you tried so I can guide you
 3. Roll back this step
-4. Restore from backup: git reset --hard backup/pre-execute-{timestamp}
+4. Restore from backup: git reset --hard {BACKUP_BRANCH}
 ```
  
 **Never update the log with failing verifications. Never continue to the next step.**
@@ -420,7 +438,7 @@ All <N> steps executed successfully.
 3. Run /code-review for final quality check
 4. For UI work: /verify-with-playwright {route} <plan-path> for comprehensive visual check
 5. Commit and push when satisfied
-6. Delete safety backup after confirming changes: git branch -D backup/pre-execute-{timestamp}
+6. Delete safety backup after confirming changes: git branch -D {BACKUP_BRANCH}
 7. Plan retained at: <plan-path>
 ```
  
@@ -454,14 +472,15 @@ All <N> steps executed successfully.
 - Only update the Execution Log after verifications pass
 - Do not delete the plan file — it serves as a record
 - For UI steps: visual verification is mandatory, not optional
+- Before each UI step: re-read the relevant Design System Reference section fresh — do not rely on memorized values from Step 2
  
 **Error Handling:**
 - Ambiguity → STOP, ask the user
 - Plan contradicts codebase → STOP, flag with evidence
 - Tests fail after one fix → STOP, show failure details
-- Visual verification fails after two fixes → STOP, surface mismatches
+- Visual verification fails after two fixes → STOP, surface mismatches with classification (value / structural / behavioral)
 - Dependency not met → STOP, inform user
-- Uncommitted changes detected → STOP, offer commit/stash/proceed options
+- Uncommitted changes from outside this session detected → STOP, offer commit/stash/proceed options
  
 **Philosophy:** The plan was carefully crafted with full codebase reconnaissance. Trust it. Follow it precisely. Flag conflicts rather than improvising. Quality over speed — each step should be production-ready code.
  

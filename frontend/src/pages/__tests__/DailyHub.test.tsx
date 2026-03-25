@@ -107,8 +107,11 @@ describe('DailyHub', () => {
 
   it('renders verse reference with dash prefix', () => {
     renderPage()
-    const ref = screen.getByText(/^—\s/)
+    // Verse reference is in the hero section, always visible regardless of tab
+    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+    const ref = hero.querySelector('.text-white\\/50')
     expect(ref).toBeInTheDocument()
+    expect(ref!.textContent).toMatch(/^—\s/)
   })
 
   it('verse card links to Bible reader', () => {
@@ -126,10 +129,19 @@ describe('DailyHub', () => {
     expect(heading!.textContent!.length).toBeGreaterThan(0)
   })
 
-  it('devotional card links to /devotional', () => {
-    renderPage()
-    const devLinks = screen.getAllByRole('link').filter(l => l.getAttribute('href') === '/devotional')
-    expect(devLinks.length).toBeGreaterThanOrEqual(1)
+  it('devotional card switches to devotional tab', async () => {
+    const user = userEvent.setup()
+    renderPage('/daily?tab=pray')
+    // Find the devotional card button within the hero section
+    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+    const devCard = Array.from(hero.querySelectorAll('button')).find(
+      (btn) => btn.textContent?.includes('Read today')
+    )!
+    expect(devCard).toBeInTheDocument()
+    await user.click(devCard)
+    // After clicking, devotional tab becomes active
+    const devTab = screen.getByRole('tab', { name: /devos|devotional/i })
+    expect(devTab).toHaveAttribute('aria-selected', 'true')
   })
 
   it('shows "DAILY DEVOTIONAL" label in hero card', () => {
@@ -211,23 +223,24 @@ describe('DailyHub', () => {
     expect(screen.getByText('Breathing Exercise')).toBeInTheDocument()
   })
 
-  it('renders tab bar with 3 tabs', () => {
+  it('renders tab bar with 4 tabs', () => {
     renderPage()
     const tablist = screen.getByRole('tablist')
     expect(tablist).toBeInTheDocument()
     const tabs = screen.getAllByRole('tab')
-    expect(tabs).toHaveLength(3)
-    expect(tabs[0]).toHaveTextContent('Pray')
-    expect(tabs[1]).toHaveTextContent('Journal')
-    expect(tabs[2]).toHaveTextContent('Meditate')
+    expect(tabs).toHaveLength(4)
+    expect(tabs[0]).toHaveTextContent(/devos|devotional/i)
+    expect(tabs[1]).toHaveTextContent('Pray')
+    expect(tabs[2]).toHaveTextContent('Journal')
+    expect(tabs[3]).toHaveTextContent('Meditate')
   })
 
-  it('defaults to Pray tab content', () => {
+  it('defaults to Devotional tab content', () => {
     renderPage()
-    // Pray heading unique word "Heart?" identifies the active tab
-    expect(screen.getByText('Heart?')).toBeInTheDocument()
-    const prayTab = screen.getByRole('tab', { name: /pray/i })
-    expect(prayTab).toHaveAttribute('aria-selected', 'true')
+    // Devotional heading unique word "Soul?" identifies the active tab
+    expect(screen.getByText('Soul?')).toBeInTheDocument()
+    const devTab = screen.getByRole('tab', { name: /devos|devotional/i })
+    expect(devTab).toHaveAttribute('aria-selected', 'true')
   })
 
   it('shows Journal tab content when ?tab=journal', () => {
@@ -250,8 +263,8 @@ describe('DailyHub', () => {
   it('switches tabs on click', async () => {
     const user = userEvent.setup()
     renderPage()
-    // Default is Pray
-    expect(screen.getByText('Heart?')).toBeInTheDocument()
+    // Default is Devotional
+    expect(screen.getByText('Soul?')).toBeInTheDocument()
 
     // Click Journal tab
     await user.click(screen.getByRole('tab', { name: /journal/i }))
@@ -285,23 +298,25 @@ describe('DailyHub', () => {
     expect(checkmarks).toHaveLength(0)
   })
 
-  it('defaults to Pray for invalid tab param', () => {
+  it('defaults to Devotional for invalid tab param', () => {
     renderPage('/daily?tab=invalid')
-    expect(screen.getByText('Heart?')).toBeInTheDocument()
+    expect(screen.getByText('Soul?')).toBeInTheDocument()
   })
 
   it('supports arrow key navigation between tabs', async () => {
     const user = userEvent.setup()
     renderPage()
-    const prayTab = screen.getByRole('tab', { name: /pray/i })
-    prayTab.focus()
+    const devTab = screen.getByRole('tab', { name: /devos|devotional/i })
+    devTab.focus()
+    await user.keyboard('{ArrowRight}')
+    expect(screen.getByRole('tab', { name: /pray/i })).toHaveFocus()
     await user.keyboard('{ArrowRight}')
     expect(screen.getByRole('tab', { name: /journal/i })).toHaveFocus()
     await user.keyboard('{ArrowRight}')
     expect(screen.getByRole('tab', { name: /meditate/i })).toHaveFocus()
     // Wraps around
     await user.keyboard('{ArrowRight}')
-    expect(screen.getByRole('tab', { name: /pray/i })).toHaveFocus()
+    expect(screen.getByRole('tab', { name: /devos|devotional/i })).toHaveFocus()
     // ArrowLeft wraps backward
     await user.keyboard('{ArrowLeft}')
     expect(screen.getByRole('tab', { name: /meditate/i })).toHaveFocus()
@@ -309,7 +324,7 @@ describe('DailyHub', () => {
 
   it('preserves textarea text when switching tabs and switching back', async () => {
     const user = userEvent.setup()
-    renderPage()
+    renderPage('/daily?tab=pray')
     const textarea = screen.getByRole('textbox', { name: /prayer request/i })
     await user.type(textarea, 'my prayer text')
     // Switch to Journal

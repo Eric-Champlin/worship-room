@@ -35,7 +35,7 @@ User input: $ARGUMENTS
  
 ---
  
-## Step 1: Gather the Diff
+## Step 1: Gather the Diff and Triage
  
 Collect all current changes:
  
@@ -60,6 +60,14 @@ git branch --show-current
 git log --oneline -10
 ```
  
+**Triage: identify high-risk files for deep review.**
+ 
+Classify every changed file into one of these risk tiers:
+ 
+- **High risk (deep review):** New components, security-sensitive changes (auth, encryption, data persistence), data model changes, files touching auth or crisis detection, database migrations, any file with >100 lines changed
+- **Medium risk (standard review):** Existing component modifications, styling changes, test files, configuration changes
+- **Low risk (light review):** Import reordering, formatting-only, comment updates, dependency bumps
+ 
 ```text
 ## Review Scope
  
@@ -69,9 +77,16 @@ git log --oneline -10
 **Lines removed:** {count}
 **Commits on branch:** {count}
  
+**Triage:**
+- High risk: {count} files (deep review)
+- Medium risk: {count} files (standard review)
+- Low risk: {count} files (light review)
+ 
 **Changed files:**
-- {file path} — {lines added / lines removed}
+- {file path} — {lines added / lines removed} — {HIGH / MEDIUM / LOW}
 ```
+ 
+**If the user provided a focus area in `$ARGUMENTS`, prioritize that area but still report blockers found elsewhere.**
  
 ## Step 2: Load Context
  
@@ -169,14 +184,22 @@ Search the plan for any values marked `[UNVERIFIED]`. For each one, check:
  
 If the plan has no [UNVERIFIED] values: `**[UNVERIFIED] values:** None in plan — all values from recon.`
  
-### 3e: Shared Data Model Consistency (if master plan referenced)
+### 3e: Data Model Consistency
  
-If the plan references a master spec plan, verify that shared data models are used consistently:
+**Check that shared data models are used consistently across the diff, regardless of whether a master plan exists.**
+ 
+**If the plan references a master spec plan:** Verify interfaces and localStorage keys match the master plan exactly:
  
 | Data Model / Key | Master Plan Definition | Code Implementation | Match? |
 |-----------------|----------------------|--------------------| -------|
 | {interface name} | {field names/types from master plan} | {file}:{line} | YES / DEVIATES: {details} |
 | {localStorage key} | {expected key name} | {file}:{line} | YES / WRONG KEY |
+ 
+**Regardless of master plan:** Check that any localStorage keys or data interfaces used in the diff are consistent with each other and with existing code. If two files in the diff use the same localStorage key with different schemas, or if a new file uses a key name that conflicts with existing code, flag it.
+ 
+| Key / Interface | File A Usage | File B Usage | Consistent? |
+|----------------|-------------|-------------|-------------|
+| {key or interface} | {file}:{line} — {schema/type} | {file}:{line} — {schema/type} | YES / CONFLICT: {details} |
  
 ## Step 4: Spec Compliance (only if --spec provided)
  
@@ -256,7 +279,7 @@ If no issues: `**Patterns:** Consistent across all changed files.`
  
 ### 5c: Codebase Consistency
  
-Read 2-3 existing unchanged files in the same area and compare:
+Read **one existing unchanged file per directory touched by the diff** and compare (prioritize the most-changed directory if many directories were touched):
  
 - Does new code follow the same patterns as existing code?
 - Are there style deviations from established codebase conventions?
@@ -337,6 +360,9 @@ If none found: `**Sensitive data:** Clean — no secrets or credentials detected
 - Meaningful assertions? Testing behavior vs implementation details? Edge cases covered?
 - Test names clearly describe what they test?
 - Tests that would pass even if the feature were broken (false greens)?
+- **Test isolation:** Do any tests depend on execution order or share mutable state? Tests that pass individually but fail when run together (or vice versa) indicate shared state leaks.
+- **Test data leaks:** Are test data/mocks properly cleaned up? Will leftover state affect other tests?
+- **Test speed:** Are integration tests doing work that should be unit tests? Are there tests making real network calls that should be mocked?
  
 ### 7e: Frontend-Specific
 - Missing key props on lists?
@@ -440,7 +466,7 @@ Consider how you (or a future you) will experience this diff:
  
 ## Step 10: Worship Room-Specific Safety Checks
  
-**These are ALWAYS checked, regardless of flags.**
+**These are ALWAYS checked, regardless of flags.** Read `.claude/rules/` for the latest project-specific safety requirements. The checks below reflect the current known requirements — if the rules files define additional checks, include those too.
  
 | Check | Status | Evidence |
 |-------|--------|----------|
@@ -461,10 +487,42 @@ Consider how you (or a future you) will experience this diff:
  
 ## Step 11: Produce Report
  
+**If total findings across ALL steps is 0 (clean review), use the compact report format:**
+ 
 ```text
 # Code Review: {branch name}
  
-**Verdict: {CLEAN / NEEDS FIXES / NEEDS DISCUSSION}**
+**Verdict: CLEAN ✅**
+ 
+**Branch:** {branch name} | **Files:** {count} | **Lines:** +{added} / -{removed}
+**Plan:** {provided / not provided} | **Spec:** {provided / not provided}
+ 
+**All checks passed:**
+- Accuracy vs plan: ✅
+- Spec compliance: ✅
+- Pattern consistency: ✅
+- Cleanliness: ✅
+- Logic: ✅
+- Security: ✅
+- Worship Room safety: ✅
+ 
+## Positive
+{list things the code does well}
+ 
+## Pre-Commit Checklist
+- [ ] Tests pass locally: `pnpm test`
+- [ ] Visual verification completed (if UI changes): `/verify-with-playwright`
+- [ ] Diff is focused and tells a clear story
+ 
+No blocking issues found. The diff is clean and ready to commit.
+```
+ 
+**If findings were found, use the full report format:**
+ 
+```text
+# Code Review: {branch name}
+ 
+**Verdict: {NEEDS FIXES / NEEDS DISCUSSION}**
  
 ## Summary
 - **Branch:** {branch name}
@@ -478,7 +536,7 @@ Consider how you (or a future you) will experience this diff:
 |----------|--------|----------|
 | Accuracy (vs plan) | {count or "N/A"} | {count} |
 | [UNVERIFIED] Values | {count or "N/A"} | {count} |
-| Shared Data Model Consistency | {count or "N/A"} | {count} |
+| Data Model Consistency | {count or "N/A"} | {count} |
 | Spec Compliance | {count or "N/A"} | {count} |
 | Pattern Consistency | {count} | {count} |
 | Cleanliness | {count} | {count} |
@@ -528,8 +586,8 @@ Consider how you (or a future you) will experience this diff:
 ### [UNVERIFIED] Values
 {from Step 3d, or "No plan provided" or "None in plan"}
  
-### Shared Data Model Consistency
-{from Step 3e, or "No master plan referenced"}
+### Data Model Consistency
+{from Step 3e, or "No issues found"}
  
 ### Spec Compliance
 {from Step 4, or "No spec provided"}
@@ -571,7 +629,6 @@ Based on this review, verify before committing:
 {anything requiring human judgment — or "None"}
 ```
  
-{If CLEAN: "No blocking issues found. The diff is clean and ready to commit."}
 {If NEEDS FIXES: "X blocking issues must be resolved before committing. Want me to apply the fixes?"}
 {If NEEDS DISCUSSION: "No code issues, but there are design/scope questions that should be considered before proceeding."}
  
@@ -599,15 +656,17 @@ If in plan-aware mode with deviations:
 - Worship Room-specific issues (AI safety, crisis detection bypass, `dangerouslySetInnerHTML`, demo mode writes, unencrypted journal entries, mood data privacy violations) are always **Blocker** severity
 - Plan deviations that violate a guardrail (DO NOT item) are always **Blocker** severity
 - Missing auth gates for spec-defined gated actions are always **Blocker** severity
-- Shared data model mismatches (wrong localStorage key names, wrong TypeScript interface fields vs master plan) are always **Major** severity
+- Data model mismatches (wrong localStorage key names, wrong TypeScript interface fields vs master plan, conflicting schemas between files) are always **Major** severity
 - If the user provides a focus area in `$ARGUMENTS`, prioritize that area but still report blockers found elsewhere
 - Read `.claude/rules/` for project-specific standards before reviewing
+- For clean reviews (zero findings), use the compact report — don't produce 12 sections of "no issues found"
+- Prioritize high-risk files (from triage) for the deepest review
  
 ## Severity Definitions
  
 - **Blocker:** Must fix. Includes: bugs, security vulnerabilities, Worship Room safety violations, missing auth gates, plan guardrail violations, sensitive data, debug artifacts in production code, unsafe database migrations, mood data privacy violations.
-- **Major:** Should fix. Includes: accessibility issues (WCAG A/AA violations), missing error handling on external calls, unverified values not confirmed, shared data model mismatches, logic errors that could cause silent failures.
-- **Medium:** Recommended. Includes: inconsistent patterns, test quality issues, missing edge cases, minor accessibility enhancements, performance concerns.
+- **Major:** Should fix. Includes: accessibility issues (WCAG A/AA violations), missing error handling on external calls, unverified values not confirmed, data model mismatches (including cross-file localStorage schema conflicts), logic errors that could cause silent failures.
+- **Medium:** Recommended. Includes: inconsistent patterns, test quality issues (isolation, shared state, false greens), missing edge cases, minor accessibility enhancements, performance concerns.
 - **Minor / Nit:** Nice to have. Includes: naming preferences, import ordering, comment wording, whitespace.
  
 ## What This Does NOT Replace
@@ -620,7 +679,7 @@ If in plan-aware mode with deviations:
  
 - No changes found → inform user, nothing to review
 - Plan file provided but doesn't match the changes → flag the mismatch
-- Diff is extremely large (>2000 lines) → flag that it might need splitting, but still review
+- Diff is extremely large (>2000 lines) → flag that it might need splitting, but still review (prioritize high-risk files from triage)
  
 ## Philosophy
  

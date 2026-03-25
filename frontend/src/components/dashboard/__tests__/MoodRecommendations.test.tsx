@@ -246,7 +246,7 @@ describe('MoodRecommendations', () => {
       expect(screen.getByText('Anchored in Trust')).toBeInTheDocument()
     })
 
-    it('devotional card links to /devotional', () => {
+    it('devotional card links to /daily?tab=devotional', () => {
       vi.mocked(getTodaysDevotional).mockReturnValue({
         ...MOCK_DEVOTIONAL,
         theme: 'trust',
@@ -254,7 +254,7 @@ describe('MoodRecommendations', () => {
       })
       renderRecommendations(1)
       const links = screen.getAllByRole('link')
-      expect(links[0]).toHaveAttribute('href', '/devotional')
+      expect(links[0]).toHaveAttribute('href', '/daily?tab=devotional')
     })
 
     it('does NOT show devotional when theme does not match mood', () => {

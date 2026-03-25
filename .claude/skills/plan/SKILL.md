@@ -41,7 +41,19 @@ Run /spec <feature idea> first to generate a spec, or verify the path.
  
 ## Step 2: Codebase Reconnaissance
  
-Before writing any plan, explore the codebase to ground your plan in reality. Discover:
+Before writing any plan, explore the codebase to ground your plan in reality.
+ 
+**If context is large (complex feature touching many files), prioritize in this order:**
+1. The spec itself
+2. Design System Reference (`_plans/recon/design-system.md`)
+3. Security rules (`.claude/rules/02-security.md`)
+4. Related existing files the feature extends or modifies
+5. Master Spec Plan (if multi-spec feature)
+6. Everything else
+ 
+**Summarize rather than quoting when possible** to preserve working context for plan generation.
+ 
+Discover:
  
 1. **Project structure** — directory layout, key directories, where components/services/routes live
 2. **Existing patterns** — how existing features are built (component structure, API patterns, state management, styling approach)
@@ -58,10 +70,11 @@ Before writing any plan, explore the codebase to ground your plan in reality. Di
     - Shared constants (mood colors, activity points, level thresholds, badge definitions)
     - Prior spec decisions that this spec must respect
     - Include relevant shared context in the Architecture Context section
+11. **Recent Execution Log deviations** — check the Execution Logs of the 2-3 most recent plans in `_plans/` for deviations caused by design system misunderstandings (wrong font, wrong gradient, wrong spacing). These patterns belong in the Design System Reminder block to prevent the same mistakes.
  
 If the Design System Reference does not exist, note it in the Assumptions section: "No design system reference found. UI styling values are based on codebase inspection and may not be pixel-perfect. Consider running `/playwright-recon --internal` before execution."
  
-**Recon staleness check:** If `_plans/recon/design-system.md` exists, check the date at the top of the file. If significant visual changes have been made since the recon was captured (check CLAUDE.md's Phase descriptions and Known Issues for recent redesigns), flag it: "⚠️ Design system recon may be stale (captured before recent visual redesign). Consider re-running `/playwright-recon --internal` to capture current values." A stale recon is worse than no recon — it gives false confidence in outdated values.
+**Recon staleness check:** If `_plans/recon/design-system.md` exists, check the date at the top of the file. Also compare the list of pages captured in the recon against current routes in CLAUDE.md — if new pages exist that weren't captured, or if CLAUDE.md mentions recent visual redesigns since the capture date, flag it: "⚠️ Design system recon may be stale (captured before recent changes: {list what changed}). Consider re-running `/playwright-recon --internal` to capture current values." A stale recon is worse than no recon — it gives false confidence in outdated values.
  
 **[UNVERIFIED] value marking:** When the spec introduces visual patterns not covered by any recon report or design system reference, or when a value is derived from codebase inspection rather than computed extraction, mark it as `[UNVERIFIED]` in the plan. Include a verification method and correction method for each:
  
@@ -150,6 +163,8 @@ This table is the executor's copy-paste reference for all styling. No guessing.
 - {e.g., Dashboard uses frosted glass cards: bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl}
 - {e.g., Mood colors: Struggling=#D97706, Heavy=#C2703E, Okay=#8B7FA8, Good=#2DD4BF, Thriving=#34D399}
  
+**Source these from:** the design system recon, `.claude/rules/09-design-system.md`, AND recent plan Execution Logs where deviations were caused by design system misunderstandings. Patterns that caused past bugs are the most important to include here.
+ 
 This block is displayed verbatim by `/execute-plan` Step 4d before each UI step to prevent mid-implementation drift back to default assumptions.
  
 ---
@@ -233,12 +248,13 @@ Before executing this plan, confirm:
 **Details:**
  
  
+ 
 **Auth gating (if applicable):**
 - 
 - 
 - 
  
-**Responsive behavior:**
+**Responsive behavior (UI steps only — write "N/A: no UI impact" for non-UI steps):**
 - Desktop (1440px): 
 - Tablet (768px): 
 - Mobile (375px): 
@@ -297,13 +313,14 @@ Before executing this plan, confirm:
 - **Order for safety.** Put data model and API steps before UI steps. Put shared utilities before consumers.
 - **AI Safety is never optional.** If the feature involves AI-generated content, every step that touches AI output must have safety guardrails.
 - **Auth gating is never optional.** Every action the spec marks as requiring login MUST have an explicit auth check in the plan. If the plan misses an auth gate, `/code-review --spec` will catch it — but it's better to get it right in the plan.
-- **Responsive is never optional.** Every UI step must include responsive behavior notes for at least 3 breakpoints (mobile, tablet, desktop). If the step creates a new layout, specify how it adapts.
+- **Responsive is never optional for UI steps.** Every UI step must include responsive behavior notes for at least 3 breakpoints (mobile, tablet, desktop). Non-UI steps (data models, utilities, API endpoints) should write "N/A: no UI impact" rather than leaving the section blank or fabricating responsive notes for code that doesn't render.
 - **Include auth gate tests.** Every step that implements an auth-gated action must include a test that verifies the auth modal appears for logged-out users.
 - **Use exact design values.** When the Design System Reference is available, use its exact values in the Details section — not "use the primary color" but "use `#6D28D9`". When citing a component pattern, include the full CSS: not "match the hero" but "use `background: linear-gradient(...)`, `padding: 3rem 0`, `text-align: center`".
 - **Mark uncertain values [UNVERIFIED].** Any value not confirmed by a recon report or design system reference must be marked `[UNVERIFIED]` with a verification method. `/execute-plan` displays these prominently, `/verify-with-playwright` gives them priority scrutiny, and `/code-review` audits whether they were resolved.
 - **Include vertical rhythm.** When the design system recon documents spacing between sections, include those values in the Vertical Rhythm section. `/verify-with-playwright` compares these — any gap difference >5px is a mismatch.
-- **Include the Design System Reminder.** If the project has UI quirks (custom fonts, spacing scales, decorative patterns), list them in the Design System Reminder block. `/execute-plan` displays this before every UI step to prevent drift.
+- **Include the Design System Reminder.** If the project has UI quirks (custom fonts, spacing scales, decorative patterns), list them in the Design System Reminder block. `/execute-plan` displays this before every UI step to prevent drift. Source these from the design system recon, rules files, AND deviations from recent plan Execution Logs.
 - **Include shared data models.** When a master spec plan exists, include the shared TypeScript interfaces and localStorage keys this spec depends on or produces. This prevents duplicate or conflicting data model definitions across specs.
+- **Calibrate test depth.** A simple utility function needs 2-4 tests. A complex interactive component with auth gating, error states, and responsive behavior needs 10-15. Match test count to component complexity — don't under-test complex logic or over-test trivial getters.
  
 ---
  
@@ -355,3 +372,4 @@ Do not repeat the full plan in chat unless the user asks. The plan file is the a
 - `/verify-with-playwright` — Runtime UI verification (consumes this plan for context + auto-detects recon)
 - `/code-review` — Pre-commit code review (cross-references this plan for compliance)
 - `/playwright-recon` — Capture visual specs from live pages (`--internal` for design system, default for external recon)
+ 

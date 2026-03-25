@@ -49,6 +49,7 @@ const mockActivities: Record<ActivityType, boolean> = {
   reflection: false,
   challenge: false,
   localVisit: false,
+  devotional: false,
 }
 
 function renderOverlay(overrides: Partial<Parameters<typeof EveningReflection>[0]> = {}) {

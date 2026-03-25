@@ -59,7 +59,7 @@ describe('TodaysDevotionalCard', () => {
     renderCard()
     const link = screen.getByRole('link', { name: /Read today's devotional/ })
     expect(link).toBeInTheDocument()
-    expect(link).toHaveAttribute('href', '/devotional')
+    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
     expect(link).toHaveClass('text-primary-lt')
   })
 
@@ -93,10 +93,10 @@ describe('TodaysDevotionalCard', () => {
     expect(screen.getByLabelText('Completed')).toBeInTheDocument()
   })
 
-  it('CTA link navigates to /devotional', () => {
+  it('CTA link navigates to /daily?tab=devotional', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link).toHaveAttribute('href', '/devotional')
+    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
   })
 
   it('does not show checkmark when unread', () => {

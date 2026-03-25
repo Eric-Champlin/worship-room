@@ -10,7 +10,7 @@ import {
 } from '../activity-points';
 
 describe('ACTIVITY_POINTS', () => {
-  it('has correct values for all 11 activity types', () => {
+  it('has correct values for all 12 activity types', () => {
     expect(ACTIVITY_POINTS.mood).toBe(5);
     expect(ACTIVITY_POINTS.pray).toBe(10);
     expect(ACTIVITY_POINTS.listen).toBe(10);
@@ -22,12 +22,13 @@ describe('ACTIVITY_POINTS', () => {
     expect(ACTIVITY_POINTS.reflection).toBe(10);
     expect(ACTIVITY_POINTS.challenge).toBe(20);
     expect(ACTIVITY_POINTS.localVisit).toBe(10);
+    expect(ACTIVITY_POINTS.devotional).toBe(10);
   });
 
   it('sums to MAX_DAILY_BASE_POINTS', () => {
     const total = Object.values(ACTIVITY_POINTS).reduce((sum, v) => sum + v, 0);
     expect(total).toBe(MAX_DAILY_BASE_POINTS);
-    expect(total).toBe(145);
+    expect(total).toBe(155);
   });
 });
 
@@ -51,13 +52,13 @@ describe('MULTIPLIER_TIERS', () => {
 describe('MAX_DAILY_POINTS', () => {
   it('equals MAX_DAILY_BASE_POINTS × 2x multiplier', () => {
     expect(MAX_DAILY_POINTS).toBe(MAX_DAILY_BASE_POINTS * 2);
-    expect(MAX_DAILY_POINTS).toBe(290);
+    expect(MAX_DAILY_POINTS).toBe(310);
   });
 });
 
 describe('ALL_ACTIVITY_TYPES', () => {
-  it('contains all 11 activity types', () => {
-    expect(ALL_ACTIVITY_TYPES).toHaveLength(11);
+  it('contains all 12 activity types', () => {
+    expect(ALL_ACTIVITY_TYPES).toHaveLength(12);
     expect(ALL_ACTIVITY_TYPES).toContain('mood');
     expect(ALL_ACTIVITY_TYPES).toContain('pray');
     expect(ALL_ACTIVITY_TYPES).toContain('listen');
@@ -69,12 +70,13 @@ describe('ALL_ACTIVITY_TYPES', () => {
     expect(ALL_ACTIVITY_TYPES).toContain('reflection');
     expect(ALL_ACTIVITY_TYPES).toContain('challenge');
     expect(ALL_ACTIVITY_TYPES).toContain('localVisit');
+    expect(ALL_ACTIVITY_TYPES).toContain('devotional');
   });
 });
 
 describe('ACTIVITY_DISPLAY_NAMES', () => {
-  it('has display names for all 11 types', () => {
-    expect(Object.keys(ACTIVITY_DISPLAY_NAMES)).toHaveLength(11);
+  it('has display names for all 12 types', () => {
+    expect(Object.keys(ACTIVITY_DISPLAY_NAMES)).toHaveLength(12);
     expect(ACTIVITY_DISPLAY_NAMES.mood).toBe('Logged mood');
     expect(ACTIVITY_DISPLAY_NAMES.journal).toBe('Journaled');
     expect(ACTIVITY_DISPLAY_NAMES.reflection).toBe('Evening reflection');
@@ -84,8 +86,8 @@ describe('ACTIVITY_DISPLAY_NAMES', () => {
 });
 
 describe('ACTIVITY_CHECKLIST_NAMES', () => {
-  it('has all 11 activity types', () => {
-    expect(Object.keys(ACTIVITY_CHECKLIST_NAMES)).toHaveLength(11);
+  it('has all 12 activity types', () => {
+    expect(Object.keys(ACTIVITY_CHECKLIST_NAMES)).toHaveLength(12);
     ALL_ACTIVITY_TYPES.forEach((type) => {
       expect(ACTIVITY_CHECKLIST_NAMES[type]).toBeDefined();
     });

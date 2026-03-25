@@ -104,6 +104,6 @@ export interface SavedJournalEntry {
 }
 
 export interface PrayContext {
-  from: 'pray'
+  from: 'pray' | 'devotional'
   topic: string
 }

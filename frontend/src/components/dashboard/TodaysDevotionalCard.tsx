@@ -40,14 +40,14 @@ export function TodaysDevotionalCard() {
 
       {isRead ? (
         <Link
-          to="/devotional"
+          to="/daily?tab=devotional"
           className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-white/50 hover:text-white/70"
         >
           Read again &rarr;
         </Link>
       ) : (
         <Link
-          to="/devotional"
+          to="/daily?tab=devotional"
           className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary-lt hover:text-primary"
         >
           Read today&apos;s devotional &rarr;

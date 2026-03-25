@@ -101,7 +101,7 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
     title: "Read Today's Devotional",
     description: devotional.title,
     icon: 'BookOpen',
-    route: '/devotional',
+    route: '/daily?tab=devotional',
   }
 
   const readingPlanRec: MoodRecommendation | null =

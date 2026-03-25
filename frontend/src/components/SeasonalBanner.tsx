@@ -69,7 +69,7 @@ export function SeasonalBanner() {
           </span>
         </div>
         <Link
-          to="/devotional"
+          to="/daily?tab=devotional"
           className="text-sm font-medium underline underline-offset-2"
           style={{ color: themeColor }}
         >

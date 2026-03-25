@@ -135,7 +135,7 @@ Create an accessible platform where anyone (especially Christians) can find emot
 | Route                               | Component                        | Status | Description                                   |
 | ----------------------------------- | -------------------------------- | ------ | --------------------------------------------- |
 | `/`                                 | `Home` / `Dashboard`             | Built  | Landing (logged-out) / Dashboard (logged-in)  |
-| `/daily`                            | `DailyHub`                       | Built  | Tabbed: Pray \| Journal \| Meditate           |
+| `/daily`                            | `DailyHub`                       | Built  | Tabbed: Devotional \| Pray \| Journal \| Meditate |
 | `/pray`                             | Redirect → `/daily?tab=pray`     | Built  | Legacy redirect                               |
 | `/journal`                          | Redirect → `/daily?tab=journal`  | Built  | Legacy redirect                               |
 | `/meditate`                         | Redirect → `/daily?tab=meditate` | Built  | Legacy redirect                               |
@@ -160,7 +160,7 @@ Create an accessible platform where anyone (especially Christians) can find emot
 | `/bible`                            | `BibleBrowser`                   | Built  | 66-book Bible browser with search             |
 | `/bible/:book/:chapter`             | `BibleChapter`                   | Built  | Chapter reading with audio, highlights, notes |
 | `/ask`                              | `AskGodsWord`                    | Built  | AI Bible chat with follow-ups                 |
-| `/devotional`                       | `DailyDevotional`                | Built  | Daily devotional with 7-day browse-back       |
+| `/devotional`                       | Redirect → `/daily?tab=devotional` | Built  | Legacy redirect                             |
 | `/reading-plans`                    | `ReadingPlanBrowser`             | Built  | 10 plans + AI plan creation                   |
 | `/reading-plans/:planId`            | `ReadingPlanDetail`              | Built  | Plan detail with daily progress               |
 | `/challenges`                       | `ChallengeBrowser`               | Built  | 5 seasonal community challenges               |

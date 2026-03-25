@@ -219,11 +219,11 @@ See [02-security.md](02-security.md) for the canonical Demo Mode Data Policy and
 
 ### Daily Hub Architecture (`/daily`)
 
-The Daily Hub is a single-page tabbed experience at `/daily`. Old routes (`/pray`, `/journal`, `/meditate`, `/scripture`) redirect here with the appropriate `?tab=` query param.
+The Daily Hub is a single-page tabbed experience at `/daily`. Old routes (`/pray`, `/journal`, `/meditate`, `/scripture`, `/devotional`) redirect here with the appropriate `?tab=` query param.
 
 **Tab Structure:**
-- 3 tabs: **Pray** | **Journal** | **Meditate** (query param: `?tab=pray|journal|meditate`)
-- Default tab: `pray`
+- 4 tabs: **Devotional** | **Pray** | **Journal** | **Meditate** (query param: `?tab=devotional|pray|journal|meditate`)
+- Default tab: `devotional`
 - Animated underline slides horizontally across active tab
 - Tab content is mounted at all times but hidden (preserves state between switches)
 - Sticky tab bar appears below hero on scroll (via Intersection Observer sentinel)
@@ -239,14 +239,15 @@ The Daily Hub is a single-page tabbed experience at `/daily`. Old routes (`/pray
 2. **StartingPointQuiz** — 5-question quiz with `id="quiz"` scroll target
 3. **SiteFooter** — Standard footer with "Listen on Spotify" badge
 
-**Heading Pattern (consistent across all 3 tabs):**
+**Heading Pattern (consistent across all 4 tabs):**
+- Devotional: "What's On Your **Soul?**" (Caveat script font)
 - Pray: "What's On Your **Heart?**" (Caveat script font)
 - Journal: "What's On Your **Mind?**" (Caveat script font)
 - Meditate: "What's On Your **Spirit?**" (Caveat script font)
 
-All 3 tabs share: `BackgroundSquiggle` decorative SVG, `max-w-2xl` container width, `SQUIGGLE_MASK_STYLE` fade mask.
+All 4 tabs share: `BackgroundSquiggle` decorative SVG, `max-w-2xl` container width, `SQUIGGLE_MASK_STYLE` fade mask.
 
-**Context Passing:** Pray tab can pass context to Journal tab (e.g., "Continuing from your prayer about anxiety"). This auto-selects Guided mode and pre-fills a relevant prompt.
+**Context Passing:** Pray tab can pass context to Journal tab (e.g., "Continuing from your prayer about anxiety"). Devotional tab can pass context to Journal (theme) and Pray (passage reference) tabs. This auto-selects Guided mode and pre-fills a relevant prompt.
 
 ---
 

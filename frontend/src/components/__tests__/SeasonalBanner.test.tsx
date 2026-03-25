@@ -79,7 +79,7 @@ describe('SeasonalBanner', () => {
     mockSeason('advent')
     renderBanner()
     const link = screen.getByText("Read today's devotional")
-    expect(link).toHaveAttribute('href', '/devotional')
+    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
   })
 
   it('dismiss button stores to sessionStorage', () => {

@@ -17,7 +17,7 @@ vi.mock('@/hooks/useAuth', () => ({
 vi.mock('@/hooks/useFaithPoints', () => ({
   useFaithPoints: () => ({
     totalPoints: 0, currentLevel: 1, levelName: 'Seedling', pointsToNextLevel: 100,
-    todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, meditate: false, journal: false, localVisit: false },
+    todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, meditate: false, journal: false, localVisit: false, devotional: false },
     todayPoints: 0, todayMultiplier: 1, currentStreak: 0, longestStreak: 0,
     recordActivity: mockRecordActivity, clearNewlyEarnedBadges: vi.fn(), repairStreak: vi.fn(),
     newlyEarnedBadges: [], previousStreak: null, isFreeRepairAvailable: false,

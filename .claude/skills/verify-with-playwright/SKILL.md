@@ -23,6 +23,9 @@ User input: $ARGUMENTS
 # Side-by-side comparison against production
 /verify-with-playwright /daily --compare-prod https://worshiproom.app/daily
  
+# Route with query parameters
+/verify-with-playwright "/daily?tab=pray"
+ 
 # Plan-aware with auto-detected prod URL (from recon report)
 /verify-with-playwright /daily _plans/2026-03-03-daily-experience.md
 ```
@@ -46,11 +49,32 @@ User input: $ARGUMENTS
  
 ---
  
+## Comparison Rules (referenced throughout)
+ 
+**These rules apply to ALL comparison steps in this skill. They are stated once here and referenced by name below.**
+ 
+**CRITICAL: There is NO "CLOSE" verdict. Every comparison is YES or NO.**
+ 
+| Value Type | YES (match) | NO (mismatch) |
+|-----------|-------------|---------------|
+| Numeric CSS (width, height, padding, margin, font-size, line-height, gap, border-radius, etc.) | Values identical or differ by ≤2px | Values differ by >2px |
+| Colors (hex, rgb, hsl) | Identical color value (same color in different format is OK) | Any visible color difference |
+| Text content | Identical text | Any text difference, no matter how small |
+| Gradient angle | Identical or ≤5° difference | >5° difference |
+| Gradient cutoff position | Identical or ≤5px | >5px difference (HIGH severity) |
+| Vertical rhythm (gap between sections) | Identical or ≤5px | >5px gap difference |
+ 
+**NEVER use "CLOSE", "APPROXIMATE", "SIMILAR", or any other soft verdict.** Report it as NO with a Fix Hint.
+ 
+**On comparison runs (where a recon report or --compare-prod was used): ANY mismatch of any type makes the overall verdict FAIL, not PARTIAL.** The whole point is accurate matching. "Close enough" is not passing.
+ 
+---
+ 
 ## Step 1: Parse Arguments & Load Context
  
 From `$ARGUMENTS`, determine:
  
-**`target`** — Route, page, or component to verify (e.g., `/daily`, `/prayer-wall`, `"the auth modal"`, `/` for dashboard)
+**`target`** — Route, page, or component to verify (e.g., `/daily`, `/prayer-wall`, `"the auth modal"`, `/` for dashboard). If the route includes query parameters (e.g., `/daily?tab=pray`), preserve them — they affect which content is displayed and must be included when navigating.
  
 **`plan_path`** (optional) — Path to a plan file. Enables plan-aware mode:
 - Cross-reference UI against plan specifications
@@ -75,18 +99,32 @@ Read the plan file and extract:
 ### Auto-detect plan (if no plan path provided)
  
 ```bash
-# Search for a plan matching the current branch
+# Search for a plan matching the current branch slug
 BRANCH=$(git branch --show-current 2>/dev/null)
-find _plans/ -name "*.md" -newer _plans/ 2>/dev/null | head -5
+SLUG=$(echo "$BRANCH" | sed 's|claude/feature/||' | sed 's|/|-|g')
+# Look for plan files containing this slug
+grep -rl "$SLUG" _plans/*.md 2>/dev/null | head -3
+# Fallback: most recently modified plan
+ls -t _plans/*.md 2>/dev/null | head -3
 ```
  
-If a plan is found, load it automatically and note:
+If a plan matching the branch slug is found, load it automatically and note:
  
 ```text
-**Plan auto-detected:** {path}
+**Plan auto-detected:** {path} (matched branch slug "{SLUG}")
 ```
  
-If no plan is found, proceed without plan context.
+If no slug match but a recent plan exists, show candidates and ask:
+ 
+```text
+No plan matching branch slug "{SLUG}" found. Recent plans:
+- {path 1} (modified {date})
+- {path 2} (modified {date})
+ 
+Load one of these? (path / none)
+```
+ 
+If no plan is found at all, proceed without plan context.
  
 ### Auto-detect --compare-prod URL from recon report
  
@@ -296,6 +334,14 @@ Proceed? (yes / modify)
  
 ## Step 5: Execute Verification Flows
  
+### Cleanup First
+ 
+**Before creating a new test file, delete any existing temporary test from a previous run:**
+ 
+```bash
+rm -f frontend/playwright-verify.spec.ts
+```
+ 
 ### Test Structure
  
 Create a temporary test at `frontend/playwright-verify.spec.ts`:
@@ -323,13 +369,50 @@ const networkFailures: { url: string; status: number; method: string; error?: st
  
 // Filter noise
 const IGNORE_PATTERNS = ['DevTools', 'HMR', '[vite]', 'favicon.ico', 'chrome-extension://'];
+ 
+// --- Helper Functions ---
+ 
+/** Wait for page to be fully rendered (network idle + key element visible) */
+async function waitForRender(page: Page, selector?: string) {
+  await page.waitForLoadState('networkidle');
+  if (selector) {
+    await page.waitForSelector(selector, { state: 'visible', timeout: 10000 });
+  }
+  // Extra 500ms for animations/transitions to settle
+  await page.waitForTimeout(500);
+}
+ 
+/** Extract computed style for a single element */
+async function getComputedStyles(page: Page, selector: string, properties: string[]) {
+  return page.evaluate(({ sel, props }) => {
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    const result: Record<string, string> = {};
+    props.forEach(p => { result[p] = cs.getPropertyValue(p) || cs[p as any]; });
+    return result;
+  }, { sel: selector, props: properties });
+}
+ 
+/** Screenshot at a specific breakpoint */
+async function screenshotAtBreakpoint(
+  page: Page, name: string, width: number, height: number
+) {
+  await page.setViewportSize({ width, height });
+  await page.waitForTimeout(300); // allow reflow
+  await page.screenshot({
+    path: `${SCREENSHOT_DIR}/${name}-${width}x${height}.png`,
+    fullPage: true
+  });
+}
 ```
  
 **For each step in the flow:**
  
 1. Execute the action (click, fill, navigate, wait)
-2. Capture state after action: new console errors, new network requests, DOM changes
-3. Validate against expected outcome:
+2. **Wait for render** using `waitForRender()` — do NOT screenshot loading spinners or partially-rendered pages
+3. Capture state after action: new console errors, new network requests, DOM changes
+4. Validate against expected outcome:
  
 ```text
 ### Step {N}: {action}
@@ -345,13 +428,14 @@ const IGNORE_PATTERNS = ['DevTools', 'HMR', '[vite]', 'favicon.ico', 'chrome-ext
 **Notes:** {anything surprising, even if passing}
 ```
  
-4. If a step fails: document exactly what happened, capture console/network state, **continue** to next step unless page is unresponsive
-5. Between flows: reset state (navigate back, clear forms, refresh)
+5. If a step fails: document exactly what happened, capture console/network state, **continue** to next step unless page is unresponsive
+6. Between flows: reset state (navigate back, clear forms, refresh)
  
 ### Run
  
 ```bash
 cd frontend
+rm -rf playwright-screenshots/*
 mkdir -p playwright-screenshots
 npx playwright test playwright-verify.spec.ts --reporter=list --headed=false
 ```
@@ -360,34 +444,19 @@ npx playwright test playwright-verify.spec.ts --reporter=list --headed=false
  
 ## Step 6: Design Compliance Check (if recon report or plan with design specs)
  
-### Matching Tolerance Rules (applies to ALL comparison steps)
- 
-**CRITICAL: There is NO "CLOSE" verdict. Every comparison is YES or NO.**
- 
-For numeric CSS values (width, height, padding, margin, font-size, line-height, gap, border-radius, etc.):
-- **YES:** Values are identical or differ by ≤2px (sub-pixel rendering)
-- **NO:** Values differ by more than 2px
- 
-For color values:
-- **YES:** Identical hex/rgb values (same color, different format is OK)
-- **NO:** Any visible color difference
- 
-For text content:
-- **YES:** Identical text
-- **NO:** Any text difference, no matter how small
- 
-**NEVER use "CLOSE", "APPROXIMATE", "SIMILAR", or any other soft verdict.** Report it as NO with a Fix Hint.
+**All comparisons in this step use the Comparison Rules defined at the top of this skill.** Do not redefine tolerances — reference them.
  
 ### 6a: Recon Style Verification (if CSS Mapping Table exists)
  
-Extract computed styles from every element in the mapping table and compare:
+Extract computed styles from every element in the mapping table and compare **at all standard breakpoints (minimum: 375px, 768px, 1440px)**, not just one viewport. Use `getComputedStyles()` helper at each breakpoint:
  
 ```text
 ## Recon Style Verification
  
 **Recon report:** {path}
-**Viewport:** {width used for comparison}
+**Viewports compared:** {list — e.g., 375px, 768px, 1440px}
  
+### Viewport: {width}px
 | Element | Property | Recon Value | Built Value | Match? | Fix Hint |
 |---------|----------|------------|-------------|--------|----------|
 | {elem}  | {prop}   | {expected} | {actual}    | YES/NO | {Tailwind class or CSS value — only for mismatches} |
@@ -442,7 +511,7 @@ For every element with a gradient `background-image`, compare the full gradient 
 | {selector} cutoff position | {px} | {px} | YES/NO |
 ```
  
-**If the gradient cutoff position differs by more than 5px, this is a HIGH severity mismatch.**
+**Gradient cutoff >5px difference is HIGH severity** (per Comparison Rules).
  
 ### 6d: Image Comparison
  
@@ -469,7 +538,7 @@ Measure the vertical gap between every pair of adjacent sections/components:
 | Section 1 → section 2 | {px} | {px} | YES/NO | |
 ```
  
-**If any gap differs by more than 5px, flag as a mismatch.** Vertical rhythm differences make the page feel "compressed" or "stretched" even when individual component styles are correct.
+**Gap >5px difference is a mismatch** (per Comparison Rules). Vertical rhythm differences make the page feel "compressed" or "stretched" even when individual component styles are correct.
  
 ### 6f: Link Verification
  
@@ -611,7 +680,7 @@ Merge and deduplicate. Do not test the same width twice.
  
 ### 8b: Computed Style Inspection
  
-At each viewport, run JavaScript to inspect computed styles on key layout elements and flag:
+At each viewport, use `getComputedStyles()` helper to inspect computed styles on key layout elements and flag:
  
 - **Horizontal overflow** (element wider than viewport → horizontal scrollbar)
 - **Text overflow** (cut off, overlapping, outside container)
@@ -653,7 +722,7 @@ At each viewport, run JavaScript to inspect computed styles on key layout elemen
  
 ## Step 9: Worship Room-Specific Checks
  
-**Always run these, regardless of flags. Mark checks as N/A if they don't apply to the target page.**
+**Always run these, regardless of flags. Mark checks as N/A if they don't apply to the target page.** Also read `.claude/rules/` for any additional project-specific checks not listed below — the rules files are the authoritative source and may include checks added after this skill was last updated.
  
 ### Global Checks (all pages)
  
@@ -773,12 +842,10 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 - **Text content mismatches:** {count from Step 6h}
 - **Overall verdict:** PASS / FAIL / PARTIAL
  
-**Verdict rules:**
-- **PASS:** Zero flow failures AND zero style mismatches AND zero gradient mismatches AND zero image mismatches AND zero vertical rhythm mismatches AND zero link mismatches AND zero hover/focus mismatches AND zero text content mismatches
-- **FAIL:** Any flow failure OR any style mismatch >2px OR any gradient mismatch OR any image sizing mismatch OR any vertical rhythm mismatch >5px OR any link mismatch (missing `<a>` tags, wrong href) OR any hover/focus state mismatch OR any text content mismatch
-- **PARTIAL:** All flows pass but minor sub-2px style differences exist
- 
-**On comparison runs (where a recon report or --compare-prod was used): ANY mismatch of any type makes the verdict FAIL, not PARTIAL.** The whole point is accurate matching. "Close enough" is not passing.
+**Verdict rules (from Comparison Rules):**
+- **PASS:** Zero flow failures AND zero mismatches of any type
+- **FAIL:** Any flow failure OR any mismatch exceeding tolerances defined in Comparison Rules
+- **PARTIAL:** All flows pass but minor sub-2px style differences exist (ONLY when no recon/prod comparison was used — comparison runs have no PARTIAL)
  
 ## Flow Results
  
@@ -882,6 +949,7 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 - Use `data-testid` when available, fall back to ARIA labels, roles, text content
 - Prefer `toBeVisible()` over `toBeInTheDocument()`
 - Check element counts for lists
+- Always use `waitForRender()` helper before asserting — never assert on a loading/partial state
  
 ### Console Error Handling
 - **Fail** on `console.error` and uncaught exceptions
@@ -894,16 +962,9 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 - Do NOT modify source code for auth testing
 - Verify both empty and seeded data states when localStorage-backed features are involved
  
-### Comparison Rules
-- **NO "CLOSE" verdict.** Every comparison is YES or NO.
-- Numeric CSS values: ≤2px difference = YES, >2px = NO
-- Colors: any visible difference = NO
-- Text: any difference = NO
-- Gradient cutoff: >5px difference = HIGH severity
-- Vertical rhythm: >5px gap difference = mismatch
-- Missing `<a>` tags where links expected = HIGH severity
-- Missing hover/focus styles = functional defect
-- Text content: any difference = mismatch
+### Comparisons
+- All comparison tolerances are defined in the **Comparison Rules** section at the top of this skill
+- Reference those rules — do not redefine tolerances inline
  
 ### Error Handling
 - Playwright install fails → **Stop**
@@ -936,4 +997,3 @@ The browser is the ultimate test environment. Unit tests prove components work i
 - `/execute-plan` — Execute all steps from a generated plan (has its own visual verification checkpoints)
 - `/code-review` — Pre-commit code review (run AFTER this verification passes)
 - `/spec` — Write a feature specification (upstream of /plan)
- 

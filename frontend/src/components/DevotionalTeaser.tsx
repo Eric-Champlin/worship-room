@@ -15,7 +15,7 @@ export function DevotionalTeaser() {
         </h2>
         <p className="mb-6 text-base text-white/50">Today: {devotional.title}</p>
         <Link
-          to="/devotional"
+          to="/daily?tab=devotional"
           className="inline-block rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white transition-colors hover:bg-white/15"
         >
           Read Today&apos;s Devotional

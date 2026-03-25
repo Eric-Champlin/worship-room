@@ -491,11 +491,11 @@ describe('Navbar', () => {
       expect(screen.getByRole('link', { name: /Daily Devotional/ })).toBeInTheDocument()
     })
 
-    it('"Daily Devotional" links to /devotional', () => {
+    it('"Daily Devotional" links to /daily?tab=devotional', () => {
       renderNavbar()
       expect(screen.getByRole('link', { name: /Daily Devotional/ })).toHaveAttribute(
         'href',
-        '/devotional',
+        '/daily?tab=devotional',
       )
     })
 

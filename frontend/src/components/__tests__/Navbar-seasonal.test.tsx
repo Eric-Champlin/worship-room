@@ -147,7 +147,7 @@ describe('Navbar — seasonal line', () => {
     await renderNavbar()
     const devLinks = screen.getAllByText(/Read today.s devotional/)
     const link = devLinks.find(el => el.tagName === 'A')
-    expect(link).toHaveAttribute('href', '/devotional')
+    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
   })
 
   it('shows seasonal content in mobile drawer area', async () => {
