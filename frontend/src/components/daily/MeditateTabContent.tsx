@@ -75,7 +75,7 @@ export function MeditateTabContent() {
           <AmbientSoundPill context="meditate" />
 
           {isAuthenticated && allComplete && (
-            <div className="mb-8 animate-golden-glow rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
+            <div className="mb-8 motion-safe:animate-golden-glow rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
               <p className="text-lg font-semibold text-text-dark">
                 You completed all 6 meditations today! What a beautiful time with
                 God.

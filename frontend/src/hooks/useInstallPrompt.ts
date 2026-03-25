@@ -37,13 +37,21 @@ function isStandalone(): boolean {
 }
 
 function isDismissedRecently(): boolean {
-  const dismissed = localStorage.getItem(DISMISS_KEY)
-  if (!dismissed) return false
-  return Date.now() - Number(dismissed) < DISMISS_COOLDOWN_MS
+  try {
+    const dismissed = localStorage.getItem(DISMISS_KEY)
+    if (!dismissed) return false
+    return Date.now() - Number(dismissed) < DISMISS_COOLDOWN_MS
+  } catch {
+    return false
+  }
 }
 
 function getVisitCount(): number {
-  return Number(localStorage.getItem(VISIT_COUNT_KEY) || '0')
+  try {
+    return Number(localStorage.getItem(VISIT_COUNT_KEY) || '0')
+  } catch {
+    return 0
+  }
 }
 
 function incrementVisitCount(): number {

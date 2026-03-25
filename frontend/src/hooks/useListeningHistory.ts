@@ -3,7 +3,11 @@ import { useAuth } from '@/hooks/useAuth'
 import { storageService } from '@/services/storage-service'
 import type { ListeningSession } from '@/types/storage'
 
-export function useListeningHistory() {
+export function useListeningHistory(): {
+  logSession: (session: Omit<ListeningSession, 'id'>) => void
+  getLastSession: () => ListeningSession | null
+  getRecentSessions: (limit: number) => ListeningSession[]
+} {
   const { isAuthenticated } = useAuth()
 
   useEffect(() => {

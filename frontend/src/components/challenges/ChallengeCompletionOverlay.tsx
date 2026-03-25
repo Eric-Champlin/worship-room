@@ -117,8 +117,9 @@ export function ChallengeCompletionOverlay({
   }, [onDismiss, navigate])
 
   const handleShare = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log('Share challenge achievement:', { challengeTitle, badgeName })
+    // TODO: implement share functionality (Web Share API)
+    void challengeTitle
+    void badgeName
   }, [challengeTitle, badgeName])
 
   return createPortal(

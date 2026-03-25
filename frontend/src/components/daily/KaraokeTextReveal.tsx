@@ -94,6 +94,10 @@ export function KaraokeTextReveal({
       const id = setTimeout(() => completeCallbackRef.current?.(), 0)
       timeoutIdsRef.current.push(id)
     }
+    return () => {
+      timeoutIdsRef.current.forEach(clearTimeout)
+      timeoutIdsRef.current = []
+    }
   }, [forceComplete, text])
 
   if (!text) return null

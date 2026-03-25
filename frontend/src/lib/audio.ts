@@ -7,7 +7,7 @@ function getAudioContext(): AudioContext {
   return audioCtx
 }
 
-export function playChime() {
+export function playChime(): void {
   try {
     const ctx = getAudioContext()
     const osc = ctx.createOscillator()

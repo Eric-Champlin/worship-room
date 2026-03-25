@@ -40,9 +40,9 @@ describe('useMusicHints', () => {
       result.current.dismissSoundGridHint()
     })
 
-    const stored = localStorage.getItem('music-hints-user-1')
+    const stored = localStorage.getItem('wr_music_hints_user-1')
     expect(stored).toBeTruthy()
-    expect(JSON.parse(stored!)).toHaveProperty('music-hint-sound-grid', true)
+    expect(JSON.parse(stored!)).toHaveProperty('wr_music_hint_sound_grid', true)
   })
 
   it('does not persist dismissal for logged-out users (React state only)', () => {

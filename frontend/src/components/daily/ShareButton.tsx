@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { Share2, Copy, Mail, MessageSquare, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { COPY_RESET_DELAY } from '@/constants/timing'
+import { FACEBOOK_SHARE_BASE, TWITTER_SHARE_BASE } from '@/constants/sharing'
 
 interface ShareButtonProps {
   shareUrl: string
@@ -117,9 +119,14 @@ export function ShareButton({
       await navigator.clipboard.writeText(fullUrl)
       setCopied(true)
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current)
-      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), COPY_RESET_DELAY)
     } catch {
-      // Clipboard API not available
+      // Clipboard API not available — prompt user to copy manually
+      try {
+        window.prompt('Copy this link:', fullUrl)
+      } catch {
+        // prompt blocked — ignore
+      }
     }
   }
 
@@ -189,7 +196,7 @@ export function ShareButton({
               </a>
 
               <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+                href={`${FACEBOOK_SHARE_BASE}?u=${encodedUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 role="menuitem"
@@ -208,7 +215,7 @@ export function ShareButton({
               </a>
 
               <a
-                href={`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`}
+                href={`${TWITTER_SHARE_BASE}?text=${encodedText}&url=${encodedUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 role="menuitem"

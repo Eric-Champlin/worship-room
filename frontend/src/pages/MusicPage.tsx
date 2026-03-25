@@ -31,16 +31,6 @@ const musicBreadcrumbs = {
 }
 import type { SharedMixData } from '@/types/storage'
 
-// Removed in visual polish — keeping for potential re-enable
-// import { LofiCrossReference } from '@/components/music/LofiCrossReference'
-// import { MusicHint } from '@/components/music/MusicHint'
-// import { PersonalizationSection } from '@/components/music/PersonalizationSection'
-// import { ResumePrompt } from '@/components/music/ResumePrompt'
-// import { RecentlyAddedSection } from '@/components/music/RecentlyAddedSection'
-// import { TimeOfDaySection } from '@/components/music/TimeOfDaySection'
-// import { useMusicHints } from '@/hooks/useMusicHints'
-// import { useTimeOfDayRecommendations } from '@/hooks/useTimeOfDayRecommendations'
-
 const TABS = [
   { id: 'playlists', label: 'Worship Playlists', shortLabel: 'Playlists' },
   { id: 'ambient', label: 'Ambient Sounds', shortLabel: 'Ambient' },

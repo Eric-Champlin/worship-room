@@ -33,7 +33,13 @@ const ITEM_DEFINITIONS: {
   { key: 'prayer_wall_visited', activityType: null, label: 'Explore the Prayer Wall', points: 15, destination: '/prayer-wall' },
 ]
 
-export function useGettingStarted(todayActivities: Record<ActivityType, boolean>) {
+export function useGettingStarted(todayActivities: Record<ActivityType, boolean>): {
+  items: GettingStartedItem[]
+  completedCount: number
+  allComplete: boolean
+  isVisible: boolean
+  dismiss: () => void
+} {
   const { isAuthenticated } = useAuth()
 
   const [flags, setFlags] = useState<GettingStartedData>(() => getGettingStartedData())

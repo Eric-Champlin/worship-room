@@ -291,7 +291,7 @@ export function CalendarHeatmap({ rangeDays }: CalendarHeatmapProps) {
         {/* Tooltip — positioned above the hovered square */}
         {hoveredCell && tooltipInfo && (
           <div
-            className="pointer-events-none absolute z-10 rounded-lg border border-white/15 bg-[#1E0B3E] px-3 py-2 text-sm text-white shadow-lg"
+            className="pointer-events-none absolute z-10 rounded-lg border border-white/15 bg-hero-mid px-3 py-2 text-sm text-white shadow-lg"
             style={{
               left: tooltipInfo.left,
               top: tooltipInfo.top,

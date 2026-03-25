@@ -6,7 +6,10 @@ interface UseSwipeOptions {
   threshold?: number // minimum px delta to trigger (default 50)
 }
 
-export function useSwipe({ onSwipeLeft, onSwipeRight, threshold = 50 }: UseSwipeOptions) {
+export function useSwipe({ onSwipeLeft, onSwipeRight, threshold = 50 }: UseSwipeOptions): {
+  onTouchStart: (e: React.TouchEvent) => void
+  onTouchEnd: (e: React.TouchEvent) => void
+} {
   const touchStartX = useRef<number | null>(null)
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {

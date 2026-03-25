@@ -2,12 +2,20 @@ import { getLocalDateString } from '@/utils/date';
 import { EVENING_REFLECTION_STORAGE_KEY, EVENING_HOUR_THRESHOLD } from '@/constants/dashboard/evening-reflection';
 
 export function hasReflectedToday(): boolean {
-  const stored = localStorage.getItem(EVENING_REFLECTION_STORAGE_KEY);
-  return stored === getLocalDateString();
+  try {
+    const stored = localStorage.getItem(EVENING_REFLECTION_STORAGE_KEY);
+    return stored === getLocalDateString();
+  } catch {
+    return false;
+  }
 }
 
 export function markReflectionDone(): void {
-  localStorage.setItem(EVENING_REFLECTION_STORAGE_KEY, getLocalDateString());
+  try {
+    localStorage.setItem(EVENING_REFLECTION_STORAGE_KEY, getLocalDateString());
+  } catch {
+    // localStorage unavailable — reflection status won't persist
+  }
 }
 
 export function isEveningTime(): boolean {

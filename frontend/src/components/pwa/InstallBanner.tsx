@@ -28,7 +28,7 @@ export function InstallBanner() {
       role="dialog"
       aria-label="Install Worship Room"
       className={cn(
-        'fixed left-1/2 z-[9997] -translate-x-1/2 animate-fade-in',
+        'fixed left-1/2 z-[9997] -translate-x-1/2 motion-safe:animate-fade-in',
         'w-[calc(100%-32px)] sm:max-w-[560px]',
         'rounded-xl border-t border-white/15 bg-white/10 shadow-2xl backdrop-blur-md',
         'px-4 py-3 sm:px-5 sm:py-4',
@@ -66,7 +66,7 @@ export function InstallBanner() {
               type="button"
               onClick={handleInstall}
               disabled={installing}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               Install
             </button>
@@ -75,7 +75,7 @@ export function InstallBanner() {
             type="button"
             onClick={dismissBanner}
             aria-label="Dismiss install prompt"
-            className="rounded p-1 text-white/60 transition-colors hover:text-white"
+            className="rounded p-1 text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>

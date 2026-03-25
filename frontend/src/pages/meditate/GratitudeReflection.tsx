@@ -22,8 +22,14 @@ export function GratitudeReflection() {
   return <GratitudeReflectionContent />
 }
 
+let nextItemId = 3
+
 function GratitudeReflectionContent() {
-  const [items, setItems] = useState(['', '', ''])
+  const [items, setItems] = useState<{ id: number; text: string }[]>([
+    { id: 0, text: '' },
+    { id: 1, text: '' },
+    { id: 2, text: '' },
+  ])
   const [isComplete, setIsComplete] = useState(false)
   const [completionVerse] = useState(() => {
     const verses = getGratitudeVerses()
@@ -45,19 +51,20 @@ function GratitudeReflectionContent() {
     prevItemCountRef.current = items.length
   }, [items.length])
 
-  const allThreeFilled = items.slice(0, 3).every((item) => item.trim().length > 0)
-  const filledCount = items.filter((item) => item.trim().length > 0).length
+  const allThreeFilled = items.slice(0, 3).every((item) => item.text.trim().length > 0)
+  const filledCount = items.filter((item) => item.text.trim().length > 0).length
 
   const handleChange = (index: number, value: string) => {
     setItems((prev) => {
       const next = [...prev]
-      next[index] = value
+      next[index] = { ...next[index], text: value }
       return next
     })
   }
 
   const handleAddAnother = () => {
-    setItems((prev) => [...prev, ''])
+    const id = nextItemId++
+    setItems((prev) => [...prev, { id, text: '' }])
   }
 
   const handleDone = () => {
@@ -94,7 +101,7 @@ function GratitudeReflectionContent() {
           {sessionDuration !== null && (() => {
             const weeklyTotal = getMeditationMinutesForWeek()
             return (
-              <div className="mb-6 animate-fade-in">
+              <div className="mb-6 motion-safe:animate-fade-in">
                 <p className="font-serif text-lg text-text-dark">
                   You meditated for {sessionDuration} {sessionDuration === 1 ? 'minute' : 'minutes'}
                 </p>
@@ -128,10 +135,10 @@ function GratitudeReflectionContent() {
         <div className="space-y-4">
           {items.map((item, index) => (
             <input
-              key={index}
+              key={item.id}
               ref={index === items.length - 1 ? lastInputRef : undefined}
               type="text"
-              value={item}
+              value={item.text}
               onChange={(e) => handleChange(index, e.target.value)}
               placeholder="I'm grateful for..."
               className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-text-dark placeholder:text-text-light/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"

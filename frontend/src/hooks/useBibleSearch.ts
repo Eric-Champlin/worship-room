@@ -46,7 +46,14 @@ function searchAllBooks(
   return results
 }
 
-export function useBibleSearch() {
+export function useBibleSearch(): {
+  query: string
+  setQuery: React.Dispatch<React.SetStateAction<string>>
+  results: BibleSearchResult[]
+  isSearching: boolean
+  isLoadingBooks: boolean
+  allBooksLoaded: boolean
+} {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<BibleSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)

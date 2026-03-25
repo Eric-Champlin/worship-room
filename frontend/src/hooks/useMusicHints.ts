@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 
-const SOUND_GRID_HINT_KEY = 'music-hint-sound-grid'
-const PILL_HINT_KEY = 'music-hint-pill'
+const SOUND_GRID_HINT_KEY = 'wr_music_hint_sound_grid'
+const PILL_HINT_KEY = 'wr_music_hint_pill'
 
 function getStorageKey(userId: string) {
-  return `music-hints-${userId}`
+  return `wr_music_hints_${userId}`
 }
 
 function isDismissed(

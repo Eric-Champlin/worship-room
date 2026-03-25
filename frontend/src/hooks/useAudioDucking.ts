@@ -22,7 +22,6 @@ export function useAudioDucking({
   engine,
   activeSoundsCount,
   masterVolume,
-  sleepTimerPhase,
 }: UseAudioDuckingOptions): UseAudioDuckingReturn {
   const isDuckedRef = useRef(false)
   const savedVolumeRef = useRef<number | null>(null)

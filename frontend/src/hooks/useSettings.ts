@@ -2,7 +2,13 @@ import { useState, useCallback, useEffect } from 'react'
 import type { UserSettings, UserSettingsProfile, UserSettingsNotifications, UserSettingsPrivacy } from '@/types/settings'
 import { getSettings, saveSettings, SETTINGS_KEY } from '@/services/settings-storage'
 
-export function useSettings() {
+export function useSettings(): {
+  settings: UserSettings
+  updateProfile: (updates: Partial<UserSettingsProfile>) => void
+  updateNotifications: (key: keyof UserSettingsNotifications, value: boolean) => void
+  updatePrivacy: (updates: Partial<Omit<UserSettingsPrivacy, 'blockedUsers'>>) => void
+  unblockUser: (userId: string) => void
+} {
   const [settings, setSettings] = useState<UserSettings>(() => getSettings())
 
   const updateProfile = useCallback((updates: Partial<UserSettingsProfile>) => {

@@ -64,6 +64,7 @@ export function BibleSearchMode() {
           </p>
         )}
 
+        <div aria-live="polite" aria-atomic="true">
         {query.length >= 2 && (isSearching || isLoadingBooks) && (
           <p className="text-center text-white/50">Searching...</p>
         )}
@@ -77,10 +78,11 @@ export function BibleSearchMode() {
               words or check spelling.
             </p>
           )}
+        </div>
 
         {results.length > 0 && (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-white/40" aria-live="polite">
               {results.length >= 100
                 ? '100+ results found (showing first 100)'
                 : `${results.length} result${results.length === 1 ? '' : 's'} found`}

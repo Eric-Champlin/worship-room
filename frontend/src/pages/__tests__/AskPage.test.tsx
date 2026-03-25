@@ -203,7 +203,7 @@ describe('AskPage — Loading State', () => {
 
   it('shows bouncing dots after submission', () => {
     fillAndSubmit()
-    const dots = document.querySelectorAll('.animate-bounce')
+    const dots = document.querySelectorAll('.motion-safe\\:animate-bounce')
     expect(dots.length).toBe(3)
   })
 

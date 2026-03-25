@@ -49,14 +49,14 @@ export function MarkAnsweredForm({ onConfirm, onCancel }: MarkAnsweredFormProps)
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-text-light hover:text-text-dark"
+          className="text-sm font-medium text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Cancel
         </button>
         <button
           type="button"
           onClick={handleConfirm}
-          className="rounded-lg bg-success px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+          className="rounded-lg bg-success px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2"
         >
           Confirm
         </button>

@@ -67,7 +67,7 @@ function writeReminders(reminders: string[]): void {
   }
 }
 
-function calculateStreak(completedDays: number[], currentDay: number): number {
+function calculateStreak(completedDays: number[], _currentDay: number): number {
   if (completedDays.length === 0) return 0
   // Count consecutive days ending at currentDay-1 (the day just completed)
   let streak = 0

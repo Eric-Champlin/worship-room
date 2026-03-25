@@ -2,6 +2,10 @@ import type { UserSettings } from '@/types/settings'
 
 export const SETTINGS_KEY = 'wr_settings'
 
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+}
+
 export const DEFAULT_SETTINGS: UserSettings = {
   profile: {
     displayName: '',
@@ -29,12 +33,11 @@ export const DEFAULT_SETTINGS: UserSettings = {
   },
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function deepMerge(defaults: any, partial: any): any {
-  const result = { ...defaults }
+function deepMerge<T extends Record<string, unknown>>(defaults: T, partial: DeepPartial<T>): T {
+  const result = { ...defaults } as Record<string, unknown>
   for (const key of Object.keys(defaults)) {
     const defaultVal = defaults[key]
-    const partialVal = partial[key]
+    const partialVal = (partial as Record<string, unknown>)[key]
     if (partialVal === undefined) continue
     if (
       defaultVal !== null &&
@@ -44,12 +47,15 @@ function deepMerge(defaults: any, partial: any): any {
       typeof partialVal === 'object' &&
       !Array.isArray(partialVal)
     ) {
-      result[key] = deepMerge(defaultVal, partialVal)
+      result[key] = deepMerge(
+        defaultVal as Record<string, unknown>,
+        partialVal as DeepPartial<Record<string, unknown>>,
+      )
     } else {
       result[key] = partialVal
     }
   }
-  return result
+  return result as T
 }
 
 export function getSettings(): UserSettings {
@@ -72,10 +78,6 @@ export function saveSettings(settings: UserSettings): void {
   } catch {
     // localStorage unavailable — degrade gracefully
   }
-}
-
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
 }
 
 export function updateSettings(partial: DeepPartial<UserSettings>): UserSettings {

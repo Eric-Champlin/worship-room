@@ -93,7 +93,11 @@ function computeMoodTrend(): MoodTrend {
 
 export function useWeeklyGodMoments(): WeeklyGodMomentsData {
   const [dismissed, setDismissed] = useState(() => {
-    return localStorage.getItem(DISMISSED_KEY) || ''
+    try {
+      return localStorage.getItem(DISMISSED_KEY) || ''
+    } catch {
+      return ''
+    }
   })
 
   const currentMonday = getCurrentWeekStart()

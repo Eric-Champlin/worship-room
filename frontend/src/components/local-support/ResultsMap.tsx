@@ -6,7 +6,9 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import type { LocalSupportPlace } from '@/types/local-support'
 
-// Fix Leaflet default marker icon (Vite bundling issue)
+// Fix Leaflet default marker icon (Vite bundling issue).
+// Leaflet's type definitions don't expose the internal _getIconUrl property,
+// so we must cast through `any` to delete it before overriding with explicit paths.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({

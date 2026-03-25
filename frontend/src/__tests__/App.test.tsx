@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import App from '@/App'
 
@@ -8,10 +8,12 @@ describe('App', () => {
     expect(document.body).toBeTruthy()
   })
 
-  it('renders the home page at /', () => {
+  it('renders the home page at /', async () => {
     render(<App />)
-    expect(
-      screen.getByRole('heading', { level: 1, name: /how're you feeling today/i })
-    ).toBeInTheDocument()
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { level: 1, name: /how're you feeling today/i })
+      ).toBeInTheDocument()
+    })
   })
 })

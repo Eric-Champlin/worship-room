@@ -146,7 +146,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
             data-toast-type={toast.type}
             className={cn(
-              'animate-slide-from-right rounded-lg border bg-white px-4 py-3 shadow-lg',
+              'motion-safe:animate-slide-from-right rounded-lg border bg-white px-4 py-3 shadow-lg',
               toast.type === 'success'
                 ? 'border-l-4 border-l-success'
                 : toast.type === 'warning'
@@ -185,7 +185,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               aria-live="polite"
               className={cn(
                 'relative overflow-hidden rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white backdrop-blur-md motion-reduce:animate-none',
-                isMobile ? 'animate-slide-from-bottom' : 'animate-slide-from-right',
+                isMobile ? 'motion-safe:animate-slide-from-bottom' : 'motion-safe:animate-slide-from-right',
                 toast.type === 'special-celebration' &&
                   'border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.2)]',
               )}

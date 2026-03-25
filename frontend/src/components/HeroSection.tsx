@@ -6,8 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 
 const VIDEO_MAX_OPACITY = 0.4
-const VIDEO_URL =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260308_114720_3dabeb9e-2c39-4907-b747-bc3544e2d5b7.mp4'
+const VIDEO_URL = import.meta.env.VITE_HERO_VIDEO_URL || ''
 
 function usePrefersReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
@@ -57,9 +56,11 @@ function useVideoFade(video: HTMLVideoElement | null) {
       rafId = requestAnimationFrame(updateOpacity)
     }
 
+    let restartTimeoutId: ReturnType<typeof setTimeout>
+
     const handleEnded = () => {
       video.style.opacity = '0'
-      setTimeout(() => {
+      restartTimeoutId = setTimeout(() => {
         video.currentTime = 0
         video.play().catch(() => {})
       }, 100)
@@ -70,6 +71,7 @@ function useVideoFade(video: HTMLVideoElement | null) {
 
     return () => {
       cancelAnimationFrame(rafId)
+      clearTimeout(restartTimeoutId)
       video.removeEventListener('ended', handleEnded)
     }
   }, [video])

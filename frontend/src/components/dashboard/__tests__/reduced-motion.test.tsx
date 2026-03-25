@@ -5,7 +5,6 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { DashboardWidgetGrid } from '../DashboardWidgetGrid'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
-import { SkeletonBlock, SkeletonCircle } from '../Skeleton'
 
 // Mock ResizeObserver for Recharts
 class ResizeObserverMock {
@@ -76,18 +75,3 @@ describe('Reduced Motion — Dashboard Widgets', () => {
   })
 })
 
-describe('Skeleton Components', () => {
-  it('SkeletonBlock renders with pulse animation and is aria-hidden', () => {
-    const { container } = render(<SkeletonBlock className="h-40 w-full" />)
-    const el = container.firstChild as HTMLElement
-    expect(el).toHaveClass('animate-pulse', 'rounded', 'bg-white/10', 'h-40', 'w-full')
-    expect(el).toHaveAttribute('aria-hidden', 'true')
-  })
-
-  it('SkeletonCircle renders with pulse animation and is aria-hidden', () => {
-    const { container } = render(<SkeletonCircle className="h-16 w-16" />)
-    const el = container.firstChild as HTMLElement
-    expect(el).toHaveClass('animate-pulse', 'rounded-full', 'bg-white/10', 'h-16', 'w-16')
-    expect(el).toHaveAttribute('aria-hidden', 'true')
-  })
-})

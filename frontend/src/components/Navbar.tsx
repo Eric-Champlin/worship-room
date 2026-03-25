@@ -241,7 +241,7 @@ function NavDropdown({
             id={dropdownId}
             role="list"
             className={cn(
-              'animate-dropdown-in rounded-xl shadow-lg py-1.5',
+              'motion-safe:animate-dropdown-in rounded-xl shadow-lg py-1.5',
               transparent
                 ? 'bg-hero-bg/95 backdrop-blur-xl border border-white/10'
                 : 'bg-white border border-gray-200'
@@ -257,7 +257,7 @@ function NavDropdown({
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
                     transparent
                       ? 'text-white/80 hover:bg-white/5 hover:text-white'
-                      : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
+                      : 'text-nav-text-dark hover:bg-nav-hover-light'
                   )}
                 >
                   <span
@@ -291,7 +291,7 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
           {link.label}
           {link.to === '/challenges' && activeChallengeInfo && (
             <span
-              className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full animate-challenge-pulse"
+              className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
               style={{ backgroundColor: CHALLENGES.find((c) => c.id === activeChallengeInfo.challengeId)?.themeColor }}
               aria-hidden="true"
             />
@@ -505,7 +505,7 @@ function DesktopUserActions() {
             <div
               id="user-menu-dropdown"
               role="menu"
-              className="animate-dropdown-in rounded-xl border border-white/15 bg-hero-mid py-1.5 shadow-lg"
+              className="motion-safe:animate-dropdown-in rounded-xl border border-white/15 bg-hero-mid py-1.5 shadow-lg"
             >
               {user && (
                 <Link
@@ -607,7 +607,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
           id="mobile-menu"
           aria-label="Mobile navigation"
           className={cn(
-            'relative z-50 mt-2 rounded-xl shadow-lg animate-dropdown-in lg:hidden',
+            'relative z-50 mt-2 rounded-xl shadow-lg motion-safe:animate-dropdown-in lg:hidden',
             isAuthenticated
               ? 'bg-hero-mid border border-white/15'
               : 'bg-white border border-gray-200'
@@ -673,7 +673,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
                     (index > 0 || isAuthenticated) && (isAuthenticated ? 'mt-2 border-t border-white/15 pt-2' : 'mt-2 border-t border-gray-100 pt-2'),
                     isAuthenticated
                       ? isActive ? 'text-white' : 'text-white/80 hover:bg-white/5 hover:text-white'
-                      : isActive ? 'text-[#2B0E4A]' : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
+                      : isActive ? 'text-nav-text-dark' : 'text-nav-text-dark hover:bg-nav-hover-light'
                   )
                 }
               >
@@ -681,7 +681,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
                 {link.label}
                 {link.to === '/challenges' && activeChallengeInfo && (
                   <span
-                    className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full animate-challenge-pulse"
+                    className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
                     style={{ backgroundColor: CHALLENGES.find((c) => c.id === activeChallengeInfo.challengeId)?.themeColor }}
                     aria-hidden="true"
                   />
@@ -718,7 +718,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                       isAuthenticated
                         ? isActive ? 'text-white' : 'text-white/80 hover:bg-white/5 hover:text-white'
-                        : isActive ? 'text-[#2B0E4A]' : 'text-[#2B0E4A] hover:bg-[#F5F3FF]'
+                        : isActive ? 'text-nav-text-dark' : 'text-nav-text-dark hover:bg-nav-hover-light'
                     )
                   }
                 >
@@ -795,7 +795,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
                     'relative min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                     "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                    'text-[#2B0E4A] after:scale-x-0 hover:after:scale-x-100'
+                    'text-nav-text-dark after:scale-x-0 hover:after:scale-x-100'
                   )}
                 >
                   Log In

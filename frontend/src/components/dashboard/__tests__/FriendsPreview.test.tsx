@@ -108,9 +108,9 @@ describe('FriendsPreview', () => {
     const rank1 = screen.getByText('#1')
     const rank2 = screen.getByText('#2')
     const rank3 = screen.getByText('#3')
-    expect(rank1.className).toContain('text-[#FFD700]')
-    expect(rank2.className).toContain('text-[#C0C0C0]')
-    expect(rank3.className).toContain('text-[#CD7F32]')
+    expect(rank1.className).toContain('text-medal-gold')
+    expect(rank2.className).toContain('text-medal-silver')
+    expect(rank3.className).toContain('text-medal-bronze')
   })
 
   it('shows current user position when not in top 3', () => {

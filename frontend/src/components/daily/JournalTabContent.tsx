@@ -514,7 +514,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           {/* Draft Saved Indicator */}
           <div className="mb-4 h-4" aria-live="polite">
             {draftSaved && (
-              <p className="animate-fade-in text-xs text-text-light">
+              <p className="motion-safe:animate-fade-in text-xs text-text-light">
                 Draft saved
               </p>
             )}
@@ -567,7 +567,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
           {/* Done Journaling CTAs */}
           {isDoneJournaling && (
-            <div className="animate-fade-in rounded-lg bg-primary/5 p-4">
+            <div className="motion-safe:animate-fade-in rounded-lg bg-primary/5 p-4">
               <p className="mb-3 text-sm font-medium text-text-dark">
                 Beautiful time of reflection. Where to next?
               </p>

@@ -5,7 +5,12 @@ import { useToast } from '@/components/ui/Toast'
 import { storageService, StorageQuotaError } from '@/services/storage-service'
 import type { Favorite, FavoriteType } from '@/types/storage'
 
-export function useFavorites() {
+export function useFavorites(): {
+  favorites: Favorite[]
+  isFavorite: (type: FavoriteType, targetId: string) => boolean
+  toggleFavorite: (type: FavoriteType, targetId: string) => void
+  isLoading: boolean
+} {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { showToast } = useToast()

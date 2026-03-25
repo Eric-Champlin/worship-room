@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-export function useOpenSet() {
+export function useOpenSet(): { readonly openSet: Set<string>; readonly toggle: (id: string) => void } {
   const [openSet, setOpenSet] = useState<Set<string>>(new Set())
 
   const toggle = useCallback((id: string) => {

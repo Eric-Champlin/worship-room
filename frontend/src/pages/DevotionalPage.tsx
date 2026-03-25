@@ -49,7 +49,12 @@ export function DevotionalPage() {
   // Check existing completion state on mount / auth change
   useEffect(() => {
     if (!isAuthenticated) return
-    const reads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
+    let reads: string[] = []
+    try {
+      reads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
+    } catch {
+      // Malformed localStorage — treat as empty
+    }
     const todayStr = new Date().toLocaleDateString('en-CA')
     setIsCompleted(reads.includes(todayStr))
   }, [isAuthenticated])
@@ -61,7 +66,12 @@ export function DevotionalPage() {
       ([entry]) => {
         if (entry.isIntersecting) {
           const todayStr = new Date().toLocaleDateString('en-CA')
-          const reads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
+          let reads: string[] = []
+          try {
+            reads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
+          } catch {
+            // Malformed localStorage — treat as empty
+          }
           if (!reads.includes(todayStr)) {
             reads.push(todayStr)
             while (reads.length > 365) reads.shift()

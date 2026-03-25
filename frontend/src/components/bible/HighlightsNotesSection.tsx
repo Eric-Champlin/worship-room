@@ -126,7 +126,7 @@ export function HighlightsNotesSection({
               key={`${item.type}-${item.book}-${item.chapter}-${item.verseNumber}-${index}`}
               type="button"
               onClick={() => handleItemClick(item)}
-              className="w-full cursor-pointer rounded-xl border border-white/10 bg-white/5 p-4 text-left transition-colors hover:bg-white/[0.08]"
+              className="w-full cursor-pointer rounded-xl border border-white/10 bg-white/5 p-4 text-left transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               <div className="flex items-start gap-3">
                 {/* Color dot for highlights */}
@@ -169,7 +169,7 @@ export function HighlightsNotesSection({
           <button
             type="button"
             onClick={handleShowMore}
-            className="text-sm text-primary hover:text-primary-lt"
+            className="text-sm text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Show more
           </button>

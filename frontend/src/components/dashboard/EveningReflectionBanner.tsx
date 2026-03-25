@@ -27,7 +27,7 @@ export function EveningReflectionBanner({ onReflectNow, onDismiss, animate }: Ev
           <button
             type="button"
             onClick={onReflectNow}
-            className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#0f0a1e] sm:w-auto"
+            className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto"
           >
             Reflect Now
           </button>

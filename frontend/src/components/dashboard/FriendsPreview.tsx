@@ -10,9 +10,9 @@ import { MilestoneFeed } from '@/components/social/MilestoneFeed'
 import { CircleNetwork } from './CircleNetwork'
 
 const RANK_COLORS: Record<number, string> = {
-  1: 'text-[#FFD700]',
-  2: 'text-[#C0C0C0]',
-  3: 'text-[#CD7F32]',
+  1: 'text-medal-gold',
+  2: 'text-medal-silver',
+  3: 'text-medal-bronze',
 }
 
 export function FriendsPreview() {

@@ -95,8 +95,20 @@ function EveningDot({ cx, cy, payload }: DotProps) {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ConnectingLines(props: any) {
+/** Props shape passed by Recharts <Customized> to its component. */
+interface RechartsCustomizedProps {
+  formattedGraphicalItems?: {
+    props?: { points?: RechartsPoint[] }
+  }[]
+}
+
+interface RechartsPoint {
+  x: number
+  y: number
+  payload?: MoodChartDataPoint
+}
+
+function ConnectingLines(props: RechartsCustomizedProps) {
   const items = props.formattedGraphicalItems
   if (!items || items.length < 2) return null
 
@@ -106,8 +118,7 @@ function ConnectingLines(props: any) {
 
   return (
     <g>
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {morningPoints.map((mp: any, i: number) => {
+      {morningPoints.map((mp: RechartsPoint, i: number) => {
         const ep = eveningPoints[i]
         if (!mp?.payload || !ep) return null
         if (mp.payload.mood == null || mp.payload.eveningMood == null) return null
@@ -143,7 +154,7 @@ function ChartTooltip({ active, payload }: MoodTooltipProps) {
   if (!data?.mood || !data.moodLabel) return null
 
   return (
-    <div className="rounded-lg border border-white/15 bg-[#1E0B3E] px-3 py-2 text-sm text-white shadow-lg">
+    <div className="rounded-lg border border-white/15 bg-hero-mid px-3 py-2 text-sm text-white shadow-lg">
       <p className="font-medium">{formatTooltipDate(data.date)}</p>
       <p className="text-white/70">{data.moodLabel}</p>
       {data.movingAvg !== null && data.movingAvg !== undefined && (

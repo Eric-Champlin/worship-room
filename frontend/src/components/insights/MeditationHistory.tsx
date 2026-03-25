@@ -85,7 +85,7 @@ interface MeditationTooltipProps {
 function MeditationTooltip({ active, payload, label }: MeditationTooltipProps) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-white/15 bg-[#1E0B3E] px-3 py-2 text-sm text-white shadow-lg">
+    <div className="rounded-lg border border-white/15 bg-hero-mid px-3 py-2 text-sm text-white shadow-lg">
       <p className="font-medium">{formatTooltipDate(label ?? '')}</p>
       {payload
         .filter((p) => (p.value ?? 0) > 0)

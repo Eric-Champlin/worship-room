@@ -77,7 +77,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(() => {
     if (!isAuthenticated) return new Set()
     try {
-      const stored = localStorage.getItem(`worship-room-bookmarks-${config.category}`)
+      const stored = localStorage.getItem(`wr_bookmarks_${config.category}`)
       if (stored) {
         const parsed: unknown = JSON.parse(stored)
         if (Array.isArray(parsed)) return new Set(parsed as string[])
@@ -92,7 +92,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   useEffect(() => {
     if (!isAuthenticated) return
     localStorage.setItem(
-      `worship-room-bookmarks-${config.category}`,
+      `wr_bookmarks_${config.category}`,
       JSON.stringify([...bookmarkedIds]),
     )
   }, [bookmarkedIds, config.category, isAuthenticated])

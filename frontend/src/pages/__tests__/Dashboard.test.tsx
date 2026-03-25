@@ -81,7 +81,7 @@ describe('Dashboard', () => {
     seedTodayMoodEntry()
     renderDashboard()
     const root = screen.getByRole('main').closest('.min-h-screen')
-    expect(root).toHaveClass('bg-[#0f0a1e]')
+    expect(root).toHaveClass('bg-dashboard-dark')
   })
 
   it('has main content landmark when checked in', () => {

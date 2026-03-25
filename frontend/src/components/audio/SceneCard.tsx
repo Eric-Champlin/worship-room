@@ -1,6 +1,6 @@
 import { Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { formatTagValue } from './AmbientFilterBar'
+import { formatTagValue } from '@/lib/format-tag'
 import { FavoriteButton } from '@/components/music/FavoriteButton'
 import { getSceneBackground } from '@/data/scene-backgrounds'
 import type { ScenePreset } from '@/types/music'

@@ -24,7 +24,13 @@ function writeHighlights(data: BibleHighlight[]): void {
   }
 }
 
-export function useBibleHighlights() {
+export function useBibleHighlights(): {
+  getHighlightsForChapter: (book: string, chapter: number) => BibleHighlight[]
+  getHighlightForVerse: (book: string, chapter: number, verseNumber: number) => BibleHighlight | undefined
+  setHighlight: (book: string, chapter: number, verseNumber: number, color: string) => void
+  removeHighlight: (book: string, chapter: number, verseNumber: number) => void
+  getAllHighlights: () => BibleHighlight[]
+} {
   const { isAuthenticated } = useAuth()
   const [highlights, setHighlights] = useState<BibleHighlight[]>(readHighlights)
 

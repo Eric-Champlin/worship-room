@@ -171,7 +171,7 @@ export function Insights() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-dashboard-dark">
       <SEO title="Mood Insights & Spiritual Growth" description="Track your mood patterns, meditation minutes, and spiritual growth over time." noIndex />
       <a
         href="#insights-content"
@@ -182,7 +182,7 @@ export function Insights() {
       <Navbar transparent />
 
       {/* Page header */}
-      <header className="bg-gradient-to-b from-[#1a0533] to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8">
+      <header className="bg-gradient-to-b from-dashboard-gradient to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <Link
             to="/"
@@ -204,7 +204,7 @@ export function Insights() {
       <div ref={sentinelRef} aria-hidden="true" />
 
       {/* Time range pills - inline */}
-      <div className="bg-[#0f0a1e] py-3">
+      <div className="bg-dashboard-dark py-3">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <TimeRangePills range={range} onChange={setRange} />
         </div>
@@ -213,7 +213,7 @@ export function Insights() {
       {/* Time range pills - sticky */}
       {isSticky && (
         <div
-          className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-[#0f0a1e]/90 py-3 backdrop-blur-sm"
+          className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-dashboard-dark/90 py-3 backdrop-blur-sm"
           aria-hidden="true"
         >
           <div className="mx-auto max-w-5xl px-4 sm:px-6">

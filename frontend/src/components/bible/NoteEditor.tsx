@@ -79,14 +79,14 @@ export function NoteEditor({
           type="button"
           onClick={handleSave}
           disabled={isEmpty}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Save
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-white/40 hover:text-white/60"
+          className="text-sm text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Cancel
         </button>
@@ -95,7 +95,7 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => setShowDeleteConfirm(true)}
-            className="ml-auto text-sm text-white/30 hover:text-white/50"
+            className="ml-auto text-sm text-white/30 hover:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Delete
           </button>
@@ -111,14 +111,14 @@ export function NoteEditor({
             onClick={() => {
               onDelete?.()
             }}
-            className="text-sm font-medium text-danger hover:text-danger/80"
+            className="text-sm font-medium text-danger hover:text-danger/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Delete
           </button>
           <button
             type="button"
             onClick={() => setShowDeleteConfirm(false)}
-            className="text-sm text-white/40 hover:text-white/60"
+            className="text-sm text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Cancel
           </button>

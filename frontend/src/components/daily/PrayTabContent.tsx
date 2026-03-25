@@ -403,9 +403,9 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
             {isLoading && (
               <div className="flex flex-col items-center justify-center py-16">
                 <div className="mb-4 flex gap-1">
-                  <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />
-                  <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:150ms]" />
-                  <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:300ms]" />
+                  <span className="inline-block h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary [animation-delay:0ms]" />
+                  <span className="inline-block h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary [animation-delay:150ms]" />
+                  <span className="inline-block h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary [animation-delay:300ms]" />
                 </div>
                 <p className="text-text-light">Generating prayer for you...</p>
               </div>
@@ -414,7 +414,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
 
           {/* Generated Prayer Display */}
           {prayer && !isLoading && (
-            <div className="animate-fade-in">
+            <div className="motion-safe:animate-fade-in">
               <p className="mb-2 text-sm font-medium text-text-light">
                 Your prayer:
               </p>
@@ -713,7 +713,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   placeholder="Start typing here..."
                   maxLength={500}
                   rows={3}
-                  className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white px-4 py-3 text-text-dark placeholder:text-text-light/60 animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white px-4 py-3 text-text-dark placeholder:text-text-light/60 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                   aria-label="Prayer request"
                   aria-describedby="pray-char-count"
                 />

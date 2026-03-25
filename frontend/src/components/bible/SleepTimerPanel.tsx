@@ -145,7 +145,7 @@ export function SleepTimerPanel({ isOpen, onClose }: SleepTimerPanelProps) {
           <button
             type="button"
             onClick={handleCancel}
-            className="text-sm text-white/40 transition-colors hover:text-danger"
+            className="text-sm text-white/40 transition-colors hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label="Cancel sleep timer"
           >
             Cancel
@@ -174,7 +174,7 @@ export function SleepTimerPanel({ isOpen, onClose }: SleepTimerPanelProps) {
           <button
             type="button"
             onClick={handleAdjust}
-            className="text-sm text-primary underline transition-colors hover:text-primary-lt"
+            className="text-sm text-primary underline transition-colors hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Adjust
           </button>

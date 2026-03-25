@@ -35,7 +35,7 @@ export function UpdatePrompt() {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed left-1/2 z-[9998] -translate-x-1/2 w-[calc(100%-32px)] sm:w-auto sm:max-w-[480px] bg-[rgba(15,10,30,0.85)] backdrop-blur-lg border border-primary/40 rounded-xl shadow-2xl p-4 flex items-center gap-3 animate-fade-in ${
+      className={`fixed left-1/2 z-[9998] -translate-x-1/2 w-[calc(100%-32px)] sm:w-auto sm:max-w-[480px] bg-[rgba(15,10,30,0.85)] backdrop-blur-lg border border-primary/40 rounded-xl shadow-2xl p-4 flex items-center gap-3 motion-safe:animate-fade-in ${
         pillVisible ? 'bottom-24' : 'bottom-6'
       }`}
     >
@@ -47,13 +47,13 @@ export function UpdatePrompt() {
         <button
           ref={updateButtonRef}
           onClick={() => updateServiceWorker(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Update now
         </button>
         <button
           onClick={() => setDismissed(true)}
-          className="ml-2 text-white/60 transition-colors hover:text-white"
+          className="ml-2 text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           aria-label="Dismiss update notification"
         >
           <X className="h-5 w-5" />

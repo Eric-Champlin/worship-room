@@ -88,7 +88,7 @@ function PsalmReadingContent() {
     return (
       <Layout hero={<PageHero title="Psalm Reading" />}>
         {sessionDuration !== null && (
-          <div className="mx-auto max-w-lg animate-fade-in px-4 pt-10 text-center">
+          <div className="mx-auto max-w-lg motion-safe:animate-fade-in px-4 pt-10 text-center">
             <p className="font-serif text-lg text-text-dark">
               You meditated for {sessionDuration} {sessionDuration === 1 ? 'minute' : 'minutes'}
             </p>

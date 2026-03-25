@@ -24,7 +24,12 @@ function writeProgress(data: BibleProgressMap): void {
   }
 }
 
-export function useBibleProgress() {
+export function useBibleProgress(): {
+  progress: BibleProgressMap
+  markChapterRead: (bookSlug: string, chapter: number) => void
+  getBookProgress: (bookSlug: string) => number[]
+  isChapterRead: (bookSlug: string, chapter: number) => boolean
+} {
   const { isAuthenticated } = useAuth()
   const [progress, setProgress] = useState<BibleProgressMap>(readProgress)
 

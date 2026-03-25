@@ -5,7 +5,13 @@ import { useToast } from '@/components/ui/Toast'
 import { storageService, StorageQuotaError } from '@/services/storage-service'
 import type { SavedMix } from '@/types/storage'
 
-export function useSavedMixes() {
+export function useSavedMixes(): {
+  mixes: SavedMix[]
+  saveMix: (name: string, sounds: { soundId: string; volume: number }[]) => SavedMix | null
+  updateName: (id: string, name: string) => void
+  deleteMix: (id: string) => void
+  duplicateMix: (id: string) => SavedMix | null | undefined
+} {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { showToast } = useToast()

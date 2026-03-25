@@ -2,55 +2,65 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/query-client'
-import { Home } from './pages/Home'
-import { Health } from './pages/Health'
-import { Insights } from './pages/Insights'
-import { MonthlyReport } from './pages/MonthlyReport'
-import { Friends } from './pages/Friends'
-import { DailyHub } from './pages/DailyHub'
-import { BreathingExercise } from './pages/meditate/BreathingExercise'
-import { ScriptureSoaking } from './pages/meditate/ScriptureSoaking'
-import { GratitudeReflection } from './pages/meditate/GratitudeReflection'
-import { ActsPrayerWalk } from './pages/meditate/ActsPrayerWalk'
-import { PsalmReading } from './pages/meditate/PsalmReading'
-import { ExamenReflection } from './pages/meditate/ExamenReflection'
-import { SharedVerse } from './pages/SharedVerse'
-import { SharedPrayer } from './pages/SharedPrayer'
-import { PrayerWall } from './pages/PrayerWall'
-import { PrayerDetail } from './pages/PrayerDetail'
-import { PrayerWallProfile } from './pages/PrayerWallProfile'
-import { PrayerWallDashboard } from './pages/PrayerWallDashboard'
 import { Layout } from './components/Layout'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { AudioProvider } from '@/components/audio/AudioProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { Churches } from './pages/Churches'
-import { Counselors } from './pages/Counselors'
-import { CelebrateRecovery } from './pages/CelebrateRecovery'
-import { MusicPage } from './pages/MusicPage'
-import { RoutinesPage } from './pages/RoutinesPage'
-import { Dashboard } from './pages/Dashboard'
-import { Settings } from './pages/Settings'
-import { GrowthProfile } from './pages/GrowthProfile'
-import { DevotionalPage } from './pages/DevotionalPage'
-import { MyPrayers } from './pages/MyPrayers'
-import { ReadingPlans } from './pages/ReadingPlans'
-import { ReadingPlanDetail } from './pages/ReadingPlanDetail'
-import { Challenges } from './pages/Challenges'
-import { ChallengeDetail } from './pages/ChallengeDetail'
-import { BibleBrowser } from './pages/BibleBrowser'
-import { BibleReader } from './pages/BibleReader'
-import { AskPage } from './pages/AskPage'
 import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
 import { InstallBanner } from '@/components/pwa/InstallBanner'
 import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { lazy, Suspense } from 'react'
 
+// Route-level lazy loading for code splitting
+const Home = lazy(() => import('./pages/Home').then((m) => ({ default: m.Home })))
+const Health = lazy(() => import('./pages/Health').then((m) => ({ default: m.Health })))
+const Insights = lazy(() => import('./pages/Insights').then((m) => ({ default: m.Insights })))
+const MonthlyReport = lazy(() => import('./pages/MonthlyReport').then((m) => ({ default: m.MonthlyReport })))
+const Friends = lazy(() => import('./pages/Friends').then((m) => ({ default: m.Friends })))
+const DailyHub = lazy(() => import('./pages/DailyHub').then((m) => ({ default: m.DailyHub })))
+const BreathingExercise = lazy(() => import('./pages/meditate/BreathingExercise').then((m) => ({ default: m.BreathingExercise })))
+const ScriptureSoaking = lazy(() => import('./pages/meditate/ScriptureSoaking').then((m) => ({ default: m.ScriptureSoaking })))
+const GratitudeReflection = lazy(() => import('./pages/meditate/GratitudeReflection').then((m) => ({ default: m.GratitudeReflection })))
+const ActsPrayerWalk = lazy(() => import('./pages/meditate/ActsPrayerWalk').then((m) => ({ default: m.ActsPrayerWalk })))
+const PsalmReading = lazy(() => import('./pages/meditate/PsalmReading').then((m) => ({ default: m.PsalmReading })))
+const ExamenReflection = lazy(() => import('./pages/meditate/ExamenReflection').then((m) => ({ default: m.ExamenReflection })))
+const SharedVerse = lazy(() => import('./pages/SharedVerse').then((m) => ({ default: m.SharedVerse })))
+const SharedPrayer = lazy(() => import('./pages/SharedPrayer').then((m) => ({ default: m.SharedPrayer })))
+const PrayerWall = lazy(() => import('./pages/PrayerWall').then((m) => ({ default: m.PrayerWall })))
+const PrayerDetail = lazy(() => import('./pages/PrayerDetail').then((m) => ({ default: m.PrayerDetail })))
+const PrayerWallProfile = lazy(() => import('./pages/PrayerWallProfile').then((m) => ({ default: m.PrayerWallProfile })))
+const PrayerWallDashboard = lazy(() => import('./pages/PrayerWallDashboard').then((m) => ({ default: m.PrayerWallDashboard })))
+const Churches = lazy(() => import('./pages/Churches').then((m) => ({ default: m.Churches })))
+const Counselors = lazy(() => import('./pages/Counselors').then((m) => ({ default: m.Counselors })))
+const CelebrateRecovery = lazy(() => import('./pages/CelebrateRecovery').then((m) => ({ default: m.CelebrateRecovery })))
+const MusicPage = lazy(() => import('./pages/MusicPage').then((m) => ({ default: m.MusicPage })))
+const RoutinesPage = lazy(() => import('./pages/RoutinesPage').then((m) => ({ default: m.RoutinesPage })))
+const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })))
+const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })))
+const GrowthProfile = lazy(() => import('./pages/GrowthProfile').then((m) => ({ default: m.GrowthProfile })))
+const DevotionalPage = lazy(() => import('./pages/DevotionalPage').then((m) => ({ default: m.DevotionalPage })))
+const MyPrayers = lazy(() => import('./pages/MyPrayers').then((m) => ({ default: m.MyPrayers })))
+const ReadingPlans = lazy(() => import('./pages/ReadingPlans').then((m) => ({ default: m.ReadingPlans })))
+const ReadingPlanDetail = lazy(() => import('./pages/ReadingPlanDetail').then((m) => ({ default: m.ReadingPlanDetail })))
+const Challenges = lazy(() => import('./pages/Challenges').then((m) => ({ default: m.Challenges })))
+const ChallengeDetail = lazy(() => import('./pages/ChallengeDetail').then((m) => ({ default: m.ChallengeDetail })))
+const BibleBrowser = lazy(() => import('./pages/BibleBrowser').then((m) => ({ default: m.BibleBrowser })))
+const BibleReader = lazy(() => import('./pages/BibleReader').then((m) => ({ default: m.BibleReader })))
+const AskPage = lazy(() => import('./pages/AskPage').then((m) => ({ default: m.AskPage })))
 const MoodCheckInPreview = lazy(() =>
   import('./pages/MoodCheckInPreview').then((m) => ({ default: m.MoodCheckInPreview }))
 )
+
+function RouteLoadingFallback() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+    </div>
+  )
+}
 
 function ComingSoon({ title }: { title: string }) {
   return (
@@ -104,12 +114,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <HelmetProvider>
+        <ErrorBoundary>
         <AuthProvider>
         <ToastProvider>
         <AuthModalProvider>
         <AudioProvider>
         <UpdatePrompt />
         <InstallBanner />
+        <Suspense fallback={<RouteLoadingFallback />}>
         <Routes>
           <Route path="/" element={<RootRoute />} />
           <Route path="/health" element={<Health />} />
@@ -154,16 +166,18 @@ function App() {
           <Route path="/profile/:userId" element={<GrowthProfile />} />
           <Route path="/local-support/celebrate-recovery" element={<CelebrateRecovery />} />
           {import.meta.env.DEV && (
-            <Route path="/dev/mood-checkin" element={<Suspense><MoodCheckInPreview /></Suspense>} />
+            <Route path="/dev/mood-checkin" element={<MoodCheckInPreview />} />
           )}
           <Route path="/login" element={<ComingSoon title="Log In" />} />
           <Route path="/register" element={<ComingSoon title="Get Started" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
         </AudioProvider>
         </AuthModalProvider>
         </ToastProvider>
         </AuthProvider>
+        </ErrorBoundary>
         </HelmetProvider>
       </BrowserRouter>
     </QueryClientProvider>

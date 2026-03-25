@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Copy, Mail, MessageSquare, Check } from 'lucide-react'
+import { FACEBOOK_SHARE_BASE, TWITTER_SHARE_BASE } from '@/constants/sharing'
+import { COPY_RESET_DELAY } from '@/constants/timing'
 
 interface ShareDropdownProps {
   prayerId: string
@@ -117,7 +119,7 @@ export function ShareDropdown({
       await navigator.clipboard.writeText(shareUrl)
       setCopied(true)
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current)
-      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), COPY_RESET_DELAY)
     } catch {
       // Fallback: do nothing if clipboard API not available
     }
@@ -173,7 +175,7 @@ export function ShareDropdown({
       </a>
 
       <a
-        href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+        href={`${FACEBOOK_SHARE_BASE}?u=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
         role="menuitem"
@@ -187,7 +189,7 @@ export function ShareDropdown({
       </a>
 
       <a
-        href={`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`}
+        href={`${TWITTER_SHARE_BASE}?text=${encodedText}&url=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
         role="menuitem"

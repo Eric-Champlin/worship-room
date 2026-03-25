@@ -79,7 +79,13 @@ export function SearchControls({
       if (!locationInput.trim()) return
 
       setGeoMessage(null)
-      const result = await onGeocode(locationInput.trim())
+      let result: { lat: number; lng: number } | null = null
+      try {
+        result = await onGeocode(locationInput.trim())
+      } catch {
+        setGeoMessage("Something went wrong. Please check your connection and try again.")
+        return
+      }
       if (result) {
         setCoordsRef(result)
         onSearch(result.lat, result.lng, radius)

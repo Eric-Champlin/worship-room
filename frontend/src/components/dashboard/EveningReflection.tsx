@@ -336,7 +336,7 @@ export function EveningReflection({
               <button
                 type="button"
                 onClick={handleStep2Next}
-                className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#0f0a1e] sm:w-auto sm:px-8"
+                className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto sm:px-8"
               >
                 Next
               </button>
@@ -392,7 +392,7 @@ export function EveningReflection({
               <button
                 type="button"
                 onClick={handleStep3Next}
-                className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#0f0a1e] sm:w-auto sm:px-8"
+                className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto sm:px-8"
               >
                 Next
               </button>
@@ -416,7 +416,7 @@ export function EveningReflection({
                   <button
                     type="button"
                     onClick={handleGoodnight}
-                    className="rounded-lg bg-indigo-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#0f0a1e]"
+                    className="rounded-lg bg-indigo-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-dashboard-dark"
                   >
                     Goodnight
                   </button>
@@ -448,14 +448,14 @@ export function EveningReflection({
                     <button
                       type="button"
                       onClick={finishReflection}
-                      className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#0f0a1e] sm:w-auto"
+                      className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto"
                     >
                       Done
                     </button>
                     <Link
                       to="/music?tab=sleep"
                       onClick={finishReflection}
-                      className="w-full rounded-lg border border-white/20 px-8 py-3 text-center font-semibold text-white transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-[#0f0a1e] sm:w-auto"
+                      className="w-full rounded-lg border border-white/20 px-8 py-3 text-center font-semibold text-white transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto"
                     >
                       Go to Sleep &amp; Rest
                     </Link>

@@ -39,7 +39,7 @@ export function ToggleSwitch({ checked, onChange, label, description, id }: Togg
         }}
         className={cn(
           'relative inline-flex h-6 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors self-center p-0',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark',
           checked ? 'bg-primary' : 'bg-white/20',
         )}
       >

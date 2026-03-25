@@ -19,7 +19,7 @@ import {
   Sun,
   Star,
 } from 'lucide-react'
-import { BADGE_DEFINITIONS, BADGE_MAP } from './badges'
+import { BADGE_MAP } from './badges'
 
 // --- Types ---
 
@@ -385,12 +385,5 @@ export const STREAK_MILESTONE_MESSAGES: Record<number, string> = {
   365: 'A full year of faith. This is extraordinary.',
 }
 
-// --- Verify all badge IDs are covered (development guard) ---
-
-if (import.meta.env.DEV) {
-  for (const badge of BADGE_DEFINITIONS) {
-    if (!BADGE_ICON_MAP[badge.id]) {
-      console.warn(`[badge-icons] Missing explicit icon mapping for badge: ${badge.id}`)
-    }
-  }
-}
+// Development guard: verify all badge IDs have explicit icon mappings.
+// Checked at build time via unit tests (badge-icons.test.ts) instead of runtime console.warn.

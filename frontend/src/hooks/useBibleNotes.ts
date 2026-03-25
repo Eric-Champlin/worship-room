@@ -24,7 +24,13 @@ function writeNotes(data: BibleNote[]): void {
   }
 }
 
-export function useBibleNotes() {
+export function useBibleNotes(): {
+  getNotesForChapter: (book: string, chapter: number) => BibleNote[]
+  getNoteForVerse: (book: string, chapter: number, verseNumber: number) => BibleNote | undefined
+  saveNote: (book: string, chapter: number, verseNumber: number, text: string) => boolean
+  deleteNote: (id: string) => void
+  getAllNotes: () => BibleNote[]
+} {
   const { isAuthenticated } = useAuth()
   const [notes, setNotes] = useState<BibleNote[]>(readNotes)
 

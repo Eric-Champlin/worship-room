@@ -56,7 +56,7 @@ function InviteByLink() {
         />
         <button
           onClick={handleCopy}
-          className="flex-shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt"
+          className="flex-shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
         >
           Copy Link
         </button>

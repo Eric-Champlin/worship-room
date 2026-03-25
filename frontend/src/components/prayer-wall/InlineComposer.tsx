@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
+import { PRAYER_POST_MAX_LENGTH, PRAYER_POST_WARNING_THRESHOLD } from '@/constants/content-limits'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
@@ -102,11 +103,11 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           value={content}
           onChange={handleChange}
           placeholder="What's on your heart?"
-          maxLength={1000}
+          maxLength={PRAYER_POST_MAX_LENGTH}
           className="w-full resize-none rounded-lg border border-gray-200 p-3 leading-relaxed text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           style={{ minHeight: '120px' }}
           aria-label="Prayer request"
-          aria-describedby={content.length >= 500 ? 'composer-char-count' : undefined}
+          aria-describedby={content.length >= PRAYER_POST_WARNING_THRESHOLD ? 'composer-char-count' : undefined}
         />
 
         {activeChallenge && (
@@ -176,18 +177,18 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           <Button
             type="button"
             variant="primary"
-            disabled={!isOnline || !content.trim() || content.length > 1000}
+            disabled={!isOnline || !content.trim() || content.length > PRAYER_POST_MAX_LENGTH}
             onClick={handleSubmit}
           >
             Submit Prayer Request
           </Button>
         </div>
 
-        {content.length >= 500 && (
+        {content.length >= PRAYER_POST_WARNING_THRESHOLD && (
           <p
             id="composer-char-count"
             aria-live="polite"
-            className={cn('mt-2 text-xs', content.length >= 1000 ? 'text-danger' : 'text-text-light')}
+            className={cn('mt-2 text-xs', content.length >= PRAYER_POST_MAX_LENGTH ? 'text-danger' : 'text-text-light')}
           >
             {content.length}/1,000
           </p>

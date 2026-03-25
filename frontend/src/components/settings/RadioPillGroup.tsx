@@ -50,7 +50,7 @@ export function RadioPillGroup({ label, options, value, onChange }: RadioPillGro
               onKeyDown={(e) => handleKeyDown(e, index)}
               className={cn(
                 'rounded-full px-4 py-2 text-sm font-medium transition-colors min-h-[44px]',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e]',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark',
                 selected
                   ? 'bg-primary/20 border border-primary text-white'
                   : 'bg-white/5 border border-white/15 text-white/60 hover:bg-white/10',

@@ -57,7 +57,7 @@ export function PrayerCardOverflowMenu({
       {isOpen && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-20 mt-1 w-48 animate-dropdown-in rounded-xl border border-white/15 bg-hero-mid shadow-lg"
+          className="absolute right-0 top-full z-20 mt-1 w-48 motion-safe:animate-dropdown-in rounded-xl border border-white/15 bg-hero-mid shadow-lg"
         >
           <button
             type="button"

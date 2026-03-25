@@ -15,9 +15,9 @@ const LEVEL_ICONS: Record<number, React.ElementType> = {
 }
 
 const RANK_COLORS: Record<number, string> = {
-  1: 'text-[#FFD700]',
-  2: 'text-[#C0C0C0]',
-  3: 'text-[#CD7F32]',
+  1: 'text-medal-gold',
+  2: 'text-medal-silver',
+  3: 'text-medal-bronze',
 }
 
 interface LeaderboardRowProps {

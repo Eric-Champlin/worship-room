@@ -245,7 +245,7 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
               <div
                 key={currentQuestion}
                 className={
-                  slideDirection === 'left' ? 'animate-slide-from-right' : 'animate-slide-from-left'
+                  slideDirection === 'left' ? 'motion-safe:animate-slide-from-right' : 'motion-safe:animate-slide-from-left'
                 }
               >
                 {showResult && destination ? (

@@ -277,7 +277,7 @@ export function Dashboard() {
   const shouldAnimate = animateEntrance && !prefersReduced
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-dashboard-dark">
       <SEO
         title="Dashboard"
         description="Your daily spiritual growth dashboard — mood tracking, streaks, faith points, and personalized encouragement."

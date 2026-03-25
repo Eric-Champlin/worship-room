@@ -111,14 +111,14 @@ export function NoteIndicator({ note, onEdit, onDelete }: NoteIndicatorProps) {
               <button
                 type="button"
                 onClick={handleConfirmDelete}
-                className="text-xs font-medium text-danger hover:text-danger/80"
+                className="text-xs font-medium text-danger hover:text-danger/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Delete
               </button>
               <button
                 type="button"
                 onClick={handleCancelDelete}
-                className="text-xs text-white/40 hover:text-white/60"
+                className="text-xs text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Cancel
               </button>

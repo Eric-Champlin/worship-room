@@ -99,7 +99,8 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
         <button
           type="button"
           onClick={() => setPickerOpen(true)}
-          className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2"
+          className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+          aria-label="Change avatar"
         >
           Change
         </button>
@@ -140,8 +141,8 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
           />
           <div className="mt-1 flex items-center justify-between">
             <div>
-              {nameError && <p className="text-xs text-red-400">{nameError}</p>}
-              {nameSaved && <p className="text-xs text-green-400">Saved</p>}
+              {nameError && <p className="text-xs text-red-400" role="alert">{nameError}</p>}
+              {nameSaved && <p className="text-xs text-green-400" aria-live="polite">Saved</p>}
             </div>
             <span className="text-xs text-white/40">{displayName.length}/{NAME_MAX}</span>
           </div>

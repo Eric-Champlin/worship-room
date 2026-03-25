@@ -19,6 +19,19 @@ export function AccountSection({ email }: AccountSectionProps) {
     const keysToRemove = Object.keys(localStorage).filter((k) => k.startsWith('wr_'))
     keysToRemove.forEach((key) => localStorage.removeItem(key))
 
+    // Remove legacy keys from before the wr_ prefix rename
+    const legacyKeys = [
+      'worship-room-daily-completion',
+      'worship-room-journal-draft',
+      'worship-room-journal-mode',
+    ]
+    legacyKeys.forEach((key) => localStorage.removeItem(key))
+
+    // Remove any worship-room-bookmarks-* and other worship-room- prefixed keys
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith('worship-room-'))
+      .forEach((key) => localStorage.removeItem(key))
+
     logout()
     navigate('/')
   }
@@ -38,7 +51,7 @@ export function AccountSection({ email }: AccountSectionProps) {
             <button
               type="button"
               onClick={() => showToast('Email change coming soon')}
-              className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2"
+              className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               Change Email
             </button>
@@ -49,7 +62,7 @@ export function AccountSection({ email }: AccountSectionProps) {
             <button
               type="button"
               onClick={() => showToast('Password change coming soon')}
-              className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2"
+              className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               Change Password
             </button>
@@ -64,7 +77,7 @@ export function AccountSection({ email }: AccountSectionProps) {
           <button
             type="button"
             onClick={() => setShowDeleteModal(true)}
-            className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 rounded-lg px-4 py-3 text-sm font-medium transition-colors min-h-[44px]"
+            className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 rounded-lg px-4 py-3 text-sm font-medium transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
           >
             Delete Account
           </button>

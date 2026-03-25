@@ -16,7 +16,7 @@ export function CompletionScreen({
   return (
     <div
       className={cn(
-        'flex animate-fade-in flex-col items-center gap-8 py-12 text-center',
+        'flex motion-safe:animate-fade-in flex-col items-center gap-8 py-12 text-center',
         className,
       )}
     >

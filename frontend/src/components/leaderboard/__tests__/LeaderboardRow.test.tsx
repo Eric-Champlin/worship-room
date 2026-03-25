@@ -45,19 +45,19 @@ describe('LeaderboardRow', () => {
   it('rank #1 has gold color', () => {
     renderRow({ rank: 1 })
     const rankEl = screen.getByText('1')
-    expect(rankEl.className).toContain('text-[#FFD700]')
+    expect(rankEl.className).toContain('text-medal-gold')
   })
 
   it('rank #2 has silver color', () => {
     renderRow({ rank: 2 })
     const rankEl = screen.getByText('2')
-    expect(rankEl.className).toContain('text-[#C0C0C0]')
+    expect(rankEl.className).toContain('text-medal-silver')
   })
 
   it('rank #3 has bronze color', () => {
     renderRow({ rank: 3 })
     const rankEl = screen.getByText('3')
-    expect(rankEl.className).toContain('text-[#CD7F32]')
+    expect(rankEl.className).toContain('text-medal-bronze')
   })
 
   it('current user has border-l-2 border-primary', () => {

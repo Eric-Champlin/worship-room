@@ -53,7 +53,7 @@ export function PrayerItemCard({ prayer, children, glowing, onToggleReminder, on
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-1 text-sm font-medium text-primary hover:text-primary-lt"
+              className="mt-1 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               {isExpanded ? 'Show less' : 'Show more'}
             </button>

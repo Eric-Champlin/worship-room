@@ -46,7 +46,7 @@ export function ProfilePopup({ entry, onClose }: ProfilePopupProps) {
       role="dialog"
       aria-label={`Profile of ${entry.displayName}`}
       tabIndex={-1}
-      className="absolute left-0 top-full z-10 mt-1 max-w-xs rounded-xl border border-white/15 bg-[#1a0533] p-3 shadow-lg"
+      className="absolute left-0 top-full z-10 mt-1 max-w-xs rounded-xl border border-white/15 bg-dashboard-gradient p-3 shadow-lg"
     >
       <div className="flex items-center gap-2 text-sm text-white">
         <LevelIcon className="h-4 w-4 text-white/60" aria-hidden="true" />

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
 import {
@@ -64,13 +64,6 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
 
   // Check if user has already read today's devotional
   const todayStr = getLocalDateString()
-  let devotionalReads: string[] = []
-  try {
-    devotionalReads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
-  } catch {
-    // Malformed localStorage — treat as unread
-  }
-  const hasReadToday = devotionalReads.includes(todayStr)
 
   // Check for active reading plan
   const { getActivePlanId, getProgress } = useReadingPlanProgress()
@@ -78,15 +71,25 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
   const activePlan = activePlanId ? getReadingPlan(activePlanId) : undefined
   const activeProgress = activePlanId ? getProgress(activePlanId) : undefined
 
-  // Check if user already completed a reading today
-  let hasReadPlanToday = false
-  try {
-    const activityLog = JSON.parse(localStorage.getItem('wr_daily_activities') || '{}')
-    const todayActivities = activityLog[todayStr]
-    hasReadPlanToday = todayActivities?.readingPlan === true
-  } catch {
-    // ignore
-  }
+  const { hasReadToday, hasReadPlanToday } = useMemo(() => {
+    let devotionalReads: string[] = []
+    try {
+      devotionalReads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
+    } catch {
+      // Malformed localStorage — treat as unread
+    }
+
+    let readPlanToday = false
+    try {
+      const activityLog = JSON.parse(localStorage.getItem('wr_daily_activities') || '{}')
+      const todayActivities = activityLog[todayStr]
+      readPlanToday = todayActivities?.readingPlan === true
+    } catch {
+      // ignore
+    }
+
+    return { hasReadToday: devotionalReads.includes(todayStr), hasReadPlanToday: readPlanToday }
+  }, [todayStr])
 
   const showReadingPlan = !!activePlan && !!activeProgress && !hasReadPlanToday
 

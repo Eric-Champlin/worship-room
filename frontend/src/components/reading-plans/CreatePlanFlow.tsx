@@ -191,7 +191,7 @@ function StepOne({
           onChange={(e) => onTopicChange(e.target.value)}
           maxLength={500}
           placeholder="I'm struggling with anxiety about my job..."
-          className="w-full resize-none rounded-xl border border-glow-cyan/30 bg-white/5 p-4 text-white backdrop-blur-sm placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 animate-glow-pulse min-h-[120px]"
+          className="w-full resize-none rounded-xl border border-glow-cyan/30 bg-white/5 p-4 text-white backdrop-blur-sm placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 motion-safe:animate-glow-pulse min-h-[120px]"
           aria-label="Describe what's on your heart"
         />
         <p className="mt-2 text-right text-xs text-white/40">

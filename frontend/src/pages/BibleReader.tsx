@@ -54,6 +54,7 @@ export function BibleReader() {
 
   const [verses, setVerses] = useState<BibleVerse[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null)
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null)
   const [showColorPicker, setShowColorPicker] = useState(false)
@@ -128,13 +129,20 @@ export function BibleReader() {
 
     let cancelled = false
     setIsLoading(true)
+    setLoadError(false)
     setVerses([])
 
-    loadChapter(bookSlug, chapterNumber).then((data) => {
-      if (cancelled) return
-      setVerses(data?.verses ?? [])
-      setIsLoading(false)
-    })
+    loadChapter(bookSlug, chapterNumber)
+      .then((data) => {
+        if (cancelled) return
+        setVerses(data?.verses ?? [])
+        setIsLoading(false)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setLoadError(true)
+        setIsLoading(false)
+      })
 
     return () => {
       cancelled = true
@@ -487,7 +495,32 @@ export function BibleReader() {
 
         {/* Content */}
         <div className="mx-auto max-w-2xl px-4 sm:px-6">
-          {!book.hasFullText ? (
+          {loadError ? (
+            <div className="py-16 text-center">
+              <p className="mb-4 text-white/50">
+                Something went wrong loading this chapter.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoadError(false)
+                  setIsLoading(true)
+                  loadChapter(bookSlug!, chapterNumber)
+                    .then((data) => {
+                      setVerses(data?.verses ?? [])
+                      setIsLoading(false)
+                    })
+                    .catch(() => {
+                      setLoadError(true)
+                      setIsLoading(false)
+                    })
+                }}
+                className="rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary-lt"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : !book.hasFullText ? (
             <ChapterPlaceholder
               bookName={book.name}
               chapter={chapterNumber}

@@ -155,14 +155,14 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
           <button
             type="button"
             onClick={handleCancel}
-            className="text-sm font-medium text-text-light hover:text-text-dark"
+            className="text-sm font-medium text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt"
+            className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Save Prayer
           </button>

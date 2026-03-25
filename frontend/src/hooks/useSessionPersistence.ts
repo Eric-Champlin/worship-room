@@ -3,7 +3,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { storageService } from '@/services/storage-service'
 import type { SessionState } from '@/types/storage'
 
-export function useSessionPersistence() {
+export function useSessionPersistence(): {
+  sessionState: SessionState | null
+  hasValidSession: boolean
+  saveSession: (state: SessionState) => void
+  clearSession: () => void
+} {
   const { isAuthenticated } = useAuth()
   const [sessionState, setSessionState] = useState<SessionState | null>(null)
 

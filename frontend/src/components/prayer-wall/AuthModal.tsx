@@ -77,7 +77,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
       >
         {/* Header */}
         <div className="relative flex items-center justify-center">
-          <h2 id="auth-modal-title" className="text-center font-script text-4xl font-bold text-[#2B0E4A] sm:text-5xl">
+          <h2 id="auth-modal-title" className="text-center font-script text-4xl font-bold text-nav-text-dark sm:text-5xl">
             {VIEW_TITLES[view]}
           </h2>
           <button
@@ -127,7 +127,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               <button
                 type="button"
                 onClick={() => setView('login')}
-                className="font-medium text-[#2B0E4A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="font-medium text-nav-text-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
               >
                 Back to Log In
               </button>
@@ -211,7 +211,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 <button
                   type="button"
                   onClick={() => setView('forgot-password')}
-                  className="mb-3 text-sm text-[#2B0E4A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                  className="mb-3 text-sm text-nav-text-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                 >
                   Forgot password?
                 </button>
@@ -250,7 +250,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   <button
                     type="button"
                     onClick={() => setView('register')}
-                    className="font-medium text-[#2B0E4A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="font-medium text-nav-text-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                   >
                     Create one!
                   </button>
@@ -261,7 +261,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   <button
                     type="button"
                     onClick={() => setView('login')}
-                    className="font-medium text-[#2B0E4A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="font-medium text-nav-text-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                   >
                     Log in
                   </button>

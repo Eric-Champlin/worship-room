@@ -28,7 +28,7 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
 function getMultiplierPreview(
   completedCount: number,
-  totalActivities: number,
+  _totalActivities: number,
 ): {
   text: string
   isCelebration: boolean

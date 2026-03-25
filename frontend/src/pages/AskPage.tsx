@@ -79,13 +79,15 @@ export function AskPage() {
 
   // Handle ?q= query param on mount
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>
     const qParam = searchParams.get('q')
     if (qParam) {
       setText(qParam)
       if (isAuthenticated) {
-        setTimeout(() => handleSubmitRef.current(), 0)
+        timeoutId = setTimeout(() => handleSubmitRef.current(), 0)
       }
     }
+    return () => clearTimeout(timeoutId)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle auto-submit from Popular Topics (Step 7)
@@ -167,9 +169,14 @@ export function AskPage() {
 
     if (!isAuthenticated || conversation.length === 0) return
     const firstResponse = conversation[0].response
-    const existing: AskFeedback[] = JSON.parse(
-      localStorage.getItem(ASK_FEEDBACK_KEY) || '[]',
-    )
+    let existing: AskFeedback[] = []
+    try {
+      existing = JSON.parse(
+        localStorage.getItem(ASK_FEEDBACK_KEY) || '[]',
+      )
+    } catch {
+      // Malformed localStorage — reset to empty
+    }
     const entry: AskFeedback = {
       questionId: firstResponse.id,
       helpful: type === 'up',
@@ -226,7 +233,7 @@ export function AskPage() {
                     className={cn(
                       'w-full resize-none rounded-lg border border-glow-cyan/30 bg-white py-3 px-4',
                       'text-base text-text-dark placeholder:text-text-light/60',
-                      'animate-glow-pulse',
+                      'motion-safe:animate-glow-pulse',
                       'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
                     )}
                   />
@@ -324,13 +331,13 @@ export function AskPage() {
                   )}
                   <div className="flex flex-col items-center justify-center py-16">
                     <div className="mb-4 flex gap-1">
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+                      <div className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary" />
                       <div
-                        className="h-2 w-2 animate-bounce rounded-full bg-primary"
+                        className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary"
                         style={{ animationDelay: '150ms' }}
                       />
                       <div
-                        className="h-2 w-2 animate-bounce rounded-full bg-primary"
+                        className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary"
                         style={{ animationDelay: '300ms' }}
                       />
                     </div>

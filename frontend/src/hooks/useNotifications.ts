@@ -4,7 +4,14 @@ import { getNotifications, setNotifications, seedNotificationsIfNeeded } from '@
 
 const STORAGE_KEY = 'wr_notifications'
 
-export function useNotifications() {
+export function useNotifications(): {
+  notifications: NotificationEntry[]
+  unreadCount: number
+  markAsRead: (id: string) => void
+  markAllAsRead: () => void
+  dismiss: (id: string) => void
+  addNotification: (n: Omit<NotificationEntry, 'id'>) => void
+} {
   const [notifications, setNotificationsState] = useState<NotificationEntry[]>(() => {
     seedNotificationsIfNeeded()
     return getNotifications()

@@ -6,7 +6,7 @@ import {
   markRemindersShown,
 } from '@/services/prayer-list-storage'
 
-export function usePrayerReminders(isActive: boolean) {
+export function usePrayerReminders(isActive: boolean): void {
   const { showToast } = useToast()
 
   useEffect(() => {

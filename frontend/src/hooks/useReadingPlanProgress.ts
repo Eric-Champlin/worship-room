@@ -23,7 +23,14 @@ function writeProgress(progress: ReadingPlanProgressMap): void {
   }
 }
 
-export function useReadingPlanProgress() {
+export function useReadingPlanProgress(): {
+  progress: ReadingPlanProgressMap
+  getProgress: (planId: string) => PlanProgress | undefined
+  getActivePlanId: () => string | null
+  startPlan: (planId: string) => void
+  completeDay: (planId: string, dayNumber: number) => void
+  getPlanStatus: (planId: string) => 'unstarted' | 'active' | 'paused' | 'completed'
+} {
   const { isAuthenticated } = useAuth()
   const [progress, setProgress] = useState<ReadingPlanProgressMap>(readProgress)
 

@@ -200,7 +200,7 @@ export function WelcomeWizard({ userName, onComplete }: WelcomeWizardProps) {
     <div
       role="dialog"
       aria-labelledby={HEADING_IDS[currentScreen]}
-      className="fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-[#0f0a1e] motion-safe:animate-continue-fade-in motion-reduce:animate-none"
+      className="fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-dashboard-dark motion-safe:animate-continue-fade-in motion-reduce:animate-none"
     >
       {/* Content card */}
       <div className="relative mx-4 w-full max-w-[560px] sm:max-w-[480px] lg:max-w-[560px]">
@@ -281,7 +281,7 @@ export function WelcomeWizard({ userName, onComplete }: WelcomeWizardProps) {
                 type="button"
                 onClick={handleNext}
                 disabled={nextDisabled}
-                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e] disabled:cursor-not-allowed disabled:opacity-40"
+                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {nextLabel}
               </button>
@@ -403,7 +403,7 @@ const Screen2Avatar = forwardRef<HTMLHeadingElement, Screen2Props>(
                         'flex items-center justify-center rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                         'h-14 w-14 sm:h-16 sm:w-16 lg:h-[72px] lg:w-[72px]',
                         selectedAvatarId === preset.id &&
-                          'ring-2 ring-primary ring-offset-2 ring-offset-[#0f0a1e]',
+                          'ring-2 ring-primary ring-offset-2 ring-offset-dashboard-dark',
                       )}
                       style={{ backgroundColor: preset.bgColor }}
                     >
@@ -537,7 +537,7 @@ const Screen4Results = forwardRef<HTMLHeadingElement, Screen4Props>(
         <button
           type="button"
           onClick={onStartJourney}
-          className="mt-6 w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e] sm:w-auto"
+          className="mt-6 w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:w-auto"
         >
           Start Your Journey
         </button>

@@ -2,7 +2,11 @@ import { useState, useCallback } from 'react'
 import { getMockReactions } from '@/mocks/prayer-wall-mock-data'
 import type { PrayerReaction } from '@/types/prayer-wall'
 
-export function usePrayerReactions() {
+export function usePrayerReactions(): {
+  reactions: Record<string, PrayerReaction>
+  togglePraying: (prayerId: string) => boolean
+  toggleBookmark: (prayerId: string) => void
+} {
   const [reactions, setReactions] = useState<Record<string, PrayerReaction>>(
     () => getMockReactions(),
   )

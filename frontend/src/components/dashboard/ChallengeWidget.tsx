@@ -10,7 +10,7 @@ const RING_RADIUS = 18
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
 export function ChallengeWidget() {
-  const { getActiveChallenge, getProgress, getReminders, toggleReminder } = useChallengeProgress()
+  const { getActiveChallenge, getReminders, toggleReminder } = useChallengeProgress()
 
   const active = getActiveChallenge()
 

@@ -122,7 +122,11 @@ const noopRecordActivity = () => {};
 const noopClearNewlyEarned = () => {};
 const noopRepairStreak = (_useFreeRepair: boolean) => {};
 
-export function useFaithPoints() {
+export function useFaithPoints(): FaithPointsState & {
+  recordActivity: (type: ActivityType) => void
+  clearNewlyEarnedBadges: () => void
+  repairStreak: (useFreeRepair: boolean) => void
+} {
   const { isAuthenticated } = useAuth();
 
   const [state, setState] = useState<FaithPointsState>(() => {
@@ -283,7 +287,7 @@ export function useFaithPoints() {
 
       try {
         localStorage.setItem('wr_faith_points', JSON.stringify(newFP));
-      } catch { return; }
+      } catch (error) { console.error('[useFaithPoints] Failed to persist faith points:', error); return; }
 
       // Restore streak — rollback faith points on failure
       const streak = getStreakData();
@@ -295,7 +299,8 @@ export function useFaithPoints() {
 
       try {
         localStorage.setItem('wr_streak', JSON.stringify(restoredStreak));
-      } catch {
+      } catch (error) {
+        console.error('[useFaithPoints] Failed to persist streak repair:', error);
         // Rollback faith points
         try {
           if (oldFaithPointsJson !== null) {
@@ -303,7 +308,7 @@ export function useFaithPoints() {
           } else {
             localStorage.removeItem('wr_faith_points');
           }
-        } catch { /* best-effort rollback */ }
+        } catch (rollbackError) { console.error('[useFaithPoints] Rollback failed:', rollbackError); }
         return;
       }
     } else {
@@ -317,7 +322,7 @@ export function useFaithPoints() {
 
       try {
         localStorage.setItem('wr_streak', JSON.stringify(restoredStreak));
-      } catch { return; }
+      } catch (error) { console.error('[useFaithPoints] Failed to persist free streak repair:', error); return; }
     }
 
     // Update repair tracking

@@ -91,7 +91,7 @@ export function DashboardHero({
   return (
     <section
       aria-label="Dashboard hero"
-      className="bg-gradient-to-b from-[#1a0533] to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8"
+      className="bg-gradient-to-b from-dashboard-gradient to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         {gardenSlot}

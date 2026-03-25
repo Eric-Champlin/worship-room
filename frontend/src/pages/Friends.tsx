@@ -65,7 +65,7 @@ export function Friends() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-dashboard-dark">
       <SEO title="Friends & Leaderboard" description="Grow together in faith with friends, encouragement, and friendly accountability." noIndex />
       <a
         href="#friends-content"
@@ -76,7 +76,7 @@ export function Friends() {
       <Navbar transparent />
 
       {/* Page header */}
-      <header className="bg-gradient-to-b from-[#1a0533] to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8">
+      <header className="bg-gradient-to-b from-dashboard-gradient to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <Link
             to="/"
@@ -90,7 +90,7 @@ export function Friends() {
       </header>
 
       {/* Tab bar */}
-      <div className="bg-[#0f0a1e] pb-6">
+      <div className="bg-dashboard-dark pb-6">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div role="tablist" aria-label="Friends page tabs" className="flex gap-2">
             {TAB_CONFIG.map((tab) => {

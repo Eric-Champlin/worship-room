@@ -17,7 +17,7 @@ export function PrayerListEmptyState({ onAddPrayer }: PrayerListEmptyStateProps)
       <button
         type="button"
         onClick={onAddPrayer}
-        className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt"
+        className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <Plus className="h-5 w-5" aria-hidden="true" />
         Add Prayer

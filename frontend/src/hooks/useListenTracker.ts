@@ -15,7 +15,7 @@ import { getLevelForPoints } from '@/constants/dashboard/levels';
 const LISTEN_THRESHOLD_MS = 30_000; // 30 seconds
 const POLL_INTERVAL_MS = 5_000; // Check every 5 seconds
 
-export function useListenTracker(isAuthenticated: boolean) {
+export function useListenTracker(isAuthenticated: boolean): void {
   const { isPlaying } = useAudioState();
   const playStartRef = useRef<number | null>(null);
   const recordedDateRef = useRef<string | null>(null);

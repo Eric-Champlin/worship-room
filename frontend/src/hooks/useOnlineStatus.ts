@@ -17,7 +17,7 @@ function getServerSnapshot() {
   return true // Assume online during SSR
 }
 
-export function useOnlineStatus() {
+export function useOnlineStatus(): { isOnline: boolean } {
   const isOnline = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   return { isOnline }
 }

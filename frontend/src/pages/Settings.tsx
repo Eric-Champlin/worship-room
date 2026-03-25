@@ -32,7 +32,7 @@ export function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-dashboard-dark">
       <SEO title="Settings" description="Manage your Worship Room account, notifications, and privacy preferences." noIndex />
       <a
         href="#settings-content"
@@ -43,7 +43,7 @@ export function Settings() {
       <Navbar transparent />
 
       {/* Page header */}
-      <header className="bg-gradient-to-b from-[#1a0533] to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8">
+      <header className="bg-gradient-to-b from-dashboard-gradient to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <Link
             to="/"

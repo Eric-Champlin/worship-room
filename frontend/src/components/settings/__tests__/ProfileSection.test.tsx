@@ -108,14 +108,14 @@ describe('ProfileSection', () => {
   it('avatar renders ProfileAvatar component', () => {
     renderProfile()
     // ProfileAvatar renders the preset avatar (default is 'default' which maps to nature-dove)
-    const avatarContainer = screen.getByRole('button', { name: 'Change' }).parentElement
+    const avatarContainer = screen.getByRole('button', { name: 'Change avatar' }).parentElement
     expect(avatarContainer).toBeInTheDocument()
   })
 
   it('avatar Change button opens avatar picker modal', async () => {
     const user = userEvent.setup()
     renderProfile()
-    await user.click(screen.getByRole('button', { name: 'Change' }))
+    await user.click(screen.getByRole('button', { name: 'Change avatar' }))
     expect(screen.getByText('Choose Your Avatar')).toBeInTheDocument()
   })
 

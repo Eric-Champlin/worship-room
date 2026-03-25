@@ -24,7 +24,21 @@ const EMPTY_DATA: FriendsData = {
   blocked: [],
 }
 
-export function useFriends() {
+export function useFriends(): {
+  friends: FriendProfile[]
+  pendingIncoming: FriendRequest[]
+  pendingOutgoing: FriendRequest[]
+  blocked: string[]
+  suggestions: FriendProfile[]
+  searchUsers: (query: string) => FriendSearchResult[]
+  sendRequest: (toProfile: FriendProfile) => void
+  acceptRequest: (requestId: string) => void
+  declineRequest: (requestId: string) => void
+  cancelRequest: (requestId: string) => void
+  removeFriend: (friendId: string) => void
+  blockUser: (userId: string) => void
+  friendCount: number
+} {
   const { isAuthenticated, user } = useAuth()
 
   const [data, setData] = useState<FriendsData>(() => {
