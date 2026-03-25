@@ -47,7 +47,7 @@ export function BibleSearchMode() {
           className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/50"
         />
         <p className="mt-2 text-center text-sm text-white/40">
-          Searching 20 of 66 books. More books coming soon.
+          Searching all 66 books of the Bible
         </p>
       </div>
 
