@@ -59,24 +59,24 @@ export function MeditateTabContent() {
       <div className="relative">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 opacity-[0.12]"
           style={SQUIGGLE_MASK_STYLE}
         >
           <BackgroundSquiggle />
         </div>
         <div className="relative">
-          <h2 className="mb-4 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
+          <h2 className="mb-4 text-center font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
             What&apos;s On Your{' '}
             <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
               Spirit?
             </span>
           </h2>
 
-          <AmbientSoundPill context="meditate" />
+          <AmbientSoundPill context="meditate" variant="dark" />
 
           {isAuthenticated && allComplete && (
-            <div className="mb-8 motion-safe:animate-golden-glow rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
-              <p className="text-lg font-semibold text-text-dark">
+            <div className="mb-8 motion-safe:animate-golden-glow rounded-xl border border-amber-200/30 bg-amber-900/20 p-6 text-center">
+              <p className="text-lg font-semibold text-white">
                 You completed all 6 meditations today! What a beautiful time with
                 God.
               </p>
@@ -105,7 +105,7 @@ export function MeditateTabContent() {
                     }
                     navigate(ROUTE_MAP[type.id])
                   }}
-                  className={`group rounded-xl border p-4 text-left shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:p-5 ${isSuggested ? 'border-primary bg-primary/5 ring-1 ring-primary/30' : 'border-gray-200 bg-white'}`}
+                  className={`group rounded-2xl border p-4 text-left transition-colors hover:bg-white/[0.10] hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:p-5 ${isSuggested ? 'border-primary bg-primary/10 ring-1 ring-primary/30' : 'border-white/10 bg-white/[0.06] backdrop-blur-sm'}`}
                 >
                   {isSuggested && (
                     <span className="mb-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
@@ -124,10 +124,10 @@ export function MeditateTabContent() {
                       </>
                     )}
                   </div>
-                  <h3 className="mb-1 text-base font-semibold text-text-dark sm:text-lg">
+                  <h3 className="mb-1 text-base font-semibold text-white sm:text-lg">
                     {type.title}
                   </h3>
-                  <p className="text-xs text-text-light sm:text-sm">
+                  <p className="text-xs text-white/60 sm:text-sm">
                     {type.description}
                   </p>
                   <p className="mt-2 text-xs font-medium text-primary">

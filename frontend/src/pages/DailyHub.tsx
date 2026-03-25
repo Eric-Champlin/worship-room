@@ -150,7 +150,7 @@ function DailyHubContent() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
+    <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
       <SEO title="Daily Prayer, Journal & Meditation" description="Start your day with AI-powered prayer, guided journaling, and Christian meditation rooted in Scripture." jsonLd={dailyHubBreadcrumbs} />
       <a
         href="#main-content"
@@ -164,11 +164,7 @@ function DailyHubContent() {
         {/* Hero Section — Greeting */}
         <section
           aria-labelledby="daily-hub-heading"
-          className="relative flex w-full flex-col items-center px-4 pb-10 pt-32 text-center antialiased sm:pb-12 sm:pt-36 lg:pb-14 lg:pt-40"
-          style={{
-            backgroundImage:
-              'linear-gradient(to bottom, #0D0620 0%, #0D0620 20%, #6D28D9 60%, #F5F5F5 100%)',
-          }}
+          className="relative flex w-full flex-col items-center bg-gradient-to-b from-dashboard-gradient to-dashboard-dark px-4 pb-10 pt-32 text-center antialiased sm:pb-12 sm:pt-36 lg:pb-14 lg:pt-40"
         >
           <h1
             id="daily-hub-heading"
@@ -197,7 +193,7 @@ function DailyHubContent() {
         </section>
 
         {/* Verse of the Day Banner */}
-        <div className="bg-gradient-to-b from-primary to-neutral-bg">
+        <div className="bg-dashboard-dark">
           <VerseOfTheDayBanner />
         </div>
 
@@ -210,11 +206,11 @@ function DailyHubContent() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-neutral-bg transition-shadow',
-            isSticky && 'shadow-md',
+            'sticky top-0 z-40 bg-white/[0.08] backdrop-blur-xl transition-shadow',
+            isSticky && 'shadow-md shadow-black/20',
           )}
         >
-          <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-gray-200">
+          <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-white/10">
             <div
               ref={tabBarRef}
               className="relative flex w-full"
@@ -239,10 +235,10 @@ function DailyHubContent() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:py-4 sm:text-base',
+                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base',
                       isActive
-                        ? 'text-primary'
-                        : 'text-text-light hover:text-text-dark',
+                        ? 'text-white'
+                        : 'text-white/60 hover:text-white/80',
                     )}
                   >
                     <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
@@ -319,7 +315,7 @@ function DailyHubContent() {
         <SongPickSection />
 
         {/* Starting Point Quiz */}
-        <StartingPointQuiz variant="light" />
+        <StartingPointQuiz variant="dark" />
       </main>
 
       <SiteFooter />

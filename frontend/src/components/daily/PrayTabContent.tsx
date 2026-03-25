@@ -391,7 +391,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
       <div className="relative">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 opacity-[0.12]"
           style={SQUIGGLE_MASK_STYLE}
         >
           <BackgroundSquiggle />
@@ -407,7 +407,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   <span className="inline-block h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary [animation-delay:150ms]" />
                   <span className="inline-block h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-primary [animation-delay:300ms]" />
                 </div>
-                <p className="text-text-light">Generating prayer for you...</p>
+                <p className="text-white/50">Generating prayer for you...</p>
               </div>
             )}
           </div>
@@ -415,15 +415,15 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
           {/* Generated Prayer Display */}
           {prayer && !isLoading && (
             <div className="motion-safe:animate-fade-in">
-              <p className="mb-2 text-sm font-medium text-text-light">
+              <p className="mb-2 text-sm font-medium text-white/50">
                 Your prayer:
               </p>
-              <div className="mb-6 rounded-lg bg-primary/5 p-6">
+              <div className="mb-6 rounded-2xl bg-white/[0.06] backdrop-blur-sm border border-white/10 p-6">
                 {revealComplete ? (
                   <KaraokeText
                     text={prayer.text}
                     currentWordIndex={prayerWordIndex}
-                    className="font-serif text-lg leading-relaxed text-text-dark"
+                    className="font-serif text-lg leading-relaxed text-white/80"
                   />
                 ) : (
                   <KaraokeTextReveal
@@ -431,7 +431,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                     msPerWord={80}
                     forceComplete={forceRevealComplete}
                     onRevealComplete={() => setRevealComplete(true)}
-                    className="font-serif text-lg leading-relaxed text-text-dark"
+                    className="font-serif text-lg leading-relaxed text-white/80"
                   />
                 )}
               </div>
@@ -442,7 +442,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   <button
                     type="button"
                     onClick={() => setForceRevealComplete(true)}
-                    className="text-xs text-subtle-gray underline transition-colors hover:text-text-dark"
+                    className="text-xs text-white/40 underline transition-colors hover:text-white/70"
                   >
                     Skip
                   </button>
@@ -452,24 +452,24 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
               {/* Sound Indicator */}
               {autoPlayedAudio && audioState.activeSounds.length > 0 && (
                 <div className="mb-4 text-center sm:text-left">
-                  <span className="text-xs text-subtle-gray">
+                  <span className="text-xs text-white/40">
                     Sound: The Upper Room
-                    <span className="mx-1 text-subtle-gray/50">&middot;</span>
+                    <span className="mx-1 text-white/20">&middot;</span>
                     <button
                       type="button"
                       onClick={() => audioDispatch({ type: audioState.drawerOpen ? 'CLOSE_DRAWER' : 'OPEN_DRAWER' })}
-                      className="text-xs text-subtle-gray underline transition-colors hover:text-text-dark"
+                      className="text-xs text-white/40 underline transition-colors hover:text-white/70"
                     >
                       Change
                     </button>
-                    <span className="mx-1 text-subtle-gray/50">&middot;</span>
+                    <span className="mx-1 text-white/20">&middot;</span>
                     <button
                       type="button"
                       onClick={() => {
                         audioDispatch({ type: 'STOP_ALL' })
                         setAutoPlayedAudio(false)
                       }}
-                      className="text-xs text-subtle-gray underline transition-colors hover:text-text-dark"
+                      className="text-xs text-white/40 underline transition-colors hover:text-white/70"
                     >
                       Stop
                     </button>
@@ -482,7 +482,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/15"
                   aria-label="Copy prayer"
                 >
                   <Copy className="h-4 w-4" />
@@ -502,7 +502,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/15"
                   aria-label="Save prayer"
                 >
                   <Bookmark className="h-4 w-4" />
@@ -514,14 +514,14 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   <button
                     type="button"
                     onClick={handleSaveToList}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/15"
                     aria-label="Save to prayer list"
                   >
                     <ListPlus className="h-4 w-4" />
                     <span className="hidden sm:inline">Save to List</span>
                   </button>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-success">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-success">
                     <Check className="h-4 w-4" />
                     <span className="hidden sm:inline">Saved</span>
                   </span>
@@ -532,7 +532,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   <button
                     type="button"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    className="inline-flex items-center rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50"
+                    className="inline-flex items-center rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/15"
                     aria-label="More actions"
                     aria-expanded={mobileMenuOpen}
                   >
@@ -542,7 +542,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                     <div
                       role="menu"
                       aria-label="More actions"
-                      className="absolute right-0 top-full z-10 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+                      className="absolute right-0 top-full z-10 mt-1 w-48 rounded-lg border border-white/10 bg-dashboard-dark py-1 shadow-lg"
                     >
                       {!savedToList && (
                         <button
@@ -552,7 +552,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                             setMobileMenuOpen(false)
                             handleSaveToList()
                           }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-dark hover:bg-gray-50"
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-white/70 hover:bg-white/10"
                         >
                           <ListPlus className="h-4 w-4" />
                           Save to List
@@ -599,14 +599,14 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   !sectionFading && 'animate-fade-in',
                   sectionFading && 'opacity-0 transition-opacity duration-500',
                 )}>
-                  <p className="mb-3 text-sm font-medium text-text-dark">
+                  <p className="mb-3 text-sm font-medium text-white">
                     How did that prayer land?
                   </p>
                   <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                     <button
                       type="button"
                       onClick={handleResonated}
-                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gray-200 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                       aria-label="It resonated — show encouraging message"
                     >
                       <Heart className="h-4 w-4" aria-hidden="true" />
@@ -615,7 +615,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                     <button
                       type="button"
                       onClick={handleSomethingDifferent}
-                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gray-200 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                       aria-label="Something different — try a new prayer"
                     >
                       <RefreshCw className="h-4 w-4" aria-hidden="true" />
@@ -624,7 +624,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                     <button
                       type="button"
                       onClick={handleJournalReflection}
-                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gray-200 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                       aria-label="Journal about this prayer"
                     >
                       <PenLine className="h-4 w-4" aria-hidden="true" />
@@ -635,7 +635,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   {resonatedMessage && (
                     <p
                       className={cn(
-                        'mt-3 text-center text-sm italic text-text-light transition-opacity duration-300',
+                        'mt-3 text-center text-sm italic text-white/50 transition-opacity duration-300',
                         resonatedFading ? 'opacity-0' : 'opacity-100',
                       )}
                       aria-live="polite"
@@ -658,7 +658,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="text-sm text-text-light underline transition-colors hover:text-text-dark"
+                  className="text-sm text-white/50 underline transition-colors hover:text-white"
                 >
                   Pray about something else
                 </button>
@@ -669,17 +669,17 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
           {/* Input Section (hidden when prayer is displayed or loading) */}
           {!prayer && !isLoading && (
             <>
-              <h2 className="mb-4 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
+              <h2 className="mb-4 text-center font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
                 What&apos;s On Your{' '}
                 <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
                   Heart?
                 </span>
               </h2>
 
-              <AmbientSoundPill context="pray" />
+              <AmbientSoundPill context="pray" variant="dark" />
 
               {retryPrompt && (
-                <p className="mb-2 text-center text-sm text-text-light">
+                <p className="mb-2 text-center text-sm text-white/50">
                   {retryPrompt}
                 </p>
               )}
@@ -691,7 +691,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                       key={chip}
                       type="button"
                       onClick={() => handleChipClick(chip)}
-                      className="min-h-[44px] shrink-0 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-text-dark transition-colors hover:border-primary hover:text-primary"
+                      className="min-h-[44px] shrink-0 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:border-primary hover:text-primary"
                     >
                       {chip}
                     </button>
@@ -713,11 +713,11 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   placeholder="Start typing here..."
                   maxLength={500}
                   rows={3}
-                  className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white px-4 py-3 text-text-dark placeholder:text-text-light/60 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/40 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                   aria-label="Prayer request"
                   aria-describedby="pray-char-count"
                 />
-                <span id="pray-char-count" className="absolute bottom-2 right-3 text-xs text-text-light/60">
+                <span id="pray-char-count" className="absolute bottom-2 right-3 text-xs text-white/40">
                   {text.length}/500
                 </span>
               </div>
@@ -745,7 +745,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
 
           {/* Classic Prayers Section — hidden; re-enable by removing false guard */}
           {false && (
-          <div className="mt-12 border-t border-b border-gray-200 pt-8 pb-8">
+          <div className="mt-12 border-t border-b border-white/10 pt-8 pb-8">
             <button
               type="button"
               onClick={() => setClassicOpen(!classicOpen)}
@@ -753,13 +753,13 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
               aria-expanded={classicOpen}
               aria-controls={classicOpen ? 'classic-prayers-panel' : undefined}
             >
-              <h2 className="text-lg font-semibold text-text-dark">
+              <h2 className="text-lg font-semibold text-white">
                 Classic Prayers
               </h2>
               {classicOpen ? (
-                <ChevronUp className="h-5 w-5 text-text-light" />
+                <ChevronUp className="h-5 w-5 text-white/50" />
               ) : (
-                <ChevronDown className="h-5 w-5 text-text-light" />
+                <ChevronDown className="h-5 w-5 text-white/50" />
               )}
             </button>
 
@@ -817,19 +817,19 @@ function ClassicPrayerCard({
   onCopy: () => void
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
-      <h3 className="mb-1 font-semibold text-text-dark">{prayer.title}</h3>
-      <p className="mb-3 text-xs text-text-light">{prayer.attribution}</p>
+    <div className="rounded-lg border border-white/10 bg-white/[0.06] p-4">
+      <h3 className="mb-1 font-semibold text-white">{prayer.title}</h3>
+      <p className="mb-3 text-xs text-white/50">{prayer.attribution}</p>
       <KaraokeText
         text={prayer.text}
         currentWordIndex={wordIndex}
-        className="whitespace-pre-wrap text-sm leading-relaxed text-text-dark"
+        className="whitespace-pre-wrap text-sm leading-relaxed text-white/80"
       />
       <div className="mt-3 flex items-center gap-2">
         <button
           type="button"
           onClick={onCopy}
-          className="inline-flex items-center gap-1 rounded border border-gray-200 px-2 py-1 text-xs text-text-dark hover:bg-gray-50"
+          className="inline-flex items-center gap-1 rounded bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/15"
           aria-label={`Copy ${prayer.title}`}
         >
           <Copy className="h-3 w-3" />

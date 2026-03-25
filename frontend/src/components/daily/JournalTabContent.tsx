@@ -349,7 +349,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
       <div className="relative">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 opacity-[0.12]"
           style={SQUIGGLE_MASK_STYLE}
         >
           <BackgroundSquiggle />
@@ -357,24 +357,24 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
         <div className="relative">
 
           {/* Heading */}
-          <h2 className="mb-4 text-center font-sans text-2xl font-bold text-text-dark sm:text-3xl lg:text-4xl">
+          <h2 className="mb-4 text-center font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
             What&apos;s On Your{' '}
             <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">Mind?</span>
           </h2>
 
-          <AmbientSoundPill context="journal" />
+          <AmbientSoundPill context="journal" variant="dark" />
 
           {/* Mode Toggle */}
           <div className="mb-6 flex justify-center">
-            <div className="inline-flex rounded-lg border border-gray-200" role="group" aria-label="Journal mode">
+            <div className="inline-flex rounded-lg border border-white/10" role="group" aria-label="Journal mode">
               <button
                 type="button"
                 onClick={() => handleModeChange('guided')}
                 className={cn(
                   'rounded-l-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                   mode === 'guided'
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-text-dark hover:bg-gray-50',
+                    ? 'bg-primary/20 text-white'
+                    : 'bg-white/10 text-white/70 hover:bg-white/15',
                 )}
                 aria-pressed={mode === 'guided'}
               >
@@ -386,8 +386,8 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
                 className={cn(
                   'rounded-r-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                   mode === 'free'
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-text-dark hover:bg-gray-50',
+                    ? 'bg-primary/20 text-white'
+                    : 'bg-white/10 text-white/70 hover:bg-white/15',
                 )}
                 aria-pressed={mode === 'free'}
               >
@@ -400,7 +400,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           <div aria-live="polite">
             {mode === 'guided' && prayContext?.from === 'pray' && !contextDismissed && (
               <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3" role="status">
-                <p className="text-sm text-text-dark">
+                <p className="text-sm text-white/80">
                   Continuing from your prayer about{' '}
                   <span className="font-medium">{prayContext.topic ?? 'what you shared'}</span>
                 </p>
@@ -418,8 +418,8 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           {/* Guided Mode Prompt Card */}
           {mode === 'guided' && (
             <div className="mb-4">
-              <div className="rounded-lg border-l-4 border-primary bg-white p-6 shadow-sm">
-                <p className="font-serif text-lg italic leading-relaxed text-text-dark sm:text-xl">
+              <div className="rounded-lg border-l-2 border-primary bg-white/[0.06] p-6">
+                <p className="font-serif text-lg italic leading-relaxed text-white/80 sm:text-xl">
                   {currentPrompt}
                 </p>
               </div>
@@ -428,7 +428,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
                   <button
                     type="button"
                     onClick={handleTryDifferentPrompt}
-                    className="inline-flex items-center gap-1.5 text-sm text-text-light transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     aria-label="New prompt"
                   >
                     <RefreshCw className="h-3.5 w-3.5" />
@@ -441,7 +441,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
           {/* Free Write Context Note */}
           {mode === 'free' && prayContext?.from === 'pray' && !contextDismissed && (
-            <p className="mb-4 text-sm text-text-light">
+            <p className="mb-4 text-sm text-white/50">
               Continuing from your prayer about {prayContext.topic ?? 'what you shared'}.{' '}
               <button
                 type="button"
@@ -466,13 +466,13 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
               placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
               maxLength={5000}
               rows={6}
-              className="min-h-[200px] w-full resize-none rounded-lg border border-gray-200 bg-white px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-text-dark placeholder:text-text-light/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="min-h-[200px] w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/40 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
               aria-label="Journal entry"
               aria-describedby="journal-char-count"
             />
             <span
               id="journal-char-count"
-              className="absolute bottom-2 left-3 text-xs text-text-light/60"
+              className="absolute bottom-2 left-3 text-xs text-white/40"
               aria-live={text.length >= 4500 ? 'polite' : 'off'}
               role="status"
             >
@@ -489,7 +489,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
                     ? 'cursor-not-allowed opacity-40'
                     : isListening
                       ? 'bg-red-500/20 text-red-400 motion-safe:animate-mic-pulse'
-                      : 'bg-black/5 text-black/30 hover:bg-black/10 hover:text-black/50',
+                      : 'bg-white/10 text-white/30 hover:bg-white/15 hover:text-white/50',
                 )}
                 aria-label={
                   isPermissionDenied
@@ -514,7 +514,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           {/* Draft Saved Indicator */}
           <div className="mb-4 h-4" aria-live="polite">
             {draftSaved && (
-              <p className="motion-safe:animate-fade-in text-xs text-text-light">
+              <p className="motion-safe:animate-fade-in text-xs text-white/50">
                 Draft saved
               </p>
             )}
@@ -558,7 +558,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
               <button
                 type="button"
                 onClick={() => setIsDoneJournaling(true)}
-                className="text-sm text-text-light underline transition-colors hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="text-sm text-white/50 underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Done journaling
               </button>
@@ -567,8 +567,8 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
           {/* Done Journaling CTAs */}
           {isDoneJournaling && (
-            <div className="motion-safe:animate-fade-in rounded-lg bg-primary/5 p-4">
-              <p className="mb-3 text-sm font-medium text-text-dark">
+            <div className="motion-safe:animate-fade-in rounded-lg bg-white/[0.06] p-4">
+              <p className="mb-3 text-sm font-medium text-white">
                 Beautiful time of reflection. Where to next?
               </p>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
@@ -591,24 +591,24 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
           {/* Search & Filter Bar */}
           {savedEntries.length >= 2 && (
-            <div className="rounded-xl border border-gray-200 bg-white/80 p-3 backdrop-blur-sm">
+            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 {/* Search input */}
                 <div className="relative flex-1 sm:max-w-none lg:max-w-sm">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-light" aria-hidden="true" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" aria-hidden="true" />
                   <input
                     type="text"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     placeholder="Search your entries..."
                     aria-label="Search your entries"
-                    className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-9 pr-8 text-sm text-text-dark placeholder:text-text-light/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+                    className="h-10 w-full rounded-lg border border-white/10 bg-white/[0.06] pl-9 pr-8 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
                   />
                   {searchText && (
                     <button
                       type="button"
                       onClick={() => { setSearchText(''); setDebouncedSearch('') }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       aria-label="Clear search"
                     >
                       <X className="h-4 w-4" />
@@ -630,7 +630,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
                           'min-h-[44px] rounded-full px-3 py-1 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                           modeFilter === m
                             ? 'bg-primary/20 text-primary'
-                            : 'bg-gray-100 text-text-dark hover:bg-gray-200',
+                            : 'bg-white/10 text-white/70 hover:bg-white/15',
                         )}
                       >
                         {m === 'all' ? 'All' : m === 'guided' ? 'Guided' : 'Free Write'}
@@ -643,7 +643,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
                     type="button"
                     onClick={() => setSortDirection((d) => d === 'newest' ? 'oldest' : 'newest')}
                     aria-label={`Sort order: ${sortDirection === 'newest' ? 'newest first' : 'oldest first'}. Click to change.`}
-                    className="inline-flex min-h-[44px] items-center gap-1 text-sm text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="inline-flex min-h-[44px] items-center gap-1 text-sm text-white/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
                     <ArrowUpDown className="h-3.5 w-3.5" />
                     {sortDirection === 'newest' ? 'Newest first' : 'Oldest first'}
@@ -655,8 +655,8 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
           {/* Empty filter state */}
           {filteredEntries.length === 0 && savedEntries.length >= 2 && (
-            <div className="rounded-xl border border-gray-200 bg-white/80 p-6 text-center backdrop-blur-sm" role="status">
-              <p className="text-sm text-text-light">No entries match your search</p>
+            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6 text-center" role="status">
+              <p className="text-sm text-white/50">No entries match your search</p>
               <button
                 type="button"
                 onClick={clearFilters}
@@ -671,10 +671,10 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           {filteredEntries.map((entry) => (
             <article
               key={entry.id}
-              className="rounded-lg border border-gray-200 bg-white p-4"
+              className="rounded-lg border border-white/10 bg-white/[0.06] backdrop-blur-sm p-4"
               aria-label={`Journal entry from ${formatDateTime(new Date(entry.timestamp))}`}
             >
-              <p className="mb-2 text-xs text-text-light">
+              <p className="mb-2 text-xs text-white/40">
                 {formatDateTime(new Date(entry.timestamp))}
                 {entry.mode === 'guided' && (
                   <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-primary">
@@ -683,20 +683,20 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
                 )}
               </p>
               {entry.promptText && (
-                <p className="mb-2 text-xs italic text-text-light">
+                <p className="mb-2 text-xs italic text-white/40">
                   Prompt: {entry.promptText}
                 </p>
               )}
-              <p className="whitespace-pre-wrap font-serif text-base leading-relaxed text-text-dark">
+              <p className="whitespace-pre-wrap font-serif text-base leading-relaxed text-white/80">
                 {entry.content}
               </p>
 
               {entry.reflection ? (
-                <div className="mt-3 rounded-lg bg-primary/5 p-3">
+                <div className="mt-3 rounded-lg bg-white/[0.04] p-3">
                   <p className="mb-1 text-xs font-medium text-primary">
                     Reflection
                   </p>
-                  <p className="text-sm leading-relaxed text-text-dark">
+                  <p className="text-sm leading-relaxed text-white/80">
                     {entry.reflection}
                   </p>
                 </div>

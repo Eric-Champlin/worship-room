@@ -47,11 +47,11 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
     <section aria-labelledby="guided-prayer-heading" id="guided-prayer-section">
       <h2
         id="guided-prayer-heading"
-        className="font-bold text-text-dark text-xl sm:text-2xl"
+        className="font-bold text-white text-xl sm:text-2xl"
       >
         Guided Prayer Sessions
       </h2>
-      <p className="mt-1 font-serif italic text-text-light text-base">
+      <p className="mt-1 font-serif italic text-white/50 text-base">
         Close your eyes and let God lead
       </p>
 
@@ -65,7 +65,7 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
               key={session.id}
               type="button"
               onClick={() => handleCardClick(session)}
-              className="relative min-w-[200px] flex-shrink-0 snap-center rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:min-w-0"
+              className="relative min-w-[200px] flex-shrink-0 snap-center rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-sm p-4 text-left transition-colors hover:bg-white/[0.10] hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:min-w-0"
             >
               {isComplete && (
                 <CheckCircle2
@@ -78,13 +78,13 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
                 <ThemeIcon className="mb-2 h-6 w-6 text-primary" aria-hidden="true" />
               )}
 
-              <h3 className="font-medium text-sm text-text-dark">{session.title}</h3>
+              <h3 className="font-medium text-sm text-white">{session.title}</h3>
 
-              <p className="mt-1 text-xs text-text-light line-clamp-2">
+              <p className="mt-1 text-xs text-white/60 line-clamp-2">
                 {session.description}
               </p>
 
-              <span className="mt-2 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-text-light">
+              <span className="mt-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/40">
                 {session.durationMinutes} min
               </span>
             </button>
