@@ -98,7 +98,7 @@ describe('ReadingPlanDetail', () => {
 
   it('renders hero with plan title, description, and emoji', () => {
     renderPage('finding-peace-in-anxiety')
-    expect(screen.getByText('Finding Peace in Anxiety')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Finding Peace in Anxiety')
     expect(screen.getByText(/A 7-day journey/)).toBeInTheDocument()
     expect(screen.getByText('7 days')).toBeInTheDocument()
     expect(screen.getByText('Beginner')).toBeInTheDocument()
@@ -224,5 +224,32 @@ describe('ReadingPlanDetail', () => {
 
     // No inline celebration on re-visit (only shows on fresh completion via IO)
     expect(screen.queryByText(/Day \d+ Complete/)).not.toBeInTheDocument()
+  })
+
+  describe('Breadcrumb', () => {
+    it('renders breadcrumb with plan trail', () => {
+      renderPage('finding-peace-in-anxiety')
+      const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+      expect(nav).toHaveTextContent('Grow')
+      expect(nav).toHaveTextContent('Reading Plans')
+      expect(nav).toHaveTextContent('Finding Peace in Anxiety')
+    })
+
+    it('Grow and Reading Plans link to /grow?tab=plans', () => {
+      renderPage('finding-peace-in-anxiety')
+      const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+      const links = nav.querySelectorAll('a')
+      const hrefs = Array.from(links).map((l) => l.getAttribute('href'))
+      expect(hrefs).toContain('/grow?tab=plans')
+      // Both Grow and Reading Plans link to the same destination
+      expect(hrefs.filter((h) => h === '/grow?tab=plans').length).toBe(2)
+    })
+
+    it('current page shows plan title', () => {
+      renderPage('finding-peace-in-anxiety')
+      const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+      const current = nav.querySelector('[aria-current="page"]')
+      expect(current).toHaveTextContent('Finding Peace in Anxiety')
+    })
   })
 })

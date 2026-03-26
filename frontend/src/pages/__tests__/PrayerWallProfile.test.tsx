@@ -49,11 +49,20 @@ describe('PrayerWallProfile', () => {
     )
   })
 
-  it('shows "Back to Prayer Wall" link', () => {
+  it('shows breadcrumb instead of back link', () => {
     renderProfile('user-1')
-    const backLink = screen.getByText('Back to Prayer Wall')
-    expect(backLink).toBeInTheDocument()
-    expect(backLink.closest('a')).toHaveAttribute('href', '/prayer-wall')
+    expect(screen.queryByText('Back to Prayer Wall')).not.toBeInTheDocument()
+    const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+    expect(nav).toBeInTheDocument()
+    const current = nav.querySelector('[aria-current="page"]')
+    expect(current).toHaveTextContent("Sarah's Profile")
+  })
+
+  it('falls back to "User Profile" when user not found', () => {
+    renderProfile('nonexistent-user')
+    const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+    const current = nav.querySelector('[aria-current="page"]')
+    expect(current).toHaveTextContent('User Profile')
   })
 
   it('shows user not found for invalid ID', () => {

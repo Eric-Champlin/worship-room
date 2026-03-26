@@ -33,11 +33,32 @@ describe('PrayerDetail', () => {
     expect(screen.queryByText('Show more')).not.toBeInTheDocument()
   })
 
-  it('shows "Back to Prayer Wall" link', () => {
+  it('shows breadcrumb instead of back link', () => {
     renderDetail('prayer-1')
-    const backLink = screen.getByText('Back to Prayer Wall')
-    expect(backLink).toBeInTheDocument()
-    expect(backLink.closest('a')).toHaveAttribute('href', '/prayer-wall')
+    expect(screen.queryByText('Back to Prayer Wall')).not.toBeInTheDocument()
+    const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+    expect(nav).toBeInTheDocument()
+    const link = nav.querySelector('a[href="/prayer-wall"]')
+    expect(link).toHaveTextContent('Prayer Wall')
+  })
+
+  it('truncates long prayer titles at 40 chars', () => {
+    // prayer-1 from mock data likely has a longer content
+    renderDetail('prayer-1')
+    const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+    const current = nav.querySelector('[aria-current="page"]')
+    expect(current).toBeInTheDocument()
+    // Title should be at most 41 chars (40 + ellipsis)
+    if (current!.textContent!.length > 41) {
+      throw new Error(`Title too long: ${current!.textContent}`)
+    }
+  })
+
+  it('falls back to "Prayer Request" when prayer not found', () => {
+    renderDetail('nonexistent-prayer-id')
+    const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+    const current = nav.querySelector('[aria-current="page"]')
+    expect(current).toHaveTextContent('Prayer Request')
   })
 
   it('renders comments without 5-comment limit', () => {

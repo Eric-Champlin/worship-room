@@ -90,7 +90,7 @@ describe('ChallengeDetail', () => {
 
   it('renders hero with title for valid challenge', () => {
     renderDetail('pray40-lenten-journey')
-    expect(screen.getByText('Pray40: A Lenten Journey')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Pray40: A Lenten Journey')
   })
 
   it('shows ChallengeNotFound for invalid ID', () => {
@@ -217,5 +217,23 @@ describe('ChallengeDetail', () => {
   it('community goal shows', () => {
     renderDetail('pray40-lenten-journey')
     expect(screen.queryByText(/community goal/i)).toBeInTheDocument()
+  })
+
+  describe('Breadcrumb', () => {
+    it('renders breadcrumb with challenge trail', () => {
+      renderDetail('pray40-lenten-journey')
+      const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+      expect(nav).toHaveTextContent('Grow')
+      expect(nav).toHaveTextContent('Challenges')
+      expect(nav).toHaveTextContent('Pray40: A Lenten Journey')
+    })
+
+    it('Grow and Challenges link to /grow?tab=challenges', () => {
+      renderDetail('pray40-lenten-journey')
+      const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+      const links = nav.querySelectorAll('a')
+      const hrefs = Array.from(links).map((l) => l.getAttribute('href'))
+      expect(hrefs.filter((h) => h === '/grow?tab=challenges').length).toBe(2)
+    })
   })
 })

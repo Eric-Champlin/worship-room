@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Navigate } from 'react-router-dom'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
@@ -102,13 +103,6 @@ export function MonthlyReport() {
         className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
         style={ATMOSPHERIC_HERO_BG}
       >
-        <Link
-          to="/insights"
-          className="mb-4 inline-flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/70"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Mood Insights
-        </Link>
         <h1
           id="monthly-report-heading"
           className="mb-3 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
@@ -135,6 +129,15 @@ export function MonthlyReport() {
           </button>
         </div>
       </section>
+
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: 'Insights', href: '/insights' },
+          { label: 'Monthly Report' },
+        ]}
+        maxWidth="max-w-5xl"
+      />
 
       {/* Content area */}
       <main

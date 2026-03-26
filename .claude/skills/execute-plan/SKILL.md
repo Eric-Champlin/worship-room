@@ -306,6 +306,8 @@ This applies when:
    - **Images:** Compare rendered width/height of images against the recon's Image tables.
    - **Links:** Verify that text documented as links in the recon's Link inventory is actually wrapped in `<a>` tags with correct href, target, color, and text-decoration. Plain text where links should be is a mismatch.
    - **Hover/focus states:** If the recon includes States tables, hover each button and verify background-color/shadow changes match. Focus each input and verify border/outline changes match. Missing hover/focus styles are a mismatch.
+   - **Form responsive widths:** If the plan or recon includes a Form Responsive Widths table, verify form container and input widths at EVERY breakpoint — not just desktop. If inputs stretch full-width on mobile when the design constrains them, this is a HIGH severity mismatch.
+   - **Intra-element style variations:** If the plan or recon documents text blocks with mixed formatting (e.g., bold opening phrase, italic body, styled links within one paragraph), verify each style region renders correctly. Check that `<strong>`, `<em>`, `<b>`, `<i>` tags are present in the rendered HTML where documented.
    - **Conditional content:** If the recon documents conditional/dynamic content (e.g., a field that appears when a tab is selected), trigger the condition and verify the content appears with correct styling.
  
 9. **Auth state verification for dashboard/logged-in features:**
@@ -406,6 +408,8 @@ Update the Execution Log entry for this step:
 | Completion Date | YYYY-MM-DD |
 | Notes / Actual Files | Files created/modified, key changes, any deviations from plan |
  
+Also update the step's **Status** field from [NOT STARTED] to [COMPLETE].
+ 
 If the actual implementation deviated from the plan in any way, document the deviation in the Notes column so the plan remains an accurate record.
  
 ### 4j: Continue
@@ -485,6 +489,16 @@ All <N> steps executed successfully.
 **Philosophy:** The plan was carefully crafted with full codebase reconnaissance. Trust it. Follow it precisely. Flag conflicts rather than improvising. Quality over speed — each step should be production-ready code.
  
 ---
+ 
+## Examples
+ 
+```bash
+# Execute all steps of the plan
+/execute-plan _plans/2026-03-03-daily-experience.md
+ 
+# If execution stopped due to a failure, fix the issue and re-run
+/execute-plan _plans/2026-03-03-daily-experience.md
+```
  
 ## See Also
  

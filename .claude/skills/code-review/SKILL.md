@@ -316,7 +316,8 @@ If none found: `**Debug artifacts:** Clean — no debug leftovers found.`
  
 ### 6b: Accidental Changes
  
-Files with only whitespace changes, import reordering, unrelated config changes, formatting-only changes in files not part of the feature.
+Files with only whitespace changes, import reordering, unrelated config changes, formatting-only changes in files not part of the feature
+- Lock files that changed unexpectedly (`pnpm-lock.yaml`, `package-lock.json`).
  
 ```text
 ## Accidental Changes
@@ -364,26 +365,52 @@ If none found: `**Sensitive data:** Clean — no secrets or credentials detected
 - **Test data leaks:** Are test data/mocks properly cleaned up? Will leftover state affect other tests?
 - **Test speed:** Are integration tests doing work that should be unit tests? Are there tests making real network calls that should be mocked?
  
-### 7e: Frontend-Specific
+### 7e: Test Coverage for New Code
+ 
+Check whether new production code in the diff has corresponding test files:
+ 
+- `NewComponent.tsx` → `NewComponent.test.tsx` or `NewComponent.spec.tsx`
+- `useNewHook.ts` → `useNewHook.test.ts`
+- `newUtil.ts` → `newUtil.test.ts`
+ 
+```text
+## Test Coverage for New Code
+ 
+| Production File | Test File? | Status |
+|----------------|-----------|--------|
+| `{path}` | {Yes — path / No} | {OK / MISSING} |
+```
+ 
+**Files that do NOT require dedicated tests** (skip these):
+- Type definition files (`.d.ts`, pure interface files)
+- Re-export barrel files (`index.ts` that only re-exports)
+- CSS/style-only files
+- Constants files with no logic
+ 
+If any production file with non-trivial logic is missing tests, flag as **Should Fix**.
+ 
+If all production files have tests: `**Test coverage:** All new production code has corresponding tests.`
+ 
+### 7f: Frontend-Specific
 - Missing key props on lists?
 - useEffect with missing or incorrect dependencies?
 - State updates that could cause infinite re-renders?
 - Missing alt text, labels, ARIA attributes?
 - Event handler references created inline causing unnecessary re-renders?
  
-### 7f: Security
+### 7g: Security
 - XSS? `dangerouslySetInnerHTML` on user content?
 - Missing auth/authz? Input validation gaps?
 - SQL injection (backend)? Logging sensitive data?
 - CORS/CSRF issues?
  
-### 7g: Backward Compatibility
+### 7h: Backward Compatibility
 - Removed or renamed exported functions/components that other files import?
 - Changed prop interfaces that existing consumers rely on?
 - Changed route paths or query parameter names?
 - Changed API response shapes? (backend)
  
-### 7h: Database Migration Safety (if migration files in diff)
+### 7i: Database Migration Safety (if migration files in diff)
 - Zero-downtime compatible? Destructive operations?
 - NOT NULL on existing columns? Large table locks?
 - Data migrations separated from schema changes? Rollback strategy?
@@ -647,6 +674,25 @@ If in plan-aware mode with deviations:
 **Do NOT edit any files until the user explicitly confirms.**
  
 ---
+ 
+## Examples
+ 
+```bash
+# Standard review (uncommitted changes)
+/code-review
+ 
+# Plan-aware review
+/code-review _plans/2026-03-03-daily-experience.md
+ 
+# Spec-aware review
+/code-review --spec _specs/daily-experience.md
+ 
+# Both plan and spec
+/code-review _plans/2026-03-03-daily-experience.md --spec _specs/daily-experience.md
+ 
+# Focused review
+/code-review "focus on the meditation components"
+```
  
 ## Rules
  

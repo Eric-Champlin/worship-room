@@ -31,6 +31,7 @@ import {
 } from '@/constants/challenges'
 import { getChallengeCalendarInfo } from '@/lib/challenge-calendar'
 import { cn } from '@/lib/utils'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 export function ChallengeDetail() {
   const { challengeId } = useParams<{ challengeId: string }>()
@@ -368,6 +369,16 @@ export function ChallengeDetail() {
             </div>
           )}
         </section>
+
+        {/* Breadcrumb */}
+        <Breadcrumb
+          items={[
+            { label: 'Grow', href: '/grow?tab=challenges' },
+            { label: 'Challenges', href: '/grow?tab=challenges' },
+            { label: challenge.title },
+          ]}
+          maxWidth="max-w-2xl"
+        />
 
         {/* Milestone card */}
         {activeMilestone && challengeId && challenge && (

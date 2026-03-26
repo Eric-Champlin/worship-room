@@ -68,11 +68,13 @@ describe('PrayerWallDashboard', () => {
     expect(photoBtn).toBeDisabled()
   })
 
-  it('shows "Back to Prayer Wall" link', () => {
+  it('shows breadcrumb instead of back link', () => {
     renderDashboard()
-    const backLink = screen.getByText('Back to Prayer Wall')
-    expect(backLink).toBeInTheDocument()
-    expect(backLink.closest('a')).toHaveAttribute('href', '/prayer-wall')
+    expect(screen.queryByText('Back to Prayer Wall')).not.toBeInTheDocument()
+    const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+    expect(nav).toBeInTheDocument()
+    const current = nav.querySelector('[aria-current="page"]')
+    expect(current).toHaveTextContent('My Dashboard')
   })
 
   it('shows edit buttons for name and bio', () => {

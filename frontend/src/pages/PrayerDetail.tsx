@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { useParams } from 'react-router-dom'
 import { SEO } from '@/components/SEO'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
@@ -92,13 +92,15 @@ function PrayerDetailContent() {
     return (
       <PageShell>
         <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
-          <Link
-            to="/prayer-wall"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to Prayer Wall
-          </Link>
+          <div className="mb-6">
+            <Breadcrumb
+              items={[
+                { label: 'Prayer Wall', href: '/prayer-wall' },
+                { label: 'Prayer Request' },
+              ]}
+              maxWidth="max-w-[720px]"
+            />
+          </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.06] p-8 text-center">
             <p className="text-lg font-semibold text-white">
               Prayer not found
@@ -124,13 +126,15 @@ function PrayerDetailContent() {
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
       >
-        <Link
-          to="/prayer-wall"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back to Prayer Wall
-        </Link>
+        <div className="mb-6">
+          <Breadcrumb
+            items={[
+              { label: 'Prayer Wall', href: '/prayer-wall' },
+              { label: prayer.content.length > 40 ? prayer.content.slice(0, 40).trim() + '\u2026' : prayer.content },
+            ]}
+            maxWidth="max-w-[720px]"
+          />
+        </div>
 
         <PrayerCard prayer={prayer} showFull>
           <InteractionBar

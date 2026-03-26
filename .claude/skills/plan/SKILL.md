@@ -304,24 +304,35 @@ Before executing this plan, confirm:
 | 3 |  | [NOT STARTED] | | |
 ````
  
-### Plan Quality Rules
+### Plan Quality Self-Review Checklist
  
-- **Be specific.** Include exact file paths, method signatures, prop types, API routes, CSS classes. The executor should not need to make architectural decisions.
-- **Reference existing patterns.** When a step should follow an existing pattern, cite the specific file and line range: "Follow the pattern in `src/components/daily/PrayTabContent.tsx` lines 15-40."
-- **Include guardrails.** Every step should have a "DO NOT" list to prevent common mistakes — especially around Worship Room–specific concerns (AI safety, demo mode, encryption, crisis detection).
-- **Keep steps small.** Each step should be independently verifiable. If a step touches more than 3 files, consider splitting it.
-- **Order for safety.** Put data model and API steps before UI steps. Put shared utilities before consumers.
-- **AI Safety is never optional.** If the feature involves AI-generated content, every step that touches AI output must have safety guardrails.
-- **Auth gating is never optional.** Every action the spec marks as requiring login MUST have an explicit auth check in the plan. If the plan misses an auth gate, `/code-review --spec` will catch it — but it's better to get it right in the plan.
-- **Responsive is never optional for UI steps.** Every UI step must include responsive behavior notes for at least 3 breakpoints (mobile, tablet, desktop). Non-UI steps (data models, utilities, API endpoints) should write "N/A: no UI impact" rather than leaving the section blank or fabricating responsive notes for code that doesn't render.
-- **Include auth gate tests.** Every step that implements an auth-gated action must include a test that verifies the auth modal appears for logged-out users.
-- **Use exact design values.** When the Design System Reference is available, use its exact values in the Details section — not "use the primary color" but "use `#6D28D9`". When citing a component pattern, include the full CSS: not "match the hero" but "use `background: linear-gradient(...)`, `padding: 3rem 0`, `text-align: center`".
-- **Mark uncertain values [UNVERIFIED].** Any value not confirmed by a recon report or design system reference must be marked `[UNVERIFIED]` with a verification method. `/execute-plan` displays these prominently, `/verify-with-playwright` gives them priority scrutiny, and `/code-review` audits whether they were resolved.
-- **Include vertical rhythm.** When the design system recon documents spacing between sections, include those values in the Vertical Rhythm section. `/verify-with-playwright` compares these — any gap difference >5px is a mismatch.
-- **Include the Design System Reminder.** If the project has UI quirks (custom fonts, spacing scales, decorative patterns), list them in the Design System Reminder block. `/execute-plan` displays this before every UI step to prevent drift. Source these from the design system recon, rules files, AND deviations from recent plan Execution Logs.
-- **Include shared data models.** When a master spec plan exists, include the shared TypeScript interfaces and localStorage keys this spec depends on or produces. This prevents duplicate or conflicting data model definitions across specs.
-- **Calibrate test depth.** A simple utility function needs 2-4 tests. A complex interactive component with auth gating, error states, and responsive behavior needs 10-15. Match test count to component complexity — don't under-test complex logic or over-test trivial getters.
+**Before saving the plan, verify it passes ALL of these checks. Do not save until every applicable item is confirmed:**
  
+1. [ ] Every step has: exact file paths, method signatures/prop types, DO NOT guardrails, test specs, expected state
+2. [ ] **No tentative language anywhere** — no "should probably", "might want to", "consider doing". Every decision is explicit.
+3. [ ] Patterns referenced in the plan actually match what was found in reconnaissance (not assumed from general knowledge)
+4. [ ] The plan is self-contained: someone reading it without the spec can understand what to build
+5. [ ] Every auth-gated action from the spec appears in the Auth Gating Checklist AND in the relevant implementation step
+6. [ ] Every [UNVERIFIED] value includes: best guess, how to verify, what to do if wrong
+7. [ ] Test count is calibrated to complexity — simple utility: 2-4 tests; complex interactive component with auth gating, error states, responsive: 10-15
+8. [ ] UI steps include responsive behavior at 3 breakpoints (mobile, tablet, desktop); non-UI steps say "N/A: no UI impact"
+9. [ ] If Design System Reference exists: exact computed values used in Details section (not "use the primary color" but "use `#6D28D9`")
+10. [ ] If Design System Reference NOT found: values from codebase inspection are cited with file:line, and guessed values are marked [UNVERIFIED]
+11. [ ] Steps are small — each touches ≤3 files and is independently verifiable
+12. [ ] Steps are ordered for safety — data models/API before UI, shared utilities before consumers
+13. [ ] AI Safety guardrails included in every step that touches AI-generated content
+14. [ ] Auth gate tests included for every step that implements a gated action (verify auth modal appears for logged-out users)
+15. [ ] Design System Reminder populated from: design system recon + rules files + deviations from recent Execution Logs
+16. [ ] Vertical Rhythm values included (from design system recon, if available)
+17. [ ] If master spec plan exists: shared data models, localStorage keys, and cross-spec integration points are in Architecture Context
+18. [ ] Edge Cases & Decisions table is populated — at least the obvious edge cases are covered
+ 
+**Additional quality rules:**
+ 
+- **Reference existing patterns.** Cite specific file and line range: "Follow the pattern in `src/components/daily/PrayTabContent.tsx` lines 15-40."
+- **Include guardrails.** Every step should have a "DO NOT" list — especially around Worship Room–specific concerns (AI safety, demo mode, encryption, crisis detection).
+- **Use exact design values.** When citing a component pattern, include the full CSS: not "match the hero" but "use `background: linear-gradient(...)`, `padding: 3rem 0`, `text-align: center`".
+- **Include shared data models.** When a master spec plan exists, include the shared TypeScript interfaces and localStorage keys this spec depends on or produces.
 ---
  
 ## Step 4: Final Output
@@ -350,12 +361,24 @@ Do not repeat the full plan in chat unless the user asks. The plan file is the a
  
 ---
  
+## Examples
+ 
+```bash
+# Generate a plan from a spec
+/plan _specs/mood-selector-page.md
+ 
+# Generate a plan for a multi-spec feature
+/plan _specs/daily-experience.md
+```
+ 
 ## Rules
  
 - **Stay in Act mode.** Do not enter Plan Mode. You need file write access to save the plan.
 - **Do not implement anything.** This command produces a plan, not code.
 - **Do not modify any existing files.** Only create the new plan file.
 - **Do not perform git operations.** The user handles all git operations.
+- **No tentative language.** Never write "should probably", "might want to", "consider doing" in the plan. Every decision must be explicit.
+- **No tentative language.** Never write "should probably", "might want to", "consider doing" in the plan. Every decision must be explicit.
 - **The spec is the product authority.** If something is ambiguous in the spec, note it in "Assumptions & Pre-Execution Checklist" rather than guessing. The user resolves ambiguities before execution.
 - **Security rules are mandatory.** Read `.claude/rules/02-security.md` during reconnaissance. Every auth-gated action from the spec must appear in the Auth Gating Checklist and in the relevant implementation step.
 - **Design values are mandatory for UI.** If a Design System Reference exists, use its exact values. If not, cite the specific codebase file/line where you found each value.

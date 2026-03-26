@@ -70,6 +70,20 @@ User input: $ARGUMENTS
  
 ---
  
+## Console Noise Filtering
+ 
+**These patterns should be IGNORED in console error/warning counts. They are not application errors:**
+ 
+- `DevTools` messages
+- `HMR` / `[vite]` hot reload messages
+- `favicon.ico` 404s
+- `chrome-extension://` errors
+- Browser-internal warnings (e.g., `Third-party cookie` deprecation notices)
+ 
+Only report console errors/warnings that originate from application code. The `IGNORE_PATTERNS` array in the test structure implements this filtering.
+ 
+---
+ 
 ## Step 1: Parse Arguments & Load Context
  
 From `$ARGUMENTS`, determine:
@@ -573,7 +587,43 @@ For every button, link, and form input, trigger the hover/focus state and compar
  
 **Missing hover/focus styles are a functional and visual defect.** A button that doesn't change on hover feels broken to the user.
  
-### 6h: Text Content Verification (if recon has Text Content Snapshot)
+### 6h: Form Responsive Widths Comparison (if forms present)
+ 
+If the page contains form elements and the recon/plan includes responsive form data, verify that form container and input widths match at EVERY breakpoint — not just desktop:
+ 
+```text
+### Form Responsive Widths Comparison
+| Breakpoint | Element | Property | Expected | Actual | Match? |
+|-----------|---------|----------|----------|--------|--------|
+| 375px | form container | width | {px} | {px} | YES/NO |
+| 375px | input | width | {px} | {px} | YES/NO |
+| 768px | form container | width | {px} | {px} | YES/NO |
+| 768px | input | width | {px} | {px} | YES/NO |
+| 1440px | form container | width | {px} | {px} | YES/NO |
+| 1440px | input | width | {px} | {px} | YES/NO |
+```
+ 
+**"Full width" inputs on mobile when the design constrains them is a HIGH severity mismatch.**
+ 
+If no forms on the page, skip this check.
+ 
+### 6i: Intra-Element Formatting Verification (if mixed formatting exists)
+ 
+If the recon/plan documents text blocks with mixed formatting (bold opening phrases, italic body text, styled links within one paragraph), verify the built page's HTML includes the correct wrapper tags:
+ 
+```text
+### Intra-Element Formatting Verification
+| Element | Expected Tag | Present in HTML? | Rendered Correctly? |
+|---------|-------------|-----------------|---------------------|
+| {element} | <strong> or <b> | YES/NO | Bold visible: YES/NO |
+| {element} | <em> or italic class | YES/NO | Italic visible: YES/NO |
+```
+ 
+**Missing `<strong>`, `<em>`, or `<b>` tags are a content mismatch, not a style mismatch.** Fix requires updating the HTML/JSX, not adding Tailwind classes.
+ 
+If no mixed-formatting text blocks exist, skip this check.
+ 
+### 6j: Text Content Verification (if recon has Text Content Snapshot)
  
 If the recon report contains a **Text Content Snapshot**, extract the rendered text of key elements and compare:
  
@@ -596,7 +646,7 @@ If the recon report contains a **Text Content Snapshot**, extract the rendered t
  
 If the recon has no Text Content Snapshot, skip this step.
  
-### 6i: Comparison Summary
+### 6k: Comparison Summary
  
 ```text
 ### Comparison Summary
@@ -839,7 +889,9 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 - **Vertical rhythm mismatches:** {count from Step 6e}
 - **Link mismatches:** {count from Step 6f}
 - **Hover/focus state mismatches:** {count from Step 6g}
-- **Text content mismatches:** {count from Step 6h}
+- **Text content mismatches:** {count from Step 6j}
+- **Form responsive width mismatches:** {count from Step 6h}
+- **Intra-element formatting mismatches:** {count from Step 6i}
 - **Overall verdict:** PASS / FAIL / PARTIAL
  
 **Verdict rules (from Comparison Rules):**
@@ -900,6 +952,18 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 - **Auth state:** {logged-out / simulated via localStorage}
 - **Seed data:** {description of seeded data or "none — empty state only"}
  
+## Verification Context
+- **Plan file:** {path or "none — manual verification"}
+- **Recon report:** {path or "none"}
+- **Prod comparison:** {URL or "not used"}
+- **Console noise filtered:** DevTools, HMR, [vite], favicon.ico, chrome-extension://
+ 
+## Verification Context
+- **Plan file:** {path or "none — manual verification"}
+- **Recon report:** {path or "none"}
+- **Prod comparison:** {URL or "not used"}
+- **Console noise filtered:** DevTools, HMR, [vite], favicon.ico, chrome-extension://
+ 
 ## Confidence Assessment
 - **Overall:** HIGH / MEDIUM / LOW
 - **Reasoning:** {specific evidence}
@@ -907,12 +971,16 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 ## Recommended Next Steps
  
 **Suggested tool based on findings:**
-| If issue is... | Use this tool |
-|---------------|--------------|
-| CSS/styling mismatch | Fix in code, re-run `/verify-with-playwright` |
-| JavaScript console error | Investigate component, check state management |
-| API/network failure | Check backend endpoint, verify API contract |
-| All checks pass | `/code-review` then commit |
+| If issue is... | Use this tool | Handoff guidance |
+|---------------|--------------|-----------------|
+| CSS/styling mismatch | Fix in code, re-run `/verify-with-playwright` | Reference the Fix Hint from the comparison table | Reference the Fix Hint from the comparison table |
+| Intra-element formatting missing | Fix HTML/JSX, re-run `/verify-with-playwright` | Add `<strong>`/`<em>` tags to component JSX |
+| Form inputs stretching on mobile | Fix responsive width constraint, re-run `/verify-with-playwright` | Check design system or recon constraint method |
+| Intra-element formatting missing | Fix HTML/JSX, re-run `/verify-with-playwright` | Add `<strong>`/`<em>` tags to component |
+| Form inputs stretching on mobile | Fix responsive width, re-run `/verify-with-playwright` | Check design system constraint method |
+| JavaScript console error | Investigate component, check state management | Check stack trace for originating component | Check stack trace for originating component |
+| API/network failure | Check backend endpoint, verify API contract | Test endpoint directly | Test endpoint directly with curl or Postman |
+| All checks pass | `/code-review` then commit | Proceed to pre-commit review | Proceed to pre-commit review |
  
 - {specific investigation actions for issues found}
 - {whether to re-verify after fixes}
@@ -931,6 +999,22 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 5. **Do NOT update** plan execution logs
  
 ---
+ 
+## Examples
+ 
+```bash
+# Standard verification
+/verify-with-playwright /daily
+ 
+# Plan-aware verification
+/verify-with-playwright /daily _plans/2026-03-03-daily-experience.md
+ 
+# Side-by-side comparison against production
+/verify-with-playwright /daily --compare-prod https://worshiproom.app/daily
+ 
+# Route with query parameters
+/verify-with-playwright "/daily?tab=pray"
+```
  
 ## Rules
  

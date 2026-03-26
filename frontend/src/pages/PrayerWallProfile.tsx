@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
 import { SEO } from '@/components/SEO'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
@@ -63,13 +63,15 @@ function PrayerWallProfileContent() {
     return (
       <PageShell>
         <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
-          <Link
-            to="/prayer-wall"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to Prayer Wall
-          </Link>
+          <div className="mb-6">
+            <Breadcrumb
+              items={[
+                { label: 'Prayer Wall', href: '/prayer-wall' },
+                { label: 'User Profile' },
+              ]}
+              maxWidth="max-w-[720px]"
+            />
+          </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.06] p-8 text-center">
             <p className="text-lg font-semibold text-white">
               User not found
@@ -101,13 +103,15 @@ function PrayerWallProfileContent() {
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
       >
-        <Link
-          to="/prayer-wall"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back to Prayer Wall
-        </Link>
+        <div className="mb-6">
+          <Breadcrumb
+            items={[
+              { label: 'Prayer Wall', href: '/prayer-wall' },
+              { label: `${user.firstName}'s Profile` },
+            ]}
+            maxWidth="max-w-[720px]"
+          />
+        </div>
 
         {/* Profile header */}
         <header className="mb-6 flex flex-col items-center text-center">

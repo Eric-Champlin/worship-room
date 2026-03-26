@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import { ArrowLeft, Pencil } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
@@ -10,6 +10,7 @@ import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { MarkAsAnsweredForm } from '@/components/prayer-wall/MarkAsAnsweredForm'
 import { DeletePrayerDialog } from '@/components/prayer-wall/DeletePrayerDialog'
 import { Button } from '@/components/ui/Button'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
@@ -148,13 +149,15 @@ function DashboardContent() {
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
       >
-        <Link
-          to="/prayer-wall"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back to Prayer Wall
-        </Link>
+        <div className="mb-6">
+          <Breadcrumb
+            items={[
+              { label: 'Prayer Wall', href: '/prayer-wall' },
+              { label: 'My Dashboard' },
+            ]}
+            maxWidth="max-w-[720px]"
+          />
+        </div>
 
         {/* Editable profile header */}
         <header className="mb-6 flex flex-col items-center text-center">

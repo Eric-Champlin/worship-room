@@ -185,10 +185,17 @@ describe('MonthlyReport — Empty State & Misc', () => {
     expect(screen.getByText('3 badges')).toBeInTheDocument()
   })
 
-  it('back link points to /insights', () => {
+  it('breadcrumb with Insights trail replaces back link', () => {
     renderPage()
-    const backLink = screen.getByText('Mood Insights')
-    expect(backLink.closest('a')).toHaveAttribute('href', '/insights')
+    // Back link removed
+    expect(screen.queryByText('Mood Insights')).not.toBeInTheDocument()
+    // Breadcrumb present
+    const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+    expect(nav).toBeInTheDocument()
+    const link = nav.querySelector('a[href="/insights"]')
+    expect(link).toHaveTextContent('Insights')
+    const current = nav.querySelector('[aria-current="page"]')
+    expect(current).toHaveTextContent('Monthly Report')
   })
 
   it('has reduced motion classes', () => {

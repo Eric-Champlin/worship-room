@@ -18,6 +18,7 @@ import { PLAN_DIFFICULTY_LABELS } from '@/constants/reading-plans'
 import type { ActivityType } from '@/types/dashboard'
 import { cn } from '@/lib/utils'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 export function ReadingPlanDetail() {
   const { planId } = useParams<{ planId: string }>()
@@ -193,6 +194,16 @@ export function ReadingPlanDetail() {
             </div>
           )}
         </section>
+
+        {/* Breadcrumb */}
+        <Breadcrumb
+          items={[
+            { label: 'Grow', href: '/grow?tab=plans' },
+            { label: 'Reading Plans', href: '/grow?tab=plans' },
+            { label: plan.title },
+          ]}
+          maxWidth="max-w-2xl"
+        />
 
         {/* Day content */}
         {currentDayContent && (

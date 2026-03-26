@@ -183,7 +183,8 @@ describe('BibleReader', () => {
     it('book name links back to /bible?book=slug', async () => {
       renderReader('/bible/genesis/1')
       await waitFor(() => {
-        const link = screen.getByRole('link', { name: 'Genesis' })
+        const heading = screen.getByRole('heading', { level: 1 })
+        const link = heading.querySelector('a')
         expect(link).toHaveAttribute('href', '/bible?book=genesis')
       })
     })
@@ -277,6 +278,51 @@ describe('BibleReader', () => {
       })
       // markChapterRead should not be called for logged-out users
       expect(mockMarkChapterRead).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Breadcrumb', () => {
+    it('renders breadcrumb with Bible trail', async () => {
+      renderReader('/bible/genesis/1')
+      await waitFor(() => {
+        const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+        expect(nav).toBeInTheDocument()
+        expect(nav).toHaveTextContent('Bible')
+        expect(nav).toHaveTextContent('Genesis')
+        expect(nav).toHaveTextContent('Chapter 1')
+      })
+    })
+
+    it('Bible link points to /bible', async () => {
+      renderReader('/bible/genesis/1')
+      await waitFor(() => {
+        screen.getByRole('navigation', { name: /breadcrumb/i })
+      })
+      const bibleLinks = screen.getAllByRole('link', { name: 'Bible' })
+      const breadcrumbBibleLink = bibleLinks.find(
+        (link) => link.closest('nav[aria-label]') !== null
+      )
+      expect(breadcrumbBibleLink).toHaveAttribute('href', '/bible')
+    })
+
+    it('Book name link points to /bible?book=slug', async () => {
+      renderReader('/bible/genesis/1')
+      await waitFor(() => {
+        screen.getByRole('navigation', { name: /breadcrumb/i })
+      })
+      // The breadcrumb Genesis link (inside nav) should go to /bible?book=genesis
+      const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+      const genesisLink = nav.querySelector('a[href="/bible?book=genesis"]')
+      expect(genesisLink).toBeInTheDocument()
+      expect(genesisLink).toHaveTextContent('Genesis')
+    })
+
+    it('displays full book name', async () => {
+      renderReader('/bible/1-corinthians/1')
+      await waitFor(() => {
+        const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+        expect(nav).toHaveTextContent('1 Corinthians')
+      })
     })
   })
 })

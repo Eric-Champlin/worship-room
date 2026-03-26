@@ -25,6 +25,7 @@ import { useBibleProgress } from '@/hooks/useBibleProgress'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import type { BibleVerse } from '@/types/bible'
 
 
@@ -440,6 +441,16 @@ export function BibleReader() {
             Chapter {chapterNumber}
           </h1>
         </section>
+
+        {/* Breadcrumb */}
+        <Breadcrumb
+          items={[
+            { label: 'Bible', href: '/bible' },
+            { label: book.name, href: `/bible?book=${book.slug}` },
+            { label: `Chapter ${chapterNumber}` },
+          ]}
+          maxWidth="max-w-2xl"
+        />
 
         {/* Chapter selector */}
         <div className="mx-auto max-w-2xl px-4 pt-4 sm:px-6">
