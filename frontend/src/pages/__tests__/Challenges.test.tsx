@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { ToastProvider } from '@/components/ui/Toast'
 
-import { Challenges } from '../Challenges'
+import { ChallengesContent } from '../Challenges'
 import { CHALLENGES } from '@/data/challenges'
 import { getChallengeCalendarInfo, getActiveChallengeInfo } from '@/lib/challenge-calendar'
 
@@ -64,7 +64,7 @@ function renderPage() {
     >
       <ToastProvider>
         <AuthModalProvider>
-          <Challenges />
+          <ChallengesContent />
         </AuthModalProvider>
       </ToastProvider>
     </MemoryRouter>,
@@ -78,10 +78,11 @@ describe('Challenges Page', () => {
     mockOpenAuthModal.mockClear()
   })
 
-  it('renders with PageHero title and subtitle', () => {
+  it('renders challenges content section', () => {
     renderPage()
-    expect(screen.getByText('Community Challenges')).toBeInTheDocument()
-    expect(screen.getByText('Grow together in faith')).toBeInTheDocument()
+    // Should render at least one section heading or challenge content
+    const found = CHALLENGES.some((c) => screen.queryByText(c.title) !== null)
+    expect(found).toBe(true)
   })
 
   it('renders at least one challenge card', () => {
@@ -124,9 +125,11 @@ describe('Challenges Page', () => {
     }
   })
 
-  it('route /challenges renders the page', () => {
+  it('renders challenges content', () => {
     renderPage()
-    expect(screen.getByText('Community Challenges')).toBeInTheDocument()
+    // Should render challenges section content (not PageHero which is now in GrowPage)
+    const found = CHALLENGES.some((c) => screen.queryByText(c.title) !== null)
+    expect(found).toBe(true)
   })
 })
 

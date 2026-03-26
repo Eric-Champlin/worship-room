@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
-import { ReadingPlans } from '../ReadingPlans'
+import { ReadingPlansContent } from '../ReadingPlans'
 import { CUSTOM_PLANS_KEY } from '@/constants/reading-plans'
 
 const mockOpenAuthModal = vi.fn()
@@ -26,7 +26,7 @@ function renderPage(initialRoute = '/reading-plans') {
     >
       <AuthProvider>
         <ToastProvider>
-          <ReadingPlans />
+          <ReadingPlansContent />
         </ToastProvider>
       </AuthProvider>
     </MemoryRouter>,

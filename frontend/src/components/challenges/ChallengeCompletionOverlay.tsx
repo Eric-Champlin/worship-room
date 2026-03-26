@@ -113,7 +113,7 @@ export function ChallengeCompletionOverlay({
 
   const handleBrowseMore = useCallback(() => {
     onDismiss()
-    navigate('/challenges')
+    navigate('/grow?tab=challenges')
   }, [onDismiss, navigate])
 
   const handleShare = useCallback(() => {

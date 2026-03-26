@@ -16,7 +16,7 @@ export function ChallengeNotFound() {
             The challenge you&apos;re looking for doesn&apos;t exist.
           </p>
           <Link
-            to="/challenges"
+            to="/grow?tab=challenges"
             className="font-script text-2xl text-primary transition-colors hover:text-primary-lt"
           >
             Browse Challenges

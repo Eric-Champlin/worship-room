@@ -133,7 +133,7 @@ export function ReadingPlanDetail() {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Reading Plans', item: `${SITE_URL}/reading-plans` },
+      { '@type': 'ListItem', position: 2, name: 'Reading Plans', item: `${SITE_URL}/grow?tab=plans` },
       { '@type': 'ListItem', position: 3, name: plan.title },
     ],
   }
@@ -268,7 +268,7 @@ export function ReadingPlanDetail() {
           planTitle={plan.title}
           totalDays={plan.durationDays}
           onDismiss={() => setShowPlanOverlay(false)}
-          onBrowsePlans={() => navigate('/reading-plans')}
+          onBrowsePlans={() => navigate('/grow?tab=plans')}
         />
       )}
     </Layout>

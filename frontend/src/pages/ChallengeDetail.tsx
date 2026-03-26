@@ -359,7 +359,7 @@ export function ChallengeDetail() {
                   )}
                 </button>
                 <Link
-                  to="/challenges"
+                  to="/grow?tab=challenges"
                   className="inline-flex min-h-[44px] items-center rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
                 >
                   Back to Challenges

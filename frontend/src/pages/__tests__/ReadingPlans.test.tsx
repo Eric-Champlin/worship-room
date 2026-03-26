@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
-import { ReadingPlans } from '../ReadingPlans'
+import { ReadingPlansContent } from '../ReadingPlans'
 
 const mockAuth = {
   isAuthenticated: false,
@@ -60,7 +60,7 @@ function renderPage(initialEntry = '/reading-plans') {
     >
       <ToastProvider>
         <AuthModalProvider>
-          <ReadingPlans />
+          <ReadingPlansContent />
         </AuthModalProvider>
       </ToastProvider>
     </MemoryRouter>,
@@ -74,14 +74,10 @@ describe('ReadingPlans', () => {
     mockOpenAuthModal.mockClear()
   })
 
-  it('renders PageHero with correct title and subtitle', () => {
+  it('renders Create Your Own Plan card', () => {
     renderPage()
-    expect(
-      screen.getByRole('heading', { name: 'Reading Plans', level: 1 }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText('Guided journeys through Scripture'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Create Your Own Plan')).toBeInTheDocument()
+    expect(screen.getByText('Create Plan')).toBeInTheDocument()
   })
 
   it('renders all 10 plan cards', () => {

@@ -25,8 +25,8 @@ const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon?: LucideIcon }>
   { label: 'Ask', to: '/ask', icon: Sparkles },
   { label: 'Bible', to: '/bible', icon: Book },
   { label: 'Daily Devotional', to: '/daily?tab=devotional', icon: Sparkles },
-  { label: 'Reading Plans', to: '/reading-plans', icon: BookOpen },
-  { label: 'Challenges', to: '/challenges', icon: Flame },
+  { label: 'Reading Plans', to: '/grow?tab=plans', icon: BookOpen },
+  { label: 'Challenges', to: '/grow?tab=challenges', icon: Flame },
   { label: 'Prayer Wall', to: '/prayer-wall' },
   { label: 'Music', to: '/music' },
 ]
@@ -289,7 +289,7 @@ function DesktopNav({ transparent }: { transparent: boolean }) {
         <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
           {link.icon && <link.icon size={14} className="mr-1 inline-block" />}
           {link.label}
-          {link.to === '/challenges' && activeChallengeInfo && (
+          {link.to === '/grow?tab=challenges' && activeChallengeInfo && (
             <span
               className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
               style={{ backgroundColor: CHALLENGES.find((c) => c.id === activeChallengeInfo.challengeId)?.themeColor }}
@@ -714,7 +714,7 @@ function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
               >
                 {link.icon && <link.icon size={16} className="mr-2 inline-block" />}
                 {link.label}
-                {link.to === '/challenges' && activeChallengeInfo && (
+                {link.to === '/grow?tab=challenges' && activeChallengeInfo && (
                   <span
                     className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
                     style={{ backgroundColor: CHALLENGES.find((c) => c.id === activeChallengeInfo.challengeId)?.themeColor }}

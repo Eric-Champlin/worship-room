@@ -7,10 +7,6 @@ import { NextChallengeCountdown } from '@/components/challenges/NextChallengeCou
 import { PastChallengeCard } from '@/components/challenges/PastChallengeCard'
 import { UpcomingChallengeCard } from '@/components/challenges/UpcomingChallengeCard'
 import { SwitchChallengeDialog } from '@/components/challenges/SwitchChallengeDialog'
-import { Navbar } from '@/components/Navbar'
-import { PageHero } from '@/components/PageHero'
-import { SEO } from '@/components/SEO'
-import { SiteFooter } from '@/components/SiteFooter'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { CHALLENGES } from '@/data/challenges'
 import { useAuth } from '@/hooks/useAuth'
@@ -35,7 +31,7 @@ interface CategorizedChallenge {
 // Challenges Page
 // ---------------------------------------------------------------------------
 
-export function Challenges() {
+export function ChallengesContent() {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const navigate = useNavigate()
@@ -147,16 +143,7 @@ export function Challenges() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
-      <SEO title="Community Challenges" description="Join seasonal faith challenges with thousands of other believers during Lent, Advent, Easter, and more." />
-      <a
-        href="#challenges-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
-      <Navbar transparent />
-      <PageHero title="Community Challenges" subtitle="Grow together in faith" />
+    <>
       <section id="challenges-content" className="px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
         {/* Active Challenges */}
@@ -274,8 +261,7 @@ export function Challenges() {
           />
         )
       })()}
-
-      <SiteFooter />
-    </div>
+    </>
   )
 }
+

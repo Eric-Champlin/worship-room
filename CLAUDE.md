@@ -161,9 +161,10 @@ Create an accessible platform where anyone (especially Christians) can find emot
 | `/bible/:book/:chapter`             | `BibleChapter`                   | Built  | Chapter reading with audio, highlights, notes |
 | `/ask`                              | `AskGodsWord`                    | Built  | AI Bible chat with follow-ups                 |
 | `/devotional`                       | Redirect → `/daily?tab=devotional` | Built  | Legacy redirect                             |
-| `/reading-plans`                    | `ReadingPlanBrowser`             | Built  | 10 plans + AI plan creation                   |
+| `/grow`                             | `GrowPage`                       | Built  | Tabbed: Reading Plans \| Challenges           |
+| `/reading-plans`                    | Redirect → `/grow?tab=plans`     | Built  | Legacy redirect                               |
 | `/reading-plans/:planId`            | `ReadingPlanDetail`              | Built  | Plan detail with daily progress               |
-| `/challenges`                       | `ChallengeBrowser`               | Built  | 5 seasonal community challenges               |
+| `/challenges`                       | Redirect → `/grow?tab=challenges` | Built | Legacy redirect                               |
 | `/challenges/:challengeId`          | `ChallengeDetail`                | Built  | Challenge daily content + progress            |
 | `/login`                            | `ComingSoon`                     | Stub   | Login placeholder                             |
 | `/register`                         | `ComingSoon`                     | Stub   | Register placeholder                          |

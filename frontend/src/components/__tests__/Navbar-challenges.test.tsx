@@ -78,13 +78,13 @@ describe('Navbar — Challenges link', () => {
     expect(challengeLinks.length).toBeGreaterThan(0)
   })
 
-  it('"Challenges" link points to /challenges', () => {
+  it('"Challenges" link points to /grow?tab=challenges', () => {
     renderNavbar()
     const links = screen.getAllByRole('link').filter(
       (el) => el.textContent?.includes('Challenges'),
     )
     const hasCorrectLink = links.some((link) =>
-      link.getAttribute('href') === '/challenges',
+      link.getAttribute('href') === '/grow?tab=challenges',
     )
     expect(hasCorrectLink).toBe(true)
   })

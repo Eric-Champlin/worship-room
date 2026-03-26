@@ -2,10 +2,6 @@ import { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 
-import { Navbar } from '@/components/Navbar'
-import { PageHero } from '@/components/PageHero'
-import { SEO } from '@/components/SEO'
-import { SiteFooter } from '@/components/SiteFooter'
 import { CreatePlanFlow } from '@/components/reading-plans/CreatePlanFlow'
 import { FilterBar } from '@/components/reading-plans/FilterBar'
 import { PlanCard } from '@/components/reading-plans/PlanCard'
@@ -16,6 +12,10 @@ import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLANS } from '@/data/reading-plans'
 import { getCustomPlanIds } from '@/utils/custom-plans-storage'
 import type { PlanDifficulty, ReadingPlan } from '@/types/reading-plans'
+
+interface ReadingPlansContentProps {
+  createParam?: boolean
+}
 
 function ConfirmDialog({
   activePlanTitle,
@@ -70,7 +70,7 @@ function ConfirmDialog({
   )
 }
 
-export function ReadingPlans() {
+export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = {}) {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const navigate = useNavigate()
@@ -83,7 +83,7 @@ export function ReadingPlans() {
     useState<PlanDifficulty | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<string | null>(null)
 
-  const showCreateFlow = searchParams.get('create') === 'true'
+  const showCreateFlow = createParam ?? searchParams.get('create') === 'true'
   const customPlanIds = isAuthenticated ? getCustomPlanIds() : []
   const activePlanId = getActivePlanId()
 
@@ -169,17 +169,7 @@ export function ReadingPlans() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
-      <SEO title="Bible Reading Plans" description="Guided multi-day Scripture journeys through topics like anxiety, grief, gratitude, forgiveness, and hope." />
-      <a
-        href="#reading-plans-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
-      <Navbar transparent />
-      <PageHero title="Reading Plans" subtitle="Guided journeys through Scripture" />
-
+    <>
       <section id="reading-plans-content" className="px-4 py-8 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
           {/* Create Your Own Plan card */}
@@ -249,8 +239,7 @@ export function ReadingPlans() {
           onCancel={handleCancelSwitch}
         />
       )}
-
-      <SiteFooter />
-    </div>
+    </>
   )
 }
+

@@ -16,7 +16,7 @@ export function PlanNotFound() {
             The reading plan you&apos;re looking for doesn&apos;t exist.
           </p>
           <Link
-            to="/reading-plans"
+            to="/grow?tab=plans"
             className="font-script text-2xl text-primary transition-colors hover:text-primary-lt"
           >
             Browse Reading Plans

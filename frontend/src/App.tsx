@@ -43,9 +43,8 @@ const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m
 const GrowthProfile = lazy(() => import('./pages/GrowthProfile').then((m) => ({ default: m.GrowthProfile })))
 // DevotionalPage kept as file but no longer routed — content lives in DevotionalTabContent
 const MyPrayers = lazy(() => import('./pages/MyPrayers').then((m) => ({ default: m.MyPrayers })))
-const ReadingPlans = lazy(() => import('./pages/ReadingPlans').then((m) => ({ default: m.ReadingPlans })))
+const GrowPage = lazy(() => import('./pages/GrowPage').then((m) => ({ default: m.GrowPage })))
 const ReadingPlanDetail = lazy(() => import('./pages/ReadingPlanDetail').then((m) => ({ default: m.ReadingPlanDetail })))
-const Challenges = lazy(() => import('./pages/Challenges').then((m) => ({ default: m.Challenges })))
 const ChallengeDetail = lazy(() => import('./pages/ChallengeDetail').then((m) => ({ default: m.ChallengeDetail })))
 const BibleBrowser = lazy(() => import('./pages/BibleBrowser').then((m) => ({ default: m.BibleBrowser })))
 const BibleReader = lazy(() => import('./pages/BibleReader').then((m) => ({ default: m.BibleReader })))
@@ -116,6 +115,13 @@ function DevotionalRedirect() {
   return <Navigate to={target} replace />
 }
 
+function ReadingPlansRedirect() {
+  const [searchParams] = useSearchParams()
+  const create = searchParams.get('create')
+  const target = create === 'true' ? '/grow?tab=plans&create=true' : '/grow?tab=plans'
+  return <Navigate to={target} replace />
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -140,9 +146,10 @@ function App() {
           <Route path="/daily" element={<DailyHub />} />
           <Route path="/ask" element={<AskPage />} />
           <Route path="/devotional" element={<DevotionalRedirect />} />
-          <Route path="/reading-plans" element={<ReadingPlans />} />
+          <Route path="/grow" element={<GrowPage />} />
+          <Route path="/reading-plans" element={<ReadingPlansRedirect />} />
           <Route path="/reading-plans/:planId" element={<ReadingPlanDetail />} />
-          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/challenges" element={<Navigate to="/grow?tab=challenges" replace />} />
           <Route path="/challenges/:challengeId" element={<ChallengeDetail />} />
           <Route path="/bible" element={<BibleBrowser />} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />

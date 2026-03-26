@@ -204,7 +204,7 @@ export function ReadingPlanWidget() {
           {recentlyCompleted.coverEmoji}
         </span>
         <Link
-          to="/reading-plans"
+          to="/grow?tab=plans"
           className="inline-flex items-center gap-1 text-sm font-medium text-primary-lt transition-colors hover:text-primary"
         >
           Start another plan
@@ -239,7 +239,7 @@ export function ReadingPlanWidget() {
       </div>
 
       <Link
-        to="/reading-plans"
+        to="/grow?tab=plans"
         className="inline-flex items-center gap-1 text-sm font-medium text-primary-lt transition-colors hover:text-primary"
       >
         Browse all plans
