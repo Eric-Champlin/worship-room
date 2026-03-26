@@ -26,10 +26,10 @@ describe('BADGE_DEFINITIONS', () => {
     }
   });
 
-  it('total unique badge IDs count is 39', () => {
+  it('total unique badge IDs count is 40', () => {
     const ids = BADGE_DEFINITIONS.map((b) => b.id);
-    // 7 streak + 6 level + 9 activity milestones + 3 reading plan + 1 full_worship_day + 5 community/first-time + 7 challenge + 1 welcome
-    expect(new Set(ids).size).toBe(39);
+    // 7 streak + 6 level + 9 activity milestones + 3 reading plan + 1 full_worship_day + 6 community/first-time + 7 challenge + 1 welcome
+    expect(new Set(ids).size).toBe(40);
   });
 });
 
@@ -139,13 +139,21 @@ describe('reading plan badges', () => {
 });
 
 describe('community badges', () => {
-  it('4 definitions', () => {
-    const expectedIds = ['first_friend', 'friends_10', 'encourage_10', 'encourage_50'];
+  it('5 definitions', () => {
+    const expectedIds = ['first_friend', 'friends_10', 'encourage_10', 'encourage_50', 'local_support_5'];
     for (const id of expectedIds) {
       expect(BADGE_MAP[id]).toBeDefined();
     }
     const communityBadges = BADGE_DEFINITIONS.filter((b) => b.category === 'community');
-    expect(communityBadges).toHaveLength(4);
+    expect(communityBadges).toHaveLength(5);
+  });
+
+  it('local_support_5 badge has correct properties', () => {
+    const badge = BADGE_MAP['local_support_5'];
+    expect(badge).toBeDefined();
+    expect(badge.name).toBe('Local Support Seeker');
+    expect(badge.category).toBe('community');
+    expect(badge.celebrationTier).toBe('toast-confetti');
   });
 });
 

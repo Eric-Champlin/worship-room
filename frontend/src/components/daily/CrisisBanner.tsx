@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
 
 interface CrisisBannerProps {
@@ -40,6 +41,14 @@ export function CrisisBanner({ text }: CrisisBannerProps) {
           </a>
         </li>
       </ul>
+      <div className="mt-3 border-t border-warning/20 pt-3">
+        <Link
+          to="/local-support/counselors"
+          className="text-sm font-semibold text-primary underline"
+        >
+          Find a counselor near you &rarr;
+        </Link>
+      </div>
     </div>
   )
 }

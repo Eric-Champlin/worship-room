@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { PrayerCardActions } from '../PrayerCardActions'
 import { PrayerCardOverflowMenu } from '../PrayerCardOverflowMenu'
@@ -117,11 +118,13 @@ describe('EditPrayerForm', () => {
   it('shows CrisisBanner on crisis keywords', async () => {
     const user = userEvent.setup()
     render(
-      <EditPrayerForm
-        prayer={makePrayer()}
-        onSave={vi.fn()}
-        onCancel={vi.fn()}
-      />,
+      <MemoryRouter>
+        <EditPrayerForm
+          prayer={makePrayer()}
+          onSave={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      </MemoryRouter>,
     )
     await user.clear(screen.getByDisplayValue('Healing for Mom'))
     await user.type(screen.getByLabelText('Title'), 'I want to kill myself')
@@ -159,7 +162,11 @@ describe('MarkAnsweredForm', () => {
 
   it('shows CrisisBanner on crisis keywords', async () => {
     const user = userEvent.setup()
-    render(<MarkAnsweredForm onConfirm={vi.fn()} onCancel={vi.fn()} />)
+    render(
+      <MemoryRouter>
+        <MarkAnsweredForm onConfirm={vi.fn()} onCancel={vi.fn()} />
+      </MemoryRouter>,
+    )
     await user.type(screen.getByLabelText('Testimony note'), 'I want to kill myself')
     expect(screen.getByRole('alert')).toBeInTheDocument()
   })

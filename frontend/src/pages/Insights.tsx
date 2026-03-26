@@ -12,6 +12,7 @@ import { MoodTrendChart } from '@/components/insights/MoodTrendChart'
 import { ScriptureConnections } from '@/components/insights/ScriptureConnections'
 import { MeditationHistory } from '@/components/insights/MeditationHistory'
 import { GratitudeStreak } from '@/components/insights/GratitudeStreak'
+import { GratitudeCorrelationCard } from '@/components/insights/GratitudeCorrelationCard'
 import { SEO } from '@/components/SEO'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
@@ -270,18 +271,21 @@ export function Insights() {
           <ActivityCorrelations hasData={hasData} />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 4 : 3}>
-          <CommunityConnections hasData={hasData} />
+          <GratitudeCorrelationCard />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 5 : 4}>
-          <GratitudeStreak />
+          <CommunityConnections hasData={hasData} />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 6 : 5}>
-          <ScriptureConnections hasData={hasData} />
+          <GratitudeStreak />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 7 : 6}>
-          <MeditationHistory rangeDays={rangeDays} />
+          <ScriptureConnections hasData={hasData} />
         </AnimatedSection>
         <AnimatedSection index={entries.length > 0 ? 8 : 7}>
+          <MeditationHistory rangeDays={rangeDays} />
+        </AnimatedSection>
+        <AnimatedSection index={entries.length > 0 ? 9 : 8}>
           <div className="pt-2 text-center">
             <Link
               to="/insights/monthly"

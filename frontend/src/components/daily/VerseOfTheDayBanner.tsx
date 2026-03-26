@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { Share2 } from 'lucide-react'
 import { getTodaysVerse } from '@/constants/verse-of-the-day'
 import { VerseSharePanel } from '@/components/verse-of-the-day/VerseSharePanel'
+import { VerseLink } from '@/components/shared/VerseLink'
 
 export function VerseOfTheDayBanner() {
   const verse = getTodaysVerse()
@@ -16,8 +17,12 @@ export function VerseOfTheDayBanner() {
           <p className="font-serif italic text-sm text-white/80 line-clamp-1 sm:line-clamp-none">
             &ldquo;{verse.text}&rdquo;
           </p>
-          <p className="mt-0.5 text-xs text-white/40 sm:mt-0 sm:ml-2 sm:inline">
-            — {verse.reference}
+          <p className="mt-0.5 text-xs sm:mt-0 sm:ml-2 sm:inline">
+            —{' '}
+            <VerseLink
+              reference={verse.reference}
+              className="text-white/40"
+            />
           </p>
         </div>
         <div className="relative flex-shrink-0">

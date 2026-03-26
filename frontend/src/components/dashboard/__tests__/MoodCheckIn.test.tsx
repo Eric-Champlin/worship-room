@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { MoodCheckIn } from '../MoodCheckIn';
 import { MOOD_OPTIONS } from '@/constants/dashboard/mood';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -12,11 +13,13 @@ const mockOnSkip = vi.fn();
 
 function renderCheckIn(userName = 'Eric') {
   return render(
-    <MoodCheckIn
-      userName={userName}
-      onComplete={mockOnComplete}
-      onSkip={mockOnSkip}
-    />
+    <MemoryRouter>
+      <MoodCheckIn
+        userName={userName}
+        onComplete={mockOnComplete}
+        onSkip={mockOnSkip}
+      />
+    </MemoryRouter>
   );
 }
 
@@ -451,16 +454,17 @@ describe('MoodCheckIn', () => {
       fireEvent.click(orbs[2]); // Okay
       fireEvent.click(screen.getByRole('button', { name: /continue/i }));
 
-      // Reference should start hidden
+      // Reference should start hidden (opacity-0 is on the parent <p>)
       const reference = screen.getByText('Psalm 46:10');
-      expect(reference).toHaveClass('opacity-0');
+      const referenceParagraph = reference.closest('p');
+      expect(referenceParagraph).toHaveClass('opacity-0');
 
       // After full reveal (2500ms + 200ms buffer)
       act(() => {
         vi.advanceTimersByTime(2701);
       });
 
-      expect(reference).toHaveClass('opacity-100');
+      expect(referenceParagraph).toHaveClass('opacity-100');
     });
 
     it('reduced motion shows verse and reference immediately', async () => {
@@ -483,7 +487,39 @@ describe('MoodCheckIn', () => {
         vi.advanceTimersByTime(1);
       });
       const reference = screen.getByText('Psalm 46:10');
-      expect(reference).toHaveClass('opacity-100');
+      const referenceParagraph = reference.closest('p');
+      expect(referenceParagraph).toHaveClass('opacity-100');
+    });
+  });
+
+  describe('Verse linking', () => {
+    it('mood check-in verse reference is a link', () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      renderCheckIn();
+
+      // Select "Okay" mood and continue to verse phase
+      fireEvent.click(screen.getAllByRole('radio')[2]);
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+
+      // Advance past karaoke reveal (2500ms + buffer)
+      act(() => {
+        vi.advanceTimersByTime(2701);
+      });
+
+      const link = screen.getByRole('link', { name: 'Psalm 46:10' });
+      expect(link).toHaveAttribute('href', '/bible/psalms/46#verse-10');
+    });
+
+    it('mood check-in link preserves fade animation', () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      renderCheckIn();
+
+      fireEvent.click(screen.getAllByRole('radio')[2]);
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+
+      // The parent p should have transition-opacity for the fade
+      const referenceParagraph = screen.getByText('Psalm 46:10').closest('p');
+      expect(referenceParagraph?.className).toContain('transition-opacity');
     });
   });
 });

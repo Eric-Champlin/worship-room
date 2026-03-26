@@ -205,4 +205,21 @@ describe('DevotionalTabContent', () => {
       expect(screen.queryByText('Completed')).not.toBeInTheDocument()
     })
   })
+
+  describe('Verse linking', () => {
+    it('devotional passage reference is a link', () => {
+      renderComponent()
+      // The passage reference should be rendered as a link (via VerseLink)
+      const links = screen.getAllByRole('link')
+      const verseLink = links.find((l) => l.getAttribute('href')?.startsWith('/bible/'))
+      expect(verseLink).toBeDefined()
+    })
+
+    it('devotional link has correct styling', () => {
+      renderComponent()
+      const links = screen.getAllByRole('link')
+      const verseLink = links.find((l) => l.getAttribute('href')?.startsWith('/bible/'))
+      expect(verseLink?.className).toContain('text-primary-lt')
+    })
+  })
 })

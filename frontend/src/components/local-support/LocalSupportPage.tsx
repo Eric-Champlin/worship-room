@@ -17,6 +17,7 @@ import { ResultsMap } from './ResultsMap'
 import { SearchPrompt, NoResults, SearchError, ListingSkeleton } from './SearchStates'
 import { List, Map as MapIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/components/ui/Toast'
 
 export interface LocalSupportPageConfig {
   category: LocalSupportCategory
@@ -41,13 +42,15 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { recordActivity } = useFaithPoints()
+  const { showToast } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const placeType = categoryToPlaceType(config.category)
 
   const handleVisit = useCallback((_placeId: string, _placeName: string) => {
     recordActivity('localVisit')
-  }, [recordActivity])
+    showToast('Visit recorded! +10 faith points', 'success')
+  }, [recordActivity, showToast])
 
   // Search state
   const [searchResults, setSearchResults] = useState<LocalSupportPlace[]>(() =>

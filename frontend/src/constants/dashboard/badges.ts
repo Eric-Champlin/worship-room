@@ -149,6 +149,7 @@ const communityBadges: BadgeDefinition[] = [
   { id: 'friends_10', name: 'Inner Circle', description: '10 mutual friends', category: 'community', celebrationTier: 'toast-confetti' },
   { id: 'encourage_10', name: 'Encourager', description: '10 encouragements sent', category: 'community', celebrationTier: 'toast' },
   { id: 'encourage_50', name: 'Cheerleader', description: '50 encouragements sent', category: 'community', celebrationTier: 'toast-confetti' },
+  { id: 'local_support_5', name: 'Local Support Seeker', description: "You've visited 5 local support locations. Your faith is lived, not just digital.", category: 'community', celebrationTier: 'toast-confetti' },
 ];
 
 const challengeBadges: BadgeDefinition[] = [

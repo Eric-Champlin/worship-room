@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { checkForNewBadges, type BadgeCheckContext } from '../badge-engine';
 import { FRESH_ACTIVITY_COUNTS } from '@/constants/dashboard/badges';
 import type { BadgeEarnedEntry, DailyActivities } from '@/types/dashboard';
@@ -271,5 +271,62 @@ describe('checkForNewBadges — multiple badges', () => {
     const result = checkForNewBadges(ctx, {});
     expect(result).toContain('journal_100');
     expect(result).toContain('full_worship_day');
+  });
+});
+
+describe('checkForNewBadges — local support badge', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('awards local_support_5 at 5 unique visits', () => {
+    const visits = [
+      { id: '1', placeId: 'a', placeName: 'A', placeType: 'church', date: '2026-03-01', note: '' },
+      { id: '2', placeId: 'b', placeName: 'B', placeType: 'church', date: '2026-03-02', note: '' },
+      { id: '3', placeId: 'c', placeName: 'C', placeType: 'counselor', date: '2026-03-03', note: '' },
+      { id: '4', placeId: 'd', placeName: 'D', placeType: 'counselor', date: '2026-03-04', note: '' },
+      { id: '5', placeId: 'e', placeName: 'E', placeType: 'cr', date: '2026-03-05', note: '' },
+    ];
+    localStorage.setItem('wr_local_visits', JSON.stringify(visits));
+
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('local_support_5');
+  });
+
+  it('does not award at 4 unique visits', () => {
+    const visits = [
+      { id: '1', placeId: 'a', placeName: 'A', placeType: 'church', date: '2026-03-01', note: '' },
+      { id: '2', placeId: 'b', placeName: 'B', placeType: 'church', date: '2026-03-02', note: '' },
+      { id: '3', placeId: 'c', placeName: 'C', placeType: 'counselor', date: '2026-03-03', note: '' },
+      { id: '4', placeId: 'd', placeName: 'D', placeType: 'counselor', date: '2026-03-04', note: '' },
+    ];
+    localStorage.setItem('wr_local_visits', JSON.stringify(visits));
+
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('local_support_5');
+  });
+
+  it('does not re-award earned badge', () => {
+    const visits = [
+      { id: '1', placeId: 'a', placeName: 'A', placeType: 'church', date: '2026-03-01', note: '' },
+      { id: '2', placeId: 'b', placeName: 'B', placeType: 'church', date: '2026-03-02', note: '' },
+      { id: '3', placeId: 'c', placeName: 'C', placeType: 'counselor', date: '2026-03-03', note: '' },
+      { id: '4', placeId: 'd', placeName: 'D', placeType: 'counselor', date: '2026-03-04', note: '' },
+      { id: '5', placeId: 'e', placeName: 'E', placeType: 'cr', date: '2026-03-05', note: '' },
+    ];
+    localStorage.setItem('wr_local_visits', JSON.stringify(visits));
+
+    const ctx = makeContext();
+    const earned = { local_support_5: { earnedAt: '2026-03-05T00:00:00Z' } };
+    const result = checkForNewBadges(ctx, earned);
+    expect(result).not.toContain('local_support_5');
+  });
+
+  it('handles empty localStorage', () => {
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('local_support_5');
   });
 });

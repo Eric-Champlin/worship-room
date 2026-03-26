@@ -80,4 +80,11 @@ describe('TodaysVerseSection', () => {
     expect(heading).toBeInTheDocument()
     expect(heading?.textContent).toBe("Today's Verse")
   })
+
+  it('landing page verse reference is a link', () => {
+    renderSection()
+    const links = screen.getAllByRole('link')
+    const verseLink = links.find((l) => l.getAttribute('href')?.startsWith('/bible/'))
+    expect(verseLink).toBeDefined()
+  })
 })

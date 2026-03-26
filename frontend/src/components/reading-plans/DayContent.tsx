@@ -1,5 +1,6 @@
 import { forwardRef } from 'react'
 
+import { VerseLink } from '@/components/shared/VerseLink'
 import type { PlanDayContent as DayContentType } from '@/types/reading-plans'
 
 interface DayContentProps {
@@ -17,8 +18,11 @@ export const DayContent = forwardRef<HTMLDivElement, DayContentProps>(
 
         {/* Passage section */}
         <section className="border-t border-white/10 py-8 sm:py-10">
-          <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/40">
-            {day.passage.reference}
+          <p className="mb-4 text-xs font-medium uppercase tracking-widest">
+            <VerseLink
+              reference={day.passage.reference}
+              className="text-white/40"
+            />
           </p>
           <div className="font-serif text-base italic leading-relaxed text-white/90 sm:text-lg">
             {day.passage.verses.map((verse) => (

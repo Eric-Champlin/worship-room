@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { PrayerComposer } from '../PrayerComposer'
 
@@ -10,7 +11,11 @@ const defaultProps = {
 }
 
 function renderComposer(overrides = {}) {
-  return render(<PrayerComposer {...defaultProps} {...overrides} />)
+  return render(
+    <MemoryRouter>
+      <PrayerComposer {...defaultProps} {...overrides} />
+    </MemoryRouter>,
+  )
 }
 
 describe('PrayerComposer', () => {

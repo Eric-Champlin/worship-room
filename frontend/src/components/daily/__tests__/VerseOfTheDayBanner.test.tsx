@@ -66,4 +66,18 @@ describe('VerseOfTheDayBanner', () => {
 
     expect(screen.getByRole('menu')).toBeInTheDocument()
   })
+
+  it('VOTD banner reference is a link', () => {
+    renderBanner()
+    const links = screen.getAllByRole('link')
+    const verseLink = links.find((l) => l.getAttribute('href')?.startsWith('/bible/'))
+    expect(verseLink).toBeDefined()
+  })
+
+  it('VOTD banner link has correct base color', () => {
+    renderBanner()
+    const links = screen.getAllByRole('link')
+    const verseLink = links.find((l) => l.getAttribute('href')?.startsWith('/bible/'))
+    expect(verseLink?.className).toContain('text-white/40')
+  })
 })

@@ -194,8 +194,8 @@ describe('Insights — full page integration', () => {
   it('reduced motion: sections have motion-reduce classes', () => {
     const { container } = renderInsights()
     const animatedSections = container.querySelectorAll('.motion-reduce\\:animate-none')
-    // 8 sections when no data: empty state + insight cards + correlations + community connections + gratitude streak + scripture + meditation history + monthly link
-    expect(animatedSections.length).toBe(8)
+    // 9 sections when no data: empty state + insight cards + correlations + gratitude correlation + community connections + gratitude streak + scripture + meditation history + monthly link
+    expect(animatedSections.length).toBe(9)
   })
 
   it('time range change updates heatmap and chart', async () => {
@@ -212,5 +212,23 @@ describe('Insights — full page integration', () => {
     // Page should still render after range change
     expect(screen.getByText('Your Mood Calendar')).toBeInTheDocument()
     expect(screen.getByText('Mood Over Time')).toBeInTheDocument()
+  })
+
+  it('renders GratitudeCorrelationCard in insights layout', () => {
+    // Seed 5 days of both mood and gratitude data
+    const moods = Array.from({ length: 5 }, (_, i) =>
+      makeMoodEntry({ date: daysAgo(i), mood: 4, moodLabel: 'Good' }),
+    )
+    seedEntries(moods)
+    const gratitude = Array.from({ length: 5 }, (_, i) => ({
+      id: `grat-${i}`,
+      date: daysAgo(i),
+      items: ['Thankful'],
+      createdAt: new Date().toISOString(),
+    }))
+    localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
+
+    renderInsights()
+    expect(screen.getByLabelText('Gratitude and mood correlation')).toBeInTheDocument()
   })
 })

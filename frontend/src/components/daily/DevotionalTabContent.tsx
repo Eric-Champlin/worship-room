@@ -12,6 +12,7 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { RelatedPlanCallout } from '@/components/devotional/RelatedPlanCallout'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLANS } from '@/data/reading-plans'
+import { VerseLink } from '@/components/shared/VerseLink'
 import type { Devotional } from '@/types/devotional'
 
 function buildReadAloudText(devotional: Devotional): string {
@@ -213,8 +214,11 @@ export function DevotionalTabContent({
 
           {/* Passage section */}
           <div className="border-t border-white/10 py-8 sm:py-10">
-            <p className="mb-4 text-xs font-medium uppercase tracking-widest text-primary-lt">
-              {devotional.passage.reference}
+            <p className="mb-4 text-xs font-medium uppercase tracking-widest">
+              <VerseLink
+                reference={devotional.passage.reference}
+                className="text-primary-lt"
+              />
             </p>
             <p className="font-serif text-base italic leading-relaxed text-white/70 sm:text-lg">
               {devotional.passage.verses.map((verse) => (

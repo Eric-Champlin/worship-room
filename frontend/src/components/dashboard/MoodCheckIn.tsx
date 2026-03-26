@@ -12,6 +12,7 @@ import { saveMoodEntry } from '@/services/mood-storage';
 import { getLocalDateString } from '@/utils/date';
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal';
 import { cn } from '@/lib/utils';
+import { VerseLink } from '@/components/shared/VerseLink';
 
 type CheckInPhase = 'idle' | 'mood_selected' | 'verse_display' | 'crisis_banner';
 
@@ -250,11 +251,14 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
             </div>
             <p
               className={cn(
-                'mt-3 text-center font-sans text-sm text-white/50 transition-opacity duration-300',
+                'mt-3 text-center font-sans text-sm transition-opacity duration-300',
                 verseRevealed ? 'opacity-100' : 'opacity-0'
               )}
             >
-              {selectedMood.verseReference}
+              <VerseLink
+                reference={selectedMood.verseReference}
+                className="text-white/50"
+              />
             </p>
           </div>
         )}

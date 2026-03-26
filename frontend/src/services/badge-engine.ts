@@ -4,6 +4,7 @@ import {
   ACTIVITY_MILESTONE_THRESHOLDS,
   COMMUNITY_BADGE_THRESHOLDS,
 } from '@/constants/dashboard/badges';
+import { getUniqueVisitedPlaces } from '@/services/local-visit-storage';
 
 export interface BadgeCheckContext {
   streak: StreakData;
@@ -127,6 +128,19 @@ export function checkForNewBadges(
     }
   } catch {
     // Malformed localStorage — skip reading plan badge check
+  }
+
+  // 7. Local Support Seeker badge
+  const LOCAL_SUPPORT_BADGE_ID = 'local_support_5';
+  if (!earned[LOCAL_SUPPORT_BADGE_ID]) {
+    try {
+      const { total } = getUniqueVisitedPlaces();
+      if (total >= 5) {
+        result.push(LOCAL_SUPPORT_BADGE_ID);
+      }
+    } catch {
+      // Malformed localStorage — skip local support badge check
+    }
   }
 
   return result;

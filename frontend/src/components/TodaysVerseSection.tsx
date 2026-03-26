@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { getTodaysVerse } from '@/constants/verse-of-the-day'
 import { VerseSharePanel } from '@/components/verse-of-the-day/VerseSharePanel'
+import { VerseLink } from '@/components/shared/VerseLink'
 
 export function TodaysVerseSection() {
   const verse = getTodaysVerse()
@@ -24,8 +25,12 @@ export function TodaysVerseSection() {
           <p className="mx-auto max-w-2xl font-serif italic text-lg leading-relaxed text-white sm:text-2xl">
             &ldquo;{verse.text}&rdquo;
           </p>
-          <cite className="mt-3 block text-sm not-italic text-white/50">
-            — {verse.reference}
+          <cite className="mt-3 block text-sm not-italic">
+            —{' '}
+            <VerseLink
+              reference={verse.reference}
+              className="text-white/50"
+            />
           </cite>
         </blockquote>
         <div className="relative mt-8 inline-block">
