@@ -66,27 +66,25 @@ function renderNavbar() {
   )
 }
 
-describe('Navbar — Challenges link', () => {
+describe('Navbar — Challenges/Grow link', () => {
   beforeEach(() => {
     localStorage.clear()
     mockAuth.isAuthenticated = false
   })
 
-  it('"Challenges" link appears in the nav', () => {
+  it('"Challenges" is no longer a standalone top-level nav item', () => {
     renderNavbar()
-    const challengeLinks = screen.getAllByText('Challenges')
-    expect(challengeLinks.length).toBeGreaterThan(0)
+    // Challenges was consolidated into the "Grow" link
+    const challengeLinks = screen.queryAllByRole('link').filter(
+      (el) => el.textContent?.trim() === 'Challenges',
+    )
+    expect(challengeLinks).toHaveLength(0)
   })
 
-  it('"Challenges" link points to /grow?tab=challenges', () => {
+  it('"Grow" link appears as a top-level nav item pointing to /grow', () => {
     renderNavbar()
-    const links = screen.getAllByRole('link').filter(
-      (el) => el.textContent?.includes('Challenges'),
-    )
-    const hasCorrectLink = links.some((link) =>
-      link.getAttribute('href') === '/grow?tab=challenges',
-    )
-    expect(hasCorrectLink).toBe(true)
+    const growLink = screen.getByRole('link', { name: 'Grow' })
+    expect(growLink).toHaveAttribute('href', '/grow')
   })
 
   it('does not break existing nav links', () => {

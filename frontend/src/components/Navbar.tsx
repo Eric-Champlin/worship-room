@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import {
-  Bell, Book, BookOpen, ChevronDown, Menu, Sparkles, WifiOff, X,
-  Star, Gift, Heart, Cross, Sun, Flame, Leaf,
-} from 'lucide-react'
-import type { LucideIcon, LucideProps } from 'lucide-react'
+import { Book, Calendar, Heart, Menu, Music, TrendingUp, WifiOff, X } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
@@ -13,29 +10,30 @@ import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
-import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
-import { CHALLENGES } from '@/data/challenges'
+import { SEASON_ICON_MAP } from '@/components/SeasonalNavLine'
+import { SeasonalNavLine } from '@/components/SeasonalNavLine'
+import { LocalSupportDropdown } from '@/components/LocalSupportDropdown'
+import { AvatarDropdown } from '@/components/AvatarDropdown'
+import { MobileDrawer, MobileNotificationSheet } from '@/components/MobileDrawer'
 
-const SEASON_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
-  Star, Gift, Sparkles, Heart, Cross, Sun, Flame, Leaf,
-}
-
-const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon?: LucideIcon }> = [
-  { label: 'Daily Hub', to: '/daily' },
-  { label: 'Ask', to: '/ask', icon: Sparkles },
+export const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> = [
+  { label: 'Daily Hub', to: '/daily', icon: Calendar },
   { label: 'Bible', to: '/bible', icon: Book },
-  { label: 'Daily Devotional', to: '/daily?tab=devotional', icon: Sparkles },
-  { label: 'Reading Plans', to: '/grow?tab=plans', icon: BookOpen },
-  { label: 'Challenges', to: '/grow?tab=challenges', icon: Flame },
-  { label: 'Prayer Wall', to: '/prayer-wall' },
-  { label: 'Music', to: '/music' },
+  { label: 'Grow', to: '/grow', icon: TrendingUp },
+  { label: 'Prayer Wall', to: '/prayer-wall', icon: Heart },
+  { label: 'Music', to: '/music', icon: Music },
 ]
 
-const LOCAL_SUPPORT_LINKS = [
-  { label: 'Churches', to: '/local-support/churches' },
-  { label: 'Counselors', to: '/local-support/counselors' },
-  { label: 'Celebrate Recovery', to: '/local-support/celebrate-recovery' },
-] as const
+export function isNavActive(to: string, pathname: string): boolean {
+  switch (to) {
+    case '/daily': return pathname.startsWith('/daily')
+    case '/bible': return pathname.startsWith('/bible')
+    case '/grow': return pathname === '/grow' || pathname.startsWith('/reading-plans/') || pathname.startsWith('/challenges/')
+    case '/prayer-wall': return pathname.startsWith('/prayer-wall')
+    case '/music': return pathname.startsWith('/music')
+    default: return pathname === to
+  }
+}
 
 function getNavLinkClass(transparent: boolean) {
   return ({ isActive }: { isActive: boolean }) =>
@@ -82,229 +80,27 @@ function NavbarLogo({ transparent }: { transparent: boolean }) {
   )
 }
 
-interface NavDropdownProps {
-  label: string
-  to: string
-  links: ReadonlyArray<{ label: string; to: string }>
-  dropdownId: string
-  transparent: boolean
-  extraActivePaths?: readonly string[]
-}
-
-function NavDropdown({
-  label,
-  to,
-  links,
-  dropdownId,
-  transparent,
-  extraActivePaths = [],
-}: NavDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
+function DesktopNav({ transparent }: { transparent: boolean }) {
   const location = useLocation()
 
-  const open = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-    }
-    setIsOpen(true)
-  }, [])
-
-  const closeWithDelay = useCallback(() => {
-    closeTimerRef.current = setTimeout(() => {
-      setIsOpen(false)
-      closeTimerRef.current = null
-    }, 150)
-  }, [])
-
-  const close = useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-    }
-    setIsOpen(false)
-  }, [])
-
-  // Close on any navigation (path or query param change, e.g. /daily?tab=...)
-  useEffect(() => {
-    close()
-  }, [location.pathname, location.search, close])
-
-  // Close on Escape and return focus to trigger
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        close()
-        triggerRef.current?.focus()
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, close])
-
-  // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        close()
-      }
-    }
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
-  }, [isOpen, close])
-
-  // Close on focus leaving the wrapper
-  const handleBlur = useCallback(
-    (e: React.FocusEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
-        close()
-      }
-    },
-    [close]
-  )
-
-  // Clean up timer on unmount
-  useEffect(() => {
-    return () => {
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current)
-      }
-    }
-  }, [])
-
-  const isActive = links.some(
-    (link) => location.pathname === link.to
-  ) || extraActivePaths.some((p) => location.pathname === p)
-
   return (
-    <div
-      ref={wrapperRef}
-      className={cn(
-        'relative flex items-center py-2',
-        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-        transparent ? 'after:bg-white' : 'after:bg-primary',
-        isActive
-          ? 'after:scale-x-100'
-          : 'after:scale-x-0 hover:after:scale-x-100'
-      )}
-      onMouseEnter={open}
-      onMouseLeave={closeWithDelay}
-      onBlur={handleBlur}
-    >
-      <NavLink
-        to={to}
-        className={cn(
-          'text-sm font-medium transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
-          isActive
-            ? transparent ? 'text-white' : 'text-primary'
-            : transparent
-              ? 'text-white/90 hover:text-white'
-              : 'text-text-dark hover:text-primary'
-        )}
-      >
-        {label}
-      </NavLink>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={cn(
-          'ml-0.5 rounded p-0.5 transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          isActive
-            ? transparent ? 'text-white' : 'text-primary'
-            : transparent
-              ? 'text-white/90 hover:text-white'
-              : 'text-text-dark hover:text-primary'
-        )}
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? dropdownId : undefined}
-        aria-label={`${label} menu`}
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
-        <ChevronDown
-          className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
-          aria-hidden="true"
-        />
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 top-full z-50 min-w-[180px] pt-2">
-          <ul
-            id={dropdownId}
-            role="list"
-            className={cn(
-              'motion-safe:animate-dropdown-in rounded-xl shadow-lg py-1.5',
-              transparent
-                ? 'bg-hero-bg/95 backdrop-blur-xl border border-white/10'
-                : 'bg-white border border-gray-200'
-            )}
+    <div className="hidden items-center gap-4 md:gap-6 md:flex">
+      {NAV_LINKS.map((link) => {
+        const active = isNavActive(link.to, location.pathname)
+        return (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={getNavLinkClass(transparent)({ isActive: active })}
+            aria-label={link.label}
+            title={link.label}
           >
-            {links.map((link) => (
-              <li key={link.to}>
-                <Link
-                  to={link.to}
-                  aria-current={location.pathname === link.to ? 'page' : undefined}
-                  className={cn(
-                    'group min-h-[44px] flex items-center px-4 py-2 text-sm font-medium transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
-                    transparent
-                      ? 'text-white/80 hover:bg-white/5 hover:text-white'
-                      : 'text-nav-text-dark hover:bg-nav-hover-light'
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'relative pb-0.5',
-                      "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                      transparent ? 'after:bg-white' : 'after:bg-primary',
-                      'after:scale-x-0 group-hover:after:scale-x-100'
-                    )}
-                  >
-                    {link.label}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function DesktopNav({ transparent }: { transparent: boolean }) {
-  const activeChallengeInfo = getActiveChallengeInfo()
-
-  return (
-    <div className="hidden items-center gap-6 lg:flex">
-      {NAV_LINKS.map((link) => (
-        <NavLink key={link.to} to={link.to} className={getNavLinkClass(transparent)}>
-          {link.icon && <link.icon size={14} className="mr-1 inline-block" />}
-          {link.label}
-          {link.to === '/grow?tab=challenges' && activeChallengeInfo && (
-            <span
-              className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
-              style={{ backgroundColor: CHALLENGES.find((c) => c.id === activeChallengeInfo.challengeId)?.themeColor }}
-              aria-hidden="true"
-            />
-          )}
-        </NavLink>
-      ))}
-      <NavDropdown
-        label="Local Support"
-        to="/local-support/churches"
-        links={LOCAL_SUPPORT_LINKS}
-        dropdownId="local-support-dropdown"
-        transparent={transparent}
-      />
+            <link.icon size={18} className="hidden md:block lg:hidden" aria-hidden="true" />
+            <span className="hidden lg:inline">{link.label}</span>
+          </NavLink>
+        )
+      })}
+      <LocalSupportDropdown transparent={transparent} />
     </div>
   )
 }
@@ -313,7 +109,7 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
   const authModal = useAuthModal()
   const { isOnline } = useOnlineStatus()
   return (
-    <div className="hidden items-center gap-4 lg:flex">
+    <div className="hidden items-center gap-4 md:flex">
       {!isOnline && (
         <div className="group relative" title="You're offline — some features are limited">
           <WifiOff
@@ -354,26 +150,6 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
     </div>
   )
 }
-
-const AVATAR_MENU_LINKS = [
-  { label: 'Dashboard', to: '/' },
-  { label: 'Friends', to: '/friends' },
-  { label: 'My Prayer Requests', to: '/prayer-wall/dashboard' },
-  { label: 'My Prayers', to: '/my-prayers' },
-  { label: 'Mood Insights', to: '/insights' },
-  { label: 'Monthly Report', to: '/insights/monthly' },
-  { label: 'Settings', to: '/settings' },
-] as const
-
-// Mobile drawer uses a different order: Mood Insights right after Friends per spec
-const MOBILE_DRAWER_EXTRA_LINKS = [
-  { label: 'Friends', to: '/friends' },
-  { label: 'Mood Insights', to: '/insights' },
-  { label: 'Monthly Report', to: '/insights/monthly' },
-  { label: 'My Prayer Requests', to: '/prayer-wall/dashboard' },
-  { label: 'My Prayers', to: '/my-prayers' },
-  { label: 'Settings', to: '/settings' },
-] as const
 
 function DesktopUserActions() {
   const { user, logout } = useAuth()
@@ -445,10 +221,8 @@ function DesktopUserActions() {
     navigate('/')
   }
 
-  const initial = user?.name.charAt(0).toUpperCase() ?? '?'
-
   return (
-    <div className="hidden items-center gap-3 lg:flex" ref={wrapperRef}>
+    <div className="hidden items-center gap-3 md:flex" ref={wrapperRef}>
       {!isOnline && (
         <div className="group relative" title="You're offline — some features are limited">
           <WifiOff
@@ -482,446 +256,22 @@ function DesktopUserActions() {
         />
       </div>
 
-      <div className="relative">
-        <button
-          ref={avatarTriggerRef}
-          type="button"
-          onClick={toggleAvatar}
-          aria-haspopup="menu"
-          aria-expanded={isAvatarOpen}
-          aria-controls={isAvatarOpen ? 'user-menu-dropdown' : undefined}
-          aria-label="User menu"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        >
-          {initial}
-        </button>
-
-        {isAvatarOpen && (
-          <div className="absolute right-0 top-full z-50 min-w-[200px] pt-2">
-            <div
-              id="user-menu-dropdown"
-              role="menu"
-              className="motion-safe:animate-dropdown-in rounded-xl border border-white/15 bg-hero-mid py-1.5 shadow-lg"
-            >
-              {user && (
-                <Link
-                  to={`/profile/${user.id}`}
-                  role="menuitem"
-                  onClick={() => setIsAvatarOpen(false)}
-                  className="flex min-h-[44px] items-center rounded px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white"
-                >
-                  My Profile
-                </Link>
-              )}
-              {AVATAR_MENU_LINKS.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  role="menuitem"
-                  onClick={() => setIsAvatarOpen(false)}
-                  className="flex min-h-[44px] items-center rounded px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white"
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <hr className="my-1 border-white/15" />
-              <button
-                type="button"
-                role="menuitem"
-                onClick={handleLogout}
-                className="flex w-full min-h-[44px] items-center rounded px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white"
-              >
-                Log Out
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-interface MobileDrawerProps {
-  isOpen: boolean
-  onClose: () => void
-  onBellTap?: () => void
-}
-
-function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) {
-  const authModal = useAuthModal()
-  const { isAuthenticated, user, logout } = useAuth()
-  const { isOnline } = useOnlineStatus()
-  const navigate = useNavigate()
-  const activeChallengeInfo = getActiveChallengeInfo()
-  const drawerRef = useRef<HTMLElement>(null)
-
-  // Seasonal banner state for mobile drawer
-  const { isNamedSeason, seasonName, icon: seasonIcon, currentSeason } = useLiturgicalSeason()
-  const [seasonDismissed, setSeasonDismissed] = useState(() => {
-    try { return sessionStorage.getItem('wr_seasonal_banner_dismissed') === 'true' }
-    catch { return false }
-  })
-  const SeasonIcon = isNamedSeason ? SEASON_ICON_MAP[seasonIcon] : null
-
-  // Focus trap: keep Tab within the drawer while open
-  useEffect(() => {
-    if (!isOpen || !drawerRef.current) return
-
-    const drawer = drawerRef.current
-    const focusableSelector =
-      'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return
-
-      const focusable = drawer.querySelectorAll<HTMLElement>(focusableSelector)
-      if (focusable.length === 0) return
-
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen])
-
-  return (
-    <>
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/20 lg:hidden"
-          onClick={onClose}
-          aria-hidden="true"
+      {user && (
+        <AvatarDropdown
+          user={user}
+          isOpen={isAvatarOpen}
+          onToggle={toggleAvatar}
+          onClose={() => setIsAvatarOpen(false)}
+          onLogout={handleLogout}
+          triggerRef={avatarTriggerRef}
         />
       )}
-
-      {/* Drawer panel */}
-      {isOpen && (
-        <nav
-          ref={drawerRef}
-          id="mobile-menu"
-          aria-label="Mobile navigation"
-          className={cn(
-            'relative z-50 mt-2 rounded-xl shadow-lg motion-safe:animate-dropdown-in lg:hidden',
-            isAuthenticated
-              ? 'bg-hero-mid border border-white/15'
-              : 'bg-white border border-gray-200'
-          )}
-        >
-          <div className="flex flex-col px-4 py-4">
-            {/* Seasonal banner — mobile drawer */}
-            {isNamedSeason && !seasonDismissed && (
-              <div className={cn(
-                'mb-3 flex items-center gap-2 px-3 pb-3 border-b',
-                isAuthenticated ? 'border-white/15' : 'border-gray-200'
-              )}>
-                {SeasonIcon && <SeasonIcon className={cn('h-3.5 w-3.5', isAuthenticated ? 'text-white/50' : 'text-gray-500')} aria-hidden="true" />}
-                <span className={cn('text-xs', isAuthenticated ? 'text-white/50' : 'text-gray-500')}>
-                  It&apos;s {seasonName} — a season of {currentSeason.themeWord}
-                </span>
-                <Link to="/daily?tab=devotional" onClick={onClose} className="text-xs text-primary-lt hover:underline">
-                  Read today&apos;s devotional
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    try { sessionStorage.setItem('wr_seasonal_banner_dismissed', 'true') }
-                    catch { /* sessionStorage unavailable */ }
-                    setSeasonDismissed(true)
-                  }}
-                  className={cn(
-                    'ml-auto rounded-full p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
-                    isAuthenticated ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'
-                  )}
-                  aria-label="Dismiss seasonal message"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            )}
-
-            {/* Offline indicator */}
-            {!isOnline && (
-              <div className={cn(
-                'mb-3 flex items-center gap-2 px-3 pb-3',
-                isAuthenticated ? 'border-b border-white/15' : 'border-b border-gray-100'
-              )}>
-                <WifiOff
-                  className={cn('h-4 w-4', isAuthenticated ? 'text-white/40' : 'text-text-light')}
-                  aria-label="You're offline — some features are limited"
-                />
-                <span className={cn('text-xs', isAuthenticated ? 'text-white/40' : 'text-text-light')}>
-                  You&apos;re offline
-                </span>
-              </div>
-            )}
-
-            {/* Logged-in: avatar + name at top */}
-            {isAuthenticated && user && (
-              <div className="mb-3 flex items-center gap-3 px-3 pb-3 border-b border-white/15">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <span className="text-sm font-medium text-white">{user.name}</span>
-              </div>
-            )}
-
-            {/* Logged-in: Dashboard link first */}
-            {isAuthenticated && (
-              <NavLink
-                to="/"
-                end
-                onClick={onClose}
-                className={({ isActive }) =>
-                  cn(
-                    'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                    isActive
-                      ? 'text-white'
-                      : 'text-white/80 hover:bg-white/5 hover:text-white'
-                  )
-                }
-              >
-                Dashboard
-              </NavLink>
-            )}
-
-            {/* Common nav links */}
-            {NAV_LINKS.map((link, index) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  cn(
-                    'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                    (index > 0 || isAuthenticated) && (isAuthenticated ? 'mt-2 border-t border-white/15 pt-2' : 'mt-2 border-t border-gray-100 pt-2'),
-                    isAuthenticated
-                      ? isActive ? 'text-white' : 'text-white/80 hover:bg-white/5 hover:text-white'
-                      : isActive ? 'text-nav-text-dark' : 'text-nav-text-dark hover:bg-nav-hover-light'
-                  )
-                }
-              >
-                {link.icon && <link.icon size={16} className="mr-2 inline-block" />}
-                {link.label}
-                {link.to === '/grow?tab=challenges' && activeChallengeInfo && (
-                  <span
-                    className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
-                    style={{ backgroundColor: CHALLENGES.find((c) => c.id === activeChallengeInfo.challengeId)?.themeColor }}
-                    aria-hidden="true"
-                  />
-                )}
-              </NavLink>
-            ))}
-
-            {/* Local Support section */}
-            <div
-              className={cn(
-                'mt-2 pt-2',
-                isAuthenticated ? 'border-t border-white/15' : 'border-t border-gray-100'
-              )}
-              role="group"
-              aria-labelledby="local-support-heading"
-            >
-              <span
-                id="local-support-heading"
-                className={cn(
-                  'px-3 text-xs font-semibold uppercase tracking-wider',
-                  isAuthenticated ? 'text-white/50' : 'text-primary/50'
-                )}
-              >
-                Local Support
-              </span>
-              {LOCAL_SUPPORT_LINKS.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    cn(
-                      'min-h-[44px] flex items-center rounded-md px-3 pl-6 text-sm font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                      isAuthenticated
-                        ? isActive ? 'text-white' : 'text-white/80 hover:bg-white/5 hover:text-white'
-                        : isActive ? 'text-nav-text-dark' : 'text-nav-text-dark hover:bg-nav-hover-light'
-                    )
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </div>
-
-            {/* Logged-in: extra nav items */}
-            {isAuthenticated && user && (
-              <div className="mt-2 border-t border-white/15 pt-2">
-                <NavLink
-                  to={`/profile/${user.id}`}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    cn(
-                      'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                      isActive
-                        ? 'text-white'
-                        : 'text-white/80 hover:bg-white/5 hover:text-white'
-                    )
-                  }
-                >
-                  My Profile
-                </NavLink>
-                {MOBILE_DRAWER_EXTRA_LINKS.map((link) => (
-                  <NavLink
-                    key={link.to}
-                    to={link.to}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        'min-h-[44px] flex items-center rounded-md px-3 text-sm font-medium transition-colors',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                        isActive
-                          ? 'text-white'
-                          : 'text-white/80 hover:bg-white/5 hover:text-white'
-                      )
-                    }
-                  >
-                    {link.label}
-                  </NavLink>
-                ))}
-              </div>
-            )}
-
-            {/* Bottom section: auth actions or log out */}
-            {isAuthenticated ? (
-              <div className="mt-4 flex flex-col gap-2 border-t border-white/15 pt-4">
-                <button
-                  type="button"
-                  aria-label="Notifications"
-                  onClick={() => { onClose(); onBellTap?.() }}
-                  className="min-h-[44px] flex items-center justify-center gap-2 rounded-md px-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                >
-                  <Bell className="h-4 w-4" aria-hidden="true" />
-                  Notifications
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { logout(); navigate('/'); onClose() }}
-                  className="min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                >
-                  Log Out
-                </button>
-              </div>
-            ) : (
-              <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => { authModal?.openAuthModal(undefined, 'login'); onClose() }}
-                  className={cn(
-                    'relative min-h-[44px] flex items-center justify-center rounded-md px-3 text-sm font-medium transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                    "after:absolute after:bottom-2 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-primary after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
-                    'text-nav-text-dark after:scale-x-0 hover:after:scale-x-100'
-                  )}
-                >
-                  Log In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { authModal?.openAuthModal(undefined, 'register'); onClose() }}
-                  className="min-h-[44px] flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                >
-                  Get Started
-                </button>
-              </div>
-            )}
-          </div>
-        </nav>
-      )}
-    </>
+    </div>
   )
 }
 
 interface NavbarProps {
   transparent?: boolean
-}
-
-/**
- * Auth-gated mobile notification bottom sheet.
- * Keeps useNotificationActions (and its localStorage reads/writes) out of
- * the always-rendered Navbar, satisfying the demo-mode "zero persistence" rule.
- */
-function MobileNotificationSheet({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean
-  onClose: () => void
-}) {
-  const {
-    notifications, unreadCount, markAsRead, markAllAsRead, dismiss,
-    handleTap, handleAcceptFriend, handleDeclineFriend, checkIsAlreadyFriend,
-  } = useNotificationActions(onClose)
-
-  return (
-    <NotificationPanel
-      isOpen={isOpen}
-      onClose={onClose}
-      isMobile={true}
-      notifications={notifications}
-      unreadCount={unreadCount}
-      onMarkAsRead={markAsRead}
-      onMarkAllAsRead={markAllAsRead}
-      onDismiss={dismiss}
-      onAcceptFriend={handleAcceptFriend}
-      onDeclineFriend={handleDeclineFriend}
-      onTapNotification={handleTap}
-      isAlreadyFriend={checkIsAlreadyFriend}
-    />
-  )
-}
-
-function SeasonalNavLine() {
-  const { isNamedSeason, seasonName, icon, currentSeason } = useLiturgicalSeason()
-  const [dismissed, setDismissed] = useState(() => {
-    try { return sessionStorage.getItem('wr_seasonal_banner_dismissed') === 'true' }
-    catch { return false }
-  })
-
-  if (!isNamedSeason || dismissed) return null
-
-  const SeasonIcon = SEASON_ICON_MAP[icon]
-
-  return (
-    <div className="flex items-center justify-center gap-2 px-4 py-1.5 text-xs text-white/50">
-      {SeasonIcon && <SeasonIcon className="h-3 w-3" aria-hidden="true" />}
-      <span>It&apos;s {seasonName} — a season of {currentSeason.themeWord}</span>
-      <Link to="/daily?tab=devotional" className="text-primary-lt hover:underline">
-        Read today&apos;s devotional
-      </Link>
-      <button
-        type="button"
-        onClick={() => {
-          try { sessionStorage.setItem('wr_seasonal_banner_dismissed', 'true') }
-          catch { /* sessionStorage unavailable */ }
-          setDismissed(true)
-        }}
-        className="ml-1 rounded-full p-1 text-white/30 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-        aria-label="Dismiss seasonal message"
-      >
-        <X className="h-3 w-3" />
-      </button>
-    </div>
-  )
 }
 
 export function Navbar({ transparent = false }: NavbarProps) {
@@ -982,7 +332,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
               ref={hamburgerRef}
               type="button"
               className={cn(
-                'inline-flex items-center justify-center rounded-md p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:hidden',
+                'inline-flex items-center justify-center rounded-md p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:hidden',
                 'text-white hover:bg-white/10 hover:text-white'
               )}
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -999,7 +349,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
           </div>
 
           {/* Seasonal line — desktop only */}
-          <div className="hidden lg:block">
+          <div className="hidden md:block">
             <SeasonalNavLine />
           </div>
         </div>

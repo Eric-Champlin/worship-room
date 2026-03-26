@@ -132,7 +132,7 @@ describe('Navbar — seasonal line', () => {
     const dismissBtns = screen.getAllByLabelText('Dismiss seasonal message')
     await user.click(dismissBtns[0])
 
-    expect(sessionStorage.getItem('wr_seasonal_banner_dismissed')).toBe('true')
+    expect(sessionStorage.getItem('wr_seasonal_nav_dismissed')).toBe('true')
   })
 
   it('dismiss button has accessible label', async () => {

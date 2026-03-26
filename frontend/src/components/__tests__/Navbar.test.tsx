@@ -63,10 +63,23 @@ describe('Navbar', () => {
   })
 
   describe('Desktop nav links', () => {
-    it('renders Daily Hub and Prayer Wall links', () => {
+    it('renders exactly 5 nav links: Daily Hub, Bible, Grow, Prayer Wall, Music', () => {
       renderNavbar()
       expect(screen.getByRole('link', { name: 'Daily Hub' })).toHaveAttribute('href', '/daily')
-      expect(screen.getByRole('link', { name: 'Prayer Wall' })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Bible' })).toHaveAttribute('href', '/bible')
+      expect(screen.getByRole('link', { name: 'Grow' })).toHaveAttribute('href', '/grow')
+      expect(screen.getByRole('link', { name: 'Prayer Wall' })).toHaveAttribute('href', '/prayer-wall')
+      expect(screen.getByRole('link', { name: 'Music' })).toHaveAttribute('href', '/music')
+    })
+
+    it('"Ask", "Daily Devotional", "Reading Plans", "Challenges" NOT in desktop nav', () => {
+      renderNavbar()
+      // These links only appear in mobile drawer (Ask as "Ask God\'s Word") or not at all
+      const nav = screen.getByRole('navigation', { name: /main navigation/i })
+      expect(within(nav).queryByRole('link', { name: 'Ask' })).not.toBeInTheDocument()
+      expect(within(nav).queryByRole('link', { name: /Daily Devotional/ })).not.toBeInTheDocument()
+      expect(within(nav).queryByRole('link', { name: /Reading Plans/ })).not.toBeInTheDocument()
+      expect(within(nav).queryByRole('link', { name: /Challenges/ })).not.toBeInTheDocument()
     })
 
     it('renders "Music" as a direct link (no dropdown)', () => {
@@ -82,6 +95,14 @@ describe('Navbar', () => {
       expect(
         screen.getByRole('button', { name: /local support menu/i })
       ).toBeInTheDocument()
+    })
+
+    it('tablet: nav links have aria-label for icon-only mode', () => {
+      renderNavbar()
+      for (const name of ['Daily Hub', 'Bible', 'Grow', 'Prayer Wall', 'Music']) {
+        const link = screen.getByRole('link', { name })
+        expect(link).toHaveAttribute('aria-label', name)
+      }
     })
   })
 
@@ -164,7 +185,7 @@ describe('Navbar', () => {
     it('"Music" link has active state on /music route', () => {
       renderNavbar('/music')
       const link = screen.getByRole('link', { name: 'Music' })
-      expect(link.className).toContain('after:scale-x-100')
+      expect(link.className).not.toContain('after:scale-x-0')
     })
   })
 
@@ -256,24 +277,59 @@ describe('Navbar', () => {
       expect(menu).toHaveAttribute('id', 'mobile-menu')
     })
 
-    it('mobile menu contains all nav links', async () => {
+    it('mobile menu contains all nav links in sections', async () => {
       const user = userEvent.setup()
       renderNavbar()
 
       await user.click(screen.getByRole('button', { name: 'Open menu' }))
 
       const menu = document.getElementById('mobile-menu')!
+      // Section headers
+      expect(within(menu).getByText('Daily')).toBeInTheDocument()
+      expect(within(menu).getByText('Study')).toBeInTheDocument()
+      expect(within(menu).getByText('Community')).toBeInTheDocument()
+      expect(within(menu).getByText('Listen')).toBeInTheDocument()
+      expect(within(menu).getByText('Find Help')).toBeInTheDocument()
+      // Nav items
       const allLabels = [
-        'Daily Hub',
-        'Prayer Wall',
-        'Music',
-        'Churches',
-        'Counselors',
-        'Celebrate Recovery',
+        'Daily Hub', 'Bible', 'Grow', "Ask God's Word",
+        'Prayer Wall', 'Music',
+        'Churches', 'Counselors', 'Celebrate Recovery',
       ]
       for (const label of allLabels) {
         expect(within(menu).getByText(label)).toBeInTheDocument()
       }
+    })
+
+    it('section headers have role="heading" aria-level="2"', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+
+      const menu = document.getElementById('mobile-menu')!
+      const headings = within(menu).getAllByRole('heading', { level: 2 })
+      expect(headings.length).toBeGreaterThanOrEqual(5)
+    })
+
+    it('logged-out: MY WORSHIP ROOM section NOT visible', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(within(menu).queryByText('My Worship Room')).not.toBeInTheDocument()
+      expect(within(menu).queryByText('Notifications')).not.toBeInTheDocument()
+    })
+
+    it('drawer always uses dark theme', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(menu.className).toContain('bg-hero-mid')
+      expect(menu.className).toContain('border-white/15')
     })
 
     it('route change closes mobile menu', async () => {
@@ -295,13 +351,57 @@ describe('Navbar', () => {
       renderNavbar('/prayer-wall')
       const link = screen.getByRole('link', { name: 'Prayer Wall' })
       expect(link.className).toContain('text-white')
-      expect(link.className).toContain('after:scale-x-100')
+      expect(link.className).not.toContain('after:scale-x-0')
     })
 
-    it('active route link has aria-current="page"', () => {
-      renderNavbar('/prayer-wall')
+    it('"Grow" active on /grow', () => {
+      renderNavbar('/grow')
+      const link = screen.getByRole('link', { name: 'Grow' })
+      expect(link.className).not.toContain('after:scale-x-0')
+    })
+
+    it('"Grow" active on /reading-plans/finding-peace', () => {
+      renderNavbar('/reading-plans/finding-peace')
+      const link = screen.getByRole('link', { name: 'Grow' })
+      expect(link.className).not.toContain('after:scale-x-0')
+    })
+
+    it('"Grow" active on /challenges/lent-2026', () => {
+      renderNavbar('/challenges/lent-2026')
+      const link = screen.getByRole('link', { name: 'Grow' })
+      expect(link.className).not.toContain('after:scale-x-0')
+    })
+
+    it('no active state on /ask', () => {
+      renderNavbar('/ask')
+      for (const name of ['Daily Hub', 'Bible', 'Grow', 'Prayer Wall', 'Music']) {
+        const link = screen.getByRole('link', { name })
+        expect(link.className).toContain('after:scale-x-0')
+      }
+    })
+
+    it('"Daily Hub" active on /daily?tab=devotional', () => {
+      renderNavbar('/daily?tab=devotional')
+      const link = screen.getByRole('link', { name: 'Daily Hub' })
+      expect(link.className).not.toContain('after:scale-x-0')
+    })
+
+    it('"Bible" active on /bible/genesis/1', () => {
+      renderNavbar('/bible/genesis/1')
+      const link = screen.getByRole('link', { name: 'Bible' })
+      expect(link.className).not.toContain('after:scale-x-0')
+    })
+
+    it('"Prayer Wall" active on /prayer-wall/dashboard', () => {
+      renderNavbar('/prayer-wall/dashboard')
       const link = screen.getByRole('link', { name: 'Prayer Wall' })
-      expect(link).toHaveAttribute('aria-current', 'page')
+      expect(link.className).not.toContain('after:scale-x-0')
+    })
+
+    it('"Music" active on /music/routines', () => {
+      renderNavbar('/music/routines')
+      const link = screen.getByRole('link', { name: 'Music' })
+      expect(link.className).not.toContain('after:scale-x-0')
     })
   })
 
@@ -355,12 +455,15 @@ describe('Navbar', () => {
 
       const menu = screen.getByRole('menu')
       expect(within(menu).getByText('Dashboard')).toBeInTheDocument()
-      expect(within(menu).getByText('Friends')).toBeInTheDocument()
-      expect(within(menu).getByText('My Prayer Requests')).toBeInTheDocument()
       expect(within(menu).getByText('My Prayers')).toBeInTheDocument()
+      expect(within(menu).getByText('Friends')).toBeInTheDocument()
       expect(within(menu).getByText('Mood Insights')).toBeInTheDocument()
       expect(within(menu).getByText('Settings')).toBeInTheDocument()
       expect(within(menu).getByText('Log Out')).toBeInTheDocument()
+      // Removed items no longer present
+      expect(within(menu).queryByText('My Prayer Requests')).not.toBeInTheDocument()
+      expect(within(menu).queryByText('Monthly Report')).not.toBeInTheDocument()
+      expect(within(menu).queryByText('My Profile')).not.toBeInTheDocument()
     })
 
     it('dropdown closes on outside click', async () => {
@@ -406,14 +509,16 @@ describe('Navbar', () => {
   })
 
   describe('Logged-in mobile drawer', () => {
-    it('shows avatar and name when logged in', async () => {
+    it('shows MY WORSHIP ROOM section when logged in', async () => {
       setLoggedIn()
       const user = userEvent.setup()
       renderNavbar()
 
       await user.click(screen.getByRole('button', { name: 'Open menu' }))
       const menu = document.getElementById('mobile-menu')!
-      expect(within(menu).getByText('Eric')).toBeInTheDocument()
+      expect(within(menu).getByText('My Worship Room')).toBeInTheDocument()
+      expect(within(menu).getByText('Dashboard')).toBeInTheDocument()
+      expect(within(menu).getByText('My Prayers')).toBeInTheDocument()
     })
 
     it('shows logged-in nav items', async () => {
@@ -483,49 +588,74 @@ describe('Navbar', () => {
       expect(menu.className).toContain('bg-hero-mid')
       expect(menu.className).toContain('border-white/15')
     })
-  })
 
-  describe('Daily Devotional nav link', () => {
-    it('"Daily Devotional" link present in desktop nav', () => {
-      renderNavbar()
-      expect(screen.getByRole('link', { name: /Daily Devotional/ })).toBeInTheDocument()
-    })
-
-    it('"Daily Devotional" links to /daily?tab=devotional', () => {
-      renderNavbar()
-      expect(screen.getByRole('link', { name: /Daily Devotional/ })).toHaveAttribute(
-        'href',
-        '/daily?tab=devotional',
-      )
-    })
-
-    it('link order: Daily Hub, Daily Devotional, Prayer Wall, Music', () => {
-      renderNavbar()
-      const nav = screen.getByRole('navigation', { name: /main navigation/i })
-      const links = within(nav).getAllByRole('link')
-      const labels = links.map((l) => l.textContent?.trim())
-      const dailyIdx = labels.indexOf('Daily Hub')
-      const devIdx = labels.findIndex((l) => l?.includes('Daily Devotional'))
-      const prayerIdx = labels.indexOf('Prayer Wall')
-      const musicIdx = labels.indexOf('Music')
-      expect(dailyIdx).toBeLessThan(devIdx)
-      expect(devIdx).toBeLessThan(prayerIdx)
-      expect(prayerIdx).toBeLessThan(musicIdx)
-    })
-
-    it('sparkle icon renders with the link', () => {
-      renderNavbar()
-      const link = screen.getByRole('link', { name: /Daily Devotional/ })
-      const svg = link.querySelector('svg')
-      expect(svg).toBeInTheDocument()
-    })
-
-    it('mobile drawer includes "Daily Devotional"', async () => {
+    it('MY WORSHIP ROOM has Dashboard, My Prayers, Friends, Mood Insights, Settings', async () => {
+      setLoggedIn()
       const user = userEvent.setup()
       renderNavbar()
+
       await user.click(screen.getByRole('button', { name: 'Open menu' }))
       const menu = document.getElementById('mobile-menu')!
-      expect(within(menu).getByText(/Daily Devotional/)).toBeInTheDocument()
+      for (const label of ['Dashboard', 'My Prayers', 'Friends', 'Mood Insights', 'Settings']) {
+        expect(within(menu).getByText(label)).toBeInTheDocument()
+      }
+    })
+
+    it('logged-in: Log In / Get Started NOT visible', async () => {
+      setLoggedIn()
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      expect(within(menu).queryByText('Log In')).not.toBeInTheDocument()
+      expect(within(menu).queryByText('Get Started')).not.toBeInTheDocument()
+    })
+
+    it('mobile drawer: active item has border-l-2 class on /daily', async () => {
+      const user = userEvent.setup()
+      renderNavbar('/daily')
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      const dailyHubLink = within(menu).getByText('Daily Hub').closest('a')!
+      expect(dailyHubLink.className).toContain('border-l-2')
+      expect(dailyHubLink.className).toContain('border-primary')
+    })
+
+    it('mobile drawer: "Ask God\'s Word" active on /ask', async () => {
+      const user = userEvent.setup()
+      renderNavbar('/ask')
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      const askLink = within(menu).getByText("Ask God's Word").closest('a')!
+      expect(askLink.className).toContain('border-l-2')
+    })
+
+    it('mobile drawer: "Grow" active on /grow', async () => {
+      const user = userEvent.setup()
+      renderNavbar('/grow')
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      const growLink = within(menu).getByText('Grow').closest('a')!
+      expect(growLink.className).toContain('border-l-2')
+    })
+
+    it('mobile drawer: nav items have min-h-[44px] touch target', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      // Check main nav links (exclude seasonal devotional link which is a utility link)
+      const navLabels = ['Daily Hub', 'Bible', 'Grow', "Ask God's Word", 'Prayer Wall', 'Music', 'Churches', 'Counselors', 'Celebrate Recovery']
+      for (const label of navLabels) {
+        const link = within(menu).getByText(label).closest('a')!
+        expect(link.className).toContain('min-h-[44px]')
+      }
     })
   })
+
 })
