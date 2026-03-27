@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from './AuthModalProvider'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 
 const MAX_COMMENT_LENGTH = 500
 
@@ -77,9 +78,9 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
           maxLength={MAX_COMMENT_LENGTH}
           placeholder="Write a comment..."
           className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          aria-label="Write a comment"
+          aria-label="Comment"
           aria-invalid={crisisDetected || undefined}
-          aria-describedby={crisisDetected ? 'comment-crisis-banner' : undefined}
+          aria-describedby={crisisDetected ? `comment-crisis-banner-${prayerId} comment-char-count-${prayerId}` : `comment-char-count-${prayerId}`}
         />
         <button
           type="button"
@@ -94,8 +95,11 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
           <Send className="h-4 w-4" />
         </button>
       </div>
+      <div className="mt-1 flex justify-end">
+        <CharacterCount current={value.length} max={500} warningAt={400} dangerAt={480} visibleAt={300} id={`comment-char-count-${prayerId}`} />
+      </div>
       {crisisDetected && (
-        <div id="comment-crisis-banner" role="alert" className="mt-3 rounded-lg border border-danger/30 bg-danger/10 p-3">
+        <div id={`comment-crisis-banner-${prayerId}`} role="alert" className="mt-3 rounded-lg border border-danger/30 bg-danger/10 p-3">
           <p className="mb-1 text-xs font-semibold text-danger">
             If you are in crisis, please reach out for help:
           </p>

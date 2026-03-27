@@ -71,13 +71,13 @@ describe('FriendSearch', () => {
 
   it('has aria-label on input', () => {
     renderSearch()
-    expect(screen.getByLabelText('Search for friends')).toBeInTheDocument()
+    expect(screen.getByLabelText('Search friends')).toBeInTheDocument()
   })
 
   it('debounces input at 300ms', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
-    const input = screen.getByLabelText('Search for friends')
+    const input = screen.getByLabelText('Search friends')
 
     await user.type(input, 'Sa')
     expect(mockSearchUsers).not.toHaveBeenCalled()
@@ -91,7 +91,7 @@ describe('FriendSearch', () => {
   it('shows dropdown on results', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
-    const input = screen.getByLabelText('Search for friends')
+    const input = screen.getByLabelText('Search friends')
 
     await user.type(input, 'Sa')
     await act(async () => {
@@ -106,7 +106,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'Sa')
+    await user.type(screen.getByLabelText('Search friends'), 'Sa')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -118,7 +118,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'Em')
+    await user.type(screen.getByLabelText('Search friends'), 'Em')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -130,7 +130,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'Ca')
+    await user.type(screen.getByLabelText('Search friends'), 'Ca')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -143,7 +143,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'zzz')
+    await user.type(screen.getByLabelText('Search friends'), 'zzz')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -155,7 +155,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'Sa')
+    await user.type(screen.getByLabelText('Search friends'), 'Sa')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -169,7 +169,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'Sa')
+    await user.type(screen.getByLabelText('Search friends'), 'Sa')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -183,7 +183,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'Sa')
+    await user.type(screen.getByLabelText('Search friends'), 'Sa')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -211,7 +211,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'Sa')
+    await user.type(screen.getByLabelText('Search friends'), 'Sa')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })
@@ -236,7 +236,7 @@ describe('FriendSearch', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderSearch()
 
-    await user.type(screen.getByLabelText('Search for friends'), 'Ca')
+    await user.type(screen.getByLabelText('Search friends'), 'Ca')
     await act(async () => {
       vi.advanceTimersByTime(300)
     })

@@ -180,7 +180,7 @@ describe('BibleReader — Notes Integration', () => {
 
     const textarea = screen.getByPlaceholderText('Add a note about this verse...')
     fireEvent.change(textarea, { target: { value: 'Test note' } })
-    expect(screen.getByText('9/300')).toBeInTheDocument()
+    expect(screen.getByText('9 / 300')).toBeInTheDocument()
   })
 
   it('saving a note stores it in localStorage', async () => {

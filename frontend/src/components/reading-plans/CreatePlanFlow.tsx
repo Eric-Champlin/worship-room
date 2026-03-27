@@ -4,6 +4,7 @@ import { ArrowLeft, Layers, Sparkles, Sunrise, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 import { useToast } from '@/components/ui/Toast'
 import { matchPlanByKeywords } from '@/utils/plan-matcher'
 import { addCustomPlanId } from '@/utils/custom-plans-storage'
@@ -192,11 +193,12 @@ function StepOne({
           maxLength={500}
           placeholder="I'm struggling with anxiety about my job..."
           className="w-full resize-none rounded-xl border border-glow-cyan/30 bg-white/5 p-4 text-white backdrop-blur-sm placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 motion-safe:animate-glow-pulse min-h-[120px]"
-          aria-label="Describe what's on your heart"
+          aria-label="What's on your heart"
+          aria-describedby="plan-char-count"
         />
-        <p className="mt-2 text-right text-xs text-white/40">
-          {topicText.length}/500
-        </p>
+        <div className="mt-2 text-right">
+          <CharacterCount current={topicText.length} max={500} warningAt={400} dangerAt={480} visibleAt={300} id="plan-char-count" />
+        </div>
       </div>
 
       {/* Topic chips */}

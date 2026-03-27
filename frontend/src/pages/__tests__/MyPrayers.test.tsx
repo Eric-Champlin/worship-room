@@ -113,8 +113,8 @@ describe('MyPrayers Page', () => {
       await user.click(screen.getAllByText('Add Prayer')[0])
 
       // Fill form
-      await user.type(screen.getByLabelText('Title'), 'Healing for Mom')
-      await user.type(screen.getByLabelText('Details (optional)'), 'She needs surgery')
+      await user.type(screen.getByLabelText('Prayer title'), 'Healing for Mom')
+      await user.type(screen.getByLabelText('Prayer details'), 'She needs surgery')
       await user.click(screen.getByText('Health'))
       await user.click(screen.getByText('Save Prayer'))
 
@@ -128,7 +128,7 @@ describe('MyPrayers Page', () => {
       renderMyPrayers()
 
       await user.click(screen.getAllByText('Add Prayer')[0])
-      await user.type(screen.getByLabelText('Title'), 'Quick prayer')
+      await user.type(screen.getByLabelText('Prayer title'), 'Quick prayer')
       await user.click(screen.getByText('Praise'))
       await user.click(screen.getByText('Save Prayer'))
 
@@ -176,7 +176,7 @@ describe('MyPrayers Page', () => {
       renderMyPrayers()
 
       await user.click(screen.getByLabelText('Mark as answered'))
-      await user.type(screen.getByLabelText('Testimony note'), 'God provided!')
+      await user.type(screen.getByLabelText('How God answered'), 'God provided!')
       await user.click(screen.getByText('Confirm'))
 
       // Dismiss celebration overlay first
@@ -289,7 +289,7 @@ describe('MyPrayers Page', () => {
       await user.click(screen.getByText('Health'))
       await user.click(screen.getByText('Save Prayer'))
 
-      expect(screen.getByText('Please add a title')).toBeInTheDocument()
+      expect(screen.getByText('Give your prayer a short title')).toBeInTheDocument()
     })
 
     it('cannot submit without category', async () => {
@@ -297,7 +297,7 @@ describe('MyPrayers Page', () => {
       renderMyPrayers()
 
       await user.click(screen.getAllByText('Add Prayer')[0])
-      await user.type(screen.getByLabelText('Title'), 'Test')
+      await user.type(screen.getByLabelText('Prayer title'), 'Test')
       await user.click(screen.getByText('Save Prayer'))
 
       expect(screen.getByText('Please choose a category')).toBeInTheDocument()
@@ -312,7 +312,7 @@ describe('MyPrayers Page', () => {
       renderMyPrayers()
 
       await user.click(screen.getAllByText('Add Prayer')[0])
-      await user.type(screen.getByLabelText('Title'), 'I want to kill myself')
+      await user.type(screen.getByLabelText('Prayer title'), 'I want to kill myself')
 
       expect(screen.getByRole('alert')).toBeInTheDocument()
     })
@@ -322,7 +322,7 @@ describe('MyPrayers Page', () => {
       renderMyPrayers()
 
       await user.click(screen.getAllByText('Add Prayer')[0])
-      await user.type(screen.getByLabelText('Details (optional)'), 'I want to end it all')
+      await user.type(screen.getByLabelText('Prayer details'), 'I want to end it all')
 
       expect(screen.getByRole('alert')).toBeInTheDocument()
     })
@@ -385,7 +385,7 @@ describe('MyPrayers Page', () => {
       const addButtons = screen.getAllByText('Add Prayer')
       await user.click(addButtons[0])
 
-      await user.type(screen.getByLabelText('Title'), 'One more')
+      await user.type(screen.getByLabelText('Prayer title'), 'One more')
       // Select category by aria-pressed attribute on the composer's category pills
       const composerPills = screen.getAllByRole('button', { name: 'Health' })
       // Click the first pill that has aria-pressed (composer pill, not category badges)

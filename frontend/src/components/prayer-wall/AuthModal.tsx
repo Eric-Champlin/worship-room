@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { X } from 'lucide-react'
+import { X, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -23,6 +23,10 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView = 'login' }: AuthModalProps) {
   const [view, setView] = useState<AuthView>(initialView)
   const [resetEmail, setResetEmail] = useState('')
+  const [emailValue, setEmailValue] = useState('')
+  const [passwordValue, setPasswordValue] = useState('')
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
   const [isClosing, setIsClosing] = useState(false)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const reducedMotion = useReducedMotion()
@@ -68,10 +72,34 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
+
+      let hasError = false
+      if (!emailValue.trim()) {
+        setEmailError('Email is required')
+        hasError = true
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+        setEmailError('Please enter a valid email')
+        hasError = true
+      } else {
+        setEmailError(null)
+      }
+
+      if (!passwordValue) {
+        setPasswordError('Password is required')
+        hasError = true
+      } else if (passwordValue.length < 12) {
+        setPasswordError('Password must be at least 12 characters')
+        hasError = true
+      } else {
+        setPasswordError(null)
+      }
+
+      if (hasError) return
+
       onShowToast('Authentication coming soon')
       handleClose()
     },
-    [handleClose, onShowToast],
+    [emailValue, passwordValue, handleClose, onShowToast],
   )
 
   const handleForgotSubmit = useCallback(
@@ -204,11 +232,22 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 </label>
                 <input
                   id="auth-email"
+                  name="auth-email"
                   type="email"
-                  required
+                  value={emailValue}
                   autoComplete="email"
                   className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Email address"
+                  aria-invalid={emailError ? 'true' : undefined}
+                  aria-describedby={emailError ? 'email-error' : undefined}
+                  onChange={(e) => { setEmailValue(e.target.value); setEmailError(null) }}
                 />
+                {emailError && (
+                  <p id="email-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-500">
+                    <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {emailError}
+                  </p>
+                )}
               </div>
 
               <div className="mb-3">
@@ -217,11 +256,22 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 </label>
                 <input
                   id="auth-password"
+                  name="auth-password"
                   type="password"
-                  required
+                  value={passwordValue}
                   autoComplete={view === 'login' ? 'current-password' : 'new-password'}
                   className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Password"
+                  aria-invalid={passwordError ? 'true' : undefined}
+                  aria-describedby={passwordError ? 'password-error' : undefined}
+                  onChange={(e) => { setPasswordValue(e.target.value); setPasswordError(null) }}
                 />
+                {passwordError && (
+                  <p id="password-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-500">
+                    <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {passwordError}
+                  </p>
+                )}
               </div>
 
               {view === 'register' && (

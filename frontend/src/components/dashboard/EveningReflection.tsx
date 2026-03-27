@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ChevronLeft, X, Check, Heart } from 'lucide-react'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 import { containsCrisisKeyword } from '@/constants/crisis-resources'
 import { MOOD_OPTIONS } from '@/constants/dashboard/mood'
 import { ACTIVITY_DISPLAY_NAMES } from '@/constants/dashboard/activity-points'
@@ -325,10 +326,11 @@ export function EveningReflection({
                 maxLength={HIGHLIGHT_MAX_LENGTH}
                 placeholder="What was the best part of your day?"
                 className="mb-2 h-28 w-full resize-none rounded-xl border border-white/15 bg-white/5 p-4 text-white placeholder:text-white/40 focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                aria-label="Today's highlight"
+                aria-label="Today's highlights"
+                aria-describedby="evening-char-count"
               />
-              <div className="mb-4 text-right text-xs text-white/30">
-                {highlightText.length}/{HIGHLIGHT_MAX_LENGTH}
+              <div className="mb-4 text-right">
+                <CharacterCount current={highlightText.length} max={500} warningAt={400} dangerAt={480} visibleAt={300} id="evening-char-count" />
               </div>
 
               {showCrisisStep2 && <CrisisBanner text={highlightText} />}

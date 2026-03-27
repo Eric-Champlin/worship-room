@@ -66,7 +66,7 @@ describe('ProfileSection', () => {
     await user.clear(input)
     await user.type(input, 'A')
     await user.tab()
-    expect(screen.getByText(/Display name must be 2-30 characters/)).toBeInTheDocument()
+    expect(screen.getByText(/Name must be between 2 and 30 characters/)).toBeInTheDocument()
     expect(onUpdateProfile).not.toHaveBeenCalled()
   })
 
@@ -89,7 +89,7 @@ describe('ProfileSection', () => {
     await user.clear(input)
     await user.type(input, 'Name@#')
     await user.tab()
-    expect(screen.getByText(/Display name must be 2-30 characters/)).toBeInTheDocument()
+    expect(screen.getByText(/Name must be between 2 and 30 characters/)).toBeInTheDocument()
     expect(onUpdateProfile).not.toHaveBeenCalled()
   })
 
@@ -134,7 +134,7 @@ describe('ProfileSection', () => {
   it('bio character count at 160 limit', () => {
     const longText = 'a'.repeat(160)
     renderProfile({ profile: { ...defaultProfile, bio: longText } })
-    expect(screen.getByText('160/160')).toBeInTheDocument()
+    expect(screen.getByText('160 / 160')).toBeInTheDocument()
   })
 
   it('saved indicator fades after 2s', async () => {
@@ -153,5 +153,48 @@ describe('ProfileSection', () => {
 
     expect(screen.queryByText('Saved')).not.toBeInTheDocument()
     vi.useRealTimers()
+  })
+
+  it('name input has aria-invalid on error', async () => {
+    const user = userEvent.setup()
+    renderProfile()
+    const input = screen.getByLabelText('Display name')
+    await user.clear(input)
+    await user.type(input, 'X')
+    await user.tab()
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('name error text matches spec', async () => {
+    const user = userEvent.setup()
+    renderProfile()
+    const input = screen.getByLabelText('Display name')
+    await user.clear(input)
+    await user.type(input, 'X')
+    await user.tab()
+    expect(screen.getByText(/Name must be between 2 and 30 characters/)).toBeInTheDocument()
+  })
+
+  it('name aria-describedby on error', async () => {
+    const user = userEvent.setup()
+    renderProfile()
+    const input = screen.getByLabelText('Display name')
+    await user.clear(input)
+    await user.type(input, 'X')
+    await user.tab()
+    expect(input.getAttribute('aria-describedby')).toContain('name-error')
+  })
+
+  it('bio textarea has aria-label', () => {
+    renderProfile()
+    expect(screen.getByLabelText('Bio')).toBeInTheDocument()
+  })
+
+  it('bio char count renders', async () => {
+    const user = userEvent.setup()
+    renderProfile()
+    const textarea = screen.getByLabelText('Bio')
+    await user.type(textarea, 'Hello world')
+    expect(screen.getByText('11 / 160')).toBeInTheDocument()
   })
 })

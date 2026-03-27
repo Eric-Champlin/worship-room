@@ -9,6 +9,14 @@ import { MarkAnsweredForm } from '../MarkAnsweredForm'
 import { DeletePrayerDialog } from '../DeletePrayerDialog'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 
+vi.mock('@/hooks/useUnsavedChanges', () => ({
+  useUnsavedChanges: () => ({
+    showModal: false,
+    confirmLeave: vi.fn(),
+    cancelLeave: vi.fn(),
+  }),
+}))
+
 function makePrayer(overrides: Partial<PersonalPrayer> = {}): PersonalPrayer {
   return {
     id: 'test-1',
@@ -112,7 +120,7 @@ describe('EditPrayerForm', () => {
     )
     await user.clear(screen.getByDisplayValue('Healing for Mom'))
     await user.click(screen.getByText('Save'))
-    expect(screen.getByText('Please add a title')).toBeInTheDocument()
+    expect(screen.getByText('Give your prayer a short title')).toBeInTheDocument()
   })
 
   it('shows CrisisBanner on crisis keywords', async () => {
@@ -127,7 +135,7 @@ describe('EditPrayerForm', () => {
       </MemoryRouter>,
     )
     await user.clear(screen.getByDisplayValue('Healing for Mom'))
-    await user.type(screen.getByLabelText('Title'), 'I want to kill myself')
+    await user.type(screen.getByLabelText('Prayer title'), 'I want to kill myself')
     expect(screen.getByRole('alert')).toBeInTheDocument()
   })
 
@@ -142,7 +150,7 @@ describe('EditPrayerForm', () => {
       />,
     )
     await user.clear(screen.getByDisplayValue('Healing for Mom'))
-    await user.type(screen.getByLabelText('Title'), 'Updated Title')
+    await user.type(screen.getByLabelText('Prayer title'), 'Updated Title')
     await user.click(screen.getByText('Family'))
     await user.click(screen.getByText('Save'))
     expect(onSave).toHaveBeenCalledWith({
@@ -156,7 +164,7 @@ describe('EditPrayerForm', () => {
 describe('MarkAnsweredForm', () => {
   it('has optional testimony input', () => {
     render(<MarkAnsweredForm onConfirm={vi.fn()} onCancel={vi.fn()} />)
-    expect(screen.getByLabelText('Testimony note')).toBeInTheDocument()
+    expect(screen.getByLabelText('How God answered')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('What happened?')).toBeInTheDocument()
   })
 
@@ -167,7 +175,7 @@ describe('MarkAnsweredForm', () => {
         <MarkAnsweredForm onConfirm={vi.fn()} onCancel={vi.fn()} />
       </MemoryRouter>,
     )
-    await user.type(screen.getByLabelText('Testimony note'), 'I want to kill myself')
+    await user.type(screen.getByLabelText('How God answered'), 'I want to kill myself')
     expect(screen.getByRole('alert')).toBeInTheDocument()
   })
 
@@ -175,7 +183,7 @@ describe('MarkAnsweredForm', () => {
     const onConfirm = vi.fn()
     const user = userEvent.setup()
     render(<MarkAnsweredForm onConfirm={onConfirm} onCancel={vi.fn()} />)
-    await user.type(screen.getByLabelText('Testimony note'), 'God answered!')
+    await user.type(screen.getByLabelText('How God answered'), 'God answered!')
     await user.click(screen.getByText('Confirm'))
     expect(onConfirm).toHaveBeenCalledWith('God answered!')
   })

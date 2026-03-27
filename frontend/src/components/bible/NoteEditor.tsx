@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
+import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { NOTE_MAX_CHARS } from '@/constants/bible'
 import type { BibleNote } from '@/types/bible'
 
@@ -25,9 +28,9 @@ export function NoteEditor({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const charsRemaining = NOTE_MAX_CHARS - text.length
   const isDirty = text !== (existingNote?.text ?? '')
   const isEmpty = text.trim().length === 0
+  const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty)
 
   // Focus textarea on mount
   useEffect(() => {
@@ -59,15 +62,12 @@ export function NoteEditor({
         rows={3}
         className="w-full resize-none rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white/90 placeholder:text-white/30 focus:border-primary/50 focus:ring-2 focus:ring-primary/50 focus:outline-none"
         aria-label={`Personal note for verse ${verseNumber}`}
+        aria-describedby="note-char-count"
       />
 
       {/* Character counter */}
       <div className="mt-1 text-right">
-        <span
-          className={`text-xs ${charsRemaining <= 20 ? 'text-danger' : 'text-white/30'}`}
-        >
-          {text.length}/{NOTE_MAX_CHARS}
-        </span>
+        <CharacterCount current={text.length} max={NOTE_MAX_CHARS} warningAt={240} dangerAt={288} id="note-char-count" />
       </div>
 
       {/* Crisis banner */}
@@ -125,6 +125,7 @@ export function NoteEditor({
         </div>
       )}
 
+      <UnsavedChangesModal isOpen={showModal} onLeave={confirmLeave} onStay={cancelLeave} />
     </div>
   )
 }

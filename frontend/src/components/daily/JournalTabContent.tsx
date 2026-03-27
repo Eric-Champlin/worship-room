@@ -6,6 +6,9 @@ import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/Background
 import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
+import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { useAuth } from '@/hooks/useAuth'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useAnnounce } from '@/hooks/useAnnounce'
@@ -72,6 +75,8 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   const [text, setText] = useState(() => {
     return localStorage.getItem(JOURNAL_DRAFT_KEY) ?? ''
   })
+  const lastSavedTextRef = useRef(text)
+  const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(text !== lastSavedTextRef.current)
 
   // Voice input
   const { announce, AnnouncerRegion } = useAnnounce()
@@ -287,6 +292,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
     }
     setSavedEntries((prev) => [entry, ...prev])
     setText('')
+    lastSavedTextRef.current = ''
     localStorage.removeItem(JOURNAL_DRAFT_KEY)
     markJournalComplete()
     recordActivity('journal')
@@ -475,14 +481,14 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
               aria-label="Journal entry"
               aria-describedby="journal-char-count"
             />
-            <span
+            <CharacterCount
+              current={text.length}
+              max={5000}
+              warningAt={4000}
+              dangerAt={4800}
               id="journal-char-count"
-              className="absolute bottom-2 left-3 text-xs text-white/40"
-              aria-live={text.length >= 4500 ? 'polite' : 'off'}
-              role="status"
-            >
-              {text.length.toLocaleString()}/5,000
-            </span>
+              className="absolute bottom-2 left-3"
+            />
             {isAuthenticated && isVoiceSupported && (
               <button
                 type="button"
@@ -739,6 +745,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           }}
         />
       )}
+      <UnsavedChangesModal isOpen={showModal} onLeave={confirmLeave} onStay={cancelLeave} />
     </div>
   )
 }

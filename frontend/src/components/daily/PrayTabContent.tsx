@@ -11,6 +11,7 @@ import {
   PenLine,
   ListPlus,
   Check,
+  AlertCircle,
 } from 'lucide-react'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { useToast } from '@/components/ui/Toast'
@@ -20,6 +21,7 @@ import { KaraokeText } from '@/components/daily/KaraokeText'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { ShareButton } from '@/components/daily/ShareButton'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 import { SaveToPrayerListForm } from '@/components/daily/SaveToPrayerListForm'
 import { GuidedPrayerSection } from '@/components/daily/GuidedPrayerSection'
 import { GuidedPrayerPlayer } from '@/components/daily/GuidedPrayerPlayer'
@@ -699,7 +701,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                 </div>
               )}
 
-              <div className="relative mb-4">
+              <div className="mb-4">
                 <textarea
                   ref={textareaRef}
                   value={text}
@@ -715,19 +717,20 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
                   rows={3}
                   className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/40 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
                   aria-label="Prayer request"
-                  aria-describedby="pray-char-count"
+                  aria-describedby={nudge ? 'pray-error pray-char-count' : 'pray-char-count'}
+                  aria-invalid={nudge ? 'true' : undefined}
                 />
-                <span id="pray-char-count" className="absolute bottom-2 right-3 text-xs text-white/40">
-                  {text.length}/500
-                </span>
+                <div className="mt-1 flex justify-end">
+                  <CharacterCount current={text.length} max={500} warningAt={400} dangerAt={480} id="pray-char-count" />
+                </div>
               </div>
 
               <CrisisBanner text={text} />
 
               {nudge && (
-                <p className="mb-4 text-sm text-warning" role="alert">
-                  Tell God what&apos;s on your heart &mdash; even a few words is
-                  enough.
+                <p id="pray-error" className="mb-4 flex items-center gap-1.5 text-sm text-red-400" role="alert">
+                  <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  Tell God what&apos;s on your heart — even a few words is enough.
                 </p>
               )}
 

@@ -91,32 +91,32 @@ describe('AskPage — Input Behavior', () => {
     expect(screen.getByLabelText('Your question')).toBeInTheDocument()
   })
 
-  it('character counter updates on input', async () => {
+  it('character counter updates on input at 300+ chars', async () => {
     const user = userEvent.setup()
     renderAskPage()
     const textarea = screen.getByLabelText('Your question')
-    await user.type(textarea, 'Hello')
-    expect(screen.getByText('5 / 500')).toBeInTheDocument()
+    await user.type(textarea, 'a'.repeat(300))
+    expect(screen.getByText('300 / 500')).toBeInTheDocument()
   })
 
-  it('character counter shows warning color at 450+ chars', async () => {
+  it('character counter shows warning color at 400+ chars', async () => {
     const user = userEvent.setup()
     renderAskPage()
     const textarea = screen.getByLabelText('Your question')
-    const text = 'a'.repeat(455)
+    const text = 'a'.repeat(400)
     await user.type(textarea, text)
-    const counter = screen.getByText('455 / 500')
-    expect(counter.className).toContain('text-warning')
+    const counter = screen.getByText('400 / 500')
+    expect(counter).toHaveClass('text-amber-400')
   })
 
-  it('character counter shows danger color at 490+ chars', async () => {
+  it('character counter shows danger color at 480+ chars', async () => {
     const user = userEvent.setup()
     renderAskPage()
     const textarea = screen.getByLabelText('Your question')
-    const text = 'a'.repeat(495)
+    const text = 'a'.repeat(480)
     await user.type(textarea, text)
-    const counter = screen.getByText('495 / 500')
-    expect(counter.className).toContain('text-danger')
+    const counter = screen.getByText('480 / 500')
+    expect(counter).toHaveClass('text-red-400')
   })
 
   it('textarea enforces 500 char max', () => {

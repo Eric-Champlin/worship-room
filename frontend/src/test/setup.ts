@@ -9,6 +9,17 @@ vi.mock('react-helmet-async', () => ({
   HelmetProvider: ({ children }: { children?: React.ReactNode }) => children,
 }))
 
+// Mock useUnsavedChanges globally — useBlocker requires a data router context
+// which most tests don't provide (they use MemoryRouter, not createMemoryRouter).
+// Individual tests can override this mock with vi.mock() in their own files.
+vi.mock('@/hooks/useUnsavedChanges', () => ({
+  useUnsavedChanges: () => ({
+    showModal: false,
+    confirmLeave: vi.fn(),
+    cancelLeave: vi.fn(),
+  }),
+}))
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({

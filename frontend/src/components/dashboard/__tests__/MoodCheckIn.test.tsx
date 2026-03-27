@@ -108,21 +108,17 @@ describe('MoodCheckIn', () => {
       const orbs = screen.getAllByRole('radio');
       await userEvent.click(orbs[2]);
 
-      // Initially 0/280 — default color
-      expect(screen.getByText('0/280')).toBeInTheDocument();
-
-      // Type 250 chars → warning
+      // Type 224 chars → warning (warningAt=224)
       const textarea = screen.getByPlaceholderText(/what's on your heart/i);
-      const longText = 'a'.repeat(250);
-      fireEvent.change(textarea, { target: { value: longText } });
+      fireEvent.change(textarea, { target: { value: 'a'.repeat(224) } });
 
-      const counter = screen.getByText('250/280');
-      expect(counter).toHaveClass('text-warning');
+      const counter = screen.getByText('224 / 280');
+      expect(counter).toHaveClass('text-amber-400');
 
-      // Type 280 chars → danger
-      fireEvent.change(textarea, { target: { value: 'a'.repeat(280) } });
-      const dangerCounter = screen.getByText('280/280');
-      expect(dangerCounter).toHaveClass('text-danger');
+      // Type 269 chars → danger (dangerAt=269)
+      fireEvent.change(textarea, { target: { value: 'a'.repeat(269) } });
+      const dangerCounter = screen.getByText('269 / 280');
+      expect(dangerCounter).toHaveClass('text-red-400');
     });
   });
 
@@ -520,6 +516,33 @@ describe('MoodCheckIn', () => {
       // The parent p should have transition-opacity for the fade
       const referenceParagraph = screen.getByText('Psalm 46:10').closest('p');
       expect(referenceParagraph?.className).toContain('transition-opacity');
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('textarea has aria-label', async () => {
+      renderCheckIn();
+      const orbs = screen.getAllByRole('radio');
+      await userEvent.click(orbs[2]);
+      expect(screen.getByLabelText("Share what's on your heart")).toBeInTheDocument();
+    });
+
+    it('character count renders with CharacterCount component', async () => {
+      renderCheckIn();
+      const orbs = screen.getAllByRole('radio');
+      await userEvent.click(orbs[2]);
+      const textarea = screen.getByPlaceholderText(/what's on your heart/i);
+      fireEvent.change(textarea, { target: { value: 'Hello' } });
+      expect(screen.getByText('5 / 280')).toBeInTheDocument();
+    });
+
+    it('warning color appears at 224 chars', async () => {
+      renderCheckIn();
+      const orbs = screen.getAllByRole('radio');
+      await userEvent.click(orbs[2]);
+      const textarea = screen.getByPlaceholderText(/what's on your heart/i);
+      fireEvent.change(textarea, { target: { value: 'a'.repeat(224) } });
+      expect(screen.getByText('224 / 280')).toHaveClass('text-amber-400');
     });
   });
 });

@@ -54,7 +54,8 @@ describe('CreatePlanFlow', () => {
     renderFlow()
     expect(screen.getByText("What's on your heart?")).toBeInTheDocument()
     expect(screen.getByPlaceholderText("I'm struggling with anxiety about my job...")).toBeInTheDocument()
-    expect(screen.getByText('0/500')).toBeInTheDocument()
+    // CharacterCount has visibleAt=300, so it's not visible at 0 characters
+    expect(screen.getByLabelText("What's on your heart")).toBeInTheDocument()
   })
 
   it('topic chip pre-fills textarea', async () => {
@@ -78,11 +79,12 @@ describe('CreatePlanFlow', () => {
     expect(screen.getByRole('button', { name: 'Next' })).not.toBeDisabled()
   })
 
-  it('character count updates as user types', async () => {
+  it('character count not visible below visibleAt threshold', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderFlow()
     await user.type(screen.getByPlaceholderText("I'm struggling with anxiety about my job..."), 'hello')
-    expect(screen.getByText('5/500')).toBeInTheDocument()
+    // CharacterCount has visibleAt=300, so at 5 characters it returns null
+    expect(screen.queryByText(/5 \/ 500/)).not.toBeInTheDocument()
   })
 
   it('shows all 6 topic chips', () => {

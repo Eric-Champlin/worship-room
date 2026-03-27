@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import { cn } from '@/lib/utils'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 
 interface MarkAnsweredFormProps {
   onConfirm: (answeredNote: string) => void
@@ -30,18 +30,12 @@ export function MarkAnsweredForm({ onConfirm, onCancel }: MarkAnsweredFormProps)
         placeholder="What happened?"
         className="w-full resize-none rounded-lg border border-gray-200 bg-white p-3 text-base text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         style={{ minHeight: '80px' }}
-        aria-label="Testimony note"
-        aria-describedby={note.length > 400 ? 'testimony-char-count' : undefined}
+        aria-label="How God answered"
+        aria-describedby="testimony-char-count"
       />
-      {note.length > 400 && (
-        <p
-          id="testimony-char-count"
-          aria-live="polite"
-          className={cn('mt-1 text-xs', note.length >= 500 ? 'text-danger' : 'text-text-light')}
-        >
-          {note.length}/500
-        </p>
-      )}
+      <div className="mt-1">
+        <CharacterCount current={note.length} max={500} warningAt={400} dangerAt={480} visibleAt={300} id="testimony-char-count" />
+      </div>
 
       <CrisisBanner text={note} />
 

@@ -1,6 +1,10 @@
 import { useState, useCallback } from 'react'
+import { AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
+import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 
 interface PrayerComposerProps {
@@ -15,6 +19,7 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
   const [selectedCategory, setSelectedCategory] = useState<PrayerCategory | null>(null)
   const [showTitleError, setShowTitleError] = useState(false)
   const [showCategoryError, setShowCategoryError] = useState(false)
+  const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(title.length > 0 || description.length > 0)
 
   const handleSave = useCallback(() => {
     const hasTitle = title.trim().length > 0
@@ -58,7 +63,7 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
         {/* Title input */}
         <div className="mb-3">
           <label htmlFor="prayer-title" className="mb-1 block text-sm font-medium text-text-dark">
-            Title
+            Title<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
           </label>
           <input
             id="prayer-title"
@@ -71,23 +76,19 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
             maxLength={100}
             placeholder="What do you want to pray about?"
             className="w-full rounded-lg border border-gray-200 p-3 text-base text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Prayer title"
             aria-invalid={showTitleError || undefined}
-            aria-describedby={showTitleError ? 'title-error' : title.length > 80 ? 'title-char-count' : undefined}
+            aria-describedby={showTitleError ? 'title-error title-char-count' : 'title-char-count'}
           />
           {showTitleError && (
-            <p id="title-error" className="mt-1 text-sm text-warning" role="alert">
-              Please add a title
+            <p id="title-error" className="mt-1 flex items-center gap-1.5 text-sm text-red-500" role="alert">
+              <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              Give your prayer a short title
             </p>
           )}
-          {title.length > 80 && (
-            <p
-              id="title-char-count"
-              aria-live="polite"
-              className={cn('mt-1 text-xs', title.length >= 100 ? 'text-danger' : 'text-text-light')}
-            >
-              {title.length}/100
-            </p>
-          )}
+          <div className="mt-1">
+            <CharacterCount current={title.length} max={100} warningAt={80} dangerAt={96} visibleAt={80} id="title-char-count" />
+          </div>
         </div>
 
         {/* Description textarea */}
@@ -103,17 +104,12 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
             placeholder="Add details..."
             className="w-full resize-none rounded-lg border border-gray-200 p-3 text-base text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             style={{ minHeight: '100px' }}
-            aria-describedby={description.length > 800 ? 'desc-char-count' : undefined}
+            aria-label="Prayer details"
+            aria-describedby="desc-char-count"
           />
-          {description.length > 800 && (
-            <p
-              id="desc-char-count"
-              aria-live="polite"
-              className={cn('mt-1 text-xs', description.length >= 1000 ? 'text-danger' : 'text-text-light')}
-            >
-              {description.length}/1,000
-            </p>
-          )}
+          <div className="mt-1">
+            <CharacterCount current={description.length} max={1000} warningAt={800} dangerAt={960} visibleAt={500} id="desc-char-count" />
+          </div>
         </div>
 
         {/* Crisis banner */}
@@ -168,6 +164,7 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
           </button>
         </div>
       </div>
+      <UnsavedChangesModal isOpen={showModal} onLeave={confirmLeave} onStay={cancelLeave} />
     </div>
   )
 }

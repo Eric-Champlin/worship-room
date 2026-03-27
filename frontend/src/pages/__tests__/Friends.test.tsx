@@ -126,7 +126,7 @@ describe('Friends Page', () => {
   it('all sections render in correct order when authenticated with mock data', () => {
     renderFriends()
     // Search input
-    expect(screen.getByLabelText('Search for friends')).toBeInTheDocument()
+    expect(screen.getByLabelText('Search friends')).toBeInTheDocument()
     // Invite section
     expect(screen.getByText('Invite by Link')).toBeInTheDocument()
     expect(screen.getByText('Invite by Email')).toBeInTheDocument()

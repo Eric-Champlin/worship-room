@@ -694,3 +694,67 @@ describe('PrayTabContent — Guided Prayer Section', () => {
     expect(screen.getByText('Generate Prayer')).toBeInTheDocument()
   })
 })
+
+describe('PrayTabContent (accessibility)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    resetAudioState()
+    localStorage.clear()
+    localStorage.setItem('wr_auth_simulated', 'true')
+    localStorage.setItem('wr_user_name', 'Eric')
+    mockReducedMotion = false
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+  })
+
+  it('character count renders with CharacterCount component', async () => {
+    const user = userEvent.setup()
+    renderPrayTab()
+    const textarea = screen.getByLabelText('Prayer request')
+    await user.type(textarea, 'Hello God')
+    expect(screen.getByText('9 / 500')).toBeInTheDocument()
+  })
+
+  it('character count shows warning color at 400 chars', async () => {
+    const user = userEvent.setup()
+    renderPrayTab()
+    const textarea = screen.getByLabelText('Prayer request')
+    const longText = 'a'.repeat(400)
+    await user.click(textarea)
+    // Use fireEvent for large text to avoid slow typing
+    await act(async () => {
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')!.set!
+      nativeInputValueSetter.call(textarea, longText)
+      textarea.dispatchEvent(new Event('input', { bubbles: true }))
+      textarea.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+    const countEl = screen.getByText('400 / 500')
+    expect(countEl).toHaveClass('text-amber-400')
+  })
+
+  it('shows inline error with AlertCircle on empty submit', async () => {
+    const user = userEvent.setup()
+    renderPrayTab()
+    await user.click(screen.getByText('Generate Prayer'))
+    expect(screen.getByText(/Tell God what's on your heart/)).toBeInTheDocument()
+    // Check for AlertCircle icon (SVG)
+    const errorP = screen.getByText(/Tell God what's on your heart/).closest('p')
+    expect(errorP?.querySelector('svg')).toBeInTheDocument()
+  })
+
+  it('error has role=alert', async () => {
+    const user = userEvent.setup()
+    renderPrayTab()
+    await user.click(screen.getByText('Generate Prayer'))
+    expect(screen.getByRole('alert')).toHaveTextContent(/Tell God what's on your heart/)
+  })
+
+  it('textarea has aria-invalid on empty submit', async () => {
+    const user = userEvent.setup()
+    renderPrayTab()
+    await user.click(screen.getByText('Generate Prayer'))
+    expect(screen.getByLabelText('Prayer request')).toHaveAttribute('aria-invalid', 'true')
+  })
+})

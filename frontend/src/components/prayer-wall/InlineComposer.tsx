@@ -2,8 +2,11 @@ import { useState, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
+import { CharacterCount } from '@/components/ui/CharacterCount'
+import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
-import { PRAYER_POST_MAX_LENGTH, PRAYER_POST_WARNING_THRESHOLD } from '@/constants/content-limits'
+import { PRAYER_POST_MAX_LENGTH } from '@/constants/content-limits'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
@@ -25,6 +28,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
   const [showCategoryError, setShowCategoryError] = useState(false)
   const [crisisDetected, setCrisisDetected] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(content.length > 0)
 
   // Challenge prayer checkbox
   const activeChallengeInfo = getActiveChallengeInfo()
@@ -107,7 +111,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 leading-relaxed text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
           style={{ minHeight: '120px' }}
           aria-label="Prayer request"
-          aria-describedby={content.length >= PRAYER_POST_WARNING_THRESHOLD ? 'composer-char-count' : undefined}
+          aria-describedby="composer-char-count"
         />
 
         {activeChallenge && (
@@ -129,8 +133,12 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           </label>
         )}
 
-        <fieldset className="mt-3">
-          <legend className="mb-2 text-sm font-medium text-white/70">Category</legend>
+        <fieldset
+          className="mt-3"
+          aria-invalid={showCategoryError || undefined}
+          aria-describedby={showCategoryError ? 'composer-category-error' : undefined}
+        >
+          <legend className="mb-2 text-sm font-medium text-white/70">Category<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span></legend>
           <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
             {PRAYER_CATEGORIES.map((cat) => (
               <button
@@ -150,7 +158,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
             ))}
           </div>
           {showCategoryError && (
-            <p className="mt-2 text-sm text-warning" role="alert">
+            <p id="composer-category-error" className="mt-2 text-sm text-warning" role="alert">
               Please choose a category
             </p>
           )}
@@ -184,15 +192,9 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           </Button>
         </div>
 
-        {content.length >= PRAYER_POST_WARNING_THRESHOLD && (
-          <p
-            id="composer-char-count"
-            aria-live="polite"
-            className={cn('mt-2 text-xs', content.length >= PRAYER_POST_MAX_LENGTH ? 'text-danger' : 'text-white/40')}
-          >
-            {content.length}/1,000
-          </p>
-        )}
+        <div className="mt-2">
+          <CharacterCount current={content.length} max={1000} warningAt={800} dangerAt={960} visibleAt={500} id="composer-char-count" />
+        </div>
 
         {crisisDetected && (
           <div role="alert" className="mt-4 rounded-lg border border-danger/30 bg-danger/10 p-4">
@@ -223,6 +225,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           </div>
         )}
       </div>
+      <UnsavedChangesModal isOpen={showModal} onLeave={confirmLeave} onStay={cancelLeave} />
     </div>
   )
 }

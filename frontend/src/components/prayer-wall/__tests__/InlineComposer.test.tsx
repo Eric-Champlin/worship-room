@@ -14,6 +14,14 @@ vi.mock('@/data/challenges', () => ({
   CHALLENGES: [],
 }))
 
+vi.mock('@/hooks/useUnsavedChanges', () => ({
+  useUnsavedChanges: () => ({
+    showModal: false,
+    confirmLeave: vi.fn(),
+    cancelLeave: vi.fn(),
+  }),
+}))
+
 function renderComposer(overrides?: { isOpen?: boolean; onClose?: () => void; onSubmit?: (content: string, isAnonymous: boolean, category: PrayerCategory, challengeId?: string) => void }) {
   return render(
     <MemoryRouter>
@@ -52,7 +60,7 @@ describe('InlineComposer', () => {
     renderComposer()
     const longText = 'a'.repeat(510)
     await user.type(screen.getByLabelText('Prayer request'), longText)
-    expect(screen.getByText('510/1,000')).toBeInTheDocument()
+    expect(screen.getByText('510 / 1,000')).toBeInTheDocument()
   })
 
   it('cancel button calls onClose', async () => {
@@ -142,5 +150,34 @@ describe('InlineComposer', () => {
 
     await user.click(screen.getByText('Cancel'))
     expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('composer char count visible at 500+ chars', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    await user.type(screen.getByLabelText('Prayer request'), 'a'.repeat(500))
+    expect(screen.getByText('500 / 1,000')).toBeInTheDocument()
+  })
+
+  it('composer warning color at 800 chars', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    await user.type(screen.getByLabelText('Prayer request'), 'a'.repeat(800))
+    expect(screen.getByText('800 / 1,000')).toHaveClass('text-amber-400')
+  })
+
+  it('category has required indicator', () => {
+    renderComposer()
+    expect(screen.getByText('*')).toBeInTheDocument()
+  })
+
+  it('category fieldset has aria-invalid on error', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    await user.type(screen.getByLabelText('Prayer request'), 'Test prayer')
+    await user.click(screen.getByRole('button', { name: 'Submit Prayer Request' }))
+    const fieldset = screen.getByRole('group')
+    expect(fieldset).toHaveAttribute('aria-invalid', 'true')
+    expect(fieldset).toHaveAttribute('aria-describedby', 'composer-category-error')
   })
 })

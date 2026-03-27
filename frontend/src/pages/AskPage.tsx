@@ -4,6 +4,7 @@ import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 import { UserQuestionBubble } from '@/components/ask/UserQuestionBubble'
 import { AskResponseDisplay } from '@/components/ask/AskResponseDisplay'
 import { PopularTopicsSection } from '@/components/ask/PopularTopicsSection'
@@ -230,6 +231,7 @@ export function AskPage() {
                       placeholder="What's on your heart? Ask anything..."
                       maxLength={ASK_MAX_LENGTH}
                       rows={3}
+                      aria-label="Your question"
                       aria-describedby="ask-char-count"
                       className={cn(
                         'w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] py-3 px-4',
@@ -238,12 +240,7 @@ export function AskPage() {
                         'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
                       )}
                     />
-                    <span
-                      id="ask-char-count"
-                      className={cn('absolute bottom-2 right-3 text-xs', charCountColor)}
-                    >
-                      {charCount} / {ASK_MAX_LENGTH}
-                    </span>
+                    <CharacterCount current={charCount} max={ASK_MAX_LENGTH} warningAt={400} dangerAt={480} visibleAt={300} id="ask-char-count" className="absolute bottom-2 right-3" />
                   </div>
 
                   {/* Crisis Banner */}

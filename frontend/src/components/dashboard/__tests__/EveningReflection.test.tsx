@@ -139,15 +139,16 @@ describe('EveningReflection — Step 2 (Highlights)', () => {
 
   it('textarea accepts text with character counter', async () => {
     const { user } = await goToStep2()
-    const textarea = screen.getByLabelText("Today's highlight")
+    const textarea = screen.getByLabelText("Today's highlights")
     await user.type(textarea, 'Great day!')
     expect(textarea).toHaveValue('Great day!')
-    expect(screen.getByText('10/500')).toBeInTheDocument()
+    // CharacterCount is hidden below 300 chars (visibleAt=300)
+    expect(textarea).toHaveAttribute('aria-describedby', 'evening-char-count')
   })
 
   it('crisis detection shows banner', async () => {
     const { user } = await goToStep2()
-    const textarea = screen.getByLabelText("Today's highlight")
+    const textarea = screen.getByLabelText("Today's highlights")
     await user.type(textarea, 'I want to kill myself')
     expect(screen.getByRole('alert')).toBeInTheDocument()
   })
@@ -156,6 +157,25 @@ describe('EveningReflection — Step 2 (Highlights)', () => {
     await goToStep2()
     const btn = screen.getByRole('button', { name: 'Next' })
     expect(btn).not.toBeDisabled()
+  })
+
+  it('evening textarea has aria-label "Today\'s highlights"', async () => {
+    await goToStep2()
+    expect(screen.getByLabelText("Today's highlights")).toBeInTheDocument()
+  })
+
+  it('evening char count uses CharacterCount at 300+', async () => {
+    const { user } = await goToStep2()
+    const textarea = screen.getByLabelText("Today's highlights")
+    await user.type(textarea, 'a'.repeat(300))
+    expect(screen.getByText('300 / 500')).toBeInTheDocument()
+  })
+
+  it('evening warning color at 400', async () => {
+    const { user } = await goToStep2()
+    const textarea = screen.getByLabelText("Today's highlights")
+    await user.type(textarea, 'a'.repeat(400))
+    expect(screen.getByText('400 / 500')).toHaveClass('text-amber-400')
   })
 })
 

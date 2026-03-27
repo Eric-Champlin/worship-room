@@ -1,6 +1,10 @@
 import { useState, useCallback } from 'react'
+import { AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { CharacterCount } from '@/components/ui/CharacterCount'
+import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 
@@ -15,6 +19,9 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
   const [description, setDescription] = useState(prayer.description)
   const [selectedCategory, setSelectedCategory] = useState<PrayerCategory>(prayer.category)
   const [showTitleError, setShowTitleError] = useState(false)
+
+  const isDirty = title !== prayer.title || description !== prayer.description || selectedCategory !== prayer.category
+  const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty)
 
   const handleSave = useCallback(() => {
     if (!title.trim()) {
@@ -35,7 +42,7 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
 
       <div className="mb-3">
         <label htmlFor="edit-prayer-title" className="mb-1 block text-sm font-medium text-text-dark">
-          Title
+          Title<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
         </label>
         <input
           id="edit-prayer-title"
@@ -47,19 +54,19 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
           }}
           maxLength={100}
           className="w-full rounded-lg border border-gray-200 p-3 text-base text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          aria-label="Prayer title"
           aria-invalid={showTitleError || undefined}
-          aria-describedby={showTitleError ? 'edit-title-error' : title.length > 80 ? 'edit-title-count' : undefined}
+          aria-describedby={showTitleError ? 'edit-title-error edit-title-count' : 'edit-title-count'}
         />
         {showTitleError && (
-          <p id="edit-title-error" className="mt-1 text-sm text-warning" role="alert">
-            Please add a title
+          <p id="edit-title-error" className="mt-1 flex items-center gap-1.5 text-sm text-red-500" role="alert">
+            <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Give your prayer a short title
           </p>
         )}
-        {title.length > 80 && (
-          <p id="edit-title-count" aria-live="polite" className={cn('mt-1 text-xs', title.length >= 100 ? 'text-danger' : 'text-text-light')}>
-            {title.length}/100
-          </p>
-        )}
+        <div className="mt-1">
+          <CharacterCount current={title.length} max={100} warningAt={80} dangerAt={96} visibleAt={80} id="edit-title-count" />
+        </div>
       </div>
 
       <div className="mb-3">
@@ -73,13 +80,12 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
           maxLength={1000}
           className="w-full resize-none rounded-lg border border-gray-200 p-3 text-base text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           style={{ minHeight: '100px' }}
-          aria-describedby={description.length > 800 ? 'edit-desc-count' : undefined}
+          aria-label="Prayer details"
+          aria-describedby="edit-desc-count"
         />
-        {description.length > 800 && (
-          <p id="edit-desc-count" aria-live="polite" className={cn('mt-1 text-xs', description.length >= 1000 ? 'text-danger' : 'text-text-light')}>
-            {description.length}/1,000
-          </p>
-        )}
+        <div className="mt-1">
+          <CharacterCount current={description.length} max={1000} warningAt={800} dangerAt={960} visibleAt={500} id="edit-desc-count" />
+        </div>
       </div>
 
       <CrisisBanner text={title + ' ' + description} />
@@ -122,6 +128,8 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
           Save
         </button>
       </div>
+
+      <UnsavedChangesModal isOpen={showModal} onLeave={confirmLeave} onStay={cancelLeave} />
     </article>
   )
 }

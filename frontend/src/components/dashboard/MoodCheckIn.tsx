@@ -4,12 +4,12 @@ import type { MoodOption } from '@/constants/dashboard/mood';
 import {
   MOOD_OPTIONS,
   MAX_MOOD_TEXT_LENGTH,
-  MOOD_TEXT_WARNING_THRESHOLD,
   VERSE_DISPLAY_DURATION_MS,
 } from '@/constants/dashboard/mood';
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources';
 import { saveMoodEntry } from '@/services/mood-storage';
 import { getLocalDateString } from '@/utils/date';
+import { CharacterCount } from '@/components/ui/CharacterCount';
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal';
 import { cn } from '@/lib/utils';
 import { VerseLink } from '@/components/shared/VerseLink';
@@ -119,12 +119,6 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
   );
 
   const charCount = text.length;
-  const charCountClass =
-    charCount >= MAX_MOOD_TEXT_LENGTH
-      ? 'text-danger'
-      : charCount >= MOOD_TEXT_WARNING_THRESHOLD
-        ? 'text-warning'
-        : 'text-white/40';
 
   return (
     <div
@@ -212,9 +206,11 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
                   placeholder="Want to share what's on your heart?"
                   rows={3}
                   className="w-full resize-none rounded-xl border border-white/15 bg-white/5 p-4 text-white placeholder:text-white/40 focus:border-glow-cyan/50 focus:outline-none"
+                  aria-label="Share what's on your heart"
+                  aria-describedby="mood-char-count"
                 />
-                <div className={`mt-1 text-right text-xs ${charCountClass}`}>
-                  {charCount}/{MAX_MOOD_TEXT_LENGTH}
+                <div className="mt-1 text-right">
+                  <CharacterCount current={charCount} max={MAX_MOOD_TEXT_LENGTH} warningAt={224} dangerAt={269} id="mood-char-count" />
                 </div>
 
                 {/* Continue Button */}

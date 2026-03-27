@@ -112,7 +112,7 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
           ref={effectiveInputRef as React.Ref<HTMLInputElement>}
           type="text"
           role="combobox"
-          aria-label="Search for friends"
+          aria-label="Search friends"
           aria-expanded={isOpen}
           aria-controls={isOpen ? 'friend-search-listbox' : undefined}
           aria-activedescendant={activeDescendantId}

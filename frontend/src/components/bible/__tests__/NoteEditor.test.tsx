@@ -9,6 +9,14 @@ vi.mock('@/components/daily/CrisisBanner', () => ({
     text.includes('kill myself') ? <div data-testid="crisis-banner">Crisis resources</div> : null,
 }))
 
+vi.mock('@/hooks/useUnsavedChanges', () => ({
+  useUnsavedChanges: () => ({
+    showModal: false,
+    confirmLeave: vi.fn(),
+    cancelLeave: vi.fn(),
+  }),
+}))
+
 const defaultProps = {
   verseNumber: 1,
   onSave: vi.fn().mockReturnValue(true),
@@ -40,24 +48,26 @@ describe('NoteEditor', () => {
     expect(screen.getByLabelText('Personal note for verse 1')).toBeInTheDocument()
   })
 
-  it('shows character counter', () => {
+  it('shows character counter when text is typed', () => {
     render(<NoteEditor {...defaultProps} />)
-    expect(screen.getByText('0/300')).toBeInTheDocument()
+    const textarea = screen.getByPlaceholderText('Add a note about this verse...')
+    fireEvent.change(textarea, { target: { value: 'H' } })
+    expect(screen.getByText('1 / 300')).toBeInTheDocument()
   })
 
   it('character counter updates on typing', () => {
     render(<NoteEditor {...defaultProps} />)
     const textarea = screen.getByPlaceholderText('Add a note about this verse...')
     fireEvent.change(textarea, { target: { value: 'Hello' } })
-    expect(screen.getByText('5/300')).toBeInTheDocument()
+    expect(screen.getByText('5 / 300')).toBeInTheDocument()
   })
 
-  it('character counter turns red near limit', () => {
+  it('character counter turns amber near warning threshold', () => {
     render(<NoteEditor {...defaultProps} />)
     const textarea = screen.getByPlaceholderText('Add a note about this verse...')
-    fireEvent.change(textarea, { target: { value: 'x'.repeat(285) } })
-    const counter = screen.getByText('285/300')
-    expect(counter).toHaveClass('text-danger')
+    fireEvent.change(textarea, { target: { value: 'x'.repeat(240) } })
+    const counter = screen.getByText('240 / 300')
+    expect(counter).toHaveClass('text-amber-400')
   })
 
   it('Save button is disabled when text is empty', () => {
@@ -127,9 +137,29 @@ describe('NoteEditor', () => {
     const textarea = screen.getByPlaceholderText('Add a note about this verse...')
     // Input at exactly 300 is accepted
     fireEvent.change(textarea, { target: { value: 'x'.repeat(300) } })
-    expect(screen.getByText('300/300')).toBeInTheDocument()
+    expect(screen.getByText('300 / 300')).toBeInTheDocument()
     // Input beyond 300 is rejected (stays at previous value)
     fireEvent.change(textarea, { target: { value: 'x'.repeat(301) } })
-    expect(screen.getByText('300/300')).toBeInTheDocument()
+    expect(screen.getByText('300 / 300')).toBeInTheDocument()
+  })
+
+  it('char count uses CharacterCount component', () => {
+    render(<NoteEditor {...defaultProps} />)
+    const textarea = screen.getByPlaceholderText('Add a note about this verse...')
+    fireEvent.change(textarea, { target: { value: 'Hello' } })
+    expect(screen.getByText('5 / 300')).toBeInTheDocument()
+  })
+
+  it('warning color at 240 chars', () => {
+    render(<NoteEditor {...defaultProps} />)
+    const textarea = screen.getByPlaceholderText('Add a note about this verse...')
+    fireEvent.change(textarea, { target: { value: 'a'.repeat(240) } })
+    expect(screen.getByText('240 / 300')).toHaveClass('text-amber-400')
+  })
+
+  it('useUnsavedChanges is wired up', () => {
+    render(<NoteEditor {...defaultProps} />)
+    // Component renders without error — useUnsavedChanges mock active
+    expect(screen.getByPlaceholderText('Add a note about this verse...')).toBeInTheDocument()
   })
 })
