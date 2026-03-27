@@ -1,14 +1,19 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { Link } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { CONFETTI_COLORS } from '@/constants/dashboard/badge-icons'
+import { findMatchingChallenge } from '@/lib/plan-challenge-matcher'
+import { getParticipantCount } from '@/constants/challenges'
+import type { PlanTheme } from '@/types/reading-plans'
 
 interface PlanCompletionOverlayProps {
   planTitle: string
   totalDays: number
   onDismiss: () => void
   onBrowsePlans: () => void
+  planTheme?: PlanTheme
 }
 
 function generateConfetti(count: number) {
@@ -46,7 +51,9 @@ export function PlanCompletionOverlay({
   totalDays,
   onDismiss,
   onBrowsePlans,
+  planTheme,
 }: PlanCompletionOverlayProps) {
+  const suggestion = planTheme ? findMatchingChallenge(planTheme) : null
   const containerRef = useFocusTrap(true, onDismiss)
 
   const prefersReducedMotion =
@@ -110,6 +117,40 @@ export function PlanCompletionOverlay({
             the faith.
           </blockquote>
           <p className="mt-2 text-sm text-white/40">— 2 Timothy 4:7 WEB</p>
+
+          {suggestion ? (
+            <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.08] p-4 text-left">
+              <p className="font-semibold text-white">Continue your journey!</p>
+              <p className="mt-1 text-sm text-white/70">
+                {suggestion.challenge.title}{' '}
+                {suggestion.isActive
+                  ? 'is happening now'
+                  : `starts ${suggestion.startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`}
+                .
+              </p>
+              <p className="text-sm text-white/50">
+                {getParticipantCount(suggestion.challenge.id, suggestion.isActive ? 1 : 0)} people are participating.
+              </p>
+              <Link
+                to="/grow?tab=challenges"
+                onClick={onDismiss}
+                className="mt-2 inline-block text-sm text-primary-lt transition-colors hover:text-primary hover:underline"
+              >
+                Join Challenge →
+              </Link>
+            </div>
+          ) : (
+            <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.08] p-4 text-left">
+              <p className="font-semibold text-white">Looking for your next journey?</p>
+              <Link
+                to="/grow?tab=challenges"
+                onClick={onDismiss}
+                className="mt-2 inline-block text-sm text-primary-lt transition-colors hover:text-primary hover:underline"
+              >
+                Browse challenges →
+              </Link>
+            </div>
+          )}
 
           <button
             type="button"

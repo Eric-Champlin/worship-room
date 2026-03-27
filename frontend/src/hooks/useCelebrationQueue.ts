@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, createElement } from 'react'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
 import { useToast } from '@/components/ui/Toast'
+import { getBadgeSuggestion } from '@/lib/badge-suggestion'
 import type { BadgeDefinition, CelebrationTier } from '@/types/dashboard'
 
 // --- Types ---
@@ -147,11 +148,13 @@ export function useCelebrationQueue({
             }),
           )
 
+          const suggestion = getBadgeSuggestion(item.badgeId, item.badge.category) ?? undefined
           await showCelebrationToast(
             item.badge.name,
             `You earned: ${item.badge.description}`,
             tierToToastType(item.tier),
             iconElement,
+            suggestion,
           )
 
           // 500ms gap between toasts

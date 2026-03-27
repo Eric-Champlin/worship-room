@@ -5,6 +5,7 @@ import {
   COMMUNITY_BADGE_THRESHOLDS,
 } from '@/constants/dashboard/badges';
 import { getUniqueVisitedPlaces } from '@/services/local-visit-storage';
+import { BIBLE_BOOKS } from '@/constants/bible';
 
 export interface BadgeCheckContext {
   streak: StreakData;
@@ -141,6 +142,35 @@ export function checkForNewBadges(
     } catch {
       // Malformed localStorage — skip local support badge check
     }
+  }
+
+  // 8. Bible book completion badges
+  const BIBLE_BOOK_BADGES: Record<number, string> = {
+    1: 'bible_book_1',
+    5: 'bible_book_5',
+    10: 'bible_book_10',
+    66: 'bible_book_66',
+  };
+
+  try {
+    const progressJson = localStorage.getItem('wr_bible_progress');
+    if (progressJson) {
+      const progressMap = JSON.parse(progressJson) as Record<string, number[]>;
+      let completedBooks = 0;
+      for (const book of BIBLE_BOOKS) {
+        const chapters = progressMap[book.slug] ?? [];
+        if (chapters.length >= book.chapters) {
+          completedBooks++;
+        }
+      }
+      for (const [threshold, badgeId] of Object.entries(BIBLE_BOOK_BADGES)) {
+        if (completedBooks >= Number(threshold) && !earned[badgeId]) {
+          result.push(badgeId);
+        }
+      }
+    }
+  } catch {
+    // Malformed localStorage — skip Bible book badge check
   }
 
   return result;

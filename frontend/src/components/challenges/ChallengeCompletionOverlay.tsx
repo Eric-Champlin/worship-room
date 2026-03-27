@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
+import { LayoutDashboard, Trophy, Share2, BookOpen, Compass } from 'lucide-react'
+import { generateChallengeShareImage } from '@/lib/challenge-share-canvas'
 
 interface ChallengeCompletionOverlayProps {
   challengeTitle: string
@@ -48,9 +50,9 @@ export function ChallengeCompletionOverlay({
   const reducedMotion = useReducedMotion()
   const [showDismiss, setShowDismiss] = useState(reducedMotion)
 
-  // Auto-dismiss after 8 seconds
+  // Auto-dismiss after 12 seconds
   useEffect(() => {
-    const timer = setTimeout(() => onDismiss(), 8000)
+    const timer = setTimeout(() => onDismiss(), 12000)
     return () => clearTimeout(timer)
   }, [onDismiss])
 
@@ -111,16 +113,49 @@ export function ChallengeCompletionOverlay({
     typeof window !== 'undefined' && window.innerWidth < 640
   const confettiCount = isMobile ? 12 : 24
 
-  const handleBrowseMore = useCallback(() => {
+  const handleNavigate = useCallback((to: string) => {
     onDismiss()
-    navigate('/grow?tab=challenges')
+    navigate(to)
   }, [onDismiss, navigate])
 
-  const handleShare = useCallback(() => {
-    // TODO: implement share functionality (Web Share API)
-    void challengeTitle
-    void badgeName
-  }, [challengeTitle, badgeName])
+  const handleShare = useCallback(async () => {
+    try {
+      const blob = await generateChallengeShareImage({
+        challengeTitle,
+        themeColor,
+        currentDay: daysCompleted,
+        totalDays: daysCompleted,
+        streak: 0,
+      })
+      const file = new File([blob], 'challenge-complete.png', { type: 'image/png' })
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: `${challengeTitle} — Challenge Complete!`,
+          text: `I completed the ${challengeTitle} challenge on Worship Room!`,
+          files: [file],
+        })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'challenge-complete.png'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
+    } catch {
+      // User cancelled or share failed — silently ignore
+    }
+  }, [challengeTitle, themeColor, daysCompleted])
+
+  const ctaItems = useMemo(() => [
+    { icon: LayoutDashboard, label: 'See your growth \u2192', description: 'Your dashboard shows the journey', to: '/' },
+    { icon: Trophy, label: 'Check the leaderboard \u2192', description: 'See where you rank now', to: '/friends?tab=leaderboard' },
+    { icon: Share2, label: 'Share your achievement', description: 'Celebrate with others', action: handleShare },
+    { icon: BookOpen, label: 'Browse more plans \u2192', description: 'Continue growing with a reading plan', to: '/grow?tab=plans' },
+    { icon: Compass, label: 'Browse more challenges \u2192', description: 'Find your next journey', to: '/grow?tab=challenges' },
+  ], [handleShare])
 
   return createPortal(
     <div
@@ -180,22 +215,26 @@ export function ChallengeCompletionOverlay({
           <span className="font-medium text-white">{badgeName}</span>
         </div>
 
-        {/* Actions */}
-        <div className="mt-6 flex flex-col items-center gap-3">
-          <button
-            type="button"
-            onClick={handleShare}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-white/30 px-6 py-3 text-sm text-white/80 transition-colors hover:bg-white/10"
-          >
-            Share Your Achievement
-          </button>
-          <button
-            type="button"
-            onClick={handleBrowseMore}
-            className="text-sm text-white/60 underline transition-colors hover:text-white/80"
-          >
-            Browse more challenges
-          </button>
+        {/* CTA Grid */}
+        <div className="mt-6 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+          {ctaItems.map((item, i) => {
+            const Icon = item.icon
+            const isLast = i === ctaItems.length - 1
+            return (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => item.action ? item.action() : handleNavigate(item.to!)}
+                className={`flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.08] p-3 text-left transition-colors hover:bg-white/[0.12] ${isLast ? 'sm:col-span-2 sm:mx-auto sm:max-w-[calc(50%-0.375rem)]' : ''}`}
+              >
+                <Icon className="mt-0.5 h-5 w-5 shrink-0 text-white/70" />
+                <div>
+                  <span className="font-semibold text-white">{item.label}</span>
+                  <p className="text-sm text-white/50">{item.description}</p>
+                </div>
+              </button>
+            )
+          })}
         </div>
 
         {/* Dismiss */}

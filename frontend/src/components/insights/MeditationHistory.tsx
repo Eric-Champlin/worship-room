@@ -164,6 +164,7 @@ export function MeditationHistory({ rangeDays }: MeditationHistoryProps) {
 
   return (
     <section
+      id="meditation-history"
       className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6"
       aria-label="Meditation history"
     >

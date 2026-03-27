@@ -29,6 +29,21 @@ describe('getBadgeIcon', () => {
     expect(levelConfig.textColor).toBe('text-primary-lt');
   });
 
+  it('getBadgeIcon returns config for bible_book badges', () => {
+    for (const id of ['bible_book_1', 'bible_book_5', 'bible_book_10', 'bible_book_66']) {
+      const config = getBadgeIcon(id);
+      expect(config).toBeDefined();
+      expect(config.icon).toBeDefined();
+      expect(config.bgColor).toBeTruthy();
+      expect(config.textColor).toBeTruthy();
+      expect(config.glowColor).toBeTruthy();
+    }
+    // bible_book_66 uses Crown icon with amber colors
+    const masterConfig = getBadgeIcon('bible_book_66');
+    expect(masterConfig.bgColor).toBe('bg-amber-500/20');
+    expect(masterConfig.textColor).toBe('text-amber-300');
+  });
+
   it('returns a fallback config for unknown badge IDs', () => {
     const config = getBadgeIcon('nonexistent_badge_xyz');
     expect(config).toBeDefined();

@@ -115,6 +115,7 @@ function GratitudeReflectionContent() {
           })()}
         </div>
         <CompletionScreen
+          showMeditationStats
           ctas={[
             { label: 'Try a different meditation', to: '/daily?tab=meditate', primary: true },
             { label: 'Continue to Pray \u2192', to: '/daily?tab=pray' },

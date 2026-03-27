@@ -1,5 +1,6 @@
 import { useCelebrationQueue } from '@/hooks/useCelebrationQueue'
 import { CelebrationOverlay } from './CelebrationOverlay'
+import { getBadgeSuggestion } from '@/lib/badge-suggestion'
 
 interface CelebrationQueueProps {
   newlyEarnedBadges: string[]
@@ -19,10 +20,13 @@ export function CelebrationQueue({
     return null
   }
 
+  const suggestion = getBadgeSuggestion(currentCelebration.badgeId, currentCelebration.badge.category) ?? undefined
+
   return (
     <CelebrationOverlay
       badge={currentCelebration.badge}
       onDismiss={dismissCurrent}
+      suggestion={suggestion}
     />
   )
 }

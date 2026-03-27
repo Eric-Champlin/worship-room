@@ -238,6 +238,32 @@ const BADGE_ICON_MAP: Record<string, BadgeIconConfig> = {
     glowColor: 'rgba(96,165,250,0.4)',
   },
 
+  // Bible book completion badges
+  bible_book_1: {
+    icon: BookOpen,
+    bgColor: 'bg-emerald-500/20',
+    textColor: 'text-emerald-400',
+    glowColor: 'rgba(52,211,153,0.3)',
+  },
+  bible_book_5: {
+    icon: BookOpen,
+    bgColor: 'bg-emerald-500/20',
+    textColor: 'text-emerald-400',
+    glowColor: 'rgba(52,211,153,0.3)',
+  },
+  bible_book_10: {
+    icon: BookOpen,
+    bgColor: 'bg-emerald-500/20',
+    textColor: 'text-emerald-300',
+    glowColor: 'rgba(52,211,153,0.4)',
+  },
+  bible_book_66: {
+    icon: Crown,
+    bgColor: 'bg-amber-500/20',
+    textColor: 'text-amber-300',
+    glowColor: 'rgba(251,191,36,0.4)',
+  },
+
   // Prayer wall badge
   first_prayerwall: {
     icon: HandHeart,

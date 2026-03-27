@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { Link } from 'react-router-dom'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { getBadgeIcon, CONFETTI_COLORS, LEVEL_ENCOURAGEMENT_MESSAGES, STREAK_MILESTONE_MESSAGES } from '@/constants/dashboard/badge-icons'
 import type { BadgeDefinition } from '@/types/dashboard'
@@ -9,6 +10,7 @@ import type { BadgeDefinition } from '@/types/dashboard'
 interface CelebrationOverlayProps {
   badge: BadgeDefinition
   onDismiss: () => void
+  suggestion?: { text: string; link: string }
 }
 
 // --- Confetti particle generation (full-screen fall) ---
@@ -81,7 +83,7 @@ function BadgeIconCircle({ badge }: { badge: BadgeDefinition }) {
 
 // --- Component ---
 
-export function CelebrationOverlay({ badge, onDismiss }: CelebrationOverlayProps) {
+export function CelebrationOverlay({ badge, onDismiss, suggestion }: CelebrationOverlayProps) {
   const [showContinue, setShowContinue] = useState(false)
   const continueRef = useRef<HTMLButtonElement>(null)
   const focusTrapRef = useFocusTrap(true, onDismiss)
@@ -168,6 +170,17 @@ export function CelebrationOverlay({ badge, onDismiss }: CelebrationOverlayProps
                 &mdash; {badge.verse.reference}
               </p>
             </div>
+          )}
+
+          {/* Suggestion link */}
+          {suggestion && (
+            <Link
+              to={suggestion.link}
+              onClick={onDismiss}
+              className="mt-3 inline-block text-sm text-primary-lt transition-colors hover:text-primary hover:underline"
+            >
+              {suggestion.text}
+            </Link>
           )}
 
           {/* Continue button (delayed 6s, immediate with reduced motion) */}

@@ -15,7 +15,8 @@ import { FloatingActionBar } from '@/components/bible/FloatingActionBar'
 import { NoteEditor } from '@/components/bible/NoteEditor'
 import { NoteIndicator } from '@/components/bible/NoteIndicator'
 import { VerseShareMenu } from '@/components/bible/VerseShareMenu'
-import { HIGHLIGHT_COLORS } from '@/constants/bible'
+import { HIGHLIGHT_COLORS, BIBLE_BOOKS } from '@/constants/bible'
+import { BookCompletionCard } from '@/components/bible/BookCompletionCard'
 import { getBookBySlug, loadChapter } from '@/data/bible'
 import { useAuth } from '@/hooks/useAuth'
 import { useBibleAudio } from '@/hooks/useBibleAudio'
@@ -43,7 +44,7 @@ export function BibleReader() {
   }>()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const { markChapterRead, isChapterRead } = useBibleProgress()
+  const { markChapterRead, isChapterRead, justCompletedBook, progress } = useBibleProgress()
   const { getHighlightsForChapter, getHighlightForVerse, setHighlight: applyHighlight } =
     useBibleHighlights()
   const { getNotesForChapter, getNoteForVerse, saveNote, deleteNote } = useBibleNotes()
@@ -60,6 +61,9 @@ export function BibleReader() {
   const [showDiscardPrompt, setShowDiscardPrompt] = useState<number | null>(null)
   const [timerPanelOpen, setTimerPanelOpen] = useState(false)
   const [ambientForceCollapse, setAmbientForceCollapse] = useState(false)
+  const [cardDismissed, setCardDismissed] = useState(() =>
+    bookSlug ? sessionStorage.getItem(`wr_bible_book_complete_dismissed_${bookSlug}`) === 'true' : false,
+  )
 
   const sleepTimer = useSleepTimerControls()
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -205,6 +209,19 @@ export function BibleReader() {
     isChapterRead,
     markChapterRead,
   ])
+
+  // Book completion toast
+  useEffect(() => {
+    if (!justCompletedBook || justCompletedBook !== bookSlug) return
+    const bookData = BIBLE_BOOKS.find(b => b.slug === justCompletedBook)
+    if (!bookData) return
+    showToast(`${bookData.name} Complete! You've read all ${bookData.chapters} chapters.`, 'success')
+  }, [justCompletedBook, bookSlug, showToast])
+
+  // Compute book completion for inline card
+  const isBookComplete = book && bookSlug
+    ? (progress[bookSlug]?.length ?? 0) >= book.chapters
+    : false
 
   const handleChapterSelect = useCallback(
     (chapter: number) => {
@@ -498,6 +515,20 @@ export function BibleReader() {
                 />
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Book completion card */}
+        {isAuthenticated && bookSlug && isBookComplete && !cardDismissed && (
+          <div className="mx-auto max-w-2xl px-4 sm:px-6">
+            <BookCompletionCard
+              bookName={book.name}
+              bookSlug={bookSlug}
+              onDismiss={() => {
+                sessionStorage.setItem(`wr_bible_book_complete_dismissed_${bookSlug}`, 'true')
+                setCardDismissed(true)
+              }}
+            />
           </div>
         )}
 

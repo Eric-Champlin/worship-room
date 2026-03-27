@@ -131,4 +131,59 @@ describe('useBibleProgress', () => {
     const { result: result2 } = renderHook(() => useBibleProgress())
     expect(result2.current.getBookProgress('john')).toEqual([3])
   })
+
+  it('markChapterRead sets justCompletedBook when all chapters read', () => {
+    mockAuth.isAuthenticated = true
+    // Ruth has 4 chapters — mark 3, then the last one
+    localStorage.setItem(BIBLE_PROGRESS_KEY, JSON.stringify({ ruth: [1, 2, 3] }))
+    const { result } = renderHook(() => useBibleProgress())
+
+    expect(result.current.justCompletedBook).toBeNull()
+
+    act(() => result.current.markChapterRead('ruth', 4))
+
+    expect(result.current.justCompletedBook).toBe('ruth')
+  })
+
+  it('markChapterRead does not set justCompletedBook for partial completion', () => {
+    mockAuth.isAuthenticated = true
+    const { result } = renderHook(() => useBibleProgress())
+
+    act(() => result.current.markChapterRead('genesis', 1))
+
+    expect(result.current.justCompletedBook).toBeNull()
+  })
+
+  it('clearJustCompletedBook resets to null', () => {
+    mockAuth.isAuthenticated = true
+    localStorage.setItem(BIBLE_PROGRESS_KEY, JSON.stringify({ ruth: [1, 2, 3] }))
+    const { result } = renderHook(() => useBibleProgress())
+
+    act(() => result.current.markChapterRead('ruth', 4))
+    expect(result.current.justCompletedBook).toBe('ruth')
+
+    act(() => result.current.clearJustCompletedBook())
+    expect(result.current.justCompletedBook).toBeNull()
+  })
+
+  it('getCompletedBookCount returns correct count', () => {
+    mockAuth.isAuthenticated = true
+    // Ruth (4 chapters) + Obadiah (1 chapter) + Philemon (1 chapter) = 3 complete books
+    localStorage.setItem(BIBLE_PROGRESS_KEY, JSON.stringify({
+      ruth: [1, 2, 3, 4],
+      obadiah: [1],
+      philemon: [1],
+      genesis: [1, 2], // incomplete
+    }))
+    const { result } = renderHook(() => useBibleProgress())
+    expect(result.current.getCompletedBookCount()).toBe(3)
+  })
+
+  it('getCompletedBookCount returns 0 when not authenticated', () => {
+    localStorage.setItem(BIBLE_PROGRESS_KEY, JSON.stringify({
+      ruth: [1, 2, 3, 4],
+    }))
+    const { result } = renderHook(() => useBibleProgress())
+    expect(result.current.getCompletedBookCount()).toBe(0)
+  })
 })

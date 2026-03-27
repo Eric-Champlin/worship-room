@@ -184,6 +184,7 @@ function BreathingExerciseContent() {
           </div>
         )}
         <CompletionScreen
+          showMeditationStats
           ctas={[
             { label: 'Meditate more', to: '/meditate/breathing' },
             { label: 'Try a different meditation', to: '/daily?tab=meditate' },

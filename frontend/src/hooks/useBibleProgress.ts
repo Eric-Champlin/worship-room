@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { BIBLE_PROGRESS_KEY } from '@/constants/bible'
+import { BIBLE_PROGRESS_KEY, BIBLE_BOOKS } from '@/constants/bible'
 import { useAuth } from '@/hooks/useAuth'
 import type { BibleProgressMap } from '@/types/bible'
 
@@ -29,9 +29,13 @@ export function useBibleProgress(): {
   markChapterRead: (bookSlug: string, chapter: number) => void
   getBookProgress: (bookSlug: string) => number[]
   isChapterRead: (bookSlug: string, chapter: number) => boolean
+  justCompletedBook: string | null
+  clearJustCompletedBook: () => void
+  getCompletedBookCount: () => number
 } {
   const { isAuthenticated } = useAuth()
   const [progress, setProgress] = useState<BibleProgressMap>(readProgress)
+  const [justCompletedBook, setJustCompletedBook] = useState<string | null>(null)
 
   const markChapterRead = useCallback(
     (bookSlug: string, chapter: number) => {
@@ -42,9 +46,31 @@ export function useBibleProgress(): {
       const updated = { ...current, [bookSlug]: [...bookProgress, chapter] }
       writeProgress(updated)
       setProgress(updated)
+
+      // Check if the book is now complete
+      const bookData = BIBLE_BOOKS.find(b => b.slug === bookSlug)
+      if (bookData) {
+        const updatedBookProgress = updated[bookSlug] ?? []
+        if (updatedBookProgress.length >= bookData.chapters) {
+          setJustCompletedBook(bookSlug)
+        }
+      }
     },
     [isAuthenticated],
   )
+
+  const clearJustCompletedBook = useCallback(() => {
+    setJustCompletedBook(null)
+  }, [])
+
+  const getCompletedBookCount = useCallback((): number => {
+    if (!isAuthenticated) return 0
+    const current = readProgress()
+    return BIBLE_BOOKS.filter(book => {
+      const chapters = current[book.slug] ?? []
+      return chapters.length >= book.chapters
+    }).length
+  }, [isAuthenticated, progress])
 
   const getBookProgress = useCallback(
     (bookSlug: string): number[] => {
@@ -62,5 +88,5 @@ export function useBibleProgress(): {
     [isAuthenticated, progress],
   )
 
-  return { progress, markChapterRead, getBookProgress, isChapterRead }
+  return { progress, markChapterRead, getBookProgress, isChapterRead, justCompletedBook, clearJustCompletedBook, getCompletedBookCount }
 }

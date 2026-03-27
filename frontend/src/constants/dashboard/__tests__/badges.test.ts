@@ -26,10 +26,10 @@ describe('BADGE_DEFINITIONS', () => {
     }
   });
 
-  it('total unique badge IDs count is 40', () => {
+  it('total unique badge IDs count is 44', () => {
     const ids = BADGE_DEFINITIONS.map((b) => b.id);
-    // 7 streak + 6 level + 9 activity milestones + 3 reading plan + 1 full_worship_day + 6 community/first-time + 7 challenge + 1 welcome
-    expect(new Set(ids).size).toBe(40);
+    // 7 streak + 6 level + 9 activity milestones + 3 reading plan + 4 bible book + 1 full_worship_day + 6 community/first-time + 7 challenge + 1 welcome
+    expect(new Set(ids).size).toBe(44);
   });
 });
 
@@ -81,9 +81,9 @@ describe('activity milestone badges', () => {
     for (const id of expectedIds) {
       expect(BADGE_MAP[id]).toBeDefined();
     }
-    // Check count of activity category badges (9 milestones + first_prayerwall + 3 reading plan = 13 activity badges)
+    // Check count of activity category badges (9 milestones + first_prayerwall + 3 reading plan + 4 bible book = 17 activity badges)
     const activityBadges = BADGE_DEFINITIONS.filter((b) => b.category === 'activity');
-    expect(activityBadges).toHaveLength(13);
+    expect(activityBadges).toHaveLength(17);
   });
 
   it('celebration tiers: activity milestones at count 1 = toast, higher = toast-confetti', () => {
@@ -135,6 +135,38 @@ describe('reading plan badges', () => {
     expect(badge.verse).toBeDefined();
     expect(badge.verse!.text).toBe('Your word is a lamp to my feet, and a light for my path.');
     expect(badge.verse!.reference).toBe('Psalm 119:105 WEB');
+  });
+});
+
+describe('bible book badges', () => {
+  it('BADGE_DEFINITIONS includes 4 bible_book badges', () => {
+    const bibleBadges = BADGE_DEFINITIONS.filter((b) => b.id.startsWith('bible_book_'));
+    expect(bibleBadges).toHaveLength(4);
+    expect(bibleBadges.map((b) => b.name)).toEqual(['First Book', 'Bible Explorer', 'Deep Reader', 'Bible Master']);
+  });
+
+  it('BADGE_MAP contains bible_book_1, bible_book_5, bible_book_10, bible_book_66', () => {
+    expect(BADGE_MAP['bible_book_1']).toBeDefined();
+    expect(BADGE_MAP['bible_book_5']).toBeDefined();
+    expect(BADGE_MAP['bible_book_10']).toBeDefined();
+    expect(BADGE_MAP['bible_book_66']).toBeDefined();
+  });
+
+  it('bible_book_10 and bible_book_66 have full-screen celebration tier with verses', () => {
+    const badge10 = BADGE_MAP['bible_book_10'];
+    expect(badge10.celebrationTier).toBe('full-screen');
+    expect(badge10.verse).toBeDefined();
+    expect(badge10.verse!.text).toContain('lamp to my feet');
+
+    const badge66 = BADGE_MAP['bible_book_66'];
+    expect(badge66.celebrationTier).toBe('full-screen');
+    expect(badge66.verse).toBeDefined();
+    expect(badge66.verse!.text).toContain('God-breathed');
+  });
+
+  it('bible_book_1 and bible_book_5 have toast-confetti tier', () => {
+    expect(BADGE_MAP['bible_book_1'].celebrationTier).toBe('toast-confetti');
+    expect(BADGE_MAP['bible_book_5'].celebrationTier).toBe('toast-confetti');
   });
 });
 

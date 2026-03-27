@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { CONFETTI_COLORS } from '@/constants/dashboard/badge-icons'
 
@@ -27,6 +28,7 @@ interface CelebrationToast {
   message: string
   type: CelebrationToastType
   icon?: ReactNode
+  suggestion?: { text: string; link: string }
 }
 
 export interface ToastContextValue {
@@ -36,6 +38,7 @@ export interface ToastContextValue {
     message: string,
     type: CelebrationToastType,
     icon?: ReactNode,
+    suggestion?: { text: string; link: string },
   ) => Promise<void>
 }
 
@@ -111,10 +114,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       message: string,
       type: CelebrationToastType,
       icon?: ReactNode,
+      suggestion?: { text: string; link: string },
     ): Promise<void> => {
       return new Promise<void>((resolve) => {
         const id = nextIdRef.current++
-        const toast: CelebrationToast = { id, badgeName, message, type, icon }
+        const toast: CelebrationToast = { id, badgeName, message, type, icon, suggestion }
 
         setCelebrationToasts((prev) => {
           const updated = [...prev, toast]
@@ -201,6 +205,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                     {toast.badgeName}
                   </p>
                   <p className="font-sans text-xs text-white/70">{toast.message}</p>
+                  {toast.suggestion && (
+                    <Link
+                      to={toast.suggestion.link}
+                      onClick={() => setCelebrationToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+                      className="mt-1 block text-xs text-primary-lt transition-colors hover:text-primary hover:underline"
+                    >
+                      {toast.suggestion.text}
+                    </Link>
+                  )}
                 </div>
               </div>
 

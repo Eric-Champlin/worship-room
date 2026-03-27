@@ -1,10 +1,19 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { PlanCompletionOverlay } from '../PlanCompletionOverlay'
+import type { PlanTheme } from '@/types/reading-plans'
+
+vi.mock('@/lib/plan-challenge-matcher', () => ({
+  findMatchingChallenge: vi.fn(() => null),
+}))
+
+import { findMatchingChallenge } from '@/lib/plan-challenge-matcher'
 
 beforeEach(() => {
   vi.restoreAllMocks()
+  vi.mocked(findMatchingChallenge).mockReturnValue(null)
 })
 
 function renderOverlay(overrides: Partial<{
@@ -12,14 +21,18 @@ function renderOverlay(overrides: Partial<{
   totalDays: number
   onDismiss: () => void
   onBrowsePlans: () => void
+  planTheme: PlanTheme
 }> = {}) {
   return render(
-    <PlanCompletionOverlay
-      planTitle={overrides.planTitle ?? 'Finding Peace in Anxiety'}
-      totalDays={overrides.totalDays ?? 7}
-      onDismiss={overrides.onDismiss ?? vi.fn()}
-      onBrowsePlans={overrides.onBrowsePlans ?? vi.fn()}
-    />,
+    <MemoryRouter>
+      <PlanCompletionOverlay
+        planTitle={overrides.planTitle ?? 'Finding Peace in Anxiety'}
+        totalDays={overrides.totalDays ?? 7}
+        onDismiss={overrides.onDismiss ?? vi.fn()}
+        onBrowsePlans={overrides.onBrowsePlans ?? vi.fn()}
+        planTheme={overrides.planTheme}
+      />
+    </MemoryRouter>,
   )
 }
 
@@ -70,6 +83,42 @@ describe('PlanCompletionOverlay', () => {
     renderOverlay({ onBrowsePlans })
     await user.click(screen.getByText('Browse more plans'))
     expect(onBrowsePlans).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows suggestion card when matching challenge exists', () => {
+    vi.mocked(findMatchingChallenge).mockReturnValue({
+      challenge: { id: 'lent', title: 'Lenten Journey', season: 'lent' } as never,
+      isActive: true,
+      startDate: new Date(2026, 1, 18),
+    })
+    renderOverlay({ planTheme: 'grief' })
+    expect(screen.getByText('Continue your journey!')).toBeInTheDocument()
+    expect(screen.getByText(/Lenten Journey/)).toBeInTheDocument()
+    expect(screen.getByText(/is happening now/)).toBeInTheDocument()
+  })
+
+  it('shows fallback when no matching challenge', () => {
+    vi.mocked(findMatchingChallenge).mockReturnValue(null)
+    renderOverlay({ planTheme: 'grief' })
+    expect(screen.getByText('Looking for your next journey?')).toBeInTheDocument()
+  })
+
+  it('"Browse more plans" button still exists alongside suggestion', () => {
+    vi.mocked(findMatchingChallenge).mockReturnValue({
+      challenge: { id: 'lent', title: 'Lenten Journey', season: 'lent' } as never,
+      isActive: true,
+      startDate: new Date(2026, 1, 18),
+    })
+    renderOverlay({ planTheme: 'grief' })
+    expect(screen.getByText('Continue your journey!')).toBeInTheDocument()
+    expect(screen.getByText('Browse more plans')).toBeInTheDocument()
+  })
+
+  it('shows fallback card when planTheme is not provided', () => {
+    renderOverlay()
+    // When no planTheme, findMatchingChallenge is not called, suggestion is null
+    // But the fallback card should still render
+    expect(screen.getByText('Looking for your next journey?')).toBeInTheDocument()
   })
 
   it('respects prefers-reduced-motion (no confetti)', () => {

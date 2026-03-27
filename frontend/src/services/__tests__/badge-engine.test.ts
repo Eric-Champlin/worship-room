@@ -262,6 +262,73 @@ describe('checkForNewBadges — reading plan badges', () => {
   });
 });
 
+describe('checkForNewBadges — Bible book badges', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  function makeFullBook(_slug: string, chapters: number): number[] {
+    return Array.from({ length: chapters }, (_, i) => i + 1);
+  }
+
+  it('awards bible_book_1 for 1 completed book', () => {
+    localStorage.setItem('wr_bible_progress', JSON.stringify({
+      ruth: makeFullBook('ruth', 4),
+    }));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('bible_book_1');
+  });
+
+  it('awards bible_book_5 at 5 books', () => {
+    const progress: Record<string, number[]> = {};
+    const shortBooks = ['ruth', 'obadiah', 'philemon', 'jude', 'jonah'];
+    const chapterCounts = [4, 1, 1, 1, 4];
+    for (let i = 0; i < 5; i++) {
+      progress[shortBooks[i]] = makeFullBook(shortBooks[i], chapterCounts[i]);
+    }
+    localStorage.setItem('wr_bible_progress', JSON.stringify(progress));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('bible_book_5');
+  });
+
+  it('awards bible_book_10 at 10 books', () => {
+    const progress: Record<string, number[]> = {};
+    // Use 10 short books
+    const books = [
+      ['ruth', 4], ['obadiah', 1], ['philemon', 1], ['jude', 1], ['jonah', 4],
+      ['haggai', 2], ['nahum', 3], ['habakkuk', 3], ['zephaniah', 3], ['malachi', 4],
+    ] as const;
+    for (const [slug, chapters] of books) {
+      progress[slug] = makeFullBook(slug, chapters);
+    }
+    localStorage.setItem('wr_bible_progress', JSON.stringify(progress));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('bible_book_10');
+  });
+
+  it('does not re-award already earned Bible book badges', () => {
+    localStorage.setItem('wr_bible_progress', JSON.stringify({
+      ruth: makeFullBook('ruth', 4),
+    }));
+    const ctx = makeContext();
+    const earned = { bible_book_1: { earnedAt: '2026-03-20T00:00:00Z' } };
+    const result = checkForNewBadges(ctx, earned);
+    expect(result).not.toContain('bible_book_1');
+  });
+
+  it('does not award when no books completed', () => {
+    localStorage.setItem('wr_bible_progress', JSON.stringify({
+      genesis: [1, 2, 3], // only 3 of 50
+    }));
+    const ctx = makeContext();
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('bible_book_1');
+  });
+});
+
 describe('checkForNewBadges — multiple badges', () => {
   it('multiple badges in single call', () => {
     const ctx = makeContext({

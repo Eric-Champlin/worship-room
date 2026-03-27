@@ -143,6 +143,45 @@ const readingPlanBadges: BadgeDefinition[] = [
   },
 ];
 
+const bibleBookBadges: BadgeDefinition[] = [
+  {
+    id: 'bible_book_1',
+    name: 'First Book',
+    description: 'Read every chapter of a Bible book',
+    category: 'activity',
+    celebrationTier: 'toast-confetti',
+  },
+  {
+    id: 'bible_book_5',
+    name: 'Bible Explorer',
+    description: 'Completed 5 Bible books',
+    category: 'activity',
+    celebrationTier: 'toast-confetti',
+  },
+  {
+    id: 'bible_book_10',
+    name: 'Deep Reader',
+    description: 'Completed 10 Bible books',
+    category: 'activity',
+    celebrationTier: 'full-screen',
+    verse: {
+      text: 'Your word is a lamp to my feet, and a light for my path.',
+      reference: 'Psalm 119:105 WEB',
+    },
+  },
+  {
+    id: 'bible_book_66',
+    name: 'Bible Master',
+    description: 'Read the entire Bible — all 66 books',
+    category: 'activity',
+    celebrationTier: 'full-screen',
+    verse: {
+      text: 'Every Scripture is God-breathed and profitable for teaching, for reproof, for correction, and for instruction in righteousness.',
+      reference: '2 Timothy 3:16 WEB',
+    },
+  },
+];
+
 const communityBadges: BadgeDefinition[] = [
   { id: 'first_prayerwall', name: 'First Prayer Wall', description: '1st prayer wall post or reaction', category: 'activity', celebrationTier: 'toast' },
   { id: 'first_friend', name: 'First Friend', description: '1st mutual friend added', category: 'community', celebrationTier: 'toast' },
@@ -175,6 +214,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   ...levelBadges,
   ...activityMilestoneBadges,
   ...readingPlanBadges,
+  ...bibleBookBadges,
   fullWorshipDayBadge,
   ...communityBadges,
   ...challengeBadges,
