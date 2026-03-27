@@ -19,6 +19,10 @@ vi.mock('@/hooks/useFaithPoints', () => ({
   }),
 }))
 
+vi.mock('@/hooks/useReducedMotion', () => ({
+  useReducedMotion: () => false,
+}))
+
 vi.mock('@/hooks/useReadAloud', () => ({
   useReadAloud: () => ({
     state: 'idle',

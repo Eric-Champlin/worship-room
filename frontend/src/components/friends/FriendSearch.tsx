@@ -3,6 +3,7 @@ import { Search } from 'lucide-react'
 import type { FriendProfile } from '@/types/dashboard'
 import type { FriendSearchResult } from '@/hooks/useFriends'
 import { Avatar } from '@/components/prayer-wall/Avatar'
+import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { splitDisplayName } from './utils'
 
 interface FriendSearchProps {
@@ -97,6 +98,8 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
   }, [])
 
   const activeDescendantId = activeIndex >= 0 ? `search-option-${results[activeIndex]?.id}` : undefined
+  const { getStaggerProps: getSearchStaggerProps } =
+    useStaggeredEntrance({ staggerDelay: 50, itemCount: results.length, inView: isOpen })
 
   return (
     <div ref={containerRef} className="relative w-full sm:max-w-[500px]">
@@ -137,6 +140,7 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
             results.map((user, index) => {
               const { first, last } = splitDisplayName(user.displayName)
               const isActive = index === activeIndex
+              const stagger = getSearchStaggerProps(index)
               return (
                 <div
                   key={user.id}
@@ -144,7 +148,8 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
                   id={`search-option-${user.id}`}
                   role="option"
                   aria-selected={isActive}
-                  className={`flex min-h-[44px] items-center gap-3 px-4 py-2 ${isActive ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                  className={`flex min-h-[44px] items-center gap-3 px-4 py-2 ${isActive ? 'bg-white/10' : 'hover:bg-white/5'} ${stagger.className}`}
+                  style={stagger.style}
                 >
                   <Avatar
                     firstName={first}

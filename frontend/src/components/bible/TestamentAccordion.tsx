@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react'
 import { BIBLE_CATEGORIES } from '@/constants/bible'
 import { getBooksByCategory } from '@/data/bible'
 import { cn } from '@/lib/utils'
+import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import type { BibleBook } from '@/types/bible'
 
 import { CategoryGroup } from './CategoryGroup'
@@ -29,6 +30,8 @@ export function TestamentAccordion({
 
   const label = testament === 'old' ? 'Old Testament' : 'New Testament'
   const categories = BIBLE_CATEGORIES.filter((c) => c.testament === testament)
+  const { containerRef: categoryListRef, getStaggerProps: getCategoryStaggerProps } =
+    useStaggeredEntrance({ staggerDelay: 30, itemCount: categories.length, inView: isExpanded })
 
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
@@ -52,17 +55,19 @@ export function TestamentAccordion({
       </button>
 
       {isExpanded && (
-        <div className="border-t border-white/10 pb-2">
-          {categories.map((cat) => {
+        <div className="border-t border-white/10 pb-2" ref={categoryListRef}>
+          {categories.map((cat, index) => {
             const categoryBooks = getBooksByCategory(cat.key)
             if (categoryBooks.length === 0) return null
+            const stagger = getCategoryStaggerProps(index)
             return (
-              <CategoryGroup
-                key={cat.key}
-                category={cat.key}
-                books={categoryBooks}
-                autoExpandSlug={autoExpandSlug}
-              />
+              <div key={cat.key} className={stagger.className} style={stagger.style}>
+                <CategoryGroup
+                  category={cat.key}
+                  books={categoryBooks}
+                  autoExpandSlug={autoExpandSlug}
+                />
+              </div>
             )
           })}
         </div>

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -310,8 +310,9 @@ describe('JournalTabContent', () => {
     })
 
     it('auth modal can be dismissed', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
       mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
-      const user = userEvent.setup()
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       renderComponent()
 
       const textarea = screen.getByLabelText('Journal entry')
@@ -322,7 +323,11 @@ describe('JournalTabContent', () => {
 
       await user.click(screen.getByLabelText('Close'))
 
+      // Wait for 150ms close animation
+      act(() => { vi.advanceTimersByTime(200) })
+
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      vi.useRealTimers()
     })
 
     it('does not gate draft auto-save', async () => {

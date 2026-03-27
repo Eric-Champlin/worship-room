@@ -180,6 +180,7 @@ export function GrowPage() {
           aria-labelledby="tab-plans"
           tabIndex={0}
           hidden={activeTab !== 'plans'}
+          className="motion-safe:animate-tab-fade-in"
         >
           <ReadingPlansContent createParam={createParam} />
         </div>
@@ -190,6 +191,7 @@ export function GrowPage() {
           aria-labelledby="tab-challenges"
           tabIndex={0}
           hidden={activeTab !== 'challenges'}
+          className="motion-safe:animate-tab-fade-in"
         >
           <ChallengesContent />
         </div>

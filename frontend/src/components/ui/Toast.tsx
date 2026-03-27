@@ -93,7 +93,25 @@ const ToastContext = createContext<ToastContextValue | null>(null)
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<StandardToast[]>([])
   const [celebrationToasts, setCelebrationToasts] = useState<CelebrationToast[]>([])
+  const [exitingIds, setExitingIds] = useState<Set<number>>(new Set())
   const nextIdRef = useRef(0)
+
+  const dismissToast = useCallback((id: number) => {
+    setExitingIds((prev) => new Set(prev).add(id))
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id))
+      setExitingIds((prev) => { const next = new Set(prev); next.delete(id); return next })
+    }, 200)
+  }, [])
+
+  const dismissCelebration = useCallback((id: number, resolve?: () => void) => {
+    setExitingIds((prev) => new Set(prev).add(id))
+    setTimeout(() => {
+      setCelebrationToasts((prev) => prev.filter((t) => t.id !== id))
+      setExitingIds((prev) => { const next = new Set(prev); next.delete(id); return next })
+      resolve?.()
+    }, 200)
+  }, [])
 
   const showToast = useCallback((message: string, type: StandardToastType = 'success', action?: ToastAction) => {
     const id = nextIdRef.current++
@@ -103,9 +121,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     })
 
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id))
+      dismissToast(id)
     }, 6000)
-  }, [])
+  }, [dismissToast])
 
   // New celebration toast — returns Promise that resolves when dismissed
   const showCelebrationToast = useCallback(
@@ -127,8 +145,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
         const duration = CELEBRATION_DURATIONS[type]
         setTimeout(() => {
-          setCelebrationToasts((prev) => prev.filter((t) => t.id !== id))
-          resolve()
+          dismissCelebration(id, resolve)
         }, duration)
       })
     },
@@ -150,7 +167,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
             data-toast-type={toast.type}
             className={cn(
-              'motion-safe:animate-slide-from-right rounded-lg border bg-white px-4 py-3 shadow-lg',
+              'rounded-lg border bg-white px-4 py-3 shadow-lg',
+              exitingIds.has(toast.id)
+                ? 'motion-safe:animate-toast-out'
+                : 'motion-safe:animate-toast-spring-in',
               toast.type === 'success'
                 ? 'border-l-4 border-l-success'
                 : toast.type === 'warning'
@@ -189,7 +209,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               aria-live="polite"
               className={cn(
                 'relative overflow-hidden rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white backdrop-blur-md motion-reduce:animate-none',
-                isMobile ? 'motion-safe:animate-slide-from-bottom' : 'motion-safe:animate-slide-from-right',
+                exitingIds.has(toast.id)
+                  ? 'motion-safe:animate-toast-out'
+                  : isMobile
+                    ? 'motion-safe:animate-slide-from-bottom-spring'
+                    : 'motion-safe:animate-slide-from-right-spring',
                 toast.type === 'special-celebration' &&
                   'border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.2)]',
               )}
@@ -208,7 +232,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   {toast.suggestion && (
                     <Link
                       to={toast.suggestion.link}
-                      onClick={() => setCelebrationToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+                      onClick={() => dismissCelebration(toast.id)}
                       className="mt-1 block text-xs text-primary-lt transition-colors hover:text-primary hover:underline"
                     >
                       {toast.suggestion.text}

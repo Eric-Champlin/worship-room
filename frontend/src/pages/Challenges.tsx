@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { ActiveChallengeCard } from '@/components/challenges/ActiveChallengeCard'
 import { HallOfFame } from '@/components/challenges/HallOfFame'
 import { NextChallengeCountdown } from '@/components/challenges/NextChallengeCountdown'
@@ -83,6 +84,11 @@ export function ChallengesContent() {
     categorized.upcoming.length > 0 ||
     categorized.past.length > 0
 
+  const allChallengeCount =
+    categorized.active.length + categorized.upcoming.length + categorized.past.length
+  const { containerRef: challengeListRef, getStaggerProps: getChallengeStaggerProps } =
+    useStaggeredEntrance({ staggerDelay: 80, itemCount: allChallengeCount })
+
   function handleJoin(challengeId: string) {
     if (!isAuthenticated) {
       authModal?.openAuthModal('Sign in to join this challenge')
@@ -145,7 +151,7 @@ export function ChallengesContent() {
   return (
     <>
       <section id="challenges-content" className="px-4 py-8 sm:px-6 sm:py-10">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-4xl" ref={challengeListRef}>
         {/* Active Challenges */}
         {categorized.active.length > 0 && (
           <section className="mb-10" aria-label="Active challenges">
@@ -153,23 +159,25 @@ export function ChallengesContent() {
               Active Now
             </h2>
             <div className="space-y-6">
-              {categorized.active.map(({ challenge, info }) => {
+              {categorized.active.map(({ challenge, info }, index) => {
                 const progress = getProgress(challenge.id)
                 const isPaused = progress?.status === 'paused'
+                const stagger = getChallengeStaggerProps(index)
                 return (
-                  <ActiveChallengeCard
-                    key={challenge.id}
-                    challenge={challenge}
-                    daysRemaining={info.daysRemaining ?? 0}
-                    calendarDay={info.calendarDay ?? 1}
-                    onJoin={() => handleJoin(challenge.id)}
-                    onContinue={() => handleContinue(challenge.id)}
-                    onResume={() => handleResume(challenge.id)}
-                    isJoined={isChallengeJoined(challenge.id)}
-                    isCompleted={isChallengeCompleted(challenge.id)}
-                    isPaused={isPaused}
-                    currentDay={progress?.currentDay}
-                  />
+                  <div key={challenge.id} className={stagger.className} style={stagger.style}>
+                    <ActiveChallengeCard
+                      challenge={challenge}
+                      daysRemaining={info.daysRemaining ?? 0}
+                      calendarDay={info.calendarDay ?? 1}
+                      onJoin={() => handleJoin(challenge.id)}
+                      onContinue={() => handleContinue(challenge.id)}
+                      onResume={() => handleResume(challenge.id)}
+                      isJoined={isChallengeJoined(challenge.id)}
+                      isCompleted={isChallengeCompleted(challenge.id)}
+                      isPaused={isPaused}
+                      currentDay={progress?.currentDay}
+                    />
+                  </div>
                 )
               })}
             </div>
@@ -195,16 +203,20 @@ export function ChallengesContent() {
               Coming Up
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {categorized.upcoming.map(({ challenge, info }) => (
-                <UpcomingChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  startDate={info.startDate}
-                  isReminderSet={reminders.includes(challenge.id)}
-                  onToggleReminder={() => handleToggleReminder(challenge.id)}
-                  onClick={() => handleChallengeClick(challenge.id)}
-                />
-              ))}
+              {categorized.upcoming.map(({ challenge, info }, index) => {
+                const stagger = getChallengeStaggerProps(categorized.active.length + index)
+                return (
+                  <div key={challenge.id} className={stagger.className} style={stagger.style}>
+                    <UpcomingChallengeCard
+                      challenge={challenge}
+                      startDate={info.startDate}
+                      isReminderSet={reminders.includes(challenge.id)}
+                      onToggleReminder={() => handleToggleReminder(challenge.id)}
+                      onClick={() => handleChallengeClick(challenge.id)}
+                    />
+                  </div>
+                )
+              })}
             </div>
           </section>
         )}
@@ -216,14 +228,20 @@ export function ChallengesContent() {
               Past
             </h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {categorized.past.map(({ challenge }) => (
-                <PastChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  isCompleted={isChallengeCompleted(challenge.id)}
-                  onClick={() => handleChallengeClick(challenge.id)}
-                />
-              ))}
+              {categorized.past.map(({ challenge }, index) => {
+                const stagger = getChallengeStaggerProps(
+                  categorized.active.length + categorized.upcoming.length + index
+                )
+                return (
+                  <div key={challenge.id} className={stagger.className} style={stagger.style}>
+                    <PastChallengeCard
+                      challenge={challenge}
+                      isCompleted={isChallengeCompleted(challenge.id)}
+                      onClick={() => handleChallengeClick(challenge.id)}
+                    />
+                  </div>
+                )
+              })}
             </div>
           </section>
         )}

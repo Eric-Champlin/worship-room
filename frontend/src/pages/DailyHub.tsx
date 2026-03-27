@@ -397,6 +397,7 @@ function DailyHubContent() {
           aria-labelledby="tab-devotional"
           tabIndex={0}
           hidden={activeTab !== 'devotional'}
+          className="motion-safe:animate-tab-fade-in"
         >
           <DevotionalTabContent
             onSwitchToJournal={handleSwitchToDevotionalJournal}
@@ -411,6 +412,7 @@ function DailyHubContent() {
           aria-labelledby="tab-pray"
           tabIndex={0}
           hidden={activeTab !== 'pray'}
+          className="motion-safe:animate-tab-fade-in"
         >
           <PrayTabContent
             onSwitchToJournal={handleSwitchToJournal}
@@ -424,6 +426,7 @@ function DailyHubContent() {
           aria-labelledby="tab-journal"
           tabIndex={0}
           hidden={activeTab !== 'journal'}
+          className="motion-safe:animate-tab-fade-in"
         >
           <JournalTabContent
             prayContext={prayContext}
@@ -438,6 +441,7 @@ function DailyHubContent() {
           aria-labelledby="tab-meditate"
           tabIndex={0}
           hidden={activeTab !== 'meditate'}
+          className="motion-safe:animate-tab-fade-in"
         >
           <MeditateTabContent />
         </div>

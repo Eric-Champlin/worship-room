@@ -53,8 +53,8 @@ describe('useCelebrationQueue', () => {
     await advanceAndFlush(1000)
     expect(clearFn).not.toHaveBeenCalled()
 
-    // After 1.5s delay + 4s toast dismiss + 0.5s gap
-    await advanceAndFlush(5000)
+    // After 1.5s delay + 4s toast dismiss + 200ms exit animation + 0.5s gap
+    await advanceAndFlush(5200)
 
     expect(clearFn).toHaveBeenCalled()
   })
@@ -70,8 +70,8 @@ describe('useCelebrationQueue', () => {
       { wrapper },
     )
 
-    // 1.5s delay + 4s toast + 0.5s gap
-    await advanceAndFlush(6000)
+    // 1.5s delay + 4s toast + 200ms exit animation + 0.5s gap
+    await advanceAndFlush(6200)
 
     // Now full-screen overlay for level_2 should be showing
     expect(result.current.currentCelebration?.badgeId).toBe('level_2')
@@ -105,8 +105,8 @@ describe('useCelebrationQueue', () => {
       { wrapper },
     )
 
-    // 1.5s delay + 4s toast + 0.5s gap
-    await advanceAndFlush(6000)
+    // 1.5s delay + 4s toast + 200ms exit animation + 0.5s gap
+    await advanceAndFlush(6200)
 
     expect(clearFn).toHaveBeenCalled()
   })
@@ -122,8 +122,8 @@ describe('useCelebrationQueue', () => {
       { wrapper },
     )
 
-    // 1.5s delay + 4s toast + 0.5s gap
-    await advanceAndFlush(6000)
+    // 1.5s delay + 4s toast + 200ms exit animation + 0.5s gap
+    await advanceAndFlush(6200)
 
     expect(clearFn).toHaveBeenCalled()
   })

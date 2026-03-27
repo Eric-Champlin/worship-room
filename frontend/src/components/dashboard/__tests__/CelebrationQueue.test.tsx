@@ -62,8 +62,8 @@ describe('CelebrationQueue', () => {
     const clearFn = vi.fn()
     renderWithProvider(['streak_7', 'level_2'], clearFn)
 
-    // 1.5s delay + 4s toast + 0.5s gap
-    await advanceAndFlush(6000)
+    // 1.5s delay + 4s toast + 200ms exit animation + 0.5s gap
+    await advanceAndFlush(6200)
 
     // Now overlay should show
     expect(screen.getByRole('dialog')).toBeInTheDocument()

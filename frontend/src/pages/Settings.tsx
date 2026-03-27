@@ -116,9 +116,10 @@ export function Settings() {
 
           {/* Content panel */}
           <div
+            key={activeSection}
             id={`settings-panel-${activeSection}`}
             aria-live="polite"
-            className="flex-1 max-w-[640px]"
+            className="flex-1 max-w-[640px] motion-safe:animate-tab-fade-in"
           >
             {activeSection === 'profile' && (
               <ProfileSection

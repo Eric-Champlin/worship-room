@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { Navigate } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -61,6 +62,9 @@ export function MyPrayers() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
   }, [prayers, filter])
+
+  const { containerRef: prayerListRef, getStaggerProps: getPrayerStaggerProps } =
+    useStaggeredEntrance({ staggerDelay: 50, itemCount: filteredPrayers.length })
 
   const counts = useMemo(
     () => ({
@@ -204,9 +208,10 @@ export function MyPrayers() {
               No {filter} prayers
             </p>
           ) : (
-            <div className="space-y-4" role="list" aria-label="Prayer list">
-              {filteredPrayers.map((prayer) =>
-                editingId === prayer.id ? (
+            <div className="space-y-4" role="list" aria-label="Prayer list" ref={prayerListRef}>
+              {filteredPrayers.map((prayer, index) => {
+                const stagger = editingId === prayer.id ? { className: '', style: {} } : getPrayerStaggerProps(index)
+                return editingId === prayer.id ? (
                   <div key={prayer.id} role="listitem">
                     <EditPrayerForm
                       prayer={prayer}
@@ -215,7 +220,7 @@ export function MyPrayers() {
                     />
                   </div>
                 ) : (
-                  <div key={prayer.id} role="listitem">
+                  <div key={prayer.id} role="listitem" className={stagger.className} style={stagger.style}>
                     <PrayerItemCard
                       prayer={prayer}
                       glowing={glowingId === prayer.id}
@@ -247,8 +252,8 @@ export function MyPrayers() {
                       )}
                     </PrayerItemCard>
                   </div>
-                ),
-              )}
+                )
+              })}
             </div>
           )}
         </div>

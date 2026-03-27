@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 
+import { cn } from '@/lib/utils'
 import { escapeRegex, useBibleSearch } from '@/hooks/useBibleSearch'
+import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 
 function HighlightedText({ text, query }: { text: string; query: string }) {
   if (!query || query.length < 2) return <>{text}</>
@@ -31,6 +33,8 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
 export function BibleSearchMode() {
   const { query, setQuery, results, isSearching, isLoadingBooks } =
     useBibleSearch()
+  const { containerRef: searchResultsRef, getStaggerProps: getSearchStaggerProps } =
+    useStaggeredEntrance({ staggerDelay: 50, itemCount: results.length })
 
   return (
     <div className="mt-6">
@@ -81,17 +85,20 @@ export function BibleSearchMode() {
         </div>
 
         {results.length > 0 && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4" ref={searchResultsRef}>
             <p className="text-sm text-white/40" aria-live="polite">
               {results.length >= 100
                 ? '100+ results found (showing first 100)'
                 : `${results.length} result${results.length === 1 ? '' : 's'} found`}
             </p>
-            {results.map((result, i) => (
+            {results.map((result, i) => {
+              const stagger = getSearchStaggerProps(i)
+              return (
               <Link
                 key={`${result.bookSlug}-${result.chapter}-${result.verseNumber}-${i}`}
                 to={`/bible/${result.bookSlug}/${result.chapter}#verse-${result.verseNumber}`}
-                className="block rounded-xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10"
+                className={cn('block rounded-xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10', stagger.className)}
+                style={stagger.style}
               >
                 <h3 className="font-semibold text-white">
                   {result.bookName} {result.chapter}:{result.verseNumber}
@@ -110,7 +117,8 @@ export function BibleSearchMode() {
                   </p>
                 )}
               </Link>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
@@ -73,11 +73,20 @@ describe('PrayerWall activity integration', () => {
 
     // First click: pray ON → recordActivity called
     await user.click(firstPrayButton!)
-    expect(mockRecordActivity).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(mockRecordActivity).toHaveBeenCalledTimes(1))
+
+    // Wait for pray state to reflect in the UI (button text changes to "Praying")
+    await waitFor(() => {
+      const prayingBtns = screen.getAllByRole('button', { name: /pray/i })
+      const prayingBtn = prayingBtns.find(btn => btn.getAttribute('aria-pressed') === 'true')
+      expect(prayingBtn).toBeDefined()
+    })
 
     // Second click: pray OFF → recordActivity NOT called again
     mockRecordActivity.mockClear()
-    await user.click(firstPrayButton!)
+    const prayingBtns = screen.getAllByRole('button', { name: /pray/i })
+    const prayingBtn = prayingBtns.find(btn => btn.getAttribute('aria-pressed') === 'true')!
+    await user.click(prayingBtn)
     expect(mockRecordActivity).not.toHaveBeenCalled()
   })
 

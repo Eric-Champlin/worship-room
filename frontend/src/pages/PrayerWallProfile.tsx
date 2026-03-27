@@ -165,7 +165,7 @@ function PrayerWallProfileContent() {
         <div
           role="tablist"
           aria-label="Profile tabs"
-          className="mb-6 flex border-b border-white/10"
+          className="relative mb-6 flex border-b border-white/10"
         >
           {tabs.map((tab, index) => (
             <button
@@ -191,13 +191,21 @@ function PrayerWallProfileContent() {
               className={cn(
                 'px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 activeTab === tab.key
-                  ? 'border-b-2 border-primary text-white'
+                  ? 'text-white'
                   : 'text-white/60 hover:text-white/80',
               )}
             >
               {tab.label}
             </button>
           ))}
+          <div
+            className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out"
+            style={{
+              width: `${100 / tabs.length}%`,
+              transform: `translateX(${tabs.findIndex(t => t.key === activeTab) * 100}%)`,
+            }}
+            aria-hidden="true"
+          />
         </div>
 
         {/* Tab content */}
@@ -205,6 +213,8 @@ function PrayerWallProfileContent() {
           role="tabpanel"
           id={`profile-tabpanel-${activeTab}`}
           aria-labelledby={`profile-tab-${activeTab}`}
+          className="motion-safe:animate-tab-fade-in"
+          key={activeTab}
         >
           {activeTab === 'prayers' && (
             <div className="flex flex-col gap-4">

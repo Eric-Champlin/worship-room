@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface DeletePrayerDialogProps {
   onDelete: () => void
@@ -9,20 +10,49 @@ interface DeletePrayerDialogProps {
 
 export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const handleClose = useCallback(() => setIsOpen(false), [])
+  const [isClosing, setIsClosing] = useState(false)
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const reducedMotion = useReducedMotion()
+  const handleClose = useCallback(() => {
+    if (reducedMotion) {
+      setIsOpen(false)
+      return
+    }
+    setIsClosing(true)
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsClosing(false)
+      setIsOpen(false)
+    }, 150)
+  }, [reducedMotion])
   const containerRef = useFocusTrap(isOpen, handleClose)
 
   useEffect(() => {
     if (isOpen) {
+      setIsClosing(false)
       document.body.style.overflow = 'hidden'
       return () => { document.body.style.overflow = '' }
     }
   }, [isOpen])
 
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    }
+  }, [])
+
   const handleDelete = () => {
     onDelete()
     setIsOpen(false)
+    setIsClosing(false)
   }
+
+  const visible = isOpen || isClosing
+  const backdropClass = isClosing
+    ? 'motion-safe:animate-backdrop-fade-out'
+    : 'motion-safe:animate-backdrop-fade-in'
+  const panelClass = isClosing
+    ? 'motion-safe:animate-modal-spring-out'
+    : 'motion-safe:animate-modal-spring-in'
 
   return (
     <>
@@ -35,10 +65,10 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
         Delete
       </button>
 
-      {isOpen && (
+      {visible && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={() => setIsOpen(false)}
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 ${backdropClass}`}
+          onClick={handleClose}
           role="presentation"
         >
           <div
@@ -47,7 +77,7 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
             aria-modal="true"
             aria-labelledby="delete-dialog-title"
             aria-describedby="delete-dialog-desc"
-            className="mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-[#1a0f2e] p-6 shadow-xl"
+            className={`mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-[#1a0f2e] p-6 shadow-xl ${panelClass}`}
             onClick={(e) => e.stopPropagation()}
           >
             <h2
@@ -67,7 +97,7 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsOpen(false)}
+                onClick={handleClose}
               >
                 Cancel
               </Button>

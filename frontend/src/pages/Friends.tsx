@@ -97,7 +97,7 @@ export function Friends() {
       {/* Tab bar */}
       <div className="bg-dashboard-dark pb-6">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div role="tablist" aria-label="Friends page tabs" className="flex gap-2">
+          <div role="tablist" aria-label="Friends page tabs" className="relative flex gap-2">
             {TAB_CONFIG.map((tab) => {
               const isActive = activeTab === tab.id
               return (
@@ -110,7 +110,7 @@ export function Friends() {
                   onClick={() => handleTabChange(tab.id)}
                   className={`rounded-full px-6 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-primary text-white'
+                      ? 'text-white font-semibold'
                       : 'border border-white/20 text-white/60 hover:text-white/80'
                   }`}
                 >
@@ -118,6 +118,15 @@ export function Friends() {
                 </button>
               )
             })}
+            {/* Animated underline */}
+            <div
+              className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out"
+              style={{
+                width: `${100 / TAB_CONFIG.length}%`,
+                transform: `translateX(${TAB_CONFIG.findIndex(t => t.id === activeTab) * 100}%)`,
+              }}
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>
@@ -132,7 +141,7 @@ export function Friends() {
           hidden={activeTab !== 'friends'}
         >
           {activeTab === 'friends' && (
-            <>
+            <div key="friends-content" className="motion-safe:animate-tab-fade-in">
               <FriendSearch
                 searchUsers={searchUsers}
                 onSendRequest={sendRequest}
@@ -156,7 +165,7 @@ export function Friends() {
                 suggestions={suggestions}
                 onSendRequest={sendRequest}
               />
-            </>
+            </div>
           )}
         </div>
         <div
@@ -165,7 +174,7 @@ export function Friends() {
           aria-labelledby="tab-leaderboard"
           hidden={activeTab !== 'leaderboard'}
         >
-          {activeTab === 'leaderboard' && <LeaderboardTab />}
+          {activeTab === 'leaderboard' && <div key="leaderboard-content" className="motion-safe:animate-tab-fade-in"><LeaderboardTab /></div>}
         </div>
       </main>
 

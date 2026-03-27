@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Heart, LayoutDashboard, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -100,6 +101,9 @@ function PrayerWallContent() {
     () => filteredPrayers.findIndex(p => p.qotdId === todaysQuestion.id),
     [filteredPrayers, todaysQuestion.id],
   )
+
+  const { containerRef: prayerListRef, getStaggerProps: getPrayerStaggerProps } =
+    useStaggeredEntrance({ staggerDelay: 50, itemCount: filteredPrayers.length })
 
   const categoryCounts = useMemo(() => {
     const counts = {} as Record<PrayerCategory, number>
@@ -439,11 +443,17 @@ function PrayerWallContent() {
         </div>
 
         {/* Prayer cards feed */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4" ref={prayerListRef}>
           {filteredPrayers.map((prayer, index) => {
             const isFirstQotd = index === firstQotdResponseIndex
+            const stagger = getPrayerStaggerProps(index)
             return (
-              <div key={prayer.id} ref={isFirstQotd ? firstQotdResponseRef : undefined}>
+              <div
+                key={prayer.id}
+                ref={isFirstQotd ? firstQotdResponseRef : undefined}
+                className={stagger.className}
+                style={stagger.style}
+              >
                 <PrayerCard prayer={prayer} onCategoryClick={handleSelectCategory}>
                   <InteractionBar
                     prayer={prayer}

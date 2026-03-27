@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { PrayerCategory } from '@/constants/prayer-categories'
@@ -9,6 +9,9 @@ import { AnsweredBadge } from './AnsweredBadge'
 import { CategoryBadge } from './CategoryBadge'
 import { QotdBadge } from './QotdBadge'
 import { formatFullDate } from '@/lib/time'
+
+const PulseContext = createContext<(() => void) | null>(null)
+export function usePrayerCardPulse() { return useContext(PulseContext) }
 
 const TRUNCATE_LENGTH = 150
 
@@ -21,6 +24,17 @@ interface PrayerCardProps {
 
 export function PrayerCard({ prayer, showFull = false, onCategoryClick, children }: PrayerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const articleRef = useRef<HTMLElement>(null)
+  const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const triggerPulse = useCallback(() => {
+    const el = articleRef.current
+    if (!el) return
+    el.classList.add('motion-safe:animate-card-pulse')
+    if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current)
+    pulseTimeoutRef.current = setTimeout(() => {
+      el.classList.remove('motion-safe:animate-card-pulse')
+    }, 300)
+  }, [])
   const challengeData = prayer.challengeId ? getChallenge(prayer.challengeId) : null
   const needsTruncation = !showFull && prayer.content.length > TRUNCATE_LENGTH
 
@@ -36,7 +50,9 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
     : null
 
   return (
+    <PulseContext.Provider value={triggerPulse}>
     <article
+      ref={articleRef}
       className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20"
       aria-label={`Prayer by ${prayer.authorName}`}
     >
@@ -129,5 +145,6 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
         />
       )}
     </article>
+    </PulseContext.Provider>
   )
 }

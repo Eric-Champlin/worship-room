@@ -2,16 +2,21 @@ import { useRef, useCallback, useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { useAudioState, useAudioDispatch } from './AudioProvider'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { cn } from '@/lib/utils'
 import { DrawerNowPlaying } from './DrawerNowPlaying'
 import { DrawerTabs } from './DrawerTabs'
 import { RoutineStepper } from './RoutineStepper'
 
 const SWIPE_THRESHOLD = 50
+const SPRING_TIMING = 'cubic-bezier(0.34, 1.2, 0.64, 1)'
 
 export function AudioDrawer() {
   const state = useAudioState()
   const dispatch = useAudioDispatch()
   const [swipeOffset, setSwipeOffset] = useState(0)
+  const [isEntering, setIsEntering] = useState(false)
+  const reducedMotion = useReducedMotion()
   const touchStartY = useRef(0)
   const headerRef = useRef<HTMLDivElement>(null)
 
@@ -70,6 +75,15 @@ export function AudioDrawer() {
     touchStartY.current = 0
   }
 
+  // Track entering state for spring animation
+  useEffect(() => {
+    if (state.drawerOpen && !reducedMotion) {
+      setIsEntering(true)
+      const timer = setTimeout(() => setIsEntering(false), 300)
+      return () => clearTimeout(timer)
+    }
+  }, [state.drawerOpen, reducedMotion])
+
   if (!state.drawerOpen) return null
 
   return (
@@ -87,7 +101,10 @@ export function AudioDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label="Audio controls"
-        className="fixed z-[10001] flex flex-col overflow-hidden rounded-t-2xl border border-white/10 lg:rounded-none lg:border-l lg:border-t-0 lg:border-b-0 lg:border-r-0 bottom-0 left-0 right-0 h-[70vh] lg:top-0 lg:right-0 lg:left-auto lg:bottom-0 lg:h-full lg:w-[400px]"
+        className={cn(
+          'fixed z-[10001] flex flex-col overflow-hidden rounded-t-2xl border border-white/10 lg:rounded-none lg:border-l lg:border-t-0 lg:border-b-0 lg:border-r-0 bottom-0 left-0 right-0 h-[70vh] lg:top-0 lg:right-0 lg:left-auto lg:bottom-0 lg:h-full lg:w-[400px]',
+          !reducedMotion && isEntering && 'motion-safe:animate-bottom-sheet-slide-in lg:motion-safe:animate-drawer-slide-in',
+        )}
         style={{
           background: 'rgba(15, 10, 30, 0.95)',
           backdropFilter: 'blur(16px)',

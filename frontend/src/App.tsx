@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { lazy, Suspense } from 'react'
+import { PageTransition } from '@/components/ui/PageTransition'
 
 // Route-level lazy loading for code splitting
 const Home = lazy(() => import('./pages/Home').then((m) => ({ default: m.Home })))
@@ -135,6 +136,7 @@ function App() {
         <UpdatePrompt />
         <InstallBanner />
         <Suspense fallback={<RouteLoadingFallback />}>
+        <PageTransition>
         <Routes>
           <Route path="/" element={<RootRoute />} />
           <Route path="/health" element={<Health />} />
@@ -186,6 +188,7 @@ function App() {
           <Route path="/register" element={<ComingSoon title="Get Started" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </PageTransition>
         </Suspense>
         </AudioProvider>
         </AuthModalProvider>

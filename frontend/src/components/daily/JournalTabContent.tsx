@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowUpDown, BookOpen, Mic, MicOff, PenLine, RefreshCw, Search, X } from 'lucide-react'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
@@ -171,6 +172,9 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
     return entries
   }, [savedEntries, debouncedSearch, modeFilter, sortDirection])
+
+  const { containerRef: entryListRef, getStaggerProps: getEntryStaggerProps } =
+    useStaggeredEntrance({ staggerDelay: 50, itemCount: filteredEntries.length })
 
   const clearFilters = () => {
     setSearchText('')
@@ -669,10 +673,14 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           )}
 
           {/* Entry Cards */}
-          {filteredEntries.map((entry) => (
+          <div ref={entryListRef} className="space-y-6">
+          {filteredEntries.map((entry, entryIndex) => {
+            const stagger = getEntryStaggerProps(entryIndex)
+            return (
             <article
               key={entry.id}
-              className="rounded-lg border border-white/10 bg-white/[0.06] backdrop-blur-sm p-4"
+              className={cn('rounded-lg border border-white/10 bg-white/[0.06] backdrop-blur-sm p-4', stagger.className)}
+              style={stagger.style}
               aria-label={`Journal entry from ${formatDateTime(new Date(entry.timestamp))}`}
             >
               <p className="mb-2 text-xs text-white/40">
@@ -712,7 +720,9 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
                 </button>
               )}
             </article>
-          ))}
+            )
+          })}
+          </div>
         </section>
       )}
 

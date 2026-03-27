@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Bell, WifiOff, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -92,6 +93,34 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
   const navigate = useNavigate()
   const location = useLocation()
   const drawerRef = useRef<HTMLElement>(null)
+  const reducedMotion = useReducedMotion()
+  const [isClosing, setIsClosing] = useState(false)
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+
+  const handleAnimatedClose = useCallback(() => {
+    if (reducedMotion) {
+      onClose()
+      return
+    }
+    setIsClosing(true)
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsClosing(false)
+      onClose()
+    }, 200)
+  }, [onClose, reducedMotion])
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsClosing(false)
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    }
+  }, [])
 
   // Seasonal banner state for mobile drawer
   const { isNamedSeason, seasonName, icon: seasonIcon, currentSeason } = useLiturgicalSeason()
@@ -150,21 +179,29 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
   return (
     <>
       {/* Backdrop */}
-      {isOpen && (
+      {(isOpen || isClosing) && (
         <div
-          className="fixed inset-0 z-40 bg-black/20 md:hidden"
-          onClick={onClose}
+          className={cn(
+            'fixed inset-0 z-40 bg-black/20 md:hidden',
+            isClosing ? 'motion-safe:animate-backdrop-fade-out' : 'motion-safe:animate-backdrop-fade-in',
+          )}
+          onClick={handleAnimatedClose}
           aria-hidden="true"
         />
       )}
 
-      {/* Drawer panel — always dark theme */}
-      {isOpen && (
+      {/* Drawer panel — slide from right */}
+      {(isOpen || isClosing) && (
         <nav
           ref={drawerRef}
           id="mobile-menu"
           aria-label="Mobile navigation"
-          className="relative z-50 mt-2 rounded-xl bg-hero-mid border border-white/15 shadow-lg motion-safe:animate-dropdown-in md:hidden"
+          className={cn(
+            'fixed right-0 top-0 bottom-0 z-50 w-[280px] overflow-y-auto bg-hero-mid border-l border-white/15 shadow-lg md:hidden',
+            isClosing
+              ? 'motion-safe:animate-drawer-slide-out'
+              : 'motion-safe:animate-drawer-slide-in',
+          )}
         >
           <div className="flex flex-col px-4 py-4">
             {/* Seasonal banner — mobile drawer */}

@@ -574,7 +574,7 @@ export function BibleReader() {
               No content available for this chapter.
             </div>
           ) : (
-            <div className="py-8 sm:py-12">
+            <div key={`${bookSlug}-${chapterNumber}`} className="py-8 sm:py-12 motion-safe:animate-content-fade-in">
               {verses.map((verse, index) => {
                 const highlight = chapterHighlights.find(
                   (h) => h.verseNumber === verse.number,

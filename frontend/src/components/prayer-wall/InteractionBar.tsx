@@ -3,6 +3,7 @@ import { HandHelping, MessageCircle, Bookmark, Share2, Plus, Check } from 'lucid
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from './AuthModalProvider'
+import { usePrayerCardPulse } from './PrayerCard'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ShareDropdown, getShareText } from './ShareDropdown'
 import type { PrayerRequest, PrayerReaction } from '@/types/prayer-wall'
@@ -34,6 +35,7 @@ export function InteractionBar({
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { playSoundEffect } = useSoundEffects()
+  const triggerPulse = usePrayerCardPulse()
   const isPraying = reactions?.isPraying ?? false
   const isBookmarked = reactions?.isBookmarked ?? false
 
@@ -58,9 +60,11 @@ export function InteractionBar({
     setIsAnimating(true)
     onTogglePraying()
     playSoundEffect('whisper')
+    triggerPulse?.()
     animationTimeoutRef.current = setTimeout(() => {
       setIsAnimating(false)
     }, 600)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- triggerPulse is stable context ref
   }, [isPraying, onTogglePraying, playSoundEffect])
 
   useEffect(() => {
@@ -149,7 +153,7 @@ export function InteractionBar({
       {isAuthenticated ? (
         <button
           type="button"
-          onClick={onToggleBookmark}
+          onClick={() => { onToggleBookmark(); triggerPulse?.() }}
           className={cn(
             btnBase,
             isBookmarked
@@ -201,7 +205,7 @@ export function InteractionBar({
       ) : isAuthenticated ? (
         <button
           type="button"
-          onClick={onToggleSave}
+          onClick={() => { onToggleSave?.(); triggerPulse?.() }}
           className={cn(btnBase, 'text-white/50 hover:text-primary')}
           aria-label="Save to your prayer list"
         >

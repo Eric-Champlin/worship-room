@@ -41,7 +41,7 @@ describe('Toast (standard)', () => {
     expect(screen.getByText('Test message')).toBeInTheDocument()
 
     act(() => {
-      vi.advanceTimersByTime(6000)
+      vi.advanceTimersByTime(6200) // 6000ms auto-dismiss + 200ms exit animation
     })
     expect(screen.queryByText('Test message')).not.toBeInTheDocument()
     vi.useRealTimers()
@@ -262,9 +262,9 @@ describe('Toast (celebration)', () => {
     })
     expect(screen.getByText('Test Badge')).toBeInTheDocument()
 
-    // Gone after 4s
+    // Gone after 4s + 200ms exit animation
     act(() => {
-      vi.advanceTimersByTime(200)
+      vi.advanceTimersByTime(400)
     })
     expect(screen.queryByText('Test Badge')).not.toBeInTheDocument()
 

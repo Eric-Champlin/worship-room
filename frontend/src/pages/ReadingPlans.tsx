@@ -10,6 +10,7 @@ import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
+import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { READING_PLANS } from '@/data/reading-plans'
 import { getCustomPlanIds } from '@/utils/custom-plans-storage'
 import type { PlanDifficulty, ReadingPlan } from '@/types/reading-plans'
@@ -118,6 +119,9 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
     })
   }, [filteredPlans, getPlanStatus])
 
+  const { containerRef: planGridRef, getStaggerProps: getPlanStaggerProps } =
+    useStaggeredEntrance({ staggerDelay: 80, itemCount: sortedPlans.length })
+
   const handleStartOrContinue = useCallback(
     (planId: string) => {
       if (!isAuthenticated) {
@@ -216,17 +220,21 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
               onCtaClick={handleCreatePlan}
             />
           ) : sortedPlans.length > 0 ? (
-            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {sortedPlans.map((plan: ReadingPlan) => (
-                <PlanCard
-                  key={plan.id}
-                  plan={plan}
-                  status={getPlanStatus(plan.id)}
-                  progress={getProgress(plan.id)}
-                  onStart={handleStartOrContinue}
-                  isCustom={customPlanIds.includes(plan.id)}
-                />
-              ))}
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2" ref={planGridRef}>
+              {sortedPlans.map((plan: ReadingPlan, index: number) => {
+                const stagger = getPlanStaggerProps(index)
+                return (
+                  <div key={plan.id} className={stagger.className} style={stagger.style}>
+                    <PlanCard
+                      plan={plan}
+                      status={getPlanStatus(plan.id)}
+                      progress={getProgress(plan.id)}
+                      onStart={handleStartOrContinue}
+                      isCustom={customPlanIds.includes(plan.id)}
+                    />
+                  </div>
+                )
+              })}
             </div>
           ) : (
             <div className="mt-12 text-center">

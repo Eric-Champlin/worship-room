@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 type AuthView = 'login' | 'register' | 'forgot-password'
 
@@ -22,14 +23,38 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView = 'login' }: AuthModalProps) {
   const [view, setView] = useState<AuthView>(initialView)
   const [resetEmail, setResetEmail] = useState('')
-  const containerRef = useFocusTrap(isOpen, onClose)
+  const [isClosing, setIsClosing] = useState(false)
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const reducedMotion = useReducedMotion()
+
+  const handleClose = useCallback(() => {
+    if (reducedMotion) {
+      onClose()
+      return
+    }
+    setIsClosing(true)
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsClosing(false)
+      onClose()
+    }, 150)
+  }, [onClose, reducedMotion])
+
+  const containerRef = useFocusTrap(isOpen, handleClose)
 
   useEffect(() => {
     if (isOpen) {
+      setIsClosing(false)
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
       document.body.style.overflow = 'hidden'
       return () => { document.body.style.overflow = '' }
     }
   }, [isOpen])
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    }
+  }, [])
 
   // Set view from initialView on open; clear fields on close
   useEffect(() => {
@@ -44,9 +69,9 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
     (e: React.FormEvent) => {
       e.preventDefault()
       onShowToast('Authentication coming soon')
-      onClose()
+      handleClose()
     },
-    [onClose, onShowToast],
+    [handleClose, onShowToast],
   )
 
   const handleForgotSubmit = useCallback(
@@ -59,12 +84,19 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
     [onShowToast],
   )
 
-  if (!isOpen) return null
+  if (!isOpen && !isClosing) return null
+
+  const backdropClass = isClosing
+    ? 'motion-safe:animate-backdrop-fade-out'
+    : 'motion-safe:animate-backdrop-fade-in'
+  const panelClass = isClosing
+    ? 'motion-safe:animate-modal-spring-out'
+    : 'motion-safe:animate-modal-spring-in'
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={onClose}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 ${backdropClass}`}
+      onClick={handleClose}
     >
       <div
         ref={containerRef}
@@ -72,7 +104,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         aria-describedby={subtitle && view !== 'forgot-password' ? 'auth-modal-subtitle' : undefined}
-        className="mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+        className={`mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl ${panelClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -82,7 +114,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full p-1 text-text-light transition-colors hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Close"
           >

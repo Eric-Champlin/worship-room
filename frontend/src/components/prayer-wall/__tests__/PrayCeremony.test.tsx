@@ -7,6 +7,17 @@ import { PrayerWall } from '@/pages/PrayerWall'
 
 const mockUser = { id: 'user-sim', name: 'Eric' }
 
+vi.mock('@/hooks/useReducedMotion', () => ({
+  useReducedMotion: () => false,
+}))
+
+vi.mock('@/hooks/useStaggeredEntrance', () => ({
+  useStaggeredEntrance: () => ({
+    containerRef: { current: null },
+    getStaggerProps: () => ({ className: '', style: {} }),
+  }),
+}))
+
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
     user: mockUser,
@@ -100,17 +111,21 @@ describe('Pray Ceremony', () => {
 
   it('no ceremony elements on pray toggle OFF', () => {
     renderPage()
+
+    // Let stagger/IntersectionObserver settle
+    act(() => { vi.advanceTimersByTime(0) })
+
     const prayButtons = screen.getAllByLabelText(/pray for this request/i)
 
     // Toggle ON
-    fireEvent.click(prayButtons[0])
+    act(() => { fireEvent.click(prayButtons[0]) })
     act(() => {
       vi.advanceTimersByTime(600)
     })
 
     // Toggle OFF
     const stopButtons = screen.getAllByLabelText(/stop praying for this request/i)
-    fireEvent.click(stopButtons[0])
+    act(() => { fireEvent.click(stopButtons[0]) })
     expect(screen.queryByText('+1 prayer')).not.toBeInTheDocument()
   })
 
@@ -151,14 +166,17 @@ describe('Pray Ceremony', () => {
   it('no toast on untoggle (clicking already-praying button)', () => {
     renderPage()
 
+    // Let stagger/IntersectionObserver settle
+    act(() => { vi.advanceTimersByTime(0) })
+
     // Mock data has some prayers already praying — click one to untoggle
     const stopButtons = screen.getAllByLabelText(/stop praying for this request/i)
     expect(stopButtons.length).toBeGreaterThan(0)
 
-    fireEvent.click(stopButtons[0])
+    act(() => { fireEvent.click(stopButtons[0]) })
 
     act(() => {
-      vi.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1200)
     })
 
     // No "lifted up" toast should appear for untoggle
@@ -167,10 +185,14 @@ describe('Pray Ceremony', () => {
 
   it('rapid toggle cancels pending toasts', () => {
     renderPage()
+
+    // Let stagger settle
+    act(() => { vi.advanceTimersByTime(0) })
+
     const prayButtons = screen.getAllByLabelText(/pray for this request/i)
 
     // Toggle ON
-    fireEvent.click(prayButtons[0])
+    act(() => { fireEvent.click(prayButtons[0]) })
 
     act(() => {
       vi.advanceTimersByTime(100)
@@ -178,10 +200,10 @@ describe('Pray Ceremony', () => {
 
     // Toggle OFF before ceremony completes
     const stopButtons = screen.getAllByLabelText(/stop praying for this request/i)
-    fireEvent.click(stopButtons[0])
+    act(() => { fireEvent.click(stopButtons[0]) })
 
     act(() => {
-      vi.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1200)
     })
 
     // No toast should have fired

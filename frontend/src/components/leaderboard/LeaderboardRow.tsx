@@ -35,7 +35,7 @@ export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index, sho
   const LevelIcon = LEVEL_ICONS[friend.level] || Sprout
   const points = metric === 'weekly' ? friend.weeklyPoints : friend.faithPoints
   const rankColor = RANK_COLORS[rank] || 'text-white/70'
-  const delay = Math.min(index * 50, 500)
+  const delay = Math.min(index * 30, 500)
 
   const handleRowClick = () => {
     navigate(`/profile/${friend.id}`)
