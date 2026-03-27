@@ -3,7 +3,7 @@ import { Heart, Check } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { containsCrisisKeyword } from '@/constants/crisis-resources'
-import { getTodayGratitude, saveGratitudeEntry } from '@/services/gratitude-storage'
+import { getGratitudeEntries, getTodayGratitude, saveGratitudeEntry } from '@/services/gratitude-storage'
 import { getDayOfYear } from '@/constants/dashboard/ai-insights'
 
 interface GratitudeWidgetProps {
@@ -54,6 +54,8 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
       setMode('saved')
     }
   }, [])
+
+  const [isFirstTime] = useState(() => getGratitudeEntries().length === 0)
 
   // Rotating placeholders (day-of-year modulo 3)
   const placeholderIndex = getDayOfYear() % 3
@@ -133,6 +135,12 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
   return (
     <div className="space-y-3">
       {showCrisis && <CrisisBanner text={combinedText} />}
+
+      {isFirstTime && (
+        <p className="text-sm italic text-white/40">
+          Count three blessings from today
+        </p>
+      )}
 
       <div className="space-y-2">
         {[0, 1, 2].map((i) => (

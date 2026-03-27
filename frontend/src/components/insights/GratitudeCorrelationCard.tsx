@@ -61,7 +61,13 @@ export function GratitudeCorrelationCard() {
     }
   }, [])
 
-  if (!data) return null
+  if (!data) {
+    return (
+      <p className="text-sm italic text-white/40">
+        Gratitude insights will grow as you count your blessings.
+      </p>
+    )
+  }
 
   return (
     <section

@@ -1,12 +1,13 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Star } from 'lucide-react'
 
 import { CreatePlanFlow } from '@/components/reading-plans/CreatePlanFlow'
 import { FilterBar } from '@/components/reading-plans/FilterBar'
 import { PlanCard } from '@/components/reading-plans/PlanCard'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLANS } from '@/data/reading-plans'
@@ -164,6 +165,11 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
     : null
   const activeProgress = activePlanId ? getProgress(activePlanId) : undefined
 
+  const allCompleted = useMemo(
+    () => READING_PLANS.every((plan) => getPlanStatus(plan.id) === 'completed'),
+    [getPlanStatus],
+  )
+
   if (showCreateFlow) {
     return <CreatePlanFlow onClose={() => setSearchParams({})} />
   }
@@ -201,7 +207,15 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
             onDifficultyChange={setSelectedDifficulty}
           />
 
-          {sortedPlans.length > 0 ? (
+          {allCompleted ? (
+            <FeatureEmptyState
+              icon={Star}
+              heading="You've completed every plan!"
+              description="New plans are coming. In the meantime, revisit your favorites or create your own."
+              ctaLabel="Create a custom plan"
+              onCtaClick={handleCreatePlan}
+            />
+          ) : sortedPlans.length > 0 ? (
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
               {sortedPlans.map((plan: ReadingPlan) => (
                 <PlanCard

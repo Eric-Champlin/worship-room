@@ -191,4 +191,24 @@ describe('BibleBrowser', () => {
       expect(otButton).toHaveAttribute('aria-expanded')
     })
   })
+
+  describe('highlights & notes empty state', () => {
+    it('shows empty state when no highlights and no notes', () => {
+      renderPage()
+      expect(
+        screen.getByText('Your Bible is ready to mark up'),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          'Tap any verse while reading to highlight it or add a personal note.',
+        ),
+      ).toBeInTheDocument()
+    })
+
+    it('CTA links to /bible/john/1', () => {
+      renderPage()
+      const link = screen.getByRole('link', { name: /start reading/i })
+      expect(link).toHaveAttribute('href', '/bible/john/1')
+    })
+  })
 })

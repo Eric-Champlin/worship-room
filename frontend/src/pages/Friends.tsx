@@ -57,9 +57,6 @@ export function Friends() {
     document.getElementById('invite-section')?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
-  const handleFocusSearch = useCallback(() => {
-    searchInputRef.current?.focus()
-  }, [])
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
@@ -154,7 +151,6 @@ export function Friends() {
                 onRemove={removeFriend}
                 onBlock={blockUser}
                 onScrollToInvite={handleScrollToInvite}
-                onFocusSearch={handleFocusSearch}
               />
               <SuggestionsSection
                 suggestions={suggestions}

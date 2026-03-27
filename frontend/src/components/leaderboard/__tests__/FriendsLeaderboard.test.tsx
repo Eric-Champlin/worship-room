@@ -120,15 +120,18 @@ describe('FriendsLeaderboard', () => {
     expect(items[2]).toHaveTextContent('James K.')
   })
 
-  it('shows empty state with "You vs. Yesterday" and encouraging message when no friends', () => {
+  it('shows Trophy empty state when no friends', () => {
     seedFriends([])
     renderComponent()
-    expect(screen.getByText('You vs. Yesterday')).toBeInTheDocument()
-    expect(screen.getByText(/compete with yourself/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Invite friends/ })).toHaveAttribute(
-      'href',
-      '/friends?tab=friends',
-    )
+    expect(screen.getByText('Friendly accountability')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Add friends to see how you encourage each other. No pressure — just love.',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /find friends/i }),
+    ).toBeInTheDocument()
   })
 
   it('rows use semantic ol/li', () => {

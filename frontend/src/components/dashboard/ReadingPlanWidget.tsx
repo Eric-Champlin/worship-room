@@ -217,8 +217,9 @@ export function ReadingPlanWidget() {
   // --- Discovery State ---
   return (
     <div className="space-y-3">
-      <p className="text-base font-semibold text-white">
-        Start a reading plan
+      <p className="text-sm font-semibold text-white">Start a guided journey</p>
+      <p className="mt-1 text-xs text-white/50">
+        Reading plans walk you through Scripture day by day.
       </p>
 
       <div className="space-y-2">

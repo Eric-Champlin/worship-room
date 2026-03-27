@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, BarChart3 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -14,6 +14,7 @@ import { MeditationHistory } from '@/components/insights/MeditationHistory'
 import { GratitudeStreak } from '@/components/insights/GratitudeStreak'
 import { GratitudeCorrelationCard } from '@/components/insights/GratitudeCorrelationCard'
 import { PrayerLifeSection } from '@/components/insights/PrayerLifeSection'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { SEO } from '@/components/SEO'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
@@ -235,26 +236,28 @@ export function Insights() {
         id="insights-content"
         className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6"
       >
-        {/* Insufficient data banner (1-6 entries) */}
-        {entries.length > 0 && entries.length < 7 && (
+        {/* Insufficient data banner (2-6 entries) */}
+        {entries.length >= 2 && entries.length < 7 && (
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-sm text-white/60 backdrop-blur-sm">
             After 7 days, you&apos;ll see trends emerge
           </div>
         )}
 
-        {/* Zero-data empty state */}
-        {entries.length === 0 && (
+        {/* Empty state (0-1 entries) */}
+        {entries.length < 2 && (
           <AnimatedSection index={0}>
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 py-16 text-center backdrop-blur-sm">
-              <p className="text-sm text-white/50">
-                Start checking in to unlock your mood insights
-              </p>
-            </div>
+            <FeatureEmptyState
+              icon={BarChart3}
+              heading="Your story is just beginning"
+              description="Check in with your mood each day, and watch your journey unfold here."
+              ctaLabel="Check in now"
+              ctaHref="/"
+            />
           </AnimatedSection>
         )}
 
-        {/* Charts (only when data exists) */}
-        {entries.length > 0 && (
+        {/* Charts (only when 2+ entries exist) */}
+        {entries.length >= 2 && (
           <>
             <AnimatedSection index={0}>
               <CalendarHeatmap rangeDays={rangeDays} />

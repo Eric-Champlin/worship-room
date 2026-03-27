@@ -203,8 +203,8 @@ describe('Friends Page', () => {
     localStorage.setItem(FRIENDS_KEY, JSON.stringify(emptyData))
 
     renderFriends()
-    expect(screen.getByText('Invite someone to grow together')).toBeInTheDocument()
-    expect(screen.getByText('Invite a Friend')).toBeInTheDocument()
+    expect(screen.getByText('Faith grows stronger together')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /invite a friend/i })).toBeInTheDocument()
   })
 
   // --- Pending section hides when empty ---

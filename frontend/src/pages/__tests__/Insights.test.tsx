@@ -175,7 +175,7 @@ describe('Insights — full page integration', () => {
 
     // Zero-data empty state replaces charts
     expect(
-      screen.getByText('Start checking in to unlock your mood insights'),
+      screen.getByText('Your story is just beginning'),
     ).toBeInTheDocument()
     // Insight cards empty
     expect(
@@ -201,6 +201,7 @@ describe('Insights — full page integration', () => {
   it('time range change updates heatmap and chart', async () => {
     seedEntries([
       makeMoodEntry({ date: daysAgo(0), mood: 4, moodLabel: 'Good' }),
+      makeMoodEntry({ date: daysAgo(1), mood: 3, moodLabel: 'Okay' }),
     ])
     const user = userEvent.setup()
     renderInsights()

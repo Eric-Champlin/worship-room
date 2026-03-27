@@ -174,4 +174,15 @@ describe('GratitudeWidget', () => {
     expect(input3.tabIndex).not.toBe(-1)
     expect(saveBtn.tabIndex).not.toBe(-1)
   })
+
+  it('shows helper text when no gratitude entries exist', () => {
+    renderWidget()
+    expect(screen.getByText('Count three blessings from today')).toBeInTheDocument()
+  })
+
+  it('hides helper text when entries exist', () => {
+    seedTodayEntry()
+    renderWidget()
+    expect(screen.queryByText('Count three blessings from today')).not.toBeInTheDocument()
+  })
 })

@@ -23,7 +23,7 @@ function renderWidget() {
 describe('ReadingPlanWidget', () => {
   it('discovery state: shows suggested plans when no active plan', () => {
     renderWidget()
-    expect(screen.getByText('Start a reading plan')).toBeInTheDocument()
+    expect(screen.getByText('Start a guided journey')).toBeInTheDocument()
     expect(screen.getByText('Browse all plans')).toBeInTheDocument()
   })
 

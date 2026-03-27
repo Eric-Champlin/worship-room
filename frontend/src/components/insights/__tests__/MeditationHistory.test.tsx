@@ -70,7 +70,7 @@ describe('MeditationHistory', () => {
   it('shows empty state when no data', () => {
     render(<MeditationHistory rangeDays={30} />)
     expect(
-      screen.getByText(/start a meditation to see your history here/i),
+      screen.getByText(/meditation trends will appear after your first few sessions/i),
     ).toBeInTheDocument()
   })
 

@@ -51,7 +51,6 @@ function renderFriendList(friends: FriendProfile[] = FRIENDS) {
   const onRemove = vi.fn()
   const onBlock = vi.fn()
   const onScrollToInvite = vi.fn()
-  const onFocusSearch = vi.fn()
 
   const result = render(
     <MemoryRouter>
@@ -60,12 +59,11 @@ function renderFriendList(friends: FriendProfile[] = FRIENDS) {
         onRemove={onRemove}
         onBlock={onBlock}
         onScrollToInvite={onScrollToInvite}
-        onFocusSearch={onFocusSearch}
       />
     </MemoryRouter>,
   )
 
-  return { ...result, onRemove, onBlock, onScrollToInvite, onFocusSearch }
+  return { ...result, onRemove, onBlock, onScrollToInvite }
 }
 
 describe('FriendList', () => {
@@ -140,15 +138,18 @@ describe('FriendList', () => {
 
   it('empty state renders when no friends', () => {
     renderFriendList([])
-    expect(screen.getByText('Invite someone to grow together')).toBeInTheDocument()
-    expect(screen.getByText('Invite a Friend')).toBeInTheDocument()
-    expect(screen.getByText('Search for friends')).toBeInTheDocument()
+    expect(screen.getByText('Faith grows stronger together')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Invite a friend to join your journey, or find people from the Prayer Wall community.',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('invite CTA calls onScrollToInvite', async () => {
     const user = userEvent.setup()
     const { onScrollToInvite } = renderFriendList([])
-    await user.click(screen.getByText('Invite a Friend'))
+    await user.click(screen.getByRole('button', { name: /invite a friend/i }))
     expect(onScrollToInvite).toHaveBeenCalled()
   })
 

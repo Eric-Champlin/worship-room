@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowUpDown, BookOpen, Mic, MicOff, RefreshCw, Search, X } from 'lucide-react'
+import { ArrowUpDown, BookOpen, Mic, MicOff, PenLine, RefreshCw, Search, X } from 'lucide-react'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
@@ -20,6 +20,7 @@ import {
   getJournalReflection,
 } from '@/mocks/daily-experience-mock-data'
 import { cn } from '@/lib/utils'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { JournalMode, SavedJournalEntry, PrayContext } from '@/types/daily-experience'
 
@@ -713,6 +714,20 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
             </article>
           ))}
         </section>
+      )}
+
+      {/* Empty state for no saved entries */}
+      {!hasSavedEntries && isAuthenticated && (
+        <FeatureEmptyState
+          icon={PenLine}
+          heading="Your journal is waiting"
+          description="Every thought you write becomes a conversation with God. Start with whatever's on your heart."
+          ctaLabel="Write your first entry"
+          onCtaClick={() => {
+            textareaRef.current?.scrollIntoView({ behavior: 'smooth' })
+            textareaRef.current?.focus()
+          }}
+        />
       )}
     </div>
   )

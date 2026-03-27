@@ -117,3 +117,35 @@ describe('PrayerWall', () => {
     expect(allPill).toHaveAttribute('aria-pressed', 'false')
   })
 })
+
+vi.mock('@/mocks/prayer-wall-mock-data', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/mocks/prayer-wall-mock-data')>()
+  return {
+    ...original,
+    getMockPrayers: vi.fn(original.getMockPrayers),
+  }
+})
+
+describe('PrayerWall empty states', () => {
+  it('shows filtered empty state with category name when filter yields no results', async () => {
+    const { getMockPrayers } = await import('@/mocks/prayer-wall-mock-data')
+    vi.mocked(getMockPrayers).mockReturnValue([])
+
+    renderPage('/prayer-wall?category=discussion')
+
+    expect(screen.getByText(/No prayers in Discussion yet/i)).toBeInTheDocument()
+    expect(screen.getByText('Be the first to share.')).toBeInTheDocument()
+  })
+
+  it('shows feed empty state when no prayers exist and no filter active', async () => {
+    const { getMockPrayers } = await import('@/mocks/prayer-wall-mock-data')
+    vi.mocked(getMockPrayers).mockReturnValue([])
+
+    renderPage('/prayer-wall')
+
+    expect(screen.getByText('This space is for you')).toBeInTheDocument()
+    expect(
+      screen.getByText("Share what's on your heart, or simply pray for others."),
+    ).toBeInTheDocument()
+  })
+})

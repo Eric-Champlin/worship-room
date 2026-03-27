@@ -1,6 +1,7 @@
 import { Flame } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { CHALLENGES } from '@/data/challenges'
 import { useChallengeProgress } from '@/hooks/useChallengeProgress'
 import { getActiveChallengeInfo, getNextChallengeInfo } from '@/lib/challenge-calendar'
@@ -158,6 +159,11 @@ export function ChallengeWidget() {
 
   // Fallback: no challenges at all
   return (
-    <p className="text-sm text-white/50">New challenges are coming soon</p>
+    <FeatureEmptyState
+      icon={Flame}
+      heading="Challenges bring us together"
+      description="Seasonal challenges happen throughout the year. The next one is coming soon!"
+      compact
+    />
   )
 }

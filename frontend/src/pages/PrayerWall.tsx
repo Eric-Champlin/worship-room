@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { LayoutDashboard } from 'lucide-react'
+import { Heart, LayoutDashboard, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -14,6 +14,7 @@ import { CategoryFilterBar } from '@/components/prayer-wall/CategoryFilterBar'
 import { QuestionOfTheDay } from '@/components/prayer-wall/QuestionOfTheDay'
 import { QotdComposer } from '@/components/prayer-wall/QotdComposer'
 import { Button } from '@/components/ui/Button'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
@@ -457,26 +458,38 @@ function PrayerWallContent() {
           })}
         </div>
 
+        {/* Empty state for empty feed (no posts at all) */}
+        {filteredPrayers.length === 0 && !activeCategory && (
+          <FeatureEmptyState
+            icon={Heart}
+            heading="This space is for you"
+            description="Share what's on your heart, or simply pray for others."
+            ctaLabel="Share a prayer request"
+            onCtaClick={() => {
+              if (isAuthenticated) {
+                setComposerOpen(true)
+              } else {
+                openAuthModal?.('Sign in to share a prayer request')
+              }
+            }}
+          />
+        )}
+
         {/* Empty state for filtered views */}
         {filteredPrayers.length === 0 && activeCategory && (
-          <div className="flex flex-col items-center py-16 text-center">
-            <p className="mb-4 text-lg text-white/60">
-              No prayers in this category yet. Be the first to share.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                if (isAuthenticated) {
-                  setComposerOpen(true)
-                } else {
-                  openAuthModal?.('Sign in to share a prayer request')
-                }
-              }}
-              className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt"
-            >
-              Share a Prayer Request
-            </button>
-          </div>
+          <FeatureEmptyState
+            icon={Search}
+            heading={`No prayers in ${CATEGORY_LABELS[activeCategory]} yet`}
+            description="Be the first to share."
+            ctaLabel="Share a prayer request"
+            onCtaClick={() => {
+              if (isAuthenticated) {
+                setComposerOpen(true)
+              } else {
+                openAuthModal?.('Sign in to share a prayer request')
+              }
+            }}
+          />
         )}
 
         {/* Load More */}

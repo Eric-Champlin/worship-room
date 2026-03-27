@@ -327,3 +327,55 @@ describe('Voice Input', () => {
     expect(screen.getByLabelText('Voice input unavailable — microphone access denied')).toBeInTheDocument()
   })
 })
+
+// --- Journal Empty State Tests ---
+
+describe('JournalTabContent empty state', () => {
+  it('shows empty state when no saved entries and authenticated', () => {
+    renderJournalTab()
+    expect(screen.getByText('Your journal is waiting')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "Every thought you write becomes a conversation with God. Start with whatever's on your heart.",
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('does not show empty state when entries exist', async () => {
+    const user = userEvent.setup()
+    renderJournalTab()
+
+    // Save an entry to move from 0 → 1 saved entries
+    const textarea = screen.getByLabelText('Journal entry')
+    await user.type(textarea, 'Today I feel grateful for many things')
+    const saveBtn = screen.getByRole('button', { name: /save entry/i })
+    await user.click(saveBtn)
+
+    expect(screen.queryByText('Your journal is waiting')).not.toBeInTheDocument()
+  })
+
+  it('does not show empty state when logged out', () => {
+    localStorage.removeItem('wr_auth_simulated')
+    renderJournalTab()
+    expect(screen.queryByText('Your journal is waiting')).not.toBeInTheDocument()
+  })
+
+  it('CTA scrolls to and focuses textarea', async () => {
+    const user = userEvent.setup()
+    renderJournalTab()
+
+    const cta = screen.getByRole('button', {
+      name: /write your first entry/i,
+    })
+    const textarea = screen.getByLabelText('Journal entry')
+
+    const scrollSpy = vi.fn()
+    textarea.scrollIntoView = scrollSpy
+    const focusSpy = vi.spyOn(textarea, 'focus')
+
+    await user.click(cta)
+
+    expect(scrollSpy).toHaveBeenCalled()
+    expect(focusSpy).toHaveBeenCalled()
+  })
+})

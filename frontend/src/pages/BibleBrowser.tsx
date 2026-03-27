@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Highlighter } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
 import { BibleBooksMode } from '@/components/bible/BibleBooksMode'
@@ -6,6 +7,7 @@ import { BibleSearchMode } from '@/components/bible/BibleSearchMode'
 import { HighlightsNotesSection } from '@/components/bible/HighlightsNotesSection'
 import { SegmentedControl } from '@/components/bible/SegmentedControl'
 import type { BibleBrowserMode } from '@/components/bible/SegmentedControl'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { useAuth } from '@/hooks/useAuth'
@@ -58,10 +60,18 @@ export function BibleBrowser() {
           {mode === 'books' ? <BibleBooksMode /> : <BibleSearchMode />}
 
           {/* My Highlights & Notes section */}
-          {isAuthenticated && hasAnnotations && (
+          {isAuthenticated && hasAnnotations ? (
             <HighlightsNotesSection
               highlights={highlights}
               notes={notes}
+            />
+          ) : (
+            <FeatureEmptyState
+              icon={Highlighter}
+              heading="Your Bible is ready to mark up"
+              description="Tap any verse while reading to highlight it or add a personal note."
+              ctaLabel="Start reading"
+              ctaHref="/bible/john/1"
             />
           )}
         </div>

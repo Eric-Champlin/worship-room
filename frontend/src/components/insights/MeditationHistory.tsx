@@ -313,8 +313,8 @@ export function MeditationHistory({ rangeDays }: MeditationHistoryProps) {
             </div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-sm text-white/50">
-              Start a meditation to see your history here
+            <p className="text-sm italic text-white/40">
+              Meditation trends will appear after your first few sessions.
             </p>
           </div>
         </div>

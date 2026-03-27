@@ -29,12 +29,14 @@ beforeEach(() => {
 })
 
 describe('GratitudeCorrelationCard', () => {
-  it('returns null when no gratitude entries', () => {
-    const { container } = render(<GratitudeCorrelationCard />)
-    expect(container.querySelector('section')).toBeNull()
+  it('shows inline empty state when no gratitude entries', () => {
+    render(<GratitudeCorrelationCard />)
+    expect(
+      screen.getByText(/gratitude insights will grow as you count your blessings/i),
+    ).toBeInTheDocument()
   })
 
-  it('returns null when exactly 4 qualifying days', () => {
+  it('shows inline empty state when exactly 4 qualifying days', () => {
     const moods = [
       makeMoodEntry('2026-03-01', 4),
       makeMoodEntry('2026-03-02', 3),
@@ -51,8 +53,10 @@ describe('GratitudeCorrelationCard', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
     localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
 
-    const { container } = render(<GratitudeCorrelationCard />)
-    expect(container.querySelector('section')).toBeNull()
+    render(<GratitudeCorrelationCard />)
+    expect(
+      screen.getByText(/gratitude insights will grow as you count your blessings/i),
+    ).toBeInTheDocument()
   })
 
   it('renders card when 5+ qualifying days exist', () => {
