@@ -52,7 +52,8 @@ export interface StreakData {
 // Badge types (Spec 7)
 
 export type CelebrationTier = 'toast' | 'toast-confetti' | 'special-toast' | 'full-screen';
-export type BadgeCategory = 'streak' | 'level' | 'activity' | 'community' | 'special' | 'challenge';
+export type BadgeCategory = 'streak' | 'level' | 'activity' | 'community' | 'special' | 'challenge'
+  | 'meditation' | 'prayer-wall' | 'bible' | 'gratitude' | 'local-support' | 'listening';
 
 export interface BadgeEarnedEntry {
   earnedAt: string;
@@ -71,6 +72,9 @@ export interface ActivityCounts {
   encouragementsSent: number;
   fullWorshipDays: number;
   challengesCompleted: number;
+  intercessionCount: number;
+  bibleChaptersRead: number;
+  prayerWallPosts: number;
 }
 
 export interface BadgeData {

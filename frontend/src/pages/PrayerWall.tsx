@@ -18,6 +18,7 @@ import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { getBadgeData, saveBadgeData } from '@/services/badge-storage'
 import { useOpenSet } from '@/hooks/useOpenSet'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
 import { getMockPrayers, getMockComments } from '@/mocks/prayer-wall-mock-data'
@@ -182,6 +183,15 @@ function PrayerWallContent() {
       }
       setPrayers((prev) => [newPrayer, ...prev])
       setComposerOpen(false)
+      recordActivity('prayerWall')
+      const badgeData = getBadgeData()
+      saveBadgeData({
+        ...badgeData,
+        activityCounts: {
+          ...badgeData.activityCounts,
+          prayerWallPosts: badgeData.activityCounts.prayerWallPosts + 1,
+        },
+      })
       showToast('Your prayer has been shared.')
     },
     [user, isAuthenticated, showToast],
@@ -248,6 +258,19 @@ function PrayerWallContent() {
       if (!wasPraying) {
         recordActivity('prayerWall')
 
+        // Only count as intercession if not praying for own prayer
+        const prayer = prayers.find((p) => p.id === prayerId)
+        if (prayer?.userId !== user?.id) {
+          const badgeData = getBadgeData()
+          saveBadgeData({
+            ...badgeData,
+            activityCounts: {
+              ...badgeData.activityCounts,
+              intercessionCount: badgeData.activityCounts.intercessionCount + 1,
+            },
+          })
+        }
+
         // Success toast after 600ms ceremony
         const successTimeout = setTimeout(() => {
           showToast('Your prayer has been lifted up')
@@ -255,7 +278,6 @@ function PrayerWallContent() {
         ceremonyTimeoutRefs.current.push(successTimeout)
 
         // Author notification: check if prayer author is the logged-in user
-        const prayer = prayers.find((p) => p.id === prayerId)
         if (prayer?.userId && prayer.userId === user?.id) {
           const authorTimeout = setTimeout(() => {
             showCelebrationToast(

@@ -201,6 +201,38 @@ const challengeBadges: BadgeDefinition[] = [
   { id: 'challenge_master', name: 'Challenge Master', description: 'Completed all 5 community challenges', category: 'challenge', celebrationTier: 'full-screen' },
 ];
 
+const meditationMilestoneBadges: BadgeDefinition[] = [
+  { id: 'meditate_10', name: 'Peaceful Beginner', description: '10 sessions of stillness. Your mind is learning to rest in God.', category: 'meditation', celebrationTier: 'toast-confetti' },
+  { id: 'meditate_50', name: 'Contemplative Heart', description: '50 moments of meditation. God meets you in the silence.', category: 'meditation', celebrationTier: 'special-toast' },
+  { id: 'meditate_100', name: 'Master of Stillness', description: '100 meditations. You\'ve built a practice that will carry you for a lifetime.', category: 'meditation', celebrationTier: 'full-screen' },
+];
+
+const prayerWallMilestoneBadges: BadgeDefinition[] = [
+  { id: 'prayerwall_first_post', name: 'First Prayer Shared', description: 'You shared your heart with the community. That takes courage.', category: 'prayer-wall', celebrationTier: 'toast-confetti' },
+  { id: 'prayerwall_10_posts', name: 'Prayer Warrior', description: 'You\'ve shared 10 prayers. You\'re building a community of faith.', category: 'prayer-wall', celebrationTier: 'toast-confetti' },
+  { id: 'prayerwall_25_intercessions', name: 'Intercessor', description: 'You\'ve lifted 25 people in prayer. Heaven notices.', category: 'prayer-wall', celebrationTier: 'special-toast' },
+];
+
+const bibleReadingMilestoneBadges: BadgeDefinition[] = [
+  { id: 'bible_first_chapter', name: 'First Chapter', description: 'Your first chapter! The Word is a lamp to your feet.', category: 'bible', celebrationTier: 'toast' },
+  { id: 'bible_10_chapters', name: 'Bible Explorer', description: '10 chapters explored. You\'re discovering the depth of God\'s Word.', category: 'bible', celebrationTier: 'toast-confetti' },
+  { id: 'bible_25_chapters', name: 'Scripture Scholar', description: '25 chapters. You\'re building a foundation that will never crack.', category: 'bible', celebrationTier: 'special-toast' },
+];
+
+const gratitudeMilestoneBadges: BadgeDefinition[] = [
+  { id: 'gratitude_7_streak', name: 'Thankful Heart', description: 'A week of gratitude. Your perspective is shifting.', category: 'gratitude', celebrationTier: 'toast-confetti' },
+  { id: 'gratitude_30_days', name: 'Gratitude Habit', description: '30 days of counting blessings. Gratitude is becoming part of who you are.', category: 'gratitude', celebrationTier: 'toast-confetti' },
+  { id: 'gratitude_100_days', name: 'Overflowing Cup', description: '100 days of gratitude. Your cup truly overflows.', category: 'gratitude', celebrationTier: 'full-screen' },
+];
+
+const localSupportBadges: BadgeDefinition[] = [
+  { id: 'local_first_visit', name: 'Community Seeker', description: 'You took a step into your local community. That matters.', category: 'local-support', celebrationTier: 'toast-confetti' },
+];
+
+const listeningBadges: BadgeDefinition[] = [
+  { id: 'listen_10_hours', name: 'Worship Listener', description: '10 hours of worship and peace. Music is your companion in faith.', category: 'listening', celebrationTier: 'toast-confetti' },
+];
+
 const welcomeBadge: BadgeDefinition = {
   id: 'welcome',
   name: 'Welcome to Worship Room',
@@ -218,6 +250,12 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   fullWorshipDayBadge,
   ...communityBadges,
   ...challengeBadges,
+  ...meditationMilestoneBadges,
+  ...prayerWallMilestoneBadges,
+  ...bibleReadingMilestoneBadges,
+  ...gratitudeMilestoneBadges,
+  ...localSupportBadges,
+  ...listeningBadges,
   welcomeBadge,
 ];
 
@@ -239,6 +277,9 @@ export const FRESH_ACTIVITY_COUNTS: ActivityCounts = {
   encouragementsSent: 0,
   fullWorshipDays: 0,
   challengesCompleted: 0,
+  intercessionCount: 0,
+  bibleChaptersRead: 0,
+  prayerWallPosts: 0,
 };
 
 export const FRESH_BADGE_DATA: BadgeData = {

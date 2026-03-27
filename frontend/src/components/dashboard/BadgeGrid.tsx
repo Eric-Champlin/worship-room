@@ -25,7 +25,7 @@ const BADGE_GRID_SECTIONS = [
   },
   {
     label: 'Activity Milestones',
-    badgeIds: ['prayer_100', 'journal_50', 'journal_100', 'meditate_25', 'listen_50', 'first_plan', 'plans_3', 'plans_10'],
+    badgeIds: ['prayer_100', 'journal_50', 'journal_100', 'meditate_25', 'listen_50'],
   },
   {
     label: 'First Steps',
@@ -37,7 +37,43 @@ const BADGE_GRID_SECTIONS = [
   },
   {
     label: 'Community',
-    badgeIds: ['friends_10', 'encourage_10', 'encourage_50'],
+    badgeIds: ['friends_10', 'encourage_10', 'encourage_50', 'local_support_5'],
+  },
+  {
+    label: 'Bible Books',
+    badgeIds: ['bible_book_1', 'bible_book_5', 'bible_book_10', 'bible_book_66'],
+  },
+  {
+    label: 'Reading Plans',
+    badgeIds: ['first_plan', 'plans_3', 'plans_10'],
+  },
+  {
+    label: 'Challenges',
+    badgeIds: ['challenge_first', 'challenge_lent', 'challenge_easter', 'challenge_pentecost', 'challenge_advent', 'challenge_newyear', 'challenge_master'],
+  },
+  {
+    label: 'Meditation Milestones',
+    badgeIds: ['meditate_10', 'meditate_50', 'meditate_100'],
+  },
+  {
+    label: 'Prayer Wall',
+    badgeIds: ['prayerwall_first_post', 'prayerwall_10_posts', 'prayerwall_25_intercessions'],
+  },
+  {
+    label: 'Bible Reading',
+    badgeIds: ['bible_first_chapter', 'bible_10_chapters', 'bible_25_chapters'],
+  },
+  {
+    label: 'Gratitude',
+    badgeIds: ['gratitude_7_streak', 'gratitude_30_days', 'gratitude_100_days'],
+  },
+  {
+    label: 'Local Support',
+    badgeIds: ['local_first_visit'],
+  },
+  {
+    label: 'Listening',
+    badgeIds: ['listen_10_hours'],
   },
 ]
 

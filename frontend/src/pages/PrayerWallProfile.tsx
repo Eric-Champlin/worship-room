@@ -9,8 +9,10 @@ import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
+import { useAuth } from '@/hooks/useAuth'
 import { useOpenSet } from '@/hooks/useOpenSet'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
+import { getBadgeData, saveBadgeData } from '@/services/badge-storage'
 import { useToast } from '@/components/ui/Toast'
 import {
   getMockUser,
@@ -30,13 +32,36 @@ const tabs: { key: ProfileTab; label: string }[] = [
 
 function PrayerWallProfileContent() {
   const { id } = useParams<{ id: string }>()
-  const user = id ? getMockUser(id) : undefined
+  const profileUser = id ? getMockUser(id) : undefined
+  const { user: currentUser } = useAuth()
   const [activeTab, setActiveTab] = useState<ProfileTab>('prayers')
   const { reactions, togglePraying, toggleBookmark } = usePrayerReactions()
   const { showToast } = useToast()
   const { openSet: openComments, toggle: handleToggleComments } = useOpenSet()
 
   const allPrayers = useMemo(() => getMockPrayers(), [])
+
+  const handleTogglePraying = useCallback(
+    (prayerId: string) => {
+      const wasPraying = togglePraying(prayerId)
+      if (!wasPraying) {
+        // Only count as intercession if not praying for own prayer
+        const prayer = allPrayers.find((p) => p.id === prayerId)
+        if (prayer?.userId !== currentUser?.id) {
+          const badgeData = getBadgeData()
+          saveBadgeData({
+            ...badgeData,
+            activityCounts: {
+              ...badgeData.activityCounts,
+              intercessionCount: badgeData.activityCounts.intercessionCount + 1,
+            },
+          })
+        }
+      }
+    },
+    [togglePraying, allPrayers, currentUser],
+  )
+
   const allComments = getMockAllComments()
   const [prayers, setPrayers] = useState<PrayerRequest[]>(allPrayers)
 
@@ -59,7 +84,7 @@ function PrayerWallProfileContent() {
     [showToast],
   )
 
-  if (!user) {
+  if (!profileUser) {
     return (
       <PageShell>
         <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
@@ -96,8 +121,8 @@ function PrayerWallProfileContent() {
   return (
     <PageShell>
       <SEO
-        title={`${user.firstName}'s Prayers`}
-        description={`Prayers shared by ${user.firstName} on the Worship Room community prayer wall.`}
+        title={`${profileUser.firstName}'s Prayers`}
+        description={`Prayers shared by ${profileUser.firstName} on the Worship Room community prayer wall.`}
       />
       <main
         id="main-content"
@@ -107,7 +132,7 @@ function PrayerWallProfileContent() {
           <Breadcrumb
             items={[
               { label: 'Prayer Wall', href: '/prayer-wall' },
-              { label: `${user.firstName}'s Profile` },
+              { label: `${profileUser.firstName}'s Profile` },
             ]}
             maxWidth="max-w-[720px]"
           />
@@ -116,23 +141,23 @@ function PrayerWallProfileContent() {
         {/* Profile header */}
         <header className="mb-6 flex flex-col items-center text-center">
           <Avatar
-            firstName={user.firstName}
-            lastName={user.lastName}
-            avatarUrl={user.avatarUrl}
+            firstName={profileUser.firstName}
+            lastName={profileUser.lastName}
+            avatarUrl={profileUser.avatarUrl}
             size="lg"
-            userId={user.id}
-            alt={`${user.firstName}'s profile photo`}
+            userId={profileUser.id}
+            alt={`${profileUser.firstName}'s profile photo`}
           />
           <h1 className="mt-3 text-xl font-semibold text-white">
-            {user.firstName}
+            {profileUser.firstName}
           </h1>
-          {user.bio && (
+          {profileUser.bio && (
             <p className="mt-2 max-w-md font-serif italic text-white/70">
-              {user.bio}
+              {profileUser.bio}
             </p>
           )}
           <p className="mt-1 text-sm text-white/60">
-            Joined: {formatFullDate(user.joinedDate)}
+            Joined: {formatFullDate(profileUser.joinedDate)}
           </p>
         </header>
 
@@ -189,7 +214,7 @@ function PrayerWallProfileContent() {
                     <InteractionBar
                       prayer={prayer}
                       reactions={reactions[prayer.id]}
-                      onTogglePraying={() => togglePraying(prayer.id)}
+                      onTogglePraying={() => handleTogglePraying(prayer.id)}
                       onToggleComments={() => handleToggleComments(prayer.id)}
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
@@ -246,7 +271,7 @@ function PrayerWallProfileContent() {
                     <InteractionBar
                       prayer={prayer}
                       reactions={reactions[prayer.id]}
-                      onTogglePraying={() => togglePraying(prayer.id)}
+                      onTogglePraying={() => handleTogglePraying(prayer.id)}
                       onToggleComments={() => handleToggleComments(prayer.id)}
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}

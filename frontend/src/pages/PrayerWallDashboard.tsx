@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { getBadgeData, saveBadgeData } from '@/services/badge-storage'
 import { useOpenSet } from '@/hooks/useOpenSet'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
 import {
@@ -44,7 +45,7 @@ const NOTIFICATION_TYPES = [
 ]
 
 function DashboardContent() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { showToast } = useToast()
   const { recordActivity } = useFaithPoints()
   const [activeTab, setActiveTab] = useState<DashboardTab>('prayers')
@@ -67,9 +68,21 @@ function DashboardContent() {
       const wasPraying = togglePraying(prayerId)
       if (!wasPraying) {
         recordActivity('prayerWall')
+        // Only count as intercession if not praying for own prayer
+        const prayer = prayers.find((p) => p.id === prayerId)
+        if (prayer?.userId !== user?.id) {
+          const badgeData = getBadgeData()
+          saveBadgeData({
+            ...badgeData,
+            activityCounts: {
+              ...badgeData.activityCounts,
+              intercessionCount: badgeData.activityCounts.intercessionCount + 1,
+            },
+          })
+        }
       }
     },
-    [togglePraying, recordActivity],
+    [togglePraying, recordActivity, prayers, user],
   )
 
   const handleMarkAnswered = useCallback(

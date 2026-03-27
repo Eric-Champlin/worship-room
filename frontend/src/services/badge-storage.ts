@@ -32,6 +32,9 @@ function fillActivityCounts(partial: Partial<ActivityCounts>): ActivityCounts {
     encouragementsSent: typeof partial.encouragementsSent === 'number' ? partial.encouragementsSent : 0,
     fullWorshipDays: typeof partial.fullWorshipDays === 'number' ? partial.fullWorshipDays : 0,
     challengesCompleted: typeof partial.challengesCompleted === 'number' ? partial.challengesCompleted : 0,
+    intercessionCount: typeof partial.intercessionCount === 'number' ? partial.intercessionCount : 0,
+    bibleChaptersRead: typeof partial.bibleChaptersRead === 'number' ? partial.bibleChaptersRead : 0,
+    prayerWallPosts: typeof partial.prayerWallPosts === 'number' ? partial.prayerWallPosts : 0,
   };
 }
 

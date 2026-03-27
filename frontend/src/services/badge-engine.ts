@@ -6,6 +6,8 @@ import {
 } from '@/constants/dashboard/badges';
 import { getUniqueVisitedPlaces } from '@/services/local-visit-storage';
 import { BIBLE_BOOKS } from '@/constants/bible';
+import { getMeditationHistory } from '@/services/meditation-storage';
+import { getGratitudeEntries } from '@/services/gratitude-storage';
 
 export interface BadgeCheckContext {
   streak: StreakData;
@@ -171,6 +173,141 @@ export function checkForNewBadges(
     }
   } catch {
     // Malformed localStorage — skip Bible book badge check
+  }
+
+  // 9. Meditation session milestones (from wr_meditation_history)
+  const MEDITATION_SESSION_BADGES: Record<number, string> = {
+    10: 'meditate_10',
+    50: 'meditate_50',
+    100: 'meditate_100',
+  };
+
+  try {
+    const sessions = getMeditationHistory();
+    const sessionCount = sessions.length;
+    for (const [threshold, badgeId] of Object.entries(MEDITATION_SESSION_BADGES)) {
+      if (sessionCount >= Number(threshold) && !earned[badgeId]) {
+        result.push(badgeId);
+      }
+    }
+  } catch {
+    // Malformed localStorage — skip meditation session badge check
+  }
+
+  // 10. Prayer Wall post milestones (from activityCounts.prayerWallPosts)
+  const PRAYER_POST_BADGES: Record<number, string> = {
+    1: 'prayerwall_first_post',
+    10: 'prayerwall_10_posts',
+  };
+
+  for (const [threshold, badgeId] of Object.entries(PRAYER_POST_BADGES)) {
+    if (context.activityCounts.prayerWallPosts >= Number(threshold) && !earned[badgeId]) {
+      result.push(badgeId);
+    }
+  }
+
+  // 11. Intercessor badge (from activityCounts.intercessionCount)
+  if (context.activityCounts.intercessionCount >= 25 && !earned['prayerwall_25_intercessions']) {
+    result.push('prayerwall_25_intercessions');
+  }
+
+  // 12. Bible chapter milestones (from wr_bible_progress, total chapters across all books)
+  const BIBLE_CHAPTER_BADGES: Record<number, string> = {
+    1: 'bible_first_chapter',
+    10: 'bible_10_chapters',
+    25: 'bible_25_chapters',
+  };
+
+  try {
+    const progressJson = localStorage.getItem('wr_bible_progress');
+    if (progressJson) {
+      const progressMap = JSON.parse(progressJson) as Record<string, number[]>;
+      let totalChapters = 0;
+      for (const chapters of Object.values(progressMap)) {
+        if (Array.isArray(chapters)) {
+          totalChapters += chapters.length;
+        }
+      }
+      for (const [threshold, badgeId] of Object.entries(BIBLE_CHAPTER_BADGES)) {
+        if (totalChapters >= Number(threshold) && !earned[badgeId]) {
+          result.push(badgeId);
+        }
+      }
+    }
+  } catch {
+    // Malformed localStorage — skip Bible chapter badge check
+  }
+
+  // 13. Gratitude milestones (from wr_gratitude_entries)
+  try {
+    const entries = getGratitudeEntries();
+    const uniqueDates = new Set(entries.map(e => e.date));
+    const totalDays = uniqueDates.size;
+
+    // Total days badges
+    const GRATITUDE_TOTAL_BADGES: Record<number, string> = {
+      30: 'gratitude_30_days',
+      100: 'gratitude_100_days',
+    };
+    for (const [threshold, badgeId] of Object.entries(GRATITUDE_TOTAL_BADGES)) {
+      if (totalDays >= Number(threshold) && !earned[badgeId]) {
+        result.push(badgeId);
+      }
+    }
+
+    // Consecutive streak badge (7 days)
+    if (!earned['gratitude_7_streak'] && totalDays >= 7) {
+      const sortedDates = Array.from(uniqueDates).sort();
+      let maxConsecutive = 1;
+      let currentConsecutive = 1;
+      for (let i = 1; i < sortedDates.length; i++) {
+        const prev = new Date(sortedDates[i - 1] + 'T12:00:00');
+        const curr = new Date(sortedDates[i] + 'T12:00:00');
+        const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) {
+          currentConsecutive++;
+          maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
+        } else {
+          currentConsecutive = 1;
+        }
+      }
+      if (maxConsecutive >= 7) {
+        result.push('gratitude_7_streak');
+      }
+    }
+  } catch {
+    // Malformed localStorage — skip gratitude badge check
+  }
+
+  // 14. Local support first visit (from wr_local_visits)
+  if (!earned['local_first_visit']) {
+    try {
+      const { total } = getUniqueVisitedPlaces();
+      if (total >= 1) {
+        result.push('local_first_visit');
+      }
+    } catch {
+      // Malformed localStorage — skip local first visit badge check
+    }
+  }
+
+  // 15. Worship Listener (from wr_listening_history, 10 hours = 36000 seconds)
+  if (!earned['listen_10_hours']) {
+    try {
+      const historyJson = localStorage.getItem('wr_listening_history');
+      if (historyJson) {
+        const sessions = JSON.parse(historyJson) as Array<{ durationSeconds?: number }>;
+        const totalSeconds = sessions.reduce(
+          (sum, s) => sum + (typeof s.durationSeconds === 'number' ? s.durationSeconds : 0),
+          0,
+        );
+        if (totalSeconds >= 36000) {
+          result.push('listen_10_hours');
+        }
+      }
+    } catch {
+      // Malformed localStorage — skip listening badge check
+    }
   }
 
   return result;

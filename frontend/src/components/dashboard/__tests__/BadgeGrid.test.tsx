@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BadgeGrid } from '../BadgeGrid'
-// BadgeGrid renders from BADGE_GRID_SECTIONS (32 badges), not all of BADGE_DEFINITIONS (39)
+// BadgeGrid renders from BADGE_GRID_SECTIONS (58 badges across 15 sections)
 
 describe('BadgeGrid', () => {
   beforeEach(() => {
@@ -17,6 +17,15 @@ describe('BadgeGrid', () => {
     expect(screen.getByText('First Steps')).toBeInTheDocument()
     expect(screen.getByText('Full Worship Day')).toBeInTheDocument()
     expect(screen.getByText('Community')).toBeInTheDocument()
+    expect(screen.getByText('Bible Books')).toBeInTheDocument()
+    expect(screen.getByText('Reading Plans')).toBeInTheDocument()
+    expect(screen.getByText('Challenges')).toBeInTheDocument()
+    expect(screen.getByText('Meditation Milestones')).toBeInTheDocument()
+    expect(screen.getByText('Prayer Wall')).toBeInTheDocument()
+    expect(screen.getByText('Bible Reading')).toBeInTheDocument()
+    expect(screen.getByText('Gratitude')).toBeInTheDocument()
+    expect(screen.getByText('Local Support')).toBeInTheDocument()
+    expect(screen.getByText('Listening')).toBeInTheDocument()
   })
 
   it('earned badges do not have grayscale class', () => {
@@ -92,15 +101,15 @@ describe('BadgeGrid', () => {
     expect(fwdBtn).toBeInTheDocument()
   })
 
-  it('renders all badge cells (32 total from BADGE_GRID_SECTIONS)', () => {
+  it('renders all badge cells (58 total from BADGE_GRID_SECTIONS)', () => {
     render(<BadgeGrid />)
 
     // Count all badge cell buttons (buttons with aria-labels)
-    // BadgeGrid renders badges from BADGE_GRID_SECTIONS, not all of BADGE_DEFINITIONS
+    // BadgeGrid renders badges from BADGE_GRID_SECTIONS across 15 sections
     const buttons = screen.getAllByRole('button').filter(
       (btn) => btn.getAttribute('aria-label') && btn.getAttribute('aria-label') !== 'Close badge collection',
     )
-    expect(buttons.length).toBe(32)
+    expect(buttons.length).toBe(58)
   })
 
   it('empty badge data does not crash — all badges locked', () => {
@@ -112,11 +121,11 @@ describe('BadgeGrid', () => {
 
     render(<BadgeGrid />)
 
-    // BadgeGrid renders badges from BADGE_GRID_SECTIONS (32), not all of BADGE_DEFINITIONS
+    // BadgeGrid renders badges from BADGE_GRID_SECTIONS (58), all locked when no earned data
     const buttons = screen.getAllByRole('button').filter(
       (btn) => btn.getAttribute('aria-label')?.includes('Locked'),
     )
-    expect(buttons.length).toBe(32)
+    expect(buttons.length).toBe(58)
   })
 
   it('corrupted localStorage data does not crash', () => {

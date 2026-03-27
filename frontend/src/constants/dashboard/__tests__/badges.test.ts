@@ -7,6 +7,7 @@ import {
   FRESH_BADGE_DATA,
   FRESH_ACTIVITY_COUNTS,
 } from '../badges';
+import { getBadgeIcon } from '../badge-icons';
 
 describe('BADGE_DEFINITIONS', () => {
   it('all badge definitions have unique IDs', () => {
@@ -21,15 +22,20 @@ describe('BADGE_DEFINITIONS', () => {
       expect(badge.description).toBeTruthy();
       expect(badge.category).toBeTruthy();
       expect(badge.celebrationTier).toBeTruthy();
-      expect(['streak', 'level', 'activity', 'community', 'special', 'challenge']).toContain(badge.category);
+      expect([
+        'streak', 'level', 'activity', 'community', 'special', 'challenge',
+        'meditation', 'prayer-wall', 'bible', 'gratitude', 'local-support', 'listening',
+      ]).toContain(badge.category);
       expect(['toast', 'toast-confetti', 'special-toast', 'full-screen']).toContain(badge.celebrationTier);
     }
   });
 
-  it('total unique badge IDs count is 44', () => {
+  it('total unique badge IDs count is 58', () => {
     const ids = BADGE_DEFINITIONS.map((b) => b.id);
-    // 7 streak + 6 level + 9 activity milestones + 3 reading plan + 4 bible book + 1 full_worship_day + 6 community/first-time + 7 challenge + 1 welcome
-    expect(new Set(ids).size).toBe(44);
+    // 7 streak + 6 level + 9 activity + 3 reading plan + 4 bible book + 1 full_worship_day
+    // + 6 community + 7 challenge + 1 welcome
+    // + 3 meditation + 3 prayer-wall + 3 bible-reading + 3 gratitude + 1 local-support + 1 listening
+    expect(new Set(ids).size).toBe(58);
   });
 });
 
@@ -260,12 +266,15 @@ describe('FRESH_BADGE_DATA', () => {
       encouragementsSent: 0,
       fullWorshipDays: 0,
       challengesCompleted: 0,
+      intercessionCount: 0,
+      bibleChaptersRead: 0,
+      prayerWallPosts: 0,
     });
   });
 
   it('FRESH_ACTIVITY_COUNTS has all zero values', () => {
     const keys = Object.keys(FRESH_ACTIVITY_COUNTS);
-    expect(keys).toHaveLength(11);
+    expect(keys).toHaveLength(14);
     for (const key of keys) {
       expect(FRESH_ACTIVITY_COUNTS[key as keyof typeof FRESH_ACTIVITY_COUNTS]).toBe(0);
     }
@@ -304,5 +313,80 @@ describe('challenge badges', () => {
 
   it('challenge_master has full-screen tier', () => {
     expect(BADGE_MAP['challenge_master'].celebrationTier).toBe('full-screen');
+  });
+});
+
+describe('meditation milestone badges', () => {
+  it('3 definitions with correct IDs and categories', () => {
+    const badges = BADGE_DEFINITIONS.filter(b => b.category === 'meditation');
+    expect(badges).toHaveLength(3);
+    expect(badges.map(b => b.id)).toEqual(['meditate_10', 'meditate_50', 'meditate_100']);
+  });
+
+  it('celebration tiers: 10=toast-confetti, 50=special-toast, 100=full-screen', () => {
+    expect(BADGE_MAP['meditate_10'].celebrationTier).toBe('toast-confetti');
+    expect(BADGE_MAP['meditate_50'].celebrationTier).toBe('special-toast');
+    expect(BADGE_MAP['meditate_100'].celebrationTier).toBe('full-screen');
+  });
+});
+
+describe('prayer wall milestone badges', () => {
+  it('3 definitions with correct IDs', () => {
+    const badges = BADGE_DEFINITIONS.filter(b => b.category === 'prayer-wall');
+    expect(badges).toHaveLength(3);
+    for (const id of ['prayerwall_first_post', 'prayerwall_10_posts', 'prayerwall_25_intercessions']) {
+      expect(BADGE_MAP[id]).toBeDefined();
+    }
+  });
+});
+
+describe('bible reading milestone badges', () => {
+  it('3 definitions with correct IDs', () => {
+    const badges = BADGE_DEFINITIONS.filter(b => b.category === 'bible');
+    expect(badges).toHaveLength(3);
+    for (const id of ['bible_first_chapter', 'bible_10_chapters', 'bible_25_chapters']) {
+      expect(BADGE_MAP[id]).toBeDefined();
+    }
+  });
+});
+
+describe('gratitude milestone badges', () => {
+  it('3 definitions with correct IDs', () => {
+    const badges = BADGE_DEFINITIONS.filter(b => b.category === 'gratitude');
+    expect(badges).toHaveLength(3);
+  });
+});
+
+describe('local support badges (new)', () => {
+  it('local_first_visit has correct properties', () => {
+    const badge = BADGE_MAP['local_first_visit'];
+    expect(badge).toBeDefined();
+    expect(badge.category).toBe('local-support');
+    expect(badge.celebrationTier).toBe('toast-confetti');
+  });
+});
+
+describe('listening badges', () => {
+  it('listen_10_hours has correct properties', () => {
+    const badge = BADGE_MAP['listen_10_hours'];
+    expect(badge).toBeDefined();
+    expect(badge.category).toBe('listening');
+    expect(badge.celebrationTier).toBe('toast-confetti');
+  });
+});
+
+describe('new badge icon mappings', () => {
+  const newBadgeIds = [
+    'meditate_10', 'meditate_50', 'meditate_100',
+    'prayerwall_first_post', 'prayerwall_10_posts', 'prayerwall_25_intercessions',
+    'bible_first_chapter', 'bible_10_chapters', 'bible_25_chapters',
+    'gratitude_7_streak', 'gratitude_30_days', 'gratitude_100_days',
+    'local_first_visit', 'listen_10_hours',
+  ];
+
+  it.each(newBadgeIds)('%s has an explicit icon mapping', (badgeId) => {
+    const config = getBadgeIcon(badgeId);
+    expect(config.icon).toBeDefined();
+    expect(config.bgColor).toBeTruthy();
   });
 });

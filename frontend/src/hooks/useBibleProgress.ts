@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 
 import { BIBLE_PROGRESS_KEY, BIBLE_BOOKS } from '@/constants/bible'
 import { useAuth } from '@/hooks/useAuth'
+import { getBadgeData, saveBadgeData } from '@/services/badge-storage'
 import type { BibleProgressMap } from '@/types/bible'
 
 function readProgress(): BibleProgressMap {
@@ -46,6 +47,16 @@ export function useBibleProgress(): {
       const updated = { ...current, [bookSlug]: [...bookProgress, chapter] }
       writeProgress(updated)
       setProgress(updated)
+
+      // Increment Bible chapters read counter for badges
+      const badgeData = getBadgeData()
+      saveBadgeData({
+        ...badgeData,
+        activityCounts: {
+          ...badgeData.activityCounts,
+          bibleChaptersRead: badgeData.activityCounts.bibleChaptersRead + 1,
+        },
+      })
 
       // Check if the book is now complete
       const bookData = BIBLE_BOOKS.find(b => b.slug === bookSlug)

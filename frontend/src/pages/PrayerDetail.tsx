@@ -14,6 +14,7 @@ import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
+import { getBadgeData, saveBadgeData } from '@/services/badge-storage'
 import { getMockPrayers, getMockComments } from '@/mocks/prayer-wall-mock-data'
 import type { PrayerRequest } from '@/types/prayer-wall'
 
@@ -35,10 +36,23 @@ function PrayerDetailContent() {
   const handleTogglePraying = useCallback(() => {
     if (!prayer) return
     const wasPraying = togglePraying(prayer.id)
+    if (!wasPraying) {
+      // Only count as intercession if not praying for own prayer
+      if (prayer.userId !== user?.id) {
+        const badgeData = getBadgeData()
+        saveBadgeData({
+          ...badgeData,
+          activityCounts: {
+            ...badgeData.activityCounts,
+            intercessionCount: badgeData.activityCounts.intercessionCount + 1,
+          },
+        })
+      }
+    }
     setPrayer((prev) =>
       prev ? { ...prev, prayingCount: prev.prayingCount + (wasPraying ? -1 : 1) } : prev,
     )
-  }, [prayer, togglePraying])
+  }, [prayer, togglePraying, user])
 
   const handleToggleBookmark = useCallback(() => {
     if (!prayer) return

@@ -397,3 +397,292 @@ describe('checkForNewBadges — local support badge', () => {
     expect(result).not.toContain('local_support_5');
   });
 });
+
+// --- New badge checks (missing-badge-definitions spec) ---
+
+describe('checkForNewBadges — meditation session badges', () => {
+  beforeEach(() => { localStorage.clear(); });
+
+  function seedSessions(count: number): void {
+    const sessions = Array.from({ length: count }, (_, i) => ({
+      id: `s-${i}`,
+      date: `2026-03-${String(i + 1).padStart(2, '0')}`,
+      type: 'breathing',
+      durationMinutes: 5,
+    }));
+    localStorage.setItem('wr_meditation_history', JSON.stringify(sessions));
+  }
+
+  it('meditate_10 fires at 10 sessions', () => {
+    seedSessions(10);
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('meditate_10');
+  });
+
+  it('meditate_10 does NOT fire at 9 sessions', () => {
+    seedSessions(9);
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).not.toContain('meditate_10');
+  });
+
+  it('meditate_50 fires at 50 sessions', () => {
+    seedSessions(50);
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('meditate_50');
+  });
+
+  it('meditate_50 does NOT fire at 49 sessions', () => {
+    seedSessions(49);
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).not.toContain('meditate_50');
+  });
+
+  it('meditate_100 fires at 100 sessions', () => {
+    seedSessions(100);
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('meditate_100');
+  });
+
+  it('meditate_100 does NOT fire at 99 sessions', () => {
+    seedSessions(99);
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).not.toContain('meditate_100');
+  });
+
+  it('already-earned meditation badges not re-returned', () => {
+    seedSessions(100);
+    const earned = {
+      meditate_10: { earnedAt: '2026-03-10T00:00:00Z' },
+      meditate_50: { earnedAt: '2026-03-15T00:00:00Z' },
+    };
+    const result = checkForNewBadges(makeContext(), earned);
+    expect(result).not.toContain('meditate_10');
+    expect(result).not.toContain('meditate_50');
+    expect(result).toContain('meditate_100');
+  });
+});
+
+describe('checkForNewBadges — prayer wall post badges', () => {
+  it('prayerwall_first_post fires at prayerWallPosts: 1', () => {
+    const ctx = makeContext({ activityCounts: { ...FRESH_ACTIVITY_COUNTS, prayerWallPosts: 1 } });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('prayerwall_first_post');
+  });
+
+  it('prayerwall_first_post does NOT fire at prayerWallPosts: 0', () => {
+    const ctx = makeContext({ activityCounts: { ...FRESH_ACTIVITY_COUNTS, prayerWallPosts: 0 } });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('prayerwall_first_post');
+  });
+
+  it('prayerwall_10_posts fires at prayerWallPosts: 10', () => {
+    const ctx = makeContext({ activityCounts: { ...FRESH_ACTIVITY_COUNTS, prayerWallPosts: 10 } });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('prayerwall_10_posts');
+  });
+
+  it('prayerwall_10_posts does NOT fire at prayerWallPosts: 9', () => {
+    const ctx = makeContext({ activityCounts: { ...FRESH_ACTIVITY_COUNTS, prayerWallPosts: 9 } });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('prayerwall_10_posts');
+  });
+
+  it('already-earned post badges not re-returned', () => {
+    const ctx = makeContext({ activityCounts: { ...FRESH_ACTIVITY_COUNTS, prayerWallPosts: 10 } });
+    const earned = { prayerwall_first_post: { earnedAt: '2026-03-01T00:00:00Z' } };
+    const result = checkForNewBadges(ctx, earned);
+    expect(result).not.toContain('prayerwall_first_post');
+    expect(result).toContain('prayerwall_10_posts');
+  });
+});
+
+describe('checkForNewBadges — intercessor badge', () => {
+  it('prayerwall_25_intercessions fires at intercessionCount: 25', () => {
+    const ctx = makeContext({ activityCounts: { ...FRESH_ACTIVITY_COUNTS, intercessionCount: 25 } });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).toContain('prayerwall_25_intercessions');
+  });
+
+  it('prayerwall_25_intercessions does NOT fire at intercessionCount: 24', () => {
+    const ctx = makeContext({ activityCounts: { ...FRESH_ACTIVITY_COUNTS, intercessionCount: 24 } });
+    const result = checkForNewBadges(ctx, {});
+    expect(result).not.toContain('prayerwall_25_intercessions');
+  });
+
+  it('already-earned not re-returned', () => {
+    const ctx = makeContext({ activityCounts: { ...FRESH_ACTIVITY_COUNTS, intercessionCount: 30 } });
+    const earned = { prayerwall_25_intercessions: { earnedAt: '2026-03-20T00:00:00Z' } };
+    const result = checkForNewBadges(ctx, earned);
+    expect(result).not.toContain('prayerwall_25_intercessions');
+  });
+});
+
+describe('checkForNewBadges — Bible chapter badges', () => {
+  beforeEach(() => { localStorage.clear(); });
+
+  it('bible_first_chapter fires at 1 total chapter', () => {
+    localStorage.setItem('wr_bible_progress', JSON.stringify({ genesis: [1] }));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('bible_first_chapter');
+  });
+
+  it('bible_10_chapters fires at 10 total chapters across books', () => {
+    localStorage.setItem('wr_bible_progress', JSON.stringify({
+      genesis: [1, 2, 3, 4, 5],
+      exodus: [1, 2, 3, 4, 5],
+    }));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('bible_10_chapters');
+  });
+
+  it('bible_25_chapters fires at 25 total chapters', () => {
+    localStorage.setItem('wr_bible_progress', JSON.stringify({
+      genesis: Array.from({ length: 25 }, (_, i) => i + 1),
+    }));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('bible_25_chapters');
+  });
+
+  it('no badge fires at 0 chapters', () => {
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).not.toContain('bible_first_chapter');
+    expect(result).not.toContain('bible_10_chapters');
+    expect(result).not.toContain('bible_25_chapters');
+  });
+
+  it('chapters spread across multiple books are summed', () => {
+    localStorage.setItem('wr_bible_progress', JSON.stringify({
+      genesis: [1, 2],
+      exodus: [1, 2, 3],
+      ruth: [1, 2, 3, 4],
+      jonah: [1],
+    }));
+    // Total: 2 + 3 + 4 + 1 = 10
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('bible_10_chapters');
+  });
+});
+
+describe('checkForNewBadges — gratitude badges', () => {
+  beforeEach(() => { localStorage.clear(); });
+
+  function seedGratitude(dates: string[]): void {
+    const entries = dates.map((date, i) => ({
+      id: `g-${i}`,
+      date,
+      items: ['Thankful'],
+      createdAt: `${date}T12:00:00Z`,
+    }));
+    localStorage.setItem('wr_gratitude_entries', JSON.stringify(entries));
+  }
+
+  function consecutiveDates(count: number, startDate = '2026-01-01'): string[] {
+    const dates: string[] = [];
+    const start = new Date(startDate + 'T12:00:00');
+    for (let i = 0; i < count; i++) {
+      const d = new Date(start.getTime() + i * 86400000);
+      dates.push(d.toISOString().split('T')[0]);
+    }
+    return dates;
+  }
+
+  it('gratitude_7_streak fires with 7 consecutive dates', () => {
+    seedGratitude(consecutiveDates(7));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('gratitude_7_streak');
+  });
+
+  it('gratitude_7_streak does NOT fire with 6 consecutive dates', () => {
+    seedGratitude(consecutiveDates(6));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).not.toContain('gratitude_7_streak');
+  });
+
+  it('gratitude_7_streak does NOT fire with 7 non-consecutive dates', () => {
+    // Dates with gaps — every other day
+    const dates = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date('2026-01-01T12:00:00');
+      d.setDate(d.getDate() + i * 2); // Every other day
+      return d.toISOString().split('T')[0];
+    });
+    seedGratitude(dates);
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).not.toContain('gratitude_7_streak');
+  });
+
+  it('gratitude_30_days fires at 30 unique dates', () => {
+    seedGratitude(consecutiveDates(30));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('gratitude_30_days');
+  });
+
+  it('gratitude_100_days fires at 100 unique dates', () => {
+    seedGratitude(consecutiveDates(100));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('gratitude_100_days');
+  });
+});
+
+describe('checkForNewBadges — local first visit badge', () => {
+  beforeEach(() => { localStorage.clear(); });
+
+  it('local_first_visit fires at 1 unique place', () => {
+    localStorage.setItem('wr_local_visits', JSON.stringify([
+      { id: '1', placeId: 'a', placeName: 'A', placeType: 'church', date: '2026-03-01', note: '' },
+    ]));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('local_first_visit');
+  });
+
+  it('local_first_visit does NOT fire at 0 places', () => {
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).not.toContain('local_first_visit');
+  });
+
+  it('local_first_visit not re-returned if earned', () => {
+    localStorage.setItem('wr_local_visits', JSON.stringify([
+      { id: '1', placeId: 'a', placeName: 'A', placeType: 'church', date: '2026-03-01', note: '' },
+    ]));
+    const earned = { local_first_visit: { earnedAt: '2026-03-01T00:00:00Z' } };
+    const result = checkForNewBadges(makeContext(), earned);
+    expect(result).not.toContain('local_first_visit');
+  });
+});
+
+describe('checkForNewBadges — listening badge', () => {
+  beforeEach(() => { localStorage.clear(); });
+
+  it('listen_10_hours fires at 36000 durationSeconds total', () => {
+    localStorage.setItem('wr_listening_history', JSON.stringify([
+      { id: '1', durationSeconds: 36000 },
+    ]));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('listen_10_hours');
+  });
+
+  it('listen_10_hours does NOT fire at 35999 seconds', () => {
+    localStorage.setItem('wr_listening_history', JSON.stringify([
+      { id: '1', durationSeconds: 35999 },
+    ]));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).not.toContain('listen_10_hours');
+  });
+
+  it('listen_10_hours sums across multiple sessions', () => {
+    localStorage.setItem('wr_listening_history', JSON.stringify([
+      { id: '1', durationSeconds: 20000 },
+      { id: '2', durationSeconds: 16000 },
+    ]));
+    const result = checkForNewBadges(makeContext(), {});
+    expect(result).toContain('listen_10_hours');
+  });
+
+  it('listen_10_hours not re-returned if earned', () => {
+    localStorage.setItem('wr_listening_history', JSON.stringify([
+      { id: '1', durationSeconds: 40000 },
+    ]));
+    const earned = { listen_10_hours: { earnedAt: '2026-03-15T00:00:00Z' } };
+    const result = checkForNewBadges(makeContext(), earned);
+    expect(result).not.toContain('listen_10_hours');
+  });
+});

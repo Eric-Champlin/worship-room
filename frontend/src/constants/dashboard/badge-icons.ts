@@ -18,6 +18,13 @@ import {
   Target,
   Sun,
   Star,
+  Wind,
+  MessageCircle,
+  Shield,
+  HandHelping,
+  Compass,
+  GraduationCap,
+  MapPin,
 } from 'lucide-react'
 import { BADGE_MAP } from './badges'
 
@@ -68,6 +75,42 @@ const CATEGORY_DEFAULTS: Record<string, BadgeIconConfig> = {
     bgColor: 'bg-purple-500/20',
     textColor: 'text-purple-400',
     glowColor: 'rgba(168,85,247,0.4)',
+  },
+  meditation: {
+    icon: Brain,
+    bgColor: 'bg-indigo-500/20',
+    textColor: 'text-indigo-400',
+    glowColor: 'rgba(99,102,241,0.4)',
+  },
+  'prayer-wall': {
+    icon: MessageCircle,
+    bgColor: 'bg-orange-500/20',
+    textColor: 'text-orange-400',
+    glowColor: 'rgba(249,115,22,0.4)',
+  },
+  bible: {
+    icon: BookOpen,
+    bgColor: 'bg-emerald-500/20',
+    textColor: 'text-emerald-400',
+    glowColor: 'rgba(52,211,153,0.4)',
+  },
+  gratitude: {
+    icon: Heart,
+    bgColor: 'bg-rose-400/20',
+    textColor: 'text-rose-400',
+    glowColor: 'rgba(251,113,133,0.4)',
+  },
+  'local-support': {
+    icon: MapPin,
+    bgColor: 'bg-cyan-500/20',
+    textColor: 'text-cyan-400',
+    glowColor: 'rgba(6,182,212,0.4)',
+  },
+  listening: {
+    icon: Headphones,
+    bgColor: 'bg-teal-500/20',
+    textColor: 'text-teal-400',
+    glowColor: 'rgba(20,184,166,0.4)',
   },
 }
 
@@ -351,6 +394,32 @@ const BADGE_ICON_MAP: Record<string, BadgeIconConfig> = {
     textColor: 'text-amber-300',
     glowColor: 'rgba(252,211,77,0.5)',
   },
+
+  // Meditation milestones
+  meditate_10: { icon: Wind, bgColor: 'bg-indigo-500/20', textColor: 'text-indigo-400', glowColor: 'rgba(99,102,241,0.4)' },
+  meditate_50: { icon: Heart, bgColor: 'bg-indigo-500/20', textColor: 'text-indigo-300', glowColor: 'rgba(99,102,241,0.4)' },
+  meditate_100: { icon: Sparkles, bgColor: 'bg-indigo-500/20', textColor: 'text-indigo-300', glowColor: 'rgba(99,102,241,0.5)' },
+
+  // Prayer Wall milestones
+  prayerwall_first_post: { icon: MessageCircle, bgColor: 'bg-orange-500/20', textColor: 'text-orange-400', glowColor: 'rgba(249,115,22,0.4)' },
+  prayerwall_10_posts: { icon: Shield, bgColor: 'bg-orange-500/20', textColor: 'text-orange-400', glowColor: 'rgba(249,115,22,0.4)' },
+  prayerwall_25_intercessions: { icon: HandHelping, bgColor: 'bg-orange-500/20', textColor: 'text-orange-300', glowColor: 'rgba(249,115,22,0.5)' },
+
+  // Bible reading milestones
+  bible_first_chapter: { icon: BookOpen, bgColor: 'bg-emerald-500/20', textColor: 'text-emerald-400', glowColor: 'rgba(52,211,153,0.3)' },
+  bible_10_chapters: { icon: Compass, bgColor: 'bg-emerald-500/20', textColor: 'text-emerald-400', glowColor: 'rgba(52,211,153,0.3)' },
+  bible_25_chapters: { icon: GraduationCap, bgColor: 'bg-emerald-500/20', textColor: 'text-emerald-300', glowColor: 'rgba(52,211,153,0.4)' },
+
+  // Gratitude milestones
+  gratitude_7_streak: { icon: Heart, bgColor: 'bg-rose-400/20', textColor: 'text-rose-400', glowColor: 'rgba(251,113,133,0.4)' },
+  gratitude_30_days: { icon: Sun, bgColor: 'bg-rose-400/20', textColor: 'text-rose-400', glowColor: 'rgba(251,113,133,0.4)' },
+  gratitude_100_days: { icon: Star, bgColor: 'bg-rose-400/20', textColor: 'text-rose-300', glowColor: 'rgba(251,113,133,0.5)' },
+
+  // Local support
+  local_first_visit: { icon: MapPin, bgColor: 'bg-cyan-500/20', textColor: 'text-cyan-400', glowColor: 'rgba(6,182,212,0.4)' },
+
+  // Listening
+  listen_10_hours: { icon: Headphones, bgColor: 'bg-teal-500/20', textColor: 'text-teal-400', glowColor: 'rgba(20,184,166,0.4)' },
 
   // Full Worship Day
   full_worship_day: {
