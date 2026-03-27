@@ -7,6 +7,7 @@ import { SiteFooter } from '@/components/SiteFooter'
 import { PrayerWallHero } from '@/components/prayer-wall/PrayerWallHero'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
+import { SaveToPrayersForm } from '@/components/prayer-wall/SaveToPrayersForm'
 import { InlineComposer } from '@/components/prayer-wall/InlineComposer'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { CategoryFilterBar } from '@/components/prayer-wall/CategoryFilterBar'
@@ -56,6 +57,8 @@ function PrayerWallContent() {
   const { openSet: openComments, toggle: handleToggleComments } = useOpenSet()
   const [composerOpen, setComposerOpen] = useState(false)
   const [localComments, setLocalComments] = useState<Record<string, PrayerComment[]>>({})
+  const [saveFormOpen, setSaveFormOpen] = useState<string | null>(null)
+  const [savedPrayers, setSavedPrayers] = useState<Set<string>>(new Set())
 
   // QOTD state
   const todaysQuestion = useMemo(() => getTodaysQuestion(), [])
@@ -426,6 +429,19 @@ function PrayerWallContent() {
                     onToggleComments={() => handleToggleComments(prayer.id)}
                     onToggleBookmark={() => toggleBookmark(prayer.id)}
                     isCommentsOpen={openComments.has(prayer.id)}
+                    onToggleSave={() => setSaveFormOpen(saveFormOpen === prayer.id ? null : prayer.id)}
+                    isSaved={savedPrayers.has(prayer.id)}
+                  />
+                  <SaveToPrayersForm
+                    prayerContent={prayer.content}
+                    prayerCategory={prayer.category}
+                    prayerId={prayer.id}
+                    isOpen={saveFormOpen === prayer.id}
+                    onSaved={() => {
+                      setSavedPrayers((prev) => new Set(prev).add(prayer.id))
+                      setSaveFormOpen(null)
+                    }}
+                    onCancel={() => setSaveFormOpen(null)}
                   />
                   <CommentsSection
                     prayerId={prayer.id}

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { HandHelping, MessageCircle, Bookmark, Share2 } from 'lucide-react'
+import { HandHelping, MessageCircle, Bookmark, Share2, Plus, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from './AuthModalProvider'
@@ -13,6 +13,8 @@ interface InteractionBarProps {
   onToggleComments: () => void
   onToggleBookmark: () => void
   isCommentsOpen: boolean
+  onToggleSave?: () => void
+  isSaved?: boolean
 }
 
 const btnBase =
@@ -25,6 +27,8 @@ export function InteractionBar({
   onToggleComments,
   onToggleBookmark,
   isCommentsOpen,
+  onToggleSave,
+  isSaved,
 }: InteractionBarProps) {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
@@ -184,6 +188,34 @@ export function InteractionBar({
           onClose={() => setShareOpen(false)}
         />
       </div>
+
+      {/* Save button */}
+      {isSaved ? (
+        <span className={cn(btnBase, 'text-white/50 cursor-default')} aria-label="Saved to your prayer list">
+          <Check className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Saved</span>
+        </span>
+      ) : isAuthenticated ? (
+        <button
+          type="button"
+          onClick={onToggleSave}
+          className={cn(btnBase, 'text-white/50 hover:text-primary')}
+          aria-label="Save to your prayer list"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Save</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => authModal?.openAuthModal('Sign in to save prayers to your list.')}
+          className={cn(btnBase, 'text-white/50 hover:text-primary')}
+          aria-label="Sign in to save to your prayer list"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Save</span>
+        </button>
+      )}
     </div>
   )
 }

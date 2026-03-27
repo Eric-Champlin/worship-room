@@ -35,6 +35,8 @@ export function addPrayer(input: {
   title: string
   description: string
   category: PrayerCategory
+  sourceType?: 'prayer_wall'
+  sourceId?: string
 }): PersonalPrayer | null {
   const prayers = readPrayers()
   if (prayers.length >= MAX_PRAYERS) return null
@@ -51,6 +53,8 @@ export function addPrayer(input: {
     answeredAt: null,
     answeredNote: null,
     lastPrayedAt: null,
+    sourceType: input.sourceType,
+    sourceId: input.sourceId,
   }
 
   writePrayers([...prayers, prayer])

@@ -13,6 +13,8 @@ export interface PersonalPrayer {
   lastPrayedAt: string | null
   reminderEnabled?: boolean
   reminderTime?: string
+  sourceType?: 'prayer_wall'
+  sourceId?: string
 }
 
 export type PrayerListFilter = 'all' | 'active' | 'answered'

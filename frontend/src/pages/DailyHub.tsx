@@ -231,10 +231,10 @@ function DailyHubContent() {
           {/* Two Content Cards */}
           <div className="mt-6 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Left Card — Today's Verse */}
-            <div className="relative">
+            <div className="relative rounded-xl border border-white/10 bg-white/[0.08] p-5 text-left backdrop-blur-sm sm:min-h-[140px]">
               <Link
                 to={verseLink}
-                className="block rounded-xl border border-white/10 bg-white/[0.08] p-5 text-left backdrop-blur-sm transition-colors hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:min-h-[140px]"
+                className="block transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 <p className="pr-6 font-serif italic text-lg text-white/90 line-clamp-3 sm:line-clamp-4">
                   &ldquo;{verse.text}&rdquo;
@@ -242,6 +242,12 @@ function DailyHubContent() {
                 <p className="mt-2 text-sm text-white/50">
                   — {verse.reference}
                 </p>
+              </Link>
+              <Link
+                to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}`}
+                className="mt-1 block text-sm text-primary-lt transition-colors hover:text-primary"
+              >
+                Meditate on this verse &gt;
               </Link>
               <button
                 ref={shareBtnRef}

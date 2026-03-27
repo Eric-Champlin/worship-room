@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { Pause, Play } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -28,11 +28,17 @@ export function ScriptureSoaking() {
 
 function ScriptureSoakingContent() {
   const verses = getSoakingVerses()
+  const [searchParams] = useSearchParams()
+  const verseParam = searchParams.get('verse')
   const [screen, setScreen] = useState<Screen>('prestart')
   const [duration, setDuration] = useState<number | null>(null)
-  const [verseIndex, setVerseIndex] = useState(() =>
-    Math.floor(Math.random() * verses.length),
-  )
+  const [verseIndex, setVerseIndex] = useState(() => {
+    if (verseParam) {
+      const matchIndex = verses.findIndex((v) => v.reference === verseParam)
+      if (matchIndex !== -1) return matchIndex
+    }
+    return Math.floor(Math.random() * verses.length)
+  })
   const [selectedVerse, setSelectedVerse] = useState<DailyVerse | null>(null)
   const [progress, setProgress] = useState(0)
   const [isPaused, setIsPaused] = useState(false)

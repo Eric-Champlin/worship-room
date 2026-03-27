@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { Share2 } from 'lucide-react'
 import { getTodaysVerse } from '@/constants/verse-of-the-day'
 import { VerseSharePanel } from '@/components/verse-of-the-day/VerseSharePanel'
@@ -15,6 +16,12 @@ export function VerseOfTheDayCard() {
         &ldquo;{verse.text}&rdquo;
       </p>
       <p className="mt-2 text-sm text-white/50">{verse.reference}</p>
+      <Link
+        to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}`}
+        className="mt-1 block text-sm text-primary-lt transition-colors hover:text-primary"
+      >
+        Meditate on this verse &gt;
+      </Link>
       <div className="relative mt-3 flex justify-end">
         <button
           ref={shareBtnRef}

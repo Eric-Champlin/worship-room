@@ -319,6 +319,38 @@ describe('markRemindersShown', () => {
   })
 })
 
+describe('sourceType and sourceId', () => {
+  it('addPrayer stores sourceType and sourceId when provided', () => {
+    const result = addPrayer({
+      title: 'From Wall',
+      description: 'Prayer wall content',
+      category: 'other',
+      sourceType: 'prayer_wall',
+      sourceId: 'pw-123',
+    })
+
+    expect(result).not.toBeNull()
+    expect(result!.sourceType).toBe('prayer_wall')
+    expect(result!.sourceId).toBe('pw-123')
+
+    const stored = getPrayers()
+    expect(stored[0].sourceType).toBe('prayer_wall')
+    expect(stored[0].sourceId).toBe('pw-123')
+  })
+
+  it('addPrayer works without sourceType/sourceId', () => {
+    const result = addPrayer({
+      title: 'Normal prayer',
+      description: 'No source',
+      category: 'health',
+    })
+
+    expect(result).not.toBeNull()
+    expect(result!.sourceType).toBeUndefined()
+    expect(result!.sourceId).toBeUndefined()
+  })
+})
+
 describe('backwards compatibility', () => {
   it('existing prayers without reminder fields work in all functions', () => {
     // Prayer without reminderEnabled or reminderTime (pre-Spec 19 format)

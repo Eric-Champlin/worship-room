@@ -355,4 +355,11 @@ describe('DailyHub', () => {
       screen.getByRole('heading', { name: /what's on your mind\?/i }),
     ).toBeInTheDocument()
   })
+
+  it('Daily Hub VOTD shows meditation link', () => {
+    renderPage()
+    const meditateLink = screen.getByText('Meditate on this verse >')
+    expect(meditateLink).toBeInTheDocument()
+    expect(meditateLink.closest('a')).toHaveAttribute('href', expect.stringContaining('/meditate/soaking?verse='))
+  })
 })

@@ -19,7 +19,9 @@ import { MonthHeatmap } from '@/components/insights/MonthHeatmap'
 import { ActivityBarChart } from '@/components/insights/ActivityBarChart'
 import { MonthlyHighlights } from '@/components/insights/MonthlyHighlights'
 import { MonthlyInsightCards } from '@/components/insights/MonthlyInsightCards'
+import { MonthlySuggestions } from '@/components/insights/MonthlySuggestions'
 import { MonthlyShareButton } from '@/components/insights/MonthlyShareButton'
+import { getMonthlyReportSuggestions } from '@/hooks/useMonthlyReportSuggestions'
 import { EmailPreviewModal } from '@/components/insights/EmailPreviewModal'
 
 function AnimatedSection({
@@ -47,6 +49,7 @@ export function MonthlyReport() {
   const [showEmailPreview, setShowEmailPreview] = useState(false)
 
   const data = useMonthlyReportData(selectedMonth, selectedYear)
+  const suggestions = getMonthlyReportSuggestions(data)
 
   const earliest = useMemo(() => {
     const allEntries = getMoodEntries()
@@ -177,7 +180,12 @@ export function MonthlyReport() {
         <AnimatedSection index={4}>
           <MonthlyInsightCards />
         </AnimatedSection>
-        <AnimatedSection index={5}>
+        {suggestions.length > 0 && (
+          <AnimatedSection index={5}>
+            <MonthlySuggestions suggestions={suggestions} />
+          </AnimatedSection>
+        )}
+        <AnimatedSection index={suggestions.length > 0 ? 6 : 5}>
           <MonthlyShareButton />
           <button
             className="mt-2 block mx-auto text-sm text-white/50 underline hover:text-white/70"

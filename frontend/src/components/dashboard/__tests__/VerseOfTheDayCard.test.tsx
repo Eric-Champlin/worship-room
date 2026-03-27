@@ -74,4 +74,27 @@ describe('VerseOfTheDayCard', () => {
     fireEvent.click(shareButton)
     expect(shareButton).toHaveAttribute('aria-expanded', 'true')
   })
+
+  it('shows meditation link', () => {
+    renderCard()
+    const meditateLink = screen.getByText('Meditate on this verse >')
+    expect(meditateLink).toBeInTheDocument()
+    expect(meditateLink.closest('a')).toHaveAttribute('href', expect.stringContaining('/meditate/soaking?verse='))
+  })
+
+  it('meditation link encodes verse reference', () => {
+    renderCard()
+    const meditateLink = screen.getByText('Meditate on this verse >')
+    const href = meditateLink.closest('a')?.getAttribute('href') ?? ''
+    // The href should contain an encoded reference
+    expect(href).toMatch(/\/meditate\/soaking\?verse=/)
+    expect(href).toContain('%')
+  })
+
+  it('meditation link has correct styling', () => {
+    renderCard()
+    const meditateLink = screen.getByText('Meditate on this verse >')
+    expect(meditateLink.className).toContain('text-primary-lt')
+    expect(meditateLink.className).toContain('text-sm')
+  })
 })

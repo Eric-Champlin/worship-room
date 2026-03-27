@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, CheckCircle2, Flame, Heart, Rocket, Target, TrendingUp, Users } from 'lucide-react'
+import { BarChart3, BookOpen, CheckCircle2, Flame, Heart, Highlighter, Rocket, Target, TrendingUp, Users } from 'lucide-react'
 import type { useFaithPoints } from '@/hooks/useFaithPoints'
 import { cn } from '@/lib/utils'
 import { useWeeklyRecap } from '@/hooks/useWeeklyRecap'
@@ -15,6 +15,7 @@ import { PrayerListWidget } from './PrayerListWidget'
 import { ReadingPlanWidget } from './ReadingPlanWidget'
 import { GratitudeWidget } from './GratitudeWidget'
 import { ChallengeWidget } from './ChallengeWidget'
+import { RecentHighlightsWidget } from './RecentHighlightsWidget'
 
 interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
@@ -60,6 +61,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
   const devotionalAnim = getAnimProps()
   const readingPlanAnim = getAnimProps()
   const prayerListAnim = getAnimProps()
+  const highlightsAnim = getAnimProps()
   const gratitudeAnim = getAnimProps()
   const streakAnim = getAnimProps()
   const activityAnim = getAnimProps()
@@ -123,10 +125,20 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
         </DashboardCard>
 
         <DashboardCard
+          id="recent-highlights"
+          title="Recent Highlights"
+          icon={<Highlighter className="h-5 w-5" />}
+          className={cn('order-7 lg:col-span-3', highlightsAnim.className)}
+          style={highlightsAnim.style}
+        >
+          <RecentHighlightsWidget />
+        </DashboardCard>
+
+        <DashboardCard
           id="todays-gratitude"
           title="Today's Gratitude"
           icon={<Heart className="h-5 w-5 text-pink-400" />}
-          className={cn('order-7 lg:col-span-3', gratitudeAnim.className)}
+          className={cn('order-8 lg:col-span-3', gratitudeAnim.className)}
           style={gratitudeAnim.style}
         >
           <GratitudeWidget onGratitudeSaved={() => faithPoints.recordActivity('gratitude')} />
@@ -158,7 +170,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
           id="activity-checklist"
           title="Today's Activity"
           icon={<CheckCircle2 className="h-5 w-5" />}
-          className={cn('order-8 lg:col-span-3', activityAnim.className)}
+          className={cn('order-9 lg:col-span-3', activityAnim.className)}
           style={activityAnim.style}
         >
           <ActivityChecklist
@@ -172,7 +184,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
           id="challenge"
           title="Challenge"
           icon={<Target className="h-5 w-5" />}
-          className={cn('order-9 lg:col-span-3', challengeAnim.className)}
+          className={cn('order-10 lg:col-span-3', challengeAnim.className)}
           style={challengeAnim.style}
         >
           <ChallengeWidget />
@@ -183,7 +195,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
           title="Friends & Leaderboard"
           icon={<Users className="h-5 w-5" />}
           action={{ label: 'See all', to: '/friends?tab=leaderboard' }}
-          className={cn('order-10 lg:col-span-2', friendsAnim.className)}
+          className={cn('order-11 lg:col-span-2', friendsAnim.className)}
           style={friendsAnim.style}
         >
           <FriendsPreview />
@@ -196,7 +208,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
             title="Weekly Recap"
             icon={<BarChart3 className="h-5 w-5" />}
             collapsible={false}
-            className={cn('order-11 lg:col-span-5', recapAnim.className)}
+            className={cn('order-12 lg:col-span-5', recapAnim.className)}
             style={recapAnim.style}
           >
             <WeeklyRecap />
@@ -205,7 +217,7 @@ export function DashboardWidgetGrid({ faithPoints, justCompletedCheckIn = false,
 
         <div
           ref={quickActionsRef}
-          className={cn('order-12 lg:col-span-5', quickAnim.className)}
+          className={cn('order-13 lg:col-span-5', quickAnim.className)}
           style={quickAnim.style}
           {...(quickActionsTooltipVisible ? { 'aria-describedby': 'dashboard-quick-actions' } : {})}
         >
