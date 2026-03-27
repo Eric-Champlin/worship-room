@@ -13,6 +13,7 @@ import { getLocalDateString } from '@/utils/date';
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal';
 import { cn } from '@/lib/utils';
 import { VerseLink } from '@/components/shared/VerseLink';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 type CheckInPhase = 'idle' | 'mood_selected' | 'verse_display' | 'crisis_banner';
 
@@ -23,6 +24,7 @@ interface MoodCheckInProps {
 }
 
 export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) {
+  const { playSoundEffect } = useSoundEffects();
   const [phase, setPhase] = useState<CheckInPhase>('idle');
   const [selectedMood, setSelectedMood] = useState<MoodOption | null>(null);
   const [text, setText] = useState('');
@@ -81,8 +83,9 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
     } else {
       setVerseRevealed(false);
       setPhase('verse_display');
+      playSoundEffect('chime');
     }
-  }, [selectedMood, text]);
+  }, [selectedMood, text, playSoundEffect]);
 
   const handleCrisisDismiss = useCallback(() => {
     if (savedEntryRef.current) {

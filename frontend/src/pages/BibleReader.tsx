@@ -24,6 +24,7 @@ import { useBibleHighlights } from '@/hooks/useBibleHighlights'
 import { useBibleNotes } from '@/hooks/useBibleNotes'
 import { useBibleProgress } from '@/hooks/useBibleProgress'
 import { useToast } from '@/components/ui/Toast'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { cn } from '@/lib/utils'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -49,6 +50,7 @@ export function BibleReader() {
     useBibleHighlights()
   const { getNotesForChapter, getNoteForVerse, saveNote, deleteNote } = useBibleNotes()
   const { showToast } = useToast()
+  const { playSoundEffect } = useSoundEffects()
 
   const [verses, setVerses] = useState<BibleVerse[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -215,8 +217,9 @@ export function BibleReader() {
     if (!justCompletedBook || justCompletedBook !== bookSlug) return
     const bookData = BIBLE_BOOKS.find(b => b.slug === justCompletedBook)
     if (!bookData) return
+    playSoundEffect('bell')
     showToast(`${bookData.name} Complete! You've read all ${bookData.chapters} chapters.`, 'success')
-  }, [justCompletedBook, bookSlug, showToast])
+  }, [justCompletedBook, bookSlug, showToast, playSoundEffect])
 
   // Compute book completion for inline card
   const isBookComplete = book && bookSlug

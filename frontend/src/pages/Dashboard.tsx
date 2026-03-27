@@ -37,6 +37,7 @@ import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { CHALLENGES } from '@/data/challenges'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { cn } from '@/lib/utils'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import type { MoodEntry } from '@/types/dashboard'
 
 type DashboardPhase = 'onboarding' | 'check_in' | 'recommendations' | 'dashboard_enter' | 'dashboard'
@@ -46,6 +47,7 @@ const DASHBOARD_ENTER_DURATION_MS = 800
 export function Dashboard() {
   const { user } = useAuth()
   const prefersReduced = useReducedMotion()
+  const { playSoundEffect } = useSoundEffects()
   const checkedRef = useRef(false)
   const hasAnimatedRef = useRef(false)
   const [animateEntrance, setAnimateEntrance] = useState(false)
@@ -368,7 +370,10 @@ export function Dashboard() {
             style={shouldAnimate ? { animationDelay: `${100 * (1 + (godMoments.isVisible ? 1 : 0) + (showGettingStarted ? 1 : 0))}ms` } : undefined}
           >
             <EveningReflectionBanner
-              onReflectNow={() => setShowReflectionOverlay(true)}
+              onReflectNow={() => {
+                setShowReflectionOverlay(true)
+                playSoundEffect('bell')
+              }}
               onDismiss={handleDismissReflection}
             />
           </div>

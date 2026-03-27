@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronDown, Circle, CircleCheck, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { getCollapseState, setCollapseState } from '@/services/dashboard-collapse-storage'
 import type { GettingStartedItem } from '@/hooks/useGettingStarted'
 
@@ -24,6 +25,7 @@ export function GettingStartedCard({
 }: GettingStartedCardProps) {
   const navigate = useNavigate()
   const prefersReduced = useReducedMotion()
+  const { playSoundEffect } = useSoundEffects()
   const uniqueId = useId()
   const titleId = `getting-started-title-${uniqueId}`
   const contentId = `getting-started-content-${uniqueId}`
@@ -58,6 +60,7 @@ export function GettingStartedCard({
 
     if (newlyCompleted.size > 0) {
       setJustCompleted(newlyCompleted)
+      playSoundEffect('sparkle')
       const timer = setTimeout(() => setJustCompleted(new Set()), 300)
       return () => clearTimeout(timer)
     }

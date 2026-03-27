@@ -4,6 +4,7 @@ import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
 import { useToast } from '@/components/ui/Toast'
 import { getBadgeSuggestion } from '@/lib/badge-suggestion'
 import type { BadgeDefinition, CelebrationTier } from '@/types/dashboard'
+import type { SoundEffectId } from '@/lib/sound-effects'
 
 // --- Types ---
 
@@ -16,6 +17,7 @@ export interface CelebrationQueueItem {
 interface UseCelebrationQueueOptions {
   newlyEarnedBadges: string[]
   clearNewlyEarnedBadges: () => void
+  onPlaySound?: (soundId: SoundEffectId) => void
 }
 
 interface UseCelebrationQueueReturn {
@@ -51,9 +53,18 @@ function tierToToastType(tier: CelebrationTier) {
 
 // --- Hook ---
 
+// Map celebration tier to sound effect
+const TIER_SOUND_MAP: Record<CelebrationTier, SoundEffectId> = {
+  'toast': 'chime',
+  'toast-confetti': 'chime',
+  'special-toast': 'ascending',
+  'full-screen': 'harp',
+}
+
 export function useCelebrationQueue({
   newlyEarnedBadges,
   clearNewlyEarnedBadges,
+  onPlaySound,
 }: UseCelebrationQueueOptions): UseCelebrationQueueReturn {
   const [currentCelebration, setCurrentCelebration] = useState<CelebrationQueueItem | null>(null)
   const [celebrationType, setCelebrationType] = useState<'toast' | 'overlay' | null>(null)
@@ -126,6 +137,7 @@ export function useCelebrationQueue({
 
         if (item.tier === 'full-screen') {
           // Show overlay — wait for dismissCurrent to be called
+          onPlaySound?.(TIER_SOUND_MAP[item.tier] ?? 'chime')
           setCurrentCelebration(item)
           setCelebrationType('overlay')
 
@@ -149,6 +161,7 @@ export function useCelebrationQueue({
           )
 
           const suggestion = getBadgeSuggestion(item.badgeId, item.badge.category) ?? undefined
+          onPlaySound?.(TIER_SOUND_MAP[item.tier] ?? 'chime')
           await showCelebrationToast(
             item.badge.name,
             `You earned: ${item.badge.description}`,

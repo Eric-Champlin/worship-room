@@ -5,6 +5,7 @@ import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useToastSafe } from '@/components/ui/Toast'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { AnimatedCounter } from './AnimatedCounter'
 import { BadgeGrid } from './BadgeGrid'
 
@@ -59,6 +60,8 @@ function getRecentBadges(): { id: string; name: string; earnedAt: string }[] {
   }
 }
 
+const MILESTONE_STREAKS = [7, 14, 30, 60, 90, 180, 365]
+
 export function StreakCard({
   currentStreak,
   longestStreak,
@@ -74,12 +77,23 @@ export function StreakCard({
 }: StreakCardProps) {
   const [showBadgeGrid, setShowBadgeGrid] = useState(false)
   const { showCelebrationToast } = useToastSafe()
+  const { playSoundEffect } = useSoundEffects()
 
   // Repair animation state
   const [justRepaired, setJustRepaired] = useState(false)
   const preRepairStreakRef = useRef(currentStreak)
 
   const prefersReduced = useReducedMotion()
+
+  // Streak milestone sound
+  const lastCelebratedStreakRef = useRef(0)
+
+  useEffect(() => {
+    if (currentStreak > lastCelebratedStreakRef.current && MILESTONE_STREAKS.includes(currentStreak)) {
+      playSoundEffect('ascending')
+      lastCelebratedStreakRef.current = currentStreak
+    }
+  }, [currentStreak, playSoundEffect])
 
   // Track previous points for live animation (not initial render, not during entry animate)
   const prevPointsRef = useRef(totalPoints)
@@ -160,6 +174,7 @@ export function StreakCard({
     preRepairStreakRef.current = currentStreak
     setJustRepaired(true)
     onRepairStreak(useFree)
+    playSoundEffect('whisper')
     showCelebrationToast(
       'Streak Restored!',
       `${streakValue}-day streak is back!`,

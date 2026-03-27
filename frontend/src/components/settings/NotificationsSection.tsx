@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { ToggleSwitch } from './ToggleSwitch'
 import type { UserSettingsNotifications } from '@/types/settings'
 
+const SOUND_EFFECTS_KEY = 'wr_sound_effects_enabled'
+
 interface NotificationsSectionProps {
   notifications: UserSettingsNotifications
   onUpdateNotifications: (key: keyof UserSettingsNotifications, value: boolean) => void
@@ -9,6 +11,22 @@ interface NotificationsSectionProps {
 
 export function NotificationsSection({ notifications, onUpdateNotifications }: NotificationsSectionProps) {
   const [showPushNote, setShowPushNote] = useState(notifications.pushNotifications)
+  const [soundEffectsEnabled, setSoundEffectsEnabled] = useState(() => {
+    try {
+      return localStorage.getItem(SOUND_EFFECTS_KEY) !== 'false'
+    } catch {
+      return true
+    }
+  })
+
+  function handleSoundEffectsToggle(value: boolean) {
+    setSoundEffectsEnabled(value)
+    try {
+      localStorage.setItem(SOUND_EFFECTS_KEY, String(value))
+    } catch {
+      // localStorage unavailable
+    }
+  }
 
   function handleToggle(key: keyof UserSettingsNotifications, value: boolean) {
     onUpdateNotifications(key, value)
@@ -20,8 +38,22 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
       <h2 className="text-base font-semibold text-white md:text-lg mb-6">Notifications</h2>
 
       <div className="space-y-6">
-        {/* General */}
+        {/* Sound */}
         <div>
+          <h3 className="text-xs text-white/40 uppercase tracking-wider mb-3">Sound</h3>
+          <div className="space-y-4">
+            <ToggleSwitch
+              id="notif-sound-effects"
+              checked={soundEffectsEnabled}
+              onChange={handleSoundEffectsToggle}
+              label="Sound Effects"
+              description="Play subtle sounds on achievements and milestones."
+            />
+          </div>
+        </div>
+
+        {/* General */}
+        <div className="border-t border-white/10 pt-4">
           <h3 className="text-xs text-white/40 uppercase tracking-wider mb-3">General</h3>
           <div className="space-y-4">
             <ToggleSwitch

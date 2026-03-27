@@ -19,6 +19,10 @@ vi.mock('@/hooks/useFaithPoints', () => ({
   }),
 }))
 
+vi.mock('@/hooks/useSoundEffects', () => ({
+  useSoundEffects: () => ({ playSoundEffect: vi.fn() }),
+}))
+
 // Mock AudioProvider (needed by AmbientSoundPill embedded in tab content components)
 vi.mock('@/components/audio/AudioProvider', () => ({
   useAudioState: () => ({

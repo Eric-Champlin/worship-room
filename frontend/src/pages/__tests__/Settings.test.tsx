@@ -26,6 +26,10 @@ vi.mock('@/contexts/AuthContext', () => ({
   useAuth: () => mockAuthFn(),
 }))
 
+vi.mock('@/hooks/useSoundEffects', () => ({
+  useSoundEffects: () => ({ playSoundEffect: vi.fn() }),
+}))
+
 const mockUseAuth = mockAuthFn
 
 function renderSettings() {
@@ -226,9 +230,9 @@ describe('Settings Page', () => {
       )
     })
 
-    // In-app notifications should now show as OFF
+    // In-app notifications should now show as OFF (index 1 because Sound Effects toggle is index 0)
     const switches = screen.getAllByRole('switch')
-    expect(switches[0]).toHaveAttribute('aria-checked', 'false')
+    expect(switches[1]).toHaveAttribute('aria-checked', 'false')
   })
 
   it('delete account full flow', async () => {

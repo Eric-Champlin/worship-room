@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useToast } from '@/components/ui/Toast'
 import { useReadAloud } from '@/hooks/useReadAloud'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { RelatedPlanCallout } from '@/components/devotional/RelatedPlanCallout'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
@@ -37,6 +38,7 @@ export function DevotionalPage() {
   const authModal = useAuthModal()
   const { showToast } = useToast()
   const readAloud = useReadAloud()
+  const { playSoundEffect } = useSoundEffects()
   const { getPlanStatus } = useReadingPlanProgress()
   const [isCompleted, setIsCompleted] = useState(false)
 
@@ -80,6 +82,7 @@ export function DevotionalPage() {
             localStorage.setItem('wr_devotional_reads', JSON.stringify(reads))
           }
           setIsCompleted(true)
+          playSoundEffect('chime')
           observer.disconnect()
         }
       },

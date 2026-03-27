@@ -47,6 +47,10 @@ vi.mock('@/components/audio/AudioProvider', () => ({
   useAudioDispatch: () => vi.fn(),
 }))
 
+vi.mock('@/hooks/useSoundEffects', () => ({
+  useSoundEffects: () => ({ playSoundEffect: vi.fn() }),
+}))
+
 // Mock useScenePlayer
 vi.mock('@/hooks/useScenePlayer', () => ({
   useScenePlayer: () => ({

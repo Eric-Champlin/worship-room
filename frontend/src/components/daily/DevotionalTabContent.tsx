@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
 import { useReadAloud } from '@/hooks/useReadAloud'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { RelatedPlanCallout } from '@/components/devotional/RelatedPlanCallout'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLANS } from '@/data/reading-plans'
@@ -44,6 +45,7 @@ export function DevotionalTabContent({
   const { showToast } = useToast()
   const readAloud = useReadAloud()
   const { recordActivity } = useFaithPoints()
+  const { playSoundEffect } = useSoundEffects()
   const { getPlanStatus } = useReadingPlanProgress()
   const [isCompleted, setIsCompleted] = useState(false)
 
@@ -87,6 +89,7 @@ export function DevotionalTabContent({
           }
           setIsCompleted(true)
           recordActivity('devotional')
+          playSoundEffect('chime')
           onComplete?.()
           observer.disconnect()
         }

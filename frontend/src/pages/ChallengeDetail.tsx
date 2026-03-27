@@ -19,6 +19,7 @@ import { useToastSafe } from '@/components/ui/Toast'
 import { useChallengeProgress } from '@/hooks/useChallengeProgress'
 import type { CompletionResult } from '@/hooks/useChallengeProgress'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { useChallengeAutoDetect } from '@/hooks/useChallengeAutoDetect'
 import { getChallenge, CHALLENGES } from '@/data/challenges'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
@@ -49,6 +50,7 @@ export function ChallengeDetail() {
 
   const faithPoints = useFaithPoints()
   const { showToast } = useToastSafe()
+  const { playSoundEffect } = useSoundEffects()
 
   // Auto-detection: auto-complete challenge day if action already done
   useChallengeAutoDetect({
@@ -123,6 +125,7 @@ export function ChallengeDetail() {
     if (progress.completedDays.includes(selectedDay)) return
 
     const result: CompletionResult = completeDay(challengeId, selectedDay, faithPoints.recordActivity)
+    playSoundEffect('ascending')
 
     if (result.isCompletion) {
       setJustCompletedFinalDay(true)

@@ -6,6 +6,7 @@ import { PageHero } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { PrayerListActionBar } from '@/components/my-prayers/PrayerListActionBar'
 import { PrayerComposer } from '@/components/my-prayers/PrayerComposer'
 import { PrayerItemCard } from '@/components/my-prayers/PrayerItemCard'
@@ -31,6 +32,7 @@ import type { PrayerCategory } from '@/constants/prayer-categories'
 export function MyPrayers() {
   const { isAuthenticated } = useAuth()
   const { showToast } = useToast()
+  const { playSoundEffect } = useSoundEffects()
 
   const [prayers, setPrayers] = useState<PersonalPrayer[]>([])
   const [filter, setFilter] = useState<PrayerListFilter>('active')
@@ -116,8 +118,9 @@ export function MyPrayers() {
       refreshPrayers()
       setAnsweringId(null)
       setCelebrationPrayer({ title, note: note || undefined })
+      playSoundEffect('harp')
     },
-    [prayers, refreshPrayers],
+    [prayers, refreshPrayers, playSoundEffect],
   )
 
   const handlePray = useCallback(

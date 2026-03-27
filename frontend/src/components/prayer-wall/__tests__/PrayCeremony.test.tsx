@@ -39,6 +39,10 @@ vi.mock('@/hooks/useFaithPoints', () => ({
   }),
 }))
 
+vi.mock('@/hooks/useSoundEffects', () => ({
+  useSoundEffects: () => ({ playSoundEffect: vi.fn() }),
+}))
+
 // Mock prayer data: set prayer-1 userId to match mockUser and clear its initial praying state
 vi.mock('@/mocks/prayer-wall-mock-data', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/mocks/prayer-wall-mock-data')>()

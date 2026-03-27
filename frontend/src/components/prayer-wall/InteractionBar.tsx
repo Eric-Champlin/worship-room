@@ -3,6 +3,7 @@ import { HandHelping, MessageCircle, Bookmark, Share2, Plus, Check } from 'lucid
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from './AuthModalProvider'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ShareDropdown, getShareText } from './ShareDropdown'
 import type { PrayerRequest, PrayerReaction } from '@/types/prayer-wall'
 
@@ -32,6 +33,7 @@ export function InteractionBar({
 }: InteractionBarProps) {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
+  const { playSoundEffect } = useSoundEffects()
   const isPraying = reactions?.isPraying ?? false
   const isBookmarked = reactions?.isBookmarked ?? false
 
@@ -55,10 +57,11 @@ export function InteractionBar({
     }
     setIsAnimating(true)
     onTogglePraying()
+    playSoundEffect('whisper')
     animationTimeoutRef.current = setTimeout(() => {
       setIsAnimating(false)
     }, 600)
-  }, [isPraying, onTogglePraying])
+  }, [isPraying, onTogglePraying, playSoundEffect])
 
   useEffect(() => {
     return () => {

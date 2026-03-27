@@ -245,6 +245,12 @@ export function useFaithPoints(): FaithPointsState & {
       previousStreak: repairInfo.previousStreak,
       isFreeRepairAvailable: isFreeRepairAvailableFn(),
     });
+
+    // Dispatch sound effect events
+    window.dispatchEvent(new CustomEvent('wr:points-earned', { detail: { type, pointDifference } }));
+    if (levelInfo.level > currentFaithPoints.currentLevel) {
+      window.dispatchEvent(new CustomEvent('wr:level-up', { detail: { newLevel: levelInfo.level } }));
+    }
   }, [isAuthenticated]);
 
   const clearNewlyEarnedBadges = useCallback(() => {

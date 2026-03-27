@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Heart, Check } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { containsCrisisKeyword } from '@/constants/crisis-resources'
 import { getGratitudeEntries, getTodayGratitude, saveGratitudeEntry } from '@/services/gratitude-storage'
@@ -46,6 +47,7 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
   const [mode, setMode] = useState<WidgetMode>('input')
   const [values, setValues] = useState<[string, string, string]>(['', '', ''])
   const { showToast } = useToast()
+  const { playSoundEffect } = useSoundEffects()
 
   // Check for existing entry on mount
   useEffect(() => {
@@ -89,6 +91,7 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
     }
 
     showToast('Gratitude logged! Thank you for counting your blessings.', 'success')
+    playSoundEffect('chime')
   }
 
   const handleEdit = () => {
