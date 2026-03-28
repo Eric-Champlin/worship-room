@@ -177,12 +177,12 @@ describe('DailyHub', () => {
     expect(screen.getByText('Already read today')).toBeInTheDocument()
   })
 
-  it('share button opens VerseSharePanel', async () => {
+  it('share button opens SharePanel', async () => {
     const user = userEvent.setup()
     renderPage()
     const shareBtn = screen.getByLabelText('Share verse of the day')
     await user.click(shareBtn)
-    // VerseSharePanel renders menu items when open
+    // SharePanel renders as a dialog when open
     expect(shareBtn).toHaveAttribute('aria-expanded', 'true')
   })
 
@@ -207,7 +207,7 @@ describe('DailyHub', () => {
     renderPage()
     const shareBtn = screen.getByLabelText('Share verse of the day')
     expect(shareBtn).toBeInTheDocument()
-    expect(shareBtn).toHaveAttribute('aria-haspopup', 'menu')
+    expect(shareBtn).toHaveAttribute('aria-haspopup', 'dialog')
   })
 
   it('verse card is keyboard navigable', () => {

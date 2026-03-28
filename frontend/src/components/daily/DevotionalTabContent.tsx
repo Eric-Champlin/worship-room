@@ -14,6 +14,7 @@ import { RelatedPlanCallout } from '@/components/devotional/RelatedPlanCallout'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLANS } from '@/data/reading-plans'
 import { VerseLink } from '@/components/shared/VerseLink'
+import { SharePanel } from '@/components/sharing/SharePanel'
 import type { Devotional } from '@/types/devotional'
 
 function buildReadAloudText(devotional: Devotional): string {
@@ -48,6 +49,7 @@ export function DevotionalTabContent({
   const { playSoundEffect } = useSoundEffects()
   const { getPlanStatus } = useReadingPlanProgress()
   const [isCompleted, setIsCompleted] = useState(false)
+  const [showPassageShare, setShowPassageShare] = useState(false)
 
   // Find matching reading plan by theme
   const matchingPlan = READING_PLANS.find(
@@ -217,12 +219,22 @@ export function DevotionalTabContent({
 
           {/* Passage section */}
           <div className="border-t border-white/10 py-8 sm:py-10">
-            <p className="mb-4 text-xs font-medium uppercase tracking-widest">
-              <VerseLink
-                reference={devotional.passage.reference}
-                className="text-primary-lt"
-              />
-            </p>
+            <div className="mb-4 flex items-center gap-2">
+              <p className="text-xs font-medium uppercase tracking-widest">
+                <VerseLink
+                  reference={devotional.passage.reference}
+                  className="text-primary-lt"
+                />
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowPassageShare(true)}
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg p-1.5 text-white/40 transition-colors hover:text-white/70"
+                aria-label={`Share ${devotional.passage.reference}`}
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+            </div>
             <p className="font-serif text-base italic leading-relaxed text-white/70 sm:text-lg">
               {devotional.passage.verses.map((verse) => (
                 <span key={verse.number}>
@@ -233,6 +245,12 @@ export function DevotionalTabContent({
                 </span>
               ))}
             </p>
+            <SharePanel
+              verseText={devotional.passage.verses.map((v) => v.text).join(' ')}
+              reference={devotional.passage.reference}
+              isOpen={showPassageShare}
+              onClose={() => setShowPassageShare(false)}
+            />
           </div>
 
           {/* Reflection section */}

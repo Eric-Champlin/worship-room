@@ -9,7 +9,6 @@ import { DrawerTabs } from './DrawerTabs'
 import { RoutineStepper } from './RoutineStepper'
 
 const SWIPE_THRESHOLD = 50
-const SPRING_TIMING = 'cubic-bezier(0.34, 1.2, 0.64, 1)'
 
 export function AudioDrawer() {
   const state = useAudioState()

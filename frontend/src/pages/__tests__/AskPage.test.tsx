@@ -363,7 +363,9 @@ describe('AskPage — Action Buttons', () => {
     expect(screen.getByRole('button', { name: /Ask another question/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Journal about this/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Pray about this/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Share/i })).toBeInTheDocument()
+    // Top-level share button + per-verse share buttons
+    const shareButtons = screen.getAllByRole('button', { name: /Share/i })
+    expect(shareButtons.length).toBeGreaterThanOrEqual(1)
   })
 
   it('"Share" copies text to clipboard', async () => {

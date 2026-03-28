@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { ToastProvider } from '@/components/ui/Toast'
 import { SharedVerse } from '../SharedVerse'
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -18,9 +19,11 @@ function renderPage(id: string) {
       initialEntries={[`/verse/${id}`]}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
-      <Routes>
-        <Route path="/verse/:id" element={<SharedVerse />} />
-      </Routes>
+      <ToastProvider>
+        <Routes>
+          <Route path="/verse/:id" element={<SharedVerse />} />
+        </Routes>
+      </ToastProvider>
     </MemoryRouter>,
   )
 }

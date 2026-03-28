@@ -10,7 +10,7 @@ import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
 import { DevotionalTabContent } from '@/components/daily/DevotionalTabContent'
-import { VerseSharePanel } from '@/components/verse-of-the-day/VerseSharePanel'
+import { SharePanel } from '@/components/sharing/SharePanel'
 import { getTodaysVerse } from '@/constants/verse-of-the-day'
 import { getTodaysDevotional } from '@/data/devotionals'
 import { parseVerseReferences } from '@/lib/parse-verse-references'
@@ -93,7 +93,6 @@ function DailyHubContent() {
   }, [])
 
   const [sharePanelOpen, setSharePanelOpen] = useState(false)
-  const shareBtnRef = useRef<HTMLButtonElement>(null)
 
   // Read cross-feature URL params on mount (consumed once, then cleared)
   const urlParamsConsumed = useRef(false)
@@ -250,22 +249,20 @@ function DailyHubContent() {
                 Meditate on this verse &gt;
               </Link>
               <button
-                ref={shareBtnRef}
                 type="button"
                 onClick={() => setSharePanelOpen(true)}
                 className="absolute bottom-5 right-5 rounded p-1 text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label="Share verse of the day"
-                aria-haspopup="menu"
+                aria-haspopup="dialog"
                 aria-expanded={sharePanelOpen}
               >
                 <Share2 className="h-4 w-4" />
               </button>
-              <VerseSharePanel
+              <SharePanel
                 verseText={verse.text}
-                verseReference={verse.reference}
+                reference={verse.reference}
                 isOpen={sharePanelOpen}
                 onClose={() => setSharePanelOpen(false)}
-                triggerRef={shareBtnRef}
               />
             </div>
 

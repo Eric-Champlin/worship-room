@@ -56,18 +56,18 @@ describe('TodaysVerseSection', () => {
 
     const button = screen.getByText('Share this verse')
     expect(button).toBeInTheDocument()
-    expect(button).toHaveAttribute('aria-haspopup', 'menu')
+    expect(button).toHaveAttribute('aria-haspopup', 'dialog')
     expect(button).toHaveAttribute('aria-expanded', 'false')
   })
 
   it('share panel opens on CTA click', () => {
     renderSection()
 
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByText('Share this verse'))
 
-    expect(screen.getByRole('menu')).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
   it('section has aria-labelledby linked to heading', () => {

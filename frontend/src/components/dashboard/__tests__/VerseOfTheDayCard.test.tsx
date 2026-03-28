@@ -48,27 +48,27 @@ describe('VerseOfTheDayCard', () => {
     renderCard()
 
     // Panel should not be visible initially
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     // Click share button
     const shareButton = screen.getByLabelText('Share verse of the day')
     fireEvent.click(shareButton)
 
     // Panel should now be visible
-    expect(screen.getByRole('menu')).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
 
     // Click again to close
     fireEvent.click(shareButton)
 
     // Panel should be hidden
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('share button has correct aria attributes', () => {
     renderCard()
 
     const shareButton = screen.getByLabelText('Share verse of the day')
-    expect(shareButton).toHaveAttribute('aria-haspopup', 'menu')
+    expect(shareButton).toHaveAttribute('aria-haspopup', 'dialog')
     expect(shareButton).toHaveAttribute('aria-expanded', 'false')
 
     fireEvent.click(shareButton)

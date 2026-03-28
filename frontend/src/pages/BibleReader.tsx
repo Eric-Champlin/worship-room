@@ -14,7 +14,7 @@ import { ChapterSelector } from '@/components/bible/ChapterSelector'
 import { FloatingActionBar } from '@/components/bible/FloatingActionBar'
 import { NoteEditor } from '@/components/bible/NoteEditor'
 import { NoteIndicator } from '@/components/bible/NoteIndicator'
-import { VerseShareMenu } from '@/components/bible/VerseShareMenu'
+import { SharePanel } from '@/components/sharing/SharePanel'
 import { HIGHLIGHT_COLORS, BIBLE_BOOKS } from '@/constants/bible'
 import { BookCompletionCard } from '@/components/bible/BookCompletionCard'
 import { getBookBySlug, loadChapter } from '@/data/bible'
@@ -721,9 +721,9 @@ export function BibleReader() {
         />
       )}
 
-      {/* Share menu */}
-      {showShareMenu && selectedVerse !== null && selectedVerseData && (
-        <VerseShareMenu
+      {/* Share panel */}
+      {selectedVerse !== null && selectedVerseData && (
+        <SharePanel
           verseText={selectedVerseData.text}
           reference={`${book.name} ${chapterNumber}:${selectedVerse} WEB`}
           isOpen={showShareMenu}
@@ -731,7 +731,6 @@ export function BibleReader() {
             setShowShareMenu(false)
             handleDismissActionBar()
           }}
-          anchorElement={selectedElement}
         />
       )}
     </Layout>

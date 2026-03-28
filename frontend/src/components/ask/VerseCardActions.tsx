@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Highlighter, StickyNote } from 'lucide-react'
+import { Highlighter, StickyNote, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useBibleNotes } from '@/hooks/useBibleNotes'
 import { useToast } from '@/components/ui/Toast'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
+import { SharePanel } from '@/components/sharing/SharePanel'
 import { NOTE_MAX_CHARS } from '@/constants/bible'
 import type { AskVerse } from '@/types/ask'
 import type { ParsedVerseReference } from '@/lib/parse-verse-references'
@@ -24,6 +25,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
   const { getNoteForVerse, saveNote } = useBibleNotes()
   const [showNoteInput, setShowNoteInput] = useState(false)
   const [noteText, setNoteText] = useState('')
+  const [showSharePanel, setShowSharePanel] = useState(false)
 
   // Pre-fill with existing note when expanding
   useEffect(() => {
@@ -89,7 +91,22 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
           <StickyNote className="h-3.5 w-3.5" />
           Save note
         </button>
+        <button
+          type="button"
+          onClick={() => setShowSharePanel(true)}
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
+          aria-label={`Share ${verse.reference}`}
+        >
+          <Share2 className="h-3.5 w-3.5" />
+          Share
+        </button>
       </div>
+      <SharePanel
+        verseText={verse.text}
+        reference={verse.reference}
+        isOpen={showSharePanel}
+        onClose={() => setShowSharePanel(false)}
+      />
 
       {showNoteInput && (
         <div className="mt-3 overflow-hidden transition-all duration-300">

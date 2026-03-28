@@ -4,6 +4,7 @@ import { Navbar } from '@/components/Navbar'
 import { SEO } from '@/components/SEO'
 import { SiteFooter } from '@/components/SiteFooter'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
+import { SharePanel } from '@/components/sharing/SharePanel'
 import { getVerseById, getSongOfTheDay } from '@/mocks/daily-experience-mock-data'
 import {
   SPOTIFY_EMBED_BASE,
@@ -16,6 +17,7 @@ export function SharedVerse() {
   const verse = id ? getVerseById(id) : undefined
   const song = getSongOfTheDay(new Date().getDate())
   const [referenceVisible, setReferenceVisible] = useState(false)
+  const [showSharePanel, setShowSharePanel] = useState(false)
 
   if (!verse) {
     return (
@@ -95,6 +97,25 @@ export function SharedVerse() {
           >
             {verse.reference} WEB
           </p>
+          <button
+            type="button"
+            onClick={() => setShowSharePanel(true)}
+            disabled={!referenceVisible}
+            aria-hidden={!referenceVisible}
+            tabIndex={referenceVisible ? 0 : -1}
+            className={cn(
+              'mt-6 rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white transition-all hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark',
+              referenceVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
+            )}
+          >
+            Share this verse
+          </button>
+          <SharePanel
+            verseText={verse.text}
+            reference={`${verse.reference} WEB`}
+            isOpen={showSharePanel}
+            onClose={() => setShowSharePanel(false)}
+          />
         </section>
 
         {/* Spotify + CTAs */}

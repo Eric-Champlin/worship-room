@@ -47,7 +47,7 @@ describe('VerseOfTheDayBanner', () => {
 
     const shareButton = screen.getByLabelText('Share verse of the day')
     expect(shareButton).toBeInTheDocument()
-    expect(shareButton).toHaveAttribute('aria-haspopup', 'menu')
+    expect(shareButton).toHaveAttribute('aria-haspopup', 'dialog')
   })
 
   it('mobile truncation class applied', () => {
@@ -60,11 +60,11 @@ describe('VerseOfTheDayBanner', () => {
   it('share panel opens on click', () => {
     renderBanner()
 
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByLabelText('Share verse of the day'))
 
-    expect(screen.getByRole('menu')).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
   it('VOTD banner reference is a link', () => {

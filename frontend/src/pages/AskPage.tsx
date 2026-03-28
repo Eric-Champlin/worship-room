@@ -12,7 +12,7 @@ import { SaveConversationButton } from '@/components/ask/SaveConversationButton'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useToast } from '@/components/ui/Toast'
-import { ASK_TOPIC_CHIPS, ASK_MAX_LENGTH, ASK_CHAR_WARNING, ASK_CHAR_DANGER, ASK_LOADING_DELAY_MS, ASK_FEEDBACK_KEY } from '@/constants/ask'
+import { ASK_TOPIC_CHIPS, ASK_MAX_LENGTH, ASK_LOADING_DELAY_MS, ASK_FEEDBACK_KEY } from '@/constants/ask'
 import { getAskResponse } from '@/mocks/ask-mock-data'
 import type { AskResponse, AskFeedback } from '@/types/ask'
 import { SEO } from '@/components/SEO'
@@ -187,12 +187,6 @@ export function AskPage() {
   }
 
   const charCount = text.length
-  const charCountColor =
-    charCount >= ASK_CHAR_DANGER
-      ? 'text-danger'
-      : charCount >= ASK_CHAR_WARNING
-        ? 'text-warning'
-        : 'text-white/40'
 
   const showInput = conversation.length === 0 && !isLoading
 

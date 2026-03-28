@@ -143,6 +143,15 @@
   color: #fff !important;
 }
 
+/* Hide scrollbar while preserving scroll */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Dark-themed thin scrollbar for dashboard panels */
 .dark-scrollbar {
   scrollbar-width: thin;
