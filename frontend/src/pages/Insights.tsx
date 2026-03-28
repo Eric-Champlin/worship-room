@@ -145,6 +145,7 @@ function AnimatedSection({
   )
 }
 
+// Loading state: use InsightsSkeleton
 export function Insights() {
   const { isAuthenticated } = useAuth()
   const [range, setRange] = useState<TimeRange>('30d')

@@ -24,7 +24,7 @@ const TAB_CONFIG: { id: FriendsTab; label: string }[] = [
   { id: 'leaderboard', label: 'Leaderboard' },
 ]
 
-
+// Loading state: use FriendsSkeleton
 export function Friends() {
   const { isAuthenticated } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()

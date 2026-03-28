@@ -10,6 +10,7 @@ import { useSleepTimerControls } from '@/components/audio/AudioProvider'
 import { BookNotFound } from '@/components/bible/BookNotFound'
 import { ChapterNav } from '@/components/bible/ChapterNav'
 import { ChapterPlaceholder } from '@/components/bible/ChapterPlaceholder'
+import { BibleReaderSkeleton } from '@/components/skeletons/BibleReaderSkeleton'
 import { ChapterSelector } from '@/components/bible/ChapterSelector'
 import { VerseDisplay } from '@/components/bible/VerseDisplay'
 import { BookCompletionCard } from '@/components/bible/BookCompletionCard'
@@ -26,6 +27,7 @@ import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import type { BibleVerse } from '@/types/bible'
 
+// Loading state: use BibleReaderSkeleton
 export function BibleReader() {
   const { book: bookSlug, chapter: chapterParam } = useParams<{
     book: string
@@ -310,7 +312,7 @@ export function BibleReader() {
               chapter={chapterNumber}
             />
           ) : isLoading ? (
-            <div className="py-16 text-center text-white/50">Loading...</div>
+            <BibleReaderSkeleton />
           ) : verses.length === 0 ? (
             <div className="py-16 text-center text-white/50">
               No content available for this chapter.

@@ -16,6 +16,7 @@ import { useSocialInteractions } from '@/hooks/useSocialInteractions'
 import { useFriends } from '@/hooks/useFriends'
 import { ALL_MOCK_USERS } from '@/mocks/friends-mock-data'
 
+// Loading state: use ProfileSkeleton
 export function GrowthProfile() {
   const { userId } = useParams<{ userId: string }>()
   const profileData = useProfileData(userId || '')

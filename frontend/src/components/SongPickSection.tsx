@@ -1,12 +1,17 @@
+import { useState } from 'react'
+
 import { getSongOfTheDay } from '@/mocks/daily-experience-mock-data'
 import { SPOTIFY_EMBED_BASE, SPOTIFY_PLAYLIST_URL } from '@/constants/daily-experience'
 import { HeadingDivider } from '@/components/HeadingDivider'
+import { SkeletonBlock } from '@/components/skeletons/SkeletonBlock'
 import { useElementWidth } from '@/hooks/useElementWidth'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { cn } from '@/lib/utils'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
 
 export function SongPickSection() {
   const { isOnline } = useOnlineStatus()
+  const [iframeLoaded, setIframeLoaded] = useState(false)
   const today = new Date().getDate()
   const song = getSongOfTheDay(today)
 
@@ -30,7 +35,13 @@ export function SongPickSection() {
         </div>
         {isOnline ? (
           <>
-            <div className="mx-auto mt-8 max-w-xl">
+            <div className="mx-auto mt-8 max-w-xl relative">
+              {!iframeLoaded && (
+                <div className="absolute inset-0 z-10" aria-busy="true">
+                  <span className="sr-only">Loading</span>
+                  <SkeletonBlock height={280} rounded="rounded-xl" />
+                </div>
+              )}
               <iframe
                 title={`${song.title} by ${song.artist}`}
                 src={`${SPOTIFY_EMBED_BASE}/${song.trackId}?utm_source=generator&theme=0`}
@@ -38,7 +49,8 @@ export function SongPickSection() {
                 height="280"
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                 loading="lazy"
-                className="rounded-xl"
+                className={cn('rounded-xl', !iframeLoaded && 'invisible')}
+                onLoad={() => setIframeLoaded(true)}
               />
             </div>
             <div className="-mt-1">

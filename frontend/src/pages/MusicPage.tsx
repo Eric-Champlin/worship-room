@@ -43,6 +43,7 @@ function isValidTab(value: string | null): value is MusicTabId {
   return value === 'playlists' || value === 'ambient' || value === 'sleep'
 }
 
+// Loading state: use MusicSkeleton
 export function MusicPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const rawTab = searchParams.get('tab')

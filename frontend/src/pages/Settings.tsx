@@ -23,6 +23,7 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
   { id: 'account', label: 'Account' },
 ]
 
+// Loading state: use SettingsSkeleton
 export function Settings() {
   const { isAuthenticated, user } = useAuth()
   const { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser } = useSettings()

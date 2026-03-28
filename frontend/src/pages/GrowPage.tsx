@@ -23,6 +23,7 @@ function isValidTab(value: string | null): value is TabId {
   return value === 'plans' || value === 'challenges'
 }
 
+// Loading state: use GrowPageSkeleton
 export function GrowPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const rawTab = searchParams.get('tab')

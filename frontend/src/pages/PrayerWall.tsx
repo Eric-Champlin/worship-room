@@ -547,6 +547,7 @@ function PrayerWallContent() {
   )
 }
 
+// Loading state: use PrayerWallSkeleton
 export function PrayerWall() {
   return <PrayerWallContent />
 }

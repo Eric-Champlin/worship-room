@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { WifiOff } from 'lucide-react'
 
 import type { SpotifyPlaylist } from '@/data/music/playlists'
+import { SkeletonBlock } from '@/components/skeletons/SkeletonBlock'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/utils'
 
@@ -68,17 +69,25 @@ export function SpotifyEmbed({
   }
 
   return (
-    <iframe
-      src={`https://open.spotify.com/embed/playlist/${playlist.spotifyId}`}
-      width="100%"
-      height={height}
-      frameBorder="0"
-      allow="clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="lazy"
-      title={`${playlist.name} Spotify playlist`}
-      className={cn('rounded-xl', className)}
-      onLoad={() => setStatus('loaded')}
-      onError={() => setStatus('error')}
-    />
+    <div className="relative">
+      {status === 'loading' && (
+        <div className="absolute inset-0 z-10" aria-busy="true">
+          <span className="sr-only">Loading</span>
+          <SkeletonBlock height={height} rounded="rounded-xl" />
+        </div>
+      )}
+      <iframe
+        src={`https://open.spotify.com/embed/playlist/${playlist.spotifyId}`}
+        width="100%"
+        height={height}
+        frameBorder="0"
+        allow="clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        title={`${playlist.name} Spotify playlist`}
+        className={cn('rounded-xl', status === 'loading' && 'invisible', className)}
+        onLoad={() => setStatus('loaded')}
+        onError={() => setStatus('error')}
+      />
+    </div>
   )
 }

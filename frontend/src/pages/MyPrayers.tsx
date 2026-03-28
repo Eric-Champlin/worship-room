@@ -30,6 +30,7 @@ import {
 import type { PersonalPrayer, PrayerListFilter } from '@/types/personal-prayer'
 import type { PrayerCategory } from '@/constants/prayer-categories'
 
+// Loading state: use MyPrayersSkeleton
 export function MyPrayers() {
   const { isAuthenticated } = useAuth()
   const { showToast } = useToast()

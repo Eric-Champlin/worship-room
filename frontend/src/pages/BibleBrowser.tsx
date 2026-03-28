@@ -22,7 +22,7 @@ const bibleBreadcrumbs = {
 import { useBibleHighlights } from '@/hooks/useBibleHighlights'
 import { useBibleNotes } from '@/hooks/useBibleNotes'
 
-
+// Loading state: use BibleBrowserSkeleton
 export function BibleBrowser() {
   const [mode, setMode] = useState<BibleBrowserMode>('books')
   const { isAuthenticated } = useAuth()

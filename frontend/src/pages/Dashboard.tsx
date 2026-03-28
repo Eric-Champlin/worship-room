@@ -45,6 +45,7 @@ type DashboardPhase = 'onboarding' | 'check_in' | 'recommendations' | 'dashboard
 
 const DASHBOARD_ENTER_DURATION_MS = 800
 
+// Loading state: use DashboardSkeleton
 export function Dashboard() {
   const { user } = useAuth()
   const prefersReduced = useReducedMotion()
