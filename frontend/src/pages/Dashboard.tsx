@@ -38,6 +38,7 @@ import { CHALLENGES } from '@/data/challenges'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { cn } from '@/lib/utils'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
+import { useRoutePreload } from '@/hooks/useRoutePreload'
 import type { MoodEntry } from '@/types/dashboard'
 
 type DashboardPhase = 'onboarding' | 'check_in' | 'recommendations' | 'dashboard_enter' | 'dashboard'
@@ -47,6 +48,10 @@ const DASHBOARD_ENTER_DURATION_MS = 800
 export function Dashboard() {
   const { user } = useAuth()
   const prefersReduced = useReducedMotion()
+  useRoutePreload([
+    () => import('@/pages/DailyHub'),
+    () => import('@/pages/MusicPage'),
+  ])
   const { playSoundEffect } = useSoundEffects()
   const checkedRef = useRef(false)
   const hasAnimatedRef = useRef(false)

@@ -13,6 +13,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { lazy, Suspense } from 'react'
+import { cn } from '@/lib/utils'
+import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
 import { PageTransition } from '@/components/ui/PageTransition'
 
 // Route-level lazy loading for code splitting
@@ -55,9 +57,18 @@ const MoodCheckInPreview = lazy(() =>
 )
 
 function RouteLoadingFallback() {
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+    <div className="flex min-h-screen items-center justify-center bg-dashboard-dark">
+      <span
+        className={cn(
+          'text-3xl font-script select-none',
+          prefersReduced ? 'text-white/30' : 'animate-logo-pulse text-white/20'
+        )}
+      >
+        Worship Room
+      </span>
     </div>
   )
 }
@@ -135,6 +146,7 @@ function App() {
         <AudioProvider>
         <UpdatePrompt />
         <InstallBanner />
+        <ChunkErrorBoundary>
         <Suspense fallback={<RouteLoadingFallback />}>
         <PageTransition>
         <Routes>
@@ -190,6 +202,7 @@ function App() {
         </Routes>
         </PageTransition>
         </Suspense>
+        </ChunkErrorBoundary>
         </AudioProvider>
         </AuthModalProvider>
         </ToastProvider>

@@ -29,6 +29,7 @@ const dailyHubBreadcrumbs = {
   ],
 }
 import { cn } from '@/lib/utils'
+import { useRoutePreload } from '@/hooks/useRoutePreload'
 import type { PrayContext } from '@/types/daily-experience'
 
 const TABS = [
@@ -465,5 +466,8 @@ function DailyHubContent() {
 }
 
 export function DailyHub() {
+  useRoutePreload([
+    () => import('@/pages/BibleBrowser'),
+  ])
   return <DailyHubContent />
 }

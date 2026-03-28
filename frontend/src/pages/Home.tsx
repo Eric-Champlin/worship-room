@@ -6,6 +6,7 @@ import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { useRoutePreload } from '@/hooks/useRoutePreload'
 
 const homepageJsonLd = [
   {
@@ -34,6 +35,10 @@ const homepageJsonLd = [
 ]
 
 export function Home() {
+  useRoutePreload([
+    () => import('@/pages/DailyHub'),
+  ])
+
   return (
     <div className="min-h-screen bg-neutral-bg font-sans">
       <SEO
