@@ -14,6 +14,7 @@ interface DashboardHeroProps {
   currentLevel?: number
   meditationMinutesThisWeek?: number
   gardenSlot?: React.ReactNode
+  headerAction?: React.ReactNode
 }
 
 function getGreeting(): string {
@@ -32,6 +33,7 @@ export function DashboardHero({
   currentLevel = 1,
   meditationMinutesThisWeek = 0,
   gardenSlot,
+  headerAction,
 }: DashboardHeroProps) {
   const greeting = getGreeting()
   const prefersReduced = useReducedMotion()
@@ -96,20 +98,23 @@ export function DashboardHero({
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         {gardenSlot}
         <div className="flex flex-col items-center text-center md:items-start md:text-left">
-          <h1 className="font-serif text-2xl text-white/90 md:text-3xl">
-            {greeting},{' '}
-            <span className="inline-block max-w-[70vw] truncate align-bottom md:max-w-none">
-              {userName}
-            </span>
-            {isNamedSeason && seasonalGreeting && (
-              <span
-                className="block text-lg md:inline md:text-2xl"
-                style={{ color: themeColor }}
-              >
-                {' — '}{seasonalGreeting}
+          <div className="flex w-full items-start justify-between gap-4">
+            <h1 className="font-serif text-2xl text-white/90 md:text-3xl">
+              {greeting},{' '}
+              <span className="inline-block max-w-[70vw] truncate align-bottom md:max-w-none">
+                {userName}
               </span>
-            )}
-          </h1>
+              {isNamedSeason && seasonalGreeting && (
+                <span
+                  className="block text-lg md:inline md:text-2xl"
+                  style={{ color: themeColor }}
+                >
+                  {' — '}{seasonalGreeting}
+                </span>
+              )}
+            </h1>
+            {headerAction && <div className="shrink-0 mt-1">{headerAction}</div>}
+          </div>
 
           <div className="mt-4 flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-6">
             <div className="flex items-center gap-2">

@@ -7,7 +7,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { getCollapseState, setCollapseState } from '@/services/dashboard-collapse-storage'
 import type { GettingStartedItem } from '@/hooks/useGettingStarted'
 
-interface GettingStartedCardProps {
+export interface GettingStartedCardProps {
   items: GettingStartedItem[]
   completedCount: number
   onDismiss: () => void

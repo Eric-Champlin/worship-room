@@ -87,15 +87,16 @@ describe('Settings Page', () => {
 
   // --- Desktop Sidebar ---
 
-  it('desktop: sidebar with 4 nav items', () => {
+  it('desktop: sidebar with 5 nav items', () => {
     renderSettings()
     const nav = screen.getByRole('navigation', { name: 'Settings' })
     const buttons = nav.querySelectorAll('button')
-    expect(buttons).toHaveLength(4)
+    expect(buttons).toHaveLength(5)
     expect(buttons[0]).toHaveTextContent('Profile')
-    expect(buttons[1]).toHaveTextContent('Notifications')
-    expect(buttons[2]).toHaveTextContent('Privacy')
-    expect(buttons[3]).toHaveTextContent('Account')
+    expect(buttons[1]).toHaveTextContent('Dashboard')
+    expect(buttons[2]).toHaveTextContent('Notifications')
+    expect(buttons[3]).toHaveTextContent('Privacy')
+    expect(buttons[4]).toHaveTextContent('Account')
   })
 
   it('active sidebar item has highlighted background', () => {
@@ -107,10 +108,10 @@ describe('Settings Page', () => {
 
   // --- Mobile Tabs ---
 
-  it('mobile: tab bar with 4 tabs', () => {
+  it('mobile: tab bar with 5 tabs', () => {
     renderSettings()
     const tabs = screen.getAllByRole('tab')
-    expect(tabs).toHaveLength(4)
+    expect(tabs).toHaveLength(5)
   })
 
   it('active mobile tab has aria-selected true', () => {
@@ -131,7 +132,7 @@ describe('Settings Page', () => {
 
     // Switch to Notifications
     const nav = screen.getByRole('navigation', { name: 'Settings' })
-    const notifBtn = nav.querySelectorAll('button')[1]
+    const notifBtn = nav.querySelectorAll('button')[2]
     await user.click(notifBtn)
 
     // Notifications section rendered
@@ -150,7 +151,7 @@ describe('Settings Page', () => {
 
     // Switch to Privacy
     const nav = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav.querySelectorAll('button')[2])
+    await user.click(nav.querySelectorAll('button')[3])
 
     // Switch back to Profile
     await user.click(nav.querySelectorAll('button')[0])
@@ -166,7 +167,7 @@ describe('Settings Page', () => {
 
     // Toggle a notification off
     const nav = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav.querySelectorAll('button')[1]) // Notifications
+    await user.click(nav.querySelectorAll('button')[2]) // Notifications
     const switches = screen.getAllByRole('switch')
     const inAppToggle = switches[0]
     await user.click(inAppToggle) // Turn off in-app
@@ -176,7 +177,7 @@ describe('Settings Page', () => {
     // Remount
     renderSettings()
     const nav2 = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav2.querySelectorAll('button')[1])
+    await user.click(nav2.querySelectorAll('button')[2])
     const switches2 = screen.getAllByRole('switch')
     expect(switches2[0]).toHaveAttribute('aria-checked', 'false')
   })
@@ -195,7 +196,7 @@ describe('Settings Page', () => {
 
     // Switch to notifications to see toggles
     const nav = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav.querySelectorAll('button')[1])
+    await user.click(nav.querySelectorAll('button')[2])
 
     // Simulate another tab changing settings
     const newSettings = {
@@ -245,7 +246,7 @@ describe('Settings Page', () => {
 
     // Go to Account section
     const nav = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav.querySelectorAll('button')[3])
+    await user.click(nav.querySelectorAll('button')[4])
 
     // Click Delete Account
     await user.click(screen.getByRole('button', { name: 'Delete Account' }))

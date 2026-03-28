@@ -8,10 +8,8 @@ import { DashboardWidgetGrid } from '@/components/dashboard/DashboardWidgetGrid'
 import { MoodCheckIn } from '@/components/dashboard/MoodCheckIn'
 import { MoodRecommendations } from '@/components/dashboard/MoodRecommendations'
 import { CelebrationQueue } from '@/components/dashboard/CelebrationQueue'
-import { GettingStartedCard } from '@/components/dashboard/GettingStartedCard'
 import { GettingStartedCelebration } from '@/components/dashboard/GettingStartedCelebration'
 import { WeeklyGodMoments } from '@/components/dashboard/WeeklyGodMoments'
-import { EveningReflectionBanner } from '@/components/dashboard/EveningReflectionBanner'
 import { EveningReflection } from '@/components/dashboard/EveningReflection'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
@@ -23,6 +21,7 @@ import { usePrayerReminders } from '@/hooks/usePrayerReminders'
 import { useChallengeProgress } from '@/hooks/useChallengeProgress'
 import { useChallengeAutoDetect } from '@/hooks/useChallengeAutoDetect'
 import { useChallengeNudge } from '@/hooks/useChallengeNudge'
+import { useWeeklyRecap } from '@/hooks/useWeeklyRecap'
 import { SEO } from '@/components/SEO'
 import { ChallengeCompletionOverlay } from '@/components/challenges/ChallengeCompletionOverlay'
 import { useToastSafe } from '@/components/ui/Toast'
@@ -30,6 +29,8 @@ import { hasCheckedInToday } from '@/services/mood-storage'
 import { getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { isOnboardingComplete } from '@/services/onboarding-storage'
 import { isEveningTime, hasReflectedToday, markReflectionDone, hasAnyActivityToday } from '@/services/evening-reflection-storage'
+import { getRecentBibleAnnotations } from '@/services/bible-annotations-storage'
+import { READING_PLAN_PROGRESS_KEY } from '@/constants/reading-plans'
 import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
@@ -39,6 +40,10 @@ import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { cn } from '@/lib/utils'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { useRoutePreload } from '@/hooks/useRoutePreload'
+import { useDashboardLayout } from '@/hooks/useDashboardLayout'
+import { CustomizePanel } from '@/components/dashboard/CustomizePanel'
+import { SlidersHorizontal } from 'lucide-react'
+import type { WidgetId } from '@/constants/dashboard/widget-order'
 import type { MoodEntry } from '@/types/dashboard'
 
 type DashboardPhase = 'onboarding' | 'check_in' | 'recommendations' | 'dashboard_enter' | 'dashboard'
@@ -57,6 +62,17 @@ export function Dashboard() {
   const checkedRef = useRef(false)
   const hasAnimatedRef = useRef(false)
   const [animateEntrance, setAnimateEntrance] = useState(false)
+  const [customizePanelOpen, setCustomizePanelOpen] = useState(false)
+  const customizeButtonRef = useRef<HTMLButtonElement>(null)
+
+  // Check URL param on mount to open customize panel from Settings
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('customize') === 'true') {
+      setCustomizePanelOpen(true)
+      window.history.replaceState({}, '', '/')
+    }
+  }, [])
 
   const [phase, setPhase] = useState<DashboardPhase>(() => {
     if (!isOnboardingComplete()) return 'onboarding'
@@ -65,6 +81,7 @@ export function Dashboard() {
   const [lastMoodEntry, setLastMoodEntry] = useState<MoodEntry | null>(null)
 
   const faithPoints = useFaithPoints()
+  const { isVisible: recapVisible, hasFriends: recapHasFriends } = useWeeklyRecap()
   const godMoments = useWeeklyGodMoments()
   usePrayerReminders(phase === 'dashboard')
 
@@ -250,6 +267,32 @@ export function Dashboard() {
     prevLevelRef.current = faithPoints.currentLevel
   }, [faithPoints.totalPoints, faithPoints.currentLevel])
 
+  // Conditional visibility for widgets
+  let hasActiveReadingPlan = false
+  try {
+    const raw = localStorage.getItem(READING_PLAN_PROGRESS_KEY)
+    if (raw) {
+      const progress = JSON.parse(raw)
+      hasActiveReadingPlan = Object.values(progress).some((p: any) => p && !p.completedAt)
+    }
+  } catch { /* ignore malformed data */ }
+
+  const hasHighlightsOrNotes = getRecentBibleAnnotations(1).length > 0
+  const hasActiveChallenge = getActiveChallenge() !== undefined
+  const showRecap = recapVisible || !recapHasFriends
+
+  // Dashboard layout hook — must be before early returns
+  const dashboardLayoutVisibility: Partial<Record<WidgetId, boolean>> = useMemo(() => ({
+    'getting-started': gettingStarted.isVisible && !gettingStartedCardDismissed,
+    'evening-reflection': showEveningBanner,
+    'reading-plan': hasActiveReadingPlan,
+    'recent-highlights': hasHighlightsOrNotes,
+    'challenge': hasActiveChallenge,
+    'weekly-recap': showRecap,
+  }), [gettingStartedCardDismissed, gettingStarted.isVisible, showEveningBanner, hasActiveReadingPlan, hasHighlightsOrNotes, hasActiveChallenge, showRecap])
+
+  const dashboardLayout = useDashboardLayout(dashboardLayoutVisibility)
+
   if (!user) return null
 
   if (phase === 'onboarding') {
@@ -313,6 +356,18 @@ export function Dashboard() {
             pointsToNextLevel={faithPoints.pointsToNextLevel}
             currentLevel={faithPoints.currentLevel}
             meditationMinutesThisWeek={getMeditationMinutesForWeek()}
+            headerAction={
+              !showGettingStarted ? (
+                <button
+                  ref={customizeButtonRef}
+                  onClick={() => setCustomizePanelOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Customize
+                </button>
+              ) : undefined
+            }
             gardenSlot={
               <div>
                 <p className="text-xs text-white/40">Your Garden</p>
@@ -351,47 +406,34 @@ export function Dashboard() {
             <WeeklyGodMoments {...godMoments} />
           </div>
         )}
-        {showGettingStarted && (
-          <div
-            className={cn(
-              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
-              shouldAnimate && 'motion-safe:animate-widget-enter',
-            )}
-            style={shouldAnimate ? { animationDelay: godMoments.isVisible ? '200ms' : '100ms' } : undefined}
-          >
-            <GettingStartedCard
-              items={gettingStarted.items}
-              completedCount={gettingStarted.completedCount}
-              onDismiss={handleGettingStartedDismiss}
-              onRequestCheckIn={handleRequestCheckIn}
-            />
-          </div>
-        )}
-        {showEveningBanner && (
-          <div
-            className={cn(
-              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
-              shouldAnimate && 'motion-safe:animate-widget-enter',
-            )}
-            style={shouldAnimate ? { animationDelay: `${100 * (1 + (godMoments.isVisible ? 1 : 0) + (showGettingStarted ? 1 : 0))}ms` } : undefined}
-          >
-            <EveningReflectionBanner
-              onReflectNow={() => {
-                setShowReflectionOverlay(true)
-                playSoundEffect('bell')
-              }}
-              onDismiss={handleDismissReflection}
-            />
-          </div>
-        )}
         <DashboardWidgetGrid
+          orderedWidgets={dashboardLayout.orderedWidgets}
           faithPoints={faithPoints}
           justCompletedCheckIn={justCompletedCheckIn}
           onRequestCheckIn={handleRequestCheckIn}
           quickActionsRef={quickActionsRef}
           quickActionsTooltipVisible={quickActionsTooltip.shouldShow}
           animateEntrance={shouldAnimate}
-          staggerStartIndex={1 + (godMoments.isVisible ? 1 : 0) + (showGettingStarted ? 1 : 0) + (showEveningBanner ? 1 : 0)}
+          staggerStartIndex={1 + (godMoments.isVisible ? 1 : 0)}
+          showGettingStarted={showGettingStarted}
+          gettingStartedProps={{
+            items: gettingStarted.items,
+            completedCount: gettingStarted.completedCount,
+            onDismiss: handleGettingStartedDismiss,
+            onRequestCheckIn: handleRequestCheckIn,
+          }}
+          showEveningBanner={showEveningBanner}
+          eveningBannerProps={{
+            onReflectNow: () => {
+              setShowReflectionOverlay(true)
+              playSoundEffect('bell')
+            },
+            onDismiss: handleDismissReflection,
+          }}
+          hasActiveReadingPlan={hasActiveReadingPlan}
+          hasActiveChallenge={hasActiveChallenge}
+          hasHighlightsOrNotes={hasHighlightsOrNotes}
+          isCustomizing={customizePanelOpen}
         />
       </main>
       {quickActionsTooltip.shouldShow && (
@@ -403,6 +445,18 @@ export function Dashboard() {
           onDismiss={quickActionsTooltip.dismiss}
         />
       )}
+      <CustomizePanel
+        isOpen={customizePanelOpen}
+        onClose={() => {
+          setCustomizePanelOpen(false)
+          customizeButtonRef.current?.focus()
+        }}
+        orderedWidgets={dashboardLayout.orderedWidgets}
+        hiddenWidgets={(dashboardLayout.layout?.hidden ?? []) as WidgetId[]}
+        onUpdateOrder={dashboardLayout.updateOrder}
+        onToggleVisibility={dashboardLayout.toggleVisibility}
+        onResetToDefault={dashboardLayout.resetToDefault}
+      />
       <SiteFooter />
       {challengeCompletionOverlay && (
         <ChallengeCompletionOverlay

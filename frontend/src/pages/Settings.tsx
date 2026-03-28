@@ -9,15 +9,17 @@ import { ProfileSection } from '@/components/settings/ProfileSection'
 import { NotificationsSection } from '@/components/settings/NotificationsSection'
 import { PrivacySection } from '@/components/settings/PrivacySection'
 import { AccountSection } from '@/components/settings/AccountSection'
+import { DashboardSection } from '@/components/settings/DashboardSection'
 import { SEO } from '@/components/SEO'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
 
-type SettingsSection = 'profile' | 'notifications' | 'privacy' | 'account'
+type SettingsSection = 'profile' | 'dashboard' | 'notifications' | 'privacy' | 'account'
 
 const SECTIONS: { id: SettingsSection; label: string }[] = [
   { id: 'profile', label: 'Profile' },
+  { id: 'dashboard', label: 'Dashboard' },
   { id: 'notifications', label: 'Notifications' },
   { id: 'privacy', label: 'Privacy' },
   { id: 'account', label: 'Account' },
@@ -129,6 +131,7 @@ export function Settings() {
                 onUpdateProfile={updateProfile}
               />
             )}
+            {activeSection === 'dashboard' && <DashboardSection />}
             {activeSection === 'notifications' && (
               <NotificationsSection
                 notifications={settings.notifications}

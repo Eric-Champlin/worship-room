@@ -1,3 +1,9 @@
+export interface DashboardLayout {
+  order: string[]
+  hidden: string[]
+  customized: boolean
+}
+
 export type MoodValue = 1 | 2 | 3 | 4 | 5;
 export type MoodLabel = 'Struggling' | 'Heavy' | 'Okay' | 'Good' | 'Thriving';
 

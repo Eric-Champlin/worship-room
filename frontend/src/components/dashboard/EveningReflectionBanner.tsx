@@ -1,7 +1,7 @@
 import { Moon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface EveningReflectionBannerProps {
+export interface EveningReflectionBannerProps {
   onReflectNow: () => void
   onDismiss: () => void
   animate?: boolean
