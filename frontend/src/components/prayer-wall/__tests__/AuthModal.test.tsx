@@ -13,6 +13,48 @@ const defaultProps = {
   onShowToast: vi.fn(),
 }
 
+describe('AuthModal — dark theme', () => {
+  it('renders dark frosted glass background', () => {
+    const { container } = render(<AuthModal {...defaultProps} />)
+    const modal = container.querySelector('[role="dialog"]')
+    expect(modal?.className).toContain('bg-hero-mid/95')
+    expect(modal?.className).toContain('backdrop-blur-xl')
+  })
+
+  it('inputs have dark styling', () => {
+    render(<AuthModal {...defaultProps} />)
+    const emailInput = screen.getByLabelText('Email address')
+    expect(emailInput.className).toContain('bg-white/[0.06]')
+  })
+
+  it('close button has white/60 text', () => {
+    render(<AuthModal {...defaultProps} />)
+    const closeBtn = screen.getByLabelText('Close')
+    expect(closeBtn.className).toContain('text-white/60')
+  })
+
+  it('error messages use red-400', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...defaultProps} />)
+    await user.click(screen.getByRole('button', { name: 'Log In' }))
+    const errorEl = screen.getByText('Email is required')
+    expect(errorEl.className).toContain('text-red-400')
+  })
+
+  it('Spotify button has ghost green style', () => {
+    render(<AuthModal {...defaultProps} />)
+    const spotifyBtn = screen.getByLabelText('Continue with Spotify')
+    expect(spotifyBtn.className).toContain('border-[#1DB954]/30')
+    expect(spotifyBtn.className).toContain('text-[#1DB954]')
+  })
+
+  it('toggle links use primary-lt', () => {
+    render(<AuthModal {...defaultProps} />)
+    const createLink = screen.getByRole('button', { name: 'Create one!' })
+    expect(createLink.className).toContain('text-primary-lt')
+  })
+})
+
 describe('AuthModal — validation', () => {
   it('shows email error on empty submit', async () => {
     const user = userEvent.setup()

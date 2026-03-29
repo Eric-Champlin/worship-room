@@ -40,7 +40,7 @@ export function BibleSleepSection() {
 
   return (
     <section>
-      <h2 className="mb-4 text-lg font-semibold text-text-dark">
+      <h2 className="mb-4 text-lg font-semibold text-white">
         Scripture Reading
       </h2>
 
@@ -51,18 +51,18 @@ export function BibleSleepSection() {
           e.preventDefault()
           navigate('/bible')
         }}
-        className="group block overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+        className="group block overflow-hidden rounded-xl border border-white/10 bg-white/[0.06] transition-shadow hover:shadow-md hover:shadow-black/20"
       >
         <div className="h-1 bg-gradient-to-r from-amber-500 to-purple-600" />
         <div className="flex items-center gap-4 p-5">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-amber-50">
-            <BookOpen className="h-6 w-6 text-amber-600" aria-hidden="true" />
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <BookOpen className="h-6 w-6 text-primary-lt" aria-hidden="true" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-text-dark">
+            <h3 className="text-lg font-semibold text-white">
               Read the Bible
             </h3>
-            <p className="text-sm text-text-light">
+            <p className="text-sm text-white/60">
               Fall asleep to any chapter read aloud
             </p>
           </div>
@@ -80,15 +80,15 @@ export function BibleSleepSection() {
               key={option.sceneId}
               type="button"
               onClick={() => handleQuickStart(option.sceneId, option.bookPath)}
-              className="flex min-h-[44px] items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+              className="flex min-h-[44px] items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] p-4 transition-shadow hover:shadow-md hover:shadow-black/20"
               aria-label={`Start ${scene.name} and read ${option.bookLabel}`}
             >
               <Play className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
               <div className="text-left">
-                <span className="block text-sm font-medium text-text-dark">
+                <span className="block text-sm font-medium text-white">
                   {scene.name}
                 </span>
-                <span className="block text-xs text-text-light">
+                <span className="block text-xs text-white/60">
                   {option.bookLabel}
                 </span>
               </div>

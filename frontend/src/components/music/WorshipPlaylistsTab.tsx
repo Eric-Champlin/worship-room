@@ -29,7 +29,7 @@ export function WorshipPlaylistsTab() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       {/* Featured */}
       <div className="mb-8 text-center" ref={featuredRef}>
-        <h2 className="font-script text-3xl font-bold text-text-dark sm:text-4xl">
+        <h2 className="font-script text-3xl font-bold text-white sm:text-4xl">
           Featured
         </h2>
         <HeadingDivider width={featuredWidth} />
@@ -42,7 +42,7 @@ export function WorshipPlaylistsTab() {
 
       {/* Explore */}
       <div className="mb-8 mt-12 text-center" ref={exploreRef}>
-        <h2 className="font-script text-3xl font-bold text-text-dark sm:text-4xl">
+        <h2 className="font-script text-3xl font-bold text-white sm:text-4xl">
           Explore
         </h2>
         <HeadingDivider width={exploreWidth} />

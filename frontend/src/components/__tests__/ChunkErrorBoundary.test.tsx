@@ -4,6 +4,12 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChunkErrorBoundary } from '../ChunkErrorBoundary'
 
+vi.mock('@/components/Layout', () => ({
+  Layout: ({ children, dark }: { children: React.ReactNode; dark?: boolean }) => (
+    <div data-testid="layout" data-dark={dark}>{children}</div>
+  ),
+}))
+
 // Component that throws on demand
 function ThrowingChild({ error }: { error?: Error }) {
   if (error) throw error
@@ -50,9 +56,9 @@ describe('ChunkErrorBoundary', () => {
       </ChunkErrorBoundary>
     )
 
-    expect(screen.getByText('Something went wrong loading this page')).toBeInTheDocument()
-    expect(screen.getByText(/slow connection/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
+    expect(screen.getByText("Let's try that again")).toBeInTheDocument()
+    expect(screen.getByText(/A quick refresh usually does the trick/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Refresh Page' })).toBeInTheDocument()
   })
 
   it('shows error UI for ChunkLoadError name', () => {
@@ -65,7 +71,7 @@ describe('ChunkErrorBoundary', () => {
       </ChunkErrorBoundary>
     )
 
-    expect(screen.getByText('Something went wrong loading this page')).toBeInTheDocument()
+    expect(screen.getByText("Let's try that again")).toBeInTheDocument()
   })
 
   it('shows error UI for "Loading chunk" error', () => {
@@ -77,7 +83,7 @@ describe('ChunkErrorBoundary', () => {
       </ChunkErrorBoundary>
     )
 
-    expect(screen.getByText('Something went wrong loading this page')).toBeInTheDocument()
+    expect(screen.getByText("Let's try that again")).toBeInTheDocument()
   })
 
   it('does not catch non-chunk errors (propagates to outer boundary)', () => {
@@ -92,7 +98,7 @@ describe('ChunkErrorBoundary', () => {
     )
 
     expect(screen.getByText('outer caught')).toBeInTheDocument()
-    expect(screen.queryByText('Something went wrong loading this page')).not.toBeInTheDocument()
+    expect(screen.queryByText("Let's try that again")).not.toBeInTheDocument()
   })
 
   it('Try again button calls window.location.reload', async () => {
@@ -111,11 +117,24 @@ describe('ChunkErrorBoundary', () => {
       </ChunkErrorBoundary>
     )
 
-    await user.click(screen.getByRole('button', { name: 'Try again' }))
+    await user.click(screen.getByRole('button', { name: 'Refresh Page' }))
     expect(reloadMock).toHaveBeenCalledOnce()
   })
 
-  it('error fallback has dark background class', () => {
+  it('error fallback uses Layout with dark prop', () => {
+    const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
+
+    render(
+      <ChunkErrorBoundary>
+        <ThrowingChild error={error} />
+      </ChunkErrorBoundary>
+    )
+
+    const layout = screen.getByTestId('layout')
+    expect(layout).toHaveAttribute('data-dark', 'true')
+  })
+
+  it('error fallback shows cross branding icon', () => {
     const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
 
     const { container } = render(
@@ -124,8 +143,8 @@ describe('ChunkErrorBoundary', () => {
       </ChunkErrorBoundary>
     )
 
-    const bg = container.querySelector('.bg-dashboard-dark')
-    expect(bg).toBeInTheDocument()
+    const svg = container.querySelector('svg[aria-hidden="true"]')
+    expect(svg).toBeInTheDocument()
   })
 
   it('button has accessible focus ring classes', () => {
@@ -137,7 +156,7 @@ describe('ChunkErrorBoundary', () => {
       </ChunkErrorBoundary>
     )
 
-    const button = screen.getByRole('button', { name: 'Try again' })
+    const button = screen.getByRole('button', { name: 'Refresh Page' })
     expect(button.className).toContain('focus-visible:ring-2')
   })
 })
