@@ -12,7 +12,8 @@ function readPrayers(): PersonalPrayer[] {
     const raw = localStorage.getItem(PRAYER_LIST_KEY)
     if (!raw) return []
     return JSON.parse(raw) as PersonalPrayer[]
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return []
   }
 }
@@ -20,8 +21,8 @@ function readPrayers(): PersonalPrayer[] {
 function writePrayers(prayers: PersonalPrayer[]): void {
   try {
     localStorage.setItem(PRAYER_LIST_KEY, JSON.stringify(prayers))
-  } catch {
-    // Silently fail on quota exceeded — caller can check return values
+  } catch (_e) {
+    // localStorage may be unavailable or quota exceeded
   }
 }
 
@@ -164,7 +165,8 @@ function readRemindersShown(): PrayerReminderShown | null {
     const raw = localStorage.getItem(REMINDERS_SHOWN_KEY)
     if (!raw) return null
     return JSON.parse(raw) as PrayerReminderShown
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return null
   }
 }
@@ -182,7 +184,7 @@ export function markRemindersShown(prayerIds: string[]): void {
   }
   try {
     localStorage.setItem(REMINDERS_SHOWN_KEY, JSON.stringify(data))
-  } catch {
-    // Silently fail on quota exceeded
+  } catch (_e) {
+    // localStorage may be unavailable or quota exceeded
   }
 }

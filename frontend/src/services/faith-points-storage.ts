@@ -40,7 +40,8 @@ export function getActivityLog(): DailyActivityLog {
     const parsed = JSON.parse(raw);
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
     return parsed;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return {};
   }
 }
@@ -64,7 +65,8 @@ export function getFaithPoints(): FaithPointsData {
       return freshFaithPoints();
     }
     return parsed;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return freshFaithPoints();
   }
 }
@@ -78,7 +80,8 @@ export function getStreakData(): StreakData {
       return freshStreakData();
     }
     return parsed;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return freshStreakData();
   }
 }
@@ -136,17 +139,31 @@ export function updateStreak(today: string, currentData: StreakData): StreakData
   };
 }
 
+function pruneOldEntries(log: DailyActivityLog): DailyActivityLog {
+  const keys = Object.keys(log);
+  if (keys.length <= 365) return log;
+  keys.sort();
+  const cutoff = keys[keys.length - 365];
+  const pruned: DailyActivityLog = {};
+  for (const key of keys) {
+    if (key >= cutoff) pruned[key] = log[key];
+  }
+  return pruned;
+}
+
 export function persistAll(
   activityLog: DailyActivityLog,
   faithPoints: FaithPointsData,
   streak: StreakData,
 ): boolean {
   try {
-    localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(activityLog));
+    const pruned = pruneOldEntries(activityLog);
+    localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(pruned));
     localStorage.setItem(POINTS_KEY, JSON.stringify(faithPoints));
     localStorage.setItem(STREAK_KEY, JSON.stringify(streak));
     return true;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable
     return false;
   }
 }

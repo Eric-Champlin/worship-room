@@ -207,28 +207,28 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
               <button
                 type="button"
                 onClick={() => handleAddStepType('scene')}
-                className="flex items-center gap-1.5 rounded-lg border border-glow-cyan/30 bg-glow-cyan/10 px-3 py-2 text-xs font-medium text-glow-cyan transition-colors hover:bg-glow-cyan/20"
+                className="flex items-center gap-1.5 rounded-lg border border-glow-cyan/30 bg-glow-cyan/10 px-3 py-2 text-xs font-medium text-glow-cyan transition-colors hover:bg-glow-cyan/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
               >
                 <Mountain size={14} /> Scene
               </button>
               <button
                 type="button"
                 onClick={() => handleAddStepType('scripture')}
-                className="flex items-center gap-1.5 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-400/20"
+                className="flex items-center gap-1.5 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
               >
                 <BookOpen size={14} /> Scripture
               </button>
               <button
                 type="button"
                 onClick={() => handleAddStepType('story')}
-                className="flex items-center gap-1.5 rounded-lg border border-primary-lt/30 bg-primary-lt/10 px-3 py-2 text-xs font-medium text-primary-lt transition-colors hover:bg-primary-lt/20"
+                className="flex items-center gap-1.5 rounded-lg border border-primary-lt/30 bg-primary-lt/10 px-3 py-2 text-xs font-medium text-primary-lt transition-colors hover:bg-primary-lt/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
               >
                 <Moon size={14} /> Story
               </button>
               <button
                 type="button"
                 onClick={() => setShowTypePicker(false)}
-                className="px-2 py-2 text-xs text-white/40 hover:text-white/60"
+                className="px-2 py-2 text-xs text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
               >
                 Cancel
               </button>
@@ -237,7 +237,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
             <button
               type="button"
               onClick={() => setShowTypePicker(true)}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-white/20 py-3 text-sm text-white/50 transition-colors hover:border-white/40 hover:text-white/70"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-white/20 py-3 text-sm text-white/50 transition-colors hover:border-white/40 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <Plus size={16} /> Add Step
             </button>
@@ -287,7 +287,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-white/20 px-6 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5"
+            className="rounded-lg border border-white/20 px-6 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
             Cancel
           </button>
@@ -295,7 +295,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
             type="button"
             onClick={handleSave}
             disabled={steps.length === 0}
-            className="rounded-lg bg-primary px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-40"
+            className="rounded-lg bg-primary px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
           >
             Save Routine
           </button>

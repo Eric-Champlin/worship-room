@@ -13,10 +13,10 @@ Detailed user experience flows for every major feature. Read this file before im
 ### Desktop Navbar (Logged Out)
 
 ```
-[Worship Room logo]   Daily Hub   Bible   Grow   Prayer Wall   Music   [Local Support ▾]   [Log In]  [Get Started]
+[Worship Room logo]   Daily Hub   Prayer Wall   Music   [Local Support ▾]   [Log In]  [Get Started]
 ```
 
-**Top-level links (5):** Daily Hub, Bible, Grow, Prayer Wall, Music. Active state: Daily Hub on `/daily*`, Bible on `/bible*`, Grow on `/grow` + `/reading-plans/*` + `/challenges/*`, Prayer Wall on `/prayer-wall*`, Music on `/music*`. Tablet (768-1024px): icon-only with `aria-label` tooltips. Desktop (1024px+): text labels.
+**Top-level links (3):** Daily Hub, Prayer Wall, and Music — all always visible, no dropdowns. Music links directly to `/music`.
 
 **"Local Support" dropdown** (clickable label goes to `/local-support/churches`; dropdown expands on hover/click):
 
@@ -29,72 +29,78 @@ Detailed user experience flows for every major feature. Read this file before im
 ### Desktop Navbar (Logged In)
 
 ```
-[Worship Room logo]   Daily Hub   Bible   Grow   Prayer Wall   Music   [Local Support ▾]   [🔔]  [Avatar ▾]
+[Worship Room logo]   Daily Hub   Prayer Wall   Music   [Local Support ▾]   [🔔]  [Avatar ▾]
 ```
 
-**Notification bell**: Lucide `Bell` icon. Badge count for unread notifications. Click opens dropdown panel (see Notification Flow below).
+**Notification bell** (🔔): Lucide `Bell` icon. Badge count for unread notifications (red circle, white text, top-right). Only shows when count > 0. Click opens dropdown panel (see Notification Flow below).
 
-**Avatar dropdown** (5 links with Lucide icons + divider + Log Out):
+**Avatar dropdown**:
 
 ```
-├── Dashboard        (LayoutDashboard)
-├── My Prayers       (Heart)
-├── Friends          (Users)
-├── Mood Insights    (BarChart3)
-├── Settings         (Settings)
+├── Dashboard
+├── Friends
+├── My Journal Entries
+├── My Prayer Requests
+├── My Favorites
+├── Mood Insights
+├── Settings
 ├── ─────────────────
-└── Log Out          (LogOut)
+└── Log Out
 ```
 
 ### Mobile Drawer (Logged Out)
 
-Always dark theme (`bg-hero-mid border border-white/15`). Organized into labeled sections with `role="heading" aria-level="2"` headers. Active items show `border-l-2 border-primary bg-white/[0.04]`.
-
 ```
-DAILY
-  Daily Hub
-STUDY
-  Bible
-  Grow
-  Ask God's Word
-COMMUNITY
-  Prayer Wall
-LISTEN
-  Music
-FIND HELP
+Daily Hub
+──────────────
+Prayer Wall
+──────────────
+Music
+──────────────
+LOCAL SUPPORT
   Churches
   Counselors
   Celebrate Recovery
 ──────────────
-[Log In]  [Get Started]
+[Log In]
+[Get Started]
 ```
 
 ### Mobile Drawer (Logged In)
 
-Same nav sections as logged-out, plus MY WORSHIP ROOM section:
-
 ```
-(same DAILY, STUDY, COMMUNITY, LISTEN, FIND HELP sections)
+Dashboard
 ──────────────
-MY WORSHIP ROOM
-  Dashboard
-  My Prayers
-  Friends
-  Mood Insights
-  Settings
+Daily Hub
 ──────────────
-[Notifications]
+Prayer Wall
+──────────────
+Music
+──────────────
+LOCAL SUPPORT
+  Churches
+  Counselors
+  Celebrate Recovery
+──────────────
+Friends
+Mood Insights
+My Journal Entries
+My Prayer Requests
+My Favorites
+Settings
+──────────────
+[🔔 Notifications]
 [Log Out]
 ```
 
-**Implementation:** The Navbar component checks `isAuthenticated` from the auth context and conditionally renders the appropriate button set. The logged-in state applies on ALL pages, not just the dashboard. Components extracted into: `LocalSupportDropdown.tsx`, `AvatarDropdown.tsx`, `MobileDrawer.tsx`, `SeasonalNavLine.tsx`.
+**Implementation:** The Navbar component checks `isAuthenticated` from the auth context and conditionally renders the appropriate button set. The logged-in state applies on ALL pages, not just the dashboard.
 
 ---
 
 ## Landing Page Structure
 
 ```
-1. Navbar (transparent glassmorphic pill — 5 nav links: Daily Hub, Bible, Grow, Prayer Wall, Music + Local Support dropdown)
+1. Navbar (transparent glassmorphic pill — Daily Hub link, Prayer Wall link, Music link, Local Support dropdown)
 2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /daily?tab=pray, quiz teaser link scrolls to #quiz)
 3. Journey Section (6-step vertical timeline: Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
 4. Growth Teasers Section ("See How You're Growing" — 3 blurred preview cards. Dark purple gradient. CTA: "Create a Free Account")
@@ -140,6 +146,7 @@ If mood already logged today, skip check-in and show dashboard directly.
 **Hero section (dark gradient):** Time-of-day greeting + streak (🔥 + count) + level badge + faith points + progress bar.
 
 **Widget grid (frosted glass cards, priority order):**
+
 1. Streak & Faith Points (right column on desktop)
 2. 7-day Mood Chart (left column)
 3. Today's Activity Checklist with progress ring (left column)
@@ -213,35 +220,38 @@ See [02-security.md](02-security.md) for the canonical Demo Mode Data Policy and
 
 ### Daily Hub Architecture (`/daily`)
 
-The Daily Hub is a single-page tabbed experience at `/daily`. Old routes (`/pray`, `/journal`, `/meditate`, `/scripture`, `/devotional`) redirect here with the appropriate `?tab=` query param.
+The Daily Hub is a single-page tabbed experience at `/daily`. Old routes (`/pray`, `/journal`, `/meditate`, `/scripture`) redirect here with the appropriate `?tab=` query param.
 
 **Tab Structure:**
-- 4 tabs: **Devotional** | **Pray** | **Journal** | **Meditate** (query param: `?tab=devotional|pray|journal|meditate`)
-- Default tab: `devotional`
+
+- 3 tabs: **Pray** | **Journal** | **Meditate** (query param: `?tab=pray|journal|meditate`)
+- Default tab: `pray`
 - Animated underline slides horizontally across active tab
 - Tab content is mounted at all times but hidden (preserves state between switches)
 - Sticky tab bar appears below hero on scroll (via Intersection Observer sentinel)
 
 **Hero Section (above tabs):**
+
 - Radial + linear gradient background
 - Time-aware greeting: "Good Morning!", "Good Afternoon!", "Good Evening!" (personalized with name if logged in)
 - Subtitle: "Start with any practice below."
 - Quiz teaser: "Not sure where to start? Take a 30-second quiz..." → scrolls to `#quiz`
 
 **Below Tab Content (always visible):**
+
 1. **SongPickSection** — Today's Song Pick with Spotify 352px iframe embed + "Follow Our Playlist" CTA
 2. **StartingPointQuiz** — 5-question quiz with `id="quiz"` scroll target
 3. **SiteFooter** — Standard footer with "Listen on Spotify" badge
 
-**Heading Pattern (consistent across all 4 tabs):**
-- Devotional: "What's On Your **Soul?**" (Caveat script font)
+**Heading Pattern (consistent across all 3 tabs):**
+
 - Pray: "What's On Your **Heart?**" (Caveat script font)
 - Journal: "What's On Your **Mind?**" (Caveat script font)
 - Meditate: "What's On Your **Spirit?**" (Caveat script font)
 
-All 4 tabs share: `BackgroundSquiggle` decorative SVG, `max-w-2xl` container width, `SQUIGGLE_MASK_STYLE` fade mask.
+All 3 tabs share: `BackgroundSquiggle` decorative SVG, `max-w-2xl` container width, `SQUIGGLE_MASK_STYLE` fade mask.
 
-**Context Passing:** Pray tab can pass context to Journal tab (e.g., "Continuing from your prayer about anxiety"). Devotional tab can pass context to Journal (theme) and Pray (passage reference) tabs. This auto-selects Guided mode and pre-fills a relevant prompt.
+**Context Passing:** Pray tab can pass context to Journal tab (e.g., "Continuing from your prayer about anxiety"). This auto-selects Guided mode and pre-fills a relevant prompt.
 
 ---
 

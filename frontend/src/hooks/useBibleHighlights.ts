@@ -11,7 +11,8 @@ function readHighlights(): BibleHighlight[] {
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
     return parsed as BibleHighlight[]
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return []
   }
 }
@@ -19,8 +20,8 @@ function readHighlights(): BibleHighlight[] {
 function writeHighlights(data: BibleHighlight[]): void {
   try {
     localStorage.setItem(BIBLE_HIGHLIGHTS_KEY, JSON.stringify(data))
-  } catch {
-    // Silently fail on quota exceeded
+  } catch (_e) {
+    // localStorage may be unavailable or quota exceeded
   }
 }
 

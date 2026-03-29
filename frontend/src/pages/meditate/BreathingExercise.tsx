@@ -29,7 +29,7 @@ function speakPhase(label: string) {
     utterance.rate = 0.9
     utterance.volume = 0.7
     speechSynthesis.speak(utterance)
-  } catch {
+  } catch (_e) {
     // Speech synthesis not available
   }
 }

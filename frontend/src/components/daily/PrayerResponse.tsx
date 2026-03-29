@@ -117,7 +117,7 @@ export function PrayerResponse({
     try {
       await navigator.clipboard.writeText(prayer.text)
       showToast('Prayer copied to clipboard')
-    } catch {
+    } catch (_e) {
       showToast('Failed to copy', 'error')
     }
   }
@@ -148,16 +148,19 @@ export function PrayerResponse({
   const handleResonated = () => {
     clearResonatedTimers()
     setResonatedMessage(true)
+    const RESONATED_FADE_START_MS = 3000
+    const SECTION_FADE_START_MS = 3500
+    const SECTION_DISMISS_MS = 4000
     resonatedTimersRef.current.push(
-      setTimeout(() => setResonatedFading(true), 3000),
-      setTimeout(() => setSectionFading(true), 3500),
+      setTimeout(() => setResonatedFading(true), RESONATED_FADE_START_MS),
+      setTimeout(() => setSectionFading(true), SECTION_FADE_START_MS),
       setTimeout(() => {
         setReflectionDismissed(true)
         setReflectionVisible(false)
         setResonatedMessage(false)
         setResonatedFading(false)
         setSectionFading(false)
-      }, 4000),
+      }, SECTION_DISMISS_MS),
     )
   }
 
@@ -177,7 +180,7 @@ export function PrayerResponse({
     try {
       await navigator.clipboard.writeText(p.text)
       showToast('Copied to clipboard')
-    } catch {
+    } catch (_e) {
       showToast('Failed to copy', 'error')
     }
   }
@@ -200,26 +203,30 @@ export function PrayerResponse({
 
       {/* Generated Prayer Display */}
       {prayer && !isLoading && (
-        <div className="motion-safe:animate-fade-in">
+        <div className="motion-safe:animate-fade-in" aria-live="polite">
           <p className="mb-2 text-sm font-medium text-white/50">
             Your prayer:
           </p>
           <div className="mb-6 rounded-2xl bg-white/[0.06] backdrop-blur-sm border border-white/10 p-6">
-            {revealComplete ? (
-              <KaraokeText
-                text={prayer.text}
-                currentWordIndex={prayerWordIndex}
-                className="font-serif text-lg leading-relaxed text-white/80"
-              />
-            ) : (
-              <KaraokeTextReveal
-                text={prayer.text}
-                msPerWord={80}
-                forceComplete={forceRevealComplete}
-                onRevealComplete={() => setRevealComplete(true)}
-                className="font-serif text-lg leading-relaxed text-white/80"
-              />
-            )}
+            {/* Full text for screen readers (hidden visually during animation) */}
+            <span className="sr-only">{prayer.text}</span>
+            <div aria-hidden="true">
+              {revealComplete ? (
+                <KaraokeText
+                  text={prayer.text}
+                  currentWordIndex={prayerWordIndex}
+                  className="font-serif text-lg leading-relaxed text-white/80"
+                />
+              ) : (
+                <KaraokeTextReveal
+                  text={prayer.text}
+                  msPerWord={80}
+                  forceComplete={forceRevealComplete}
+                  onRevealComplete={() => setRevealComplete(true)}
+                  className="font-serif text-lg leading-relaxed text-white/80"
+                />
+              )}
+            </div>
           </div>
 
           {/* Skip link during reveal */}

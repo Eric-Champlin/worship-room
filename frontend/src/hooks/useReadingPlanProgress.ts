@@ -10,7 +10,8 @@ function readProgress(): ReadingPlanProgressMap {
     const raw = localStorage.getItem(READING_PLAN_PROGRESS_KEY)
     if (!raw) return {}
     return JSON.parse(raw) as ReadingPlanProgressMap
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return {}
   }
 }
@@ -18,8 +19,8 @@ function readProgress(): ReadingPlanProgressMap {
 function writeProgress(progress: ReadingPlanProgressMap): void {
   try {
     localStorage.setItem(READING_PLAN_PROGRESS_KEY, JSON.stringify(progress))
-  } catch {
-    // localStorage unavailable
+  } catch (_e) {
+    // localStorage may be unavailable
   }
 }
 

@@ -106,7 +106,7 @@ describe('JourneySection', () => {
         '/pray',
         '/journal',
         '/meditate',
-        '/',
+        '/daily?tab=journal',
         '/music',
         '/prayer-wall',
         '/local-support/churches',

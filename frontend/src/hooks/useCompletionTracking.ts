@@ -23,13 +23,17 @@ function readCompletion(): DailyCompletion {
     const parsed = JSON.parse(raw) as DailyCompletion
     if (parsed.date !== getTodayString()) return getEmptyCompletion()
     return parsed
-  } catch {
+  } catch (_e) {
     return getEmptyCompletion()
   }
 }
 
 function writeCompletion(completion: DailyCompletion): void {
-  localStorage.setItem(DAILY_COMPLETION_KEY, JSON.stringify(completion))
+  try {
+    localStorage.setItem(DAILY_COMPLETION_KEY, JSON.stringify(completion))
+  } catch (_e) {
+    // localStorage write failure is non-critical
+  }
 }
 
 export interface CompletionTracking {

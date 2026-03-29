@@ -113,7 +113,6 @@ function DashboardContent() {
   )
 
   const handleSubmitComment = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (prayerId: string, _content: string) => {
       setPrayers((prev) =>
         prev.map((p) =>

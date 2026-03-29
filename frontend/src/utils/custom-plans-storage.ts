@@ -4,7 +4,8 @@ export function getCustomPlanIds(): string[] {
   try {
     const raw = localStorage.getItem(CUSTOM_PLANS_KEY)
     return raw ? JSON.parse(raw) : []
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return []
   }
 }

@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { useAudioState } from '@/components/audio/AudioProvider'
 import { useToast } from '@/components/ui/Toast'
+import { Z } from '@/constants/z-index'
 
 export function InstallBanner() {
   const { showBanner, isIOS, triggerInstall, dismissBanner } = useInstallPrompt()
@@ -28,7 +29,7 @@ export function InstallBanner() {
       role="dialog"
       aria-label="Install Worship Room"
       className={cn(
-        'fixed left-1/2 z-[9997] -translate-x-1/2 motion-safe:animate-fade-in',
+        `fixed left-1/2 z-[${Z.INSTALL_BANNER}] -translate-x-1/2 motion-safe:animate-fade-in`,
         'w-[calc(100%-32px)] sm:max-w-[560px]',
         'rounded-xl border-t border-white/15 bg-white/10 shadow-2xl backdrop-blur-md',
         'px-4 py-3 sm:px-5 sm:py-4',

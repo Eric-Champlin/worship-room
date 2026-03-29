@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 const PHRASES = [
   "I'm going through a difficult season.",
@@ -181,7 +182,7 @@ export function TypewriterInput({ onSubmit, variant = 'glow' }: TypewriterInputP
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               isGlass ? 'text-hero-bg hover:opacity-90' : 'bg-primary text-white hover:bg-primary-lt'
             )}
-            style={isGlass ? { background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)' } : undefined}
+            style={isGlass ? { background: WHITE_PURPLE_GRADIENT } : undefined}
           >
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </button>

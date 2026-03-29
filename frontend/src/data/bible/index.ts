@@ -109,7 +109,7 @@ export async function loadChapter(
   try {
     const chapters = await loader()
     return chapters.find((c) => c.chapter === chapter) ?? null
-  } catch {
+  } catch (_e) {
     return null
   }
 }
@@ -120,7 +120,7 @@ export async function loadAllBookText(bookSlug: string): Promise<BibleChapter[]>
 
   try {
     return await loader()
-  } catch {
+  } catch (_e) {
     return []
   }
 }

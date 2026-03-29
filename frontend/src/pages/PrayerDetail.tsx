@@ -60,7 +60,6 @@ function PrayerDetailContent() {
   }, [prayer, toggleBookmark])
 
   const handleSubmitComment = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (_prayerId: string, _content: string) => {
       setPrayer((prev) =>
         prev

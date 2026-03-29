@@ -23,7 +23,7 @@ const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> 
 
 export function isNavActive(to: string, pathname: string): boolean {
   switch (to) {
-    case '/daily': return pathname.startsWith('/daily')
+    case '/daily': return pathname.startsWith('/daily') || pathname.startsWith('/meditate')
     case '/bible': return pathname.startsWith('/bible')
     case '/grow': return pathname === '/grow' || pathname.startsWith('/reading-plans/') || pathname.startsWith('/challenges/')
     case '/prayer-wall': return pathname.startsWith('/prayer-wall')

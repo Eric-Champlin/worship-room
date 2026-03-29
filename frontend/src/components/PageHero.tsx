@@ -3,8 +3,11 @@ import { HeadingDivider } from '@/components/HeadingDivider'
 import { useElementWidth } from '@/hooks/useElementWidth'
 import { cn } from '@/lib/utils'
 
+// Matches Tailwind's dashboard-dark token
+const DASHBOARD_DARK_HEX = '#0f0a1e'
+
 export const ATMOSPHERIC_HERO_BG = {
-  backgroundColor: '#0f0a1e',
+  backgroundColor: DASHBOARD_DARK_HEX,
   backgroundImage:
     'radial-gradient(ellipse at top center, rgba(109, 40, 217, 0.15) 0%, transparent 70%)',
 } as const

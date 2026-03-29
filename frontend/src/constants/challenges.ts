@@ -22,7 +22,6 @@ export const CHALLENGE_BADGE_MAP: Record<string, string> = {
 export const CHALLENGE_PROGRESS_KEY = 'wr_challenge_progress'
 export const CHALLENGE_REMINDERS_KEY = 'wr_challenge_reminders'
 
-export const CHALLENGE_SEASONS = ['lent', 'easter', 'pentecost', 'advent', 'newyear'] as const
 
 export const SEASON_LABELS: Record<ChallengeSeason, string> = {
   lent: 'Lent',

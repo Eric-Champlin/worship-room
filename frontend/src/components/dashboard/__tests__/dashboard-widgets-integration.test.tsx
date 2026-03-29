@@ -98,14 +98,14 @@ describe('Dashboard widgets integration', () => {
     expect(screen.getByText('A new streak starts today')).toBeInTheDocument()
     expect(screen.getByText('0 Faith Points')).toBeInTheDocument()
     expect(screen.getByText('Seedling')).toBeInTheDocument()
-    expect(screen.getByText('Complete 2 activities for 1.25x bonus!')).toBeInTheDocument()
+    expect(screen.getByText('Every small step matters.')).toBeInTheDocument()
   })
 
   it('with 3 activities: shows 3/7, correct multiplier preview', () => {
     seedActivities({ mood: true, pray: true, listen: true })
     renderWidgetGrid()
     expect(screen.getByText('3/7')).toBeInTheDocument()
-    expect(screen.getByText('Complete 1 more for 1.5x bonus!')).toBeInTheDocument()
+    expect(screen.getByText('Look at you, making space for what matters.')).toBeInTheDocument()
   })
 
   it('7/7 complete: shows Full Worship Day message and 2x badge', () => {
@@ -115,7 +115,7 @@ describe('Dashboard widgets integration', () => {
     })
     renderWidgetGrid()
     expect(screen.getByText('7/7')).toBeInTheDocument()
-    expect(screen.getByText('Full Worship Day! 2x points earned!')).toBeInTheDocument()
+    expect(screen.getByText('A full day of worship — what a gift.')).toBeInTheDocument()
     expect(screen.getByText('2x bonus today!')).toBeInTheDocument()
   })
 

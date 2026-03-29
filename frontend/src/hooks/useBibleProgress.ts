@@ -12,7 +12,8 @@ function readProgress(): BibleProgressMap {
     const parsed = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null) return {}
     return parsed as BibleProgressMap
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return {}
   }
 }
@@ -20,8 +21,8 @@ function readProgress(): BibleProgressMap {
 function writeProgress(data: BibleProgressMap): void {
   try {
     localStorage.setItem(BIBLE_PROGRESS_KEY, JSON.stringify(data))
-  } catch {
-    // Silently fail on quota exceeded
+  } catch (_e) {
+    // localStorage may be unavailable or quota exceeded
   }
 }
 

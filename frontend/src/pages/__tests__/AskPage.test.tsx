@@ -58,7 +58,8 @@ beforeEach(() => {
 describe('AskPage — Page Structure', () => {
   it('renders PageHero with "Ask God\'s Word" title', () => {
     renderAskPage()
-    expect(screen.getByText("Ask God's Word")).toBeInTheDocument()
+    const heading = screen.getByRole('heading', { name: "Ask God's Word" })
+    expect(heading).toBeInTheDocument()
   })
 
   it('renders subtitle in Lora italic', () => {
@@ -72,7 +73,7 @@ describe('AskPage — Page Structure', () => {
   it('renders HeadingDivider', () => {
     renderAskPage()
     // HeadingDivider renders as an SVG element within the hero
-    const heading = screen.getByText("Ask God's Word")
+    const heading = screen.getByRole('heading', { name: "Ask God's Word" })
     // showDivider causes the heading to have inline-block class
     expect(heading.className).toContain('inline-block')
   })

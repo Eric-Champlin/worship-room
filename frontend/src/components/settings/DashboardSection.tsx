@@ -12,7 +12,7 @@ export function DashboardSection() {
       <div className="space-y-4">
         <button
           onClick={() => navigate('/?customize=true')}
-          className="flex w-full min-h-[44px] items-center justify-between rounded-lg bg-white/[0.06] p-4 text-sm text-white hover:bg-white/[0.08] transition-colors"
+          className="flex w-full min-h-[44px] items-center justify-between rounded-lg bg-white/[0.06] p-4 text-sm text-white hover:bg-white/[0.08] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           <span>Dashboard Layout</span>
           <span className="text-white/40">Customize →</span>
@@ -23,7 +23,7 @@ export function DashboardSection() {
             clearDashboardLayout()
             showToast('Dashboard layout reset to default', 'success')
           }}
-          className="w-full min-h-[44px] rounded-lg bg-white/[0.06] p-4 text-left text-sm text-white/60 hover:bg-white/[0.08] hover:text-white transition-colors"
+          className="w-full min-h-[44px] rounded-lg bg-white/[0.06] p-4 text-left text-sm text-white/60 hover:bg-white/[0.08] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           Reset Dashboard Layout
         </button>

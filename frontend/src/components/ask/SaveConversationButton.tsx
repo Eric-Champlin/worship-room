@@ -30,7 +30,7 @@ export function SaveConversationButton({ conversation }: SaveConversationButtonP
     try {
       await navigator.clipboard.writeText(fullText)
       showToast('Conversation copied to clipboard!')
-    } catch {
+    } catch (_e) {
       showToast("Couldn't copy \u2014 try selecting the text manually.", 'error')
     }
   }

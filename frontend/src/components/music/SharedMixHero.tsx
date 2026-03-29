@@ -48,7 +48,7 @@ export function SharedMixHero({
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss shared mix"
-          className="absolute right-4 top-4 rounded-full p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
+          className="absolute right-4 top-4 rounded-full p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           <X size={20} />
         </button>
@@ -93,7 +93,7 @@ export function SharedMixHero({
         <button
           type="button"
           onClick={onPlay}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-semibold text-white transition-colors hover:bg-primary-lt"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           <Play size={20} fill="currentColor" />
           Play This Mix

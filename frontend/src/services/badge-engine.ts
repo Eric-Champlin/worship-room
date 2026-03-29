@@ -37,11 +37,26 @@ const ENCOURAGE_BADGE_MAP: Record<number, string> = {
   50: 'encourage_50',
 };
 
+/** 10 hours in seconds */
+const LISTEN_10_HOURS_SECONDS = 36000;
+
+function readJsonFromStorage<T>(key: string): T | null {
+  try {
+    const json = localStorage.getItem(key);
+    if (json) return JSON.parse(json) as T;
+  } catch (_e) { /* malformed localStorage */ }
+  return null;
+}
+
 export function checkForNewBadges(
   context: BadgeCheckContext,
   earned: Record<string, BadgeEarnedEntry>,
 ): string[] {
   const result: string[] = [];
+
+  // Read shared localStorage data once
+  const readingPlanProgress = readJsonFromStorage<Record<string, { completedAt: string | null }>>('wr_reading_plan_progress');
+  const bibleProgress = readJsonFromStorage<Record<string, number[]>>('wr_bible_progress');
 
   // 1. Streak badges
   for (const threshold of STREAK_THRESHOLDS) {
@@ -79,14 +94,9 @@ export function checkForNewBadges(
     context.todayActivities.journal;
 
   // If user has an active reading plan, Full Worship Day requires readingPlan too
-  let hasActivePlan = false;
-  try {
-    const progressJson = localStorage.getItem('wr_reading_plan_progress');
-    if (progressJson) {
-      const progressMap = JSON.parse(progressJson) as Record<string, { completedAt: string | null }>;
-      hasActivePlan = Object.values(progressMap).some(p => p.completedAt == null);
-    }
-  } catch { /* ignore */ }
+  const hasActivePlan = readingPlanProgress
+    ? Object.values(readingPlanProgress).some(p => p.completedAt == null)
+    : false;
 
   const allTrue = hasActivePlan
     ? baseAllTrue && context.todayActivities.readingPlan
@@ -118,19 +128,13 @@ export function checkForNewBadges(
     10: 'plans_10',
   };
 
-  try {
-    const progressJson = localStorage.getItem('wr_reading_plan_progress');
-    if (progressJson) {
-      const progressMap = JSON.parse(progressJson) as Record<string, { completedAt: string | null }>;
-      const completedCount = Object.values(progressMap).filter(p => p.completedAt != null).length;
-      for (const [threshold, badgeId] of Object.entries(READING_PLAN_BADGES)) {
-        if (completedCount >= Number(threshold) && !earned[badgeId]) {
-          result.push(badgeId);
-        }
+  if (readingPlanProgress) {
+    const completedCount = Object.values(readingPlanProgress).filter(p => p.completedAt != null).length;
+    for (const [threshold, badgeId] of Object.entries(READING_PLAN_BADGES)) {
+      if (completedCount >= Number(threshold) && !earned[badgeId]) {
+        result.push(badgeId);
       }
     }
-  } catch {
-    // Malformed localStorage — skip reading plan badge check
   }
 
   // 7. Local Support Seeker badge
@@ -141,7 +145,7 @@ export function checkForNewBadges(
       if (total >= 5) {
         result.push(LOCAL_SUPPORT_BADGE_ID);
       }
-    } catch {
+    } catch (_e) {
       // Malformed localStorage — skip local support badge check
     }
   }
@@ -154,25 +158,19 @@ export function checkForNewBadges(
     66: 'bible_book_66',
   };
 
-  try {
-    const progressJson = localStorage.getItem('wr_bible_progress');
-    if (progressJson) {
-      const progressMap = JSON.parse(progressJson) as Record<string, number[]>;
-      let completedBooks = 0;
-      for (const book of BIBLE_BOOKS) {
-        const chapters = progressMap[book.slug] ?? [];
-        if (chapters.length >= book.chapters) {
-          completedBooks++;
-        }
-      }
-      for (const [threshold, badgeId] of Object.entries(BIBLE_BOOK_BADGES)) {
-        if (completedBooks >= Number(threshold) && !earned[badgeId]) {
-          result.push(badgeId);
-        }
+  if (bibleProgress) {
+    let completedBooks = 0;
+    for (const book of BIBLE_BOOKS) {
+      const chapters = bibleProgress[book.slug] ?? [];
+      if (chapters.length >= book.chapters) {
+        completedBooks++;
       }
     }
-  } catch {
-    // Malformed localStorage — skip Bible book badge check
+    for (const [threshold, badgeId] of Object.entries(BIBLE_BOOK_BADGES)) {
+      if (completedBooks >= Number(threshold) && !earned[badgeId]) {
+        result.push(badgeId);
+      }
+    }
   }
 
   // 9. Meditation session milestones (from wr_meditation_history)
@@ -190,7 +188,7 @@ export function checkForNewBadges(
         result.push(badgeId);
       }
     }
-  } catch {
+  } catch (_e) {
     // Malformed localStorage — skip meditation session badge check
   }
 
@@ -218,24 +216,18 @@ export function checkForNewBadges(
     25: 'bible_25_chapters',
   };
 
-  try {
-    const progressJson = localStorage.getItem('wr_bible_progress');
-    if (progressJson) {
-      const progressMap = JSON.parse(progressJson) as Record<string, number[]>;
-      let totalChapters = 0;
-      for (const chapters of Object.values(progressMap)) {
-        if (Array.isArray(chapters)) {
-          totalChapters += chapters.length;
-        }
-      }
-      for (const [threshold, badgeId] of Object.entries(BIBLE_CHAPTER_BADGES)) {
-        if (totalChapters >= Number(threshold) && !earned[badgeId]) {
-          result.push(badgeId);
-        }
+  if (bibleProgress) {
+    let totalChapters = 0;
+    for (const chapters of Object.values(bibleProgress)) {
+      if (Array.isArray(chapters)) {
+        totalChapters += chapters.length;
       }
     }
-  } catch {
-    // Malformed localStorage — skip Bible chapter badge check
+    for (const [threshold, badgeId] of Object.entries(BIBLE_CHAPTER_BADGES)) {
+      if (totalChapters >= Number(threshold) && !earned[badgeId]) {
+        result.push(badgeId);
+      }
+    }
   }
 
   // 13. Gratitude milestones (from wr_gratitude_entries)
@@ -275,7 +267,7 @@ export function checkForNewBadges(
         result.push('gratitude_7_streak');
       }
     }
-  } catch {
+  } catch (_e) {
     // Malformed localStorage — skip gratitude badge check
   }
 
@@ -286,7 +278,7 @@ export function checkForNewBadges(
       if (total >= 1) {
         result.push('local_first_visit');
       }
-    } catch {
+    } catch (_e) {
       // Malformed localStorage — skip local first visit badge check
     }
   }
@@ -301,11 +293,11 @@ export function checkForNewBadges(
           (sum, s) => sum + (typeof s.durationSeconds === 'number' ? s.durationSeconds : 0),
           0,
         );
-        if (totalSeconds >= 36000) {
+        if (totalSeconds >= LISTEN_10_HOURS_SECONDS) {
           result.push('listen_10_hours');
         }
       }
-    } catch {
+    } catch (_e) {
       // Malformed localStorage — skip listening badge check
     }
   }

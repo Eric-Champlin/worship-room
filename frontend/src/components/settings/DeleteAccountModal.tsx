@@ -22,7 +22,7 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm }: DeleteAccount
         role="alertdialog"
         aria-labelledby="delete-title"
         aria-describedby="delete-desc"
-        className="relative z-10 rounded-2xl border border-white/10 bg-[#1a0f2e] backdrop-blur-md p-6 max-w-md w-full mx-4"
+        className="relative z-10 rounded-2xl border border-white/10 bg-surface-dark backdrop-blur-md p-6 max-w-md w-full mx-4"
       >
         <h2 id="delete-title" className="text-lg font-semibold text-white mb-2">
           Delete Your Account?

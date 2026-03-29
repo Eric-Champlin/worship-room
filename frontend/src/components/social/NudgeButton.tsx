@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Heart } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useSocialInteractions } from '@/hooks/useSocialInteractions'
@@ -23,7 +23,7 @@ function getNudgePermission(): boolean {
     const settings = JSON.parse(raw)
     if (settings.nudgePermission === 'nobody') return false
     return true
-  } catch {
+  } catch (_e) {
     return true
   }
 }
@@ -58,9 +58,11 @@ export function NudgeButton({ friendId, friendName, lastActive }: NudgeButtonPro
     setDialogOpen(false)
   }, [])
 
+  const nudgePermission = useMemo(() => getNudgePermission(), [])
+
   // Don't render if friend is active or privacy disallows
   if (!isInactive(lastActive)) return null
-  if (!getNudgePermission()) return null
+  if (!nudgePermission) return null
 
   if (alreadyNudged || nudgeSent) {
     return (

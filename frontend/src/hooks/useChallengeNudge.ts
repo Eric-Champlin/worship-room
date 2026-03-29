@@ -41,7 +41,7 @@ export function useChallengeNudge({
     try {
       const lastShown = localStorage.getItem(CHALLENGE_NUDGE_KEY)
       if (lastShown === today) return
-    } catch {
+    } catch (_e) {
       // localStorage unavailable
     }
 
@@ -65,7 +65,7 @@ export function useChallengeNudge({
     // Mark as shown
     try {
       localStorage.setItem(CHALLENGE_NUDGE_KEY, today)
-    } catch {
+    } catch (_e) {
       // best-effort
     }
 

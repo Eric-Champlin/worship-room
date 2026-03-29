@@ -35,7 +35,7 @@ function CustomTooltip({
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-white/10 bg-[#1a0f2e] px-3 py-2 text-sm text-white shadow-lg">
+    <div className="rounded-lg border border-white/10 bg-surface-dark px-3 py-2 text-sm text-white shadow-lg">
       <p className="font-medium">{label}</p>
       <p className="text-white/70">{payload[0].value} times</p>
     </div>

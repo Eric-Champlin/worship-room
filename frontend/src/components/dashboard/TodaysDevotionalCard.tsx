@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { getTodaysDevotional } from '@/data/devotionals'
@@ -7,14 +8,16 @@ import { getLocalDateString } from '@/utils/date'
 export function TodaysDevotionalCard() {
   const devotional = getTodaysDevotional()
 
-  const todayStr = getLocalDateString()
-  let reads: string[] = []
-  try {
-    reads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
-  } catch {
-    // Malformed localStorage — treat as unread
-  }
-  const isRead = reads.includes(todayStr)
+  const isRead = useMemo(() => {
+    const todayStr = getLocalDateString()
+    let reads: string[] = []
+    try {
+      reads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
+    } catch (_e) {
+      // Malformed localStorage — treat as unread
+    }
+    return reads.includes(todayStr)
+  }, [])
 
   return (
     <div>

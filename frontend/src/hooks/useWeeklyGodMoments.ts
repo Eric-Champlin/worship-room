@@ -95,7 +95,7 @@ export function useWeeklyGodMoments(): WeeklyGodMomentsData {
   const [dismissed, setDismissed] = useState(() => {
     try {
       return localStorage.getItem(DISMISSED_KEY) || ''
-    } catch {
+    } catch (_e) {
       return ''
     }
   })
@@ -114,7 +114,7 @@ export function useWeeklyGodMoments(): WeeklyGodMomentsData {
     try {
       const raw = localStorage.getItem('wr_devotional_reads')
       return raw ? (JSON.parse(raw) as string[]) : []
-    } catch {
+    } catch (_e) {
       return []
     }
   }, [])
@@ -124,7 +124,11 @@ export function useWeeklyGodMoments(): WeeklyGodMomentsData {
   const moodTrend = computeMoodTrend()
 
   const dismiss = useCallback(() => {
-    localStorage.setItem(DISMISSED_KEY, currentMonday)
+    try {
+      localStorage.setItem(DISMISSED_KEY, currentMonday)
+    } catch (_e) {
+      // localStorage write failure is non-critical
+    }
     setDismissed(currentMonday)
   }, [currentMonday])
 

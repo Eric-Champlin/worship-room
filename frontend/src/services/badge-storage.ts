@@ -59,7 +59,8 @@ export function getBadgeData(): BadgeData {
       : { ...FRESH_ACTIVITY_COUNTS };
 
     return { earned, newlyEarned, activityCounts };
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return { ...FRESH_BADGE_DATA, activityCounts: { ...FRESH_ACTIVITY_COUNTS } };
   }
 }
@@ -68,7 +69,8 @@ export function saveBadgeData(data: BadgeData): boolean {
   try {
     localStorage.setItem(BADGES_KEY, JSON.stringify(data));
     return true;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable
     return false;
   }
 }
@@ -108,7 +110,7 @@ export function getOrInitBadgeData(isAuthenticated: boolean): BadgeData {
       // Corrupted data — reinitialize
       return initializeBadgesForNewUser();
     }
-  } catch {
+  } catch (_e) {
     // Invalid JSON or localStorage error — reinitialize
     return initializeBadgesForNewUser();
   }
@@ -175,7 +177,8 @@ export function getFriendCount(): number {
     const parsed = JSON.parse(raw);
     if (!parsed || !Array.isArray(parsed.friends)) return 0;
     return parsed.friends.length;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return 0;
   }
 }

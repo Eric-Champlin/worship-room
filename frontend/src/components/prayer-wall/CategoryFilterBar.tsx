@@ -40,7 +40,7 @@ export function CategoryFilterBar({
             if (isChallengeFilterActive && onToggleChallengeFilter) onToggleChallengeFilter()
           }}
           className={cn(
-            'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 whitespace-nowrap',
+            'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
             activeCategory === null && !isChallengeFilterActive
               ? 'border-primary/40 bg-primary/20 text-primary-lt'
               : 'border-white/15 bg-white/10 text-white/70 hover:bg-white/15 hover:text-white/90',
@@ -60,7 +60,7 @@ export function CategoryFilterBar({
               onToggleChallengeFilter()
             }}
             className={cn(
-              'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 whitespace-nowrap',
+              'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
               !isChallengeFilterActive && 'border-white/15 bg-white/10 text-white/70 hover:bg-white/15 hover:text-white/90',
             )}
             style={isChallengeFilterActive ? {
@@ -83,7 +83,7 @@ export function CategoryFilterBar({
               if (isChallengeFilterActive && onToggleChallengeFilter) onToggleChallengeFilter()
             }}
             className={cn(
-              'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 whitespace-nowrap',
+              'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
               activeCategory === cat
                 ? 'border-primary/40 bg-primary/20 text-primary-lt'
                 : 'border-white/15 bg-white/10 text-white/70 hover:bg-white/15 hover:text-white/90',

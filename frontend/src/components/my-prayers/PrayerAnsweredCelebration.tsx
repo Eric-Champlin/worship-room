@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { CONFETTI_COLORS } from '@/constants/dashboard/badge-icons'
+import { Z } from '@/constants/z-index'
 
 interface PrayerAnsweredCelebrationProps {
   prayerTitle: string
@@ -72,7 +73,7 @@ export function PrayerAnsweredCelebration({
       aria-labelledby="prayer-celebration-title"
       aria-modal="true"
     >
-      <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md">
+      <div className={`fixed inset-0 z-[${Z.OVERLAY}] bg-black/70 backdrop-blur-md`}>
         {generateConfetti(confettiCount)}
 
         <div className="flex min-h-screen flex-col items-center justify-center px-6 sm:px-8">

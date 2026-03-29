@@ -90,7 +90,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="report-dialog-title"
-            className={`mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-[#1a0f2e] p-6 shadow-xl ${panelClass}`}
+            className={`mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-surface-dark p-6 shadow-xl ${panelClass}`}
             onClick={(e) => e.stopPropagation()}
           >
             {submitted ? (

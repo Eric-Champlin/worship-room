@@ -3,18 +3,6 @@ import type { PlanDifficulty, PlanTheme } from '@/types/reading-plans'
 export const READING_PLAN_PROGRESS_KEY = 'wr_reading_plan_progress'
 export const CUSTOM_PLANS_KEY = 'wr_custom_plans'
 
-export const PLAN_THEMES = [
-  'anxiety',
-  'grief',
-  'gratitude',
-  'identity',
-  'forgiveness',
-  'trust',
-  'hope',
-  'healing',
-  'purpose',
-  'relationships',
-] as const
 
 export const PLAN_THEME_LABELS: Record<PlanTheme, string> = {
   anxiety: 'Anxiety',

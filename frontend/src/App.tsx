@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useSearchParams, Link } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/query-client'
@@ -16,6 +16,19 @@ import { lazy, Suspense } from 'react'
 import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
 import { PageTransition } from '@/components/ui/PageTransition'
+import {
+  DashboardSkeleton,
+  DailyHubSkeleton,
+  PrayerWallSkeleton,
+  FriendsSkeleton,
+  SettingsSkeleton,
+  InsightsSkeleton,
+  MyPrayersSkeleton,
+  MusicSkeleton,
+  GrowPageSkeleton,
+  BibleBrowserSkeleton,
+  ProfileSkeleton,
+} from '@/components/skeletons'
 
 // Route-level lazy loading for code splitting
 const Home = lazy(() => import('./pages/Home').then((m) => ({ default: m.Home })))
@@ -44,7 +57,6 @@ const RoutinesPage = lazy(() => import('./pages/RoutinesPage').then((m) => ({ de
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })))
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })))
 const GrowthProfile = lazy(() => import('./pages/GrowthProfile').then((m) => ({ default: m.GrowthProfile })))
-// DevotionalPage kept as file but no longer routed — content lives in DevotionalTabContent
 const MyPrayers = lazy(() => import('./pages/MyPrayers').then((m) => ({ default: m.MyPrayers })))
 const GrowPage = lazy(() => import('./pages/GrowPage').then((m) => ({ default: m.GrowPage })))
 const ReadingPlanDetail = lazy(() => import('./pages/ReadingPlanDetail').then((m) => ({ default: m.ReadingPlanDetail })))
@@ -103,12 +115,12 @@ function NotFound() {
           <p className="mb-6 text-base text-text-light sm:text-lg">
             The page you&apos;re looking for doesn&apos;t exist.
           </p>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="font-script text-2xl text-primary transition-colors hover:text-primary-lt"
           >
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </Layout>
@@ -150,22 +162,22 @@ function App() {
         <Suspense fallback={<RouteLoadingFallback />}>
         <PageTransition>
         <Routes>
-          <Route path="/" element={<RootRoute />} />
+          <Route path="/" element={<Suspense fallback={<DashboardSkeleton />}><RootRoute /></Suspense>} />
           <Route path="/health" element={<Health />} />
-          <Route path="/insights" element={<Insights />} />
+          <Route path="/insights" element={<Suspense fallback={<InsightsSkeleton />}><Insights /></Suspense>} />
           <Route path="/insights/monthly" element={<MonthlyReport />} />
-          <Route path="/friends" element={<Friends />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/my-prayers" element={<MyPrayers />} />
-          <Route path="/daily" element={<DailyHub />} />
+          <Route path="/friends" element={<Suspense fallback={<FriendsSkeleton />}><Friends /></Suspense>} />
+          <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
+          <Route path="/my-prayers" element={<Suspense fallback={<MyPrayersSkeleton />}><MyPrayers /></Suspense>} />
+          <Route path="/daily" element={<Suspense fallback={<DailyHubSkeleton />}><DailyHub /></Suspense>} />
           <Route path="/ask" element={<AskPage />} />
           <Route path="/devotional" element={<DevotionalRedirect />} />
-          <Route path="/grow" element={<GrowPage />} />
+          <Route path="/grow" element={<Suspense fallback={<GrowPageSkeleton />}><GrowPage /></Suspense>} />
           <Route path="/reading-plans" element={<ReadingPlansRedirect />} />
           <Route path="/reading-plans/:planId" element={<ReadingPlanDetail />} />
           <Route path="/challenges" element={<Navigate to="/grow?tab=challenges" replace />} />
           <Route path="/challenges/:challengeId" element={<ChallengeDetail />} />
-          <Route path="/bible" element={<BibleBrowser />} />
+          <Route path="/bible" element={<Suspense fallback={<BibleBrowserSkeleton />}><BibleBrowser /></Suspense>} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />
           <Route path="/journal" element={<Navigate to="/daily?tab=journal" replace />} />
@@ -179,19 +191,19 @@ function App() {
           <Route path="/verse/:id" element={<SharedVerse />} />
           <Route path="/prayer/:id" element={<SharedPrayer />} />
           <Route path="/scripture" element={<Navigate to="/daily?tab=pray" replace />} />
-          <Route path="/music" element={<MusicPage />} />
+          <Route path="/music" element={<Suspense fallback={<MusicSkeleton />}><MusicPage /></Suspense>} />
           <Route path="/music/playlists" element={<Navigate to="/music?tab=playlists" replace />} />
           <Route path="/music/ambient" element={<Navigate to="/music?tab=ambient" replace />} />
           <Route path="/music/sleep" element={<Navigate to="/music?tab=sleep" replace />} />
           <Route path="/music/routines" element={<RoutinesPage />} />
-          <Route path="/prayer-wall" element={<PrayerWall />} />
+          <Route path="/prayer-wall" element={<Suspense fallback={<PrayerWallSkeleton />}><PrayerWall /></Suspense>} />
           {/* Static segments must precede :id to avoid matching "dashboard"/"user" as a prayer ID */}
           <Route path="/prayer-wall/dashboard" element={<PrayerWallDashboard />} />
           <Route path="/prayer-wall/user/:id" element={<PrayerWallProfile />} />
           <Route path="/prayer-wall/:id" element={<PrayerDetail />} />
           <Route path="/local-support/churches" element={<Churches />} />
           <Route path="/local-support/counselors" element={<Counselors />} />
-          <Route path="/profile/:userId" element={<GrowthProfile />} />
+          <Route path="/profile/:userId" element={<Suspense fallback={<ProfileSkeleton />}><GrowthProfile /></Suspense>} />
           <Route path="/local-support/celebrate-recovery" element={<CelebrateRecovery />} />
           {import.meta.env.DEV && (
             <Route path="/dev/mood-checkin" element={<MoodCheckInPreview />} />

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { DrawerNowPlaying } from './DrawerNowPlaying'
 import { DrawerTabs } from './DrawerTabs'
 import { RoutineStepper } from './RoutineStepper'
+import { Z } from '@/constants/z-index'
 
 const SWIPE_THRESHOLD = 50
 
@@ -89,7 +90,7 @@ export function AudioDrawer() {
     <>
       {/* Scrim (mobile only) */}
       <div
-        className="fixed inset-0 z-[10000] bg-black/40 lg:hidden"
+        className={`fixed inset-0 z-[${Z.DRAWER_BACKDROP}] bg-black/40 lg:hidden`}
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -101,7 +102,7 @@ export function AudioDrawer() {
         aria-modal="true"
         aria-label="Audio controls"
         className={cn(
-          'fixed z-[10001] flex flex-col overflow-hidden rounded-t-2xl border border-white/10 lg:rounded-none lg:border-l lg:border-t-0 lg:border-b-0 lg:border-r-0 bottom-0 left-0 right-0 h-[70vh] lg:top-0 lg:right-0 lg:left-auto lg:bottom-0 lg:h-full lg:w-[400px]',
+          `fixed z-[${Z.DRAWER}] flex flex-col overflow-hidden rounded-t-2xl border border-white/10 lg:rounded-none lg:border-l lg:border-t-0 lg:border-b-0 lg:border-r-0 bottom-0 left-0 right-0 h-[70vh] lg:top-0 lg:right-0 lg:left-auto lg:bottom-0 lg:h-full lg:w-[400px]`,
           !reducedMotion && isEntering && 'motion-safe:animate-bottom-sheet-slide-in lg:motion-safe:animate-drawer-slide-in',
         )}
         style={{

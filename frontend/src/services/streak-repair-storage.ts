@@ -41,7 +41,8 @@ export function getRepairData(): StreakRepairData {
       repairsUsedThisWeek: typeof data.repairsUsedThisWeek === 'number' ? data.repairsUsedThisWeek : 0,
       weekStartDate: data.weekStartDate ?? currentWeekStart,
     };
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return freshRepairData();
   }
 }
@@ -50,7 +51,8 @@ export function saveRepairData(data: StreakRepairData): boolean {
   try {
     localStorage.setItem(REPAIRS_KEY, JSON.stringify(data));
     return true;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable
     return false;
   }
 }

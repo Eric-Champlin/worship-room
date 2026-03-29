@@ -5,6 +5,7 @@ paths: ["backend/**", "**/*.sql"]
 ## Tech Stack
 
 ### Database
+
 - **Local Development**: PostgreSQL via Docker Compose
 - **Production**: PostgreSQL hosted on Railway, Render, or Supabase
 - **ORM**: Spring Data JPA
@@ -15,6 +16,7 @@ paths: ["backend/**", "**/*.sql"]
 **Phase 2.75 uses localStorage exclusively — no new database tables.** All dashboard, growth, friends, and notification data is stored client-side via the `StorageService` abstraction (keys prefixed `wr_`). Phase 3 will add database tables and swap the `StorageService` implementation from `LocalStorageService` to API calls.
 
 **Phase 3 database tables to be added:**
+
 - `mood_check_ins` — daily mood entries (mood level 1-5, optional text, verse shown)
 - `daily_activities` — per-day activity completion flags + points earned
 - `streaks` — current streak, longest streak, last active date
@@ -32,6 +34,7 @@ These schemas will be finalized during Phase 3 planning. The localStorage data m
 ## Database Schema
 
 ### users
+
 ```sql
 id (UUID, primary key)
 email (VARCHAR, unique, not null)
@@ -45,6 +48,7 @@ last_login_at (TIMESTAMP)
 ```
 
 ### scriptures
+
 ```sql
 id (UUID, primary key)
 reference (VARCHAR, e.g., "John 3:16", "Psalm 23:1-4")
@@ -57,6 +61,7 @@ updated_at (TIMESTAMP)
 ```
 
 ### mood_selections
+
 ```sql
 id (UUID, primary key)
 user_id (UUID, foreign key → users.id, nullable for future anonymous tracking only - MVP: no logged-out persistence)
@@ -68,6 +73,7 @@ created_at (TIMESTAMP)
 ```
 
 **Logged-Out Mood Tracking Policy**:
+
 - **MVP**: Do NOT persist mood selections for logged-out users (privacy-first approach)
   - Mood selection only stored in session memory/React state
   - No database write if `user_id` is NULL
@@ -79,6 +85,7 @@ created_at (TIMESTAMP)
   - Allow opt-out
 
 ### journal_entries
+
 ```sql
 id (UUID, primary key)
 user_id (UUID, foreign key → users.id, not null)
@@ -90,6 +97,7 @@ updated_at (TIMESTAMP)
 ```
 
 ### prayer_wall_posts
+
 ```sql
 id (UUID, primary key)
 user_id (UUID, foreign key → users.id, not null)
@@ -103,6 +111,7 @@ updated_at (TIMESTAMP)
 ```
 
 ### prayer_wall_reports
+
 ```sql
 id (UUID, primary key)
 post_id (UUID, foreign key → prayer_wall_posts.id)
@@ -112,6 +121,7 @@ created_at (TIMESTAMP)
 ```
 
 ### guided_meditations
+
 ```sql
 id (UUID, primary key)
 title (VARCHAR, not null)
@@ -124,6 +134,7 @@ updated_at (TIMESTAMP)
 ```
 
 ### daily_content
+
 ```sql
 id (UUID, primary key)
 date (DATE, unique, not null)
@@ -135,6 +146,7 @@ created_at (TIMESTAMP)
 ```
 
 ### admin_audit_log
+
 ```sql
 id (UUID, primary key)
 admin_user_id (UUID, foreign key → users.id)
@@ -148,6 +160,7 @@ created_at (TIMESTAMP)
 ### Database Indexes & Constraints
 
 **Performance-Critical Indexes**:
+
 ```sql
 -- Mood tracking (dashboard, insights page)
 CREATE INDEX idx_mood_selections_user_timestamp ON mood_selections(user_id, timestamp DESC);
@@ -165,6 +178,7 @@ CREATE INDEX idx_audit_log_target ON admin_audit_log(target_type, target_id);
 ```
 
 **Unique Constraints**:
+
 ```sql
 -- Only one verse/song per day
 ALTER TABLE daily_content ADD CONSTRAINT unique_daily_date UNIQUE (date);
@@ -174,10 +188,12 @@ ALTER TABLE users ADD CONSTRAINT unique_user_email UNIQUE (email);
 ```
 
 **Future Considerations** (non-goals for MVP):
+
 - Full-text search on prayer wall posts (PostgreSQL `tsvector` or external search engine)
 - Composite indexes for complex queries as usage patterns emerge
 
 ## Data Retention & Deletion
+
 - **Account Deletion**: User can delete their account via profile settings
   - **Journal Entries**: Hard deleted (permanently removed from database)
   - **Mood Selections**: Hard deleted OR anonymized (user_id set to NULL, description cleared if present)
@@ -193,6 +209,7 @@ ALTER TABLE users ADD CONSTRAINT unique_user_email UNIQUE (email);
 - **Data Export**: User can export their data (journal entries, mood history) before deletion (future feature)
 
 ## Encryption Policies
+
 - **Encryption**: Encrypt sensitive private content at the application layer before writing to database (not only disk-level encryption)
   - **Journal Entries**: Always encrypted (private content)
   - **Prayer Wall Posts**: NOT encrypted (public by design for community sharing)

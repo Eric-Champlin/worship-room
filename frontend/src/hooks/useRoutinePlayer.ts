@@ -126,7 +126,7 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
                 },
               })
               loadedCount++
-            } catch {
+            } catch (_e) {
               // Non-fatal: individual sound load failure
             }
             resolve()
@@ -194,7 +194,8 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
         })
 
         return true
-      } catch {
+      } catch (_e) {
+        // Audio playback may not be available
         return false
       }
     },

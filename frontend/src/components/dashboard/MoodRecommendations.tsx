@@ -75,7 +75,7 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
     let devotionalReads: string[] = []
     try {
       devotionalReads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
-    } catch {
+    } catch (_e) {
       // Malformed localStorage — treat as unread
     }
 
@@ -84,7 +84,7 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
       const activityLog = JSON.parse(localStorage.getItem('wr_daily_activities') || '{}')
       const todayActivities = activityLog[todayStr]
       readPlanToday = todayActivities?.readingPlan === true
-    } catch {
+    } catch (_e) {
       // ignore
     }
 

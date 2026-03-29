@@ -69,7 +69,11 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
     setNameError('')
     setDisplayName(trimmed)
     onUpdateProfile({ displayName: trimmed })
-    localStorage.setItem('wr_user_name', trimmed)
+    try {
+      localStorage.setItem('wr_user_name', trimmed)
+    } catch (_e) {
+      // localStorage write failure is non-critical
+    }
     previousNameRef.current = trimmed
 
     // Show "Saved" indicator

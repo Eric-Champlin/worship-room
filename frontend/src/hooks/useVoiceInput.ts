@@ -73,7 +73,7 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputRetur
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort()
-      } catch {
+      } catch (_e) {
         // ignore
       }
     }
@@ -141,7 +141,7 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputRetur
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop()
-      } catch {
+      } catch (_e) {
         // ignore
       }
     }
@@ -154,7 +154,7 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputRetur
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort()
-        } catch {
+        } catch (_e) {
           // ignore
         }
       }

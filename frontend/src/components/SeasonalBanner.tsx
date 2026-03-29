@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { X, Star, Gift, Sparkles, Heart, Cross, Sun, Flame, Leaf } from 'lucide-react'
 import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
@@ -17,12 +17,16 @@ export function SeasonalBanner() {
   const [dismissed, setDismissed] = useState(() => {
     try {
       return sessionStorage.getItem(DISMISS_KEY) === 'true'
-    } catch {
+    } catch (_e) {
       return false
     }
   })
   const [hiding, setHiding] = useState(false)
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => { if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current) }
+  }, [])
 
   const handleDismiss = useCallback(() => {
     if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)

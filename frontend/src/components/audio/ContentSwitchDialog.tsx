@@ -1,4 +1,5 @@
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { Z } from '@/constants/z-index'
 
 interface ContentSwitchDialogProps {
   currentTitle: string
@@ -24,7 +25,7 @@ export function ContentSwitchDialog({
   const containerRef = useFocusTrap(true, onKeepListening)
 
   return (
-    <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/40">
+    <div className={`fixed inset-0 z-[${Z.MODAL}] flex items-center justify-center bg-black/40`}>
       <div
         ref={containerRef}
         role="alertdialog"

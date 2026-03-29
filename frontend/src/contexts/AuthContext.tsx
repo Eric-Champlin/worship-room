@@ -28,7 +28,8 @@ function readAuthState(): { isAuthenticated: boolean; user: { name: string; id: 
     const name = localStorage.getItem(NAME_KEY) || 'User'
     const id = localStorage.getItem(ID_KEY) || ''
     return { isAuthenticated: true, user: { name, id } }
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable
     return { isAuthenticated: false, user: null }
   }
 }
@@ -46,8 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(ID_KEY, id)
       }
       setState({ isAuthenticated: true, user: { name, id } })
-    } catch {
-      // localStorage unavailable — stay logged out
+    } catch (_e) {
+      // localStorage may be unavailable — stay logged out
     }
   }, [])
 
@@ -56,8 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(AUTH_KEY)
       localStorage.removeItem(NAME_KEY)
       // Preserve wr_user_id and all other wr_* keys
-    } catch {
-      // localStorage unavailable
+    } catch (_e) {
+      // localStorage may be unavailable
     }
     setState({ isAuthenticated: false, user: null })
   }, [])

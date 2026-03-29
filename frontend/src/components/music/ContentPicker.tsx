@@ -78,7 +78,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
             type="button"
             onClick={onClose}
             aria-label="Close picker"
-            className="rounded-lg p-1.5 text-text-light transition-colors hover:bg-gray-100"
+            className="rounded-lg p-1.5 text-text-light transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
           >
             <X size={20} />
           </button>
@@ -103,7 +103,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTab(key)}
                 onKeyDown={(e) => handleTabKeyDown(e, index)}
-                className={`flex items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 ${
                   isActive
                     ? 'border-primary text-primary'
                     : 'border-transparent text-text-light hover:text-text-dark'
@@ -130,7 +130,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                   key={scene.id}
                   type="button"
                   onClick={() => onSelect('scene', scene.id, scene.name)}
-                  className="rounded-lg border border-gray-200 p-4 text-left transition-colors hover:border-primary hover:bg-primary/5"
+                  className="rounded-lg border border-gray-200 p-4 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
                   <p className="font-medium text-text-dark">{scene.name}</p>
                   <p className="mt-1 line-clamp-2 text-xs text-text-light">
@@ -159,7 +159,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                         onClick={() =>
                           onSelect('scripture', reading.id, reading.title)
                         }
-                        className="rounded-lg border border-gray-200 p-3 text-left transition-colors hover:border-primary hover:bg-primary/5"
+                        className="rounded-lg border border-gray-200 p-3 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                       >
                         <p className="text-sm font-medium text-text-dark">
                           {reading.title}
@@ -182,7 +182,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                   key={story.id}
                   type="button"
                   onClick={() => onSelect('story', story.id, story.title)}
-                  className="rounded-lg border border-gray-200 p-4 text-left transition-colors hover:border-primary hover:bg-primary/5"
+                  className="rounded-lg border border-gray-200 p-4 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
                   <p className="font-medium text-text-dark">{story.title}</p>
                   <p className="mt-1 line-clamp-2 text-xs text-text-light">

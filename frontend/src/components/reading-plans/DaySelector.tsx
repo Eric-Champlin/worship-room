@@ -123,7 +123,7 @@ export function DaySelector({
         }}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
+        className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
       >
         Day {selectedDay} of {totalDays}
         <ChevronDown

@@ -75,7 +75,7 @@ export function useNotifications(): {
         if (Array.isArray(parsed)) {
           setNotificationsState(parsed)
         }
-      } catch {
+      } catch (_e) {
         // Ignore corrupt cross-tab data
       }
     }

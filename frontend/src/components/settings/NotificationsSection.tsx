@@ -14,7 +14,7 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
   const [soundEffectsEnabled, setSoundEffectsEnabled] = useState(() => {
     try {
       return localStorage.getItem(SOUND_EFFECTS_KEY) !== 'false'
-    } catch {
+    } catch (_e) {
       return true
     }
   })
@@ -23,7 +23,7 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
     setSoundEffectsEnabled(value)
     try {
       localStorage.setItem(SOUND_EFFECTS_KEY, String(value))
-    } catch {
+    } catch (_e) {
       // localStorage unavailable
     }
   }

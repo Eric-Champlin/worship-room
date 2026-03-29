@@ -34,7 +34,7 @@ export function FilterBar({
                 aria-pressed={isActive}
                 onClick={() => onDurationChange(opt.value)}
                 className={cn(
-                  'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                  'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                   isActive
                     ? 'bg-primary/20 text-primary-lt'
                     : 'bg-white/10 text-white/60 hover:bg-white/15',
@@ -61,7 +61,7 @@ export function FilterBar({
                 aria-pressed={isActive}
                 onClick={() => onDifficultyChange(opt.value)}
                 className={cn(
-                  'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                  'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                   isActive
                     ? 'bg-primary/20 text-primary-lt'
                     : 'bg-white/10 text-white/60 hover:bg-white/15',

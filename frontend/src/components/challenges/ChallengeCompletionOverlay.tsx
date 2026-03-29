@@ -52,14 +52,16 @@ export function ChallengeCompletionOverlay({
 
   // Auto-dismiss after 12 seconds
   useEffect(() => {
-    const timer = setTimeout(() => onDismiss(), 12000)
+    const AUTO_DISMISS_MS = 12_000
+    const timer = setTimeout(() => onDismiss(), AUTO_DISMISS_MS)
     return () => clearTimeout(timer)
   }, [onDismiss])
 
   // Show dismiss button after 2s (or immediately for reduced motion)
   useEffect(() => {
     if (reducedMotion) return
-    const timer = setTimeout(() => setShowDismiss(true), 2000)
+    const SHOW_DISMISS_MS = 2000
+    const timer = setTimeout(() => setShowDismiss(true), SHOW_DISMISS_MS)
     return () => clearTimeout(timer)
   }, [reducedMotion])
 
@@ -144,7 +146,7 @@ export function ChallengeCompletionOverlay({
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
       }
-    } catch {
+    } catch (_e) {
       // User cancelled or share failed — silently ignore
     }
   }, [challengeTitle, themeColor, daysCompleted])

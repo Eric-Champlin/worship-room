@@ -77,7 +77,7 @@ const mockFaithPoints = {
   currentLevel: 3,
   levelName: 'Blooming',
   pointsToNextLevel: 1000,
-  todayActivities: {} as any,
+  todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, readingPlan: false, meditate: false, journal: false, gratitude: false, reflection: false, challenge: false, localVisit: false, devotional: false },
   todayMultiplier: 1,
   todayPoints: 50,
   previousStreak: null,
@@ -93,7 +93,7 @@ function renderGrid(props: Partial<Parameters<typeof DashboardWidgetGrid>[0]> = 
     <MemoryRouter>
       <ToastProvider>
         <AuthModalProvider>
-          <DashboardWidgetGrid faithPoints={mockFaithPoints as any} {...props} />
+          <DashboardWidgetGrid faithPoints={mockFaithPoints} {...props} />
         </AuthModalProvider>
       </ToastProvider>
     </MemoryRouter>,

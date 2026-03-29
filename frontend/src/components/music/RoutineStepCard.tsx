@@ -49,7 +49,7 @@ export function RoutineStepCard({
           onClick={onMoveUp}
           disabled={isFirst}
           aria-label={`Move step ${stepNumber} up`}
-          className="flex h-11 w-11 items-center justify-center rounded text-white/60 transition-colors hover:text-white disabled:opacity-30"
+          className="flex h-11 w-11 items-center justify-center rounded text-white/60 transition-colors hover:text-white disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           <ArrowUp size={14} />
         </button>
@@ -58,7 +58,7 @@ export function RoutineStepCard({
           onClick={onMoveDown}
           disabled={isLast}
           aria-label={`Move step ${stepNumber} down`}
-          className="flex h-11 w-11 items-center justify-center rounded text-white/60 transition-colors hover:text-white disabled:opacity-30"
+          className="flex h-11 w-11 items-center justify-center rounded text-white/60 transition-colors hover:text-white disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           <ArrowDown size={14} />
         </button>
@@ -74,7 +74,7 @@ export function RoutineStepCard({
         type="button"
         onClick={onRemove}
         aria-label={`Remove step ${stepNumber}`}
-        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
       >
         <X size={16} />
       </button>

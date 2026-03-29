@@ -6,6 +6,8 @@ import { SkeletonBlock } from '@/components/skeletons/SkeletonBlock'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/utils'
 
+const EMBED_LOAD_TIMEOUT_MS = 10_000
+
 interface SpotifyEmbedProps {
   playlist: SpotifyPlaylist
   height?: number
@@ -27,7 +29,7 @@ export function SpotifyEmbed({
     if (status === 'loading') {
       timeoutRef.current = setTimeout(() => {
         setStatus((prev) => (prev === 'loading' ? 'error' : prev))
-      }, 10000)
+      }, EMBED_LOAD_TIMEOUT_MS)
     }
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)

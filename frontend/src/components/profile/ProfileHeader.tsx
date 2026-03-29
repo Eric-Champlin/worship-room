@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -26,7 +26,12 @@ export function ProfileHeader({
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [sentFeedback, setSentFeedback] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const sentFeedbackTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const { showToast } = useToast()
+
+  useEffect(() => {
+    return () => { if (sentFeedbackTimerRef.current) clearTimeout(sentFeedbackTimerRef.current) }
+  }, [])
 
   const handleEncourageSend = useCallback(
     (message: string) => {
@@ -34,7 +39,7 @@ export function ProfileHeader({
       onEncourage(message)
       setSentFeedback(true)
       showToast(`Encouragement sent to ${profileData.displayName}!`, 'success')
-      setTimeout(() => setSentFeedback(false), 3000)
+      sentFeedbackTimerRef.current = setTimeout(() => setSentFeedback(false), 3000)
     },
     [onEncourage, profileData.displayName, showToast],
   )

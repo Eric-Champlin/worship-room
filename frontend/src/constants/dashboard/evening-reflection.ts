@@ -24,7 +24,7 @@ export const EVENING_PRAYERS: EveningPrayer[] = [
 
 export const EVENING_VERSES: EveningVerse[] = [
   { dayOfWeek: 0, text: 'You will keep whoever\'s mind is steadfast in perfect peace, because he trusts in you.', reference: 'Isaiah 26:3' },
-  { dayOfWeek: 1, text: 'In peace I will both lay myself down and sleep, for you alone, Lord, make me live in safety.', reference: 'Psalm 4:8' },
+  { dayOfWeek: 1, text: 'In peace I will both lay myself down and sleep, for you, Yahweh alone, make me live in safety.', reference: 'Psalm 4:8' },
   { dayOfWeek: 2, text: 'He who keeps you will not slumber.', reference: 'Psalm 121:3' },
   { dayOfWeek: 3, text: 'When you lie down, you will not be afraid. Yes, you will lie down, and your sleep will be sweet.', reference: 'Proverbs 3:24' },
   { dayOfWeek: 4, text: 'He who dwells in the secret place of the Most High will rest in the shadow of the Almighty.', reference: 'Psalm 91:1' },

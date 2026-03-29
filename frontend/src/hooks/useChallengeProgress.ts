@@ -36,7 +36,7 @@ function readProgress(): ChallengeProgressMap {
       migrated[key] = migrateEntry(value)
     }
     return migrated
-  } catch {
+  } catch (_e) {
     return {}
   }
 }
@@ -44,7 +44,7 @@ function readProgress(): ChallengeProgressMap {
 function writeProgress(progress: ChallengeProgressMap): void {
   try {
     localStorage.setItem(CHALLENGE_PROGRESS_KEY, JSON.stringify(progress))
-  } catch {
+  } catch (_e) {
     // localStorage unavailable
   }
 }
@@ -54,7 +54,7 @@ function readReminders(): string[] {
     const raw = localStorage.getItem(CHALLENGE_REMINDERS_KEY)
     if (!raw) return []
     return JSON.parse(raw) as string[]
-  } catch {
+  } catch (_e) {
     return []
   }
 }
@@ -62,7 +62,7 @@ function readReminders(): string[] {
 function writeReminders(reminders: string[]): void {
   try {
     localStorage.setItem(CHALLENGE_REMINDERS_KEY, JSON.stringify(reminders))
-  } catch {
+  } catch (_e) {
     // localStorage unavailable
   }
 }
@@ -96,7 +96,7 @@ function awardBonusPoints(amount: number): void {
       lastUpdated: new Date().toISOString(),
     }
     localStorage.setItem('wr_faith_points', JSON.stringify(updated))
-  } catch {
+  } catch (_e) {
     // best-effort
   }
 }
@@ -143,12 +143,25 @@ function awardChallengeBadges(challengeId: string): string[] {
 
     saveBadgeData(updated)
     return newBadgeIds
-  } catch {
+  } catch (_e) {
     return []
   }
 }
 
-export function useChallengeProgress() {
+export function useChallengeProgress(): {
+  getProgress: (challengeId: string) => ChallengeProgress | undefined
+  joinChallenge: (challengeId: string) => string | undefined
+  completeDay: (challengeId: string, dayNumber: number, recordActivityFn?: (type: ActivityType) => void) => CompletionResult
+  isChallengeJoined: (challengeId: string) => boolean
+  isChallengeCompleted: (challengeId: string) => boolean
+  getActiveChallenge: () => { challengeId: string; progress: ChallengeProgress } | undefined
+  pauseChallenge: (challengeId: string) => void
+  resumeChallenge: (challengeId: string) => void
+  getReminders: () => string[]
+  toggleReminder: (challengeId: string) => void
+  markMilestoneShown: (challengeId: string, dayNumber: number) => void
+  hasMilestoneBeenShown: (challengeId: string, dayNumber: number) => boolean
+} {
   const { isAuthenticated } = useAuth()
   const [progress, setProgress] = useState<ChallengeProgressMap>(readProgress)
   const [reminders, setReminders] = useState<string[]>(readReminders)

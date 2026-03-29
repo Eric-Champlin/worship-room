@@ -37,6 +37,17 @@ export function AskPage() {
   const [searchParams] = useSearchParams()
   const handleSubmitRef = useRef<() => void>(() => {})
   const pendingAutoSubmitRef = useRef<string | null>(null)
+  const loadingTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => {
+    return () => {
+      if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current)
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current)
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
+    }
+  }, [])
 
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
@@ -59,7 +70,7 @@ export function AskPage() {
     setFeedback(null)
     setFeedbackThanks(false)
 
-    setTimeout(() => {
+    loadingTimerRef.current = setTimeout(() => {
       const result = getAskResponse(submittedText)
       setConversation((prev) => [...prev, { question: submittedText, response: result }])
       setText('')
@@ -67,7 +78,7 @@ export function AskPage() {
       setIsLoading(false)
 
       // Auto-scroll to new response
-      setTimeout(() => {
+      scrollTimerRef.current = setTimeout(() => {
         document.getElementById('latest-response')?.scrollIntoView({
           behavior: prefersReducedMotion ? 'auto' : 'smooth',
           block: 'start',
@@ -126,13 +137,13 @@ export function AskPage() {
     }
     setPendingQuestion(question)
     setIsLoading(true)
-    setTimeout(() => {
+    loadingTimerRef.current = setTimeout(() => {
       const result = getAskResponse(question)
       setConversation((prev) => [...prev, { question, response: result }])
       setPendingQuestion(null)
       setIsLoading(false)
 
-      setTimeout(() => {
+      scrollTimerRef.current = setTimeout(() => {
         document.getElementById('latest-response')?.scrollIntoView({
           behavior: prefersReducedMotion ? 'auto' : 'smooth',
           block: 'start',
@@ -158,7 +169,7 @@ export function AskPage() {
     try {
       await navigator.clipboard.writeText(shareText)
       showToast('Copied to clipboard')
-    } catch {
+    } catch (_e) {
       showToast('Could not copy to clipboard', 'error')
     }
   }
@@ -166,7 +177,7 @@ export function AskPage() {
   const handleFeedback = (type: 'up' | 'down') => {
     setFeedback(type)
     setFeedbackThanks(true)
-    setTimeout(() => setFeedbackThanks(false), 2000)
+    feedbackTimerRef.current = setTimeout(() => setFeedbackThanks(false), 2000)
 
     if (!isAuthenticated || conversation.length === 0) return
     const firstResponse = conversation[0].response
@@ -175,7 +186,7 @@ export function AskPage() {
       existing = JSON.parse(
         localStorage.getItem(ASK_FEEDBACK_KEY) || '[]',
       )
-    } catch {
+    } catch (_e) {
       // Malformed localStorage — reset to empty
     }
     const entry: AskFeedback = {

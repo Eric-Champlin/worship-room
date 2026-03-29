@@ -35,7 +35,8 @@ export function getSocialInteractions(): SocialInteractionsData {
       return { ...EMPTY_SOCIAL_DATA };
     }
     return parsed as SocialInteractionsData;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return { ...EMPTY_SOCIAL_DATA };
   }
 }
@@ -51,7 +52,8 @@ export function getMilestoneFeed(): MilestoneEvent[] {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed as MilestoneEvent[];
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return [];
   }
 }
@@ -114,8 +116,9 @@ export function addNotification(
       read: false,
     };
     existing.push(notification);
-    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(existing));
-  } catch {
+    const capped = existing.length > 50 ? existing.slice(-50) : existing;
+    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(capped));
+  } catch (_e) {
     // Gracefully handle corrupted data — start fresh
     const notification: NotificationEntry = {
       ...entry,

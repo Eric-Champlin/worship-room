@@ -14,6 +14,7 @@
 Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is a **UI shell only** — it displays "Sign in to [action]" with login/register options but does not perform real authentication. Real auth (Spring Security + JWT) is Phase 3.
 
 **What requires login (triggers auth modal when logged out):**
+
 - AI prayer generation, journal entry saving, journal AI reflection
 - Meditation: card clicks in MeditateTabContent (auth modal) + route-level redirect on all 6 sub-pages (`/meditate/*` → `/daily?tab=meditate` via `<Navigate>` when logged out)
 - Prayer Wall posting, commenting, bookmarking
@@ -21,6 +22,7 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - Local Support search, Local Support bookmarking
 
 **What works without login:**
+
 - Browsing Daily Hub, switching tabs, typing in textareas (but can't submit/save)
 - Draft auto-save to localStorage (Journal)
 - Reading Prayer Wall, expanding comments, sharing
@@ -29,6 +31,7 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 ### Auth Gating — Dashboard & Growth Features (Phase 2.75)
 
 **Frontend-first auth via `AuthProvider` context.** Until real JWT auth in Phase 3, simulated auth uses localStorage:
+
 - `wr_auth_simulated`: `true`/`false` — dev toggle for simulated login
 - `wr_user_name`: simulated display name
 - `AuthProvider` exposes `{ isAuthenticated, user, login(), logout() }` context
@@ -36,6 +39,7 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - `logout()` clears auth state but preserves ALL user data (mood, points, badges, friends, etc.)
 
 **What requires login (entire dashboard is auth-gated):**
+
 - Mood check-in: only appears for logged-in users (logged-out users see landing page)
 - Dashboard (`/`): only renders when `isAuthenticated` — otherwise renders `Home` (landing page)
 - All dashboard widget interactions (activity checklist, streak, points, badges)
@@ -48,11 +52,13 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - Notifications: bell only visible when authenticated
 
 **Mood data privacy rule (MANDATORY):**
+
 - Mood data (check-in mood level, text, timestamps) is NEVER visible to friends
 - Only engagement data is shareable: streak count, faith points, level, badges
 - Privacy settings control visibility of engagement data (everyone / friends / only me)
 
 ### Rate Limiting
+
 - **Backend**: Per-user rate limiting on AI endpoints to prevent abuse and control costs
   - **AI Requests**: 20 requests per hour per user (scripture matching, prayers, reflections, prompts) - configurable via environment variables (dev vs prod)
   - **Prayer Wall Posts**: 5 posts per day per user - configurable via environment variables
@@ -64,12 +70,14 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
   - **Implementation**: Nginx or Spring Security
 
 ### API Key Security & Environment Variables
+
 - **Never commit API keys to repository**
 - Use environment variables (`.env` for local, platform env vars for production)
 - Rotate keys periodically
 - Monitor OpenAI API usage to detect anomalies
 
 ### JWT Storage & Security
+
 - **JWT Storage for MVP**: In-memory JWT (React state/context)
   - **MVP Implementation**: Store token in React state/context, lost on page refresh (user must re-login)
   - **Benefits**: Simpler implementation, no CSRF concerns, better XSS protection than localStorage
@@ -79,6 +87,7 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - **Token Expiration**: Short-lived tokens (1 hour), refresh token mechanism (future enhancement)
 
 ### Password Policy (MVP)
+
 - **Minimum Length**: 12 characters (strong length requirement for sensitive content)
 - **Requirements**: No complexity rules (length is more important than uppercase/number requirements)
 - **Rate Limiting**: Login attempts rate-limited to prevent brute force
@@ -99,6 +108,7 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - **Future Enhancement**: Password strength meter, common password blacklist, 2FA
 
 ### CORS Policy
+
 - **Allowed Origins**:
   - **Local Development**: `http://localhost:5173` (Vite dev server)
   - **Production**: `https://worshiproom.com` (or actual production domain)
@@ -108,6 +118,7 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - **Implementation**: Spring Boot `@CrossOrigin` or global CORS configuration
 
 ### Input Validation & Sanitization
+
 - **All User Inputs**: Validate length, format, content
 - **Scripture References**: Validate format (e.g., "John 3:16")
 - **Prayer Wall Posts & Journal Entries**:

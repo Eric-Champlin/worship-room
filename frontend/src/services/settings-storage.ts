@@ -68,7 +68,8 @@ export function getSettings(): UserSettings {
       return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] } }
     }
     return deepMerge(DEFAULT_SETTINGS, parsed)
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] } }
   }
 }
@@ -76,8 +77,8 @@ export function getSettings(): UserSettings {
 export function saveSettings(settings: UserSettings): void {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
-  } catch {
-    // localStorage unavailable — degrade gracefully
+  } catch (_e) {
+    // localStorage may be unavailable
   }
 }
 

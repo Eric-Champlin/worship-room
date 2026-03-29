@@ -20,7 +20,8 @@ export function getGettingStartedData(): GettingStartedData {
     if (!raw) return freshGettingStartedData()
     const parsed = JSON.parse(raw)
     return { ...freshGettingStartedData(), ...parsed }
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return freshGettingStartedData()
   }
 }
@@ -30,15 +31,16 @@ export function setGettingStartedFlag(key: keyof GettingStartedData, value: bool
     const data = getGettingStartedData()
     data[key] = value
     localStorage.setItem(GETTING_STARTED_KEY, JSON.stringify(data))
-  } catch {
-    // localStorage unavailable
+  } catch (_e) {
+    // localStorage may be unavailable
   }
 }
 
 export function isGettingStartedComplete(): boolean {
   try {
     return localStorage.getItem(GETTING_STARTED_COMPLETE_KEY) === 'true'
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable
     return false
   }
 }
@@ -46,7 +48,7 @@ export function isGettingStartedComplete(): boolean {
 export function setGettingStartedComplete(): void {
   try {
     localStorage.setItem(GETTING_STARTED_COMPLETE_KEY, 'true')
-  } catch {
-    // localStorage unavailable
+  } catch (_e) {
+    // localStorage may be unavailable
   }
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useListenTracker } from '@/hooks/useListenTracker';
 
 /**
@@ -10,7 +11,7 @@ import { useListenTracker } from '@/hooks/useListenTracker';
  * TODO: Replace readAuthFromStorage() with useAuth() when real JWT auth is implemented (Phase 3).
  */
 export function ListenTracker() {
-  const isAuthenticated = readAuthFromStorage();
+  const [isAuthenticated] = useState(readAuthFromStorage);
   useListenTracker(isAuthenticated);
   return null;
 }
@@ -18,7 +19,7 @@ export function ListenTracker() {
 function readAuthFromStorage(): boolean {
   try {
     return localStorage.getItem('wr_auth_simulated') === 'true';
-  } catch {
+  } catch (_e) {
     return false;
   }
 }

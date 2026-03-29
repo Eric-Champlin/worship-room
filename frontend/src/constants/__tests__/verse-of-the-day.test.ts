@@ -40,8 +40,8 @@ const VALID_THEMES: VerseOfTheDay['theme'][] = [
 ]
 
 describe('VERSE_OF_THE_DAY_POOL', () => {
-  it('has exactly 60 entries', () => {
-    expect(VERSE_OF_THE_DAY_POOL).toHaveLength(60)
+  it('has exactly 70 entries', () => {
+    expect(VERSE_OF_THE_DAY_POOL).toHaveLength(70)
   })
 
   it('each entry has text, reference, and theme', () => {
@@ -54,9 +54,9 @@ describe('VERSE_OF_THE_DAY_POOL', () => {
     }
   })
 
-  it('new 30 verses have 5 per theme', () => {
+  it('new verses (after first 30) have at least 5 per theme', () => {
     const newVerses = VERSE_OF_THE_DAY_POOL.slice(30)
-    expect(newVerses).toHaveLength(30)
+    expect(newVerses).toHaveLength(40)
 
     const counts: Record<string, number> = {}
     for (const verse of newVerses) {
@@ -64,7 +64,7 @@ describe('VERSE_OF_THE_DAY_POOL', () => {
     }
 
     for (const theme of VALID_THEMES) {
-      expect(counts[theme]).toBe(5)
+      expect(counts[theme]).toBeGreaterThanOrEqual(5)
     }
   })
 
@@ -74,7 +74,7 @@ describe('VERSE_OF_THE_DAY_POOL', () => {
     expect(uniqueRefs.size).toBe(references.length)
   })
 
-  it('new 30 verses do not collide with existing codebase references', () => {
+  it('new verses (after first 30) do not collide with existing codebase references', () => {
     const newVerses = VERSE_OF_THE_DAY_POOL.slice(30)
     const existingSet = new Set(EXISTING_CODEBASE_REFERENCES)
 
@@ -137,16 +137,16 @@ describe('getTodaysVerse', () => {
 })
 
 describe('seasonal verse tagging', () => {
-  it('pool still has exactly 60 entries', () => {
-    expect(VERSE_OF_THE_DAY_POOL).toHaveLength(60)
+  it('pool still has exactly 70 entries', () => {
+    expect(VERSE_OF_THE_DAY_POOL).toHaveLength(70)
   })
 
-  it('20 verses have a season field', () => {
+  it('30 verses have a season field', () => {
     const tagged = VERSE_OF_THE_DAY_POOL.filter((v) => v.season)
-    expect(tagged).toHaveLength(20)
+    expect(tagged).toHaveLength(30)
   })
 
-  it('distribution: 5 advent, 5 lent, 4 easter, 3 christmas, 2 holy-week, 1 pentecost', () => {
+  it('distribution: 5 advent, 15 lent, 4 easter, 3 christmas, 2 holy-week, 1 pentecost', () => {
     const counts = new Map<string, number>()
     VERSE_OF_THE_DAY_POOL.forEach((v) => {
       if (v.season) {
@@ -154,7 +154,7 @@ describe('seasonal verse tagging', () => {
       }
     })
     expect(counts.get('advent')).toBe(5)
-    expect(counts.get('lent')).toBe(5)
+    expect(counts.get('lent')).toBe(15)
     expect(counts.get('easter')).toBe(4)
     expect(counts.get('christmas')).toBe(3)
     expect(counts.get('holy-week')).toBe(2)

@@ -46,7 +46,7 @@ export class ChunkErrorBoundary extends Component<ChunkErrorBoundaryProps, Chunk
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="rounded-xl bg-primary px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e]"
+              className="rounded-xl bg-primary px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               Try again
             </button>

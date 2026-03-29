@@ -1,3 +1,9 @@
+// --- Canvas color constants ---
+const WHITE = '#FFFFFF'
+const WHITE_20 = 'rgba(255,255,255,0.2)'
+const WHITE_40 = 'rgba(255,255,255,0.4)'
+const WHITE_70 = 'rgba(255,255,255,0.7)'
+
 export interface ShareCanvasOptions {
   challengeTitle: string
   themeColor: string
@@ -54,7 +60,7 @@ export async function generateChallengeShareImage(
   ctx.fillRect(0, 0, 1080, 1080)
 
   // 2. Challenge title (Caveat ~72px, white, centered, top third)
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = WHITE
   ctx.font = 'bold 72px Caveat, cursive'
   ctx.textAlign = 'center'
   ctx.fillText(options.challengeTitle, 540, 360, 880)
@@ -75,24 +81,24 @@ export async function generateChallengeShareImage(
   const pct = options.currentDay / options.totalDays
 
   // Background track
-  ctx.fillStyle = 'rgba(255,255,255,0.2)'
+  ctx.fillStyle = WHITE_20
   roundedRect(ctx, barX, barY, barW, barH, 6)
   ctx.fill()
 
   // Filled portion
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = WHITE
   roundedRect(ctx, barX, barY, Math.max(barH, barW * pct), barH, 6)
   ctx.fill()
 
   // 5. Streak text (if > 3)
   if (options.streak > 3) {
-    ctx.fillStyle = 'rgba(255,255,255,0.7)'
+    ctx.fillStyle = WHITE_70
     ctx.font = '24px Inter, sans-serif'
     ctx.fillText(`🔥 ${options.streak} day streak`, 540, 570)
   }
 
   // 6. Watermark
-  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.fillStyle = WHITE_40
   ctx.font = '28px Caveat, cursive'
   ctx.fillText('Worship Room', 540, 1020)
 

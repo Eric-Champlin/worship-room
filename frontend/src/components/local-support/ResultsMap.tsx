@@ -6,6 +6,9 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import type { LocalSupportPlace } from '@/types/local-support'
 
+const CARTO_DARK_TILE_URL =
+  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+
 // Fix Leaflet default marker icon (Vite bundling issue).
 // Leaflet's type definitions don't expose the internal _getIconUrl property,
 // so we must cast through `any` to delete it before overriding with explicit paths.
@@ -76,7 +79,7 @@ export function ResultsMap({
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url={CARTO_DARK_TILE_URL}
         />
         <MapUpdater center={center} />
         <SelectedMarkerOpener selectedPlaceId={selectedPlaceId} places={places} />

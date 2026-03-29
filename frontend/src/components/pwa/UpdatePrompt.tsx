@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { RefreshCw, X } from 'lucide-react'
 import { useAudioState } from '@/components/audio/AudioProvider'
+import { Z } from '@/constants/z-index'
 
 const AUTO_DISMISS_MS = 30_000
 
@@ -35,7 +36,7 @@ export function UpdatePrompt() {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed left-1/2 z-[9998] -translate-x-1/2 w-[calc(100%-32px)] sm:w-auto sm:max-w-[480px] bg-[rgba(15,10,30,0.85)] backdrop-blur-lg border border-primary/40 rounded-xl shadow-2xl p-4 flex items-center gap-3 motion-safe:animate-fade-in ${
+      className={`fixed left-1/2 z-[${Z.UPDATE_PROMPT}] -translate-x-1/2 w-[calc(100%-32px)] sm:w-auto sm:max-w-[480px] bg-[rgba(15,10,30,0.85)] backdrop-blur-lg border border-primary/40 rounded-xl shadow-2xl p-4 flex items-center gap-3 motion-safe:animate-fade-in ${
         pillVisible ? 'bottom-24' : 'bottom-6'
       }`}
     >

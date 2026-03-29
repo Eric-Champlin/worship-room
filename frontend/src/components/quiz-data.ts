@@ -154,7 +154,7 @@ export const QUIZ_DESTINATIONS: QuizDestination[] = [
     ctaLabel: 'Prayer',
     description:
       "It sounds like you could use a moment with God. Share what's on your heart and receive a personalized scripture and prayer.",
-    verse: 'Cast all your anxiety on him because he cares for you.',
+    verse: 'casting all your worries on him, because he cares for you.',
     verseReference: '1 Peter 5:7',
   },
   {
@@ -164,7 +164,7 @@ export const QUIZ_DESTINATIONS: QuizDestination[] = [
     ctaLabel: 'Journaling',
     description:
       'Writing is a powerful way to process your thoughts. Let guided prompts help you reflect on what God is doing in your life.',
-    verse: 'Search me, God, and know my heart; test me and know my anxious thoughts.',
+    verse: 'Search me, God, and know my heart. Try me, and know my thoughts.',
     verseReference: 'Psalm 139:23',
   },
   {
@@ -184,7 +184,7 @@ export const QUIZ_DESTINATIONS: QuizDestination[] = [
     ctaLabel: 'Worship Music',
     description:
       "Sometimes worship music speaks when words can't. Let curated playlists meet you where you are.",
-    verse: 'Sing to the Lord a new song, for he has done marvelous things.',
+    verse: 'Sing to Yahweh a new song, for he has done marvelous things!',
     verseReference: 'Psalm 98:1',
   },
   {
@@ -194,7 +194,7 @@ export const QUIZ_DESTINATIONS: QuizDestination[] = [
     ctaLabel: 'Sleep & Rest',
     description:
       'Nighttime can be the hardest. Let calming scripture and gentle sounds help you find rest.',
-    verse: 'In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.',
+    verse: 'In peace I will both lay myself down and sleep, for you, Yahweh alone, make me live in safety.',
     verseReference: 'Psalm 4:8',
   },
   {
@@ -204,7 +204,7 @@ export const QUIZ_DESTINATIONS: QuizDestination[] = [
     ctaLabel: 'Prayer Wall',
     description:
       "You're not alone in this. See what others are praying for and find encouragement in community.",
-    verse: 'Carry each other\u2019s burdens, and in this way you will fulfill the law of Christ.',
+    verse: 'Bear one another\'s burdens, and so fulfill the law of Christ.',
     verseReference: 'Galatians 6:2',
   },
   {
@@ -214,7 +214,7 @@ export const QUIZ_DESTINATIONS: QuizDestination[] = [
     ctaLabel: 'Local Support',
     description:
       'Sometimes the next step is a real conversation. Find churches and Christian counselors near you.',
-    verse: 'Where two or three gather in my name, there am I with them.',
+    verse: 'For where two or three are gathered together in my name, there I am in the middle of them.',
     verseReference: 'Matthew 18:20',
   },
 ]

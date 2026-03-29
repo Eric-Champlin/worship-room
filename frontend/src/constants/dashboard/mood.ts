@@ -13,14 +13,14 @@ export const MOOD_OPTIONS: MoodOption[] = [
     value: 1,
     label: 'Struggling',
     color: '#D97706',
-    verse: 'The Lord is near to the brokenhearted, and saves those who have a crushed spirit.',
+    verse: 'Yahweh is near to those who have a broken heart, and saves those who have a crushed spirit.',
     verseReference: 'Psalm 34:18',
   },
   {
     value: 2,
     label: 'Heavy',
     color: '#C2703E',
-    verse: 'Cast your burden on the Lord, and he will sustain you.',
+    verse: 'Cast your burden on Yahweh and he will sustain you. He will never allow the righteous to be moved.',
     verseReference: 'Psalm 55:22',
   },
   {
@@ -34,14 +34,14 @@ export const MOOD_OPTIONS: MoodOption[] = [
     value: 4,
     label: 'Good',
     color: '#2DD4BF',
-    verse: 'Give thanks to the Lord, for he is good, for his loving kindness endures forever.',
+    verse: 'Give thanks to Yahweh, for he is good, for his loving kindness endures forever.',
     verseReference: 'Psalm 107:1',
   },
   {
     value: 5,
     label: 'Thriving',
     color: '#34D399',
-    verse: 'This is the day that the Lord has made. We will rejoice and be glad in it!',
+    verse: 'This is the day that Yahweh has made. We will rejoice and be glad in it!',
     verseReference: 'Psalm 118:24',
   },
 ];

@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Check, Copy, Highlighter, Lock, Share2, StickyNote } from 'lucide-react'
 import { HIGHLIGHT_COLORS } from '@/constants/bible'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { COPY_RESET_DELAY } from '@/constants/timing'
+import { Z } from '@/constants/z-index'
 
 interface FloatingActionBarProps {
   verseNumber: number
@@ -44,7 +46,15 @@ export function FloatingActionBar({
   const barRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [copied, setCopied] = useState(false)
   const prefersReduced = useReducedMotion()
+
+  const handleCopy = useCallback(() => {
+    onCopy()
+    setCopied(true)
+    const timer = setTimeout(() => setCopied(false), COPY_RESET_DELAY)
+    return () => clearTimeout(timer)
+  }, [onCopy])
 
   // Calculate position relative to target element
   useEffect(() => {
@@ -142,7 +152,7 @@ export function FloatingActionBar({
       ref={barRef}
       role="toolbar"
       aria-label="Verse actions"
-      className="z-[60]"
+      className={`z-[${Z.OVERLAY}]`}
       style={{
         position: 'fixed',
         top: position?.top ?? -9999,
@@ -203,11 +213,11 @@ export function FloatingActionBar({
             </button>
             <button
               type="button"
-              onClick={onCopy}
+              onClick={handleCopy}
               className={btnClass}
-              aria-label="Copy verse"
+              aria-label={copied ? 'Copied' : 'Copy verse'}
             >
-              <Copy size={20} aria-hidden="true" />
+              {copied ? <Check size={20} aria-hidden="true" /> : <Copy size={20} aria-hidden="true" />}
             </button>
             <button
               type="button"
@@ -228,11 +238,11 @@ export function FloatingActionBar({
             </div>
             <button
               type="button"
-              onClick={onCopy}
+              onClick={handleCopy}
               className={btnClass}
-              aria-label="Copy verse"
+              aria-label={copied ? 'Copied' : 'Copy verse'}
             >
-              <Copy size={20} aria-hidden="true" />
+              {copied ? <Check size={20} aria-hidden="true" /> : <Copy size={20} aria-hidden="true" />}
             </button>
           </>
         )}

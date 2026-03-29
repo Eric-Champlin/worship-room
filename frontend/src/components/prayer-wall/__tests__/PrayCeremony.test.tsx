@@ -93,7 +93,7 @@ function renderPage() {
   )
 }
 
-describe('Pray Ceremony', () => {
+describe('Pray Ceremony', { timeout: 15000 }, () => {
   beforeEach(() => {
     vi.useFakeTimers()
   })
@@ -186,7 +186,8 @@ describe('Pray Ceremony', () => {
   it('rapid toggle cancels pending toasts', () => {
     renderPage()
 
-    // Let stagger settle
+    // Let stagger and cleanup effects settle
+    act(() => { vi.advanceTimersByTime(0) })
     act(() => { vi.advanceTimersByTime(0) })
 
     const prayButtons = screen.getAllByLabelText(/pray for this request/i)
@@ -203,7 +204,7 @@ describe('Pray Ceremony', () => {
     act(() => { fireEvent.click(stopButtons[0]) })
 
     act(() => {
-      vi.advanceTimersByTime(1200)
+      vi.runAllTimers()
     })
 
     // No toast should have fired

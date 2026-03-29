@@ -8,6 +8,12 @@ const FOOTER_DAILY_LINKS = [
   { label: 'Daily Hub', to: '/daily' },
 ]
 
+const FOOTER_STUDY_LINKS = [
+  { label: 'Bible', to: '/bible' },
+  { label: 'Grow', to: '/grow' },
+  { label: 'Ask God\'s Word', to: '/ask' },
+]
+
 const FOOTER_MUSIC_LINKS = [
   { label: 'Worship Playlists', to: '/music/playlists' },
   { label: 'Ambient Sounds', to: '/music/ambient' },
@@ -23,6 +29,7 @@ const FOOTER_SUPPORT_LINKS = [
 
 const FOOTER_COLUMNS = [
   { heading: 'Daily', links: FOOTER_DAILY_LINKS },
+  { heading: 'Study', links: FOOTER_STUDY_LINKS },
   { heading: 'Music', links: FOOTER_MUSIC_LINKS },
   { heading: 'Support', links: FOOTER_SUPPORT_LINKS },
 ]
@@ -86,7 +93,7 @@ export function SiteFooter() {
 
         {/* Nav Columns */}
         <nav aria-label="Footer navigation" className="mt-10">
-          <div className="mx-auto grid max-w-lg grid-cols-1 gap-8 text-center sm:max-w-2xl sm:grid-cols-3">
+          <div className="mx-auto grid max-w-lg grid-cols-1 gap-8 text-center sm:max-w-2xl sm:grid-cols-2 lg:grid-cols-4">
             {FOOTER_COLUMNS.map((column) => (
               <div key={column.heading}>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-white">

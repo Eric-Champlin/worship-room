@@ -285,7 +285,9 @@ export function useGuidedPrayerPlayer({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]) // Only run when session changes
+  }, [session])
+  // Only re-run when session changes. audioDispatch/loadScene are stable refs.
+  // prefersReduced and audioState are intentionally read at call-time, not reactive.
 
   // --- Wake lock on session start ---
 
@@ -295,7 +297,7 @@ export function useGuidedPrayerPlayer({
     async function requestWakeLock() {
       try {
         wakeLockRef.current = await navigator.wakeLock?.request('screen')
-      } catch {
+      } catch (_e) {
         // Fail silently
       }
     }

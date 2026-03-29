@@ -312,7 +312,7 @@ function StepThree() {
       </p>
 
       <blockquote className="mt-8 max-w-md font-serif text-base italic leading-relaxed text-white/60">
-        For I know the plans I have for you, declares the Lord.
+        &ldquo;For I know the thoughts that I think toward you,&rdquo; says Yahweh, &ldquo;thoughts of peace, and not of evil, to give you hope and a future.&rdquo;
       </blockquote>
       <p className="mt-2 text-sm text-white/40">— Jeremiah 29:11 WEB</p>
     </div>

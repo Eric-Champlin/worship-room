@@ -735,14 +735,7 @@ export function getPsalms(): PsalmInfo[] {
   return PSALMS
 }
 
-export function getPsalm(id: string): PsalmInfo | undefined {
-  return PSALMS.find((p) => p.id === id)
-}
-
 export function getPsalm119Sections(): Psalm119Section[] {
   return PSALM_119_SECTIONS
 }
 
-export function getPsalm119Section(sectionId: string): Psalm119Section | undefined {
-  return PSALM_119_SECTIONS.find((s) => s.id === sectionId)
-}

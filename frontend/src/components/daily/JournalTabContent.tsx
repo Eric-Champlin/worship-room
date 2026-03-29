@@ -47,8 +47,12 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
   // Mode toggle
   const [mode, setMode] = useState<JournalMode>(() => {
-    const saved = localStorage.getItem(JOURNAL_MODE_KEY)
-    return saved === 'free' ? 'free' : 'guided'
+    try {
+      const saved = localStorage.getItem(JOURNAL_MODE_KEY)
+      return saved === 'free' ? 'free' : 'guided'
+    } catch (_e) {
+      return 'guided'
+    }
   })
 
   // Context banner
@@ -113,7 +117,11 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
   const handleModeChange = useCallback((newMode: JournalMode) => {
     setMode(newMode)
-    localStorage.setItem(JOURNAL_MODE_KEY, newMode)
+    try {
+      localStorage.setItem(JOURNAL_MODE_KEY, newMode)
+    } catch (_e) {
+      // localStorage write failure is non-critical
+    }
   }, [])
 
   const handleTryDifferentPrompt = () => {
@@ -153,12 +161,16 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
       let celebrated: number[] = []
       try {
         celebrated = JSON.parse(localStorage.getItem(JOURNAL_MILESTONES_KEY) ?? '[]')
-      } catch {
+      } catch (_e) {
         celebrated = []
       }
       if (!celebrated.includes(newCount)) {
         celebrated.push(newCount)
-        localStorage.setItem(JOURNAL_MILESTONES_KEY, JSON.stringify(celebrated))
+        try {
+          localStorage.setItem(JOURNAL_MILESTONES_KEY, JSON.stringify(celebrated))
+        } catch (_e) {
+          // localStorage write failure is non-critical
+        }
         const milestoneIcon = (
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
             <BookOpen className="h-4 w-4 text-primary-lt" />
@@ -188,7 +200,11 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   }
 
   const handleWriteAnother = () => {
-    localStorage.removeItem(JOURNAL_DRAFT_KEY)
+    try {
+      localStorage.removeItem(JOURNAL_DRAFT_KEY)
+    } catch (_e) {
+      // localStorage removal failure is non-critical
+    }
     if (parentTextareaRef.current) {
       parentTextareaRef.current.style.height = 'auto'
       parentTextareaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })

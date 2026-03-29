@@ -248,7 +248,7 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       },
       {
         reference: 'Romans 8:26',
-        text: 'In the same way, the Spirit also helps our weakness, for we don\'t know how to pray as we ought. But the Spirit himself makes intercession for us with groanings which can\'t be uttered.',
+        text: 'In the same way, the Spirit also helps our weaknesses, for we don\'t know how to pray as we ought. But the Spirit himself makes intercession for us with groanings which can\'t be uttered.',
         explanation:
           'Even when you don\'t have the right words, the Holy Spirit prays on your behalf.',
       },
@@ -394,7 +394,7 @@ export const ASK_RESPONSES: Record<string, AskResponse> = {
       },
       {
         reference: 'Ecclesiastes 4:12',
-        text: 'If one prevails against him, two shall withstand him; and a threefold cord is not quickly broken.',
+        text: 'If a man prevails against one who is alone, two will withstand him; and a threefold cord is not quickly broken.',
         explanation:
           'A relationship with God at the center is stronger than one built on two people alone.',
       },

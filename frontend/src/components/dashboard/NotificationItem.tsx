@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { timeAgo } from '@/lib/time'
@@ -40,6 +40,11 @@ export function NotificationItem({
   const [swipeX, setSwipeX] = useState(0)
   const [isDismissing, setIsDismissing] = useState(false)
   const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => {
+    return () => { if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current) }
+  }, [])
   const prefersReducedMotion = typeof window !== 'undefined'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -70,7 +75,7 @@ export function NotificationItem({
       return
     }
     setIsDismissing(true)
-    setTimeout(() => onDismiss(notification.id), 200)
+    dismissTimerRef.current = setTimeout(() => onDismiss(notification.id), 200)
   }
 
   // Mobile swipe-to-dismiss
@@ -95,7 +100,7 @@ export function NotificationItem({
         onDismiss(notification.id)
       } else {
         setIsDismissing(true)
-        setTimeout(() => onDismiss(notification.id), 200)
+        dismissTimerRef.current = setTimeout(() => onDismiss(notification.id), 200)
       }
     } else {
       setSwipeX(0)

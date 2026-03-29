@@ -93,7 +93,7 @@ export function DashboardHero({
   return (
     <section
       aria-label="Dashboard hero"
-      className="bg-gradient-to-b from-dashboard-gradient to-[#0f0a1e] pt-24 pb-6 md:pt-28 md:pb-8"
+      className="bg-gradient-to-b from-dashboard-gradient to-dashboard-dark pt-24 pb-6 md:pt-28 md:pb-8"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         {gardenSlot}
@@ -152,8 +152,8 @@ export function DashboardHero({
                 className="h-1.5 w-32 rounded-full bg-white/10"
                 role="progressbar"
                 aria-valuenow={totalPoints}
-                aria-valuemin={isMaxLevel ? 10000 : currentThreshold}
-                aria-valuemax={isMaxLevel ? 10000 : nextThreshold}
+                aria-valuemin={isMaxLevel ? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1].threshold : currentThreshold}
+                aria-valuemax={isMaxLevel ? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1].threshold : nextThreshold}
                 aria-label="Level progress"
                 aria-valuetext={
                   isMaxLevel

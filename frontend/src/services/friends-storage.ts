@@ -25,7 +25,8 @@ export function getFriendsData(): FriendsData {
       return EMPTY_FRIENDS_DATA
     }
     return parsed as FriendsData
-  } catch {
+  } catch (_e) {
+    // Corrupted localStorage data — return empty defaults
     return EMPTY_FRIENDS_DATA
   }
 }
@@ -34,12 +35,13 @@ export function saveFriendsData(data: FriendsData): boolean {
   try {
     localStorage.setItem(FRIENDS_KEY, JSON.stringify(data))
     return true
-  } catch {
+  } catch (_e) {
+    // localStorage write failed (quota exceeded or unavailable)
     return false
   }
 }
 
-export function initializeFriendsData(currentUserId: string): FriendsData {
+function initializeFriendsData(currentUserId: string): FriendsData {
   const data = createDefaultFriendsData(currentUserId)
   saveFriendsData(data)
   return data

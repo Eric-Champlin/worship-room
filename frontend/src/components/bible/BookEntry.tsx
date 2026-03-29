@@ -26,7 +26,7 @@ export function BookEntry({ book, isExpanded, onToggle }: BookEntryProps) {
         type="button"
         onClick={onToggle}
         aria-expanded={isExpanded}
-        className="flex w-full min-h-[44px] items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/5"
+        className="flex w-full min-h-[44px] items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
       >
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-white">{book.name}</span>

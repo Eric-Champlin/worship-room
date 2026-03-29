@@ -14,7 +14,7 @@ export function SeasonalNavLine() {
   const { isNamedSeason, seasonName, icon, currentSeason } = useLiturgicalSeason()
   const [dismissed, setDismissed] = useState(() => {
     try { return sessionStorage.getItem('wr_seasonal_nav_dismissed') === 'true' }
-    catch { return false }
+    catch (_e) { return false }
   })
 
   if (!isNamedSeason || dismissed) return null
@@ -32,7 +32,7 @@ export function SeasonalNavLine() {
         type="button"
         onClick={() => {
           try { sessionStorage.setItem('wr_seasonal_nav_dismissed', 'true') }
-          catch { /* sessionStorage unavailable */ }
+          catch (_e) { /* sessionStorage unavailable */ }
           setDismissed(true)
         }}
         className="ml-1 rounded-full p-1 text-white/30 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { NotificationItem } from './NotificationItem'
+import { Z } from '@/constants/z-index'
 import type { NotificationEntry } from '@/types/dashboard'
 
 interface NotificationPanelProps {
@@ -117,7 +118,7 @@ export function NotificationPanel({
 
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-[60]">
+      <div className={`fixed inset-0 z-[${Z.OVERLAY}]`}>
         {/* Backdrop */}
         <div
           className="absolute inset-0 bg-black/50"
@@ -134,7 +135,7 @@ export function NotificationPanel({
 
   // Desktop: dropdown positioned by parent
   return (
-    <div className="absolute right-0 top-full z-[60] pt-2">
+    <div className={`absolute right-0 top-full z-[${Z.OVERLAY}] pt-2`}>
       {panelContent}
     </div>
   )

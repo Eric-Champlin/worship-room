@@ -5,7 +5,7 @@ export function hasReflectedToday(): boolean {
   try {
     const stored = localStorage.getItem(EVENING_REFLECTION_STORAGE_KEY);
     return stored === getLocalDateString();
-  } catch {
+  } catch (_e) {
     return false;
   }
 }
@@ -13,7 +13,7 @@ export function hasReflectedToday(): boolean {
 export function markReflectionDone(): void {
   try {
     localStorage.setItem(EVENING_REFLECTION_STORAGE_KEY, getLocalDateString());
-  } catch {
+  } catch (_e) {
     // localStorage unavailable — reflection status won't persist
   }
 }

@@ -10,6 +10,7 @@ export interface DailySong {
   trackId: string
   title: string
   artist: string
+  verse?: string
 }
 
 export interface MockPrayer {

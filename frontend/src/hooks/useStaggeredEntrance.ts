@@ -15,7 +15,10 @@ interface StaggerProps {
   style: React.CSSProperties
 }
 
-export function useStaggeredEntrance(options: UseStaggeredEntranceOptions) {
+export function useStaggeredEntrance(options: UseStaggeredEntranceOptions): {
+  containerRef: React.RefObject<HTMLDivElement>
+  getStaggerProps: (index: number) => StaggerProps
+} {
   const { staggerDelay, inView: externalInView } = options
   const reducedMotion = useReducedMotion()
   const [containerRef, observerInView] = useInView<HTMLDivElement>()

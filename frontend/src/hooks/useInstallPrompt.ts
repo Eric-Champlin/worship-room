@@ -41,7 +41,7 @@ function isDismissedRecently(): boolean {
     const dismissed = localStorage.getItem(DISMISS_KEY)
     if (!dismissed) return false
     return Date.now() - Number(dismissed) < DISMISS_COOLDOWN_MS
-  } catch {
+  } catch (_e) {
     return false
   }
 }
@@ -49,7 +49,7 @@ function isDismissedRecently(): boolean {
 function getVisitCount(): number {
   try {
     return Number(localStorage.getItem(VISIT_COUNT_KEY) || '0')
-  } catch {
+  } catch (_e) {
     return 0
   }
 }
@@ -59,7 +59,11 @@ function incrementVisitCount(): number {
   if (sessionStorage.getItem(SESSION_COUNTED_KEY)) return getVisitCount()
 
   const count = getVisitCount() + 1
-  localStorage.setItem(VISIT_COUNT_KEY, String(count))
+  try {
+    localStorage.setItem(VISIT_COUNT_KEY, String(count))
+  } catch (_e) {
+    // localStorage write failure is non-critical
+  }
   sessionStorage.setItem(SESSION_COUNTED_KEY, 'true')
   return count
 }
@@ -101,7 +105,11 @@ export function useInstallPrompt(): UseInstallPromptReturn {
   }, [])
 
   const dismissBanner = useCallback(() => {
-    localStorage.setItem(DISMISS_KEY, String(Date.now()))
+    try {
+      localStorage.setItem(DISMISS_KEY, String(Date.now()))
+    } catch (_e) {
+      // localStorage write failure is non-critical
+    }
     setDismissed(true)
   }, [])
 

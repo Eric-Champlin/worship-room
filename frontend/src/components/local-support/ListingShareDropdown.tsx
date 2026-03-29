@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Copy, Mail, MessageSquare, Check } from 'lucide-react'
-import { FACEBOOK_SHARE_BASE } from '@/constants/sharing'
+import { FACEBOOK_SHARE_BASE, TWITTER_SHARE_BASE } from '@/constants/sharing'
 import { COPY_RESET_DELAY } from '@/constants/timing'
 import type { LocalSupportCategory } from '@/types/local-support'
 
@@ -18,7 +18,7 @@ export async function tryWebShare(placeName: string, category: LocalSupportCateg
       url: shareUrl,
     })
     return true
-  } catch {
+  } catch (_e) {
     return false
   }
 }
@@ -136,7 +136,7 @@ export function ListingShareDropdown({
       setCopied(true)
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current)
       copyTimeoutRef.current = setTimeout(() => setCopied(false), COPY_RESET_DELAY)
-    } catch {
+    } catch (_e) {
       // Fallback: do nothing if clipboard API not available
     }
   }
@@ -206,7 +206,7 @@ export function ListingShareDropdown({
       </a>
 
       <a
-        href={`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`}
+        href={`${TWITTER_SHARE_BASE}?text=${encodedText}&url=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
         role="menuitem"

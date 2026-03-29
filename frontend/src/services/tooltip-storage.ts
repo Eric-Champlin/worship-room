@@ -5,7 +5,7 @@ export function getTooltipsSeen(): Record<string, true> {
     const raw = localStorage.getItem(TOOLTIPS_SEEN_KEY)
     if (!raw) return {}
     return JSON.parse(raw)
-  } catch {
+  } catch (_e) {
     return {}
   }
 }
@@ -19,7 +19,7 @@ export function markTooltipSeen(tooltipId: string): void {
     const current = getTooltipsSeen()
     current[tooltipId] = true
     localStorage.setItem(TOOLTIPS_SEEN_KEY, JSON.stringify(current))
-  } catch {
+  } catch (_e) {
     // localStorage unavailable — tooltip will show again next visit (acceptable for MVP)
   }
 }

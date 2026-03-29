@@ -13,6 +13,7 @@ import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useRoutinePlayer } from '@/hooks/useRoutinePlayer'
 import { useToast } from '@/components/ui/Toast'
 import { storageService } from '@/services/storage-service'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import type { RoutineDefinition } from '@/types/storage'
 
 export function RoutinesPage() {
@@ -128,6 +129,17 @@ export function RoutinesPage() {
         </div>
       </section>
 
+      {/* Breadcrumb */}
+      <div className="mx-auto max-w-5xl px-4 pt-4">
+        <Breadcrumb
+          items={[
+            { label: 'Music', href: '/music' },
+            { label: 'Bedtime Routines' },
+          ]}
+          maxWidth="max-w-5xl"
+        />
+      </div>
+
       {/* Content */}
       <section className="mx-auto max-w-5xl px-4 py-8">
         {showBuilder ? (
@@ -169,7 +181,7 @@ export function RoutinesPage() {
               <button
                 type="button"
                 onClick={handleCreate}
-                className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary/90"
+                className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
               >
                 Create Routine
               </button>

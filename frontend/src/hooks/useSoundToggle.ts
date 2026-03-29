@@ -117,7 +117,7 @@ export function useSoundToggle(): UseSoundToggleReturn {
       try {
         await engine!.addSound(sound.id, url, AUDIO_CONFIG.DEFAULT_SOUND_VOLUME)
         return
-      } catch {
+      } catch (_e) {
         if (attempt < AUDIO_CONFIG.LOAD_RETRY_MAX) {
           await new Promise<void>((r) => setTimeout(r, delays[attempt]))
         }

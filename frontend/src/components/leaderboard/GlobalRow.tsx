@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 import type { LeaderboardEntry } from '@/types/dashboard'
 
 const RANK_COLORS: Record<number, string> = {
@@ -15,7 +15,7 @@ interface GlobalRowProps {
   index?: number
 }
 
-export function GlobalRow({ rank, entry, isCurrentUser, onClick, index = 0 }: GlobalRowProps) {
+const GlobalRowInner = function GlobalRow({ rank, entry, isCurrentUser, onClick, index = 0 }: GlobalRowProps) {
   const rankColor = RANK_COLORS[rank] || 'text-white/70'
 
   const handleKeyDown = useCallback(
@@ -57,3 +57,5 @@ export function GlobalRow({ rank, entry, isCurrentUser, onClick, index = 0 }: Gl
     </div>
   )
 }
+
+export const GlobalRow = memo(GlobalRowInner)

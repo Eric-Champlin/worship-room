@@ -59,7 +59,8 @@ function hasWeeklyRecapNotificationThisWeek(): boolean {
       (n: { type: string; timestamp: string }) =>
         n.type === 'weekly_recap' && n.timestamp >= weekStart + 'T00:00:00',
     )
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return false
   }
 }

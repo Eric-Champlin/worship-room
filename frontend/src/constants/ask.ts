@@ -16,7 +16,5 @@ export const POPULAR_TOPICS = [
 ] as const
 
 export const ASK_MAX_LENGTH = 500
-export const ASK_CHAR_WARNING = 450
-export const ASK_CHAR_DANGER = 490
 export const ASK_LOADING_DELAY_MS = 2000
 export const ASK_FEEDBACK_KEY = 'wr_chat_feedback'

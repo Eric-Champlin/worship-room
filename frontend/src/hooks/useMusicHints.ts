@@ -17,7 +17,8 @@ function isDismissed(
     if (!data) return false
     const parsed = JSON.parse(data)
     return !!parsed[hintKey]
-  } catch {
+  } catch (_e) {
+    // Corrupted localStorage data — treat as not dismissed
     return false
   }
 }
@@ -31,12 +32,17 @@ function persistDismissed(
     const parsed = data ? JSON.parse(data) : {}
     parsed[hintKey] = true
     localStorage.setItem(storageKey, JSON.stringify(parsed))
-  } catch {
-    // Storage full or unavailable — silently fail
+  } catch (_e) {
+    // localStorage may be unavailable or quota exceeded
   }
 }
 
-export function useMusicHints() {
+export function useMusicHints(): {
+  showSoundGridHint: boolean
+  showPillHint: boolean
+  dismissSoundGridHint: () => void
+  dismissPillHint: () => void
+} {
   const { user, isAuthenticated } = useAuth()
 
   const [showSoundGridHint, setShowSoundGridHint] = useState(() => {

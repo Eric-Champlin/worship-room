@@ -10,7 +10,8 @@ export function getGlobalLeaderboard(): LeaderboardEntry[] {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed) || parsed.length === 0) return initializeGlobalLeaderboard();
     return parsed;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return initializeGlobalLeaderboard();
   }
 }

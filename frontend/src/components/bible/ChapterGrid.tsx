@@ -33,7 +33,7 @@ export function ChapterGrid({
             to={`/bible/${bookSlug}/${chapter}`}
             aria-label={ariaLabel}
             className={cn(
-              'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-sm font-medium transition-colors',
+              'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
               isRead
                 ? 'border border-primary/30 bg-primary/20 text-white'
                 : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10',

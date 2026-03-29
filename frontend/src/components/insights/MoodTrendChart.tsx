@@ -154,7 +154,7 @@ function ChartTooltip({ active, payload }: MoodTooltipProps) {
   if (!data?.mood || !data.moodLabel) return null
 
   return (
-    <div className="rounded-lg border border-white/10 bg-[#1a0f2e] px-3 py-2 text-sm text-white shadow-lg">
+    <div className="rounded-lg border border-white/10 bg-surface-dark px-3 py-2 text-sm text-white shadow-lg">
       <p className="font-medium">{formatTooltipDate(data.date)}</p>
       <p className="text-white/70">{data.moodLabel}</p>
       {data.movingAvg !== null && data.movingAvg !== undefined && (

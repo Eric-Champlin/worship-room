@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { getBadgeIcon, CONFETTI_COLORS, LEVEL_ENCOURAGEMENT_MESSAGES, STREAK_MILESTONE_MESSAGES } from '@/constants/dashboard/badge-icons'
+import { Z } from '@/constants/z-index'
 import type { BadgeDefinition } from '@/types/dashboard'
 
 // --- Props ---
@@ -135,7 +136,7 @@ export function CelebrationOverlay({ badge, onDismiss, suggestion }: Celebration
       aria-labelledby="celebration-title"
       aria-modal="true"
     >
-      <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md">
+      <div className={`fixed inset-0 z-[${Z.OVERLAY}] bg-black/70 backdrop-blur-md`}>
         {/* Confetti particles */}
         {generateOverlayConfetti(confettiCount)}
 

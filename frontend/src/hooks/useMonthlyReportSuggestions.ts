@@ -98,7 +98,7 @@ export function getMonthlyReportSuggestions(data: MonthlyReportData): MonthSugge
           })
         }
       }
-    } catch {
+    } catch (_e) {
       /* ignore parse errors */
     }
   }

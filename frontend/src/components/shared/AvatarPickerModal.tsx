@@ -178,7 +178,7 @@ export function AvatarPickerModal({
             </h2>
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
               aria-label="Close avatar picker"
             >
               <X className="h-5 w-5" />
@@ -194,7 +194,7 @@ export function AvatarPickerModal({
               aria-controls="panel-presets"
               onClick={() => setActiveTab('presets')}
               className={cn(
-                'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors',
+                'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                 activeTab === 'presets' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/70',
               )}
             >
@@ -207,7 +207,7 @@ export function AvatarPickerModal({
               aria-controls="panel-upload"
               onClick={() => setActiveTab('upload')}
               className={cn(
-                'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors',
+                'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                 activeTab === 'upload' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/70',
               )}
             >
@@ -256,7 +256,7 @@ export function AvatarPickerModal({
                             aria-checked={isSelected}
                             tabIndex={isSelected ? 0 : -1}
                             className={cn(
-                              'flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all',
+                              'flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                               isSelected
                                 ? 'ring-2 ring-primary ring-offset-2 ring-offset-hero-mid'
                                 : 'hover:bg-white/5',
@@ -306,7 +306,7 @@ export function AvatarPickerModal({
                           aria-checked={isSelected}
                           tabIndex={isSelected ? 0 : isUnlocked ? -1 : undefined}
                           className={cn(
-                            'flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all',
+                            'flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                             isSelected
                               ? 'ring-2 ring-primary ring-offset-2 ring-offset-hero-mid'
                               : isUnlocked
@@ -343,7 +343,7 @@ export function AvatarPickerModal({
               {/* Save button */}
               <button
                 onClick={handleSave}
-                className="w-full bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary/90 transition-colors"
+                className="w-full bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
               >
                 Save
               </button>
@@ -387,7 +387,7 @@ export function AvatarPickerModal({
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isProcessing}
-                  className="bg-white/10 text-white border border-white/20 rounded-lg py-3 px-6 hover:bg-white/15 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="bg-white/10 text-white border border-white/20 rounded-lg py-3 px-6 hover:bg-white/15 transition-colors disabled:opacity-50 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
                   <Upload className="h-4 w-4" />
                   {isProcessing ? 'Processing...' : 'Choose File'}
@@ -415,7 +415,7 @@ export function AvatarPickerModal({
                 {photoPreview && (
                   <button
                     onClick={handleSave}
-                    className="w-full bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary/90 transition-colors"
+                    className="w-full bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                   >
                     Use This Photo
                   </button>
@@ -424,7 +424,7 @@ export function AvatarPickerModal({
                 {(currentAvatarId === 'custom' || photoPreview) && (
                   <button
                     onClick={handleRemovePhoto}
-                    className="w-full text-white/50 hover:text-white text-sm py-2 transition-colors"
+                    className="w-full text-white/50 hover:text-white text-sm py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                   >
                     Remove Photo
                   </button>

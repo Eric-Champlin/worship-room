@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { Copy, Mail, MessageSquare, Check } from 'lucide-react'
 import { FACEBOOK_SHARE_BASE, TWITTER_SHARE_BASE } from '@/constants/sharing'
 import { COPY_RESET_DELAY } from '@/constants/timing'
+import { useToastSafe } from '@/components/ui/Toast'
 
 interface ShareDropdownProps {
   prayerId: string
@@ -24,6 +25,7 @@ export function ShareDropdown({
   const triggerRef = useRef<HTMLElement | null>(null)
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [copied, setCopied] = useState(false)
+  const { showToast } = useToastSafe()
 
   const shareUrl = `${window.location.origin}/prayer-wall/${prayerId}`
   const shareText = getShareText(prayerContent)
@@ -120,8 +122,9 @@ export function ShareDropdown({
       setCopied(true)
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current)
       copyTimeoutRef.current = setTimeout(() => setCopied(false), COPY_RESET_DELAY)
-    } catch {
-      // Fallback: do nothing if clipboard API not available
+    } catch (_e) {
+      // Clipboard API unavailable or permission denied
+      showToast("Couldn't copy link", 'error')
     }
   }
 

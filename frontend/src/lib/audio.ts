@@ -20,7 +20,7 @@ export function playChime(): void {
     gain.connect(ctx.destination)
     osc.start()
     osc.stop(ctx.currentTime + 0.5)
-  } catch {
+  } catch (_e) {
     // Audio not available
   }
 }

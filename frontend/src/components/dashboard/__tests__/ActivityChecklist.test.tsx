@@ -188,49 +188,49 @@ describe('ActivityChecklist', () => {
   it('shows correct multiplier preview for each tier', () => {
     // 0 activities
     const { unmount: u0 } = renderChecklist({ todayActivities: ALL_FALSE })
-    expect(screen.getByText('Complete 2 activities for 1.25x bonus!')).toBeInTheDocument()
+    expect(screen.getByText('Every small step matters.')).toBeInTheDocument()
     u0()
 
     // 1 activity
     const { unmount: u1 } = renderChecklist({
       todayActivities: { ...ALL_FALSE, mood: true },
     })
-    expect(screen.getByText('Complete 1 more for 1.25x bonus!')).toBeInTheDocument()
+    expect(screen.getByText('You showed up — that takes courage.')).toBeInTheDocument()
     u1()
 
     // 2 activities
     const { unmount: u2 } = renderChecklist({
       todayActivities: { ...ALL_FALSE, mood: true, pray: true },
     })
-    expect(screen.getByText('Complete 2 more for 1.5x bonus!')).toBeInTheDocument()
+    expect(screen.getByText('Each practice deepens your day.')).toBeInTheDocument()
     u2()
 
     // 3 activities
     const { unmount: u3 } = renderChecklist({
       todayActivities: { ...ALL_FALSE, mood: true, pray: true, listen: true },
     })
-    expect(screen.getByText('Complete 1 more for 1.5x bonus!')).toBeInTheDocument()
+    expect(screen.getByText('Look at you, making space for what matters.')).toBeInTheDocument()
     u3()
 
     // 4 activities
     const { unmount: u4 } = renderChecklist({
       todayActivities: { ...ALL_FALSE, mood: true, pray: true, listen: true, prayerWall: true },
     })
-    expect(screen.getByText('Complete 3 more for 2x Full Worship Day!')).toBeInTheDocument()
+    expect(screen.getByText("You're building something beautiful today.")).toBeInTheDocument()
     u4()
 
     // 5 activities
     const { unmount: u5 } = renderChecklist({
       todayActivities: { ...ALL_FALSE, mood: true, pray: true, listen: true, prayerWall: true, meditate: true },
     })
-    expect(screen.getByText('Complete 2 more for 2x Full Worship Day!')).toBeInTheDocument()
+    expect(screen.getByText('Your faithfulness is a quiet kind of brave.')).toBeInTheDocument()
     u5()
 
     // 6 activities (no active plan → total is 7, so "1 more")
     const { unmount: u6 } = renderChecklist({
       todayActivities: { ...ALL_FALSE, mood: true, pray: true, listen: true, prayerWall: true, gratitude: true, meditate: true },
     })
-    expect(screen.getByText('Complete 1 more for 2x Full Worship Day!')).toBeInTheDocument()
+    expect(screen.getByText('Almost a full day of worship — beautifully done.')).toBeInTheDocument()
     u6()
   })
 
@@ -246,7 +246,7 @@ describe('ActivityChecklist', () => {
       journal: true,
     }
     renderChecklist({ todayActivities: sevenActivities, todayMultiplier: 2 })
-    const celebration = screen.getByText('Full Worship Day! 2x points earned!')
+    const celebration = screen.getByText('A full day of worship — what a gift.')
     expect(celebration).toBeInTheDocument()
     expect(celebration).toHaveClass('text-amber-300')
     expect(celebration).toHaveClass('font-medium')
@@ -256,7 +256,7 @@ describe('ActivityChecklist', () => {
     seedActivePlan()
     renderChecklist({ todayActivities: ALL_TRUE, todayMultiplier: 2 })
     expect(screen.getByText('8/8')).toBeInTheDocument()
-    expect(screen.getByText('Full Worship Day! 2x points earned!')).toBeInTheDocument()
+    expect(screen.getByText('A full day of worship — what a gift.')).toBeInTheDocument()
   })
 
   it('progress ring has aria-label', () => {

@@ -45,7 +45,7 @@ export function ChallengeBanner() {
     if (!challengeId) return false
     try {
       return sessionStorage.getItem(`wr_challenge_banner_dismissed_${challengeId}`) === 'true'
-    } catch {
+    } catch (_e) {
       return false
     }
   })

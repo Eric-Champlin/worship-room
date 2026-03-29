@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { CONFETTI_COLORS } from '@/constants/dashboard/badge-icons'
+import { Z } from '@/constants/z-index'
 
 interface GettingStartedCelebrationProps {
   onDismiss: () => void
@@ -67,7 +68,7 @@ export function GettingStartedCelebration({ onDismiss }: GettingStartedCelebrati
       aria-labelledby="getting-started-celebration-title"
       aria-modal="true"
     >
-      <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md">
+      <div className={`fixed inset-0 z-[${Z.OVERLAY}] bg-black/70 backdrop-blur-md`}>
         {!prefersReducedMotion && generateConfetti(confettiCount)}
 
         <div className="flex min-h-screen flex-col items-center justify-center px-4 sm:px-8">

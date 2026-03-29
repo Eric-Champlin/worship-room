@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAnnounce } from '@/hooks/useAnnounce'
 import { markTooltipSeen } from '@/services/tooltip-storage'
+import { Z } from '@/constants/z-index'
 
 type TooltipPosition = 'top' | 'bottom' | 'left' | 'right'
 
@@ -355,7 +356,7 @@ export function TooltipCallout({
         ref={tooltipRef}
         role="tooltip"
         id={tooltipId}
-        className={`z-[70] ${isMobile ? '' : 'max-w-[300px] sm:max-w-[320px] lg:max-w-[300px]'}`}
+        className={`z-[${Z.TOOLTIP}] ${isMobile ? '' : 'max-w-[300px] sm:max-w-[320px] lg:max-w-[300px]'}`}
         style={containerStyle}
       >
         {/* Arrow */}

@@ -321,6 +321,68 @@ export const VERSE_OF_THE_DAY_POOL: VerseOfTheDay[] = [
     theme: 'trust',
   },
 
+  // Lent — additional seasonal verses (repentance, preparation, sacrifice, wilderness, renewal, drawing near)
+  {
+    text: 'Draw near to God, and he will draw near to you. Cleanse your hands, you sinners. Purify your hearts, you double-minded.',
+    reference: 'James 4:8',
+    theme: 'trust',
+    season: 'lent',
+  },
+  {
+    text: 'Create in me a clean heart, O God. Renew a right spirit within me.',
+    reference: 'Psalm 51:10',
+    theme: 'hope',
+    season: 'lent',
+  },
+  {
+    text: 'Search me, God, and know my heart. Try me, and know my thoughts. See if there is any wicked way in me, and lead me in the everlasting way.',
+    reference: 'Psalm 139:23-24',
+    theme: 'trust',
+    season: 'lent',
+  },
+  {
+    text: "Rend your heart, and not your garments, and turn to Yahweh, your God; for he is gracious and merciful, slow to anger, and abundant in loving kindness, and relents from sending calamity.",
+    reference: 'Joel 2:13',
+    theme: 'comfort',
+    season: 'lent',
+  },
+  {
+    text: '"Yet even now," says Yahweh, "turn to me with all your heart, and with fasting, and with weeping, and with mourning."',
+    reference: 'Joel 2:12',
+    theme: 'hope',
+    season: 'lent',
+  },
+  {
+    text: 'He has shown you, O man, what is good. What does Yahweh require of you, but to act justly, to love mercy, and to walk humbly with your God?',
+    reference: 'Micah 6:8',
+    theme: 'peace',
+    season: 'lent',
+  },
+  {
+    text: 'For we don\'t have a high priest who can\'t be touched with the feeling of our infirmities, but one who has been in all points tempted like we are, yet without sin.',
+    reference: 'Hebrews 4:15',
+    theme: 'strength',
+    season: 'lent',
+  },
+  {
+    text: '"If my people who are called by my name will humble themselves, pray, seek my face, and turn from their wicked ways, then I will hear from heaven, will forgive their sin, and will heal their land."',
+    reference: '2 Chronicles 7:14',
+    theme: 'hope',
+    season: 'lent',
+  },
+  {
+    text: 'Therefore let us also, seeing we are surrounded by so great a cloud of witnesses, lay aside every weight and the sin which so easily entangles us, and let us run with perseverance the race that is set before us.',
+    reference: 'Hebrews 12:1',
+    theme: 'strength',
+    season: 'lent',
+  },
+  {
+    text: 'He made him who knew no sin to be sin on our behalf, so that in him we might become the righteousness of God.',
+    reference: '2 Corinthians 5:21',
+    theme: 'comfort',
+    season: 'lent',
+  },
+
   // Peace (5)
   {
     text: 'I have told you these things, that in me you may have peace. In the world you have trouble; but cheer up! I have overcome the world.',

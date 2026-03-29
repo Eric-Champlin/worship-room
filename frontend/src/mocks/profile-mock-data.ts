@@ -3,7 +3,7 @@ import { FRESH_ACTIVITY_COUNTS } from '@/constants/dashboard/badges'
 import { ALL_MOCK_USERS } from './friends-mock-data'
 
 // Map each mock user to a unique avatar preset
-export const MOCK_USER_AVATARS: Record<string, string> = {
+const MOCK_USER_AVATARS: Record<string, string> = {
   'friend-sarah-m': 'nature-dove',
   'friend-james-k': 'faith-cross',
   'friend-maria-l': 'water-wave',

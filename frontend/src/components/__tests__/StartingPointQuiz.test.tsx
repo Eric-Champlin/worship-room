@@ -244,8 +244,8 @@ describe('StartingPointQuiz', () => {
       await answerAllQuestions()
 
       // Verse text split across spans by KaraokeTextReveal
-      expect(screen.getByText('Cast')).toBeInTheDocument()
-      expect(screen.getByText('anxiety')).toBeInTheDocument()
+      expect(screen.getByText('casting')).toBeInTheDocument()
+      expect(screen.getByText('worries')).toBeInTheDocument()
       expect(screen.getByText(/1 peter 5:7/i)).toBeInTheDocument()
     })
 
@@ -379,7 +379,7 @@ describe('StartingPointQuiz', () => {
       await answerAllQuestions()
 
       // Each verse word should be in the DOM (split by KaraokeTextReveal)
-      expect(screen.getByText('Cast')).toBeInTheDocument()
+      expect(screen.getByText('casting')).toBeInTheDocument()
       expect(screen.getByText('you.')).toBeInTheDocument()
     })
 
@@ -420,7 +420,7 @@ describe('StartingPointQuiz', () => {
       await answerAllQuestions()
 
       // All verse words visible immediately
-      expect(screen.getByText('Cast').style.opacity).toBe('1')
+      expect(screen.getByText('casting').style.opacity).toBe('1')
 
       // onRevealComplete fires on next tick → reference visible
       act(() => {

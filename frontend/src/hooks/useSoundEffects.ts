@@ -9,7 +9,8 @@ function isSoundEffectsEnabled(): boolean {
   try {
     const val = localStorage.getItem(STORAGE_KEY)
     return val !== 'false' // default true when not set
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable
     return false
   }
 }
@@ -17,7 +18,8 @@ function isSoundEffectsEnabled(): boolean {
 function prefersReducedMotion(): boolean {
   try {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  } catch {
+  } catch (_e) {
+    // matchMedia may not be available in some environments
     return false
   }
 }
@@ -34,8 +36,8 @@ export function useSoundEffects(): { playSoundEffect: (soundId: SoundEffectId) =
       try {
         const ctx = engine.ensureContext()
         playSound(ctx, soundId)
-      } catch {
-        // Fail silently — sound is enhancement only
+      } catch (_e) {
+        // Audio API may not be available
       }
     },
     [engine],

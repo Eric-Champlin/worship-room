@@ -146,7 +146,7 @@ export function playSound(ctx: AudioContext, soundId: SoundEffectId): void {
     if (player) {
       player(ctx, volume)
     }
-  } catch {
+  } catch (_e) {
     // Fail silently — sound effects are enhancement only
   }
 }

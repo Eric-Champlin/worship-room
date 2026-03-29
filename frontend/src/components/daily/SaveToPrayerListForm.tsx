@@ -79,7 +79,7 @@ export function SaveToPrayerListForm({
             type="button"
             onClick={() => setCategory(cat)}
             className={cn(
-              'min-h-[44px] shrink-0 rounded-full px-3 py-1.5 text-xs transition-colors',
+              'min-h-[44px] shrink-0 rounded-full px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               category === cat
                 ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
@@ -107,7 +107,7 @@ export function SaveToPrayerListForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-text-light hover:text-text-dark"
+          className="text-sm text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
         >
           Cancel
         </button>

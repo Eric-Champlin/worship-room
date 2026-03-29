@@ -133,7 +133,7 @@ export class AudioEngineService {
       const cleanupTimerId = setTimeout(() => {
         try {
           currentEntry.sourceNode.stop()
-        } catch {
+        } catch (_e) {
           // Already stopped
         }
         currentEntry.sourceNode.disconnect()
@@ -181,7 +181,7 @@ export class AudioEngineService {
     setTimeout(() => {
       try {
         entry.sourceNode.stop()
-      } catch {
+      } catch (_e) {
         // Already stopped
       }
       entry.sourceNode.disconnect()
@@ -278,7 +278,7 @@ export class AudioEngineService {
       }
       try {
         entry.sourceNode.stop()
-      } catch {
+      } catch (_e) {
         // Already stopped
       }
       entry.sourceNode.disconnect()

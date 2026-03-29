@@ -52,16 +52,6 @@ export const MEDITATION_TYPES = [
   },
 ] as const
 
-export const PRAYER_STARTER_CHIPS = [
-  "I'm anxious about...",
-  "I'm grateful for...",
-  'I need healing for...',
-  "I'm struggling with...",
-  'Help me forgive...',
-  'I need guidance about...',
-  "I'm grieving over...",
-  'I feel lost about...',
-] as const
 
 export const DEFAULT_PRAYER_CHIPS = [
   "I'm struggling with...",

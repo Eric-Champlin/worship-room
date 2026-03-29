@@ -62,8 +62,8 @@ export function NextChallengeCountdown({
         onClick={onToggleReminder}
         className={
           isReminderSet
-            ? 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/60 transition-colors'
-            : 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/15'
+            ? 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
+            : 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
         }
         aria-label={isReminderSet ? 'Remove reminder' : 'Set reminder'}
         aria-pressed={isReminderSet}

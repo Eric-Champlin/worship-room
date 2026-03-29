@@ -97,7 +97,7 @@ export function SwitchChallengeDialog({
             type="button"
             data-primary
             onClick={onConfirm}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
             style={{ backgroundColor: themeColor }}
           >
             Join {newChallengeTitle}
@@ -105,7 +105,7 @@ export function SwitchChallengeDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-white/20 px-6 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/5"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-white/20 px-6 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
           >
             Keep current challenge
           </button>

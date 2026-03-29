@@ -87,7 +87,7 @@ export function InteractionBar({
           url: shareUrl,
         })
         return
-      } catch {
+      } catch (_e) {
         // Fall through to dropdown if native share fails/cancels
       }
     }

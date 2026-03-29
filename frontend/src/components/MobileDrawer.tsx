@@ -126,7 +126,7 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
   const { isNamedSeason, seasonName, icon: seasonIcon, currentSeason } = useLiturgicalSeason()
   const [seasonDismissed, setSeasonDismissed] = useState(() => {
     try { return sessionStorage.getItem('wr_seasonal_nav_dismissed') === 'true' }
-    catch { return false }
+    catch (_e) { return false }
   })
   const SeasonIcon = isNamedSeason ? SEASON_ICON_MAP[seasonIcon] : null
 
@@ -218,7 +218,7 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
                   type="button"
                   onClick={() => {
                     try { sessionStorage.setItem('wr_seasonal_nav_dismissed', 'true') }
-                    catch { /* sessionStorage unavailable */ }
+                    catch (_e) { /* sessionStorage unavailable */ }
                     setSeasonDismissed(true)
                   }}
                   className="ml-auto rounded-full p-1 text-white/30 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"

@@ -4,7 +4,8 @@ export function getCollapseState(): Record<string, boolean> {
   try {
     const raw = localStorage.getItem(COLLAPSE_KEY)
     return raw ? JSON.parse(raw) : {}
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return {}
   }
 }
@@ -14,8 +15,8 @@ export function setCollapseState(id: string, collapsed: boolean): void {
     const state = getCollapseState()
     state[id] = collapsed
     localStorage.setItem(COLLAPSE_KEY, JSON.stringify(state))
-  } catch {
-    // localStorage unavailable
+  } catch (_e) {
+    // localStorage may be unavailable
   }
 }
 

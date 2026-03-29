@@ -100,7 +100,7 @@ export function ActiveChallengeCard({
             <button
               type="button"
               onClick={onResume}
-              className="inline-flex min-h-[44px] items-center rounded-full border-2 px-6 py-2 text-sm font-semibold transition-opacity hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center rounded-full border-2 px-6 py-2 text-sm font-semibold transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
               style={{ borderColor: challenge.themeColor, color: getContrastSafeColor(challenge.themeColor) }}
             >
               Resume
@@ -109,7 +109,7 @@ export function ActiveChallengeCard({
             <button
               type="button"
               onClick={onContinue}
-              className="inline-flex min-h-[44px] items-center rounded-full px-6 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center rounded-full px-6 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
               style={{ backgroundColor: challenge.themeColor }}
             >
               Continue
@@ -118,7 +118,7 @@ export function ActiveChallengeCard({
             <button
               type="button"
               onClick={onJoin}
-              className="inline-flex min-h-[44px] items-center rounded-full px-6 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center rounded-full px-6 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
               style={{ backgroundColor: challenge.themeColor }}
             >
               Join Challenge

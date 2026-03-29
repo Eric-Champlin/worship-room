@@ -17,7 +17,8 @@ export function getNotifications(): NotificationEntry[] {
       return [...MOCK_NOTIFICATIONS]
     }
     return parsed as NotificationEntry[]
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     forceSetMockData()
     return [...MOCK_NOTIFICATIONS]
   }
@@ -26,8 +27,8 @@ export function getNotifications(): NotificationEntry[] {
 function forceSetMockData(): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_NOTIFICATIONS))
-  } catch {
-    // localStorage unavailable
+  } catch (_e) {
+    // localStorage may be unavailable
   }
 }
 
@@ -35,7 +36,7 @@ export function setNotifications(notifications: NotificationEntry[]): void {
   try {
     const capped = notifications.slice(0, MAX_NOTIFICATIONS)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(capped))
-  } catch {
+  } catch (_e) {
     // localStorage unavailable — degrade gracefully
   }
 }
@@ -45,7 +46,7 @@ export function seedNotificationsIfNeeded(): void {
     if (localStorage.getItem(STORAGE_KEY) === null) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_NOTIFICATIONS))
     }
-  } catch {
+  } catch (_e) {
     // localStorage unavailable — degrade gracefully
   }
 }
@@ -58,7 +59,7 @@ export function getPushNotificationFlag(): boolean {
   try {
     const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
     return settings?.notifications?.pushNotifications ?? false
-  } catch {
+  } catch (_e) {
     return false
   }
 }
@@ -69,7 +70,7 @@ export function setPushNotificationFlag(enabled: boolean): void {
     if (!settings.notifications) settings.notifications = {}
     settings.notifications.pushNotifications = enabled
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
-  } catch {
+  } catch (_e) {
     // localStorage unavailable
   }
 }

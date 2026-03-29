@@ -75,7 +75,7 @@ export function UnsavedChangesModal({ isOpen, onLeave, onStay }: UnsavedChangesM
         aria-modal="true"
         aria-labelledby="unsaved-dialog-title"
         aria-describedby="unsaved-dialog-desc"
-        className={`mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-[#1a0f2e] p-6 shadow-xl ${panelClass}`}
+        className={`mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-surface-dark p-6 shadow-xl ${panelClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="unsaved-dialog-title" className="text-lg font-semibold text-white">

@@ -43,8 +43,9 @@ export function Avatar({
   isAnonymous = false,
   userId = '',
   className,
-  alt = '',
+  alt,
 }: AvatarProps) {
+  const resolvedAlt = alt ?? (`${firstName} ${lastName}`.trim() || 'User avatar')
   const [imgError, setImgError] = useState(false)
 
   const baseClasses = cn(
@@ -65,7 +66,7 @@ export function Avatar({
     return (
       <img
         src={avatarUrl}
-        alt={alt}
+        alt={resolvedAlt}
         className={cn(baseClasses, 'object-cover')}
         onError={() => setImgError(true)}
       />

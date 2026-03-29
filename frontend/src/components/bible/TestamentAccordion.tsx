@@ -39,7 +39,7 @@ export function TestamentAccordion({
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
-        className="flex w-full min-h-[44px] items-center justify-between px-4 py-4 text-left"
+        className="flex w-full min-h-[44px] items-center justify-between px-4 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
       >
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-semibold text-white">{label}</h3>

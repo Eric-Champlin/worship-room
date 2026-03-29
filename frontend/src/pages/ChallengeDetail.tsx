@@ -218,7 +218,7 @@ export function ChallengeDetail() {
         title={`${challenge.title} | Community Challenges`}
         description={challenge.description.slice(0, 155).trim()}
       />
-      <div className="min-h-screen bg-[#0f0a1e]">
+      <div className="min-h-screen bg-dashboard-dark">
         {/* Hero section */}
         <section
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
@@ -311,7 +311,7 @@ export function ChallengeDetail() {
             <button
               type="button"
               onClick={handleJoin}
-              className="mt-6 inline-flex min-h-[44px] items-center rounded-full px-8 py-3 text-base font-semibold text-white transition-opacity hover:opacity-90"
+              className="mt-6 inline-flex min-h-[44px] items-center rounded-full px-8 py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
               style={{ backgroundColor: challenge.themeColor }}
             >
               Join Challenge
@@ -342,7 +342,7 @@ export function ChallengeDetail() {
                     if (challengeId) toggleReminder(challengeId)
                   }}
                   className={cn(
-                    'inline-flex min-h-[44px] items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors',
+                    'inline-flex min-h-[44px] items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                     getReminders().includes(challengeId ?? '')
                       ? 'bg-white/20 text-white/70'
                       : 'border border-white/20 bg-white/10 text-white hover:bg-white/15',
@@ -364,7 +364,7 @@ export function ChallengeDetail() {
                 </button>
                 <Link
                   to="/grow?tab=challenges"
-                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
                   Back to Challenges
                 </Link>
@@ -464,7 +464,7 @@ export function ChallengeDetail() {
                   disabled={selectedDay <= 1}
                   aria-label="Go to previous day"
                   className={cn(
-                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors',
+                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                     selectedDay <= 1
                       ? 'cursor-not-allowed opacity-50'
                       : 'hover:bg-white/15',
@@ -480,7 +480,7 @@ export function ChallengeDetail() {
                   disabled={selectedDay >= challenge.durationDays}
                   aria-label="Go to next day"
                   className={cn(
-                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors',
+                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                     selectedDay >= challenge.durationDays
                       ? 'cursor-not-allowed opacity-50'
                       : 'hover:bg-white/15',

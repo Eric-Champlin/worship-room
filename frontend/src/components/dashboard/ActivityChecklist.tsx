@@ -34,23 +34,23 @@ function getMultiplierPreview(
   isCelebration: boolean
 } {
   if (completedCount >= 7) {
-    return { text: 'Full Worship Day! 2x points earned!', isCelebration: true }
+    return { text: 'A full day of worship — what a gift.', isCelebration: true }
   }
   switch (completedCount) {
     case 0:
-      return { text: 'Complete 2 activities for 1.25x bonus!', isCelebration: false }
+      return { text: 'Every small step matters.', isCelebration: false }
     case 1:
-      return { text: 'Complete 1 more for 1.25x bonus!', isCelebration: false }
+      return { text: 'You showed up — that takes courage.', isCelebration: false }
     case 2:
-      return { text: 'Complete 2 more for 1.5x bonus!', isCelebration: false }
+      return { text: 'Each practice deepens your day.', isCelebration: false }
     case 3:
-      return { text: 'Complete 1 more for 1.5x bonus!', isCelebration: false }
+      return { text: 'Look at you, making space for what matters.', isCelebration: false }
     case 4:
-      return { text: 'Complete 3 more for 2x Full Worship Day!', isCelebration: false }
+      return { text: "You're building something beautiful today.", isCelebration: false }
     case 5:
-      return { text: 'Complete 2 more for 2x Full Worship Day!', isCelebration: false }
+      return { text: 'Your faithfulness is a quiet kind of brave.', isCelebration: false }
     case 6:
-      return { text: 'Complete 1 more for 2x Full Worship Day!', isCelebration: false }
+      return { text: 'Almost a full day of worship — beautifully done.', isCelebration: false }
     default:
       return { text: '', isCelebration: false }
   }
@@ -74,7 +74,7 @@ export function ActivityChecklist({
       if (!raw) return false
       const parsed = JSON.parse(raw)
       return Array.isArray(parsed) && parsed.length > 0
-    } catch {
+    } catch (_e) {
       return false
     }
   }, [])

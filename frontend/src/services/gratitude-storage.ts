@@ -17,7 +17,8 @@ export function getGratitudeEntries(): GratitudeEntry[] {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed;
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return [];
   }
 }

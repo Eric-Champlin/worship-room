@@ -74,7 +74,8 @@ function readJSON<T>(key: string, fallback: T): T {
     const raw = localStorage.getItem(key)
     if (!raw) return fallback
     return JSON.parse(raw) as T
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable or data malformed
     return fallback
   }
 }
@@ -324,7 +325,8 @@ export class LocalStorageService implements StorageService {
         if (typeof s.id !== 'string' || typeof s.v !== 'number') return null
       }
       return data
-    } catch {
+    } catch (_e) {
+      // Malformed base64 or JSON in shared mix URL
       return null
     }
   }

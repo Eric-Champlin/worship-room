@@ -146,7 +146,7 @@ describe('MoodCheckIn', () => {
 
       // Verse text is split across spans by KaraokeTextReveal
       expect(screen.getByText('Give')).toBeInTheDocument();
-      expect(screen.getByText('Lord,')).toBeInTheDocument();
+      expect(screen.getByText('Yahweh,')).toBeInTheDocument();
       expect(screen.getByText('Psalm 107:1')).toBeInTheDocument();
     });
 
@@ -194,7 +194,7 @@ describe('MoodCheckIn', () => {
       await userEvent.click(screen.getByRole('button', { name: /continue/i }));
 
       // Verse text split across spans — find a word and traverse to aria-live container
-      const liveRegion = screen.getByText('Lord').closest('[aria-live]');
+      const liveRegion = screen.getByText('Yahweh').closest('[aria-live]');
       expect(liveRegion).toHaveAttribute('aria-live', 'polite');
     });
   });
@@ -266,7 +266,7 @@ describe('MoodCheckIn', () => {
       // Should show verse, not crisis banner
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
       // Verse text split across spans by KaraokeTextReveal
-      expect(screen.getByText('brokenhearted,')).toBeInTheDocument();
+      expect(screen.getByText('broken')).toBeInTheDocument();
     });
   });
 

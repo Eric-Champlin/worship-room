@@ -113,7 +113,7 @@ export function useScenePlayer(): UseScenePlayerReturn {
                   url,
                 },
               })
-            } catch {
+            } catch (_e) {
               // Non-fatal: individual sound load failure in a scene
             }
             resolve()

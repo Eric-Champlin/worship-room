@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Flame, MoreVertical, Sprout, Leaf, Flower2, TreePine, Trees, Landmark } from 'lucide-react'
 import type { FriendProfile } from '@/types/dashboard'
@@ -23,7 +23,7 @@ interface FriendRowProps {
   onBlock: (userId: string) => void
 }
 
-export function FriendRow({ friend, onRemove, onBlock }: FriendRowProps) {
+const FriendRowInner = function FriendRow({ friend, onRemove, onBlock }: FriendRowProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
   const { first, last } = splitDisplayName(friend.displayName)
@@ -135,3 +135,5 @@ export function FriendRow({ friend, onRemove, onBlock }: FriendRowProps) {
     </div>
   )
 }
+
+export const FriendRow = memo(FriendRowInner)

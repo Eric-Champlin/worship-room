@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { FavoriteType } from '@/types/storage'
 
+const ANNOUNCEMENT_CLEAR_MS = 3000
+
 interface FavoriteButtonProps {
   type: FavoriteType
   targetId: string
@@ -47,7 +49,7 @@ export function FavoriteButton({
           : `${targetName} added to favorites`,
       )
       clearTimeout(announcementTimerRef.current)
-      announcementTimerRef.current = setTimeout(() => setAnnouncement(''), 3000)
+      announcementTimerRef.current = setTimeout(() => setAnnouncement(''), ANNOUNCEMENT_CLEAR_MS)
     }
   }
 

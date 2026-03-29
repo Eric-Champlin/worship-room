@@ -98,7 +98,8 @@ export function VerseDisplay({
 
     if (!prefersReducedMotion) {
       setHighlightedVerse(verseNum)
-      const timer = setTimeout(() => setHighlightedVerse(null), 2000)
+      const HIGHLIGHT_FADE_MS = 2000
+      const timer = setTimeout(() => setHighlightedVerse(null), HIGHLIGHT_FADE_MS)
       return () => clearTimeout(timer)
     }
   }, [verses])
@@ -156,7 +157,7 @@ export function VerseDisplay({
 
     try {
       await navigator.clipboard.writeText(text)
-    } catch {
+    } catch (_e) {
       try {
         const textarea = document.createElement('textarea')
         textarea.value = text
@@ -166,7 +167,7 @@ export function VerseDisplay({
         textarea.select()
         document.execCommand('copy')
         document.body.removeChild(textarea)
-      } catch {
+      } catch (_e) {
         showToast('Failed to copy', 'error')
         return
       }

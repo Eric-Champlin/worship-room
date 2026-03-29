@@ -96,7 +96,7 @@ describe('GrowthProfile', () => {
   it('has correct background classes', () => {
     setOwnData()
     const { container } = renderProfilePage('/profile/my-user-id')
-    const bgDiv = container.querySelector('.bg-\\[\\#0f0a1e\\]')
+    const bgDiv = container.querySelector('.bg-dashboard-dark')
     expect(bgDiv).toBeTruthy()
   })
 

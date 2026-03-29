@@ -1,6 +1,36 @@
 import type { ShareTemplate, ShareSize } from '@/types/verse-sharing'
 import { SHARE_SIZES } from '@/constants/verse-sharing'
 
+// --- Canvas color constants ---
+
+const WHITE = '#FFFFFF'
+const WHITE_60 = 'rgba(255, 255, 255, 0.6)'
+const WHITE_50 = 'rgba(255, 255, 255, 0.5)'
+const WHITE_30 = 'rgba(255, 255, 255, 0.3)'
+const WHITE_20 = 'rgba(255, 255, 255, 0.2)'
+const WHITE_05 = 'rgba(255, 255, 255, 0.05)'
+
+const CLASSIC_GRADIENT_TOP = '#1a0533'
+const CLASSIC_GRADIENT_BOTTOM = '#0f0a1e'
+
+const RADIANT_GRADIENT_TOP = '#1a0533'
+const RADIANT_GRADIENT_MID = '#4c1d95'
+const RADIANT_GRADIENT_BOTTOM = '#831843'
+
+const NATURE_GRADIENT_TOP = '#0f172a'
+const NATURE_GRADIENT_BOTTOM = '#134e4a'
+const NATURE_CREAM = '#fef3c7'
+const NATURE_CREAM_60 = 'rgba(254, 243, 199, 0.6)'
+const NATURE_CREAM_20 = 'rgba(254, 243, 199, 0.2)'
+const NATURE_STROKE = 'rgba(212, 165, 116, 0.3)'
+
+const BOLD_BG = '#0a0a0a'
+const BOLD_ACCENT = '#8b5cf6'
+
+const LEGACY_GRADIENT_TOP = '#0D0620'
+const LEGACY_GRADIENT_MID = '#1E0B3E'
+const LEGACY_GRADIENT_BOTTOM = '#4A1D96'
+
 export function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -100,10 +130,9 @@ function renderClassic(
   h: number,
   size: ShareSize,
 ) {
-  // Gradient: top-to-bottom #1a0533 → #0f0a1e
   const gradient = ctx.createLinearGradient(0, 0, 0, h)
-  gradient.addColorStop(0, '#1a0533')
-  gradient.addColorStop(1, '#0f0a1e')
+  gradient.addColorStop(0, CLASSIC_GRADIENT_TOP)
+  gradient.addColorStop(1, CLASSIC_GRADIENT_BOTTOM)
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, w, h)
 
@@ -128,21 +157,21 @@ function renderClassic(
   const textStartY = getTextStartY(size, h, maxTextHeight, totalTextHeight, fontSize, padding)
 
   ctx.textAlign = 'center'
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = WHITE
   ctx.font = `italic ${fontSize}px Lora, serif`
   drawLines(ctx, lines, w / 2, textStartY, fontSize, lineHeight)
 
   // Reference
   const refFontSize = 14 * scale
   ctx.font = `${refFontSize}px Inter, sans-serif`
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+  ctx.fillStyle = WHITE_60
   const refY = textStartY + (lines.length - 1) * fontSize * lineHeight + 40 * scale
   ctx.fillText(`— ${reference}`, w / 2, refY)
 
   // Watermark
   const wmFontSize = 16 * scale
   ctx.font = `${wmFontSize}px Caveat, cursive`
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+  ctx.fillStyle = WHITE_20
   ctx.fillText('Worship Room', w / 2, h - 12 * scale)
 }
 
@@ -154,17 +183,16 @@ function renderRadiant(
   h: number,
   size: ShareSize,
 ) {
-  // Gradient: #1a0533 → #4c1d95 → #831843
   const gradient = ctx.createLinearGradient(0, 0, 0, h)
-  gradient.addColorStop(0, '#1a0533')
-  gradient.addColorStop(0.5, '#4c1d95')
-  gradient.addColorStop(1, '#831843')
+  gradient.addColorStop(0, RADIANT_GRADIENT_TOP)
+  gradient.addColorStop(0.5, RADIANT_GRADIENT_MID)
+  gradient.addColorStop(1, RADIANT_GRADIENT_BOTTOM)
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, w, h)
 
   // Radial glow
   const radial = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.6)
-  radial.addColorStop(0, 'rgba(255, 255, 255, 0.05)')
+  radial.addColorStop(0, WHITE_05)
   radial.addColorStop(1, 'transparent')
   ctx.fillStyle = radial
   ctx.fillRect(0, 0, w, h)
@@ -194,7 +222,7 @@ function renderRadiant(
   ctx.shadowBlur = 8
   ctx.shadowOffsetY = 2
   ctx.textAlign = 'center'
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = WHITE
   ctx.font = `italic ${fontSize}px Lora, serif`
   drawLines(ctx, lines, w / 2, textStartY, fontSize, lineHeight)
   ctx.restore()
@@ -212,7 +240,7 @@ function renderRadiant(
   const pillX = w / 2 - pillW / 2
   const pillY = refY - refFontSize - pillPadY + 2
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+  ctx.fillStyle = WHITE_20
   const pillR = pillH / 2
   ctx.beginPath()
   ctx.moveTo(pillX + pillR, pillY)
@@ -226,13 +254,13 @@ function renderRadiant(
   ctx.fill()
 
   ctx.textAlign = 'center'
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = WHITE
   ctx.fillText(refText, w / 2, refY)
 
   // Watermark
   const wmFontSize = 16 * scale
   ctx.font = `${wmFontSize}px Caveat, cursive`
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+  ctx.fillStyle = WHITE_20
   ctx.fillText('Worship Room', w / 2, h - 12 * scale)
 }
 
@@ -244,10 +272,9 @@ function renderNature(
   h: number,
   size: ShareSize,
 ) {
-  // Gradient: #0f172a → #134e4a
   const gradient = ctx.createLinearGradient(0, 0, 0, h)
-  gradient.addColorStop(0, '#0f172a')
-  gradient.addColorStop(1, '#134e4a')
+  gradient.addColorStop(0, NATURE_GRADIENT_TOP)
+  gradient.addColorStop(1, NATURE_GRADIENT_BOTTOM)
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, w, h)
 
@@ -255,7 +282,7 @@ function renderNature(
   const padding = w * 0.15
   const maxWidth = w - padding * 2
   const maxTextHeight = h * 0.6
-  const cream = '#fef3c7'
+  const cream = NATURE_CREAM
 
   // Verse text
   const { lines, fontSize } = fitVerseText(
@@ -276,7 +303,7 @@ function renderNature(
   const lineWidth = w * 0.6
   const lineX = (w - lineWidth) / 2
   const lineAboveY = textStartY - fontSize - 20 * scale
-  ctx.strokeStyle = 'rgba(212, 165, 116, 0.3)'
+  ctx.strokeStyle = NATURE_STROKE
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(lineX, lineAboveY)
@@ -298,14 +325,14 @@ function renderNature(
   // Reference
   const refFontSize = 14 * scale
   ctx.font = `${refFontSize}px Inter, sans-serif`
-  ctx.fillStyle = 'rgba(254, 243, 199, 0.6)'
+  ctx.fillStyle = NATURE_CREAM_60
   const refY = lineBelowY + 30 * scale
   ctx.fillText(`— ${reference}`, w / 2, refY)
 
   // Watermark
   const wmFontSize = 16 * scale
   ctx.font = `${wmFontSize}px Caveat, cursive`
-  ctx.fillStyle = 'rgba(254, 243, 199, 0.2)'
+  ctx.fillStyle = NATURE_CREAM_20
   ctx.fillText('Worship Room', w / 2, h - 12 * scale)
 }
 
@@ -317,8 +344,7 @@ function renderBold(
   h: number,
   size: ShareSize,
 ) {
-  // Solid black background
-  ctx.fillStyle = '#0a0a0a'
+  ctx.fillStyle = BOLD_BG
   ctx.fillRect(0, 0, w, h)
 
   const scale = (Math.min(w, h) / 1080) * getWideFontMultiplier(size)
@@ -343,7 +369,7 @@ function renderBold(
   const textX = padding + 20 * scale // offset for accent bar
 
   ctx.textAlign = 'left'
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = WHITE
   ctx.font = `bold ${fontSize}px Inter, sans-serif`
   drawLines(ctx, lines, textX, textStartY, fontSize, lineHeight)
 
@@ -351,20 +377,20 @@ function renderBold(
   const barX = padding
   const barY = textStartY - fontSize
   const barHeight = totalTextHeight + 10 * scale
-  ctx.fillStyle = '#8b5cf6'
+  ctx.fillStyle = BOLD_ACCENT
   ctx.fillRect(barX, barY, 3 * scale, barHeight)
 
   // Reference — purple, left-aligned
   const refFontSize = 14 * scale
   ctx.font = `${refFontSize}px Inter, sans-serif`
-  ctx.fillStyle = '#8b5cf6'
+  ctx.fillStyle = BOLD_ACCENT
   const refY = textStartY + (lines.length - 1) * fontSize * lineHeight + 40 * scale
   ctx.fillText(`— ${reference}`, textX, refY)
 
   // Watermark — bottom-RIGHT
   const wmFontSize = 16 * scale
   ctx.font = `${wmFontSize}px Caveat, cursive`
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+  ctx.fillStyle = WHITE_20
   ctx.textAlign = 'right'
   ctx.fillText('Worship Room', w - padding, h - 12 * scale)
 }
@@ -406,7 +432,7 @@ export async function generateVerseImageTemplated(
       document.fonts.load('bold 28px Inter'),
       document.fonts.load('28px Caveat'),
     ])
-  } catch {
+  } catch (_e) {
     // Fonts may not be available in all environments; fall back to system fonts
   }
 
@@ -441,11 +467,10 @@ export async function generateVerseImage(
   canvas.height = 600
   const ctx = canvas.getContext('2d')!
 
-  // Gradient background matching hero: #0D0620 → #1E0B3E → #4A1D96
   const gradient = ctx.createLinearGradient(0, 0, 0, 600)
-  gradient.addColorStop(0, '#0D0620')
-  gradient.addColorStop(0.35, '#1E0B3E')
-  gradient.addColorStop(1, '#4A1D96')
+  gradient.addColorStop(0, LEGACY_GRADIENT_TOP)
+  gradient.addColorStop(0.35, LEGACY_GRADIENT_MID)
+  gradient.addColorStop(1, LEGACY_GRADIENT_BOTTOM)
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, 400, 600)
 
@@ -467,7 +492,7 @@ export async function generateVerseImage(
 
   // Draw verse text centered in upper area
   ctx.textAlign = 'center'
-  ctx.fillStyle = '#FFFFFF'
+  ctx.fillStyle = WHITE
   ctx.font = `italic ${fontSize}px Lora, serif`
   const totalTextHeight = lines.length * fontSize * lineHeight
   const textStartY = 60 + (maxTextHeight - totalTextHeight) / 2 + fontSize
@@ -478,13 +503,13 @@ export async function generateVerseImage(
 
   // Draw reference below verse
   ctx.font = '14px Inter, sans-serif'
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
+  ctx.fillStyle = WHITE_50
   const refY = textStartY + (lines.length - 1) * fontSize * lineHeight + 40
   ctx.fillText(`— ${reference}`, 200, refY)
 
   // Draw "Worship Room" watermark at bottom
   ctx.font = '16px Caveat, cursive'
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'
+  ctx.fillStyle = WHITE_30
   ctx.fillText('Worship Room', 200, 588)
 
   return new Promise((resolve, reject) => {

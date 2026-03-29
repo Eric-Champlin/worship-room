@@ -13,7 +13,8 @@ function formatEarnedDate(isoDate: string): string {
   try {
     const d = new Date(isoDate)
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  } catch {
+  } catch (_e) {
+    // localStorage may be unavailable
     return 'recently'
   }
 }
@@ -82,7 +83,7 @@ function BadgeCell({ badge, earned, isOwnProfile }: BadgeCellProps) {
 
   return (
     <button
-      className="group relative flex items-center justify-center motion-safe:hover:scale-105 transition-transform duration-150"
+      className="group relative flex items-center justify-center motion-safe:hover:scale-105 transition-transform duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
       aria-label={ariaLabel}
       type="button"
     >

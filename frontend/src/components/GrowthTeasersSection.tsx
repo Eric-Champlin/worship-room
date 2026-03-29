@@ -2,6 +2,7 @@ import { BarChart3, Flame, Users, Lock, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useInView } from '@/hooks/useInView'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 const HEATMAP_COLORS = [
   '#27AE60', '#6BCB77', '#27AE60', '#2a2040', '#F39C12', '#27AE60', '#6BCB77',
@@ -158,7 +159,7 @@ export function GrowthTeasersSection() {
             <span
               className="inline-block pb-1 text-5xl sm:text-6xl lg:text-7xl"
               style={{
-                background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+                background: WHITE_PURPLE_GRADIENT,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -225,7 +226,7 @@ export function GrowthTeasersSection() {
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
             )}
             style={{
-              background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+              background: WHITE_PURPLE_GRADIENT,
             }}
           >
             Create a Free Account

@@ -146,7 +146,7 @@ export function ReadingPlanDetail() {
         description={plan.description.slice(0, 155).trim()}
         jsonLd={breadcrumbs}
       />
-      <div className="min-h-screen bg-[#0f0a1e]">
+      <div className="min-h-screen bg-dashboard-dark">
         {/* Hero section */}
         <section
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
@@ -243,7 +243,7 @@ export function ReadingPlanDetail() {
                 disabled={selectedDay <= 1}
                 aria-label="Go to previous day"
                 className={cn(
-                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors',
+                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                   selectedDay <= 1
                     ? 'cursor-not-allowed opacity-50'
                     : 'hover:bg-white/15',
@@ -259,7 +259,7 @@ export function ReadingPlanDetail() {
                 disabled={selectedDay >= plan.durationDays}
                 aria-label="Go to next day"
                 className={cn(
-                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors',
+                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                   selectedDay >= plan.durationDays
                     ? 'cursor-not-allowed opacity-50'
                     : 'hover:bg-white/15',

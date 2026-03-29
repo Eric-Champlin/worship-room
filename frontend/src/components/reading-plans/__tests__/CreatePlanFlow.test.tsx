@@ -162,7 +162,7 @@ describe('CreatePlanFlow', () => {
     await user.click(screen.getByRole('button', { name: /Generate My Plan/ }))
 
     expect(screen.getByText('Creating a Scripture journey just for you...')).toBeInTheDocument()
-    expect(screen.getByText(/I know the plans I have for you/)).toBeInTheDocument()
+    expect(screen.getByText(/I know the thoughts that I think toward you/)).toBeInTheDocument()
     expect(screen.getByText(/Jeremiah 29:11 WEB/)).toBeInTheDocument()
   })
 

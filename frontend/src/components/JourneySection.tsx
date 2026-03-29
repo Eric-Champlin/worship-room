@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useInView } from '@/hooks/useInView'
 import { BackgroundSquiggle } from '@/components/BackgroundSquiggle'
+import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 interface JourneyStep {
   number: number
@@ -42,7 +43,7 @@ const JOURNEY_STEPS: JourneyStep[] = [
     highlight: 'Thanks',
     description:
       'Count your blessings and watch your perspective shift.',
-    to: '/',
+    to: '/daily?tab=journal',
   },
   {
     number: 5,
@@ -80,7 +81,7 @@ function StepCircle({ number }: { number: number }) {
         'sm:h-12 sm:w-12 sm:text-base'
       )}
       style={{
-        background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+        background: WHITE_PURPLE_GRADIENT,
       }}
     >
       {number}
@@ -123,7 +124,7 @@ export function JourneySection() {
               <span
                 className="inline-block pb-1 pr-1 font-script text-3xl sm:text-4xl lg:text-5xl"
                 style={{
-                  background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+                  background: WHITE_PURPLE_GRADIENT,
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -178,7 +179,7 @@ export function JourneySection() {
                       <span
                         className="inline-block pb-1 pr-1 font-script text-2xl sm:text-3xl"
                         style={{
-                          background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+                          background: WHITE_PURPLE_GRADIENT,
                           backgroundClip: 'text',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',

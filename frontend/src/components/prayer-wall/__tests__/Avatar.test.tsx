@@ -38,7 +38,7 @@ describe('Avatar', () => {
     const img = container.querySelector('img')
     expect(img).toBeInTheDocument()
     expect(img).toHaveAttribute('src', 'https://example.com/photo.jpg')
-    expect(img).toHaveAttribute('alt', '')
+    expect(img).toHaveAttribute('alt', 'Sarah Johnson')
   })
 
   it('falls back to initials on image error', () => {

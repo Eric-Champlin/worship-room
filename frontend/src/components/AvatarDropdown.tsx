@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { BarChart3, Heart, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-export const AVATAR_MENU_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> = [
+const AVATAR_MENU_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> = [
   { label: 'Dashboard', to: '/', icon: LayoutDashboard },
   { label: 'My Prayers', to: '/my-prayers', icon: Heart },
   { label: 'Friends', to: '/friends', icon: Users },

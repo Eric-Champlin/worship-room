@@ -28,6 +28,7 @@ export default {
         'medal-silver': '#C0C0C0',
         'medal-bronze': '#CD7F32',
         'spotify-green': '#1DB954',
+        'surface-dark': '#1a0f2e',
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],

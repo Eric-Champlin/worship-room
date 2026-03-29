@@ -5,7 +5,7 @@ import { SiteFooter } from '@/components/SiteFooter'
 
 export function PlanNotFound() {
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-dashboard-dark">
       <Navbar transparent />
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-md text-center">
