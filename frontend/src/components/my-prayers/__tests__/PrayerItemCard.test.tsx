@@ -105,7 +105,7 @@ describe('PrayerItemCard', () => {
     const { container } = renderCard(makePrayer(), { glowing: true })
     const article = container.querySelector('article')!
     expect(article.className).toContain('ring-primary/30')
-    expect(article.className).toContain('bg-primary/5')
+    expect(article.className).toContain('bg-primary/10')
   })
 
   it('renders children (action buttons)', () => {

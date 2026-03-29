@@ -59,7 +59,7 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1.5 text-sm font-medium text-danger hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:rounded"
+        className="flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-danger hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:rounded"
       >
         <Trash2 className="h-4 w-4" aria-hidden="true" />
         Delete
@@ -77,7 +77,7 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
             aria-modal="true"
             aria-labelledby="delete-dialog-title"
             aria-describedby="delete-dialog-desc"
-            className={`mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-[#1a0f2e] p-6 shadow-xl ${panelClass}`}
+            className={`mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-surface-dark p-6 shadow-xl ${panelClass}`}
             onClick={(e) => e.stopPropagation()}
           >
             <h2

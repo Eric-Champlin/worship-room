@@ -86,7 +86,7 @@ function DailyHubContent() {
       const reads: string[] = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]')
       const todayStr = new Date().toLocaleDateString('en-CA')
       return reads.includes(todayStr)
-    } catch { return false }
+    } catch (_e) { return false }
   })
 
   const handleDevotionalComplete = useCallback(() => {
@@ -245,14 +245,14 @@ function DailyHubContent() {
               </Link>
               <Link
                 to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}`}
-                className="mt-1 block text-sm text-primary-lt transition-colors hover:text-primary"
+                className="mt-1 inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
               >
                 Meditate on this verse &gt;
               </Link>
               <button
                 type="button"
                 onClick={() => setSharePanelOpen(true)}
-                className="absolute bottom-5 right-5 rounded p-1 text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="absolute bottom-3 right-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-1 text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label="Share verse of the day"
                 aria-haspopup="dialog"
                 aria-expanded={sharePanelOpen}
@@ -306,7 +306,7 @@ function DailyHubContent() {
                   .getElementById('quiz')
                   ?.scrollIntoView({ behavior: 'smooth' })
               }}
-              className="rounded font-semibold text-white/50 underline underline-offset-2 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+              className="inline-flex min-h-[44px] items-center rounded font-semibold text-white/50 underline underline-offset-2 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             >
               Take a 30-second quiz
             </button>{' '}
@@ -349,7 +349,7 @@ function DailyHubContent() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base',
+                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base',
                       isActive
                         ? 'text-white'
                         : 'text-white/60 hover:text-white/80',

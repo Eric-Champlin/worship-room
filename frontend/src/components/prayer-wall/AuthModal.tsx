@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/Button'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
+const PASSWORD_MIN_LENGTH = 12
+
 type AuthView = 'login' | 'register' | 'forgot-password'
 
 const VIEW_TITLES: Record<AuthView, string> = {
@@ -87,8 +89,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
       if (!passwordValue) {
         setPasswordError('Password is required')
         hasError = true
-      } else if (passwordValue.length < 12) {
-        setPasswordError('Password must be at least 12 characters')
+      } else if (passwordValue.length < PASSWORD_MIN_LENGTH) {
+        setPasswordError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
         hasError = true
       } else {
         setPasswordError(null)
@@ -143,7 +145,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full p-1 text-text-light transition-colors hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="absolute right-0 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-text-light transition-colors hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Close"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -315,7 +317,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
             <button
               type="button"
               disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[#1DB954]/40 px-4 py-2.5 text-sm font-medium text-white opacity-60"
+              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-spotify-green/40 px-4 py-2.5 text-sm font-medium text-white opacity-60"
               aria-label="Continue with Spotify"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

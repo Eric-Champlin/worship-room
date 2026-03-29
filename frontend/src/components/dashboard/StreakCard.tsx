@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Flame } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
@@ -55,7 +55,7 @@ function getRecentBadges(): { id: string; name: string; earnedAt: string }[] {
       }))
       .sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime())
       .slice(0, 3)
-  } catch {
+  } catch (_e) {
     return []
   }
 }
@@ -81,6 +81,7 @@ export function StreakCard({
 
   // Repair animation state
   const [justRepaired, setJustRepaired] = useState(false)
+  const justRepairedTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const preRepairStreakRef = useRef(currentStreak)
 
   const prefersReduced = useReducedMotion()
@@ -135,6 +136,7 @@ export function StreakCard({
   useEffect(() => {
     return () => {
       if (glowTimerRef.current) clearTimeout(glowTimerRef.current)
+      if (justRepairedTimerRef.current) clearTimeout(justRepairedTimerRef.current)
     }
   }, [])
 
@@ -151,7 +153,7 @@ export function StreakCard({
       ? ((totalPoints - currentThreshold) / (nextThreshold - currentThreshold)) * 100
       : 100
 
-  const recentBadges = getRecentBadges()
+  const recentBadges = useMemo(() => getRecentBadges(), [])
 
   // Streak encouragement messages
   function getStreakMessage(): string | null {
@@ -181,7 +183,7 @@ export function StreakCard({
       'celebration-confetti',
     )
     // Reset after animation completes
-    setTimeout(() => setJustRepaired(false), 800)
+    justRepairedTimerRef.current = setTimeout(() => setJustRepaired(false), 800)
   }
 
   return (
@@ -367,7 +369,7 @@ export function StreakCard({
       {recentBadges.length > 0 && !showBadgeGrid && (
         <button
           onClick={() => setShowBadgeGrid(true)}
-          className="text-xs text-primary hover:text-primary-lt focus-visible:ring-2 focus-visible:ring-white/50"
+          className="inline-flex min-h-[44px] items-center text-xs text-primary hover:text-primary-lt focus-visible:ring-2 focus-visible:ring-white/50"
           type="button"
         >
           View all badges

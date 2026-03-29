@@ -33,7 +33,7 @@ function loadPref<T extends string>(key: string, fallback: T, validValues: T[]):
   try {
     const stored = localStorage.getItem(key) as T | null
     if (stored && validValues.includes(stored)) return stored
-  } catch {
+  } catch (_e) {
     // localStorage unavailable
   }
   return fallback
@@ -42,7 +42,7 @@ function loadPref<T extends string>(key: string, fallback: T, validValues: T[]):
 function savePref(key: string, value: string) {
   try {
     localStorage.setItem(key, value)
-  } catch {
+  } catch (_e) {
     // localStorage unavailable
   }
 }
@@ -54,7 +54,7 @@ function canUseWebShare(): boolean {
   if (typeof navigator === 'undefined' || !navigator.share) return false
   try {
     return navigator.canShare?.({ files: [new File([], 'test.png', { type: 'image/png' })] }) ?? false
-  } catch {
+  } catch (_e) {
     return false
   }
 }
@@ -135,7 +135,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
           if (mountedRef.current) {
             thumbnailUrls.current[t.id] = URL.createObjectURL(blob)
           }
-        } catch {
+        } catch (_e) {
           // Skip failed thumbnail
         }
       }
@@ -171,7 +171,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
           })
           setIsRendering(false)
         }
-      } catch {
+      } catch (_e) {
         if (mountedRef.current) {
           setIsRendering(false)
           showToast('Failed to generate image', 'error')
@@ -250,7 +250,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       showToast('Image downloaded!')
-    } catch {
+    } catch (_e) {
       showToast('Failed to generate image', 'error')
     } finally {
       setIsActioning(false)
@@ -308,7 +308,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
         aria-modal="true"
         aria-labelledby={headingId}
         className={cn(
-          'relative z-10 bg-[#1a0f2e] border border-white/10 shadow-2xl overflow-y-auto',
+          'relative z-10 bg-surface-dark border border-white/10 shadow-2xl overflow-y-auto',
           // Mobile: bottom sheet
           'w-full max-h-[90vh] rounded-t-2xl',
           // Desktop: centered modal
@@ -330,7 +330,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
           </h2>
           <button
             onClick={handleClose}
-            className="flex items-center justify-center w-8 h-8 rounded-full text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />

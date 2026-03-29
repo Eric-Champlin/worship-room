@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Copy, Mail } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 
@@ -35,7 +35,7 @@ function InviteByLink() {
     try {
       await copyToClipboard(url)
       showToast('Invite link copied!', 'success')
-    } catch {
+    } catch (_e) {
       showToast('Failed to copy link', 'error')
     }
   }
@@ -56,7 +56,7 @@ function InviteByLink() {
         />
         <button
           onClick={handleCopy}
-          className="flex-shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+          className="flex-shrink-0 rounded-lg bg-primary px-4 py-2 min-h-[44px] text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
         >
           Copy Link
         </button>
@@ -68,7 +68,12 @@ function InviteByLink() {
 function InviteByEmail() {
   const [email, setEmail] = useState('')
   const [sending, setSending] = useState(false)
+  const sendTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const { showToast } = useToast()
+
+  useEffect(() => {
+    return () => { if (sendTimerRef.current) clearTimeout(sendTimerRef.current) }
+  }, [])
 
   const isValidEmail = email.includes('@') && email.includes('.')
 
@@ -76,7 +81,7 @@ function InviteByEmail() {
     e.preventDefault()
     if (!isValidEmail || sending) return
     setSending(true)
-    setTimeout(() => {
+    sendTimerRef.current = setTimeout(() => {
       showToast('Invitation sent!', 'success')
       setEmail('')
       setSending(false)
@@ -101,7 +106,7 @@ function InviteByEmail() {
         <button
           type="submit"
           disabled={!isValidEmail || sending}
-          className="flex-shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-shrink-0 rounded-lg bg-primary px-4 py-2 min-h-[44px] text-sm font-medium text-white transition-colors hover:bg-primary-lt disabled:cursor-not-allowed disabled:opacity-50"
         >
           {sending ? 'Sending...' : 'Send Invite'}
         </button>

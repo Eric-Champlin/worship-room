@@ -34,7 +34,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
       <button
         type="button"
         onClick={onLoginClick ?? (() => authModal?.openAuthModal())}
-        className="mt-3 block w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-sm text-white/40 transition-colors hover:border-primary"
+        className="mt-3 block min-h-[44px] w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-sm text-white/40 transition-colors hover:border-primary"
       >
         Log in to comment
       </button>
@@ -87,7 +87,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
           onClick={handleSubmit}
           disabled={!value.trim()}
           className={cn(
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded',
+            'min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded',
             value.trim() ? 'text-primary hover:text-primary-lt' : 'text-white/20',
           )}
           aria-label="Submit comment"

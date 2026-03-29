@@ -64,7 +64,7 @@ export function DevotionalTabContent({
     let reads: string[] = []
     try {
       reads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
-    } catch {
+    } catch (_e) {
       // Malformed localStorage — treat as empty
     }
     const todayStr = new Date().toLocaleDateString('en-CA')
@@ -81,13 +81,17 @@ export function DevotionalTabContent({
           let reads: string[] = []
           try {
             reads = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]') as string[]
-          } catch {
+          } catch (_e) {
             // Malformed localStorage — treat as empty
           }
           if (!reads.includes(todayStr)) {
             reads.push(todayStr)
             while (reads.length > 365) reads.shift()
-            localStorage.setItem('wr_devotional_reads', JSON.stringify(reads))
+            try {
+              localStorage.setItem('wr_devotional_reads', JSON.stringify(reads))
+            } catch (_e) {
+              // localStorage write failure is non-critical
+            }
           }
           setIsCompleted(true)
           recordActivity('devotional')
@@ -123,7 +127,7 @@ export function DevotionalTabContent({
     try {
       await navigator.clipboard.writeText(window.location.href)
       showToast('Link copied!', 'success')
-    } catch {
+    } catch (_e) {
       showToast('Could not copy link', 'error')
     }
   }, [showToast])
@@ -319,14 +323,14 @@ export function DevotionalTabContent({
             <button
               type="button"
               onClick={() => onSwitchToJournal?.(devotional.theme)}
-              className="text-sm font-medium text-primary transition-colors hover:text-primary-light"
+              className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
             >
               Journal about this &rarr;
             </button>
             <button
               type="button"
               onClick={() => onSwitchToPray?.(`I'm reflecting on ${devotional.passage.reference}...`)}
-              className="text-sm font-medium text-primary transition-colors hover:text-primary-light"
+              className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
             >
               Pray about today&apos;s reading &rarr;
             </button>

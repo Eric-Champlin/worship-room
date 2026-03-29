@@ -109,7 +109,11 @@ beforeEach(() => {
   localStorage.clear()
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'TestUser')
-  vi.useFakeTimers({ shouldAdvanceTime: true })
+  // Pin to 9 AM so getTimeOfDay() returns 'morning' — the devotional widget
+  // is included in the morning order but absent from evening/night orders.
+  const morning = new Date()
+  morning.setHours(9, 0, 0, 0)
+  vi.useFakeTimers({ shouldAdvanceTime: true, now: morning })
 })
 
 afterEach(() => {

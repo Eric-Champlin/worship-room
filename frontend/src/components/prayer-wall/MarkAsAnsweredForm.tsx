@@ -28,7 +28,7 @@ export function MarkAsAnsweredForm({ onConfirm }: MarkAsAnsweredFormProps) {
       <button
         type="button"
         onClick={() => setIsExpanded(true)}
-        className="flex items-center gap-1.5 text-sm font-medium text-success hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:rounded"
+        className="flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-success hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:rounded"
       >
         <CheckCircle className="h-4 w-4" aria-hidden="true" />
         Mark as Answered

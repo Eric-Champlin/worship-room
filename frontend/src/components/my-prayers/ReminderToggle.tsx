@@ -27,7 +27,7 @@ export function ReminderToggle({
           onClick={() => onToggle(!enabled)}
           className={cn(
             'relative inline-flex h-[22px] w-10 min-w-[40px] shrink-0 cursor-pointer items-center rounded-full transition-colors',
-            enabled ? 'bg-primary' : 'bg-gray-300',
+            enabled ? 'bg-primary' : 'bg-white/20',
           )}
         >
           <span
@@ -37,7 +37,7 @@ export function ReminderToggle({
             )}
           />
         </button>
-        <span className="text-sm text-text-dark">Remind me</span>
+        <span className="text-sm text-white/70">Remind me</span>
       </div>
 
       {enabled && (
@@ -46,13 +46,13 @@ export function ReminderToggle({
             type="time"
             value={time}
             onChange={(e) => onTimeChange(e.target.value)}
-            className="rounded border border-gray-200 px-2 py-1 text-sm text-text-dark"
+            className="rounded border border-white/15 bg-white/5 px-2 py-1 text-sm text-white"
             aria-label="Reminder time"
             aria-describedby={tooltipId}
           />
           <span
             id={tooltipId}
-            className="cursor-help text-xs text-text-light"
+            className="cursor-help text-xs text-white/40"
             title="Push notification timing coming soon. For now, you'll see reminders when you open the app."
           >
             ?

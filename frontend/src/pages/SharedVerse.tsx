@@ -22,6 +22,7 @@ export function SharedVerse() {
   if (!verse) {
     return (
       <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
+        <SEO title="Verse Not Found" description="This verse may no longer be available on Worship Room." />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"

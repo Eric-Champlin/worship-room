@@ -37,11 +37,11 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
   }, [title, description, selectedCategory, onSave])
 
   return (
-    <article className="rounded-xl border border-primary/30 bg-white p-5 sm:p-6">
-      <h3 className="mb-4 text-lg font-semibold text-text-dark">Edit Prayer</h3>
+    <article className="rounded-2xl border border-primary/30 bg-white/5 backdrop-blur-sm p-5 sm:p-6">
+      <h3 className="mb-4 text-lg font-semibold text-white">Edit Prayer</h3>
 
       <div className="mb-3">
-        <label htmlFor="edit-prayer-title" className="mb-1 block text-sm font-medium text-text-dark">
+        <label htmlFor="edit-prayer-title" className="mb-1 block text-sm font-medium text-white/70">
           Title<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
         </label>
         <input
@@ -53,7 +53,7 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
             if (e.target.value.trim()) setShowTitleError(false)
           }}
           maxLength={100}
-          className="w-full rounded-lg border border-gray-200 p-3 text-base text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="w-full rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Prayer title"
           aria-invalid={showTitleError || undefined}
           aria-describedby={showTitleError ? 'edit-title-error edit-title-count' : 'edit-title-count'}
@@ -70,7 +70,7 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
       </div>
 
       <div className="mb-3">
-        <label htmlFor="edit-prayer-desc" className="mb-1 block text-sm font-medium text-text-dark">
+        <label htmlFor="edit-prayer-desc" className="mb-1 block text-sm font-medium text-white/70">
           Details (optional)
         </label>
         <textarea
@@ -78,7 +78,7 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={1000}
-          className="w-full resize-none rounded-lg border border-gray-200 p-3 text-base text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="w-full resize-none rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           style={{ minHeight: '100px' }}
           aria-label="Prayer details"
           aria-describedby="edit-desc-count"
@@ -91,7 +91,7 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
       <CrisisBanner text={title + ' ' + description} />
 
       <fieldset className="mt-3">
-        <legend className="mb-2 text-sm font-medium text-text-dark">Category</legend>
+        <legend className="mb-2 text-sm font-medium text-white/70">Category</legend>
         <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
           {PRAYER_CATEGORIES.map((cat) => (
             <button
@@ -102,7 +102,7 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
                 'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
                 selectedCategory === cat
                   ? 'border-primary/40 bg-primary/10 text-primary'
-                  : 'border-gray-200 bg-white text-text-dark hover:bg-gray-50',
+                  : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10',
               )}
               aria-pressed={selectedCategory === cat}
             >
@@ -116,7 +116,7 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="text-sm font-medium text-white/50 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
         >
           Cancel
         </button>

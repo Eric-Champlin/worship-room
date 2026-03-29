@@ -22,7 +22,7 @@ export function PrayerListActionBar({
   onAddPrayer,
 }: PrayerListActionBarProps) {
   return (
-    <div className="sticky top-[56px] z-30 border-b border-gray-200 bg-white py-3 px-4 sm:top-[94px]">
+    <div className="sticky top-[56px] z-30 border-b border-white/10 bg-[rgba(30,11,62,0.85)] backdrop-blur-sm py-3 px-4 sm:top-[94px]">
       <div className="mx-auto flex max-w-3xl items-center gap-3">
         <button
           type="button"
@@ -49,7 +49,7 @@ export function PrayerListActionBar({
                 'min-h-[44px] shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
                 filter === f.id
                   ? 'bg-primary text-white'
-                  : 'border border-gray-200 bg-white text-text-dark hover:bg-gray-50',
+                  : 'border border-white/15 bg-white/5 text-white/70 hover:bg-white/10',
               )}
             >
               {f.label} ({counts[f.id]})

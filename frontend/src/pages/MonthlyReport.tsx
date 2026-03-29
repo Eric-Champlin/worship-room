@@ -117,7 +117,7 @@ export function MonthlyReport() {
             onClick={goToPreviousMonth}
             disabled={isAtEarliest}
             aria-label="Previous month"
-            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/40 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30"
+            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/40 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -126,7 +126,7 @@ export function MonthlyReport() {
             onClick={goToNextMonth}
             disabled={isAtLatest}
             aria-label="Next month"
-            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/40 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30"
+            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/40 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
           >
             <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -188,7 +188,7 @@ export function MonthlyReport() {
         <AnimatedSection index={suggestions.length > 0 ? 6 : 5}>
           <MonthlyShareButton />
           <button
-            className="mt-2 block mx-auto text-sm text-white/50 underline hover:text-white/70"
+            className="mt-2 mx-auto inline-flex min-h-[44px] items-center text-sm text-white/50 underline hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
             onClick={() => setShowEmailPreview(true)}
           >
             Preview Email

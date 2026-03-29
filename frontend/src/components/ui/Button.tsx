@@ -20,7 +20,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             'bg-gray-200 text-gray-900 hover:bg-gray-300': variant === 'secondary',
             'border border-primary text-primary hover:bg-primary/5': variant === 'outline',
             'text-primary hover:bg-primary/5': variant === 'ghost',
-            'h-8 px-3 text-sm': size === 'sm',
+            'h-9 px-3 text-sm': size === 'sm',
             'h-10 px-4': size === 'md',
             'h-12 px-6 text-lg': size === 'lg',
           },

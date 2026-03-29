@@ -12,6 +12,7 @@ import { useAnnounce } from '@/hooks/useAnnounce'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { JOURNAL_DRAFT_KEY } from '@/constants/daily-experience'
 import { cn } from '@/lib/utils'
+import { JOURNAL_MAX_LENGTH, JOURNAL_WARNING_THRESHOLD, JOURNAL_DANGER_THRESHOLD } from '@/constants/content-limits'
 import type { JournalMode, PrayContext } from '@/types/daily-experience'
 
 export interface JournalInputProps {
@@ -52,6 +53,7 @@ export function JournalInput({
 
   const [draftSaved, setDraftSaved] = useState(false)
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const draftFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -74,7 +76,7 @@ export function JournalInput({
         return prev + separator + transcript
       })
     },
-    maxLength: 5000 - text.length,
+    maxLength: JOURNAL_MAX_LENGTH - text.length,
     onMaxLengthReached: () => {
       showToast('Character limit reached.', 'warning')
     },
@@ -113,11 +115,12 @@ export function JournalInput({
       if (text.trim()) {
         localStorage.setItem(JOURNAL_DRAFT_KEY, text)
         setDraftSaved(true)
-        setTimeout(() => setDraftSaved(false), 2000)
+        draftFeedbackTimerRef.current = setTimeout(() => setDraftSaved(false), 2000)
       }
     }, 1000)
     return () => {
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
+      if (draftFeedbackTimerRef.current) clearTimeout(draftFeedbackTimerRef.current)
     }
   }, [text])
 
@@ -156,7 +159,7 @@ export function JournalInput({
             type="button"
             onClick={() => onModeChange('guided')}
             className={cn(
-              'rounded-l-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+              'min-h-[44px] rounded-l-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               mode === 'guided'
                 ? 'bg-primary/20 text-white'
                 : 'bg-white/10 text-white/70 hover:bg-white/15',
@@ -169,7 +172,7 @@ export function JournalInput({
             type="button"
             onClick={() => onModeChange('free')}
             className={cn(
-              'rounded-r-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+              'min-h-[44px] rounded-r-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               mode === 'free'
                 ? 'bg-primary/20 text-white'
                 : 'bg-white/10 text-white/70 hover:bg-white/15',
@@ -213,7 +216,7 @@ export function JournalInput({
               <button
                 type="button"
                 onClick={onTryDifferentPrompt}
-                className="inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="New prompt"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
@@ -249,7 +252,7 @@ export function JournalInput({
           }}
           onInput={(e) => autoExpand(e.target as HTMLTextAreaElement)}
           placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
-          maxLength={5000}
+          maxLength={JOURNAL_MAX_LENGTH}
           rows={6}
           className="min-h-[200px] w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/40 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
           aria-label="Journal entry"
@@ -257,9 +260,9 @@ export function JournalInput({
         />
         <CharacterCount
           current={text.length}
-          max={5000}
-          warningAt={4000}
-          dangerAt={4800}
+          max={JOURNAL_MAX_LENGTH}
+          warningAt={JOURNAL_WARNING_THRESHOLD}
+          dangerAt={JOURNAL_DANGER_THRESHOLD}
           id="journal-char-count"
           className="absolute bottom-2 left-3"
         />

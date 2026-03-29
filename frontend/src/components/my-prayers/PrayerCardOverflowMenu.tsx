@@ -46,7 +46,7 @@ export function PrayerCardOverflowMenu({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-light transition-colors hover:bg-gray-100 hover:text-text-dark"
+        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white"
         aria-label="Prayer actions"
         aria-expanded={isOpen}
         aria-haspopup="menu"

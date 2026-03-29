@@ -116,7 +116,12 @@ export function Dashboard() {
     showToast: challengeShowToast,
   })
 
-  // Check for challenge completion from auto-detect on dashboard mount
+  // Check for challenge completion from auto-detect on dashboard mount.
+  // Intentionally depends only on `phase` — we want this to run once when
+  // the dashboard phase is reached, not re-fire when callback identities
+  // change. `user` is checked inside but excluded to avoid re-triggering
+  // on auth context updates. `getActiveChallenge`, `checkAndAutoComplete`,
+  // and `handleAutoDetectComplete` are stable useCallback refs.
   useEffect(() => {
     if (phase !== 'dashboard' || !user) return
     const active = getActiveChallenge()
@@ -268,14 +273,16 @@ export function Dashboard() {
   }, [faithPoints.totalPoints, faithPoints.currentLevel])
 
   // Conditional visibility for widgets
-  let hasActiveReadingPlan = false
-  try {
-    const raw = localStorage.getItem(READING_PLAN_PROGRESS_KEY)
-    if (raw) {
-      const progress = JSON.parse(raw)
-      hasActiveReadingPlan = Object.values(progress).some((p: any) => p && !p.completedAt)
-    }
-  } catch { /* ignore malformed data */ }
+  const hasActiveReadingPlan = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(READING_PLAN_PROGRESS_KEY)
+      if (raw) {
+        const progress = JSON.parse(raw)
+        return Object.values(progress).some((p) => p && typeof p === 'object' && !((p as Record<string, unknown>).completedAt))
+      }
+    } catch (_e) { /* ignore malformed data */ }
+    return false
+  }, [])
 
   const hasHighlightsOrNotes = getRecentBibleAnnotations(1).length > 0
   const hasActiveChallenge = getActiveChallenge() !== undefined
@@ -361,7 +368,7 @@ export function Dashboard() {
                 <button
                   ref={customizeButtonRef}
                   onClick={() => setCustomizePanelOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <SlidersHorizontal className="h-4 w-4" />
                   Customize

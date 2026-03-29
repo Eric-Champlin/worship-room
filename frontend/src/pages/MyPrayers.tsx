@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { Navigate } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
@@ -43,7 +43,12 @@ export function MyPrayers() {
   const [answeringId, setAnsweringId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [glowingId, setGlowingId] = useState<string | null>(null)
+  const glowTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [celebrationPrayer, setCelebrationPrayer] = useState<{ title: string; note?: string } | null>(null)
+
+  useEffect(() => {
+    return () => { if (glowTimerRef.current) clearTimeout(glowTimerRef.current) }
+  }, [])
 
   // Load prayers from localStorage on mount
   useEffect(() => {
@@ -139,7 +144,7 @@ export function MyPrayers() {
       ).matches
       if (!prefersReducedMotion) {
         setGlowingId(id)
-        setTimeout(() => setGlowingId(null), 1000)
+        glowTimerRef.current = setTimeout(() => setGlowingId(null), 1000)
       }
     },
     [refreshPrayers],
@@ -166,13 +171,13 @@ export function MyPrayers() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-bg">
+    <div className="min-h-screen bg-dashboard-dark">
       <SEO title="My Saved Prayers" description="Your saved prayers and prayer history on Worship Room." noIndex />
       <Navbar transparent />
       <PageHero title="My Prayers" subtitle="Your personal conversation with God." />
 
       {counts.answered > 0 && (
-        <div className="bg-gradient-to-b from-[#4A1D96] to-neutral-bg pb-6 text-center">
+        <div className="bg-gradient-to-b from-[#4A1D96] to-dashboard-dark pb-6 text-center">
           <p className="text-base text-white/85">
             <span className="font-semibold text-emerald-400" data-testid="answered-count">
               {counts.answered}
@@ -194,7 +199,7 @@ export function MyPrayers() {
         onAddPrayer={() => setComposerOpen(true)}
       />
 
-      <main className="min-h-[50vh] bg-neutral-bg px-4 py-4">
+      <main className="min-h-[50vh] px-4 py-4">
         <div className="mx-auto max-w-3xl">
           <PrayerComposer
             isOpen={composerOpen}
@@ -205,7 +210,7 @@ export function MyPrayers() {
           {prayers.length === 0 ? (
             <PrayerListEmptyState onAddPrayer={() => setComposerOpen(true)} />
           ) : filteredPrayers.length === 0 ? (
-            <p className="py-16 text-center text-text-light" role="status">
+            <p className="py-16 text-center text-white/50" role="status">
               No {filter} prayers
             </p>
           ) : (

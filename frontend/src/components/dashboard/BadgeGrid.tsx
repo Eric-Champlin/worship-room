@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { X, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BADGE_DEFINITIONS, BADGE_MAP } from '@/constants/dashboard/badges'
@@ -83,7 +83,8 @@ function formatEarnedDate(isoDate: string): string {
   try {
     const d = new Date(isoDate)
     return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-  } catch {
+  } catch (_e) {
+    // Invalid date string — fall back to generic label
     return 'recently'
   }
 }
@@ -95,7 +96,7 @@ interface BadgeCellProps {
   earned: BadgeEarnedEntry | undefined
 }
 
-function BadgeCell({ badge, earned }: BadgeCellProps) {
+const BadgeCellInner = function BadgeCell({ badge, earned }: BadgeCellProps) {
   const isEarned = !!earned
   const isRepeatable = badge.repeatable === true
   const config = getBadgeIcon(badge.id)
@@ -167,13 +168,16 @@ function BadgeCell({ badge, earned }: BadgeCellProps) {
   )
 }
 
+const BadgeCell = memo(BadgeCellInner)
+
 // --- Component ---
 
 export function BadgeGrid({ onClose }: BadgeGridProps) {
   const badgeData = useMemo(() => {
     try {
       return getBadgeData()
-    } catch {
+    } catch (_e) {
+      // Corrupted badge data — return empty defaults
       return { earned: {}, newlyEarned: [], activityCounts: {} }
     }
   }, [])
@@ -195,7 +199,7 @@ export function BadgeGrid({ onClose }: BadgeGridProps) {
         {onClose && (
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50 sm:h-8 sm:w-8"
             aria-label="Close badge collection"
             type="button"
           >

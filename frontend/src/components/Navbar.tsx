@@ -13,7 +13,7 @@ import { LocalSupportDropdown } from '@/components/LocalSupportDropdown'
 import { MobileDrawer, MobileNotificationSheet } from '@/components/MobileDrawer'
 import { DesktopUserActions } from '@/components/DesktopUserActions'
 
-export const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> = [
+const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> = [
   { label: 'Daily Hub', to: '/daily', icon: Calendar },
   { label: 'Bible', to: '/bible', icon: Book },
   { label: 'Grow', to: '/grow', icon: TrendingUp },
@@ -210,7 +210,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
               ref={hamburgerRef}
               type="button"
               className={cn(
-                'inline-flex items-center justify-center rounded-md p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:hidden',
+                'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:hidden',
                 'text-white hover:bg-white/10 hover:text-white'
               )}
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}

@@ -4,6 +4,7 @@ import { TypewriterInput } from './TypewriterInput'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 const VIDEO_MAX_OPACITY = 0.4
 const VIDEO_URL = import.meta.env.VITE_HERO_VIDEO_URL || ''
@@ -133,7 +134,7 @@ export function HeroSection() {
           className="hero-gradient-text mb-4 pb-2 text-4xl font-bold leading-tight sm:text-5xl lg:text-7xl"
           style={{
             color: 'white',
-            backgroundImage: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+            backgroundImage: WHITE_PURPLE_GRADIENT,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -155,7 +156,7 @@ export function HeroSection() {
             onClick={() => {
               document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' })
             }}
-            className="rounded font-semibold text-white underline underline-offset-2 transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+            className="inline-flex min-h-[44px] items-center rounded font-semibold text-white underline underline-offset-2 transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
           >
             Take a 30-second quiz
           </button>{' '}

@@ -56,7 +56,7 @@ export function SuggestionsSection({ suggestions, onSendRequest }: SuggestionsSe
               <button
                 onClick={() => handleSend(suggestion)}
                 disabled={isSent}
-                className={`w-full rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                className={`w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   isSent
                     ? 'cursor-not-allowed bg-white/10 text-white/40'
                     : 'bg-primary text-white hover:bg-primary-lt'

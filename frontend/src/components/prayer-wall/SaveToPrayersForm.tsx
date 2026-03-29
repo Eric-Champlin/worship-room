@@ -80,7 +80,7 @@ export function SaveToPrayersForm({
                 aria-checked={selectedCategory === cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={cn(
-                  'rounded-full px-3 py-1.5 text-xs transition-colors',
+                  'min-h-[44px] rounded-full px-3 py-1.5 text-xs transition-colors',
                   selectedCategory === cat
                     ? 'bg-primary text-white'
                     : 'border border-white/15 bg-white/10 text-white/70 hover:bg-white/15',
@@ -94,14 +94,14 @@ export function SaveToPrayersForm({
             <button
               type="button"
               onClick={handleSave}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90"
+              className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90"
             >
               Save to My Prayers
             </button>
             <button
               type="button"
               onClick={onCancel}
-              className="text-sm text-white/50 hover:text-white/70"
+              className="min-h-[44px] px-2 text-sm text-white/50 hover:text-white/70"
             >
               Cancel
             </button>

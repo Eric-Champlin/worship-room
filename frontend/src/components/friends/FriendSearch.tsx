@@ -173,7 +173,7 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
                       <button
                         onClick={() => onSendRequest(user)}
                         tabIndex={-1}
-                        className="rounded-full bg-primary px-3 py-1 text-sm text-white transition-colors hover:bg-primary-lt"
+                        className="min-h-[44px] rounded-full bg-primary px-3 py-1 text-sm text-white transition-colors hover:bg-primary-lt"
                       >
                         Add Friend
                       </button>

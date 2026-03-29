@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
+import { QOTD_MAX_LENGTH, QOTD_WARNING_THRESHOLD } from '@/constants/content-limits'
 
 interface QotdComposerProps {
   isOpen: boolean
@@ -63,32 +64,33 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
           value={content}
           onChange={handleChange}
           placeholder="Share your thoughts..."
-          maxLength={500}
+          maxLength={QOTD_MAX_LENGTH}
           className="w-full resize-none rounded-lg border border-gray-200 p-3 leading-relaxed text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           style={{ minHeight: '100px' }}
           aria-label="Your response to the question of the day"
-          aria-describedby={content.length >= 400 ? 'qotd-char-count' : undefined}
+          aria-describedby={content.length >= QOTD_WARNING_THRESHOLD ? 'qotd-char-count' : undefined}
         />
 
-        {content.length >= 400 && (
+        {content.length >= QOTD_WARNING_THRESHOLD && (
           <p
             id="qotd-char-count"
             aria-live="polite"
-            className={cn('mt-2 text-xs', content.length >= 500 ? 'text-danger' : 'text-text-light')}
+            className={cn('mt-2 text-xs', content.length >= QOTD_MAX_LENGTH ? 'text-danger' : 'text-text-light')}
           >
-            {content.length}/500
+            {content.length}/{QOTD_MAX_LENGTH}
           </p>
         )}
 
         <div className="mt-3 flex items-center justify-end gap-3">
-          <Button type="button" variant="ghost" onClick={handleCancel}>
+          <Button type="button" variant="ghost" onClick={handleCancel} className="min-h-[44px]">
             Cancel
           </Button>
           <Button
             type="button"
             variant="primary"
-            disabled={!content.trim() || content.length > 500}
+            disabled={!content.trim() || content.length > QOTD_MAX_LENGTH}
             onClick={handleSubmit}
+            className="min-h-[44px]"
           >
             Post Response
           </Button>

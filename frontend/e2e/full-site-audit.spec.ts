@@ -7,6 +7,7 @@ import * as path from 'path';
 const publicRoutes = [
   '/',
   '/daily',
+  '/daily?tab=devotional',
   '/daily?tab=pray',
   '/daily?tab=journal',
   '/daily?tab=meditate',
@@ -18,9 +19,9 @@ const publicRoutes = [
   '/music/routines',
   '/bible',
   '/ask',
-  '/devotional',
-  '/reading-plans',
-  '/challenges',
+  '/grow',
+  '/grow?tab=plans',
+  '/grow?tab=challenges',
   '/local-support/churches',
   '/local-support/counselors',
   '/local-support/celebrate-recovery',
@@ -48,23 +49,8 @@ const viewports = [
   { name: 'desktopXL', width: 1920, height: 1080 },
 ];
 
-// Pages that should have a dark theme background
-const darkThemePages = [
-  '/',          // dashboard (when authenticated)
-  '/insights',
-  '/insights/monthly',
-  '/friends',
-  '/settings',
-  '/music',
-  '/music?tab=playlists',
-  '/music?tab=ambient',
-  '/music?tab=sleep',
-  '/bible',
-  '/ask',
-  '/devotional',
-  '/reading-plans',
-  '/challenges',
-];
+// Pages that should NOT have dark theme — everything else should be dark
+const lightThemeExceptions = ['/login', '/register'];
 
 // ─── Noise Filters ──────────────────────────────────────────────────────────
 
@@ -328,13 +314,22 @@ async function auditRoute(
     if (!mainContent) return issues;
 
     const mainRect = mainContent.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
     for (const el of allFixed) {
+      const style = window.getComputedStyle(el);
       const rect = el.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) continue;
       // Skip navbar (expected fixed/sticky)
       if (el.tagName === 'NAV' || el.closest('nav')) continue;
       // Skip elements at very top (likely navbar)
       if (rect.top < 80 && rect.bottom < 80) continue;
+      // Skip all sticky-positioned elements (tab bars, map sidebars, etc.)
+      if (style.position === 'sticky') continue;
+      // Skip AudioPill and similar fixed floating controls near viewport bottom
+      // (z-index 9999 or fixed within the bottom 80px of the viewport)
+      const zIndex = parseInt(style.zIndex, 10);
+      if (zIndex >= 9999) continue;
+      if (style.position === 'fixed' && rect.bottom >= viewportHeight - 80) continue;
 
       // Check for actual visual overlap with main
       const overlaps =
@@ -387,8 +382,8 @@ async function auditRoute(
     touchTargetIssues.warnings = results.warnings;
   }
 
-  // 18) Dark theme check
-  const isDarkThemePage = isAuthenticated && darkThemePages.includes(route);
+  // 18) Dark theme check — all pages except /login and /register stubs
+  const isDarkThemePage = !lightThemeExceptions.includes(route);
   let darkTheme = { applicable: isDarkThemePage, pass: true, bgColor: '' };
   if (isDarkThemePage) {
     darkTheme = await page.evaluate(() => {

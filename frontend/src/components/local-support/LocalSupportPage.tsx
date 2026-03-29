@@ -86,7 +86,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
         if (Array.isArray(parsed)) return new Set(parsed as string[])
       }
       return new Set()
-    } catch {
+    } catch (_e) {
       return new Set()
     }
   })
@@ -152,7 +152,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
         setSearchResults(result.places)
         setHasMore(result.hasMore)
         setSearchState('success')
-      } catch {
+      } catch (_e) {
         setErrorMessage("We're having trouble connecting to our search service. Please try again in a moment.")
         setSearchState('error')
       }
@@ -180,7 +180,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
       setSearchResults((prev) => [...prev, ...result.places])
       setHasMore(result.hasMore)
       setPage(nextPage)
-    } catch {
+    } catch (_e) {
       setLoadMoreError('Unable to load more results. Please try again.')
     } finally {
       setIsLoadingMore(false)
@@ -293,7 +293,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                   tabRefs.current[nextIndex]?.focus()
                 }}
                 className={cn(
-                  'rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                  'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors',
                   activeTab === tab
                     ? 'bg-primary/20 text-white'
                     : 'bg-white/10 text-white/60 hover:bg-white/15',
@@ -372,7 +372,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     aria-pressed={mobileView === 'list'}
                     onClick={() => setMobileView('list')}
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                       mobileView === 'list'
                         ? 'bg-primary/20 text-white'
                         : 'bg-white/10 text-white/60 hover:bg-white/15',
@@ -386,7 +386,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     aria-pressed={mobileView === 'map'}
                     onClick={() => setMobileView('map')}
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                       mobileView === 'map'
                         ? 'bg-primary/20 text-white'
                         : 'bg-white/10 text-white/60 hover:bg-white/15',

@@ -144,7 +144,7 @@ export function RoutineCard({
         <button
           type="button"
           onClick={handleStart}
-          className="flex items-center gap-1.5 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          className="flex min-h-[44px] items-center gap-1.5 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
         >
           <Play size={14} fill="currentColor" /> Start
         </button>

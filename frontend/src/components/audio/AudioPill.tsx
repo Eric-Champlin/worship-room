@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRoutinePlayer } from '@/hooks/useRoutinePlayer'
 import { storageService } from '@/services/storage-service'
 import { ROUTINE_TEMPLATES } from '@/data/music/routines'
+import { Z } from '@/constants/z-index'
 import type { RoutineDefinition } from '@/types/storage'
 
 function getSuggestedRoutine(): RoutineDefinition | null {
@@ -61,7 +62,7 @@ export function AudioPill() {
       <div
         role="complementary"
         aria-label="Routine shortcut"
-        className="fixed z-[9999] flex h-14 min-w-[44px] items-center gap-3 rounded-full border border-primary/40 px-4 transition-opacity duration-300 bottom-0 left-1/2 -translate-x-1/2 mb-[max(24px,calc(env(safe-area-inset-bottom)+8px))] lg:left-auto lg:right-6 lg:bottom-6 lg:translate-x-0 lg:mb-0"
+        className={`fixed z-[${Z.AUDIO_PILL}] flex h-14 min-w-[44px] items-center gap-3 rounded-full border border-primary/40 px-4 transition-opacity duration-300 bottom-0 left-1/2 -translate-x-1/2 mb-[max(24px,calc(env(safe-area-inset-bottom)+8px))] lg:left-auto lg:right-6 lg:bottom-6 lg:translate-x-0 lg:mb-0`}
         style={{
           background: 'rgba(15, 10, 30, 0.85)',
           backdropFilter: 'blur(8px)',
@@ -72,7 +73,7 @@ export function AudioPill() {
           type="button"
           onClick={() => startRoutine(suggested)}
           aria-label={`Start ${suggested.name}`}
-          className="flex flex-1 items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+          className="flex min-h-[44px] flex-1 items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
         >
           <Play size={16} className="shrink-0 text-white" />
           <span className="max-w-[150px] truncate text-sm font-medium text-white">
@@ -82,7 +83,7 @@ export function AudioPill() {
         <Link
           to="/music/routines"
           aria-label="Edit routines"
-          className="shrink-0 rounded-full p-1 text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
         >
           <Pencil size={12} />
         </Link>
@@ -108,7 +109,7 @@ export function AudioPill() {
   return (
     <div
       aria-label="Audio player"
-      className="fixed z-[9999] flex h-14 min-w-[44px] items-center gap-3 rounded-full border border-primary/40 px-4 transition-opacity duration-300 bottom-0 left-1/2 -translate-x-1/2 mb-[max(24px,calc(env(safe-area-inset-bottom)+8px))] lg:left-auto lg:right-6 lg:bottom-6 lg:translate-x-0 lg:mb-0"
+      className={`fixed z-[${Z.AUDIO_PILL}] flex h-14 min-w-[44px] items-center gap-3 rounded-full border border-primary/40 px-4 transition-opacity duration-300 bottom-0 left-1/2 -translate-x-1/2 mb-[max(24px,calc(env(safe-area-inset-bottom)+8px))] lg:left-auto lg:right-6 lg:bottom-6 lg:translate-x-0 lg:mb-0`}
       style={{
         background: 'rgba(15, 10, 30, 0.85)',
         backdropFilter: 'blur(8px)',

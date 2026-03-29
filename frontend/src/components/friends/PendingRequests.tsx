@@ -127,7 +127,7 @@ export function PendingRequests({
                   <button
                     onClick={() => handleAction(req.id, 'cancel')}
                     disabled={isProcessing}
-                    className="text-sm text-white/40 underline transition-colors hover:text-white/60 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center text-sm text-white/40 underline transition-colors hover:text-white/60 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Cancel
                   </button>

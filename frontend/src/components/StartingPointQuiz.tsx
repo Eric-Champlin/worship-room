@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { useInView } from '@/hooks/useInView'
 import { QUIZ_QUESTIONS, calculateResult } from '@/components/quiz-data'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
+import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 function BackgroundSquiggle({ isDark }: { isDark: boolean }) {
   const stroke1 = isDark ? '#FFFFFF' : '#D6D3D1'
@@ -184,7 +185,7 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
                 <span
                   className="inline-block pb-1 pr-3 font-script text-3xl sm:text-4xl lg:text-5xl"
                   style={{
-                    background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+                    background: WHITE_PURPLE_GRADIENT,
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -225,7 +226,7 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
                     aria-label="Quiz progress"
                     className={cn('h-full rounded-full', !isDark && 'bg-primary')}
                     style={{
-                      ...(isDark && { background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)' }),
+                      ...(isDark && { background: WHITE_PURPLE_GRADIENT }),
                       width: `${(currentQuestion + 1) * 20}%`,
                       transition: 'width 300ms ease',
                     }}
@@ -293,7 +294,7 @@ function QuestionCard({ questionIndex, selectedAnswer, onSelect, onBack, isDark 
             type="button"
             onClick={onBack}
             className={cn(
-              'inline-flex items-center gap-1 text-sm transition-colors focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+              'inline-flex min-h-[44px] items-center gap-1 text-sm transition-colors focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               isDark
                 ? 'text-white/50 hover:text-white'
                 : 'text-text-light hover:text-text-dark'
@@ -404,7 +405,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
           )}
           style={{
-            background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+            background: WHITE_PURPLE_GRADIENT,
           }}
         >
           Go to {destination.ctaLabel}
@@ -427,7 +428,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           type="button"
           onClick={onExploreAll}
           className={cn(
-            'text-sm transition-colors focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+            'inline-flex min-h-[44px] items-center text-sm transition-colors focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
             isDark
               ? 'text-white/70 hover:text-primary-lt'
               : 'text-text-dark hover:text-primary'
@@ -442,9 +443,9 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           <button
             type="button"
             onClick={onRetake}
-            className="inline-block pb-1 font-script text-xl font-normal transition-colors hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="inline-flex min-h-[44px] items-center pb-1 font-script text-xl font-normal transition-colors hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             style={{
-              background: 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)',
+              background: WHITE_PURPLE_GRADIENT,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -456,7 +457,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           <button
             type="button"
             onClick={onRetake}
-            className="font-script text-xl font-normal text-primary transition-colors hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="inline-flex min-h-[44px] items-center font-script text-xl font-normal text-primary transition-colors hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             Retake Quiz
           </button>

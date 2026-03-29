@@ -39,18 +39,18 @@ export function DeletePrayerDialog({ isOpen, onClose, onDelete }: DeletePrayerDi
         aria-modal="true"
         aria-labelledby="delete-prayer-dialog-title"
         aria-describedby="delete-prayer-dialog-desc"
-        className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
+        className="mx-4 w-full max-w-sm rounded-xl border border-white/15 bg-hero-mid p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h2
           id="delete-prayer-dialog-title"
-          className="text-lg font-semibold text-text-dark"
+          className="text-lg font-semibold text-white"
         >
           Remove this prayer?
         </h2>
         <p
           id="delete-prayer-dialog-desc"
-          className="mt-2 text-sm text-text-light"
+          className="mt-2 text-sm text-white/60"
         >
           This cannot be undone.
         </p>

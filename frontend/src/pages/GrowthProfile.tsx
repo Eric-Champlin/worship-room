@@ -76,7 +76,8 @@ export function GrowthProfile() {
 
   if (!profileData.found) {
     return (
-      <div className="min-h-screen bg-[#0f0a1e]">
+      <div className="min-h-screen bg-dashboard-dark">
+        <SEO title="Profile Not Found" description="This user profile doesn't exist or may have been removed." noIndex />
         <Navbar transparent />
         <div className="mx-auto max-w-3xl px-4 pt-8 pb-12 text-center sm:px-6 md:pt-12">
           <h1 className="text-2xl font-bold text-white">Profile not found</h1>
@@ -105,7 +106,7 @@ export function GrowthProfile() {
   const displayData = { ...profileData, relationship }
 
   return (
-    <div className="min-h-screen bg-[#0f0a1e]">
+    <div className="min-h-screen bg-dashboard-dark">
       <Navbar transparent />
       <SEO
         title={`${profileData.displayName}'s Growth Profile`}

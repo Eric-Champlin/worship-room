@@ -107,7 +107,7 @@ export function ShareButton({
       try {
         await navigator.share({ title: shareTitle, text: shareText, url: fullUrl })
         return
-      } catch {
+      } catch (_e) {
         // User cancelled or API failed — fall through to dropdown
       }
     }
@@ -120,11 +120,11 @@ export function ShareButton({
       setCopied(true)
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current)
       copyTimeoutRef.current = setTimeout(() => setCopied(false), COPY_RESET_DELAY)
-    } catch {
+    } catch (_e) {
       // Clipboard API not available — prompt user to copy manually
       try {
         window.prompt('Copy this link:', fullUrl)
-      } catch {
+      } catch (_e) {
         // prompt blocked — ignore
       }
     }
@@ -142,7 +142,7 @@ export function ShareButton({
         ref={triggerRef}
         type="button"
         onClick={handleToggle}
-        className="inline-flex items-center justify-center rounded-lg border border-gray-200 p-2 text-text-dark transition-colors hover:bg-gray-100"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-gray-200 p-2 text-text-dark transition-colors hover:bg-gray-100"
         aria-label="Share"
         aria-haspopup="menu"
         aria-expanded={isOpen}

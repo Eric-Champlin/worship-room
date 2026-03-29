@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { PrayerCategory } from '@/constants/prayer-categories'
@@ -26,6 +26,9 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
   const [isExpanded, setIsExpanded] = useState(false)
   const articleRef = useRef<HTMLElement>(null)
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  useEffect(() => {
+    return () => { if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current) }
+  }, [])
   const triggerPulse = useCallback(() => {
     const el = articleRef.current
     if (!el) return
@@ -129,7 +132,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
             aria-expanded={isExpanded}
-            className="mt-1 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+            className="mt-1 min-h-[44px] text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
           >
             {isExpanded ? 'Show less' : 'Show more'}
           </button>

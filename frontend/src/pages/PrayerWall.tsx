@@ -527,7 +527,7 @@ function PrayerWallContent() {
         {/* Load More */}
         {hasMore && (
           <div className="mt-6 text-center">
-            <Button variant="outline" onClick={loadMore}>
+            <Button variant="outline" onClick={loadMore} className="min-h-[44px]">
               Load More
             </Button>
           </div>

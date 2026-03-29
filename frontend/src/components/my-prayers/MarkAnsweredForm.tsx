@@ -15,11 +15,11 @@ export function MarkAnsweredForm({ onConfirm, onCancel }: MarkAnsweredFormProps)
   }, [note, onConfirm])
 
   return (
-    <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-      <h4 className="mb-2 text-sm font-semibold text-text-dark">
+    <div className="mt-3 rounded-lg border border-white/15 bg-white/5 p-4">
+      <h4 className="mb-2 text-sm font-semibold text-white">
         Mark as Answered
       </h4>
-      <p className="mb-3 text-sm text-text-light">
+      <p className="mb-3 text-sm text-white/50">
         Share what happened (optional)
       </p>
 
@@ -28,7 +28,7 @@ export function MarkAnsweredForm({ onConfirm, onCancel }: MarkAnsweredFormProps)
         onChange={(e) => setNote(e.target.value)}
         maxLength={500}
         placeholder="What happened?"
-        className="w-full resize-none rounded-lg border border-gray-200 bg-white p-3 text-base text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="w-full resize-none rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         style={{ minHeight: '80px' }}
         aria-label="How God answered"
         aria-describedby="testimony-char-count"
@@ -43,7 +43,7 @@ export function MarkAnsweredForm({ onConfirm, onCancel }: MarkAnsweredFormProps)
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm font-medium text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="text-sm font-medium text-white/50 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
         >
           Cancel
         </button>

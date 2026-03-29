@@ -31,7 +31,7 @@ export function PrayerCardActions({
       <button
         type="button"
         onClick={onEdit}
-        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-light transition-colors hover:bg-gray-100 hover:text-text-dark"
+        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white"
         aria-label="Edit prayer"
         title="Edit"
       >
@@ -42,7 +42,7 @@ export function PrayerCardActions({
         <button
           type="button"
           onClick={onMarkAnswered}
-          className="flex min-h-[44px] items-center gap-1 rounded-lg px-2 text-success transition-colors hover:bg-green-50 hover:text-green-700"
+          className="flex min-h-[44px] items-center gap-1 rounded-lg px-2 text-success transition-colors hover:bg-success/10 hover:text-green-400"
           aria-label="Mark as answered"
           title="Mark Answered"
         >
@@ -54,7 +54,7 @@ export function PrayerCardActions({
       <button
         type="button"
         onClick={onDelete}
-        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-light transition-colors hover:bg-red-50 hover:text-danger"
+        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-danger/10 hover:text-danger"
         aria-label="Delete prayer"
         title="Delete"
       >

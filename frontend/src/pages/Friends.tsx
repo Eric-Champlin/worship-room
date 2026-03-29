@@ -108,7 +108,7 @@ export function Friends() {
                   aria-selected={isActive}
                   aria-controls={`panel-${tab.id}`}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`rounded-full px-6 py-2 text-sm font-medium transition-colors ${
+                  className={`min-h-[44px] rounded-full px-6 py-2 text-sm font-medium transition-colors ${
                     isActive
                       ? 'text-white font-semibold'
                       : 'border border-white/20 text-white/60 hover:text-white/80'

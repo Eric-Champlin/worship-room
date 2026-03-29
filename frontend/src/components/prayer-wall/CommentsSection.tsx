@@ -54,7 +54,7 @@ export function CommentsSection({
         {totalCount > MAX_VISIBLE_COMMENTS && (
           <Link
             to={`/prayer-wall/${prayerId}`}
-            className="mt-2 block text-sm text-primary hover:underline"
+            className="mt-2 inline-flex min-h-[44px] items-center text-sm text-primary hover:underline"
           >
             See more comments (showing {MAX_VISIBLE_COMMENTS} of {totalCount})
           </Link>
@@ -73,14 +73,14 @@ export function CommentsSection({
             <Link
               to="/daily?tab=pray"
               state={{ prayWallContext: prayerContent.slice(0, 100) }}
-              className="text-sm text-primary-lt transition-colors hover:text-primary"
+              className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
             >
               Pray about this &rarr;
             </Link>
             <Link
               to="/daily?tab=journal"
               state={{ prayWallContext: prayerContent.slice(0, 100) }}
-              className="text-sm text-primary-lt transition-colors hover:text-primary"
+              className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
             >
               Journal about this &rarr;
             </Link>

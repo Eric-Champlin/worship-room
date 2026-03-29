@@ -13,7 +13,7 @@ export function WeeklyRecap() {
         <p className="mb-3 text-sm text-white/50">Add friends to see your weekly recap</p>
         <Link
           to="/friends"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           <UserPlus className="h-4 w-4" aria-hidden="true" />
           Find friends
@@ -34,7 +34,7 @@ export function WeeklyRecap() {
       {/* Dismiss button */}
       <button
         onClick={dismiss}
-        className="absolute right-0 top-0 rounded-lg p-1 text-white/40 transition-colors hover:text-white/70"
+        className="absolute right-0 top-0 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1 text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         aria-label="Dismiss weekly recap"
       >
         <X className="h-4 w-4" aria-hidden="true" />
