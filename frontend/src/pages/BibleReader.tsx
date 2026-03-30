@@ -195,7 +195,7 @@ export function BibleReader() {
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
           style={ATMOSPHERIC_HERO_BG}
         >
-          <h1 id="bible-reader-heading" className="font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
+          <h1 id="bible-reader-heading" className="px-1 sm:px-2 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
             <Link
               to={`/bible?book=${book.slug}`}
               className="text-white/60 underline transition-colors hover:text-white"

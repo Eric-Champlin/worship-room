@@ -32,7 +32,7 @@ export function PageHero({ title, subtitle, showDivider, children }: PageHeroPro
         ref={showDivider ? headingRef : undefined}
         id="page-hero-heading"
         className={cn(
-          'font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl',
+          'px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl',
           showDivider ? 'inline-block' : 'mb-3'
         )}
       >

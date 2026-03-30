@@ -97,6 +97,13 @@ describe('DailyHub', () => {
     expect(greeting).toBeInTheDocument()
   })
 
+  it('hero title has padding for Caveat flourish fix', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading.className).toContain('px-1')
+    expect(heading.className).toContain('sm:px-2')
+  })
+
   it('does not render the old subtitle', () => {
     renderPage()
     expect(screen.queryByText(/start with any practice below/i)).not.toBeInTheDocument()

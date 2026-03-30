@@ -68,6 +68,19 @@ describe('LocalSupportHero', () => {
     expect(section.children).toHaveLength(2)
   })
 
+  it('renders title with padding for Caveat flourish fix', () => {
+    render(
+      <LocalSupportHero
+        headingId="test-heading"
+        title="Test Title"
+        subtitle="Sub"
+      />,
+    )
+    const heading = screen.getByRole('heading', { name: 'Test Title' })
+    expect(heading.className).toContain('px-1')
+    expect(heading.className).toContain('sm:px-2')
+  })
+
   it('heading uses font-script (Caveat)', () => {
     render(
       <LocalSupportHero

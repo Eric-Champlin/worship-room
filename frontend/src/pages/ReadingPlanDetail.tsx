@@ -156,7 +156,7 @@ export function ReadingPlanDetail() {
             {plan.coverEmoji}
           </div>
 
-          <h1 className="mt-4 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
+          <h1 className="mt-4 px-1 sm:px-2 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
             {plan.title}
           </h1>
 

@@ -42,6 +42,12 @@ describe('PrayerWall', () => {
     ).toBeInTheDocument()
   })
 
+  it('page wrapper has overflow-x-hidden to contain scrollable filter bar', () => {
+    const { container } = renderPage()
+    const wrapper = container.firstElementChild as HTMLElement
+    expect(wrapper.className).toContain('overflow-x-hidden')
+  })
+
   it('renders prayer cards from mock data', () => {
     renderPage()
     // Should render prayer cards as articles

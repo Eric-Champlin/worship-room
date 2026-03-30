@@ -45,7 +45,7 @@ export function BibleBrowser() {
         >
           <h1
             id="bible-hero-heading"
-            className="font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+            className="px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
           >
             Bible
           </h1>
@@ -55,7 +55,7 @@ export function BibleBrowser() {
         </section>
 
         {/* Content area */}
-        <div className="mx-auto max-w-4xl px-4 pb-16">
+        <div className="mx-auto max-w-5xl px-4 pb-16 lg:px-8">
           <SegmentedControl mode={mode} onModeChange={setMode} />
           {mode === 'books' ? <BibleBooksMode /> : <BibleSearchMode />}
 
