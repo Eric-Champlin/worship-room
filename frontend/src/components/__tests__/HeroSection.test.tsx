@@ -6,10 +6,6 @@ import { HeroSection } from '@/components/HeroSection'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
-}))
-
 function renderHero() {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -62,26 +58,7 @@ describe('HeroSection', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows auth modal when logged-out user submits', async () => {
-    const user = userEvent.setup()
-    renderHero()
-
-    const input = screen.getByRole('textbox')
-    await user.click(input)
-    await user.type(input, 'I need prayer')
-    await user.click(
-      screen.getByRole('button', { name: /submit your question/i })
-    )
-
-    expect(
-      screen.getByRole('dialog', { name: /log in/i })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText('Sign in to ask questions')
-    ).toBeInTheDocument()
-  })
-
-  it('does not navigate when logged-out user submits', async () => {
+  it('navigates to /ask?q= when user submits', async () => {
     const user = userEvent.setup()
 
     render(
@@ -91,8 +68,8 @@ describe('HeroSection', () => {
             <Routes>
               <Route path="/" element={<HeroSection />} />
               <Route
-                path="/pray"
-                element={<div data-testid="pray-page" />}
+                path="/ask"
+                element={<div data-testid="ask-page" />}
               />
             </Routes>
           </AuthModalProvider>
@@ -107,7 +84,23 @@ describe('HeroSection', () => {
       screen.getByRole('button', { name: /submit your question/i })
     )
 
-    expect(screen.queryByTestId('pray-page')).not.toBeInTheDocument()
+    expect(screen.getByTestId('ask-page')).toBeInTheDocument()
+  })
+
+  it('does not show auth modal when user submits', async () => {
+    const user = userEvent.setup()
+    renderHero()
+
+    const input = screen.getByRole('textbox')
+    await user.click(input)
+    await user.type(input, 'I need prayer')
+    await user.click(
+      screen.getByRole('button', { name: /submit your question/i })
+    )
+
+    expect(
+      screen.queryByRole('dialog', { name: /log in/i })
+    ).not.toBeInTheDocument()
   })
 
   it('renders the quiz teaser text', () => {

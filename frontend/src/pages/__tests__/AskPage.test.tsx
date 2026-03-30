@@ -170,14 +170,34 @@ describe('AskPage — Crisis Banner', () => {
   })
 })
 
-describe('AskPage — Auth Gating', () => {
-  it('logged-out user clicking submit sees auth modal', async () => {
-    const user = userEvent.setup()
+describe('AskPage — Auth Gating (first submit)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('logged-out user clicking submit gets response, not auth modal', () => {
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
     renderAskPage()
-    await user.type(screen.getByLabelText('Your question'), 'Why does God allow suffering?')
-    await user.click(screen.getByRole('button', { name: 'Find Answers' }))
-    // Auth modal should appear
-    expect(screen.getByText(/sign in/i)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'Why does God allow suffering?' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    // Should show loading, NOT auth modal
+    expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
+    expect(screen.queryByText(/sign in/i)).not.toBeInTheDocument()
+    act(() => {
+      vi.advanceTimersByTime(2100)
+    })
+    expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
   })
 })
 
@@ -459,33 +479,24 @@ describe('AskPage — Feedback', () => {
     expect(stored[0].helpful).toBe(true)
   })
 
-  it('feedback NOT stored for logged-out user', () => {
+  it('feedback NOT stored for logged-out user (auth modal shown instead)', () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: false,
       user: null,
       login: vi.fn(),
       logout: vi.fn(),
     })
-    // Can't submit as logged-out user, but can test feedback behavior
-    // Re-mock as logged-in to submit, then re-mock as logged-out for feedback
-    mockAuthFn.mockReturnValue({
-      isAuthenticated: true,
-      user: { name: 'Test', id: 'test' },
-      login: vi.fn(),
-      logout: vi.fn(),
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'Why does God allow suffering?' },
     })
-    submitAndWait()
-    // Now switch to logged out before clicking feedback
-    mockAuthFn.mockReturnValue({
-      isAuthenticated: false,
-      user: null,
-      login: vi.fn(),
-      logout: vi.fn(),
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    act(() => {
+      vi.advanceTimersByTime(2100)
     })
-    // Re-render won't happen, but the handleFeedback checks isAuthenticated at call time
-    // This test verifies the guard exists by checking localStorage after the fact
-    // Since the component reads isAuthenticated from the initial render, let's just verify the key is empty for a fresh scenario
-    localStorage.clear()
+    // Clicking feedback as logged-out user should show auth modal, not store feedback
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, helpful' }))
+    expect(screen.getByText('Sign in to give feedback')).toBeInTheDocument()
     expect(localStorage.getItem('wr_chat_feedback')).toBeNull()
   })
 
@@ -539,7 +550,7 @@ describe('AskPage — URL Params', () => {
     expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
   })
 
-  it('does NOT auto-submit for logged-out user with ?q=', () => {
+  it('auto-submits for logged-out user with ?q=', () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: false,
       user: null,
@@ -550,9 +561,8 @@ describe('AskPage — URL Params', () => {
     act(() => {
       vi.advanceTimersByTime(1)
     })
-    // Should still show input, not loading
-    expect(screen.queryByText('Searching Scripture for wisdom...')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('Your question')).toHaveValue('anxiety')
+    // Should be in loading state — first response is free for all users
+    expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
   })
 })
 
@@ -793,7 +803,7 @@ describe('AskPage — Conversation Thread Integration', () => {
   })
 })
 
-describe('AskPage — Auth Gating', () => {
+describe('AskPage — Auth Gating (follow-up actions)', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     Element.prototype.scrollIntoView = vi.fn()
@@ -801,21 +811,6 @@ describe('AskPage — Auth Gating', () => {
 
   afterEach(() => {
     vi.useRealTimers()
-  })
-
-  it('logged-out: submit button triggers auth modal', () => {
-    mockAuthFn.mockReturnValue({
-      isAuthenticated: false,
-      user: null,
-      login: vi.fn(),
-      logout: vi.fn(),
-    })
-    renderAskPage()
-    fireEvent.change(screen.getByLabelText('Your question'), {
-      target: { value: 'test question' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    expect(screen.getByText(/sign in/i)).toBeInTheDocument()
   })
 
   it('verse reference links in response are public (no auth gate)', () => {
@@ -833,22 +828,226 @@ describe('AskPage — Auth Gating', () => {
     act(() => {
       vi.advanceTimersByTime(2200)
     })
-    // Links to Bible reader should be present
     const links = screen.getAllByRole('link', { name: 'Romans 8:28' })
     expect(links.length).toBeGreaterThanOrEqual(1)
     expect(links[0]).toHaveAttribute('href', '/bible/romans/8#verse-28')
   })
+})
 
-  it('follow-up chip and verse card auth gating verified at component level', () => {
-    // Auth gating for follow-up chips is in handleFollowUpClick (AskPage.tsx:119-121)
-    // and for Highlight/Save note in VerseCardActions.tsx:41-43,49-51.
-    // These cannot be integration-tested here because follow-up chips only appear
-    // after a logged-in submission, and React closures capture isAuthenticated at render time.
-    // Auth gating is verified in:
-    //   - VerseCardActions.test.tsx: logged-out Highlight/Save note → auth modal
-    //   - DigDeeperSection.test.tsx: chip click calls onChipClick (handler has auth check)
-    //   - Code inspection: handleFollowUpClick guards with if (!isAuthenticated)
-    expect(true).toBe(true) // placeholder — real coverage in component tests above
+describe('AskPage — Logged-Out First Response', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    Element.prototype.scrollIntoView = vi.fn()
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('logged-out: Find Answers submits and shows response', () => {
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'Why does God allow suffering?' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
+    act(() => {
+      vi.advanceTimersByTime(2100)
+    })
+    expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
+  })
+
+  it('logged-out: ?q= param auto-submits and shows response', () => {
+    renderAskPage('/ask?q=suffering')
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+    expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
+    act(() => {
+      vi.advanceTimersByTime(2100)
+    })
+    expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
+  })
+
+  it('logged-out: Popular Topics auto-submits first response', () => {
+    renderAskPage()
+    // Click a Popular Topic card — button text is the topic name + description
+    const popularButton = screen.getByRole('button', { name: /Overcoming Anxiety/i })
+    fireEvent.click(popularButton)
+    // The auto-submit effect fires after text state updates
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+    expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
+    act(() => {
+      vi.advanceTimersByTime(2100)
+    })
+    expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
+  })
+
+  it('logged-out: crisis keywords in ?q= show CrisisBanner', () => {
+    renderAskPage('/ask?q=I%20want%20to%20kill%20myself')
+    // CrisisBanner should show before auto-submit completes
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+})
+
+describe('AskPage — Logged-Out Action Gating', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    Element.prototype.scrollIntoView = vi.fn()
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  function submitAndWaitLoggedOut(questionText = 'Why does God allow suffering?') {
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: questionText },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    act(() => {
+      vi.advanceTimersByTime(2100)
+    })
+  }
+
+  it('logged-out: follow-up chip click shows auth modal', () => {
+    submitAndWaitLoggedOut()
+    const chips = screen.getAllByRole('button', { name: /What if my suffering doesn't end/i })
+    fireEvent.click(chips[0])
+    expect(screen.getByText('Sign in to continue the conversation')).toBeInTheDocument()
+  })
+
+  it('logged-out: "Journal about this" shows auth modal', () => {
+    submitAndWaitLoggedOut()
+    fireEvent.click(screen.getByRole('button', { name: /Journal about this/i }))
+    expect(screen.getByText('Sign in to save journal entries')).toBeInTheDocument()
+  })
+
+  it('logged-out: "Pray about this" shows auth modal', () => {
+    submitAndWaitLoggedOut()
+    fireEvent.click(screen.getByRole('button', { name: /Pray about this/i }))
+    expect(screen.getByText('Sign in to generate prayers')).toBeInTheDocument()
+  })
+
+  it('logged-out: feedback thumbs up shows auth modal', () => {
+    submitAndWaitLoggedOut()
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, helpful' }))
+    expect(screen.getByText('Sign in to give feedback')).toBeInTheDocument()
+  })
+
+  it('logged-out: feedback thumbs down shows auth modal', () => {
+    submitAndWaitLoggedOut()
+    fireEvent.click(screen.getByRole('button', { name: 'No, not helpful' }))
+    expect(screen.getByText('Sign in to give feedback')).toBeInTheDocument()
+  })
+
+  it('logged-out: Copy/Share works without auth', async () => {
+    const writeTextSpy = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: writeTextSpy },
+      writable: true,
+      configurable: true,
+    })
+    submitAndWaitLoggedOut()
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /^Share$/i }))
+    })
+    expect(writeTextSpy).toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('logged-out: "Ask another question" works without auth', () => {
+    submitAndWaitLoggedOut()
+    fireEvent.click(screen.getByRole('button', { name: /Ask another question/i }))
+    expect(screen.getByLabelText('Your question')).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('logged-out: SaveConversationButton not rendered', () => {
+    submitAndWaitLoggedOut()
+    expect(screen.queryByRole('button', { name: /Save conversation/i })).not.toBeInTheDocument()
+  })
+})
+
+describe('AskPage — Conversion Prompt Integration', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    Element.prototype.scrollIntoView = vi.fn()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('conversion prompt appears for logged-out user after response', () => {
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'suffering' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    act(() => {
+      vi.advanceTimersByTime(2100)
+    })
+    expect(screen.getByText('This is just the beginning.')).toBeInTheDocument()
+  })
+
+  it('conversion prompt does NOT appear for logged-in user', () => {
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: true,
+      user: { name: 'Test', id: 'test' },
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'suffering' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    act(() => {
+      vi.advanceTimersByTime(2100)
+    })
+    expect(screen.queryByText('This is just the beginning.')).not.toBeInTheDocument()
+  })
+
+  it('conversion prompt dismisses on "Keep exploring"', () => {
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'suffering' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    act(() => {
+      vi.advanceTimersByTime(2100)
+    })
+    expect(screen.getByText('This is just the beginning.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Keep exploring' }))
+    expect(screen.queryByText('This is just the beginning.')).not.toBeInTheDocument()
   })
 })
 
