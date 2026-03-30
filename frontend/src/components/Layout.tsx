@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { Navbar } from '@/components/Navbar'
+import { SeasonalBanner } from '@/components/SeasonalBanner'
 import { SiteFooter } from '@/components/SiteFooter'
 import { cn } from '@/lib/utils'
 
@@ -22,6 +23,7 @@ export function Layout({ children, hero, dark }: LayoutProps) {
         Skip to content
       </a>
       {hero ? <Navbar transparent /> : <Navbar />}
+      <SeasonalBanner />
       {hero}
       <main
         id="main-content"

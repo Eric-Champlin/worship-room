@@ -1,23 +1,33 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { X, Star, Gift, Sparkles, Heart, Cross, Sun, Flame, Leaf } from 'lucide-react'
+import { Sparkles, X } from 'lucide-react'
 import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import type { ComponentType } from 'react'
+import type { LiturgicalSeasonId } from '@/constants/liturgical-calendar'
 
-const DISMISS_KEY = 'wr_seasonal_banner_dismissed'
+const SEASON_MESSAGES: Partial<Record<LiturgicalSeasonId, string>> = {
+  advent: "It's Advent — a season of waiting and hope",
+  christmas: 'Merry Christmas — celebrate the gift of Emmanuel',
+  lent: "It's Lent — a season of reflection and renewal",
+  'holy-week': "It's Holy Week — a season of sacrifice and redemption",
+  easter: 'He is risen! — celebrate the joy of Easter',
+  pentecost: "It's Pentecost — the Spirit is moving",
+}
 
-const SEASON_ICON_MAP: Record<string, ComponentType<{ className?: string; style?: React.CSSProperties; 'aria-hidden'?: boolean | 'true' | 'false' }>> = {
-  Star, Gift, Sparkles, Heart, Cross, Sun, Flame, Leaf,
+function getDismissKey(seasonId: string): string {
+  return `wr_seasonal_banner_dismissed_${seasonId}`
 }
 
 export function SeasonalBanner() {
-  const { isNamedSeason, seasonName, themeColor, icon, currentSeason } = useLiturgicalSeason()
+  const { isNamedSeason, currentSeason } = useLiturgicalSeason()
   const prefersReduced = useReducedMotion()
+  const seasonId = currentSeason.id
+
   const [dismissed, setDismissed] = useState(() => {
+    if (!isNamedSeason) return true
     try {
-      return sessionStorage.getItem(DISMISS_KEY) === 'true'
-    } catch (_e) {
+      return localStorage.getItem(getDismissKey(seasonId)) === 'true'
+    } catch {
       return false
     }
   })
@@ -25,68 +35,71 @@ export function SeasonalBanner() {
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    return () => { if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current) }
+    return () => {
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+    }
   }, [])
 
   const handleDismiss = useCallback(() => {
     if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
     if (prefersReduced) {
-      sessionStorage.setItem(DISMISS_KEY, 'true')
+      try { localStorage.setItem(getDismissKey(seasonId), 'true') } catch { /* noop */ }
       setDismissed(true)
       return
     }
     setHiding(true)
     dismissTimerRef.current = setTimeout(() => {
-      sessionStorage.setItem(DISMISS_KEY, 'true')
+      try { localStorage.setItem(getDismissKey(seasonId), 'true') } catch { /* noop */ }
       setDismissed(true)
     }, 200)
-  }, [prefersReduced])
+  }, [prefersReduced, seasonId])
 
   if (!isNamedSeason || dismissed) return null
 
-  const SeasonIcon = SEASON_ICON_MAP[icon]
+  const message =
+    SEASON_MESSAGES[seasonId as LiturgicalSeasonId] ??
+    `It's ${currentSeason.name} — a season of ${currentSeason.themeWord}`
 
   return (
     <div
-      className="relative flex w-full items-center justify-center px-4 py-2"
+      className="w-full bg-white/[0.04] backdrop-blur-md border-b border-white/10"
       style={{
-        backgroundColor: `${themeColor}1A`,
-        maxHeight: hiding ? 0 : 100,
-        overflow: 'hidden',
+        maxHeight: hiding ? 0 : 200,
         opacity: hiding ? 0 : 1,
-        transition: prefersReduced ? 'none' : 'max-height 200ms ease-out, opacity 200ms ease-out',
+        overflow: 'hidden',
+        transition: prefersReduced
+          ? 'none'
+          : 'max-height 200ms ease-out, opacity 200ms ease-out',
       }}
       role="complementary"
-      aria-label="Seasonal greeting"
+      aria-label="Seasonal announcement"
     >
-      <div className="flex flex-col items-center gap-1 sm:flex-row sm:gap-3">
-        <div className="flex items-center gap-2">
-          {SeasonIcon && (
-            <SeasonIcon
-              className="h-4 w-4"
-              style={{ color: `${themeColor}B3` }}
-              aria-hidden="true"
-            />
-          )}
-          <span className="text-sm text-white/90">
-            It&apos;s {seasonName} — a season of {currentSeason.themeWord}
-          </span>
+      <div className="relative mx-auto flex max-w-6xl items-center justify-center px-4 py-2 sm:px-6">
+        {/* Mobile: wrap-friendly layout */}
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pr-10 sm:pr-12">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-white/40" aria-hidden="true" />
+            <span className="text-sm text-white/70">{message}</span>
+          </div>
+          <span className="hidden text-white/40 sm:inline" aria-hidden="true">&middot;</span>
+          <Link
+            to="/daily?tab=devotional"
+            className="text-sm font-medium text-primary-lt transition-colors hover:text-primary"
+          >
+            Read today&apos;s devotional &rarr;
+          </Link>
         </div>
-        <Link
-          to="/daily?tab=devotional"
-          className="text-sm font-medium underline underline-offset-2"
-          style={{ color: themeColor }}
+
+        {/* Dismiss button — absolute right to avoid layout shifts */}
+        <button
+          type="button"
+          onClick={handleDismiss}
+          className="absolute right-2 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:right-4"
+          aria-label="Dismiss seasonal banner"
         >
-          Read today&apos;s devotional
-        </Link>
+          <X className="h-3.5 w-3.5" />
+        </button>
       </div>
-      <button
-        onClick={handleDismiss}
-        className="absolute right-2 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full text-white/60 hover:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-        aria-label="Dismiss seasonal banner"
-      >
-        <X className="h-4 w-4" />
-      </button>
     </div>
   )
 }

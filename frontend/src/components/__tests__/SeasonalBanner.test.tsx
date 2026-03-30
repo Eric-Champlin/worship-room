@@ -40,7 +40,7 @@ function renderBanner() {
 }
 
 beforeEach(() => {
-  sessionStorage.clear()
+  localStorage.clear()
   mockUseReducedMotion.mockReturnValue(false)
 })
 
@@ -52,7 +52,7 @@ describe('SeasonalBanner', () => {
   it('renders during named season', () => {
     mockSeason('lent')
     renderBanner()
-    expect(screen.getByText(/It's Lent/)).toBeInTheDocument()
+    expect(screen.getByRole('complementary')).toBeInTheDocument()
   })
 
   it('does not render during Ordinary Time', () => {
@@ -61,13 +61,63 @@ describe('SeasonalBanner', () => {
     expect(container.innerHTML).toBe('')
   })
 
-  it('shows season name and theme word', () => {
-    mockSeason('lent')
+  it('shows custom Advent message', () => {
+    mockSeason('advent')
     renderBanner()
-    expect(screen.getByText(/It's Lent — a season of renewal/)).toBeInTheDocument()
+    expect(screen.getByText(/waiting and hope/)).toBeInTheDocument()
   })
 
-  it('shows seasonal icon with aria-hidden', () => {
+  it('shows custom Christmas message', () => {
+    mockSeason('christmas')
+    renderBanner()
+    expect(screen.getByText(/gift of Emmanuel/)).toBeInTheDocument()
+  })
+
+  it('shows custom Lent message', () => {
+    mockSeason('lent')
+    renderBanner()
+    expect(screen.getByText(/reflection and renewal/)).toBeInTheDocument()
+  })
+
+  it('shows custom Holy Week message', () => {
+    mockSeason('holy-week')
+    renderBanner()
+    expect(screen.getByText(/sacrifice and redemption/)).toBeInTheDocument()
+  })
+
+  it('shows custom Easter message', () => {
+    mockSeason('easter')
+    renderBanner()
+    expect(screen.getByText(/He is risen!/)).toBeInTheDocument()
+  })
+
+  it('shows custom Pentecost message', () => {
+    mockSeason('pentecost')
+    renderBanner()
+    expect(screen.getByText(/the Spirit is moving/)).toBeInTheDocument()
+  })
+
+  it('shows fallback message for Epiphany', () => {
+    mockSeason('epiphany')
+    renderBanner()
+    expect(screen.getByText(/It's Epiphany — a season of/)).toBeInTheDocument()
+  })
+
+  it('CTA links to /daily?tab=devotional', () => {
+    mockSeason('advent')
+    renderBanner()
+    const link = screen.getByText(/Read today.s devotional/)
+    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
+  })
+
+  it('CTA uses text-primary-lt class', () => {
+    mockSeason('advent')
+    renderBanner()
+    const link = screen.getByText(/Read today.s devotional/)
+    expect(link.className).toContain('text-primary-lt')
+  })
+
+  it('decorative sparkle icon has aria-hidden', () => {
     mockSeason('lent')
     renderBanner()
     const banner = screen.getByRole('complementary')
@@ -75,27 +125,27 @@ describe('SeasonalBanner', () => {
     expect(icon).toBeInTheDocument()
   })
 
-  it('CTA links to /devotional', () => {
-    mockSeason('advent')
-    renderBanner()
-    const link = screen.getByText("Read today's devotional")
-    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
-  })
-
-  it('dismiss button stores to sessionStorage', () => {
-    mockSeason('easter')
+  it('dismiss writes to localStorage with season key', () => {
+    mockSeason('lent')
     mockUseReducedMotion.mockReturnValue(true)
     renderBanner()
     const dismissBtn = screen.getByLabelText('Dismiss seasonal banner')
     fireEvent.click(dismissBtn)
-    expect(sessionStorage.getItem('wr_seasonal_banner_dismissed')).toBe('true')
+    expect(localStorage.getItem('wr_seasonal_banner_dismissed_lent')).toBe('true')
   })
 
-  it('does not render after dismissal', () => {
-    sessionStorage.setItem('wr_seasonal_banner_dismissed', 'true')
+  it('does not render when dismissed', () => {
+    localStorage.setItem('wr_seasonal_banner_dismissed_christmas', 'true')
     mockSeason('christmas')
     const { container } = renderBanner()
     expect(container.innerHTML).toBe('')
+  })
+
+  it('new season shows banner after previous season dismissal', () => {
+    localStorage.setItem('wr_seasonal_banner_dismissed_lent', 'true')
+    mockSeason('easter')
+    renderBanner()
+    expect(screen.getByRole('complementary')).toBeInTheDocument()
   })
 
   it('dismiss button has aria-label', () => {
@@ -118,11 +168,27 @@ describe('SeasonalBanner', () => {
     expect(screen.getByRole('complementary')).toBeInTheDocument()
   })
 
-  it('no slide animation when prefers-reduced-motion', () => {
+  it('banner has aria-label="Seasonal announcement"', () => {
+    mockSeason('pentecost')
+    renderBanner()
+    expect(screen.getByRole('complementary')).toHaveAttribute('aria-label', 'Seasonal announcement')
+  })
+
+  it('no animation when prefers-reduced-motion', () => {
     mockSeason('advent')
     mockUseReducedMotion.mockReturnValue(true)
     renderBanner()
     const banner = screen.getByRole('complementary')
     expect(banner.style.transition).toBe('none')
+  })
+
+  it('has glassmorphic background classes', () => {
+    mockSeason('lent')
+    renderBanner()
+    const banner = screen.getByRole('complementary')
+    expect(banner.className).toContain('bg-white/[0.04]')
+    expect(banner.className).toContain('backdrop-blur-md')
+    expect(banner.className).toContain('border-b')
+    expect(banner.className).toContain('border-white/10')
   })
 })
