@@ -8,6 +8,7 @@ import { BibleAmbientChip } from '@/components/bible/BibleAmbientChip'
 import { SleepTimerPanel } from '@/components/bible/SleepTimerPanel'
 import { useSleepTimerControls } from '@/components/audio/AudioProvider'
 import { BookNotFound } from '@/components/bible/BookNotFound'
+import { ChapterEngagementBridge } from '@/components/bible/ChapterEngagementBridge'
 import { ChapterNav } from '@/components/bible/ChapterNav'
 import { ChapterPlaceholder } from '@/components/bible/ChapterPlaceholder'
 import { BibleReaderSkeleton } from '@/components/skeletons/BibleReaderSkeleton'
@@ -339,6 +340,12 @@ export function BibleReader() {
             />
           )}
 
+          {/* Engagement bridges */}
+          <ChapterEngagementBridge
+            bookName={book.name}
+            chapterNumber={chapterNumber}
+          />
+
           {/* Chapter navigation */}
           <ChapterNav
             bookSlug={book.slug}
@@ -346,21 +353,7 @@ export function BibleReader() {
             totalChapters={book.chapters}
           />
 
-          {/* Cross-feature CTAs */}
-          <div className="mt-8 flex flex-col items-center gap-3 pb-16 text-sm">
-            <Link
-              to="/daily?tab=pray"
-              className="text-white/50 transition-colors hover:text-white/80"
-            >
-              Pray about this chapter &rarr;
-            </Link>
-            <Link
-              to="/daily?tab=journal"
-              className="text-white/50 transition-colors hover:text-white/80"
-            >
-              Journal your thoughts &rarr;
-            </Link>
-          </div>
+          <div className="pb-16" />
         </div>
       </div>
     </Layout>

@@ -257,16 +257,57 @@ describe('BibleReader', () => {
     })
   })
 
-  describe('Cross-feature CTAs', () => {
-    it('links to correct Daily Hub tabs', async () => {
+  describe('Engagement bridges', () => {
+    it('CTA strip renders on Bible reader page', async () => {
       renderReader('/bible/genesis/1')
       await waitFor(() => {
-        expect(screen.getByText(/Pray about this chapter/)).toBeInTheDocument()
+        expect(screen.getByText('Continue your time with Genesis 1')).toBeInTheDocument()
       })
-      const prayLink = screen.getByText(/Pray about this chapter/).closest('a')
-      expect(prayLink).toHaveAttribute('href', '/daily?tab=pray')
-      const journalLink = screen.getByText(/Journal your thoughts/).closest('a')
-      expect(journalLink).toHaveAttribute('href', '/daily?tab=journal')
+    })
+
+    it('CTA strip renders above ChapterNav', async () => {
+      renderReader('/bible/genesis/1')
+      await waitFor(() => {
+        expect(screen.getByText('Continue your time with Genesis 1')).toBeInTheDocument()
+      })
+      const ctaHeading = screen.getByText('Continue your time with Genesis 1')
+      const nextChapter = screen.getByText('Next Chapter')
+      // CTA heading should appear before Next Chapter in DOM order
+      const ctaSection = ctaHeading.closest('section')
+      expect(ctaSection).not.toBeNull()
+      const navDiv = nextChapter.closest('div.mt-12')
+      expect(navDiv).not.toBeNull()
+      expect(ctaSection!.compareDocumentPosition(navDiv!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
+    it('CTA strip renders on chapter with placeholder content', async () => {
+      // 3 John has hasFullText: false in BIBLE_BOOKS
+      renderReader('/bible/3-john/1')
+      await waitFor(() => {
+        expect(screen.getByText('Continue your time with 3 John 1')).toBeInTheDocument()
+      })
+    })
+
+    it('old cross-feature CTAs are removed', async () => {
+      renderReader('/bible/genesis/1')
+      await waitFor(() => {
+        expect(screen.getByText('Continue your time with Genesis 1')).toBeInTheDocument()
+      })
+      expect(screen.queryByText(/Pray about this chapter/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Journal your thoughts/)).not.toBeInTheDocument()
+    })
+
+    it('existing Bible reader functionality preserved', async () => {
+      renderReader('/bible/genesis/1')
+      await waitFor(() => {
+        // Breadcrumb
+        const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
+        expect(nav).toBeInTheDocument()
+        // Chapter selector
+        expect(screen.getByText('Chapter 1 of 50')).toBeInTheDocument()
+        // Verse content
+        expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
+      })
     })
   })
 
