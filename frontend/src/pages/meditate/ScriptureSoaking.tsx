@@ -130,7 +130,7 @@ function ScriptureSoakingContent() {
   if (screen === 'complete') {
     const weeklyTotal = getMeditationMinutesForWeek()
     return (
-      <Layout hero={<PageHero title="Scripture Soaking" />}>
+      <Layout hero={<PageHero title="Scripture Soaking" scriptWord="Soaking" />}>
         {sessionDuration !== null && (
           <div className="mx-auto max-w-lg motion-safe:animate-fade-in px-4 pt-10 text-center">
             <p className="font-serif text-lg text-text-dark">
@@ -158,7 +158,7 @@ function ScriptureSoakingContent() {
 
   if (screen === 'exercise' && selectedVerse) {
     return (
-      <Layout hero={<PageHero title="Scripture Soaking" />}>
+      <Layout hero={<PageHero title="Scripture Soaking" scriptWord="Soaking" />}>
         <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-10 text-center">
           <blockquote className="mx-auto max-w-2xl font-serif text-2xl leading-relaxed text-text-dark sm:text-3xl lg:text-4xl">
             &ldquo;<KaraokeTextReveal
@@ -212,7 +212,7 @@ function ScriptureSoakingContent() {
 
   // Pre-start
   return (
-    <Layout hero={<PageHero title="Scripture Soaking" subtitle="Sit quietly with a single verse. No analyzing — just being present with God's word." />}>
+    <Layout hero={<PageHero title="Scripture Soaking" subtitle="Sit quietly with a single verse. No analyzing — just being present with God's word." scriptWord="Soaking" />}>
       <SEO title="Scripture Soaking" description="Contemplate and meditate on a Bible verse with guided reflection." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="soaking" />

@@ -183,6 +183,7 @@ export function MusicPage() {
         <PageHero
           title="Music"
           subtitle="Worship, rest, and find peace in God's presence."
+          scriptWord="Music"
         />
 
         {/* Sentinel for sticky tab bar shadow */}

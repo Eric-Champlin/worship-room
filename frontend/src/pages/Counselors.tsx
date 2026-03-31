@@ -20,6 +20,7 @@ export function Counselors() {
         category: 'counselors',
         headingId: 'counselors-heading',
         title: 'Find a Christian Counselor',
+        scriptWord: 'Counselor',
         subtitle:
           'Sometimes the bravest step in healing is asking for help. A faith-based counselor can offer professional guidance rooted in compassion, understanding, and Biblical truth.',
         searchKeyword: 'Christian counselor',

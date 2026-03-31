@@ -49,7 +49,7 @@ function ExamenReflectionContent() {
   if (isComplete) {
     const weeklyTotal = getMeditationMinutesForWeek()
     return (
-      <Layout hero={<PageHero title="Examen Reflection" />}>
+      <Layout hero={<PageHero title="Examen Reflection" scriptWord="Reflection" />}>
         {sessionDuration !== null && (
           <div className="mx-auto max-w-lg motion-safe:animate-fade-in px-4 pt-10 text-center">
             <p className="font-serif text-lg text-text-dark">
@@ -79,7 +79,7 @@ function ExamenReflectionContent() {
   const isLast = currentStep === steps.length - 1
 
   return (
-    <Layout hero={<PageHero title="Examen Reflection" />}>
+    <Layout hero={<PageHero title="Examen Reflection" scriptWord="Reflection" />}>
       <SEO title="Examen Reflection" description="The Ignatian Examen — a reflective prayer reviewing your day with God." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />

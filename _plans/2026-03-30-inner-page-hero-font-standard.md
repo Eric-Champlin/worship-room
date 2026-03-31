@@ -784,12 +784,12 @@ Steps 3-8 all depend on Step 1 (for the constant/helper) but are independent of 
 
 | Step | Title | Status | Completion Date | Notes / Actual Files |
 |------|-------|--------|-----------------|----------------------|
-| 1 | Gradient utilities + PageHero.tsx | [NOT STARTED] | | |
-| 2 | PrayerWallHero + LocalSupportHero | [NOT STARTED] | | |
-| 3 | Local Support page scriptWord configs | [NOT STARTED] | | |
-| 4 | PageHero consumer scriptWord props | [NOT STARTED] | | |
-| 5 | Inline heroes: BibleBrowser, GrowPage, Insights | [NOT STARTED] | | |
-| 6 | Inline heroes: Friends, Settings, MonthlyReport | [NOT STARTED] | | |
-| 7 | Inline heroes: RoutinesPage, GrowthProfile, ChallengeDetail | [NOT STARTED] | | |
-| 8 | Inline heroes: BibleReader, ReadingPlanDetail | [NOT STARTED] | | |
-| 9 | Update tests | [NOT STARTED] | | |
+| 1 | Gradient utilities + PageHero.tsx | [COMPLETE] | 2026-03-31 | Renamed gradients.ts → gradients.tsx for JSX support. Added GRADIENT_TEXT_STYLE, renderWithScriptAccent. Updated PageHero with inline gradient style, lg:text-5xl sizing, scriptWord prop. |
+| 2 | PrayerWallHero + LocalSupportHero | [COMPLETE] | 2026-03-31 | Updated PrayerWallHero with gradient style + "Wall" accent. Updated LocalSupportHero with scriptWord prop + gradient. Added scriptWord to LocalSupportPageConfig + pass-through. 1 pre-existing test failure in LocalSupportHero (font-script on h1 check) — deferred to Step 9. |
+| 3 | Local Support page scriptWord configs | [COMPLETE] | 2026-03-31 | Added scriptWord to Churches (Church), Counselors (Counselor), CelebrateRecovery (Recovery). |
+| 4 | PageHero consumer scriptWord props | [COMPLETE] | 2026-03-31 | Added scriptWord to 19 PageHero usages across 9 files: MusicPage, AskPage, MyPrayers, BreathingExercise(3), ScriptureSoaking(3), GratitudeReflection(2), ActsPrayerWalk(2), ExamenReflection(2), PsalmReading(4). |
+| 5 | Inline heroes: BibleBrowser, GrowPage, Insights | [COMPLETE] | 2026-03-31 | Updated 3 inline heroes. BibleBrowser heading changed to "The Bible". Also fixed BibleBrowser test (heading name), Insights test (disambiguation), LocalSupportHero test (font-script on span). |
+| 6 | Inline heroes: Friends, Settings, MonthlyReport | [COMPLETE] | 2026-03-31 | Updated all 3 files. Friends/Settings: single-word accent. MonthlyReport: "Report" accent. |
+| 7 | Inline heroes: RoutinesPage, GrowthProfile, ChallengeDetail | [COMPLETE] | 2026-03-31 | RoutinesPage: "Routines" accent. GrowthProfile: changed to "{name}'s Garden" with "Garden" accent. ChallengeDetail: dynamic last-word accent. |
+| 8 | Inline heroes: BibleReader, ReadingPlanDetail | [COMPLETE] | 2026-03-31 | BibleReader: book name Link gets font-script + inherit styles for gradient pass-through. ReadingPlanDetail: dynamic last-word accent. |
+| 9 | Update tests | [COMPLETE] | 2026-03-31 | PageHero: 6 tests (was 1). PrayerWallHero: 6 tests (was 4, added gradient + accent). LocalSupportHero: 7 tests (fixed in Step 5). 4952 pass / 5 pre-existing failures. No regressions. |

@@ -20,6 +20,7 @@ export function Churches() {
         category: 'churches',
         headingId: 'churches-heading',
         title: 'Find a Church Near You',
+        scriptWord: 'Church',
         subtitle:
           'Your healing journey was never meant to be walked alone. A local church can be a place of belonging, encouragement, and spiritual growth — a community that walks with you through every season.',
         searchKeyword: 'church',

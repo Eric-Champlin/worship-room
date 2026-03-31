@@ -163,7 +163,7 @@ describe('Insights — full page integration', () => {
     // Trend chart
     expect(screen.getByText('Mood Over Time')).toBeInTheDocument()
     // Insight cards
-    expect(screen.getByText('Insights')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Insights' })).toBeInTheDocument()
     // Activity correlations
     expect(screen.getByText('Activity & Mood')).toBeInTheDocument()
     // Scripture connections

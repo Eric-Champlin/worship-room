@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
@@ -108,9 +109,10 @@ export function MonthlyReport() {
       >
         <h1
           id="monthly-report-heading"
-          className="mb-3 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+          className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+          style={GRADIENT_TEXT_STYLE}
         >
-          Monthly Report
+          Monthly <span className="font-script">Report</span>
         </h1>
         <div className="mt-2 flex items-center gap-3">
           <button

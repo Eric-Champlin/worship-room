@@ -81,16 +81,19 @@ describe('LocalSupportHero', () => {
     expect(heading.className).toContain('sm:px-2')
   })
 
-  it('heading uses font-script (Caveat)', () => {
+  it('heading uses gradient text style, accent word gets font-script', () => {
     render(
       <LocalSupportHero
         headingId="test-heading"
         title="Test Title"
         subtitle="Sub"
+        scriptWord="Title"
       />,
     )
     const heading = screen.getByRole('heading', { name: 'Test Title' })
-    expect(heading.className).toContain('font-script')
-    expect(heading.className).not.toContain('font-sans')
+    expect(heading.className).not.toContain('font-script')
+    const scriptSpan = heading.querySelector('.font-script')
+    expect(scriptSpan).toBeInTheDocument()
+    expect(scriptSpan?.textContent).toBe('Title')
   })
 })

@@ -24,6 +24,7 @@ export interface LocalSupportPageConfig {
   headingId: string
   title: string
   subtitle: string
+  scriptWord?: string
   extraHeroContent?: ReactNode
   searchKeyword: string
   filterOptions: readonly string[] | null
@@ -241,6 +242,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
         headingId={config.headingId}
         title={config.title}
         subtitle={config.subtitle}
+        scriptWord={config.scriptWord}
         extraContent={config.extraHeroContent}
       />
 

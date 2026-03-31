@@ -49,7 +49,7 @@ function ActsPrayerWalkContent() {
   if (isComplete) {
     const weeklyTotal = getMeditationMinutesForWeek()
     return (
-      <Layout hero={<PageHero title="ACTS Prayer Walk" />}>
+      <Layout hero={<PageHero title="ACTS Prayer Walk" scriptWord="Walk" />}>
         {sessionDuration !== null && (
           <div className="mx-auto max-w-lg motion-safe:animate-fade-in px-4 pt-10 text-center">
             <p className="font-serif text-lg text-text-dark">
@@ -79,7 +79,7 @@ function ActsPrayerWalkContent() {
   const isLast = currentStep === steps.length - 1
 
   return (
-    <Layout hero={<PageHero title="ACTS Prayer Walk" />}>
+    <Layout hero={<PageHero title="ACTS Prayer Walk" scriptWord="Walk" />}>
       <SEO title="ACTS Prayer Walk" description="A structured prayer using the ACTS framework — Adoration, Confession, Thanksgiving, Supplication." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />

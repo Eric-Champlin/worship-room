@@ -174,7 +174,7 @@ export function MyPrayers() {
     <div className="min-h-screen bg-dashboard-dark">
       <SEO title="My Saved Prayers" description="Your saved prayers and prayer history on Worship Room." noIndex />
       <Navbar transparent />
-      <PageHero title="My Prayers" subtitle="Your personal conversation with God." />
+      <PageHero title="My Prayers" subtitle="Your personal conversation with God." scriptWord="Prayers" />
 
       {counts.answered > 0 && (
         <div className="bg-gradient-to-b from-[#4A1D96] to-dashboard-dark pb-6 text-center">
