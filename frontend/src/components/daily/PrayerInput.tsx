@@ -75,14 +75,17 @@ export function PrayerInput({
 
   return (
     <>
-      <h2 className="mb-4 text-center font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
-        What&apos;s On Your{' '}
-        <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
-          Heart?
-        </span>
-      </h2>
-
-      <AmbientSoundPill context="pray" variant="dark" />
+      <div className="mb-4">
+        <h2 className="text-center font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
+          What&apos;s On Your{' '}
+          <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
+            Heart?
+          </span>
+        </h2>
+        <div className="z-10 mt-2 flex justify-center">
+          <AmbientSoundPill context="pray" variant="dark" className="mb-0" />
+        </div>
+      </div>
 
       {retryPrompt && (
         <p className="mb-2 text-center text-sm text-white/50">

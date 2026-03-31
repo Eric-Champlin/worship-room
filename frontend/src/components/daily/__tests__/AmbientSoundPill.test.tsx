@@ -83,7 +83,7 @@ beforeEach(() => {
   }
 })
 
-function renderPill(props: { context?: AmbientContext; variant?: 'light' | 'dark'; visible?: boolean } = {}) {
+function renderPill(props: { context?: AmbientContext; variant?: 'light' | 'dark'; visible?: boolean; className?: string } = {}) {
   const { context = 'pray', ...rest } = props
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -311,6 +311,23 @@ describe('AmbientSoundPill', () => {
       await user.click(screen.getByLabelText('Enhance with sound'))
       const link = screen.getByText(/Browse all sounds/)
       expect(link).toHaveAttribute('href', '/music?tab=ambient')
+    })
+  })
+
+  describe('className prop', () => {
+    it('applies custom className to root container', () => {
+      renderPill({ className: 'mb-0' })
+      const pill = screen.getByLabelText('Enhance with sound')
+      const container = pill.closest('div')
+      expect(container).toHaveClass('mb-0')
+      expect(container).not.toHaveClass('mb-4')
+    })
+
+    it('uses default mb-4 when no className provided', () => {
+      renderPill()
+      const pill = screen.getByLabelText('Enhance with sound')
+      const container = pill.closest('div')
+      expect(container).toHaveClass('mb-4')
     })
   })
 

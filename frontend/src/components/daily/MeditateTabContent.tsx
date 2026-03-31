@@ -65,14 +65,17 @@ export function MeditateTabContent() {
           <BackgroundSquiggle />
         </div>
         <div className="relative">
-          <h2 className="mb-4 text-center font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
-            What&apos;s On Your{' '}
-            <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
-              Spirit?
-            </span>
-          </h2>
-
-          <AmbientSoundPill context="meditate" variant="dark" />
+          <div className="mb-4">
+            <h2 className="text-center font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
+              What&apos;s On Your{' '}
+              <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">
+                Spirit?
+              </span>
+            </h2>
+            <div className="z-10 mt-2 flex justify-center">
+              <AmbientSoundPill context="meditate" variant="dark" className="mb-0" />
+            </div>
+          </div>
 
           {isAuthenticated && allComplete && (
             <div className="mb-8 motion-safe:animate-golden-glow rounded-xl border border-amber-200/30 bg-amber-900/20 p-6 text-center">

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useAudioState, useAudioDispatch } from '@/components/audio/AudioProvider'
 import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { getSuggestedScenes } from '@/constants/ambient-suggestions'
+import { cn } from '@/lib/utils'
 import type { AmbientContext } from '@/constants/ambient-suggestions'
 import type { ScenePreset } from '@/types/music'
 
@@ -11,12 +12,14 @@ interface AmbientSoundPillProps {
   context: AmbientContext
   variant?: 'light' | 'dark'
   visible?: boolean
+  className?: string
 }
 
 export function AmbientSoundPill({
   context,
   variant = 'light',
   visible = true,
+  className,
 }: AmbientSoundPillProps) {
   const [expanded, setExpanded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -110,7 +113,7 @@ export function AmbientSoundPill({
   const isLight = variant === 'light'
 
   return (
-    <div ref={containerRef} className="mb-4">
+    <div ref={containerRef} className={cn('mb-4', className)}>
       {/* Pill button */}
       <button
         ref={pillButtonRef}

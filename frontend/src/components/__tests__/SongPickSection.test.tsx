@@ -36,4 +36,21 @@ describe('SongPickSection', () => {
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
+
+  it('wraps content in frosted glass card', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { name: /today's song pick/i })
+    const card = heading.closest('.rounded-2xl')
+    expect(card).toBeInTheDocument()
+    expect(card).toHaveClass('border')
+    expect(card).toHaveClass('backdrop-blur-sm')
+  })
+
+  it('renders music icon in heading', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { name: /today's song pick/i })
+    const svg = heading.querySelector('svg')
+    expect(svg).toBeInTheDocument()
+    expect(svg).toHaveAttribute('aria-hidden', 'true')
+  })
 })
