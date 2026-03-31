@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils'
 import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 const VIDEO_MAX_OPACITY = 0.4
-const VIDEO_URL = import.meta.env.VITE_HERO_VIDEO_URL || ''
+const VIDEO_URL =
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260308_114720_3dabeb9e-2c39-4907-b747-bc3544e2d5b7.mp4'
 
 function usePrefersReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
@@ -139,7 +140,7 @@ export function HeroSection() {
           Get AI-powered guidance built on Biblical principles.
         </p>
 
-        <TypewriterInput onSubmit={handleInputSubmit} variant="glass" />
+        <TypewriterInput onSubmit={handleInputSubmit} variant="glow" />
 
         <p className="mt-5 font-sans text-sm text-white/50">
           Not sure where to start?{' '}
