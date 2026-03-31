@@ -235,7 +235,7 @@ export function PrayerResponse({
               <button
                 type="button"
                 onClick={() => setForceRevealComplete(true)}
-                className="text-xs text-white/40 underline transition-colors hover:text-white/70"
+                className="text-xs text-white/50 underline transition-colors hover:text-white/70"
               >
                 Skip
               </button>
@@ -245,13 +245,13 @@ export function PrayerResponse({
           {/* Sound Indicator */}
           {autoPlayedAudio && audioActiveSounds > 0 && (
             <div className="mb-4 text-center sm:text-left">
-              <span className="text-xs text-white/40">
+              <span className="text-xs text-white/60">
                 Sound: The Upper Room
                 <span className="mx-1 text-white/20">&middot;</span>
                 <button
                   type="button"
                   onClick={onToggleAudioDrawer}
-                  className="text-xs text-white/40 underline transition-colors hover:text-white/70"
+                  className="text-xs text-white/50 underline transition-colors hover:text-white/70"
                 >
                   Change
                 </button>
@@ -259,7 +259,7 @@ export function PrayerResponse({
                 <button
                   type="button"
                   onClick={onStopAudio}
-                  className="text-xs text-white/40 underline transition-colors hover:text-white/70"
+                  className="text-xs text-white/50 underline transition-colors hover:text-white/70"
                 >
                   Stop
                 </button>

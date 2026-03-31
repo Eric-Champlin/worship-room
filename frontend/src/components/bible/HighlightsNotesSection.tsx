@@ -111,7 +111,7 @@ export function HighlightsNotesSection({
     <section className="mt-8" aria-label="My Highlights and Notes">
       <div className="mb-4 flex items-baseline gap-2">
         <h2 className="text-xl font-semibold text-white">My Highlights &amp; Notes</h2>
-        <span className="text-sm text-white/40">{totalCount} items</span>
+        <span className="text-sm text-white/60">{totalCount} items</span>
       </div>
 
       <div className="space-y-3">
@@ -149,7 +149,7 @@ export function HighlightsNotesSection({
                   )}
 
                   {/* Reference */}
-                  <p className="mt-1 text-xs text-white/40">{reference}</p>
+                  <p className="mt-1 text-xs text-white/60">{reference}</p>
 
                   {/* Note preview */}
                   {item.type === 'note' && item.noteText && (

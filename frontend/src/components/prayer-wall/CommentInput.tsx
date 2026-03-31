@@ -34,7 +34,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
       <button
         type="button"
         onClick={onLoginClick ?? (() => authModal?.openAuthModal())}
-        className="mt-3 block min-h-[44px] w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-sm text-white/40 transition-colors hover:border-primary"
+        className="mt-3 block min-h-[44px] w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-sm text-white/50 transition-colors hover:border-primary"
       >
         Log in to comment
       </button>
@@ -77,7 +77,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
           onKeyDown={handleKeyDown}
           maxLength={MAX_COMMENT_LENGTH}
           placeholder="Write a comment..."
-          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Comment"
           aria-invalid={crisisDetected || undefined}
           aria-describedby={crisisDetected ? `comment-crisis-banner-${prayerId} comment-char-count-${prayerId}` : `comment-char-count-${prayerId}`}

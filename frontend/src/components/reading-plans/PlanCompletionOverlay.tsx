@@ -116,7 +116,7 @@ export function PlanCompletionOverlay({
             I have fought the good fight, I have finished the race, I have kept
             the faith.
           </blockquote>
-          <p className="mt-2 text-sm text-white/40">— 2 Timothy 4:7 WEB</p>
+          <p className="mt-2 text-sm text-white/60">— 2 Timothy 4:7 WEB</p>
 
           {suggestion ? (
             <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.08] p-4 text-left">

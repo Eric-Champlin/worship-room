@@ -186,7 +186,7 @@ describe('GrowthGarden', () => {
           userName="Eric"
           gardenSlot={
             <div>
-              <p className="text-xs text-white/40">Your Garden</p>
+              <p className="text-xs text-white/60">Your Garden</p>
               <GrowthGarden stage={3} size="lg" animated={true} streakActive={true} />
             </div>
           }

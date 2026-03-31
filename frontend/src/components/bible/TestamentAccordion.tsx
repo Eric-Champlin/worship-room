@@ -43,12 +43,12 @@ export function TestamentAccordion({
       >
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-semibold text-white">{label}</h3>
-          <span className="text-sm text-white/40">{books.length} books</span>
+          <span className="text-sm text-white/60">{books.length} books</span>
         </div>
         <ChevronDown
           size={20}
           className={cn(
-            'text-white/40 transition-transform',
+            'text-white/50 transition-transform',
             isExpanded && 'rotate-180',
           )}
         />

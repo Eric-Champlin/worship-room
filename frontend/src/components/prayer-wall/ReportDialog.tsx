@@ -73,7 +73,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex min-h-[44px] items-center gap-1 px-2 text-xs text-white/40 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:rounded sm:min-h-0 sm:px-0"
+        className="flex min-h-[44px] items-center gap-1 px-2 text-xs text-white/50 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:rounded sm:min-h-0 sm:px-0"
       >
         <Flag className="h-3 w-3" aria-hidden="true" />
         Report
@@ -113,7 +113,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Reason for reporting..."
-                  className="mt-3 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="mt-3 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   rows={3}
                   aria-label="Report reason"
                 />

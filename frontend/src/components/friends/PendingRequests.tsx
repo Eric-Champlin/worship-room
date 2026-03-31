@@ -122,12 +122,12 @@ export function PendingRequests({
                   />
                   <div className="min-w-0 flex-1">
                     <span className="font-medium text-white">{req.to.displayName}</span>
-                    <span className="ml-2 text-sm text-white/40">Pending</span>
+                    <span className="ml-2 text-sm text-white/60">Pending</span>
                   </div>
                   <button
                     onClick={() => handleAction(req.id, 'cancel')}
                     disabled={isProcessing}
-                    className="inline-flex min-h-[44px] items-center text-sm text-white/40 underline transition-colors hover:text-white/60 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center text-sm text-white/50 underline transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Cancel
                   </button>

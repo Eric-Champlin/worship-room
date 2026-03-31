@@ -94,7 +94,7 @@ export function SeasonalBanner() {
         <button
           type="button"
           onClick={handleDismiss}
-          className="absolute right-2 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:right-4"
+          className="absolute right-2 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:right-4"
           aria-label="Dismiss seasonal banner"
         >
           <X className="h-3.5 w-3.5" />

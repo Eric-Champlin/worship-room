@@ -25,7 +25,7 @@ export function VerseOfTheDayCard() {
         <button
           type="button"
           onClick={() => setSharePanelOpen((prev) => !prev)}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg p-1.5 text-sm text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg p-1.5 text-sm text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Share verse of the day"
           aria-haspopup="dialog"
           aria-expanded={sharePanelOpen}

@@ -121,7 +121,7 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
           value={query}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
+          className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-white placeholder:text-white/50 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
         />
       </div>
 
@@ -133,7 +133,7 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
           className="absolute left-0 right-0 top-full z-20 mt-2 max-h-80 overflow-y-auto rounded-xl border border-white/15 bg-hero-mid shadow-lg"
         >
           {results.length === 0 ? (
-            <div className="px-4 py-3 text-sm text-white/40">
+            <div className="px-4 py-3 text-sm text-white/60">
               No users found for &lsquo;{query}&rsquo;
             </div>
           ) : (
@@ -164,10 +164,10 @@ export function FriendSearch({ searchUsers, onSendRequest, inputRef }: FriendSea
                   </div>
                   <div className="flex-shrink-0">
                     {user.status === 'friend' && (
-                      <span className="text-sm text-white/40">Already friends</span>
+                      <span className="text-sm text-white/60">Already friends</span>
                     )}
                     {(user.status === 'pending-incoming' || user.status === 'pending-outgoing') && (
-                      <span className="text-sm text-white/40">Request pending</span>
+                      <span className="text-sm text-white/60">Request pending</span>
                     )}
                     {user.status === 'none' && (
                       <button

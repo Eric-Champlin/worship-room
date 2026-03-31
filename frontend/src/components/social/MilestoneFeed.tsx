@@ -68,7 +68,7 @@ export function MilestoneFeed({ maxItems = 3 }: MilestoneFeedProps) {
             </Link>
             <div className="min-w-0 flex-1">
               <p className="text-xs text-white/60">{formatMilestone(event)}</p>
-              <p className="text-xs text-white/40">{timeAgo(event.timestamp)}</p>
+              <p className="text-xs text-white/60">{timeAgo(event.timestamp)}</p>
             </div>
           </li>
         )

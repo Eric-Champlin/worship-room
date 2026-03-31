@@ -145,7 +145,7 @@ export function SleepTimerPanel({ isOpen, onClose }: SleepTimerPanelProps) {
           <button
             type="button"
             onClick={handleCancel}
-            className="text-sm text-white/40 transition-colors hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="text-sm text-white/50 transition-colors hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label="Cancel sleep timer"
           >
             Cancel
@@ -244,14 +244,14 @@ export function SleepTimerPanel({ isOpen, onClose }: SleepTimerPanelProps) {
             value={customMinutes}
             onChange={(e) => setCustomMinutes(e.target.value)}
             placeholder="Minutes (5-480)"
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30"
+            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/50"
           />
         </div>
       )}
 
       {/* Fade duration */}
       <div className="mt-3">
-        <span className="text-xs text-white/40">Fade duration</span>
+        <span className="text-xs text-white/60">Fade duration</span>
         <div
           role="radiogroup"
           aria-label="Fade duration"
@@ -267,7 +267,7 @@ export function SleepTimerPanel({ isOpen, onClose }: SleepTimerPanelProps) {
               className={`min-h-[44px] rounded-full px-3 py-1 text-xs transition-colors ${
                 selectedFade === minutes
                   ? 'bg-primary/20 text-primary'
-                  : 'text-white/40 hover:text-white/60'
+                  : 'text-white/50 hover:text-white/70'
               }`}
             >
               {minutes}m

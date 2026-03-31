@@ -75,7 +75,7 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
             }}
             maxLength={100}
             placeholder="What do you want to pray about?"
-            className="w-full rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Prayer title"
             aria-invalid={showTitleError || undefined}
             aria-describedby={showTitleError ? 'title-error title-char-count' : 'title-char-count'}
@@ -102,7 +102,7 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
             onChange={(e) => setDescription(e.target.value)}
             maxLength={1000}
             placeholder="Add details..."
-            className="w-full resize-none rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full resize-none rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             style={{ minHeight: '100px' }}
             aria-label="Prayer details"
             aria-describedby="desc-char-count"

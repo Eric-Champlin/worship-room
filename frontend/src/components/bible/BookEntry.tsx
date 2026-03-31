@@ -31,24 +31,24 @@ export function BookEntry({ book, isExpanded, onToggle }: BookEntryProps) {
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-white">{book.name}</span>
           {!book.hasFullText && (
-            <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-white/40">
+            <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-white/60">
               Coming soon
             </span>
           )}
           {hasProgress && (
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-white/60">
               {completedChapters.length}/{book.chapters} read
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-white/40">
+          <span className="text-xs text-white/60">
             {book.chapters} {book.chapters === 1 ? 'chapter' : 'chapters'}
           </span>
           <ChevronDown
             size={16}
             className={cn(
-              'text-white/40 transition-transform',
+              'text-white/50 transition-transform',
               isExpanded && 'rotate-180',
             )}
           />

@@ -205,7 +205,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
                   maxLength={MAX_MOOD_TEXT_LENGTH}
                   placeholder="Want to share what's on your heart?"
                   rows={3}
-                  className="w-full resize-none rounded-xl border border-white/15 bg-white/5 p-4 text-white placeholder:text-white/40 focus:border-glow-cyan/50 focus:outline-none"
+                  className="w-full resize-none rounded-xl border border-white/15 bg-white/5 p-4 text-white placeholder:text-white/50 focus:border-glow-cyan/50 focus:outline-none"
                   aria-label="Share what's on your heart"
                   aria-describedby="mood-char-count"
                 />
@@ -226,7 +226,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
             {/* Skip Link */}
             <button
               onClick={onSkip}
-              className="mt-8 inline-flex min-h-[44px] items-center text-sm text-white/40 underline underline-offset-4 hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+              className="mt-8 inline-flex min-h-[44px] items-center text-sm text-white/50 underline underline-offset-4 hover:text-white/70 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             >
               Not right now
             </button>

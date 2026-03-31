@@ -19,7 +19,7 @@ function getZone(current: number, warningAt: number, dangerAt: number): Zone {
 }
 
 const zoneColors: Record<Zone, string> = {
-  normal: 'text-white/40',
+  normal: 'text-white/60',
   warning: 'text-amber-400',
   danger: 'text-red-400',
 }

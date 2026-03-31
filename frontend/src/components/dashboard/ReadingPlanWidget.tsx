@@ -167,7 +167,7 @@ export function ReadingPlanWidget() {
         </Link>
 
         {readingStreak > 0 && (
-          <p className="text-xs text-white/40">
+          <p className="text-xs text-white/60">
             {readingStreak} day reading streak
           </p>
         )}

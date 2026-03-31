@@ -144,10 +144,10 @@ export function VisitNote({ visitState }: { visitState: VisitState }) {
         placeholder="How was your experience?"
         maxLength={300}
         rows={2}
-        className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 lg:max-w-[60%]"
+        className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 lg:max-w-[60%]"
         aria-label={`Note about your visit to ${placeName}`}
       />
-      <span className="text-xs text-white/40">
+      <span className="text-xs text-white/60">
         {note.length}/300
       </span>
     </div>

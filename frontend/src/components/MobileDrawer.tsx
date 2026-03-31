@@ -42,7 +42,7 @@ function DrawerSectionHeader({ children }: { children: React.ReactNode }) {
     <span
       role="heading"
       aria-level={2}
-      className="px-3 text-xs uppercase tracking-wide text-white/30"
+      className="px-3 text-xs uppercase tracking-wide text-white/50"
     >
       {children}
     </span>
@@ -201,7 +201,7 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
                   className="h-4 w-4 text-white/40"
                   aria-label="You're offline — some features are limited"
                 />
-                <span className="text-xs text-white/40">
+                <span className="text-xs text-white/60">
                   You&apos;re offline
                 </span>
               </div>

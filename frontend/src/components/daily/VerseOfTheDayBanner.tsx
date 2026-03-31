@@ -20,7 +20,7 @@ export function VerseOfTheDayBanner() {
             —{' '}
             <VerseLink
               reference={verse.reference}
-              className="text-white/40"
+              className="text-white/60"
             />
           </p>
         </div>

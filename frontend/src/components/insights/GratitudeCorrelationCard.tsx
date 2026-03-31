@@ -63,7 +63,7 @@ export function GratitudeCorrelationCard() {
 
   if (!data) {
     return (
-      <p className="text-sm italic text-white/40">
+      <p className="text-sm italic text-white/60">
         Gratitude insights will grow as you count your blessings.
       </p>
     )

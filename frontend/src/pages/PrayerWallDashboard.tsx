@@ -184,7 +184,7 @@ function DashboardContent() {
           <button
             type="button"
             disabled
-            className="mt-2 text-xs text-white/40"
+            className="mt-2 text-xs text-white/60"
             aria-label="Change photo (coming soon)"
           >
             Change Photo (coming soon)
@@ -218,7 +218,7 @@ function DashboardContent() {
               <button
                 type="button"
                 onClick={() => setEditingName(true)}
-                className="text-white/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="text-white/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                 aria-label="Edit name"
               >
                 <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
@@ -240,7 +240,7 @@ function DashboardContent() {
                 aria-label="Bio"
               />
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-xs text-white/40">
+                <span className="text-xs text-white/60">
                   {bio.length}/500
                 </span>
                 <Button

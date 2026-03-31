@@ -215,7 +215,7 @@ export function AmbientSoundPill({
               className={`text-xs transition-colors ${
                 isLight
                   ? 'text-gray-400 hover:text-gray-600'
-                  : 'text-white/40 hover:text-white/70'
+                  : 'text-white/50 hover:text-white/70'
               }`}
             >
               Browse all sounds &rarr;

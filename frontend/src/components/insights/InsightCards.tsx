@@ -120,7 +120,7 @@ export function InsightCards({ hasData }: InsightCardsProps) {
                   className="h-5 w-5 text-white/60"
                   aria-hidden="true"
                 />
-                <span className="text-xs uppercase tracking-wider text-white/40">
+                <span className="text-xs uppercase tracking-wider text-white/60">
                   {insight.categoryLabel}
                 </span>
               </div>
@@ -137,7 +137,7 @@ export function InsightCards({ hasData }: InsightCardsProps) {
                 className="h-5 w-5 text-white/60"
                 aria-hidden="true"
               />
-              <span className="text-xs uppercase tracking-wider text-white/40">
+              <span className="text-xs uppercase tracking-wider text-white/60">
                 Morning vs Evening
               </span>
             </div>
@@ -148,7 +148,7 @@ export function InsightCards({ hasData }: InsightCardsProps) {
         )}
       </div>
 
-      <p className="mt-4 text-center text-xs text-white/40">
+      <p className="mt-4 text-center text-xs text-white/60">
         Insights are illustrative examples. Personalized AI insights coming
         soon.
       </p>

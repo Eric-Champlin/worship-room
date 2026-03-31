@@ -211,7 +211,7 @@ export function ActivityChecklist({
                   className={
                     completed
                       ? 'ml-auto text-xs text-success'
-                      : 'ml-auto text-xs text-white/30'
+                      : 'ml-auto text-xs text-white/60'
                   }
                 >
                   +{points} pts

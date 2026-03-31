@@ -89,7 +89,7 @@ export function FormField({
       )}
 
       {helpText && (
-        <p id={helpId} className="mt-1 text-xs text-white/40">
+        <p id={helpId} className="mt-1 text-xs text-white/60">
           {helpText}
         </p>
       )}

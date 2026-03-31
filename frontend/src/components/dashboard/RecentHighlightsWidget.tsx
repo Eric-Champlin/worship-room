@@ -52,7 +52,7 @@ export function RecentHighlightsWidget() {
                 {item.type === 'note' && (
                   <span className="text-sm text-white/60">{ref}</span>
                 )}
-                <span className="text-xs text-white/40">{timeAgo(item.createdAt)}</span>
+                <span className="text-xs text-white/60">{timeAgo(item.createdAt)}</span>
               </div>
             </div>
           </Link>

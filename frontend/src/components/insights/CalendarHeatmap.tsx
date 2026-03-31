@@ -196,7 +196,7 @@ export function CalendarHeatmap({ rangeDays }: CalendarHeatmapProps) {
       >
         {/* Month labels */}
         <div
-          className="mb-1 flex text-xs text-white/40"
+          className="mb-1 flex text-xs text-white/60"
           style={{ paddingLeft: '28px' }}
           aria-hidden="true"
         >
@@ -217,7 +217,7 @@ export function CalendarHeatmap({ rangeDays }: CalendarHeatmapProps) {
         <div className="flex">
           {/* Day labels */}
           <div
-            className="mr-1 flex shrink-0 flex-col text-xs text-white/40"
+            className="mr-1 flex shrink-0 flex-col text-xs text-white/60"
             style={{ width: '24px' }}
             aria-hidden="true"
           >

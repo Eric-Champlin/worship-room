@@ -61,7 +61,7 @@ export function WeeklyGodMoments({
     >
       <button
         onClick={handleDismiss}
-        className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/40 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/50 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
         aria-label="Dismiss weekly summary"
       >
         <X className="h-5 w-5" />

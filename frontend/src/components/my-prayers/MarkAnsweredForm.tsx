@@ -28,7 +28,7 @@ export function MarkAnsweredForm({ onConfirm, onCancel }: MarkAnsweredFormProps)
         onChange={(e) => setNote(e.target.value)}
         maxLength={500}
         placeholder="What happened?"
-        className="w-full resize-none rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="w-full resize-none rounded-lg border border-white/15 bg-white/5 p-3 text-base text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         style={{ minHeight: '80px' }}
         aria-label="How God answered"
         aria-describedby="testimony-char-count"

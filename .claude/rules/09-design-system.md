@@ -43,6 +43,24 @@ Frosted glass cards for the all-dark dashboard:
 - Padding: `p-4 md:p-6`
 - Collapsible with height transition (`overflow-hidden`)
 
+### Text Opacity Standards (WCAG AA)
+
+All text on dark backgrounds must meet these minimum opacity values:
+
+| Use Case | Minimum | Class |
+|----------|---------|-------|
+| Primary text | 70% | `text-white/70` |
+| Secondary text | 60% | `text-white/60` |
+| Placeholder text | 50% | `placeholder:text-white/50` |
+| Large headings (18px+) | 60% | `text-white/60` |
+| Interactive text (buttons/links) | 50% | `text-white/50` |
+| Decorative / disabled | 20-40% | `text-white/20` to `text-white/40` |
+
+Body text below `text-white/60` fails WCAG AA 4.5:1 on hero-dark (#0D0620).
+Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input backgrounds.
+
+**Exempt from contrast requirements:** decorative icons, locked badge silhouettes, verse number superscripts, middot separators, disabled/locked state indicators, background decorations.
+
 ### Typography
 
 - **Body Font**: Inter (sans-serif) — Tailwind: `font-sans`
@@ -326,6 +344,5 @@ Placeholder silent MP3s in `public/audio/` (gitignored). Subdirectories: `ambien
 
 - **Footer touch targets**: Crisis resource links and App Store badges (40px) undersized on mobile (44px minimum). Pre-existing.
 - **Spotify embed loading**: May show fallback in headless/restricted environments.
-- **WCAG AA contrast**: `text-white/30` and `text-white/40` appear 271 times across 133 files, failing 4.5:1 contrast ratio on dark backgrounds. Round 3 spec addresses this.
 - **Skeleton loading not wired**: 13 skeleton components built in `components/skeletons/` but only BibleReaderSkeleton is wired to Suspense. All other lazy routes use a generic `RouteLoadingFallback`. Round 3 quick win addresses this.
 - **Music page theme break**: Music page uses light `bg-neutral-bg` background while the rest of the app uses dark theme. Creates a jarring transition from the dark dashboard/daily hub. Design-system intentional but noted for potential future alignment.

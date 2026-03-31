@@ -407,7 +407,7 @@ export function Dashboard() {
             }
             gardenSlot={
               <div>
-                <p className="text-xs text-white/40">Your Garden</p>
+                <p className="text-xs text-white/60">Your Garden</p>
                 <div className="mt-1 lg:hidden">
                   <GrowthGarden
                     stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}

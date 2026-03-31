@@ -246,7 +246,7 @@ export function AskPage() {
                       aria-describedby="ask-char-count"
                       className={cn(
                         'w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] py-3 px-4',
-                        'text-base text-white placeholder:text-white/40',
+                        'text-base text-white placeholder:text-white/50',
                         'motion-safe:animate-glow-pulse',
                         'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
                       )}

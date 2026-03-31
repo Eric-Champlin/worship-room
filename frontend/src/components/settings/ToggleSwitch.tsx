@@ -19,7 +19,7 @@ export function ToggleSwitch({ checked, onChange, label, description, id }: Togg
           {label}
         </span>
         {description && (
-          <p id={descId} className="mt-0.5 text-xs text-white/40">
+          <p id={descId} className="mt-0.5 text-xs text-white/60">
             {description}
           </p>
         )}

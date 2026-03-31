@@ -66,7 +66,7 @@ export function NudgeButton({ friendId, friendName, lastActive }: NudgeButtonPro
 
   if (alreadyNudged || nudgeSent) {
     return (
-      <span className="flex items-center gap-1 text-sm text-white/30" onClick={(e) => e.stopPropagation()}>
+      <span className="flex items-center gap-1 text-sm text-white/60" onClick={(e) => e.stopPropagation()}>
         <Heart className="h-3.5 w-3.5" aria-hidden="true" />
         Nudge sent
       </span>
@@ -77,7 +77,7 @@ export function NudgeButton({ friendId, friendName, lastActive }: NudgeButtonPro
     <span onClick={(e) => e.stopPropagation()}>
       <button
         onClick={handleOpenDialog}
-        className="flex min-h-[44px] items-center gap-1 text-sm text-white/40 transition-colors hover:text-white/60"
+        className="flex min-h-[44px] items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/70"
         aria-label={`Send a nudge to ${friendName}`}
       >
         <Heart className="h-3.5 w-3.5" aria-hidden="true" />

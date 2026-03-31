@@ -294,7 +294,7 @@ export function WelcomeWizard({ userName, onComplete }: WelcomeWizardProps) {
           <button
             type="button"
             onClick={handleSkip}
-            className="min-h-[44px] text-sm text-white/40 underline-offset-4 transition-colors hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+            className="min-h-[44px] text-sm text-white/50 underline-offset-4 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
           >
             Skip for now
           </button>
@@ -342,7 +342,7 @@ const Screen1Welcome = forwardRef<HTMLHeadingElement, Screen1Props>(
             onBlur={onNameBlur}
             maxLength={30}
             placeholder="Your name"
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             aria-invalid={showNameError ? 'true' : undefined}
             aria-describedby={showNameError ? 'wizard-name-error' : undefined}
           />

@@ -89,7 +89,7 @@ export function NoteIndicator({ note, onEdit, onDelete }: NoteIndicatorProps) {
               <button
                 type="button"
                 onClick={handleEdit}
-                className="flex items-center gap-1 text-xs text-white/30 hover:text-white/50"
+                className="flex items-center gap-1 text-xs text-white/50 hover:text-white/70"
                 aria-label="Edit note"
               >
                 <Pencil size={12} aria-hidden="true" />
@@ -98,7 +98,7 @@ export function NoteIndicator({ note, onEdit, onDelete }: NoteIndicatorProps) {
               <button
                 type="button"
                 onClick={handleDeleteClick}
-                className="flex items-center gap-1 text-xs text-white/30 hover:text-white/50"
+                className="flex items-center gap-1 text-xs text-white/50 hover:text-white/70"
                 aria-label="Delete note"
               >
                 <Trash2 size={12} aria-hidden="true" />
@@ -118,7 +118,7 @@ export function NoteIndicator({ note, onEdit, onDelete }: NoteIndicatorProps) {
               <button
                 type="button"
                 onClick={handleCancelDelete}
-                className="text-xs text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="text-xs text-white/50 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Cancel
               </button>

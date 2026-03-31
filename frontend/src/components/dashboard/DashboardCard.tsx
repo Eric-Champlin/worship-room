@@ -80,7 +80,7 @@ export function DashboardCard({
               onClick={toggleCollapse}
               aria-expanded={!collapsed}
               aria-controls={contentId}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1 text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={collapsed ? `Expand ${title}` : `Collapse ${title}`}
             >
               <ChevronDown

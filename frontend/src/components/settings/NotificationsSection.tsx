@@ -40,7 +40,7 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
       <div className="space-y-6">
         {/* Sound */}
         <div>
-          <h3 className="text-xs text-white/40 uppercase tracking-wider mb-3">Sound</h3>
+          <h3 className="text-xs text-white/60 uppercase tracking-wider mb-3">Sound</h3>
           <div className="space-y-4">
             <ToggleSwitch
               id="notif-sound-effects"
@@ -54,7 +54,7 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
 
         {/* General */}
         <div className="border-t border-white/10 pt-4">
-          <h3 className="text-xs text-white/40 uppercase tracking-wider mb-3">General</h3>
+          <h3 className="text-xs text-white/60 uppercase tracking-wider mb-3">General</h3>
           <div className="space-y-4">
             <ToggleSwitch
               id="notif-in-app"
@@ -72,7 +72,7 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
                 description="Get notified even when you're away (coming soon)"
               />
               {showPushNote && (
-                <p className="mt-1 ml-0 text-xs text-white/40">
+                <p className="mt-1 ml-0 text-xs text-white/60">
                   Push notifications will be available in a future update
                 </p>
               )}
@@ -82,7 +82,7 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
 
         {/* Email */}
         <div className="border-t border-white/10 pt-4">
-          <h3 className="text-xs text-white/40 uppercase tracking-wider mb-3">Email</h3>
+          <h3 className="text-xs text-white/60 uppercase tracking-wider mb-3">Email</h3>
           <div className="space-y-4">
             <ToggleSwitch
               id="notif-weekly-digest"
@@ -103,7 +103,7 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
 
         {/* Activity */}
         <div className="border-t border-white/10 pt-4">
-          <h3 className="text-xs text-white/40 uppercase tracking-wider mb-3">Activity</h3>
+          <h3 className="text-xs text-white/60 uppercase tracking-wider mb-3">Activity</h3>
           <div className="space-y-4">
             <ToggleSwitch
               id="notif-encouragements"

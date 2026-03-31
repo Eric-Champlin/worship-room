@@ -176,7 +176,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   autoComplete="email"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                 />
               </div>
 
@@ -210,7 +210,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                       type="text"
                       required
                       autoComplete="given-name"
-                      className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                      className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -222,7 +222,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                       type="text"
                       required
                       autoComplete="family-name"
-                      className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                      className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   type="email"
                   value={emailValue}
                   autoComplete="email"
-                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                   aria-label="Email address"
                   aria-invalid={emailError ? 'true' : undefined}
                   aria-describedby={emailError ? 'email-error' : undefined}
@@ -262,7 +262,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   type="password"
                   value={passwordValue}
                   autoComplete={view === 'login' ? 'current-password' : 'new-password'}
-                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                   aria-label="Password"
                   aria-invalid={passwordError ? 'true' : undefined}
                   aria-describedby={passwordError ? 'password-error' : undefined}
@@ -286,7 +286,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                     type="password"
                     required
                     autoComplete="new-password"
-                    className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                    className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                   />
                 </div>
               )}
@@ -309,7 +309,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
             {/* Divider */}
             <div className="my-4 flex items-center gap-3">
               <div className="h-px flex-1 bg-white/10" />
-              <span className="text-xs text-white/40">or</span>
+              <span className="text-xs text-white/50">or</span>
               <div className="h-px flex-1 bg-white/10" />
             </div>
 

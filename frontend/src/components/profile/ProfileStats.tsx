@@ -8,7 +8,7 @@ export function ProfileStats({ profileData }: ProfileStatsProps) {
   if (!profileData.statsVisible) {
     return (
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-        <p className="text-center text-base text-white/40">
+        <p className="text-center text-base text-white/60">
           {profileData.privacyMessage || 'This user keeps their stats private'}
         </p>
       </div>
@@ -55,7 +55,7 @@ function StatCard({ value, label, extra }: StatCardProps) {
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6">
       <p className="text-3xl font-bold text-white">{value}</p>
       <p className="text-sm text-white/50">{label}</p>
-      {extra && <p className="mt-1 text-xs text-white/40">{extra}</p>}
+      {extra && <p className="mt-1 text-xs text-white/60">{extra}</p>}
     </div>
   )
 }

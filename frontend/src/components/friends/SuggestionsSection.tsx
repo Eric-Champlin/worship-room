@@ -52,7 +52,7 @@ export function SuggestionsSection({ suggestions, onSendRequest }: SuggestionsSe
                   <div className="text-sm text-white/50">{suggestion.levelName}</div>
                 </div>
               </div>
-              <p className="mb-3 text-sm text-white/40">Active on Prayer Wall</p>
+              <p className="mb-3 text-sm text-white/60">Active on Prayer Wall</p>
               <button
                 onClick={() => handleSend(suggestion)}
                 disabled={isSent}

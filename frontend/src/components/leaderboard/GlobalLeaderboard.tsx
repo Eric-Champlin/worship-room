@@ -109,7 +109,7 @@ export function GlobalLeaderboard() {
             </span>
             <span className="text-sm text-white/70">{currentUserEntry.weeklyPoints} pts</span>
           </div>
-          <p className="mt-1 text-center text-xs text-white/40">
+          <p className="mt-1 text-center text-xs text-white/60">
             You&apos;re #{userRank} this week
           </p>
         </div>

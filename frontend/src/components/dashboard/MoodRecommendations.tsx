@@ -199,7 +199,7 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
 
         <button
           onClick={handleSkipClick}
-          className="mt-6 inline-flex min-h-[44px] items-center text-sm text-white/40 underline underline-offset-4 hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 lg:mt-8"
+          className="mt-6 inline-flex min-h-[44px] items-center text-sm text-white/50 underline underline-offset-4 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 lg:mt-8"
         >
           Go to Dashboard
         </button>

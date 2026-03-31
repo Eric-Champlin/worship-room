@@ -330,7 +330,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
           </h2>
           <button
             onClick={handleClose}
-            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-full text-white/50 hover:text-white/70 hover:bg-white/10 transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />

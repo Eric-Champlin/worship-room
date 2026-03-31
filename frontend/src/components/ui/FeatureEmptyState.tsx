@@ -36,11 +36,11 @@ export function FeatureEmptyState({
       )}
     >
       <Icon
-        className="mb-3 h-10 w-10 text-white/20 sm:h-12 sm:w-12"
+        className="mb-3 h-10 w-10 text-white/30 sm:h-12 sm:w-12"
         aria-hidden="true"
       />
       <h3 className="text-lg font-bold text-white/70">{heading}</h3>
-      <p className="mt-1 text-sm text-white/50">{description}</p>
+      <p className="mt-1 text-sm text-white/60">{description}</p>
       {children}
       {ctaLabel && ctaHref && (
         <Link

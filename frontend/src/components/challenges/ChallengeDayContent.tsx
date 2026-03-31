@@ -57,7 +57,7 @@ export function ChallengeDayContent({
 
       {/* Scripture section */}
       <section className="border-t border-white/10 py-8 sm:py-10">
-        <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/40">
+        <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/60">
           {day.scripture.reference}
         </p>
         <p className="font-serif text-base italic leading-relaxed text-white/90 sm:text-lg">
@@ -67,7 +67,7 @@ export function ChallengeDayContent({
 
       {/* Reflection section */}
       <section className="border-t border-white/10 py-8 sm:py-10">
-        <h3 className="mb-4 text-xs font-medium uppercase tracking-widest text-white/40">
+        <h3 className="mb-4 text-xs font-medium uppercase tracking-widest text-white/60">
           Reflection
         </h3>
         <div className="space-y-4 text-base leading-relaxed text-white/80">
@@ -86,7 +86,7 @@ export function ChallengeDayContent({
               style={{ color: themeColor }}
               aria-hidden="true"
             />
-            <h3 className="text-sm text-white/40">Today&apos;s action:</h3>
+            <h3 className="text-sm text-white/60">Today&apos;s action:</h3>
           </div>
           <p className="text-lg font-medium text-white">{day.dailyAction}</p>
 

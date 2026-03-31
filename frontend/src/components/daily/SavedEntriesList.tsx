@@ -171,7 +171,7 @@ export function SavedEntriesList({
           style={stagger.style}
           aria-label={`Journal entry from ${formatDateTime(new Date(entry.timestamp))}`}
         >
-          <p className="mb-2 text-xs text-white/40">
+          <p className="mb-2 text-xs text-white/60">
             {formatDateTime(new Date(entry.timestamp))}
             {entry.mode === 'guided' && (
               <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-primary">
@@ -180,7 +180,7 @@ export function SavedEntriesList({
             )}
           </p>
           {entry.promptText && (
-            <p className="mb-2 text-xs italic text-white/40">
+            <p className="mb-2 text-xs italic text-white/60">
               Prompt: {entry.promptText}
             </p>
           )}

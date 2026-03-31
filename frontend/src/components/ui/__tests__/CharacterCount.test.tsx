@@ -20,7 +20,7 @@ describe('CharacterCount', () => {
   it('applies normal color below warning threshold', () => {
     renderCount({ current: 100, max: 500 })
     const display = screen.getByText('100 / 500')
-    expect(display).toHaveClass('text-white/40')
+    expect(display).toHaveClass('text-white/60')
   })
 
   it('applies warning color at warning threshold', () => {

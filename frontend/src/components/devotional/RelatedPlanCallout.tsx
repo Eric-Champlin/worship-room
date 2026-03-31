@@ -31,7 +31,7 @@ export function RelatedPlanCallout({
 
   return (
     <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-5">
-      <p className="text-xs uppercase tracking-wider text-white/40">
+      <p className="text-xs uppercase tracking-wider text-white/60">
         Go Deeper
       </p>
       <p className="mt-2 text-base font-semibold text-white">{planTitle}</p>

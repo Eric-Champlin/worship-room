@@ -53,7 +53,7 @@ export function CommentItem({ comment, onReply }: CommentItemProps) {
             {comment.authorName}
           </span>
           <span className="text-xs text-white/40"> &mdash; </span>
-          <time dateTime={comment.createdAt} className="text-xs text-white/40">
+          <time dateTime={comment.createdAt} className="text-xs text-white/60">
             {timeAgo(comment.createdAt)}
           </time>
         </div>
@@ -63,7 +63,7 @@ export function CommentItem({ comment, onReply }: CommentItemProps) {
         <button
           type="button"
           onClick={() => onReply(comment.authorName)}
-          className="mt-1 min-h-[44px] px-2 text-xs text-white/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded sm:min-h-0 sm:px-0"
+          className="mt-1 min-h-[44px] px-2 text-xs text-white/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded sm:min-h-0 sm:px-0"
         >
           Reply
         </button>

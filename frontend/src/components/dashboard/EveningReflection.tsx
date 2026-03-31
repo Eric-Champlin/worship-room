@@ -228,7 +228,7 @@ export function EveningReflection({
           <button
             type="button"
             onClick={handleDismiss}
-            className="min-h-[44px] min-w-[44px] rounded-lg text-white/40 transition-colors hover:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="min-h-[44px] min-w-[44px] rounded-lg text-white/50 transition-colors hover:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/30"
             aria-label="Close reflection"
           >
             <X className="h-6 w-6" />
@@ -325,7 +325,7 @@ export function EveningReflection({
                 onChange={(e) => setHighlightText(e.target.value)}
                 maxLength={HIGHLIGHT_MAX_LENGTH}
                 placeholder="What was the best part of your day?"
-                className="mb-2 h-28 w-full resize-none rounded-xl border border-white/15 bg-white/5 p-4 text-white placeholder:text-white/40 focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="mb-2 h-28 w-full resize-none rounded-xl border border-white/15 bg-white/5 p-4 text-white placeholder:text-white/50 focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50"
                 aria-label="Today's highlights"
                 aria-describedby="evening-char-count"
               />
@@ -381,7 +381,7 @@ export function EveningReflection({
                         }}
                         maxLength={150}
                         placeholder={gratitudePlaceholders[i]}
-                        className="h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50"
                         aria-label={`Gratitude item ${i + 1}`}
                       />
                     </div>

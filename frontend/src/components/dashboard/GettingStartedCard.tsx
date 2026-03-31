@@ -163,7 +163,7 @@ export function GettingStartedCard({
             onClick={toggleCollapse}
             aria-expanded={!collapsed}
             aria-controls={contentId}
-            className="rounded-lg p-1 text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+            className="rounded-lg p-1 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
             aria-label={collapsed ? 'Expand Getting Started' : 'Collapse Getting Started'}
           >
             <ChevronDown
@@ -177,7 +177,7 @@ export function GettingStartedCard({
           {/* Dismiss X */}
           <button
             onClick={handleDismiss}
-            className="rounded-lg p-2 text-white/40 transition-colors hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+            className="rounded-lg p-2 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
             aria-label="Dismiss getting started checklist"
           >
             <X className="h-6 w-6" />
@@ -254,7 +254,7 @@ export function GettingStartedCard({
                     <span
                       className={cn(
                         'text-xs',
-                        item.completed ? 'text-white/20' : 'text-white/30',
+                        item.completed ? 'text-white/20' : 'text-white/60',
                       )}
                     >
                       {item.pointHint}

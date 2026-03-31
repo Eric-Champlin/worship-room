@@ -85,7 +85,7 @@ export function AskResponseDisplay({
       </div>
 
       {/* AI disclaimer */}
-      <p className="mt-6 text-center text-xs text-white/40">
+      <p className="mt-6 text-center text-xs text-white/60">
         AI-generated content for encouragement. Not professional advice.
       </p>
 

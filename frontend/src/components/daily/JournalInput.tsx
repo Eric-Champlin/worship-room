@@ -254,7 +254,7 @@ export function JournalInput({
           placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
           maxLength={JOURNAL_MAX_LENGTH}
           rows={6}
-          className="min-h-[200px] w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/40 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="min-h-[200px] w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/50 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
           aria-label="Journal entry"
           aria-describedby="journal-char-count"
         />

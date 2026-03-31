@@ -122,19 +122,19 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
             rows={3}
             className={cn(
               'w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2',
-              'text-sm text-white placeholder:text-white/40',
+              'text-sm text-white placeholder:text-white/50',
               'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
             )}
           />
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-white/60">
               {noteText.length} / {NOTE_MAX_CHARS}
             </span>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="min-h-[44px] rounded-lg px-3 py-1 text-xs text-white/40 transition-colors hover:text-white/60"
+                className="min-h-[44px] rounded-lg px-3 py-1 text-xs text-white/50 transition-colors hover:text-white/70"
               >
                 Cancel
               </button>
