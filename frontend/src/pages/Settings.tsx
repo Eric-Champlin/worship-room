@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { ProfileSection } from '@/components/settings/ProfileSection'
@@ -61,9 +62,10 @@ export function Settings() {
         </Link>
         <h1
           id="settings-heading"
-          className="px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+          className="px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+          style={GRADIENT_TEXT_STYLE}
         >
-          Settings
+          <span className="font-script">Settings</span>
         </h1>
       </section>
 

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { Layout } from '@/components/Layout'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SEO } from '@/components/SEO'
 import { HeadingDivider } from '@/components/HeadingDivider'
 import { useElementWidth } from '@/hooks/useElementWidth'
@@ -117,9 +118,10 @@ export function RoutinesPage() {
       >
         <h1
           ref={headingRef}
-          className="px-1 sm:px-2 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+          className="px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl"
+          style={GRADIENT_TEXT_STYLE}
         >
-          Bedtime Routines
+          Bedtime <span className="font-script">Routines</span>
         </h1>
         <p className="mx-auto mt-4 max-w-lg font-serif italic text-base text-white/60 sm:text-lg">
           Build your path to peaceful sleep

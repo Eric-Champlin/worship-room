@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react'
 import { HeadingDivider } from '@/components/HeadingDivider'
+import { GRADIENT_TEXT_STYLE, renderWithScriptAccent } from '@/constants/gradients'
 import { useElementWidth } from '@/hooks/useElementWidth'
 import { cn } from '@/lib/utils'
 
@@ -16,10 +17,11 @@ interface PageHeroProps {
   title: string
   subtitle?: string
   showDivider?: boolean
+  scriptWord?: string
   children?: ReactNode
 }
 
-export function PageHero({ title, subtitle, showDivider, children }: PageHeroProps) {
+export function PageHero({ title, subtitle, showDivider, scriptWord, children }: PageHeroProps) {
   const { ref: headingRef, width: headingWidth } = useElementWidth<HTMLHeadingElement>()
 
   return (
@@ -32,11 +34,12 @@ export function PageHero({ title, subtitle, showDivider, children }: PageHeroPro
         ref={showDivider ? headingRef : undefined}
         id="page-hero-heading"
         className={cn(
-          'px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl',
+          'px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl',
           showDivider ? 'inline-block' : 'mb-3'
         )}
+        style={GRADIENT_TEXT_STYLE}
       >
-        {title}
+        {renderWithScriptAccent(title, scriptWord)}
       </h1>
       {showDivider && (
         <div className="mt-1 flex justify-center">

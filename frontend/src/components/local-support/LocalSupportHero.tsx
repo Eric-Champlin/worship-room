@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE, renderWithScriptAccent } from '@/constants/gradients'
 
 interface LocalSupportHeroProps {
   headingId: string
   title: string
   subtitle: string
+  scriptWord?: string
   extraContent?: ReactNode
   action?: ReactNode
 }
@@ -13,6 +15,7 @@ export function LocalSupportHero({
   headingId,
   title,
   subtitle,
+  scriptWord,
   extraContent,
   action,
 }: LocalSupportHeroProps) {
@@ -24,9 +27,10 @@ export function LocalSupportHero({
     >
       <h1
         id={headingId}
-        className="mb-3 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+        className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+        style={GRADIENT_TEXT_STYLE}
       >
-        {title}
+        {renderWithScriptAccent(title, scriptWord)}
       </h1>
       <p className="mx-auto max-w-2xl font-serif italic text-base leading-relaxed text-white/60 sm:text-lg">
         {subtitle}

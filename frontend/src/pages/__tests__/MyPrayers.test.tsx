@@ -78,7 +78,7 @@ describe('MyPrayers Page', () => {
 
     it('renders page when authenticated', () => {
       renderMyPrayers()
-      expect(screen.getByText('My Prayers')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'My Prayers' })).toBeInTheDocument()
       expect(screen.getByText('Your personal conversation with God.')).toBeInTheDocument()
     })
   })

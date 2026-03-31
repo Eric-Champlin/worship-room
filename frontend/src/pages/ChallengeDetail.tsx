@@ -4,6 +4,7 @@ import { Bell, BellOff, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SEO } from '@/components/SEO'
 import { ChallengeIcon } from '@/components/challenges/ChallengeIcon'
 import { ChallengeDayContent } from '@/components/challenges/ChallengeDayContent'
@@ -203,6 +204,10 @@ export function ChallengeDetail() {
     backgroundImage: `radial-gradient(circle at 50% 30%, ${challenge.themeColor}20 0%, transparent 60%), ${ATMOSPHERIC_HERO_BG.backgroundImage}`,
   }
 
+  const titleWords = challenge.title.split(' ')
+  const titleLastWord = titleWords[titleWords.length - 1]
+  const titlePrefix = titleWords.slice(0, -1).join(' ')
+
   // Days until a future challenge starts
   const daysUntilStart = isFutureChallenge && calendarInfo
     ? Math.ceil(
@@ -231,8 +236,11 @@ export function ChallengeDetail() {
             aria-hidden="true"
           />
 
-          <h1 className="mt-4 px-1 sm:px-2 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
-            {challenge.title}
+          <h1
+            className="mt-4 px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl"
+            style={GRADIENT_TEXT_STYLE}
+          >
+            {titlePrefix} <span className="font-script">{titleLastWord}</span>
           </h1>
 
           <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">

@@ -87,7 +87,7 @@ function GratitudeReflectionContent() {
     const affirmation = getGratitudeAffirmation(filledCount)
 
     return (
-      <Layout hero={<PageHero title="Gratitude Reflection" />}>
+      <Layout hero={<PageHero title="Gratitude Reflection" scriptWord="Reflection" />}>
         <div className="mx-auto max-w-lg px-4 py-10 text-center">
           <p className="mb-4 text-lg font-semibold text-text-dark">
             {affirmation}
@@ -128,7 +128,7 @@ function GratitudeReflectionContent() {
   }
 
   return (
-    <Layout hero={<PageHero title="Gratitude Reflection" subtitle="Name the things you're thankful for today." />}>
+    <Layout hero={<PageHero title="Gratitude Reflection" subtitle="Name the things you're thankful for today." scriptWord="Reflection" />}>
       <SEO title="Gratitude Reflection" description="A guided gratitude journaling meditation rooted in Scripture." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />

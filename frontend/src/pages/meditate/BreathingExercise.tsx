@@ -167,7 +167,7 @@ function BreathingExerciseContent() {
   if (screen === 'complete') {
     const weeklyTotal = getMeditationMinutesForWeek()
     return (
-      <Layout hero={<PageHero title="Breathing Exercise" />}>
+      <Layout hero={<PageHero title="Breathing Exercise" scriptWord="Exercise" />}>
         <div className="mx-auto max-w-lg px-4 pt-10 sm:pt-14">
           <AmbientSoundPill context="breathing" />
         </div>
@@ -213,7 +213,7 @@ function BreathingExerciseContent() {
           : 'transition-transform duration-[8000ms] ease-in-out'
 
     return (
-      <Layout hero={<PageHero title="Breathing Exercise" />}>
+      <Layout hero={<PageHero title="Breathing Exercise" scriptWord="Exercise" />}>
         <div className="flex flex-col items-center px-4 py-10 text-center sm:py-16">
           {/* Breathing circle */}
           <div className="relative mb-8 flex h-48 w-48 items-center justify-center sm:h-64 sm:w-64">
@@ -253,7 +253,7 @@ function BreathingExerciseContent() {
 
   // Pre-start screen
   return (
-    <Layout hero={<PageHero title="Breathing Exercise" subtitle="Follow a 4-7-8 breathing pattern with scripture to focus your mind." />}>
+    <Layout hero={<PageHero title="Breathing Exercise" subtitle="Follow a 4-7-8 breathing pattern with scripture to focus your mind." scriptWord="Exercise" />}>
       <SEO title="Breathing Exercise" description="A calming 4-7-8 breathing exercise for peace and focus." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="breathing" />

@@ -61,9 +61,9 @@ describe('BibleBrowser', () => {
   })
 
   describe('Hero section', () => {
-    it('renders "Bible" heading', () => {
+    it('renders "The Bible" heading', () => {
       renderPage()
-      expect(screen.getByRole('heading', { name: 'Bible', level: 1 })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'The Bible', level: 1 })).toBeInTheDocument()
     })
 
     it('content area uses max-w-5xl with lg:px-8', () => {
@@ -75,7 +75,7 @@ describe('BibleBrowser', () => {
 
     it('title has padding for Caveat flourish fix', () => {
       renderPage()
-      const heading = screen.getByRole('heading', { name: 'Bible', level: 1 })
+      const heading = screen.getByRole('heading', { name: 'The Bible', level: 1 })
       expect(heading.className).toContain('px-1')
       expect(heading.className).toContain('sm:px-2')
     })

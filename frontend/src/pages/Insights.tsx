@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft, BarChart3 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { ActivityCorrelations } from '@/components/insights/ActivityCorrelations'
 import { CommunityConnections } from '@/components/insights/CommunityConnections'
@@ -201,9 +202,10 @@ export function Insights() {
         </Link>
         <h1
           id="insights-heading"
-          className="mb-3 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+          className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+          style={GRADIENT_TEXT_STYLE}
         >
-          Mood Insights
+          Mood <span className="font-script">Insights</span>
         </h1>
         <p className="font-serif italic text-base text-white/60 sm:text-lg">
           Reflect on your journey

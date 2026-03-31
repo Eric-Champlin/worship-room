@@ -24,6 +24,7 @@ import { useBibleProgress } from '@/hooks/useBibleProgress'
 import { useToast } from '@/components/ui/Toast'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import type { BibleVerse } from '@/types/bible'
 
@@ -195,10 +196,11 @@ export function BibleReader() {
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
           style={ATMOSPHERIC_HERO_BG}
         >
-          <h1 id="bible-reader-heading" className="px-1 sm:px-2 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
+          <h1 id="bible-reader-heading" className="px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl" style={GRADIENT_TEXT_STYLE}>
             <Link
               to={`/bible?book=${book.slug}`}
-              className="text-white/60 underline transition-colors hover:text-white"
+              className="font-script underline transition-opacity hover:opacity-80"
+              style={{ color: 'inherit', WebkitTextFillColor: 'inherit' }}
             >
               {book.name}
             </Link>{' '}

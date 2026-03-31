@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
@@ -127,9 +128,10 @@ export function GrowthProfile() {
         </Link>
         <h1
           id="profile-heading"
-          className="mb-2 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+          className="mb-2 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+          style={GRADIENT_TEXT_STYLE}
         >
-          {profileData.displayName}
+          {profileData.displayName}&apos;s <span className="font-script">Garden</span>
         </h1>
         {profileData.levelName !== null && (
           <p className="font-serif italic text-base text-white/60 sm:text-lg">

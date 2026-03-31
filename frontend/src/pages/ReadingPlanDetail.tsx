@@ -18,6 +18,7 @@ import { PLAN_DIFFICULTY_LABELS } from '@/constants/reading-plans'
 import type { ActivityType } from '@/types/dashboard'
 import { cn } from '@/lib/utils'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 export function ReadingPlanDetail() {
@@ -123,6 +124,10 @@ export function ReadingPlanDetail() {
 
   if (!plan) return <PlanNotFound />
 
+  const titleWords = plan.title.split(' ')
+  const titleLastWord = titleWords[titleWords.length - 1]
+  const titlePrefix = titleWords.slice(0, -1).join(' ')
+
   const completionPercent = progress
     ? Math.round((progress.completedDays.length / plan.durationDays) * 100)
     : 0
@@ -156,8 +161,8 @@ export function ReadingPlanDetail() {
             {plan.coverEmoji}
           </div>
 
-          <h1 className="mt-4 px-1 sm:px-2 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
-            {plan.title}
+          <h1 className="mt-4 px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl" style={GRADIENT_TEXT_STYLE}>
+            {titlePrefix} <span className="font-script">{titleLastWord}</span>
           </h1>
 
           <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">

@@ -10,6 +10,7 @@ import type { BibleBrowserMode } from '@/components/bible/SegmentedControl'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { useAuth } from '@/hooks/useAuth'
 const bibleBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -45,9 +46,10 @@ export function BibleBrowser() {
         >
           <h1
             id="bible-hero-heading"
-            className="px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+            className="px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+            style={GRADIENT_TEXT_STYLE}
           >
-            Bible
+            The <span className="font-script">Bible</span>
           </h1>
           <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
             The Word of God

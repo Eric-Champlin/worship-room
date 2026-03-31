@@ -86,7 +86,7 @@ function PsalmReadingContent() {
   if (screen === 'complete') {
     const weeklyTotal = getMeditationMinutesForWeek()
     return (
-      <Layout hero={<PageHero title="Psalm Reading" />}>
+      <Layout hero={<PageHero title="Psalm Reading" scriptWord="Reading" />}>
         {sessionDuration !== null && (
           <div className="mx-auto max-w-lg motion-safe:animate-fade-in px-4 pt-10 text-center">
             <p className="font-serif text-lg text-text-dark">
@@ -114,7 +114,7 @@ function PsalmReadingContent() {
 
   if (screen === 'section-selection') {
     return (
-      <Layout hero={<PageHero title="Psalm 119" subtitle="Choose a section to read." />}>
+      <Layout hero={<PageHero title="Psalm 119" subtitle="Choose a section to read." scriptWord="Psalm" />}>
         <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {psalm119Sections.map((section) => (
@@ -151,7 +151,7 @@ function PsalmReadingContent() {
       : `Psalm ${selectedPsalm?.number}`
 
     return (
-      <Layout hero={<PageHero title={title} />}>
+      <Layout hero={<PageHero title={title} scriptWord="Psalm" />}>
         <div className="mx-auto max-w-lg px-4 py-10 text-center sm:py-14">
 
           {!isIntro && (
@@ -214,7 +214,7 @@ function PsalmReadingContent() {
 
   // Selection screen
   return (
-    <Layout hero={<PageHero title="Psalm Reading" subtitle="Choose a Psalm to read slowly, one verse at a time." />}>
+    <Layout hero={<PageHero title="Psalm Reading" subtitle="Choose a Psalm to read slowly, one verse at a time." scriptWord="Reading" />}>
       <SEO title="Psalm Reading" description="Read and reflect on a Psalm with historical context and guided meditation." noIndex />
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />
