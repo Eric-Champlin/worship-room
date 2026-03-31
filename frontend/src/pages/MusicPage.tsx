@@ -168,11 +168,11 @@ export function MusicPage() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
+    <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
       <SEO title="Worship Music & Ambient Sounds" description="Listen to worship playlists, mix ambient sounds for prayer and meditation, and fall asleep to Scripture readings." jsonLd={musicBreadcrumbs} />
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-primary focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
       >
         Skip to content
       </a>
@@ -191,11 +191,11 @@ export function MusicPage() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-neutral-bg transition-shadow',
+            'sticky top-0 z-40 bg-dashboard-dark transition-shadow',
             isSticky && 'shadow-md',
           )}
         >
-          <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-gray-200">
+          <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-white/10">
             <div
               ref={tabBarRef}
               className="relative flex w-full"
@@ -220,10 +220,10 @@ export function MusicPage() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:py-4 sm:text-base',
+                      'flex flex-1 items-center justify-center px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e] sm:py-4 sm:text-base',
                       isActive
-                        ? 'text-primary'
-                        : 'text-text-light hover:text-text-dark',
+                        ? 'text-white'
+                        : 'text-white/60 hover:text-white/80',
                     )}
                   >
                     <span className="sm:hidden">{tab.shortLabel}</span>

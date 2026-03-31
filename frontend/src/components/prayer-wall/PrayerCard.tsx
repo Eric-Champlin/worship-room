@@ -102,7 +102,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
           <span className="text-white/40"> &mdash; </span>
           <time
             dateTime={prayer.createdAt}
-            className="text-sm text-white/40"
+            className="text-sm text-white/60"
           >
             {formatFullDate(prayer.createdAt)}
           </time>

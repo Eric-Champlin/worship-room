@@ -47,7 +47,7 @@ export function PastChallengeCard({ challenge, isCompleted, onClick }: PastChall
             Completed
           </span>
         ) : (
-          <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/40">
+          <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60">
             Missed
           </span>
         )}

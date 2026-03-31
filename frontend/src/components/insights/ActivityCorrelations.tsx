@@ -130,7 +130,7 @@ export function ActivityCorrelations({ hasData }: ActivityCorrelationsProps) {
             </ResponsiveContainer>
           </div>
 
-          <p className="mt-3 text-xs text-white/40">
+          <p className="mt-3 text-xs text-white/60">
             Based on example data. Real correlations coming soon.
           </p>
         </>

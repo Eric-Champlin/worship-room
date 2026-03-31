@@ -96,7 +96,7 @@ const FriendRowInner = function FriendRow({ friend, onRemove, onBlock }: FriendR
                 {friend.currentStreak}
               </span>
             )}
-            <span className="text-white/40">{activityText}</span>
+            <span className="text-white/60">{activityText}</span>
           </div>
           {/* Nudge — only for inactive friends */}
           <NudgeButton
@@ -118,7 +118,7 @@ const FriendRowInner = function FriendRow({ friend, onRemove, onBlock }: FriendR
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             aria-label={`Options for ${friend.displayName}`}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-white/10 hover:text-white/60"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white/70"
           >
             <MoreVertical className="h-5 w-5" aria-hidden="true" />
           </button>

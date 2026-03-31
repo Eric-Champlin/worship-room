@@ -223,7 +223,7 @@ function DailyHubContent() {
         >
           <h1
             id="daily-hub-heading"
-            className="mb-1 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+            className="mb-1 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
           >
             {displayName}
           </h1>
@@ -252,7 +252,7 @@ function DailyHubContent() {
               <button
                 type="button"
                 onClick={() => setSharePanelOpen(true)}
-                className="absolute bottom-3 right-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-1 text-white/40 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="absolute bottom-3 right-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-1 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label="Share verse of the day"
                 aria-haspopup="dialog"
                 aria-expanded={sharePanelOpen}

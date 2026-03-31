@@ -30,7 +30,7 @@ export function HallOfFame({ pastChallenges }: HallOfFameProps) {
                 <Trophy className="h-5 w-5 shrink-0 text-amber-500" aria-hidden="true" />
                 <h3 className="font-semibold text-white">{challenge.title}</h3>
               </div>
-              <p className="mt-2 text-sm text-white/40">
+              <p className="mt-2 text-sm text-white/60">
                 {completionCount.toLocaleString()} people completed this in {year}
               </p>
             </div>

@@ -105,7 +105,7 @@ export function MonthHeatmap({ month, year, monthName, entries }: MonthHeatmapPr
               {DAY_LABELS.map((label, i) => (
                 <div
                   key={i}
-                  className="flex h-3 w-4 items-center justify-center text-[10px] text-white/40 sm:h-4"
+                  className="flex h-3 w-4 items-center justify-center text-[10px] text-white/60 sm:h-4"
                 >
                   {label}
                 </div>

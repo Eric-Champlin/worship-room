@@ -46,7 +46,7 @@ export function MarkAsAnsweredForm({ onConfirm }: MarkAsAnsweredFormProps) {
         value={praiseText}
         onChange={(e) => setPraiseText(e.target.value)}
         placeholder="Share your testimony..."
-        className="mb-3 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="mb-3 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         rows={3}
         aria-label="Share how God answered this prayer"
       />

@@ -139,7 +139,7 @@ export function DevotionalTabContent({
   }, [readAloud, devotional])
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14" {...swipeHandlers}>
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:py-14" {...swipeHandlers}>
       <div className="relative">
         <div
           aria-hidden="true"
@@ -166,7 +166,7 @@ export function DevotionalTabContent({
                 'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 transition-colors',
                 dayOffset <= -7
                   ? 'cursor-not-allowed text-white/15'
-                  : 'text-white/40 hover:text-white/70',
+                  : 'text-white/50 hover:text-white/70',
               )}
               aria-label="Previous day's devotional"
               aria-disabled={dayOffset <= -7}
@@ -189,7 +189,7 @@ export function DevotionalTabContent({
                 'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 transition-colors',
                 dayOffset >= 0
                   ? 'cursor-not-allowed text-white/15'
-                  : 'text-white/40 hover:text-white/70',
+                  : 'text-white/50 hover:text-white/70',
               )}
               aria-label="Next day's devotional"
               aria-disabled={dayOffset >= 0}
@@ -217,7 +217,7 @@ export function DevotionalTabContent({
               <blockquote className="mt-2 font-serif text-xl italic leading-relaxed text-white/70 sm:text-2xl">
                 {devotional.quote.text}
               </blockquote>
-              <p className="mt-3 text-sm text-white/40">&mdash; {devotional.quote.attribution}</p>
+              <p className="mt-3 text-sm text-white/60">&mdash; {devotional.quote.attribution}</p>
             </div>
           </div>
 
@@ -233,7 +233,7 @@ export function DevotionalTabContent({
               <button
                 type="button"
                 onClick={() => setShowPassageShare(true)}
-                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg p-1.5 text-white/40 transition-colors hover:text-white/70"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg p-1.5 text-white/50 transition-colors hover:text-white/70"
                 aria-label={`Share ${devotional.passage.reference}`}
               >
                 <Share2 className="h-4 w-4" />
@@ -268,7 +268,7 @@ export function DevotionalTabContent({
 
           {/* Prayer section */}
           <div className="border-t border-white/10 py-8 sm:py-10">
-            <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/40">
+            <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/60">
               Closing Prayer
             </p>
             <p className="font-serif text-base italic leading-relaxed text-white/60">
@@ -279,7 +279,7 @@ export function DevotionalTabContent({
           {/* Reflection question section */}
           <div className="border-t border-white/10 py-8 sm:py-10" ref={questionRef}>
             <div className="rounded-2xl border border-white/10 border-l-2 border-l-primary bg-white/[0.06] p-4 backdrop-blur-sm sm:p-6">
-              <p className="text-sm text-white/40">Something to think about today:</p>
+              <p className="text-sm text-white/60">Something to think about today:</p>
               <p className="mt-2 text-lg font-medium text-white">
                 {devotional.reflectionQuestion.replace('Something to think about today: ', '')}
               </p>

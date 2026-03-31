@@ -77,7 +77,7 @@ export function ChallengeWidget() {
             {streak > 3 && (
               <Flame className="h-3.5 w-3.5" style={{ color: challenge.themeColor }} aria-hidden="true" />
             )}
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-white/60">
               {streak > 0 ? `${streak}-day streak` : 'Start your streak!'}
             </span>
           </div>
@@ -106,7 +106,7 @@ export function ChallengeWidget() {
         <div>
           <p className="text-sm font-semibold text-white">Join {challenge.title}</p>
           <p className="mt-1 line-clamp-2 text-sm text-white/60">{challenge.description}</p>
-          <div className="mt-2 flex items-center gap-3 text-xs text-white/40">
+          <div className="mt-2 flex items-center gap-3 text-xs text-white/60">
             <span>{activeSeason.daysRemaining} days remaining</span>
             <span>{participantCount.toLocaleString()} participants</span>
           </div>

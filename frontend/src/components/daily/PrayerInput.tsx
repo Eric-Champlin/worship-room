@@ -119,7 +119,7 @@ export function PrayerInput({
           placeholder="Start typing here..."
           maxLength={500}
           rows={3}
-          className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/40 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
           aria-label="Prayer request"
           aria-describedby={nudge ? 'pray-error pray-char-count' : 'pray-char-count'}
           aria-invalid={nudge ? 'true' : undefined}

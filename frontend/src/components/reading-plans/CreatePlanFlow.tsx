@@ -192,7 +192,7 @@ function StepOne({
           onChange={(e) => onTopicChange(e.target.value)}
           maxLength={500}
           placeholder="I'm struggling with anxiety about my job..."
-          className="w-full resize-none rounded-xl border border-glow-cyan/30 bg-white/5 p-4 text-white backdrop-blur-sm placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 motion-safe:animate-glow-pulse min-h-[120px]"
+          className="w-full resize-none rounded-xl border border-glow-cyan/30 bg-white/5 p-4 text-white backdrop-blur-sm placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 motion-safe:animate-glow-pulse min-h-[120px]"
           aria-label="What's on your heart"
           aria-describedby="plan-char-count"
         />
@@ -314,7 +314,7 @@ function StepThree() {
       <blockquote className="mt-8 max-w-md font-serif text-base italic leading-relaxed text-white/60">
         &ldquo;For I know the thoughts that I think toward you,&rdquo; says Yahweh, &ldquo;thoughts of peace, and not of evil, to give you hope and a future.&rdquo;
       </blockquote>
-      <p className="mt-2 text-sm text-white/40">— Jeremiah 29:11 WEB</p>
+      <p className="mt-2 text-sm text-white/60">— Jeremiah 29:11 WEB</p>
     </div>
   )
 }

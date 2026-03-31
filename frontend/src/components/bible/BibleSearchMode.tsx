@@ -49,9 +49,9 @@ export function BibleSearchMode() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search the Bible..."
           aria-label="Search the Bible"
-          className="w-full rounded-xl border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder-white/40 outline-none transition-colors motion-safe:animate-glow-pulse focus:border-primary focus:ring-2 focus:ring-primary/50"
+          className="w-full rounded-xl border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder-white/50 outline-none transition-colors motion-safe:animate-glow-pulse focus:border-primary focus:ring-2 focus:ring-primary/50"
         />
-        <p className="mt-2 text-center text-sm text-white/40">
+        <p className="mt-2 text-center text-sm text-white/60">
           Searching all 66 books of the Bible
         </p>
       </div>
@@ -87,7 +87,7 @@ export function BibleSearchMode() {
 
         {results.length > 0 && (
           <div className="flex flex-col gap-4" ref={searchResultsRef}>
-            <p className="text-sm text-white/40" aria-live="polite">
+            <p className="text-sm text-white/60" aria-live="polite">
               {results.length >= 100
                 ? '100+ results found (showing first 100)'
                 : `${results.length} result${results.length === 1 ? '' : 's'} found`}
@@ -105,7 +105,7 @@ export function BibleSearchMode() {
                   {result.bookName} {result.chapter}:{result.verseNumber}
                 </h3>
                 {result.contextBefore && (
-                  <p className="mt-2 text-sm text-white/40">
+                  <p className="mt-2 text-sm text-white/60">
                     {result.contextBefore}
                   </p>
                 )}
@@ -113,7 +113,7 @@ export function BibleSearchMode() {
                   <HighlightedText text={result.verseText} query={query} />
                 </p>
                 {result.contextAfter && (
-                  <p className="mt-1 text-sm text-white/40">
+                  <p className="mt-1 text-sm text-white/60">
                     {result.contextAfter}
                   </p>
                 )}

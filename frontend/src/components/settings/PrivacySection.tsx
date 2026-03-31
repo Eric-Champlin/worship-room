@@ -98,7 +98,7 @@ export function PrivacySection({ privacy, onUpdatePrivacy, onUnblockUser }: Priv
         <div className="border-t border-white/10 pt-6">
           <h3 className="text-sm font-medium text-white/80 mb-3">Blocked Users</h3>
           {privacy.blockedUsers.length === 0 ? (
-            <p className="text-sm text-white/40">You haven&apos;t blocked anyone</p>
+            <p className="text-sm text-white/60">You haven&apos;t blocked anyone</p>
           ) : (
             <div className="space-y-3">
               {privacy.blockedUsers.map((userId) => (

@@ -84,7 +84,7 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
                 {session.description}
               </p>
 
-              <span className="mt-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/40">
+              <span className="mt-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
                 {session.durationMinutes} min
               </span>
             </button>

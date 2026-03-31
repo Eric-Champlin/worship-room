@@ -28,10 +28,12 @@ import { useToastSafe } from '@/components/ui/Toast'
 import { hasCheckedInToday } from '@/services/mood-storage'
 import { getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { isOnboardingComplete } from '@/services/onboarding-storage'
+import { shouldShowWelcomeBack, markWelcomeBackShown } from '@/services/welcome-back-storage'
 import { isEveningTime, hasReflectedToday, markReflectionDone, hasAnyActivityToday } from '@/services/evening-reflection-storage'
 import { getRecentBibleAnnotations } from '@/services/bible-annotations-storage'
 import { READING_PLAN_PROGRESS_KEY } from '@/constants/reading-plans'
 import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
+import { WelcomeBack } from '@/components/dashboard/WelcomeBack'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
@@ -46,7 +48,7 @@ import { SlidersHorizontal } from 'lucide-react'
 import type { WidgetId } from '@/constants/dashboard/widget-order'
 import type { MoodEntry } from '@/types/dashboard'
 
-type DashboardPhase = 'onboarding' | 'check_in' | 'recommendations' | 'dashboard_enter' | 'dashboard'
+type DashboardPhase = 'onboarding' | 'welcome_back' | 'check_in' | 'recommendations' | 'dashboard_enter' | 'dashboard'
 
 const DASHBOARD_ENTER_DURATION_MS = 800
 
@@ -76,6 +78,7 @@ export function Dashboard() {
 
   const [phase, setPhase] = useState<DashboardPhase>(() => {
     if (!isOnboardingComplete()) return 'onboarding'
+    if (shouldShowWelcomeBack()) return 'welcome_back'
     return hasCheckedInToday() ? 'dashboard' : 'check_in'
   })
   const [lastMoodEntry, setLastMoodEntry] = useState<MoodEntry | null>(null)
@@ -160,6 +163,8 @@ export function Dashboard() {
       checkedRef.current = true
       if (!isOnboardingComplete()) {
         setPhase('onboarding')
+      } else if (shouldShowWelcomeBack()) {
+        setPhase('welcome_back')
       } else {
         setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
       }
@@ -188,7 +193,21 @@ export function Dashboard() {
   }, [phase])
 
   const handleOnboardingComplete = () => {
-    setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
+    if (shouldShowWelcomeBack()) {
+      setPhase('welcome_back')
+    } else {
+      setPhase(hasCheckedInToday() ? 'dashboard' : 'check_in')
+    }
+  }
+
+  const handleWelcomeBackStepIn = () => {
+    markWelcomeBackShown()
+    setPhase('check_in')
+  }
+
+  const handleWelcomeBackSkip = () => {
+    markWelcomeBackShown()
+    setPhase('dashboard')
   }
 
   const handleCheckInComplete = (entry: MoodEntry) => {
@@ -311,6 +330,17 @@ export function Dashboard() {
     )
   }
 
+  if (phase === 'welcome_back') {
+    return (
+      <WelcomeBack
+        userName={user.name}
+        faithPoints={faithPoints}
+        onStepIn={handleWelcomeBackStepIn}
+        onSkipToDashboard={handleWelcomeBackSkip}
+      />
+    )
+  }
+
   if (phase === 'check_in') {
     return (
       <MoodCheckIn
@@ -377,7 +407,7 @@ export function Dashboard() {
             }
             gardenSlot={
               <div>
-                <p className="text-xs text-white/40">Your Garden</p>
+                <p className="text-xs text-white/60">Your Garden</p>
                 <div className="mt-1 lg:hidden">
                   <GrowthGarden
                     stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}

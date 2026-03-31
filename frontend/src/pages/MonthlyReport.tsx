@@ -108,7 +108,7 @@ export function MonthlyReport() {
       >
         <h1
           id="monthly-report-heading"
-          className="mb-3 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+          className="mb-3 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
         >
           Monthly Report
         </h1>
@@ -117,7 +117,7 @@ export function MonthlyReport() {
             onClick={goToPreviousMonth}
             disabled={isAtEarliest}
             aria-label="Previous month"
-            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/40 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/50 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -126,7 +126,7 @@ export function MonthlyReport() {
             onClick={goToNextMonth}
             disabled={isAtLatest}
             aria-label="Next month"
-            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/40 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+            className="min-h-[44px] min-w-[44px] rounded-full p-2 text-white/50 transition-colors hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
           >
             <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>

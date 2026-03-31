@@ -15,7 +15,7 @@ export function DashboardSection() {
           className="flex w-full min-h-[44px] items-center justify-between rounded-lg bg-white/[0.06] p-4 text-sm text-white hover:bg-white/[0.08] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           <span>Dashboard Layout</span>
-          <span className="text-white/40">Customize →</span>
+          <span className="text-white/50">Customize →</span>
         </button>
 
         <button

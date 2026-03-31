@@ -56,7 +56,7 @@ export function ScriptureConnections({ hasData }: ScriptureConnectionsProps) {
             ))}
           </div>
 
-          <p className="mt-3 text-xs text-white/40">
+          <p className="mt-3 text-xs text-white/60">
             Based on example data. Personalized connections coming soon.
           </p>
         </>

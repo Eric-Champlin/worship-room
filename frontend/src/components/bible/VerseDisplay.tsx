@@ -368,7 +368,7 @@ export function VerseDisplay({
                   <button
                     type="button"
                     onClick={handleKeepEditing}
-                    className="text-sm text-white/40 hover:text-white/60"
+                    className="text-sm text-white/50 hover:text-white/60"
                   >
                     Keep editing
                   </button>

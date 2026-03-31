@@ -40,7 +40,7 @@ export function RoutineStepper() {
                   'flex shrink-0 items-center justify-center rounded-full transition-transform',
                   isCompleted && 'h-6 w-6 bg-primary/30 text-primary sm:h-7 sm:w-7',
                   isCurrent && 'h-7 w-7 scale-110 bg-primary text-white sm:h-8 sm:w-8',
-                  !isCompleted && !isCurrent && 'h-6 w-6 bg-white/10 text-white/40 sm:h-7 sm:w-7',
+                  !isCompleted && !isCurrent && 'h-6 w-6 bg-white/10 text-white/60 sm:h-7 sm:w-7',
                 )}
                 aria-label={`Step ${i + 1}: ${step.label}${isCompleted ? ' (completed)' : isCurrent ? ' (current)' : ''}`}
               >
@@ -55,7 +55,7 @@ export function RoutineStepper() {
 
         {/* Timer icon at end */}
         <div className="flex flex-col items-center gap-1">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/40 sm:h-7 sm:w-7">
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/60 sm:h-7 sm:w-7">
             <Clock size={14} />
           </div>
           <span className="hidden text-[10px] text-white/60 sm:block">Timer</span>

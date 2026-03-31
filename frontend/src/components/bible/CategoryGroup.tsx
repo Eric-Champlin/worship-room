@@ -24,7 +24,7 @@ export function CategoryGroup({ category, books, autoExpandSlug }: CategoryGroup
 
   return (
     <div className="mt-2">
-      <h4 className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white/40">
+      <h4 className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white/60">
         {CATEGORY_LABELS[category]} ({books.length})
       </h4>
       <div>

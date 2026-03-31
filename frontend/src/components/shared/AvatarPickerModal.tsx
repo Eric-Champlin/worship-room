@@ -240,7 +240,7 @@ export function AvatarPickerModal({
               <div role="radiogroup" aria-label="Avatar presets">
                 {presetsByCategory.map(({ category, label, presets }) => (
                   <div key={category} className="mb-4">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-2">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-white/60 mb-2">
                       {label}
                     </h3>
                     <div className="grid grid-cols-4 gap-3">
@@ -281,7 +281,7 @@ export function AvatarPickerModal({
 
                 {/* Unlockable section */}
                 <div className="mb-4">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-2">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-white/60 mb-2">
                     Unlockable Avatars
                   </h3>
                   <div className="grid grid-cols-4 gap-3">
@@ -395,7 +395,7 @@ export function AvatarPickerModal({
 
                 {/* Desktop drag-and-drop zone */}
                 <div
-                  className="hidden sm:flex w-full border-2 border-dashed border-white/20 rounded-xl p-8 items-center justify-center text-white/40 text-sm"
+                  className="hidden sm:flex w-full border-2 border-dashed border-white/20 rounded-xl p-8 items-center justify-center text-white/60 text-sm"
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
                 >

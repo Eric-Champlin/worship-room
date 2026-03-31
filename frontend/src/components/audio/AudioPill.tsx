@@ -83,7 +83,7 @@ export function AudioPill() {
         <Link
           to="/music/routines"
           aria-label="Edit routines"
-          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
         >
           <Pencil size={12} />
         </Link>

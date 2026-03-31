@@ -105,19 +105,19 @@ function ComingSoon({ title }: { title: string }) {
 
 function NotFound() {
   return (
-    <Layout>
+    <Layout dark>
       <SEO title="Page Not Found" description="The page you're looking for doesn't exist." noIndex />
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-md text-center">
-          <h1 className="mb-4 text-3xl font-bold text-text-dark sm:text-4xl">
+          <h1 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
             Page Not Found
           </h1>
-          <p className="mb-6 text-base text-text-light sm:text-lg">
-            The page you&apos;re looking for doesn&apos;t exist.
+          <p className="mb-6 text-base text-white/70 sm:text-lg">
+            This page doesn&apos;t exist, but there&apos;s plenty of peace to find elsewhere.
           </p>
           <Link
             to="/"
-            className="font-script text-2xl text-primary transition-colors hover:text-primary-lt"
+            className="font-script text-2xl text-primary-lt transition-colors hover:text-primary"
           >
             Go Home
           </Link>

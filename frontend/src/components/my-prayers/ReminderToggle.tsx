@@ -52,7 +52,7 @@ export function ReminderToggle({
           />
           <span
             id={tooltipId}
-            className="cursor-help text-xs text-white/40"
+            className="cursor-help text-xs text-white/60"
             title="Push notification timing coming soon. For now, you'll see reminders when you open the app."
           >
             ?

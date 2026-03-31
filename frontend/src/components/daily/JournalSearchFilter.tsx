@@ -33,13 +33,13 @@ export function JournalSearchFilter({
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search your entries..."
             aria-label="Search your entries"
-            className="h-10 w-full rounded-lg border border-white/10 bg-white/[0.06] pl-9 pr-8 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+            className="h-10 w-full rounded-lg border border-white/10 bg-white/[0.06] pl-9 pr-8 text-sm text-white placeholder:text-white/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
           />
           {searchText && (
             <button
               type="button"
               onClick={onClearSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />

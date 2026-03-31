@@ -66,6 +66,20 @@ describe('BibleBrowser', () => {
       expect(screen.getByRole('heading', { name: 'Bible', level: 1 })).toBeInTheDocument()
     })
 
+    it('content area uses max-w-5xl with lg:px-8', () => {
+      const { container } = renderPage()
+      const contentDiv = container.querySelector('.max-w-5xl')
+      expect(contentDiv).toBeInTheDocument()
+      expect(contentDiv?.className).toContain('lg:px-8')
+    })
+
+    it('title has padding for Caveat flourish fix', () => {
+      renderPage()
+      const heading = screen.getByRole('heading', { name: 'Bible', level: 1 })
+      expect(heading.className).toContain('px-1')
+      expect(heading.className).toContain('sm:px-2')
+    })
+
     it('renders "The Word of God" subtitle in serif italic', () => {
       renderPage()
       const subtitle = screen.getByText('The Word of God')

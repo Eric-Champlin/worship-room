@@ -5,10 +5,7 @@ import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
-import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
-import { SEASON_ICON_MAP } from '@/components/SeasonalNavLine'
-import { SeasonalNavLine } from '@/components/SeasonalNavLine'
 import { LocalSupportDropdown } from '@/components/LocalSupportDropdown'
 import { MobileDrawer, MobileNotificationSheet } from '@/components/MobileDrawer'
 import { DesktopUserActions } from '@/components/DesktopUserActions'
@@ -53,9 +50,6 @@ function getNavLinkClass(transparent: boolean) {
 }
 
 function NavbarLogo({ transparent }: { transparent: boolean }) {
-  const { icon, themeColor, isNamedSeason } = useLiturgicalSeason()
-  const SeasonIcon = isNamedSeason ? SEASON_ICON_MAP[icon] : null
-
   return (
     <Link to="/" className="flex items-center gap-1.5" aria-label="Worship Room home">
       <span
@@ -66,13 +60,6 @@ function NavbarLogo({ transparent }: { transparent: boolean }) {
       >
         Worship Room
       </span>
-      {SeasonIcon && (
-        <SeasonIcon
-          className="h-3.5 w-3.5 sm:h-4 sm:w-4"
-          style={{ color: `${themeColor}80` }}
-          aria-hidden="true"
-        />
-      )}
     </Link>
   )
 }
@@ -226,10 +213,6 @@ export function Navbar({ transparent = false }: NavbarProps) {
             </button>
           </div>
 
-          {/* Seasonal line — desktop only */}
-          <div className="hidden md:block">
-            <SeasonalNavLine />
-          </div>
         </div>
 
         {transparent && (

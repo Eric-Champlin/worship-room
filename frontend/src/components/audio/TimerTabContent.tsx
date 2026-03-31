@@ -305,7 +305,7 @@ export function TimerTabContent() {
               value={customDuration}
               onChange={(e) => handleCustomChange(e.target.value)}
               placeholder="Minutes (5-480)"
-              className="min-h-[44px] w-full rounded-lg border border-white/20 bg-transparent px-4 py-2 text-sm text-white placeholder:text-white/30 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+              className="min-h-[44px] w-full rounded-lg border border-white/20 bg-transparent px-4 py-2 text-sm text-white placeholder:text-white/50 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
             />
           </div>
         )}

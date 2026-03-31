@@ -13,7 +13,7 @@ export function PrayerWallHero({ action }: PrayerWallHeroProps) {
       className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
       style={ATMOSPHERIC_HERO_BG}
     >
-      <h1 id="prayer-wall-heading" className="mb-3 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
+      <h1 id="prayer-wall-heading" className="mb-3 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl">
         Prayer Wall
       </h1>
       <p className="mx-auto max-w-xl font-serif italic text-base text-white/60 sm:text-lg">

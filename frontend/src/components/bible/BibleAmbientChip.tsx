@@ -186,7 +186,7 @@ export function BibleAmbientChip({ onExpand, forceCollapse }: BibleAmbientChipPr
           <div className="mt-2 text-center">
             <Link
               to="/music?tab=ambient"
-              className="text-xs text-white/40 transition-colors hover:text-white/60"
+              className="text-xs text-white/50 transition-colors hover:text-white/70"
             >
               Browse all sounds &rarr;
             </Link>

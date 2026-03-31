@@ -171,7 +171,7 @@ export function ChallengeBanner() {
           <button
             onClick={handleDismiss}
             aria-label="Dismiss challenge banner"
-            className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full text-white/50 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
             <X className="h-4 w-4" />
           </button>

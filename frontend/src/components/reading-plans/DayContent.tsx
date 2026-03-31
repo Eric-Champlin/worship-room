@@ -21,7 +21,7 @@ export const DayContent = forwardRef<HTMLDivElement, DayContentProps>(
           <p className="mb-4 text-xs font-medium uppercase tracking-widest">
             <VerseLink
               reference={day.passage.reference}
-              className="text-white/40"
+              className="text-white/50"
             />
           </p>
           <div className="font-serif text-base italic leading-relaxed text-white/90 sm:text-lg">
@@ -38,7 +38,7 @@ export const DayContent = forwardRef<HTMLDivElement, DayContentProps>(
 
         {/* Reflection section */}
         <section className="border-t border-white/10 py-8 sm:py-10">
-          <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/40">
+          <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/60">
             Reflection
           </p>
           <div className="space-y-4 text-base leading-relaxed text-white/80">
@@ -50,7 +50,7 @@ export const DayContent = forwardRef<HTMLDivElement, DayContentProps>(
 
         {/* Prayer section */}
         <section className="border-t border-white/10 py-8 sm:py-10">
-          <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/40">
+          <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/60">
             Closing Prayer
           </p>
           <p className="font-serif text-base italic leading-relaxed text-white/80">
@@ -61,7 +61,7 @@ export const DayContent = forwardRef<HTMLDivElement, DayContentProps>(
         {/* Action step section */}
         <section className="border-t border-white/10 py-8 sm:py-10" ref={ref}>
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-6">
-            <p className="text-sm text-white/40">Today&apos;s Action Step</p>
+            <p className="text-sm text-white/60">Today&apos;s Action Step</p>
             <p className="mt-2 text-lg font-medium text-white">
               {day.actionStep}
             </p>

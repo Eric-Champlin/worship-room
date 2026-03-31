@@ -37,9 +37,9 @@ describe('VerseLink', () => {
   })
 
   it('applies custom className', () => {
-    renderVerseLink({ reference: 'Psalm 34:18', className: 'text-white/40' })
+    renderVerseLink({ reference: 'Psalm 34:18', className: 'text-white/60' })
     const link = screen.getByRole('link', { name: 'Psalm 34:18' })
-    expect(link.className).toContain('text-white/40')
+    expect(link.className).toContain('text-white/60')
   })
 
   it('always has hover styles', () => {

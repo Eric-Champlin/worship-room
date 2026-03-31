@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TypewriterInput } from './TypewriterInput'
 import { cn } from '@/lib/utils'
-import { useAuth } from '@/hooks/useAuth'
-import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 const VIDEO_MAX_OPACITY = 0.4
@@ -80,18 +78,12 @@ function useVideoFade(video: HTMLVideoElement | null) {
 
 export function HeroSection() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
-  const authModal = useAuthModal()
   const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null)
   const prefersReducedMotion = usePrefersReducedMotion()
 
   useVideoFade(videoEl)
 
   const handleInputSubmit = (value: string) => {
-    if (!isAuthenticated) {
-      authModal?.openAuthModal('Sign in to ask questions')
-      return
-    }
     navigate(`/ask?q=${encodeURIComponent(value)}`)
   }
 

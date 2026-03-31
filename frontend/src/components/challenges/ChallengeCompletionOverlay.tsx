@@ -244,7 +244,7 @@ export function ChallengeCompletionOverlay({
           <button
             type="button"
             onClick={onDismiss}
-            className="mt-4 text-xs text-white/40 transition-colors hover:text-white/60"
+            className="mt-4 text-xs text-white/50 transition-colors hover:text-white/60"
           >
             Tap anywhere to dismiss
           </button>

@@ -117,7 +117,7 @@ export function RoutinesPage() {
       >
         <h1
           ref={headingRef}
-          className="font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+          className="px-1 sm:px-2 font-script text-3xl font-bold bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
         >
           Bedtime Routines
         </h1>

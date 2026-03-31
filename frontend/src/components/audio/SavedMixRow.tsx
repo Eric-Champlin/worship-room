@@ -140,7 +140,7 @@ export function SavedMixRow({ mix, onShare }: SavedMixRowProps) {
                 />
               ),
           )}
-          <span className="ml-1 text-xs text-white/30">
+          <span className="ml-1 text-xs text-white/60">
             {mix.sounds.length}
           </span>
         </div>
@@ -153,7 +153,7 @@ export function SavedMixRow({ mix, onShare }: SavedMixRowProps) {
             aria-label={`Actions for ${mix.name}`}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
-            className="rounded-md p-1 text-white/40 transition-colors hover:bg-white/10 hover:text-white/70"
+            className="rounded-md p-1 text-white/50 transition-colors hover:bg-white/10 hover:text-white/70"
           >
             <MoreVertical size={16} />
           </button>

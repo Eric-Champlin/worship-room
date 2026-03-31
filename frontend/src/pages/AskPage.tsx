@@ -9,6 +9,7 @@ import { UserQuestionBubble } from '@/components/ask/UserQuestionBubble'
 import { AskResponseDisplay } from '@/components/ask/AskResponseDisplay'
 import { PopularTopicsSection } from '@/components/ask/PopularTopicsSection'
 import { SaveConversationButton } from '@/components/ask/SaveConversationButton'
+import { ConversionPrompt } from '@/components/ask/ConversionPrompt'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useToast } from '@/components/ui/Toast'
@@ -30,6 +31,7 @@ export function AskPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null)
   const [feedbackThanks, setFeedbackThanks] = useState(false)
+  const [conversionDismissed, setConversionDismissed] = useState(false)
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const navigate = useNavigate()
@@ -60,10 +62,6 @@ export function AskPage() {
 
   const handleSubmit = () => {
     if (!text.trim()) return
-    if (!isAuthenticated) {
-      authModal?.openAuthModal('Sign in to ask questions')
-      return
-    }
     const submittedText = text.trim()
     setIsLoading(true)
     setPendingQuestion(submittedText)
@@ -95,20 +93,18 @@ export function AskPage() {
     const qParam = searchParams.get('q')
     if (qParam) {
       setText(qParam)
-      if (isAuthenticated) {
-        timeoutId = setTimeout(() => handleSubmitRef.current(), 0)
-      }
+      timeoutId = setTimeout(() => handleSubmitRef.current(), 0)
     }
     return () => clearTimeout(timeoutId)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle auto-submit from Popular Topics (Step 7)
+  // Handle auto-submit from Popular Topics
   useEffect(() => {
-    if (pendingAutoSubmitRef.current && text === pendingAutoSubmitRef.current && isAuthenticated) {
+    if (pendingAutoSubmitRef.current && text === pendingAutoSubmitRef.current) {
       pendingAutoSubmitRef.current = null
       handleSubmitRef.current()
     }
-  }, [text, isAuthenticated])
+  }, [text])
 
   const handleChipClick = (chipText: string) => {
     setText(chipText)
@@ -117,9 +113,7 @@ export function AskPage() {
 
   const handleTopicClick = (starterQuestion: string) => {
     setText(starterQuestion)
-    if (isAuthenticated) {
-      pendingAutoSubmitRef.current = starterQuestion
-    }
+    pendingAutoSubmitRef.current = starterQuestion
   }
 
   const handleAskAnother = () => {
@@ -132,7 +126,7 @@ export function AskPage() {
 
   const handleFollowUpClick = (question: string) => {
     if (!isAuthenticated) {
-      authModal?.openAuthModal('Sign in to ask questions')
+      authModal?.openAuthModal('Sign in to continue the conversation')
       return
     }
     setPendingQuestion(question)
@@ -153,11 +147,19 @@ export function AskPage() {
   }
 
   const handleJournal = () => {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to save journal entries')
+      return
+    }
     const questionText = conversation.length > 0 ? conversation[0].question : text
     navigate('/daily?tab=journal', { state: { prayWallContext: questionText } })
   }
 
   const handlePray = () => {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to generate prayers')
+      return
+    }
     const questionText = conversation.length > 0 ? conversation[0].question : text
     navigate('/daily?tab=pray', { state: { prayWallContext: questionText } })
   }
@@ -175,11 +177,15 @@ export function AskPage() {
   }
 
   const handleFeedback = (type: 'up' | 'down') => {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to give feedback')
+      return
+    }
     setFeedback(type)
     setFeedbackThanks(true)
     feedbackTimerRef.current = setTimeout(() => setFeedbackThanks(false), 2000)
 
-    if (!isAuthenticated || conversation.length === 0) return
+    if (conversation.length === 0) return
     const firstResponse = conversation[0].response
     let existing: AskFeedback[] = []
     try {
@@ -240,7 +246,7 @@ export function AskPage() {
                       aria-describedby="ask-char-count"
                       className={cn(
                         'w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] py-3 px-4',
-                        'text-base text-white placeholder:text-white/40',
+                        'text-base text-white placeholder:text-white/50',
                         'motion-safe:animate-glow-pulse',
                         'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
                       )}
@@ -356,8 +362,16 @@ export function AskPage() {
                 )}
               </div>
 
-              {/* Save conversation button — after 2+ Q&A pairs */}
-              <SaveConversationButton conversation={conversation} />
+              {/* Conversion prompt for logged-out users */}
+              {!isAuthenticated && conversation.length > 0 && !conversionDismissed && (
+                <ConversionPrompt
+                  onDismiss={() => setConversionDismissed(true)}
+                  prefersReducedMotion={prefersReducedMotion}
+                />
+              )}
+
+              {/* Save conversation button — after 2+ Q&A pairs (logged-in only) */}
+              {isAuthenticated && <SaveConversationButton conversation={conversation} />}
             </div>
           </div>
         </main>

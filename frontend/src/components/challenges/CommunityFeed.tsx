@@ -35,7 +35,7 @@ export function CommunityFeed({ dayNumber, challengeDuration }: CommunityFeedPro
                 <span className="text-sm font-medium text-white/90">{item.name}</span>{' '}
                 <span className="text-sm text-white/60">{item.action}</span>
               </div>
-              <span className="shrink-0 text-xs text-white/40">{item.timestamp}</span>
+              <span className="shrink-0 text-xs text-white/60">{item.timestamp}</span>
             </li>
           ))}
         </ul>

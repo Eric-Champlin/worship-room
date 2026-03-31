@@ -34,7 +34,7 @@ export function EveningReflectionBanner({ onReflectNow, onDismiss, animate }: Ev
           <button
             type="button"
             onClick={onDismiss}
-            className="min-h-[44px] text-sm text-white/40 transition-colors hover:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 focus:rounded"
+            className="min-h-[44px] text-sm text-white/50 transition-colors hover:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:rounded"
           >
             Not tonight
           </button>

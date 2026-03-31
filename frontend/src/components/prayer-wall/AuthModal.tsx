@@ -134,18 +134,18 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         aria-describedby={subtitle && view !== 'forgot-password' ? 'auth-modal-subtitle' : undefined}
-        className={`mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl ${panelClass}`}
+        className={`mx-4 w-full max-w-md rounded-xl bg-hero-mid/95 backdrop-blur-xl border border-white/10 p-6 shadow-xl ${panelClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="relative flex items-center justify-center">
-          <h2 id="auth-modal-title" className="text-center font-script text-4xl font-bold text-nav-text-dark sm:text-5xl">
+          <h2 id="auth-modal-title" className="text-center font-script text-4xl font-bold text-white sm:text-5xl">
             {VIEW_TITLES[view]}
           </h2>
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-0 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-text-light transition-colors hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="absolute right-0 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Close"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -153,20 +153,20 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         </div>
 
         {subtitle && view !== 'forgot-password' && (
-          <p id="auth-modal-subtitle" className="mt-2 text-center text-sm text-text-light">
+          <p id="auth-modal-subtitle" className="mt-2 text-center text-sm text-white/60">
             {subtitle}
           </p>
         )}
 
         {view === 'forgot-password' ? (
           <>
-            <p className="mt-2 text-center text-sm text-text-light">
+            <p className="mt-2 text-center text-sm text-white/60">
               Enter your email and we'll send you a reset link.
             </p>
 
             <form onSubmit={handleForgotSubmit} className="mt-4">
               <div className="mb-4">
-                <label htmlFor="auth-reset-email" className="mb-1 block text-sm font-medium text-text-dark">
+                <label htmlFor="auth-reset-email" className="mb-1 block text-sm font-medium text-white/80">
                   Email
                 </label>
                 <input
@@ -176,7 +176,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   autoComplete="email"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                 />
               </div>
 
@@ -185,11 +185,11 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               </Button>
             </form>
 
-            <p className="mt-4 text-center text-sm text-text-light">
+            <p className="mt-4 text-center text-sm text-white/60">
               <button
                 type="button"
                 onClick={() => setView('login')}
-                className="font-medium text-nav-text-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="font-medium text-primary-lt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
               >
                 Back to Log In
               </button>
@@ -202,7 +202,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               {view === 'register' && (
                 <div className="mb-3 grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="auth-first-name" className="mb-1 block text-sm font-medium text-text-dark">
+                    <label htmlFor="auth-first-name" className="mb-1 block text-sm font-medium text-white/80">
                       First name
                     </label>
                     <input
@@ -210,11 +210,11 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                       type="text"
                       required
                       autoComplete="given-name"
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                     />
                   </div>
                   <div>
-                    <label htmlFor="auth-last-name" className="mb-1 block text-sm font-medium text-text-dark">
+                    <label htmlFor="auth-last-name" className="mb-1 block text-sm font-medium text-white/80">
                       Last name
                     </label>
                     <input
@@ -222,14 +222,14 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                       type="text"
                       required
                       autoComplete="family-name"
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                     />
                   </div>
                 </div>
               )}
 
               <div className="mb-3">
-                <label htmlFor="auth-email" className="mb-1 block text-sm font-medium text-text-dark">
+                <label htmlFor="auth-email" className="mb-1 block text-sm font-medium text-white/80">
                   Email
                 </label>
                 <input
@@ -238,14 +238,14 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   type="email"
                   value={emailValue}
                   autoComplete="email"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                   aria-label="Email address"
                   aria-invalid={emailError ? 'true' : undefined}
                   aria-describedby={emailError ? 'email-error' : undefined}
                   onChange={(e) => { setEmailValue(e.target.value); setEmailError(null) }}
                 />
                 {emailError && (
-                  <p id="email-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-500">
+                  <p id="email-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
                     <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {emailError}
                   </p>
@@ -253,7 +253,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               </div>
 
               <div className="mb-3">
-                <label htmlFor="auth-password" className="mb-1 block text-sm font-medium text-text-dark">
+                <label htmlFor="auth-password" className="mb-1 block text-sm font-medium text-white/80">
                   Password
                 </label>
                 <input
@@ -262,14 +262,14 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   type="password"
                   value={passwordValue}
                   autoComplete={view === 'login' ? 'current-password' : 'new-password'}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                   aria-label="Password"
                   aria-invalid={passwordError ? 'true' : undefined}
                   aria-describedby={passwordError ? 'password-error' : undefined}
                   onChange={(e) => { setPasswordValue(e.target.value); setPasswordError(null) }}
                 />
                 {passwordError && (
-                  <p id="password-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-500">
+                  <p id="password-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
                     <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {passwordError}
                   </p>
@@ -278,7 +278,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
 
               {view === 'register' && (
                 <div className="mb-3">
-                  <label htmlFor="auth-confirm-password" className="mb-1 block text-sm font-medium text-text-dark">
+                  <label htmlFor="auth-confirm-password" className="mb-1 block text-sm font-medium text-white/80">
                     Confirm password
                   </label>
                   <input
@@ -286,7 +286,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                     type="password"
                     required
                     autoComplete="new-password"
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                   />
                 </div>
               )}
@@ -295,7 +295,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 <button
                   type="button"
                   onClick={() => setView('forgot-password')}
-                  className="mb-3 text-sm text-nav-text-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                  className="mb-3 text-sm text-primary-lt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                 >
                   Forgot password?
                 </button>
@@ -308,16 +308,16 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
 
             {/* Divider */}
             <div className="my-4 flex items-center gap-3">
-              <div className="h-px flex-1 bg-gray-200" />
-              <span className="text-xs text-text-light">or</span>
-              <div className="h-px flex-1 bg-gray-200" />
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-xs text-white/50">or</span>
+              <div className="h-px flex-1 bg-white/10" />
             </div>
 
             {/* Spotify button (disabled) */}
             <button
               type="button"
               disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-spotify-green/40 px-4 py-2.5 text-sm font-medium text-white opacity-60"
+              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[#1DB954]/20 border border-[#1DB954]/30 px-4 py-2.5 text-sm font-medium text-[#1DB954] opacity-60"
               aria-label="Continue with Spotify"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -327,14 +327,14 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
             </button>
 
             {/* Toggle link */}
-            <p className="mt-4 text-center text-sm text-text-light">
+            <p className="mt-4 text-center text-sm text-white/60">
               {view === 'login' ? (
                 <>
                   No account?{' '}
                   <button
                     type="button"
                     onClick={() => setView('register')}
-                    className="font-medium text-nav-text-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="font-medium text-primary-lt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                   >
                     Create one!
                   </button>
@@ -345,7 +345,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   <button
                     type="button"
                     onClick={() => setView('login')}
-                    className="font-medium text-nav-text-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="font-medium text-primary-lt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                   >
                     Log in
                   </button>

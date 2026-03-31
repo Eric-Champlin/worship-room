@@ -72,7 +72,7 @@ export function EncourageButton({ friendId, friendName, iconOnly }: EncourageBut
         className={
           isDisabled
             ? 'flex min-h-[44px] cursor-not-allowed items-center gap-1.5 rounded-lg px-2 py-1 text-sm text-white/40 opacity-40'
-            : 'flex min-h-[44px] items-center gap-1.5 rounded-lg px-2 py-1 text-sm text-white/40 transition-colors hover:text-white/60'
+            : 'flex min-h-[44px] items-center gap-1.5 rounded-lg px-2 py-1 text-sm text-white/50 transition-colors hover:text-white/70'
         }
         disabled={false}
         tabIndex={isDisabled ? -1 : 0}

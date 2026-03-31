@@ -60,7 +60,7 @@ export function NoteEditor({
         placeholder="Add a note about this verse..."
         maxLength={NOTE_MAX_CHARS}
         rows={3}
-        className="w-full resize-none rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white/90 placeholder:text-white/30 focus:border-primary/50 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+        className="w-full resize-none rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white/90 placeholder:text-white/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/50 focus:outline-none"
         aria-label={`Personal note for verse ${verseNumber}`}
         aria-describedby="note-char-count"
       />
@@ -86,7 +86,7 @@ export function NoteEditor({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="text-sm text-white/50 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Cancel
         </button>
@@ -95,7 +95,7 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => setShowDeleteConfirm(true)}
-            className="ml-auto text-sm text-white/30 hover:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="ml-auto text-sm text-white/50 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Delete
           </button>
@@ -118,7 +118,7 @@ export function NoteEditor({
           <button
             type="button"
             onClick={() => setShowDeleteConfirm(false)}
-            className="text-sm text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="text-sm text-white/50 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Cancel
           </button>

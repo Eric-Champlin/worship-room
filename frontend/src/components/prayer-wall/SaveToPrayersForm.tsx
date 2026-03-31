@@ -69,7 +69,7 @@ export function SaveToPrayersForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Prayer title..."
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-primary focus:outline-none"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-primary focus:outline-none"
           />
           <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Prayer category">
             {SAVEABLE_CATEGORIES.map((cat) => (

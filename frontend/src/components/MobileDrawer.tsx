@@ -1,15 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, WifiOff, X } from 'lucide-react'
+import { Bell, WifiOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
-import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { useNotificationActions } from '@/hooks/useNotificationActions'
 import { NotificationPanel } from '@/components/dashboard/NotificationPanel'
-import { SEASON_ICON_MAP } from '@/components/SeasonalNavLine'
 import { isNavActive } from '@/components/Navbar'
 import { LOCAL_SUPPORT_LINKS } from '@/components/LocalSupportDropdown'
 
@@ -44,7 +42,7 @@ function DrawerSectionHeader({ children }: { children: React.ReactNode }) {
     <span
       role="heading"
       aria-level={2}
-      className="px-3 text-xs uppercase tracking-wide text-white/30"
+      className="px-3 text-xs uppercase tracking-wide text-white/50"
     >
       {children}
     </span>
@@ -122,14 +120,6 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
     }
   }, [])
 
-  // Seasonal banner state for mobile drawer
-  const { isNamedSeason, seasonName, icon: seasonIcon, currentSeason } = useLiturgicalSeason()
-  const [seasonDismissed, setSeasonDismissed] = useState(() => {
-    try { return sessionStorage.getItem('wr_seasonal_nav_dismissed') === 'true' }
-    catch (_e) { return false }
-  })
-  const SeasonIcon = isNamedSeason ? SEASON_ICON_MAP[seasonIcon] : null
-
   // Focus trap: keep Tab within the drawer while open
   useEffect(() => {
     if (!isOpen || !drawerRef.current) return
@@ -204,31 +194,6 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
           )}
         >
           <div className="flex flex-col px-4 py-4">
-            {/* Seasonal banner — mobile drawer */}
-            {isNamedSeason && !seasonDismissed && (
-              <div className="mb-3 flex items-center gap-2 px-3 pb-3 border-b border-white/15">
-                {SeasonIcon && <SeasonIcon className="h-3.5 w-3.5 text-white/40" aria-hidden="true" />}
-                <span className="text-xs text-white/40">
-                  It&apos;s {seasonName} — a season of {currentSeason.themeWord}
-                </span>
-                <Link to="/daily?tab=devotional" onClick={onClose} className="text-xs text-primary-lt hover:underline">
-                  Read today&apos;s devotional
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    try { sessionStorage.setItem('wr_seasonal_nav_dismissed', 'true') }
-                    catch (_e) { /* sessionStorage unavailable */ }
-                    setSeasonDismissed(true)
-                  }}
-                  className="ml-auto rounded-full p-1 text-white/30 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                  aria-label="Dismiss seasonal message"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            )}
-
             {/* Offline indicator */}
             {!isOnline && (
               <div className="mb-3 flex items-center gap-2 px-3 pb-3 border-b border-white/15">
@@ -236,7 +201,7 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
                   className="h-4 w-4 text-white/40"
                   aria-label="You're offline — some features are limited"
                 />
-                <span className="text-xs text-white/40">
+                <span className="text-xs text-white/60">
                   You&apos;re offline
                 </span>
               </div>

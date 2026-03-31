@@ -133,7 +133,7 @@ export function SaveMixButton() {
             onKeyDown={handleKeyDown}
             maxLength={50}
             aria-label="Name your mix"
-            className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-lt focus:ring-offset-1 focus:ring-offset-hero-mid"
+            className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-lt focus:ring-offset-1 focus:ring-offset-hero-mid"
             placeholder="Name your mix..."
           />
           <div className="flex gap-2">

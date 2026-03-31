@@ -23,7 +23,7 @@ export function BookCompletionCard({
       <button
         type="button"
         onClick={onDismiss}
-        className="absolute right-2 top-2 rounded p-1 text-white/40 transition-colors hover:text-white/70"
+        className="absolute right-2 top-2 rounded p-1 text-white/50 transition-colors hover:text-white/70"
         aria-label="Dismiss"
       >
         <X className="h-4 w-4" />

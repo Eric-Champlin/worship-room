@@ -110,7 +110,7 @@ export function GuidedPrayerPlayer({
             <p className="font-serif italic text-white/80 text-lg leading-relaxed">
               &ldquo;{session.completionVerse.text}&rdquo;
             </p>
-            <p className="mt-2 text-xs text-white/40">
+            <p className="mt-2 text-xs text-white/60">
               &mdash; {session.completionVerse.reference}
             </p>
           </div>
@@ -200,7 +200,7 @@ export function GuidedPrayerPlayer({
               className={`transition-opacity duration-500 ${prefersReduced ? '' : 'animate-fade-in'}`}
               key={`silence-${player.currentSegmentIndex}`}
             >
-              <p className="font-serif italic text-white/30 text-xl">
+              <p className="font-serif italic text-white/60 text-xl">
                 Be still...
               </p>
             </div>
@@ -220,7 +220,7 @@ export function GuidedPrayerPlayer({
               style={{ width: `${player.progressPercent}%` }}
             />
           </div>
-          <p className="mt-1 text-center text-xs text-white/40">
+          <p className="mt-1 text-center text-xs text-white/60">
             {formatTime(player.elapsedSeconds)} / {formatTime(player.totalDurationSeconds)}
           </p>
         </div>
@@ -251,13 +251,13 @@ export function GuidedPrayerPlayer({
 
         {/* Sound indicator */}
         {player.autoStartedAmbient && audioState.activeSounds.length > 0 && (
-          <div className="mt-4 text-center text-xs text-white/40">
+          <div className="mt-4 text-center text-xs text-white/60">
             Sound: {player.ambientSceneName}
             <span className="mx-1 text-white/20">&middot;</span>
             <button
               type="button"
               onClick={handleOpenDrawer}
-              className="text-white/40 underline hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+              className="text-white/50 underline hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
             >
               Change
             </button>
@@ -265,7 +265,7 @@ export function GuidedPrayerPlayer({
             <button
               type="button"
               onClick={handleStopAmbient}
-              className="text-white/40 underline hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+              className="text-white/50 underline hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
             >
               Stop
             </button>

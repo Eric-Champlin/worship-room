@@ -18,16 +18,16 @@ export function ScriptureSessionCard({ reading, onPlay }: ScriptureSessionCardPr
         type="button"
         aria-label={`Play ${reading.scriptureReference}: ${reading.title}, ${formatDuration(reading.durationSeconds)}, ${reading.voiceId} voice`}
         onClick={() => onPlay(reading)}
-        className="w-full min-w-[220px] shrink-0 snap-start cursor-pointer rounded-xl border border-gray-200 bg-white p-4 pr-12 text-left shadow-sm transition-colors hover:border-gray-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+        className="w-full min-w-[220px] shrink-0 snap-start cursor-pointer rounded-xl border border-white/10 bg-white/[0.06] p-4 pr-12 text-left transition-colors hover:border-white/20 hover:shadow-md hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-[#0f0a1e]"
       >
-        <p className="text-sm font-medium text-text-dark">{reading.title}</p>
-        <p className="mt-0.5 text-xs text-text-light">{reading.scriptureReference}</p>
+        <p className="text-sm font-medium text-white">{reading.title}</p>
+        <p className="mt-0.5 text-xs text-white/60">{reading.scriptureReference}</p>
 
         <div className="mt-3 flex items-center gap-2">
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-text-light">
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
             {formatDuration(reading.durationSeconds)}
           </span>
-          <span className="text-xs text-text-light">
+          <span className="text-xs text-white/50">
             {reading.voiceId === 'male' ? 'Male voice' : 'Female voice'}
           </span>
           <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">

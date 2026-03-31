@@ -108,7 +108,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           onChange={handleChange}
           placeholder="What's on your heart?"
           maxLength={PRAYER_POST_MAX_LENGTH}
-          className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 leading-relaxed text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
+          className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 leading-relaxed text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
           style={{ minHeight: '120px' }}
           aria-label="Prayer request"
           aria-describedby="composer-char-count"
@@ -174,7 +174,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           <span className="text-sm text-white/70">Post anonymously</span>
         </label>
 
-        <p className="mt-3 text-xs text-white/40">
+        <p className="mt-3 text-xs text-white/60">
           Your prayer will be shared with the community. Be kind and respectful.
         </p>
 

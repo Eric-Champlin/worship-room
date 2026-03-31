@@ -146,7 +146,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
           onChange={(e) => setName(e.target.value.slice(0, 50))}
           maxLength={50}
           placeholder="My Bedtime Routine"
-          className="mb-6 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="mb-6 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
 
         {/* Step timeline */}
@@ -154,7 +154,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
           <h3 className="mb-3 text-sm font-medium text-white/80">Steps</h3>
 
           {steps.length === 0 ? (
-            <p className="mb-4 text-center text-sm text-white/40">
+            <p className="mb-4 text-center text-sm text-white/60">
               Add steps to build your routine
             </p>
           ) : (
@@ -170,7 +170,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
                   {i > 0 && (
                     <div className="mb-2 flex items-center gap-2 pl-8">
                       <Clock size={12} className="text-white/30" />
-                      <span className="text-xs text-white/40">Wait</span>
+                      <span className="text-xs text-white/60">Wait</span>
                       <input
                         type="number"
                         min={0}
@@ -182,7 +182,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
                         aria-label={`Transition gap before step ${i + 1} in minutes`}
                         className="w-12 rounded border border-white/10 bg-white/5 px-2 py-0.5 text-center text-xs text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                       />
-                      <span className="text-xs text-white/40">min</span>
+                      <span className="text-xs text-white/60">min</span>
                     </div>
                   )}
 
@@ -228,7 +228,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
               <button
                 type="button"
                 onClick={() => setShowTypePicker(false)}
-                className="px-2 py-2 text-xs text-white/40 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
+                className="px-2 py-2 text-xs text-white/50 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
               >
                 Cancel
               </button>

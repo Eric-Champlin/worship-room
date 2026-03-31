@@ -140,7 +140,7 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
       {showCrisis && <CrisisBanner text={combinedText} />}
 
       {isFirstTime && (
-        <p className="text-sm italic text-white/40">
+        <p className="text-sm italic text-white/60">
           Count three blessings from today
         </p>
       )}
@@ -156,7 +156,7 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
               placeholder={placeholders[i]}
               maxLength={150}
               aria-label={`Gratitude item ${i + 1}`}
-              className="h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
         ))}

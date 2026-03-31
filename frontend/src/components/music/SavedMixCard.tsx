@@ -71,7 +71,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
 
   return (
     <>
-      <div className="group relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+      <div className="group relative rounded-xl border border-white/10 bg-white/[0.06] p-4 transition-shadow hover:shadow-md hover:shadow-black/20">
         {/* Favorite button */}
         <FavoriteButton
           type="custom_mix"
@@ -106,10 +106,10 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
             maxLength={50}
             aria-label="Edit mix name"
             autoFocus
-            className="w-full rounded-md border border-gray-300 bg-white px-2 py-1 pr-10 text-sm text-text-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-lt"
+            className="w-full rounded-md bg-white/[0.06] border border-white/10 px-2 py-1 pr-10 text-sm text-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-lt"
           />
         ) : (
-          <h3 className="pr-10 text-sm font-semibold text-text-dark">
+          <h3 className="pr-10 text-sm font-semibold text-white">
             {mix.name}
           </h3>
         )}
@@ -122,12 +122,12 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
                 <si.Icon
                   key={si.id}
                   size={14}
-                  className="text-text-light"
+                  className="text-white/50"
                   aria-hidden="true"
                 />
               ),
           )}
-          <span className="text-xs text-text-light">
+          <span className="text-xs text-white/50">
             {mix.sounds.length} sounds
           </span>
         </div>
@@ -151,7 +151,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
               aria-label={`Actions for ${mix.name}`}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-text-light transition-colors hover:bg-gray-100 hover:text-text-dark"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-white/50 transition-colors hover:bg-white/10 hover:text-white"
             >
               <MoreVertical size={16} />
             </button>

@@ -127,7 +127,7 @@ export function GrowthProfile() {
         </Link>
         <h1
           id="profile-heading"
-          className="mb-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+          className="mb-2 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
         >
           {profileData.displayName}
         </h1>

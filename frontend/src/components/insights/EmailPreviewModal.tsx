@@ -100,7 +100,7 @@ export function EmailPreviewModal({ isOpen, onClose, monthName }: EmailPreviewMo
         </div>
 
         {/* Disclaimer */}
-        <p className="mt-3 text-center text-xs text-white/40">
+        <p className="mt-3 text-center text-xs text-white/60">
           Email reports coming soon. This is a preview of what your monthly
           email will look like.
         </p>

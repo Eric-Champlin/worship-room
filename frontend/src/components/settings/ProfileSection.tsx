@@ -141,7 +141,7 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
             }}
             onBlur={handleNameBlur}
             maxLength={NAME_MAX}
-            className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:outline-none min-h-[44px]"
+            className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:outline-none min-h-[44px]"
             placeholder="Your display name"
             aria-label="Display name"
             aria-invalid={nameError ? 'true' : undefined}
@@ -152,7 +152,7 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
               {nameError && <p id="name-error" className="text-xs text-red-400" role="alert">{nameError}</p>}
               {nameSaved && <p className="text-xs text-green-400" aria-live="polite">Saved</p>}
             </div>
-            <span className="text-xs text-white/40">{displayName.length}/{NAME_MAX}</span>
+            <span className="text-xs text-white/60">{displayName.length}/{NAME_MAX}</span>
           </div>
         </div>
 
@@ -169,13 +169,13 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
             }}
             onBlur={handleBioBlur}
             rows={3}
-            className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:outline-none resize-none"
+            className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:border-primary focus:ring-1 focus:ring-primary/50 focus-visible:outline-none resize-none"
             placeholder="Tell your friends a little about yourself..."
             aria-label="Bio"
             aria-describedby="bio-char-count"
           />
           <div className="mt-1 flex items-center justify-between">
-            <p className="text-xs text-white/40">Your bio will appear on your profile (coming soon)</p>
+            <p className="text-xs text-white/60">Your bio will appear on your profile (coming soon)</p>
             <CharacterCount current={bio.length} max={BIO_MAX} warningAt={128} dangerAt={154} id="bio-char-count" />
           </div>
         </div>

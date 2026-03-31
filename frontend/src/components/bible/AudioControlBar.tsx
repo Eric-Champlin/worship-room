@@ -108,7 +108,7 @@ export function AudioControlBar({
                 'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg transition-colors',
                 isIdle
                   ? 'cursor-not-allowed text-white/20'
-                  : 'text-white/40 hover:bg-white/10 hover:text-white/60',
+                  : 'text-white/50 hover:bg-white/10 hover:text-white/70',
               )}
             >
               <Square className="h-5 w-5" />
@@ -202,7 +202,7 @@ export function AudioControlBar({
                 aria-expanded={isTimerPanelOpen}
                 className={cn(
                   'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg transition-colors',
-                  isTimerActive ? 'text-primary' : 'text-white/40 hover:text-white/60',
+                  isTimerActive ? 'text-primary' : 'text-white/50 hover:text-white/70',
                 )}
               >
                 <Timer className="h-5 w-5" />

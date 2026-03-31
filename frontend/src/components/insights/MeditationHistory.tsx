@@ -175,7 +175,7 @@ export function MeditationHistory({ rangeDays }: MeditationHistoryProps) {
       {/* Summary cards */}
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-          <p className="text-xs uppercase tracking-wider text-white/40">
+          <p className="text-xs uppercase tracking-wider text-white/60">
             This Week
           </p>
           <p className="mt-1 text-xl font-semibold text-white">
@@ -183,7 +183,7 @@ export function MeditationHistory({ rangeDays }: MeditationHistoryProps) {
           </p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-          <p className="text-xs uppercase tracking-wider text-white/40">
+          <p className="text-xs uppercase tracking-wider text-white/60">
             This Month
           </p>
           <p className="mt-1 text-xl font-semibold text-white">
@@ -191,7 +191,7 @@ export function MeditationHistory({ rangeDays }: MeditationHistoryProps) {
           </p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-          <p className="text-xs uppercase tracking-wider text-white/40">
+          <p className="text-xs uppercase tracking-wider text-white/60">
             All Time
           </p>
           <p className="mt-1 text-xl font-semibold text-white">
@@ -313,7 +313,7 @@ export function MeditationHistory({ rangeDays }: MeditationHistoryProps) {
             </div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-sm italic text-white/40">
+            <p className="text-sm italic text-white/60">
               Meditation trends will appear after your first few sessions.
             </p>
           </div>

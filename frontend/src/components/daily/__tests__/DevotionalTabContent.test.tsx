@@ -70,6 +70,13 @@ describe('DevotionalTabContent', () => {
       expect(screen.getByText(/What's On Your/)).toBeInTheDocument()
     })
 
+    it('uses max-w-4xl container width', () => {
+      const { container } = renderComponent()
+      const wrapper = container.firstElementChild as HTMLElement
+      expect(wrapper.className).toContain('max-w-4xl')
+      expect(wrapper.className).not.toContain('max-w-2xl')
+    })
+
     it('renders devotional title', () => {
       renderComponent()
       const headings = screen.getAllByRole('heading')

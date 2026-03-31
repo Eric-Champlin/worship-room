@@ -78,6 +78,6 @@ describe('VerseOfTheDayBanner', () => {
     renderBanner()
     const links = screen.getAllByRole('link')
     const verseLink = links.find((l) => l.getAttribute('href')?.startsWith('/bible/'))
-    expect(verseLink?.className).toContain('text-white/40')
+    expect(verseLink?.className).toContain('text-white/60')
   })
 })
