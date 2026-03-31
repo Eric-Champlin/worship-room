@@ -182,13 +182,14 @@ describe('SeasonalBanner', () => {
     expect(banner.style.transition).toBe('none')
   })
 
-  it('has glassmorphic background classes', () => {
+  it('has glassmorphic background classes on inner container', () => {
     mockSeason('lent')
     renderBanner()
     const banner = screen.getByRole('complementary')
-    expect(banner.className).toContain('bg-white/[0.04]')
-    expect(banner.className).toContain('backdrop-blur-md')
-    expect(banner.className).toContain('border-b')
-    expect(banner.className).toContain('border-white/10')
+    const inner = banner.firstElementChild as HTMLElement
+    expect(inner.className).toContain('bg-white/[0.04]')
+    expect(inner.className).toContain('backdrop-blur-md')
+    expect(inner.className).toContain('rounded-2xl')
+    expect(inner.className).toContain('border-white/10')
   })
 })

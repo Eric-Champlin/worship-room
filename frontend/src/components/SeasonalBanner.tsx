@@ -62,7 +62,7 @@ export function SeasonalBanner() {
 
   return (
     <div
-      className="w-full bg-white/[0.04] backdrop-blur-md border-b border-white/10"
+      className="w-full"
       style={{
         maxHeight: hiding ? 0 : 200,
         opacity: hiding ? 0 : 1,
@@ -74,7 +74,7 @@ export function SeasonalBanner() {
       role="complementary"
       aria-label="Seasonal announcement"
     >
-      <div className="relative mx-auto flex max-w-6xl items-center justify-center px-4 py-2 sm:px-6">
+      <div className="relative flex items-center justify-center rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/10 px-4 py-2 sm:px-6">
         {/* Mobile: wrap-friendly layout */}
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pr-10 sm:pr-12">
           <div className="flex items-center gap-2">

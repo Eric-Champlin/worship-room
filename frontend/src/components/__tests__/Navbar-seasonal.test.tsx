@@ -25,6 +25,10 @@ vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
   useAuthModal: vi.fn(() => ({ openAuthModal: vi.fn() })),
 }))
 
+vi.mock('@/hooks/useReducedMotion', () => ({
+  useReducedMotion: vi.fn(() => false),
+}))
+
 import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 
 const mockUseLiturgicalSeason = vi.mocked(useLiturgicalSeason)
@@ -77,5 +81,38 @@ describe('Navbar — clean logo', () => {
     await renderNavbar()
     const homeLink = screen.getByLabelText('Worship Room home')
     expect(homeLink).toHaveTextContent('Worship Room')
+  })
+})
+
+describe('Navbar — SeasonalBanner integration', () => {
+  it('renders SeasonalBanner during named season', async () => {
+    mockSeason('lent')
+    await renderNavbar()
+    expect(screen.getByRole('complementary', { name: 'Seasonal announcement' })).toBeInTheDocument()
+  })
+
+  it('does not render SeasonalBanner during Ordinary Time', async () => {
+    mockSeason('ordinary-time')
+    await renderNavbar()
+    expect(screen.queryByRole('complementary', { name: 'Seasonal announcement' })).not.toBeInTheDocument()
+  })
+
+  it('renders SeasonalBanner inside the nav element', async () => {
+    mockSeason('advent')
+    await renderNavbar()
+    const nav = screen.getByRole('navigation', { name: 'Main navigation' })
+    const banner = screen.getByRole('complementary', { name: 'Seasonal announcement' })
+    expect(nav.contains(banner)).toBe(true)
+  })
+
+  it('suppresses SeasonalBanner when hideBanner is true', async () => {
+    mockSeason('lent')
+    const { Navbar } = await import('../Navbar')
+    render(
+      <MemoryRouter>
+        <Navbar transparent hideBanner />
+      </MemoryRouter>,
+    )
+    expect(screen.queryByRole('complementary', { name: 'Seasonal announcement' })).not.toBeInTheDocument()
   })
 })

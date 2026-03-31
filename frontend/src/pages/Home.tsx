@@ -53,7 +53,7 @@ export function Home() {
       >
         Skip to content
       </a>
-      <Navbar transparent />
+      <Navbar transparent hideBanner />
       <main id="main-content">
         <HeroSection />
         <JourneySection />

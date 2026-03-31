@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Layout } from '../Layout'
 import { LITURGICAL_SEASONS } from '@/constants/liturgical-calendar'
@@ -74,24 +74,4 @@ describe('Layout', () => {
     expect(outer.className).not.toContain('bg-neutral-bg')
   })
 
-  it('renders SeasonalBanner during named season', () => {
-    mockSeason('lent')
-    renderLayout()
-    expect(screen.getByRole('complementary', { name: 'Seasonal announcement' })).toBeInTheDocument()
-  })
-
-  it('renders SeasonalBanner before main content', () => {
-    mockSeason('lent')
-    renderLayout()
-    const banner = screen.getByRole('complementary')
-    const main = screen.getByRole('main')
-    // banner should come before main in DOM order
-    expect(banner.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-  })
-
-  it('renders SeasonalBanner when hero prop is provided', () => {
-    mockSeason('advent')
-    renderLayout({ hero: <div>hero content</div> })
-    expect(screen.getByRole('complementary', { name: 'Seasonal announcement' })).toBeInTheDocument()
-  })
 })

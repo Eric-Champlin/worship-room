@@ -9,6 +9,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { LocalSupportDropdown } from '@/components/LocalSupportDropdown'
 import { MobileDrawer, MobileNotificationSheet } from '@/components/MobileDrawer'
 import { DesktopUserActions } from '@/components/DesktopUserActions'
+import { SeasonalBanner } from '@/components/SeasonalBanner'
 
 const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> = [
   { label: 'Daily Hub', to: '/daily', icon: Calendar },
@@ -137,9 +138,10 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
 
 interface NavbarProps {
   transparent?: boolean
+  hideBanner?: boolean
 }
 
-export function Navbar({ transparent = false }: NavbarProps) {
+export function Navbar({ transparent = false, hideBanner = false }: NavbarProps) {
   const { isAuthenticated } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMobileBellOpen, setIsMobileBellOpen] = useState(false)
@@ -227,6 +229,8 @@ export function Navbar({ transparent = false }: NavbarProps) {
           onClose={() => setIsMenuOpen(false)}
           onBellTap={() => setIsMobileBellOpen(true)}
         />
+
+        {!hideBanner && <SeasonalBanner />}
       </div>
 
       {/* Mobile notification bottom sheet — auth-gated to prevent localStorage writes for logged-out users */}
