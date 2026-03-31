@@ -8,6 +8,7 @@ const MIN_CATEGORY_PRAYERS = 3
 
 const CATEGORY_COLORS: Record<PrayerCategory, string> = {
   health: '#2DD4BF',
+  'mental-health': '#60A5FA',
   family: '#8B5CF6',
   work: '#F59E0B',
   grief: '#D97706',

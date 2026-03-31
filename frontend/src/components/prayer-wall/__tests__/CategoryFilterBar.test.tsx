@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CategoryFilterBar } from '../CategoryFilterBar'
-import { PRAYER_CATEGORIES, type PrayerCategory } from '@/constants/prayer-categories'
+import { type PrayerCategory } from '@/constants/prayer-categories'
 
 const zeroCounts: Record<PrayerCategory, number> = {
-  health: 2, family: 2, work: 3, grief: 1,
+  health: 2, 'mental-health': 0, family: 2, work: 3, grief: 1,
   gratitude: 3, praise: 2, relationships: 2, other: 3, discussion: 0,
 }
 
@@ -25,14 +25,31 @@ function renderBar(overrides?: {
 }
 
 describe('CategoryFilterBar', () => {
-  it('renders "All" pill and 9 category pills', () => {
+  it('renders "All" pill and 10 category pills', () => {
     renderBar()
     const buttons = screen.getAllByRole('button')
-    expect(buttons).toHaveLength(10) // "All" + 9 categories
+    expect(buttons).toHaveLength(11) // "All" + 10 categories
     expect(screen.getByText('All')).toBeInTheDocument()
-    for (const cat of PRAYER_CATEGORIES) {
-      expect(screen.getByText(cat.charAt(0).toUpperCase() + cat.slice(1))).toBeInTheDocument()
-    }
+    expect(screen.getByText('Mental Health')).toBeInTheDocument()
+  })
+
+  it('"Mental Health" pill renders between Health and Family', () => {
+    renderBar()
+    const buttons = screen.getAllByRole('button')
+    const labels = buttons.map((b) => b.textContent)
+    const healthIdx = labels.indexOf('Health')
+    const mentalHealthIdx = labels.indexOf('Mental Health')
+    const familyIdx = labels.indexOf('Family')
+    expect(mentalHealthIdx).toBe(healthIdx + 1)
+    expect(familyIdx).toBe(mentalHealthIdx + 1)
+  })
+
+  it('scroll container has flex-nowrap and no lg:flex-wrap', () => {
+    renderBar()
+    const toolbar = screen.getByRole('toolbar')
+    const scrollContainer = toolbar.querySelector('.flex-nowrap')
+    expect(scrollContainer).not.toBeNull()
+    expect(scrollContainer?.className).not.toContain('lg:flex-wrap')
   })
 
   it('"All" is selected by default (no active category)', () => {
@@ -63,10 +80,11 @@ describe('CategoryFilterBar', () => {
     expect(healthPill).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('counts shown when showCounts is true', () => {
+  it('count shown only on the active pill when showCounts is true', () => {
     renderBar({ showCounts: true, activeCategory: 'health' })
     expect(screen.getByText('Health (2)')).toBeInTheDocument()
-    expect(screen.getByText('Work (3)')).toBeInTheDocument()
+    expect(screen.getByText('Work')).toBeInTheDocument()
+    expect(screen.queryByText('Work (3)')).not.toBeInTheDocument()
   })
 
   it('counts NOT shown when showCounts is false', () => {

@@ -93,9 +93,9 @@ describe('InlineComposer', () => {
   })
 
   // Category-specific tests
-  it('renders 9 category pills when open', () => {
+  it('renders 10 category pills when open', () => {
     renderComposer()
-    const pills = ['Health', 'Family', 'Work', 'Grief', 'Gratitude', 'Praise', 'Relationships', 'Other', 'Discussion']
+    const pills = ['Health', 'Mental Health', 'Family', 'Work', 'Grief', 'Gratitude', 'Praise', 'Relationships', 'Other', 'Discussion']
     for (const label of pills) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }

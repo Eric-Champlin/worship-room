@@ -116,8 +116,9 @@ describe('InlineComposer — challenge integration', () => {
 // ---------------------------------------------------------------------------
 
 describe('CategoryFilterBar — challenge filter', () => {
-  const baseCounts = {
+  const baseCounts: Record<PrayerCategory, number> = {
     health: 5,
+    'mental-health': 0,
     family: 3,
     work: 2,
     grief: 1,
@@ -126,7 +127,7 @@ describe('CategoryFilterBar — challenge filter', () => {
     relationships: 1,
     other: 0,
     discussion: 2,
-  } as Record<PrayerCategory, number>
+  }
 
   it('shows "Challenge Prayers" pill during active season', () => {
     render(

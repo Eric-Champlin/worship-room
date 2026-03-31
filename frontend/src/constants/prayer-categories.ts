@@ -1,5 +1,5 @@
 export const PRAYER_CATEGORIES = [
-  'health', 'family', 'work', 'grief',
+  'health', 'mental-health', 'family', 'work', 'grief',
   'gratitude', 'praise', 'relationships', 'other', 'discussion',
 ] as const
 
@@ -7,6 +7,7 @@ export type PrayerCategory = (typeof PRAYER_CATEGORIES)[number]
 
 export const CATEGORY_LABELS: Record<PrayerCategory, string> = {
   health: 'Health',
+  'mental-health': 'Mental Health',
   family: 'Family',
   work: 'Work',
   grief: 'Grief',

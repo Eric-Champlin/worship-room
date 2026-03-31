@@ -117,7 +117,7 @@ describe('PrayerWall', () => {
   it('URL param pre-selects filter', () => {
     renderPage('/prayer-wall?category=health')
     const toolbar = screen.getByRole('toolbar')
-    const healthPill = within(toolbar).getByRole('button', { name: /Health/i })
+    const healthPill = within(toolbar).getByRole('button', { name: /^Health(\s|$)/i })
     expect(healthPill).toHaveAttribute('aria-pressed', 'true')
     const allPill = within(toolbar).getByRole('button', { name: 'All' })
     expect(allPill).toHaveAttribute('aria-pressed', 'false')
