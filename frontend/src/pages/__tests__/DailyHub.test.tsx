@@ -120,7 +120,7 @@ describe('DailyHub', () => {
     renderPage()
     // Verse reference is in the hero section, always visible regardless of tab
     const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const ref = hero.querySelector('.text-white\\/50')
+    const ref = hero.querySelector('.text-white\\/60')
     expect(ref).toBeInTheDocument()
     expect(ref!.textContent).toMatch(/^—\s/)
   })
@@ -132,56 +132,26 @@ describe('DailyHub', () => {
     expect(verseLinks.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('renders devotional card with title', () => {
+  it('devotional card is not rendered in hero', () => {
     renderPage()
     const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const heading = hero.querySelector('h2')
-    expect(heading).toBeInTheDocument()
-    expect(heading!.textContent!.length).toBeGreaterThan(0)
+    expect(hero.textContent).not.toMatch(/Daily Devotional/i)
+    expect(hero.textContent).not.toMatch(/Read today/i)
   })
 
-  it('devotional card switches to devotional tab', async () => {
-    const user = userEvent.setup()
-    renderPage('/daily?tab=pray')
-    // Find the devotional card button within the hero section
-    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const devCard = Array.from(hero.querySelectorAll('button')).find(
-      (btn) => btn.textContent?.includes('Read today')
-    )!
-    expect(devCard).toBeInTheDocument()
-    await user.click(devCard)
-    // After clicking, devotional tab becomes active
-    const devTab = screen.getByRole('tab', { name: /devos|devotional/i })
-    expect(devTab).toHaveAttribute('aria-selected', 'true')
-  })
-
-  it('shows "DAILY DEVOTIONAL" label in hero card', () => {
+  it('VOTD banner has full-width frosted glass styling', () => {
     renderPage()
     const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const label = hero.querySelector('.uppercase')
-    expect(label).toBeInTheDocument()
-    expect(label!.textContent).toBe('Daily Devotional')
+    const banner = hero.querySelector('.rounded-2xl')
+    expect(banner).toBeInTheDocument()
+    expect(banner!.className).toContain('bg-white/5')
   })
 
-  it('shows theme pill', () => {
+  it('verse text is not line-clamped in banner', () => {
     renderPage()
-    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const pill = hero.querySelector('.rounded-full')
-    expect(pill).toBeInTheDocument()
-  })
-
-  it('does NOT show devotional checkmark when logged out', () => {
-    renderPage()
-    // No sr-only "Already read today" text when logged out
-    expect(screen.queryByText('Already read today')).not.toBeInTheDocument()
-  })
-
-  it('shows devotional checkmark when logged in and devotional read', () => {
-    const todayStr = new Date().toLocaleDateString('en-CA')
-    localStorage.setItem('wr_devotional_reads', JSON.stringify([todayStr]))
-    mockUseAuth.mockReturnValue({ user: { name: 'Eric', id: 'test-user' }, isAuthenticated: true, login: vi.fn(), logout: vi.fn() })
-    renderPage()
-    expect(screen.getByText('Already read today')).toBeInTheDocument()
+    const verseText = document.querySelector('.font-serif.italic')
+    expect(verseText).toBeInTheDocument()
+    expect(verseText!.className).not.toContain('line-clamp')
   })
 
   it('share button opens SharePanel', async () => {

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams, useLocation, Link } from 'react-router-dom'
-import { Heart, PenLine, Wind, BookOpen, Check, Share2, ChevronRight } from 'lucide-react'
+import { Heart, PenLine, Wind, BookOpen, Check, Share2 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -12,7 +12,6 @@ import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
 import { DevotionalTabContent } from '@/components/daily/DevotionalTabContent'
 import { SharePanel } from '@/components/sharing/SharePanel'
 import { getTodaysVerse } from '@/constants/verse-of-the-day'
-import { getTodaysDevotional } from '@/data/devotionals'
 import { parseVerseReferences } from '@/lib/parse-verse-references'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
@@ -52,13 +51,6 @@ function getGreeting(): string {
   return 'Good Evening'
 }
 
-function formatTheme(theme: string): string {
-  return theme
-    .split('-')
-    .map(w => w === 'and' ? '&' : w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
-}
-
 function DailyHubContent() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -73,7 +65,6 @@ function DailyHubContent() {
 
   // Hero content data
   const verse = getTodaysVerse()
-  const devotional = getTodaysDevotional()
 
   const parsedRefs = parseVerseReferences(verse.reference)
   const verseLink = parsedRefs.length > 0
@@ -228,72 +219,43 @@ function DailyHubContent() {
             {displayName}
           </h1>
 
-          {/* Two Content Cards */}
-          <div className="mt-6 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Left Card — Today's Verse */}
-            <div className="relative rounded-xl border border-white/10 bg-white/[0.08] p-5 text-left backdrop-blur-sm sm:min-h-[140px]">
-              <Link
-                to={verseLink}
-                className="block transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              >
-                <p className="pr-6 font-serif italic text-lg text-white/90 line-clamp-3 sm:line-clamp-4">
-                  &ldquo;{verse.text}&rdquo;
-                </p>
-                <p className="mt-2 text-sm text-white/50">
-                  — {verse.reference}
-                </p>
-              </Link>
+          {/* Verse of the Day — Full-Width Banner */}
+          <div className="mt-6 w-full max-w-3xl rounded-2xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur-sm sm:p-8">
+            <Link
+              to={verseLink}
+              className="block transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:rounded"
+            >
+              <p className="font-serif italic text-lg leading-relaxed text-white/90 sm:text-xl">
+                &ldquo;{verse.text}&rdquo;
+              </p>
+            </Link>
+            <p className="mt-3 text-sm text-white/60 sm:text-base">
+              — {verse.reference}
+            </p>
+            <div className="mt-4 flex items-center gap-4">
               <Link
                 to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}`}
-                className="mt-1 inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
+                className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
               >
                 Meditate on this verse &gt;
               </Link>
               <button
                 type="button"
                 onClick={() => setSharePanelOpen(true)}
-                className="absolute bottom-3 right-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-1 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-1 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label="Share verse of the day"
                 aria-haspopup="dialog"
                 aria-expanded={sharePanelOpen}
               >
                 <Share2 className="h-4 w-4" />
               </button>
-              <SharePanel
-                verseText={verse.text}
-                reference={verse.reference}
-                isOpen={sharePanelOpen}
-                onClose={() => setSharePanelOpen(false)}
-              />
             </div>
-
-            {/* Right Card — Today's Devotional */}
-            <button
-              type="button"
-              onClick={() => switchTab('devotional')}
-              className="block w-full rounded-xl border border-white/10 bg-white/[0.08] p-5 text-left backdrop-blur-sm transition-colors hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:min-h-[140px]"
-            >
-              <p className="text-xs uppercase tracking-wide text-primary-lt">
-                Daily Devotional
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                <h2 className="text-lg font-bold text-white">
-                  {devotional.title}
-                </h2>
-                {hasReadDevotional && (
-                  <>
-                    <Check className="h-4 w-4 flex-shrink-0 text-success" aria-hidden="true" />
-                    <span className="sr-only">Already read today</span>
-                  </>
-                )}
-              </div>
-              <span className="mt-2 inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/50">
-                {formatTheme(devotional.theme)}
-              </span>
-              <p className="mt-3 flex items-center gap-1 text-sm text-primary-lt">
-                Read today&apos;s devotional <ChevronRight className="h-3 w-3" />
-              </p>
-            </button>
+            <SharePanel
+              verseText={verse.text}
+              reference={verse.reference}
+              isOpen={sharePanelOpen}
+              onClose={() => setSharePanelOpen(false)}
+            />
           </div>
 
           {/* Quiz Teaser */}
