@@ -188,7 +188,13 @@ export function MonthlyReport() {
           </AnimatedSection>
         )}
         <AnimatedSection index={suggestions.length > 0 ? 6 : 5}>
-          <MonthlyShareButton />
+          <MonthlyShareButton
+            monthName={data.monthName}
+            year={data.year}
+            moodEntries={data.moodEntries}
+            activityCounts={data.activityCounts}
+            longestStreak={data.longestStreak}
+          />
           <button
             className="mt-2 mx-auto inline-flex min-h-[44px] items-center text-sm text-white/50 underline hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
             onClick={() => setShowEmailPreview(true)}

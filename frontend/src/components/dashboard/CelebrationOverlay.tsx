@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { getBadgeIcon, CONFETTI_COLORS, LEVEL_ENCOURAGEMENT_MESSAGES, STREAK_MILESTONE_MESSAGES } from '@/constants/dashboard/badge-icons'
 import { Z } from '@/constants/z-index'
+import { ShareImageButton } from '@/components/sharing/ShareImageButton'
+import { generateBadgeShareImage, generateStreakShareImage, generateLevelUpShareImage } from '@/lib/celebration-share-canvas'
+import { STREAK_SHARE_MESSAGES, LEVEL_SHARE_CONTENT, BADGE_CATEGORY_EMOJI } from '@/constants/dashboard/share-card-content'
 import type { BadgeDefinition } from '@/types/dashboard'
 
 // --- Props ---
@@ -129,6 +132,47 @@ export function CelebrationOverlay({ badge, onDismiss, suggestion }: Celebration
 
   const encouragement = getEncouragementMessage(badge)
 
+  const shareConfig = useMemo(() => {
+    // Level badge: level_2 -> 2
+    const levelMatch = badge.id.match(/^level_(\d+)$/)
+    if (levelMatch) {
+      const levelNum = parseInt(levelMatch[1], 10)
+      if (levelNum >= 2 && LEVEL_SHARE_CONTENT[levelNum]) {
+        return {
+          generate: () => generateLevelUpShareImage(levelNum),
+          filename: `worship-room-level-${levelNum}.png`,
+        }
+      }
+      return null // level_1 (Seedling) — no share
+    }
+
+    // Streak badge: streak_60 -> 60
+    const streakMatch = badge.id.match(/^streak_(\d+)$/)
+    if (streakMatch) {
+      const days = parseInt(streakMatch[1], 10)
+      const message = STREAK_SHARE_MESSAGES[days]
+      if (message) {
+        return {
+          generate: () => generateStreakShareImage(days, message),
+          filename: `worship-room-streak-${days}.png`,
+        }
+      }
+      return null
+    }
+
+    // Other badges (activity, community, etc.)
+    const emoji = BADGE_CATEGORY_EMOJI[badge.category] ?? '⭐'
+    return {
+      generate: () =>
+        generateBadgeShareImage({
+          name: badge.name,
+          description: badge.description,
+          icon: emoji,
+        }),
+      filename: `worship-room-badge-${badge.id}.png`,
+    }
+  }, [badge])
+
   return createPortal(
     <div
       ref={focusTrapRef}
@@ -184,19 +228,29 @@ export function CelebrationOverlay({ badge, onDismiss, suggestion }: Celebration
             </Link>
           )}
 
-          {/* Continue button (delayed 6s, immediate with reduced motion) */}
-          {showContinue && (
-            <button
-              ref={continueRef}
-              onClick={onDismiss}
-              className={`mt-8 animate-continue-fade-in rounded-lg border border-white/30 px-8 py-3 font-sans text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50 motion-reduce:animate-none ${
-                isMobile ? 'w-full py-4' : ''
-              }`}
-              aria-label="Continue"
-            >
-              Continue
-            </button>
-          )}
+          {/* Share + Continue buttons */}
+          <div className={`mt-8 flex items-center justify-center gap-3 ${isMobile ? 'flex-col w-full' : ''}`}>
+            {shareConfig && (
+              <ShareImageButton
+                generateImage={shareConfig.generate}
+                filename={shareConfig.filename}
+                variant="ghost"
+                className={isMobile ? 'w-full' : ''}
+              />
+            )}
+            {showContinue && (
+              <button
+                ref={continueRef}
+                onClick={onDismiss}
+                className={`animate-continue-fade-in rounded-lg border border-white/30 px-8 py-3 font-sans text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50 motion-reduce:animate-none ${
+                  isMobile ? 'w-full py-4' : ''
+                }`}
+                aria-label="Continue"
+              >
+                Continue
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>,

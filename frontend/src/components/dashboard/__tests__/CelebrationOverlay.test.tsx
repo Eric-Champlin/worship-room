@@ -3,6 +3,26 @@ import { render, screen, act } from '@testing-library/react'
 import { CelebrationOverlay } from '../CelebrationOverlay'
 import type { BadgeDefinition } from '@/types/dashboard'
 
+// Mock canvas generators to avoid real canvas operations
+vi.mock('@/lib/celebration-share-canvas', () => ({
+  generateBadgeShareImage: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'image/png' })),
+  generateStreakShareImage: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'image/png' })),
+  generateLevelUpShareImage: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'image/png' })),
+}))
+
+// Mock useToastSafe for ShareImageButton
+vi.mock('@/components/ui/Toast', () => ({
+  useToastSafe: () => ({ showToast: vi.fn() }),
+}))
+
+const LEVEL_1_BADGE: BadgeDefinition = {
+  id: 'level_1',
+  name: 'Seedling',
+  description: 'Reached Level 1',
+  category: 'level',
+  celebrationTier: 'full-screen',
+}
+
 const LEVEL_2_BADGE: BadgeDefinition = {
   id: 'level_2',
   name: 'Sprout',
@@ -20,6 +40,14 @@ const STREAK_60_BADGE: BadgeDefinition = {
   name: 'Unwavering',
   description: 'Maintained a 60-day streak',
   category: 'streak',
+  celebrationTier: 'full-screen',
+}
+
+const ACTIVITY_BADGE: BadgeDefinition = {
+  id: 'first_prayer',
+  name: 'First Prayer',
+  description: 'Prayed for the first time',
+  category: 'activity',
   celebrationTier: 'full-screen',
 }
 
@@ -125,7 +153,9 @@ describe('CelebrationOverlay', () => {
     const onDismiss = vi.fn()
     render(<CelebrationOverlay badge={LEVEL_2_BADGE} onDismiss={onDismiss} />)
 
-    const confetti = document.querySelectorAll('[aria-hidden="true"]')
+    // Select only span confetti particles (not SVG icons which also have aria-hidden)
+    const confetti = document.querySelectorAll('span[aria-hidden="true"]')
+    expect(confetti.length).toBeGreaterThan(0)
     confetti.forEach((particle) => {
       expect(particle.className).toContain('motion-reduce:hidden')
     })
@@ -168,5 +198,83 @@ describe('CelebrationOverlay', () => {
 
     unmount()
     expect(document.body.style.overflow).not.toBe('hidden')
+  })
+
+  // --- Share button tests ---
+
+  it('Share button renders on level-up celebration (level 2-6)', () => {
+    const onDismiss = vi.fn()
+    render(<CelebrationOverlay badge={LEVEL_2_BADGE} onDismiss={onDismiss} />)
+
+    expect(screen.getByRole('button', { name: /share/i })).toBeInTheDocument()
+  })
+
+  it('Share button renders on full-screen streak celebration', () => {
+    const onDismiss = vi.fn()
+    render(<CelebrationOverlay badge={STREAK_60_BADGE} onDismiss={onDismiss} />)
+
+    expect(screen.getByRole('button', { name: /share/i })).toBeInTheDocument()
+  })
+
+  it('Share button renders on activity badge celebration', () => {
+    const onDismiss = vi.fn()
+    render(<CelebrationOverlay badge={ACTIVITY_BADGE} onDismiss={onDismiss} />)
+
+    expect(screen.getByRole('button', { name: /share/i })).toBeInTheDocument()
+  })
+
+  it('Share button does NOT render for level_1 (Seedling)', () => {
+    const onDismiss = vi.fn()
+    render(<CelebrationOverlay badge={LEVEL_1_BADGE} onDismiss={onDismiss} />)
+
+    expect(screen.queryByRole('button', { name: /share/i })).not.toBeInTheDocument()
+  })
+
+  it('Share button visible immediately (before Continue)', () => {
+    // Ensure matchMedia returns non-reduced-motion (no instant Continue)
+    vi.spyOn(window, 'matchMedia').mockReturnValue({
+      matches: false,
+      media: '(prefers-reduced-motion: reduce)',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+    })
+
+    const onDismiss = vi.fn()
+    render(<CelebrationOverlay badge={LEVEL_2_BADGE} onDismiss={onDismiss} />)
+
+    // Share is visible at t=0
+    expect(screen.getByRole('button', { name: /share/i })).toBeInTheDocument()
+    // Continue is NOT visible yet (6s delay)
+    expect(screen.queryByText('Continue')).not.toBeInTheDocument()
+  })
+
+  it('Continue button still appears after 6s alongside Share', () => {
+    const onDismiss = vi.fn()
+    render(<CelebrationOverlay badge={LEVEL_2_BADGE} onDismiss={onDismiss} />)
+
+    act(() => {
+      vi.advanceTimersByTime(6000)
+    })
+
+    // Both buttons visible
+    expect(screen.getByRole('button', { name: /share/i })).toBeInTheDocument()
+    expect(screen.getByText('Continue')).toBeInTheDocument()
+  })
+
+  it('Clicking Share does not dismiss overlay', () => {
+    const onDismiss = vi.fn()
+    render(<CelebrationOverlay badge={LEVEL_2_BADGE} onDismiss={onDismiss} />)
+
+    act(() => {
+      screen.getByRole('button', { name: /share/i }).click()
+    })
+
+    expect(onDismiss).not.toHaveBeenCalled()
+    // Dialog still open
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 })

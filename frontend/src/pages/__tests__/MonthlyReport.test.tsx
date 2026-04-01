@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
@@ -31,12 +31,25 @@ vi.mock('@/components/ui/Toast', () => ({
   useToastSafe: () => ({ showToast: mockShowToast, showCelebrationToast: vi.fn() }),
 }))
 
+// --- Canvas generator mock ---
+const mockGenerateMonthlyShareImage = vi.fn().mockResolvedValue(
+  new Blob(['test'], { type: 'image/png' }),
+)
+vi.mock('@/lib/celebration-share-canvas', () => ({
+  generateMonthlyShareImage: (...args: unknown[]) => mockGenerateMonthlyShareImage(...args),
+}))
+
 // Force reduced motion so count-up resolves instantly
 beforeEach(() => {
   localStorage.clear()
   mockAuth.isAuthenticated = true
   mockAuth.user = { name: 'Eric', id: 'test-id' }
   mockShowToast.mockClear()
+  mockGenerateMonthlyShareImage.mockClear()
+  mockGenerateMonthlyShareImage.mockResolvedValue(new Blob(['test'], { type: 'image/png' }))
+  // No Web Share or clipboard in tests
+  Object.defineProperty(navigator, 'share', { value: undefined, writable: true, configurable: true })
+  Object.defineProperty(navigator, 'clipboard', { value: undefined, writable: true, configurable: true })
   vi.spyOn(window, 'matchMedia').mockImplementation(
     (query: string) =>
       ({
@@ -114,7 +127,7 @@ describe('MonthlyReport — All Sections', () => {
 
   it('renders share button', () => {
     renderPage()
-    expect(screen.getByText('Share Your Month')).toBeInTheDocument()
+    expect(screen.getByText('Share This Month')).toBeInTheDocument()
   })
 
   it('renders email preview link', () => {
@@ -154,14 +167,19 @@ describe('MonthlyReport — Month Navigation', () => {
 })
 
 describe('MonthlyReport — Share & Email', () => {
-  it('share button triggers toast', async () => {
+  it('share button generates canvas image on click', async () => {
     const user = userEvent.setup()
     renderPage()
-    await user.click(screen.getByText('Share Your Month'))
-    expect(mockShowToast).toHaveBeenCalledWith(
-      'Sharing your report is coming soon.',
-      'success',
-    )
+    await user.click(screen.getByText('Share This Month'))
+
+    await waitFor(() => {
+      expect(mockGenerateMonthlyShareImage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          monthName: expect.any(String),
+          year: expect.any(Number),
+        }),
+      )
+    })
   })
 
   it('email preview opens and closes', async () => {
