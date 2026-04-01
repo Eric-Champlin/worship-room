@@ -1,7 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useSearchParams, Link } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from './lib/query-client'
 import { Layout } from './components/Layout'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
@@ -150,7 +148,6 @@ function ReadingPlansRedirect() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <HelmetProvider>
         <ErrorBoundary>
@@ -227,7 +224,6 @@ function App() {
         </ErrorBoundary>
         </HelmetProvider>
       </BrowserRouter>
-    </QueryClientProvider>
   )
 }
 

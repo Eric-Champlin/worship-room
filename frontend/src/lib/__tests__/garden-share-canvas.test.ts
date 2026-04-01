@@ -139,7 +139,7 @@ describe('generateGardenShareImage', () => {
     await triggerImageLoad()
     await promise
     const fillTextCalls = mockCtx.fillText.mock.calls.map(
-      (c: [string, number, number]) => c[0],
+      (c: any[]) => c[0],
     )
     expect(fillTextCalls).toContain("Eric's Garden")
     expect(fillTextCalls).toContain('Blooming')
@@ -157,7 +157,7 @@ describe('generateGardenShareImage', () => {
     await triggerImageLoad()
     await promise
     const fillTextCalls = mockCtx.fillText.mock.calls.map(
-      (c: [string, number, number]) => c[0],
+      (c: any[]) => c[0],
     )
     expect(fillTextCalls).not.toContain(expect.stringContaining('streak'))
   })

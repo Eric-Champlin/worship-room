@@ -22,7 +22,7 @@ import { MOOD_COLORS } from '@/constants/dashboard/mood'
 import { THEME_TO_MOOD } from '@/constants/dashboard/devotional-integration'
 import { getTodaysDevotional } from '@/data/devotionals'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
-import { getReadingPlan } from '@/data/reading-plans'
+import { getReadingPlanMeta } from '@/data/reading-plans'
 import { getLocalDateString } from '@/utils/date'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
@@ -68,7 +68,7 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
   // Check for active reading plan
   const { getActivePlanId, getProgress } = useReadingPlanProgress()
   const activePlanId = getActivePlanId()
-  const activePlan = activePlanId ? getReadingPlan(activePlanId) : undefined
+  const activePlan = activePlanId ? getReadingPlanMeta(activePlanId) : undefined
   const activeProgress = activePlanId ? getProgress(activePlanId) : undefined
 
   const { hasReadToday, hasReadPlanToday } = useMemo(() => {
@@ -108,7 +108,7 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
     showReadingPlan && activePlan && activeProgress
       ? {
           title: 'Continue Your Reading Plan',
-          description: `Day ${activeProgress.currentDay}: ${activePlan.days.find((d) => d.dayNumber === activeProgress.currentDay)?.title ?? ''}`,
+          description: `Day ${activeProgress.currentDay} of ${activePlan.durationDays}`,
           icon: 'BookOpen',
           route: `/reading-plans/${activePlanId}`,
         }

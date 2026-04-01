@@ -13,7 +13,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
-import { getReadingPlan } from '@/data/reading-plans'
+import { loadReadingPlan, getReadingPlanMeta } from '@/data/reading-plans'
+import type { ReadingPlan } from '@/types/reading-plans'
 import { PLAN_DIFFICULTY_LABELS } from '@/constants/reading-plans'
 import type { ActivityType } from '@/types/dashboard'
 import { cn } from '@/lib/utils'
@@ -29,7 +30,22 @@ export function ReadingPlanDetail() {
   const { getProgress, completeDay } = useReadingPlanProgress()
   const { recordActivity, todayActivities } = useFaithPoints()
 
-  const plan = planId ? getReadingPlan(planId) : undefined
+  const meta = planId ? getReadingPlanMeta(planId) : undefined
+  const [plan, setPlan] = useState<ReadingPlan | null>(null)
+  const [planLoading, setPlanLoading] = useState(true)
+
+  useEffect(() => {
+    if (!planId) {
+      setPlanLoading(false)
+      return
+    }
+    setPlanLoading(true)
+    loadReadingPlan(planId).then((p) => {
+      setPlan(p ?? null)
+      setPlanLoading(false)
+    })
+  }, [planId])
+
   const progress = planId ? getProgress(planId) : undefined
 
   const initialDay = progress?.currentDay ?? 1
@@ -122,6 +138,19 @@ export function ReadingPlanDetail() {
     handleDayChange(selectedDay + 1)
   }, [selectedDay, plan, handleDayChange])
 
+  if (!meta) return <PlanNotFound />
+  if (planLoading) {
+    return (
+      <Layout>
+        <div className="flex min-h-screen items-center justify-center bg-dashboard-dark">
+          <div className="text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
+            <p className="mt-4 text-sm text-white/50">Loading plan...</p>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
   if (!plan) return <PlanNotFound />
 
   const titleWords = plan.title.split(' ')

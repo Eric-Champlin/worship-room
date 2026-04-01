@@ -113,6 +113,9 @@ export default defineConfig({
           if (id.includes('node_modules/react-helmet-async')) {
             return 'react-helmet-async'
           }
+          if (id.includes('node_modules/leaflet') || id.includes('node_modules/react-leaflet')) {
+            return 'leaflet'
+          }
         },
       },
     },

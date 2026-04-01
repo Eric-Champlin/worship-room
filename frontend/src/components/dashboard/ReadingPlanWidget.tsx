@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, ChevronRight } from 'lucide-react'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
-import { READING_PLANS, getReadingPlan } from '@/data/reading-plans'
+import { READING_PLAN_METADATA, getReadingPlanMeta } from '@/data/reading-plans'
 import { getActivityLog } from '@/services/faith-points-storage'
 import { getMoodEntries } from '@/services/mood-storage'
 import { getLocalDateString } from '@/utils/date'
@@ -45,12 +45,12 @@ export function ReadingPlanWidget() {
   const { progress, getActivePlanId, getPlanStatus } = useReadingPlanProgress()
 
   const activePlanId = getActivePlanId()
-  const activePlan = activePlanId ? getReadingPlan(activePlanId) : undefined
+  const activePlan = activePlanId ? getReadingPlanMeta(activePlanId) : undefined
   const activeProgress = activePlanId ? progress[activePlanId] : undefined
 
   // Determine widget state
   const allCompleted = useMemo(() => {
-    return READING_PLANS.every((p) => {
+    return READING_PLAN_METADATA.every((p) => {
       const status = getPlanStatus(p.id)
       return status === 'completed'
     })
@@ -67,7 +67,7 @@ export function ReadingPlanWidget() {
         }
       }
     }
-    return latest ? getReadingPlan(latest.id) : null
+    return latest ? getReadingPlanMeta(latest.id) : null
   }, [activePlan, progress])
 
   // Discovery suggestions based on mood
@@ -77,7 +77,7 @@ export function ReadingPlanWidget() {
     const moodEntries = getMoodEntries()
     const last7Days = moodEntries.slice(-7)
 
-    let matchedPlans: typeof READING_PLANS = []
+    let matchedPlans: typeof READING_PLAN_METADATA = []
 
     if (last7Days.length > 0) {
       // Find most common mood
@@ -94,7 +94,7 @@ export function ReadingPlanWidget() {
         .filter(([, moods]) => moods.includes(dominantMood))
         .map(([theme]) => theme as PlanTheme)
 
-      matchedPlans = READING_PLANS.filter((p) => {
+      matchedPlans = READING_PLAN_METADATA.filter((p) => {
         const status = getPlanStatus(p.id)
         return (
           matchingThemes.includes(p.theme) &&
@@ -105,7 +105,7 @@ export function ReadingPlanWidget() {
 
     // Fallback: first 3 beginner plans
     if (matchedPlans.length === 0) {
-      matchedPlans = READING_PLANS.filter((p) => {
+      matchedPlans = READING_PLAN_METADATA.filter((p) => {
         const status = getPlanStatus(p.id)
         return (
           p.difficulty === 'beginner' &&
@@ -128,10 +128,6 @@ export function ReadingPlanWidget() {
     const completionPercent = Math.round(
       (activeProgress.completedDays.length / activePlan.durationDays) * 100,
     )
-    const currentDayContent = activePlan.days.find(
-      (d) => d.dayNumber === activeProgress.currentDay,
-    )
-
     return (
       <div className="space-y-3">
         <p className="text-base font-semibold text-white">{activePlan.title}</p>
@@ -153,10 +149,6 @@ export function ReadingPlanWidget() {
         <p className="text-sm text-white/50">
           Day {activeProgress.currentDay} of {activePlan.durationDays} ({completionPercent}%)
         </p>
-
-        {currentDayContent && (
-          <p className="text-sm text-white/70">{currentDayContent.title}</p>
-        )}
 
         <Link
           to={`/reading-plans/${activePlan.id}`}

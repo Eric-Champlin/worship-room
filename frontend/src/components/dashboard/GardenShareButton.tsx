@@ -17,8 +17,8 @@ export function GardenShareButton({
   levelName,
   streakCount,
 }: GardenShareButtonProps) {
-  const showToast = useToastSafe()
-  const { play: playSound } = useSoundEffects()
+  const toast = useToastSafe()
+  const { playSoundEffect } = useSoundEffects()
   const [isGenerating, setIsGenerating] = useState(false)
 
   const handleShare = async () => {
@@ -38,7 +38,7 @@ export function GardenShareButton({
         const file = new File([blob], 'my-garden.png', { type: 'image/png' })
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: `${userName}'s Growth Garden` })
-          playSound('chime')
+          playSoundEffect('chime')
           return
         }
       }
@@ -50,10 +50,10 @@ export function GardenShareButton({
       a.download = 'my-garden.png'
       a.click()
       URL.revokeObjectURL(url)
-      playSound('chime')
-      showToast?.('Garden image saved.', { type: 'success' })
+      playSoundEffect('chime')
+      toast.showToast('Garden image saved.', 'success')
     } catch {
-      showToast?.('We couldn\'t create the image. Try again.', { type: 'error' })
+      toast.showToast('We couldn\'t create the image. Try again.', 'error')
     } finally {
       setIsGenerating(false)
     }

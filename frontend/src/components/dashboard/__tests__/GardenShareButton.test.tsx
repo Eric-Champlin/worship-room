@@ -15,11 +15,11 @@ vi.mock('@/lib/garden-share-canvas', () => ({
 }))
 
 vi.mock('@/components/ui/Toast', () => ({
-  useToastSafe: () => vi.fn(),
+  useToastSafe: () => ({ showToast: vi.fn(), showCelebrationToast: vi.fn() }),
 }))
 
 vi.mock('@/hooks/useSoundEffects', () => ({
-  useSoundEffects: () => ({ play: vi.fn() }),
+  useSoundEffects: () => ({ playSoundEffect: vi.fn() }),
 }))
 
 describe('GardenShareButton', () => {

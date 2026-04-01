@@ -42,6 +42,8 @@ export interface ReadingPlan {
   days: PlanDayContent[]
 }
 
+export type ReadingPlanMeta = Omit<ReadingPlan, 'days'>
+
 export interface PlanProgress {
   startedAt: string
   currentDay: number

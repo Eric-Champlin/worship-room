@@ -12,7 +12,7 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { RelatedPlanCallout } from '@/components/devotional/RelatedPlanCallout'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
-import { READING_PLANS } from '@/data/reading-plans'
+import { READING_PLAN_METADATA } from '@/data/reading-plans'
 import { VerseLink } from '@/components/shared/VerseLink'
 import { SharePanel } from '@/components/sharing/SharePanel'
 import type { Devotional } from '@/types/devotional'
@@ -52,7 +52,7 @@ export function DevotionalTabContent({
   const [showPassageShare, setShowPassageShare] = useState(false)
 
   // Find matching reading plan by theme
-  const matchingPlan = READING_PLANS.find(
+  const matchingPlan = READING_PLAN_METADATA.find(
     (p) => (p.theme as string) === (devotional.theme as string),
   )
   const matchingPlanStatus = matchingPlan ? getPlanStatus(matchingPlan.id) : 'completed'

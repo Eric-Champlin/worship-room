@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
 import { PLAN_DIFFICULTY_LABELS, PLAN_THEME_LABELS } from '@/constants/reading-plans'
-import type { ReadingPlan, PlanProgress } from '@/types/reading-plans'
+import type { ReadingPlanMeta, PlanProgress } from '@/types/reading-plans'
 
 interface PlanCardProps {
-  plan: ReadingPlan
+  plan: ReadingPlanMeta
   status: 'unstarted' | 'active' | 'paused' | 'completed'
   progress?: PlanProgress
   onStart: (planId: string) => void

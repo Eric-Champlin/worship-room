@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import { READING_PLAN_PROGRESS_KEY } from '@/constants/reading-plans'
-import { READING_PLANS } from '@/data/reading-plans'
+import { READING_PLAN_METADATA } from '@/data/reading-plans'
 import { useAuth } from '@/hooks/useAuth'
 import type { PlanProgress, ReadingPlanProgressMap } from '@/types/reading-plans'
 
@@ -77,7 +77,7 @@ export function useReadingPlanProgress(): {
       if (!planProgress) return
       if (planProgress.completedDays.includes(dayNumber)) return
 
-      const plan = READING_PLANS.find((p) => p.id === planId)
+      const plan = READING_PLAN_METADATA.find((p) => p.id === planId)
       if (!plan) return
 
       const updated = { ...progress }

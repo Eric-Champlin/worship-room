@@ -11,9 +11,9 @@ import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
-import { READING_PLANS } from '@/data/reading-plans'
+import { READING_PLAN_METADATA } from '@/data/reading-plans'
 import { getCustomPlanIds } from '@/utils/custom-plans-storage'
-import type { PlanDifficulty, ReadingPlan } from '@/types/reading-plans'
+import type { PlanDifficulty, ReadingPlanMeta } from '@/types/reading-plans'
 
 interface ReadingPlansContentProps {
   createParam?: boolean
@@ -98,7 +98,7 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
   }, [isAuthenticated, authModal, setSearchParams])
 
   const filteredPlans = useMemo(() => {
-    return READING_PLANS.filter((plan) => {
+    return READING_PLAN_METADATA.filter((plan) => {
       if (selectedDuration !== null && plan.durationDays !== selectedDuration)
         return false
       if (
@@ -165,12 +165,12 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
   }, [])
 
   const activePlan = activePlanId
-    ? READING_PLANS.find((p) => p.id === activePlanId)
+    ? READING_PLAN_METADATA.find((p) => p.id === activePlanId)
     : null
   const activeProgress = activePlanId ? getProgress(activePlanId) : undefined
 
   const allCompleted = useMemo(
-    () => READING_PLANS.every((plan) => getPlanStatus(plan.id) === 'completed'),
+    () => READING_PLAN_METADATA.every((plan) => getPlanStatus(plan.id) === 'completed'),
     [getPlanStatus],
   )
 
@@ -221,7 +221,7 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
             />
           ) : sortedPlans.length > 0 ? (
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2" ref={planGridRef}>
-              {sortedPlans.map((plan: ReadingPlan, index: number) => {
+              {sortedPlans.map((plan: ReadingPlanMeta, index: number) => {
                 const stagger = getPlanStaggerProps(index)
                 return (
                   <div key={plan.id} className={stagger.className} style={stagger.style}>
