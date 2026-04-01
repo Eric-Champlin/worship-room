@@ -1,5 +1,11 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { forwardRef, useEffect, useId, useRef, useState } from 'react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import type { GardenActivityElements } from '@/hooks/useGardenElements'
+import { getSkyConfig } from './garden/gardenTimeOfDay'
+import { getSeasonalOverlay } from './garden/gardenSeasons'
+import { NightSky } from './garden/NightSky'
+import { SeasonalOverlay } from './garden/SeasonalOverlay'
+import { ActivityElements } from './garden/ActivityElements'
 
 // --- Types ---
 
@@ -11,6 +17,9 @@ export interface GrowthGardenProps {
   size: 'sm' | 'md' | 'lg'
   amplifiedSparkle?: boolean
   showRainbow?: boolean
+  seasonName?: string
+  activityElements?: GardenActivityElements
+  hourOverride?: number
 }
 
 // --- Constants ---
@@ -29,6 +38,14 @@ export const STAGE_LABELS: Record<number, string> = {
   4: 'Your garden: a young tree with flowers and a bird',
   5: 'Your garden: a strong oak tree with fruit and a stream',
   6: 'Your garden: a glowing oak tree in a full garden with a bench',
+}
+
+// eslint-disable-next-line react-refresh/only-export-components -- Helper co-located with GrowthGarden
+export function getGardenAriaLabel(stage: number, seasonName?: string, timeOfDay?: string): string {
+  const base = STAGE_LABELS[stage] ?? STAGE_LABELS[1]
+  const seasonSuffix = seasonName && seasonName !== 'Ordinary Time' ? ` during ${seasonName}` : ''
+  const timeSuffix = timeOfDay === 'night' ? ' at night' : timeOfDay === 'dawn' ? ' at dawn' : ''
+  return `${base}${seasonSuffix}${timeSuffix}`
 }
 
 // Color palette matching design system
@@ -51,15 +68,22 @@ const C = {
 
 // --- Shared SVG Sub-Components ---
 
-function SkyBackground({ uid, streakActive }: { uid: string; streakActive: boolean }) {
-  const skyTop = streakActive ? '#0D0620' : '#1a1025'
-  const skyBot = streakActive ? '#1E0B3E' : '#2a1845'
+function SkyBackground({
+  uid,
+  streakActive,
+  hour,
+}: {
+  uid: string
+  streakActive: boolean
+  hour: number
+}) {
+  const sky = getSkyConfig(hour, streakActive)
   return (
     <>
       <defs>
         <linearGradient id={`sky-${uid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={skyTop} />
-          <stop offset="100%" stopColor={skyBot} />
+          <stop offset="0%" stopColor={sky.skyGradientColors[0]} />
+          <stop offset="100%" stopColor={sky.skyGradientColors[1]} />
         </linearGradient>
       </defs>
       <rect width="800" height="400" fill={`url(#sky-${uid})`} />
@@ -67,24 +91,34 @@ function SkyBackground({ uid, streakActive }: { uid: string; streakActive: boole
   )
 }
 
-function SkyElements({ streakActive }: { streakActive: boolean }) {
-  if (streakActive) {
+function SkyElements({
+  streakActive,
+  showSun,
+}: {
+  streakActive: boolean
+  showSun: boolean
+}) {
+  if (showSun) {
+    if (streakActive) {
+      return (
+        <g data-testid="garden-sun">
+          <circle cx="680" cy="80" r="50" fill="rgba(255,255,255,0.08)" />
+          <circle cx="680" cy="80" r="30" fill="rgba(255,255,255,0.6)" />
+        </g>
+      )
+    }
     return (
-      <g data-testid="garden-sun">
-        <circle cx="680" cy="80" r="50" fill="rgba(255,255,255,0.08)" />
-        <circle cx="680" cy="80" r="30" fill="rgba(255,255,255,0.6)" />
+      <g data-testid="garden-clouds">
+        <ellipse cx="200" cy="100" rx="60" ry="25" fill="rgba(255,255,255,0.15)" />
+        <ellipse cx="240" cy="88" rx="45" ry="20" fill="rgba(255,255,255,0.12)" />
+        <ellipse cx="550" cy="115" rx="65" ry="22" fill="rgba(255,255,255,0.15)" />
+        <ellipse cx="590" cy="105" rx="50" ry="18" fill="rgba(255,255,255,0.12)" />
+        <ellipse cx="680" cy="80" rx="40" ry="18" fill="rgba(255,255,255,0.1)" />
       </g>
     )
   }
-  return (
-    <g data-testid="garden-clouds">
-      <ellipse cx="200" cy="100" rx="60" ry="25" fill="rgba(255,255,255,0.15)" />
-      <ellipse cx="240" cy="88" rx="45" ry="20" fill="rgba(255,255,255,0.12)" />
-      <ellipse cx="550" cy="115" rx="65" ry="22" fill="rgba(255,255,255,0.15)" />
-      <ellipse cx="590" cy="105" rx="50" ry="18" fill="rgba(255,255,255,0.12)" />
-      <ellipse cx="680" cy="80" rx="40" ry="18" fill="rgba(255,255,255,0.1)" />
-    </g>
-  )
+  // Night/dusk: no sun or clouds (moon/stars handled by NightSky)
+  return null
 }
 
 function GroundLayer({ uid, stage }: { uid: string; stage: number }) {
@@ -728,7 +762,7 @@ function RainbowArc({ uid }: { uid: string }) {
 
 // --- Main Component ---
 
-export function GrowthGarden({
+export const GrowthGarden = forwardRef<SVGSVGElement, GrowthGardenProps>(function GrowthGarden({
   stage,
   animated = true,
   showSparkle = false,
@@ -736,11 +770,17 @@ export function GrowthGarden({
   size,
   amplifiedSparkle = false,
   showRainbow = false,
-}: GrowthGardenProps) {
+  seasonName,
+  activityElements,
+  hourOverride,
+}, ref) {
   const rawId = useId()
   const uid = rawId.replace(/:/g, '')
   const prefersReduced = useReducedMotion()
   const shouldAnimate = animated && !prefersReduced
+  const hour = hourOverride ?? new Date().getHours()
+  const skyConfig = getSkyConfig(hour, streakActive)
+  const seasonalConfig = seasonName ? getSeasonalOverlay(seasonName) : null
 
   // Stage transition crossfade
   const [displayStage, setDisplayStage] = useState(stage)
@@ -786,32 +826,46 @@ export function GrowthGarden({
           className="absolute inset-0 animate-garden-fade-out"
           data-testid="garden-transition-old"
         >
-          <SkyBackground uid={`${uid}-old`} streakActive={streakActive} />
-          <SkyElements streakActive={streakActive} />
+          <SkyBackground uid={`${uid}-old`} streakActive={streakActive} hour={hour} />
+          <SkyElements streakActive={streakActive} showSun={skyConfig.showSun} />
           <GroundLayer uid={`${uid}-old`} stage={previousStage} />
           <GardenScene stage={previousStage} shouldAnimate={shouldAnimate} uid={`${uid}-old`} streakActive={streakActive} />
         </svg>
       )}
       {/* Current stage (fading in during transition, or fully visible) */}
       <svg
+        ref={ref}
         width="100%"
         height="100%"
         viewBox="0 0 800 400"
         preserveAspectRatio="xMidYMid slice"
         role="img"
-        aria-label={STAGE_LABELS[displayStage]}
+        aria-label={getGardenAriaLabel(displayStage, seasonName, skyConfig.timeOfDay)}
         className={isTransitioning ? 'animate-garden-fade-in' : undefined}
         data-testid={isTransitioning ? 'garden-transition-new' : undefined}
       >
-        <SkyBackground uid={uid} streakActive={streakActive} />
-        <SkyElements streakActive={streakActive} />
+        <SkyBackground uid={uid} streakActive={streakActive} hour={hour} />
+        <NightSky skyConfig={skyConfig} prefersReduced={prefersReduced} skyTopColor={skyConfig.skyGradientColors[0]} />
+        <SkyElements streakActive={streakActive} showSun={skyConfig.showSun} />
         {showRainbow && (
           <RainbowArc uid={uid} />
         )}
         <GroundLayer uid={uid} stage={displayStage} />
-        <GardenScene stage={displayStage} shouldAnimate={shouldAnimate} uid={uid} streakActive={streakActive} />
+        {seasonalConfig?.cssFilter ? (
+          <g style={{ filter: seasonalConfig.cssFilter }}>
+            <GardenScene stage={displayStage} shouldAnimate={shouldAnimate} uid={uid} streakActive={streakActive} />
+          </g>
+        ) : (
+          <GardenScene stage={displayStage} shouldAnimate={shouldAnimate} uid={uid} streakActive={streakActive} />
+        )}
+        {activityElements && (
+          <ActivityElements elements={activityElements} stage={displayStage as 1 | 2 | 3 | 4 | 5 | 6} prefersReduced={prefersReduced} />
+        )}
+        {seasonalConfig && (
+          <SeasonalOverlay config={seasonalConfig} prefersReduced={prefersReduced} />
+        )}
       </svg>
       <SparkleOverlay show={showSparkle} amplified={amplifiedSparkle} prefersReduced={prefersReduced} />
     </div>
   )
-}
+})

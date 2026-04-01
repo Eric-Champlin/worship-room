@@ -72,19 +72,19 @@ describe('GrowthGarden', () => {
 
   describe('streak-responsive sky', () => {
     it('shows sun when streakActive is true', () => {
-      render(<GrowthGarden stage={1} size="lg" streakActive={true} />)
+      render(<GrowthGarden stage={1} size="lg" streakActive={true} hourOverride={12} />)
       expect(screen.getByTestId('garden-sun')).toBeInTheDocument()
       expect(screen.queryByTestId('garden-clouds')).not.toBeInTheDocument()
     })
 
     it('shows clouds when streakActive is false', () => {
-      render(<GrowthGarden stage={1} size="lg" streakActive={false} />)
+      render(<GrowthGarden stage={1} size="lg" streakActive={false} hourOverride={12} />)
       expect(screen.getByTestId('garden-clouds')).toBeInTheDocument()
       expect(screen.queryByTestId('garden-sun')).not.toBeInTheDocument()
     })
 
     it('defaults streakActive to true', () => {
-      render(<GrowthGarden stage={1} size="lg" />)
+      render(<GrowthGarden stage={1} size="lg" hourOverride={12} />)
       expect(screen.getByTestId('garden-sun')).toBeInTheDocument()
     })
   })
@@ -233,7 +233,7 @@ describe('GrowthGarden', () => {
         <DashboardHero
           userName="Eric"
           currentStreak={3}
-          gardenSlot={<GrowthGarden stage={2} size="lg" streakActive={true} />}
+          gardenSlot={<GrowthGarden stage={2} size="lg" streakActive={true} hourOverride={12} />}
         />,
       )
       expect(screen.getByTestId('garden-sun')).toBeInTheDocument()
@@ -244,7 +244,7 @@ describe('GrowthGarden', () => {
         <DashboardHero
           userName="Eric"
           currentStreak={0}
-          gardenSlot={<GrowthGarden stage={2} size="lg" streakActive={false} />}
+          gardenSlot={<GrowthGarden stage={2} size="lg" streakActive={false} hourOverride={12} />}
         />,
       )
       expect(screen.getByTestId('garden-clouds')).toBeInTheDocument()

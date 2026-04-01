@@ -199,6 +199,35 @@ export default {
           '0%': { opacity: '1', transform: 'translateY(0) translateX(0)' },
           '100%': { opacity: '0', transform: 'translateY(-40px) translateX(var(--drift-x, 0px))' },
         },
+        'garden-snow-fall': {
+          '0%': { transform: 'translateY(-20px) translateX(0)', opacity: '0' },
+          '10%': { opacity: '0.8' },
+          '100%': { transform: 'translateY(420px) translateX(10px)', opacity: '0' },
+        },
+        'garden-star-twinkle': {
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '0.7' },
+        },
+        'garden-firefly-glow': {
+          '0%, 100%': { opacity: '0.2', transform: 'translate(0, 0)' },
+          '25%': { opacity: '0.5', transform: 'translate(3px, -2px)' },
+          '50%': { opacity: '0.15', transform: 'translate(-2px, 1px)' },
+          '75%': { opacity: '0.45', transform: 'translate(1px, 3px)' },
+        },
+        'garden-flame-flicker': {
+          '0%, 100%': { opacity: '0.8', transform: 'scaleY(1) scaleX(1)' },
+          '25%': { opacity: '1', transform: 'scaleY(1.05) scaleX(0.95)' },
+          '50%': { opacity: '0.7', transform: 'scaleY(0.95) scaleX(1.05)' },
+          '75%': { opacity: '0.9', transform: 'scaleY(1.02) scaleX(0.98)' },
+        },
+        'garden-seasonal-fade': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'garden-element-fade': {
+          '0%': { opacity: '0', transform: 'translateY(5px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         'logo-pulse': {
           '0%, 100%': { opacity: '0.2' },
           '50%': { opacity: '0.4' },
@@ -305,6 +334,12 @@ export default {
         'garden-fade-out': 'garden-fade-out 2s ease-in-out forwards',
         'garden-fade-in': 'garden-fade-in 2s ease-in-out forwards',
         'garden-sparkle-rise': 'garden-sparkle-rise 1s ease-out forwards',
+        'garden-snow-fall': 'garden-snow-fall 8s linear infinite',
+        'garden-star-twinkle': 'garden-star-twinkle 3.5s ease-in-out infinite',
+        'garden-firefly-glow': 'garden-firefly-glow 5s ease-in-out infinite',
+        'garden-flame-flicker': 'garden-flame-flicker 2s ease-in-out infinite',
+        'garden-seasonal-fade': 'garden-seasonal-fade 1s ease-out forwards',
+        'garden-element-fade': 'garden-element-fade 500ms ease-out forwards',
         'logo-pulse': 'logo-pulse 2s ease-in-out infinite',
         'page-enter': 'page-enter 200ms ease-out both',
         'stagger-enter': 'stagger-enter 300ms ease-out both',

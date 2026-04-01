@@ -4,6 +4,9 @@ import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DashboardHero } from '@/components/dashboard/DashboardHero'
 import { GrowthGarden } from '@/components/dashboard/GrowthGarden'
+import { GardenShareButton } from '@/components/dashboard/GardenShareButton'
+import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
+import { useGardenElements } from '@/hooks/useGardenElements'
 import { DashboardWidgetGrid } from '@/components/dashboard/DashboardWidgetGrid'
 import { MoodCheckIn } from '@/components/dashboard/MoodCheckIn'
 import { MoodRecommendations } from '@/components/dashboard/MoodRecommendations'
@@ -88,6 +91,9 @@ export function Dashboard() {
   const [lastMoodEntry, setLastMoodEntry] = useState<MoodEntry | null>(null)
 
   const faithPoints = useFaithPoints()
+  const season = useLiturgicalSeason()
+  const gardenElements = useGardenElements()
+  const gardenRef = useRef<SVGSVGElement>(null)
   const { isVisible: recapVisible, hasFriends: recapHasFriends } = useWeeklyRecap()
   const godMoments = useWeeklyGodMoments()
   usePrayerReminders(phase === 'dashboard')
@@ -450,9 +456,18 @@ export function Dashboard() {
             }
             gardenSlot={
               <div>
-                <p className="text-xs text-white/60">Your Garden</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-white/60">Your Garden</p>
+                  <GardenShareButton
+                    gardenRef={gardenRef}
+                    userName={user.name}
+                    levelName={faithPoints.levelName}
+                    streakCount={faithPoints.currentStreak}
+                  />
+                </div>
                 <div className="mt-1 lg:hidden">
                   <GrowthGarden
+                    ref={gardenRef}
                     stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}
                     animated={true}
                     showSparkle={gardenSparkle}
@@ -460,10 +475,13 @@ export function Dashboard() {
                     streakActive={faithPoints.currentStreak > 0}
                     showRainbow={showRainbow}
                     size="md"
+                    seasonName={season.seasonName}
+                    activityElements={gardenElements}
                   />
                 </div>
                 <div className="mt-1 hidden lg:block">
                   <GrowthGarden
+                    ref={gardenRef}
                     stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}
                     animated={true}
                     showSparkle={gardenSparkle}
@@ -471,6 +489,8 @@ export function Dashboard() {
                     streakActive={faithPoints.currentStreak > 0}
                     showRainbow={showRainbow}
                     size="lg"
+                    seasonName={season.seasonName}
+                    activityElements={gardenElements}
                   />
                 </div>
               </div>

@@ -15,7 +15,7 @@ describe('GrowthGarden — Accessibility', () => {
   })
 
   it.each([1, 2, 3, 4, 5, 6] as const)('stage %i has descriptive aria-label', (stage) => {
-    render(<GrowthGarden stage={stage} size="lg" />)
+    render(<GrowthGarden stage={stage} size="lg" hourOverride={12} />)
     const svg = screen.getByRole('img')
     expect(svg).toHaveAttribute('aria-label', STAGE_LABELS[stage])
   })
@@ -64,16 +64,85 @@ describe('GrowthGarden — Accessibility', () => {
   })
 
   it('stage 1 with no streak shows correct garden (edge case)', () => {
-    render(<GrowthGarden stage={1} size="lg" streakActive={false} />)
+    render(<GrowthGarden stage={1} size="lg" streakActive={false} hourOverride={12} />)
     expect(screen.getByRole('img')).toHaveAttribute('aria-label', STAGE_LABELS[1])
     expect(screen.getByTestId('garden-clouds')).toBeInTheDocument()
     expect(screen.getByTestId('garden-stage-1')).toBeInTheDocument()
   })
 
   it('stage 6 at max level renders correctly (edge case)', () => {
-    render(<GrowthGarden stage={6} size="lg" streakActive={true} />)
+    render(<GrowthGarden stage={6} size="lg" streakActive={true} hourOverride={12} />)
     expect(screen.getByRole('img')).toHaveAttribute('aria-label', STAGE_LABELS[6])
     expect(screen.getByTestId('garden-stage-6')).toBeInTheDocument()
     expect(screen.getByTestId('garden-sun')).toBeInTheDocument()
   })
+
+  // --- Enhancement a11y tests ---
+
+  it('aria-label includes season name', () => {
+    render(<GrowthGarden stage={4} size="lg" seasonName="Advent" hourOverride={12} />)
+    const svg = screen.getByRole('img')
+    expect(svg.getAttribute('aria-label')).toContain('during Advent')
+  })
+
+  it('aria-label excludes Ordinary Time', () => {
+    render(<GrowthGarden stage={4} size="lg" seasonName="Ordinary Time" hourOverride={12} />)
+    const svg = screen.getByRole('img')
+    expect(svg.getAttribute('aria-label')).not.toContain('Ordinary Time')
+  })
+
+  it('aria-label includes "at night" for night time', () => {
+    render(<GrowthGarden stage={4} size="lg" hourOverride={23} />)
+    const svg = screen.getByRole('img')
+    expect(svg.getAttribute('aria-label')).toContain('at night')
+  })
+
+  it('static snow when prefers-reduced-motion', () => {
+    vi.mocked(useReducedMotion).mockReturnValue(true)
+    const { container } = render(
+      <GrowthGarden stage={4} size="lg" seasonName="Advent" hourOverride={12} />,
+    )
+    const snowCircles = container.querySelectorAll('[data-testid="garden-snow"]')
+    expect(snowCircles.length).toBeGreaterThan(0)
+    // Snow should have no animation class
+    snowCircles.forEach((el) => {
+      expect(el.classList.contains('motion-safe:animate-garden-snow-fall')).toBe(false)
+    })
+    vi.mocked(useReducedMotion).mockReturnValue(false)
+  })
+
+  it('static stars when prefers-reduced-motion', () => {
+    vi.mocked(useReducedMotion).mockReturnValue(true)
+    const { container } = render(
+      <GrowthGarden stage={4} size="lg" hourOverride={23} />,
+    )
+    const stars = container.querySelectorAll('[data-testid="garden-star"]')
+    expect(stars.length).toBeGreaterThan(0)
+    stars.forEach((el) => {
+      expect(el.classList.contains('motion-safe:animate-garden-star-twinkle')).toBe(false)
+    })
+    vi.mocked(useReducedMotion).mockReturnValue(false)
+  })
+
+  it('activity elements visible without fade when reduced motion', () => {
+    vi.mocked(useReducedMotion).mockReturnValue(true)
+    const { container } = render(
+      <GrowthGarden
+        stage={4}
+        size="lg"
+        activityElements={{ writingDesk: true, cushion: true, candle: false, bible: false, windChime: false }}
+        hourOverride={12}
+      />,
+    )
+    const elements = container.querySelectorAll('[data-testid^="garden-activity-"]')
+    // Should be present (not hidden)
+    expect(elements.length).toBeGreaterThan(0)
+    // Should have no animation class
+    elements.forEach((el) => {
+      expect(el.classList.contains('motion-safe:animate-garden-element-fade')).toBe(false)
+    })
+    vi.mocked(useReducedMotion).mockReturnValue(false)
+  })
+
+  // share button aria-label covered by GardenShareButton.test.tsx
 })
