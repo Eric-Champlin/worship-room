@@ -25,6 +25,14 @@ vi.mock('@/contexts/AuthContext', () => ({
   useAuth: mockAuthFn,
 }))
 
+vi.mock('@/hooks/useReducedMotion', () => ({
+  useReducedMotion: () => true,
+}))
+
+vi.mock('@/hooks/useSoundEffects', () => ({
+  useSoundEffects: () => ({ playSoundEffect: vi.fn() }),
+}))
+
 const mockUseAuth = mockAuthFn
 
 function renderMyPrayers() {
@@ -180,7 +188,7 @@ describe('MyPrayers Page', () => {
       await user.click(screen.getByText('Confirm'))
 
       // Dismiss celebration overlay first
-      await user.click(screen.getByText('Praise God!'))
+      await user.click(screen.getByText('Close'))
 
       // Switch to "Answered" filter to see the prayer
       await user.click(screen.getByText(/^Answered/))

@@ -7,7 +7,7 @@ import { PageHero } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
-import { useSoundEffects } from '@/hooks/useSoundEffects'
+import type { FaithfulnessScripture } from '@/constants/faithfulness-scriptures'
 import { PrayerListActionBar } from '@/components/my-prayers/PrayerListActionBar'
 import { PrayerComposer } from '@/components/my-prayers/PrayerComposer'
 import { PrayerItemCard } from '@/components/my-prayers/PrayerItemCard'
@@ -18,6 +18,7 @@ import { MarkAnsweredForm } from '@/components/my-prayers/MarkAnsweredForm'
 import { DeletePrayerDialog } from '@/components/my-prayers/DeletePrayerDialog'
 import { PrayerListEmptyState } from '@/components/my-prayers/PrayerListEmptyState'
 import { PrayerAnsweredCelebration } from '@/components/my-prayers/PrayerAnsweredCelebration'
+import { TestimonyShareActions } from '@/components/my-prayers/TestimonyShareActions'
 import {
   getPrayers,
   addPrayer,
@@ -34,8 +35,6 @@ import type { PrayerCategory } from '@/constants/prayer-categories'
 export function MyPrayers() {
   const { isAuthenticated } = useAuth()
   const { showToast } = useToast()
-  const { playSoundEffect } = useSoundEffects()
-
   const [prayers, setPrayers] = useState<PersonalPrayer[]>([])
   const [filter, setFilter] = useState<PrayerListFilter>('active')
   const [composerOpen, setComposerOpen] = useState(false)
@@ -45,6 +44,12 @@ export function MyPrayers() {
   const [glowingId, setGlowingId] = useState<string | null>(null)
   const glowTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const [celebrationPrayer, setCelebrationPrayer] = useState<{ title: string; note?: string } | null>(null)
+  const [shareData, setShareData] = useState<{
+    prayerTitle: string
+    testimonyNote?: string
+    scriptureText: string
+    scriptureReference: string
+  } | null>(null)
 
   useEffect(() => {
     return () => { if (glowTimerRef.current) clearTimeout(glowTimerRef.current) }
@@ -128,9 +133,8 @@ export function MyPrayers() {
       refreshPrayers()
       setAnsweringId(null)
       setCelebrationPrayer({ title, note: note || undefined })
-      playSoundEffect('harp')
     },
-    [prayers, refreshPrayers, playSoundEffect],
+    [prayers, refreshPrayers],
   )
 
   const handlePray = useCallback(
@@ -278,6 +282,23 @@ export function MyPrayers() {
           prayerTitle={celebrationPrayer.title}
           testimonyNote={celebrationPrayer.note}
           onDismiss={() => setCelebrationPrayer(null)}
+          onShareRequest={(scripture: FaithfulnessScripture) => {
+            setShareData({
+              prayerTitle: celebrationPrayer.title,
+              testimonyNote: celebrationPrayer.note,
+              scriptureText: scripture.text,
+              scriptureReference: scripture.reference,
+            })
+            setCelebrationPrayer(null)
+          }}
+        />
+      )}
+
+      {shareData && (
+        <TestimonyShareActions
+          isOpen={!!shareData}
+          onClose={() => setShareData(null)}
+          {...shareData}
         />
       )}
     </div>
