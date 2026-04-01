@@ -22,6 +22,7 @@ vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
 
 vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: mockShowToast }),
+  useToastSafe: () => ({ showToast: mockShowToast }),
   ToastProvider: ({ children }: { children: React.ReactNode }) => children,
 }))
 

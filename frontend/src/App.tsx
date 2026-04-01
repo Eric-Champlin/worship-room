@@ -6,7 +6,7 @@ import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { AudioProvider } from '@/components/audio/AudioProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
-import { InstallBanner } from '@/components/pwa/InstallBanner'
+import { InstallPromptProvider } from '@/contexts/InstallPromptContext'
 import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -152,13 +152,13 @@ function App() {
         <HelmetProvider>
         <ErrorBoundary>
         <AuthProvider>
+        <InstallPromptProvider>
         <ToastProvider>
         <AuthModalProvider>
         <AudioProvider>
         <WhisperToastProvider>
         <MidnightVerse />
         <UpdatePrompt />
-        <InstallBanner />
         <ChunkErrorBoundary>
         <Suspense fallback={<RouteLoadingFallback />}>
         <PageTransition>
@@ -220,6 +220,7 @@ function App() {
         </AudioProvider>
         </AuthModalProvider>
         </ToastProvider>
+        </InstallPromptProvider>
         </AuthProvider>
         </ErrorBoundary>
         </HelmetProvider>

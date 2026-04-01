@@ -36,6 +36,7 @@ vi.mock('@/hooks/useNotificationActions', () => ({
 
 vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
+  useToastSafe: () => ({ showToast: vi.fn() }),
 }))
 
 vi.mock('@/components/ui/WhisperToast', () => ({

@@ -1,8 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
+import { type ReactNode, createElement } from 'react'
 import { useInstallPrompt } from '../useInstallPrompt'
+import { InstallPromptProvider } from '@/contexts/InstallPromptContext'
 
-describe('useInstallPrompt', () => {
+function wrapper({ children }: { children: ReactNode }) {
+  return createElement(InstallPromptProvider, null, children)
+}
+
+describe('useInstallPrompt (via InstallPromptContext)', () => {
   let originalMatchMedia: typeof window.matchMedia
 
   beforeEach(() => {
@@ -36,90 +42,10 @@ describe('useInstallPrompt', () => {
     vi.restoreAllMocks()
   })
 
-  it('increments wr_visit_count on first call', () => {
-    renderHook(() => useInstallPrompt())
-    expect(localStorage.getItem('wr_visit_count')).toBe('1')
-  })
+  it('captures beforeinstallprompt and sets isInstallable', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
 
-  it('does not increment twice in same session', () => {
-    const { unmount } = renderHook(() => useInstallPrompt())
-    unmount()
-    renderHook(() => useInstallPrompt())
-    expect(localStorage.getItem('wr_visit_count')).toBe('1')
-  })
-
-  it('showBanner is false on first visit', () => {
-    const { result } = renderHook(() => useInstallPrompt())
-    expect(result.current.showBanner).toBe(false)
-  })
-
-  it('showBanner is true on second visit with beforeinstallprompt', () => {
-    // Simulate second visit (count already at 2, session already counted)
-    localStorage.setItem('wr_visit_count', '2')
-    sessionStorage.setItem('wr_session_counted', 'true')
-
-    const { result } = renderHook(() => useInstallPrompt())
-
-    // Fire beforeinstallprompt
-    act(() => {
-      const event = new Event('beforeinstallprompt')
-      ;(event as Event & { prompt: () => Promise<void> }).prompt = vi.fn()
-      ;(event as Event & { userChoice: Promise<{ outcome: string }> }).userChoice = Promise.resolve({
-        outcome: 'accepted',
-      })
-      window.dispatchEvent(event)
-    })
-
-    expect(result.current.showBanner).toBe(true)
-  })
-
-  it('showBanner is false when dismissed less than 7 days ago', () => {
-    localStorage.setItem('wr_visit_count', '2')
-    sessionStorage.setItem('wr_session_counted', 'true')
-    localStorage.setItem('wr_install_dismissed', String(Date.now() - 1000)) // 1 second ago
-
-    const { result } = renderHook(() => useInstallPrompt())
-
-    // Fire beforeinstallprompt
-    act(() => {
-      const event = new Event('beforeinstallprompt')
-      ;(event as Event & { prompt: () => Promise<void> }).prompt = vi.fn()
-      ;(event as Event & { userChoice: Promise<{ outcome: string }> }).userChoice = Promise.resolve({
-        outcome: 'accepted',
-      })
-      window.dispatchEvent(event)
-    })
-
-    expect(result.current.showBanner).toBe(false)
-  })
-
-  it('showBanner is true when dismissed more than 7 days ago', () => {
-    localStorage.setItem('wr_visit_count', '2')
-    sessionStorage.setItem('wr_session_counted', 'true')
-    const eightDaysAgo = Date.now() - 8 * 24 * 60 * 60 * 1000
-    localStorage.setItem('wr_install_dismissed', String(eightDaysAgo))
-
-    const { result } = renderHook(() => useInstallPrompt())
-
-    // Fire beforeinstallprompt
-    act(() => {
-      const event = new Event('beforeinstallprompt')
-      ;(event as Event & { prompt: () => Promise<void> }).prompt = vi.fn()
-      ;(event as Event & { userChoice: Promise<{ outcome: string }> }).userChoice = Promise.resolve({
-        outcome: 'accepted',
-      })
-      window.dispatchEvent(event)
-    })
-
-    expect(result.current.showBanner).toBe(true)
-  })
-
-  it('showBanner is false in standalone mode', () => {
-    localStorage.setItem('wr_visit_count', '2')
-    sessionStorage.setItem('wr_session_counted', 'true')
-    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia
-
-    const { result } = renderHook(() => useInstallPrompt())
+    expect(result.current.isInstallable).toBe(false)
 
     act(() => {
       const event = new Event('beforeinstallprompt')
@@ -130,36 +56,14 @@ describe('useInstallPrompt', () => {
       window.dispatchEvent(event)
     })
 
-    expect(result.current.showBanner).toBe(false)
+    expect(result.current.isInstallable).toBe(true)
   })
 
-  it('isIOS is true for iPhone Safari UA', () => {
-    Object.defineProperty(navigator, 'userAgent', {
-      value:
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-      configurable: true,
-    })
-
-    const { result } = renderHook(() => useInstallPrompt())
-    expect(result.current.isIOS).toBe(true)
-  })
-
-  it('isIOS is false for Chrome on iOS', () => {
-    Object.defineProperty(navigator, 'userAgent', {
-      value:
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0.0.0 Mobile/15E148 Safari/604.1',
-      configurable: true,
-    })
-
-    const { result } = renderHook(() => useInstallPrompt())
-    expect(result.current.isIOS).toBe(false)
-  })
-
-  it('triggerInstall calls prompt() on deferred event', async () => {
+  it('promptInstall calls prompt() and returns outcome', async () => {
     const mockPrompt = vi.fn()
     const mockUserChoice = Promise.resolve({ outcome: 'accepted' as const })
 
-    const { result } = renderHook(() => useInstallPrompt())
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
 
     act(() => {
       const event = new Event('beforeinstallprompt')
@@ -170,22 +74,98 @@ describe('useInstallPrompt', () => {
 
     let outcome: string | null = null
     await act(async () => {
-      outcome = await result.current.triggerInstall()
+      outcome = await result.current.promptInstall()
     })
 
     expect(mockPrompt).toHaveBeenCalled()
     expect(outcome).toBe('accepted')
   })
 
-  it('dismissBanner stores timestamp', () => {
-    const { result } = renderHook(() => useInstallPrompt())
+  it('dismissBanner sets wr_install_dismissed permanently', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    expect(result.current.isDismissed).toBe(false)
 
     act(() => {
       result.current.dismissBanner()
     })
 
+    expect(result.current.isDismissed).toBe(true)
     const stored = localStorage.getItem('wr_install_dismissed')
     expect(stored).toBeTruthy()
     expect(Number(stored)).toBeGreaterThan(0)
+  })
+
+  it('no 7-day cooldown — dismissed stays dismissed', () => {
+    // Set dismiss timestamp to 30 days ago (would have expired under old 7-day cooldown)
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+    localStorage.setItem('wr_install_dismissed', String(thirtyDaysAgo))
+
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    // Should still be dismissed — no cooldown, permanent dismissal
+    expect(result.current.isDismissed).toBe(true)
+  })
+
+  it('visitCount incremented once per session', () => {
+    renderHook(() => useInstallPrompt(), { wrapper })
+    expect(localStorage.getItem('wr_visit_count')).toBe('1')
+
+    // Re-render in same session (sessionStorage still has flag)
+    renderHook(() => useInstallPrompt(), { wrapper })
+    expect(localStorage.getItem('wr_visit_count')).toBe('1')
+  })
+
+  it('isInstalled detects standalone mode', () => {
+    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia
+
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    expect(result.current.isInstalled).toBe(true)
+  })
+
+  it('markDashboardCardShown sets localStorage key', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    expect(result.current.isDashboardCardShown).toBe(false)
+
+    act(() => {
+      result.current.markDashboardCardShown()
+    })
+
+    expect(result.current.isDashboardCardShown).toBe(true)
+    expect(localStorage.getItem('wr_install_dashboard_shown')).toBe('true')
+  })
+
+  it('isIOS detects iOS Safari', () => {
+    Object.defineProperty(navigator, 'userAgent', {
+      value:
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      configurable: true,
+    })
+
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+    expect(result.current.isIOS).toBe(true)
+    // iOS Safari is also installable (manual Add to Home Screen)
+    expect(result.current.isInstallable).toBe(true)
+  })
+
+  it('appinstalled event sets isInstalled', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    expect(result.current.isInstalled).toBe(false)
+
+    act(() => {
+      window.dispatchEvent(new Event('appinstalled'))
+    })
+
+    expect(result.current.isInstalled).toBe(true)
+  })
+
+  it('returns safe defaults when used outside provider', () => {
+    const { result } = renderHook(() => useInstallPrompt())
+    expect(result.current.isInstallable).toBe(false)
+    expect(result.current.isInstalled).toBe(false)
+    expect(result.current.visitCount).toBe(0)
   })
 })

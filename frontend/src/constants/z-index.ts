@@ -15,8 +15,6 @@ export const Z = {
   TOOLTIP: 70,
   /** Skip-to-content links */
   SKIP_LINK: 100,
-  /** PWA install banner */
-  INSTALL_BANNER: 9997,
   /** PWA update prompt, scene undo toast */
   UPDATE_PROMPT: 9998,
   /** Audio pill (persistent mini-player) */

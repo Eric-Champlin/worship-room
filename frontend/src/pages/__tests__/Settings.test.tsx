@@ -87,16 +87,17 @@ describe('Settings Page', () => {
 
   // --- Desktop Sidebar ---
 
-  it('desktop: sidebar with 5 nav items', () => {
+  it('desktop: sidebar with 6 nav items', () => {
     renderSettings()
     const nav = screen.getByRole('navigation', { name: 'Settings' })
     const buttons = nav.querySelectorAll('button')
-    expect(buttons).toHaveLength(5)
+    expect(buttons).toHaveLength(6)
     expect(buttons[0]).toHaveTextContent('Profile')
     expect(buttons[1]).toHaveTextContent('Dashboard')
     expect(buttons[2]).toHaveTextContent('Notifications')
     expect(buttons[3]).toHaveTextContent('Privacy')
     expect(buttons[4]).toHaveTextContent('Account')
+    expect(buttons[5]).toHaveTextContent('App')
   })
 
   it('active sidebar item has highlighted background', () => {
@@ -108,10 +109,10 @@ describe('Settings Page', () => {
 
   // --- Mobile Tabs ---
 
-  it('mobile: tab bar with 5 tabs', () => {
+  it('mobile: tab bar with 6 tabs', () => {
     renderSettings()
     const tabs = screen.getAllByRole('tab')
-    expect(tabs).toHaveLength(5)
+    expect(tabs).toHaveLength(6)
   })
 
   it('active mobile tab has aria-selected true', () => {

@@ -10,13 +10,14 @@ import { ProfileSection } from '@/components/settings/ProfileSection'
 import { NotificationsSection } from '@/components/settings/NotificationsSection'
 import { PrivacySection } from '@/components/settings/PrivacySection'
 import { AccountSection } from '@/components/settings/AccountSection'
+import { AppSection } from '@/components/settings/AppSection'
 import { DashboardSection } from '@/components/settings/DashboardSection'
 import { SEO } from '@/components/SEO'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
 
-type SettingsSection = 'profile' | 'dashboard' | 'notifications' | 'privacy' | 'account'
+type SettingsSection = 'profile' | 'dashboard' | 'notifications' | 'privacy' | 'account' | 'app'
 
 const SECTIONS: { id: SettingsSection; label: string }[] = [
   { id: 'profile', label: 'Profile' },
@@ -24,6 +25,7 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
   { id: 'notifications', label: 'Notifications' },
   { id: 'privacy', label: 'Privacy' },
   { id: 'account', label: 'Account' },
+  { id: 'app', label: 'App' },
 ]
 
 // Loading state: use SettingsSkeleton
@@ -150,6 +152,7 @@ export function Settings() {
             {activeSection === 'account' && (
               <AccountSection email={settings.profile.email || 'user@example.com'} />
             )}
+            {activeSection === 'app' && <AppSection />}
           </div>
         </div>
       </main>

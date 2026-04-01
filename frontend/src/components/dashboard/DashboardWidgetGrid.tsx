@@ -25,6 +25,7 @@ import type { EveningReflectionBannerProps } from './EveningReflectionBanner'
 import { EveningReflectionBanner } from './EveningReflectionBanner'
 import type { AnniversaryCardProps } from './AnniversaryCard'
 import { AnniversaryCard } from './AnniversaryCard'
+import { InstallCard } from './InstallCard'
 
 interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
@@ -355,6 +356,9 @@ export function DashboardWidgetGrid({
     <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
       <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-5">
         {orderedWidgets.map((id, index) => renderWidget(id, index))}
+        <div className="lg:col-span-5" style={{ order: 9999 }}>
+          <InstallCard />
+        </div>
       </div>
     </div>
   )
