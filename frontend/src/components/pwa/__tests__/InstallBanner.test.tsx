@@ -90,7 +90,7 @@ describe('InstallBanner', () => {
     })
 
     expect(mockShowToast).toHaveBeenCalledWith(
-      'Worship Room installed! Find it on your home screen.',
+      'Worship Room is on your home screen now. Welcome home.',
       'success'
     )
   })

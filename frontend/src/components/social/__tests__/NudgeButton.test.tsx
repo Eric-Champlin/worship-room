@@ -184,7 +184,7 @@ describe('NudgeButton send flow', () => {
     expect(notifications[0].type).toBe('nudge')
 
     // Toast shown
-    expect(mockShowToast).toHaveBeenCalledWith('Nudge sent to Rachel T.', 'success')
+    expect(mockShowToast).toHaveBeenCalledWith('Rachel T. will see your nudge.', 'success')
 
     // Button changed to "Nudge sent"
     expect(screen.getByText('Nudge sent')).toBeInTheDocument()

@@ -117,7 +117,7 @@ describe('useSleepTimer', () => {
         result.current.cancel()
       })
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'CANCEL_SLEEP_TIMER' })
-      expect(mockShowToast).toHaveBeenCalledWith('Timer cancelled')
+      expect(mockShowToast).toHaveBeenCalledWith('Timer cancelled.')
     })
   })
 
@@ -196,7 +196,7 @@ describe('useSleepTimer', () => {
 
       expect(mockEngine.pauseAll).toHaveBeenCalled()
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'COMPLETE_SLEEP_TIMER' })
-      expect(mockShowToast).toHaveBeenCalledWith('Timer complete')
+      expect(mockShowToast).toHaveBeenCalledWith('Timer complete. Rest well.')
     })
   })
 

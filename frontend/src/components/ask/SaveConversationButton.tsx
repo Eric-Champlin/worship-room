@@ -29,9 +29,9 @@ export function SaveConversationButton({ conversation }: SaveConversationButtonP
 
     try {
       await navigator.clipboard.writeText(fullText)
-      showToast('Conversation copied to clipboard!')
+      showToast('Conversation copied — ready to share.')
     } catch (_e) {
-      showToast("Couldn't copy \u2014 try selecting the text manually.", 'error')
+      showToast("We couldn't copy that. Try selecting the text and copying manually.", 'error')
     }
   }
 

@@ -94,10 +94,10 @@ export function MilestoneCard({
         a.click()
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
-        showToast('Image downloaded!')
+        showToast('Image saved.')
       }
     } catch (_e) {
-      showToast('Could not share image')
+      showToast('We couldn\'t share that. Try again.')
     } finally {
       setIsSharing(false)
     }

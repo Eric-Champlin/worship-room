@@ -86,7 +86,7 @@ export function SaveMixButton() {
       trimmed,
       state.activeSounds.map((s) => ({ soundId: s.soundId, volume: s.volume })),
     )
-    showToast('Mix saved!')
+    showToast("Your mix is saved. It'll be here whenever you need it.")
     setAnnouncement(`Mix saved as ${trimmed}`)
     clearTimeout(announcementTimerRef.current)
     announcementTimerRef.current = setTimeout(() => setAnnouncement(''), 3000)

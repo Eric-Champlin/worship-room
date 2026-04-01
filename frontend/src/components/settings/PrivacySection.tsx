@@ -52,7 +52,7 @@ export function PrivacySection({ privacy, onUpdatePrivacy, onUnblockUser }: Priv
       saveFriendsData(updated)
     }
 
-    showToast(`Unblocked ${name}`)
+    showToast(`${name} has been unblocked.`)
   }
 
   return (

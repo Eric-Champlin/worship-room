@@ -225,7 +225,7 @@ describe('Voice Input', () => {
       fireEvent.click(stopBtn)
     })
 
-    expect(screen.getByText('Voice captured.')).toBeInTheDocument()
+    expect(screen.getByText('Got it.')).toBeInTheDocument()
   })
 
   it('permission denied shows error toast and disables button', () => {
@@ -244,7 +244,7 @@ describe('Voice Input', () => {
     })
 
     // Error toast
-    expect(screen.getByText('Microphone access is needed for voice input. Check your browser settings.')).toBeInTheDocument()
+    expect(screen.getByText('Microphone access needed. Check your browser settings.')).toBeInTheDocument()
 
     // Button should be disabled with correct aria-label
     const disabledBtn = screen.getByLabelText('Voice input unavailable — microphone access denied')

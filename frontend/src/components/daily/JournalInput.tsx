@@ -78,14 +78,14 @@ export function JournalInput({
     },
     maxLength: JOURNAL_MAX_LENGTH - text.length,
     onMaxLengthReached: () => {
-      showToast('Character limit reached.', 'warning')
+      showToast('You\'ve reached the limit.', 'warning')
     },
   })
 
   const handleVoiceToggle = () => {
     if (isListening) {
       stopListening()
-      showToast('Voice captured.', 'success')
+      showToast('Got it.', 'success')
       announce('Recording stopped')
     } else {
       startListening()
@@ -98,7 +98,7 @@ export function JournalInput({
   const prevPermissionDenied = useRef(false)
   useEffect(() => {
     if (isPermissionDenied && !prevPermissionDenied.current) {
-      showToast('Microphone access is needed for voice input. Check your browser settings.', 'error')
+      showToast('Microphone access needed. Check your browser settings.', 'error')
       prevPermissionDenied.current = true
     }
   }, [isPermissionDenied, showToast])

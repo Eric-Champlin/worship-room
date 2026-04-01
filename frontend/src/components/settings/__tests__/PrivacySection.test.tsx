@@ -168,6 +168,6 @@ describe('PrivacySection', () => {
     })
     await user.click(screen.getByRole('button', { name: 'Unblock' }))
     // The toast message includes the display name (or "Unknown User" for mock IDs not in ALL_MOCK_USERS)
-    expect(screen.getByText(/Unblocked/)).toBeInTheDocument()
+    expect(screen.getByText(/has been unblocked/)).toBeInTheDocument()
   })
 })

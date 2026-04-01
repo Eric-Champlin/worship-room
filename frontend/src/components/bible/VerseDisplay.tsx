@@ -168,12 +168,12 @@ export function VerseDisplay({
         document.execCommand('copy')
         document.body.removeChild(textarea)
       } catch (_e) {
-        showToast('Failed to copy', 'error')
+        showToast("We couldn't copy that. Try again.", 'error')
         return
       }
     }
 
-    showToast('Copied!', 'success')
+    showToast('Verse copied.', 'success')
     handleDismissActionBar()
   }, [selectedVerse, verses, book.name, chapterNumber, showToast, handleDismissActionBar])
 
@@ -218,7 +218,7 @@ export function VerseDisplay({
       if (editingNoteVerse === null) return false
       const success = saveNote(bookSlug, chapterNumber, editingNoteVerse, text)
       if (!success) {
-        showToast('Note limit reached. Delete an existing note to add a new one.', 'error')
+        showToast("You've filled your notebook! Remove an older note to make room.", 'error')
         return false
       }
       announce(`Note saved for verse ${editingNoteVerse}`)

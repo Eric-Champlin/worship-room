@@ -21,7 +21,7 @@ export function DashboardSection() {
         <button
           onClick={() => {
             clearDashboardLayout()
-            showToast('Dashboard layout reset to default', 'success')
+            showToast('Dashboard layout reset.', 'success')
           }}
           className="w-full min-h-[44px] rounded-lg bg-white/[0.06] p-4 text-left text-sm text-white/60 hover:bg-white/[0.08] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >

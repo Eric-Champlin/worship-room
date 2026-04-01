@@ -172,7 +172,7 @@ describe('VerseCardActions', () => {
     await user.click(screen.getByRole('button', { name: /Save note/i }))
     await user.type(screen.getByPlaceholderText('Add a note about this verse...'), 'Note text')
     await user.click(screen.getByRole('button', { name: /^Save$/i }))
-    expect(screen.getByText(/Note limit reached/i)).toBeInTheDocument()
+    expect(screen.getByText(/filled your notebook/i)).toBeInTheDocument()
   })
 
   it('existing note pre-fills textarea', async () => {

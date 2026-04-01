@@ -70,7 +70,7 @@ function PrayerDetailContent() {
             }
           : prev,
       )
-      showToast('Comment posted.')
+      showToast('Comment shared.')
       setReplyTo('')
     },
     [showToast],
@@ -92,13 +92,13 @@ function PrayerDetailContent() {
             }
           : prev,
       )
-      showToast('Prayer marked as answered.')
+      showToast('What a testimony. God is faithful.')
     },
     [showToast],
   )
 
   const handleDelete = useCallback(() => {
-    showToast('Prayer deleted.')
+    showToast('Prayer removed from your list.')
   }, [showToast])
 
   if (!prayer) {

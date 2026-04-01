@@ -56,7 +56,7 @@ describe('InviteSection', () => {
       vi.advanceTimersByTime(300)
     })
 
-    expect(screen.getByText('Invitation sent!')).toBeInTheDocument()
+    expect(screen.getByText('Invitation sent.')).toBeInTheDocument()
     expect(emailInput).toHaveValue('')
   })
 

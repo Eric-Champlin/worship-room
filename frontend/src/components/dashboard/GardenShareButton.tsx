@@ -51,9 +51,9 @@ export function GardenShareButton({
       a.click()
       URL.revokeObjectURL(url)
       playSound('chime')
-      showToast?.('Garden image downloaded!', { type: 'success' })
+      showToast?.('Garden image saved.', { type: 'success' })
     } catch {
-      showToast?.('Could not generate garden image. Please try again.', { type: 'error' })
+      showToast?.('We couldn\'t create the image. Try again.', { type: 'error' })
     } finally {
       setIsGenerating(false)
     }

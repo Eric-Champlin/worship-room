@@ -196,7 +196,7 @@ function PrayerWallContent() {
           prayerWallPosts: badgeData.activityCounts.prayerWallPosts + 1,
         },
       })
-      showToast('Your prayer has been shared.')
+      showToast('Your prayer is on the wall. Others can now lift it up.')
     },
     [user, isAuthenticated, showToast, recordActivity],
   )
@@ -337,7 +337,7 @@ function PrayerWallContent() {
         ),
       )
       recordActivity('prayerWall')
-      showToast('Comment posted.')
+      showToast('Comment shared.')
     },
     [isAuthenticated, showToast, user, recordActivity],
   )

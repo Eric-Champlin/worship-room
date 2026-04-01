@@ -50,7 +50,7 @@ export function AccountSection({ email }: AccountSectionProps) {
             </div>
             <button
               type="button"
-              onClick={() => showToast('Email change coming soon')}
+              onClick={() => showToast('This feature is on the way.')}
               className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               Change Email
@@ -61,7 +61,7 @@ export function AccountSection({ email }: AccountSectionProps) {
           <div>
             <button
               type="button"
-              onClick={() => showToast('Password change coming soon')}
+              onClick={() => showToast('This feature is on the way.')}
               className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               Change Password

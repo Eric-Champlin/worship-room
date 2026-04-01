@@ -56,10 +56,10 @@ export function ChallengeShareButton({
         a.click()
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
-        showToast('Image downloaded!')
+        showToast('Image saved.')
       }
     } catch (_e) {
-      showToast('Could not share image')
+      showToast('We couldn\'t share that. Try again.')
     } finally {
       setIsGenerating(false)
     }
@@ -69,9 +69,9 @@ export function ChallengeShareButton({
     const text = `I'm on Day ${currentDay} of ${challengeTitle} on Worship Room! Join me: /challenges/${challengeId}`
     try {
       await navigator.clipboard.writeText(text)
-      showToast('Copied!')
+      showToast('Copied — ready to share.')
     } catch (_e) {
-      showToast('Could not copy text')
+      showToast('We couldn\'t copy that. Try selecting the text manually.')
     }
   }, [currentDay, challengeTitle, challengeId, showToast])
 

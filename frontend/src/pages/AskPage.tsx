@@ -170,9 +170,9 @@ export function AskPage() {
     const shareText = `${first.question}\n\n${first.response.verses[0].reference} — Found on Worship Room`
     try {
       await navigator.clipboard.writeText(shareText)
-      showToast('Copied to clipboard')
+      showToast('Copied — ready to share.')
     } catch (_e) {
-      showToast('Could not copy to clipboard', 'error')
+      showToast("We couldn't copy that. Try again.", 'error')
     }
   }
 

@@ -50,7 +50,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
 
   const handleVisit = useCallback((_placeId: string, _placeName: string) => {
     recordActivity('localVisit')
-    showToast('Visit recorded! +10 faith points', 'success')
+    showToast('Visit recorded. That took courage. +10 faith points.', 'success')
   }, [recordActivity, showToast])
 
   // Search state

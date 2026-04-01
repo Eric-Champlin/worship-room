@@ -125,7 +125,7 @@ export function ShareDropdown({
       copyTimeoutRef.current = setTimeout(() => setCopied(false), COPY_RESET_DELAY)
     } catch (_e) {
       // Clipboard API unavailable or permission denied
-      showToast("Couldn't copy link", 'error')
+      showToast("We couldn't copy that link. Try again.", 'error')
     }
   }
 

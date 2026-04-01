@@ -73,7 +73,7 @@ describe('ChallengeShareButton', () => {
     fireEvent.click(screen.getByText('Copy text'))
 
     await waitFor(() => {
-      expect(mockShowToast).toHaveBeenCalledWith('Copied!')
+      expect(mockShowToast).toHaveBeenCalledWith('Copied — ready to share.')
     })
   })
 

@@ -95,7 +95,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
           >
             {submitted ? (
               <p role="status" className="text-center text-sm font-medium text-success">
-                Report submitted. Thank you.
+                Report submitted. Thank you for keeping this safe.
               </p>
             ) : (
               <>
@@ -106,7 +106,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
                   Report Prayer Request
                 </h2>
                 <p className="mt-1 text-sm text-white/60">
-                  Please describe why you are reporting this content (optional):
+                  Help us keep this community safe. Describe the issue (optional):
                 </p>
                 <textarea
                   ref={textareaRef}

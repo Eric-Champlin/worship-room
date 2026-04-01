@@ -57,14 +57,14 @@ describe('AccountSection', () => {
     const user = userEvent.setup()
     renderAccount()
     await user.click(screen.getByRole('button', { name: 'Change Email' }))
-    expect(screen.getByText('Email change coming soon')).toBeInTheDocument()
+    expect(screen.getByText('This feature is on the way.')).toBeInTheDocument()
   })
 
   it('Change Password shows toast', async () => {
     const user = userEvent.setup()
     renderAccount()
     await user.click(screen.getByRole('button', { name: 'Change Password' }))
-    expect(screen.getByText('Password change coming soon')).toBeInTheDocument()
+    expect(screen.getByText('This feature is on the way.')).toBeInTheDocument()
   })
 
   it('Delete Account button has danger styling', () => {

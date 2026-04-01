@@ -210,7 +210,7 @@ describe('SaveMixButton', () => {
     expect(mockSaveMix).toHaveBeenCalledWith('My Custom Mix', [
       { soundId: 'gentle-rain', volume: 0.7 },
     ])
-    expect(mockShowToast).toHaveBeenCalledWith('Mix saved!')
+    expect(mockShowToast).toHaveBeenCalledWith("Your mix is saved. It'll be here whenever you need it.")
   })
 
   it('cancel hides the input', async () => {

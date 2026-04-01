@@ -34,9 +34,9 @@ function InviteByLink() {
   async function handleCopy() {
     try {
       await copyToClipboard(url)
-      showToast('Invite link copied!', 'success')
+      showToast('Link copied — share it with a friend.', 'success')
     } catch (_e) {
-      showToast('Failed to copy link', 'error')
+      showToast("We couldn't copy that link. Try again.", 'error')
     }
   }
 
@@ -82,7 +82,7 @@ function InviteByEmail() {
     if (!isValidEmail || sending) return
     setSending(true)
     sendTimerRef.current = setTimeout(() => {
-      showToast('Invitation sent!', 'success')
+      showToast('Invitation sent.', 'success')
       setEmail('')
       setSending(false)
     }, 300)

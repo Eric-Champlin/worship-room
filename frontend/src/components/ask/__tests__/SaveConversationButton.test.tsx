@@ -85,7 +85,7 @@ describe('SaveConversationButton', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Save this conversation/i }))
     })
-    expect(screen.getByText('Conversation copied to clipboard!')).toBeInTheDocument()
+    expect(screen.getByText('Conversation copied — ready to share.')).toBeInTheDocument()
   })
 
   it('error toast appears on clipboard failure', async () => {
@@ -94,6 +94,6 @@ describe('SaveConversationButton', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Save this conversation/i }))
     })
-    expect(screen.getByText(/try selecting the text manually/i)).toBeInTheDocument()
+    expect(screen.getByText(/Try selecting the text and copying manually/i)).toBeInTheDocument()
   })
 })

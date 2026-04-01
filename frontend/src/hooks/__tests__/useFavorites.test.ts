@@ -88,7 +88,7 @@ describe('useFavorites', () => {
     })
 
     expect(mockShowToast).toHaveBeenCalledWith(
-      'Storage is full. Please remove some items.',
+      'Storage is full. Remove some items to make room.',
       'error',
     )
     // Should revert — no favorites in localStorage

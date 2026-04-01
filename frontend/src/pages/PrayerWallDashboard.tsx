@@ -99,7 +99,7 @@ function DashboardContent() {
             : p,
         ),
       )
-      showToast('Prayer marked as answered.')
+      showToast('What a testimony. God is faithful.')
     },
     [showToast],
   )
@@ -107,7 +107,7 @@ function DashboardContent() {
   const handleDelete = useCallback(
     (prayerId: string) => {
       setPrayers((prev) => prev.filter((p) => p.id !== prayerId))
-      showToast('Prayer deleted.')
+      showToast('Prayer removed from your list.')
     },
     [showToast],
   )
@@ -126,7 +126,7 @@ function DashboardContent() {
         ),
       )
       recordActivity('prayerWall')
-      showToast('Comment posted.')
+      showToast('Comment shared.')
     },
     [showToast, recordActivity],
   )
@@ -394,7 +394,7 @@ function DashboardContent() {
                 ))
               ) : (
                 <p className="py-8 text-center text-sm text-white/50">
-                  No comments yet.
+                  No comments yet. Be the first to encourage.
                 </p>
               )}
             </div>

@@ -62,7 +62,7 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
         className="flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-danger hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:rounded"
       >
         <Trash2 className="h-4 w-4" aria-hidden="true" />
-        Delete
+        Remove
       </button>
 
       {visible && (
@@ -84,14 +84,13 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
               id="delete-dialog-title"
               className="text-lg font-semibold text-white"
             >
-              Delete Prayer Request
+              Remove this prayer?
             </h2>
             <p
               id="delete-dialog-desc"
               className="mt-2 text-sm text-white/60"
             >
-              Are you sure you want to delete this prayer request? This action
-              cannot be undone.
+              This will remove the prayer from the wall. This can&apos;t be undone.
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <Button
@@ -106,7 +105,7 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
                 onClick={handleDelete}
                 className="rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
               >
-                Delete
+                Remove
               </button>
             </div>
           </div>

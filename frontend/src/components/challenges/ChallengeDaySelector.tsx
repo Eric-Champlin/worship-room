@@ -43,7 +43,7 @@ export function ChallengeDaySelector({
   const handleSelect = useCallback(
     (day: number) => {
       if (isDayLocked(day)) {
-        showToast("Complete today's challenge to unlock the next day.", 'warning')
+        showToast("Today's step comes first — take it at your pace.", 'warning')
         return
       }
       onSelectDay(day)

@@ -50,7 +50,7 @@ export function NudgeButton({ friendId, friendName, lastActive }: NudgeButtonPro
   const handleConfirm = useCallback(() => {
     setDialogOpen(false)
     sendNudge(friendId, friendName)
-    showToast(`Nudge sent to ${friendName}`, 'success')
+    showToast(`${friendName} will see your nudge.`, 'success')
     setNudgeSent(true)
   }, [friendId, friendName, sendNudge, showToast])
 

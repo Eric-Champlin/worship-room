@@ -92,7 +92,7 @@ export function MyPrayers() {
       if (result) {
         refreshPrayers()
         setComposerOpen(false)
-        showToast('Prayer added', 'success')
+        showToast("Added to your prayer list. We'll keep it close.", 'success')
       } else {
         showToast(
           "You've reached the 200 prayer limit. Consider archiving answered prayers to make room.",
@@ -118,7 +118,7 @@ export function MyPrayers() {
       deletePrayer(id)
       refreshPrayers()
       setDeletingId(null)
-      showToast('Prayer removed', 'success')
+      showToast('Removed from your list.', 'success')
     },
     [refreshPrayers, showToast],
   )

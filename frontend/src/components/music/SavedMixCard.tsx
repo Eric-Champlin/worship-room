@@ -169,7 +169,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
                 }}
                 onDuplicate={() => {
                   duplicateMix(mix.id)
-                  showToast('Mix duplicated!')
+                  showToast('Mix duplicated.')
                   setMenuOpen(false)
                 }}
                 onShare={() => {
@@ -192,7 +192,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
           mixName={mix.name}
           onConfirm={() => {
             deleteMix(mix.id)
-            showToast('Mix deleted')
+            showToast('Mix removed.')
             setShowDeleteDialog(false)
           }}
           onCancel={() => setShowDeleteDialog(false)}

@@ -174,7 +174,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
       } catch (_e) {
         if (mountedRef.current) {
           setIsRendering(false)
-          showToast('Failed to generate image', 'error')
+          showToast('We couldn\'t create the image. Try again.', 'error')
         }
       }
     }, 300)
@@ -249,9 +249,9 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      showToast('Image downloaded!')
+      showToast('Image saved.')
     } catch (_e) {
-      showToast('Failed to generate image', 'error')
+      showToast('We couldn\'t create the image. Try again.', 'error')
     } finally {
       setIsActioning(false)
     }
@@ -270,12 +270,12 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': blob }),
         ])
-        showToast('Image copied!')
+        showToast('Image copied.')
       }
     } catch (err) {
       // User cancelled share is not an error
       if (err instanceof Error && err.name === 'AbortError') return
-      showToast('Failed to share image', 'error')
+      showToast('We couldn\'t share that. Try again.', 'error')
     } finally {
       setIsActioning(false)
     }

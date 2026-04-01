@@ -39,7 +39,7 @@ export function useSavedMixes(): {
         return mix
       } catch (e) {
         if (e instanceof StorageQuotaError) {
-          showToast('Storage is full. Please remove some items.', 'error')
+          showToast('Storage is full. Remove some items to make room.', 'error')
         }
         return null
       }
@@ -56,7 +56,7 @@ export function useSavedMixes(): {
         setMixes(storageService.getSavedMixes())
       } catch (e) {
         if (e instanceof StorageQuotaError) {
-          showToast('Storage is full.', 'error')
+          showToast('Storage is full. Remove some items to make room.', 'error')
         }
       }
     },
@@ -84,7 +84,7 @@ export function useSavedMixes(): {
         return copy
       } catch (e) {
         if (e instanceof StorageQuotaError) {
-          showToast('Storage is full. Please remove some items.', 'error')
+          showToast('Storage is full. Remove some items to make room.', 'error')
         }
         return null
       }

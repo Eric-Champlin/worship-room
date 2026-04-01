@@ -61,9 +61,9 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
     if (success) {
       setShowNoteInput(false)
       setNoteText('')
-      showToast('Note saved')
+      showToast('Note saved.')
     } else {
-      showToast('Note limit reached. Delete an existing note to add a new one.', 'error')
+      showToast("You've filled your notebook! Remove an older note to make room.", 'error')
     }
   }
 

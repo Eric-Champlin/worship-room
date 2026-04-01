@@ -8,7 +8,7 @@ export function MonthlyShareButton() {
       <button
         onClick={() =>
           showToast(
-            "Sharing is coming soon! We're working on beautiful shareable cards for your faith journey.",
+            'Sharing your report is coming soon.',
             'success',
           )
         }

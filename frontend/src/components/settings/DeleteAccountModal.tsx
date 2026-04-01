@@ -30,6 +30,7 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm }: DeleteAccount
         <p id="delete-desc" className="text-sm text-white/70 mb-6">
           This will permanently delete all your Worship Room data including mood entries, journal
           drafts, badges, friends, and settings. This action cannot be undone.
+          We&apos;ll miss you.
         </p>
 
         {/* Desktop: side by side, Mobile: stacked */}

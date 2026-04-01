@@ -79,12 +79,12 @@ export function SavedMixRow({ mix, onShare }: SavedMixRowProps) {
 
   function handleDuplicate() {
     duplicateMix(mix.id)
-    showToast('Mix duplicated!')
+    showToast('Mix duplicated.')
   }
 
   function handleDeleteConfirm() {
     deleteMix(mix.id)
-    showToast('Mix deleted')
+    showToast('Mix removed.')
     setShowDeleteDialog(false)
   }
 

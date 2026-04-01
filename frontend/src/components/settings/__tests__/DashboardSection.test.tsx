@@ -51,7 +51,7 @@ describe('DashboardSection', () => {
   it('Reset Dashboard Layout shows confirmation toast', () => {
     renderSection()
     fireEvent.click(screen.getByText('Reset Dashboard Layout'))
-    expect(screen.getByText('Dashboard layout reset to default')).toBeInTheDocument()
+    expect(screen.getByText('Dashboard layout reset.')).toBeInTheDocument()
   })
 
   it('follows existing card styling', () => {

@@ -98,7 +98,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
 
       if (hasError) return
 
-      onShowToast('Authentication coming soon')
+      onShowToast('Account creation is on the way. For now, explore freely.')
       handleClose()
     },
     [emailValue, passwordValue, handleClose, onShowToast],
@@ -107,7 +107,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
   const handleForgotSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      onShowToast('Password reset coming soon')
+      onShowToast('Password reset is coming soon. Hang tight.')
       setResetEmail('')
       setView('login')
     },

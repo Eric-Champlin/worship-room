@@ -113,7 +113,7 @@ export function useSleepTimer(): SleepTimerControls {
     }
     dispatch({ type: 'CANCEL_SLEEP_TIMER' })
     fadeScheduledRef.current = false
-    showToast('Timer cancelled')
+    showToast('Timer cancelled.')
   }, [timer, engine, dispatch, showToast])
 
   // Interval for countdown ticks + phase transitions
@@ -135,7 +135,7 @@ export function useSleepTimer(): SleepTimerControls {
         engine?.pauseAll()
         dispatch({ type: 'COMPLETE_SLEEP_TIMER' })
         fadeScheduledRef.current = false
-        showToast('Timer complete')
+        showToast('Timer complete. Rest well.')
         return
       }
 
@@ -259,7 +259,7 @@ export function useSleepTimer(): SleepTimerControls {
     ) {
       dispatch({ type: 'CANCEL_SLEEP_TIMER' })
       fadeScheduledRef.current = false
-      showToast('Timer cancelled')
+      showToast('Timer cancelled.')
     }
   }, [
     timer?.isActive,

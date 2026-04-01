@@ -126,9 +126,9 @@ export function DevotionalTabContent({
   const handleShareClick = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      showToast('Link copied!', 'success')
+      showToast('Link copied — pass it along.', 'success')
     } catch (_e) {
-      showToast('Could not copy link', 'error')
+      showToast("We couldn't copy that link. Try again.", 'error')
     }
   }, [showToast])
 

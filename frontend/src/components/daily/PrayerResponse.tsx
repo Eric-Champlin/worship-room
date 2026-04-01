@@ -116,9 +116,9 @@ export function PrayerResponse({
     if (!prayer) return
     try {
       await navigator.clipboard.writeText(prayer.text)
-      showToast('Prayer copied to clipboard')
+      showToast('Prayer copied — share it with someone who needs it.')
     } catch (_e) {
-      showToast('Failed to copy', 'error')
+      showToast("We couldn't copy that. Try again.", 'error')
     }
   }
 
@@ -127,7 +127,7 @@ export function PrayerResponse({
       authModal?.openAuthModal('Sign in to save your prayers')
       return
     }
-    showToast('Save feature coming soon')
+    showToast('Saving prayers is coming soon. For now, try copying it.')
   }
 
   const handleSaveToList = () => {
@@ -179,9 +179,9 @@ export function PrayerResponse({
   const handleCopyClassic = async (p: ClassicPrayer) => {
     try {
       await navigator.clipboard.writeText(p.text)
-      showToast('Copied to clipboard')
+      showToast('Copied — ready to share.')
     } catch (_e) {
-      showToast('Failed to copy', 'error')
+      showToast("We couldn't copy that. Try again.", 'error')
     }
   }
 

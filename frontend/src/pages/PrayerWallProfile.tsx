@@ -78,7 +78,7 @@ function PrayerWallProfileContent() {
             : p,
         ),
       )
-      showToast('Comment posted.')
+      showToast('Comment shared.')
     },
     [showToast],
   )
@@ -239,7 +239,7 @@ function PrayerWallProfileContent() {
                 ))
               ) : (
                 <p className="py-8 text-center text-sm text-white/50">
-                  No prayer requests yet.
+                  No prayers shared yet.
                 </p>
               )}
             </div>

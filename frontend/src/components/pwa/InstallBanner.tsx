@@ -19,7 +19,7 @@ export function InstallBanner() {
     const outcome = await triggerInstall()
     setInstalling(false)
     if (outcome === 'accepted') {
-      showToast('Worship Room installed! Find it on your home screen.', 'success')
+      showToast('Worship Room is on your home screen now. Welcome home.', 'success')
       dismissBanner()
     }
   }

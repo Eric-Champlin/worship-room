@@ -40,7 +40,7 @@ export function DaySelector({
   const handleSelect = useCallback(
     (day: number) => {
       if (isDayLocked(day)) {
-        showToast('Complete the current day to unlock this one.', 'warning')
+        showToast('Take today\'s step first — it\'s waiting for you.', 'warning')
         return
       }
       onSelectDay(day)

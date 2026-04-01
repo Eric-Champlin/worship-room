@@ -66,7 +66,7 @@ export function useFavorites(): {
         // Revert optimistic update
         setFavorites(storageService.getFavorites())
         if (e instanceof StorageQuotaError) {
-          showToast('Storage is full. Please remove some items.', 'error')
+          showToast('Storage is full. Remove some items to make room.', 'error')
         }
       }
     },

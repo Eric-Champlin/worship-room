@@ -9,10 +9,10 @@ export function PrayerListEmptyState({ onAddPrayer }: PrayerListEmptyStateProps)
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <Heart className="mb-4 h-16 w-16 text-white/30" aria-hidden="true" />
       <h2 className="mb-2 text-xl font-semibold text-white/70">
-        Your prayer list is empty
+        Your prayer list is waiting.
       </h2>
       <p className="mb-6 text-white/50">
-        Start tracking what&apos;s on your heart
+        Bring what&apos;s on your heart. God is already listening.
       </p>
       <button
         type="button"

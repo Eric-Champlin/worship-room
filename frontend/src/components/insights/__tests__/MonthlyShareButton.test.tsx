@@ -20,7 +20,7 @@ describe('MonthlyShareButton', () => {
     render(<MonthlyShareButton />)
     await user.click(screen.getByText('Share Your Month'))
     expect(mockShowToast).toHaveBeenCalledWith(
-      "Sharing is coming soon! We're working on beautiful shareable cards for your faith journey.",
+      'Sharing your report is coming soon.',
       'success',
     )
   })

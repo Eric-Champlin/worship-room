@@ -96,8 +96,8 @@ describe('MyPrayers Page', () => {
   describe('Empty state', () => {
     it('shows empty state with correct text and CTA', () => {
       renderMyPrayers()
-      expect(screen.getByText('Your prayer list is empty')).toBeInTheDocument()
-      expect(screen.getByText("Start tracking what's on your heart")).toBeInTheDocument()
+      expect(screen.getByText('Your prayer list is waiting.')).toBeInTheDocument()
+      expect(screen.getByText("Bring what's on your heart. God is already listening.")).toBeInTheDocument()
     })
 
     it('empty state CTA opens composer', async () => {
@@ -409,7 +409,7 @@ describe('MyPrayers Page', () => {
       localStorage.setItem('wr_prayer_list', '{not valid json!!!')
       renderMyPrayers()
       // Should show empty state, not crash
-      expect(screen.getByText('Your prayer list is empty')).toBeInTheDocument()
+      expect(screen.getByText('Your prayer list is waiting.')).toBeInTheDocument()
     })
   })
 })
