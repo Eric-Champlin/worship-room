@@ -98,7 +98,7 @@ function ScriptureSoakingContent() {
       }
       rafRef.current = requestAnimationFrame(tick)
     },
-    [cleanup, markMeditationComplete, recordActivity],
+    [cleanup, markMeditationComplete, recordActivity, duration],
   )
 
   const handleBegin = () => {

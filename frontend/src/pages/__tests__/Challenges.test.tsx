@@ -120,8 +120,10 @@ describe('Challenges Page', () => {
     const remindButtons = screen.queryAllByRole('button', { name: /set reminder/i })
     if (remindButtons.length > 0) {
       await user.click(remindButtons[0])
-      // Button text should change to "Reminder set"
-      expect(screen.queryByText('Reminder set')).toBeInTheDocument()
+      // Button text should change to "Reminder set" (may appear in both
+      // NextChallengeCountdown and UpcomingChallengeCard for the same challenge)
+      const reminderSetElements = screen.queryAllByText('Reminder set')
+      expect(reminderSetElements.length).toBeGreaterThan(0)
     }
   })
 

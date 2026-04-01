@@ -156,7 +156,7 @@ export function ChallengeDetail() {
         }
       }
     }
-  }, [challengeId, challenge, progress, selectedDay, completeDay, faithPoints.recordActivity, hasMilestoneBeenShown])
+  }, [challengeId, challenge, progress, selectedDay, completeDay, faithPoints.recordActivity, hasMilestoneBeenShown, playSoundEffect])
 
   const handleJoin = useCallback(() => {
     if (!challengeId) return

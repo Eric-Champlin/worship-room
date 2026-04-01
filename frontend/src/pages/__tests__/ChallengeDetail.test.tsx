@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { ToastProvider } from '@/components/ui/Toast'
 import { CHALLENGE_PROGRESS_KEY } from '@/constants/challenges'
+import type { ChallengeCalendarInfo } from '@/lib/challenge-calendar'
 
 import { ChallengeDetail } from '../ChallengeDetail'
 
@@ -17,6 +18,23 @@ const mockAuth = {
 }
 
 const mockOpenAuthModal = vi.fn()
+
+// Force the challenge to appear as "past" so date-dependent UI (participants,
+// community goal, day content) always renders regardless of the real date.
+vi.mock('@/lib/challenge-calendar', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/challenge-calendar')>(
+    '@/lib/challenge-calendar',
+  )
+  return {
+    ...actual,
+    getChallengeCalendarInfo: (): ChallengeCalendarInfo => ({
+      status: 'past',
+      startDate: new Date(2026, 1, 18), // Feb 18 2026
+      endDate: new Date(2026, 2, 29), // Mar 29 2026
+      calendarDay: 1,
+    }),
+  }
+})
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => mockAuth,

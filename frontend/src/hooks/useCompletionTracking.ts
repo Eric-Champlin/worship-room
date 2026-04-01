@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import type { DailyCompletion, MeditationType } from '@/types/daily-experience'
 import { DAILY_COMPLETION_KEY } from '@/constants/daily-experience'
 
@@ -96,7 +96,10 @@ export function useCompletionTracking(): CompletionTracking {
     })
   }, [])
 
-  const completedGuidedPrayerSessions = completion.guidedPrayer ?? []
+  const completedGuidedPrayerSessions = useMemo(
+    () => completion.guidedPrayer ?? [],
+    [completion.guidedPrayer]
+  )
 
   const isGuidedPrayerComplete = useCallback(
     (sessionId: string) => completedGuidedPrayerSessions.includes(sessionId),

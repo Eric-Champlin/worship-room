@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -269,9 +269,13 @@ describe('BibleReader — Audio Integration', () => {
     it('cross-feature CTAs present', async () => {
       renderReader('/bible/genesis/1')
       await waitFor(() => {
-        const prayLink = screen.getByText(/Pray about this chapter/)
-        expect(prayLink.closest('a')).toHaveAttribute('href', '/daily?tab=pray')
+        expect(screen.getByText('Continue your time with Genesis 1')).toBeInTheDocument()
       })
+      // Engagement bridge section has Pray CTA linking to /daily?tab=pray
+      const heading = screen.getByText('Continue your time with Genesis 1')
+      const section = heading.closest('section')!
+      const prayLink = within(section).getByText('Pray').closest('a')
+      expect(prayLink).toHaveAttribute('href', expect.stringContaining('/daily?tab=pray'))
     })
 
     it('verse click still works (no broken interactions)', async () => {

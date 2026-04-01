@@ -18,14 +18,6 @@ export interface MoodChartDataPoint {
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function useMoodChartData(days: number = 7): MoodChartDataPoint[] {
-  const raw = useMemo(() => {
-    try {
-      return localStorage.getItem('wr_mood_entries') ?? '';
-    } catch (_e) {
-      return '';
-    }
-  }, []);
-
   return useMemo(() => {
     const entries = getMoodEntries();
 
@@ -63,5 +55,5 @@ export function useMoodChartData(days: number = 7): MoodChartDataPoint[] {
     }
 
     return result;
-  }, [raw, days]);
+  }, [days]);
 }

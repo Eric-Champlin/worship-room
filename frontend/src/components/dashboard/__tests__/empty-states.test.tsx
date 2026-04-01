@@ -1,10 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { DashboardWidgetGrid } from '../DashboardWidgetGrid'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
+
+// Mock evening time check so tests are time-independent
+vi.mock('@/services/evening-reflection-storage', () => ({
+  isEveningTime: () => false,
+}))
 
 // Mock ResizeObserver for Recharts ResponsiveContainer
 class ResizeObserverMock {
@@ -16,6 +21,11 @@ global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
 
 beforeEach(() => {
   localStorage.clear()
+  // Pin to 9 AM so getTimeOfDay() returns 'morning' — the activity-checklist
+  // widget is included in morning order but absent from night order.
+  const morning = new Date()
+  morning.setHours(9, 0, 0, 0)
+  vi.useFakeTimers({ shouldAdvanceTime: true, now: morning })
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'Eric')
   // Seed empty friends data so FriendsPreview shows empty state (otherwise mock data auto-initializes)
@@ -25,6 +35,10 @@ beforeEach(() => {
     pendingOutgoing: [],
     blocked: [],
   }))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 function GridWithFaithPoints() {

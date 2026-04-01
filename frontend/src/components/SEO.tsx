@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async'
 import { useLocation } from 'react-router-dom'
 
+// eslint-disable-next-line react-refresh/only-export-components -- Constant co-located with SEO component
 export const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://worshiproom.com'
 
 /** Query params that represent UI state (not content) and should be stripped from canonical URLs */

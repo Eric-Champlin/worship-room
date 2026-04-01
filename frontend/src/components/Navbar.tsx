@@ -19,6 +19,7 @@ const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> 
   { label: 'Music', to: '/music', icon: Music },
 ]
 
+// eslint-disable-next-line react-refresh/only-export-components -- Utility co-located with Navbar for route matching
 export function isNavActive(to: string, pathname: string): boolean {
   switch (to) {
     case '/daily': return pathname.startsWith('/daily') || pathname.startsWith('/meditate')

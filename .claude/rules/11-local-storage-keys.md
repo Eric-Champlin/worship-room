@@ -39,6 +39,8 @@ All keys use the `wr_` prefix (except legacy `worship-room-*` keys). Data persis
 | ----------------------------- | -------------------- | --------------------------------------------- |
 | `wr_settings`                 | UserSettings         | Profile, notifications, privacy, account      |
 | `wr_dashboard_collapsed`      | {cardId: bool}       | Dashboard card collapse state                 |
+| `wr_dashboard_layout`         | DashboardLayout      | Dashboard widget layout/ordering              |
+| `wr_seasonal_banner_dismissed_*` | "true"            | Seasonal banner dismissal (per season suffix) |
 | `wr_onboarding_complete`      | "true"               | Welcome wizard completed                      |
 | `wr_tooltips_seen`            | string[]             | Dismissed tooltip IDs                         |
 | `wr_getting_started`          | GettingStartedData   | Getting started checklist progress            |
@@ -54,6 +56,8 @@ All keys use the `wr_` prefix (except legacy `worship-room-*` keys). Data persis
 | `wr_listening_history` | ListeningSession[] (max 100) | Audio listening sessions   |
 | `wr_session_state`     | SessionState (24h expiry)    | Audio session persistence  |
 | `wr_routines`          | RoutineDefinition[]          | Custom bedtime routines    |
+| `wr_sound_effects_enabled` | "true"/"false"           | Sound effects toggle       |
+| `wr_music_hints_*`    | MusicHintState               | Music hints per user (dynamic suffix) |
 
 ### Daily Hub & Journal
 
@@ -74,6 +78,8 @@ All keys use the `wr_` prefix (except legacy `worship-room-*` keys). Data persis
 | `wr_reading_plan_progress`  | {planId: PlanProgress}     | Reading plan daily progress    |
 | `wr_custom_plans`           | string[] (plan IDs)        | AI-generated plan references   |
 | `wr_gratitude_entries`      | GratitudeEntry[] (max 365) | Daily gratitude items          |
+| `wr_share_last_template`   | string                     | Last-used verse share template |
+| `wr_share_last_size`       | string                     | Last-used verse share size     |
 
 ### Bible Reader
 

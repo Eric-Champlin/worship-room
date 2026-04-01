@@ -39,6 +39,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
  * (e.g. PrayerDetail which has no provider), returns undefined so callers
  * can fall back to a regular link.
  */
+// eslint-disable-next-line react-refresh/only-export-components -- Hook co-located with AuthModalProvider
 export function useAuthModal(): AuthModalContextValue | undefined {
   return useContext(AuthModalContext) ?? undefined
 }

@@ -20,6 +20,7 @@ const SIZE_CLASSES = {
   lg: 'h-[300px]',
 } as const
 
+// eslint-disable-next-line react-refresh/only-export-components -- Constant co-located with GrowthGarden
 export const STAGE_LABELS: Record<number, string> = {
   1: 'Your garden: a tiny sprout in bare soil',
   2: 'Your garden: a small plant with leaves and a flower bud',

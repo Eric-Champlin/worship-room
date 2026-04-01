@@ -198,7 +198,7 @@ function PrayerWallContent() {
       })
       showToast('Your prayer has been shared.')
     },
-    [user, isAuthenticated, showToast],
+    [user, isAuthenticated, showToast, recordActivity],
   )
 
   // QOTD response count

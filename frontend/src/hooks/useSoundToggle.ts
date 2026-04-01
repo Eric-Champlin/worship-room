@@ -81,7 +81,22 @@ export function useSoundToggle(): UseSoundToggleReturn {
 
       const url = AUDIO_BASE_URL + sound.filename
 
-      loadWithRetry(sound, url)
+      async function retry(): Promise<void> {
+        const delays = AUDIO_CONFIG.LOAD_RETRY_DELAYS_MS
+        for (let attempt = 0; attempt <= AUDIO_CONFIG.LOAD_RETRY_MAX; attempt++) {
+          try {
+            await engine!.addSound(sound.id, url, AUDIO_CONFIG.DEFAULT_SOUND_VOLUME)
+            return
+          } catch (_e) {
+            if (attempt < AUDIO_CONFIG.LOAD_RETRY_MAX) {
+              await new Promise<void>((r) => setTimeout(r, delays[attempt]))
+            }
+          }
+        }
+        throw new Error(`Failed to load ${sound.name}`)
+      }
+
+      retry()
         .then(() => {
           // Success: dispatch to reducer, clear loading state
           dispatch({
@@ -110,21 +125,6 @@ export function useSoundToggle(): UseSoundToggleReturn {
     },
     [isAuthenticated, authModal, audioState.activeSounds, dispatch, engine, showToast],
   )
-
-  async function loadWithRetry(sound: Sound, url: string): Promise<void> {
-    const delays = AUDIO_CONFIG.LOAD_RETRY_DELAYS_MS
-    for (let attempt = 0; attempt <= AUDIO_CONFIG.LOAD_RETRY_MAX; attempt++) {
-      try {
-        await engine!.addSound(sound.id, url, AUDIO_CONFIG.DEFAULT_SOUND_VOLUME)
-        return
-      } catch (_e) {
-        if (attempt < AUDIO_CONFIG.LOAD_RETRY_MAX) {
-          await new Promise<void>((r) => setTimeout(r, delays[attempt]))
-        }
-      }
-    }
-    throw new Error(`Failed to load ${sound.name}`)
-  }
 
   return { loadingSoundIds, errorSoundIds, toggleSound }
 }

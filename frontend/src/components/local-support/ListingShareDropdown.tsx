@@ -8,6 +8,7 @@ import type { LocalSupportCategory } from '@/types/local-support'
  * Try native Web Share API. Returns true if share dialog was shown.
  * Callers should skip opening the dropdown if this returns true.
  */
+// eslint-disable-next-line react-refresh/only-export-components -- Utility co-located with ListingShareDropdown
 export async function tryWebShare(placeName: string, category: LocalSupportCategory, placeId: string): Promise<boolean> {
   if (typeof navigator === 'undefined' || !navigator.share) return false
   const shareUrl = `${window.location.origin}/local-support/${category}?placeId=${placeId}`

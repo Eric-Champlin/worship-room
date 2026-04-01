@@ -82,7 +82,7 @@ export function useBibleProgress(): {
       const chapters = current[book.slug] ?? []
       return chapters.length >= book.chapters
     }).length
-  }, [isAuthenticated, progress])
+  }, [isAuthenticated])
 
   const getBookProgress = useCallback(
     (bookSlug: string): number[] => {

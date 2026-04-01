@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 // Mock evening time check so tests are time-independent
 vi.mock('@/services/evening-reflection-storage', () => ({
@@ -22,6 +22,15 @@ global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
 
 beforeEach(() => {
   localStorage.clear()
+  // Pin to 9 AM so getTimeOfDay() returns 'morning' — the activity-checklist
+  // widget is included in morning order but absent from night order.
+  const morning = new Date()
+  morning.setHours(9, 0, 0, 0)
+  vi.useFakeTimers({ shouldAdvanceTime: true, now: morning })
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 // Wrapper component that provides faithPoints from the hook

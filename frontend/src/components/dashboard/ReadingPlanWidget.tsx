@@ -121,7 +121,7 @@ export function ReadingPlanWidget() {
   const readingStreak = useMemo(() => {
     if (!activePlan) return 0
     return calculateReadingStreak()
-  }, [activePlan, progress])
+  }, [activePlan])
 
   // --- Active Plan State ---
   if (activePlan && activeProgress) {

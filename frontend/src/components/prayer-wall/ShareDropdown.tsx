@@ -11,6 +11,7 @@ interface ShareDropdownProps {
   onClose: () => void
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Utility co-located with ShareDropdown
 export function getShareText(content: string): string {
   return `Please pray with me — ${content.slice(0, 100)}${content.length > 100 ? '...' : ''} — Worship Room Prayer Wall`
 }

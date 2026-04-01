@@ -23,6 +23,7 @@ export interface VisitState {
   placeName: string
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Hook co-located with VisitButton
 export function useVisitState({ placeId, placeName, placeType, onVisit }: VisitButtonProps): VisitState {
   const [visited, setVisited] = useState(() => hasVisitedToday(placeId))
   const [showNote, setShowNote] = useState(false)

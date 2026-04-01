@@ -64,7 +64,7 @@ export function GettingStartedCard({
       const timer = setTimeout(() => setJustCompleted(new Set()), 300)
       return () => clearTimeout(timer)
     }
-  }, [items])
+  }, [items, playSoundEffect])
 
   // Progress ring animation
   const targetOffset = RING_CIRCUMFERENCE * (1 - completedCount / 6)

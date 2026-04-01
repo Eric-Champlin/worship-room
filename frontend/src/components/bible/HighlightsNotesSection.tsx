@@ -57,8 +57,9 @@ export function HighlightsNotesSection({
 
   // Lazy load verse text for visible feed items
   useEffect(() => {
+    const visible = feed.slice(0, visibleCount)
     const chaptersToLoad = new Set<string>()
-    for (const item of visibleFeed) {
+    for (const item of visible) {
       const key = `${item.book}:${item.chapter}`
       if (!loadedChaptersRef.current.has(key)) {
         chaptersToLoad.add(key)

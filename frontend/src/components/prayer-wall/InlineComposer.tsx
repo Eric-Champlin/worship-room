@@ -66,7 +66,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
-  }, [content, isAnonymous, selectedCategory, onSubmit])
+  }, [content, isAnonymous, selectedCategory, onSubmit, isChallengePrayer, activeChallenge])
 
   const handleCancel = useCallback(() => {
     setContent('')

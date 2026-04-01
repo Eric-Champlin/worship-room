@@ -167,6 +167,7 @@ export function useSleepTimer(): SleepTimerControls {
         intervalRef.current = null
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- timer properties listed individually for granular reactivity; adding `timer` object would be redundant
   }, [
     timer?.isActive,
     timer?.isPaused,

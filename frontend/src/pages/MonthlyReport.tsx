@@ -55,7 +55,7 @@ export function MonthlyReport() {
   const earliest = useMemo(() => {
     const allEntries = getMoodEntries()
     return getEarliestMonth(allEntries)
-  }, [selectedMonth, selectedYear])
+  }, [])
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />

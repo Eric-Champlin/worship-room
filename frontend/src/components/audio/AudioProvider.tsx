@@ -278,6 +278,7 @@ function SleepTimerBridge({ children }: { children: ReactNode }) {
   )
 }
 
+/* eslint-disable react-refresh/only-export-components -- Hooks co-located with their Provider */
 export function useAudioState(): AudioState {
   const ctx = useContext(AudioStateContext)
   if (!ctx) {

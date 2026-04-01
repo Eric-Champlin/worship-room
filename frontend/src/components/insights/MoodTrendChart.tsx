@@ -44,6 +44,7 @@ interface ExtendedDataPoint extends MoodChartDataPoint {
   movingAvg: number | null
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Utility co-located with MoodTrendChart
 export function computeMovingAverage(
   data: MoodChartDataPoint[],
   windowSize: number = 7,

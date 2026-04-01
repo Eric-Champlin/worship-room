@@ -104,7 +104,7 @@ export function DevotionalTabContent({
     )
     if (questionRef.current) observer.observe(questionRef.current)
     return () => observer.disconnect()
-  }, [isAuthenticated, dayOffset, isCompleted, recordActivity, onComplete])
+  }, [isAuthenticated, dayOffset, isCompleted, recordActivity, onComplete, playSoundEffect])
 
   const navigateDay = useCallback(
     (direction: -1 | 1) => {

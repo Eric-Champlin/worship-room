@@ -11,6 +11,7 @@ import { QotdBadge } from './QotdBadge'
 import { formatFullDate } from '@/lib/time'
 
 const PulseContext = createContext<(() => void) | null>(null)
+// eslint-disable-next-line react-refresh/only-export-components -- Hook co-located with PrayerCard
 export function usePrayerCardPulse() { return useContext(PulseContext) }
 
 const TRUNCATE_LENGTH = 150

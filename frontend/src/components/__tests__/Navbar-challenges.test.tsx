@@ -20,11 +20,21 @@ vi.mock('@/hooks/useAuth', () => ({
 
 vi.mock('@/hooks/useLiturgicalSeason', () => ({
   useLiturgicalSeason: () => ({
+    currentSeason: {
+      id: 'ordinary-time',
+      name: 'Ordinary Time',
+      themeColor: '#059669',
+      icon: 'Leaf',
+      greeting: '',
+      suggestedContent: ['growth', 'discipleship', 'daily faithfulness'],
+      themeWord: 'growth',
+    },
     icon: 'Leaf',
     themeColor: '#059669',
     isNamedSeason: false,
     seasonName: 'Ordinary Time',
-    seasonLabel: 'Ordinary Time',
+    greeting: '',
+    daysUntilNextSeason: 30,
   }),
 }))
 

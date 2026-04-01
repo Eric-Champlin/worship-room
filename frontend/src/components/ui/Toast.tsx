@@ -149,7 +149,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         }, duration)
       })
     },
-    [],
+    [dismissCelebration],
   )
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
@@ -254,6 +254,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 // --- Hooks ---
 
+// eslint-disable-next-line react-refresh/only-export-components -- Co-located hook for ToastProvider consumers
 export function useToast(): ToastContextValue {
   const context = useContext(ToastContext)
   if (!context) {
@@ -272,6 +273,7 @@ const NOOP_TOAST: ToastContextValue = {
  * Use in components that may render outside the provider tree (e.g., Navbar
  * rendered inside Layout which doesn't always have ToastProvider).
  */
+// eslint-disable-next-line react-refresh/only-export-components -- Safe variant co-located with ToastProvider
 export function useToastSafe(): ToastContextValue {
   const context = useContext(ToastContext)
   return context ?? NOOP_TOAST
