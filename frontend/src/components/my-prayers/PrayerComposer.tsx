@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
@@ -6,6 +6,7 @@ import { CharacterCount } from '@/components/ui/CharacterCount'
 import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
+import { useRovingTabindex } from '@/hooks/useRovingTabindex'
 
 interface PrayerComposerProps {
   isOpen: boolean
@@ -20,6 +21,22 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
   const [showTitleError, setShowTitleError] = useState(false)
   const [showCategoryError, setShowCategoryError] = useState(false)
   const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(title.length > 0 || description.length > 0)
+
+  const initialCategoryIndex = useMemo(
+    () => (selectedCategory ? PRAYER_CATEGORIES.indexOf(selectedCategory) : 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  const { setFocusedIndex: setCategoryFocusedIndex, getItemProps: getCategoryItemProps } = useRovingTabindex({
+    itemCount: PRAYER_CATEGORIES.length,
+    onSelect: (index) => {
+      setSelectedCategory(PRAYER_CATEGORIES[index])
+      setShowCategoryError(false)
+    },
+    orientation: 'horizontal',
+    initialIndex: initialCategoryIndex,
+  })
 
   const handleSave = useCallback(() => {
     const hasTitle = title.trim().length > 0
@@ -116,31 +133,43 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
         <CrisisBanner text={title + ' ' + description} />
 
         {/* Category pills */}
-        <fieldset className="mt-3">
+        <fieldset
+          className="mt-3"
+          aria-invalid={showCategoryError ? 'true' : undefined}
+          aria-describedby={showCategoryError ? 'prayer-category-error' : undefined}
+        >
           <legend className="mb-2 text-sm font-medium text-white/70">Category</legend>
-          <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
-            {PRAYER_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => {
-                  setSelectedCategory(cat)
-                  setShowCategoryError(false)
-                }}
-                className={cn(
-                  'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 ease-in-out whitespace-nowrap',
-                  selectedCategory === cat
-                    ? 'border-primary/40 bg-primary/10 text-primary'
-                    : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10',
-                )}
-                aria-pressed={selectedCategory === cat}
-              >
-                {CATEGORY_LABELS[cat]}
-              </button>
-            ))}
+          <div role="radiogroup" aria-label="Prayer category" className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
+            {PRAYER_CATEGORIES.map((cat, index) => {
+              const itemProps = getCategoryItemProps(index)
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedCategory === cat}
+                  onClick={() => {
+                    setSelectedCategory(cat)
+                    setShowCategoryError(false)
+                    setCategoryFocusedIndex(index)
+                  }}
+                  className={cn(
+                    'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 ease-in-out whitespace-nowrap',
+                    selectedCategory === cat
+                      ? 'border-primary/40 bg-primary/10 text-primary'
+                      : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10',
+                  )}
+                  tabIndex={itemProps.tabIndex}
+                  onKeyDown={itemProps.onKeyDown}
+                  ref={itemProps.ref}
+                >
+                  {CATEGORY_LABELS[cat]}
+                </button>
+              )
+            })}
           </div>
           {showCategoryError && (
-            <p className="mt-2 text-sm text-warning" role="alert">
+            <p id="prayer-category-error" className="mt-2 text-sm text-warning" role="alert">
               Please choose a category
             </p>
           )}

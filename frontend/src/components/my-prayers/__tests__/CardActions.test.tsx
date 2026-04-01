@@ -105,8 +105,8 @@ describe('EditPrayerForm', () => {
     )
     expect(screen.getByDisplayValue('Healing for Mom')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Prayer details here')).toBeInTheDocument()
-    const healthPill = screen.getByText('Health')
-    expect(healthPill).toHaveAttribute('aria-pressed', 'true')
+    const healthPill = screen.getByRole('radio', { name: 'Health' })
+    expect(healthPill).toHaveAttribute('aria-checked', 'true')
   })
 
   it('validates title required', async () => {

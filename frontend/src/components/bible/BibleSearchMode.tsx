@@ -49,6 +49,7 @@ export function BibleSearchMode() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search the Bible..."
           aria-label="Search the Bible"
+          aria-describedby="bible-search-status"
           className="w-full rounded-xl border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder-white/50 outline-none transition-colors motion-safe:animate-glow-pulse focus:border-primary focus:ring-2 focus:ring-primary/50"
         />
         <p className="mt-2 text-center text-sm text-white/60">
@@ -69,7 +70,7 @@ export function BibleSearchMode() {
           </p>
         )}
 
-        <div aria-live="polite" aria-atomic="true">
+        <div id="bible-search-status" aria-live="polite" aria-atomic="true">
         {query.length >= 2 && (isSearching || isLoadingBooks) && (
           <p className="text-center text-white/50">Searching...</p>
         )}

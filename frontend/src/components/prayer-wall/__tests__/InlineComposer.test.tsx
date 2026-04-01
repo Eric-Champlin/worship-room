@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { InlineComposer } from '../InlineComposer'
@@ -101,24 +101,24 @@ describe('InlineComposer', () => {
     }
   })
 
-  it('selecting a pill highlights it (aria-pressed)', async () => {
+  it('selecting a pill highlights it (aria-checked)', async () => {
     const user = userEvent.setup()
     renderComposer()
-    const healthPill = screen.getByText('Health')
-    expect(healthPill).toHaveAttribute('aria-pressed', 'false')
+    const healthPill = screen.getByRole('radio', { name: 'Health' })
+    expect(healthPill).toHaveAttribute('aria-checked', 'false')
     await user.click(healthPill)
-    expect(healthPill).toHaveAttribute('aria-pressed', 'true')
+    expect(healthPill).toHaveAttribute('aria-checked', 'true')
   })
 
   it('only one pill can be selected at a time', async () => {
     const user = userEvent.setup()
     renderComposer()
-    await user.click(screen.getByText('Health'))
-    expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'true')
+    await user.click(screen.getByRole('radio', { name: 'Health' }))
+    expect(screen.getByRole('radio', { name: 'Health' })).toHaveAttribute('aria-checked', 'true')
 
-    await user.click(screen.getByText('Grief'))
-    expect(screen.getByText('Grief')).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'false')
+    await user.click(screen.getByRole('radio', { name: 'Grief' }))
+    expect(screen.getByRole('radio', { name: 'Grief' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: 'Health' })).toHaveAttribute('aria-checked', 'false')
   })
 
   it('submit without category shows validation error', async () => {
@@ -145,11 +145,11 @@ describe('InlineComposer', () => {
   it('cancel resets category selection', async () => {
     const user = userEvent.setup()
     renderComposer()
-    await user.click(screen.getByText('Health'))
-    expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'true')
+    await user.click(screen.getByRole('radio', { name: 'Health' }))
+    expect(screen.getByRole('radio', { name: 'Health' })).toHaveAttribute('aria-checked', 'true')
 
     await user.click(screen.getByText('Cancel'))
-    expect(screen.getByText('Health')).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('radio', { name: 'Health' })).toHaveAttribute('aria-checked', 'false')
   })
 
   it('composer char count visible at 500+ chars', async () => {
@@ -179,5 +179,89 @@ describe('InlineComposer', () => {
     const fieldset = screen.getByRole('group')
     expect(fieldset).toHaveAttribute('aria-invalid', 'true')
     expect(fieldset).toHaveAttribute('aria-describedby', 'composer-category-error')
+  })
+})
+
+describe('InlineComposer — accessibility', () => {
+  it('textarea has aria-invalid when content exceeds max length', async () => {
+    renderComposer()
+    const textarea = screen.getByLabelText('Prayer request') as HTMLTextAreaElement
+    // The maxLength attribute prevents typing beyond 1000, so we fire change via act
+    await act(async () => {
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set
+      nativeInputValueSetter?.call(textarea, 'a'.repeat(1001))
+      textarea.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+    expect(textarea).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('textarea has aria-describedby linking to char count', () => {
+    renderComposer()
+    const textarea = screen.getByLabelText('Prayer request')
+    expect(textarea).toHaveAttribute('aria-describedby', 'composer-char-count')
+  })
+
+  it('category container has role="radiogroup"', () => {
+    renderComposer()
+    expect(screen.getByRole('radiogroup', { name: 'Prayer category' })).toBeInTheDocument()
+  })
+
+  it('category pills have role="radio"', () => {
+    renderComposer()
+    const radios = screen.getAllByRole('radio')
+    expect(radios).toHaveLength(10)
+  })
+
+  it('selected category pill has aria-checked="true"', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    const healthRadio = screen.getByRole('radio', { name: 'Health' })
+    await user.click(healthRadio)
+    expect(healthRadio).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('unselected pills have aria-checked="false"', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    await user.click(screen.getByRole('radio', { name: 'Health' }))
+    const otherRadios = screen.getAllByRole('radio').filter((r) => r.textContent !== 'Health')
+    for (const radio of otherRadios) {
+      expect(radio).toHaveAttribute('aria-checked', 'false')
+    }
+  })
+
+  it('only one pill has tabIndex 0', () => {
+    renderComposer()
+    const radios = screen.getAllByRole('radio')
+    const withTabZero = radios.filter((r) => r.getAttribute('tabindex') === '0')
+    expect(withTabZero).toHaveLength(1)
+  })
+
+  it('ArrowRight moves focus to next pill', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    const radios = screen.getAllByRole('radio')
+    radios[0].focus()
+    await user.keyboard('{ArrowRight}')
+    expect(radios[1]).toHaveFocus()
+  })
+
+  it('Enter selects focused pill', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    const radios = screen.getAllByRole('radio')
+    radios[0].focus()
+    await user.keyboard('{Enter}')
+    expect(radios[0]).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('submitting without category shows inline error', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
+    await user.click(screen.getByRole('button', { name: 'Submit Prayer Request' }))
+    const error = screen.getByText('Please choose a category')
+    expect(error).toBeInTheDocument()
+    expect(error).toHaveAttribute('role', 'alert')
   })
 })

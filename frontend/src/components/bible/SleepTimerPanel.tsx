@@ -244,6 +244,7 @@ export function SleepTimerPanel({ isOpen, onClose }: SleepTimerPanelProps) {
             value={customMinutes}
             onChange={(e) => setCustomMinutes(e.target.value)}
             placeholder="Minutes (5-480)"
+            aria-invalid={customMinutes && (parseInt(customMinutes) < 5 || parseInt(customMinutes) > 480) ? 'true' : undefined}
             className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/50"
           />
         </div>

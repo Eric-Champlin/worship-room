@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Flag } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
@@ -113,10 +114,15 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Reason for reporting..."
+                  maxLength={500}
                   className="mt-3 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   rows={3}
                   aria-label="Report reason"
+                  aria-describedby="report-char-count"
                 />
+                <div className="mt-1">
+                  <CharacterCount current={reason.length} max={500} visibleAt={300} id="report-char-count" />
+                </div>
                 <div className="mt-4 flex justify-end gap-2">
                   <Button
                     variant="outline"

@@ -5,6 +5,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { containsCrisisKeyword } from '@/constants/crisis-resources'
 import { getGratitudeEntries, getTodayGratitude, saveGratitudeEntry } from '@/services/gratitude-storage'
+import { GRATITUDE_LABELS } from '@/constants/gratitude'
 import { getDayOfYear } from '@/constants/dashboard/ai-insights'
 
 interface GratitudeWidgetProps {
@@ -155,7 +156,7 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
               onChange={(e) => handleChange(i, e.target.value)}
               placeholder={placeholders[i]}
               maxLength={150}
-              aria-label={`Gratitude item ${i + 1}`}
+              aria-label={GRATITUDE_LABELS[i]}
               className="h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>

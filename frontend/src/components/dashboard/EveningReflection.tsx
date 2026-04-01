@@ -8,6 +8,7 @@ import { useAudioState, useAudioDispatch } from '@/components/audio/AudioProvide
 import { containsCrisisKeyword } from '@/constants/crisis-resources'
 import { MOOD_OPTIONS } from '@/constants/dashboard/mood'
 import { ACTIVITY_DISPLAY_NAMES } from '@/constants/dashboard/activity-points'
+import { GRATITUDE_LABELS } from '@/constants/gratitude'
 import { getEveningVerse } from '@/constants/dashboard/evening-reflection'
 import { buildEveningPrayer } from '@/constants/dashboard/evening-prayer-builder'
 import { getDayOfYear } from '@/constants/dashboard/ai-insights'
@@ -514,7 +515,7 @@ export function EveningReflection({
                         maxLength={150}
                         placeholder={gratitudePlaceholders[i]}
                         className="h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        aria-label={`Gratitude item ${i + 1}`}
+                        aria-label={GRATITUDE_LABELS[i]}
                       />
                     </div>
                   ))}

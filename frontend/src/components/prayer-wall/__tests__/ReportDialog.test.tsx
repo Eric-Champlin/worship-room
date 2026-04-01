@@ -28,4 +28,26 @@ describe('ReportDialog', () => {
     await user.click(screen.getByText('Submit Report'))
     expect(onReport).toHaveBeenCalledWith('prayer-1', 'Inappropriate content')
   })
+
+  it('textarea has maxLength 500', async () => {
+    const user = userEvent.setup()
+    render(<ReportDialog prayerId="prayer-1" />)
+    await user.click(screen.getByText('Report'))
+    expect(screen.getByLabelText('Report reason')).toHaveAttribute('maxLength', '500')
+  })
+
+  it('character count renders when typing 300+ chars', async () => {
+    const user = userEvent.setup()
+    render(<ReportDialog prayerId="prayer-1" />)
+    await user.click(screen.getByText('Report'))
+    await user.type(screen.getByLabelText('Report reason'), 'a'.repeat(300))
+    expect(screen.getByText('300 / 500')).toBeInTheDocument()
+  })
+
+  it('textarea has aria-describedby', async () => {
+    const user = userEvent.setup()
+    render(<ReportDialog prayerId="prayer-1" />)
+    await user.click(screen.getByText('Report'))
+    expect(screen.getByLabelText('Report reason')).toHaveAttribute('aria-describedby', 'report-char-count')
+  })
 })

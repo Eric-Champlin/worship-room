@@ -183,4 +183,21 @@ describe('SleepTimerPanel', () => {
     await user.click(document.body)
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('custom input has accessible name via label association', async () => {
+    const user = userEvent.setup()
+    renderPanel()
+    await user.click(screen.getByRole('radio', { name: 'Custom' }))
+    const input = screen.getByLabelText('Custom timer duration in minutes')
+    expect(input).toBeInTheDocument()
+  })
+
+  it('custom input has aria-invalid for out-of-range value', async () => {
+    const user = userEvent.setup()
+    renderPanel()
+    await user.click(screen.getByRole('radio', { name: 'Custom' }))
+    const input = screen.getByLabelText('Custom timer duration in minutes')
+    await user.type(input, '3')
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+  })
 })

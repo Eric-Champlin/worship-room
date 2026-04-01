@@ -41,9 +41,9 @@ describe('GratitudeWidget', () => {
 
   it('renders 3 input fields with correct aria-labels', () => {
     renderWidget()
-    expect(screen.getByLabelText('Gratitude item 1')).toBeInTheDocument()
-    expect(screen.getByLabelText('Gratitude item 2')).toBeInTheDocument()
-    expect(screen.getByLabelText('Gratitude item 3')).toBeInTheDocument()
+    expect(screen.getByLabelText('First thing you\'re grateful for')).toBeInTheDocument()
+    expect(screen.getByLabelText('Second thing you\'re grateful for')).toBeInTheDocument()
+    expect(screen.getByLabelText('Third thing you\'re grateful for')).toBeInTheDocument()
   })
 
   it('shows rotating placeholders', () => {
@@ -64,7 +64,7 @@ describe('GratitudeWidget', () => {
 
   it('save button is enabled when at least one input has text', () => {
     renderWidget()
-    const input1 = screen.getByLabelText('Gratitude item 1')
+    const input1 = screen.getByLabelText('First thing you\'re grateful for')
     fireEvent.change(input1, { target: { value: 'Thankful for today' } })
     const saveBtn = screen.getByRole('button', { name: /save/i })
     expect(saveBtn).toBeEnabled()
@@ -72,7 +72,7 @@ describe('GratitudeWidget', () => {
 
   it('saves entry and shows saved state with checkmarks', () => {
     renderWidget()
-    const input1 = screen.getByLabelText('Gratitude item 1')
+    const input1 = screen.getByLabelText('First thing you\'re grateful for')
     fireEvent.change(input1, { target: { value: 'Thankful for sunshine' } })
 
     const saveBtn = screen.getByRole('button', { name: /save/i })
@@ -83,14 +83,14 @@ describe('GratitudeWidget', () => {
     // Edit button should appear
     expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument()
     // Input fields should be gone
-    expect(screen.queryByLabelText('Gratitude item 1')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('First thing you\'re grateful for')).not.toBeInTheDocument()
   })
 
   it('calls onGratitudeSaved on first save', () => {
     const onSaved = vi.fn()
     renderWidget(onSaved)
 
-    const input1 = screen.getByLabelText('Gratitude item 1')
+    const input1 = screen.getByLabelText('First thing you\'re grateful for')
     fireEvent.change(input1, { target: { value: 'Test' } })
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
@@ -128,15 +128,15 @@ describe('GratitudeWidget', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /edit/i }))
 
-    const input1 = screen.getByLabelText('Gratitude item 1') as HTMLInputElement
-    const input2 = screen.getByLabelText('Gratitude item 2') as HTMLInputElement
+    const input1 = screen.getByLabelText('First thing you\'re grateful for') as HTMLInputElement
+    const input2 = screen.getByLabelText('Second thing you\'re grateful for') as HTMLInputElement
     expect(input1.value).toBe('Sunshine')
     expect(input2.value).toBe('Good coffee')
   })
 
   it('shows crisis banner when crisis keyword detected', () => {
     renderWidget()
-    const input1 = screen.getByLabelText('Gratitude item 1')
+    const input1 = screen.getByLabelText('First thing you\'re grateful for')
     fireEvent.change(input1, { target: { value: 'I want to kill myself' } })
 
     expect(screen.getByRole('alert')).toBeInTheDocument()
@@ -144,7 +144,7 @@ describe('GratitudeWidget', () => {
 
   it('does not block save when crisis keyword is present', () => {
     renderWidget()
-    const input1 = screen.getByLabelText('Gratitude item 1')
+    const input1 = screen.getByLabelText('First thing you\'re grateful for')
     fireEvent.change(input1, { target: { value: 'I want to kill myself' } })
 
     const saveBtn = screen.getByRole('button', { name: /save/i })
@@ -157,15 +157,15 @@ describe('GratitudeWidget', () => {
 
   it('enforces maxLength of 150 on inputs', () => {
     renderWidget()
-    const input1 = screen.getByLabelText('Gratitude item 1')
+    const input1 = screen.getByLabelText('First thing you\'re grateful for')
     expect(input1).toHaveAttribute('maxLength', '150')
   })
 
   it('keyboard navigation works through all inputs and buttons', () => {
     renderWidget()
-    const input1 = screen.getByLabelText('Gratitude item 1')
-    const input2 = screen.getByLabelText('Gratitude item 2')
-    const input3 = screen.getByLabelText('Gratitude item 3')
+    const input1 = screen.getByLabelText('First thing you\'re grateful for')
+    const input2 = screen.getByLabelText('Second thing you\'re grateful for')
+    const input3 = screen.getByLabelText('Third thing you\'re grateful for')
     const saveBtn = screen.getByRole('button', { name: /save/i })
 
     // All should be focusable (not have tabIndex -1)

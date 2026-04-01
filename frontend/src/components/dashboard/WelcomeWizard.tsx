@@ -344,7 +344,7 @@ const Screen1Welcome = forwardRef<HTMLHeadingElement, Screen1Props>(
             placeholder="Your name"
             className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             aria-invalid={showNameError ? 'true' : undefined}
-            aria-describedby={showNameError ? 'wizard-name-error' : undefined}
+            aria-describedby="wizard-name-error"
           />
           {showNameError && (
             <p id="wizard-name-error" className="mt-1 text-sm text-danger" role="alert">

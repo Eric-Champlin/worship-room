@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
@@ -6,6 +6,7 @@ import { CharacterCount } from '@/components/ui/CharacterCount'
 import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
+import { useRovingTabindex } from '@/hooks/useRovingTabindex'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 
 interface EditPrayerFormProps {
@@ -22,6 +23,21 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
 
   const isDirty = title !== prayer.title || description !== prayer.description || selectedCategory !== prayer.category
   const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty)
+
+  const initialCategoryIndex = useMemo(
+    () => PRAYER_CATEGORIES.indexOf(selectedCategory),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  const { setFocusedIndex: setEditCategoryFocusedIndex, getItemProps: getEditCategoryItemProps } = useRovingTabindex({
+    itemCount: PRAYER_CATEGORIES.length,
+    onSelect: (index) => {
+      setSelectedCategory(PRAYER_CATEGORIES[index])
+    },
+    orientation: 'horizontal',
+    initialIndex: initialCategoryIndex >= 0 ? initialCategoryIndex : 0,
+  })
 
   const handleSave = useCallback(() => {
     if (!title.trim()) {
@@ -92,23 +108,30 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
 
       <fieldset className="mt-3">
         <legend className="mb-2 text-sm font-medium text-white/70">Category</legend>
-        <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
-          {PRAYER_CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={cn(
-                'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
-                selectedCategory === cat
-                  ? 'border-primary/40 bg-primary/10 text-primary'
-                  : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10',
-              )}
-              aria-pressed={selectedCategory === cat}
-            >
-              {CATEGORY_LABELS[cat]}
-            </button>
-          ))}
+        <div role="radiogroup" aria-label="Prayer category" className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
+          {PRAYER_CATEGORIES.map((cat, index) => {
+            const itemProps = getEditCategoryItemProps(index)
+            return (
+              <button
+                key={cat}
+                type="button"
+                role="radio"
+                aria-checked={selectedCategory === cat}
+                onClick={() => { setSelectedCategory(cat); setEditCategoryFocusedIndex(index) }}
+                className={cn(
+                  'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
+                  selectedCategory === cat
+                    ? 'border-primary/40 bg-primary/10 text-primary'
+                    : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10',
+                )}
+                tabIndex={itemProps.tabIndex}
+                onKeyDown={itemProps.onKeyDown}
+                ref={itemProps.ref}
+              >
+                {CATEGORY_LABELS[cat]}
+              </button>
+            )
+          })}
         </div>
       </fieldset>
 

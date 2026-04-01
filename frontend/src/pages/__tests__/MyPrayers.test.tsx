@@ -394,11 +394,9 @@ describe('MyPrayers Page', () => {
       await user.click(addButtons[0])
 
       await user.type(screen.getByLabelText('Prayer title'), 'One more')
-      // Select category by aria-pressed attribute on the composer's category pills
-      const composerPills = screen.getAllByRole('button', { name: 'Health' })
-      // Click the first pill that has aria-pressed (composer pill, not category badges)
-      const pill = composerPills.find((p) => p.hasAttribute('aria-pressed'))
-      await user.click(pill!)
+      // Select category via the radiogroup pattern
+      const composerRadios = screen.getAllByRole('radio', { name: 'Health' })
+      await user.click(composerRadios[0])
       await user.click(screen.getByText('Save Prayer'))
 
       // Should see error toast (toast text in DOM)

@@ -148,11 +148,12 @@ describe('PrayerComposer', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('category pills have aria-pressed', () => {
+  it('category pills have role="radio" with aria-checked', () => {
     renderComposer()
-    const pills = screen.getAllByRole('button', { name: /Health|Family|Work|Grief|Gratitude|Praise|Relationships|Other/ })
-    pills.forEach((pill) => {
-      expect(pill).toHaveAttribute('aria-pressed')
+    const radios = screen.getAllByRole('radio')
+    expect(radios.length).toBe(10)
+    radios.forEach((radio) => {
+      expect(radio).toHaveAttribute('aria-checked')
     })
   })
 
@@ -190,5 +191,30 @@ describe('PrayerComposer', () => {
   it('useUnsavedChanges is wired up', () => {
     renderComposer()
     expect(screen.getByText('Add a Prayer')).toBeInTheDocument()
+  })
+})
+
+describe('PrayerComposer — radiogroup accessibility', () => {
+  it('category container has role="radiogroup"', () => {
+    renderComposer()
+    expect(screen.getByRole('radiogroup', { name: 'Prayer category' })).toBeInTheDocument()
+  })
+
+  it('arrow key navigation between pills', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    const radios = screen.getAllByRole('radio')
+    radios[0].focus()
+    await user.keyboard('{ArrowRight}')
+    expect(radios[1]).toHaveFocus()
+  })
+
+  it('Enter/Space selects focused pill', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    const radios = screen.getAllByRole('radio')
+    radios[0].focus()
+    await user.keyboard('{Enter}')
+    expect(radios[0]).toHaveAttribute('aria-checked', 'true')
   })
 })

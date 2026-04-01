@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QotdComposer } from '../QotdComposer'
 
@@ -42,7 +42,7 @@ describe('QotdComposer', () => {
     const textarea = screen.getByLabelText('Your response to the question of the day')
     await user.type(textarea, 'a'.repeat(400))
 
-    expect(screen.getByText('400/500')).toBeInTheDocument()
+    expect(screen.getByText('400 / 500')).toBeInTheDocument()
   })
 
   it('character count shows danger styling at 500 chars', async () => {
@@ -52,8 +52,8 @@ describe('QotdComposer', () => {
     const textarea = screen.getByLabelText('Your response to the question of the day')
     await user.type(textarea, 'a'.repeat(500))
 
-    const counter = screen.getByText('500/500')
-    expect(counter).toHaveClass('text-danger')
+    const counter = screen.getByText('500 / 500')
+    expect(counter).toHaveClass('text-red-400')
   })
 
   it('crisis detection shows banner', async () => {
@@ -102,5 +102,44 @@ describe('QotdComposer', () => {
   it('textarea has accessible label', () => {
     renderComposer()
     expect(screen.getByLabelText('Your response to the question of the day')).toBeInTheDocument()
+  })
+})
+
+describe('QotdComposer — accessibility', () => {
+  it('textarea has aria-describedby linking to char count', () => {
+    renderComposer()
+    const textarea = screen.getByLabelText('Your response to the question of the day')
+    expect(textarea).toHaveAttribute('aria-describedby', 'qotd-char-count')
+  })
+
+  it('CharacterCount renders when above threshold', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    const textarea = screen.getByLabelText('Your response to the question of the day')
+    await user.type(textarea, 'a'.repeat(400))
+    expect(screen.getByText('400 / 500')).toBeInTheDocument()
+  })
+
+  it('textarea has aria-invalid when over limit', async () => {
+    renderComposer()
+    const textarea = screen.getByLabelText('Your response to the question of the day') as HTMLTextAreaElement
+    // Use native setter to bypass maxLength
+    await act(async () => {
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set
+      nativeInputValueSetter?.call(textarea, 'a'.repeat(501))
+      textarea.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+    expect(textarea).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('CharacterCount uses zone-based colors', async () => {
+    const user = userEvent.setup()
+    renderComposer()
+    const textarea = screen.getByLabelText('Your response to the question of the day')
+    // At 400 chars (default warningAt = 80% of 500 = 400), should use warning color
+    await user.type(textarea, 'a'.repeat(400))
+    // CharacterCount component defaults warningAt to 80% of max = 400
+    // At exactly 400 chars, zone is warning → text-amber-400
+    expect(screen.getByText('400 / 500')).toHaveClass('text-amber-400')
   })
 })

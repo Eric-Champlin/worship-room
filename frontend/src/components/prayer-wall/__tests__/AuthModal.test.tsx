@@ -118,3 +118,102 @@ describe('AuthModal — validation', () => {
     expect(screen.queryByText('Email is required')).not.toBeInTheDocument()
   })
 })
+
+describe('AuthModal — register validation', () => {
+  const registerProps = { ...defaultProps, initialView: 'register' as const }
+
+  it('first name shows inline error on blur when empty', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />)
+    const firstNameInput = screen.getByLabelText(/First name/i)
+    await user.click(firstNameInput)
+    await user.tab()
+    expect(screen.getByText('First name is required')).toBeInTheDocument()
+  })
+
+  it('first name has aria-invalid when error shows', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />)
+    const firstNameInput = screen.getByLabelText(/First name/i)
+    await user.click(firstNameInput)
+    await user.tab()
+    expect(firstNameInput).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('last name shows inline error on blur when empty', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />)
+    const lastNameInput = screen.getByLabelText(/Last name/i)
+    await user.click(lastNameInput)
+    await user.tab()
+    expect(screen.getByText('Last name is required')).toBeInTheDocument()
+  })
+
+  it('confirm password shows "Passwords do not match" when mismatched', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />)
+    const passwordInput = screen.getByLabelText('Password')
+    const confirmInput = screen.getByLabelText(/Confirm password/i)
+    await user.type(passwordInput, 'securepassword1')
+    await user.type(confirmInput, 'differentpassword')
+    await user.tab()
+    expect(screen.getByText('Passwords do not match')).toBeInTheDocument()
+  })
+
+  it('confirm password error clears when passwords match', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />)
+    const passwordInput = screen.getByLabelText('Password')
+    const confirmInput = screen.getByLabelText(/Confirm password/i)
+    await user.type(passwordInput, 'securepassword1')
+    await user.type(confirmInput, 'differentpass')
+    await user.tab()
+    expect(screen.getByText('Passwords do not match')).toBeInTheDocument()
+    await user.clear(confirmInput)
+    await user.type(confirmInput, 'securepassword1')
+    expect(screen.queryByText('Passwords do not match')).not.toBeInTheDocument()
+  })
+
+  it('all 5 fields show required indicator', () => {
+    render(<AuthModal {...registerProps} />)
+    const srOnlyTexts = screen.getAllByText('required', { exact: false })
+    // 5 fields × 1 sr-only "required" text each
+    expect(srOnlyTexts.length).toBeGreaterThanOrEqual(5)
+  })
+
+  it('submit with empty fields shows all inline errors', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />)
+    await user.click(screen.getByRole('button', { name: 'Create Account' }))
+    expect(screen.getByText('First name is required')).toBeInTheDocument()
+    expect(screen.getByText('Last name is required')).toBeInTheDocument()
+    expect(screen.getByText('Email is required')).toBeInTheDocument()
+    expect(screen.getByText('Password is required')).toBeInTheDocument()
+    expect(screen.getByText('Confirm password is required')).toBeInTheDocument()
+  })
+
+  it('login fields have required attribute', () => {
+    render(<AuthModal {...defaultProps} />)
+    expect(screen.getByLabelText('Email address')).toHaveAttribute('required')
+    expect(screen.getByLabelText('Password')).toHaveAttribute('required')
+  })
+})
+
+describe('AuthModal — password reset validation', () => {
+  it('empty email shows inline error', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...defaultProps} />)
+    await user.click(screen.getByRole('button', { name: 'Forgot password?' }))
+    await user.click(screen.getByRole('button', { name: 'Send Reset Link' }))
+    expect(screen.getByText('Email is required')).toBeInTheDocument()
+  })
+
+  it('email has aria-invalid on error', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...defaultProps} />)
+    await user.click(screen.getByRole('button', { name: 'Forgot password?' }))
+    await user.click(screen.getByRole('button', { name: 'Send Reset Link' }))
+    const resetEmailInput = screen.getByLabelText(/Email/i)
+    expect(resetEmailInput).toHaveAttribute('aria-invalid', 'true')
+  })
+})

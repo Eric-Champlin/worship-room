@@ -120,6 +120,8 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
             placeholder="Add a note about this verse..."
             maxLength={NOTE_MAX_CHARS}
             rows={3}
+            aria-invalid={noteText.length > NOTE_MAX_CHARS ? 'true' : undefined}
+            aria-describedby={`note-count-${verse.reference}`}
             className={cn(
               'w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2',
               'text-sm text-white placeholder:text-white/50',
@@ -127,7 +129,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
             )}
           />
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-xs text-white/60">
+            <span id={`note-count-${verse.reference}`} className="text-xs text-white/60">
               {noteText.length} / {NOTE_MAX_CHARS}
             </span>
             <div className="flex gap-2">

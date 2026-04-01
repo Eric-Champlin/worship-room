@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Plus, Mountain, BookOpen, Moon, Clock } from 'lucide-react'
+import { Plus, Mountain, BookOpen, Moon, Clock, AlertCircle } from 'lucide-react'
 import { RoutineStepCard } from './RoutineStepCard'
 import { ContentPicker } from './ContentPicker'
 import { AUDIO_CONFIG } from '@/constants/audio'
 import { SCENE_BY_ID } from '@/data/scenes'
 import { SCRIPTURE_READING_BY_ID } from '@/data/music/scripture-readings'
 import { BEDTIME_STORY_BY_ID } from '@/data/music/bedtime-stories'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 import type { RoutineDefinition } from '@/types/storage'
 
 type StepType = 'scene' | 'scripture' | 'story'
@@ -50,6 +51,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
     initial?.sleepTimer.fadeDurationMinutes ?? 15,
   )
 
+  const [showNameError, setShowNameError] = useState(false)
   const [showTypePicker, setShowTypePicker] = useState(false)
   const [contentPickerType, setContentPickerType] = useState<StepType | null>(null)
 
@@ -108,6 +110,10 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
 
   const handleSave = () => {
     if (steps.length === 0) return
+    if (!name.trim()) {
+      setShowNameError(true)
+      return
+    }
 
     onSave({
       id: initial?.id ?? crypto.randomUUID(),
@@ -143,11 +149,22 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
           id="routine-name"
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value.slice(0, 50))}
+          onChange={(e) => { setName(e.target.value.slice(0, 50)); setShowNameError(false) }}
           maxLength={50}
           placeholder="My Bedtime Routine"
-          className="mb-6 w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          aria-invalid={showNameError ? 'true' : undefined}
+          aria-describedby={showNameError ? 'routine-name-error routine-name-count' : 'routine-name-count'}
         />
+        {showNameError && (
+          <p id="routine-name-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
+            <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Routine name is required
+          </p>
+        )}
+        <div className="mt-1 mb-6">
+          <CharacterCount current={name.length} max={50} visibleAt={35} id="routine-name-count" />
+        </div>
 
         {/* Step timeline */}
         <div className="mb-6">

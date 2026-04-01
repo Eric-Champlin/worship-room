@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -12,6 +12,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 import { getChallenge } from '@/data/challenges'
+import { useRovingTabindex } from '@/hooks/useRovingTabindex'
 
 interface InlineComposerProps {
   isOpen: boolean
@@ -36,6 +37,22 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
   const [isChallengePrayer, setIsChallengePrayer] = useState(
     () => searchParams.get('challengePrayer') === 'true',
   )
+
+  const initialCategoryIndex = useMemo(
+    () => (selectedCategory ? PRAYER_CATEGORIES.indexOf(selectedCategory) : 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  const { setFocusedIndex: setCategoryFocusedIndex, getItemProps: getCategoryItemProps } = useRovingTabindex({
+    itemCount: PRAYER_CATEGORIES.length,
+    onSelect: (index) => {
+      setSelectedCategory(PRAYER_CATEGORIES[index])
+      setShowCategoryError(false)
+    },
+    orientation: 'horizontal',
+    initialIndex: initialCategoryIndex,
+  })
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
@@ -111,6 +128,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 leading-relaxed text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
           style={{ minHeight: '120px' }}
           aria-label="Prayer request"
+          aria-invalid={content.length > PRAYER_POST_MAX_LENGTH ? 'true' : undefined}
           aria-describedby="composer-char-count"
         />
 
@@ -139,23 +157,30 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           aria-describedby={showCategoryError ? 'composer-category-error' : undefined}
         >
           <legend className="mb-2 text-sm font-medium text-white/70">Category<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span></legend>
-          <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
-            {PRAYER_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => { setSelectedCategory(cat); setShowCategoryError(false) }}
-                className={cn(
-                  'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 ease-in-out whitespace-nowrap',
-                  selectedCategory === cat
-                    ? 'border-primary/40 bg-primary/20 text-primary-lt'
-                    : 'border-white/10 bg-white/10 text-white/70 hover:bg-white/15',
-                )}
-                aria-pressed={selectedCategory === cat}
-              >
-                {CATEGORY_LABELS[cat]}
-              </button>
-            ))}
+          <div role="radiogroup" aria-label="Prayer category" className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
+            {PRAYER_CATEGORIES.map((cat, index) => {
+              const itemProps = getCategoryItemProps(index)
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedCategory === cat}
+                  onClick={() => { setSelectedCategory(cat); setShowCategoryError(false); setCategoryFocusedIndex(index) }}
+                  className={cn(
+                    'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 ease-in-out whitespace-nowrap',
+                    selectedCategory === cat
+                      ? 'border-primary/40 bg-primary/20 text-primary-lt'
+                      : 'border-white/10 bg-white/10 text-white/70 hover:bg-white/15',
+                  )}
+                  tabIndex={itemProps.tabIndex}
+                  onKeyDown={itemProps.onKeyDown}
+                  ref={itemProps.ref}
+                >
+                  {CATEGORY_LABELS[cat]}
+                </button>
+              )
+            })}
           </div>
           {showCategoryError && (
             <p id="composer-category-error" className="mt-2 text-sm text-warning" role="alert">

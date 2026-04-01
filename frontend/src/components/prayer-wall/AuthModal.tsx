@@ -27,11 +27,24 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
   const [resetEmail, setResetEmail] = useState('')
   const [emailValue, setEmailValue] = useState('')
   const [passwordValue, setPasswordValue] = useState('')
+  const [firstNameValue, setFirstNameValue] = useState('')
+  const [lastNameValue, setLastNameValue] = useState('')
+  const [confirmPasswordValue, setConfirmPasswordValue] = useState('')
   const [emailError, setEmailError] = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [firstNameError, setFirstNameError] = useState<string | null>(null)
+  const [lastNameError, setLastNameError] = useState<string | null>(null)
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null)
+  const [resetEmailError, setResetEmailError] = useState<string | null>(null)
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [submitted, setSubmitted] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const reducedMotion = useReducedMotion()
+
+  const markTouched = useCallback((field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+  }, [])
 
   const handleClose = useCallback(() => {
     if (reducedMotion) {
@@ -68,14 +81,41 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
       setView(initialView)
     } else {
       setResetEmail('')
+      setFirstNameValue('')
+      setLastNameValue('')
+      setConfirmPasswordValue('')
+      setFirstNameError(null)
+      setLastNameError(null)
+      setConfirmPasswordError(null)
+      setResetEmailError(null)
+      setTouched({})
+      setSubmitted(false)
     }
   }, [isOpen, initialView])
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
+      setSubmitted(true)
 
       let hasError = false
+
+      if (view === 'register') {
+        if (!firstNameValue.trim()) {
+          setFirstNameError('First name is required')
+          hasError = true
+        } else {
+          setFirstNameError(null)
+        }
+
+        if (!lastNameValue.trim()) {
+          setLastNameError('Last name is required')
+          hasError = true
+        } else {
+          setLastNameError(null)
+        }
+      }
+
       if (!emailValue.trim()) {
         setEmailError('Email is required')
         hasError = true
@@ -96,22 +136,44 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         setPasswordError(null)
       }
 
+      if (view === 'register') {
+        if (!confirmPasswordValue) {
+          setConfirmPasswordError('Confirm password is required')
+          hasError = true
+        } else if (confirmPasswordValue !== passwordValue) {
+          setConfirmPasswordError('Passwords do not match')
+          hasError = true
+        } else {
+          setConfirmPasswordError(null)
+        }
+      }
+
       if (hasError) return
 
       onShowToast('Account creation is on the way. For now, explore freely.')
       handleClose()
     },
-    [emailValue, passwordValue, handleClose, onShowToast],
+    [emailValue, passwordValue, firstNameValue, lastNameValue, confirmPasswordValue, view, handleClose, onShowToast],
   )
 
   const handleForgotSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
+
+      if (!resetEmail.trim()) {
+        setResetEmailError('Email is required')
+        return
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail)) {
+        setResetEmailError('Please enter a valid email')
+        return
+      }
+
+      setResetEmailError(null)
       onShowToast('Password reset is coming soon. Hang tight.')
       setResetEmail('')
       setView('login')
     },
-    [onShowToast],
+    [onShowToast, resetEmail],
   )
 
   if (!isOpen && !isClosing) return null
@@ -164,10 +226,10 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               Enter your email and we'll send you a reset link.
             </p>
 
-            <form onSubmit={handleForgotSubmit} className="mt-4">
+            <form onSubmit={handleForgotSubmit} noValidate className="mt-4">
               <div className="mb-4">
                 <label htmlFor="auth-reset-email" className="mb-1 block text-sm font-medium text-white/80">
-                  Email
+                  Email<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
                 <input
                   id="auth-reset-email"
@@ -175,12 +237,20 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   required
                   autoComplete="email"
                   value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
+                  onChange={(e) => { setResetEmail(e.target.value); setResetEmailError(null) }}
+                  aria-invalid={resetEmailError ? 'true' : undefined}
+                  aria-describedby={resetEmailError ? 'reset-email-error' : undefined}
                   className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                 />
+                {resetEmailError && (
+                  <p id="reset-email-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
+                    <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {resetEmailError}
+                  </p>
+                )}
               </div>
 
-              <Button type="submit" variant="primary" className="w-full" disabled={!resetEmail.trim()}>
+              <Button type="submit" variant="primary" className="w-full">
                 Send Reset Link
               </Button>
             </form>
@@ -198,44 +268,73 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         ) : (
           <>
             {/* Login / Register form */}
-            <form onSubmit={handleSubmit} className="mt-4">
+            <form onSubmit={handleSubmit} noValidate className="mt-4">
               {view === 'register' && (
                 <div className="mb-3 grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="auth-first-name" className="mb-1 block text-sm font-medium text-white/80">
-                      First name
+                      First name<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                     </label>
                     <input
                       id="auth-first-name"
                       type="text"
                       required
                       autoComplete="given-name"
+                      value={firstNameValue}
+                      onChange={(e) => { setFirstNameValue(e.target.value); setFirstNameError(null) }}
+                      onBlur={() => {
+                        markTouched('firstName')
+                        if (!firstNameValue.trim()) setFirstNameError('First name is required')
+                      }}
+                      aria-invalid={(touched.firstName || submitted) && firstNameError ? 'true' : undefined}
+                      aria-describedby={(touched.firstName || submitted) && firstNameError ? 'firstname-error' : undefined}
                       className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                     />
+                    {(touched.firstName || submitted) && firstNameError && (
+                      <p id="firstname-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
+                        <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        {firstNameError}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="auth-last-name" className="mb-1 block text-sm font-medium text-white/80">
-                      Last name
+                      Last name<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                     </label>
                     <input
                       id="auth-last-name"
                       type="text"
                       required
                       autoComplete="family-name"
+                      value={lastNameValue}
+                      onChange={(e) => { setLastNameValue(e.target.value); setLastNameError(null) }}
+                      onBlur={() => {
+                        markTouched('lastName')
+                        if (!lastNameValue.trim()) setLastNameError('Last name is required')
+                      }}
+                      aria-invalid={(touched.lastName || submitted) && lastNameError ? 'true' : undefined}
+                      aria-describedby={(touched.lastName || submitted) && lastNameError ? 'lastname-error' : undefined}
                       className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                     />
+                    {(touched.lastName || submitted) && lastNameError && (
+                      <p id="lastname-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
+                        <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        {lastNameError}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
 
               <div className="mb-3">
                 <label htmlFor="auth-email" className="mb-1 block text-sm font-medium text-white/80">
-                  Email
+                  Email<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
                 <input
                   id="auth-email"
                   name="auth-email"
                   type="email"
+                  required
                   value={emailValue}
                   autoComplete="email"
                   className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
@@ -254,12 +353,13 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
 
               <div className="mb-3">
                 <label htmlFor="auth-password" className="mb-1 block text-sm font-medium text-white/80">
-                  Password
+                  Password<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
                 <input
                   id="auth-password"
                   name="auth-password"
                   type="password"
+                  required
                   value={passwordValue}
                   autoComplete={view === 'login' ? 'current-password' : 'new-password'}
                   className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
@@ -279,15 +379,40 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               {view === 'register' && (
                 <div className="mb-3">
                   <label htmlFor="auth-confirm-password" className="mb-1 block text-sm font-medium text-white/80">
-                    Confirm password
+                    Confirm password<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                   </label>
                   <input
                     id="auth-confirm-password"
                     type="password"
                     required
                     autoComplete="new-password"
+                    value={confirmPasswordValue}
+                    onChange={(e) => {
+                      setConfirmPasswordValue(e.target.value)
+                      if (e.target.value && e.target.value !== passwordValue) {
+                        setConfirmPasswordError('Passwords do not match')
+                      } else {
+                        setConfirmPasswordError(null)
+                      }
+                    }}
+                    onBlur={() => {
+                      markTouched('confirmPassword')
+                      if (!confirmPasswordValue) {
+                        setConfirmPasswordError('Confirm password is required')
+                      } else if (confirmPasswordValue !== passwordValue) {
+                        setConfirmPasswordError('Passwords do not match')
+                      }
+                    }}
+                    aria-invalid={(touched.confirmPassword || submitted) && confirmPasswordError ? 'true' : undefined}
+                    aria-describedby={(touched.confirmPassword || submitted) && confirmPasswordError ? 'confirmpassword-error' : undefined}
                     className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
                   />
+                  {(touched.confirmPassword || submitted) && confirmPasswordError && (
+                    <p id="confirmpassword-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
+                      <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {confirmPasswordError}
+                    </p>
+                  )}
                 </div>
               )}
 

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
+import { CharacterCount } from '@/components/ui/CharacterCount'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
 import { QOTD_MAX_LENGTH, QOTD_WARNING_THRESHOLD } from '@/constants/content-limits'
 
@@ -68,18 +69,18 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
           className="w-full resize-none rounded-lg border border-gray-200 p-3 leading-relaxed text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           style={{ minHeight: '100px' }}
           aria-label="Your response to the question of the day"
-          aria-describedby={content.length >= QOTD_WARNING_THRESHOLD ? 'qotd-char-count' : undefined}
+          aria-invalid={content.length > QOTD_MAX_LENGTH ? 'true' : undefined}
+          aria-describedby="qotd-char-count"
         />
 
-        {content.length >= QOTD_WARNING_THRESHOLD && (
-          <p
+        <div className="mt-2">
+          <CharacterCount
+            current={content.length}
+            max={QOTD_MAX_LENGTH}
+            visibleAt={QOTD_WARNING_THRESHOLD}
             id="qotd-char-count"
-            aria-live="polite"
-            className={cn('mt-2 text-xs', content.length >= QOTD_MAX_LENGTH ? 'text-danger' : 'text-text-light')}
-          >
-            {content.length}/{QOTD_MAX_LENGTH}
-          </p>
-        )}
+          />
+        </div>
 
         <div className="mt-3 flex items-center justify-end gap-3">
           <Button type="button" variant="ghost" onClick={handleCancel} className="min-h-[44px]">
