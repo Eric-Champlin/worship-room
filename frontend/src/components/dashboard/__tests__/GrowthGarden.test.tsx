@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { GrowthGarden, STAGE_LABELS } from '../GrowthGarden'
 import { DashboardHero } from '../DashboardHero'
@@ -248,6 +248,46 @@ describe('GrowthGarden', () => {
         />,
       )
       expect(screen.getByTestId('garden-clouds')).toBeInTheDocument()
+    })
+  })
+
+  describe('rainbow', () => {
+    it('renders rainbow when showRainbow=true', () => {
+      render(<GrowthGarden stage={3} size="lg" showRainbow={true} />)
+      expect(screen.getByTestId('garden-rainbow')).toBeInTheDocument()
+    })
+
+    it('does not render rainbow when showRainbow=false', () => {
+      render(<GrowthGarden stage={3} size="lg" showRainbow={false} />)
+      expect(screen.queryByTestId('garden-rainbow')).not.toBeInTheDocument()
+    })
+
+    it('does not render rainbow by default', () => {
+      render(<GrowthGarden stage={3} size="lg" />)
+      expect(screen.queryByTestId('garden-rainbow')).not.toBeInTheDocument()
+    })
+
+    it('rainbow starts at opacity 0 for fade-in animation', () => {
+      render(<GrowthGarden stage={3} size="lg" showRainbow={true} />)
+      const rainbow = screen.getByTestId('garden-rainbow')
+      // Starts at 0 — CSS transition to 0.35 happens after rAF
+      expect(rainbow.style.opacity).toBe('0')
+    })
+
+    it('rainbow transitions to target opacity after mount', async () => {
+      render(<GrowthGarden stage={3} size="lg" showRainbow={true} />)
+      const rainbow = screen.getByTestId('garden-rainbow')
+      // After rAF fires, opacity becomes 0.35
+      await act(async () => {
+        await new Promise((r) => requestAnimationFrame(r))
+      })
+      expect(rainbow.style.opacity).toBe('0.35')
+    })
+
+    it('rainbow has motion-reduce class for accessibility', () => {
+      render(<GrowthGarden stage={3} size="lg" showRainbow={true} />)
+      const rainbow = screen.getByTestId('garden-rainbow')
+      expect(rainbow.getAttribute('class')).toContain('motion-reduce:opacity-40')
     })
   })
 })

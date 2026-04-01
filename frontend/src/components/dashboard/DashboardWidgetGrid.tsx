@@ -23,6 +23,8 @@ import type { GettingStartedCardProps } from './GettingStartedCard'
 import { GettingStartedCard } from './GettingStartedCard'
 import type { EveningReflectionBannerProps } from './EveningReflectionBanner'
 import { EveningReflectionBanner } from './EveningReflectionBanner'
+import type { AnniversaryCardProps } from './AnniversaryCard'
+import { AnniversaryCard } from './AnniversaryCard'
 
 interface DashboardWidgetGridProps {
   faithPoints: ReturnType<typeof useFaithPoints>
@@ -35,6 +37,8 @@ interface DashboardWidgetGridProps {
   staggerStartIndex?: number
   showGettingStarted?: boolean
   gettingStartedProps?: GettingStartedCardProps
+  showAnniversary?: boolean
+  anniversaryProps?: AnniversaryCardProps
   showEveningBanner?: boolean
   eveningBannerProps?: EveningReflectionBannerProps
   hasActiveReadingPlan?: boolean
@@ -54,6 +58,8 @@ export function DashboardWidgetGrid({
   staggerStartIndex = 0,
   showGettingStarted = false,
   gettingStartedProps,
+  showAnniversary = false,
+  anniversaryProps,
   showEveningBanner = false,
   eveningBannerProps,
   hasActiveReadingPlan = true,
@@ -79,6 +85,7 @@ export function DashboardWidgetGrid({
   const showRecap = recapVisible || !recapHasFriends
 
   const visibility: Partial<Record<WidgetId, boolean>> = {
+    'anniversary': showAnniversary,
     'getting-started': showGettingStarted,
     'evening-reflection': showEveningBanner,
     'reading-plan': hasActiveReadingPlan,
@@ -97,6 +104,18 @@ export function DashboardWidgetGrid({
     const transitionClass = isCustomizing ? 'transition-all duration-300 ease-in-out motion-reduce:transition-none' : undefined
 
     switch (id) {
+      case 'anniversary':
+        if (!anniversaryProps) return null
+        return (
+          <div
+            key="anniversary"
+            className={cn(def.colSpan, animClass, transitionClass)}
+            style={{ order: index, ...animStyle }}
+          >
+            <AnniversaryCard {...anniversaryProps} />
+          </div>
+        )
+
       case 'mood-chart':
         return (
           <DashboardCard

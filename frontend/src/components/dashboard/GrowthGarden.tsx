@@ -10,6 +10,7 @@ export interface GrowthGardenProps {
   streakActive?: boolean
   size: 'sm' | 'md' | 'lg'
   amplifiedSparkle?: boolean
+  showRainbow?: boolean
 }
 
 // --- Constants ---
@@ -679,6 +680,52 @@ function SparkleOverlay({
   )
 }
 
+// --- Rainbow Arc (fades in over 2s) ---
+
+function RainbowArc({ uid }: { uid: string }) {
+  const [opacity, setOpacity] = useState(0)
+
+  useEffect(() => {
+    // Start at 0, then transition to 0.35 on next frame so CSS transition fires
+    const raf = requestAnimationFrame(() => setOpacity(0.35))
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  return (
+    <g
+      data-testid="garden-rainbow"
+      className="motion-safe:transition-opacity motion-safe:duration-[2000ms] motion-reduce:opacity-40"
+      style={{ opacity }}
+    >
+      <defs>
+        <linearGradient id={`rainbow-${uid}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#EF4444" stopOpacity="0.35" />
+          <stop offset="20%" stopColor="#F97316" stopOpacity="0.35" />
+          <stop offset="40%" stopColor="#EAB308" stopOpacity="0.35" />
+          <stop offset="60%" stopColor="#22C55E" stopOpacity="0.35" />
+          <stop offset="80%" stopColor="#3B82F6" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.35" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M 150 300 Q 400 -20 650 300"
+        stroke={`url(#rainbow-${uid})`}
+        strokeWidth="20"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <path
+        d="M 165 300 Q 400 0 635 300"
+        stroke={`url(#rainbow-${uid})`}
+        strokeWidth="12"
+        fill="none"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+    </g>
+  )
+}
+
 // --- Main Component ---
 
 export function GrowthGarden({
@@ -688,6 +735,7 @@ export function GrowthGarden({
   streakActive = true,
   size,
   amplifiedSparkle = false,
+  showRainbow = false,
 }: GrowthGardenProps) {
   const rawId = useId()
   const uid = rawId.replace(/:/g, '')
@@ -757,6 +805,9 @@ export function GrowthGarden({
       >
         <SkyBackground uid={uid} streakActive={streakActive} />
         <SkyElements streakActive={streakActive} />
+        {showRainbow && (
+          <RainbowArc uid={uid} />
+        )}
         <GroundLayer uid={uid} stage={displayStage} />
         <GardenScene stage={displayStage} shouldAnimate={shouldAnimate} uid={uid} streakActive={streakActive} />
       </svg>

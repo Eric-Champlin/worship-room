@@ -39,6 +39,10 @@ vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
 }))
 
+vi.mock('@/components/ui/WhisperToast', () => ({
+  useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
+}))
+
 vi.mock('@/hooks/useBibleHighlights', () => ({
   useBibleHighlights: () => ({
     getHighlightsForChapter: vi.fn().mockReturnValue([]),

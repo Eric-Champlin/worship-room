@@ -49,12 +49,14 @@ describe('TIME_OF_DAY_ORDERS', () => {
     },
   )
 
-  it('morning order has devotional first', () => {
-    expect(TIME_OF_DAY_ORDERS.morning[0]).toBe('devotional')
+  it('morning order has anniversary first, then devotional', () => {
+    expect(TIME_OF_DAY_ORDERS.morning[0]).toBe('anniversary')
+    expect(TIME_OF_DAY_ORDERS.morning[1]).toBe('devotional')
   })
 
-  it('evening order has evening-reflection first', () => {
-    expect(TIME_OF_DAY_ORDERS.evening[0]).toBe('evening-reflection')
+  it('evening order has anniversary first, then evening-reflection', () => {
+    expect(TIME_OF_DAY_ORDERS.evening[0]).toBe('anniversary')
+    expect(TIME_OF_DAY_ORDERS.evening[1]).toBe('evening-reflection')
   })
 
   it('getting-started is not in any time-of-day order', () => {

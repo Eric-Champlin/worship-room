@@ -27,6 +27,10 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
+vi.mock('@/components/ui/WhisperToast', () => ({
+  useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
+}))
+
 // Mock AudioProvider (needed by AmbientSoundPill embedded in tab content components)
 vi.mock('@/components/audio/AudioProvider', () => ({
   useAudioState: () => ({

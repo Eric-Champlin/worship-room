@@ -23,6 +23,7 @@ import { useBibleHighlights } from '@/hooks/useBibleHighlights'
 import { useBibleNotes } from '@/hooks/useBibleNotes'
 import { useBibleProgress } from '@/hooks/useBibleProgress'
 import { useToast } from '@/components/ui/Toast'
+import { useScriptureEcho } from '@/hooks/useScriptureEcho'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
@@ -61,6 +62,8 @@ export function BibleReader() {
 
   const book = bookSlug ? getBookBySlug(bookSlug) : undefined
   const chapterNumber = chapterParam ? parseInt(chapterParam, 10) : NaN
+
+  useScriptureEcho(bookSlug ?? '', chapterNumber, isLoading)
 
   const announce = useCallback((message: string) => {
     if (announceRef.current) {

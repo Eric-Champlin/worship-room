@@ -22,9 +22,10 @@ describe('useDashboardLayout', () => {
   it('returns time-based order when no layout saved', () => {
     mockHour(8) // morning
     const { result } = renderHook(() => useDashboardLayout({}))
-    // Morning order starts with getting-started (prepended), then devotional
+    // Morning order starts with getting-started (prepended), then anniversary, then devotional
     expect(result.current.orderedWidgets[0]).toBe('getting-started')
-    expect(result.current.orderedWidgets[1]).toBe('devotional')
+    expect(result.current.orderedWidgets[1]).toBe('anniversary')
+    expect(result.current.orderedWidgets[2]).toBe('devotional')
     expect(result.current.isCustomized).toBe(false)
   })
 
@@ -34,7 +35,7 @@ describe('useDashboardLayout', () => {
     const { result } = renderHook(() => useDashboardLayout({}))
     // Should use time-based order, not the saved order
     expect(result.current.orderedWidgets[0]).toBe('getting-started')
-    expect(result.current.orderedWidgets[1]).toBe('devotional')
+    expect(result.current.orderedWidgets[1]).toBe('anniversary')
   })
 
   it('returns user order when customized is true', () => {
@@ -116,7 +117,7 @@ describe('useDashboardLayout', () => {
     expect(result.current.layout).toBeNull()
     // Should now use morning order
     expect(result.current.orderedWidgets[0]).toBe('getting-started')
-    expect(result.current.orderedWidgets[1]).toBe('devotional')
+    expect(result.current.orderedWidgets[1]).toBe('anniversary')
   })
 
   it('updateOrder persists and switches to customized', () => {

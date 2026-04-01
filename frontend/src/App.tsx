@@ -15,6 +15,8 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { lazy, Suspense } from 'react'
 import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
+import { WhisperToastProvider } from '@/components/ui/WhisperToast'
+import { MidnightVerse } from '@/components/MidnightVerse'
 import { PageTransition } from '@/components/ui/PageTransition'
 import {
   DashboardSkeleton,
@@ -156,6 +158,8 @@ function App() {
         <ToastProvider>
         <AuthModalProvider>
         <AudioProvider>
+        <WhisperToastProvider>
+        <MidnightVerse />
         <UpdatePrompt />
         <InstallBanner />
         <ChunkErrorBoundary>
@@ -215,6 +219,7 @@ function App() {
         </PageTransition>
         </Suspense>
         </ChunkErrorBoundary>
+        </WhisperToastProvider>
         </AudioProvider>
         </AuthModalProvider>
         </ToastProvider>

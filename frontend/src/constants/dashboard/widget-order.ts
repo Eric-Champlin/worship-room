@@ -12,9 +12,11 @@ import {
   BarChart3,
   Moon,
   ListChecks,
+  Sparkles,
 } from 'lucide-react'
 
 export type WidgetId =
+  | 'anniversary'
   | 'devotional'
   | 'votd'
   | 'activity-checklist'
@@ -40,6 +42,7 @@ export interface WidgetDefinition {
 }
 
 export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
+  { id: 'anniversary', label: 'Anniversary', icon: Sparkles, colSpan: 'lg:col-span-5', fullWidth: true },
   { id: 'devotional', label: 'Devotional', icon: BookOpen, colSpan: 'lg:col-span-3', fullWidth: false },
   { id: 'votd', label: 'Verse of the Day', icon: BookOpen, colSpan: 'lg:col-span-3', fullWidth: false },
   { id: 'activity-checklist', label: 'Activity Checklist', icon: CheckCircle2, colSpan: 'lg:col-span-3', fullWidth: false },
@@ -65,6 +68,7 @@ export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
 
 export const TIME_OF_DAY_ORDERS: Record<TimeOfDay, WidgetId[]> = {
   morning: [
+    'anniversary',
     'devotional',
     'votd',
     'activity-checklist',
@@ -80,6 +84,7 @@ export const TIME_OF_DAY_ORDERS: Record<TimeOfDay, WidgetId[]> = {
     'weekly-recap',
   ],
   afternoon: [
+    'anniversary',
     'activity-checklist',
     'reading-plan',
     'challenge',
@@ -94,6 +99,7 @@ export const TIME_OF_DAY_ORDERS: Record<TimeOfDay, WidgetId[]> = {
     'friends',
   ],
   evening: [
+    'anniversary',
     'evening-reflection',
     'gratitude',
     'activity-checklist',
@@ -108,6 +114,7 @@ export const TIME_OF_DAY_ORDERS: Record<TimeOfDay, WidgetId[]> = {
     'quick-actions',
   ],
   night: [
+    'anniversary',
     'evening-reflection',
     'gratitude',
     'votd',

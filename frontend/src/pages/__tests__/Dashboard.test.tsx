@@ -30,6 +30,10 @@ vi.mock('@/hooks/useReducedMotion', () => ({
   useReducedMotion: vi.fn(() => false),
 }))
 
+vi.mock('@/components/ui/WhisperToast', () => ({
+  useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
+}))
+
 vi.mock('@/hooks/useFaithPoints', () => ({
   useFaithPoints: () => ({
     totalPoints: 0, currentLevel: 1, levelName: 'Seedling', pointsToNextLevel: 100,

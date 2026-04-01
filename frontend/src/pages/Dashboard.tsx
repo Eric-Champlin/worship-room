@@ -41,6 +41,10 @@ import { CHALLENGES } from '@/data/challenges'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import { cn } from '@/lib/utils'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
+import { useAnniversaryMoment } from '@/hooks/useAnniversaryMoment'
+import { useGratitudeCallback } from '@/hooks/useGratitudeCallback'
+import { markMilestoneShown, markSurpriseShown, hasRainbowBeenShown, markRainbowShown } from '@/services/surprise-storage'
+import { useWhisperToast } from '@/components/ui/WhisperToast'
 import { useRoutePreload } from '@/hooks/useRoutePreload'
 import { useDashboardLayout } from '@/hooks/useDashboardLayout'
 import { CustomizePanel } from '@/components/dashboard/CustomizePanel'
@@ -149,6 +153,18 @@ export function Dashboard() {
   const [showGettingStartedCelebration, setShowGettingStartedCelebration] = useState(false)
   const [gettingStartedCardDismissed, setGettingStartedCardDismissed] = useState(false)
   const celebrationFiredRef = useRef(false)
+
+  // Anniversary moment
+  const anniversary = useAnniversaryMoment()
+  const [anniversaryDismissed, setAnniversaryDismissed] = useState(false)
+
+  const handleAnniversaryDismiss = useCallback(() => {
+    if (anniversary.milestone) {
+      markMilestoneShown(anniversary.milestone)
+      markSurpriseShown()
+    }
+    setAnniversaryDismissed(true)
+  }, [anniversary.milestone])
 
   // Trigger celebration when all items complete (only once)
   useEffect(() => {
@@ -291,6 +307,30 @@ export function Dashboard() {
     prevLevelRef.current = faithPoints.currentLevel
   }, [faithPoints.totalPoints, faithPoints.currentLevel])
 
+  // Streak Weather (Garden Rainbow)
+  const { showWhisperToast } = useWhisperToast()
+  const [showRainbow, setShowRainbow] = useState(false)
+
+  useEffect(() => {
+    if (phase !== 'dashboard') return
+    if (faithPoints.currentStreak < 7) return
+    if (hasRainbowBeenShown()) return
+
+    markRainbowShown()
+    markSurpriseShown()
+    setShowRainbow(true)
+    showWhisperToast({
+      message: 'A rainbow in your garden! 7 days of faithfulness.',
+      duration: 6000,
+      soundId: 'sparkle',
+    })
+  // Only trigger on phase change — hasRainbowBeenShown() prevents double-fire
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
+
+  // Gratitude callback surprise
+  useGratitudeCallback(phase === 'dashboard')
+
   // Conditional visibility for widgets
   const hasActiveReadingPlan = useMemo(() => {
     try {
@@ -308,14 +348,17 @@ export function Dashboard() {
   const showRecap = recapVisible || !recapHasFriends
 
   // Dashboard layout hook — must be before early returns
+  const showAnniversary = anniversary.show && !anniversaryDismissed
+
   const dashboardLayoutVisibility: Partial<Record<WidgetId, boolean>> = useMemo(() => ({
+    'anniversary': showAnniversary,
     'getting-started': gettingStarted.isVisible && !gettingStartedCardDismissed,
     'evening-reflection': showEveningBanner,
     'reading-plan': hasActiveReadingPlan,
     'recent-highlights': hasHighlightsOrNotes,
     'challenge': hasActiveChallenge,
     'weekly-recap': showRecap,
-  }), [gettingStartedCardDismissed, gettingStarted.isVisible, showEveningBanner, hasActiveReadingPlan, hasHighlightsOrNotes, hasActiveChallenge, showRecap])
+  }), [showAnniversary, gettingStartedCardDismissed, gettingStarted.isVisible, showEveningBanner, hasActiveReadingPlan, hasHighlightsOrNotes, hasActiveChallenge, showRecap])
 
   const dashboardLayout = useDashboardLayout(dashboardLayoutVisibility)
 
@@ -415,6 +458,7 @@ export function Dashboard() {
                     showSparkle={gardenSparkle}
                     amplifiedSparkle={gardenLevelUp}
                     streakActive={faithPoints.currentStreak > 0}
+                    showRainbow={showRainbow}
                     size="md"
                   />
                 </div>
@@ -425,6 +469,7 @@ export function Dashboard() {
                     showSparkle={gardenSparkle}
                     amplifiedSparkle={gardenLevelUp}
                     streakActive={faithPoints.currentStreak > 0}
+                    showRainbow={showRainbow}
                     size="lg"
                   />
                 </div>
@@ -459,6 +504,13 @@ export function Dashboard() {
             onDismiss: handleGettingStartedDismiss,
             onRequestCheckIn: handleRequestCheckIn,
           }}
+          showAnniversary={showAnniversary}
+          anniversaryProps={anniversary.show ? {
+            heading: anniversary.heading!,
+            closingMessage: anniversary.closingMessage!,
+            stats: anniversary.stats!,
+            onDismiss: handleAnniversaryDismiss,
+          } : undefined}
           showEveningBanner={showEveningBanner}
           eveningBannerProps={{
             onReflectNow: () => {

@@ -9,6 +9,10 @@ import { useAuth } from '@/hooks/useAuth'
 import { getLocalDateString } from '@/utils/date'
 import type { MoodEntry } from '@/types/dashboard'
 
+vi.mock('@/components/ui/WhisperToast', () => ({
+  useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
+}))
+
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn(() => ({
     user: { name: 'Eric', id: 'test-id' },
