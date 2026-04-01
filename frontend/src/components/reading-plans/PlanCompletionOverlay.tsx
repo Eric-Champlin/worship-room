@@ -1,19 +1,20 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { BookCheck, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { CONFETTI_COLORS } from '@/constants/dashboard/badge-icons'
-import { findMatchingChallenge } from '@/lib/plan-challenge-matcher'
-import { getParticipantCount } from '@/constants/challenges'
-import type { PlanTheme } from '@/types/reading-plans'
+import { PLAN_COMPLETION_SCRIPTURES } from '@/constants/reading-plan-completion-scriptures'
+import { generatePlanCompletionImage } from '@/lib/plan-completion-canvas'
 
 interface PlanCompletionOverlayProps {
   planTitle: string
   totalDays: number
+  planId: string
+  startDate?: string | null
   onDismiss: () => void
   onBrowsePlans: () => void
-  planTheme?: PlanTheme
 }
 
 function generateConfetti(count: number) {
@@ -46,25 +47,56 @@ function generateConfetti(count: number) {
   })
 }
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 export function PlanCompletionOverlay({
   planTitle,
   totalDays,
+  planId,
+  startDate,
   onDismiss,
   onBrowsePlans,
-  planTheme,
 }: PlanCompletionOverlayProps) {
-  const suggestion = planTheme ? findMatchingChallenge(planTheme) : null
+  const reducedMotion = useReducedMotion()
+  const { playSoundEffect } = useSoundEffects()
+  const doneButtonRef = useRef<HTMLButtonElement>(null)
   const containerRef = useFocusTrap(true, onDismiss)
 
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
+  const confettiCount = reducedMotion ? 0 : isMobile ? 15 : 30
 
-  const confettiCount = prefersReducedMotion
-    ? 0
-    : typeof window !== 'undefined' && window.innerWidth < 640
-      ? 15
-      : 30
+  const [scripture] = useState(() =>
+    PLAN_COMPLETION_SCRIPTURES[Math.floor(Math.random() * PLAN_COMPLETION_SCRIPTURES.length)],
+  )
+
+  // Step-based animation sequence
+  const [step, setStep] = useState(reducedMotion ? 7 : 0)
+
+  useEffect(() => {
+    if (reducedMotion) return
+    const timers = [
+      setTimeout(() => setStep(1), 0),
+      setTimeout(() => setStep(2), 300),
+      setTimeout(() => setStep(3), 500),
+      setTimeout(() => setStep(4), 900),
+      setTimeout(() => setStep(5), 1200),
+      setTimeout(() => setStep(6), 1700),
+      setTimeout(() => setStep(7), 2000),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [reducedMotion])
+
+  // Play ascending sound when heading appears
+  useEffect(() => {
+    if (step === 3) playSoundEffect('ascending')
+  }, [step, playSoundEffect])
+
+  // Focus Done button when CTAs appear
+  useEffect(() => {
+    if (step >= 7) doneButtonRef.current?.focus()
+  }, [step])
 
   // Scroll lock
   useEffect(() => {
@@ -75,6 +107,51 @@ export function PlanCompletionOverlay({
     }
   }, [])
 
+  // Auto-dismiss after 15 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => onDismiss(), 15_000)
+    return () => clearTimeout(timer)
+  }, [onDismiss])
+
+  const fadeStyle = (threshold: number, durationMs = 300): React.CSSProperties =>
+    reducedMotion
+      ? {}
+      : {
+          opacity: step >= threshold ? 1 : 0,
+          transform: step >= threshold ? 'translateY(0)' : 'translateY(10px)',
+          transition: `opacity ${durationMs}ms ease-out, transform ${durationMs}ms ease-out`,
+        }
+
+  const handleShare = useCallback(async () => {
+    try {
+      const blob = await generatePlanCompletionImage({
+        planTitle,
+        totalDays,
+        totalPoints: totalDays * 15,
+        scripture,
+      })
+      const file = new File([blob], `reading-plan-complete-${planId}.png`, { type: 'image/png' })
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: `${planTitle} — Plan Complete!`,
+          text: `I completed the ${planTitle} reading plan on Worship Room!`,
+          files: [file],
+        })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `reading-plan-complete-${planId}.png`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
+    } catch (_e) {
+      // User cancelled or share failed — silently ignore
+    }
+  }, [planTitle, totalDays, scripture, planId])
+
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
@@ -82,9 +159,13 @@ export function PlanCompletionOverlay({
       aria-modal="true"
       aria-labelledby="plan-completion-title"
       ref={containerRef}
+      style={{
+        opacity: reducedMotion ? 1 : step >= 1 ? 1 : 0,
+        transition: reducedMotion ? undefined : 'opacity 300ms ease-out',
+      }}
     >
       {/* Confetti */}
-      {confettiCount > 0 && generateConfetti(confettiCount)}
+      {step >= 2 && confettiCount > 0 && generateConfetti(confettiCount)}
 
       {/* Content card */}
       <div className="relative mx-4 max-w-md rounded-2xl border border-white/15 bg-hero-mid/90 p-8 sm:p-10">
@@ -99,66 +180,78 @@ export function PlanCompletionOverlay({
         </button>
 
         <div className="text-center">
+          {/* Icon */}
+          <div style={fadeStyle(3)}>
+            <BookCheck className="mx-auto mb-3 h-10 w-10 text-primary-lt" aria-hidden="true" />
+          </div>
+
+          {/* Heading */}
           <h2
             id="plan-completion-title"
             className="font-script text-4xl text-white sm:text-5xl"
+            style={fadeStyle(3)}
           >
             Plan Complete!
           </h2>
 
-          <p className="mt-4 text-xl font-bold text-white">{planTitle}</p>
-
-          <p className="mt-2 text-white/60">
-            {totalDays} days completed
+          {/* Plan title */}
+          <p className="mt-3 text-xl font-bold text-white" style={fadeStyle(4, 200)}>
+            {planTitle}
           </p>
 
-          <blockquote className="mt-6 font-serif text-base italic leading-relaxed text-white/80">
-            I have fought the good fight, I have finished the race, I have kept
-            the faith.
-          </blockquote>
-          <p className="mt-2 text-sm text-white/60">— 2 Timothy 4:7 WEB</p>
-
-          {suggestion ? (
-            <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.08] p-4 text-left">
-              <p className="font-semibold text-white">Continue your journey!</p>
-              <p className="mt-1 text-sm text-white/70">
-                {suggestion.challenge.title}{' '}
-                {suggestion.isActive
-                  ? 'is happening now'
-                  : `starts ${suggestion.startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`}
-                .
-              </p>
-              <p className="text-sm text-white/50">
-                {getParticipantCount(suggestion.challenge.id, suggestion.isActive ? 1 : 0)} people are participating.
-              </p>
-              <Link
-                to="/grow?tab=challenges"
-                onClick={onDismiss}
-                className="mt-2 inline-block text-sm text-primary-lt transition-colors hover:text-primary hover:underline"
-              >
-                Join Challenge →
-              </Link>
-            </div>
-          ) : (
-            <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.08] p-4 text-left">
-              <p className="font-semibold text-white">Looking for your next journey?</p>
-              <Link
-                to="/grow?tab=challenges"
-                onClick={onDismiss}
-                className="mt-2 inline-block text-sm text-primary-lt transition-colors hover:text-primary hover:underline"
-              >
-                Browse challenges →
-              </Link>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={onBrowsePlans}
-            className="mt-8 w-full rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/90 sm:w-auto"
+          {/* Stats card */}
+          <div
+            className="mt-4 rounded-xl border border-white/10 bg-white/5 p-4"
+            style={fadeStyle(5, 300)}
           >
-            Browse more plans
-          </button>
+            <p className="text-lg font-bold text-white">{totalDays} days completed</p>
+            {startDate && (
+              <p className="mt-1 text-sm text-white/60">
+                Started {formatDate(startDate)} — Finished {formatDate(new Date().toISOString())}
+              </p>
+            )}
+            <p className="mt-1 text-sm text-white/60">+{totalDays * 15} faith points earned</p>
+          </div>
+
+          {/* Scripture */}
+          <blockquote
+            className="mt-5 font-serif text-base italic leading-relaxed text-white/80"
+            style={fadeStyle(6, 300)}
+          >
+            {scripture.text}
+          </blockquote>
+          <p className="mt-2 text-sm text-white/60" style={fadeStyle(6, 300)}>
+            — {scripture.reference}
+          </p>
+
+          {/* CTA buttons */}
+          <div
+            className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center"
+            style={fadeStyle(7, 200)}
+          >
+            <button
+              type="button"
+              onClick={onBrowsePlans}
+              className="min-h-[44px] rounded-xl border border-white/10 bg-white/[0.08] px-6 py-3 font-medium text-white transition-colors hover:bg-white/[0.12]"
+            >
+              Browse Plans
+            </button>
+            <button
+              type="button"
+              onClick={handleShare}
+              className="min-h-[44px] rounded-xl border border-white/10 bg-white/[0.08] px-6 py-3 font-medium text-white transition-colors hover:bg-white/[0.12]"
+            >
+              Share
+            </button>
+            <button
+              ref={doneButtonRef}
+              type="button"
+              onClick={onDismiss}
+              className="min-h-[44px] rounded-xl border border-white/10 bg-white/[0.08] px-6 py-3 font-medium text-white transition-colors hover:bg-white/[0.12]"
+            >
+              Done
+            </button>
+          </div>
         </div>
       </div>
     </div>,

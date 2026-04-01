@@ -283,7 +283,8 @@ export function ReadingPlanDetail() {
         <PlanCompletionOverlay
           planTitle={plan.title}
           totalDays={plan.durationDays}
-          planTheme={plan.theme}
+          planId={planId!}
+          startDate={progress?.startedAt ?? null}
           onDismiss={() => setShowPlanOverlay(false)}
           onBrowsePlans={() => navigate('/grow?tab=plans')}
         />
