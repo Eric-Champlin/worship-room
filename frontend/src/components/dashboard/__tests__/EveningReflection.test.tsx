@@ -37,6 +37,54 @@ vi.mock('@/services/gratitude-storage', () => ({
   saveGratitudeEntry: (...args: unknown[]) => mockSaveGratitudeEntry(...args),
 }))
 
+// Mock audio hooks
+const mockLoadScene = vi.fn()
+const mockAudioDispatch = vi.fn()
+const mockPlaySoundEffect = vi.fn()
+vi.mock('@/hooks/useScenePlayer', () => ({
+  useScenePlayer: () => ({
+    loadScene: mockLoadScene,
+    activeSceneId: null,
+    isLoading: false,
+    undoAvailable: false,
+    undoSceneSwitch: vi.fn(),
+    pendingRoutineInterrupt: null,
+    confirmRoutineInterrupt: vi.fn(),
+    cancelRoutineInterrupt: vi.fn(),
+  }),
+}))
+vi.mock('@/hooks/useSoundEffects', () => ({
+  useSoundEffects: () => ({ playSoundEffect: mockPlaySoundEffect }),
+}))
+const mockUseReducedMotion = vi.fn(() => false)
+vi.mock('@/hooks/useReducedMotion', () => ({
+  useReducedMotion: () => mockUseReducedMotion(),
+}))
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockUseAudioState = vi.fn((): any => ({
+  activeSounds: [],
+  isPlaying: false,
+  masterVolume: 0.8,
+  pillVisible: false,
+  activeRoutine: null,
+  foregroundContent: null,
+  currentSceneName: null,
+  currentSceneId: null,
+}))
+vi.mock('@/components/audio/AudioProvider', () => ({
+  useAudioState: () => mockUseAudioState(),
+  useAudioDispatch: () => mockAudioDispatch,
+}))
+vi.mock('@/data/scenes', () => ({
+  SCENE_BY_ID: new Map([['still-waters', { id: 'still-waters', name: 'Still Waters', sounds: [] }]]),
+}))
+
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return { ...actual, useNavigate: () => mockNavigate }
+})
+
 const mockActivities: Record<ActivityType, boolean> = {
   mood: true,
   pray: true,
@@ -74,10 +122,27 @@ function renderOverlay(overrides: Partial<Parameters<typeof EveningReflection>[0
 
 beforeEach(() => {
   localStorage.clear()
+  // Disable auto-play by default so existing tests don't need timer handling
+  localStorage.setItem('wr_sound_effects_enabled', 'false')
   mockSaveMoodEntry.mockClear()
   mockMarkReflectionDone.mockClear()
   mockGetTodayGratitude.mockReturnValue(null)
   mockSaveGratitudeEntry.mockClear()
+  mockLoadScene.mockClear()
+  mockAudioDispatch.mockClear()
+  mockPlaySoundEffect.mockClear()
+  mockNavigate.mockClear()
+  mockUseReducedMotion.mockReturnValue(false)
+  mockUseAudioState.mockReturnValue({
+    activeSounds: [],
+    isPlaying: false,
+    masterVolume: 0.8,
+    pillVisible: false,
+    activeRoutine: null,
+    foregroundContent: null,
+    currentSceneName: null,
+    currentSceneId: null,
+  })
 })
 
 afterEach(() => {
@@ -251,15 +316,15 @@ describe('EveningReflection — Step 4 (Prayer)', () => {
     await user.click(screen.getByRole('button', { name: 'Goodnight' }))
     await user.click(screen.getByTestId('karaoke-complete'))
     expect(screen.getByRole('button', { name: 'Done' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Go to Sleep/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Go to Sleep/i })).toBeInTheDocument()
   })
 
-  it('Go to Sleep links to /music?tab=sleep', async () => {
+  it('Go to Sleep navigates to /music?tab=sleep', async () => {
     const { user } = await goToStep4()
     await user.click(screen.getByRole('button', { name: 'Goodnight' }))
     await user.click(screen.getByTestId('karaoke-complete'))
-    const link = screen.getByRole('link', { name: /Go to Sleep/i })
-    expect(link).toHaveAttribute('href', '/music?tab=sleep')
+    await user.click(screen.getByRole('button', { name: /Go to Sleep/i }))
+    expect(mockNavigate).toHaveBeenCalledWith('/music?tab=sleep')
   })
 
   it('Done triggers completion sequence', async () => {
@@ -318,5 +383,179 @@ describe('EveningReflection — Navigation', () => {
     await user.click(screen.getByRole('button', { name: 'Done' }))
     const savedEntry = mockSaveMoodEntry.mock.calls[0][0]
     expect(savedEntry.timeOfDay).toBe('evening')
+  })
+})
+
+describe('EveningReflection — Ambient Sound Auto-Play', () => {
+  it('dispatches SET_MASTER_VOLUME and calls loadScene on mount', () => {
+    // Enable sound effects for this test
+    localStorage.removeItem('wr_sound_effects_enabled')
+    renderOverlay()
+    expect(mockAudioDispatch).toHaveBeenCalledWith({
+      type: 'SET_MASTER_VOLUME',
+      payload: { volume: 0 },
+    })
+    expect(mockLoadScene).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'still-waters' }),
+    )
+  })
+
+  it('does not auto-play when sound effects disabled', () => {
+    localStorage.setItem('wr_sound_effects_enabled', 'false')
+    renderOverlay()
+    expect(mockLoadScene).not.toHaveBeenCalled()
+  })
+
+  it('does not auto-play when audio already active', () => {
+    localStorage.removeItem('wr_sound_effects_enabled')
+    mockUseAudioState.mockReturnValue({
+      activeSounds: [{ id: 'test-sound' }],
+      isPlaying: true,
+      masterVolume: 0.8,
+      pillVisible: true,
+      activeRoutine: null,
+      foregroundContent: null,
+      currentSceneName: null,
+      currentSceneId: null,
+    })
+    renderOverlay()
+    expect(mockLoadScene).not.toHaveBeenCalled()
+  })
+
+  it('does not auto-play when reduced motion preferred', () => {
+    localStorage.removeItem('wr_sound_effects_enabled')
+    mockUseReducedMotion.mockReturnValue(true)
+    renderOverlay()
+    expect(mockLoadScene).not.toHaveBeenCalled()
+  })
+})
+
+describe('EveningReflection — Morning Gratitude Recall', () => {
+  it('shows gratitude recall card in Step 2 when today\'s gratitude exists', async () => {
+    mockGetTodayGratitude.mockReturnValue({
+      id: 'test',
+      date: '2026-04-01',
+      items: ['friend', 'sunshine and warmth', 'coffee'],
+      createdAt: '2026-04-01T08:00:00Z',
+    })
+    const user = userEvent.setup()
+    renderOverlay()
+    await user.click(screen.getAllByRole('radio')[3])
+    // Should show the longest entry
+    expect(screen.getByText(/sunshine and warmth/)).toBeInTheDocument()
+  })
+
+  it('hides gratitude recall when no gratitude today', async () => {
+    mockGetTodayGratitude.mockReturnValue(null)
+    const user = userEvent.setup()
+    renderOverlay()
+    await user.click(screen.getAllByRole('radio')[3])
+    expect(screen.queryByText('This morning, you were grateful for:')).not.toBeInTheDocument()
+  })
+
+  it('displays label, quoted text, and follow-up prompt', async () => {
+    mockGetTodayGratitude.mockReturnValue({
+      id: 'test',
+      date: '2026-04-01',
+      items: ['my family'],
+      createdAt: '2026-04-01T08:00:00Z',
+    })
+    const user = userEvent.setup()
+    renderOverlay()
+    await user.click(screen.getAllByRole('radio')[3])
+    expect(screen.getByText('This morning, you were grateful for:')).toBeInTheDocument()
+    expect(screen.getByText(/my family/)).toBeInTheDocument()
+    expect(screen.getByText('How did the rest of your day unfold?')).toBeInTheDocument()
+  })
+})
+
+describe('EveningReflection — Personalized Closing Prayer', () => {
+  async function goToStep4WithActivities(activities: Partial<Record<ActivityType, boolean>> = {}) {
+    const user = userEvent.setup()
+    const result = renderOverlay({
+      todayActivities: { ...mockActivities, ...activities },
+    })
+    await user.click(screen.getAllByRole('radio')[3]) // "Good"
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    return { user, ...result }
+  }
+
+  it('shows activity-specific lines in Step 4', async () => {
+    await goToStep4WithActivities({ devotional: true, pray: true })
+    expect(screen.getByText(/meeting me in Your Word/)).toBeInTheDocument()
+    expect(screen.getByText(/hearing my prayers/)).toBeInTheDocument()
+  })
+
+  it('shows mood-specific line matching Step 1 selection', async () => {
+    // User selects "Good" (radio[3]) in goToStep4WithActivities
+    await goToStep4WithActivities()
+    expect(screen.getByText(/I felt Your goodness today/)).toBeInTheDocument()
+  })
+
+  it('uses generic line when no activities completed', async () => {
+    const noActivities: Record<ActivityType, boolean> = {
+      mood: false, pray: false, listen: false, prayerWall: false,
+      readingPlan: false, meditate: false, journal: false,
+      gratitude: false, reflection: false, challenge: false,
+      localVisit: false, devotional: false,
+    }
+    const user = userEvent.setup()
+    renderOverlay({ todayActivities: noActivities })
+    await user.click(screen.getAllByRole('radio')[3])
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    expect(screen.getByText(/bringing me through this day/)).toBeInTheDocument()
+  })
+
+  it('caps activity lines at 3', async () => {
+    await goToStep4WithActivities({
+      devotional: true, readingPlan: true, pray: true,
+      journal: true, meditate: true,
+    })
+    // First 3: devotional, readingPlan, pray
+    expect(screen.getByText(/meeting me in Your Word/)).toBeInTheDocument()
+    expect(screen.getByText(/time I spent in Your Word/)).toBeInTheDocument()
+    expect(screen.getByText(/hearing my prayers/)).toBeInTheDocument()
+    // 4th should NOT appear
+    expect(screen.queryByText(/pour out my heart in my journal/)).not.toBeInTheDocument()
+  })
+})
+
+describe('EveningReflection — Closing Sound & Sleep Transition', () => {
+  async function goToDonePhase() {
+    const user = userEvent.setup()
+    const result = renderOverlay()
+    await user.click(screen.getAllByRole('radio')[3])
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: 'Goodnight' }))
+    await user.click(screen.getByTestId('karaoke-complete'))
+    return { user, ...result }
+  }
+
+  it('plays whisper sound on Done click', async () => {
+    const { user } = await goToDonePhase()
+    await user.click(screen.getByRole('button', { name: 'Done' }))
+    expect(mockPlaySoundEffect).toHaveBeenCalledWith('whisper')
+  })
+
+  it('navigates to /music?tab=sleep on sleep transition', async () => {
+    const { user } = await goToDonePhase()
+    await user.click(screen.getByRole('button', { name: /Go to Sleep/i }))
+    expect(mockNavigate).toHaveBeenCalledWith('/music?tab=sleep')
+  })
+
+  it('Done still records activity and saves mood', async () => {
+    const { user, recordActivity } = await goToDonePhase()
+    await user.click(screen.getByRole('button', { name: 'Done' }))
+    expect(recordActivity).toHaveBeenCalledWith('reflection')
+    expect(mockSaveMoodEntry).toHaveBeenCalled()
+  })
+
+  it('Done still calls markReflectionDone', async () => {
+    const { user } = await goToDonePhase()
+    await user.click(screen.getByRole('button', { name: 'Done' }))
+    expect(mockMarkReflectionDone).toHaveBeenCalled()
   })
 })

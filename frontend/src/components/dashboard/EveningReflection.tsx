@@ -1,18 +1,24 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, X, Check, Heart } from 'lucide-react'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
+import { useAudioState, useAudioDispatch } from '@/components/audio/AudioProvider'
 import { containsCrisisKeyword } from '@/constants/crisis-resources'
 import { MOOD_OPTIONS } from '@/constants/dashboard/mood'
 import { ACTIVITY_DISPLAY_NAMES } from '@/constants/dashboard/activity-points'
-import { getEveningPrayer, getEveningVerse } from '@/constants/dashboard/evening-reflection'
+import { getEveningVerse } from '@/constants/dashboard/evening-reflection'
+import { buildEveningPrayer } from '@/constants/dashboard/evening-prayer-builder'
 import { getDayOfYear } from '@/constants/dashboard/ai-insights'
+import { SCENE_BY_ID } from '@/data/scenes'
 import { getTodayGratitude, saveGratitudeEntry } from '@/services/gratitude-storage'
 import { markReflectionDone } from '@/services/evening-reflection-storage'
 import { saveMoodEntry } from '@/services/mood-storage'
 import { getLocalDateString } from '@/utils/date'
+import { useScenePlayer } from '@/hooks/useScenePlayer'
+import { useSoundEffects } from '@/hooks/useSoundEffects'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
 import type { MoodOption } from '@/constants/dashboard/mood'
 import type { ActivityType, MoodEntry } from '@/types/dashboard'
@@ -75,9 +81,98 @@ export function EveningReflection({
   const [existingGratitude, setExistingGratitude] = useState<string[] | null>(null)
   const [showCrisisStep2, setShowCrisisStep2] = useState(false)
   const [showCrisisStep3, setShowCrisisStep3] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+  const [morningGratitudeItem, setMorningGratitudeItem] = useState<string | null>(null)
 
   const capturedDate = useMemo(() => getLocalDateString(), [])
   const moodGroupRef = useRef<HTMLDivElement>(null)
+
+  // Audio hooks
+  const navigate = useNavigate()
+  const audioState = useAudioState()
+  const audioDispatch = useAudioDispatch()
+  const { loadScene } = useScenePlayer()
+  const { playSoundEffect } = useSoundEffects()
+  const prefersReduced = useReducedMotion()
+
+  // Ambient auto-play tracking
+  const didAutoPlayRef = useRef(false)
+  const originalVolumeRef = useRef(0.8)
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval>>()
+  const volumeRef = useRef(0)
+
+  // Ambient sound auto-play on mount
+  useEffect(() => {
+    const soundEnabled = localStorage.getItem('wr_sound_effects_enabled') !== 'false'
+    const hasActiveAudio = audioState.activeSounds.length > 0 || audioState.pillVisible
+
+    if (!soundEnabled || prefersReduced || hasActiveAudio || audioState.activeRoutine) {
+      return
+    }
+
+    const scene = SCENE_BY_ID.get('still-waters')
+    if (!scene) return
+
+    // Save original volume, set to 0 before loading
+    originalVolumeRef.current = audioState.masterVolume
+    audioDispatch({ type: 'SET_MASTER_VOLUME', payload: { volume: 0 } })
+    loadScene(scene)
+    didAutoPlayRef.current = true
+
+    // Fade in: ramp master volume from 0 to 0.3 over 2 seconds (20 steps × 100ms)
+    volumeRef.current = 0
+    fadeTimerRef.current = setInterval(() => {
+      volumeRef.current = Math.min(0.3, volumeRef.current + 0.015)
+      audioDispatch({ type: 'SET_MASTER_VOLUME', payload: { volume: volumeRef.current } })
+      if (volumeRef.current >= 0.3) {
+        clearInterval(fadeTimerRef.current!)
+        fadeTimerRef.current = undefined
+      }
+    }, 100)
+
+    return () => {
+      if (fadeTimerRef.current) clearInterval(fadeTimerRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on mount
+  }, [])
+
+  // Fade-out helper (used by Done and Sleep)
+  const fadeOutAudio = useCallback((durationMs: number, onFadeComplete: () => void) => {
+    if (!didAutoPlayRef.current) {
+      onFadeComplete()
+      return
+    }
+    if (fadeTimerRef.current) clearInterval(fadeTimerRef.current)
+
+    const steps = Math.max(1, Math.round(durationMs / 100))
+    const decrement = volumeRef.current / steps
+    const origVolume = originalVolumeRef.current
+
+    fadeTimerRef.current = setInterval(() => {
+      volumeRef.current = Math.max(0, volumeRef.current - decrement)
+      audioDispatch({ type: 'SET_MASTER_VOLUME', payload: { volume: volumeRef.current } })
+      if (volumeRef.current <= 0) {
+        clearInterval(fadeTimerRef.current!)
+        fadeTimerRef.current = undefined
+        audioDispatch({ type: 'STOP_ALL' })
+        audioDispatch({ type: 'SET_MASTER_VOLUME', payload: { volume: origVolume } })
+        didAutoPlayRef.current = false
+        onFadeComplete()
+      }
+    }, 100)
+  }, [audioDispatch])
+
+  // Morning gratitude recall (read on mount)
+  useEffect(() => {
+    const entry = getTodayGratitude()
+    if (entry) {
+      const nonEmpty = entry.items.filter((item) => item.trim().length > 0)
+      if (nonEmpty.length > 0) {
+        const longest = nonEmpty.reduce((a, b) => (a.length > b.length ? a : b))
+        setMorningGratitudeItem(longest)
+      }
+    }
+  }, [])
 
   // Check for existing gratitude when entering Step 3
   useEffect(() => {
@@ -154,13 +249,19 @@ export function EveningReflection({
     setStep4Phase('done')
   }
 
-  const finishReflection = useCallback(() => {
+  // Personalized closing prayer
+  const personalizedPrayer = useMemo(
+    () => buildEveningPrayer({
+      todayActivities,
+      eveningMoodLabel: selectedMood?.label ?? null,
+    }),
+    [todayActivities, selectedMood],
+  )
+
+  const saveReflection = useCallback(() => {
     if (!selectedMood) return
-    // 1. Mark reflection done
     markReflectionDone()
-    // 2. Record activity
     recordActivity('reflection')
-    // 3. Save evening mood entry
     const verse = getEveningVerse()
     const eveningEntry: MoodEntry = {
       id: crypto.randomUUID(),
@@ -173,9 +274,23 @@ export function EveningReflection({
       timeOfDay: 'evening',
     }
     saveMoodEntry(eveningEntry)
-    // 4. Close overlay
-    onComplete()
-  }, [selectedMood, capturedDate, highlightText, recordActivity, onComplete])
+  }, [selectedMood, capturedDate, highlightText, recordActivity])
+
+  const handleDone = useCallback(() => {
+    saveReflection()
+    playSoundEffect('whisper')
+    fadeOutAudio(3000, () => {
+      onComplete()
+    })
+  }, [saveReflection, playSoundEffect, fadeOutAudio, onComplete])
+
+  const handleSleepTransition = useCallback(() => {
+    saveReflection()
+    setIsClosing(true)
+    fadeOutAudio(1000, () => {
+      navigate('/music?tab=sleep')
+    })
+  }, [saveReflection, fadeOutAudio, navigate])
 
   const handleDismiss = useCallback(() => {
     markReflectionDone()
@@ -192,7 +307,6 @@ export function EveningReflection({
     .filter(([key, val]) => val === true && key !== 'reflection')
     .map(([key]) => key as ActivityType)
 
-  const prayer = getEveningPrayer()
   const verse = getEveningVerse()
 
   // Gratitude placeholders (rotating day-of-year)
@@ -208,7 +322,10 @@ export function EveningReflection({
       role="dialog"
       aria-modal="true"
       aria-labelledby="evening-reflection-heading"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(ellipse_at_50%_30%,_rgb(59,7,100)_0%,_transparent_60%),_linear-gradient(rgb(13,6,32)_0%,_rgb(30,11,62)_50%,_rgb(13,6,32)_100%)]"
+      className={cn(
+        "fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(ellipse_at_50%_30%,_rgb(59,7,100)_0%,_transparent_60%),_linear-gradient(rgb(13,6,32)_0%,_rgb(30,11,62)_50%,_rgb(13,6,32)_100%)]",
+        isClosing && "transition-opacity duration-500 opacity-0",
+      )}
     >
       <div className="flex h-full w-full max-w-[640px] flex-col px-4">
         {/* Top bar */}
@@ -294,6 +411,21 @@ export function EveningReflection({
               >
                 Today&apos;s Highlights
               </h2>
+
+              {/* Morning gratitude recall card */}
+              {morningGratitudeItem && (
+                <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.04] p-4 motion-safe:animate-fade-in">
+                  <p className="mb-1 text-sm text-white/50">
+                    This morning, you were grateful for:
+                  </p>
+                  <p className="mb-2 font-serif italic text-white/80">
+                    &ldquo;{morningGratitudeItem}&rdquo;
+                  </p>
+                  <p className="text-sm text-white/60">
+                    How did the rest of your day unfold?
+                  </p>
+                </div>
+              )}
 
               {/* Activity summary */}
               {completedActivities.length > 0 && (
@@ -412,8 +544,8 @@ export function EveningReflection({
 
               {step4Phase === 'prayer' && (
                 <>
-                  <p className="mx-auto mb-8 max-w-lg font-serif text-lg italic leading-relaxed text-white/90 md:text-xl">
-                    {prayer.text}
+                  <p className="mx-auto mb-8 max-w-lg whitespace-pre-line font-serif text-lg italic leading-relaxed text-white/80 md:text-xl">
+                    {personalizedPrayer}
                   </p>
                   <button
                     type="button"
@@ -449,18 +581,18 @@ export function EveningReflection({
                   <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                     <button
                       type="button"
-                      onClick={finishReflection}
+                      onClick={handleDone}
                       className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto"
                     >
                       Done
                     </button>
-                    <Link
-                      to="/music?tab=sleep"
-                      onClick={finishReflection}
+                    <button
+                      type="button"
+                      onClick={handleSleepTransition}
                       className="w-full rounded-lg border border-white/20 px-8 py-3 text-center font-semibold text-white transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto"
                     >
                       Go to Sleep &amp; Rest
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}
