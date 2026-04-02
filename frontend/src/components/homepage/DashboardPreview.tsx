@@ -215,6 +215,7 @@ export function DashboardPreview() {
               onClick={() => authModal?.openAuthModal(undefined, 'register')}
               className={cn(
                 'inline-flex w-full items-center justify-center rounded-full px-8 py-3 text-base font-semibold text-hero-bg sm:w-auto',
+                'shadow-[0_0_20px_rgba(255,255,255,0.15)]',
                 'transition-all hover:shadow-lg hover:brightness-110',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
               )}

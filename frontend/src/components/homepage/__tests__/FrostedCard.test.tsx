@@ -60,4 +60,29 @@ describe('FrostedCard', () => {
     await user.click(screen.getByRole('button'))
     expect(handleClick).toHaveBeenCalledOnce()
   })
+
+  it('has border-white/[0.12] base border', () => {
+    const { container } = render(<FrostedCard>Content</FrostedCard>)
+    expect((container.firstElementChild as HTMLElement).className).toContain('border-white/[0.12]')
+  })
+
+  it('has bg-white/[0.06] base background', () => {
+    const { container } = render(<FrostedCard>Content</FrostedCard>)
+    expect((container.firstElementChild as HTMLElement).className).toContain('bg-white/[0.06]')
+  })
+
+  it('has base box-shadow', () => {
+    const { container } = render(<FrostedCard>Content</FrostedCard>)
+    expect((container.firstElementChild as HTMLElement).className).toContain('shadow-[0_0_25px')
+  })
+
+  it('interactive card has hover border-white/[0.18]', () => {
+    const { container } = render(<FrostedCard onClick={vi.fn()}>Clickable</FrostedCard>)
+    expect((container.firstElementChild as HTMLElement).className).toContain('hover:border-white/[0.18]')
+  })
+
+  it('interactive card has hover shadow', () => {
+    const { container } = render(<FrostedCard onClick={vi.fn()}>Clickable</FrostedCard>)
+    expect((container.firstElementChild as HTMLElement).className).toContain('hover:shadow-[0_0_35px')
+  })
 })

@@ -10,13 +10,13 @@ export function FinalCTA() {
 
   return (
     <GlowBackground variant="center" className="py-20 sm:py-28">
-      {/* Extra glow orb for slightly more intensity than standard sections */}
+      {/* Extra glow orb — strongest on page */}
       <div
         aria-hidden="true"
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[600px] md:h-[600px] rounded-full blur-[60px] md:blur-[80px]"
         style={{
           background:
-            'radial-gradient(circle, rgba(139, 92, 246, 0.10) 0%, transparent 70%)',
+            'radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, transparent 70%)',
         }}
       />
 
@@ -52,7 +52,7 @@ export function FinalCTA() {
           <button
             type="button"
             onClick={() => authModal?.openAuthModal(undefined, 'register')}
-            className="mt-8 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg transition-colors duration-200 hover:bg-white/90 sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="mt-8 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Get Started &mdash; It&apos;s Free
           </button>

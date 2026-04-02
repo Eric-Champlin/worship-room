@@ -139,4 +139,20 @@ describe('DifferentiatorSection', () => {
       expect(textContent).not.toContain(name.toLowerCase())
     }
   })
+
+  it('icon containers have border-white/[0.06]', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const iconContainers = container.querySelectorAll('.rounded-xl')
+    for (const ic of iconContainers) {
+      expect(ic.className).toContain('border-white/[0.06]')
+    }
+  })
+
+  it('icon containers have bg-white/[0.08]', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const iconContainers = container.querySelectorAll('.rounded-xl')
+    for (const ic of iconContainers) {
+      expect(ic.className).toContain('bg-white/[0.08]')
+    }
+  })
 })

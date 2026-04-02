@@ -419,7 +419,7 @@ describe('StartingPointQuiz', () => {
     it('result card has glow div', async () => {
       renderQuiz()
       await answerAllQuestions()
-      const blurEl = document.querySelector('.blur-\\[80px\\]')
+      const blurEl = document.querySelector('.blur-\\[60px\\]')
       expect(blurEl).toBeInTheDocument()
     })
 
@@ -520,6 +520,42 @@ describe('StartingPointQuiz', () => {
       })
       const reference = screen.getByText(/1 peter 5:7/i)
       expect(reference).toHaveClass('opacity-100')
+    })
+  })
+
+  describe('frosted glass container', () => {
+    it('dark variant has frosted glass container with rounded-3xl and border', () => {
+      const { container } = renderQuiz()
+      const frostedContainer = container.querySelector('.rounded-3xl')
+      expect(frostedContainer).toBeInTheDocument()
+      expect(frostedContainer?.className).toContain('border-white/[0.10]')
+    })
+
+    it('SectionHeading is NOT inside the frosted glass container', () => {
+      const { container } = renderQuiz()
+      const frostedContainer = container.querySelector('.rounded-3xl')
+      const heading = screen.getByRole('heading', { name: /not sure where to start/i })
+      expect(frostedContainer?.contains(heading)).toBe(false)
+    })
+
+    it('frosted glass container has max-w-3xl', () => {
+      const { container } = renderQuiz()
+      const frostedContainer = container.querySelector('.rounded-3xl')
+      expect(frostedContainer?.className).toContain('max-w-3xl')
+    })
+
+    it('result glow orb has updated 0.12 opacity', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+
+      renderQuiz()
+      await answerAllQuestions()
+
+      const glowOrbs = document.querySelectorAll('[aria-hidden="true"]')
+      const resultGlow = Array.from(glowOrbs).find(
+        (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.12)')
+      )
+      expect(resultGlow).toBeTruthy()
     })
   })
 })

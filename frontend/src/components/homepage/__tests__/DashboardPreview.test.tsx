@@ -285,4 +285,10 @@ describe('card sizing and layout', () => {
       expect(previewArea?.className).toContain('flex-1')
     }
   })
+
+  it('CTA button has white glow shadow', () => {
+    renderDashboardPreview()
+    const btn = screen.getByRole('button', { name: /get started/i })
+    expect(btn.className).toContain('shadow-[0_0_20px')
+  })
 })

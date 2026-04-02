@@ -117,7 +117,8 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
             {isDark && (
               <div
                 aria-hidden="true"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-purple-500/10 rounded-full blur-[80px]"
+                className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-[60px]"
+                style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%)' }}
               />
             )}
             <div
@@ -181,9 +182,16 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
               className={cn('scroll-reveal', isVisible && 'is-visible')}
               style={staggerDelay(1, 200)}
             >
-              {/* Quiz content */}
-              <div className="relative mx-auto max-w-[600px]">
-                {quizContent}
+              {/* Frosted glass container */}
+              <div className={cn(
+                'relative mx-auto max-w-3xl',
+                'bg-white/[0.04] backdrop-blur-sm border border-white/[0.10] rounded-3xl',
+                'shadow-[0_0_30px_rgba(139,92,246,0.08),0_4px_25px_rgba(0,0,0,0.25)]',
+                'p-6 sm:p-8 lg:p-10'
+              )}>
+                <div className="relative mx-auto max-w-[600px]">
+                  {quizContent}
+                </div>
               </div>
             </div>
           </div>

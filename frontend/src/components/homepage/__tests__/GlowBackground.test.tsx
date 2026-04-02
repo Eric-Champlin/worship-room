@@ -82,4 +82,75 @@ describe('GlowBackground', () => {
     const outer = container.firstElementChild as HTMLElement
     expect(outer.className).toContain('custom-class')
   })
+
+  it('center variant orb has 0.15 opacity', () => {
+    render(
+      <GlowBackground variant="center">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orb = screen.getByTestId('glow-orb')
+    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.15)')
+  })
+
+  it('left variant orb has 0.12 opacity', () => {
+    render(
+      <GlowBackground variant="left">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orb = screen.getByTestId('glow-orb')
+    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.12)')
+  })
+
+  it('right variant orb has 0.12 opacity', () => {
+    render(
+      <GlowBackground variant="right">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orb = screen.getByTestId('glow-orb')
+    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.12)')
+  })
+
+  it('split variant orbs have 0.14 and 0.08 opacities', () => {
+    render(
+      <GlowBackground variant="split">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs[0].style.background).toContain('0.14')
+    expect(orbs[1].style.background).toContain('0.08')
+  })
+
+  it('orbs have pointer-events-none', () => {
+    render(
+      <GlowBackground variant="center">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orb = screen.getByTestId('glow-orb')
+    expect(orb.className).toContain('pointer-events-none')
+  })
+
+  it('orbs have will-change-transform', () => {
+    render(
+      <GlowBackground variant="center">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orb = screen.getByTestId('glow-orb')
+    expect(orb.className).toContain('will-change-transform')
+  })
+
+  it('orbs have blur class', () => {
+    render(
+      <GlowBackground variant="center">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orb = screen.getByTestId('glow-orb')
+    expect(orb.className).toContain('blur-')
+  })
 })

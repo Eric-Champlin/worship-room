@@ -101,4 +101,34 @@ describe('FinalCTA', () => {
     const button = screen.getByRole('button', { name: /get started/i })
     expect(button).toHaveAttribute('type', 'button')
   })
+
+  it('glow orb has 0.18 opacity', () => {
+    const { container } = renderFinalCTA()
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const orb018 = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.18)')
+    )
+    expect(orb018).toBeTruthy()
+  })
+
+  it('CTA button has base shadow', () => {
+    renderFinalCTA()
+    const button = screen.getByRole('button', { name: /get started/i })
+    expect(button.className).toContain('shadow-[0_0_30px')
+  })
+
+  it('CTA button has hover shadow', () => {
+    renderFinalCTA()
+    const button = screen.getByRole('button', { name: /get started/i })
+    expect(button.className).toContain('hover:shadow-[0_0_40px')
+  })
+
+  it('glow orb has pointer-events-none', () => {
+    const { container } = renderFinalCTA()
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const orb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('radial-gradient')
+    )
+    expect(orb?.className).toContain('pointer-events-none')
+  })
 })

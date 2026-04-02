@@ -32,7 +32,7 @@ export function DifferentiatorSection() {
                   style={staggerDelay(index, 100, 200)}
                 >
                   <FrostedCard>
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/[0.06] flex items-center justify-center">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/[0.08] border border-white/[0.06] flex items-center justify-center">
                       <Icon
                         className="w-5 h-5 sm:w-6 sm:h-6 text-white/80"
                         aria-hidden="true"

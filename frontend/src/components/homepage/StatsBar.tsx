@@ -58,7 +58,7 @@ export function StatsBar() {
       <section
         ref={ref as React.RefObject<HTMLElement>}
         aria-label="Content statistics"
-        className="border-y border-white/[0.06]"
+        className="border-y border-white/[0.10]"
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">

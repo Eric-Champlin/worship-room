@@ -66,4 +66,10 @@ describe('StatsBar', () => {
       )
     })
   })
+
+  it('section border has border-white/[0.10] opacity', () => {
+    const { container } = render(<StatsBar />)
+    const section = container.querySelector('.border-y') as HTMLElement
+    expect(section.className).toContain('border-white/[0.10]')
+  })
 })
