@@ -113,10 +113,10 @@ describe('Navbar', () => {
       expect(loginButtons.length).toBeGreaterThanOrEqual(1)
     })
 
-    it('"Get Started" button opens auth modal', () => {
+    it('"Get Started" link navigates to /register', () => {
       renderNavbar()
-      const ctaButtons = screen.getAllByRole('button', { name: /get started/i })
-      expect(ctaButtons.length).toBeGreaterThanOrEqual(1)
+      const ctaLink = screen.getByRole('link', { name: /get started/i })
+      expect(ctaLink).toHaveAttribute('href', '/register')
     })
   })
 

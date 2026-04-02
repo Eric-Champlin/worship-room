@@ -67,6 +67,7 @@ const AskPage = lazy(() => import('./pages/AskPage').then((m) => ({ default: m.A
 const MoodCheckInPreview = lazy(() =>
   import('./pages/MoodCheckInPreview').then((m) => ({ default: m.MoodCheckInPreview }))
 )
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })))
 
 function RouteLoadingFallback() {
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -210,7 +211,7 @@ function App() {
             <Route path="/dev/mood-checkin" element={<MoodCheckInPreview />} />
           )}
           <Route path="/login" element={<ComingSoon title="Log In" />} />
-          <Route path="/register" element={<ComingSoon title="Get Started" />} />
+          <Route path="/register" element={<Suspense fallback={null}><RegisterPage /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </PageTransition>

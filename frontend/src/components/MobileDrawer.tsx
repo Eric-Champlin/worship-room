@@ -259,13 +259,13 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
                 >
                   Log In
                 </button>
-                <button
-                  type="button"
-                  onClick={() => { authModal?.openAuthModal(undefined, 'register'); onClose() }}
+                <Link
+                  to="/register"
+                  onClick={onClose}
                   className="min-h-[44px] flex items-center justify-center rounded-full bg-white/20 border border-white/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
                   Get Started
-                </button>
+                </Link>
               </div>
             )}
           </div>

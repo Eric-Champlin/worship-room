@@ -122,9 +122,8 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
       >
         Log In
       </button>
-      <button
-        type="button"
-        onClick={() => authModal?.openAuthModal(undefined, 'register')}
+      <Link
+        to="/register"
         className={cn(
           'inline-flex items-center rounded-full px-5 py-2 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           transparent
@@ -133,7 +132,7 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
         )}
       >
         Get Started
-      </button>
+      </Link>
     </div>
   )
 }
