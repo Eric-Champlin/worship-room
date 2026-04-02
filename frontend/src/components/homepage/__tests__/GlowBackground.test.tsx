@@ -12,7 +12,7 @@ describe('GlowBackground', () => {
     expect(screen.getByText('Test content')).toBeInTheDocument()
   })
 
-  it('renders with relative and overflow-hidden', () => {
+  it('renders with relative and bg-hero-bg', () => {
     const { container } = render(
       <GlowBackground>
         <p>Content</p>
@@ -20,7 +20,7 @@ describe('GlowBackground', () => {
     )
     const outer = container.firstElementChild as HTMLElement
     expect(outer.className).toContain('relative')
-    expect(outer.className).toContain('overflow-hidden')
+    expect(outer.className).toContain('bg-hero-bg')
   })
 
   it('variant="center" renders single glow orb', () => {

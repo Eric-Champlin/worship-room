@@ -109,8 +109,8 @@ export function JourneySection() {
         className="pointer-events-none absolute inset-0 flex justify-center overflow-hidden"
         style={SQUIGGLE_MASK_STYLE}
       >
-        <div className="w-[45%]">
-          <BackgroundSquiggle className="h-full w-full opacity-20" />
+        <div className="w-[40%] max-w-[500px]">
+          <BackgroundSquiggle className="h-full w-full opacity-30" />
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export function JourneySection() {
               {index < JOURNEY_STEPS.length - 1 && (
                 <div
                   aria-hidden="true"
-                  className="absolute left-5 top-10 bottom-0 w-px bg-gradient-to-b from-purple-500/30 via-purple-500/15 to-purple-500/30"
+                  className="absolute left-8 top-10 bottom-0 w-px bg-gradient-to-b from-purple-500/30 via-purple-500/15 to-purple-500/30"
                 />
               )}
               <Link

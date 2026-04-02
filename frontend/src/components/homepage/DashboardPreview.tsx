@@ -129,9 +129,8 @@ function EveningReflectionPreview() {
 
 function LockOverlay() {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 backdrop-blur-[3px] bg-hero-bg/50">
+    <div className="absolute inset-0 flex items-center justify-center backdrop-blur-[3px] bg-hero-bg/50">
       <Lock className="w-5 h-5 text-white/40" aria-hidden="true" />
-      <span className="text-xs text-white/50">Create account to unlock</span>
     </div>
   )
 }
@@ -179,8 +178,8 @@ export function DashboardPreview() {
             style={staggerDelay(0, 100, 0)}
           >
             <SectionHeading
-              topLine="See What's"
-              bottomLine="Waiting for You"
+              topLine="See How You're"
+              bottomLine="Growing"
               tagline="Create a free account and unlock your personal dashboard."
             />
           </div>

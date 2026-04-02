@@ -84,10 +84,10 @@ describe('dashboard-preview-data', () => {
 // --- Component render tests ---
 
 describe('DashboardPreview', () => {
-  it('renders section heading "See What\'s Waiting for You"', () => {
+  it('renders section heading "See How You\'re Growing"', () => {
     renderDashboardPreview()
     expect(
-      screen.getByRole('heading', { name: /see what's waiting for you/i })
+      screen.getByRole('heading', { name: /see how you're growing/i })
     ).toBeInTheDocument()
   })
 
@@ -110,9 +110,10 @@ describe('DashboardPreview', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders 6 lock overlays with "Create account to unlock"', () => {
-    renderDashboardPreview()
-    expect(screen.getAllByText(/create account to unlock/i)).toHaveLength(6)
+  it('renders 6 lock overlays with lock icons', () => {
+    const { container } = renderDashboardPreview()
+    const overlays = container.querySelectorAll('.absolute.inset-0.backdrop-blur-\\[3px\\]')
+    expect(overlays).toHaveLength(6)
   })
 
   it('renders mood heatmap with 35 squares', () => {
@@ -314,11 +315,10 @@ describe('card sizing and layout', () => {
   })
 
   it('lock overlays are scoped to preview area (not text area)', () => {
-    renderDashboardPreview()
-    const overlays = screen.getAllByText(/create account to unlock/i)
+    const { container } = renderDashboardPreview()
+    const overlays = container.querySelectorAll('.absolute.inset-0.backdrop-blur-\\[3px\\]')
     for (const overlay of overlays) {
-      const overlayContainer = overlay.closest('.absolute.inset-0')
-      const previewArea = overlayContainer?.parentElement
+      const previewArea = overlay.parentElement
       // Preview area should have bg-white/[0.02] (the top zone)
       expect(previewArea?.className).toContain('bg-white/[0.02]')
     }
