@@ -58,7 +58,11 @@ describe('Home', () => {
     expect(
       screen.getByRole('region', { name: /welcome to worship room/i })
     ).toBeInTheDocument()
-    // Dashboard Preview (replaced Growth Teasers)
+    // Journey
+    expect(
+      screen.getByRole('region', { name: /your journey to healing/i })
+    ).toBeInTheDocument()
+    // Dashboard Preview
     expect(
       screen.getByRole('region', { name: /dashboard preview/i })
     ).toBeInTheDocument()
@@ -68,14 +72,6 @@ describe('Home', () => {
     ).toBeInTheDocument()
   })
 
-  it('does not render JourneySection (removed in homepage redesign)', () => {
-    renderHome()
-    expect(
-      screen.queryByRole('region', { name: /your journey to/i })
-    ).not.toBeInTheDocument()
-    expect(screen.queryByText('Your Journey to Healing')).not.toBeInTheDocument()
-  })
-
   it('does NOT render removed sections (DevotionalTeaser, TodaysVerse, ChallengeBanner, SeasonalBanner)', () => {
     renderHome()
     expect(screen.queryByRole('heading', { name: /Start Each Morning with God/i })).not.toBeInTheDocument()
@@ -83,11 +79,18 @@ describe('Home', () => {
     expect(screen.queryByText(/Join the Challenge/i)).not.toBeInTheDocument()
   })
 
-  it('renders FeatureShowcase section', () => {
+  it('does not render FeatureShowcase (replaced by JourneySection)', () => {
     renderHome()
     expect(
-      screen.getByRole('heading', { name: /experience worship room/i })
-    ).toBeInTheDocument()
+      screen.queryByRole('heading', { name: /experience worship room/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('does not render PillarSection (removed in HP-8)', () => {
+    renderHome()
+    expect(
+      screen.queryByText(/three pillars/i)
+    ).not.toBeInTheDocument()
   })
 
   it('renders FinalCTA heading', () => {

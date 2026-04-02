@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/Navbar'
 import { HeroSection } from '@/components/HeroSection'
-import { FeatureShowcase, StatsBar, PillarSection, DifferentiatorSection, DashboardPreview, FinalCTA } from '@/components/homepage'
+import { StatsBar, DifferentiatorSection, DashboardPreview, FinalCTA } from '@/components/homepage'
+import { JourneySection } from '@/components/JourneySection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
@@ -55,11 +56,10 @@ export function Home() {
       <Navbar transparent hideBanner />
       <main id="main-content">
         <HeroSection />
-        <FeatureShowcase />
+        <JourneySection />
         <StatsBar />
-        <PillarSection />
-        <DifferentiatorSection />
         <DashboardPreview />
+        <DifferentiatorSection />
         <StartingPointQuiz />
         <FinalCTA />
       </main>
