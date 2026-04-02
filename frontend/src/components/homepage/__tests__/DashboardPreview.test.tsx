@@ -226,3 +226,63 @@ describe('DashboardPreview', () => {
     expect(btn.className).toContain('sm:w-auto')
   })
 })
+
+// --- Card sizing and layout tests ---
+
+describe('card sizing and layout', () => {
+  it('grid container has auto-rows-fr', () => {
+    const { container } = renderDashboardPreview()
+    const grid = container.querySelector('.grid')
+    expect(grid?.className).toContain('auto-rows-fr')
+  })
+
+  it('each card wrapper has h-full', () => {
+    const { container } = renderDashboardPreview()
+    const scrollReveals = container.querySelectorAll('.scroll-reveal')
+    // Cards are indices 1-6 (0 is heading, 7 is CTA)
+    for (let i = 1; i <= 6; i++) {
+      expect(scrollReveals[i]?.className).toContain('h-full')
+    }
+  })
+
+  it('preview content areas have responsive min-height', () => {
+    const { container } = renderDashboardPreview()
+    const previewAreas = container.querySelectorAll('.flex-1.min-h-\\[160px\\]')
+    expect(previewAreas).toHaveLength(6)
+  })
+
+  it('header rows have bottom border divider', () => {
+    const { container } = renderDashboardPreview()
+    const headers = container.querySelectorAll('.border-b.border-white\\/\\[0\\.06\\]')
+    expect(headers).toHaveLength(6)
+  })
+
+  it('centered preview cards have items-center', () => {
+    const { container } = renderDashboardPreview()
+    const centeredWrappers = container.querySelectorAll('.flex.h-full.flex-col.justify-center.items-center')
+    expect(centeredWrappers).toHaveLength(4)
+  })
+
+  it('left-aligned cards lack items-center on preview wrapper', () => {
+    const { container } = renderDashboardPreview()
+    // All 6 preview wrappers have justify-center
+    const allWrappers = container.querySelectorAll('.flex.h-full.flex-col.justify-center')
+    expect(allWrappers).toHaveLength(6)
+    // Only 4 have items-center (mood, streak, garden, evening)
+    const centeredWrappers = Array.from(allWrappers).filter(
+      (el) => el.className.includes('items-center')
+    )
+    expect(centeredWrappers).toHaveLength(4)
+  })
+
+  it('lock overlays are scoped to preview area (not header)', () => {
+    renderDashboardPreview()
+    const overlays = screen.getAllByText(/create account to unlock/i)
+    for (const overlay of overlays) {
+      const overlayContainer = overlay.closest('.absolute.inset-0')
+      const previewArea = overlayContainer?.parentElement
+      // Preview area should have flex-1 (not the card root)
+      expect(previewArea?.className).toContain('flex-1')
+    }
+  })
+})

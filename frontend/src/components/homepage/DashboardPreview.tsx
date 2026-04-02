@@ -170,25 +170,30 @@ export function DashboardPreview() {
           </div>
 
           {/* Card Grid */}
-          <div className="mt-12 grid grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 auto-rows-fr">
             {PREVIEW_CARDS.map((card, index) => {
               const Preview = PREVIEW_MAP[card.id]
               const Icon = card.icon
               return (
                 <div
                   key={card.id}
-                  className={cn('scroll-reveal', isVisible && 'is-visible')}
+                  className={cn('scroll-reveal h-full', isVisible && 'is-visible')}
                   style={staggerDelay(index, 100, 200)}
                 >
-                  <FrostedCard className="min-h-[140px] sm:min-h-[160px] p-0 overflow-hidden">
+                  <FrostedCard className="h-full flex flex-col p-0 overflow-hidden">
                     {/* Header — NOT covered by lock overlay */}
-                    <div className="flex items-center gap-2 px-4 pt-4 pb-2">
+                    <div className="flex items-center gap-2 px-4 pt-4 pb-3 border-b border-white/[0.06]">
                       <Icon className="h-4 w-4 text-white/50" aria-hidden="true" />
                       <h3 className="text-sm font-medium text-white/70">{card.title}</h3>
                     </div>
                     {/* Preview content area with lock overlay */}
-                    <div className="relative px-4 pb-4">
-                      <Preview />
+                    <div className="relative flex-1 px-4 pb-4 min-h-[160px] sm:min-h-[220px]">
+                      <div className={cn(
+                        'flex h-full flex-col justify-center',
+                        ['mood', 'streak', 'garden', 'evening'].includes(card.id) && 'items-center'
+                      )}>
+                        <Preview />
+                      </div>
                       <LockOverlay />
                     </div>
                   </FrostedCard>
