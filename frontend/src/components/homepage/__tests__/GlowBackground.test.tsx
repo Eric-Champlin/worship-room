@@ -1,0 +1,85 @@
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import { GlowBackground } from '../GlowBackground'
+
+describe('GlowBackground', () => {
+  it('renders children', () => {
+    render(
+      <GlowBackground>
+        <p>Test content</p>
+      </GlowBackground>
+    )
+    expect(screen.getByText('Test content')).toBeInTheDocument()
+  })
+
+  it('renders with relative and overflow-hidden', () => {
+    const { container } = render(
+      <GlowBackground>
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const outer = container.firstElementChild as HTMLElement
+    expect(outer.className).toContain('relative')
+    expect(outer.className).toContain('overflow-hidden')
+  })
+
+  it('variant="center" renders single glow orb', () => {
+    render(
+      <GlowBackground variant="center">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs).toHaveLength(1)
+  })
+
+  it('variant="split" renders two glow orbs', () => {
+    render(
+      <GlowBackground variant="split">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs).toHaveLength(2)
+  })
+
+  it('variant="none" renders no glow orbs', () => {
+    render(
+      <GlowBackground variant="none">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    expect(screen.queryByTestId('glow-orb')).not.toBeInTheDocument()
+  })
+
+  it('children have z-10 wrapper', () => {
+    render(
+      <GlowBackground>
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const content = screen.getByText('Content')
+    const wrapper = content.parentElement as HTMLElement
+    expect(wrapper.className).toContain('z-10')
+  })
+
+  it('applies bg-hero-bg', () => {
+    const { container } = render(
+      <GlowBackground>
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const outer = container.firstElementChild as HTMLElement
+    expect(outer.className).toContain('bg-hero-bg')
+  })
+
+  it('accepts className prop', () => {
+    const { container } = render(
+      <GlowBackground className="custom-class">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const outer = container.firstElementChild as HTMLElement
+    expect(outer.className).toContain('custom-class')
+  })
+})

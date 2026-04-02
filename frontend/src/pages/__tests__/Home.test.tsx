@@ -58,10 +58,6 @@ describe('Home', () => {
     expect(
       screen.getByRole('region', { name: /welcome to worship room/i })
     ).toBeInTheDocument()
-    // Journey
-    expect(
-      screen.getByRole('region', { name: /your journey to/i })
-    ).toBeInTheDocument()
     // Growth Teasers
     expect(
       screen.getByRole('region', { name: /see how you're growing/i })
@@ -70,6 +66,14 @@ describe('Home', () => {
     expect(
       screen.getByRole('region', { name: /not sure where to start/i })
     ).toBeInTheDocument()
+  })
+
+  it('does not render JourneySection (removed in homepage redesign)', () => {
+    renderHome()
+    expect(
+      screen.queryByRole('region', { name: /your journey to/i })
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText('Your Journey to Healing')).not.toBeInTheDocument()
   })
 
   it('does NOT render removed sections (DevotionalTeaser, TodaysVerse, ChallengeBanner, SeasonalBanner)', () => {
