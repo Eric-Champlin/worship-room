@@ -82,4 +82,11 @@ describe('Home', () => {
     expect(screen.queryByText(/Today's Verse/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Join the Challenge/i)).not.toBeInTheDocument()
   })
+
+  it('renders FeatureShowcase section', () => {
+    renderHome()
+    expect(
+      screen.getByRole('heading', { name: /experience worship room/i })
+    ).toBeInTheDocument()
+  })
 })

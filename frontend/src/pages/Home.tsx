@@ -1,5 +1,6 @@
 import { Navbar } from '@/components/Navbar'
 import { HeroSection } from '@/components/HeroSection'
+import { FeatureShowcase } from '@/components/homepage'
 import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -56,7 +57,7 @@ export function Home() {
       <main id="main-content">
         <HeroSection />
         {/* === Homepage Redesign Sections === */}
-        {/* HP-2: FeatureShowcase */}
+        <FeatureShowcase />
         {/* HP-3: StatsBar */}
         {/* HP-4: PillarSection */}
         {/* HP-5: DifferentiatorSection */}
