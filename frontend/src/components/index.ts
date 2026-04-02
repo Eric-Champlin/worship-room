@@ -1,4 +1,3 @@
-export { GrowthTeasersSection } from './GrowthTeasersSection'
 export { HeroSection } from './HeroSection'
 export { Layout } from './Layout'
 export { Navbar } from './Navbar'

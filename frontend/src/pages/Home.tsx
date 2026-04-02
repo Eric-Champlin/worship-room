@@ -1,7 +1,6 @@
 import { Navbar } from '@/components/Navbar'
 import { HeroSection } from '@/components/HeroSection'
-import { FeatureShowcase, StatsBar, PillarSection, DifferentiatorSection } from '@/components/homepage'
-import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
+import { FeatureShowcase, StatsBar, PillarSection, DifferentiatorSection, DashboardPreview } from '@/components/homepage'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
@@ -61,10 +60,9 @@ export function Home() {
         <StatsBar />
         <PillarSection />
         <DifferentiatorSection />
-        {/* HP-6: DashboardPreview (currently GrowthTeasersSection -- will be evolved) */}
+        <DashboardPreview />
         {/* HP-7: Quiz Polish + FinalCTA */}
         {/* === End Homepage Redesign === */}
-        <GrowthTeasersSection />
         <StartingPointQuiz />
       </main>
       <SiteFooter />
