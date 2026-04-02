@@ -2,7 +2,7 @@
 
 import type { CSSProperties, ReactNode } from 'react'
 
-/** White-to-purple gradient — used on JourneySection, GrowthTeasersSection, StartingPointQuiz, HeroSection, TypewriterInput */
+/** White-to-purple gradient — used on JourneySection, StartingPointQuiz, HeroSection, TypewriterInput */
 export const WHITE_PURPLE_GRADIENT = 'linear-gradient(223deg, #FFFFFF 0%, #8B5CF6 100%)'
 
 /** Inline style for gradient text headings — matches HeroSection.tsx */

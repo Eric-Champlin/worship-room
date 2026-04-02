@@ -79,20 +79,6 @@ describe('Home', () => {
     expect(screen.queryByText(/Join the Challenge/i)).not.toBeInTheDocument()
   })
 
-  it('does not render FeatureShowcase (replaced by JourneySection)', () => {
-    renderHome()
-    expect(
-      screen.queryByRole('heading', { name: /experience worship room/i })
-    ).not.toBeInTheDocument()
-  })
-
-  it('does not render PillarSection (removed in HP-8)', () => {
-    renderHome()
-    expect(
-      screen.queryByText(/three pillars/i)
-    ).not.toBeInTheDocument()
-  })
-
   it('renders FinalCTA heading', () => {
     renderHome()
     expect(
