@@ -6,6 +6,7 @@ interface SectionHeadingProps {
   tagline?: string
   align?: 'center' | 'left'
   className?: string
+  id?: string
 }
 
 export function SectionHeading({
@@ -13,12 +14,14 @@ export function SectionHeading({
   tagline,
   align = 'center',
   className,
+  id,
 }: SectionHeadingProps) {
   const isCenter = align === 'center'
 
   return (
     <div className={cn(isCenter && 'text-center', className)}>
       <h2
+        id={id}
         className="text-3xl sm:text-4xl lg:text-5xl font-bold"
         style={GRADIENT_TEXT_STYLE}
       >

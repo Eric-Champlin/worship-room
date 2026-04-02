@@ -89,4 +89,18 @@ describe('Home', () => {
       screen.getByRole('heading', { name: /experience worship room/i })
     ).toBeInTheDocument()
   })
+
+  it('renders FinalCTA heading', () => {
+    renderHome()
+    expect(
+      screen.getByText(/your healing starts here/i)
+    ).toBeInTheDocument()
+  })
+
+  it('renders FinalCTA button', () => {
+    renderHome()
+    expect(
+      screen.getByRole('button', { name: /get started.*free/i })
+    ).toBeInTheDocument()
+  })
 })

@@ -7,6 +7,12 @@ import { QUIZ_QUESTIONS } from '@/components/quiz-data'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 vi.mock('@/hooks/useReducedMotion')
+vi.mock('@/hooks/useScrollReveal', () => ({
+  useScrollReveal: () => ({ ref: { current: null }, isVisible: true }),
+  staggerDelay: (i: number, base = 100, initial = 0) => ({
+    transitionDelay: `${initial + i * base}ms`,
+  }),
+}))
 
 function renderQuiz() {
   return render(
@@ -332,10 +338,8 @@ describe('StartingPointQuiz', () => {
 
   describe('Props', () => {
     it('renders with dark background by default', () => {
-      renderQuiz()
-      const section = document.getElementById('quiz')!
-      const contentArea = section.firstElementChild as HTMLElement
-      expect(contentArea.className).toContain('bg-hero-bg')
+      const { container } = renderQuiz()
+      expect(container.querySelector('.bg-hero-bg')).toBeInTheDocument()
     })
 
     it('renders with light background when variant="light"', () => {
@@ -348,6 +352,94 @@ describe('StartingPointQuiz', () => {
       const contentArea = section.firstElementChild as HTMLElement
       expect(contentArea.className).toContain('bg-white')
       expect(contentArea.className).not.toContain('bg-hero-bg')
+    })
+  })
+
+  describe('Visual Polish', () => {
+    it('renders GlowBackground wrapper', () => {
+      const { container } = renderQuiz()
+      expect(container.querySelector('.bg-hero-bg')).toBeInTheDocument()
+    })
+
+    it('renders SectionHeading with correct text and id', () => {
+      const { container } = renderQuiz()
+      const heading = container.querySelector('#quiz-heading')
+      expect(heading).toBeInTheDocument()
+      expect(heading?.tagName).toBe('H2')
+    })
+
+    it('renders tagline', () => {
+      renderQuiz()
+      expect(screen.getByText(/take a 30-second quiz/i)).toBeInTheDocument()
+    })
+
+    it('section has aria-labelledby="quiz-heading"', () => {
+      const { container } = renderQuiz()
+      expect(container.querySelector('section[aria-labelledby="quiz-heading"]')).toBeInTheDocument()
+    })
+
+    it('option buttons have frosted glass styling', () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('button', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      expect(firstOption.className).toContain('bg-white/[0.05]')
+    })
+
+    it('selected option has purple highlight', async () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('button', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      await user.click(firstOption)
+      expect(firstOption.className).toContain('bg-purple-500/20')
+    })
+
+    it('progress bar uses thin track', () => {
+      const { container } = renderQuiz()
+      const track = container.querySelector('.h-1')
+      expect(track).toBeInTheDocument()
+    })
+
+    it('progress bar uses gradient fill', () => {
+      const { container } = renderQuiz()
+      const fill = container.querySelector('.from-purple-500')
+      expect(fill).toBeInTheDocument()
+    })
+
+    it('result card wrapped in FrostedCard', async () => {
+      renderQuiz()
+      await answerAllQuestions()
+      const section = document.getElementById('quiz')!
+      // FrostedCard result wrapper has backdrop-blur-sm
+      const resultArea = section.querySelector('.backdrop-blur-sm')
+      expect(resultArea).toBeInTheDocument()
+    })
+
+    it('result card has glow div', async () => {
+      renderQuiz()
+      await answerAllQuestions()
+      const blurEl = document.querySelector('.blur-\\[80px\\]')
+      expect(blurEl).toBeInTheDocument()
+    })
+
+    it('result CTA is solid white button', async () => {
+      renderQuiz()
+      await answerAllQuestions()
+      const ctaLink = screen.getByRole('link', { name: /go to prayer/i })
+      expect(ctaLink.className).toContain('bg-white')
+    })
+
+    it('scroll-reveal classes applied', () => {
+      const { container } = renderQuiz()
+      const scrollRevealEls = container.querySelectorAll('.scroll-reveal')
+      expect(scrollRevealEls.length).toBeGreaterThan(0)
+    })
+
+    it('scroll-reveal elements have is-visible class', () => {
+      const { container } = renderQuiz()
+      const visibleEls = container.querySelectorAll('.is-visible')
+      expect(visibleEls.length).toBeGreaterThan(0)
     })
   })
 

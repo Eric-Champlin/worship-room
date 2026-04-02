@@ -37,4 +37,17 @@ describe('SectionHeading', () => {
     const tagline = screen.getByText('Tag')
     expect(tagline.className).not.toContain('mx-auto')
   })
+
+  it('renders h2 with id when provided', () => {
+    const { container } = render(<SectionHeading heading="Title" id="test-heading" />)
+    const h2 = container.querySelector('#test-heading')
+    expect(h2).toBeInTheDocument()
+    expect(h2?.tagName).toBe('H2')
+  })
+
+  it('renders h2 without id when omitted', () => {
+    render(<SectionHeading heading="Title" />)
+    const h2 = screen.getByRole('heading', { level: 2 })
+    expect(h2.id).toBe('')
+  })
 })

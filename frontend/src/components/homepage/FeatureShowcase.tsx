@@ -16,7 +16,7 @@ export function FeatureShowcase() {
       <section
         ref={ref as React.RefObject<HTMLElement>}
         aria-label="Feature previews"
-        className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto"
+        className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto"
       >
         {/* Heading */}
         <div

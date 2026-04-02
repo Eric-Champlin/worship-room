@@ -1,6 +1,6 @@
 import { Navbar } from '@/components/Navbar'
 import { HeroSection } from '@/components/HeroSection'
-import { FeatureShowcase, StatsBar, PillarSection, DifferentiatorSection, DashboardPreview } from '@/components/homepage'
+import { FeatureShowcase, StatsBar, PillarSection, DifferentiatorSection, DashboardPreview, FinalCTA } from '@/components/homepage'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
@@ -55,15 +55,13 @@ export function Home() {
       <Navbar transparent hideBanner />
       <main id="main-content">
         <HeroSection />
-        {/* === Homepage Redesign Sections === */}
         <FeatureShowcase />
         <StatsBar />
         <PillarSection />
         <DifferentiatorSection />
         <DashboardPreview />
-        {/* HP-7: Quiz Polish + FinalCTA */}
-        {/* === End Homepage Redesign === */}
         <StartingPointQuiz />
+        <FinalCTA />
       </main>
       <SiteFooter />
       {import.meta.env.DEV && <DevAuthToggle />}
