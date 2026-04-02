@@ -103,13 +103,13 @@ export function JourneySection() {
         />
       </div>
 
-      {/* BackgroundSquiggle — constrained to center 45% */}
+      {/* BackgroundSquiggle — narrow column behind circles */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 flex justify-center overflow-hidden"
         style={SQUIGGLE_MASK_STYLE}
       >
-        <div className="w-[40%] max-w-[500px]">
+        <div className="w-[20%] max-w-[300px]">
           <BackgroundSquiggle className="h-full w-full opacity-30" />
         </div>
       </div>

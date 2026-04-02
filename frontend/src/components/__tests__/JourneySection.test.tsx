@@ -140,10 +140,10 @@ describe('JourneySection', () => {
       expect(svgs.length).toBeGreaterThanOrEqual(1)
     })
 
-    it('BackgroundSquiggle container constrained to ~40% width', () => {
+    it('BackgroundSquiggle container constrained to ~20% width', () => {
       renderJourney()
       const section = screen.getByRole('region', { name: /your journey to.*healing/i })
-      const squiggleContainer = section.querySelector('.w-\\[40\\%\\]')
+      const squiggleContainer = section.querySelector('.w-\\[20\\%\\]')
       expect(squiggleContainer).toBeInTheDocument()
     })
   })

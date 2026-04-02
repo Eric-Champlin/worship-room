@@ -29,9 +29,9 @@ describe('StatsBar', () => {
     expect(container.querySelector('.bg-hero-bg')).toBeInTheDocument()
   })
 
-  it('applies border separators', () => {
-    const { container } = render(<StatsBar />)
-    expect(container.querySelector('.border-y')).toBeInTheDocument()
+  it('renders content statistics section', () => {
+    render(<StatsBar />)
+    expect(screen.getByRole('region', { name: /content statistics/i })).toBeInTheDocument()
   })
 
   it('has aria-label on section', () => {
@@ -67,10 +67,9 @@ describe('StatsBar', () => {
     })
   })
 
-  it('section border has border-white/[0.10] opacity', () => {
+  it('section renders within GlowBackground', () => {
     const { container } = render(<StatsBar />)
-    const section = container.querySelector('.border-y') as HTMLElement
-    expect(section.className).toContain('border-white/[0.10]')
+    expect(container.querySelector('.bg-hero-bg')).toBeInTheDocument()
   })
 
   it('has elliptical glow orb with 0.30 center opacity', () => {

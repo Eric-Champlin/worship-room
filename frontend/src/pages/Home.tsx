@@ -57,10 +57,15 @@ export function Home() {
       <main id="main-content">
         <HeroSection />
         <JourneySection />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
         <StatsBar />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
         <DashboardPreview />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
         <DifferentiatorSection />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
         <StartingPointQuiz />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
         <FinalCTA />
       </main>
       <SiteFooter />
