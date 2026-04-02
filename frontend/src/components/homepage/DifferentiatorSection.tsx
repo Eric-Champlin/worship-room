@@ -17,7 +17,7 @@ export function DifferentiatorSection() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
           <div className={cn('scroll-reveal', isVisible && 'is-visible')}>
             <SectionHeading
-              heading="Built for Your Heart, Not Our Bottom Line"
+              heading="Built for Your Heart"
               tagline="The things we'll never do matter as much as the things we will."
             />
           </div>

@@ -119,6 +119,19 @@ describe('DifferentiatorSection', () => {
     expect(revealElements).toHaveLength(7)
   })
 
+  it('renders updated card titles per HP-9 spec', () => {
+    render(<DifferentiatorSection />)
+    expect(screen.getByText('Your time is sacred')).toBeInTheDocument()
+    expect(screen.getByText('Your conversations stay private')).toBeInTheDocument()
+    expect(screen.getByText('AI That Meets You Where You Are')).toBeInTheDocument()
+  })
+
+  it('renders updated card descriptions per HP-9 spec', () => {
+    render(<DifferentiatorSection />)
+    expect(screen.getByText(/we welcome you back/i)).toBeInTheDocument()
+    expect(screen.getByText(/AI woven through every experience/i)).toBeInTheDocument()
+  })
+
   it('no competitor names in rendered content', () => {
     const { container } = render(<DifferentiatorSection />)
     const textContent = container.textContent?.toLowerCase() ?? ''

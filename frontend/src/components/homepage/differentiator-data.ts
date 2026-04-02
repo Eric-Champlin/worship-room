@@ -17,13 +17,13 @@ export interface DifferentiatorItem {
 export const DIFFERENTIATORS: DifferentiatorItem[] = [
   {
     icon: ShieldOff,
-    title: 'Your prayer time is sacred',
+    title: 'Your time is sacred',
     description:
       "No ads. No sponsored content. No interruptions. When you open Worship Room, the only voice you'll hear is the one you came to listen to.",
   },
   {
     icon: EyeOff,
-    title: 'Your prayers stay between you and God',
+    title: 'Your conversations stay private',
     description:
       "We don't sell your data, track your behavior for advertisers, or share your journal entries with anyone. Your spiritual life is private. Period.",
   },
@@ -37,13 +37,13 @@ export const DIFFERENTIATORS: DifferentiatorItem[] = [
     icon: HeartHandshake,
     title: "We'll never guilt you for missing a day",
     description:
-      "Life happens. God's grace covers every gap. Your streak has gentle repair, your garden doesn't wilt, and when you come back, we say welcome — not where have you been.",
+      "Life happens. Your streak has gentle repair, your garden doesn't wilt, and when you come back, we welcome you back.",
   },
   {
     icon: Sparkles,
-    title: 'Prayers that know your heart',
+    title: 'AI That Meets You Where You Are',
     description:
-      "Tell us how you're feeling, and we'll write a prayer just for you. Not a template. Not a generic blessing. A prayer shaped by your words, your moment, your need.",
+      "Share how you're feeling and receive a personalized prayer. Ask questions about Scripture and get thoughtful answers. Journal your thoughts and receive reflections that understand your journey. AI woven through every experience.",
   },
   {
     icon: LifeBuoy,
