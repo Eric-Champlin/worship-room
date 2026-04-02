@@ -5,7 +5,6 @@ import { useScrollReveal, staggerDelay } from '@/hooks/useScrollReveal'
 import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 import { GlowBackground } from './GlowBackground'
 import { SectionHeading } from './SectionHeading'
-import { FrostedCard } from './FrostedCard'
 import { PREVIEW_CARDS, getHeatmapColor, PRACTICES, FRIENDS } from './dashboard-preview-data'
 
 // --- Preview Sub-Components (internal, not exported) ---
@@ -130,8 +129,8 @@ function EveningReflectionPreview() {
 
 function LockOverlay() {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 rounded-xl backdrop-blur-[3px] bg-[#08051A]/60">
-      <Lock className="h-4 w-4 text-white/40" aria-hidden="true" />
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 backdrop-blur-[3px] bg-hero-bg/50">
+      <Lock className="w-5 h-5 text-white/40" aria-hidden="true" />
       <span className="text-xs text-white/50">Create account to unlock</span>
     </div>
   )
@@ -181,14 +180,9 @@ export function DashboardPreview() {
                   className={cn('scroll-reveal h-full', isVisible && 'is-visible')}
                   style={staggerDelay(index, 100, 200)}
                 >
-                  <FrostedCard className="h-full flex flex-col p-0 overflow-hidden">
-                    {/* Header — NOT covered by lock overlay */}
-                    <div className="flex items-center gap-2 px-4 pt-4 pb-3 border-b border-white/[0.06]">
-                      <Icon className="h-4 w-4 text-white" aria-hidden="true" />
-                      <h3 className="text-sm font-medium text-white">{card.title}</h3>
-                    </div>
-                    {/* Preview content area with lock overlay */}
-                    <div className="relative flex-1 px-4 pb-4 min-h-[160px] sm:min-h-[220px]">
+                  <div className="bg-white/[0.04] border border-white/[0.12] rounded-2xl overflow-hidden h-full flex flex-col">
+                    {/* Top area — Preview mockup with lock overlay */}
+                    <div className="relative bg-white/[0.02] min-h-[160px] sm:min-h-[180px] px-4 py-4">
                       <div className={cn(
                         'flex h-full flex-col justify-center',
                         ['mood', 'streak', 'garden', 'evening'].includes(card.id) && 'items-center'
@@ -197,7 +191,17 @@ export function DashboardPreview() {
                       </div>
                       <LockOverlay />
                     </div>
-                  </FrostedCard>
+                    {/* Divider */}
+                    <div className="border-b border-white/[0.06]" />
+                    {/* Bottom area — Icon + title + description in clear text */}
+                    <div className="p-4 sm:p-5">
+                      <div className="flex items-center gap-2">
+                        <Icon className={cn('h-4 w-4', card.iconColor)} aria-hidden="true" />
+                        <h3 className="text-white font-semibold text-sm sm:text-base">{card.title}</h3>
+                      </div>
+                      <p className="text-white/90 text-xs sm:text-sm leading-relaxed mt-2">{card.description}</p>
+                    </div>
+                  </div>
                 </div>
               )
             })}
@@ -209,7 +213,7 @@ export function DashboardPreview() {
             style={staggerDelay(0, 100, 800)}
           >
             <p className="mb-4 text-base text-white">
-              All of this is free. All of it is yours.
+              It's free. No catch.
             </p>
             <button
               type="button"
@@ -222,7 +226,7 @@ export function DashboardPreview() {
               )}
               style={{ background: WHITE_PURPLE_GRADIENT }}
             >
-              Get Started
+              Create a Free Account
             </button>
           </div>
         </div>

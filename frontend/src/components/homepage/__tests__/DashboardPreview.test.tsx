@@ -33,14 +33,23 @@ describe('dashboard-preview-data', () => {
     expect(PREVIEW_CARDS).toHaveLength(6)
   })
 
-  it('each card has id, icon, and title', () => {
+  it('each card has id, icon, iconColor, title, and description', () => {
     for (const card of PREVIEW_CARDS) {
       expect(typeof card.id).toBe('string')
       expect(card.id.length).toBeGreaterThan(0)
       expect(card.icon).toBeDefined()
+      expect(typeof card.iconColor).toBe('string')
+      expect(card.iconColor).toMatch(/^text-/)
       expect(typeof card.title).toBe('string')
       expect(card.title.length).toBeGreaterThan(0)
+      expect(typeof card.description).toBe('string')
+      expect(card.description.length).toBeGreaterThan(0)
     }
+  })
+
+  it('streak card title is pluralized', () => {
+    const streakCard = PREVIEW_CARDS.find((c) => c.id === 'streak')
+    expect(streakCard?.title).toBe('Streaks & Faith Points')
   })
 
   it('getHeatmapColor is deterministic', () => {
@@ -179,25 +188,25 @@ describe('DashboardPreview', () => {
 
   it('renders "Wind down your day with intention"', () => {
     renderDashboardPreview()
-    expect(screen.getByText(/wind down your day/i)).toBeInTheDocument()
+    expect(screen.getByText(/wind down your day with intention/i)).toBeInTheDocument()
   })
 
-  it('renders CTA text "All of this is free"', () => {
+  it('renders CTA trust line "It\'s free. No catch."', () => {
     renderDashboardPreview()
-    expect(screen.getByText(/all of this is free/i)).toBeInTheDocument()
+    expect(screen.getByText(/it's free\. no catch\./i)).toBeInTheDocument()
   })
 
-  it('renders "Get Started" button', () => {
+  it('renders "Create a Free Account" button', () => {
     renderDashboardPreview()
     expect(
-      screen.getByRole('button', { name: /get started/i })
+      screen.getByRole('button', { name: /create a free account/i })
     ).toBeInTheDocument()
   })
 
-  it('Get Started button triggers auth modal', async () => {
+  it('Create a Free Account button triggers auth modal', async () => {
     const user = userEvent.setup()
     renderDashboardPreview()
-    const btn = screen.getByRole('button', { name: /get started/i })
+    const btn = screen.getByRole('button', { name: /create a free account/i })
     await user.click(btn)
     // Auth modal renders with role="dialog"
     expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -221,7 +230,7 @@ describe('DashboardPreview', () => {
 
   it('CTA button has full-width mobile class', () => {
     renderDashboardPreview()
-    const btn = screen.getByRole('button', { name: /get started/i })
+    const btn = screen.getByRole('button', { name: /create a free account/i })
     expect(btn.className).toContain('w-full')
     expect(btn.className).toContain('sm:w-auto')
   })
@@ -247,14 +256,14 @@ describe('card sizing and layout', () => {
 
   it('preview content areas have responsive min-height', () => {
     const { container } = renderDashboardPreview()
-    const previewAreas = container.querySelectorAll('.flex-1.min-h-\\[160px\\]')
+    const previewAreas = container.querySelectorAll('.relative.bg-white\\/\\[0\\.02\\].min-h-\\[160px\\]')
     expect(previewAreas).toHaveLength(6)
   })
 
-  it('header rows have bottom border divider', () => {
+  it('dividers separate preview from text areas', () => {
     const { container } = renderDashboardPreview()
-    const headers = container.querySelectorAll('.border-b.border-white\\/\\[0\\.06\\]')
-    expect(headers).toHaveLength(6)
+    const dividers = container.querySelectorAll('.border-b.border-white\\/\\[0\\.06\\]')
+    expect(dividers).toHaveLength(6)
   })
 
   it('centered preview cards have items-center', () => {
@@ -275,20 +284,65 @@ describe('card sizing and layout', () => {
     expect(centeredWrappers).toHaveLength(4)
   })
 
-  it('lock overlays are scoped to preview area (not header)', () => {
+  it('lock overlays are scoped to preview area (not text area)', () => {
     renderDashboardPreview()
     const overlays = screen.getAllByText(/create account to unlock/i)
     for (const overlay of overlays) {
       const overlayContainer = overlay.closest('.absolute.inset-0')
       const previewArea = overlayContainer?.parentElement
-      // Preview area should have flex-1 (not the card root)
-      expect(previewArea?.className).toContain('flex-1')
+      // Preview area should have bg-white/[0.02] (the top zone)
+      expect(previewArea?.className).toContain('bg-white/[0.02]')
     }
   })
 
   it('CTA button has white glow shadow', () => {
     renderDashboardPreview()
-    const btn = screen.getByRole('button', { name: /get started/i })
+    const btn = screen.getByRole('button', { name: /create a free account/i })
     expect(btn.className).toContain('shadow-[0_0_20px')
+  })
+
+  it('renders all 6 card descriptions', () => {
+    renderDashboardPreview()
+    for (const card of PREVIEW_CARDS) {
+      expect(screen.getByText(card.description)).toBeInTheDocument()
+    }
+  })
+
+  it('icon has per-card color class', () => {
+    const { container } = renderDashboardPreview()
+    const iconColorMap: Record<string, string> = {
+      mood: 'text-purple-400',
+      streak: 'text-orange-400',
+      garden: 'text-emerald-400',
+      practices: 'text-purple-400',
+      friends: 'text-blue-400',
+      evening: 'text-purple-400',
+    }
+    // Card containers have both bg-white/[0.04] and rounded-2xl
+    const cards = container.querySelectorAll('.bg-white\\/\\[0\\.04\\].border')
+    expect(cards).toHaveLength(6)
+    for (let i = 0; i < PREVIEW_CARDS.length; i++) {
+      const textArea = cards[i].querySelector('.p-4')
+      const icon = textArea?.querySelector('svg')
+      expect(icon?.classList.toString()).toContain(iconColorMap[PREVIEW_CARDS[i].id])
+    }
+  })
+
+  it('preview area has bg-white/[0.02]', () => {
+    const { container } = renderDashboardPreview()
+    const previewAreas = container.querySelectorAll('.bg-white\\/\\[0\\.02\\]')
+    expect(previewAreas).toHaveLength(6)
+  })
+
+  it('cards use bg-white/[0.04] (not FrostedCard bg)', () => {
+    const { container } = renderDashboardPreview()
+    // Card containers have both bg-white/[0.04] and rounded-2xl
+    const cards = container.querySelectorAll('.bg-white\\/\\[0\\.04\\].border')
+    expect(cards).toHaveLength(6)
+  })
+
+  it('streak card title includes "Streaks" (plural)', () => {
+    renderDashboardPreview()
+    expect(screen.getByText('Streaks & Faith Points')).toBeInTheDocument()
   })
 })

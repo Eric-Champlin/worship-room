@@ -19,19 +19,19 @@ export const DIFFERENTIATORS: DifferentiatorItem[] = [
     icon: ShieldOff,
     title: 'Your time is sacred',
     description:
-      "No ads. No sponsored content. No interruptions. When you open Worship Room, the only voice you'll hear is the one you came to listen to.",
+      'No ads. No sponsored content. No interruptions. When you open Worship Room, the only voice is yours.',
   },
   {
     icon: EyeOff,
     title: 'Your conversations stay private',
     description:
-      "We don't sell your data, track your behavior for advertisers, or share your journal entries with anyone. Your spiritual life is private. Period.",
+      "We don't sell your data or share your journal entries with anyone. Your spiritual life is private. Period.",
   },
   {
     icon: CreditCard,
     title: 'Honest from day one',
     description:
-      "No hidden fees, no auto-renewing traps buried in fine print, no paywall that appears after you've invested weeks of your heart. You'll always know exactly where you stand.",
+      "No hidden fees, no auto-renewing traps, no paywall that appears after you've invested your heart.",
   },
   {
     icon: HeartHandshake,
@@ -43,12 +43,12 @@ export const DIFFERENTIATORS: DifferentiatorItem[] = [
     icon: Sparkles,
     title: 'AI That Meets You Where You Are',
     description:
-      "Share how you're feeling and receive a personalized prayer. Ask questions about Scripture and get thoughtful answers. Journal your thoughts and receive reflections that understand your journey. AI woven through every experience.",
+      "Share how you're feeling and receive a personalized prayer. Ask questions about Scripture. Journal and receive reflections.",
   },
   {
     icon: LifeBuoy,
     title: 'A safe space when it matters most',
     description:
-      "If you're in crisis, we won't just offer a verse. We'll connect you with the 988 Suicide & Crisis Lifeline, Crisis Text Line, and SAMHSA — because spiritual care and professional help belong together.",
+      "If you're in crisis, we connect you with the 988 Lifeline, Crisis Text Line, and SAMHSA. Help is always here.",
   },
 ]

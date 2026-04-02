@@ -4,16 +4,18 @@ import { BarChart3, Flame, Sprout, CheckSquare, Users, Moon } from 'lucide-react
 export interface PreviewCard {
   id: string
   icon: LucideIcon
+  iconColor: string
   title: string
+  description: string
 }
 
 export const PREVIEW_CARDS: PreviewCard[] = [
-  { id: 'mood', icon: BarChart3, title: 'Mood Insights' },
-  { id: 'streak', icon: Flame, title: 'Streak & Faith Points' },
-  { id: 'garden', icon: Sprout, title: 'Growth Garden' },
-  { id: 'practices', icon: CheckSquare, title: "Today's Practices" },
-  { id: 'friends', icon: Users, title: 'Friends' },
-  { id: 'evening', icon: Moon, title: 'Evening Reflection' },
+  { id: 'mood', icon: BarChart3, iconColor: 'text-purple-400', title: 'Mood Insights', description: 'See how God is meeting you over time.' },
+  { id: 'streak', icon: Flame, iconColor: 'text-orange-400', title: 'Streaks & Faith Points', description: 'Build daily habits and watch your faith grow.' },
+  { id: 'garden', icon: Sprout, iconColor: 'text-emerald-400', title: 'Growth Garden', description: 'A living illustration that grows with your journey.' },
+  { id: 'practices', icon: CheckSquare, iconColor: 'text-purple-400', title: "Today's Practices", description: 'Your daily rhythm of prayer, journaling, and worship.' },
+  { id: 'friends', icon: Users, iconColor: 'text-blue-400', title: 'Friends', description: 'Grow together and encourage each other.' },
+  { id: 'evening', icon: Moon, iconColor: 'text-purple-400', title: 'Evening Reflection', description: 'Wind down your day with gratitude and prayer.' },
 ]
 
 const HEATMAP_LEVELS = [

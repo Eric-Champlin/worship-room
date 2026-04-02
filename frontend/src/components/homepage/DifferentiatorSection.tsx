@@ -23,16 +23,16 @@ export function DifferentiatorSection() {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 auto-rows-fr">
             {DIFFERENTIATORS.map((item, index) => {
               const Icon = item.icon
               return (
                 <div
                   key={index}
-                  className={cn('scroll-reveal', isVisible && 'is-visible')}
+                  className={cn('scroll-reveal h-full', isVisible && 'is-visible')}
                   style={staggerDelay(index, 100, 200)}
                 >
-                  <FrostedCard>
+                  <FrostedCard className="h-full flex flex-col">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/[0.08] border border-white/[0.06] flex items-center justify-center">
                       <Icon
                         className="w-5 h-5 sm:w-6 sm:h-6 text-white"
@@ -42,7 +42,7 @@ export function DifferentiatorSection() {
                     <h3 className="text-white text-base sm:text-lg font-semibold mt-4">
                       {item.title}
                     </h3>
-                    <p className="text-white text-sm leading-relaxed mt-2">
+                    <p className="text-white text-sm leading-relaxed mt-2 flex-1">
                       {item.description}
                     </p>
                   </FrostedCard>

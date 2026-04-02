@@ -126,10 +126,10 @@ describe('DifferentiatorSection', () => {
     expect(screen.getByText('AI That Meets You Where You Are')).toBeInTheDocument()
   })
 
-  it('renders updated card descriptions per HP-9 spec', () => {
+  it('renders updated card descriptions per HP-14 spec', () => {
     render(<DifferentiatorSection />)
     expect(screen.getByText(/we welcome you back/i)).toBeInTheDocument()
-    expect(screen.getByText(/AI woven through every experience/i)).toBeInTheDocument()
+    expect(screen.getByText(/help is always here/i)).toBeInTheDocument()
   })
 
   it('no competitor names in rendered content', () => {
@@ -153,6 +153,46 @@ describe('DifferentiatorSection', () => {
     const iconContainers = container.querySelectorAll('.rounded-xl')
     for (const ic of iconContainers) {
       expect(ic.className).toContain('bg-white/[0.08]')
+    }
+  })
+
+  it('grid has auto-rows-fr', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const grid = container.querySelector('.grid')
+    expect(grid?.className).toContain('auto-rows-fr')
+  })
+
+  it('card wrappers have h-full', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const scrollReveals = container.querySelectorAll('.scroll-reveal')
+    // Cards are indices 1-6 (0 is heading wrapper)
+    for (let i = 1; i <= 6; i++) {
+      expect(scrollReveals[i]?.className).toContain('h-full')
+    }
+  })
+
+  it('FrostedCard has h-full and flex-col', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const frostedCards = container.querySelectorAll('.rounded-2xl')
+    expect(frostedCards).toHaveLength(6)
+    for (const card of frostedCards) {
+      expect(card.className).toContain('h-full')
+      expect(card.className).toContain('flex-col')
+    }
+  })
+
+  it('description has flex-1', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const descriptions = container.querySelectorAll('.leading-relaxed')
+    expect(descriptions).toHaveLength(6)
+    for (const desc of descriptions) {
+      expect(desc.className).toContain('flex-1')
+    }
+  })
+
+  it('descriptions are uniform length (under 140 chars)', () => {
+    for (const item of DIFFERENTIATORS) {
+      expect(item.description.length).toBeLessThanOrEqual(140)
     }
   })
 })
