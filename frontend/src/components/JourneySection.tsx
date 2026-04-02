@@ -3,55 +3,65 @@ import { cn } from '@/lib/utils'
 import { useScrollReveal, staggerDelay } from '@/hooks/useScrollReveal'
 import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 import { SectionHeading } from '@/components/homepage/SectionHeading'
+import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
+import { ArrowRight } from 'lucide-react'
 
 interface JourneyStep {
   number: number
-  prefix: string
-  highlight: string
+  title: React.ReactNode
+  description: string
   route: string
+}
+
+const GRADIENT_KEYWORD_STYLE: React.CSSProperties = {
+  color: 'white',
+  background: WHITE_PURPLE_GRADIENT,
+  backgroundClip: 'text',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
 }
 
 const JOURNEY_STEPS: JourneyStep[] = [
   {
     number: 1,
-    prefix: 'Read a',
-    highlight: 'Devotional',
+    title: <>Read a <span style={GRADIENT_KEYWORD_STYLE}>Devotional</span></>,
+    description: 'Start each morning with a short reflection, a verse, and a prayer written just for today.',
     route: '/daily?tab=devotional',
   },
   {
     number: 2,
-    prefix: 'Learn to',
-    highlight: 'Pray',
+    title: <>Learn to <span style={GRADIENT_KEYWORD_STYLE}>Pray</span></>,
+    description: 'Begin with what\'s on your heart. We\'ll turn your words into a personalized prayer.',
     route: '/daily?tab=pray',
   },
   {
     number: 3,
-    prefix: 'Learn to',
-    highlight: 'Journal',
+    title: <>Learn to <span style={GRADIENT_KEYWORD_STYLE}>Journal</span></>,
+    description: 'Write freely or follow a guided prompt. Your thoughts stay private and encrypted.',
     route: '/daily?tab=journal',
   },
   {
     number: 4,
-    prefix: 'Learn to',
-    highlight: 'Meditate',
+    title: <>Learn to <span style={GRADIENT_KEYWORD_STYLE}>Meditate</span></>,
+    description: 'Quiet your mind with breathing exercises, scripture soaking, and guided reflection.',
     route: '/daily?tab=meditate',
   },
   {
     number: 5,
-    prefix: 'Listen to',
-    highlight: 'Music',
+    title: <>Listen to <span style={GRADIENT_KEYWORD_STYLE}>Music</span></>,
+    description: 'Layer ambient sounds, worship playlists, and bedtime routines to create your sanctuary.',
     route: '/music',
   },
   {
     number: 6,
-    prefix: 'Write on the',
-    highlight: 'Prayer Wall',
+    title: <>Write on the <span style={GRADIENT_KEYWORD_STYLE}>Prayer Wall</span></>,
+    description: 'You\'re not alone. Share what\'s on your heart and pray for others walking the same road.',
     route: '/prayer-wall',
   },
   {
     number: 7,
-    prefix: 'Find',
-    highlight: 'Local Support',
+    title: <>Find <span style={GRADIENT_KEYWORD_STYLE}>Local Support</span></>,
+    description: 'Discover churches, counselors, and recovery groups near you when you\'re ready for the next step.',
     route: '/local-support/churches',
   },
 ]
@@ -87,48 +97,61 @@ export function JourneySection() {
         />
       </div>
 
-      <div className="relative mx-auto max-w-6xl">
+      {/* BackgroundSquiggle — constrained to center 45% */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 flex justify-center overflow-hidden"
+        style={SQUIGGLE_MASK_STYLE}
+      >
+        <div className="w-[45%]">
+          <BackgroundSquiggle className="h-full w-full opacity-20" />
+        </div>
+      </div>
+
+      <div className="relative mx-auto max-w-2xl">
         <SectionHeading
-          id="journey-heading"
-          heading="Your Journey to Healing"
+          topLine="Your Journey to"
+          bottomLine="Healing"
           tagline="From prayer to community, every step draws you closer to peace."
-          align="center"
+          id="journey-heading"
         />
 
         <ol
           ref={stepsRef as React.RefObject<HTMLOListElement>}
           role="list"
-          className="mt-12 flex flex-wrap justify-center gap-6 sm:mt-16 sm:gap-8 lg:gap-10"
+          className="mt-12 space-y-0 sm:mt-16"
         >
           {JOURNEY_STEPS.map((step, index) => (
             <li
               key={step.route}
               className={cn(
-                'transition-all duration-500 ease-out',
+                'relative transition-all duration-500 ease-out',
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
               )}
-              style={isVisible ? staggerDelay(index, 80, 200) : { transitionDelay: '0ms' }}
+              style={isVisible ? staggerDelay(index, 120, 200) : { transitionDelay: '0ms' }}
             >
+              {/* Connecting line between circles (not on last item) */}
+              {index < JOURNEY_STEPS.length - 1 && (
+                <div
+                  aria-hidden="true"
+                  className="absolute left-5 top-10 bottom-0 w-px bg-gradient-to-b from-purple-500/30 via-purple-500/15 to-purple-500/30"
+                />
+              )}
               <Link
                 to={step.route}
-                className="group flex w-[100px] flex-col items-center gap-2 text-center sm:w-[120px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
+                className="group flex items-start gap-4 rounded-xl px-3 py-4 transition-colors duration-200 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
               >
                 <StepCircle number={step.number} />
-                <span className="text-sm font-medium leading-tight text-white/80 transition-colors duration-200 group-hover:text-white">
-                  {step.prefix}
-                </span>
-                <span
-                  className="text-lg font-bold leading-tight sm:text-xl transition-transform duration-200 group-hover:-translate-y-0.5"
-                  style={{
-                    color: 'white',
-                    background: WHITE_PURPLE_GRADIENT,
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  {step.highlight}
-                </span>
+                <div className="flex-1 pt-1">
+                  <h3 className="text-lg font-bold text-white sm:text-xl">{step.title}</h3>
+                  <p className="mt-1 max-w-lg text-sm leading-relaxed text-white sm:text-base">
+                    {step.description}
+                  </p>
+                </div>
+                <ArrowRight
+                  className="mt-2 h-5 w-5 text-white/0 transition-all duration-200 group-hover:translate-x-1 group-hover:text-white/60"
+                  aria-hidden="true"
+                />
               </Link>
             </li>
           ))}

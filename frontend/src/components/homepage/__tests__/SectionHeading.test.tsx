@@ -14,7 +14,8 @@ describe('SectionHeading', () => {
     render(<SectionHeading heading="Title" tagline="A tagline" />)
     const tagline = screen.getByText('A tagline')
     expect(tagline.tagName).toBe('P')
-    expect(tagline.className).toContain('text-white/60')
+    expect(tagline.className).toContain('text-white')
+    expect(tagline.className).not.toContain('text-white/')
   })
 
   it('omits tagline when not provided', () => {
@@ -49,5 +50,62 @@ describe('SectionHeading', () => {
     render(<SectionHeading heading="Title" />)
     const h2 = screen.getByRole('heading', { level: 2 })
     expect(h2.id).toBe('')
+  })
+
+  it('renders 2-line heading with topLine + bottomLine', () => {
+    render(<SectionHeading topLine="Your Journey to" bottomLine="Healing" />)
+    const h2 = screen.getByRole('heading', { level: 2 })
+    expect(h2).toHaveTextContent('Your Journey toHealing')
+    const spans = h2.querySelectorAll('span')
+    expect(spans).toHaveLength(2)
+    expect(spans[0]).toHaveTextContent('Your Journey to')
+    expect(spans[1]).toHaveTextContent('Healing')
+  })
+
+  it('top line renders in white without gradient', () => {
+    render(<SectionHeading topLine="Your Journey to" bottomLine="Healing" />)
+    const h2 = screen.getByRole('heading', { level: 2 })
+    const topSpan = h2.querySelectorAll('span')[0]
+    expect(topSpan.className).toContain('text-white')
+    expect(topSpan.style.backgroundImage).toBe('')
+  })
+
+  it('bottom line renders with gradient', () => {
+    render(<SectionHeading topLine="Your Journey to" bottomLine="Healing" />)
+    const h2 = screen.getByRole('heading', { level: 2 })
+    const bottomSpan = h2.querySelectorAll('span')[1]
+    expect(bottomSpan.style.backgroundImage).toBe(WHITE_PURPLE_GRADIENT)
+  })
+
+  it('backward compat: heading prop still works', () => {
+    render(<SectionHeading heading="Single Line" />)
+    const h2 = screen.getByRole('heading', { level: 2, name: 'Single Line' })
+    expect(h2.style.backgroundImage).toBe(WHITE_PURPLE_GRADIENT)
+    expect(h2.querySelectorAll('span')).toHaveLength(0)
+  })
+
+  it('tagline uses text-white (not text-white/60)', () => {
+    render(<SectionHeading heading="Title" tagline="Some tagline" />)
+    const tagline = screen.getByText('Some tagline')
+    expect(tagline.className).toContain('text-white')
+    expect(tagline.className).not.toContain('text-white/')
+  })
+
+  it('top line has correct responsive sizing', () => {
+    render(<SectionHeading topLine="Top" bottomLine="Bottom" />)
+    const h2 = screen.getByRole('heading', { level: 2 })
+    const topSpan = h2.querySelectorAll('span')[0]
+    expect(topSpan.className).toContain('text-2xl')
+    expect(topSpan.className).toContain('sm:text-3xl')
+    expect(topSpan.className).toContain('lg:text-4xl')
+  })
+
+  it('bottom line has correct responsive sizing', () => {
+    render(<SectionHeading topLine="Top" bottomLine="Bottom" />)
+    const h2 = screen.getByRole('heading', { level: 2 })
+    const bottomSpan = h2.querySelectorAll('span')[1]
+    expect(bottomSpan.className).toContain('text-4xl')
+    expect(bottomSpan.className).toContain('sm:text-5xl')
+    expect(bottomSpan.className).toContain('lg:text-6xl')
   })
 })

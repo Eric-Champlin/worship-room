@@ -81,9 +81,11 @@ describe('Home', () => {
 
   it('renders FinalCTA heading', () => {
     renderHome()
-    expect(
-      screen.getByText(/your healing starts here/i)
-    ).toBeInTheDocument()
+    const headings = screen.getAllByRole('heading', { level: 2 })
+    const ctaHeading = headings.find(
+      (h) => /your healing/i.test(h.textContent ?? '') && /starts here/i.test(h.textContent ?? '')
+    )
+    expect(ctaHeading).toBeTruthy()
   })
 
   it('renders FinalCTA button', () => {

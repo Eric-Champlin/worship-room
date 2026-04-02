@@ -17,7 +17,8 @@ export function DifferentiatorSection() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
           <div className={cn('scroll-reveal', isVisible && 'is-visible')}>
             <SectionHeading
-              heading="Built for Your Heart"
+              topLine="Built for"
+              bottomLine="Your Heart"
               tagline="The things we'll never do matter as much as the things we will."
             />
           </div>
@@ -34,14 +35,14 @@ export function DifferentiatorSection() {
                   <FrostedCard>
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/[0.08] border border-white/[0.06] flex items-center justify-center">
                       <Icon
-                        className="w-5 h-5 sm:w-6 sm:h-6 text-white/80"
+                        className="w-5 h-5 sm:w-6 sm:h-6 text-white"
                         aria-hidden="true"
                       />
                     </div>
                     <h3 className="text-white text-base sm:text-lg font-semibold mt-4">
                       {item.title}
                     </h3>
-                    <p className="text-white/55 text-sm leading-relaxed mt-2">
+                    <p className="text-white text-sm leading-relaxed mt-2">
                       {item.description}
                     </p>
                   </FrostedCard>

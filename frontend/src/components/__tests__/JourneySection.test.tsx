@@ -18,26 +18,6 @@ function renderJourney() {
   )
 }
 
-const STEP_PREFIXES = [
-  'Read a',
-  'Learn to',
-  'Learn to',
-  'Learn to',
-  'Listen to',
-  'Write on the',
-  'Find',
-]
-
-const STEP_KEYWORDS = [
-  'Devotional',
-  'Pray',
-  'Journal',
-  'Meditate',
-  'Music',
-  'Prayer Wall',
-  'Local Support',
-]
-
 const STEP_ROUTES = [
   '/daily?tab=devotional',
   '/daily?tab=pray',
@@ -48,23 +28,32 @@ const STEP_ROUTES = [
   '/local-support/churches',
 ]
 
+const STEP_DESCRIPTIONS = [
+  /start each morning/i,
+  /begin with what.s on your heart/i,
+  /write freely or follow/i,
+  /quiet your mind/i,
+  /layer ambient sounds/i,
+  /you.re not alone/i,
+  /discover churches/i,
+]
+
 describe('JourneySection', () => {
   describe('Structure & Semantics', () => {
     it('renders as a named section landmark', () => {
       renderJourney()
       expect(
-        screen.getByRole('region', { name: /your journey to healing/i })
+        screen.getByRole('region', { name: /your journey to.*healing/i })
       ).toBeInTheDocument()
     })
 
-    it('renders an h2 heading via SectionHeading', () => {
+    it('renders h2 with topLine and bottomLine', () => {
       renderJourney()
-      const heading = screen.getByRole('heading', {
-        level: 2,
-        name: /your journey to healing/i,
-      })
-      expect(heading).toBeInTheDocument()
-      expect(heading.style.backgroundImage).toContain('linear-gradient')
+      const heading = screen.getByRole('heading', { level: 2 })
+      expect(heading).toHaveTextContent(/your journey to/i)
+      expect(heading).toHaveTextContent(/healing/i)
+      const spans = heading.querySelectorAll('span')
+      expect(spans.length).toBeGreaterThanOrEqual(2)
     })
 
     it('renders the tagline', () => {
@@ -87,13 +76,6 @@ describe('JourneySection', () => {
       const items = within(list).getAllByRole('listitem')
       expect(items).toHaveLength(7)
     })
-
-    it('steps container uses flex-wrap and justify-center', () => {
-      renderJourney()
-      const list = screen.getByRole('list')
-      expect(list.className).toContain('flex-wrap')
-      expect(list.className).toContain('justify-center')
-    })
   })
 
   describe('Step Content', () => {
@@ -104,28 +86,11 @@ describe('JourneySection', () => {
       }
     })
 
-    it('renders prefix text for each step', () => {
+    it('renders description text for each step', () => {
       renderJourney()
-      for (const prefix of STEP_PREFIXES) {
-        expect(
-          screen.getAllByText(prefix).length
-        ).toBeGreaterThanOrEqual(1)
+      for (const desc of STEP_DESCRIPTIONS) {
+        expect(screen.getByText(desc)).toBeInTheDocument()
       }
-    })
-
-    it('renders keyword text for each step', () => {
-      renderJourney()
-      for (const keyword of STEP_KEYWORDS) {
-        expect(screen.getByText(keyword)).toBeInTheDocument()
-      }
-    })
-
-    it('does not render description text', () => {
-      renderJourney()
-      expect(screen.queryByText(/start each morning/i)).not.toBeInTheDocument()
-      expect(screen.queryByText(/begin with what.s on your heart/i)).not.toBeInTheDocument()
-      expect(screen.queryByText(/quiet your mind/i)).not.toBeInTheDocument()
-      expect(screen.queryByText(/you.re not alone/i)).not.toBeInTheDocument()
     })
 
     it('each step links to the correct route', () => {
@@ -140,20 +105,82 @@ describe('JourneySection', () => {
       }
     })
 
-    it('step links have consistent width class', () => {
+    it('step links have hover background class', () => {
       renderJourney()
       const links = screen.getAllByRole('link')
       const journeyLinks = links.filter((link) =>
         STEP_ROUTES.some((route) => link.getAttribute('href') === route)
       )
       for (const link of journeyLinks) {
-        expect(link.className).toContain('w-[100px]')
+        expect(link.className).toContain('hover:bg-white/[0.04]')
       }
     })
   })
 
+  describe('Connecting Lines', () => {
+    it('connecting line present between circles (not on last)', () => {
+      renderJourney()
+      const items = within(screen.getByRole('list')).getAllByRole('listitem')
+      // First 6 items should have a connecting line div
+      for (let i = 0; i < 6; i++) {
+        const line = items[i].querySelector('.w-px')
+        expect(line).toBeInTheDocument()
+      }
+      // Last item should NOT have a connecting line
+      const lastLine = items[6].querySelector('.w-px')
+      expect(lastLine).not.toBeInTheDocument()
+    })
+  })
+
+  describe('BackgroundSquiggle', () => {
+    it('BackgroundSquiggle rendered', () => {
+      renderJourney()
+      const section = screen.getByRole('region', { name: /your journey to.*healing/i })
+      const svgs = section.querySelectorAll('svg')
+      expect(svgs.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('BackgroundSquiggle container constrained to ~45% width', () => {
+      renderJourney()
+      const section = screen.getByRole('region', { name: /your journey to.*healing/i })
+      const squiggleContainer = section.querySelector('.w-\\[45\\%\\]')
+      expect(squiggleContainer).toBeInTheDocument()
+    })
+  })
+
+  describe('Glow Orbs', () => {
+    it('renders two glow orbs with radial gradients', () => {
+      renderJourney()
+      const section = screen.getByRole('region', { name: /your journey to.*healing/i })
+      const orbs = section.querySelectorAll('.blur-\\[80px\\]')
+      expect(orbs).toHaveLength(2)
+      expect((orbs[0] as HTMLElement).style.background).toContain('radial-gradient')
+      expect((orbs[1] as HTMLElement).style.background).toContain('radial-gradient')
+    })
+  })
+
+  describe('Animation', () => {
+    it('steps have 120ms stagger with 200ms initial delay', () => {
+      renderJourney()
+      const items = within(screen.getByRole('list')).getAllByRole('listitem')
+      for (let i = 0; i < items.length; i++) {
+        expect(items[i].style.transitionDelay).toBe(`${200 + i * 120}ms`)
+      }
+    })
+  })
+
+  describe('Arrow Icon', () => {
+    it('arrow icon present for hover', () => {
+      renderJourney()
+      const section = screen.getByRole('region', { name: /your journey to.*healing/i })
+      // ArrowRight icons should be present (one per step, aria-hidden)
+      const arrows = section.querySelectorAll('svg.h-5.w-5')
+      expect(arrows.length).toBeGreaterThanOrEqual(7)
+    })
+  })
+
   describe('Accessibility', () => {
-    it('all links are keyboard-focusable (no negative tabindex)', () => {
+    it('all links are keyboard-focusable', () => {
       renderJourney()
       const links = screen.getAllByRole('link')
       const journeyLinks = links.filter((link) =>
@@ -180,42 +207,6 @@ describe('JourneySection', () => {
       )
       for (const link of journeyLinks) {
         expect(link.className).toContain('focus-visible:ring-2')
-      }
-    })
-
-    it('does not render BackgroundSquiggle', () => {
-      renderJourney()
-      const section = screen.getByRole('region', { name: /your journey to healing/i })
-      // BackgroundSquiggle renders an SVG with a <pattern> element
-      const patterns = section.querySelectorAll('pattern')
-      expect(patterns).toHaveLength(0)
-    })
-  })
-
-  describe('Glow Orbs', () => {
-    it('glow orbs container is pointer-events-none', () => {
-      renderJourney()
-      const section = screen.getByRole('region', { name: /your journey to healing/i })
-      const glowContainer = section.querySelector('.pointer-events-none.absolute.inset-0.overflow-hidden')
-      expect(glowContainer).toBeInTheDocument()
-    })
-
-    it('renders two glow orbs with radial gradients', () => {
-      renderJourney()
-      const section = screen.getByRole('region', { name: /your journey to healing/i })
-      const orbs = section.querySelectorAll('.blur-\\[80px\\]')
-      expect(orbs).toHaveLength(2)
-      expect((orbs[0] as HTMLElement).style.background).toContain('radial-gradient')
-      expect((orbs[1] as HTMLElement).style.background).toContain('radial-gradient')
-    })
-  })
-
-  describe('Animation', () => {
-    it('steps have 80ms stagger with 200ms initial delay', () => {
-      renderJourney()
-      const items = within(screen.getByRole('list')).getAllByRole('listitem')
-      for (let i = 0; i < items.length; i++) {
-        expect(items[i].style.transitionDelay).toBe(`${200 + i * 80}ms`)
       }
     })
   })

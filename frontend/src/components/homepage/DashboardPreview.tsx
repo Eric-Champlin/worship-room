@@ -164,8 +164,9 @@ export function DashboardPreview() {
             style={staggerDelay(0, 100, 0)}
           >
             <SectionHeading
-              heading="See What's Waiting for You"
-              tagline="Your personal dashboard — mood tracking, growth insights, and a garden that grows with your faith."
+              topLine="See What's"
+              bottomLine="Waiting for You"
+              tagline="Create a free account and unlock your personal dashboard."
             />
           </div>
 
@@ -183,8 +184,8 @@ export function DashboardPreview() {
                   <FrostedCard className="h-full flex flex-col p-0 overflow-hidden">
                     {/* Header — NOT covered by lock overlay */}
                     <div className="flex items-center gap-2 px-4 pt-4 pb-3 border-b border-white/[0.06]">
-                      <Icon className="h-4 w-4 text-white/50" aria-hidden="true" />
-                      <h3 className="text-sm font-medium text-white/70">{card.title}</h3>
+                      <Icon className="h-4 w-4 text-white" aria-hidden="true" />
+                      <h3 className="text-sm font-medium text-white">{card.title}</h3>
                     </div>
                     {/* Preview content area with lock overlay */}
                     <div className="relative flex-1 px-4 pb-4 min-h-[160px] sm:min-h-[220px]">
@@ -207,7 +208,7 @@ export function DashboardPreview() {
             className={cn('scroll-reveal mt-12 text-center sm:mt-16', isVisible && 'is-visible')}
             style={staggerDelay(0, 100, 800)}
           >
-            <p className="mb-4 text-base text-white/60">
+            <p className="mb-4 text-base text-white">
               All of this is free. All of it is yours.
             </p>
             <button

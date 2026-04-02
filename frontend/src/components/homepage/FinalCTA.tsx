@@ -24,25 +24,31 @@ export function FinalCTA() {
         ref={ref as React.RefObject<HTMLDivElement>}
         className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6"
       >
-        <h2
-          className={cn(
-            'scroll-reveal text-3xl font-bold sm:text-4xl lg:text-5xl',
-            isVisible && 'is-visible'
-          )}
-          style={{ ...GRADIENT_TEXT_STYLE, ...staggerDelay(0) }}
+        <div
+          className={cn('scroll-reveal', isVisible && 'is-visible')}
+          style={staggerDelay(0)}
         >
-          Your Healing Starts Here
-        </h2>
+          <h2>
+            <span className="block text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
+              Your Healing
+            </span>
+            <span
+              className="block text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mt-1"
+              style={GRADIENT_TEXT_STYLE}
+            >
+              Starts Here
+            </span>
+          </h2>
+        </div>
 
         <p
           className={cn(
-            'scroll-reveal mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/55 sm:text-lg',
+            'scroll-reveal mx-auto mt-4 max-w-xl text-base leading-relaxed text-white sm:text-lg',
             isVisible && 'is-visible'
           )}
           style={staggerDelay(1, 150)}
         >
-          No credit card. No commitment. Just a quiet room where God meets you
-          where you are.
+          No credit card. No commitment.
         </p>
 
         <div
@@ -56,9 +62,6 @@ export function FinalCTA() {
           >
             Get Started &mdash; It&apos;s Free
           </button>
-          <p className="mt-4 text-xs tracking-wide text-white/30">
-            Join thousands finding peace, one prayer at a time.
-          </p>
         </div>
       </div>
     </GlowBackground>

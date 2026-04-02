@@ -43,7 +43,7 @@ function StatItem({
       >
         {count}
       </div>
-      <div className="text-white/50 text-xs sm:text-sm mt-1 tracking-wide uppercase">
+      <div className="text-white/90 text-xs sm:text-sm mt-1 tracking-wide uppercase">
         {label}
       </div>
     </div>

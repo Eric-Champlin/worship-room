@@ -103,7 +103,7 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
           </div>
           <p className={cn(
             'mb-2 mt-3 text-center text-sm',
-            isDark ? 'text-white/50' : 'text-text-light'
+            isDark ? 'text-white' : 'text-text-light'
           )}>
             Question {currentQuestion + 1} of {QUIZ_QUESTIONS.length}
           </p>
@@ -173,7 +173,8 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
           <div ref={sectionRef as React.RefObject<HTMLDivElement>} className="relative mx-auto max-w-5xl px-4 sm:px-6">
             <SectionHeading
               id="quiz-heading"
-              heading="Not Sure Where to Start?"
+              topLine="Not Sure Where to"
+              bottomLine="Start?"
               tagline="Take a 30-second quiz and we'll point you in the right direction."
               align="center"
               className={cn('scroll-reveal mb-10 sm:mb-12', isVisible && 'is-visible')}
@@ -248,7 +249,7 @@ function QuestionCard({ questionIndex, selectedAnswer, onSelect, onBack, isDark 
             className={cn(
               'inline-flex min-h-[44px] items-center gap-1 text-sm transition-colors focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               isDark
-                ? 'text-white/50 hover:text-white'
+                ? 'text-white'
                 : 'text-text-light hover:text-text-dark'
             )}
           >
@@ -285,7 +286,7 @@ function QuestionCard({ questionIndex, selectedAnswer, onSelect, onBack, isDark 
                 isDark
                   ? 'px-4 py-3 min-h-[44px] duration-150'
                   : 'p-4 duration-200',
-                isDark ? 'text-white/70' : '',
+                isDark ? 'text-white' : '',
                 isSelected
                   ? isDark
                     ? 'bg-purple-500/20 border-purple-500/30 text-white'
@@ -330,11 +331,11 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
         We&apos;d recommend starting with {destination.name}
       </h3>
 
-      <p className={cn('mt-3 px-6', isDark ? 'text-white/70' : 'text-text-light')}>
+      <p className={cn('mt-3 px-6', isDark ? 'text-white' : 'text-text-light')}>
         {destination.description}
       </p>
 
-      <blockquote className={cn('mt-4 px-6 font-serif italic', isDark ? 'text-white/80' : 'text-text-dark')}>
+      <blockquote className={cn('mt-4 px-6 font-serif italic', isDark ? 'text-white' : 'text-text-dark')}>
         &ldquo;<KaraokeTextReveal
           text={destination.verse}
           revealDuration={2000}
@@ -344,7 +345,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           className={cn(
             'mt-1 block font-sans text-sm not-italic transition-opacity duration-300',
             referenceVisible ? 'opacity-100' : 'opacity-0',
-            isDark ? 'text-white/50' : 'text-text-light',
+            isDark ? 'text-white' : 'text-text-light',
           )}
         >
           &mdash; {destination.verseReference}
@@ -382,7 +383,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           className={cn(
             'inline-flex min-h-[44px] items-center text-sm transition-colors focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
             isDark
-              ? 'text-white/70 hover:text-primary-lt'
+              ? 'text-white hover:text-primary-lt'
               : 'text-text-dark hover:text-primary'
           )}
         >

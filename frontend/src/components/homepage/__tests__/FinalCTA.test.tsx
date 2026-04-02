@@ -48,9 +48,24 @@ describe('FinalCTA', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders trust line', () => {
+  it('trust line removed', () => {
     renderFinalCTA()
-    expect(screen.getByText(/join thousands/i)).toBeInTheDocument()
+    expect(screen.queryByText(/join thousands/i)).not.toBeInTheDocument()
+  })
+
+  it('subtext is exactly "No credit card. No commitment."', () => {
+    renderFinalCTA()
+    const subtext = screen.getByText(/no credit card/i)
+    expect(subtext.textContent?.trim()).toBe('No credit card. No commitment.')
+  })
+
+  it('heading renders as 2 lines', () => {
+    renderFinalCTA()
+    const h2 = screen.getByRole('heading', { level: 2 })
+    const spans = h2.querySelectorAll('span')
+    expect(spans).toHaveLength(2)
+    expect(spans[0]).toHaveTextContent('Your Healing')
+    expect(spans[1]).toHaveTextContent('Starts Here')
   })
 
   it('CTA button opens auth modal', async () => {
