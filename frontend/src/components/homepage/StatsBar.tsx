@@ -54,7 +54,15 @@ export function StatsBar() {
   const { ref, isVisible } = useScrollReveal()
 
   return (
-    <GlowBackground variant="center">
+    <GlowBackground variant="none">
+      {/* Elliptical glow — behind stat numbers */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[180px] md:w-[700px] md:h-[300px] rounded-full blur-[45px] md:blur-[60px] will-change-transform animate-glow-float motion-reduce:animate-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.30) 0%, rgba(139, 92, 246, 0.12) 40%, transparent 70%)',
+        }}
+      />
       <section
         ref={ref as React.RefObject<HTMLElement>}
         aria-label="Content statistics"

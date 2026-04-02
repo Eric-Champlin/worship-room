@@ -152,10 +152,40 @@ describe('JourneySection', () => {
     it('renders two glow orbs with radial gradients', () => {
       renderJourney()
       const section = screen.getByRole('region', { name: /your journey to.*healing/i })
-      const orbs = section.querySelectorAll('.blur-\\[80px\\]')
+      const glowContainer = section.querySelector('[aria-hidden="true"].pointer-events-none.absolute.inset-0')!
+      const orbs = glowContainer.querySelectorAll('.rounded-full')
       expect(orbs).toHaveLength(2)
       expect((orbs[0] as HTMLElement).style.background).toContain('radial-gradient')
       expect((orbs[1] as HTMLElement).style.background).toContain('radial-gradient')
+    })
+
+    it('upper orb has 0.25 center opacity with two-stop gradient', () => {
+      renderJourney()
+      const section = screen.getByRole('region', { name: /your journey to.*healing/i })
+      const glowContainer = section.querySelector('[aria-hidden="true"].pointer-events-none.absolute.inset-0')!
+      const orbs = glowContainer.querySelectorAll('.rounded-full')
+      const bg = (orbs[0] as HTMLElement).style.background
+      expect(bg).toContain('rgba(139, 92, 246, 0.25)')
+      expect(bg).toContain('40%')
+    })
+
+    it('lower orb has 0.20 center opacity with two-stop gradient', () => {
+      renderJourney()
+      const section = screen.getByRole('region', { name: /your journey to.*healing/i })
+      const glowContainer = section.querySelector('[aria-hidden="true"].pointer-events-none.absolute.inset-0')!
+      const orbs = glowContainer.querySelectorAll('.rounded-full')
+      const bg = (orbs[1] as HTMLElement).style.background
+      expect(bg).toContain('rgba(139, 92, 246, 0.20)')
+      expect(bg).toContain('40%')
+    })
+
+    it('both orbs have will-change-transform', () => {
+      renderJourney()
+      const section = screen.getByRole('region', { name: /your journey to.*healing/i })
+      const glowContainer = section.querySelector('[aria-hidden="true"].pointer-events-none.absolute.inset-0')!
+      const orbs = glowContainer.querySelectorAll('.rounded-full')
+      expect((orbs[0] as HTMLElement).className).toContain('will-change-transform')
+      expect((orbs[1] as HTMLElement).className).toContain('will-change-transform')
     })
   })
 

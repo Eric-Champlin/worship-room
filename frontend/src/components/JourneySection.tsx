@@ -87,13 +87,19 @@ export function JourneySection() {
     >
       {/* Glow orbs */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        {/* Upper orb — behind steps 1-3 */}
         <div
-          className="absolute left-[20%] top-[20%] h-[500px] w-[500px] rounded-full blur-[80px]"
-          style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)' }}
+          className="absolute left-1/2 -translate-x-1/2 top-[15%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full blur-[45px] md:blur-[70px] will-change-transform"
+          style={{
+            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.10) 40%, transparent 70%)',
+          }}
         />
+        {/* Lower orb — behind steps 5-7 */}
         <div
-          className="absolute bottom-[20%] right-[15%] h-[400px] w-[400px] rounded-full blur-[80px]"
-          style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%)' }}
+          className="absolute left-1/2 -translate-x-1/2 bottom-[15%] w-[240px] h-[240px] md:w-[400px] md:h-[400px] rounded-full blur-[45px] md:blur-[70px] will-change-transform"
+          style={{
+            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.20) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%)',
+          }}
         />
       </div>
 

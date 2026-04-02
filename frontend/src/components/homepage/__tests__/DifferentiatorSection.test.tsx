@@ -195,4 +195,33 @@ describe('DifferentiatorSection', () => {
       expect(item.description.length).toBeLessThanOrEqual(140)
     }
   })
+
+  it('has left glow at 0.35 with two-stop gradient', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const leftOrb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.35)')
+    )
+    expect(leftOrb).toBeTruthy()
+    expect((leftOrb as HTMLElement).style.background).toContain('40%')
+  })
+
+  it('has right glow at 0.25 with lighter violet', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const rightOrb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('rgba(168, 130, 255, 0.25)')
+    )
+    expect(rightOrb).toBeTruthy()
+    expect((rightOrb as HTMLElement).style.background).toContain('40%')
+  })
+
+  it('has 2 glow orbs', () => {
+    const { container } = render(<DifferentiatorSection />)
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const orbsWithGradient = Array.from(glowOrbs).filter(
+      (el) => (el as HTMLElement).style.background?.includes('radial-gradient') && (el as HTMLElement).className.includes('pointer-events-none')
+    )
+    expect(orbsWithGradient).toHaveLength(2)
+  })
 })

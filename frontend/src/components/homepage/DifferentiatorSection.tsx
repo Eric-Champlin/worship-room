@@ -9,7 +9,23 @@ export function DifferentiatorSection() {
   const { ref, isVisible } = useScrollReveal()
 
   return (
-    <GlowBackground variant="split">
+    <GlowBackground variant="none">
+      {/* Left glow — behind left cards */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[15%] top-[35%] -translate-x-1/2 -translate-y-1/2 w-[360px] h-[300px] md:w-[600px] md:h-[500px] rounded-full blur-[45px] md:blur-[70px] will-change-transform animate-glow-float motion-reduce:animate-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, rgba(139, 92, 246, 0.12) 40%, transparent 70%)',
+        }}
+      />
+      {/* Right glow — lighter violet accent */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-[15%] top-[45%] translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full blur-[45px] md:blur-[70px] will-change-transform animate-glow-float motion-reduce:animate-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(168, 130, 255, 0.25) 0%, rgba(168, 130, 255, 0.08) 40%, transparent 70%)',
+        }}
+      />
       <section
         ref={ref as React.RefObject<HTMLElement>}
         aria-label="What makes Worship Room different"

@@ -9,14 +9,13 @@ export function FinalCTA() {
   const authModal = useAuthModal()
 
   return (
-    <GlowBackground variant="center" className="py-20 sm:py-28">
-      {/* Extra glow orb — strongest on page */}
+    <GlowBackground variant="none" className="py-20 sm:py-28">
+      {/* Strongest glow on entire page — emotional climax */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[600px] md:h-[600px] rounded-full blur-[60px] md:blur-[80px]"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[360px] md:w-[800px] md:h-[600px] rounded-full blur-[45px] md:blur-[60px] will-change-transform animate-glow-float motion-reduce:animate-none"
         style={{
-          background:
-            'radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.50) 0%, rgba(139, 92, 246, 0.20) 35%, rgba(139, 92, 246, 0.05) 55%, transparent 70%)',
         }}
       />
 

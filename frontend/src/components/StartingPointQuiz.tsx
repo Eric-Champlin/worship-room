@@ -118,7 +118,7 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-[60px]"
-                style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%)' }}
+                style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.20) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%)' }}
               />
             )}
             <div
@@ -169,7 +169,15 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
   return (
     <section id="quiz" aria-labelledby="quiz-heading">
       {isDark ? (
-        <GlowBackground variant="right" className="py-20 sm:py-28">
+        <GlowBackground variant="none" className="py-20 sm:py-28">
+          {/* Focused glow — behind frosted glass quiz container */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2 w-[420px] h-[300px] md:w-[700px] md:h-[500px] rounded-full blur-[45px] md:blur-[60px] will-change-transform animate-glow-float motion-reduce:animate-none"
+            style={{
+              background: 'radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, rgba(139, 92, 246, 0.12) 40%, transparent 70%)',
+            }}
+          />
           <div ref={sectionRef as React.RefObject<HTMLDivElement>} className="relative mx-auto max-w-5xl px-4 sm:px-6">
             <SectionHeading
               id="quiz-heading"

@@ -72,4 +72,33 @@ describe('StatsBar', () => {
     const section = container.querySelector('.border-y') as HTMLElement
     expect(section.className).toContain('border-white/[0.10]')
   })
+
+  it('has elliptical glow orb with 0.30 center opacity', () => {
+    const { container } = render(<StatsBar />)
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const orb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.30)')
+    )
+    expect(orb).toBeTruthy()
+  })
+
+  it('glow has two-stop gradient with 0.12 at 40%', () => {
+    const { container } = render(<StatsBar />)
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const orb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('0.30')
+    )
+    expect((orb as HTMLElement).style.background).toContain('0.12')
+    expect((orb as HTMLElement).style.background).toContain('40%')
+  })
+
+  it('glow has elliptical dimensions', () => {
+    const { container } = render(<StatsBar />)
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const orb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('0.30')
+    )
+    expect(orb?.className).toContain('md:w-[700px]')
+    expect(orb?.className).toContain('md:h-[300px]')
+  })
 })

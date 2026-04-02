@@ -154,7 +154,23 @@ export function DashboardPreview() {
   const { ref, isVisible } = useScrollReveal()
 
   return (
-    <GlowBackground variant="center">
+    <GlowBackground variant="none">
+      {/* Primary glow — dramatic three-stop gradient */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-[40%] -translate-y-1/2 w-[540px] h-[360px] md:w-[900px] md:h-[600px] rounded-full blur-[45px] md:blur-[60px] will-change-transform animate-glow-float motion-reduce:animate-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.40) 0%, rgba(139, 92, 246, 0.15) 35%, rgba(139, 92, 246, 0.05) 55%, transparent 70%)',
+        }}
+      />
+      {/* Secondary offset glow — lighter violet */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-[5%] top-[30%] -translate-y-1/2 w-[240px] h-[240px] md:w-[400px] md:h-[400px] rounded-full blur-[48px] md:blur-[80px] will-change-transform animate-glow-float motion-reduce:animate-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(168, 130, 255, 0.25) 0%, transparent 70%)',
+        }}
+      />
       <section aria-label="Dashboard preview">
         <div ref={ref as React.RefObject<HTMLDivElement>} className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           {/* Heading */}

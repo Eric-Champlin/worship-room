@@ -117,13 +117,24 @@ describe('FinalCTA', () => {
     expect(button).toHaveAttribute('type', 'button')
   })
 
-  it('glow orb has 0.18 opacity', () => {
+  it('glow orb has 0.50 center opacity with three-stop gradient', () => {
     const { container } = renderFinalCTA()
     const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
-    const orb018 = Array.from(glowOrbs).find(
-      (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.18)')
+    const orb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.50)')
     )
-    expect(orb018).toBeTruthy()
+    expect(orb).toBeTruthy()
+    expect((orb as HTMLElement).style.background).toContain('35%')
+    expect((orb as HTMLElement).style.background).toContain('55%')
+  })
+
+  it('has single glow orb (not 2)', () => {
+    const { container } = renderFinalCTA()
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const orbsWithGradient = Array.from(glowOrbs).filter(
+      (el) => (el as HTMLElement).style.background?.includes('radial-gradient') && (el as HTMLElement).className.includes('pointer-events-none')
+    )
+    expect(orbsWithGradient).toHaveLength(1)
   })
 
   it('CTA button has base shadow', () => {

@@ -544,7 +544,7 @@ describe('StartingPointQuiz', () => {
       expect(frostedContainer?.className).toContain('max-w-3xl')
     })
 
-    it('result glow orb has updated 0.12 opacity', async () => {
+    it('result glow orb has updated 0.20 opacity', async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true })
       user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
 
@@ -553,9 +553,19 @@ describe('StartingPointQuiz', () => {
 
       const glowOrbs = document.querySelectorAll('[aria-hidden="true"]')
       const resultGlow = Array.from(glowOrbs).find(
-        (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.12)')
+        (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.20)')
       )
       expect(resultGlow).toBeTruthy()
+    })
+
+    it('section has centered glow at 0.35', () => {
+      const { container } = renderQuiz()
+      const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+      const sectionGlow = Array.from(glowOrbs).find(
+        (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.35)')
+      )
+      expect(sectionGlow).toBeTruthy()
+      expect(sectionGlow?.className).toContain('left-1/2')
     })
   })
 })

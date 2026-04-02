@@ -217,6 +217,35 @@ describe('DashboardPreview', () => {
     expect(container.querySelector('.bg-hero-bg')).toBeInTheDocument()
   })
 
+  it('has primary glow at 0.40 with three-stop gradient', () => {
+    const { container } = renderDashboardPreview()
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const primaryOrb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.40)')
+    )
+    expect(primaryOrb).toBeTruthy()
+    expect((primaryOrb as HTMLElement).style.background).toContain('35%')
+    expect((primaryOrb as HTMLElement).style.background).toContain('55%')
+  })
+
+  it('has secondary glow at 0.25 with lighter violet', () => {
+    const { container } = renderDashboardPreview()
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const secondaryOrb = Array.from(glowOrbs).find(
+      (el) => (el as HTMLElement).style.background?.includes('rgba(168, 130, 255, 0.25)')
+    )
+    expect(secondaryOrb).toBeTruthy()
+  })
+
+  it('has 2 glow orbs', () => {
+    const { container } = renderDashboardPreview()
+    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
+    const orbsWithGradient = Array.from(glowOrbs).filter(
+      (el) => (el as HTMLElement).style.background?.includes('radial-gradient') && (el as HTMLElement).className.includes('pointer-events-none')
+    )
+    expect(orbsWithGradient).toHaveLength(2)
+  })
+
   it('cards have stagger delay styles', () => {
     const { container } = renderDashboardPreview()
     const cards = container.querySelectorAll('.scroll-reveal')
