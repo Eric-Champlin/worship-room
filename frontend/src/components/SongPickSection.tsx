@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Music } from 'lucide-react'
 
 import { getSongOfTheDay } from '@/mocks/daily-experience-mock-data'
 import { SPOTIFY_EMBED_BASE, SPOTIFY_PLAYLIST_URL } from '@/constants/daily-experience'
-import { HeadingDivider } from '@/components/HeadingDivider'
+import { GlowBackground } from '@/components/homepage/GlowBackground'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SkeletonBlock } from '@/components/skeletons/SkeletonBlock'
-import { useElementWidth } from '@/hooks/useElementWidth'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/utils'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
@@ -16,47 +15,32 @@ export function SongPickSection() {
   const today = new Date().getDate()
   const song = getSongOfTheDay(today)
 
-  const { ref: headingRef, width: headingWidth } = useElementWidth<HTMLHeadingElement>()
-
   return (
-    <section
-      aria-labelledby="song-pick-heading"
-      className="px-4 py-12 sm:px-6 sm:py-16"
-    >
-      <div className="mx-auto max-w-xl">
-        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 text-center backdrop-blur-sm sm:p-8">
-          <h2
-            ref={headingRef}
-            id="song-pick-heading"
-            className="inline-flex items-center justify-center gap-2 font-script text-[2.7rem] font-bold text-white sm:text-[3.4rem] lg:text-[4rem]"
-          >
-            <Music className="h-7 w-7 text-white/40 sm:h-8 sm:w-8" aria-hidden="true" />
-            Today&apos;s Song Pick
-          </h2>
-          <div className="mt-2 flex justify-center">
-            <HeadingDivider width={headingWidth} />
-          </div>
-          {isOnline ? (
-            <>
-              <div className="relative mt-6">
-                {!iframeLoaded && (
-                  <div className="absolute inset-0 z-10" aria-busy="true">
-                    <span className="sr-only">Loading</span>
-                    <SkeletonBlock height={280} rounded="rounded-xl" />
-                  </div>
-                )}
-                <iframe
-                  title={`${song.title} by ${song.artist}`}
-                  src={`${SPOTIFY_EMBED_BASE}/${song.trackId}?utm_source=generator&theme=0`}
-                  width="100%"
-                  height="280"
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                  className={cn('rounded-xl', !iframeLoaded && 'invisible')}
-                  onLoad={() => setIframeLoaded(true)}
-                />
-              </div>
-              <div className="-mt-1">
+    <GlowBackground variant="left" glowOpacity={0.30} className="!bg-transparent">
+      <section aria-labelledby="song-pick-heading" className="px-4 py-12 sm:px-6 sm:py-16">
+        {/* Section divider */}
+        <div className="mx-auto max-w-xl border-t border-white/[0.08]" />
+
+        {/* Content container — side-by-side at md */}
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 pt-8 md:flex-row md:items-start md:gap-12">
+
+          {/* Left: Heading + button */}
+          <div className="flex shrink-0 flex-col items-center md:items-start md:pt-4">
+            <h2 id="song-pick-heading" className="text-center md:text-left">
+              <span
+                className="block text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+                style={GRADIENT_TEXT_STYLE}
+              >
+                Today&apos;s
+              </span>
+              <span className="mt-1 block text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+                Song Pick
+              </span>
+            </h2>
+
+            {/* Follow button + follower count — below heading */}
+            {isOnline && (
+              <div className="mt-6 text-center md:text-left">
                 <a
                   href={SPOTIFY_PLAYLIST_URL}
                   target="_blank"
@@ -67,14 +51,36 @@ export function SongPickSection() {
                 </a>
                 <p className="mt-2 text-xs text-white/70">Join 117K+ other followers!</p>
               </div>
-            </>
-          ) : (
-            <div className="mt-6">
+            )}
+          </div>
+
+          {/* Right: Spotify player or offline message */}
+          <div className="w-full max-w-xl flex-1">
+            {isOnline ? (
+              <div className="relative">
+                {!iframeLoaded && (
+                  <div className="absolute inset-0 z-10" aria-busy="true">
+                    <span className="sr-only">Loading</span>
+                    <SkeletonBlock height={152} rounded="rounded-xl" />
+                  </div>
+                )}
+                <iframe
+                  title={`${song.title} by ${song.artist}`}
+                  src={`${SPOTIFY_EMBED_BASE}/${song.trackId}?utm_source=generator&theme=0`}
+                  width="100%"
+                  height="152"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                  className={cn('rounded-xl', !iframeLoaded && 'invisible')}
+                  onLoad={() => setIframeLoaded(true)}
+                />
+              </div>
+            ) : (
               <OfflineMessage variant="dark" message="Spotify playlists available when online" />
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </GlowBackground>
   )
 }

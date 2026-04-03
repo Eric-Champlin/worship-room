@@ -13,18 +13,52 @@ function renderComponent() {
 }
 
 describe('SongPickSection', () => {
-  it('renders heading', () => {
+  it('renders heading with gradient "Today\'s" and white "Song Pick"', () => {
     renderComponent()
-    expect(
-      screen.getByRole('heading', { name: /today's song pick/i }),
-    ).toBeInTheDocument()
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading).toBeInTheDocument()
+    expect(heading).toHaveTextContent("Today's")
+    expect(heading).toHaveTextContent('Song Pick')
   })
 
-  it('renders Spotify iframe', () => {
+  it('applies gradient text style to "Today\'s" line', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { level: 2 })
+    const gradientSpan = heading.querySelector('span')
+    expect(gradientSpan).toHaveStyle({ backgroundClip: 'text' })
+  })
+
+  it('does not render music icon in heading', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading.querySelector('svg')).not.toBeInTheDocument()
+  })
+
+  it('does not render HeadingDivider', () => {
+    renderComponent()
+    // HeadingDivider renders an SVG with specific viewBox
+    const section = screen.getByRole('heading', { level: 2 }).closest('section')
+    const svgs = section?.querySelectorAll('svg[viewBox]') ?? []
+    expect(svgs.length).toBe(0)
+  })
+
+  it('does not render glass card wrapper', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { level: 2 })
+    const card = heading.closest('.backdrop-blur-sm.border.rounded-2xl.bg-white\\/\\[0\\.03\\]')
+    expect(card).not.toBeInTheDocument()
+  })
+
+  it('renders GlowBackground with glow orb', () => {
+    renderComponent()
+    expect(screen.getByTestId('glow-orb')).toBeInTheDocument()
+  })
+
+  it('renders Spotify iframe with 152px height', () => {
     renderComponent()
     const iframe = document.querySelector('iframe[title]') as HTMLIFrameElement
     expect(iframe).toBeInTheDocument()
-    expect(iframe.getAttribute('height')).toBe('280')
+    expect(iframe.getAttribute('height')).toBe('152')
     expect(iframe.getAttribute('src')).toContain('open.spotify.com/embed/track')
   })
 
@@ -37,20 +71,28 @@ describe('SongPickSection', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
-  it('wraps content in frosted glass card', () => {
+  it('renders follower count text', () => {
     renderComponent()
-    const heading = screen.getByRole('heading', { name: /today's song pick/i })
-    const card = heading.closest('.rounded-2xl')
-    expect(card).toBeInTheDocument()
-    expect(card).toHaveClass('border')
-    expect(card).toHaveClass('backdrop-blur-sm')
+    expect(screen.getByText(/117K\+/)).toBeInTheDocument()
   })
 
-  it('renders music icon in heading', () => {
+  it('has accessible section with aria-labelledby', () => {
     renderComponent()
-    const heading = screen.getByRole('heading', { name: /today's song pick/i })
-    const svg = heading.querySelector('svg')
-    expect(svg).toBeInTheDocument()
-    expect(svg).toHaveAttribute('aria-hidden', 'true')
+    const section = screen.getByRole('heading', { level: 2 }).closest('section')
+    expect(section).toHaveAttribute('aria-labelledby', 'song-pick-heading')
+  })
+
+  it('renders section divider', () => {
+    renderComponent()
+    const section = screen.getByRole('heading', { level: 2 }).closest('section')
+    const divider = section?.querySelector('.border-t')
+    expect(divider).toBeInTheDocument()
+  })
+
+  it('does not use Caveat script font', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading).not.toHaveClass('font-script')
+    expect(heading.querySelector('.font-script')).not.toBeInTheDocument()
   })
 })
