@@ -69,10 +69,10 @@ beforeEach(() => {
   }))
 })
 
-function renderComponent() {
+function renderComponent(locationState?: Record<string, unknown>) {
   return render(
     <MemoryRouter
-      initialEntries={['/daily?tab=meditate']}
+      initialEntries={[{ pathname: '/daily', search: '?tab=meditate', state: locationState }]}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <ToastProvider>
@@ -85,10 +85,54 @@ function renderComponent() {
 }
 
 describe('MeditateTabContent', () => {
-  it('renders styled heading with "Spirit?"', () => {
+  it('renders gradient heading text', () => {
     renderComponent()
-    expect(screen.getByText('Spirit?')).toBeInTheDocument()
-    expect(screen.getByText(/what's on your/i)).toBeInTheDocument()
+    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
+    expect(heading).toBeInTheDocument()
+    expect(heading).toHaveStyle({ backgroundImage: expect.stringContaining('linear-gradient') })
+  })
+
+  it('heading has no Caveat script font span', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
+    const scriptSpan = heading.querySelector('.font-script')
+    expect(scriptSpan).toBeNull()
+  })
+
+  it('renders glow background with split variant', () => {
+    renderComponent()
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('standard card has frosted glass classes', () => {
+    renderComponent()
+    const card = screen.getByText('Breathing Exercise').closest('button')!
+    expect(card.className).toContain('bg-white/[0.06]')
+    expect(card.className).toContain('border-white/[0.12]')
+    expect(card.className).toContain('shadow-[')
+  })
+
+  it('standard card has hover lift classes', () => {
+    renderComponent()
+    const card = screen.getByText('Breathing Exercise').closest('button')!
+    expect(card.className).toContain('hover:-translate-y-0.5')
+    expect(card.className).toContain('motion-reduce:hover:translate-y-0')
+  })
+
+  it('focus ring uses hero-bg offset', () => {
+    renderComponent()
+    const card = screen.getByText('Breathing Exercise').closest('button')!
+    expect(card.className).toContain('ring-offset-hero-bg')
+    expect(card.className).not.toContain('ring-offset-dashboard-dark')
+  })
+
+  it('suggested card has enhanced shadow', () => {
+    // 'pray' action type maps to '/meditate/acts' which is the ACTS Prayer Walk card
+    renderComponent({ challengeContext: { actionType: 'pray', dayTitle: 'Test Day' } })
+    const suggestedCard = screen.getByText('ACTS Prayer Walk').closest('button')!
+    expect(suggestedCard.className).toContain('border-primary')
+    expect(suggestedCard.className).toContain('shadow-[0_0_30px_rgba(139,92,246,0.12)')
   })
 
   it('renders 6 meditation cards', () => {
