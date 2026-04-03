@@ -97,11 +97,15 @@ describe('DailyHub', () => {
     expect(greeting).toBeInTheDocument()
   })
 
-  it('hero title has padding for Caveat flourish fix', () => {
+  it('greeting heading uses gradient text style, not Caveat font', () => {
     renderPage()
     const heading = screen.getByRole('heading', { level: 1 })
-    expect(heading.className).toContain('px-1')
-    expect(heading.className).toContain('sm:px-2')
+    // No Caveat font class
+    expect(heading.className).not.toContain('font-script')
+    // GRADIENT_TEXT_STYLE applies inline backgroundImage
+    expect(heading.style.backgroundImage).toContain('linear-gradient')
+    // backgroundClip is set via both standard and webkit-prefixed properties
+    expect(heading.style.backgroundClip).toBe('text')
   })
 
   it('does not render the old subtitle', () => {
@@ -139,12 +143,14 @@ describe('DailyHub', () => {
     expect(hero.textContent).not.toMatch(/Read today/i)
   })
 
-  it('VOTD banner has full-width frosted glass styling', () => {
+  it('VOTD banner uses FrostedCard component', () => {
     renderPage()
     const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
     const banner = hero.querySelector('.rounded-2xl')
     expect(banner).toBeInTheDocument()
-    expect(banner!.className).toContain('bg-white/5')
+    // FrostedCard classes (not the old bg-white/5)
+    expect(banner!.className).toContain('bg-white/[0.06]')
+    expect(banner!.className).toContain('border-white/[0.12]')
   })
 
   it('verse text is not line-clamped in banner', () => {
@@ -163,15 +169,14 @@ describe('DailyHub', () => {
     expect(shareBtn).toHaveAttribute('aria-expanded', 'true')
   })
 
-  it('does NOT render VerseOfTheDayBanner', () => {
+  it('does NOT render VerseOfTheDayBanner as separate component', () => {
     renderPage()
-    // The old VOTD banner had a specific container — verify it's gone
-    // It would have had its own share panel and standalone verse display
-    // We check that no element with the old banner's class structure exists between hero and tabs
+    // Verse is inside the hero section, not a standalone banner
     const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')
-    const tablist = screen.getByRole('tablist')
-    // The hero's next sibling should be the sentinel or the tab bar's container
-    expect(hero?.parentElement).toBe(tablist.closest('main'))
+    expect(hero).toBeInTheDocument()
+    // Verse text is within the hero
+    const verseText = hero!.querySelector('.font-serif.italic')
+    expect(verseText).toBeInTheDocument()
   })
 
   it('does NOT render ChallengeStrip', () => {
@@ -342,5 +347,63 @@ describe('DailyHub', () => {
     const meditateLink = screen.getByText('Meditate on this verse >')
     expect(meditateLink).toBeInTheDocument()
     expect(meditateLink.closest('a')).toHaveAttribute('href', expect.stringContaining('/meditate/soaking?verse='))
+  })
+
+  it('root background uses hero-bg, not dashboard-dark', () => {
+    const { container } = renderPage()
+    const root = container.firstElementChild as HTMLElement
+    expect(root.className).toContain('bg-hero-bg')
+    expect(root.className).not.toContain('bg-dashboard-dark')
+  })
+
+  it('hero has GlowBackground with glow orb', () => {
+    renderPage()
+    const glowOrb = document.querySelector('[data-testid="glow-orb"]')
+    expect(glowOrb).toBeInTheDocument()
+  })
+
+  it('tab bar has pill-shaped container', () => {
+    renderPage()
+    const tablist = screen.getByRole('tablist')
+    expect(tablist.className).toContain('rounded-full')
+    expect(tablist.className).toContain('bg-white/[0.06]')
+  })
+
+  it('active tab has pill indicator with background', () => {
+    renderPage()
+    const activeTab = screen.getByRole('tab', { selected: true })
+    expect(activeTab.className).toContain('bg-white/[0.12]')
+  })
+
+  it('inactive tabs have muted text color', () => {
+    renderPage()
+    const inactiveTabs = screen.getAllByRole('tab').filter(t => t.getAttribute('aria-selected') === 'false')
+    expect(inactiveTabs.length).toBe(3)
+    inactiveTabs.forEach(tab => {
+      expect(tab.className).toContain('text-white/50')
+    })
+  })
+
+  it('tab bar has no animated underline div', () => {
+    renderPage()
+    const tablist = screen.getByRole('tablist')
+    // The old underline was a div with bg-primary inside the tablist
+    const underline = tablist.querySelector('div.bg-primary')
+    expect(underline).toBeNull()
+  })
+
+  it('tab panels do not use animate-tab-fade-in', () => {
+    renderPage()
+    const panels = screen.getAllByRole('tabpanel', { hidden: true })
+    panels.forEach(panel => {
+      expect(panel.className).not.toContain('animate-tab-fade-in')
+    })
+  })
+
+  it('tab buttons use hero-bg focus ring offset', () => {
+    renderPage()
+    const activeTab = screen.getByRole('tab', { selected: true })
+    expect(activeTab.className).toContain('ring-offset-hero-bg')
+    expect(activeTab.className).not.toContain('ring-offset-dashboard-dark')
   })
 })

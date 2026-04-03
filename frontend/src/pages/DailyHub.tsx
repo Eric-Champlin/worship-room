@@ -2,7 +2,9 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams, useLocation, Link } from 'react-router-dom'
 import { Heart, PenLine, Wind, BookOpen, Check, Share2 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
-import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
+import { GlowBackground } from '@/components/homepage/GlowBackground'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
@@ -160,9 +162,6 @@ function DailyHubContent() {
     meditate: isMeditateComplete,
   }
 
-  // Tab underline position
-  const activeTabIndex = TABS.findIndex((t) => t.id === activeTab)
-
   // Screen-reader announcement for auth redirects from meditation sub-pages
   const [srMessage, setSrMessage] = useState('')
   useEffect(() => {
@@ -195,7 +194,7 @@ function DailyHubContent() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
+    <div className="flex min-h-screen flex-col bg-hero-bg font-sans">
       <SEO title="Daily Prayer, Journal & Meditation" description="Start your day with AI-powered prayer, guided journaling, and Christian meditation rooted in Scripture." jsonLd={dailyHubBreadcrumbs} />
       <a
         href="#main-content"
@@ -207,20 +206,21 @@ function DailyHubContent() {
 
       <main id="main-content">
         {/* Hero Section — Greeting + Content Cards */}
-        <section
-          aria-labelledby="daily-hub-heading"
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
-          style={ATMOSPHERIC_HERO_BG}
-        >
+        <GlowBackground variant="center">
+          <section
+            aria-labelledby="daily-hub-heading"
+            className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+          >
           <h1
             id="daily-hub-heading"
-            className="mb-1 px-1 sm:px-2 font-script text-3xl font-bold leading-tight bg-gradient-to-r from-white to-primary-lt bg-clip-text text-transparent sm:text-4xl"
+            className="mb-1 text-3xl font-bold leading-tight sm:text-4xl"
+            style={GRADIENT_TEXT_STYLE}
           >
             {displayName}
           </h1>
 
           {/* Verse of the Day — Full-Width Banner */}
-          <div className="mt-6 w-full max-w-3xl rounded-2xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur-sm sm:p-8">
+          <FrostedCard className="mt-6 w-full max-w-3xl text-left sm:p-8">
             <Link
               to={verseLink}
               className="block transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:rounded"
@@ -256,7 +256,7 @@ function DailyHubContent() {
               isOpen={sharePanelOpen}
               onClose={() => setSharePanelOpen(false)}
             />
-          </div>
+          </FrostedCard>
 
           {/* Quiz Teaser */}
           <p className="mt-4 font-sans text-sm text-white/50">
@@ -274,7 +274,8 @@ function DailyHubContent() {
             </button>{' '}
             and we&apos;ll help you find your path.
           </p>
-        </section>
+          </section>
+        </GlowBackground>
 
         {/* Sentinel for sticky tab bar shadow */}
         <div ref={sentinelRef} aria-hidden="true" />
@@ -282,14 +283,14 @@ function DailyHubContent() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-white/[0.08] backdrop-blur-xl transition-shadow',
+            'sticky top-0 z-40 bg-hero-bg/85 backdrop-blur-lg transition-shadow',
             isSticky && 'shadow-md shadow-black/20',
           )}
         >
-          <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-white/10">
+          <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">
             <div
               ref={tabBarRef}
-              className="relative flex w-full"
+              className="flex w-full rounded-full border border-white/[0.12] bg-white/[0.06] p-1"
               role="tablist"
               aria-label="Daily practices"
               {...(tabBarTooltip.shouldShow ? { 'aria-describedby': 'daily-hub-tabs' } : {})}
@@ -311,10 +312,10 @@ function DailyHubContent() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base',
+                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:text-base',
                       isActive
-                        ? 'text-white'
-                        : 'text-white/60 hover:text-white/80',
+                        ? 'bg-white/[0.12] border border-white/[0.15] text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
+                        : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
                     )}
                   >
                     <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
@@ -332,15 +333,6 @@ function DailyHubContent() {
                   </button>
                 )
               })}
-              {/* Animated underline */}
-              <div
-                className="absolute bottom-0 h-0.5 bg-primary transition-transform duration-200 ease-in-out"
-                style={{
-                  width: `${100 / TABS.length}%`,
-                  transform: `translateX(${activeTabIndex * 100}%)`,
-                }}
-                aria-hidden="true"
-              />
             </div>
           </div>
         </div>
@@ -357,7 +349,6 @@ function DailyHubContent() {
           aria-labelledby="tab-devotional"
           tabIndex={0}
           hidden={activeTab !== 'devotional'}
-          className="motion-safe:animate-tab-fade-in"
         >
           <DevotionalTabContent
             onSwitchToJournal={handleSwitchToDevotionalJournal}
@@ -372,7 +363,6 @@ function DailyHubContent() {
           aria-labelledby="tab-pray"
           tabIndex={0}
           hidden={activeTab !== 'pray'}
-          className="motion-safe:animate-tab-fade-in"
         >
           <PrayTabContent
             onSwitchToJournal={handleSwitchToJournal}
@@ -386,7 +376,6 @@ function DailyHubContent() {
           aria-labelledby="tab-journal"
           tabIndex={0}
           hidden={activeTab !== 'journal'}
-          className="motion-safe:animate-tab-fade-in"
         >
           <JournalTabContent
             prayContext={prayContext}
@@ -401,7 +390,6 @@ function DailyHubContent() {
           aria-labelledby="tab-meditate"
           tabIndex={0}
           hidden={activeTab !== 'meditate'}
-          className="motion-safe:animate-tab-fade-in"
         >
           <MeditateTabContent />
         </div>

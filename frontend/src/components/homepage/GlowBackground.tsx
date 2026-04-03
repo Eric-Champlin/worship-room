@@ -75,7 +75,7 @@ export function GlowBackground({
   className,
 }: GlowBackgroundProps) {
   return (
-    <div className={cn('relative bg-hero-bg', className)}>
+    <div className={cn('relative overflow-hidden bg-hero-bg', className)}>
       {variant !== 'none' && <GlowOrbs variant={variant} />}
       <div className="relative z-10">{children}</div>
     </div>
