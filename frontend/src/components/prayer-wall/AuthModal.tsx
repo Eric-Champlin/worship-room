@@ -197,7 +197,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         aria-describedby={subtitle && view !== 'forgot-password' ? 'auth-modal-subtitle' : undefined}
-        className={`mx-4 w-full max-w-md rounded-3xl bg-hero-mid/95 backdrop-blur-md border border-white/[0.12] p-6 shadow-[0_0_40px_rgba(139,92,246,0.15),0_8px_30px_rgba(0,0,0,0.4)] ${panelClass}`}
+        className={`mx-4 w-full max-w-md rounded-3xl bg-hero-bg/95 backdrop-blur-md border border-white/[0.12] p-6 shadow-[0_0_40px_rgba(139,92,246,0.15),0_8px_30px_rgba(0,0,0,0.4)] ${panelClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
