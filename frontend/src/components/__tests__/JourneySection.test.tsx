@@ -132,19 +132,20 @@ describe('JourneySection', () => {
     })
   })
 
-  describe('BackgroundSquiggle', () => {
-    it('BackgroundSquiggle rendered', () => {
+  describe('Squiggle Lines', () => {
+    it('inline squiggle SVG rendered', () => {
       renderJourney()
       const section = screen.getByRole('region', { name: /your journey to.*healing/i })
       const svgs = section.querySelectorAll('svg')
       expect(svgs.length).toBeGreaterThanOrEqual(1)
     })
 
-    it('BackgroundSquiggle container constrained to ~20% width', () => {
+    it('squiggle SVG is 150px wide and centered', () => {
       renderJourney()
       const section = screen.getByRole('region', { name: /your journey to.*healing/i })
-      const squiggleContainer = section.querySelector('.w-\\[20\\%\\]')
-      expect(squiggleContainer).toBeInTheDocument()
+      const squiggleSvg = section.querySelector('svg[viewBox="0 0 150 1000"]') as SVGElement
+      expect(squiggleSvg).toBeInTheDocument()
+      expect(squiggleSvg.style.width).toBe('150px')
     })
   })
 

@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils'
 import { useScrollReveal, staggerDelay } from '@/hooks/useScrollReveal'
 import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 import { SectionHeading } from '@/components/homepage/SectionHeading'
-import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { ArrowRight } from 'lucide-react'
 
 interface JourneyStep {
@@ -103,16 +102,38 @@ export function JourneySection() {
         />
       </div>
 
-      {/* BackgroundSquiggle — narrow column behind circles */}
-      <div
+      {/* Narrow squiggle lines behind numbered circles */}
+      <svg
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex justify-center overflow-hidden"
-        style={SQUIGGLE_MASK_STYLE}
+        className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-0 h-full"
+        style={{
+          width: '150px',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+        }}
+        viewBox="0 0 150 1000"
+        preserveAspectRatio="none"
+        fill="none"
       >
-        <div className="w-[20%] max-w-[300px]">
-          <BackgroundSquiggle className="h-full w-full opacity-30" />
-        </div>
-      </div>
+        <path
+          d="M 45 0 Q 70 40, 45 80 Q 20 120, 45 160 Q 70 200, 45 240 Q 20 280, 45 320 Q 70 360, 45 400 Q 20 440, 45 480 Q 70 520, 45 560 Q 20 600, 45 640 Q 70 680, 45 720 Q 20 760, 45 800 Q 70 840, 45 880 Q 20 920, 45 960 L 45 1000"
+          stroke="rgba(214, 211, 209, 0.15)"
+          strokeWidth="8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 75 0 Q 100 50, 75 100 Q 50 150, 75 200 Q 100 250, 75 300 Q 50 350, 75 400 Q 100 450, 75 500 Q 50 550, 75 600 Q 100 650, 75 700 Q 50 750, 75 800 Q 100 850, 75 900 Q 50 950, 75 1000"
+          stroke="rgba(214, 211, 209, 0.20)"
+          strokeWidth="12"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 105 0 Q 130 45, 105 90 Q 80 135, 105 180 Q 130 225, 105 270 Q 80 315, 105 360 Q 130 405, 105 450 Q 80 495, 105 540 Q 130 585, 105 630 Q 80 675, 105 720 Q 130 765, 105 810 Q 80 855, 105 900 Q 130 945, 105 1000"
+          stroke="rgba(231, 229, 228, 0.12)"
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+      </svg>
 
       <div className="relative mx-auto max-w-2xl">
         <SectionHeading
@@ -136,18 +157,20 @@ export function JourneySection() {
               )}
               style={isVisible ? staggerDelay(index, 120, 200) : { transitionDelay: '0ms' }}
             >
-              {/* Connecting line between circles (not on last item) */}
-              {index < JOURNEY_STEPS.length - 1 && (
-                <div
-                  aria-hidden="true"
-                  className="absolute left-8 top-10 bottom-0 w-px bg-gradient-to-b from-purple-500/30 via-purple-500/15 to-purple-500/30"
-                />
-              )}
               <Link
                 to={step.route}
                 className="group flex items-start gap-4 rounded-xl px-3 py-4 transition-colors duration-200 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
               >
-                <StepCircle number={step.number} />
+                {/* Circle column — contains circle and connecting line */}
+                <div className="relative flex flex-col items-center shrink-0">
+                  <StepCircle number={step.number} />
+                  {index < JOURNEY_STEPS.length - 1 && (
+                    <div
+                      aria-hidden="true"
+                      className="w-px flex-1 bg-gradient-to-b from-purple-500/30 via-purple-500/15 to-purple-500/30 mt-1"
+                    />
+                  )}
+                </div>
                 <div className="flex-1 pt-1">
                   <h3 className="text-lg font-bold text-white sm:text-xl">{step.title}</h3>
                   <p className="mt-1 max-w-lg text-sm leading-relaxed text-white sm:text-base">
