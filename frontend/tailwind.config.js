@@ -295,6 +295,10 @@ export default {
           '0%': { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
         },
+        'glow-float': {
+          '0%, 100%': { transform: 'translateY(0) translateX(-50%)' },
+          '50%': { transform: 'translateY(-10px) translateX(-50%)' },
+        },
       },
       animation: {
         'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
@@ -359,6 +363,7 @@ export default {
         'slide-from-right-spring': 'slide-from-right 300ms cubic-bezier(0.34, 1.3, 0.64, 1) both',
         'slide-from-bottom-spring': 'slide-from-bottom 300ms cubic-bezier(0.34, 1.3, 0.64, 1) both',
         shimmer: 'shimmer 1.5s ease-in-out infinite',
+        'glow-float': 'glow-float 20s ease-in-out infinite',
       },
     },
   },

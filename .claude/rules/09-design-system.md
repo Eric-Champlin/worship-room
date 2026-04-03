@@ -13,6 +13,7 @@ This file is the comprehensive design reference for UI implementation. It covers
 - **Hero Dark**: `#0D0620` (dark purple for hero gradient) — Tailwind: `hero-dark`
 - **Hero Mid**: `#1E0B3E` — Tailwind: `hero-mid`
 - **Hero Deep**: `#251248` — Tailwind: `hero-deep`
+- **Hero BG**: `#08051A` (darkest background, used by homepage sections) — Tailwind: `hero-bg`
 - **Glow Cyan**: `#00D4FF` (cyan for input glow effects) — Tailwind: `glow-cyan`
 - **Neutral Background**: `#F5F5F5` (warm off-white) — Tailwind: `neutral-bg`
 - **White**: `#FFFFFF`
@@ -43,23 +44,29 @@ Frosted glass cards for the all-dark dashboard:
 - Padding: `p-4 md:p-6`
 - Collapsible with height transition (`overflow-hidden`)
 
-### Text Opacity Standards (WCAG AA)
+**Homepage cards** use the upgraded `FrostedCard` component (see "Homepage Visual Patterns" section below) which has stronger borders, box-shadow, and hover states.
 
-All text on dark backgrounds must meet these minimum opacity values:
+### Text Opacity Standards
 
-| Use Case | Minimum | Class |
-|----------|---------|-------|
-| Primary text | 70% | `text-white/70` |
-| Secondary text | 60% | `text-white/60` |
-| Placeholder text | 50% | `placeholder:text-white/50` |
-| Large headings (18px+) | 60% | `text-white/60` |
-| Interactive text (buttons/links) | 50% | `text-white/50` |
-| Decorative / disabled | 20-40% | `text-white/20` to `text-white/40` |
+**Homepage and landing page sections (Round 3 standard):** Default to `text-white` for all readable text. Reserve muted opacities only for lock overlays (`text-white/50`), placeholder text (`placeholder:text-white/50`), and purely decorative elements (`text-white/20` to `text-white/40`). StatsBar ALL CAPS labels use `text-white/90`.
+
+**Dashboard and inner pages (WCAG AA standard):** All text on dark backgrounds must meet these minimum opacity values:
+
+| Use Case                         | Minimum | Class                              |
+| -------------------------------- | ------- | ---------------------------------- |
+| Primary text                     | 70%     | `text-white/70`                    |
+| Secondary text                   | 60%     | `text-white/60`                    |
+| Placeholder text                 | 50%     | `placeholder:text-white/50`        |
+| Large headings (18px+)           | 60%     | `text-white/60`                    |
+| Interactive text (buttons/links) | 50%     | `text-white/50`                    |
+| Decorative / disabled            | 20-40%  | `text-white/20` to `text-white/40` |
 
 Body text below `text-white/60` fails WCAG AA 4.5:1 on hero-dark (#0D0620).
 Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input backgrounds.
 
 **Exempt from contrast requirements:** decorative icons, locked badge silhouettes, verse number superscripts, middot separators, disabled/locked state indicators, background decorations.
+
+**Note:** The homepage uses `text-white` for all readable text (which exceeds WCAG AA). When redesigning inner pages to match the homepage style, prefer `text-white` everywhere. The WCAG minimum table above is a floor, not a target.
 
 ### Typography
 
@@ -69,6 +76,7 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
   - Regular: 400, Italic: 400 italic, Bold: 700
 - **Decorative Font**: Caveat (cursive) — Tailwind: `font-script`
   - Used for script emphasis in headings ("Heart?", "Mind?", "Spirit?") and branding
+  - **Note:** Homepage headings no longer use Caveat — they use `WHITE_PURPLE_GRADIENT` via `background-clip: text` instead. Caveat is still used on other pages.
 - **Heading Font**: Inter (same as body for consistency)
   - Semi-bold: 600, Bold: 700
 - **Font Sizes**: Hero: 3rem (mobile: 2rem), H1: 2.5rem (1.75rem), H2: 2rem (1.5rem), H3: 1.5rem (1.25rem), Body: 1rem, Small: 0.875rem
@@ -105,17 +113,32 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
 
 - **PageHero.tsx** — Purple gradient header with title, subtitle, optional `HeadingDivider`. Used by Prayer Wall, Local Support pages.
 - **HeadingDivider.tsx** — White decorative SVG divider with fade gradients. Responsive via `useElementWidth()`.
-- **BackgroundSquiggle.tsx** — Decorative SVG squiggle. Exported `SQUIGGLE_MASK_STYLE` for consistent fade mask. Used by all 4 Daily Hub tabs.
+- **BackgroundSquiggle.tsx** — Decorative SVG squiggle (viewBox 1800×1350, 6 paths). Exported `SQUIGGLE_MASK_STYLE` for consistent fade mask. Used by Daily Hub tabs. **Not used by homepage JourneySection** — the homepage uses narrow inline SVG squiggles instead (see "Homepage Visual Patterns" below).
 - **SongPickSection.tsx** — Spotify iframe embed (352px height) + "Follow Our Playlist on Spotify" button.
-- **HeroSection.tsx** — Landing page hero: dark purple gradient, typewriter input, quiz teaser link.
-- **JourneySection.tsx** — 6-step vertical timeline.
-- **GrowthTeasersSection.tsx** — 3 blurred preview cards with lock icons.
-- **StartingPointQuiz.tsx** — 5-question quiz with result card. `id="quiz"` for scroll target.
+- **HeroSection.tsx** — Landing page hero: dark purple gradient, typewriter input, quiz teaser link. UNTOUCHED by homepage redesign.
+- **JourneySection.tsx** — 7-step vertical timeline with numbered circles, gradient keyword text, inline narrow squiggle SVG, glow orbs. Steps link to feature routes.
+- **StartingPointQuiz.tsx** — 5-question quiz inside a frosted glass container (`rounded-3xl`), gradient progress bar. `id="quiz"` for scroll target.
 - **TypewriterInput.tsx** — Hero input with typewriter placeholder animation.
 - **SpotifyBadge.tsx** — "Listen on Spotify" badge link.
 - **Breadcrumb.tsx** — Breadcrumb navigation for detail pages.
 - **FeatureEmptyState.tsx** — Reusable warm empty state with icon, heading, description. Used in 10+ locations.
 - **FormField.tsx** — Accessible form field with `aria-invalid`, `aria-describedby`, character count, inline validation (built but not yet adopted by production forms).
+
+### Homepage Components (`components/homepage/`)
+
+Shared building blocks for the landing page, created during the Round 3 homepage redesign (HP-1 through HP-15):
+
+- **SectionHeading.tsx** — 2-line heading: smaller white `topLine` + larger purple gradient `bottomLine`. Backward-compatible single `heading` prop. See "Homepage Visual Patterns" for sizing.
+- **GlowBackground.tsx** — Atmospheric glow wrapper with variants: `center`, `left`, `right`, `split`, `none`. Glow orb opacity at 0.25-0.50 range.
+- **FrostedCard.tsx** — Glass card: `bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] rounded-2xl` with dual box-shadow. Optional `onClick` adds hover elevation.
+- **StatsBar.tsx** — 6 animated counters (scroll-triggered via `useAnimatedCounter`). 50 Devotionals, 10 Reading Plans, 24 Ambient Sounds, 6 Meditation Types, 5 Seasonal Challenges, 8 Worship Playlists.
+- **DashboardPreview.tsx** — "See How You're Growing" section with 6 locked preview cards + "Create a Free Account" CTA.
+- **DashboardPreviewCard.tsx** — Locked preview card: blurred mockup on top, clear icon + title + description below. Each icon has a unique accent color.
+- **DifferentiatorSection.tsx** — "Built for Your Heart" section with 6 competitive advantage cards.
+- **FinalCTA.tsx** — Bottom CTA: "Your Healing Starts Here", strongest glow on the page (0.50 center), "Get Started — It's Free" button → auth modal.
+- **dashboard-preview-data.ts** — Card metadata (icons, titles, descriptions, preview keys).
+- **differentiator-data.ts** — 6 differentiator cards (titles, descriptions, icons).
+- **index.ts** — Barrel export for all homepage components.
 
 ### Daily Experience Components (`components/daily/`)
 
@@ -194,7 +217,9 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
 - **useAuth()** — Returns `{ isAuthenticated, user, login(), logout() }` from `AuthProvider` context. Simulated auth via localStorage (`wr_auth_simulated`, `wr_user_name`). Real JWT auth in Phase 3.
 - **useCompletionTracking()** — Daily practice completion per session. localStorage with date-based reset.
 - **useReadAloud()** — Browser Speech Synthesis TTS. Play/pause/resume/stop, word index tracking.
-- **useInView()** — Intersection Observer for lazy animations. Respects `prefers-reduced-motion`.
+- **useInView()** — Intersection Observer for lazy animations. Respects `prefers-reduced-motion`. Used by non-homepage components.
+- **useScrollReveal()** — Enhanced scroll reveal hook for homepage. `triggerOnce: true` by default. Exports `staggerDelay()` utility for cascading animations. Homepage sections use this instead of `useInView`.
+- **useAnimatedCounter()** — RAF-based number counter for StatsBar. Ease-out curve, configurable duration/delay. Respects `prefers-reduced-motion`.
 - **useFocusTrap()** — Keyboard focus trapping for modals. Used in 37 modal/dialog components. Stores `previouslyFocused` and restores focus on cleanup.
 - **useOpenSet()** — Manages a Set of open item IDs for expand/collapse patterns.
 - **usePrayerReactions()** — Prayer Wall reaction state.
@@ -236,6 +261,7 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
 - **verse-of-the-day.ts** — 60 verses (40 general + 20 seasonal) with daily rotation.
 - **question-of-the-day.ts** — 72 QOTD entries (60 general + 12 liturgical).
 - **bible.ts** — `BIBLE_BOOKS` constant (66 books with chapter counts), `BOOK_LOADERS` for lazy loading.
+- **gradients.tsx** — `WHITE_PURPLE_GRADIENT` CSS string used for gradient text across homepage headings and keywords.
 
 ### Dashboard Constants
 
@@ -340,7 +366,81 @@ In `constants/audio.ts`: `MAX_SIMULTANEOUS_SOUNDS: 6`, `DEFAULT_SOUND_VOLUME: 0.
 
 Placeholder silent MP3s in `public/audio/` (gitignored). Subdirectories: `ambient/`, `scripture/`, `stories/`, `artwork/`. Real TTS via Google Cloud TTS WaveNet (Male: en-US-Wavenet-D, Female: en-US-Wavenet-F). CDN: Cloudflare R2, base URL in `VITE_AUDIO_BASE_URL`.
 
-### Known Issues
+---
+
+## Homepage Visual Patterns (Round 3)
+
+These patterns were established during the GitHub-inspired homepage redesign (HP-1 through HP-15). They apply site-wide when building or redesigning pages with dark backgrounds.
+
+### Section Heading — 2-Line Treatment
+
+Use `SectionHeading` component from `src/components/homepage/SectionHeading.tsx`:
+
+- **Top line:** `text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight`
+- **Bottom line:** `text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight` with `WHITE_PURPLE_GRADIENT` via `background-clip: text` and `text-transparent`
+- Size ratio: bottom line is ~1.5x larger than top line
+- `mt-1` between lines (tight coupling)
+- Props: `topLine`, `bottomLine`, `tagline?`, `align?`
+
+### Glow Backgrounds — Visible Purple Spotlights
+
+Radial glow orbs positioned behind content. MUST be clearly visible.
+
+**Opacity ranges (center of radial gradient):**
+
+- Standard sections: `0.25-0.35`
+- Behind card grids: `0.35-0.40`
+- CTA / emotional peaks: `0.45-0.50`
+- **NEVER use `0.03-0.15`** — invisible on `bg-hero-bg`
+
+**Implementation pattern:**
+
+```
+background: radial-gradient(circle, rgba(139,92,246, CENTER) 0%, rgba(139,92,246, MID) 40%, transparent 70%)
+width: 400-900px, height: 300-600px
+filter: blur(60-80px)
+pointer-events: none, z-0 (content at z-10)
+```
+
+Two-stop gradient (center → mid → transparent) produces a richer glow pool than single-stop.
+
+**Mobile:** Reduce orb size by 40% and blur by 25% below `md` breakpoint. Use `will-change: transform` for GPU compositing.
+
+### Frosted Glass Cards
+
+`FrostedCard` component (`src/components/homepage/FrostedCard.tsx`):
+
+- Background: `bg-white/[0.06]` with `backdrop-blur-sm`
+- Border: `border border-white/[0.12]` — visible, not invisible
+- Shadow: `shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]`
+- Radius: `rounded-2xl`, Padding: `p-6`
+- Hover (when interactive): `bg-white/[0.09] border-white/[0.18]` with intensified shadows
+
+### Locked Preview Card Pattern
+
+For showing auth-gated features to logged-out visitors:
+
+- **Top:** Preview mockup area with `bg-hero-bg/50 backdrop-blur-[3px]` lock overlay. Lock icon only (no text).
+- **Bottom:** Clear text area with icon (unique color per card) + title + description. Not behind blur.
+- Border between areas: `border-b border-white/[0.06]`
+
+### Section Dividers
+
+Between every major homepage section:
+
+```
+<div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
+```
+
+Content-width, not full-viewport. Subtle but visible.
+
+### Journey Section Squiggles
+
+The homepage `JourneySection` uses narrow inline SVG squiggles (~150px wide column, centered) — NOT the full-width `BackgroundSquiggle` component. The SVG uses `preserveAspectRatio="none"` to stretch vertically and a gradient mask to fade at top/bottom.
+
+---
+
+## Known Issues
 
 - **Footer touch targets**: Crisis resource links and App Store badges (40px) undersized on mobile (44px minimum). Pre-existing.
 - **Spotify embed loading**: May show fallback in headless/restricted environments.

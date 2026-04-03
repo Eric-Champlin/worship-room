@@ -60,11 +60,11 @@ describe('Home', () => {
     ).toBeInTheDocument()
     // Journey
     expect(
-      screen.getByRole('region', { name: /your journey to/i })
+      screen.getByRole('region', { name: /your journey to healing/i })
     ).toBeInTheDocument()
-    // Growth Teasers
+    // Dashboard Preview
     expect(
-      screen.getByRole('region', { name: /see how you're growing/i })
+      screen.getByRole('region', { name: /dashboard preview/i })
     ).toBeInTheDocument()
     // Quiz
     expect(
@@ -77,5 +77,21 @@ describe('Home', () => {
     expect(screen.queryByRole('heading', { name: /Start Each Morning with God/i })).not.toBeInTheDocument()
     expect(screen.queryByText(/Today's Verse/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Join the Challenge/i)).not.toBeInTheDocument()
+  })
+
+  it('renders FinalCTA heading', () => {
+    renderHome()
+    const headings = screen.getAllByRole('heading', { level: 2 })
+    const ctaHeading = headings.find(
+      (h) => /your healing/i.test(h.textContent ?? '') && /starts here/i.test(h.textContent ?? '')
+    )
+    expect(ctaHeading).toBeTruthy()
+  })
+
+  it('renders FinalCTA button', () => {
+    renderHome()
+    expect(
+      screen.getByRole('button', { name: /get started.*free/i })
+    ).toBeInTheDocument()
   })
 })

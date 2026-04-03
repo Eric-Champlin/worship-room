@@ -1,7 +1,7 @@
 import { Navbar } from '@/components/Navbar'
 import { HeroSection } from '@/components/HeroSection'
+import { StatsBar, DifferentiatorSection, DashboardPreview, FinalCTA } from '@/components/homepage'
 import { JourneySection } from '@/components/JourneySection'
-import { GrowthTeasersSection } from '@/components/GrowthTeasersSection'
 import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
@@ -57,8 +57,16 @@ export function Home() {
       <main id="main-content">
         <HeroSection />
         <JourneySection />
-        <GrowthTeasersSection />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
+        <StatsBar />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
+        <DashboardPreview />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
+        <DifferentiatorSection />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
         <StartingPointQuiz />
+        <div className="bg-hero-bg"><div className="border-t border-white/[0.08] max-w-6xl mx-auto" /></div>
+        <FinalCTA />
       </main>
       <SiteFooter />
       {import.meta.env.DEV && <DevAuthToggle />}

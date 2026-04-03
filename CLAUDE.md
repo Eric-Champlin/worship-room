@@ -26,7 +26,7 @@ Worship Room is free, ad-free, and privacy-respecting in a market where competit
 - ✅ **[Testing](.claude/rules/06-testing.md)** - Testing strategy, coverage requirements, definition of done
 - 📊 **[Logging & Monitoring](.claude/rules/07-logging-monitoring.md)** - Structured logging, PII handling
 - 🚀 **[Deployment](.claude/rules/08-deployment.md)** - Environment variables, deployment platforms, dev commands
-- 🎨 **[Design System & Components](.claude/rules/09-design-system.md)** - Color palette, typography, component inventory, hooks, utilities, Music architecture
+- 🎨 **[Design System & Components](.claude/rules/09-design-system.md)** - Color palette, typography, component inventory, hooks, utilities, Music architecture, **homepage visual patterns (Round 3)**
 - 🔄 **[UX Flows](.claude/rules/10-ux-flows.md)** - Navigation structure, all user flows
 - 💾 **[localStorage Keys](.claude/rules/11-localstorage-keys.md)** - Complete inventory of all `wr_*` storage keys with types and descriptions
 
@@ -45,6 +45,7 @@ Worship Room is free, ad-free, and privacy-respecting in a market where competit
 - **Dark Theme**: App uses dark theme throughout (cinematic dark landing page + dark dashboard + dark inner pages). Light mode deferred to Phase 4.
 - **Navigation**: 5 top-level nav items (Daily Hub, Bible, Grow, Prayer Wall, Music) + Local Support dropdown + avatar dropdown for authenticated users. Mobile: grouped section drawer.
 - **Sound Design**: Web Audio API synthesized sound effects (chime, ascending, harp, bell, whisper, sparkle) on by default, gated behind `wr_sound_effects_enabled` and `prefers-reduced-motion`.
+- **Homepage Visual Design**: GitHub-inspired dark theme with visible purple glow backgrounds (0.25-0.50 opacity), 2-line section headings, frosted glass cards, section dividers, and locked preview cards. Full specs in `09-design-system.md` § "Homepage Visual Patterns". These patterns apply site-wide.
 
 ---
 
@@ -52,7 +53,7 @@ Worship Room is free, ad-free, and privacy-respecting in a market where competit
 
 ### Foundation
 
-- Authentication (mock/simulated, real JWT in Phase 3), React Router, Landing Page (hero with AI TypewriterInput, journey timeline, Verse of the Day section, quiz, growth teasers, seasonal banner), Dashboard (visual garden, frosted glass widgets), Design System (dark theme, page transitions, frosted glass cards)
+- Authentication (mock/simulated, real JWT in Phase 3), React Router, Landing Page (hero with AI TypewriterInput, 7-step journey timeline, animated stats bar, locked dashboard preview, differentiator cards, starting point quiz, final CTA, seasonal banner), Dashboard (visual garden, frosted glass widgets), Design System (dark theme, page transitions, frosted glass cards, glow backgrounds)
 
 ### Daily Experience
 
@@ -263,7 +264,8 @@ All counts programmatically verified via `_recon/agent-6-count-scripts.ts`.
 
 - Focus: go beyond fixing what's broken — enhance working features to their full emotional and engagement potential.
 - Enhancement lenses: speed-to-peace for hurting users, time-of-day awareness, decision fatigue reduction, ritual building, growth narrative (story not stats), emotional moment capture, surprise/delight, guilt-free re-engagement, shareable cards, beauty as sanctuary, sound as atmosphere, content freshness, community warmth, "tell a friend" moment.
-- 15 specs planned covering conversion fixes, engagement depth, delight, and technical polish.
+- 24 specs total: 7 original Round 3 specs + 15 homepage redesign specs (HP-1 through HP-15).
+- Homepage redesign established site-wide visual patterns (see `09-design-system.md` § "Homepage Visual Patterns").
 
 **Phase 3 — Auth & Backend Wiring** (NEXT after Round 3)
 
@@ -320,3 +322,7 @@ All counts programmatically verified via `_recon/agent-6-count-scripts.ts`.
 - **Sound as atmosphere** — sound effects enhance emotional moments; gated behind user preference and prefers-reduced-motion
 - **Warm copy** — every user-facing message (toasts, empty states, confirmations) should feel like a caring friend, not a system notification
 - **Shareable moments** — features that produce emotional peaks should have share affordances with beautiful visual output
+- **Visible glows** — glow backgrounds use 0.25-0.50 center opacity with two-stop radial gradients; NEVER use 0.03-0.15 (invisible). See `09-design-system.md`.
+- **White text default** — all readable text on dark backgrounds uses `text-white`; muted opacities only for lock overlays, placeholders, and decorative elements
+- **2-line headings** — major section headings use `SectionHeading` with smaller white topLine and larger purple gradient bottomLine
+- **Section dividers** — thin `border-white/[0.08]` lines between major sections, constrained to content width (`max-w-6xl`)
