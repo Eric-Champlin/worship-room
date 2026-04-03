@@ -17,7 +17,7 @@ describe('AuthModal — homepage visual style', () => {
   it('renders frosted glass modal container', () => {
     const { container } = render(<AuthModal {...defaultProps} />)
     const modal = container.querySelector('[role="dialog"]')
-    expect(modal?.className).toContain('bg-white/[0.06]')
+    expect(modal?.className).toContain('bg-hero-mid/95')
     expect(modal?.className).toContain('backdrop-blur-md')
     expect(modal?.className).toContain('rounded-3xl')
   })

@@ -197,12 +197,12 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         aria-describedby={subtitle && view !== 'forgot-password' ? 'auth-modal-subtitle' : undefined}
-        className={`mx-4 w-full max-w-md rounded-3xl bg-white/[0.06] backdrop-blur-md border border-white/[0.12] p-6 shadow-[0_0_40px_rgba(139,92,246,0.15),0_8px_30px_rgba(0,0,0,0.4)] ${panelClass}`}
+        className={`mx-4 w-full max-w-md rounded-3xl bg-hero-mid/95 backdrop-blur-md border border-white/[0.12] p-6 shadow-[0_0_40px_rgba(139,92,246,0.15),0_8px_30px_rgba(0,0,0,0.4)] ${panelClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="relative flex items-center justify-center">
-          <h2 id="auth-modal-title" className="text-center text-3xl font-bold sm:text-4xl" style={GRADIENT_TEXT_STYLE}>
+          <h2 id="auth-modal-title" className="text-center text-3xl font-bold sm:text-4xl pb-1" style={GRADIENT_TEXT_STYLE}>
             {VIEW_TITLES[view]}
           </h2>
           <button
@@ -443,7 +443,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
             <button
               type="button"
               disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full border border-white/[0.12] bg-transparent px-4 py-3 text-sm font-medium text-white opacity-60 transition-colors hover:bg-white/[0.04] hover:border-white/[0.18]"
+              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full border border-white/[0.12] bg-transparent px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/[0.04] hover:border-white/[0.18]"
               aria-label="Continue with Spotify"
             >
               <svg className="h-5 w-5 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
