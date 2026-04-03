@@ -13,24 +13,32 @@ const defaultProps = {
   onShowToast: vi.fn(),
 }
 
-describe('AuthModal — dark theme', () => {
-  it('renders dark frosted glass background', () => {
+describe('AuthModal — homepage visual style', () => {
+  it('renders frosted glass modal container', () => {
     const { container } = render(<AuthModal {...defaultProps} />)
     const modal = container.querySelector('[role="dialog"]')
-    expect(modal?.className).toContain('bg-hero-mid/95')
-    expect(modal?.className).toContain('backdrop-blur-xl')
+    expect(modal?.className).toContain('bg-hero-bg/95')
+    expect(modal?.className).toContain('backdrop-blur-md')
+    expect(modal?.className).toContain('rounded-3xl')
   })
 
-  it('inputs have dark styling', () => {
+  it('backdrop has inline style for atmospheric glow', () => {
+    const { container } = render(<AuthModal {...defaultProps} />)
+    const backdrop = container.firstElementChild as HTMLElement
+    expect(backdrop?.hasAttribute('style')).toBe(true)
+  })
+
+  it('inputs have frosted glass styling', () => {
     render(<AuthModal {...defaultProps} />)
     const emailInput = screen.getByLabelText('Email address')
     expect(emailInput.className).toContain('bg-white/[0.06]')
+    expect(emailInput.className).toContain('border-white/[0.12]')
   })
 
-  it('close button has white/60 text', () => {
+  it('close button has white/50 text', () => {
     render(<AuthModal {...defaultProps} />)
     const closeBtn = screen.getByLabelText('Close')
-    expect(closeBtn.className).toContain('text-white/60')
+    expect(closeBtn.className).toContain('text-white/50')
   })
 
   it('error messages use red-400', async () => {
@@ -41,17 +49,34 @@ describe('AuthModal — dark theme', () => {
     expect(errorEl.className).toContain('text-red-400')
   })
 
-  it('Spotify button has ghost green style', () => {
+  it('Spotify button has transparent border style with green icon', () => {
     render(<AuthModal {...defaultProps} />)
     const spotifyBtn = screen.getByLabelText('Continue with Spotify')
-    expect(spotifyBtn.className).toContain('border-[#1DB954]/30')
-    expect(spotifyBtn.className).toContain('text-[#1DB954]')
+    expect(spotifyBtn.className).toContain('border-white/[0.12]')
+    expect(spotifyBtn.className).toContain('text-white')
+    const icon = spotifyBtn.querySelector('svg')
+    expect(icon?.getAttribute('class')).toContain('text-[#1DB954]')
   })
 
-  it('toggle links use primary-lt', () => {
+  it('toggle links use purple-400', () => {
     render(<AuthModal {...defaultProps} />)
     const createLink = screen.getByRole('button', { name: 'Create one!' })
-    expect(createLink.className).toContain('text-primary-lt')
+    expect(createLink.className).toContain('text-purple-400')
+  })
+
+  it('title uses gradient text style (not script font)', () => {
+    const { container } = render(<AuthModal {...defaultProps} />)
+    const title = container.querySelector('#auth-modal-title')
+    expect(title?.className).not.toContain('font-script')
+    expect(title?.getAttribute('style')).toContain('background-clip')
+  })
+
+  it('labels use text-white and purple-400 asterisks', () => {
+    render(<AuthModal {...defaultProps} />)
+    const emailLabel = screen.getByText('Email').closest('label')
+    expect(emailLabel?.className).toContain('text-white')
+    const asterisk = emailLabel?.querySelector('[aria-hidden="true"]')
+    expect(asterisk?.className).toContain('text-purple-400')
   })
 })
 
