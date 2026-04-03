@@ -10,15 +10,6 @@ export function FinalCTA() {
 
   return (
     <GlowBackground variant="none" className="py-20 sm:py-28">
-      {/* Strongest glow on entire page — emotional climax */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[360px] md:w-[800px] md:h-[600px] rounded-full blur-[45px] md:blur-[60px] will-change-transform animate-glow-float motion-reduce:animate-none"
-        style={{
-          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.50) 0%, rgba(139, 92, 246, 0.20) 35%, rgba(139, 92, 246, 0.05) 55%, transparent 70%)',
-        }}
-      />
-
       <div
         ref={ref as React.RefObject<HTMLDivElement>}
         className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6"
