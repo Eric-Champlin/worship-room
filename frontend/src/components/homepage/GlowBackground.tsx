@@ -4,6 +4,7 @@ interface GlowBackgroundProps {
   children: React.ReactNode
   variant?: 'center' | 'left' | 'right' | 'split' | 'none'
   className?: string
+  glowOpacity?: number
 }
 
 const GLOW_CONFIG = {
@@ -50,7 +51,7 @@ const GLOW_CONFIG = {
 const ORB_BASE =
   'absolute rounded-full pointer-events-none will-change-transform blur-[60px] md:blur-[80px] animate-glow-float motion-reduce:animate-none'
 
-function GlowOrbs({ variant }: { variant: 'center' | 'left' | 'right' | 'split' }) {
+function GlowOrbs({ variant, glowOpacity }: { variant: 'center' | 'left' | 'right' | 'split'; glowOpacity?: number }) {
   const orbs = GLOW_CONFIG[variant]
   return (
     <>
@@ -60,7 +61,7 @@ function GlowOrbs({ variant }: { variant: 'center' | 'left' | 'right' | 'split' 
           data-testid="glow-orb"
           className={cn(ORB_BASE, orb.size, orb.position)}
           style={{
-            background: `radial-gradient(circle, rgba(${orb.color}, ${orb.opacity}) 0%, transparent 70%)`,
+            background: `radial-gradient(circle, rgba(${orb.color}, ${glowOpacity ?? orb.opacity}) 0%, transparent 70%)`,
           }}
           aria-hidden="true"
         />
@@ -73,10 +74,11 @@ export function GlowBackground({
   children,
   variant = 'center',
   className,
+  glowOpacity,
 }: GlowBackgroundProps) {
   return (
     <div className={cn('relative overflow-hidden bg-hero-bg', className)}>
-      {variant !== 'none' && <GlowOrbs variant={variant} />}
+      {variant !== 'none' && <GlowOrbs variant={variant} glowOpacity={glowOpacity} />}
       <div className="relative z-10">{children}</div>
     </div>
   )

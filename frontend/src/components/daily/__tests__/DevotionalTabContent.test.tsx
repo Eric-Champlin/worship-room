@@ -64,17 +64,19 @@ function renderComponent(initialEntry = '/daily?tab=devotional', props: Partial<
 
 describe('DevotionalTabContent', () => {
   describe('Rendering', () => {
-    it('renders "What\'s On Your Soul?" heading', () => {
+    it('renders "What\'s On Your Soul?" heading with gradient style', () => {
       renderComponent()
-      expect(screen.getByText('Soul?')).toBeInTheDocument()
-      expect(screen.getByText(/What's On Your/)).toBeInTheDocument()
+      const heading = screen.getByRole('heading', { name: /What's On Your Soul\?/ })
+      expect(heading).toBeInTheDocument()
+      expect(heading.className).not.toContain('font-script')
+      expect(heading.querySelector('span')).toBeNull()
     })
 
     it('uses max-w-4xl container width', () => {
       const { container } = renderComponent()
-      const wrapper = container.firstElementChild as HTMLElement
-      expect(wrapper.className).toContain('max-w-4xl')
-      expect(wrapper.className).not.toContain('max-w-2xl')
+      const maxWEl = container.querySelector('.max-w-4xl') as HTMLElement
+      expect(maxWEl).not.toBeNull()
+      expect(maxWEl.className).not.toContain('max-w-2xl')
     })
 
     it('renders devotional title', () => {
@@ -231,6 +233,28 @@ describe('DevotionalTabContent', () => {
       const links = screen.getAllByRole('link')
       const verseLink = links.find((l) => l.getAttribute('href')?.startsWith('/bible/'))
       expect(verseLink?.className).toContain('text-primary-lt')
+    })
+  })
+
+  describe('Visual atmosphere', () => {
+    it('wraps content in GlowBackground with glow orb', () => {
+      renderComponent()
+      expect(screen.getByTestId('glow-orb')).toBeInTheDocument()
+    })
+
+    it('reflection question card has frosted glass styling with purple border', () => {
+      renderComponent()
+      const questionText = screen.getByText(/Something to think about today/)
+      const card = questionText.closest('[class*="backdrop-blur"]') as HTMLElement
+      expect(card).not.toBeNull()
+      expect(card!.className).toContain('border-l-primary')
+    })
+
+    it('action buttons have frosted glass styling', () => {
+      renderComponent()
+      const shareBtn = screen.getByRole('button', { name: /Share today/i })
+      expect(shareBtn.className).toContain('rounded-xl')
+      expect(shareBtn.className).toContain('backdrop-blur-sm')
     })
   })
 })

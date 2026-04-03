@@ -153,4 +153,14 @@ describe('GlowBackground', () => {
     const orb = screen.getByTestId('glow-orb')
     expect(orb.className).toContain('blur-')
   })
+
+  it('glowOpacity prop overrides default opacity', () => {
+    render(
+      <GlowBackground variant="center" glowOpacity={0.30}>
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orb = screen.getByTestId('glow-orb')
+    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.3)')
+  })
 })
