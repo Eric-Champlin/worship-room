@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { X, AlertCircle } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 
 const PASSWORD_MIN_LENGTH = 12
 
@@ -187,7 +187,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 ${backdropClass}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center ${backdropClass}`}
+      style={{ background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.12) 0%, transparent 60%), rgba(0, 0, 0, 0.7)' }}
       onClick={handleClose}
     >
       <div
@@ -196,18 +197,18 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         aria-describedby={subtitle && view !== 'forgot-password' ? 'auth-modal-subtitle' : undefined}
-        className={`mx-4 w-full max-w-md rounded-xl bg-hero-mid/95 backdrop-blur-xl border border-white/10 p-6 shadow-xl ${panelClass}`}
+        className={`mx-4 w-full max-w-md rounded-3xl bg-white/[0.06] backdrop-blur-md border border-white/[0.12] p-6 shadow-[0_0_40px_rgba(139,92,246,0.15),0_8px_30px_rgba(0,0,0,0.4)] ${panelClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="relative flex items-center justify-center">
-          <h2 id="auth-modal-title" className="text-center font-script text-4xl font-bold text-white sm:text-5xl">
+          <h2 id="auth-modal-title" className="text-center text-3xl font-bold sm:text-4xl" style={GRADIENT_TEXT_STYLE}>
             {VIEW_TITLES[view]}
           </h2>
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-0 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="absolute right-0 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center text-white/50 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-full"
             aria-label="Close"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -215,21 +216,21 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         </div>
 
         {subtitle && view !== 'forgot-password' && (
-          <p id="auth-modal-subtitle" className="mt-2 text-center text-sm text-white/60">
+          <p id="auth-modal-subtitle" className="mt-2 text-center text-sm text-white/90">
             {subtitle}
           </p>
         )}
 
         {view === 'forgot-password' ? (
           <>
-            <p className="mt-2 text-center text-sm text-white/60">
+            <p className="mt-2 text-center text-sm text-white/90">
               Enter your email and we'll send you a reset link.
             </p>
 
             <form onSubmit={handleForgotSubmit} noValidate className="mt-4">
               <div className="mb-4">
-                <label htmlFor="auth-reset-email" className="mb-1 block text-sm font-medium text-white/80">
-                  Email<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
+                <label htmlFor="auth-reset-email" className="mb-1 block text-sm font-medium text-white">
+                  Email<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
                 <input
                   id="auth-reset-email"
@@ -240,7 +241,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   onChange={(e) => { setResetEmail(e.target.value); setResetEmailError(null) }}
                   aria-invalid={resetEmailError ? 'true' : undefined}
                   aria-describedby={resetEmailError ? 'reset-email-error' : undefined}
-                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                 />
                 {resetEmailError && (
                   <p id="reset-email-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
@@ -250,16 +251,16 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 )}
               </div>
 
-              <Button type="submit" variant="primary" className="w-full">
+              <button type="submit" className="w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg">
                 Send Reset Link
-              </Button>
+              </button>
             </form>
 
-            <p className="mt-4 text-center text-sm text-white/60">
+            <p className="mt-4 text-center text-sm text-white/90">
               <button
                 type="button"
                 onClick={() => setView('login')}
-                className="font-medium text-primary-lt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
               >
                 Back to Log In
               </button>
@@ -272,8 +273,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               {view === 'register' && (
                 <div className="mb-3 grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="auth-first-name" className="mb-1 block text-sm font-medium text-white/80">
-                      First name<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
+                    <label htmlFor="auth-first-name" className="mb-1 block text-sm font-medium text-white">
+                      First name<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                     </label>
                     <input
                       id="auth-first-name"
@@ -288,7 +289,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                       }}
                       aria-invalid={(touched.firstName || submitted) && firstNameError ? 'true' : undefined}
                       aria-describedby={(touched.firstName || submitted) && firstNameError ? 'firstname-error' : undefined}
-                      className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                      className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                     />
                     {(touched.firstName || submitted) && firstNameError && (
                       <p id="firstname-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
@@ -298,8 +299,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                     )}
                   </div>
                   <div>
-                    <label htmlFor="auth-last-name" className="mb-1 block text-sm font-medium text-white/80">
-                      Last name<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
+                    <label htmlFor="auth-last-name" className="mb-1 block text-sm font-medium text-white">
+                      Last name<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                     </label>
                     <input
                       id="auth-last-name"
@@ -314,7 +315,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                       }}
                       aria-invalid={(touched.lastName || submitted) && lastNameError ? 'true' : undefined}
                       aria-describedby={(touched.lastName || submitted) && lastNameError ? 'lastname-error' : undefined}
-                      className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                      className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                     />
                     {(touched.lastName || submitted) && lastNameError && (
                       <p id="lastname-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
@@ -327,8 +328,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               )}
 
               <div className="mb-3">
-                <label htmlFor="auth-email" className="mb-1 block text-sm font-medium text-white/80">
-                  Email<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
+                <label htmlFor="auth-email" className="mb-1 block text-sm font-medium text-white">
+                  Email<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
                 <input
                   id="auth-email"
@@ -337,7 +338,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   required
                   value={emailValue}
                   autoComplete="email"
-                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                   aria-label="Email address"
                   aria-invalid={emailError ? 'true' : undefined}
                   aria-describedby={emailError ? 'email-error' : undefined}
@@ -352,8 +353,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               </div>
 
               <div className="mb-3">
-                <label htmlFor="auth-password" className="mb-1 block text-sm font-medium text-white/80">
-                  Password<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
+                <label htmlFor="auth-password" className="mb-1 block text-sm font-medium text-white">
+                  Password<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
                 <input
                   id="auth-password"
@@ -362,7 +363,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   required
                   value={passwordValue}
                   autoComplete={view === 'login' ? 'current-password' : 'new-password'}
-                  className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                   aria-label="Password"
                   aria-invalid={passwordError ? 'true' : undefined}
                   aria-describedby={passwordError ? 'password-error' : undefined}
@@ -378,8 +379,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
 
               {view === 'register' && (
                 <div className="mb-3">
-                  <label htmlFor="auth-confirm-password" className="mb-1 block text-sm font-medium text-white/80">
-                    Confirm password<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
+                  <label htmlFor="auth-confirm-password" className="mb-1 block text-sm font-medium text-white">
+                    Confirm password<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                   </label>
                   <input
                     id="auth-confirm-password"
@@ -405,7 +406,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                     }}
                     aria-invalid={(touched.confirmPassword || submitted) && confirmPasswordError ? 'true' : undefined}
                     aria-describedby={(touched.confirmPassword || submitted) && confirmPasswordError ? 'confirmpassword-error' : undefined}
-                    className="w-full rounded-xl bg-white/[0.06] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary/50"
+                    className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                   />
                   {(touched.confirmPassword || submitted) && confirmPasswordError && (
                     <p id="confirmpassword-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
@@ -420,46 +421,46 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 <button
                   type="button"
                   onClick={() => setView('forgot-password')}
-                  className="mb-3 text-sm text-primary-lt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                  className="mb-3 text-sm text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                 >
                   Forgot password?
                 </button>
               )}
 
-              <Button type="submit" variant="primary" className="w-full">
+              <button type="submit" className="w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg">
                 {view === 'login' ? 'Log In' : 'Create Account'}
-              </Button>
+              </button>
             </form>
 
             {/* Divider */}
             <div className="my-4 flex items-center gap-3">
-              <div className="h-px flex-1 bg-white/10" />
-              <span className="text-xs text-white/50">or</span>
-              <div className="h-px flex-1 bg-white/10" />
+              <div className="h-px flex-1 border-t border-white/[0.08]" />
+              <span className="text-xs text-white/30">or</span>
+              <div className="h-px flex-1 border-t border-white/[0.08]" />
             </div>
 
             {/* Spotify button (disabled) */}
             <button
               type="button"
               disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[#1DB954]/20 border border-[#1DB954]/30 px-4 py-2.5 text-sm font-medium text-[#1DB954] opacity-60"
+              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full border border-white/[0.12] bg-transparent px-4 py-3 text-sm font-medium text-white opacity-60 transition-colors hover:bg-white/[0.04] hover:border-white/[0.18]"
               aria-label="Continue with Spotify"
             >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg className="h-5 w-5 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
               </svg>
               Continue with Spotify
             </button>
 
             {/* Toggle link */}
-            <p className="mt-4 text-center text-sm text-white/60">
+            <p className="mt-4 text-center text-sm text-white/90">
               {view === 'login' ? (
                 <>
                   No account?{' '}
                   <button
                     type="button"
                     onClick={() => setView('register')}
-                    className="font-medium text-primary-lt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                   >
                     Create one!
                   </button>
@@ -470,7 +471,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   <button
                     type="button"
                     onClick={() => setView('login')}
-                    className="font-medium text-primary-lt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
                   >
                     Log in
                   </button>
