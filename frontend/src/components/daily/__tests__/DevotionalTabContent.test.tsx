@@ -64,14 +64,6 @@ function renderComponent(initialEntry = '/daily?tab=devotional', props: Partial<
 
 describe('DevotionalTabContent', () => {
   describe('Rendering', () => {
-    it('renders "What\'s On Your Soul?" heading with gradient style', () => {
-      renderComponent()
-      const heading = screen.getByRole('heading', { name: /What's On Your Soul\?/ })
-      expect(heading).toBeInTheDocument()
-      expect(heading.className).not.toContain('font-script')
-      expect(heading.querySelector('span')).toBeNull()
-    })
-
     it('uses max-w-4xl container width', () => {
       const { container } = renderComponent()
       const maxWEl = container.querySelector('.max-w-4xl') as HTMLElement
@@ -79,11 +71,12 @@ describe('DevotionalTabContent', () => {
       expect(maxWEl.className).not.toContain('max-w-2xl')
     })
 
-    it('renders devotional title', () => {
+    it('renders devotional title as primary heading', () => {
       renderComponent()
       const headings = screen.getAllByRole('heading')
-      // h2 is the main heading "What's On Your Soul?", h3 is devotional title
-      expect(headings.length).toBeGreaterThanOrEqual(2)
+      // Only the devotional title heading remains (h3)
+      expect(headings.length).toBeGreaterThanOrEqual(1)
+      expect(headings[0].textContent).toBeTruthy()
     })
 
     it('renders formatted date', () => {
@@ -255,6 +248,32 @@ describe('DevotionalTabContent', () => {
       const shareBtn = screen.getByRole('button', { name: /Share today/i })
       expect(shareBtn.className).toContain('rounded-xl')
       expect(shareBtn.className).toContain('backdrop-blur-sm')
+    })
+
+    it('does not render BackgroundSquiggle', () => {
+      const { container } = renderComponent()
+      // No squiggle SVG with mask-style should be present in the component
+      expect(container.querySelector('[aria-hidden="true"][style*="mask"]')).toBeNull()
+    })
+
+    it('quote section has frosted glass styling', () => {
+      renderComponent()
+      const blockquote = screen.getByRole('blockquote')
+      const card = blockquote.closest('[class*="backdrop-blur"]') as HTMLElement
+      expect(card).not.toBeNull()
+      expect(card!.className).toContain('bg-white/[0.06]')
+    })
+
+    it('section dividers use border-white/[0.08]', () => {
+      const { container } = renderComponent()
+      const dividers = container.querySelectorAll('.border-white\\/\\[0\\.08\\]')
+      expect(dividers.length).toBeGreaterThanOrEqual(5)
+    })
+
+    it('bottom padding is compact (pb-8)', () => {
+      const { container } = renderComponent()
+      expect(container.querySelector('.pb-8')).not.toBeNull()
+      expect(container.querySelector('.pb-16')).toBeNull()
     })
   })
 })

@@ -2,10 +2,8 @@ import { useCallback, useRef, useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Share2, Volume2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
-import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { getTodaysDevotional, formatDevotionalDate } from '@/data/devotionals'
 import { useSwipe } from '@/hooks/useSwipe'
 import { useAuth } from '@/hooks/useAuth'
@@ -145,204 +143,187 @@ export function DevotionalTabContent({
     <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
       <div className="mx-auto max-w-4xl px-4 py-10 sm:py-14" {...swipeHandlers}>
         <div className="relative">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-[0.12]"
-            style={SQUIGGLE_MASK_STYLE}
-          >
-            <BackgroundSquiggle />
-          </div>
-          <div className="relative">
-            {/* Heading */}
-            <h2
-              className="mb-4 text-center font-sans text-2xl font-bold sm:text-3xl lg:text-4xl"
-              style={GRADIENT_TEXT_STYLE}
+          {/* Date navigation */}
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => navigateDay(-1)}
+              disabled={dayOffset <= -7}
+              className={cn(
+                'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 transition-colors',
+                dayOffset <= -7
+                  ? 'cursor-not-allowed text-white/15'
+                  : 'text-white/50 hover:text-white/70',
+              )}
+              aria-label="Previous day's devotional"
+              aria-disabled={dayOffset <= -7}
             >
-              What&apos;s On Your Soul?
-            </h2>
-
-            {/* Date navigation */}
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => navigateDay(-1)}
-                disabled={dayOffset <= -7}
-                className={cn(
-                  'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 transition-colors',
-                  dayOffset <= -7
-                    ? 'cursor-not-allowed text-white/15'
-                    : 'text-white/50 hover:text-white/70',
-                )}
-                aria-label="Previous day's devotional"
-                aria-disabled={dayOffset <= -7}
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <div className="flex items-center gap-2">
-                <span className="text-lg text-white/85 sm:text-xl">{dateStr}</span>
-                {isCompleted && dayOffset === 0 && (
-                  <span className="ml-2 inline-flex items-center gap-1 text-sm text-white/50">
-                    <Check size={14} />
-                    Completed
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => navigateDay(1)}
-                disabled={dayOffset >= 0}
-                className={cn(
-                  'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 transition-colors',
-                  dayOffset >= 0
-                    ? 'cursor-not-allowed text-white/15'
-                    : 'text-white/50 hover:text-white/70',
-                )}
-                aria-label="Next day's devotional"
-                aria-disabled={dayOffset >= 0}
-              >
-                <ChevronRight size={24} />
-              </button>
-            </div>
-
-            {/* Devotional title */}
-            <h3 className="pt-8 text-center text-2xl font-bold text-white sm:pt-10 sm:text-3xl">
-              {devotional.title}
-            </h3>
-            <div className="mt-2 text-center">
-              <span className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/50">
-                {devotional.theme}
-              </span>
-            </div>
-
-            {/* Quote section */}
-            <div className="border-t border-white/10 py-8 sm:py-10">
-              <div className="relative">
-                <span className="font-serif text-5xl leading-none text-white/20" aria-hidden="true">
-                  &ldquo;
+              <ChevronLeft size={24} />
+            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-lg text-white/85 sm:text-xl">{dateStr}</span>
+              {isCompleted && dayOffset === 0 && (
+                <span className="ml-2 inline-flex items-center gap-1 text-sm text-white/50">
+                  <Check size={14} />
+                  Completed
                 </span>
-                <blockquote className="mt-2 font-serif text-xl italic leading-relaxed text-white/70 sm:text-2xl">
-                  {devotional.quote.text}
-                </blockquote>
-                <p className="mt-3 text-sm text-white/60">&mdash; {devotional.quote.attribution}</p>
-              </div>
+              )}
             </div>
-
-            {/* Passage section */}
-            <div className="border-t border-white/10 py-8 sm:py-10">
-              <div className="mb-4 flex items-center gap-2">
-                <p className="text-xs font-medium uppercase tracking-widest">
-                  <VerseLink
-                    reference={devotional.passage.reference}
-                    className="text-primary-lt"
-                  />
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowPassageShare(true)}
-                  className="inline-flex min-h-[44px] items-center gap-1 rounded-lg p-1.5 text-white/50 transition-colors hover:text-white/70"
-                  aria-label={`Share ${devotional.passage.reference}`}
-                >
-                  <Share2 className="h-4 w-4" />
-                </button>
-              </div>
-              <p className="font-serif text-base italic leading-relaxed text-white/70 sm:text-lg">
-                {devotional.passage.verses.map((verse) => (
-                  <span key={verse.number}>
-                    <sup className="mr-1 align-super font-sans text-xs text-white/30">
-                      {verse.number}
-                    </sup>
-                    {verse.text}{' '}
-                  </span>
-                ))}
-              </p>
-              <SharePanel
-                verseText={devotional.passage.verses.map((v) => v.text).join(' ')}
-                reference={devotional.passage.reference}
-                isOpen={showPassageShare}
-                onClose={() => setShowPassageShare(false)}
-              />
-            </div>
-
-            {/* Reflection section */}
-            <div className="border-t border-white/10 py-8 sm:py-10">
-              <div className="space-y-4 text-base leading-relaxed text-white/80">
-                {devotional.reflection.map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </div>
-            </div>
-
-            {/* Prayer section */}
-            <div className="border-t border-white/10 py-8 sm:py-10">
-              <p className="mb-4 text-xs font-medium uppercase tracking-widest text-white/60">
-                Closing Prayer
-              </p>
-              <p className="font-serif text-base italic leading-relaxed text-white/60">
-                {devotional.prayer}
-              </p>
-            </div>
-
-            {/* Reflection question section */}
-            <div className="border-t border-white/10 py-8 sm:py-10" ref={questionRef}>
-              <FrostedCard className="border-l-2 border-l-primary p-4 sm:p-6">
-                <p className="text-sm text-white/60">Something to think about today:</p>
-                <p className="mt-2 text-lg font-medium text-white">
-                  {devotional.reflectionQuestion.replace('Something to think about today: ', '')}
-                </p>
-              </FrostedCard>
-            </div>
-
-            {/* Related reading plan callout */}
-            {showPlanCallout && (
-              <RelatedPlanCallout
-                planId={matchingPlan.id}
-                planTitle={matchingPlan.title}
-                planDuration={matchingPlan.durationDays}
-                planStatus={matchingPlanStatus as 'unstarted' | 'active' | 'paused'}
-              />
-            )}
-
-            {/* Share & Read Aloud */}
-            <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:justify-center">
-              <button
-                onClick={handleShareClick}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]"
-              >
-                <Share2 size={18} />
-                Share today&apos;s devotional
-              </button>
-              <button
-                onClick={handleReadAloudClick}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]"
-              >
-                <Volume2 size={18} />
-                {readAloud.state === 'idle'
-                  ? 'Read aloud'
-                  : readAloud.state === 'playing'
-                    ? 'Pause'
-                    : 'Resume'}
-              </button>
-            </div>
-
-            {/* Cross-tab CTAs */}
-            <div className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:flex-row sm:justify-center">
-              <button
-                type="button"
-                onClick={() => onSwitchToJournal?.(devotional.theme)}
-                className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
-              >
-                Journal about this &rarr;
-              </button>
-              <button
-                type="button"
-                onClick={() => onSwitchToPray?.(`I'm reflecting on ${devotional.passage.reference}...`)}
-                className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
-              >
-                Pray about today&apos;s reading &rarr;
-              </button>
-            </div>
-
-            {/* Bottom padding */}
-            <div className="pb-16 sm:pb-20" />
+            <button
+              onClick={() => navigateDay(1)}
+              disabled={dayOffset >= 0}
+              className={cn(
+                'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 transition-colors',
+                dayOffset >= 0
+                  ? 'cursor-not-allowed text-white/15'
+                  : 'text-white/50 hover:text-white/70',
+              )}
+              aria-label="Next day's devotional"
+              aria-disabled={dayOffset >= 0}
+            >
+              <ChevronRight size={24} />
+            </button>
           </div>
+
+          {/* Devotional title */}
+          <h3 className="pt-8 text-center text-2xl font-bold text-white sm:pt-10 sm:text-3xl">
+            {devotional.title}
+          </h3>
+          <div className="mt-2 text-center">
+            <span className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/50">
+              {devotional.theme}
+            </span>
+          </div>
+
+          {/* Quote section */}
+          <div className="border-t border-white/[0.08] py-5 sm:py-6">
+            <FrostedCard className="p-5 sm:p-6">
+              <span className="font-serif text-5xl leading-none text-white/20" aria-hidden="true">
+                &ldquo;
+              </span>
+              <blockquote className="mt-2 font-serif text-xl italic leading-relaxed text-white sm:text-2xl">
+                {devotional.quote.text}
+              </blockquote>
+              <p className="mt-3 text-sm text-white/70">&mdash; {devotional.quote.attribution}</p>
+            </FrostedCard>
+          </div>
+
+          {/* Passage section */}
+          <div className="border-t border-white/[0.08] py-5 sm:py-6">
+            <div className="mb-4 flex items-center gap-2">
+              <p className="text-xs font-medium uppercase tracking-widest">
+                <VerseLink
+                  reference={devotional.passage.reference}
+                  className="text-primary-lt"
+                />
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowPassageShare(true)}
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg p-1.5 text-white/50 transition-colors hover:text-white/70"
+                aria-label={`Share ${devotional.passage.reference}`}
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="font-serif text-base italic leading-relaxed text-white/80 sm:text-lg">
+              {devotional.passage.verses.map((verse) => (
+                <span key={verse.number}>
+                  <sup className="mr-1 align-super font-sans text-xs text-white/30">
+                    {verse.number}
+                  </sup>
+                  {verse.text}{' '}
+                </span>
+              ))}
+            </p>
+            <SharePanel
+              verseText={devotional.passage.verses.map((v) => v.text).join(' ')}
+              reference={devotional.passage.reference}
+              isOpen={showPassageShare}
+              onClose={() => setShowPassageShare(false)}
+            />
+          </div>
+
+          {/* Reflection section */}
+          <div className="border-t border-white/[0.08] py-5 sm:py-6">
+            <div className="space-y-4 text-base leading-relaxed text-white">
+              {devotional.reflection.map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
+            </div>
+          </div>
+
+          {/* Prayer section */}
+          <div className="border-t border-white/[0.08] py-5 sm:py-6">
+            <p className="mb-2 text-xs font-medium uppercase tracking-widest text-white/50">
+              Closing Prayer
+            </p>
+            <p className="font-serif text-sm italic leading-relaxed text-white/60">
+              {devotional.prayer}
+            </p>
+          </div>
+
+          {/* Reflection question section */}
+          <div className="border-t border-white/[0.08] py-5 sm:py-6" ref={questionRef}>
+            <FrostedCard className="border-l-2 border-l-primary p-4 sm:p-6">
+              <p className="text-sm text-white/60">Something to think about today:</p>
+              <p className="mt-2 text-lg font-medium text-white">
+                {devotional.reflectionQuestion.replace('Something to think about today: ', '')}
+              </p>
+            </FrostedCard>
+          </div>
+
+          {/* Related reading plan callout */}
+          {showPlanCallout && (
+            <RelatedPlanCallout
+              planId={matchingPlan.id}
+              planTitle={matchingPlan.title}
+              planDuration={matchingPlan.durationDays}
+              planStatus={matchingPlanStatus as 'unstarted' | 'active' | 'paused'}
+            />
+          )}
+
+          {/* Share & Read Aloud */}
+          <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:justify-center">
+            <button
+              onClick={handleShareClick}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]"
+            >
+              <Share2 size={18} />
+              Share today&apos;s devotional
+            </button>
+            <button
+              onClick={handleReadAloudClick}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]"
+            >
+              <Volume2 size={18} />
+              {readAloud.state === 'idle'
+                ? 'Read aloud'
+                : readAloud.state === 'playing'
+                  ? 'Pause'
+                  : 'Resume'}
+            </button>
+          </div>
+
+          {/* Cross-tab CTAs */}
+          <div className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={() => onSwitchToJournal?.(devotional.theme)}
+              className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
+            >
+              Journal about this &rarr;
+            </button>
+            <button
+              type="button"
+              onClick={() => onSwitchToPray?.(`I'm reflecting on ${devotional.passage.reference}...`)}
+              className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
+            >
+              Pray about today&apos;s reading &rarr;
+            </button>
+          </div>
+
+          {/* Bottom padding */}
+          <div className="pb-8 sm:pb-12" />
         </div>
       </div>
     </GlowBackground>
