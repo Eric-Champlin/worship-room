@@ -54,26 +54,29 @@ describe('SongPickSection', () => {
     expect(screen.getByTestId('glow-orb')).toBeInTheDocument()
   })
 
-  it('renders Spotify iframe with 152px height', () => {
+  it('renders Spotify iframe with 352px height', () => {
     renderComponent()
     const iframe = document.querySelector('iframe[title]') as HTMLIFrameElement
     expect(iframe).toBeInTheDocument()
-    expect(iframe.getAttribute('height')).toBe('152')
+    expect(iframe.getAttribute('height')).toBe('352')
     expect(iframe.getAttribute('src')).toContain('open.spotify.com/embed/track')
   })
 
-  it('renders Follow Our Playlist link', () => {
+  it('renders two Follow Our Playlist links (one per breakpoint)', () => {
     renderComponent()
-    const link = screen.getByRole('link', { name: /follow our playlist/i })
-    expect(link).toBeInTheDocument()
-    expect(link).toHaveAttribute('href', SPOTIFY_PLAYLIST_URL)
-    expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    const links = screen.getAllByRole('link', { name: /follow our playlist/i })
+    expect(links).toHaveLength(2)
+    links.forEach((link) => {
+      expect(link).toHaveAttribute('href', SPOTIFY_PLAYLIST_URL)
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    })
   })
 
-  it('renders follower count text', () => {
+  it('renders follower count text in two places (one per breakpoint)', () => {
     renderComponent()
-    expect(screen.getByText(/117K\+/)).toBeInTheDocument()
+    const captions = screen.getAllByText(/117K\+/)
+    expect(captions).toHaveLength(2)
   })
 
   it('has accessible section with aria-labelledby', () => {
@@ -82,11 +85,12 @@ describe('SongPickSection', () => {
     expect(section).toHaveAttribute('aria-labelledby', 'song-pick-heading')
   })
 
-  it('renders section divider', () => {
+  it('renders section divider with aria-hidden', () => {
     renderComponent()
     const section = screen.getByRole('heading', { level: 2 }).closest('section')
     const divider = section?.querySelector('.border-t')
     expect(divider).toBeInTheDocument()
+    expect(divider).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('does not use Caveat script font', () => {
@@ -94,5 +98,35 @@ describe('SongPickSection', () => {
     const heading = screen.getByRole('heading', { level: 2 })
     expect(heading).not.toHaveClass('font-script')
     expect(heading.querySelector('.font-script')).not.toBeInTheDocument()
+  })
+
+  it('desktop CTA is hidden on mobile via responsive class', () => {
+    renderComponent()
+    const links = screen.getAllByRole('link', { name: /follow our playlist/i })
+    // One wrapper has `hidden md:block`, the other has `md:hidden`
+    const wrappers = links.map((l) => l.closest('div'))
+    const hiddenOnMobile = wrappers.find((w) => w?.className.includes('hidden md:block'))
+    const hiddenOnDesktop = wrappers.find((w) => w?.className.includes('md:hidden'))
+    expect(hiddenOnMobile).toBeInTheDocument()
+    expect(hiddenOnDesktop).toBeInTheDocument()
+  })
+
+  it('heading is flex-col with gradient "Today\'s" as the larger line', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading).toHaveClass('flex', 'flex-col')
+    const spans = heading.querySelectorAll('span')
+    expect(spans).toHaveLength(2)
+    // First span = "Today's" (gradient, larger)
+    expect(spans[0]).toHaveTextContent("Today's")
+    expect(spans[0].className).toContain('text-4xl')
+    expect(spans[0].className).toContain('sm:text-5xl')
+    expect(spans[0].className).toContain('lg:text-6xl')
+    // Second span = "Song Pick" (white, smaller)
+    expect(spans[1]).toHaveTextContent('Song Pick')
+    expect(spans[1]).toHaveClass('text-white')
+    expect(spans[1].className).toContain('text-2xl')
+    expect(spans[1].className).toContain('sm:text-3xl')
+    expect(spans[1].className).toContain('lg:text-4xl')
   })
 })

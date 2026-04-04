@@ -45,6 +45,7 @@ describe('SongPickSection offline handling', () => {
     // Should have an iframe element
     const iframe = document.querySelector('iframe')
     expect(iframe).toBeInTheDocument()
+    expect(iframe?.getAttribute('height')).toBe('352')
     expect(
       screen.queryByText('Spotify playlists available when online')
     ).not.toBeInTheDocument()
