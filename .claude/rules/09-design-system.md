@@ -13,7 +13,7 @@ This file is the comprehensive design reference for UI implementation. It covers
 - **Hero Dark**: `#0D0620` (dark purple for hero gradient) — Tailwind: `hero-dark`
 - **Hero Mid**: `#1E0B3E` — Tailwind: `hero-mid`
 - **Hero Deep**: `#251248` — Tailwind: `hero-deep`
-- **Hero BG**: `#08051A` (darkest background, used by homepage sections) — Tailwind: `hero-bg`
+- **Hero BG**: `#08051A` (darkest background, used by homepage and Daily Hub sections) — Tailwind: `hero-bg`
 - **Glow Cyan**: `#00D4FF` (cyan for input glow effects) — Tailwind: `glow-cyan`
 - **Neutral Background**: `#F5F5F5` (warm off-white) — Tailwind: `neutral-bg`
 - **White**: `#FFFFFF`
@@ -44,13 +44,13 @@ Frosted glass cards for the all-dark dashboard:
 - Padding: `p-4 md:p-6`
 - Collapsible with height transition (`overflow-hidden`)
 
-**Homepage cards** use the upgraded `FrostedCard` component (see "Homepage Visual Patterns" section below) which has stronger borders, box-shadow, and hover states.
+**Homepage and Daily Hub cards** use the upgraded `FrostedCard` component (see "Homepage Visual Patterns" section below) which has stronger borders, box-shadow, and hover states.
 
 ### Text Opacity Standards
 
-**Homepage and landing page sections (Round 3 standard):** Default to `text-white` for all readable text. Reserve muted opacities only for lock overlays (`text-white/50`), placeholder text (`placeholder:text-white/50`), and purely decorative elements (`text-white/20` to `text-white/40`). StatsBar ALL CAPS labels use `text-white/90`.
+**Homepage, Daily Hub, and landing page sections (Round 3 standard):** Default to `text-white` for all readable text. Reserve muted opacities only for lock overlays (`text-white/50`), placeholder text (`placeholder:text-white/50`), and purely decorative elements (`text-white/20` to `text-white/40`). StatsBar ALL CAPS labels use `text-white/90`.
 
-**Dashboard and inner pages (WCAG AA standard):** All text on dark backgrounds must meet these minimum opacity values:
+**Dashboard and other inner pages (WCAG AA standard):** All text on dark backgrounds must meet these minimum opacity values:
 
 | Use Case                         | Minimum | Class                              |
 | -------------------------------- | ------- | ---------------------------------- |
@@ -66,7 +66,7 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
 
 **Exempt from contrast requirements:** decorative icons, locked badge silhouettes, verse number superscripts, middot separators, disabled/locked state indicators, background decorations.
 
-**Note:** The homepage uses `text-white` for all readable text (which exceeds WCAG AA). When redesigning inner pages to match the homepage style, prefer `text-white` everywhere. The WCAG minimum table above is a floor, not a target.
+**Note:** The homepage and Daily Hub use `text-white` for all readable text (which exceeds WCAG AA). When redesigning inner pages to match the homepage style, prefer `text-white` everywhere. The WCAG minimum table above is a floor, not a target.
 
 ### Typography
 
@@ -75,8 +75,8 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
 - **Scripture Font**: Lora (serif) — Tailwind: `font-serif`
   - Regular: 400, Italic: 400 italic, Bold: 700
 - **Decorative Font**: Caveat (cursive) — Tailwind: `font-script`
-  - Used for script emphasis in headings ("Heart?", "Mind?", "Spirit?") and branding
-  - **Note:** Homepage headings no longer use Caveat — they use `WHITE_PURPLE_GRADIENT` via `background-clip: text` instead. Caveat is still used on other pages.
+  - Used for branding elements (logo)
+  - **Note:** Homepage and Daily Hub headings no longer use Caveat — they use `GRADIENT_TEXT_STYLE` (white-to-purple gradient via `background-clip: text`) instead. Caveat may still appear on other inner pages but is being phased out in favor of gradient text.
 - **Heading Font**: Inter (same as body for consistency)
   - Semi-bold: 600, Bold: 700
 - **Font Sizes**: Hero: 3rem (mobile: 2rem), H1: 2.5rem (1.75rem), H2: 2rem (1.5rem), H3: 1.5rem (1.25rem), Body: 1rem, Small: 0.875rem
@@ -107,17 +107,17 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
 - **Layout.tsx** — Wrapper: `<Navbar>` + content + `<SiteFooter>`. Passes `transparent` prop on landing page.
 - **Navbar.tsx** — Glassmorphic navigation. Desktop: 5 top-level items + Local Support dropdown + avatar dropdown. Mobile: hamburger drawer (`MobileDrawer`). `transparent` prop controls absolute vs relative positioning. Logged-in state: replaces Log In/Get Started with notification bell + avatar dropdown (see `10-ux-flows.md` for nav structure).
 - **SiteFooter.tsx** — Dark purple footer. Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), "Listen on Spotify" badge, copyright.
-- **PageTransition.tsx** — 150ms opacity fade-out + 200ms fade-in on route changes.
+- **PageTransition.tsx** — 150ms opacity fade-out + 200ms fade-in on route changes. Body background set to `#08051A` to prevent white flash during transitions.
 
 ### Design System Components
 
 - **PageHero.tsx** — Purple gradient header with title, subtitle, optional `HeadingDivider`. Used by Prayer Wall, Local Support pages.
 - **HeadingDivider.tsx** — White decorative SVG divider with fade gradients. Responsive via `useElementWidth()`.
-- **BackgroundSquiggle.tsx** — Decorative SVG squiggle (viewBox 1800×1350, 6 paths). Exported `SQUIGGLE_MASK_STYLE` for consistent fade mask. Used by Daily Hub tabs. **Not used by homepage JourneySection** — the homepage uses narrow inline SVG squiggles instead (see "Homepage Visual Patterns" below).
-- **SongPickSection.tsx** — Spotify iframe embed (352px height) + "Follow Our Playlist on Spotify" button.
+- **BackgroundSquiggle.tsx** — Decorative SVG squiggle (viewBox 1800×1350, 6 paths). Exported `SQUIGGLE_MASK_STYLE` for consistent fade mask. Used by Daily Hub Pray, Journal, and Meditate tabs (layered behind GlowBackground). NOT used by Devotional tab (removed in Round 3 redesign).
+- **SongPickSection.tsx** — Side-by-side layout: "Today's" (GRADIENT_TEXT_STYLE, large) + "Song Pick" (white, smaller) heading on left, Spotify 352px iframe on right. Stacked on mobile. GlowBackground variant="left". No glass card wrapper, no music icon, no HeadingDivider.
 - **HeroSection.tsx** — Landing page hero: dark purple gradient, typewriter input, quiz teaser link. UNTOUCHED by homepage redesign.
 - **JourneySection.tsx** — 7-step vertical timeline with numbered circles, gradient keyword text, inline narrow squiggle SVG, glow orbs. Steps link to feature routes.
-- **StartingPointQuiz.tsx** — 5-question quiz inside a frosted glass container (`rounded-3xl`), gradient progress bar. `id="quiz"` for scroll target.
+- **StartingPointQuiz.tsx** — 5-question quiz inside a frosted glass container (`rounded-3xl`), gradient progress bar. `id="quiz"` for scroll target. Only appears on the landing page (removed from Daily Hub in Round 3 redesign).
 - **TypewriterInput.tsx** — Hero input with typewriter placeholder animation.
 - **SpotifyBadge.tsx** — "Listen on Spotify" badge link.
 - **Breadcrumb.tsx** — Breadcrumb navigation for detail pages.
@@ -126,7 +126,9 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
 
 ### Homepage Components (`components/homepage/`)
 
-Shared building blocks for the landing page, created during the Round 3 homepage redesign (HP-1 through HP-15):
+> These patterns now apply to both the homepage AND the Daily Hub page as of the Round 3 Daily Hub redesign. GlowBackground, FrostedCard, GRADIENT_TEXT_STYLE, and section dividers are used across both pages.
+
+Shared building blocks for the landing page and Daily Hub, created during the Round 3 homepage redesign (HP-1 through HP-15):
 
 - **SectionHeading.tsx** — 2-line heading: smaller white `topLine` + larger purple gradient `bottomLine`. Backward-compatible single `heading` prop. See "Homepage Visual Patterns" for sizing.
 - **GlowBackground.tsx** — Atmospheric glow wrapper with variants: `center`, `left`, `right`, `split`, `none`. Glow orb opacity at 0.25-0.50 range.
@@ -142,10 +144,10 @@ Shared building blocks for the landing page, created during the Round 3 homepage
 
 ### Daily Experience Components (`components/daily/`)
 
-- **PrayTabContent.tsx** — Full Pray tab: textarea with chips, crisis banner, mock prayer generation, KaraokeText, action buttons, cross-tab CTA.
-- **JournalTabContent.tsx** — Full Journal tab: Guided/Free Write toggle, prompt card, draft auto-save, crisis banner, saved entries, AI reflection.
-- **MeditateTabContent.tsx** — Full Meditate tab: 6 auth-gated meditation cards, completion checkmarks, celebration banner.
-- **DevotionalTabContent.tsx** — Full Devotional tab: daily quote, passage, reflection, prayer, question. Cross-tab CTAs to Journal and Pray.
+- **PrayTabContent.tsx** — Full Pray tab: GlowBackground + BackgroundSquiggle layered, textarea with chips, crisis banner, mock prayer generation, KaraokeText, action buttons, cross-tab CTA.
+- **JournalTabContent.tsx** — Full Journal tab: GlowBackground + BackgroundSquiggle layered, Guided/Free Write toggle, prompt card, draft auto-save, crisis banner, saved entries, AI reflection.
+- **MeditateTabContent.tsx** — Full Meditate tab: GlowBackground (split variant) + BackgroundSquiggle layered, 6 auth-gated FrostedCard meditation cards, completion checkmarks, celebration banner.
+- **DevotionalTabContent.tsx** — Full Devotional tab: GlowBackground only (no squiggle), no heading. Daily quote in FrostedCard, passage, reflection, prayer (compact), reflection question in FrostedCard. Cross-tab CTAs to Journal and Pray. Tighter section spacing (py-5 sm:py-6).
 - **MiniHubCards.tsx** — Small cards linking to Pray/Journal/Meditate with completion badges.
 - **ReadAloudButton.tsx** — TTS playback via browser Speech Synthesis API.
 - **KaraokeText.tsx** — Word-by-word highlighting during Read Aloud and prayer generation.
@@ -261,7 +263,7 @@ Shared building blocks for the landing page, created during the Round 3 homepage
 - **verse-of-the-day.ts** — 60 verses (40 general + 20 seasonal) with daily rotation.
 - **question-of-the-day.ts** — 72 QOTD entries (60 general + 12 liturgical).
 - **bible.ts** — `BIBLE_BOOKS` constant (66 books with chapter counts), `BOOK_LOADERS` for lazy loading.
-- **gradients.tsx** — `WHITE_PURPLE_GRADIENT` CSS string used for gradient text across homepage headings and keywords.
+- **gradients.tsx** — `WHITE_PURPLE_GRADIENT` CSS string and `GRADIENT_TEXT_STYLE` CSSProperties object used for gradient text across homepage and Daily Hub headings.
 
 ### Dashboard Constants
 
@@ -369,6 +371,8 @@ Placeholder silent MP3s in `public/audio/` (gitignored). Subdirectories: `ambien
 ---
 
 ## Homepage Visual Patterns (Round 3)
+
+> These patterns now apply to both the homepage AND the Daily Hub page as of the Round 3 Daily Hub redesign. GlowBackground, FrostedCard, GRADIENT_TEXT_STYLE, and section dividers are used across both pages.
 
 These patterns were established during the GitHub-inspired homepage redesign (HP-1 through HP-15). They apply site-wide when building or redesigning pages with dark backgrounds.
 

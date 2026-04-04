@@ -224,32 +224,32 @@ The Daily Hub is a single-page tabbed experience at `/daily`. Old routes (`/pray
 
 **Tab Structure:**
 
-- 3 tabs: **Pray** | **Journal** | **Meditate** (query param: `?tab=pray|journal|meditate`)
-- Default tab: `pray`
-- Animated underline slides horizontally across active tab
+- 4 tabs: **Devotional** (default) | **Pray** | **Journal** | **Meditate** (query param: `?tab=devotional|pray|journal|meditate`)
+- Pill-shaped tab container (rounded-full, frosted glass border). Active tab shows filled pill with purple glow shadow. Inactive tabs show hover fade effect. No underline.
 - Tab content is mounted at all times but hidden (preserves state between switches)
 - Sticky tab bar appears below hero on scroll (via Intersection Observer sentinel)
+- Tab transitions use opacity crossfade (no white flash)
 
 **Hero Section (above tabs):**
 
-- Radial + linear gradient background
-- Time-aware greeting: "Good Morning!", "Good Afternoon!", "Good Evening!" (personalized with name if logged in)
-- Subtitle: "Start with any practice below."
-- Quiz teaser: "Not sure where to start? Take a 30-second quiz..." → scrolls to `#quiz`
+- GlowBackground (variant="center") with purple glow orbs
+- Time-aware greeting in GRADIENT_TEXT_STYLE (white-to-purple gradient, large text matching home hero size)
+- Compact Verse of the Day card (frosted glass, single-line on mobile)
 
 **Below Tab Content (always visible):**
 
-1. **SongPickSection** — Today's Song Pick with Spotify 352px iframe embed + "Follow Our Playlist" CTA
-2. **StartingPointQuiz** — 5-question quiz with `id="quiz"` scroll target
-3. **SiteFooter** — Standard footer with "Listen on Spotify" badge
+1. **SongPickSection** — Side-by-side layout: "Today's" (large purple gradient) + "Song Pick" (smaller white) heading on left, Spotify 352px iframe on right. Stacked on mobile. GlowBackground variant="left". "Follow Our Playlist" CTA under heading on desktop, under player on mobile.
+2. **SiteFooter** — Standard footer with "Listen on Spotify" badge
 
-**Heading Pattern (consistent across all 3 tabs):**
+**Heading Pattern (consistent across Pray, Journal, Meditate tabs):**
 
-- Pray: "What's On Your **Heart?**" (Caveat script font)
-- Journal: "What's On Your **Mind?**" (Caveat script font)
-- Meditate: "What's On Your **Spirit?**" (Caveat script font)
+- Pray: "What's On Your Heart?" (GRADIENT_TEXT_STYLE, no Caveat)
+- Journal: "What's On Your Mind?" (GRADIENT_TEXT_STYLE, no Caveat)
+- Meditate: "What's On Your Spirit?" (GRADIENT_TEXT_STYLE, no Caveat)
 
-All 3 tabs share: `BackgroundSquiggle` decorative SVG, `max-w-2xl` container width, `SQUIGGLE_MASK_STYLE` fade mask.
+Pray, Journal, and Meditate tabs share: `BackgroundSquiggle` decorative SVG layered behind `GlowBackground` orbs, `max-w-2xl` container width.
+
+**Devotional tab:** No heading (removed). No BackgroundSquiggle (removed). Uses GlowBackground (variant="center") only. FrostedCard on quote and reflection question. Tighter section spacing (py-5 sm:py-6).
 
 **Context Passing:** Pray tab can pass context to Journal tab (e.g., "Continuing from your prayer about anxiety"). This auto-selects Guided mode and pre-fills a relevant prompt.
 
@@ -340,7 +340,7 @@ Dark purple (#0D0620). 3 nav columns (Daily, Music, Support) + crisis resources 
 
 ### Starting Point Quiz Flow
 
-5-question points-based quiz. `id="quiz"` scroll target. Single-select, auto-advance. Points-based scoring → result card with CTA. 100% client-side, no persistence.
+5-question points-based quiz. `id="quiz"` scroll target on the homepage. Single-select, auto-advance. Points-based scoring → result card with CTA. 100% client-side, no persistence. Only appears on the landing page (removed from Daily Hub in Round 3 redesign).
 
 ---
 
