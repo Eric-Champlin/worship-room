@@ -146,18 +146,19 @@ describe('DailyHub', () => {
   it('VOTD banner uses FrostedCard component', () => {
     renderPage()
     const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const banner = hero.querySelector('.rounded-2xl')
+    const banner = hero.querySelector('.rounded-xl')
     expect(banner).toBeInTheDocument()
     // FrostedCard classes (not the old bg-white/5)
     expect(banner!.className).toContain('bg-white/[0.06]')
     expect(banner!.className).toContain('border-white/[0.12]')
   })
 
-  it('verse text is not line-clamped in banner', () => {
+  it('verse text has mobile line-clamp with tablet breakout', () => {
     renderPage()
     const verseText = document.querySelector('.font-serif.italic')
     expect(verseText).toBeInTheDocument()
-    expect(verseText!.className).not.toContain('line-clamp')
+    expect(verseText!.className).toContain('line-clamp-2')
+    expect(verseText!.className).toContain('sm:line-clamp-none')
   })
 
   it('share button opens SharePanel', async () => {
@@ -266,16 +267,10 @@ describe('DailyHub', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders the Starting Point Quiz section', () => {
+  it('does not render quiz teaser or StartingPointQuiz', () => {
     renderPage()
-    expect(document.getElementById('quiz')).toBeInTheDocument()
-  })
-
-  it('renders quiz teaser link in hero', () => {
-    renderPage()
-    expect(
-      screen.getByRole('button', { name: /take a 30-second quiz/i }),
-    ).toBeInTheDocument()
+    expect(screen.queryByText(/not sure where to start/i)).not.toBeInTheDocument()
+    expect(document.getElementById('quiz')).not.toBeInTheDocument()
   })
 
   it('does not show checkmarks when logged out', () => {
@@ -382,6 +377,31 @@ describe('DailyHub', () => {
     inactiveTabs.forEach(tab => {
       expect(tab.className).toContain('text-white/50')
     })
+  })
+
+  it('greeting heading uses enlarged text size', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading.className).toContain('text-4xl')
+    expect(heading.className).not.toContain('text-3xl')
+  })
+
+  it('verse card uses compact max-w-2xl with rounded-xl', () => {
+    renderPage()
+    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+    const card = hero.querySelector('.max-w-2xl')
+    expect(card).toBeInTheDocument()
+    expect(card!.className).toContain('rounded-xl')
+    expect(card!.className).toContain('px-5')
+    expect(card!.className).toContain('py-4')
+  })
+
+  it('verse text has line-clamp-2 for mobile compaction', () => {
+    renderPage()
+    const verseText = document.querySelector('.font-serif.italic')
+    expect(verseText).toBeInTheDocument()
+    expect(verseText!.className).toContain('line-clamp-2')
+    expect(verseText!.className).toContain('text-white/80')
   })
 
   it('tab bar has no animated underline div', () => {

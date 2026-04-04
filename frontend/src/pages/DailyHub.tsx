@@ -7,7 +7,6 @@ import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
-import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
@@ -213,26 +212,26 @@ function DailyHubContent() {
           >
           <h1
             id="daily-hub-heading"
-            className="mb-1 text-3xl font-bold leading-tight sm:text-4xl"
+            className="mb-1 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
             style={GRADIENT_TEXT_STYLE}
           >
             {displayName}
           </h1>
 
           {/* Verse of the Day — Full-Width Banner */}
-          <FrostedCard className="mt-6 w-full max-w-3xl text-left sm:p-8">
+          <FrostedCard className="mt-6 w-full max-w-2xl rounded-xl px-5 py-4 text-left">
             <Link
               to={verseLink}
               className="block transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:rounded"
             >
-              <p className="font-serif italic text-lg leading-relaxed text-white/90 sm:text-xl">
+              <p className="font-serif italic text-base leading-relaxed text-white/80 line-clamp-2 sm:text-lg sm:line-clamp-none">
                 &ldquo;{verse.text}&rdquo;
               </p>
             </Link>
-            <p className="mt-3 text-sm text-white/60 sm:text-base">
+            <p className="mt-2 text-sm text-white/60">
               — {verse.reference}
             </p>
-            <div className="mt-4 flex items-center gap-4">
+            <div className="mt-3 flex items-center gap-4">
               <Link
                 to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}`}
                 className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
@@ -258,22 +257,6 @@ function DailyHubContent() {
             />
           </FrostedCard>
 
-          {/* Quiz Teaser */}
-          <p className="mt-4 font-sans text-sm text-white/50">
-            Not sure where to start?{' '}
-            <button
-              type="button"
-              onClick={() => {
-                document
-                  .getElementById('quiz')
-                  ?.scrollIntoView({ behavior: 'smooth' })
-              }}
-              className="inline-flex min-h-[44px] items-center rounded font-semibold text-white/50 underline underline-offset-2 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-            >
-              Take a 30-second quiz
-            </button>{' '}
-            and we&apos;ll help you find your path.
-          </p>
           </section>
         </GlowBackground>
 
@@ -397,8 +380,6 @@ function DailyHubContent() {
         {/* Today's Song Pick */}
         <SongPickSection />
 
-        {/* Starting Point Quiz */}
-        <StartingPointQuiz variant="dark" />
       </main>
 
       <SiteFooter />
