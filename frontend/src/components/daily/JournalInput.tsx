@@ -11,6 +11,7 @@ import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useAnnounce } from '@/hooks/useAnnounce'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { JOURNAL_DRAFT_KEY } from '@/constants/daily-experience'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { cn } from '@/lib/utils'
 import { JOURNAL_MAX_LENGTH, JOURNAL_WARNING_THRESHOLD, JOURNAL_DANGER_THRESHOLD } from '@/constants/content-limits'
 import type { JournalMode, PrayContext } from '@/types/daily-experience'
@@ -146,9 +147,11 @@ export function JournalInput({
 
       {/* Heading */}
       <div className="mb-4">
-        <h2 className="text-center font-sans text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
-          What&apos;s On Your{' '}
-          <span className="font-script text-3xl text-primary sm:text-4xl lg:text-5xl">Mind?</span>
+        <h2
+          className="text-center font-sans text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl"
+          style={GRADIENT_TEXT_STYLE}
+        >
+          What&apos;s On Your Mind?
         </h2>
         <div className="z-10 mt-2 flex justify-center">
           <AmbientSoundPill context="journal" variant="dark" className="mb-0" />

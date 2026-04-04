@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
+import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerInput } from '@/components/daily/PrayerInput'
 import { PrayerResponse } from '@/components/daily/PrayerResponse'
@@ -163,51 +164,55 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
-      <div className="relative">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-[0.12]"
-          style={SQUIGGLE_MASK_STYLE}
-        >
-          <BackgroundSquiggle />
-        </div>
-        <div className="relative">
+    <>
+      <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
+        <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+          <div className="relative">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-[0.12]"
+              style={SQUIGGLE_MASK_STYLE}
+            >
+              <BackgroundSquiggle />
+            </div>
+            <div className="relative">
 
-          {/* Prayer Response (loading + display + actions) */}
-          {(isLoading || prayer) && (
-            <PrayerResponse
-              key={prayer?.id ?? 'loading'}
-              prayer={prayer}
-              isLoading={isLoading}
-              topic={extractTopic()}
-              onReset={handleReset}
-              onRetryPrompt={(prompt) => setRetryPrompt(prompt)}
-              onSwitchToJournal={(t) => onSwitchToJournal?.(t)}
-              autoPlayedAudio={autoPlayedAudio}
-              audioActiveSounds={audioState.activeSounds.length}
-              onToggleAudioDrawer={() => audioDispatch({ type: audioState.drawerOpen ? 'CLOSE_DRAWER' : 'OPEN_DRAWER' })}
-              onStopAudio={() => { audioDispatch({ type: 'STOP_ALL' }); setAutoPlayedAudio(false) }}
-            />
-          )}
+              {/* Prayer Response (loading + display + actions) */}
+              {(isLoading || prayer) && (
+                <PrayerResponse
+                  key={prayer?.id ?? 'loading'}
+                  prayer={prayer}
+                  isLoading={isLoading}
+                  topic={extractTopic()}
+                  onReset={handleReset}
+                  onRetryPrompt={(prompt) => setRetryPrompt(prompt)}
+                  onSwitchToJournal={(t) => onSwitchToJournal?.(t)}
+                  autoPlayedAudio={autoPlayedAudio}
+                  audioActiveSounds={audioState.activeSounds.length}
+                  onToggleAudioDrawer={() => audioDispatch({ type: audioState.drawerOpen ? 'CLOSE_DRAWER' : 'OPEN_DRAWER' })}
+                  onStopAudio={() => { audioDispatch({ type: 'STOP_ALL' }); setAutoPlayedAudio(false) }}
+                />
+              )}
 
-          {/* Input Section (hidden when prayer is displayed or loading) */}
-          {!prayer && !isLoading && (
-            <PrayerInput
-              onSubmit={handleGenerate}
-              isLoading={isLoading}
-              initialText={initialText}
-              retryPrompt={retryPrompt}
-              onRetryPromptClear={() => setRetryPrompt(null)}
-            />
-          )}
+              {/* Input Section (hidden when prayer is displayed or loading) */}
+              {!prayer && !isLoading && (
+                <PrayerInput
+                  onSubmit={handleGenerate}
+                  isLoading={isLoading}
+                  initialText={initialText}
+                  retryPrompt={retryPrompt}
+                  onRetryPromptClear={() => setRetryPrompt(null)}
+                />
+              )}
 
-          {/* Guided Prayer Sessions — always visible */}
-          <div className="mt-12">
-            <GuidedPrayerSection onStartSession={handleStartGuidedSession} />
+              {/* Guided Prayer Sessions — always visible */}
+              <div className="mt-12">
+                <GuidedPrayerSection onStartSession={handleStartGuidedSession} />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </GlowBackground>
 
       {/* Player overlay (fixed positioning, visually covers full viewport) */}
       {activeGuidedSession && (
@@ -219,6 +224,6 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
           onTryAnother={handleGuidedTryAnother}
         />
       )}
-    </div>
+    </>
   )
 }

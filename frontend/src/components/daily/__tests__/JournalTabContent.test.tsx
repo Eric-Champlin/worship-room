@@ -434,3 +434,65 @@ describe('JournalTabContent (accessibility)', () => {
     expect(textarea).toHaveValue('My journal entry')
   })
 })
+
+describe('JournalTabContent atmospheric visuals', () => {
+  it('renders glow background with center variant (>= 1 orb)', () => {
+    renderJournalTab()
+    expect(screen.getAllByTestId('glow-orb').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('renders gradient heading text "What\'s On Your Mind?"', () => {
+    renderJournalTab()
+    const heading = screen.getByRole('heading', { name: /what's on your mind\?/i })
+    expect(heading).toBeInTheDocument()
+    expect(heading).toHaveStyle({ backgroundImage: expect.stringContaining('linear-gradient') })
+  })
+
+  it('heading has no Caveat script font span', () => {
+    renderJournalTab()
+    const heading = screen.getByRole('heading', { name: /what's on your mind\?/i })
+    expect(heading.querySelector('.font-script')).toBeNull()
+  })
+
+  it('heading is a single text node (no inner span)', () => {
+    renderJournalTab()
+    const heading = screen.getByRole('heading', { name: /what's on your mind\?/i })
+    expect(heading.querySelector('span')).toBeNull()
+  })
+
+  it('heading has leading-tight class and no text-white class', () => {
+    renderJournalTab()
+    const heading = screen.getByRole('heading', { name: /what's on your mind\?/i })
+    expect(heading.className).toContain('leading-tight')
+    expect(heading.className).not.toContain('text-white')
+  })
+
+  it('empty state renders inside GlowBackground wrapper', () => {
+    renderJournalTab()
+    const emptyStateText = screen.getByText('Your journal is waiting')
+    const glowOrb = screen.getAllByTestId('glow-orb')[0]
+    // GlowBackground's wrapper (overflow-hidden) must contain both the glow orb
+    // and the empty state — they share the same wrapper as siblings of content.
+    const glowWrapper = glowOrb.closest('.overflow-hidden')
+    expect(glowWrapper).not.toBeNull()
+    expect(glowWrapper!.contains(emptyStateText)).toBe(true)
+  })
+
+  it('saved entries list renders inside GlowBackground wrapper', async () => {
+    const user = userEvent.setup()
+    renderJournalTab()
+    // Save an entry to populate SavedEntriesList
+    const textarea = screen.getByLabelText('Journal entry')
+    await user.type(textarea, 'Today I feel grateful for many things')
+    const saveBtn = screen.getByRole('button', { name: /save entry/i })
+    await user.click(saveBtn)
+    // SavedEntriesList now rendered — locate by its content
+    const savedEntryContent = screen.getByText('Today I feel grateful for many things')
+    // GlowBackground's wrapper (overflow-hidden) must contain the saved entry,
+    // confirming saved entries are part of the same atmospheric context.
+    const glowOrb = screen.getAllByTestId('glow-orb')[0]
+    const glowWrapper = glowOrb.closest('.overflow-hidden')
+    expect(glowWrapper).not.toBeNull()
+    expect(glowWrapper!.contains(savedEntryContent)).toBe(true)
+  })
+})

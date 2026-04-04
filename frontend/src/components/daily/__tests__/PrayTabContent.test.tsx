@@ -66,6 +66,16 @@ vi.mock('@/hooks/useReducedMotion', () => ({
   useReducedMotion: () => mockReducedMotion,
 }))
 
+// Mock GuidedPrayerPlayer to avoid TTS/speechSynthesis/wakeLock/timer complexity.
+// We only need to verify its structural placement relative to GlowBackground.
+vi.mock('@/components/daily/GuidedPrayerPlayer', () => ({
+  GuidedPrayerPlayer: ({ session }: { session: { title: string } }) => (
+    <div role="dialog" aria-label={`Guided prayer: ${session.title}`} data-testid="mock-guided-player">
+      Mock Guided Prayer Player
+    </div>
+  ),
+}))
+
 // --- Helpers ---
 interface MockAudioState {
   activeSounds: { id: string }[]
@@ -756,5 +766,57 @@ describe('PrayTabContent (accessibility)', () => {
     renderPrayTab()
     await user.click(screen.getByText('Generate Prayer'))
     expect(screen.getByLabelText('Prayer request')).toHaveAttribute('aria-invalid', 'true')
+  })
+})
+
+describe('PrayTabContent atmospheric visuals', () => {
+  it('renders glow background with center variant (>= 1 orb)', () => {
+    renderPrayTab()
+    expect(screen.getAllByTestId('glow-orb').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('renders gradient heading text "What\'s On Your Heart?"', () => {
+    renderPrayTab()
+    const heading = screen.getByRole('heading', { name: /what's on your heart\?/i })
+    expect(heading).toBeInTheDocument()
+    expect(heading).toHaveStyle({ backgroundImage: expect.stringContaining('linear-gradient') })
+  })
+
+  it('heading has no Caveat script font span', () => {
+    renderPrayTab()
+    const heading = screen.getByRole('heading', { name: /what's on your heart\?/i })
+    expect(heading.querySelector('.font-script')).toBeNull()
+  })
+
+  it('heading is a single text node (no inner span)', () => {
+    renderPrayTab()
+    const heading = screen.getByRole('heading', { name: /what's on your heart\?/i })
+    expect(heading.querySelector('span')).toBeNull()
+  })
+
+  it('heading has leading-tight class and no text-white class', () => {
+    renderPrayTab()
+    const heading = screen.getByRole('heading', { name: /what's on your heart\?/i })
+    expect(heading.className).toContain('leading-tight')
+    expect(heading.className).not.toContain('text-white')
+  })
+
+  it('GuidedPrayerPlayer renders as sibling of GlowBackground, not a descendant', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    // Trigger guided session by clicking the first session card
+    const sessionTitle = screen.getByText('Morning Offering')
+    const sessionCard = sessionTitle.closest('button')
+    expect(sessionCard).not.toBeNull()
+    await user.click(sessionCard!)
+    // Player dialog now rendered (mocked)
+    const playerDialog = screen.getByTestId('mock-guided-player')
+    // GlowBackground's wrapper has the overflow-hidden class
+    const glowOrb = screen.getAllByTestId('glow-orb')[0]
+    const glowWrapper = glowOrb.closest('.overflow-hidden')
+    expect(glowWrapper).not.toBeNull()
+    // CRITICAL INVARIANT: Player must NOT be inside GlowBackground's overflow-hidden
+    // wrapper — otherwise its fixed-position full-viewport overlay would be clipped.
+    expect(glowWrapper!.contains(playerDialog)).toBe(false)
   })
 })

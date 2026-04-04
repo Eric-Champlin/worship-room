@@ -100,9 +100,8 @@ describe('PrayTabContent', () => {
 
   it('renders styled heading', () => {
     renderComponent()
-    expect(screen.getByText('Heart?')).toBeInTheDocument()
     expect(
-      screen.getByText(/what's on your/i),
+      screen.getByRole('heading', { name: /what's on your heart\?/i }),
     ).toBeInTheDocument()
   })
 
