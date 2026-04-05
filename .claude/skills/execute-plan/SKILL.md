@@ -316,7 +316,7 @@ This applies when:
      ```typescript
      await page.addInitScript(() => {
        localStorage.setItem('wr_auth_simulated', 'true');
-       localStorage.setItem('wr_user_name', 'Eric');
+       localStorage.setItem('wr_user_name', 'Test User');
      });
      ```
    - Verify BOTH logged-out state (default, no injection) AND logged-in state

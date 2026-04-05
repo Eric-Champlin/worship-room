@@ -825,7 +825,7 @@ At each viewport, use `getComputedStyles()` helper to inspect computed styles on
 |-------|--------|----------|
 | Spotify embed loads | YES / NO / N/A | {details} |
 | Squiggle backgrounds render correctly (Music tabs: slice) | CONSISTENT / MISMATCHED / N/A | {details} |
-| Light background on all tabs | YES / NO / N/A | {details} |
+| Dark background on all tabs (bg-dashboard-dark #0f0a1e) | YES / NO / N/A | {details} |
  
 ---
  
@@ -973,14 +973,12 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 **Suggested tool based on findings:**
 | If issue is... | Use this tool | Handoff guidance |
 |---------------|--------------|-----------------|
-| CSS/styling mismatch | Fix in code, re-run `/verify-with-playwright` | Reference the Fix Hint from the comparison table | Reference the Fix Hint from the comparison table |
+| CSS/styling mismatch | Fix in code, re-run `/verify-with-playwright` | Reference the Fix Hint from the comparison table |
 | Intra-element formatting missing | Fix HTML/JSX, re-run `/verify-with-playwright` | Add `<strong>`/`<em>` tags to component JSX |
 | Form inputs stretching on mobile | Fix responsive width constraint, re-run `/verify-with-playwright` | Check design system or recon constraint method |
-| Intra-element formatting missing | Fix HTML/JSX, re-run `/verify-with-playwright` | Add `<strong>`/`<em>` tags to component |
-| Form inputs stretching on mobile | Fix responsive width, re-run `/verify-with-playwright` | Check design system constraint method |
-| JavaScript console error | Investigate component, check state management | Check stack trace for originating component | Check stack trace for originating component |
-| API/network failure | Check backend endpoint, verify API contract | Test endpoint directly | Test endpoint directly with curl or Postman |
-| All checks pass | `/code-review` then commit | Proceed to pre-commit review | Proceed to pre-commit review |
+| JavaScript console error | Investigate component, check state management | Check stack trace for originating component |
+| API/network failure | Check backend endpoint, verify API contract | Test endpoint directly with curl or Postman |
+| All checks pass | `/code-review` then commit | Proceed to pre-commit review |
  
 - {specific investigation actions for issues found}
 - {whether to re-verify after fixes}

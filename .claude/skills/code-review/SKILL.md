@@ -197,6 +197,8 @@ If the plan has no [UNVERIFIED] values: `**[UNVERIFIED] values:** None in plan �
  
 **Regardless of master plan:** Check that any localStorage keys or data interfaces used in the diff are consistent with each other and with existing code. If two files in the diff use the same localStorage key with different schemas, or if a new file uses a key name that conflicts with existing code, flag it.
  
+**When checking localStorage keys across files, consult `.claude/rules/11-local-storage-keys.md` as the canonical list of active `wr_*` keys and their shapes.** Any new key introduced in the diff that isn't in that inventory is either (a) a legitimate new key that should be added to the inventory in a follow-up, or (b) a drift/typo that should be flagged. Any existing key used with a different shape than the inventory describes is a data-model conflict.
+ 
 | Key / Interface | File A Usage | File B Usage | Consistent? |
 |----------------|-------------|-------------|-------------|
 | {key or interface} | {file}:{line} — {schema/type} | {file}:{line} — {schema/type} | YES / CONFLICT: {details} |
