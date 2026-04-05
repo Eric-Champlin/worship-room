@@ -15,7 +15,6 @@ import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
 import { WhisperToastProvider } from '@/components/ui/WhisperToast'
 import { MidnightVerse } from '@/components/MidnightVerse'
-import { PageTransition } from '@/components/ui/PageTransition'
 import {
   DashboardSkeleton,
   DailyHubSkeleton,
@@ -162,7 +161,6 @@ function App() {
         <UpdatePrompt />
         <ChunkErrorBoundary>
         <Suspense fallback={<RouteLoadingFallback />}>
-        <PageTransition>
         <Routes>
           <Route path="/" element={<Suspense fallback={<DashboardSkeleton />}><RootRoute /></Suspense>} />
           <Route path="/health" element={<Health />} />
@@ -214,7 +212,6 @@ function App() {
           <Route path="/register" element={<Suspense fallback={null}><RegisterPage /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </PageTransition>
         </Suspense>
         </ChunkErrorBoundary>
         </WhisperToastProvider>

@@ -232,10 +232,6 @@ export default {
           '0%, 100%': { opacity: '0.2' },
           '50%': { opacity: '0.4' },
         },
-        'page-enter': {
-          '0%': { opacity: '0', transform: 'translateY(8px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
         'stagger-enter': {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
@@ -345,7 +341,6 @@ export default {
         'garden-seasonal-fade': 'garden-seasonal-fade 1s ease-out forwards',
         'garden-element-fade': 'garden-element-fade 500ms ease-out forwards',
         'logo-pulse': 'logo-pulse 2s ease-in-out infinite',
-        'page-enter': 'page-enter 200ms ease-out both',
         'stagger-enter': 'stagger-enter 300ms ease-out both',
         'modal-spring-in': 'modal-spring-in 250ms cubic-bezier(0.34, 1.56, 0.64, 1) both',
         'modal-spring-out': 'modal-spring-out 150ms ease-out both',
