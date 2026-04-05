@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { type ReactNode, createElement } from 'react'
 import { useInstallPrompt } from '../useInstallPrompt'
-import { InstallPromptProvider } from '@/contexts/InstallPromptContext'
+import { InstallPromptProvider } from '@/contexts/InstallPromptProvider'
 
 function wrapper({ children }: { children: ReactNode }) {
   return createElement(InstallPromptProvider, null, children)
