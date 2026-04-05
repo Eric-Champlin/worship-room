@@ -114,7 +114,7 @@ Round 3 redesign (HP-1 through HP-15) established the current structure. All sec
    ─── section divider ───
 7. StartingPointQuiz (id="quiz" — 5-question points-based quiz, result card routes to recommended feature)
    ─── section divider ───
-8. FinalCTA ("Your Healing Starts Here" — strongest glow on the page at 0.50 center, "Get Started — It's Free" button → auth modal)
+8. FinalCTA ("Your Healing Starts Here" — no glow orb, "Get Started — It's Free" button with white shadow → auth modal)
 9. SiteFooter (nav columns, crisis resources, app download badges, "Listen on Spotify" badge, copyright)
 ```
 

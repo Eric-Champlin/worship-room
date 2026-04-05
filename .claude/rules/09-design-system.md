@@ -137,7 +137,7 @@ Shared building blocks for the landing page and Daily Hub, created during the Ro
 - **DashboardPreview.tsx** — "See How You're Growing" section with 6 locked preview cards + "Create a Free Account" CTA.
 - **DashboardPreviewCard.tsx** — Locked preview card: blurred mockup on top, clear icon + title + description below. Each icon has a unique accent color.
 - **DifferentiatorSection.tsx** — "Built for Your Heart" section with 6 competitive advantage cards.
-- **FinalCTA.tsx** — Bottom CTA: "Your Healing Starts Here", strongest glow on the page (0.50 center), "Get Started — It's Free" button → auth modal.
+- **FinalCTA.tsx** — Bottom CTA: "Your Healing Starts Here", "Get Started — It's Free" button → auth modal. Uses `GlowBackground` with `variant="none"` — no glow orb (removed in 585f186 to let the white button shadow carry the emotional peak).
 - **dashboard-preview-data.ts** — Card metadata (icons, titles, descriptions, preview keys).
 - **differentiator-data.ts** — 6 differentiator cards (titles, descriptions, icons).
 - **index.ts** — Barrel export for all homepage components.
