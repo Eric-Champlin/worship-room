@@ -26,7 +26,7 @@ vi.mock('@/hooks/useAuth', () => ({
   }),
 }))
 
-vi.mock('@/components/ui/WhisperToast', () => ({
+vi.mock('@/hooks/useWhisperToast', () => ({
   useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
 }))
 

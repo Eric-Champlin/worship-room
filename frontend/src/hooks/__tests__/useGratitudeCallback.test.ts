@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useGratitudeCallback } from '../useGratitudeCallback'
 import { getLocalDateString } from '@/utils/date'
@@ -11,7 +11,7 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ isAuthenticated: mockIsAuthenticated.value }),
 }))
 
-vi.mock('@/components/ui/WhisperToast', () => ({
+vi.mock('@/hooks/useWhisperToast', () => ({
   useWhisperToast: () => ({ showWhisperToast: mockShowWhisperToast }),
 }))
 

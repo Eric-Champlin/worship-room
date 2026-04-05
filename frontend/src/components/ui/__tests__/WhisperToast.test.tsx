@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { WhisperToastProvider, useWhisperToast } from '../WhisperToast'
+import { WhisperToastProvider } from '../WhisperToast'
+import { useWhisperToast } from '@/hooks/useWhisperToast'
 
 // ── Mocks ───────────────────────────────────────────────────────────
 const mockPlaySoundEffect = vi.fn()

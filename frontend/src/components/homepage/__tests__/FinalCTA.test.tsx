@@ -82,14 +82,16 @@ describe('FinalCTA', () => {
     expect(container.querySelector('.bg-hero-bg')).toBeInTheDocument()
   })
 
-  it('has extra glow orb', () => {
+  // Glow orb was intentionally removed in commit 585f186
+  // ("Remove purple glow orb from FinalCTA section"). GlowBackground is
+  // rendered with variant="none", so no radial-gradient orbs should exist.
+  it('has no glow orb (removed in 585f186)', () => {
     const { container } = renderFinalCTA()
     const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
-    // At least one aria-hidden glow element with radial-gradient
     const hasRadialGradient = Array.from(glowOrbs).some(
       (el) => (el as HTMLElement).style.background?.includes('radial-gradient')
     )
-    expect(hasRadialGradient).toBe(true)
+    expect(hasRadialGradient).toBe(false)
   })
 
   it('stagger delays applied', () => {
@@ -117,26 +119,6 @@ describe('FinalCTA', () => {
     expect(button).toHaveAttribute('type', 'button')
   })
 
-  it('glow orb has 0.50 center opacity with three-stop gradient', () => {
-    const { container } = renderFinalCTA()
-    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
-    const orb = Array.from(glowOrbs).find(
-      (el) => (el as HTMLElement).style.background?.includes('rgba(139, 92, 246, 0.50)')
-    )
-    expect(orb).toBeTruthy()
-    expect((orb as HTMLElement).style.background).toContain('35%')
-    expect((orb as HTMLElement).style.background).toContain('55%')
-  })
-
-  it('has single glow orb (not 2)', () => {
-    const { container } = renderFinalCTA()
-    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
-    const orbsWithGradient = Array.from(glowOrbs).filter(
-      (el) => (el as HTMLElement).style.background?.includes('radial-gradient') && (el as HTMLElement).className.includes('pointer-events-none')
-    )
-    expect(orbsWithGradient).toHaveLength(1)
-  })
-
   it('CTA button has base shadow', () => {
     renderFinalCTA()
     const button = screen.getByRole('button', { name: /get started/i })
@@ -147,14 +129,5 @@ describe('FinalCTA', () => {
     renderFinalCTA()
     const button = screen.getByRole('button', { name: /get started/i })
     expect(button.className).toContain('hover:shadow-[0_0_40px')
-  })
-
-  it('glow orb has pointer-events-none', () => {
-    const { container } = renderFinalCTA()
-    const glowOrbs = container.querySelectorAll('[aria-hidden="true"]')
-    const orb = Array.from(glowOrbs).find(
-      (el) => (el as HTMLElement).style.background?.includes('radial-gradient')
-    )
-    expect(orb?.className).toContain('pointer-events-none')
   })
 })

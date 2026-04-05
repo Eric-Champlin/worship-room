@@ -27,7 +27,7 @@ vi.mock('@/hooks/useReducedMotion', () => ({
   useReducedMotion: vi.fn(() => true),
 }))
 
-vi.mock('@/components/ui/WhisperToast', () => ({
+vi.mock('@/hooks/useWhisperToast', () => ({
   useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
 }))
 

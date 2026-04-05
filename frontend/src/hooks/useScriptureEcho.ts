@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { useWhisperToast } from '@/components/ui/WhisperToast'
+import { useWhisperToast } from '@/hooks/useWhisperToast'
 import { canShowSurprise, markSurpriseShown } from '@/services/surprise-storage'
 import { getBookDisplayName } from '@/services/bible-annotations-storage'
 import { BIBLE_HIGHLIGHTS_KEY } from '@/constants/bible'

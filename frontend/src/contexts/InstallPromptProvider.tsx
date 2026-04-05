@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -7,22 +6,14 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import {
+  InstallPromptContext,
+  type InstallPromptContextValue,
+} from './InstallPromptContext'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
-}
-
-export interface InstallPromptContextValue {
-  isInstallable: boolean
-  isInstalled: boolean
-  isIOS: boolean
-  visitCount: number
-  isDismissed: boolean
-  isDashboardCardShown: boolean
-  promptInstall: () => Promise<'accepted' | 'dismissed' | null>
-  dismissBanner: () => void
-  markDashboardCardShown: () => void
 }
 
 const VISIT_COUNT_KEY = 'wr_visit_count'
@@ -66,8 +57,6 @@ function incrementVisitCount(): number {
   sessionStorage.setItem(SESSION_COUNTED_KEY, 'true')
   return count
 }
-
-export const InstallPromptContext = createContext<InstallPromptContextValue | null>(null)
 
 export function InstallPromptProvider({ children }: { children: ReactNode }) {
   const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(null)

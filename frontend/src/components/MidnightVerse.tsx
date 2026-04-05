@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { useWhisperToast } from '@/components/ui/WhisperToast'
+import { useWhisperToast } from '@/hooks/useWhisperToast'
 import {
   hasMidnightVerseBeenShown,
   markMidnightVerseShown,

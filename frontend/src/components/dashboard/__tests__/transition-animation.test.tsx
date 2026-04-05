@@ -27,7 +27,7 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
-vi.mock('@/components/ui/WhisperToast', () => ({
+vi.mock('@/hooks/useWhisperToast', () => ({
   useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
 }))
 

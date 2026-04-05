@@ -1,7 +1,5 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -11,32 +9,10 @@ import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
-
-// ── Types ───────────────────────────────────────────────────────────
-export interface WhisperToastContent {
-  message: string
-  highlightedText?: string
-  closingMessage?: string
-  ctaLabel?: string
-  ctaTo?: string
-  duration?: number
-  soundId?: 'whisper' | 'sparkle' | 'chime'
-}
-
-interface WhisperToastContextValue {
-  showWhisperToast: (content: WhisperToastContent) => void
-}
-
-// ── Context ─────────────────────────────────────────────────────────
-const WhisperToastContext = createContext<WhisperToastContextValue | null>(null)
-
-export function useWhisperToast(): WhisperToastContextValue {
-  const ctx = useContext(WhisperToastContext)
-  if (!ctx) {
-    throw new Error('useWhisperToast must be used within WhisperToastProvider')
-  }
-  return ctx
-}
+import {
+  WhisperToastContext,
+  type WhisperToastContent,
+} from '@/hooks/useWhisperToast'
 
 // ── Provider ────────────────────────────────────────────────────────
 export function WhisperToastProvider({ children }: { children: ReactNode }) {

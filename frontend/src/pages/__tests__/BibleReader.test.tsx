@@ -39,7 +39,7 @@ vi.mock('@/components/ui/Toast', () => ({
   useToastSafe: () => ({ showToast: vi.fn() }),
 }))
 
-vi.mock('@/components/ui/WhisperToast', () => ({
+vi.mock('@/hooks/useWhisperToast', () => ({
   useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
 }))
 
