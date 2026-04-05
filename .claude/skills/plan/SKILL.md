@@ -63,6 +63,11 @@ Discover:
 6. **Design system** — read `.claude/rules/09-design-system.md` for component inventory, hooks, and utilities
 7. **Security rules** — read `.claude/rules/02-security.md` for auth gating requirements. Identify every action in the spec that requires login and ensure the plan includes auth checks for each one.
 8. **Design System Reference** — check if `_plans/recon/design-system.md` exists. If it does, read it for exact computed CSS values, color tokens, typography, spacing, and component patterns (heroes, cards, buttons, decorative elements). These exact values must be referenced in any UI step's Details section — not "match the hero" but "use `background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%)`, font: Lora 48px/1.2 bold, color: #FFFFFF`".
+
+   **Precedence rule** — these two design files have different roles and don't compete:
+   - **`_plans/recon/design-system.md`** (the live recon snapshot) **takes precedence** for visual property values: exact colors, gradients, spacing, font sizes, box-shadows, class lists. It's a computed extraction from the real pages, so it matches what users actually see.
+   - **`.claude/rules/09-design-system.md`** **takes precedence** for architectural patterns, component inventory, design principles, and the "why" behind the system (color semantics, accessibility floors, section heading treatment rules).
+   - If they disagree on a specific CSS value, trust the recon. If they disagree on a principle or component description, trust 09-design-system.md. If the recon doesn't cover a component, fall back to 09-design-system.md + codebase inspection and mark derived values `[UNVERIFIED]`.
 9. **External Recon Report** — check if the spec references a recon report (e.g., `_plans/recon/{slug}.md`). If it does, read it for per-screen CSS Mapping Tables, Gradient tables, Vertical Rhythm tables, Image tables, Link inventories, States tables, Text Content Snapshots, and Responsive CSS Mapping Tables. These feed directly into implementation steps and are verified by `/verify-with-playwright`.
 10. **Master Spec Plan** — check if the spec references a master plan (e.g., `dashboard-growth-spec-plan-v2.md`). Also check CLAUDE.md for a multi-spec phase listing the current spec. If a master plan exists, read it for:
     - Shared data models (TypeScript interfaces, localStorage keys)
@@ -71,6 +76,8 @@ Discover:
     - Prior spec decisions that this spec must respect
     - Include relevant shared context in the Architecture Context section
 11. **Recent Execution Log deviations** — check the Execution Logs of the 2-3 most recent plans in `_plans/` for deviations caused by design system misunderstandings (wrong font, wrong gradient, wrong spacing). These patterns belong in the Design System Reminder block to prevent the same mistakes.
+
+    **"Recent" definition** — plans modified within the last 14 days, sorted by file mtime (newest first). Command: `ls -t _plans/*.md | head -3` then filter by mtime within 14 days. If no plans fall within that window, check the most recent plan regardless of age (it may still surface relevant deviations).
  
 If the Design System Reference does not exist, note it in the Assumptions section: "No design system reference found. UI styling values are based on codebase inspection and may not be pixel-perfect. Consider running `/playwright-recon --internal` before execution."
  
