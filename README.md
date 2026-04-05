@@ -1,206 +1,96 @@
 # Worship Room
 
-A Christian emotional healing and worship web application that provides a safe, peaceful online space where users can find comfort, guidance, and spiritual support through AI-powered scripture matching, prayer generation, journaling, community prayer support, and worship music.
+A Christian emotional healing and worship web application — a safe, peaceful online space where users find comfort, guidance, and spiritual support through AI-powered prayer, Scripture, journaling, meditation, worship music, and community support.
+
+Free, ad-free, and privacy-respecting in a market where competitors charge $40–$100/yr.
+
+## Documentation
+
+- **[CLAUDE.md](./CLAUDE.md)** — canonical project guide (feature summary, routes, implementation phases, build health, working guidelines)
+- **[.claude/rules/](./.claude/rules/)** — modular conventions (AI safety, security, design system, UX flows, backend/frontend/database standards, logging, deployment, testing, localStorage keys)
+
+If anything in this README disagrees with CLAUDE.md or the rule files, the rule files win.
 
 ## Project Structure
 
 ```
 worship-room/
-├── frontend/          # React 18 + TypeScript + Vite + TailwindCSS
-├── backend/           # Spring Boot 3 + Maven + Java 21
-├── _specs/            # Feature spec files (product requirements)
-├── _plans/            # Implementation plan files (technical plans)
-├── .claude/           # Claude Code rules and skills
-├── justfile           # Task runner commands
-├── docker-compose.yml # Docker orchestration
-├── CLAUDE.md          # Project guide and conventions
-└── README.md
+├── frontend/       # React 18 + TypeScript + Vite + TailwindCSS
+├── backend/        # Spring Boot 3 + Maven + Java 21 (Phase 3 — scaffold only)
+├── _specs/         # Feature spec files
+├── _plans/         # Implementation plan files
+├── .claude/        # Claude Code rules, skills, and agents
+├── CLAUDE.md       # Project guide (read this first)
+└── README.md       # This file
 ```
+
+## Tech Stack
+
+**Frontend:** React 18, TypeScript (strict), Vite, TailwindCSS, React Router, Lucide React, Recharts, Leaflet, react-helmet-async, vite-plugin-pwa. Tested with Vitest + React Testing Library + Playwright.
+
+**Backend (Phase 3):** Spring Boot 3, Java 21, Maven, Spring Security + JWT, PostgreSQL.
 
 ## Prerequisites
 
-- **Node.js** 18+ and **pnpm** (for frontend)
-- **Java 21** (for backend)
-- **Maven** (wrapper included)
-- **Just** (optional, for task runner) - install via `brew install just`
-- **Docker** (optional, for containerized setup)
+- Node.js 18+ and pnpm
+- Java 21 (backend only)
+- Just task runner (optional): `brew install just`
+- Docker (optional)
 
 ## Quick Start
 
-### Option 1: Using Just (Recommended)
-
 ```bash
-# Install frontend dependencies
-cd frontend && pnpm install && cd ..
-
-# Terminal 1 - Start backend
-just dev-backend
-
-# Terminal 2 - Start frontend
-just dev-frontend
-```
-
-### Option 2: Manual Commands
-
-```bash
-# Terminal 1 - Backend (http://localhost:8080)
-cd backend
-./mvnw spring-boot:run
-
-# Terminal 2 - Frontend (http://localhost:5173)
+# Frontend (http://localhost:5173)
 cd frontend
 pnpm install
 pnpm dev
-```
 
-### Option 3: Docker Compose
-
-```bash
-# Build and start both services
-docker-compose up --build
-
-# Access:
-# - Frontend: http://localhost:5173
-# - Backend: http://localhost:8080
-```
-
-## Available Commands (Just)
-
-```bash
-just install         # Install all dependencies
-just dev-frontend    # Run frontend dev server
-just dev-backend     # Run backend dev server
-just build           # Build both projects
-just lint-frontend   # Lint frontend code
-just format-frontend # Format frontend code
-just clean           # Clean build artifacts
-just docker-up       # Start with Docker
-just docker-down     # Stop Docker containers
-just help            # Show all commands
-```
-
-## API Endpoints
-
-- `GET /api/health` → `{ "status": "ok" }`
-- `GET /api/hello` → `{ "message": "Hello" }`
-- `GET /actuator/health` → Spring Boot Actuator health check
-
-## Testing the Setup
-
-1. Start both services (backend on port 8080, frontend on port 5173)
-2. Open http://localhost:5173 in your browser
-3. Click "Check Backend Health" link
-4. You should see successful responses from both `/api/health` and `/api/hello` endpoints
-
-## Implemented Features
-
-### Landing Page (Complete)
-- Hero section with typewriter input and mood-to-scripture flow
-- 7-step Journey to Healing timeline (Devotional → Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
-- Growth Teasers section (3 blurred preview cards)
-- Starting Point Quiz (5-question recommendation engine)
-- Full footer with crisis resources
-
-### Prayer Wall (Frontend Complete — Mock Data)
-- Community prayer feed with inline composer and inline comments
-- Prayer cards with avatars, "Show more" in-place expand, interaction bar
-- Share dropdown (copy link, email, SMS, Facebook, X)
-- Public user profiles with tabs (Prayers, Replies, Reactions)
-- Private dashboard with tabs (My Prayers, Comments, Bookmarks, Reactions, Settings)
-- Auth modal for login/register gates
-- Report dialog, answered prayer badges, delete confirmation
-- Client-side crisis keyword detection on user input
-
-### Local Support (Frontend Complete — Mock Data)
-- Church Locator (`/local-support/churches`) with denomination filter
-- Christian Counselor Locator (`/local-support/counselors`) with specialty filter and disclaimer banner
-- Celebrate Recovery Locator (`/local-support/celebrate-recovery`) with CR explainer section
-- Search controls: geolocation, city/zip geocoding, radius slider (1–100 miles)
-- Leaflet map + list view with toggle (mobile) and side-by-side (desktop)
-- Listing cards with details expand, save to favorites (localStorage), share dropdown
-- Auth-gated search UI: logged-out users see hero with "Sign In to Search" CTA
-- Saved Locations tab with localStorage persistence
-- Proper ARIA tab pattern with keyboard navigation
-- Google Places API wiring is Phase 3+ (currently uses mock data)
-
-### Other Pages
-- Daily page (Verse & Song of the Day — placeholder)
-- Insights page (mood analytics — placeholder)
-
-**Total: 331 frontend tests passing (43 test files)**
-
-## Frontend Stack
-
-- React 18 + TypeScript (strict) + Vite
-- TailwindCSS for styling
-- React Router for navigation
-- Vitest + React Testing Library for tests
-- ESLint + Prettier configured
-- Leaflet + React Leaflet for maps
-- Lucide React for icons
-
-## Backend Stack
-
-- Java 21 + Spring Boot 3.5
-- Maven build system
-- CORS configured for frontend origin
-- Actuator for health checks
-- Validation support built-in
-- Database, auth, AI integration, and remaining backend features are not yet implemented
-
-## Development
-
-### Frontend
-
-```bash
-cd frontend
-pnpm dev      # Start dev server
-pnpm build    # Build for production
-pnpm test     # Run Vitest tests
-pnpm lint     # Run ESLint
-pnpm format   # Format with Prettier
-```
-
-### Backend
-
-```bash
+# Backend (http://localhost:8080) — optional, scaffold only
 cd backend
-./mvnw spring-boot:run    # Start dev server
-./mvnw clean package      # Build JAR
-./mvnw test               # Run tests
-./mvnw clean              # Clean build directory
+./mvnw spring-boot:run
+```
+
+Or with Just:
+
+```bash
+just install
+just dev-frontend    # terminal 1
+just dev-backend     # terminal 2
+```
+
+## Common Commands
+
+```bash
+# Frontend
+cd frontend
+pnpm dev          # dev server
+pnpm build        # production build
+pnpm test         # Vitest
+pnpm lint         # ESLint
+pnpm format       # Prettier
+
+# Backend
+cd backend
+./mvnw spring-boot:run
+./mvnw test
+
+# Docker
+docker-compose up --build
 ```
 
 ## Environment Variables
 
-### Frontend (.env)
-
+**Frontend (`frontend/.env`)**
 ```env
 VITE_API_BASE_URL=http://localhost:8080
 ```
 
-### Backend (application.properties)
-
-```properties
-server.port=8080
-spring.application.name=worship-room-backend
-```
+See [.claude/rules/08-deployment.md](./.claude/rules/08-deployment.md) for the full environment variable list (OpenAI, SMTP, encryption, rate limiting, etc. — all Phase 3).
 
 ## Troubleshooting
 
-**Frontend can't connect to backend:**
-- Ensure backend is running on port 8080
-- Check CORS configuration in `backend/src/main/java/com/example/worshiproom/config/CorsConfig.java`
-- Verify VITE_API_BASE_URL in frontend/.env
-
-**Backend won't start:**
-- Ensure Java 21 is installed: `java -version`
-- Check if port 8080 is already in use: `lsof -i :8080`
-- Verify JAVA_HOME is set correctly
-
-**Maven wrapper issues:**
-- The mvnw script will auto-download Maven on first run
-- Ensure execute permissions: `chmod +x mvnw`
+- **Port conflicts:** Frontend uses 5173, backend uses 8080. `lsof -i :5173` / `lsof -i :8080` to check.
+- **Maven wrapper:** `chmod +x backend/mvnw` if the wrapper lacks execute permissions.
 
 ## License
 
