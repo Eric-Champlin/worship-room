@@ -36,12 +36,6 @@ function stepFrame(timestamp: number) {
   }
 }
 
-function runAnimation(startTime: number, endTime: number, stepMs: number) {
-  for (let t = startTime; t <= endTime; t += stepMs) {
-    stepFrame(t)
-  }
-}
-
 beforeEach(() => {
   matchMediaMatches = false
 

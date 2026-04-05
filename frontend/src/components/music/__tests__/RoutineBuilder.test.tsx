@@ -29,7 +29,6 @@ const defaultProps = {
 
 describe('RoutineBuilder — name validation', () => {
   it('shows error when saving with empty name', async () => {
-    const user = userEvent.setup()
     render(<RoutineBuilder {...defaultProps} />)
     // Need at least one step to enable save — but save button is disabled when steps.length === 0
     // The name validation only triggers when steps exist, so we test the save button enabled state first
