@@ -107,7 +107,7 @@ Placeholder text below `placeholder:text-white/50` fails WCAG AA 3:1 on input ba
 - **Layout.tsx** — Wrapper: `<Navbar>` + content + `<SiteFooter>`. Passes `transparent` prop on landing page.
 - **Navbar.tsx** — Glassmorphic navigation. Desktop: 5 top-level items + Local Support dropdown + avatar dropdown. Mobile: hamburger drawer (`MobileDrawer`). `transparent` prop controls absolute vs relative positioning. Logged-in state: replaces Log In/Get Started with notification bell + avatar dropdown (see `10-ux-flows.md` for nav structure).
 - **SiteFooter.tsx** — Dark purple footer. Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), "Listen on Spotify" badge, copyright.
-- **PageTransition.tsx** — 150ms opacity fade-out + 200ms fade-in on route changes. Body background set to `#08051A` to prevent white flash during transitions.
+- **PageTransition.tsx** — 150ms opacity fade-out + 200ms fade-in on route changes. `html`, `body`, and `#root` backgrounds are set to `#08051A` in `src/index.css` to prevent white flash during the opacity-0 phase of the transition.
 
 ### Design System Components
 
@@ -208,7 +208,7 @@ Shared building blocks for the landing page and Daily Hub, created during the Ro
 
 ### Skeleton Components (`components/skeletons/`)
 
-13 page-level skeleton components for content-shaped loading states: `DashboardSkeleton`, `DailyHubSkeleton`, `PrayerWallSkeleton`, `FriendsSkeleton`, `SettingsSkeleton`, `InsightsSkeleton`, `MyPrayersSkeleton`, `MusicSkeleton`, `GrowPageSkeleton`, `BibleBrowserSkeleton`, `BibleReaderSkeleton`, `ProfileSkeleton`. BibleReaderSkeleton is wired inline; others are built but not yet wired to route-level Suspense boundaries.
+13 page-level skeleton components for content-shaped loading states: `DashboardSkeleton`, `DailyHubSkeleton`, `PrayerWallSkeleton`, `FriendsSkeleton`, `SettingsSkeleton`, `InsightsSkeleton`, `MyPrayersSkeleton`, `MusicSkeleton`, `GrowPageSkeleton`, `BibleBrowserSkeleton`, `BibleReaderSkeleton`, `ProfileSkeleton`. 11 are wired to route-level `<Suspense>` boundaries in `App.tsx`. BibleReaderSkeleton is wired inline. MonthlyReport falls back to the generic `RouteLoadingFallback`.
 
 ---
 
@@ -242,7 +242,6 @@ Shared building blocks for the landing page and Daily Hub, created during the Ro
 ## Utility Libraries (`lib/`)
 
 - **utils.ts** — `cn()` classname utility (clsx + tailwind-merge).
-- **query-client.ts** — React Query client (5-min staleTime, refetchOnWindowFocus disabled).
 - **time.ts** — `timeAgo()` relative time, `formatFullDate()` date formatting.
 - **geo.ts** — `calculateDistanceMiles()` Haversine formula.
 - **audio.ts** — `playChime()` Web Audio API 528 Hz sine wave.
@@ -348,7 +347,7 @@ Global `AudioProvider` wraps the app (between `AuthModalProvider` and `Routes` i
 
 ### Visual Theme
 
-Music tabs: light `#F5F5F5` (`bg-neutral-bg`) background with dark-on-light cards (`bg-white rounded-xl border border-gray-200 shadow-sm`). AudioDrawer/AudioPill/overlays: dark-themed (`rgba(15,10,30,0.85)` with white text).
+Music tabs: dark `#0f0a1e` (`bg-dashboard-dark`) background with frosted glass cards (`bg-white/[0.06] border border-white/10 rounded-xl`) and white text. AudioDrawer/AudioPill/overlays: dark-themed (`rgba(15,10,30,0.85)` with white text). Consistent with the rest of the dark-theme app.
 
 Components built but not rendered (kept for re-enable): `TimeOfDaySection`, `PersonalizationSection`, `RecentlyAddedSection`, `ResumePrompt`, `MusicHint`, `LofiCrossReference`, `AmbientSearchBar`, `AmbientFilterBar`. Hooks kept: `useSpotifyAutoPause`, `useMusicHints`, `useTimeOfDayRecommendations`.
 
@@ -448,5 +447,3 @@ The homepage `JourneySection` uses narrow inline SVG squiggles (~150px wide colu
 
 - **Footer touch targets**: Crisis resource links and App Store badges (40px) undersized on mobile (44px minimum). Pre-existing.
 - **Spotify embed loading**: May show fallback in headless/restricted environments.
-- **Skeleton loading not wired**: 13 skeleton components built in `components/skeletons/` but only BibleReaderSkeleton is wired to Suspense. All other lazy routes use a generic `RouteLoadingFallback`. Round 3 quick win addresses this.
-- **Music page theme break**: Music page uses light `bg-neutral-bg` background while the rest of the app uses dark theme. Creates a jarring transition from the dark dashboard/daily hub. Design-system intentional but noted for potential future alignment.

@@ -28,7 +28,7 @@ Worship Room is free, ad-free, and privacy-respecting in a market where competit
 - 🚀 **[Deployment](.claude/rules/08-deployment.md)** - Environment variables, deployment platforms, dev commands
 - 🎨 **[Design System & Components](.claude/rules/09-design-system.md)** - Color palette, typography, component inventory, hooks, utilities, Music architecture, **homepage visual patterns (Round 3)**
 - 🔄 **[UX Flows](.claude/rules/10-ux-flows.md)** - Navigation structure, all user flows
-- 💾 **[localStorage Keys](.claude/rules/11-localstorage-keys.md)** - Complete inventory of all `wr_*` storage keys with types and descriptions
+- 💾 **[localStorage Keys](.claude/rules/11-local-storage-keys.md)** - Complete inventory of all `wr_*` storage keys with types and descriptions
 
 **Source of truth**: If CLAUDE.md conflicts with a rule file, rule file wins.
 
@@ -135,7 +135,7 @@ Worship Room is free, ad-free, and privacy-respecting in a market where competit
 - **Seasonal Calendar** — Liturgical season detection via Computus algorithm, useLiturgicalSeason hook
 - **Sound Effects** — 6 Web Audio API sounds (chime, ascending, harp, bell, whisper, sparkle), 12+ triggers
 - **Page Transitions** — 150ms opacity fade-out + 200ms fade-in via PageTransition component
-- **Skeleton Loading** — 13 page-level skeleton components built (wiring to Suspense is a Round 3 quick win)
+- **Skeleton Loading** — 13 page-level skeleton components built; 11 wired to route-level Suspense in `App.tsx` (Dashboard, DailyHub, PrayerWall, Friends, Settings, Insights, MyPrayers, Music, GrowPage, BibleBrowser, Profile). BibleReaderSkeleton wired inline. MonthlyReport uses `RouteLoadingFallback`.
 - **Route Code Splitting** — 34 lazy-loaded route components via React.lazy()
 - **Verse Sharing** — Canvas-generated shareable images, 4 templates × 3 sizes (square/story/wide)
 
@@ -206,7 +206,7 @@ All counts programmatically verified via `_recon/agent-6-count-scripts.ts`.
 | `/challenges`                       | Redirect → `/grow?tab=challenges`  | Built  | Legacy redirect                                   |
 | `/challenges/:challengeId`          | `ChallengeDetail`                  | Built  | Challenge daily content + progress                |
 | `/login`                            | `ComingSoon`                       | Stub   | Login placeholder                                 |
-| `/register`                         | `ComingSoon`                       | Stub   | Register placeholder                              |
+| `/register`                         | `RegisterPage`                     | Built  | Registration page (UI shell, backend in Phase 3)  |
 | `/health`                           | `Health`                           | Built  | Backend health check                              |
 | `/dev/mood-checkin`                 | `MoodCheckInPreview`               | Built  | Dev-only mood check-in preview                    |
 | `*`                                 | `NotFound`                         | Built  | 404 page                                          |
