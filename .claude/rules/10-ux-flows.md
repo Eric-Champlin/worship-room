@@ -99,20 +99,32 @@ Settings
 
 ## Landing Page Structure
 
+Round 3 redesign (HP-1 through HP-15) established the current structure. All sections sit on the dark `bg-hero-bg` background with thin `border-white/[0.08] max-w-6xl mx-auto` dividers between each major section.
+
 ```
-1. Navbar (transparent glassmorphic pill — Daily Hub link, Prayer Wall link, Music link, Local Support dropdown)
-2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /daily?tab=pray, quiz teaser link scrolls to #quiz)
-3. Journey Section (7-step vertical timeline: Devotional → Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
-4. Growth Teasers Section ("See How You're Growing" — 3 blurred preview cards. Dark purple gradient. CTA: "Create a Free Account")
-5. Starting Point Quiz (id="quiz" — 5 questions, points-based scoring, result card routes to recommended feature)
-6. Footer (nav columns, crisis resources, app download badges, "Listen on Spotify" badge, copyright)
+1. Navbar (transparent glassmorphic — Daily Hub, Prayer Wall, Music, Local Support dropdown)
+2. HeroSection (dark purple gradient, "How're You Feeling Today?", typewriter input → /daily?tab=pray, quiz teaser link scrolls to #quiz)
+3. JourneySection (7-step vertical timeline: Devotional → Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
+   ─── section divider ───
+4. StatsBar (6 animated scroll-triggered counters: 50 Devotionals, 10 Reading Plans, 24 Ambient Sounds, 6 Meditation Types, 5 Seasonal Challenges, 8 Worship Playlists)
+   ─── section divider ───
+5. DashboardPreview ("See How You're Growing" — 6 locked preview cards with blurred mockup + clear icon/title/description, "Create a Free Account" CTA)
+   ─── section divider ───
+6. DifferentiatorSection ("Built for Your Heart" — 6 competitive advantage cards)
+   ─── section divider ───
+7. StartingPointQuiz (id="quiz" — 5-question points-based quiz, result card routes to recommended feature)
+   ─── section divider ───
+8. FinalCTA ("Your Healing Starts Here" — strongest glow on the page at 0.50 center, "Get Started — It's Free" button → auth modal)
+9. SiteFooter (nav columns, crisis resources, app download badges, "Listen on Spotify" badge, copyright)
 ```
+
+See `09-design-system.md` § "Homepage Visual Patterns" for the visual specs (glow opacities, frosted card styles, section heading treatment).
 
 ---
 
 ## Dashboard UX Flow (Logged-In Users) — Phase 2.75
 
-**Full specifications in `dashboard-growth-spec-plan-v2.md`.**
+**Full specifications in `_plans/_archive/dashboard-growth-spec-plan-v2.md`.** (Archived after Phase 2.75 completion — kept for historical reference and shared-data-model lookups.)
 
 ### Route Switching
 
