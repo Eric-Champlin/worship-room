@@ -6,6 +6,11 @@
   html {
     scroll-behavior: smooth;
   }
+  html,
+  body,
+  #root {
+    background-color: #08051A;
+  }
 }
 
 /* Audio slider thumb/track styling (vendor-prefixed, can't use Tailwind) */
