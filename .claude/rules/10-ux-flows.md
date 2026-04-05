@@ -102,7 +102,7 @@ Settings
 ```
 1. Navbar (transparent glassmorphic pill — Daily Hub link, Prayer Wall link, Music link, Local Support dropdown)
 2. Hero Section (dark purple gradient, "How're You Feeling Today?", typewriter input → /daily?tab=pray, quiz teaser link scrolls to #quiz)
-3. Journey Section (6-step vertical timeline: Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
+3. Journey Section (7-step vertical timeline: Devotional → Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
 4. Growth Teasers Section ("See How You're Growing" — 3 blurred preview cards. Dark purple gradient. CTA: "Create a Free Account")
 5. Starting Point Quiz (id="quiz" — 5 questions, points-based scoring, result card routes to recommended feature)
 6. Footer (nav columns, crisis resources, app download badges, "Listen on Spotify" badge, copyright)

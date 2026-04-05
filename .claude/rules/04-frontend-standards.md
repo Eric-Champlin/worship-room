@@ -9,11 +9,12 @@ paths: ["frontend/**"]
 - **Styling**: TailwindCSS
 - **Build Tool**: Vite
 - **Routing**: React Router (required)
-- **Data Fetching**: React Query (@tanstack/react-query)
-- **Forms**: React Hook Form + Zod validation
+- **Data Persistence (Phase 2)**: localStorage via `StorageService` abstraction (`services/storage-service.ts`). All keys prefixed `wr_`. Abstraction designed for API swap in Phase 3+.
+- **Data Fetching (Phase 3)**: direct `fetch` in custom hooks. Phase 3 will introduce API wiring; if a data-fetching library is adopted then, document it here.
+- **Forms**: controlled inputs with `useState` + Zod schemas for validation where needed. **Not using** `react-hook-form` (installed but unused).
 - **Icons**: Lucide React
 - **Utilities**: clsx + tailwind-merge
-- **Testing**: Vitest + React Testing Library + jsdom
+- **Testing**: Vitest + React Testing Library + jsdom, Playwright for E2E
 
 ## Coding Standards
 
@@ -21,8 +22,8 @@ paths: ["frontend/**"]
 - Use `@/` path aliases for imports
 - Export components from `components/index.ts`
 - Use `cn()` utility for conditional classNames
-- Validate forms with Zod schemas
-- Use React Query for data fetching
+- Validate form input with Zod schemas (controlled inputs, not react-hook-form)
+- Persist user data via `StorageService` (`services/storage-service.ts`) using `wr_` prefixed keys
 - Prefer composition over prop drilling
 - Extract complex logic into custom hooks
 - Use TypeScript interfaces for props

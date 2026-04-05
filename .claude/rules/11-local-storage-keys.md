@@ -1,6 +1,6 @@
 ## localStorage Key Inventory
 
-All keys use the `wr_` prefix (except legacy `worship-room-*` keys). Data persists across page refreshes and survives logout (except auth keys).
+All keys use the `wr_` prefix. Data persists across page refreshes and survives logout (except auth keys).
 
 ### Auth Keys (cleared on logout)
 
@@ -57,16 +57,17 @@ All keys use the `wr_` prefix (except legacy `worship-room-*` keys). Data persis
 | `wr_session_state`     | SessionState (24h expiry)    | Audio session persistence  |
 | `wr_routines`          | RoutineDefinition[]          | Custom bedtime routines    |
 | `wr_sound_effects_enabled` | "true"/"false"           | Sound effects toggle       |
-| `wr_music_hints_*`    | MusicHintState               | Music hints per user (dynamic suffix) |
+| `wr_music_hint_pill`       | MusicHintState               | Music hint for audio pill (dismissed flag) |
+| `wr_music_hint_sound_grid` | MusicHintState               | Music hint for sound grid (dismissed flag) |
 
 ### Daily Hub & Journal
 
-| Key                             | Type            | Feature                              |
-| ------------------------------- | --------------- | ------------------------------------ |
-| `worship-room-daily-completion` | DailyCompletion | Daily tab completion tracking        |
-| `worship-room-journal-draft`    | string          | Journal draft auto-save              |
-| `worship-room-journal-mode`     | "guided"/"free" | Journal mode preference              |
-| `wr_journal_milestones`         | number[]        | Fired journal milestone celebrations |
+| Key                     | Type            | Feature                              |
+| ----------------------- | --------------- | ------------------------------------ |
+| `wr_daily_completion`   | DailyCompletion | Daily tab completion tracking        |
+| `wr_journal_draft`      | string          | Journal draft auto-save              |
+| `wr_journal_mode`       | "guided"/"free" | Journal mode preference              |
+| `wr_journal_milestones` | number[]        | Fired journal milestone celebrations |
 
 ### Content Features
 
@@ -111,7 +112,20 @@ All keys use the `wr_` prefix (except legacy `worship-room-*` keys). Data persis
 
 ### PWA
 
-| Key                    | Type      | Feature                               |
-| ---------------------- | --------- | ------------------------------------- |
-| `wr_install_dismissed` | timestamp | Install prompt dismissal              |
-| `wr_visit_count`       | number    | Visit count for install prompt timing |
+| Key                         | Type      | Feature                                        |
+| --------------------------- | --------- | ---------------------------------------------- |
+| `wr_install_dismissed`      | timestamp | Install prompt dismissal                       |
+| `wr_install_dashboard_shown`| "true"    | Dashboard install card shown flag              |
+| `wr_visit_count`            | number    | Visit count for install prompt timing          |
+| `wr_session_counted`        | "true"    | Visit-count increment guard (once per session) |
+
+### Engagement & Surprise Moments
+
+| Key                                | Type                   | Feature                                         |
+| ---------------------------------- | ---------------------- | ----------------------------------------------- |
+| `wr_welcome_back_shown`            | string (today's date)  | WelcomeBack banner daily dismissal              |
+| `wr_midnight_verse_shown`          | string (today's date)  | Midnight verse reveal daily tracking            |
+| `wr_last_surprise_date`            | string (date)          | Last date a surprise moment fired               |
+| `wr_surprise_shown_rainbow`        | "true"                 | Rainbow surprise one-time dismissal             |
+| `wr_anniversary_milestones_shown`  | number[]               | Fired anniversary milestone celebrations        |
+| `wr_gratitude_callback_last_shown` | string (date)          | Gratitude callback toast last-shown tracking    |

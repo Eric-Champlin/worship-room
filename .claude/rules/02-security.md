@@ -103,7 +103,7 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
   - **Rationale**: Generic message works for both cases without lying (more honest than "Account created" for existing emails)
   - **Email sending**: Do not send different emails (or any email) based solely on account existence (prevents inbox-based enumeration)
   - **Future Enhancement**: Add email verification flow (send confirmation link before account activation)
-- **Validation**: Frontend validation (React Hook Form + Zod) + backend validation (Spring Validation)
+- **Validation**: Frontend validation (Zod schemas with controlled inputs) + backend validation (Spring Validation)
 - **Storage**: BCrypt hashing with salt (Spring Security default)
 - **Future Enhancement**: Password strength meter, common password blacklist, 2FA
 

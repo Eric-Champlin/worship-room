@@ -96,7 +96,7 @@ just help            # Show all commands
 
 ### Landing Page (Complete)
 - Hero section with typewriter input and mood-to-scripture flow
-- 6-step Journey to Healing timeline
+- 7-step Journey to Healing timeline (Devotional → Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
 - Growth Teasers section (3 blurred preview cards)
 - Starting Point Quiz (5-question recommendation engine)
 - Full footer with crisis resources
