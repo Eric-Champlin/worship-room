@@ -379,6 +379,23 @@ describe('DailyHub', () => {
     })
   })
 
+  it('tab bar outer wrapper has no background color (transparent for glow bleed-through)', () => {
+    renderPage()
+    const tablist = screen.getByRole('tablist')
+    // Outer wrapper is tablist → parent (inner padding div) → parent (sticky div)
+    const outerWrapper = tablist.parentElement!.parentElement!
+    expect(outerWrapper.className).not.toContain('bg-hero-bg')
+    expect(outerWrapper.className).toContain('backdrop-blur-md')
+  })
+
+  it('tab bar outer wrapper uses reduced blur (md not lg)', () => {
+    renderPage()
+    const tablist = screen.getByRole('tablist')
+    const outerWrapper = tablist.parentElement!.parentElement!
+    expect(outerWrapper.className).toContain('backdrop-blur-md')
+    expect(outerWrapper.className).not.toContain('backdrop-blur-lg')
+  })
+
   it('greeting heading uses enlarged text size', () => {
     renderPage()
     const heading = screen.getByRole('heading', { level: 1 })

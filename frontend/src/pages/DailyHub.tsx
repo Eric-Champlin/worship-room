@@ -266,7 +266,7 @@ function DailyHubContent() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-hero-bg/85 backdrop-blur-lg transition-shadow',
+            'sticky top-0 z-40 backdrop-blur-md transition-shadow',
             isSticky && 'shadow-md shadow-black/20',
           )}
         >
