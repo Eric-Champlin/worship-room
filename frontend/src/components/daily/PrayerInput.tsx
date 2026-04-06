@@ -173,7 +173,7 @@ export function PrayerInput({
           type="button"
           onClick={handleSubmit}
           disabled={isLoading}
-          className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-primary px-8 py-3 text-base font-semibold text-white shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-all duration-200 hover:bg-primary-light hover:shadow-[0_0_30px_rgba(139,92,246,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:cursor-not-allowed disabled:opacity-50"
         >
           Help Me Pray
         </button>

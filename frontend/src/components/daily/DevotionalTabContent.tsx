@@ -322,7 +322,7 @@ export function DevotionalTabContent({
                   stripReflectionPrefix(devotional.reflectionQuestion),
                 )
               }
-              className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
             >
               Journal about this &rarr;
             </button>
@@ -334,7 +334,7 @@ export function DevotionalTabContent({
                   `I'm reflecting on ${devotional.passage.reference}. ${stripReflectionPrefix(devotional.reflectionQuestion)}`,
                 )
               }
-              className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
             >
               Pray about today&apos;s reading &rarr;
             </button>
