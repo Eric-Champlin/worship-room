@@ -62,21 +62,19 @@ describe('SongPickSection', () => {
     expect(iframe.getAttribute('src')).toContain('open.spotify.com/embed/track')
   })
 
-  it('renders two Follow Our Playlist links (one per breakpoint)', () => {
+  it('renders Follow Our Playlist link', () => {
     renderComponent()
     const links = screen.getAllByRole('link', { name: /follow our playlist/i })
-    expect(links).toHaveLength(2)
-    links.forEach((link) => {
-      expect(link).toHaveAttribute('href', SPOTIFY_PLAYLIST_URL)
-      expect(link).toHaveAttribute('target', '_blank')
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    })
+    expect(links).toHaveLength(1)
+    expect(links[0]).toHaveAttribute('href', SPOTIFY_PLAYLIST_URL)
+    expect(links[0]).toHaveAttribute('target', '_blank')
+    expect(links[0]).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
-  it('renders follower count text in two places (one per breakpoint)', () => {
+  it('renders follower count text', () => {
     renderComponent()
     const captions = screen.getAllByText(/117K\+/)
-    expect(captions).toHaveLength(2)
+    expect(captions).toHaveLength(1)
   })
 
   it('has accessible section with aria-labelledby', () => {
@@ -100,15 +98,14 @@ describe('SongPickSection', () => {
     expect(heading.querySelector('.font-script')).not.toBeInTheDocument()
   })
 
-  it('desktop CTA is hidden on mobile via responsive class', () => {
+  it('uses single CTA block without responsive duplication', () => {
     renderComponent()
     const links = screen.getAllByRole('link', { name: /follow our playlist/i })
-    // One wrapper has `hidden md:block`, the other has `md:hidden`
-    const wrappers = links.map((l) => l.closest('div'))
-    const hiddenOnMobile = wrappers.find((w) => w?.className.includes('hidden md:block'))
-    const hiddenOnDesktop = wrappers.find((w) => w?.className.includes('md:hidden'))
-    expect(hiddenOnMobile).toBeInTheDocument()
-    expect(hiddenOnDesktop).toBeInTheDocument()
+    expect(links).toHaveLength(1)
+    // No hidden/md:hidden wrappers — single always-visible block
+    const wrapper = links[0].closest('div')
+    expect(wrapper?.className).not.toContain('hidden')
+    expect(wrapper?.className).not.toContain('md:hidden')
   })
 
   it('heading is flex-col with gradient "Today\'s" as the larger line', () => {
@@ -117,16 +114,28 @@ describe('SongPickSection', () => {
     expect(heading).toHaveClass('flex', 'flex-col')
     const spans = heading.querySelectorAll('span')
     expect(spans).toHaveLength(2)
-    // First span = "Today's" (gradient, larger)
+    // First span = "Today's" (gradient, larger, leading-none)
     expect(spans[0]).toHaveTextContent("Today's")
     expect(spans[0].className).toContain('text-4xl')
     expect(spans[0].className).toContain('sm:text-5xl')
     expect(spans[0].className).toContain('lg:text-6xl')
-    // Second span = "Song Pick" (white, smaller)
+    expect(spans[0].className).toContain('leading-none')
+    // Second span = "Song Pick" (white, smaller, leading-none, tracking)
     expect(spans[1]).toHaveTextContent('Song Pick')
     expect(spans[1]).toHaveClass('text-white')
     expect(spans[1].className).toContain('text-2xl')
     expect(spans[1].className).toContain('sm:text-3xl')
     expect(spans[1].className).toContain('lg:text-4xl')
+    expect(spans[1].className).toContain('leading-none')
+    expect(spans[1].className).toContain('tracking-[0.18em]')
+  })
+
+  it('Song Pick has letter-spacing for width matching', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { level: 2 })
+    const spans = heading.querySelectorAll('span')
+    const songPickSpan = spans[1]
+    expect(songPickSpan).toHaveTextContent('Song Pick')
+    expect(songPickSpan.className).toContain('tracking-')
   })
 })
