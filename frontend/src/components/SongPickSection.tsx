@@ -29,12 +29,12 @@ export function SongPickSection() {
           <div className="text-center">
             <h2 id="song-pick-heading" className="flex flex-col items-center">
               <span
-                className="text-4xl font-bold leading-none sm:text-5xl lg:text-6xl"
+                className="text-4xl font-bold leading-[1.15] pb-1 sm:text-5xl lg:text-6xl"
                 style={GRADIENT_TEXT_STYLE}
               >
                 Today&apos;s
               </span>
-              <span className="mt-1 text-2xl font-bold leading-none text-white sm:text-3xl lg:text-4xl">
+              <span className="mt-1 text-2xl font-bold leading-[1.15] text-white tracking-[0.11em] sm:text-3xl sm:tracking-[0.15em] lg:text-4xl lg:tracking-[0.18em]">
                 Song Pick
               </span>
             </h2>
