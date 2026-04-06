@@ -131,7 +131,7 @@ describe('PrayTabContent', () => {
   it('shows nudge when submitting empty', async () => {
     const user = userEvent.setup()
     renderComponent()
-    await user.click(screen.getByText('Generate Prayer'))
+    await user.click(screen.getByText('Help Me Pray'))
     expect(
       screen.getByText(/tell god what's on your heart/i),
     ).toBeInTheDocument()
@@ -146,7 +146,7 @@ describe('PrayTabContent', () => {
       /start typing here/i,
     )
     await user.type(textarea, "I'm anxious about my job")
-    await user.click(screen.getByText('Generate Prayer'))
+    await user.click(screen.getByText('Help Me Pray'))
 
     // Loading state
     expect(
@@ -173,7 +173,7 @@ describe('PrayTabContent', () => {
       /start typing here/i,
     )
     await user.type(textarea, 'Help me')
-    await user.click(screen.getByText('Generate Prayer'))
+    await user.click(screen.getByText('Help Me Pray'))
     vi.advanceTimersByTime(2000)
 
     await waitFor(() => {
@@ -224,7 +224,7 @@ describe('PrayTabContent', () => {
       /start typing here/i,
     )
     await user.type(textarea, 'I need help')
-    await user.click(screen.getByText('Generate Prayer'))
+    await user.click(screen.getByText('Help Me Pray'))
     vi.advanceTimersByTime(2000)
 
     await waitFor(() => {
@@ -245,7 +245,7 @@ describe('PrayTabContent', () => {
 
     const textarea = screen.getByPlaceholderText(/start typing here/i)
     await user.type(textarea, 'I have anxiety about work')
-    await user.click(screen.getByText('Generate Prayer'))
+    await user.click(screen.getByText('Help Me Pray'))
     vi.advanceTimersByTime(2000)
 
     await waitFor(() => {
@@ -259,7 +259,7 @@ describe('PrayTabContent', () => {
   })
 
   describe('auth gate', () => {
-    it('shows auth modal when logged out and clicking Generate Prayer', async () => {
+    it('shows auth modal when logged out and clicking Help Me Pray', async () => {
       mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() })
       const user = userEvent.setup()
       renderComponent()
@@ -268,7 +268,7 @@ describe('PrayTabContent', () => {
         /start typing here/i,
       )
       await user.type(textarea, 'I need guidance')
-      await user.click(screen.getByText('Generate Prayer'))
+      await user.click(screen.getByText('Help Me Pray'))
 
       // Auth modal should appear instead of loading
       expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -291,7 +291,7 @@ describe('PrayTabContent', () => {
         /start typing here/i,
       )
       await user.type(textarea, 'Help me')
-      await user.click(screen.getByText('Generate Prayer'))
+      await user.click(screen.getByText('Help Me Pray'))
       vi.advanceTimersByTime(2000)
 
       await waitFor(() => {

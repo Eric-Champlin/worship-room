@@ -83,9 +83,6 @@ export function PrayerInput({
         >
           What&apos;s On Your Heart?
         </h2>
-        <div className="z-10 mt-2 flex justify-center">
-          <AmbientSoundPill context="pray" variant="dark" className="mb-0" />
-        </div>
       </div>
 
       {retryPrompt && (
@@ -95,7 +92,7 @@ export function PrayerInput({
       )}
 
       {showChips && (
-        <div className="mb-6 flex flex-wrap justify-center gap-2">
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
           {DEFAULT_PRAYER_CHIPS.map((chip) => (
             <button
               key={chip}
@@ -106,6 +103,7 @@ export function PrayerInput({
               {chip}
             </button>
           ))}
+          <AmbientSoundPill context="pray" variant="dark" className="!mb-0 !w-auto" />
         </div>
       )}
 
@@ -149,7 +147,7 @@ export function PrayerInput({
           disabled={isLoading}
           className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
-          Generate Prayer
+          Help Me Pray
         </button>
       </div>
     </>

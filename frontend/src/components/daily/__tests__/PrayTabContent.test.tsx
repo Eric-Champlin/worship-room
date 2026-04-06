@@ -130,7 +130,7 @@ function renderPrayTab(props: { onSwitchToJournal?: (topic: string) => void } = 
 async function generatePrayer(user: ReturnType<typeof userEvent.setup>, inputText = 'I am feeling anxious') {
   const textarea = screen.getByLabelText('Prayer request')
   await user.type(textarea, inputText)
-  const generateBtn = screen.getByRole('button', { name: /generate prayer/i })
+  const generateBtn = screen.getByRole('button', { name: /help me pray/i })
   await user.click(generateBtn)
 }
 
@@ -171,7 +171,7 @@ describe('PrayTabContent activity integration', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderPrayTab()
 
-    const generateBtn = screen.getByRole('button', { name: /generate prayer/i })
+    const generateBtn = screen.getByRole('button', { name: /help me pray/i })
     await user.click(generateBtn)
 
     expect(mockRecordActivity).not.toHaveBeenCalled()
@@ -699,9 +699,9 @@ describe('PrayTabContent — Guided Prayer Section', () => {
     expect(screen.getByText('Guided Prayer Sessions')).toBeInTheDocument()
   })
 
-  it('existing Generate Prayer button still present', () => {
+  it('existing Help Me Pray button still present', () => {
     renderPrayTab()
-    expect(screen.getByText('Generate Prayer')).toBeInTheDocument()
+    expect(screen.getByText('Help Me Pray')).toBeInTheDocument()
   })
 })
 
@@ -747,7 +747,7 @@ describe('PrayTabContent (accessibility)', () => {
   it('shows inline error with AlertCircle on empty submit', async () => {
     const user = userEvent.setup()
     renderPrayTab()
-    await user.click(screen.getByText('Generate Prayer'))
+    await user.click(screen.getByText('Help Me Pray'))
     expect(screen.getByText(/Tell God what's on your heart/)).toBeInTheDocument()
     // Check for AlertCircle icon (SVG)
     const errorP = screen.getByText(/Tell God what's on your heart/).closest('p')
@@ -757,14 +757,14 @@ describe('PrayTabContent (accessibility)', () => {
   it('error has role=alert', async () => {
     const user = userEvent.setup()
     renderPrayTab()
-    await user.click(screen.getByText('Generate Prayer'))
+    await user.click(screen.getByText('Help Me Pray'))
     expect(screen.getByRole('alert')).toHaveTextContent(/Tell God what's on your heart/)
   })
 
   it('textarea has aria-invalid on empty submit', async () => {
     const user = userEvent.setup()
     renderPrayTab()
-    await user.click(screen.getByText('Generate Prayer'))
+    await user.click(screen.getByText('Help Me Pray'))
     expect(screen.getByLabelText('Prayer request')).toHaveAttribute('aria-invalid', 'true')
   })
 })
@@ -818,5 +818,33 @@ describe('PrayTabContent atmospheric visuals', () => {
     // CRITICAL INVARIANT: Player must NOT be inside GlowBackground's overflow-hidden
     // wrapper — otherwise its fixed-position full-viewport overlay would be clipped.
     expect(glowWrapper!.contains(playerDialog)).toBe(false)
+  })
+
+  it('submit button reads "Help Me Pray"', () => {
+    renderPrayTab()
+    expect(screen.getByRole('button', { name: 'Help Me Pray' })).toBeInTheDocument()
+  })
+
+  it('ambient sound pill renders inside chips row (same container)', () => {
+    renderPrayTab()
+    const chip = screen.getByText("I'm struggling with...")
+    const pillButton = screen.getByLabelText(/enhance with sound/i)
+    expect(chip.closest('div.flex')).toBe(pillButton.closest('div.flex'))
+  })
+
+  it('chips row has items-center for vertical alignment', () => {
+    renderPrayTab()
+    const chip = screen.getByText("I'm struggling with...")
+    const chipsContainer = chip.closest('div.flex')
+    expect(chipsContainer).toHaveClass('items-center')
+  })
+
+  it('pill disappears when user types in textarea', async () => {
+    const user = userEvent.setup()
+    renderPrayTab()
+    expect(screen.getByLabelText(/enhance with sound/i)).toBeInTheDocument()
+    const textarea = screen.getByLabelText('Prayer request')
+    await user.type(textarea, 'Help me')
+    expect(screen.queryByLabelText(/enhance with sound/i)).not.toBeInTheDocument()
   })
 })
