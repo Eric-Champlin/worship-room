@@ -16,8 +16,6 @@ import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLAN_METADATA } from '@/data/reading-plans'
 import { VerseLink } from '@/components/shared/VerseLink'
 import { SharePanel } from '@/components/sharing/SharePanel'
-import { getTodaysVerse } from '@/constants/verse-of-the-day'
-import { parseVerseReferences } from '@/lib/parse-verse-references'
 import type { Devotional } from '@/types/devotional'
 
 function buildReadAloudText(devotional: Devotional): string {
@@ -53,14 +51,6 @@ export function DevotionalTabContent({
   const { getPlanStatus } = useReadingPlanProgress()
   const [isCompleted, setIsCompleted] = useState(false)
   const [showPassageShare, setShowPassageShare] = useState(false)
-  const [showVerseShare, setShowVerseShare] = useState(false)
-
-  // Verse of the Day data
-  const verse = getTodaysVerse()
-  const parsedRefs = parseVerseReferences(verse.reference)
-  const verseLink = parsedRefs.length > 0
-    ? `/bible/${parsedRefs[0].bookSlug}/${parsedRefs[0].chapter}`
-    : '/bible'
 
   // Find matching reading plan by theme
   const matchingPlan = READING_PLAN_METADATA.find(
@@ -153,45 +143,6 @@ export function DevotionalTabContent({
     <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
       <div className="mx-auto max-w-4xl px-4 py-10 sm:py-14" {...swipeHandlers}>
         <div className="relative">
-          {/* Daily Verse of the Day Card */}
-          <FrostedCard className="mb-8 sm:mb-10">
-            <Link
-              to={verseLink}
-              className="block transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:rounded"
-            >
-              <p className="font-serif italic text-lg leading-relaxed text-white sm:text-xl">
-                &ldquo;{verse.text}&rdquo;
-              </p>
-            </Link>
-            <p className="mt-2 text-sm text-white/70">
-              — {verse.reference}
-            </p>
-            <div className="mt-3 flex items-center gap-4">
-              <Link
-                to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}&verseText=${encodeURIComponent(verse.text)}&verseTheme=${encodeURIComponent(verse.theme)}`}
-                className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
-              >
-                Meditate on this verse &gt;
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowVerseShare(true)}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-1 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                aria-label="Share verse of the day"
-                aria-haspopup="dialog"
-                aria-expanded={showVerseShare}
-              >
-                <Share2 className="h-4 w-4" />
-              </button>
-            </div>
-            <SharePanel
-              verseText={verse.text}
-              reference={verse.reference}
-              isOpen={showVerseShare}
-              onClose={() => setShowVerseShare(false)}
-            />
-          </FrostedCard>
-
           {/* Date navigation */}
           <div className="flex items-center justify-center gap-3">
             <button
@@ -272,6 +223,14 @@ export function DevotionalTabContent({
                   </span>
                 ))}
               </p>
+            </div>
+            <div className="mt-4 flex items-center gap-4">
+              <Link
+                to={`/meditate/soaking?verse=${encodeURIComponent(devotional.passage.reference)}&verseText=${encodeURIComponent(devotional.passage.verses.map((v) => v.text).join(' '))}&verseTheme=${encodeURIComponent(devotional.theme)}`}
+                className="inline-flex min-h-[44px] items-center text-sm text-white/80 underline transition-colors hover:text-white"
+              >
+                Meditate on this passage &gt;
+              </Link>
             </div>
             <SharePanel
               verseText={devotional.passage.verses.map((v) => v.text).join(' ')}
