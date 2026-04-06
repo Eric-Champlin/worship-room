@@ -87,11 +87,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
     ) {
       devotionalContextConsumed.current = true
       setInitialText(prayContext.customPrompt)
-      requestAnimationFrame(() => {
-        const textarea = document.querySelector<HTMLTextAreaElement>('#pray-textarea')
-        textarea?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        textarea?.focus()
-      })
+      window.scrollTo(0, 0)
     }
   }, [prayContext, activeTab])
 

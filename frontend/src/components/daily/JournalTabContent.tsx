@@ -94,10 +94,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
       } else {
         setMode('guided')
         setContextDismissed(false)
-        requestAnimationFrame(() => {
-          parentTextareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          parentTextareaRef.current?.focus()
-        })
+        window.scrollTo(0, 0)
       }
     }
   }, [prayContext])
@@ -151,10 +148,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
     setDraftClearSignal((c) => c + 1)
     setMode('guided')
     setContextDismissed(false)
-    requestAnimationFrame(() => {
-      parentTextareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      parentTextareaRef.current?.focus()
-    })
+    window.scrollTo(0, 0)
   }, [])
 
   const handleKeepDraft = useCallback(() => {
