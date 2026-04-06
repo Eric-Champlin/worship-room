@@ -67,6 +67,44 @@ describe('getMockPrayer', () => {
     const prayer = getMockPrayer('xyzzy random gibberish')
     expect(prayer.topic).toBe('general')
   })
+
+  describe('devotional context detection', () => {
+    it('returns devotional prayer for "today\'s devotional" input', () => {
+      const result = getMockPrayer("I'm reflecting on today's devotional about trust. The passage is Proverbs 3:5-6.")
+      expect(result.topic).toBe('devotional')
+    })
+
+    it('returns devotional prayer for "devotional about" input', () => {
+      const result = getMockPrayer('devotional about healing')
+      expect(result.topic).toBe('devotional')
+    })
+
+    it('returns devotional prayer for "what I\'ve read" input', () => {
+      const result = getMockPrayer("Help me pray about what I've read")
+      expect(result.topic).toBe('devotional')
+    })
+
+    it('devotional prayer text references God\'s word and reading', () => {
+      const result = getMockPrayer("today's devotional about trust")
+      expect(result.text).toContain('word')
+      expect(result.text).toContain('read')
+    })
+
+    it('devotional detection takes priority over topic keywords', () => {
+      const result = getMockPrayer("today's devotional about healing and strength")
+      expect(result.topic).toBe('devotional')
+    })
+
+    it('non-devotional input still returns category-matched prayer', () => {
+      const result = getMockPrayer("I'm anxious about work")
+      expect(result.topic).toBe('anxiety')
+    })
+
+    it('general fallback still works for unmatched input', () => {
+      const result = getMockPrayer('hello')
+      expect(result.topic).toBe('general')
+    })
+  })
 })
 
 describe('getClassicPrayers', () => {

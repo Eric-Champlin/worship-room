@@ -102,36 +102,9 @@ describe('DevotionalTabContent', () => {
       expect(decorativeQuote).toHaveAttribute('aria-hidden', 'true')
     })
 
-    it('renders "Closing Prayer" label', () => {
+    it('does not render Closing Prayer section', () => {
       renderComponent()
-      expect(screen.getByText('Closing Prayer')).toBeInTheDocument()
-    })
-
-    it('Closing Prayer label uses text-white/60 opacity', () => {
-      renderComponent()
-      const label = screen.getByText('Closing Prayer')
-      expect(label.className).toContain('text-white/60')
-      expect(label.className).not.toContain('text-white/50')
-    })
-
-    it('Closing Prayer label preserves typography classes', () => {
-      renderComponent()
-      const label = screen.getByText('Closing Prayer')
-      expect(label.className).toContain('mb-2')
-      expect(label.className).toContain('text-xs')
-      expect(label.className).toContain('font-medium')
-      expect(label.className).toContain('uppercase')
-      expect(label.className).toContain('tracking-widest')
-    })
-
-    it('Closing Prayer body uses text-white/70 (brightened from text-white/60)', () => {
-      renderComponent()
-      const label = screen.getByText('Closing Prayer')
-      const prayerBody = label.nextElementSibling as HTMLElement
-      expect(prayerBody).not.toBeNull()
-      expect(prayerBody.tagName).toBe('P')
-      expect(prayerBody.className).toContain('text-white/70')
-      expect(label.className).toContain('text-white/60')
+      expect(screen.queryByText('Closing Prayer')).not.toBeInTheDocument()
     })
 
     it('renders reflection question', () => {
@@ -201,7 +174,7 @@ describe('DevotionalTabContent', () => {
       expect(customPrompt.length).toBeGreaterThan(0)
     })
 
-    it('"Pray about today\'s reading" calls onSwitchToPray with theme and combined context', async () => {
+    it('"Pray about today\'s reading" calls onSwitchToPray with theme and rich context', async () => {
       const onSwitchToPray = vi.fn()
       const user = userEvent.setup()
       renderComponent('/daily?tab=devotional', { onSwitchToPray })
@@ -209,13 +182,16 @@ describe('DevotionalTabContent', () => {
       expect(onSwitchToPray).toHaveBeenCalledTimes(1)
       // First arg: theme
       expect(typeof onSwitchToPray.mock.calls[0][0]).toBe('string')
-      // Second arg: combined passage reference + stripped reflection question
+      // Second arg: rich context with theme, passage reference, verse text
       const customPrompt = onSwitchToPray.mock.calls[0][1] as string
-      expect(customPrompt).toContain('reflecting on')
-      expect(customPrompt).not.toContain('Something to think about today: ')
+      expect(customPrompt).toContain("today's devotional about")
+      expect(customPrompt).toContain('The passage is')
+      expect(customPrompt).toContain('Help me pray about what I\'ve read')
+      // Should NOT contain old format (which was "reflecting on [reference]. [question]")
+      expect(customPrompt).not.toMatch(/reflecting on [A-Z][a-z]+ \d/)
     })
 
-    it('stripReflectionPrefix strips known prefix from reflection question', async () => {
+    it('Journal CTA strips "Something to think about today" prefix from reflection question', async () => {
       const onSwitchToJournal = vi.fn()
       const user = userEvent.setup()
       renderComponent('/daily?tab=devotional', { onSwitchToJournal })
@@ -382,40 +358,65 @@ describe('DevotionalTabContent', () => {
         expect(reflectionDiv.className).not.toContain('backdrop-blur')
       })
 
-      it('Tier 4: prayer wrapped in dimmed frosted card', () => {
-        renderComponent()
-        const label = screen.getByText('Closing Prayer')
-        const card = label.closest('.rounded-2xl') as HTMLElement
-        expect(card).not.toBeNull()
-        expect(card!.className).toContain('border')
-        expect(card!.className).toContain('border-white/[0.08]')
-        expect(card!.className).toContain('bg-white/[0.03]')
-        expect(card!.className).toContain('backdrop-blur-sm')
-      })
-
-      it('Tier 4: prayer section outer div has no border-t', () => {
-        renderComponent()
-        const label = screen.getByText('Closing Prayer')
-        const card = label.closest('.rounded-2xl') as HTMLElement
-        expect(card).not.toBeNull()
-        const outerDiv = card!.parentElement as HTMLElement
-        expect(outerDiv.className).not.toContain('border-t')
-      })
-
-      it('Tier 4: prayer body text brightened to text-white/70', () => {
-        renderComponent()
-        const label = screen.getByText('Closing Prayer')
-        const prayerBody = label.nextElementSibling as HTMLElement
-        expect(prayerBody).not.toBeNull()
-        expect(prayerBody.className).toContain('text-white/70')
-        expect(prayerBody.className).not.toContain('text-white/60')
-      })
     })
 
     it('bottom padding is compact (pb-8)', () => {
       const { container } = renderComponent()
       expect(container.querySelector('.pb-8')).not.toBeNull()
       expect(container.querySelector('.pb-16')).toBeNull()
+    })
+  })
+
+  describe('Pray CTA section', () => {
+    it('CTA intro text renders', () => {
+      renderComponent()
+      expect(screen.getByText("Ready to pray about today's reading?")).toBeInTheDocument()
+    })
+
+    it('CTA intro text has muted styling', () => {
+      renderComponent()
+      const intro = screen.getByText("Ready to pray about today's reading?")
+      expect(intro.className).toContain('text-sm')
+      expect(intro.className).toContain('text-white/60')
+    })
+
+    it('CTA button renders with correct text', () => {
+      renderComponent()
+      expect(screen.getByRole('button', { name: /Pray about today.*reading/ })).toBeInTheDocument()
+    })
+
+    it('CTA button has pill styling', () => {
+      renderComponent()
+      const btn = screen.getByRole('button', { name: /Pray about today.*reading/ })
+      expect(btn.className).toContain('rounded-full')
+      expect(btn.className).toContain('bg-white')
+    })
+
+    it('CTA button meets 44px touch target', () => {
+      renderComponent()
+      const btn = screen.getByRole('button', { name: /Pray about today.*reading/ })
+      expect(btn.className).toContain('min-h-[44px]')
+    })
+
+    it('CTA section has top border separator', () => {
+      renderComponent()
+      const intro = screen.getByText("Ready to pray about today's reading?")
+      const section = intro.closest('.border-t') as HTMLElement
+      expect(section).not.toBeNull()
+      expect(section!.className).toContain('border-white/[0.08]')
+    })
+
+    it('only one Pray CTA button exists', () => {
+      renderComponent()
+      const buttons = screen.getAllByRole('button', { name: /Pray about today/i })
+      expect(buttons).toHaveLength(1)
+    })
+
+    it('no duplicate bottom CTA wrapper', () => {
+      const { container } = renderComponent()
+      // Old bottom CTA had mt-8 flex justify-center sm:mt-10
+      const oldWrapper = container.querySelector('.mt-8.flex.justify-center')
+      expect(oldWrapper).toBeNull()
     })
   })
 })

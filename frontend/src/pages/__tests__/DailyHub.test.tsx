@@ -224,8 +224,8 @@ describe('DailyHub', () => {
 
   it('defaults to Devotional tab content', () => {
     renderPage()
-    // "Closing Prayer" text uniquely identifies the devotional tab content
-    expect(screen.getByText('Closing Prayer')).toBeInTheDocument()
+    // "Ready to pray about today's reading?" text uniquely identifies the devotional tab content
+    expect(screen.getByText("Ready to pray about today's reading?")).toBeInTheDocument()
     const devTab = screen.getByRole('tab', { name: /devos|devotional/i })
     expect(devTab).toHaveAttribute('aria-selected', 'true')
   })
@@ -250,8 +250,8 @@ describe('DailyHub', () => {
   it('switches tabs on click', async () => {
     const user = userEvent.setup()
     renderPage()
-    // Default is Devotional — identified by "Closing Prayer" text
-    expect(screen.getByText('Closing Prayer')).toBeInTheDocument()
+    // Default is Devotional — identified by Pray CTA intro text
+    expect(screen.getByText("Ready to pray about today's reading?")).toBeInTheDocument()
 
     // Click Journal tab
     await user.click(screen.getByRole('tab', { name: /journal/i }))
@@ -281,7 +281,7 @@ describe('DailyHub', () => {
 
   it('defaults to Devotional for invalid tab param', () => {
     renderPage('/daily?tab=invalid')
-    expect(screen.getByText('Closing Prayer')).toBeInTheDocument()
+    expect(screen.getByText("Ready to pray about today's reading?")).toBeInTheDocument()
   })
 
   it('supports arrow key navigation between tabs', async () => {

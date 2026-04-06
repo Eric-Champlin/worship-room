@@ -289,6 +289,11 @@ const MOCK_PRAYERS: MockPrayer[] = [
     topic: 'general',
     text: 'Dear God, I come before You with an open heart, bringing everything I am feeling to Your feet. You know me better than I know myself, and You understand what I need even when I cannot find the words to express it. Meet me right where I am in this moment. Fill me with Your peace, Your clarity, and Your love. Help me to slow down and listen for Your voice amidst the busyness and noise of daily life. Remind me that I am never alone, that You are always near, and that Your plans for me are good. I surrender this moment to You. Amen.',
   },
+  {
+    id: 'prayer-devotional',
+    topic: 'devotional',
+    text: 'Dear God, thank You for speaking to me through Your word today. As I reflect on what I have read, I am reminded that Your truth is living and active, always meeting me right where I am. Help me to carry the message of this passage into my day — not just as head knowledge, but as a reality that transforms how I think, speak, and love. Where I have been holding back from You, give me the courage to surrender. Where I have been striving in my own strength, teach me to rest in Yours. Let the seeds planted by today\'s reading take root deep in my heart and bear fruit that blesses those around me. I am grateful for this time in Your presence. Continue to shape me into the person You created me to be. Amen.',
+  },
 ]
 
 // --- Classic Prayers ---
@@ -498,6 +503,13 @@ export function getSoakingVerses(): DailyVerse[] {
 
 export function getMockPrayer(userInput: string): MockPrayer {
   const lower = userInput.toLowerCase()
+
+  // Check for devotional context first
+  const devotionalKeywords = ["today's devotional", 'devotional about', "what i've read", 'devotional on']
+  if (devotionalKeywords.some((kw) => lower.includes(kw))) {
+    return MOCK_PRAYERS.find((p) => p.topic === 'devotional') ?? MOCK_PRAYERS[MOCK_PRAYERS.length - 1]
+  }
+
   for (const prayer of MOCK_PRAYERS) {
     const keywords = TOPIC_KEYWORDS[prayer.topic]
     if (keywords && keywords.some((kw) => lower.includes(kw))) {

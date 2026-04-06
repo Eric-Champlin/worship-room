@@ -27,14 +27,6 @@ function buildReadAloudText(devotional: Devotional): string {
   return `${quoteText} ${passageText} ${reflectionText} ${prayerText} ${questionText}`
 }
 
-const REFLECTION_PREFIX = 'Something to think about today: '
-
-function stripReflectionPrefix(question: string): string {
-  return question.startsWith(REFLECTION_PREFIX)
-    ? question.slice(REFLECTION_PREFIX.length)
-    : question
-}
-
 interface DevotionalTabContentProps {
   onSwitchToJournal?: (topic: string, customPrompt: string) => void
   onSwitchToPray?: (topic: string, customPrompt: string) => void
@@ -262,15 +254,21 @@ export function DevotionalTabContent({
             </div>
           </div>
 
-          {/* Prayer section */}
-          <div className="py-5 sm:py-6">
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-5">
-              <p className="mb-2 text-xs font-medium uppercase tracking-widest text-white/60">
-                Closing Prayer
-              </p>
-              <p className="font-serif text-sm italic leading-relaxed text-white/70">
-                {devotional.prayer}
-              </p>
+          {/* Pray CTA section */}
+          <div className="border-t border-white/[0.08] py-6 sm:py-8">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <p className="text-sm text-white/60">Ready to pray about today&apos;s reading?</p>
+              <button
+                type="button"
+                onClick={() => {
+                  const verseText = devotional.passage.verses.map((v) => v.text).join(' ')
+                  const customPrompt = `I'm reflecting on today's devotional about ${devotional.theme}. The passage is ${devotional.passage.reference}: "${verseText}". Help me pray about what I've read.`
+                  onSwitchToPray?.(devotional.theme, customPrompt)
+                }}
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
+              >
+                Pray about today&apos;s reading &rarr;
+              </button>
             </div>
           </div>
 
@@ -328,22 +326,6 @@ export function DevotionalTabContent({
                 : readAloud.state === 'playing'
                   ? 'Pause'
                   : 'Resume'}
-            </button>
-          </div>
-
-          {/* Cross-tab CTAs */}
-          <div className="mt-8 flex justify-center sm:mt-10">
-            <button
-              type="button"
-              onClick={() =>
-                onSwitchToPray?.(
-                  devotional.theme,
-                  `I'm reflecting on ${devotional.passage.reference}. ${stripReflectionPrefix(devotional.reflectionQuestion)}`,
-                )
-              }
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
-            >
-              Pray about today&apos;s reading &rarr;
             </button>
           </div>
 
