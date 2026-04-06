@@ -276,7 +276,7 @@ describe('JournalTabContent', () => {
       // Auth modal should appear with contextual subtitle
       expect(screen.getByRole('dialog')).toBeInTheDocument()
       expect(
-        screen.getByText('Sign in to save your journal entries'),
+        screen.getByText('Sign in to save your journal entries. Your draft is safe — we\u2019ll bring it back after.'),
       ).toBeInTheDocument()
 
       // Entry should NOT be saved

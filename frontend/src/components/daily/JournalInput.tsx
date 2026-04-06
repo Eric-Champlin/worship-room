@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Mic, MicOff, RefreshCw } from 'lucide-react'
+import { CheckCircle2, Mic, MicOff, RefreshCw } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
@@ -140,7 +140,10 @@ export function JournalInput({
   const handleSave = () => {
     if (!text.trim()) return
     if (!isAuthenticated) {
-      authModal?.openAuthModal('Sign in to save your journal entries')
+      const subtitle = text.trim()
+        ? 'Sign in to save your journal entries. Your draft is safe — we\u2019ll bring it back after.'
+        : 'Sign in to save your journal entries'
+      authModal?.openAuthModal(subtitle)
       return
     }
     onSave({
@@ -343,9 +346,10 @@ export function JournalInput({
       </div>
 
       {/* Draft Saved Indicator */}
-      <div className="mb-4 h-4" aria-live="polite">
+      <div className="mb-4 flex h-5 items-center justify-end" aria-live="polite">
         {draftSaved && (
-          <p className="motion-safe:animate-fade-in text-xs text-white/50">
+          <p className="motion-safe:animate-fade-in flex items-center gap-1 text-xs text-white/50">
+            <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />
             Draft saved
           </p>
         )}

@@ -273,7 +273,7 @@ describe('PrayTabContent', () => {
       // Auth modal should appear instead of loading
       expect(screen.getByRole('dialog')).toBeInTheDocument()
       expect(
-        screen.getByText('Sign in to generate a prayer'),
+        screen.getByText('Sign in to pray together. Your draft is safe — we\u2019ll bring it back after.'),
       ).toBeInTheDocument()
 
       // Should NOT show loading state

@@ -103,7 +103,10 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
 
   const handleGenerate = (inputText: string) => {
     if (!isAuthenticated) {
-      authModal?.openAuthModal('Sign in to generate a prayer')
+      const subtitle = inputText.trim()
+        ? 'Sign in to pray together. Your draft is safe — we\u2019ll bring it back after.'
+        : 'Sign in to generate a prayer'
+      authModal?.openAuthModal(subtitle)
       return
     }
     submittedTextRef.current = inputText

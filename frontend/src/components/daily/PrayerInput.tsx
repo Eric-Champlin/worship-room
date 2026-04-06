@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
@@ -29,6 +29,8 @@ export function PrayerInput({
   })
   const [selectedChip, setSelectedChip] = useState<string | null>(null)
   const [nudge, setNudge] = useState(false)
+  const [draftSaved, setDraftSaved] = useState(false)
+  const draftFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Sync from parent's initialText (pre-fill from Prayer Wall, challenge, cross-feature CTA)
@@ -59,6 +61,8 @@ export function PrayerInput({
       try {
         if (text.trim()) {
           localStorage.setItem(PRAYER_DRAFT_KEY, text)
+          setDraftSaved(true)
+          draftFeedbackTimerRef.current = setTimeout(() => setDraftSaved(false), 2000)
         } else {
           localStorage.removeItem(PRAYER_DRAFT_KEY)
         }
@@ -68,6 +72,7 @@ export function PrayerInput({
     }, 1000)
     return () => {
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
+      if (draftFeedbackTimerRef.current) clearTimeout(draftFeedbackTimerRef.current)
     }
   }, [text])
 
@@ -139,6 +144,15 @@ export function PrayerInput({
         <div className="mt-1 flex justify-end">
           <CharacterCount current={text.length} max={500} warningAt={400} dangerAt={480} id="pray-char-count" />
         </div>
+      </div>
+
+      <div className="mb-4 flex h-5 items-center justify-end" aria-live="polite">
+        {draftSaved && (
+          <p className="motion-safe:animate-fade-in flex items-center gap-1 text-xs text-white/50">
+            <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />
+            Draft saved
+          </p>
+        )}
       </div>
 
       <CrisisBanner text={text} />

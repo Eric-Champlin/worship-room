@@ -614,6 +614,10 @@ describe('full prayer experience flow', () => {
     expect(mockLoadScene).not.toHaveBeenCalled()
     // Should not start loading
     expect(screen.queryByText(/generating prayer/i)).not.toBeInTheDocument()
+    // Should show draft-aware subtitle
+    expect(
+      screen.getByText('Sign in to pray together. Your draft is safe — we\u2019ll bring it back after.'),
+    ).toBeInTheDocument()
   })
 
   it('no regressions: Copy, Save buttons present after generation', async () => {
@@ -973,5 +977,23 @@ describe('prayer draft persistence', () => {
     unmount()
     renderPrayTab()
     expect(screen.getByLabelText('Prayer request')).toHaveValue('Persisted draft')
+  })
+
+  it('shows draft saved indicator after typing in prayer input', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    await user.type(screen.getByLabelText('Prayer request'), 'My heartfelt prayer')
+    act(() => { vi.advanceTimersByTime(1100) })
+    expect(screen.getByText('Draft saved')).toBeInTheDocument()
+  })
+
+  it('draft saved indicator auto-hides after 2 seconds', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
+    act(() => { vi.advanceTimersByTime(1100) })
+    expect(screen.getByText('Draft saved')).toBeInTheDocument()
+    act(() => { vi.advanceTimersByTime(2100) })
+    expect(screen.queryByText('Draft saved')).not.toBeInTheDocument()
   })
 })
