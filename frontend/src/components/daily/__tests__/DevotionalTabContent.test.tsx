@@ -64,11 +64,11 @@ function renderComponent(initialEntry = '/daily?tab=devotional', props: Partial<
 
 describe('DevotionalTabContent', () => {
   describe('Rendering', () => {
-    it('uses max-w-4xl container width', () => {
+    it('uses max-w-2xl container width', () => {
       const { container } = renderComponent()
-      const maxWEl = container.querySelector('.max-w-4xl') as HTMLElement
+      const maxWEl = container.querySelector('.max-w-2xl') as HTMLElement
       expect(maxWEl).not.toBeNull()
-      expect(maxWEl.className).not.toContain('max-w-2xl')
+      expect(maxWEl.className).not.toContain('max-w-4xl')
     })
 
     it('renders devotional title as primary heading', () => {
@@ -109,7 +109,7 @@ describe('DevotionalTabContent', () => {
 
     it('renders reflection question', () => {
       renderComponent()
-      expect(screen.getByText('Something to think about today:')).toBeInTheDocument()
+      expect(screen.getByText('Something to think about')).toBeInTheDocument()
     })
 
     it('renders Share and Read Aloud buttons', () => {
@@ -247,9 +247,9 @@ describe('DevotionalTabContent', () => {
     it('devotional link has correct styling', () => {
       renderComponent()
       const links = screen.getAllByRole('link')
-      // Find the passage VerseLink (has text-primary-lt), not the verse card Bible link
+      // Find the passage VerseLink (has text-white/80), not the verse card Bible link
       const verseLink = links.find(
-        (l) => l.getAttribute('href')?.startsWith('/bible/') && l.className.includes('text-primary-lt'),
+        (l) => l.getAttribute('href')?.startsWith('/bible/') && l.className.includes('text-white/80'),
       )
       expect(verseLink).toBeDefined()
     })
@@ -263,7 +263,7 @@ describe('DevotionalTabContent', () => {
 
     it('reflection question card has frosted glass styling with purple border', () => {
       renderComponent()
-      const questionText = screen.getByText(/Something to think about today/)
+      const questionText = screen.getByText(/Something to think about/)
       const card = questionText.closest('[class*="backdrop-blur"]') as HTMLElement
       expect(card).not.toBeNull()
       expect(card!.className).toContain('border-l-primary')
@@ -290,10 +290,18 @@ describe('DevotionalTabContent', () => {
       expect(card!.className).toContain('bg-white/[0.06]')
     })
 
-    it('section dividers use border-white/[0.08]', () => {
+    it('no section border dividers between content sections', () => {
       const { container } = renderComponent()
-      const dividers = container.querySelectorAll('.border-white\\/\\[0\\.08\\]')
-      expect(dividers.length).toBeGreaterThanOrEqual(4)
+      // After readability fix, all border-t/border-b dividers between content sections are removed
+      // FrostedCards provide visual separation instead
+      const passageCallout = container.querySelector('.rounded-xl.border-l-4') as HTMLElement
+      const passageSection = passageCallout!.parentElement as HTMLElement
+      expect(passageSection.className).not.toContain('border-t')
+      // Quote, reflection, question, pray CTA sections should have no border-t
+      const blockquote = container.querySelector('blockquote') as HTMLElement
+      const quoteCard = blockquote!.closest('[class*="backdrop-blur"]') as HTMLElement
+      const quoteSection = quoteCard!.parentElement as HTMLElement
+      expect(quoteSection.className).not.toContain('border-t')
     })
 
     describe('Container tiers', () => {
@@ -302,7 +310,7 @@ describe('DevotionalTabContent', () => {
         const callout = container.querySelector('.rounded-xl.border-l-4') as HTMLElement
         expect(callout).not.toBeNull()
         expect(callout!.className).toContain('border-l-primary/60')
-        expect(callout!.className).toContain('bg-white/[0.03]')
+        expect(callout!.className).toContain('bg-white/[0.04]')
       })
 
       it('Tier 2: passage text brightened to text-white', () => {
@@ -315,13 +323,13 @@ describe('DevotionalTabContent', () => {
         expect(passageP.className).not.toContain('text-white/80')
       })
 
-      it('Tier 2: verse superscripts use text-white/40', () => {
+      it('Tier 2: verse superscripts use text-white/50 and font-medium', () => {
         const { container } = renderComponent()
         const sups = container.querySelectorAll('sup')
         expect(sups.length).toBeGreaterThan(0)
         sups.forEach((sup) => {
-          expect(sup.className).toContain('text-white/40')
-          expect(sup.className).not.toContain('text-white/30')
+          expect(sup.className).toContain('text-white/50')
+          expect(sup.className).toContain('font-medium')
         })
       })
 
@@ -333,34 +341,96 @@ describe('DevotionalTabContent', () => {
         expect(outerDiv.className).not.toContain('border-t')
       })
 
-      it('Tier 3: reflection section has top and bottom dividers', () => {
+      it('Tier 3: reflection body is wrapped in FrostedCard', () => {
         const { container } = renderComponent()
-        const reflectionContent = container.querySelector('.space-y-4.text-base') as HTMLElement
+        const reflectionContent = container.querySelector('.space-y-5') as HTMLElement
         expect(reflectionContent).not.toBeNull()
-        const reflectionDiv = reflectionContent!.parentElement as HTMLElement
-        expect(reflectionDiv.className).toContain('border-t')
-        expect(reflectionDiv.className).toContain('border-b')
+        const frostedCard = reflectionContent!.closest('[class*="backdrop-blur"]') as HTMLElement
+        expect(frostedCard).not.toBeNull()
+        expect(frostedCard!.className).toContain('bg-white/[0.06]')
       })
 
-      it('Tier 3: reflection section has increased padding', () => {
+      it('Tier 3: reflection FrostedCard has generous padding', () => {
         const { container } = renderComponent()
-        const reflectionContent = container.querySelector('.space-y-4.text-base') as HTMLElement
+        const reflectionContent = container.querySelector('.space-y-5') as HTMLElement
         expect(reflectionContent).not.toBeNull()
-        const reflectionDiv = reflectionContent!.parentElement as HTMLElement
-        expect(reflectionDiv.className).toContain('py-6')
-        expect(reflectionDiv.className).toContain('sm:py-8')
+        const frostedCard = reflectionContent!.closest('[class*="backdrop-blur"]') as HTMLElement
+        expect(frostedCard).not.toBeNull()
+        expect(frostedCard!.className).toContain('p-5')
+        expect(frostedCard!.className).toContain('sm:p-8')
       })
 
-      it('Tier 3: reflection section has no background', () => {
-        const { container } = renderComponent()
-        const reflectionContent = container.querySelector('.space-y-4.text-base') as HTMLElement
-        expect(reflectionContent).not.toBeNull()
-        const reflectionDiv = reflectionContent!.parentElement as HTMLElement
-        expect(reflectionDiv.className).not.toMatch(/bg-white/)
-        expect(reflectionDiv.className).not.toContain('rounded')
-        expect(reflectionDiv.className).not.toContain('backdrop-blur')
+    })
+
+    describe('Readability enhancements', () => {
+      it('glow orb uses reduced opacity (0.18)', () => {
+        renderComponent()
+        const glowOrb = screen.getByTestId('glow-orb')
+        expect(glowOrb.getAttribute('style')).toContain('0.18')
       })
 
+      it('passage text is not italic', () => {
+        const { container } = renderComponent()
+        const callout = container.querySelector('.rounded-xl.border-l-4') as HTMLElement
+        const passageP = callout!.querySelector('p') as HTMLElement
+        expect(passageP.className).not.toContain('italic')
+      })
+
+      it('passage text uses reading-optimized line height', () => {
+        const { container } = renderComponent()
+        const callout = container.querySelector('.rounded-xl.border-l-4') as HTMLElement
+        const passageP = callout!.querySelector('p') as HTMLElement
+        expect(passageP.className).toContain('leading-[1.75]')
+      })
+
+      it('quote blockquote has explicit line height and retains italic', () => {
+        renderComponent()
+        const blockquote = screen.getByRole('blockquote')
+        expect(blockquote.className).toContain('leading-[1.6]')
+        expect(blockquote.className).toContain('italic')
+      })
+
+      it('quote section has no border-t divider', () => {
+        renderComponent()
+        const blockquote = screen.getByRole('blockquote')
+        const frostedCard = blockquote.closest('[class*="backdrop-blur"]') as HTMLElement
+        const sectionDiv = frostedCard!.parentElement as HTMLElement
+        expect(sectionDiv.className).not.toContain('border-t')
+      })
+
+      it('reflection text uses increased size and spacing', () => {
+        const { container } = renderComponent()
+        const reflectionContent = container.querySelector('.space-y-5') as HTMLElement
+        expect(reflectionContent).not.toBeNull()
+        expect(reflectionContent.className).toContain('text-[17px]')
+        expect(reflectionContent.className).toContain('leading-[1.8]')
+      })
+
+      it('reflection question label uses uppercase tracked treatment', () => {
+        renderComponent()
+        const label = screen.getByText('Something to think about')
+        expect(label.className).toContain('uppercase')
+        expect(label.className).toContain('tracking-widest')
+        expect(label.className).toContain('text-white/70')
+        expect(label.className).toContain('font-medium')
+      })
+
+      it('question text uses larger font', () => {
+        renderComponent()
+        const label = screen.getByText('Something to think about')
+        const questionP = label.nextElementSibling as HTMLElement
+        expect(questionP).not.toBeNull()
+        expect(questionP.className).toContain('text-xl')
+        expect(questionP.className).toContain('leading-[1.5]')
+      })
+
+      it('quote attribution is text-white/80', () => {
+        const { container } = renderComponent()
+        const blockquote = container.querySelector('blockquote') as HTMLElement
+        const attribution = blockquote!.nextElementSibling as HTMLElement
+        expect(attribution).not.toBeNull()
+        expect(attribution.className).toContain('text-white/80')
+      })
     })
 
     it('bottom padding is compact (pb-8)', () => {
@@ -401,12 +471,12 @@ describe('DevotionalTabContent', () => {
       expect(btn.className).toContain('min-h-[44px]')
     })
 
-    it('CTA section has top border separator', () => {
+    it('CTA section has no border-t divider', () => {
       renderComponent()
       const intro = screen.getByText("Ready to pray about today's reading?")
-      const section = intro.closest('.border-t') as HTMLElement
+      const section = intro.closest('.py-6') as HTMLElement
       expect(section).not.toBeNull()
-      expect(section!.className).toContain('border-white/[0.08]')
+      expect(section!.className).not.toContain('border-t')
     })
 
     it('only one Pray CTA button exists', () => {
@@ -459,7 +529,7 @@ describe('DevotionalTabContent', () => {
 
     it('reflection question appears before Pray CTA', () => {
       renderComponent()
-      const questionText = screen.getByText('Something to think about today:')
+      const questionText = screen.getByText('Something to think about')
       const prayCta = screen.getByText("Ready to pray about today's reading?")
       // Question should precede Pray CTA in DOM
       expect(questionText.compareDocumentPosition(prayCta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
@@ -469,7 +539,7 @@ describe('DevotionalTabContent', () => {
       renderComponent()
       const dateNav = screen.getByLabelText("Previous day's devotional")
       const blockquote = screen.getByRole('blockquote')
-      const questionLabel = screen.getByText('Something to think about today:')
+      const questionLabel = screen.getByText('Something to think about')
       const prayCta = screen.getByText("Ready to pray about today's reading?")
 
       // Each should precede the next in DOM order

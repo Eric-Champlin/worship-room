@@ -140,8 +140,8 @@ export function DevotionalTabContent({
   }, [readAloud, devotional])
 
   return (
-    <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
-      <div className="mx-auto max-w-4xl px-4 py-10 sm:py-14" {...swipeHandlers}>
+    <GlowBackground variant="center" glowOpacity={0.18} className="!bg-transparent">
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14" {...swipeHandlers}>
         <div className="relative">
           {/* Date navigation */}
           <div className="flex items-center justify-center gap-3">
@@ -195,12 +195,12 @@ export function DevotionalTabContent({
           </div>
 
           {/* Passage section */}
-          <div className="py-5 sm:py-6">
+          <div className="py-6 sm:py-8">
             <div className="mb-4 flex items-center gap-2">
               <p className="text-xs font-medium uppercase tracking-widest">
                 <VerseLink
                   reference={devotional.passage.reference}
-                  className="text-primary-lt"
+                  className="text-white/80"
                 />
               </p>
               <button
@@ -212,11 +212,11 @@ export function DevotionalTabContent({
                 <Share2 className="h-4 w-4" />
               </button>
             </div>
-            <div className="rounded-xl border-l-4 border-l-primary/60 bg-white/[0.03] px-5 py-5 sm:px-6 sm:py-6">
-              <p className="font-serif text-base italic leading-relaxed text-white sm:text-lg">
+            <div className="rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-5 py-6 sm:px-7 sm:py-7">
+              <p className="font-serif text-lg leading-[1.75] text-white sm:text-xl">
                 {devotional.passage.verses.map((verse) => (
                   <span key={verse.number}>
-                    <sup className="mr-1 align-super font-sans text-xs text-white/40">
+                    <sup className="mr-1 align-super font-sans text-xs font-medium text-white/50">
                       {verse.number}
                     </sup>
                     {verse.text}{' '}
@@ -241,32 +241,34 @@ export function DevotionalTabContent({
           </div>
 
           {/* Quote section */}
-          <div className="border-t border-white/[0.08] py-5 sm:py-6">
+          <div className="py-6 sm:py-8">
             <FrostedCard className="p-5 sm:p-6">
-              <span className="font-serif text-5xl leading-none text-white/20" aria-hidden="true">
+              <span className="font-serif text-5xl leading-none text-white/25" aria-hidden="true">
                 &ldquo;
               </span>
-              <blockquote className="mt-2 font-serif text-xl italic leading-relaxed text-white sm:text-2xl">
+              <blockquote className="mt-2 font-serif text-xl italic leading-[1.6] text-white sm:text-2xl">
                 {devotional.quote.text}
               </blockquote>
-              <p className="mt-3 text-sm text-white/70">&mdash; {devotional.quote.attribution}</p>
+              <p className="mt-3 text-sm text-white/80">&mdash; {devotional.quote.attribution}</p>
             </FrostedCard>
           </div>
 
           {/* Reflection section */}
-          <div className="border-t border-b border-white/[0.08] py-6 sm:py-8">
-            <div className="space-y-4 text-base leading-relaxed text-white">
-              {devotional.reflection.map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-              ))}
-            </div>
+          <div className="py-6 sm:py-8">
+            <FrostedCard className="p-5 sm:p-8">
+              <div className="space-y-5 text-[17px] leading-[1.8] text-white sm:text-lg">
+                {devotional.reflection.map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            </FrostedCard>
           </div>
 
           {/* Reflection question section */}
-          <div className="border-t border-white/[0.08] py-5 sm:py-6" ref={questionRef}>
+          <div className="py-6 sm:py-8" ref={questionRef}>
             <FrostedCard className="border-l-2 border-l-primary p-4 sm:p-6">
-              <p className="text-sm text-white/60">Something to think about today:</p>
-              <p className="mt-2 text-lg font-medium text-white">
+              <p className="text-xs font-medium uppercase tracking-widest text-white/70">Something to think about</p>
+              <p className="mt-2 text-xl font-medium leading-[1.5] text-white sm:text-2xl">
                 {devotional.reflectionQuestion.replace('Something to think about today: ', '')}
               </p>
               <div className="mt-5">
@@ -288,7 +290,7 @@ export function DevotionalTabContent({
           </div>
 
           {/* Pray CTA section */}
-          <div className="border-t border-white/[0.08] py-6 sm:py-8">
+          <div className="py-6 sm:py-8">
             <div className="flex flex-col items-center gap-3 text-center">
               <p className="text-sm text-white/60">Ready to pray about today&apos;s reading?</p>
               <button
