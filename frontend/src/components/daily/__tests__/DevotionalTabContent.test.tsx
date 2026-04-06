@@ -107,6 +107,33 @@ describe('DevotionalTabContent', () => {
       expect(screen.getByText('Closing Prayer')).toBeInTheDocument()
     })
 
+    it('Closing Prayer label uses text-white/60 opacity', () => {
+      renderComponent()
+      const label = screen.getByText('Closing Prayer')
+      expect(label.className).toContain('text-white/60')
+      expect(label.className).not.toContain('text-white/50')
+    })
+
+    it('Closing Prayer label preserves typography classes', () => {
+      renderComponent()
+      const label = screen.getByText('Closing Prayer')
+      expect(label.className).toContain('mb-2')
+      expect(label.className).toContain('text-xs')
+      expect(label.className).toContain('font-medium')
+      expect(label.className).toContain('uppercase')
+      expect(label.className).toContain('tracking-widest')
+    })
+
+    it('Closing Prayer label matches prayer body opacity (text-white/60)', () => {
+      renderComponent()
+      const label = screen.getByText('Closing Prayer')
+      const prayerBody = label.nextElementSibling as HTMLElement
+      expect(prayerBody).not.toBeNull()
+      expect(prayerBody.tagName).toBe('P')
+      expect(prayerBody.className).toContain('text-white/60')
+      expect(label.className).toContain('text-white/60')
+    })
+
     it('renders reflection question', () => {
       renderComponent()
       expect(screen.getByText('Something to think about today:')).toBeInTheDocument()

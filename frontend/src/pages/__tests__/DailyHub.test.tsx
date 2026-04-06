@@ -386,6 +386,29 @@ describe('DailyHub', () => {
     expect(heading.className).not.toContain('text-3xl')
   })
 
+  it('greeting heading uses leading-[1.15] for descender clearance', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading.className).toContain('leading-[1.15]')
+    expect(heading.className).not.toContain('leading-tight')
+  })
+
+  it('greeting heading has pb-2 for descender paint room', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading.className).toContain('pb-2')
+  })
+
+  it('greeting heading preserves responsive size and weight classes', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading.className).toContain('mb-1')
+    expect(heading.className).toContain('text-4xl')
+    expect(heading.className).toContain('font-bold')
+    expect(heading.className).toContain('sm:text-5xl')
+    expect(heading.className).toContain('lg:text-6xl')
+  })
+
   it('verse card uses compact max-w-2xl with rounded-xl', () => {
     renderPage()
     const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!

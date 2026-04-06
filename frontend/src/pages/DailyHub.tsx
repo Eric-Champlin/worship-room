@@ -212,7 +212,7 @@ function DailyHubContent() {
           >
           <h1
             id="daily-hub-heading"
-            className="mb-1 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
+            className="mb-1 text-4xl font-bold leading-[1.15] pb-2 sm:text-5xl lg:text-6xl"
             style={GRADIENT_TEXT_STYLE}
           >
             {displayName}

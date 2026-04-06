@@ -254,7 +254,7 @@ export function DevotionalTabContent({
 
           {/* Prayer section */}
           <div className="border-t border-white/[0.08] py-5 sm:py-6">
-            <p className="mb-2 text-xs font-medium uppercase tracking-widest text-white/50">
+            <p className="mb-2 text-xs font-medium uppercase tracking-widest text-white/60">
               Closing Prayer
             </p>
             <p className="font-serif text-sm italic leading-relaxed text-white/60">
