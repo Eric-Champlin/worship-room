@@ -21,43 +21,27 @@ export function SongPickSection() {
         {/* Section divider */}
         <div
           aria-hidden="true"
-          className="mx-auto max-w-xl border-t border-white/[0.08]"
+          className="mx-auto max-w-xl border-t border-white/[0.08] mb-10"
         />
 
-        {/* Content container — side-by-side at md */}
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 pt-8 md:flex-row md:items-stretch md:gap-12">
-
-          {/* Left: Heading top, CTA bottom — stretch fills to player height */}
-          <div className="flex shrink-0 flex-col items-center md:items-start md:justify-between">
-            <h2 id="song-pick-heading" className="flex flex-col items-center md:items-start">
+        {/* Content container — centered column */}
+        <div className="mx-auto max-w-2xl">
+          <div className="text-center">
+            <h2 id="song-pick-heading" className="flex flex-col items-center">
               <span
                 className="text-4xl font-bold leading-none sm:text-5xl lg:text-6xl"
                 style={GRADIENT_TEXT_STYLE}
               >
                 Today&apos;s
               </span>
-              <span className="mt-1 text-2xl font-bold leading-none tracking-[0.18em] text-white sm:text-3xl lg:text-4xl">
+              <span className="mt-1 text-2xl font-bold leading-none text-white sm:text-3xl lg:text-4xl">
                 Song Pick
               </span>
             </h2>
-
-            {isOnline && (
-              <div className="mt-6">
-                <a
-                  href={SPOTIFY_PLAYLIST_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
-                >
-                  Follow Our Playlist
-                </a>
-                <p className="mt-2 text-xs text-white/70">Join 117K+ other followers!</p>
-              </div>
-            )}
           </div>
 
-          {/* Right: Spotify player only — no CTA in this column */}
-          <div className="w-full min-w-0 flex-1 max-w-xl">
+          {/* Player */}
+          <div className="mt-8">
             {isOnline ? (
               <div className="relative">
                 {!iframeLoaded && (
@@ -81,6 +65,21 @@ export function SongPickSection() {
               <OfflineMessage variant="dark" message="Spotify playlists available when online" />
             )}
           </div>
+
+          {/* CTA */}
+          {isOnline && (
+            <div className="mt-6 text-center">
+              <a
+                href={SPOTIFY_PLAYLIST_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
+              >
+                Follow Our Playlist
+              </a>
+              <p className="mt-2 text-xs text-white/70">Join 117K+ other followers!</p>
+            </div>
+          )}
         </div>
       </section>
     </GlowBackground>

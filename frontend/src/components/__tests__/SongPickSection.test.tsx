@@ -120,22 +120,31 @@ describe('SongPickSection', () => {
     expect(spans[0].className).toContain('sm:text-5xl')
     expect(spans[0].className).toContain('lg:text-6xl')
     expect(spans[0].className).toContain('leading-none')
-    // Second span = "Song Pick" (white, smaller, leading-none, tracking)
+    // Second span = "Song Pick" (white, smaller, leading-none, no tracking)
     expect(spans[1]).toHaveTextContent('Song Pick')
     expect(spans[1]).toHaveClass('text-white')
     expect(spans[1].className).toContain('text-2xl')
     expect(spans[1].className).toContain('sm:text-3xl')
     expect(spans[1].className).toContain('lg:text-4xl')
     expect(spans[1].className).toContain('leading-none')
-    expect(spans[1].className).toContain('tracking-[0.18em]')
+    expect(spans[1].className).not.toContain('tracking-')
   })
 
-  it('Song Pick has letter-spacing for width matching', () => {
+  it('uses max-w-2xl centered column layout', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { level: 2 })
+    const container = heading.closest('.max-w-2xl')
+    expect(container).toBeInTheDocument()
+    // No side-by-side layout classes
+    expect(container?.className).not.toContain('md:flex-row')
+    expect(container?.className).not.toContain('max-w-4xl')
+  })
+
+  it('Song Pick has no letter-spacing manipulation', () => {
     renderComponent()
     const heading = screen.getByRole('heading', { level: 2 })
     const spans = heading.querySelectorAll('span')
-    const songPickSpan = spans[1]
-    expect(songPickSpan).toHaveTextContent('Song Pick')
-    expect(songPickSpan.className).toContain('tracking-')
+    expect(spans[1]).toHaveTextContent('Song Pick')
+    expect(spans[1].className).not.toContain('tracking-')
   })
 })
