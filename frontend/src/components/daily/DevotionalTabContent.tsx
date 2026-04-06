@@ -277,6 +277,21 @@ export function DevotionalTabContent({
               <p className="mt-2 text-lg font-medium text-white">
                 {devotional.reflectionQuestion.replace('Something to think about today: ', '')}
               </p>
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const reflectionQuestion = devotional.reflectionQuestion.replace(
+                      'Something to think about today: ',
+                      '',
+                    )
+                    onSwitchToJournal?.(devotional.theme, reflectionQuestion)
+                  }}
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
+                >
+                  Journal about this question &rarr;
+                </button>
+              </div>
             </FrostedCard>
           </div>
 
@@ -313,19 +328,7 @@ export function DevotionalTabContent({
           </div>
 
           {/* Cross-tab CTAs */}
-          <div className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:flex-row sm:justify-center">
-            <button
-              type="button"
-              onClick={() =>
-                onSwitchToJournal?.(
-                  devotional.theme,
-                  stripReflectionPrefix(devotional.reflectionQuestion),
-                )
-              }
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
-            >
-              Journal about this &rarr;
-            </button>
+          <div className="mt-8 flex justify-center sm:mt-10">
             <button
               type="button"
               onClick={() =>
