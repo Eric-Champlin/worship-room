@@ -630,4 +630,63 @@ describe('JournalTabContent devotional context', () => {
     await user.click(screen.getByRole('button', { name: 'Free Write' }))
     expect(screen.getByText(/Reflecting on today.s devotional on Trust/)).toBeInTheDocument()
   })
+
+  it('guided-mode devotional banner has "View full devotional" link', () => {
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    const link = screen.getByRole('link', { name: /view full devotional/i })
+    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('free-write mode devotional banner has "View full devotional" link', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    await user.click(screen.getByRole('button', { name: 'Free Write' }))
+    const link = screen.getByRole('link', { name: /view full devotional/i })
+    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('ExternalLink icon is aria-hidden in guided mode', () => {
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    const link = screen.getByRole('link', { name: /view full devotional/i })
+    const svg = link.querySelector('svg')
+    expect(svg).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('pray context banner does not have "View full devotional" link', () => {
+    renderJournalTab({
+      prayContext: { from: 'pray', topic: 'anxiety' },
+    })
+    expect(screen.queryByRole('link', { name: /view full devotional/i })).not.toBeInTheDocument()
+  })
+
+  it('dismiss still works in guided mode alongside "View full devotional"', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    expect(screen.getByRole('link', { name: /view full devotional/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /write about something else/i }))
+    expect(screen.queryByRole('link', { name: /view full devotional/i })).not.toBeInTheDocument()
+  })
+
+  it('dismiss still works in free-write mode alongside "View full devotional"', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    await user.click(screen.getByRole('button', { name: 'Free Write' }))
+    expect(screen.getByRole('link', { name: /view full devotional/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /dismiss/i }))
+    expect(screen.queryByRole('link', { name: /view full devotional/i })).not.toBeInTheDocument()
+  })
 })

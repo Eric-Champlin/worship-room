@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { ExternalLink } from 'lucide-react'
 import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerInput } from '@/components/daily/PrayerInput'
@@ -47,6 +48,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
   const [autoPlayedAudio, setAutoPlayedAudio] = useState(false)
   const [retryPrompt, setRetryPrompt] = useState<string | null>(null)
   const [activeGuidedSession, setActiveGuidedSession] = useState<GuidedPrayerSession | null>(null)
+  const [contextDismissed, setContextDismissed] = useState(false)
 
   const submittedTextRef = useRef('')
   const initialContextConsumed = useRef(false)
@@ -90,6 +92,13 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
       window.scrollTo(0, 0)
     }
   }, [prayContext, activeTab])
+
+  // Reset context dismissed when prayContext changes
+  useEffect(() => {
+    if (prayContext?.from === 'devotional' && prayContext.customPrompt) {
+      setContextDismissed(false)
+    }
+  }, [prayContext])
 
   const extractTopic = () => {
     if (!submittedTextRef.current.trim()) return 'prayer'
@@ -191,6 +200,34 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
     <>
       <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
         <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+          {/* Devotional Context Banner */}
+          {prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed && !isLoading && !prayer && (
+            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3" role="status" aria-live="polite">
+              <p className="text-sm text-white/80">
+                Praying about today&apos;s devotional on{' '}
+                <span className="font-medium">{prayContext.topic ?? 'today\u2019s reading'}</span>
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                <button
+                  type="button"
+                  onClick={() => setContextDismissed(true)}
+                  className="inline-flex min-h-[44px] items-center text-xs text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                >
+                  Pray about something else
+                </button>
+                <a
+                  href="/daily?tab=devotional"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[44px] items-center gap-1 text-xs text-white/60 underline hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                >
+                  View full devotional
+                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* Prayer Response (loading + display + actions) */}
           {(isLoading || prayer) && (
             <PrayerResponse

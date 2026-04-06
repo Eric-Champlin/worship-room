@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { CheckCircle2, Mic, MicOff, RefreshCw } from 'lucide-react'
+import { CheckCircle2, ExternalLink, Mic, MicOff, RefreshCw } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
@@ -226,13 +226,24 @@ export function JournalInput({
               Reflecting on today&apos;s devotional on{' '}
               <span className="font-medium">{prayContext.topic ?? 'today\u2019s reading'}</span>
             </p>
-            <button
-              type="button"
-              onClick={onDismissContext}
-              className="mt-1 text-xs text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-            >
-              Write about something else
-            </button>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <button
+                type="button"
+                onClick={onDismissContext}
+                className="inline-flex min-h-[44px] items-center text-xs text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+              >
+                Write about something else
+              </button>
+              <a
+                href="/daily?tab=devotional"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center gap-1 text-xs text-white/60 underline hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+              >
+                View full devotional
+                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>
+            </div>
           </div>
         )}
       </div>
@@ -275,16 +286,27 @@ export function JournalInput({
         </p>
       )}
       {mode === 'free' && prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed && (
-        <p className="mb-4 text-sm text-white/50">
-          Reflecting on today&apos;s devotional on {prayContext.topic ?? 'today\u2019s reading'}.{' '}
-          <button
-            type="button"
-            onClick={onDismissContext}
-            className="text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          >
-            Dismiss
-          </button>
-        </p>
+        <div className="mb-4 text-sm text-white/50">
+          <p>Reflecting on today&apos;s devotional on {prayContext.topic ?? 'today\u2019s reading'}.</p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+            <button
+              type="button"
+              onClick={onDismissContext}
+              className="inline-flex min-h-[44px] items-center text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+            >
+              Dismiss
+            </button>
+            <a
+              href="/daily?tab=devotional"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[44px] items-center gap-1 text-xs text-white/60 underline hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+            >
+              View full devotional
+              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            </a>
+          </div>
+        </div>
       )}
 
       {/* Textarea */}

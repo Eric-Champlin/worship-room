@@ -881,6 +881,90 @@ describe('PrayTabContent devotional context', () => {
     const textarea = screen.getByLabelText('Prayer request')
     expect(textarea).toHaveValue('')
   })
+
+  it('devotional context banner appears with prayContext.from === "devotional"', () => {
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    expect(screen.getByText(/praying about today.s devotional on/i)).toBeInTheDocument()
+    expect(screen.getByText('Trust')).toBeInTheDocument()
+  })
+
+  it('banner has "Pray about something else" dismiss button', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    const dismissButton = screen.getByRole('button', { name: /pray about something else/i })
+    await user.click(dismissButton)
+    expect(screen.queryByText(/praying about today.s devotional on/i)).not.toBeInTheDocument()
+  })
+
+  it('banner has "View full devotional" link with correct attributes', () => {
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    const link = screen.getByRole('link', { name: /view full devotional/i })
+    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('banner hidden when prayer is loading', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    expect(screen.getByText(/praying about today.s devotional on/i)).toBeInTheDocument()
+    await generatePrayer(user)
+    expect(screen.queryByText(/praying about today.s devotional on/i)).not.toBeInTheDocument()
+  })
+
+  it('banner hidden when prayer response is displayed', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+    expect(screen.queryByText(/praying about today.s devotional on/i)).not.toBeInTheDocument()
+  })
+
+  it('no devotional banner when prayContext is null', () => {
+    renderPrayTab()
+    expect(screen.queryByText(/praying about today.s devotional on/i)).not.toBeInTheDocument()
+  })
+
+  it('no devotional banner when prayContext.from === "pray"', () => {
+    renderPrayTab({
+      prayContext: { from: 'pray', topic: 'anxiety' },
+    })
+    expect(screen.queryByText(/praying about today.s devotional on/i)).not.toBeInTheDocument()
+  })
+
+  it('contextDismissed resets when prayContext changes', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const prayContext1: PrayContext = { from: 'devotional', topic: 'Trust', customPrompt: 'Prompt 1' }
+    const prayContext2: PrayContext = { from: 'devotional', topic: 'Grace', customPrompt: 'Prompt 2' }
+    const { rerender } = renderPrayTab({ prayContext: prayContext1 })
+    // Dismiss the banner
+    await user.click(screen.getByRole('button', { name: /pray about something else/i }))
+    expect(screen.queryByText(/praying about today.s devotional on/i)).not.toBeInTheDocument()
+    // Re-render with new prayContext
+    rerender(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <AuthProvider>
+          <ToastProvider>
+            <AuthModalProvider>
+              <PrayTabContent prayContext={prayContext2} />
+            </AuthModalProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+    expect(screen.getByText(/praying about today.s devotional on/i)).toBeInTheDocument()
+    expect(screen.getByText('Grace')).toBeInTheDocument()
+  })
 })
 
 describe('prayer draft persistence', () => {
