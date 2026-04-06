@@ -47,15 +47,11 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
     <section aria-labelledby="guided-prayer-heading" id="guided-prayer-section">
       <h2
         id="guided-prayer-heading"
-        className="font-bold text-white text-xl sm:text-2xl"
+        className="mb-5 font-bold text-white text-xl sm:text-2xl"
       >
         Guided Prayer Sessions
       </h2>
-      <p className="mt-1 font-serif italic text-white/50 text-base">
-        Close your eyes and let God lead
-      </p>
-
-      <div className="mt-4 flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 sm:gap-3 sm:overflow-visible sm:pb-0 lg:grid-cols-4 lg:gap-4">
+      <div className="mt-0 flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:pb-0 lg:grid-cols-4 lg:gap-5">
         {GUIDED_PRAYER_SESSIONS.map((session) => {
           const ThemeIcon = ICON_COMPONENTS[session.icon]
           const isComplete = isAuthenticated && isGuidedPrayerComplete(session.id)
@@ -65,7 +61,7 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
               key={session.id}
               type="button"
               onClick={() => handleCardClick(session)}
-              className="relative min-w-[200px] flex-shrink-0 snap-center rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-sm p-4 text-left transition-colors hover:bg-white/[0.10] hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:min-w-0"
+              className="relative min-w-[220px] flex flex-col flex-shrink-0 snap-center rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 text-left transition-all duration-200 hover:bg-white/[0.10] hover:border-white/20 hover:shadow-[0_0_25px_rgba(139,92,246,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:min-w-0 sm:min-h-[180px]"
             >
               {isComplete && (
                 <CheckCircle2
@@ -75,16 +71,16 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
               )}
 
               {ThemeIcon && (
-                <ThemeIcon className="mb-2 h-6 w-6 text-primary" aria-hidden="true" />
+                <ThemeIcon className="mb-3 h-8 w-8 text-primary" aria-hidden="true" />
               )}
 
-              <h3 className="font-medium text-sm text-white">{session.title}</h3>
+              <h3 className="font-semibold text-base text-white">{session.title}</h3>
 
-              <p className="mt-1 text-xs text-white/60 line-clamp-2">
+              <p className="mt-1 text-sm text-white/70 line-clamp-3 flex-1">
                 {session.description}
               </p>
 
-              <span className="mt-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
+              <span className="mt-2 self-start rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70">
                 {session.durationMinutes} min
               </span>
             </button>

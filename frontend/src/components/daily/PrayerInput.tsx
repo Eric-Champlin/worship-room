@@ -1,10 +1,9 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { DEFAULT_PRAYER_CHIPS, PRAYER_DRAFT_KEY } from '@/constants/daily-experience'
-import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 
 export interface PrayerInputProps {
   onSubmit: (text: string) => void
@@ -31,11 +30,6 @@ export function PrayerInput({
   const [selectedChip, setSelectedChip] = useState<string | null>(null)
   const [nudge, setNudge] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  const autoExpand = useCallback((el: HTMLTextAreaElement) => {
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
-  }, [])
 
   // Sync from parent's initialText (pre-fill from Prayer Wall, challenge, cross-feature CTA)
   useEffect(() => {
@@ -86,7 +80,6 @@ export function PrayerInput({
         textareaRef.current.focus()
         textareaRef.current.selectionStart = chip.length
         textareaRef.current.selectionEnd = chip.length
-        autoExpand(textareaRef.current)
       }
     }, 0)
   }
@@ -103,15 +96,6 @@ export function PrayerInput({
 
   return (
     <>
-      <div className="mb-4">
-        <h2
-          className="text-center font-sans text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl"
-          style={GRADIENT_TEXT_STYLE}
-        >
-          What&apos;s On Your Heart?
-        </h2>
-      </div>
-
       {retryPrompt && (
         <p className="mb-2 text-center text-sm text-white/50">
           {retryPrompt}
@@ -143,13 +127,11 @@ export function PrayerInput({
             setText(e.target.value)
             setNudge(false)
             if (retryPrompt) onRetryPromptClear?.()
-            autoExpand(e.target)
           }}
-          onInput={(e) => autoExpand(e.target as HTMLTextAreaElement)}
           placeholder="Start typing here..."
           maxLength={500}
-          rows={3}
-          className="w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+          rows={8}
+          className="w-full resize-y min-h-[200px] max-h-[500px] rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
           aria-label="Prayer request"
           aria-describedby={nudge ? 'pray-error pray-char-count' : 'pray-char-count'}
           aria-invalid={nudge ? 'true' : undefined}
@@ -173,7 +155,7 @@ export function PrayerInput({
           type="button"
           onClick={handleSubmit}
           disabled={isLoading}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-primary px-8 py-3 text-base font-semibold text-white shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-all duration-200 hover:bg-primary-light hover:shadow-[0_0_30px_rgba(139,92,246,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:cursor-not-allowed disabled:opacity-50"
         >
           Help Me Pray
         </button>

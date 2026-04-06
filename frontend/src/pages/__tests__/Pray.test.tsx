@@ -98,11 +98,11 @@ describe('PrayTabContent', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders styled heading', () => {
+  it('heading "What\'s On Your Heart?" is removed', () => {
     renderComponent()
     expect(
-      screen.getByRole('heading', { name: /what's on your heart\?/i }),
-    ).toBeInTheDocument()
+      screen.queryByRole('heading', { name: /what's on your heart\?/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('renders 3 default starter chips', () => {

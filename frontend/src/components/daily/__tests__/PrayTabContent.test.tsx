@@ -677,7 +677,7 @@ describe('PrayTabContent — Guided Prayer Section', () => {
   it('Guided Prayer Section renders within Pray tab', () => {
     renderPrayTab()
     expect(screen.getByText('Guided Prayer Sessions')).toBeInTheDocument()
-    expect(screen.getByText('Close your eyes and let God lead')).toBeInTheDocument()
+    expect(screen.queryByText('Close your eyes and let God lead')).not.toBeInTheDocument()
   })
 
   it('all 8 session cards are visible', () => {
@@ -694,8 +694,8 @@ describe('PrayTabContent — Guided Prayer Section', () => {
 
   it('section visible alongside input area (not hidden by prayer state)', () => {
     renderPrayTab()
-    // Input section heading is visible
-    expect(screen.getByText(/What's On Your/)).toBeInTheDocument()
+    // Prayer textarea is visible
+    expect(screen.getByLabelText('Prayer request')).toBeInTheDocument()
     // Guided prayer section is also visible
     expect(screen.getByText('Guided Prayer Sessions')).toBeInTheDocument()
   })
@@ -776,30 +776,9 @@ describe('PrayTabContent atmospheric visuals', () => {
     expect(screen.getAllByTestId('glow-orb').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('renders gradient heading text "What\'s On Your Heart?"', () => {
+  it('pray tab heading "What\'s On Your Heart?" is removed', () => {
     renderPrayTab()
-    const heading = screen.getByRole('heading', { name: /what's on your heart\?/i })
-    expect(heading).toBeInTheDocument()
-    expect(heading).toHaveStyle({ backgroundImage: expect.stringContaining('linear-gradient') })
-  })
-
-  it('heading has no Caveat script font span', () => {
-    renderPrayTab()
-    const heading = screen.getByRole('heading', { name: /what's on your heart\?/i })
-    expect(heading.querySelector('.font-script')).toBeNull()
-  })
-
-  it('heading is a single text node (no inner span)', () => {
-    renderPrayTab()
-    const heading = screen.getByRole('heading', { name: /what's on your heart\?/i })
-    expect(heading.querySelector('span')).toBeNull()
-  })
-
-  it('heading has leading-tight class and no text-white class', () => {
-    renderPrayTab()
-    const heading = screen.getByRole('heading', { name: /what's on your heart\?/i })
-    expect(heading.className).toContain('leading-tight')
-    expect(heading.className).not.toContain('text-white')
+    expect(screen.queryByRole('heading', { name: /what's on your heart\?/i })).not.toBeInTheDocument()
   })
 
   it('GuidedPrayerPlayer renders as sibling of GlowBackground, not a descendant', async () => {

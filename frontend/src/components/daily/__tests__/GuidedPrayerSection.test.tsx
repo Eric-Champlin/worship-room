@@ -92,12 +92,12 @@ beforeEach(() => {
 })
 
 describe('GuidedPrayerSection', () => {
-  it('renders section heading and subheading', () => {
+  it('renders section heading without subtitle', () => {
     renderWithProviders()
     expect(screen.getByText('Guided Prayer Sessions')).toBeInTheDocument()
     expect(
-      screen.getByText('Close your eyes and let God lead')
-    ).toBeInTheDocument()
+      screen.queryByText('Close your eyes and let God lead')
+    ).not.toBeInTheDocument()
   })
 
   it('renders 8 session cards', () => {
@@ -178,7 +178,7 @@ describe('GuidedPrayerSection', () => {
   it('cards have minimum touch target size via padding', () => {
     renderWithProviders()
     const firstButton = screen.getAllByRole('button')[0]
-    // Cards have p-4 (16px) and content, ensuring > 44px height
-    expect(firstButton.className).toContain('p-4')
+    // Cards have p-6 (24px) and content, ensuring > 44px height
+    expect(firstButton.className).toContain('p-6')
   })
 })
