@@ -30,19 +30,19 @@ export function RelatedPlanCallout({
   }
 
   return (
-    <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-5">
-      <p className="text-xs uppercase tracking-wider text-white/60">
+    <div className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-6">
+      <p className="text-xs uppercase tracking-widest text-white/70">
         Go Deeper
       </p>
       <p className="mt-2 text-base font-semibold text-white">{planTitle}</p>
-      <p className="mt-1 text-sm text-white/50">{planDuration}-day plan</p>
+      <p className="mt-1 text-sm text-white/60">{planDuration}-day plan</p>
       <Link
         to={`/reading-plans/${planId}`}
         onClick={handleClick}
-        className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary-lt transition-colors hover:text-primary"
+        className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
       >
         {ctaText}
-        <ChevronRight size={14} />
+        <ChevronRight size={16} />
       </Link>
     </div>
   )
