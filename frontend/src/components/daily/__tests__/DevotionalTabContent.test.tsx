@@ -247,8 +247,11 @@ describe('DevotionalTabContent', () => {
     it('devotional link has correct styling', () => {
       renderComponent()
       const links = screen.getAllByRole('link')
-      const verseLink = links.find((l) => l.getAttribute('href')?.startsWith('/bible/'))
-      expect(verseLink?.className).toContain('text-primary-lt')
+      // Find the passage VerseLink (has text-primary-lt), not the verse card Bible link
+      const verseLink = links.find(
+        (l) => l.getAttribute('href')?.startsWith('/bible/') && l.className.includes('text-primary-lt'),
+      )
+      expect(verseLink).toBeDefined()
     })
   })
 
@@ -417,6 +420,135 @@ describe('DevotionalTabContent', () => {
       // Old bottom CTA had mt-8 flex justify-center sm:mt-10
       const oldWrapper = container.querySelector('.mt-8.flex.justify-center')
       expect(oldWrapper).toBeNull()
+    })
+  })
+
+  describe('Daily Verse Card', () => {
+    it('renders verse of the day text in FrostedCard', () => {
+      renderComponent()
+      // Verse text appears in curly quotes
+      const verseText = screen.getByText(/\u201c.+\u201d/)
+      expect(verseText).toBeInTheDocument()
+      // Inside a FrostedCard (backdrop-blur element)
+      const card = verseText.closest('[class*="backdrop-blur"]') as HTMLElement
+      expect(card).not.toBeNull()
+      expect(card!.className).toContain('bg-white/[0.06]')
+    })
+
+    it('verse text uses upgraded styling (text-lg sm:text-xl text-white)', () => {
+      renderComponent()
+      const verseText = screen.getByText(/\u201c.+\u201d/)
+      expect(verseText.className).toContain('text-lg')
+      expect(verseText.className).toContain('text-white')
+      expect(verseText.className).toContain('sm:text-xl')
+      // Not the old muted version
+      expect(verseText.className).not.toContain('text-white/80')
+    })
+
+    it('verse card links to Bible reader', () => {
+      renderComponent()
+      const links = screen.getAllByRole('link')
+      const bibleLink = links.find(l => l.getAttribute('href')?.startsWith('/bible/'))
+      expect(bibleLink).toBeDefined()
+    })
+
+    it('verse card has "Meditate on this verse" link with all 3 URL params', () => {
+      renderComponent()
+      const meditateLink = screen.getByText('Meditate on this verse >')
+      expect(meditateLink).toBeInTheDocument()
+      const href = meditateLink.closest('a')!.getAttribute('href')!
+      expect(href).toContain('/meditate/soaking?verse=')
+      expect(href).toContain('verseText=')
+      expect(href).toContain('verseTheme=')
+    })
+
+    it('verse card has share button with accessible label', () => {
+      renderComponent()
+      const shareBtn = screen.getByLabelText('Share verse of the day')
+      expect(shareBtn).toBeInTheDocument()
+      expect(shareBtn).toHaveAttribute('aria-haspopup', 'dialog')
+    })
+
+    it('verse card share button meets 44px touch target', () => {
+      renderComponent()
+      const shareBtn = screen.getByLabelText('Share verse of the day')
+      expect(shareBtn.className).toContain('min-h-[44px]')
+      expect(shareBtn.className).toContain('min-w-[44px]')
+    })
+
+    it('verse card SharePanel uses independent state from passage SharePanel', async () => {
+      const user = userEvent.setup()
+      renderComponent()
+      // Open verse share panel
+      const verseShareBtn = screen.getByLabelText('Share verse of the day')
+      await user.click(verseShareBtn)
+      expect(verseShareBtn).toHaveAttribute('aria-expanded', 'true')
+      // Passage share button should NOT be expanded
+      const allShareBtns = screen.getAllByRole('button').filter(b => b.getAttribute('aria-label')?.includes('Share'))
+      const passageBtn = allShareBtns.find(b => b.getAttribute('aria-label') !== 'Share verse of the day')
+      if (passageBtn) {
+        expect(passageBtn).not.toHaveAttribute('aria-expanded', 'true')
+      }
+    })
+
+    it('verse reference uses text-sm text-white/70', () => {
+      renderComponent()
+      // Find the reference line (starts with "— ")
+      const refs = screen.getAllByText(/^—\s/)
+      // The first one should be the verse card reference
+      expect(refs[0].className).toContain('text-sm')
+      expect(refs[0].className).toContain('text-white/70')
+    })
+
+    it('verse card appears before date navigation', () => {
+      renderComponent()
+      const frostedCards = document.querySelectorAll('[class*="backdrop-blur"]')
+      const dateNav = screen.getByLabelText("Previous day's devotional")
+      // First frosted card should be the verse card, and it should precede date nav in DOM order
+      expect(frostedCards.length).toBeGreaterThan(0)
+      const verseCard = frostedCards[0]
+      expect(verseCard.compareDocumentPosition(dateNav) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+  })
+
+  describe('Content order', () => {
+    it('quote card appears after passage section (not before)', () => {
+      const { container } = renderComponent()
+      const blockquote = screen.getByRole('blockquote')
+      const passageCallout = container.querySelector('.rounded-xl.border-l-4') as HTMLElement
+      expect(passageCallout).not.toBeNull()
+      // Blockquote (in quote card) should follow passage callout in DOM
+      expect(passageCallout.compareDocumentPosition(blockquote) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
+    it('reflection question appears before Pray CTA', () => {
+      renderComponent()
+      const questionText = screen.getByText('Something to think about today:')
+      const prayCta = screen.getByText("Ready to pray about today's reading?")
+      // Question should precede Pray CTA in DOM
+      expect(questionText.compareDocumentPosition(prayCta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
+    it('verse card is the first content element (before date navigation)', () => {
+      renderComponent()
+      const verseText = screen.getByText(/\u201c.+\u201d/)
+      const dateNav = screen.getByLabelText("Previous day's devotional")
+      expect(verseText.compareDocumentPosition(dateNav) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
+    it('full content order: verse → date → title → passage → quote → reflection → question → pray CTA', () => {
+      renderComponent()
+      const verseQuote = screen.getByText(/\u201c.+\u201d/)
+      const dateNav = screen.getByLabelText("Previous day's devotional")
+      const blockquote = screen.getByRole('blockquote')
+      const questionLabel = screen.getByText('Something to think about today:')
+      const prayCta = screen.getByText("Ready to pray about today's reading?")
+
+      // Each should precede the next in DOM order
+      expect(verseQuote.compareDocumentPosition(dateNav) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      expect(dateNav.compareDocumentPosition(blockquote) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      expect(blockquote.compareDocumentPosition(questionLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      expect(questionLabel.compareDocumentPosition(prayCta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     })
   })
 })

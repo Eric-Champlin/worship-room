@@ -1,9 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useSearchParams, useLocation, Link } from 'react-router-dom'
-import { Heart, PenLine, Wind, BookOpen, Check, Share2 } from 'lucide-react'
+import { useSearchParams, useLocation } from 'react-router-dom'
+import { Heart, PenLine, Wind, BookOpen, Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { GlowBackground } from '@/components/homepage/GlowBackground'
-import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
@@ -11,9 +10,6 @@ import { PrayTabContent } from '@/components/daily/PrayTabContent'
 import { JournalTabContent } from '@/components/daily/JournalTabContent'
 import { MeditateTabContent } from '@/components/daily/MeditateTabContent'
 import { DevotionalTabContent } from '@/components/daily/DevotionalTabContent'
-import { SharePanel } from '@/components/sharing/SharePanel'
-import { getTodaysVerse } from '@/constants/verse-of-the-day'
-import { parseVerseReferences } from '@/lib/parse-verse-references'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
@@ -64,14 +60,6 @@ function DailyHubContent() {
 
   const [prayContext, setPrayContext] = useState<PrayContext | null>(null)
 
-  // Hero content data
-  const verse = getTodaysVerse()
-
-  const parsedRefs = parseVerseReferences(verse.reference)
-  const verseLink = parsedRefs.length > 0
-    ? `/bible/${parsedRefs[0].bookSlug}/${parsedRefs[0].chapter}`
-    : '/bible'
-
   const [hasReadDevotional, setHasReadDevotional] = useState(() => {
     if (!isAuthenticated) return false
     try {
@@ -84,8 +72,6 @@ function DailyHubContent() {
   const handleDevotionalComplete = useCallback(() => {
     setHasReadDevotional(true)
   }, [])
-
-  const [sharePanelOpen, setSharePanelOpen] = useState(false)
 
   // Read cross-feature URL params on mount (consumed once, then cleared)
   const urlParamsConsumed = useRef(false)
@@ -209,7 +195,7 @@ function DailyHubContent() {
         <GlowBackground variant="center">
           <section
             aria-labelledby="daily-hub-heading"
-            className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+            className="relative flex w-full flex-col items-center px-4 pt-32 pb-12 text-center antialiased sm:pt-36 sm:pb-16 lg:pt-40"
           >
           <h1
             id="daily-hub-heading"
@@ -218,45 +204,6 @@ function DailyHubContent() {
           >
             {displayName}
           </h1>
-
-          {/* Verse of the Day — Full-Width Banner */}
-          <FrostedCard className="mt-6 w-full max-w-2xl rounded-xl px-5 py-4 text-left">
-            <Link
-              to={verseLink}
-              className="block transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:rounded"
-            >
-              <p className="font-serif italic text-base leading-relaxed text-white/80 line-clamp-2 sm:text-lg sm:line-clamp-none">
-                &ldquo;{verse.text}&rdquo;
-              </p>
-            </Link>
-            <p className="mt-2 text-sm text-white/60">
-              — {verse.reference}
-            </p>
-            <div className="mt-3 flex items-center gap-4">
-              <Link
-                to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}&verseText=${encodeURIComponent(verse.text)}&verseTheme=${encodeURIComponent(verse.theme)}`}
-                className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
-              >
-                Meditate on this verse &gt;
-              </Link>
-              <button
-                type="button"
-                onClick={() => setSharePanelOpen(true)}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-1 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                aria-label="Share verse of the day"
-                aria-haspopup="dialog"
-                aria-expanded={sharePanelOpen}
-              >
-                <Share2 className="h-4 w-4" />
-              </button>
-            </div>
-            <SharePanel
-              verseText={verse.text}
-              reference={verse.reference}
-              isOpen={sharePanelOpen}
-              onClose={() => setSharePanelOpen(false)}
-            />
-          </FrostedCard>
 
           </section>
         </GlowBackground>

@@ -113,71 +113,11 @@ describe('DailyHub', () => {
     expect(screen.queryByText(/start with any practice below/i)).not.toBeInTheDocument()
   })
 
-  it('renders verse card with today\'s verse text', () => {
-    renderPage()
-    // Verse text appears within quotes in the hero
-    const verseText = screen.getByText(/\u201c.+\u201d/)
-    expect(verseText).toBeInTheDocument()
-  })
-
-  it('renders verse reference with dash prefix', () => {
-    renderPage()
-    // Verse reference is in the hero section, always visible regardless of tab
-    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const ref = hero.querySelector('.text-white\\/60')
-    expect(ref).toBeInTheDocument()
-    expect(ref!.textContent).toMatch(/^—\s/)
-  })
-
-  it('verse card links to Bible reader', () => {
-    renderPage()
-    // The verse card is a Link — find the link that points to /bible/
-    const verseLinks = screen.getAllByRole('link').filter(l => l.getAttribute('href')?.startsWith('/bible/'))
-    expect(verseLinks.length).toBeGreaterThanOrEqual(1)
-  })
-
   it('devotional card is not rendered in hero', () => {
     renderPage()
     const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
     expect(hero.textContent).not.toMatch(/Daily Devotional/i)
     expect(hero.textContent).not.toMatch(/Read today/i)
-  })
-
-  it('VOTD banner uses FrostedCard component', () => {
-    renderPage()
-    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const banner = hero.querySelector('.rounded-xl')
-    expect(banner).toBeInTheDocument()
-    // FrostedCard classes (not the old bg-white/5)
-    expect(banner!.className).toContain('bg-white/[0.06]')
-    expect(banner!.className).toContain('border-white/[0.12]')
-  })
-
-  it('verse text has mobile line-clamp with tablet breakout', () => {
-    renderPage()
-    const verseText = document.querySelector('.font-serif.italic')
-    expect(verseText).toBeInTheDocument()
-    expect(verseText!.className).toContain('line-clamp-2')
-    expect(verseText!.className).toContain('sm:line-clamp-none')
-  })
-
-  it('share button opens SharePanel', async () => {
-    const user = userEvent.setup()
-    renderPage()
-    const shareBtn = screen.getByLabelText('Share verse of the day')
-    await user.click(shareBtn)
-    // SharePanel renders as a dialog when open
-    expect(shareBtn).toHaveAttribute('aria-expanded', 'true')
-  })
-
-  it('does NOT render VerseOfTheDayBanner as separate component', () => {
-    renderPage()
-    // Verse is inside the hero section, not a standalone banner
-    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')
-    expect(hero).toBeInTheDocument()
-    // Verse text is within the hero
-    const verseText = hero!.querySelector('.font-serif.italic')
-    expect(verseText).toBeInTheDocument()
   })
 
   it('does NOT render ChallengeStrip', () => {
@@ -186,19 +126,37 @@ describe('DailyHub', () => {
     expect(screen.queryByText(/day challenge/i)).not.toBeInTheDocument()
   })
 
-  it('share button has accessible label', () => {
-    renderPage()
-    const shareBtn = screen.getByLabelText('Share verse of the day')
-    expect(shareBtn).toBeInTheDocument()
-    expect(shareBtn).toHaveAttribute('aria-haspopup', 'dialog')
-  })
+  describe('Hero minimalism', () => {
+    it('hero contains only the greeting heading — no verse card', () => {
+      renderPage()
+      const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+      // No FrostedCard classes in hero
+      expect(hero.querySelector('.bg-white\\/\\[0\\.06\\]')).toBeNull()
+      // No verse text (serif italic)
+      expect(hero.querySelector('.font-serif.italic')).toBeNull()
+      // No share button
+      expect(hero.querySelector('[aria-label="Share verse of the day"]')).toBeNull()
+      // Only the greeting heading
+      const heading = hero.querySelector('h1')
+      expect(heading).toBeInTheDocument()
+    })
 
-  it('verse card is keyboard navigable', () => {
-    renderPage()
-    const verseLinks = screen.getAllByRole('link').filter(l => l.getAttribute('href')?.startsWith('/bible/'))
-    expect(verseLinks[0]).toBeInTheDocument()
-    // Links are inherently focusable
-    expect(verseLinks[0].tagName).toBe('A')
+    it('hero bottom padding is pb-12 sm:pb-16', () => {
+      renderPage()
+      const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+      expect(hero.className).toContain('pb-12')
+      expect(hero.className).toContain('sm:pb-16')
+      // Old values removed
+      expect(hero.className).not.toContain('pb-8')
+      expect(hero.className).not.toMatch(/\bsm:pb-12\b/)
+    })
+
+    it('hero has no SharePanel', () => {
+      renderPage()
+      const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+      // No share-related buttons or modals in hero
+      expect(hero.querySelectorAll('button').length).toBe(0)
+    })
   })
 
   it('tab bar still functions after hero redesign', async () => {
@@ -337,13 +295,6 @@ describe('DailyHub', () => {
     ).toBeInTheDocument()
   })
 
-  it('Daily Hub VOTD shows meditation link', () => {
-    renderPage()
-    const meditateLink = screen.getByText('Meditate on this verse >')
-    expect(meditateLink).toBeInTheDocument()
-    expect(meditateLink.closest('a')).toHaveAttribute('href', expect.stringContaining('/meditate/soaking?verse='))
-  })
-
   it('root background uses hero-bg, not dashboard-dark', () => {
     const { container } = renderPage()
     const root = container.firstElementChild as HTMLElement
@@ -424,24 +375,6 @@ describe('DailyHub', () => {
     expect(heading.className).toContain('font-bold')
     expect(heading.className).toContain('sm:text-5xl')
     expect(heading.className).toContain('lg:text-6xl')
-  })
-
-  it('verse card uses compact max-w-2xl with rounded-xl', () => {
-    renderPage()
-    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-    const card = hero.querySelector('.max-w-2xl')
-    expect(card).toBeInTheDocument()
-    expect(card!.className).toContain('rounded-xl')
-    expect(card!.className).toContain('px-5')
-    expect(card!.className).toContain('py-4')
-  })
-
-  it('verse text has line-clamp-2 for mobile compaction', () => {
-    renderPage()
-    const verseText = document.querySelector('.font-serif.italic')
-    expect(verseText).toBeInTheDocument()
-    expect(verseText!.className).toContain('line-clamp-2')
-    expect(verseText!.className).toContain('text-white/80')
   })
 
   it('tab bar has no animated underline div', () => {

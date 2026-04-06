@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Share2, Volume2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { GlowBackground } from '@/components/homepage/GlowBackground'
@@ -16,6 +16,8 @@ import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { READING_PLAN_METADATA } from '@/data/reading-plans'
 import { VerseLink } from '@/components/shared/VerseLink'
 import { SharePanel } from '@/components/sharing/SharePanel'
+import { getTodaysVerse } from '@/constants/verse-of-the-day'
+import { parseVerseReferences } from '@/lib/parse-verse-references'
 import type { Devotional } from '@/types/devotional'
 
 function buildReadAloudText(devotional: Devotional): string {
@@ -51,6 +53,14 @@ export function DevotionalTabContent({
   const { getPlanStatus } = useReadingPlanProgress()
   const [isCompleted, setIsCompleted] = useState(false)
   const [showPassageShare, setShowPassageShare] = useState(false)
+  const [showVerseShare, setShowVerseShare] = useState(false)
+
+  // Verse of the Day data
+  const verse = getTodaysVerse()
+  const parsedRefs = parseVerseReferences(verse.reference)
+  const verseLink = parsedRefs.length > 0
+    ? `/bible/${parsedRefs[0].bookSlug}/${parsedRefs[0].chapter}`
+    : '/bible'
 
   // Find matching reading plan by theme
   const matchingPlan = READING_PLAN_METADATA.find(
@@ -143,6 +153,45 @@ export function DevotionalTabContent({
     <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
       <div className="mx-auto max-w-4xl px-4 py-10 sm:py-14" {...swipeHandlers}>
         <div className="relative">
+          {/* Daily Verse of the Day Card */}
+          <FrostedCard className="mb-8 sm:mb-10">
+            <Link
+              to={verseLink}
+              className="block transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:rounded"
+            >
+              <p className="font-serif italic text-lg leading-relaxed text-white sm:text-xl">
+                &ldquo;{verse.text}&rdquo;
+              </p>
+            </Link>
+            <p className="mt-2 text-sm text-white/70">
+              — {verse.reference}
+            </p>
+            <div className="mt-3 flex items-center gap-4">
+              <Link
+                to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}&verseText=${encodeURIComponent(verse.text)}&verseTheme=${encodeURIComponent(verse.theme)}`}
+                className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
+              >
+                Meditate on this verse &gt;
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowVerseShare(true)}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-1 text-white/50 transition-colors hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label="Share verse of the day"
+                aria-haspopup="dialog"
+                aria-expanded={showVerseShare}
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+            </div>
+            <SharePanel
+              verseText={verse.text}
+              reference={verse.reference}
+              isOpen={showVerseShare}
+              onClose={() => setShowVerseShare(false)}
+            />
+          </FrostedCard>
+
           {/* Date navigation */}
           <div className="flex items-center justify-center gap-3">
             <button
@@ -194,19 +243,6 @@ export function DevotionalTabContent({
             </span>
           </div>
 
-          {/* Quote section */}
-          <div className="border-t border-white/[0.08] py-5 sm:py-6">
-            <FrostedCard className="p-5 sm:p-6">
-              <span className="font-serif text-5xl leading-none text-white/20" aria-hidden="true">
-                &ldquo;
-              </span>
-              <blockquote className="mt-2 font-serif text-xl italic leading-relaxed text-white sm:text-2xl">
-                {devotional.quote.text}
-              </blockquote>
-              <p className="mt-3 text-sm text-white/70">&mdash; {devotional.quote.attribution}</p>
-            </FrostedCard>
-          </div>
-
           {/* Passage section */}
           <div className="py-5 sm:py-6">
             <div className="mb-4 flex items-center gap-2">
@@ -245,30 +281,25 @@ export function DevotionalTabContent({
             />
           </div>
 
+          {/* Quote section */}
+          <div className="border-t border-white/[0.08] py-5 sm:py-6">
+            <FrostedCard className="p-5 sm:p-6">
+              <span className="font-serif text-5xl leading-none text-white/20" aria-hidden="true">
+                &ldquo;
+              </span>
+              <blockquote className="mt-2 font-serif text-xl italic leading-relaxed text-white sm:text-2xl">
+                {devotional.quote.text}
+              </blockquote>
+              <p className="mt-3 text-sm text-white/70">&mdash; {devotional.quote.attribution}</p>
+            </FrostedCard>
+          </div>
+
           {/* Reflection section */}
           <div className="border-t border-b border-white/[0.08] py-6 sm:py-8">
             <div className="space-y-4 text-base leading-relaxed text-white">
               {devotional.reflection.map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
               ))}
-            </div>
-          </div>
-
-          {/* Pray CTA section */}
-          <div className="border-t border-white/[0.08] py-6 sm:py-8">
-            <div className="flex flex-col items-center gap-3 text-center">
-              <p className="text-sm text-white/60">Ready to pray about today&apos;s reading?</p>
-              <button
-                type="button"
-                onClick={() => {
-                  const verseText = devotional.passage.verses.map((v) => v.text).join(' ')
-                  const customPrompt = `I'm reflecting on today's devotional about ${devotional.theme}. The passage is ${devotional.passage.reference}: "${verseText}". Help me pray about what I've read.`
-                  onSwitchToPray?.(devotional.theme, customPrompt)
-                }}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
-              >
-                Pray about today&apos;s reading &rarr;
-              </button>
             </div>
           </div>
 
@@ -295,6 +326,24 @@ export function DevotionalTabContent({
                 </button>
               </div>
             </FrostedCard>
+          </div>
+
+          {/* Pray CTA section */}
+          <div className="border-t border-white/[0.08] py-6 sm:py-8">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <p className="text-sm text-white/60">Ready to pray about today&apos;s reading?</p>
+              <button
+                type="button"
+                onClick={() => {
+                  const verseText = devotional.passage.verses.map((v) => v.text).join(' ')
+                  const customPrompt = `I'm reflecting on today's devotional about ${devotional.theme}. The passage is ${devotional.passage.reference}: "${verseText}". Help me pray about what I've read.`
+                  onSwitchToPray?.(devotional.theme, customPrompt)
+                }}
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
+              >
+                Pray about today&apos;s reading &rarr;
+              </button>
+            </div>
           </div>
 
           {/* Related reading plan callout */}
