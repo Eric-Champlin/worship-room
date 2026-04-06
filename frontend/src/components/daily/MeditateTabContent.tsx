@@ -69,16 +69,14 @@ export function MeditateTabContent() {
             <BackgroundSquiggle />
           </div>
           <div className="relative">
-            <div className="mb-4">
+            <div className="mb-4 flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4">
               <h2
-                className="text-center font-sans text-2xl font-bold sm:text-3xl lg:text-4xl"
+                className="font-sans text-2xl font-bold sm:text-3xl lg:text-4xl"
                 style={GRADIENT_TEXT_STYLE}
               >
                 What&apos;s On Your Spirit?
               </h2>
-              <div className="z-10 mt-2 flex justify-center">
-                <AmbientSoundPill context="meditate" variant="dark" className="mb-0" />
-              </div>
+              <AmbientSoundPill context="meditate" variant="dark" className="!mb-0 !w-auto" />
             </div>
 
             {isAuthenticated && allComplete && (

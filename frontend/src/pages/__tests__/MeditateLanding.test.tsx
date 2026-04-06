@@ -178,4 +178,31 @@ describe('MeditateTabContent', () => {
     const checkmarks = screen.queryAllByText(/completed/i)
     expect(checkmarks).toHaveLength(0)
   })
+
+  it('ambient sound pill renders inline with heading (same flex container)', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
+    const pillButton = screen.getByLabelText(/enhance with sound/i)
+    const headingParent = heading.parentElement
+    expect(headingParent).not.toBeNull()
+    expect(headingParent!.contains(pillButton)).toBe(true)
+  })
+
+  it('heading flex container has responsive inline classes', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
+    const container = heading.parentElement!
+    expect(container.className).toContain('flex')
+    expect(container.className).toContain('flex-col')
+    expect(container.className).toContain('items-center')
+    expect(container.className).toContain('gap-3')
+    expect(container.className).toContain('sm:flex-row')
+    expect(container.className).toContain('sm:gap-4')
+  })
+
+  it('heading does not have text-center (flex parent handles centering)', () => {
+    renderComponent()
+    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
+    expect(heading.className).not.toContain('text-center')
+  })
 })
