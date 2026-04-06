@@ -205,4 +205,9 @@ describe('MeditateTabContent', () => {
     const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
     expect(heading.className).not.toContain('text-center')
   })
+
+  it('does not render BackgroundSquiggle', () => {
+    renderComponent()
+    expect(document.querySelector('[aria-hidden="true"][style*="mask"]')).toBeNull()
+  })
 })

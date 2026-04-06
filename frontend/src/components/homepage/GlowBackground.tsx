@@ -10,7 +10,7 @@ interface GlowBackgroundProps {
 const GLOW_CONFIG = {
   center: [
     {
-      opacity: 0.15,
+      opacity: 0.25,
       color: '139, 92, 246',
       size: 'w-[300px] h-[300px] md:w-[600px] md:h-[600px]',
       position: 'top-[30%] left-1/2 -translate-x-1/2',
@@ -18,7 +18,7 @@ const GLOW_CONFIG = {
   ],
   left: [
     {
-      opacity: 0.12,
+      opacity: 0.22,
       color: '139, 92, 246',
       size: 'w-[300px] h-[300px] md:w-[500px] md:h-[500px]',
       position: 'top-[40%] left-[20%] -translate-x-1/2 -translate-y-1/2',
@@ -26,7 +26,7 @@ const GLOW_CONFIG = {
   ],
   right: [
     {
-      opacity: 0.12,
+      opacity: 0.22,
       color: '139, 92, 246',
       size: 'w-[300px] h-[300px] md:w-[500px] md:h-[500px]',
       position: 'top-[40%] left-[80%] -translate-x-1/2 -translate-y-1/2',
@@ -34,13 +34,13 @@ const GLOW_CONFIG = {
   ],
   split: [
     {
-      opacity: 0.14,
+      opacity: 0.24,
       color: '139, 92, 246',
       size: 'w-[300px] h-[300px] md:w-[500px] md:h-[500px]',
       position: 'top-[40%] left-[25%] -translate-x-1/2 -translate-y-1/2',
     },
     {
-      opacity: 0.08,
+      opacity: 0.18,
       color: '168, 130, 255',
       size: 'w-[250px] h-[250px] md:w-[400px] md:h-[400px]',
       position: 'top-[40%] left-[75%] -translate-x-1/2 -translate-y-1/2',

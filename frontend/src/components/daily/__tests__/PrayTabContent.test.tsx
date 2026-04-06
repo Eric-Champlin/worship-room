@@ -847,4 +847,9 @@ describe('PrayTabContent atmospheric visuals', () => {
     await user.type(textarea, 'Help me')
     expect(screen.queryByLabelText(/enhance with sound/i)).not.toBeInTheDocument()
   })
+
+  it('does not render BackgroundSquiggle', () => {
+    renderPrayTab()
+    expect(document.querySelector('[aria-hidden="true"][style*="mask"]')).toBeNull()
+  })
 })

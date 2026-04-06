@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { BookOpen, PenLine } from 'lucide-react'
-import { BackgroundSquiggle, SQUIGGLE_MASK_STYLE } from '@/components/BackgroundSquiggle'
 import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
@@ -216,30 +215,18 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   return (
     <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
-        {/* Squiggle background wrapper */}
-        <div className="relative">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-[0.12]"
-            style={SQUIGGLE_MASK_STYLE}
-          >
-            <BackgroundSquiggle />
-          </div>
-          <div className="relative">
-            <JournalInput
-              mode={mode}
-              onModeChange={handleModeChange}
-              currentPrompt={currentPrompt}
-              onTryDifferentPrompt={handleTryDifferentPrompt}
-              showPromptRefresh={showPromptRefresh}
-              prayContext={prayContext}
-              contextDismissed={contextDismissed}
-              onDismissContext={() => setContextDismissed(true)}
-              onSave={handleEntrySave}
-              onTextareaRef={(ref) => { parentTextareaRef.current = ref }}
-            />
-          </div>
-        </div>
+        <JournalInput
+          mode={mode}
+          onModeChange={handleModeChange}
+          currentPrompt={currentPrompt}
+          onTryDifferentPrompt={handleTryDifferentPrompt}
+          showPromptRefresh={showPromptRefresh}
+          prayContext={prayContext}
+          contextDismissed={contextDismissed}
+          onDismissContext={() => setContextDismissed(true)}
+          onSave={handleEntrySave}
+          onTextareaRef={(ref) => { parentTextareaRef.current = ref }}
+        />
 
         {/* Saved Entries */}
         {savedEntries.length > 0 && (

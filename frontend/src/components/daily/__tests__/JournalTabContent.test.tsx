@@ -529,4 +529,9 @@ describe('JournalTabContent atmospheric visuals', () => {
     await user.click(freeWriteButton)
     expect(screen.getByLabelText(/enhance with sound/i)).toBeInTheDocument()
   })
+
+  it('does not render BackgroundSquiggle', () => {
+    renderJournalTab()
+    expect(document.querySelector('[aria-hidden="true"][style*="mask"]')).toBeNull()
+  })
 })

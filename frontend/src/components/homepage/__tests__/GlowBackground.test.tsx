@@ -83,45 +83,45 @@ describe('GlowBackground', () => {
     expect(outer.className).toContain('custom-class')
   })
 
-  it('center variant orb has 0.15 opacity', () => {
+  it('center variant orb has 0.25 opacity', () => {
     render(
       <GlowBackground variant="center">
         <p>Content</p>
       </GlowBackground>
     )
     const orb = screen.getByTestId('glow-orb')
-    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.15)')
+    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.25)')
   })
 
-  it('left variant orb has 0.12 opacity', () => {
+  it('left variant orb has 0.22 opacity', () => {
     render(
       <GlowBackground variant="left">
         <p>Content</p>
       </GlowBackground>
     )
     const orb = screen.getByTestId('glow-orb')
-    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.12)')
+    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.22)')
   })
 
-  it('right variant orb has 0.12 opacity', () => {
+  it('right variant orb has 0.22 opacity', () => {
     render(
       <GlowBackground variant="right">
         <p>Content</p>
       </GlowBackground>
     )
     const orb = screen.getByTestId('glow-orb')
-    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.12)')
+    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.22)')
   })
 
-  it('split variant orbs have 0.14 and 0.08 opacities', () => {
+  it('split variant orbs have 0.24 and 0.18 opacities', () => {
     render(
       <GlowBackground variant="split">
         <p>Content</p>
       </GlowBackground>
     )
     const orbs = screen.getAllByTestId('glow-orb')
-    expect(orbs[0].style.background).toContain('0.14')
-    expect(orbs[1].style.background).toContain('0.08')
+    expect(orbs[0].style.background).toContain('0.24')
+    expect(orbs[1].style.background).toContain('0.18')
   })
 
   it('orbs have pointer-events-none', () => {
