@@ -66,6 +66,7 @@ All keys use the `wr_` prefix. Data persists across page refreshes and survives 
 | ----------------------- | --------------- | ------------------------------------ |
 | `wr_daily_completion`   | DailyCompletion | Daily tab completion tracking        |
 | `wr_journal_draft`      | string          | Journal draft auto-save              |
+| `wr_prayer_draft`       | string          | Prayer textarea draft auto-save      |
 | `wr_journal_mode`       | "guided"/"free" | Journal mode preference              |
 | `wr_journal_milestones` | number[]        | Fired journal milestone celebrations |
 

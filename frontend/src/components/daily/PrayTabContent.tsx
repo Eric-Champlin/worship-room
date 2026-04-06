@@ -15,6 +15,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAudioState, useAudioDispatch } from '@/components/audio/AudioProvider'
 import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { SCENE_BY_ID } from '@/data/scenes'
+import { PRAYER_DRAFT_KEY } from '@/constants/daily-experience'
 import { getPrayerPrefill } from '@/data/challenge-prefills'
 import { getMockPrayer } from '@/mocks/daily-experience-mock-data'
 import type { MockPrayer, PrayContext } from '@/types/daily-experience'
@@ -135,6 +136,11 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
       setIsLoading(false)
       markPrayComplete()
       recordActivity('pray')
+      try {
+        localStorage.removeItem(PRAYER_DRAFT_KEY)
+      } catch {
+        // localStorage failure is non-critical
+      }
     }, 1500)
   }
 

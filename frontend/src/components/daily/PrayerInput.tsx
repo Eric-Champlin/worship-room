@@ -3,7 +3,7 @@ import { AlertCircle } from 'lucide-react'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
-import { DEFAULT_PRAYER_CHIPS } from '@/constants/daily-experience'
+import { DEFAULT_PRAYER_CHIPS, PRAYER_DRAFT_KEY } from '@/constants/daily-experience'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 
 export interface PrayerInputProps {
@@ -21,7 +21,13 @@ export function PrayerInput({
   retryPrompt,
   onRetryPromptClear,
 }: PrayerInputProps) {
-  const [text, setText] = useState('')
+  const [text, setText] = useState(() => {
+    try {
+      return localStorage.getItem(PRAYER_DRAFT_KEY) ?? ''
+    } catch {
+      return ''
+    }
+  })
   const [selectedChip, setSelectedChip] = useState<string | null>(null)
   const [nudge, setNudge] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -49,6 +55,27 @@ export function PrayerInput({
       }, 100)
     }
   }, [retryPrompt])
+
+  // Debounced draft save to localStorage
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
+    draftTimerRef.current = setTimeout(() => {
+      try {
+        if (text.trim()) {
+          localStorage.setItem(PRAYER_DRAFT_KEY, text)
+        } else {
+          localStorage.removeItem(PRAYER_DRAFT_KEY)
+        }
+      } catch {
+        // localStorage failure is non-critical
+      }
+    }, 1000)
+    return () => {
+      if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
+    }
+  }, [text])
 
   const handleChipClick = (chip: string) => {
     setSelectedChip(chip)

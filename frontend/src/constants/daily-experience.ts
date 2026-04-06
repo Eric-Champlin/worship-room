@@ -1,5 +1,6 @@
 export const DAILY_COMPLETION_KEY = 'wr_daily_completion'
 export const JOURNAL_DRAFT_KEY = 'wr_journal_draft'
+export const PRAYER_DRAFT_KEY = 'wr_prayer_draft'
 export const JOURNAL_MILESTONES_KEY = 'wr_journal_milestones'
 export const JOURNAL_MODE_KEY = 'wr_journal_mode'
 export const SPOTIFY_PLAYLIST_URL =

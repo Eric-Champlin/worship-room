@@ -899,3 +899,100 @@ describe('PrayTabContent devotional context', () => {
     expect(textarea).toHaveValue('')
   })
 })
+
+describe('prayer draft persistence', () => {
+  it('restores draft from localStorage on mount', () => {
+    localStorage.setItem('wr_prayer_draft', 'My ongoing prayer')
+    renderPrayTab()
+    expect(screen.getByLabelText('Prayer request')).toHaveValue('My ongoing prayer')
+  })
+
+  it('starts with empty textarea when no draft exists', () => {
+    renderPrayTab()
+    expect(screen.getByLabelText('Prayer request')).toHaveValue('')
+  })
+
+  it('saves draft to localStorage after 1-second debounce', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    const textarea = screen.getByLabelText('Prayer request')
+    await user.type(textarea, 'Help me with anxiety')
+    // Before debounce fires
+    expect(localStorage.getItem('wr_prayer_draft')).toBeNull()
+    // After debounce
+    act(() => { vi.advanceTimersByTime(1100) })
+    expect(localStorage.getItem('wr_prayer_draft')).toBe('Help me with anxiety')
+  })
+
+  it('does not save draft before debounce completes', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    await user.type(screen.getByLabelText('Prayer request'), 'Hello')
+    act(() => { vi.advanceTimersByTime(500) })
+    expect(localStorage.getItem('wr_prayer_draft')).toBeNull()
+  })
+
+  it('removes draft key when textarea is cleared', async () => {
+    localStorage.setItem('wr_prayer_draft', 'Existing draft')
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    const textarea = screen.getByLabelText('Prayer request')
+    await user.clear(textarea)
+    act(() => { vi.advanceTimersByTime(1100) })
+    expect(localStorage.getItem('wr_prayer_draft')).toBeNull()
+  })
+
+  it('clears draft after successful prayer generation', async () => {
+    localStorage.setItem('wr_prayer_draft', 'My prayer text')
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+    expect(localStorage.getItem('wr_prayer_draft')).toBeNull()
+  })
+
+  it('preserves draft in localStorage when auth modal opens (logged out)', async () => {
+    localStorage.removeItem('wr_auth_simulated')
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    await user.type(screen.getByLabelText('Prayer request'), 'Vulnerable prayer')
+    act(() => { vi.advanceTimersByTime(1100) })
+    expect(localStorage.getItem('wr_prayer_draft')).toBe('Vulnerable prayer')
+    // Click generate — auth modal opens
+    await user.click(screen.getByRole('button', { name: /help me pray/i }))
+    // Draft should still be in localStorage
+    expect(localStorage.getItem('wr_prayer_draft')).toBe('Vulnerable prayer')
+  })
+
+  it('initialText prop overrides stored draft', () => {
+    localStorage.setItem('wr_prayer_draft', 'Stale draft')
+    renderPrayTab({
+      prayContext: {
+        from: 'devotional',
+        topic: 'Trust',
+        customPrompt: 'Fresh devotional context',
+      },
+    })
+    expect(screen.getByLabelText('Prayer request')).toHaveValue('Fresh devotional context')
+  })
+
+  it('prayer draft operations do not affect journal draft', async () => {
+    localStorage.setItem('wr_journal_draft', 'My journal entry')
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab()
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(1600) })
+    // Prayer draft cleared, journal draft untouched
+    expect(localStorage.getItem('wr_prayer_draft')).toBeNull()
+    expect(localStorage.getItem('wr_journal_draft')).toBe('My journal entry')
+  })
+
+  it('draft persists when component remounts', () => {
+    localStorage.setItem('wr_prayer_draft', 'Persisted draft')
+    const { unmount } = renderPrayTab()
+    expect(screen.getByLabelText('Prayer request')).toHaveValue('Persisted draft')
+    unmount()
+    renderPrayTab()
+    expect(screen.getByLabelText('Prayer request')).toHaveValue('Persisted draft')
+  })
+})
