@@ -16,7 +16,7 @@ export function VerseOfTheDayCard() {
       </p>
       <p className="mt-2 text-sm text-white/50">{verse.reference}</p>
       <Link
-        to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}`}
+        to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}&verseText=${encodeURIComponent(verse.text)}&verseTheme=${encodeURIComponent(verse.theme)}`}
         className="mt-1 block text-sm text-primary-lt transition-colors hover:text-primary"
       >
         Meditate on this verse &gt;

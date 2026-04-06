@@ -811,12 +811,12 @@ describe('PrayTabContent atmospheric visuals', () => {
     await user.click(sessionCard!)
     // Player dialog now rendered (mocked)
     const playerDialog = screen.getByTestId('mock-guided-player')
-    // GlowBackground's wrapper has the overflow-hidden class
+    // GlowBackground's wrapper has the overflow-visible class
     const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    const glowWrapper = glowOrb.closest('.overflow-hidden')
+    const glowWrapper = glowOrb.closest('.overflow-visible')
     expect(glowWrapper).not.toBeNull()
-    // CRITICAL INVARIANT: Player must NOT be inside GlowBackground's overflow-hidden
-    // wrapper — otherwise its fixed-position full-viewport overlay would be clipped.
+    // CRITICAL INVARIANT: Player must NOT be inside GlowBackground's overflow-visible
+    // wrapper — it renders as a sibling, not a descendant.
     expect(glowWrapper!.contains(playerDialog)).toBe(false)
   })
 

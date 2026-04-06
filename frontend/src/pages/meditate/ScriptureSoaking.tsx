@@ -30,8 +30,24 @@ function ScriptureSoakingContent() {
   const verses = getSoakingVerses()
   const [searchParams] = useSearchParams()
   const verseParam = searchParams.get('verse')
+  const verseTextParam = searchParams.get('verseText')
+  const verseThemeParam = searchParams.get('verseTheme')
   const [screen, setScreen] = useState<Screen>('prestart')
   const [duration, setDuration] = useState<number | null>(null)
+  const [customVerse, setCustomVerse] = useState<DailyVerse | null>(() => {
+    if (verseParam && verseTextParam) {
+      const matchIndex = verses.findIndex((v) => v.reference === verseParam)
+      if (matchIndex === -1) {
+        return {
+          id: 'custom-url-verse',
+          reference: verseParam,
+          text: verseTextParam,
+          theme: verseThemeParam || 'peace',
+        }
+      }
+    }
+    return null
+  })
   const [verseIndex, setVerseIndex] = useState(() => {
     if (verseParam) {
       const matchIndex = verses.findIndex((v) => v.reference === verseParam)
@@ -39,6 +55,8 @@ function ScriptureSoakingContent() {
     }
     return Math.floor(Math.random() * verses.length)
   })
+
+  const activeVerse = customVerse ?? verses[verseIndex]
   const [selectedVerse, setSelectedVerse] = useState<DailyVerse | null>(null)
   const [progress, setProgress] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -63,6 +81,7 @@ function ScriptureSoakingContent() {
   useEffect(() => cleanup, [cleanup])
 
   const handleTryAnother = () => {
+    setCustomVerse(null)
     let next = Math.floor(Math.random() * verses.length)
     while (next === verseIndex && verses.length > 1) {
       next = Math.floor(Math.random() * verses.length)
@@ -103,7 +122,7 @@ function ScriptureSoakingContent() {
 
   const handleBegin = () => {
     if (!duration) return
-    setSelectedVerse(verses[verseIndex])
+    setSelectedVerse(activeVerse)
     setReferenceVisible(false)
     setScreen('exercise')
     navigator.wakeLock
@@ -216,6 +235,16 @@ function ScriptureSoakingContent() {
       <SEO title="Scripture Soaking" description="Contemplate and meditate on a Bible verse with guided reflection." noIndex />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="soaking" />
+
+        {/* Verse preview */}
+        <div className="mb-4 rounded-lg border border-gray-200 bg-white/50 p-4 text-center">
+          <p className="font-serif text-sm italic leading-relaxed text-text-dark sm:text-base">
+            &ldquo;{activeVerse.text}&rdquo;
+          </p>
+          <p className="mt-2 text-xs text-text-light">
+            — {activeVerse.reference}
+          </p>
+        </div>
 
         <div className="mb-6 text-center">
           <button

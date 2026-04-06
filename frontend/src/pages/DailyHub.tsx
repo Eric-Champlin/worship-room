@@ -233,7 +233,7 @@ function DailyHubContent() {
             </p>
             <div className="mt-3 flex items-center gap-4">
               <Link
-                to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}`}
+                to={`/meditate/soaking?verse=${encodeURIComponent(verse.reference)}&verseText=${encodeURIComponent(verse.text)}&verseTheme=${encodeURIComponent(verse.theme)}`}
                 className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary"
               >
                 Meditate on this verse &gt;

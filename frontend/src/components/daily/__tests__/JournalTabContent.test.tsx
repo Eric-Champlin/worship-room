@@ -471,9 +471,9 @@ describe('JournalTabContent atmospheric visuals', () => {
     renderJournalTab()
     const emptyStateText = screen.getByText('Your journal is waiting')
     const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    // GlowBackground's wrapper (overflow-hidden) must contain both the glow orb
+    // GlowBackground's wrapper (overflow-visible) must contain both the glow orb
     // and the empty state — they share the same wrapper as siblings of content.
-    const glowWrapper = glowOrb.closest('.overflow-hidden')
+    const glowWrapper = glowOrb.closest('.overflow-visible')
     expect(glowWrapper).not.toBeNull()
     expect(glowWrapper!.contains(emptyStateText)).toBe(true)
   })
@@ -488,10 +488,10 @@ describe('JournalTabContent atmospheric visuals', () => {
     await user.click(saveBtn)
     // SavedEntriesList now rendered — locate by its content
     const savedEntryContent = screen.getByText('Today I feel grateful for many things')
-    // GlowBackground's wrapper (overflow-hidden) must contain the saved entry,
+    // GlowBackground's wrapper (overflow-visible) must contain the saved entry,
     // confirming saved entries are part of the same atmospheric context.
     const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    const glowWrapper = glowOrb.closest('.overflow-hidden')
+    const glowWrapper = glowOrb.closest('.overflow-visible')
     expect(glowWrapper).not.toBeNull()
     expect(glowWrapper!.contains(savedEntryContent)).toBe(true)
   })

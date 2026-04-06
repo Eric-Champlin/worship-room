@@ -154,6 +154,17 @@ describe('GlowBackground', () => {
     expect(orb.className).toContain('blur-')
   })
 
+  it('uses overflow-visible to allow glow bleed', () => {
+    const { container } = render(
+      <GlowBackground>
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const outer = container.firstElementChild as HTMLElement
+    expect(outer.className).toContain('overflow-visible')
+    expect(outer.className).not.toContain('overflow-hidden')
+  })
+
   it('glowOpacity prop overrides default opacity', () => {
     render(
       <GlowBackground variant="center" glowOpacity={0.30}>

@@ -91,6 +91,14 @@ describe('VerseOfTheDayCard', () => {
     expect(href).toContain('%')
   })
 
+  it('meditation link includes verseText and verseTheme params', () => {
+    renderCard()
+    const meditateLink = screen.getByText('Meditate on this verse >')
+    const href = meditateLink.closest('a')?.getAttribute('href') ?? ''
+    expect(href).toContain('verseText=')
+    expect(href).toContain('verseTheme=')
+  })
+
   it('meditation link has correct styling', () => {
     renderCard()
     const meditateLink = screen.getByText('Meditate on this verse >')

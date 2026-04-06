@@ -85,6 +85,74 @@ describe('ScriptureSoaking URL parameter', () => {
     expect(screen.getByRole('blockquote')).toBeInTheDocument()
   })
 
+  it('constructs custom verse when verseText present and no soaking list match', async () => {
+    const user = userEvent.setup()
+    const customRef = 'Philippians 4:6-7'
+    const customText = 'In nothing be anxious'
+    renderSoaking(`?verse=${encodeURIComponent(customRef)}&verseText=${encodeURIComponent(customText)}`)
+
+    // Preview card shows custom verse text
+    expect(screen.getByText(/In nothing be anxious/)).toBeInTheDocument()
+    expect(screen.getByText(/Philippians 4:6-7/)).toBeInTheDocument()
+
+    // Begin with custom verse
+    await user.click(screen.getByText('5 min'))
+    await user.click(screen.getByText('Begin'))
+
+    // Exercise screen shows custom verse reference (text is broken up by KaraokeTextReveal spans)
+    expect(screen.getByText(/Philippians 4:6-7 WEB/)).toBeInTheDocument()
+  })
+
+  it('shows verse preview card on prestart screen', () => {
+    renderSoaking()
+
+    // Preview card renders with verse text in serif italic
+    const previewCard = document.querySelector('.font-serif.italic')
+    expect(previewCard).toBeInTheDocument()
+  })
+
+  it('preview card updates after Try Another Verse', async () => {
+    const user = userEvent.setup()
+    const customRef = 'Philippians 4:6-7'
+    const customText = 'In nothing be anxious'
+    renderSoaking(`?verse=${encodeURIComponent(customRef)}&verseText=${encodeURIComponent(customText)}`)
+
+    // Initially shows custom verse
+    expect(screen.getByText(/In nothing be anxious/)).toBeInTheDocument()
+
+    // Click try another — custom verse cleared, soaking verse shown
+    await user.click(screen.getByText('Try another verse'))
+
+    // Custom verse text should no longer be in preview
+    expect(screen.queryByText(/In nothing be anxious/)).not.toBeInTheDocument()
+  })
+
+  it('falls back to existing behavior when verseText is missing', async () => {
+    const user = userEvent.setup()
+    renderSoaking('?verse=Nonexistent%2099%3A99')
+
+    // Should render prestart with a soaking verse preview (not custom)
+    expect(screen.getByText('Begin')).toBeInTheDocument()
+
+    await user.click(screen.getByText('5 min'))
+    await user.click(screen.getByText('Begin'))
+
+    // A soaking verse renders (not a custom verse)
+    expect(screen.getByRole('blockquote')).toBeInTheDocument()
+  })
+
+  it('uses matched soaking verse when verse param matches pool entry with verseText present', async () => {
+    const user = userEvent.setup()
+    // Psalm 139:13-14 is in the soaking pool — should use pool version, not construct custom
+    renderSoaking('?verse=Psalm%20139%3A13-14&verseText=Custom%20text%20here')
+
+    await user.click(screen.getByText('5 min'))
+    await user.click(screen.getByText('Begin'))
+
+    // Should show the pool verse (Psalm 139:13-14), not the custom text
+    expect(screen.getByText(/Psalm 139:13-14 WEB/)).toBeInTheDocument()
+  })
+
   it('Try Another replaces VOTD-loaded verse', async () => {
     const user = userEvent.setup()
     renderSoaking('?verse=Psalm%20139%3A13-14')
