@@ -216,7 +216,7 @@ export function DevotionalTabContent({
           </div>
 
           {/* Passage section */}
-          <div className="border-t border-white/[0.08] py-5 sm:py-6">
+          <div className="py-5 sm:py-6">
             <div className="mb-4 flex items-center gap-2">
               <p className="text-xs font-medium uppercase tracking-widest">
                 <VerseLink
@@ -233,16 +233,18 @@ export function DevotionalTabContent({
                 <Share2 className="h-4 w-4" />
               </button>
             </div>
-            <p className="font-serif text-base italic leading-relaxed text-white/80 sm:text-lg">
-              {devotional.passage.verses.map((verse) => (
-                <span key={verse.number}>
-                  <sup className="mr-1 align-super font-sans text-xs text-white/30">
-                    {verse.number}
-                  </sup>
-                  {verse.text}{' '}
-                </span>
-              ))}
-            </p>
+            <div className="rounded-xl border-l-4 border-l-primary/60 bg-white/[0.03] px-5 py-5 sm:px-6 sm:py-6">
+              <p className="font-serif text-base italic leading-relaxed text-white sm:text-lg">
+                {devotional.passage.verses.map((verse) => (
+                  <span key={verse.number}>
+                    <sup className="mr-1 align-super font-sans text-xs text-white/40">
+                      {verse.number}
+                    </sup>
+                    {verse.text}{' '}
+                  </span>
+                ))}
+              </p>
+            </div>
             <SharePanel
               verseText={devotional.passage.verses.map((v) => v.text).join(' ')}
               reference={devotional.passage.reference}
@@ -252,7 +254,7 @@ export function DevotionalTabContent({
           </div>
 
           {/* Reflection section */}
-          <div className="border-t border-white/[0.08] py-5 sm:py-6">
+          <div className="border-t border-b border-white/[0.08] py-6 sm:py-8">
             <div className="space-y-4 text-base leading-relaxed text-white">
               {devotional.reflection.map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
@@ -261,13 +263,15 @@ export function DevotionalTabContent({
           </div>
 
           {/* Prayer section */}
-          <div className="border-t border-white/[0.08] py-5 sm:py-6">
-            <p className="mb-2 text-xs font-medium uppercase tracking-widest text-white/60">
-              Closing Prayer
-            </p>
-            <p className="font-serif text-sm italic leading-relaxed text-white/60">
-              {devotional.prayer}
-            </p>
+          <div className="py-5 sm:py-6">
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-5">
+              <p className="mb-2 text-xs font-medium uppercase tracking-widest text-white/60">
+                Closing Prayer
+              </p>
+              <p className="font-serif text-sm italic leading-relaxed text-white/70">
+                {devotional.prayer}
+              </p>
+            </div>
           </div>
 
           {/* Reflection question section */}

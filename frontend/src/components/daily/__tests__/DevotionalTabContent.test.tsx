@@ -124,13 +124,13 @@ describe('DevotionalTabContent', () => {
       expect(label.className).toContain('tracking-widest')
     })
 
-    it('Closing Prayer label matches prayer body opacity (text-white/60)', () => {
+    it('Closing Prayer body uses text-white/70 (brightened from text-white/60)', () => {
       renderComponent()
       const label = screen.getByText('Closing Prayer')
       const prayerBody = label.nextElementSibling as HTMLElement
       expect(prayerBody).not.toBeNull()
       expect(prayerBody.tagName).toBe('P')
-      expect(prayerBody.className).toContain('text-white/60')
+      expect(prayerBody.className).toContain('text-white/70')
       expect(label.className).toContain('text-white/60')
     })
 
@@ -314,7 +314,102 @@ describe('DevotionalTabContent', () => {
     it('section dividers use border-white/[0.08]', () => {
       const { container } = renderComponent()
       const dividers = container.querySelectorAll('.border-white\\/\\[0\\.08\\]')
-      expect(dividers.length).toBeGreaterThanOrEqual(5)
+      expect(dividers.length).toBeGreaterThanOrEqual(4)
+    })
+
+    describe('Container tiers', () => {
+      it('Tier 2: passage wrapped in scripture callout with left accent', () => {
+        const { container } = renderComponent()
+        const callout = container.querySelector('.rounded-xl.border-l-4') as HTMLElement
+        expect(callout).not.toBeNull()
+        expect(callout!.className).toContain('border-l-primary/60')
+        expect(callout!.className).toContain('bg-white/[0.03]')
+      })
+
+      it('Tier 2: passage text brightened to text-white', () => {
+        const { container } = renderComponent()
+        const callout = container.querySelector('.rounded-xl.border-l-4') as HTMLElement
+        expect(callout).not.toBeNull()
+        const passageP = callout!.querySelector('p') as HTMLElement
+        expect(passageP).not.toBeNull()
+        expect(passageP.className).toContain('text-white')
+        expect(passageP.className).not.toContain('text-white/80')
+      })
+
+      it('Tier 2: verse superscripts use text-white/40', () => {
+        const { container } = renderComponent()
+        const sups = container.querySelectorAll('sup')
+        expect(sups.length).toBeGreaterThan(0)
+        sups.forEach((sup) => {
+          expect(sup.className).toContain('text-white/40')
+          expect(sup.className).not.toContain('text-white/30')
+        })
+      })
+
+      it('Tier 2: passage section outer div has no border-t', () => {
+        const { container } = renderComponent()
+        const callout = container.querySelector('.rounded-xl.border-l-4') as HTMLElement
+        expect(callout).not.toBeNull()
+        const outerDiv = callout!.parentElement as HTMLElement
+        expect(outerDiv.className).not.toContain('border-t')
+      })
+
+      it('Tier 3: reflection section has top and bottom dividers', () => {
+        const { container } = renderComponent()
+        const reflectionContent = container.querySelector('.space-y-4.text-base') as HTMLElement
+        expect(reflectionContent).not.toBeNull()
+        const reflectionDiv = reflectionContent!.parentElement as HTMLElement
+        expect(reflectionDiv.className).toContain('border-t')
+        expect(reflectionDiv.className).toContain('border-b')
+      })
+
+      it('Tier 3: reflection section has increased padding', () => {
+        const { container } = renderComponent()
+        const reflectionContent = container.querySelector('.space-y-4.text-base') as HTMLElement
+        expect(reflectionContent).not.toBeNull()
+        const reflectionDiv = reflectionContent!.parentElement as HTMLElement
+        expect(reflectionDiv.className).toContain('py-6')
+        expect(reflectionDiv.className).toContain('sm:py-8')
+      })
+
+      it('Tier 3: reflection section has no background', () => {
+        const { container } = renderComponent()
+        const reflectionContent = container.querySelector('.space-y-4.text-base') as HTMLElement
+        expect(reflectionContent).not.toBeNull()
+        const reflectionDiv = reflectionContent!.parentElement as HTMLElement
+        expect(reflectionDiv.className).not.toMatch(/bg-white/)
+        expect(reflectionDiv.className).not.toContain('rounded')
+        expect(reflectionDiv.className).not.toContain('backdrop-blur')
+      })
+
+      it('Tier 4: prayer wrapped in dimmed frosted card', () => {
+        renderComponent()
+        const label = screen.getByText('Closing Prayer')
+        const card = label.closest('.rounded-2xl') as HTMLElement
+        expect(card).not.toBeNull()
+        expect(card!.className).toContain('border')
+        expect(card!.className).toContain('border-white/[0.08]')
+        expect(card!.className).toContain('bg-white/[0.03]')
+        expect(card!.className).toContain('backdrop-blur-sm')
+      })
+
+      it('Tier 4: prayer section outer div has no border-t', () => {
+        renderComponent()
+        const label = screen.getByText('Closing Prayer')
+        const card = label.closest('.rounded-2xl') as HTMLElement
+        expect(card).not.toBeNull()
+        const outerDiv = card!.parentElement as HTMLElement
+        expect(outerDiv.className).not.toContain('border-t')
+      })
+
+      it('Tier 4: prayer body text brightened to text-white/70', () => {
+        renderComponent()
+        const label = screen.getByText('Closing Prayer')
+        const prayerBody = label.nextElementSibling as HTMLElement
+        expect(prayerBody).not.toBeNull()
+        expect(prayerBody.className).toContain('text-white/70')
+        expect(prayerBody.className).not.toContain('text-white/60')
+      })
     })
 
     it('bottom padding is compact (pb-8)', () => {
