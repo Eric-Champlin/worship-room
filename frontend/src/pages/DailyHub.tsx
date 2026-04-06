@@ -122,7 +122,8 @@ function DailyHubContent() {
 
   const switchTab = useCallback(
     (tab: TabId) => {
-      setSearchParams({ tab }, { replace: true })
+      setPrayContext(null)
+      setSearchParams({ tab })
     },
     [setSearchParams],
   )
@@ -130,7 +131,7 @@ function DailyHubContent() {
   const handleSwitchToJournal = useCallback(
     (topic: string) => {
       setPrayContext({ from: 'pray', topic })
-      setSearchParams({ tab: 'journal' }, { replace: true })
+      setSearchParams({ tab: 'journal' })
     },
     [setSearchParams],
   )
@@ -138,7 +139,7 @@ function DailyHubContent() {
   const handleSwitchToDevotionalJournal = useCallback(
     (topic: string, customPrompt: string) => {
       setPrayContext({ from: 'devotional', topic, customPrompt })
-      setSearchParams({ tab: 'journal' }, { replace: true })
+      setSearchParams({ tab: 'journal' })
     },
     [setSearchParams],
   )
@@ -146,7 +147,7 @@ function DailyHubContent() {
   const handleSwitchToDevotionalPray = useCallback(
     (topic: string, customPrompt: string) => {
       setPrayContext({ from: 'devotional', topic, customPrompt })
-      setSearchParams({ tab: 'pray' }, { replace: true })
+      setSearchParams({ tab: 'pray' })
     },
     [setSearchParams],
   )
