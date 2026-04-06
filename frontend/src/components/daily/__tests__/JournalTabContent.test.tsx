@@ -495,4 +495,38 @@ describe('JournalTabContent atmospheric visuals', () => {
     expect(glowWrapper).not.toBeNull()
     expect(glowWrapper!.contains(savedEntryContent)).toBe(true)
   })
+
+  it('ambient sound pill renders inline with mode toggle (same flex container)', () => {
+    renderJournalTab()
+    const guidedButton = screen.getByRole('button', { name: 'Guided' })
+    const pillButton = screen.getByLabelText(/enhance with sound/i)
+    const toggleGroup = guidedButton.closest('[role="group"]')
+    const sharedParent = toggleGroup?.parentElement
+    expect(sharedParent).not.toBeNull()
+    expect(sharedParent!.contains(pillButton)).toBe(true)
+  })
+
+  it('mode toggle + pill container has flex-wrap and items-center', () => {
+    renderJournalTab()
+    const guidedButton = screen.getByRole('button', { name: 'Guided' })
+    const toggleGroup = guidedButton.closest('[role="group"]')
+    const container = toggleGroup?.parentElement
+    expect(container).not.toBeNull()
+    expect(container!.className).toContain('flex-wrap')
+    expect(container!.className).toContain('items-center')
+    expect(container!.className).toContain('gap-3')
+  })
+
+  it('pill is visible in Guided mode', () => {
+    renderJournalTab()
+    expect(screen.getByLabelText(/enhance with sound/i)).toBeInTheDocument()
+  })
+
+  it('pill is visible in Free Write mode', async () => {
+    const user = userEvent.setup()
+    renderJournalTab()
+    const freeWriteButton = screen.getByRole('button', { name: 'Free Write' })
+    await user.click(freeWriteButton)
+    expect(screen.getByLabelText(/enhance with sound/i)).toBeInTheDocument()
+  })
 })

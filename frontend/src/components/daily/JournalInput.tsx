@@ -153,13 +153,10 @@ export function JournalInput({
         >
           What&apos;s On Your Mind?
         </h2>
-        <div className="z-10 mt-2 flex justify-center">
-          <AmbientSoundPill context="journal" variant="dark" className="mb-0" />
-        </div>
       </div>
 
-      {/* Mode Toggle */}
-      <div className="mb-6 flex justify-center">
+      {/* Mode Toggle + Ambient Pill */}
+      <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
         <div className="inline-flex rounded-lg border border-white/10" role="group" aria-label="Journal mode">
           <button
             type="button"
@@ -188,6 +185,7 @@ export function JournalInput({
             Free Write
           </button>
         </div>
+        <AmbientSoundPill context="journal" variant="dark" className="!mb-0 !w-auto" />
       </div>
 
       {/* Context Banner (Guided mode) */}
