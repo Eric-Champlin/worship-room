@@ -73,11 +73,32 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   // Context prompt (from Prayer Wall / challenge / URL)
   const [contextPrompt, setContextPrompt] = useState<string | null>(null)
 
+  // Draft conflict dialog state
+  const [draftConflictPending, setDraftConflictPending] = useState(false)
+  const [draftClearSignal, setDraftClearSignal] = useState(0)
+
   // Switch to Guided mode when prayContext arrives
   useEffect(() => {
     if (prayContext?.from === 'pray') {
       setMode('guided')
       setContextDismissed(false)
+    }
+  }, [prayContext])
+
+  // Switch to Guided mode when devotional context arrives
+  useEffect(() => {
+    if (prayContext?.from === 'devotional' && prayContext.customPrompt) {
+      const existingDraft = localStorage.getItem(JOURNAL_DRAFT_KEY)
+      if (existingDraft && existingDraft.trim().length > 0) {
+        setDraftConflictPending(true)
+      } else {
+        setMode('guided')
+        setContextDismissed(false)
+        requestAnimationFrame(() => {
+          parentTextareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          parentTextareaRef.current?.focus()
+        })
+      }
     }
   }, [prayContext])
 
@@ -124,6 +145,23 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
     }
   }, [])
 
+  const handleStartFresh = useCallback(() => {
+    setDraftConflictPending(false)
+    localStorage.removeItem(JOURNAL_DRAFT_KEY)
+    setDraftClearSignal((c) => c + 1)
+    setMode('guided')
+    setContextDismissed(false)
+    requestAnimationFrame(() => {
+      parentTextareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      parentTextareaRef.current?.focus()
+    })
+  }, [])
+
+  const handleKeepDraft = useCallback(() => {
+    setDraftConflictPending(false)
+    setContextDismissed(true)
+  }, [])
+
   const handleTryDifferentPrompt = () => {
     if (allPrompts.length <= 1) return
     let next = Math.floor(Math.random() * allPrompts.length)
@@ -135,11 +173,16 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
 
   const currentPrompt = contextPrompt && !contextDismissed
     ? contextPrompt
-    : prayContext?.from === 'pray' && !contextDismissed
-      ? `Reflect on your prayer about ${prayContext.topic ?? 'what you shared'}. How did it feel to bring that before God? What comes up as you sit with it?`
-      : allPrompts[promptIndex]?.text ?? ''
+    : prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed
+      ? prayContext.customPrompt
+      : prayContext?.from === 'pray' && !contextDismissed
+        ? `Reflect on your prayer about ${prayContext.topic ?? 'what you shared'}. How did it feel to bring that before God? What comes up as you sit with it?`
+        : allPrompts[promptIndex]?.text ?? ''
 
-  const showPromptRefresh = !(prayContext?.from === 'pray' && !contextDismissed)
+  const showPromptRefresh = !(
+    (prayContext?.from === 'pray' && !contextDismissed) ||
+    (prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed)
+  )
 
   const handleEntrySave = (entry: { content: string; mode: JournalMode; promptText?: string }) => {
     const savedEntry: SavedJournalEntry = {
@@ -215,6 +258,38 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   return (
     <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+        {draftConflictPending && prayContext?.from === 'devotional' && (
+          <div
+            role="dialog"
+            aria-labelledby="draft-conflict-title"
+            className="mb-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] p-6 backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]"
+          >
+            <h3 id="draft-conflict-title" className="mb-2 text-lg font-semibold text-white">
+              You have an unsaved draft
+            </h3>
+            <p className="mb-4 text-sm text-white/80">
+              Would you like to start fresh with today&apos;s devotional prompt, or keep working on your current draft?
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleStartFresh}
+                className="min-h-[44px] rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                Start fresh
+              </button>
+              <button
+                type="button"
+                onClick={handleKeepDraft}
+                className="min-h-[44px] rounded-lg border border-white/[0.12] bg-transparent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                autoFocus
+              >
+                Keep my current draft
+              </button>
+            </div>
+          </div>
+        )}
+
         <JournalInput
           mode={mode}
           onModeChange={handleModeChange}
@@ -226,6 +301,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           onDismissContext={() => setContextDismissed(true)}
           onSave={handleEntrySave}
           onTextareaRef={(ref) => { parentTextareaRef.current = ref }}
+          draftClearSignal={draftClearSignal}
         />
 
         {/* Saved Entries */}

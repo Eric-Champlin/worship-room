@@ -27,9 +27,17 @@ function buildReadAloudText(devotional: Devotional): string {
   return `${quoteText} ${passageText} ${reflectionText} ${prayerText} ${questionText}`
 }
 
+const REFLECTION_PREFIX = 'Something to think about today: '
+
+function stripReflectionPrefix(question: string): string {
+  return question.startsWith(REFLECTION_PREFIX)
+    ? question.slice(REFLECTION_PREFIX.length)
+    : question
+}
+
 interface DevotionalTabContentProps {
-  onSwitchToJournal?: (topic: string) => void
-  onSwitchToPray?: (context: string) => void
+  onSwitchToJournal?: (topic: string, customPrompt: string) => void
+  onSwitchToPray?: (topic: string, customPrompt: string) => void
   onComplete?: () => void
 }
 
@@ -308,14 +316,24 @@ export function DevotionalTabContent({
           <div className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:flex-row sm:justify-center">
             <button
               type="button"
-              onClick={() => onSwitchToJournal?.(devotional.theme)}
+              onClick={() =>
+                onSwitchToJournal?.(
+                  devotional.theme,
+                  stripReflectionPrefix(devotional.reflectionQuestion),
+                )
+              }
               className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
             >
               Journal about this &rarr;
             </button>
             <button
               type="button"
-              onClick={() => onSwitchToPray?.(`I'm reflecting on ${devotional.passage.reference}...`)}
+              onClick={() =>
+                onSwitchToPray?.(
+                  devotional.theme,
+                  `I'm reflecting on ${devotional.passage.reference}. ${stripReflectionPrefix(devotional.reflectionQuestion)}`,
+                )
+              }
               className="inline-flex min-h-[44px] items-center text-sm font-medium text-primary transition-colors hover:text-primary-light"
             >
               Pray about today&apos;s reading &rarr;

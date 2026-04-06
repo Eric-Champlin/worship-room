@@ -109,6 +109,7 @@ export function PrayerInput({
 
       <div className="mb-4">
         <textarea
+          id="pray-textarea"
           ref={textareaRef}
           value={text}
           onChange={(e) => {

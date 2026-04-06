@@ -27,6 +27,7 @@ export interface JournalInputProps {
   onDismissContext: () => void
   onSave: (entry: { content: string; mode: JournalMode; promptText?: string }) => void
   onTextareaRef?: (ref: HTMLTextAreaElement | null) => void
+  draftClearSignal?: number
 }
 
 export function JournalInput({
@@ -40,6 +41,7 @@ export function JournalInput({
   onDismissContext,
   onSave,
   onTextareaRef,
+  draftClearSignal,
 }: JournalInputProps) {
   const { showToast } = useToast()
   const authModal = useAuthModal()
@@ -125,6 +127,16 @@ export function JournalInput({
     }
   }, [text])
 
+  // Clear text when draft clear signal changes (from "Start fresh" in draft conflict dialog)
+  const prevClearSignal = useRef(draftClearSignal ?? 0)
+  useEffect(() => {
+    if (draftClearSignal !== undefined && draftClearSignal !== prevClearSignal.current) {
+      prevClearSignal.current = draftClearSignal
+      setText('')
+      lastSavedTextRef.current = ''
+    }
+  }, [draftClearSignal])
+
   const handleSave = () => {
     if (!text.trim()) return
     if (!isAuthenticated) {
@@ -205,6 +217,21 @@ export function JournalInput({
             </button>
           </div>
         )}
+        {mode === 'guided' && prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed && (
+          <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3" role="status">
+            <p className="text-sm text-white/80">
+              Reflecting on today&apos;s devotional on{' '}
+              <span className="font-medium">{prayContext.topic ?? 'today\u2019s reading'}</span>
+            </p>
+            <button
+              type="button"
+              onClick={onDismissContext}
+              className="mt-1 text-xs text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
+              Write about something else
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Guided Mode Prompt Card */}
@@ -235,6 +262,18 @@ export function JournalInput({
       {mode === 'free' && prayContext?.from === 'pray' && !contextDismissed && (
         <p className="mb-4 text-sm text-white/50">
           Continuing from your prayer about {prayContext.topic ?? 'what you shared'}.{' '}
+          <button
+            type="button"
+            onClick={onDismissContext}
+            className="text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            Dismiss
+          </button>
+        </p>
+      )}
+      {mode === 'free' && prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed && (
+        <p className="mb-4 text-sm text-white/50">
+          Reflecting on today&apos;s devotional on {prayContext.topic ?? 'today\u2019s reading'}.{' '}
           <button
             type="button"
             onClick={onDismissContext}

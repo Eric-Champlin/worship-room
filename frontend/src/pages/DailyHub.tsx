@@ -136,16 +136,16 @@ function DailyHubContent() {
   )
 
   const handleSwitchToDevotionalJournal = useCallback(
-    (topic: string) => {
-      setPrayContext({ from: 'devotional', topic })
+    (topic: string, customPrompt: string) => {
+      setPrayContext({ from: 'devotional', topic, customPrompt })
       setSearchParams({ tab: 'journal' }, { replace: true })
     },
     [setSearchParams],
   )
 
   const handleSwitchToDevotionalPray = useCallback(
-    (context: string) => {
-      setPrayContext({ from: 'devotional', topic: context })
+    (topic: string, customPrompt: string) => {
+      setPrayContext({ from: 'devotional', topic, customPrompt })
       setSearchParams({ tab: 'pray' }, { replace: true })
     },
     [setSearchParams],
@@ -350,6 +350,7 @@ function DailyHubContent() {
           <PrayTabContent
             onSwitchToJournal={handleSwitchToJournal}
             initialContext={urlContext.current}
+            prayContext={prayContext}
           />
         </div>
 

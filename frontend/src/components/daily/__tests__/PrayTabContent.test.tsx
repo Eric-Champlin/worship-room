@@ -6,6 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayTabContent } from '../PrayTabContent'
+import type { PrayContext } from '@/types/daily-experience'
 
 // --- Granular mocks for audio system ---
 const mockLoadScene = vi.fn()
@@ -113,13 +114,13 @@ function resetAudioState(overrides: Partial<MockAudioState> = {}) {
 
 const mockOnSwitchToJournal = vi.fn()
 
-function renderPrayTab(props: { onSwitchToJournal?: (topic: string) => void } = {}) {
+function renderPrayTab(props: { onSwitchToJournal?: (topic: string) => void; prayContext?: PrayContext | null } = {}) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <AuthModalProvider>
-            <PrayTabContent onSwitchToJournal={props.onSwitchToJournal} />
+            <PrayTabContent onSwitchToJournal={props.onSwitchToJournal} prayContext={props.prayContext} />
           </AuthModalProvider>
         </ToastProvider>
       </AuthProvider>
@@ -851,5 +852,50 @@ describe('PrayTabContent atmospheric visuals', () => {
   it('does not render BackgroundSquiggle', () => {
     renderPrayTab()
     expect(document.querySelector('[aria-hidden="true"][style*="mask"]')).toBeNull()
+  })
+})
+
+describe('PrayTabContent devotional context', () => {
+  it('devotional prayContext pre-fills textarea', () => {
+    renderPrayTab({
+      prayContext: {
+        from: 'devotional',
+        topic: 'Trust',
+        customPrompt: "I'm reflecting on Proverbs 3:5-6. Where are you relying on your own understanding?",
+      },
+    })
+    const textarea = screen.getByLabelText('Prayer request')
+    expect(textarea).toHaveValue("I'm reflecting on Proverbs 3:5-6. Where are you relying on your own understanding?")
+  })
+
+  it('devotional pre-fill consumed only once', () => {
+    const prayContext: PrayContext = {
+      from: 'devotional',
+      topic: 'Trust',
+      customPrompt: "I'm reflecting on Proverbs 3:5-6. Where are you relying on your own understanding?",
+    }
+    const { rerender } = renderPrayTab({ prayContext })
+    const textarea = screen.getByLabelText('Prayer request')
+    expect(textarea).toHaveValue("I'm reflecting on Proverbs 3:5-6. Where are you relying on your own understanding?")
+    // Re-render with same context — should not duplicate
+    rerender(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <AuthProvider>
+          <ToastProvider>
+            <AuthModalProvider>
+              <PrayTabContent prayContext={prayContext} />
+            </AuthModalProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+    expect(textarea).toHaveValue("I'm reflecting on Proverbs 3:5-6. Where are you relying on your own understanding?")
+  })
+
+  it('existing URL param initialContext still works', () => {
+    renderPrayTab()
+    // Without initialContext, textarea should be empty
+    const textarea = screen.getByLabelText('Prayer request')
+    expect(textarea).toHaveValue('')
   })
 })

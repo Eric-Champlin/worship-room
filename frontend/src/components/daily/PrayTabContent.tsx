@@ -17,15 +17,16 @@ import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { SCENE_BY_ID } from '@/data/scenes'
 import { getPrayerPrefill } from '@/data/challenge-prefills'
 import { getMockPrayer } from '@/mocks/daily-experience-mock-data'
-import type { MockPrayer } from '@/types/daily-experience'
+import type { MockPrayer, PrayContext } from '@/types/daily-experience'
 import type { GuidedPrayerSession } from '@/types/guided-prayer'
 
 interface PrayTabContentProps {
   onSwitchToJournal?: (topic: string) => void
   initialContext?: string | null
+  prayContext?: PrayContext | null
 }
 
-export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabContentProps) {
+export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext }: PrayTabContentProps) {
   const authModal = useAuthModal()
   const { isAuthenticated } = useAuth()
   const { markPrayComplete, markGuidedPrayerComplete } = useCompletionTracking()
@@ -73,6 +74,25 @@ export function PrayTabContent({ onSwitchToJournal, initialContext }: PrayTabCon
       navigate(location.pathname + location.search, { replace: true, state: null })
     }
   }, [challengeContext, activeTab, navigate, location.pathname, location.search])
+
+  // Pre-fill from devotional context
+  const devotionalContextConsumed = useRef(false)
+  useEffect(() => {
+    if (
+      prayContext?.from === 'devotional' &&
+      prayContext.customPrompt &&
+      !devotionalContextConsumed.current &&
+      activeTab === 'pray'
+    ) {
+      devotionalContextConsumed.current = true
+      setInitialText(prayContext.customPrompt)
+      requestAnimationFrame(() => {
+        const textarea = document.querySelector<HTMLTextAreaElement>('#pray-textarea')
+        textarea?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        textarea?.focus()
+      })
+    }
+  }, [prayContext, activeTab])
 
   const extractTopic = () => {
     if (!submittedTextRef.current.trim()) return 'prayer'

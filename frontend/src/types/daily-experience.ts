@@ -107,4 +107,5 @@ export interface SavedJournalEntry {
 export interface PrayContext {
   from: 'pray' | 'devotional'
   topic: string
+  customPrompt?: string
 }

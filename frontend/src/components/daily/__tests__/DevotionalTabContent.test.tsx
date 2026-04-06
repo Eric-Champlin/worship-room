@@ -186,23 +186,43 @@ describe('DevotionalTabContent', () => {
   })
 
   describe('Cross-tab CTAs', () => {
-    it('"Journal about this" calls onSwitchToJournal with theme', async () => {
+    it('"Journal about this" calls onSwitchToJournal with theme and stripped reflection question', async () => {
       const onSwitchToJournal = vi.fn()
       const user = userEvent.setup()
       renderComponent('/daily?tab=devotional', { onSwitchToJournal })
       await user.click(screen.getByText(/Journal about this/))
       expect(onSwitchToJournal).toHaveBeenCalledTimes(1)
-      // Called with a string (the theme)
+      // First arg: theme (string)
       expect(typeof onSwitchToJournal.mock.calls[0][0]).toBe('string')
+      // Second arg: stripped reflection question (no "Something to think about today: " prefix)
+      const customPrompt = onSwitchToJournal.mock.calls[0][1] as string
+      expect(typeof customPrompt).toBe('string')
+      expect(customPrompt).not.toContain('Something to think about today: ')
+      expect(customPrompt.length).toBeGreaterThan(0)
     })
 
-    it('"Pray about today\'s reading" calls onSwitchToPray with passage ref', async () => {
+    it('"Pray about today\'s reading" calls onSwitchToPray with theme and combined context', async () => {
       const onSwitchToPray = vi.fn()
       const user = userEvent.setup()
       renderComponent('/daily?tab=devotional', { onSwitchToPray })
       await user.click(screen.getByText(/Pray about today/))
       expect(onSwitchToPray).toHaveBeenCalledTimes(1)
-      expect(onSwitchToPray.mock.calls[0][0]).toContain('reflecting on')
+      // First arg: theme
+      expect(typeof onSwitchToPray.mock.calls[0][0]).toBe('string')
+      // Second arg: combined passage reference + stripped reflection question
+      const customPrompt = onSwitchToPray.mock.calls[0][1] as string
+      expect(customPrompt).toContain('reflecting on')
+      expect(customPrompt).not.toContain('Something to think about today: ')
+    })
+
+    it('stripReflectionPrefix strips known prefix from reflection question', async () => {
+      const onSwitchToJournal = vi.fn()
+      const user = userEvent.setup()
+      renderComponent('/daily?tab=devotional', { onSwitchToJournal })
+      await user.click(screen.getByText(/Journal about this/))
+      const customPrompt = onSwitchToJournal.mock.calls[0][1] as string
+      // The stripped question should start with an uppercase letter (the actual question)
+      expect(customPrompt[0]).toBe(customPrompt[0].toUpperCase())
     })
   })
 

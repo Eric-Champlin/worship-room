@@ -71,15 +71,17 @@ beforeEach(() => {
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'Eric')
   mockRecordActivity.mockClear()
+  // jsdom doesn't implement scrollIntoView
+  Element.prototype.scrollIntoView = vi.fn()
 })
 
-function renderJournalTab() {
+function renderJournalTab(props: Partial<React.ComponentProps<typeof JournalTabContent>> = {}) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <AuthModalProvider>
-            <JournalTabContent />
+            <JournalTabContent {...props} />
           </AuthModalProvider>
         </ToastProvider>
       </AuthProvider>
@@ -533,5 +535,99 @@ describe('JournalTabContent atmospheric visuals', () => {
   it('does not render BackgroundSquiggle', () => {
     renderJournalTab()
     expect(document.querySelector('[aria-hidden="true"][style*="mask"]')).toBeNull()
+  })
+})
+
+describe('JournalTabContent devotional context', () => {
+  it('auto-selects Guided mode when devotional context arrives with no draft', () => {
+    localStorage.removeItem('wr_journal_draft')
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    const guidedButton = screen.getByRole('button', { name: 'Guided' })
+    expect(guidedButton).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('shows draft conflict dialog when devotional context arrives and draft exists', () => {
+    localStorage.setItem('wr_journal_draft', 'Some existing draft text')
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    expect(screen.getByRole('dialog', { name: /unsaved draft/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /start fresh/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /keep my current draft/i })).toBeInTheDocument()
+  })
+
+  it('"Start fresh" clears draft and shows devotional prompt', async () => {
+    const user = userEvent.setup()
+    localStorage.setItem('wr_journal_draft', 'Some existing draft text')
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    await user.click(screen.getByRole('button', { name: /start fresh/i }))
+    // Dialog should be gone
+    expect(screen.queryByRole('dialog', { name: /unsaved draft/i })).not.toBeInTheDocument()
+    // Draft cleared from localStorage
+    expect(localStorage.getItem('wr_journal_draft')).toBeNull()
+    // Prompt card shows the devotional reflection question
+    expect(screen.getByText(/Where are you relying on your own understanding/)).toBeInTheDocument()
+  })
+
+  it('"Keep my current draft" dismisses devotional context and shows rotating prompts', async () => {
+    const user = userEvent.setup()
+    localStorage.setItem('wr_journal_draft', 'Some existing draft text')
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    await user.click(screen.getByText(/keep my current draft/i))
+    // Dialog gone
+    expect(screen.queryByRole('dialog', { name: /unsaved draft/i })).not.toBeInTheDocument()
+    // Devotional prompt NOT shown (rotating prompt shown instead)
+    expect(screen.queryByText(/Where are you relying on your own understanding/)).not.toBeInTheDocument()
+  })
+
+  it('no draft conflict dialog when draft is empty', () => {
+    localStorage.setItem('wr_journal_draft', '   ')
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    expect(screen.queryByRole('dialog', { name: /unsaved draft/i })).not.toBeInTheDocument()
+  })
+
+  it('prompt card shows devotional reflection question when context is active', () => {
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    expect(screen.getByText(/Where are you relying on your own understanding/)).toBeInTheDocument()
+  })
+
+  it('existing Pray → Journal context still works', () => {
+    renderJournalTab({
+      prayContext: { from: 'pray', topic: 'anxiety' },
+    })
+    expect(screen.getByText(/Continuing from your prayer about/)).toBeInTheDocument()
+    expect(screen.getByText('anxiety')).toBeInTheDocument()
+  })
+
+  it('"Write about something else" dismisses devotional context', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    // The "Write about something else" link should be present
+    const dismissLink = screen.getByRole('button', { name: /write about something else/i })
+    await user.click(dismissLink)
+    // Devotional prompt should be gone, rotating prompt shown
+    expect(screen.queryByText(/Where are you relying on your own understanding/)).not.toBeInTheDocument()
+  })
+
+  it('free-write mode shows devotional context note', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    // Switch to Free Write mode
+    await user.click(screen.getByRole('button', { name: 'Free Write' }))
+    expect(screen.getByText(/Reflecting on today.s devotional on Trust/)).toBeInTheDocument()
   })
 })
