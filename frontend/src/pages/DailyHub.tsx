@@ -195,7 +195,7 @@ function DailyHubContent() {
         <GlowBackground variant="center">
           <section
             aria-labelledby="daily-hub-heading"
-            className="relative flex w-full flex-col items-center px-4 pt-32 pb-12 text-center antialiased sm:pt-36 sm:pb-16 lg:pt-40"
+            className="relative flex w-full flex-col items-center px-4 pt-36 pb-6 text-center antialiased sm:pt-40 sm:pb-8 lg:pt-44"
           >
           <h1
             id="daily-hub-heading"

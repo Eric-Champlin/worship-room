@@ -141,14 +141,11 @@ describe('DailyHub', () => {
       expect(heading).toBeInTheDocument()
     })
 
-    it('hero bottom padding is pb-12 sm:pb-16', () => {
+    it('hero bottom padding is pb-6 sm:pb-8', () => {
       renderPage()
       const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-      expect(hero.className).toContain('pb-12')
-      expect(hero.className).toContain('sm:pb-16')
-      // Old values removed
-      expect(hero.className).not.toContain('pb-8')
-      expect(hero.className).not.toMatch(/\bsm:pb-12\b/)
+      expect(hero.className).toContain('pb-6')
+      expect(hero.className).toContain('sm:pb-8')
     })
 
     it('hero has no SharePanel', () => {
