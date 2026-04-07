@@ -123,6 +123,9 @@ importers:
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(jiti@1.21.7)(jsdom@25.0.1)(terser@5.46.1)
+      workbox-window:
+        specifier: ^7.4.0
+        version: 7.4.0
 
 packages:
 
