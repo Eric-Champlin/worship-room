@@ -44,19 +44,23 @@ Before doing anything, read and internalize:
  
 2. **Design System Reference** — Check if `_plans/recon/design-system.md` exists. If it does, read it and internalize the full design system: color tokens, typography scale, spacing values, component patterns (hero, card, button, section, decorative elements), and the CSS Mapping Table. **This is the single source of truth for all UI styling.** When the plan says "match the existing hero" or "use the same card style," look up the exact computed values from this file — do NOT inspect other components at build time or guess. If the design system file does not exist, proceed without it but flag to the user: "No design system reference found at `_plans/recon/design-system.md`. Consider running `/playwright-recon --internal` to generate one for more accurate UI implementation."
  
-3. **Master Spec Plan** — Check the plan header for a "Master Spec Plan" reference. If one exists, read it for shared data models, localStorage keys, cross-spec integration points, and constants. When implementing data models or storage keys, use the exact interfaces and key names from the master plan — do not invent alternatives.
+3. **`.claude/rules/09-design-system.md`** — Read this for architectural patterns, the Round 3 Visual Patterns section, the Daily Hub Visual Architecture section, the FrostedCard Tier System, the white pill CTA patterns, the textarea glow pattern, the sticky FAB pattern, the drawer-aware visibility pattern, the inline element layout verification rule, and the Deprecated Patterns table. The recon snapshot wins on specific CSS values; this file wins on architectural principles and component patterns.
  
-4. **Assumptions & Pre-Execution Checklist** — If this is the first run (no steps marked [COMPLETE] in the Execution Log), verify the checklist:
+4. **Master Spec Plan** — Check the plan header for a "Master Spec Plan" reference. If one exists, read it for shared data models, localStorage keys, cross-spec integration points, and constants. When implementing data models or storage keys, use the exact interfaces and key names from the master plan — do not invent alternatives.
+ 
+5. **Assumptions & Pre-Execution Checklist** — If this is the first run (no steps marked [COMPLETE] in the Execution Log), verify the checklist:
    - Display the checklist to the user
    - Ask: "Have you reviewed and confirmed these assumptions? (yes/no)"
    - **DO NOT proceed until the user confirms**
    - If the user says an assumption is wrong, **STOP** and inform them to update the plan
  
-5. **Edge Cases & Decisions table** — Know the explicit decisions so you don't re-decide them during implementation.
+6. **Edge Cases & Decisions table** — Know the explicit decisions so you don't re-decide them during implementation.
  
-6. **[UNVERIFIED] values** — Scan the plan for any `[UNVERIFIED]` flags. Know which values are provisional before you start implementing. These get extra scrutiny during visual verification (Step 4g).
+7. **[UNVERIFIED] values** — Scan the plan for any `[UNVERIFIED]` flags. Know which values are provisional before you start implementing. These get extra scrutiny during visual verification (Step 4g).
  
-7. **Record the starting file set** — Run `git diff --name-only HEAD 2>/dev/null` and store the list of already-changed files. This is used in Step 4a to distinguish pre-existing changes from changes made by this execution session.
+8. **Inline Element Position Expectations table** — If the plan contains inline-row layouts, internalize the expected y-coordinate alignments. These are checked in Step 4g (Inline Element Positional Verification).
+ 
+9. **Record the starting file set** — Run `git diff --name-only HEAD 2>/dev/null` and store the list of already-changed files. This is used in Step 4a to distinguish pre-existing changes from changes made by this execution session.
  
 ---
  
@@ -126,7 +130,7 @@ git status --porcelain
  
 Compare the list of changed files against:
 1. Files listed in any completed step's "Files to create/modify" (changes from this session — expected)
-2. The starting file set recorded in Step 2.7 (changes that predate this session — unexpected)
+2. The starting file set recorded in Step 2.9 (changes that predate this session — unexpected)
  
 **If there are uncommitted changes to files NOT created/modified by any completed step in this session AND NOT in the starting file set:**
  
@@ -201,16 +205,28 @@ checkpoint (4g) should specifically compare these against the design system or e
  
 ```text
 ⚠️  DESIGN SYSTEM REMINDER:
-- {quirk 1, e.g., Worship Room uses Caveat for script headings, not Lora}
-- {quirk 2, e.g., Squiggle backgrounds use SQUIGGLE_MASK_STYLE for fade mask}
-- {quirk 3, e.g., All tabs share max-w-2xl container width}
+ 
+Canonical patterns (always check):
+- Worship Room uses GRADIENT_TEXT_STYLE for headings on dark backgrounds, NOT Caveat (deprecated)
+- Daily Hub uses HorizonGlow at the page root, NOT per-section GlowBackground (deprecated on Daily Hub)
+- Daily Hub tab content uses transparent backgrounds with `mx-auto max-w-2xl px-4 py-10 sm:py-14`
+- No "What's On Your Heart/Mind/Spirit?" headings on Daily Hub tabs (removed)
+- Pray/Journal textareas use static white box-shadow glow, NOT animate-glow-pulse (removed)
+- White pill CTAs use Pattern 1 (inline) or Pattern 2 (homepage primary) from `09-design-system.md`
+- FrostedCard tier system: Tier 1 for primary reading, Tier 2 (left-border accent) for scripture callouts
+- Sticky FABs use pointer-events-none outer + pointer-events-auto inner with env(safe-area-inset-*)
+- Drawer-aware FABs auto-hide when state.drawerOpen === true
+- Frosted glass cards: bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] rounded-2xl
+- Mood colors: Struggling=#D97706, Heavy=#C2703E, Okay=#8B7FA8, Good=#2DD4BF, Thriving=#34D399
+ 
+{plan-specific quirks from the Design System Reminder block}
  
 All styling for this step must account for these patterns.
 ```
  
-**2. Re-read the relevant section of the Design System Reference** (`_plans/recon/design-system.md`) for the specific component being built in this step. Do not rely on values memorized from Step 2 — re-read fresh to ensure accuracy. Look up the exact values for this component's colors, typography, spacing, gradients, and hover states.
+**2. Re-read the relevant section of the Design System Reference** (`_plans/recon/design-system.md`) AND the relevant Round 3 / Daily Hub Visual Architecture sections of `.claude/rules/09-design-system.md` for the specific component being built in this step. Do not rely on values memorized from Step 2 — re-read fresh to ensure accuracy. Look up the exact values for this component's colors, typography, spacing, gradients, and hover states.
  
-**If no Design System Reminder in the plan:** Skip the reminder display, but still re-read the design system reference for this component.
+**If no Design System Reminder in the plan:** Skip the plan-specific quirk display, but still show the canonical patterns block above and re-read both design system files.
  
 ### 4e: Implement
  
@@ -221,9 +237,10 @@ Execute the step following the plan's exact specifications.
 1. **The plan's explicit instructions** — file paths, method signatures, patterns, guardrails
 2. **Master Spec Plan** — shared data models, localStorage keys, cross-spec interfaces
 3. **Design System Reference** (`_plans/recon/design-system.md`) — exact computed CSS values, color tokens, typography, component patterns
-4. **Architecture Context** — patterns from reconnaissance
-5. **CLAUDE.md and `.claude/rules/`** — project standards
-6. **General best practices** — only when the above are silent
+4. **`.claude/rules/09-design-system.md`** — architectural patterns, Round 3 Visual Patterns, Daily Hub Visual Architecture, deprecated patterns
+5. **Architecture Context** — patterns from reconnaissance
+6. **CLAUDE.md and `.claude/rules/`** — project standards
+7. **General best practices** — only when the above are silent
  
 **Requirements:**
  
@@ -231,6 +248,7 @@ Execute the step following the plan's exact specifications.
 - Follow referenced patterns — when the plan says "follow the pattern in `ExistingComponent.tsx`", read that file and match it
 - Respect DO NOT guardrails — check each action against them before proceeding
 - Match design specs — use exact colors, spacing, typography from the Design System Reference or plan's Architecture Context. Do not approximate.
+- **Do not introduce deprecated patterns.** The Deprecated Patterns table in `09-design-system.md` lists patterns that have been replaced. If the spec or plan accidentally references a deprecated pattern, STOP and flag it before implementing.
 - Match test patterns — use the same naming, assertion style, and setup patterns from Architecture Context
 - Use shared data models exactly as defined — when the master plan specifies a TypeScript interface or localStorage key, use it verbatim. Do not rename fields or invent alternative keys.
  
@@ -279,7 +297,7 @@ This applies when:
  
 **Verification process:**
  
-1. Start the dev server if not already running
+1. Start the dev server if not already running (`pnpm dev` from `/frontend`)
 2. **Wait for render:** After navigation, wait for `networkidle` AND verify key elements are visible before taking screenshots. For components with async data (Spotify embeds, API calls, lazy images), wait for the loading state to resolve. Do NOT screenshot a loading spinner or partially-rendered page.
 3. **Screenshot the built component at multiple breakpoints** using Playwright. Use breakpoints from the plan's Responsive Structure section, or defaults: 375px, 768px, 1440px.
 4. **Compare against the recon report screenshots** for that component (if available)
@@ -292,15 +310,34 @@ This applies when:
    - Layout: display, flex-direction, align-items, justify-content
    - Effects: box-shadow, opacity
  
-6. **Matching tolerance: There is NO "CLOSE" verdict.** Every comparison is YES or NO:
+6. **Inline Element Positional Verification (NEW — if plan has Inline Element Position Expectations):**
+ 
+   For every entry in the plan's Inline Element Position Expectations table, capture the `boundingBox().y` of each element in the group at each tested breakpoint and compare:
+ 
+   ```text
+   ## Inline Position Verification: Step <N>
+ 
+   ### Group: {e.g., "Pray chip row"} at 1440px
+   | Element | y-coordinate | Match expected? |
+   |---------|-------------|-----------------|
+   | Chip 1 | 412 | YES |
+   | Chip 2 | 412 | YES |
+   | Chip 3 | 412 | YES |
+   | Ambient pill | 466 | NO — wrapped to row 2 |
+   ```
+ 
+   **Differing y-coordinates indicate wrapping bugs.** This is a HIGH severity layout failure even if individual element CSS is correct. Treat as a structural mismatch and fix before continuing.
+ 
+7. **Matching tolerance: There is NO "CLOSE" verdict.** Every comparison is YES or NO:
    - Numeric values differ by ≤2px → YES
    - Numeric values differ by >2px → NO
    - Colors differ at all → NO
+   - y-coordinates of inline-row elements differ by >5px → NO (wrapping bug)
    - Any other difference → NO
  
-7. **If any [UNVERIFIED] values exist in this step**, compare them FIRST against the recon or existing UI and flag if the guess was wrong.
+8. **If any [UNVERIFIED] values exist in this step**, compare them FIRST against the recon or existing UI and flag if the guess was wrong.
  
-8. **Additional checks (if the recon/plan includes these tables):**
+9. **Additional checks (if the recon/plan includes these tables):**
    - **Gradients:** Compare the full background-image gradient string. If the gradient angle or cutoff position differs by >5px, flag as a mismatch.
    - **Vertical rhythm:** Measure the gap between adjacent sections and compare against the recon's Vertical Rhythm table. Any gap difference >5px is a mismatch.
    - **Images:** Compare rendered width/height of images against the recon's Image tables.
@@ -310,20 +347,20 @@ This applies when:
    - **Intra-element style variations:** If the plan or recon documents text blocks with mixed formatting (e.g., bold opening phrase, italic body, styled links within one paragraph), verify each style region renders correctly. Check that `<strong>`, `<em>`, `<b>`, `<i>` tags are present in the rendered HTML where documented.
    - **Conditional content:** If the recon documents conditional/dynamic content (e.g., a field that appears when a tab is selected), trigger the condition and verify the content appears with correct styling.
  
-9. **Auth state verification for dashboard/logged-in features:**
-   If the component requires logged-in state and the project uses simulated auth via localStorage (`wr_auth_simulated`):
-   - Inject auth state via Playwright's `page.addInitScript()` BEFORE navigating:
-     ```typescript
-     await page.addInitScript(() => {
-       localStorage.setItem('wr_auth_simulated', 'true');
-       localStorage.setItem('wr_user_name', 'Test User');
-     });
-     ```
-   - Verify BOTH logged-out state (default, no injection) AND logged-in state
-   - If the step also needs seed data (mood entries, friends, badges, etc.), inject it via the same mechanism using the data models from the master plan
-   - Do NOT modify source code for auth or data seeding
+10. **Auth state verification for dashboard/logged-in features:**
+    If the component requires logged-in state and the project uses simulated auth via localStorage (`wr_auth_simulated`):
+    - Inject auth state via Playwright's `page.addInitScript()` BEFORE navigating:
+      ```typescript
+      await page.addInitScript(() => {
+        localStorage.setItem('wr_auth_simulated', 'true');
+        localStorage.setItem('wr_user_name', 'Test User');
+      });
+      ```
+    - Verify BOTH logged-out state (default, no injection) AND logged-in state
+    - If the step also needs seed data (mood entries, friends, badges, etc.), inject it via the same mechanism using the data models from the master plan
+    - Do NOT modify source code for auth or data seeding
  
-10. **Produce a comparison table:**
+11. **Produce a comparison table:**
  
 ```text
 ## Visual Verification: Step <N> — <component name>
@@ -333,12 +370,12 @@ This applies when:
 | {elem}  | {prop}   | {expected}    | {actual}    | YES/NO | {Tailwind class if NO} |
 ```
  
-11. **If all values match:** Proceed to 4h
-12. **If mismatches found:**
+12. **If all values match (including positional):** Proceed to 4h
+13. **If mismatches found:**
  
    First, classify each mismatch:
    - **(a) Value mismatch** — wrong color, size, spacing, font, etc. Fix: apply the exact value from the CSS Mapping Table or Fix Hint.
-   - **(b) Structural mismatch** — wrong HTML nesting, missing wrapper div, wrong flexbox direction, missing element entirely. Fix: review DOM structure against the plan's expected component structure.
+   - **(b) Structural mismatch** — wrong HTML nesting, missing wrapper div, wrong flexbox direction, missing element entirely, **inline-row elements wrapping when they should be on the same row**. Fix: review DOM structure against the plan's expected component structure; for wrapping, narrow chip widths, increase container max-width, or change to a different layout pattern.
    - **(c) Behavioral mismatch** — wrong state, missing hover effect, interaction not working. Fix: review component logic, event handlers, and state management.
  
    Then fix using the appropriate strategy for the mismatch type. Re-screenshot and re-compare.
@@ -361,7 +398,7 @@ Options:
 5. Restore from backup: git reset --hard {BACKUP_BRANCH}
 ```
  
-**If no recon report or Design System Reference exists:** Do a basic browser sanity check instead — navigate to the page, verify key elements are visible, layout is correct, no console errors, interactions work. Check at mobile and desktop. This catches obvious visual/behavioral issues that unit tests miss.
+**If no recon report or Design System Reference exists:** Do a basic browser sanity check instead — navigate to the page, verify key elements are visible, layout is correct, no console errors, interactions work. Check at mobile and desktop. If the step has inline-row layouts, still capture y-coordinates and verify alignment manually. This catches obvious visual/behavioral issues that unit tests miss.
  
 ### 4h: Verify Expected State
  
@@ -469,6 +506,7 @@ All <N> steps executed successfully.
 - The master spec plan is the authority for shared data models and localStorage keys
 - If the plan conflicts with general best practices, follow the plan (it was written with codebase-specific knowledge)
 - If the plan conflicts with reality (files don't exist, interfaces don't match), STOP and flag it
+- If the plan accidentally introduces a deprecated pattern (per `09-design-system.md` § "Deprecated Patterns"), STOP and flag it before implementing
 - If you need to deviate, get user approval first and document the deviation in the Execution Log
  
 **Quality:**
@@ -476,13 +514,16 @@ All <N> steps executed successfully.
 - Only update the Execution Log after verifications pass
 - Do not delete the plan file — it serves as a record
 - For UI steps: visual verification is mandatory, not optional
-- Before each UI step: re-read the relevant Design System Reference section fresh — do not rely on memorized values from Step 2
+- For UI steps with inline-row layouts: positional verification (boundingBox().y) is mandatory
+- Before each UI step: re-read the relevant Design System Reference section AND the relevant `09-design-system.md` patterns fresh — do not rely on memorized values from Step 2
  
 **Error Handling:**
 - Ambiguity → STOP, ask the user
 - Plan contradicts codebase → STOP, flag with evidence
+- Plan introduces deprecated pattern → STOP, flag and ask for spec/plan correction
 - Tests fail after one fix → STOP, show failure details
 - Visual verification fails after two fixes → STOP, surface mismatches with classification (value / structural / behavioral)
+- Inline-row positional verification fails → treat as structural mismatch, narrow widths or change layout, re-verify
 - Dependency not met → STOP, inform user
 - Uncommitted changes from outside this session detected → STOP, offer commit/stash/proceed options
  
