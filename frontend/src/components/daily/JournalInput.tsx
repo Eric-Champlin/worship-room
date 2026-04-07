@@ -11,7 +11,6 @@ import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useAnnounce } from '@/hooks/useAnnounce'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { JOURNAL_DRAFT_KEY } from '@/constants/daily-experience'
-import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { cn } from '@/lib/utils'
 import { JOURNAL_MAX_LENGTH, JOURNAL_WARNING_THRESHOLD, JOURNAL_DANGER_THRESHOLD } from '@/constants/content-limits'
 import type { JournalMode, PrayContext } from '@/types/daily-experience'
@@ -159,16 +158,6 @@ export function JournalInput({
   return (
     <>
       <AnnouncerRegion />
-
-      {/* Heading */}
-      <div className="mb-4">
-        <h2
-          className="text-center font-sans text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl"
-          style={GRADIENT_TEXT_STYLE}
-        >
-          What&apos;s On Your Mind?
-        </h2>
-      </div>
 
       {/* Mode Toggle + Ambient Pill */}
       <div className="mb-6 flex flex-wrap items-center justify-center gap-3">

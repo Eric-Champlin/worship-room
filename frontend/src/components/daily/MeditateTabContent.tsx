@@ -14,7 +14,6 @@ import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { getMeditationSuggestion } from '@/data/challenge-prefills'
-import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { cn } from '@/lib/utils'
 import { MEDITATION_TYPES } from '@/constants/daily-experience'
 import type { ChallengeActionType } from '@/types/challenges'
@@ -59,16 +58,6 @@ export function MeditateTabContent() {
   return (
     <GlowBackground variant="split" glowOpacity={0.30} className="!bg-transparent">
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
-        <div className="mb-4 flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4">
-          <h2
-            className="font-sans text-2xl font-bold sm:text-3xl lg:text-4xl"
-            style={GRADIENT_TEXT_STYLE}
-          >
-            What&apos;s On Your Spirit?
-          </h2>
-          <AmbientSoundPill context="meditate" variant="dark" className="!mb-0 !w-auto" />
-        </div>
-
         {isAuthenticated && allComplete && (
           <div className="mb-8 motion-safe:animate-golden-glow rounded-xl border border-amber-200/30 bg-amber-900/20 p-6 text-center">
             <p className="text-lg font-semibold text-white">
@@ -148,6 +137,11 @@ export function MeditateTabContent() {
               </button>
             )
           })}
+        </div>
+
+        {/* Ambient sound pill — relocated below cards */}
+        <div className="mt-8 flex justify-center">
+          <AmbientSoundPill context="meditate" variant="dark" className="!mb-0 !w-auto" />
         </div>
       </div>
     </GlowBackground>
