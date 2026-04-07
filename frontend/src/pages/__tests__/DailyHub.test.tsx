@@ -313,24 +313,14 @@ describe('DailyHub', () => {
     expect(root.className).toContain('bg-hero-bg')
   })
 
-  it('renders StarField as a root-level decorative layer', () => {
-    const { container } = renderPage()
-    const root = container.firstElementChild as HTMLElement
-    // StarField renders a div with aria-hidden and pointer-events-none containing ~110 star dots
-    const starFieldContainer = root.querySelector('[aria-hidden="true"].pointer-events-none')
-    expect(starFieldContainer).toBeInTheDocument()
-    const stars = starFieldContainer!.querySelectorAll('.bg-white')
-    expect(stars.length).toBeGreaterThanOrEqual(100)
-  })
-
   it('renders HorizonGlow as a root-level decorative layer', () => {
     const { container } = renderPage()
     const root = container.firstElementChild as HTMLElement
-    // HorizonGlow container is the second aria-hidden + pointer-events-none div (after StarField)
+    // HorizonGlow container is the first aria-hidden + pointer-events-none div
     const decorativeLayers = root.querySelectorAll(':scope > [aria-hidden="true"].pointer-events-none')
-    expect(decorativeLayers.length).toBeGreaterThanOrEqual(2)
-    // Second decorative layer is HorizonGlow with exactly 5 glow spots
-    const horizonGlow = decorativeLayers[1]
+    expect(decorativeLayers.length).toBeGreaterThanOrEqual(1)
+    // First decorative layer is HorizonGlow with exactly 5 glow spots
+    const horizonGlow = decorativeLayers[0]
     expect(horizonGlow.children.length).toBe(5)
   })
 

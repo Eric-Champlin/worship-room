@@ -2,7 +2,6 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams, useLocation } from 'react-router-dom'
 import { Heart, PenLine, Wind, BookOpen, Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
-import { StarField } from '@/components/daily/StarField'
 import { HorizonGlow } from '@/components/daily/HorizonGlow'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -182,7 +181,6 @@ function DailyHubContent() {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
-      <StarField />
       <HorizonGlow />
       <SEO title="Daily Prayer, Journal & Meditation" description="Start your day with AI-powered prayer, guided journaling, and Christian meditation rooted in Scripture." jsonLd={dailyHubBreadcrumbs} />
       <a
