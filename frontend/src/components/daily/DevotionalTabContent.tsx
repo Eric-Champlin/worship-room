@@ -188,11 +188,6 @@ export function DevotionalTabContent({
           <h3 className="pt-8 text-center text-2xl font-bold text-white sm:pt-10 sm:text-3xl">
             {devotional.title}
           </h3>
-          <div className="mt-2 text-center">
-            <span className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/50">
-              {devotional.theme}
-            </span>
-          </div>
 
           {/* Passage section */}
           <div className="py-6 sm:py-8">
