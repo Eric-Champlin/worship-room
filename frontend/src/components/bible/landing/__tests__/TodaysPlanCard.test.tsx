@@ -83,4 +83,10 @@ describe('TodaysPlanCard', () => {
     const link = screen.getByRole('link')
     expect(link.getAttribute('href')).toBe('/bible/plans')
   })
+
+  it('links have focus-visible ring', () => {
+    renderWithRouter(<TodaysPlanCard plans={[PLAN_A]} />)
+    const link = screen.getByRole('link', { name: /Gospel of John/i })
+    expect(link.className).toContain('focus-visible:ring-2')
+  })
 })

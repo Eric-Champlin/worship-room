@@ -49,4 +49,30 @@ describe('ResumeReadingCard', () => {
     const link = screen.getByRole('link')
     expect(link.getAttribute('href')).toBe('/bible/browse')
   })
+
+  it('populated card has stronger shadow', () => {
+    const { container } = renderWithRouter(
+      <ResumeReadingCard
+        lastRead={{ book: 'John', chapter: 3, verse: 16, timestamp: Date.now() }}
+      />
+    )
+    const article = container.querySelector('article')
+    expect(article?.className).toContain('0.12')
+  })
+
+  it('empty state card has primary weight', () => {
+    const { container } = renderWithRouter(<ResumeReadingCard lastRead={null} />)
+    const article = container.querySelector('article')
+    expect(article?.className).toContain('0.12')
+  })
+
+  it('link has focus-visible ring', () => {
+    renderWithRouter(
+      <ResumeReadingCard
+        lastRead={{ book: 'John', chapter: 3, verse: 16, timestamp: Date.now() }}
+      />
+    )
+    const link = screen.getByRole('link')
+    expect(link.className).toContain('focus-visible:ring-2')
+  })
 })

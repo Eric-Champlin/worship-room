@@ -38,6 +38,31 @@ describe('StreakChip', () => {
     expect(handleClick).toHaveBeenCalledOnce()
   })
 
+  it('shows subtle glow for streak <= 7', () => {
+    const { container } = render(
+      <StreakChip streak={{ count: 5, lastReadDate: '2026-04-07' }} />
+    )
+    const button = container.querySelector('button')
+    expect(button?.className).toContain('12px')
+  })
+
+  it('shows intense glow for streak > 7', () => {
+    const { container } = render(
+      <StreakChip streak={{ count: 10, lastReadDate: '2026-04-07' }} />
+    )
+    const button = container.querySelector('button')
+    expect(button?.className).toContain('20px')
+  })
+
+  it('has transition-all class for smooth shadow transition', () => {
+    const { container } = render(
+      <StreakChip streak={{ count: 3, lastReadDate: '2026-04-07' }} />
+    )
+    const button = container.querySelector('button')
+    expect(button?.className).toContain('transition-all')
+    expect(button?.className).toContain('duration-300')
+  })
+
   it('has minimum 44px tap target', () => {
     const { container } = render(
       <StreakChip streak={{ count: 1, lastReadDate: '2026-04-07' }} />

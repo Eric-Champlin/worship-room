@@ -80,12 +80,12 @@ describe('BibleBrowser', () => {
       expect(heading.className).toContain('sm:px-2')
     })
 
-    it('renders "The Word of God" subtitle in serif italic', () => {
+    it('renders "The Word of God" subtitle in sans (not serif italic)', () => {
       renderPage()
       const subtitle = screen.getByText('The Word of God')
       expect(subtitle).toBeInTheDocument()
-      expect(subtitle.className).toContain('font-serif')
-      expect(subtitle.className).toContain('italic')
+      expect(subtitle.className).not.toContain('font-serif')
+      expect(subtitle.className).not.toContain('italic')
     })
   })
 

@@ -49,9 +49,9 @@ export function BibleBrowser() {
             className="px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
             style={GRADIENT_TEXT_STYLE}
           >
-            The <span className="font-script">Bible</span>
+            The Bible
           </h1>
-          <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
+          <p className="mx-auto mt-3 max-w-xl text-base text-white/60 sm:text-lg">
             The Word of God
           </p>
         </section>

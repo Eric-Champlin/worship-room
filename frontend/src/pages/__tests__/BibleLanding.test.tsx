@@ -134,7 +134,7 @@ describe('BibleLanding', () => {
     renderLanding()
     const heading = screen.getByText('The Word of God')
     expect(heading).toBeInTheDocument()
-    expect(screen.getByText('Open to You')).toBeInTheDocument()
+    expect(screen.getByText('open to you')).toBeInTheDocument()
     // Verify no font-script within the hero section itself
     const heroSection = heading.closest('section')
     expect(heroSection?.querySelector('.font-script')).toBeNull()

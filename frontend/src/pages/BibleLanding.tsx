@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
+import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
 import { StreakChip } from '@/components/bible/landing/StreakChip'
 import { ResumeReadingCard } from '@/components/bible/landing/ResumeReadingCard'
 import { TodaysPlanCard } from '@/components/bible/landing/TodaysPlanCard'
@@ -38,10 +39,14 @@ export function BibleLanding() {
         description="Read the full World English Bible — free, public domain, no account needed. Resume reading, daily verse, reading plans, and more."
         jsonLd={bibleBreadcrumbs}
       />
-      <div className="min-h-screen bg-dashboard-dark">
+      <div className="relative min-h-screen bg-dashboard-dark">
+        <BibleLandingOrbs />
         <BibleHero />
 
-        <div className="mx-auto max-w-4xl space-y-8 px-4 pb-16">
+        {/* Section divider: hero → content */}
+        <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
+
+        <div className="relative z-10 mx-auto max-w-4xl space-y-8 px-4 pb-16">
           {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap */}
           {streak && streak.count > 0 && (
             <div className="flex justify-center">
@@ -57,6 +62,9 @@ export function BibleLanding() {
 
           {/* Verse of the Day */}
           <VerseOfTheDay />
+
+          {/* Section divider: VOTD → Quick Actions */}
+          <div className="border-t border-white/[0.08]" />
 
           {/* Quick Actions */}
           <QuickActionsRow />

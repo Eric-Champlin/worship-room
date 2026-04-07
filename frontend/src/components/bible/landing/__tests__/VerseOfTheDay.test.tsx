@@ -55,4 +55,10 @@ describe('VerseOfTheDay', () => {
     expect(button.className).toContain('min-h-[44px]')
     expect(button.className).toContain('min-w-[44px]')
   })
+
+  it('share button has focus-visible ring', () => {
+    renderWithRouter(<VerseOfTheDay />)
+    const button = screen.getByLabelText('Share verse of the day')
+    expect(button.className).toContain('focus-visible:ring-2')
+  })
 })

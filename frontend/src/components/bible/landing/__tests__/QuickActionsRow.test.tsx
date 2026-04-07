@@ -64,4 +64,16 @@ describe('QuickActionsRow', () => {
     const links = screen.getAllByRole('link')
     expect(links.length).toBe(3)
   })
+
+  it('links have focus-visible ring', () => {
+    render(
+      <MemoryRouter>
+        <QuickActionsRow />
+      </MemoryRouter>
+    )
+    const links = screen.getAllByRole('link')
+    links.forEach((link) => {
+      expect(link.className).toContain('focus-visible:ring-2')
+    })
+  })
 })

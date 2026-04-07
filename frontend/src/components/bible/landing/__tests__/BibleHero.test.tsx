@@ -6,7 +6,27 @@ describe('BibleHero', () => {
   it('renders heading text', () => {
     render(<BibleHero />)
     expect(screen.getByText('The Word of God')).toBeInTheDocument()
-    expect(screen.getByText('Open to You')).toBeInTheDocument()
+    expect(screen.getByText('open to you')).toBeInTheDocument()
+  })
+
+  it('top line renders as white text', () => {
+    render(<BibleHero />)
+    const topLine = screen.getByText('The Word of God')
+    expect(topLine.className).toContain('text-white')
+  })
+
+  it('bottom line renders with gradient style', () => {
+    render(<BibleHero />)
+    const bottomLine = screen.getByText('open to you')
+    expect(bottomLine.style.backgroundClip).toBeTruthy()
+  })
+
+  it('heading sizes follow SectionHeading pattern', () => {
+    render(<BibleHero />)
+    const topLine = screen.getByText('The Word of God')
+    const bottomLine = screen.getByText('open to you')
+    expect(topLine.className).toContain('text-2xl')
+    expect(bottomLine.className).toContain('text-4xl')
   })
 
   it('renders subhead text', () => {
