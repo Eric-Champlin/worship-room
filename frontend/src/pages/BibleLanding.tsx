@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
@@ -9,6 +10,9 @@ import { TodaysPlanCard } from '@/components/bible/landing/TodaysPlanCard'
 import { VerseOfTheDay } from '@/components/bible/landing/VerseOfTheDay'
 import { QuickActionsRow } from '@/components/bible/landing/QuickActionsRow'
 import { BibleSearchEntry } from '@/components/bible/landing/BibleSearchEntry'
+import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
+import { BibleDrawer } from '@/components/bible/BibleDrawer'
+import { BooksDrawerContent } from '@/components/bible/BooksDrawerContent'
 import { getLastRead, getActivePlans, getBibleStreak } from '@/lib/bible/landingState'
 import type { LastRead, ActivePlan, BibleStreak } from '@/types/bible-landing'
 
@@ -21,16 +25,48 @@ const bibleBreadcrumbs = {
   ],
 }
 
-export function BibleLanding() {
+function isInputFocused(): boolean {
+  const tag = document.activeElement?.tagName.toLowerCase()
+  return (
+    tag === 'input' ||
+    tag === 'textarea' ||
+    tag === 'select' ||
+    document.activeElement?.getAttribute('contenteditable') === 'true'
+  )
+}
+
+function BibleLandingInner() {
   const [lastRead, setLastRead] = useState<LastRead | null>(null)
   const [plans, setPlans] = useState<ActivePlan[]>([])
   const [streak, setStreak] = useState<BibleStreak | null>(null)
+  const { isOpen, close, toggle } = useBibleDrawer()
+  const navigate = useNavigate()
 
   useEffect(() => {
     setLastRead(getLastRead())
     setPlans(getActivePlans())
     setStreak(getBibleStreak())
   }, [])
+
+  // Keyboard shortcut: 'b' to toggle drawer
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'b' && !isInputFocused()) {
+        e.preventDefault()
+        toggle()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [toggle])
+
+  const handleSelectBook = useCallback(
+    (slug: string) => {
+      navigate(`/bible/${slug}/1`)
+      close()
+    },
+    [navigate, close]
+  )
 
   return (
     <Layout>
@@ -78,6 +114,19 @@ export function BibleLanding() {
           </p>
         </div>
       </div>
+
+      {/* Books Drawer */}
+      <BibleDrawer isOpen={isOpen} onClose={close} ariaLabel="Books of the Bible">
+        <BooksDrawerContent onClose={close} onSelectBook={handleSelectBook} />
+      </BibleDrawer>
     </Layout>
+  )
+}
+
+export function BibleLanding() {
+  return (
+    <BibleDrawerProvider>
+      <BibleLandingInner />
+    </BibleDrawerProvider>
   )
 }
