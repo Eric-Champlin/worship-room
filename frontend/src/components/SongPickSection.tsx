@@ -34,7 +34,7 @@ export function SongPickSection() {
               >
                 Today&apos;s
               </span>
-              <span className="mt-1 text-2xl font-bold leading-[1.15] text-white tracking-[0.11em] sm:text-3xl sm:tracking-[0.15em] lg:text-4xl lg:tracking-[0.18em]">
+              <span className="mt-1 text-3xl font-bold leading-[1.15] text-white sm:text-4xl sm:tracking-[0.02em] lg:text-5xl lg:tracking-normal">
                 Song Pick
               </span>
             </h2>
