@@ -108,13 +108,13 @@ export function PrayerInput({
       )}
 
       {showChips && (
-        <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-1.5">
           {DEFAULT_PRAYER_CHIPS.map((chip) => (
             <button
               key={chip}
               type="button"
               onClick={() => handleChipClick(chip)}
-              className="min-h-[44px] shrink-0 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:border-primary hover:text-primary"
+              className="min-h-[44px] shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:border-primary hover:text-primary"
             >
               {chip}
             </button>
