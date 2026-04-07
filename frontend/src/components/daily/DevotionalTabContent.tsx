@@ -222,9 +222,9 @@ export function DevotionalTabContent({
             <div className="mt-4 flex items-center gap-4">
               <Link
                 to={`/meditate/soaking?verse=${encodeURIComponent(devotional.passage.reference)}&verseText=${encodeURIComponent(devotional.passage.verses.map((v) => v.text).join(' '))}&verseTheme=${encodeURIComponent(devotional.theme)}`}
-                className="inline-flex min-h-[44px] items-center text-sm text-white/80 underline transition-colors hover:text-white"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
               >
-                Meditate on this passage &gt;
+                Meditate on this passage &rarr;
               </Link>
             </div>
             <SharePanel
