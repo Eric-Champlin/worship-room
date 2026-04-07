@@ -23,24 +23,24 @@ describe('GlowBackground', () => {
     expect(outer.className).toContain('bg-hero-bg')
   })
 
-  it('variant="center" renders single glow orb', () => {
+  it('variant="center" renders two glow orbs', () => {
     render(
       <GlowBackground variant="center">
         <p>Content</p>
       </GlowBackground>
     )
     const orbs = screen.getAllByTestId('glow-orb')
-    expect(orbs).toHaveLength(1)
+    expect(orbs).toHaveLength(2)
   })
 
-  it('variant="split" renders two glow orbs', () => {
+  it('variant="split" renders three glow orbs', () => {
     render(
       <GlowBackground variant="split">
         <p>Content</p>
       </GlowBackground>
     )
     const orbs = screen.getAllByTestId('glow-orb')
-    expect(orbs).toHaveLength(2)
+    expect(orbs).toHaveLength(3)
   })
 
   it('variant="none" renders no glow orbs', () => {
@@ -83,37 +83,37 @@ describe('GlowBackground', () => {
     expect(outer.className).toContain('custom-class')
   })
 
-  it('center variant orb has 0.25 opacity', () => {
+  it('center variant primary orb has 0.25 opacity', () => {
     render(
       <GlowBackground variant="center">
         <p>Content</p>
       </GlowBackground>
     )
-    const orb = screen.getByTestId('glow-orb')
-    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.25)')
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs[0].style.background).toContain('rgba(139, 92, 246, 0.25)')
   })
 
-  it('left variant orb has 0.22 opacity', () => {
+  it('left variant primary orb has 0.22 opacity', () => {
     render(
       <GlowBackground variant="left">
         <p>Content</p>
       </GlowBackground>
     )
-    const orb = screen.getByTestId('glow-orb')
-    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.22)')
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs[0].style.background).toContain('rgba(139, 92, 246, 0.22)')
   })
 
-  it('right variant orb has 0.22 opacity', () => {
+  it('right variant primary orb has 0.22 opacity', () => {
     render(
       <GlowBackground variant="right">
         <p>Content</p>
       </GlowBackground>
     )
-    const orb = screen.getByTestId('glow-orb')
-    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.22)')
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs[0].style.background).toContain('rgba(139, 92, 246, 0.22)')
   })
 
-  it('split variant orbs have 0.24 and 0.18 opacities', () => {
+  it('split variant orbs have 0.24, 0.18, and 0.14 opacities', () => {
     render(
       <GlowBackground variant="split">
         <p>Content</p>
@@ -122,6 +122,7 @@ describe('GlowBackground', () => {
     const orbs = screen.getAllByTestId('glow-orb')
     expect(orbs[0].style.background).toContain('0.24')
     expect(orbs[1].style.background).toContain('0.18')
+    expect(orbs[2].style.background).toContain('0.14')
   })
 
   it('orbs have pointer-events-none', () => {
@@ -130,8 +131,8 @@ describe('GlowBackground', () => {
         <p>Content</p>
       </GlowBackground>
     )
-    const orb = screen.getByTestId('glow-orb')
-    expect(orb.className).toContain('pointer-events-none')
+    const orbs = screen.getAllByTestId('glow-orb')
+    orbs.forEach((orb) => expect(orb.className).toContain('pointer-events-none'))
   })
 
   it('orbs have will-change-transform', () => {
@@ -140,8 +141,8 @@ describe('GlowBackground', () => {
         <p>Content</p>
       </GlowBackground>
     )
-    const orb = screen.getByTestId('glow-orb')
-    expect(orb.className).toContain('will-change-transform')
+    const orbs = screen.getAllByTestId('glow-orb')
+    orbs.forEach((orb) => expect(orb.className).toContain('will-change-transform'))
   })
 
   it('orbs have blur class', () => {
@@ -150,18 +151,18 @@ describe('GlowBackground', () => {
         <p>Content</p>
       </GlowBackground>
     )
-    const orb = screen.getByTestId('glow-orb')
-    expect(orb.className).toContain('blur-')
+    const orbs = screen.getAllByTestId('glow-orb')
+    orbs.forEach((orb) => expect(orb.className).toContain('blur-'))
   })
 
-  it('uses overflow-visible to allow glow bleed', () => {
+  it('uses overflow-clip to contain glow orbs within viewport', () => {
     const { container } = render(
       <GlowBackground>
         <p>Content</p>
       </GlowBackground>
     )
     const outer = container.firstElementChild as HTMLElement
-    expect(outer.className).toContain('overflow-visible')
+    expect(outer.className).toContain('overflow-clip')
     expect(outer.className).not.toContain('overflow-hidden')
   })
 
@@ -171,7 +172,7 @@ describe('GlowBackground', () => {
         <p>Content</p>
       </GlowBackground>
     )
-    const orb = screen.getByTestId('glow-orb')
-    expect(orb.style.background).toContain('rgba(139, 92, 246, 0.3)')
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs[0].style.background).toContain('rgba(139, 92, 246, 0.3)')
   })
 })

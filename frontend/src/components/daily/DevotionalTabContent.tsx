@@ -17,6 +17,7 @@ import { READING_PLAN_METADATA } from '@/data/reading-plans'
 import { VerseLink } from '@/components/shared/VerseLink'
 import { SharePanel } from '@/components/sharing/SharePanel'
 import type { Devotional } from '@/types/devotional'
+import type { DevotionalSnapshot } from '@/types/daily-experience'
 
 function buildReadAloudText(devotional: Devotional): string {
   const quoteText = devotional.quote.text
@@ -28,8 +29,8 @@ function buildReadAloudText(devotional: Devotional): string {
 }
 
 interface DevotionalTabContentProps {
-  onSwitchToJournal?: (topic: string, customPrompt: string) => void
-  onSwitchToPray?: (topic: string, customPrompt: string) => void
+  onSwitchToJournal?: (topic: string, customPrompt: string, snapshot?: DevotionalSnapshot) => void
+  onSwitchToPray?: (topic: string, customPrompt: string, snapshot?: DevotionalSnapshot) => void
   onComplete?: () => void
 }
 
@@ -51,6 +52,15 @@ export function DevotionalTabContent({
   const { getPlanStatus } = useReadingPlanProgress()
   const [isCompleted, setIsCompleted] = useState(false)
   const [showPassageShare, setShowPassageShare] = useState(false)
+
+  const buildSnapshot = (): DevotionalSnapshot => ({
+    date: dateStr,
+    title: devotional.title,
+    passage: devotional.passage,
+    reflection: devotional.reflection,
+    reflectionQuestion: devotional.reflectionQuestion.replace('Something to think about today: ', ''),
+    quote: devotional.quote,
+  })
 
   // Find matching reading plan by theme
   const matchingPlan = READING_PLAN_METADATA.find(
@@ -274,7 +284,7 @@ export function DevotionalTabContent({
                       'Something to think about today: ',
                       '',
                     )
-                    onSwitchToJournal?.(devotional.theme, reflectionQuestion)
+                    onSwitchToJournal?.(devotional.theme, reflectionQuestion, buildSnapshot())
                   }}
                   className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
                 >
@@ -293,7 +303,7 @@ export function DevotionalTabContent({
                 onClick={() => {
                   const verseText = devotional.passage.verses.map((v) => v.text).join(' ')
                   const customPrompt = `I'm reflecting on today's devotional about ${devotional.theme}. The passage is ${devotional.passage.reference}: "${verseText}". Help me pray about what I've read.`
-                  onSwitchToPray?.(devotional.theme, customPrompt)
+                  onSwitchToPray?.(devotional.theme, customPrompt, buildSnapshot())
                 }}
                 className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
               >

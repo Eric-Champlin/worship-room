@@ -26,7 +26,7 @@ const dailyHubBreadcrumbs = {
 }
 import { cn } from '@/lib/utils'
 import { useRoutePreload } from '@/hooks/useRoutePreload'
-import type { PrayContext } from '@/types/daily-experience'
+import type { PrayContext, DevotionalSnapshot } from '@/types/daily-experience'
 
 const TABS = [
   { id: 'devotional', label: 'Devotional', mobileLabel: 'Devos', icon: BookOpen },
@@ -123,16 +123,16 @@ function DailyHubContent() {
   )
 
   const handleSwitchToDevotionalJournal = useCallback(
-    (topic: string, customPrompt: string) => {
-      setPrayContext({ from: 'devotional', topic, customPrompt })
+    (topic: string, customPrompt: string, snapshot?: DevotionalSnapshot) => {
+      setPrayContext({ from: 'devotional', topic, customPrompt, devotionalSnapshot: snapshot })
       setSearchParams({ tab: 'journal' })
     },
     [setSearchParams],
   )
 
   const handleSwitchToDevotionalPray = useCallback(
-    (topic: string, customPrompt: string) => {
-      setPrayContext({ from: 'devotional', topic, customPrompt })
+    (topic: string, customPrompt: string, snapshot?: DevotionalSnapshot) => {
+      setPrayContext({ from: 'devotional', topic, customPrompt, devotionalSnapshot: snapshot })
       setSearchParams({ tab: 'pray' })
     },
     [setSearchParams],

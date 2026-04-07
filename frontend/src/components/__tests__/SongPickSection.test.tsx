@@ -51,7 +51,7 @@ describe('SongPickSection', () => {
 
   it('renders GlowBackground with glow orb', () => {
     renderComponent()
-    expect(screen.getByTestId('glow-orb')).toBeInTheDocument()
+    expect(screen.getAllByTestId('glow-orb').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders Spotify iframe with 352px height', () => {

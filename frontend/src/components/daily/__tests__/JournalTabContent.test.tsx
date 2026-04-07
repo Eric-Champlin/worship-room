@@ -6,6 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { JournalTabContent } from '../JournalTabContent'
+import type { DevotionalSnapshot } from '@/types/daily-experience'
 
 // Mock AudioProvider (needed by AmbientSoundPill embedded in JournalTabContent)
 vi.mock('@/components/audio/AudioProvider', () => ({
@@ -473,9 +474,9 @@ describe('JournalTabContent atmospheric visuals', () => {
     renderJournalTab()
     const emptyStateText = screen.getByText('Your journal is waiting')
     const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    // GlowBackground's wrapper (overflow-visible) must contain both the glow orb
+    // GlowBackground's wrapper (overflow-clip) must contain both the glow orb
     // and the empty state — they share the same wrapper as siblings of content.
-    const glowWrapper = glowOrb.closest('.overflow-visible')
+    const glowWrapper = glowOrb.closest('.overflow-clip')
     expect(glowWrapper).not.toBeNull()
     expect(glowWrapper!.contains(emptyStateText)).toBe(true)
   })
@@ -490,10 +491,10 @@ describe('JournalTabContent atmospheric visuals', () => {
     await user.click(saveBtn)
     // SavedEntriesList now rendered — locate by its content
     const savedEntryContent = screen.getByText('Today I feel grateful for many things')
-    // GlowBackground's wrapper (overflow-visible) must contain the saved entry,
+    // GlowBackground's wrapper (overflow-clip) must contain the saved entry,
     // confirming saved entries are part of the same atmospheric context.
     const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    const glowWrapper = glowOrb.closest('.overflow-visible')
+    const glowWrapper = glowOrb.closest('.overflow-clip')
     expect(glowWrapper).not.toBeNull()
     expect(glowWrapper!.contains(savedEntryContent)).toBe(true)
   })
@@ -688,5 +689,60 @@ describe('JournalTabContent devotional context', () => {
     expect(screen.getByRole('link', { name: /view full devotional/i })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /dismiss/i }))
     expect(screen.queryByRole('link', { name: /view full devotional/i })).not.toBeInTheDocument()
+  })
+
+  // --- DevotionalPreviewPanel integration ---
+
+  const mockSnapshot: DevotionalSnapshot = {
+    date: '2026-04-06',
+    title: 'Anchored in Trust',
+    passage: {
+      reference: 'Proverbs 3:5-6',
+      verses: [
+        { number: 5, text: 'Trust in Yahweh with all your heart.' },
+        { number: 6, text: 'In all your ways acknowledge him.' },
+      ],
+    },
+    reflection: ['Trusting God does not mean you stop thinking.'],
+    reflectionQuestion: 'Where are you relying on your own understanding?',
+    quote: { text: 'God never made a promise that was too good to be true.', attribution: 'D.L. Moody' },
+  }
+
+  it('preview panel appears when devotionalSnapshot is present', () => {
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?', devotionalSnapshot: mockSnapshot },
+    })
+    expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
+    expect(screen.getByText('Anchored in Trust', { exact: false })).toBeInTheDocument()
+  })
+
+  it('preview panel not shown when no snapshot', () => {
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
+    })
+    expect(screen.queryByRole('button', { name: /today's devotional/i })).not.toBeInTheDocument()
+  })
+
+  it('preview panel disappears when "Write about something else" clicked', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?', devotionalSnapshot: mockSnapshot },
+    })
+    expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /write about something else/i }))
+    expect(screen.queryByRole('button', { name: /today's devotional/i })).not.toBeInTheDocument()
+  })
+
+  it('preview panel appears in both guided and free-write modes', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?', devotionalSnapshot: mockSnapshot },
+    })
+    // Visible in guided mode (default)
+    expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
+    // Switch to free-write mode
+    await user.click(screen.getByRole('button', { name: 'Free Write' }))
+    // Still visible
+    expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
   })
 })

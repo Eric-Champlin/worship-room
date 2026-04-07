@@ -103,7 +103,7 @@ export function GlowBackground({
   glowOpacity,
 }: GlowBackgroundProps) {
   return (
-    <div className={cn('relative overflow-visible bg-hero-bg', className)}>
+    <div className={cn('relative overflow-clip bg-hero-bg', className)}>
       {variant !== 'none' && <GlowOrbs variant={variant} glowOpacity={glowOpacity} />}
       <div className="relative z-10">{children}</div>
     </div>

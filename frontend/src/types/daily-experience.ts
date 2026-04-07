@@ -104,8 +104,24 @@ export interface SavedJournalEntry {
   reflection?: string
 }
 
+export interface DevotionalSnapshot {
+  date: string
+  title: string
+  passage: {
+    reference: string
+    verses: { number: number; text: string }[]
+  }
+  reflection: string[]
+  reflectionQuestion: string
+  quote: {
+    text: string
+    attribution: string
+  }
+}
+
 export interface PrayContext {
   from: 'pray' | 'devotional'
   topic: string
   customPrompt?: string
+  devotionalSnapshot?: DevotionalSnapshot
 }

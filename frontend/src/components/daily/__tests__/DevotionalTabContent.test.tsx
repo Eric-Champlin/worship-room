@@ -256,9 +256,9 @@ describe('DevotionalTabContent', () => {
   })
 
   describe('Visual atmosphere', () => {
-    it('wraps content in GlowBackground with glow orb', () => {
+    it('wraps content in GlowBackground with glow orbs', () => {
       renderComponent()
-      expect(screen.getByTestId('glow-orb')).toBeInTheDocument()
+      expect(screen.getAllByTestId('glow-orb').length).toBeGreaterThanOrEqual(1)
     })
 
     it('reflection question card has frosted glass styling with purple border', () => {
@@ -365,8 +365,8 @@ describe('DevotionalTabContent', () => {
     describe('Readability enhancements', () => {
       it('glow orb uses reduced opacity (0.18)', () => {
         renderComponent()
-        const glowOrb = screen.getByTestId('glow-orb')
-        expect(glowOrb.getAttribute('style')).toContain('0.18')
+        const glowOrbs = screen.getAllByTestId('glow-orb')
+        expect(glowOrbs[0].getAttribute('style')).toContain('0.18')
       })
 
       it('passage text is not italic', () => {

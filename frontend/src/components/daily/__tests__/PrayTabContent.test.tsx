@@ -6,7 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayTabContent } from '../PrayTabContent'
-import type { PrayContext } from '@/types/daily-experience'
+import type { PrayContext, DevotionalSnapshot } from '@/types/daily-experience'
 
 // --- Granular mocks for audio system ---
 const mockLoadScene = vi.fn()
@@ -795,11 +795,11 @@ describe('PrayTabContent atmospheric visuals', () => {
     await user.click(sessionCard!)
     // Player dialog now rendered (mocked)
     const playerDialog = screen.getByTestId('mock-guided-player')
-    // GlowBackground's wrapper has the overflow-visible class
+    // GlowBackground's wrapper has the overflow-clip class
     const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    const glowWrapper = glowOrb.closest('.overflow-visible')
+    const glowWrapper = glowOrb.closest('.overflow-clip')
     expect(glowWrapper).not.toBeNull()
-    // CRITICAL INVARIANT: Player must NOT be inside GlowBackground's overflow-visible
+    // CRITICAL INVARIANT: Player must NOT be inside GlowBackground's overflow-clip
     // wrapper — it renders as a sibling, not a descendant.
     expect(glowWrapper!.contains(playerDialog)).toBe(false)
   })
@@ -964,6 +964,66 @@ describe('PrayTabContent devotional context', () => {
     )
     expect(screen.getByText(/praying about today.s devotional on/i)).toBeInTheDocument()
     expect(screen.getByText('Grace')).toBeInTheDocument()
+  })
+
+  // --- DevotionalPreviewPanel integration ---
+
+  const mockSnapshot: DevotionalSnapshot = {
+    date: '2026-04-06',
+    title: 'Anchored in Trust',
+    passage: {
+      reference: 'Proverbs 3:5-6',
+      verses: [
+        { number: 5, text: 'Trust in Yahweh with all your heart.' },
+        { number: 6, text: 'In all your ways acknowledge him.' },
+      ],
+    },
+    reflection: ['Trusting God does not mean you stop thinking.'],
+    reflectionQuestion: 'Where are you relying on your own understanding?',
+    quote: { text: 'God never made a promise that was too good to be true.', attribution: 'D.L. Moody' },
+  }
+
+  it('preview panel appears when devotionalSnapshot is present', () => {
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Reflect on trust', devotionalSnapshot: mockSnapshot },
+    })
+    expect(screen.getByText('Anchored in Trust', { exact: false })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
+  })
+
+  it('preview panel not shown when no snapshot', () => {
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Reflect on trust' },
+    })
+    expect(screen.queryByRole('button', { name: /today's devotional/i })).not.toBeInTheDocument()
+  })
+
+  it('preview panel disappears when context dismissed', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Reflect on trust', devotionalSnapshot: mockSnapshot },
+    })
+    expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /pray about something else/i }))
+    expect(screen.queryByRole('button', { name: /today's devotional/i })).not.toBeInTheDocument()
+  })
+
+  it('preview panel hidden during loading', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Reflect on trust', devotionalSnapshot: mockSnapshot },
+    })
+    expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
+    await generatePrayer(user)
+    expect(screen.queryByRole('button', { name: /today's devotional/i })).not.toBeInTheDocument()
+  })
+
+  it('preview panel coexists with "View full devotional" link', () => {
+    renderPrayTab({
+      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Reflect on trust', devotionalSnapshot: mockSnapshot },
+    })
+    expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /view full devotional/i })).toBeInTheDocument()
   })
 })
 

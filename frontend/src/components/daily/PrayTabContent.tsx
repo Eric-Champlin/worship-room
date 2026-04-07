@@ -17,6 +17,7 @@ import { useAudioState, useAudioDispatch } from '@/components/audio/AudioProvide
 import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { SCENE_BY_ID } from '@/data/scenes'
 import { PRAYER_DRAFT_KEY } from '@/constants/daily-experience'
+import { DevotionalPreviewPanel } from '@/components/daily/DevotionalPreviewPanel'
 import { getPrayerPrefill } from '@/data/challenge-prefills'
 import { getMockPrayer } from '@/mocks/daily-experience-mock-data'
 import type { MockPrayer, PrayContext } from '@/types/daily-experience'
@@ -200,6 +201,11 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
     <>
       <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
         <div className="mx-auto max-w-2xl px-4 pt-10 pb-4 sm:pt-14 sm:pb-6">
+          {/* Devotional Preview Panel */}
+          {prayContext?.from === 'devotional' && prayContext.devotionalSnapshot && !contextDismissed && !isLoading && !prayer && (
+            <DevotionalPreviewPanel snapshot={prayContext.devotionalSnapshot} />
+          )}
+
           {/* Devotional Context Banner */}
           {prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed && !isLoading && !prayer && (
             <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3" role="status" aria-live="polite">

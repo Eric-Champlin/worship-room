@@ -10,6 +10,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useAnnounce } from '@/hooks/useAnnounce'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
+import { DevotionalPreviewPanel } from '@/components/daily/DevotionalPreviewPanel'
 import { JOURNAL_DRAFT_KEY } from '@/constants/daily-experience'
 import { cn } from '@/lib/utils'
 import { JOURNAL_MAX_LENGTH, JOURNAL_WARNING_THRESHOLD, JOURNAL_DANGER_THRESHOLD } from '@/constants/content-limits'
@@ -191,6 +192,11 @@ export function JournalInput({
         </div>
         <AmbientSoundPill context="journal" variant="dark" className="!mb-0 !w-auto" />
       </div>
+
+      {/* Devotional Preview Panel */}
+      {prayContext?.from === 'devotional' && prayContext.devotionalSnapshot && !contextDismissed && (
+        <DevotionalPreviewPanel snapshot={prayContext.devotionalSnapshot} />
+      )}
 
       {/* Context Banner (Guided mode) */}
       <div aria-live="polite">
