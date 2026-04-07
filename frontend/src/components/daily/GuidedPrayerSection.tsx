@@ -61,7 +61,7 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
               key={session.id}
               type="button"
               onClick={() => handleCardClick(session)}
-              className="relative w-[220px] min-w-[220px] flex flex-col flex-shrink-0 snap-center rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 text-left transition-all duration-200 hover:bg-white/[0.10] hover:border-white/20 hover:shadow-[0_0_25px_rgba(139,92,246,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:w-auto sm:min-w-0 sm:aspect-square"
+              className="relative w-[220px] min-w-[220px] flex flex-col flex-shrink-0 snap-center rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 text-left transition-all duration-200 hover:bg-white/[0.10] hover:border-white/20 hover:shadow-[0_0_25px_rgba(139,92,246,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:w-auto sm:min-w-0 sm:min-h-[260px]"
             >
               {isComplete && (
                 <CheckCircle2
@@ -76,7 +76,7 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
 
               <h3 className="font-semibold text-base text-white">{session.title}</h3>
 
-              <p className="mt-1 text-sm text-white/70 line-clamp-3 flex-1">
+              <p className="mt-1 text-sm leading-relaxed text-white/70 flex-1">
                 {session.description}
               </p>
 

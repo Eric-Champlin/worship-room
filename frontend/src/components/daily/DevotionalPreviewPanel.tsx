@@ -1,13 +1,14 @@
 import { useId, useState } from 'react'
-import { BookOpen, ChevronDown } from 'lucide-react'
+import { BookOpen, ChevronDown, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DevotionalSnapshot } from '@/types/daily-experience'
 
 interface DevotionalPreviewPanelProps {
   snapshot: DevotionalSnapshot
+  onDismiss: () => void
 }
 
-export function DevotionalPreviewPanel({ snapshot }: DevotionalPreviewPanelProps) {
+export function DevotionalPreviewPanel({ snapshot, onDismiss }: DevotionalPreviewPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const reactId = useId()
   const contentId = `devotional-preview-content${reactId}`
@@ -22,37 +23,40 @@ export function DevotionalPreviewPanel({ snapshot }: DevotionalPreviewPanelProps
         )}
       >
         {/* Collapsed Pill (always visible) */}
-        <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
-          aria-expanded={isExpanded}
-          aria-controls={contentId}
-          className={cn(
-            'flex w-full items-center gap-3 px-4 py-3 sm:px-5 lg:px-6',
-            'text-left transition-colors',
-            'hover:bg-white/[0.04]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-            'focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
-            'rounded-2xl',
-          )}
-        >
-          <BookOpen className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
-              Today&apos;s Devotional
-            </p>
-            <p className="truncate text-sm font-medium text-white">
-              {snapshot.title} &middot; {snapshot.passage.reference}
-            </p>
-          </div>
-          <ChevronDown
-            className={cn(
-              'h-5 w-5 shrink-0 text-white/60 transition-transform duration-300',
-              isExpanded && 'rotate-180',
-            )}
-            aria-hidden="true"
-          />
-        </button>
+        <div className="flex w-full items-center gap-3 px-4 py-3 sm:px-5 lg:px-6">
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            aria-expanded={isExpanded}
+            aria-controls={contentId}
+            className="flex flex-1 items-center gap-3 min-w-0 text-left transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+          >
+            <BookOpen className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
+                Today&apos;s Devotional
+              </p>
+              <p className="truncate text-sm font-medium text-white">
+                {snapshot.title} &middot; {snapshot.passage.reference}
+              </p>
+            </div>
+            <ChevronDown
+              className={cn(
+                'h-5 w-5 shrink-0 text-white/60 transition-transform duration-300',
+                isExpanded && 'rotate-180',
+              )}
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label="Dismiss devotional preview"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
 
         {/* Expanded Content */}
         <div

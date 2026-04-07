@@ -140,7 +140,7 @@ export function TypewriterInput({ onSubmit, variant = 'glow' }: TypewriterInputP
       <div
         className={cn(
           'rounded-2xl',
-          isGlass ? 'liquid-glass overflow-hidden' : 'motion-safe:animate-glow-pulse p-[2px]'
+          isGlass ? 'liquid-glass overflow-hidden' : 'shadow-[0_0_12px_2px_rgba(0,212,255,0.35),0_0_27px_5px_rgba(139,92,246,0.26)] p-[2px]'
         )}
         style={isGlass ? undefined : { background: 'linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%)' }}
       >

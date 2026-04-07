@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ExternalLink } from 'lucide-react'
 import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerInput } from '@/components/daily/PrayerInput'
@@ -203,36 +202,12 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
         <div className="mx-auto max-w-2xl px-4 pt-10 pb-4 sm:pt-14 sm:pb-6">
           {/* Devotional Preview Panel */}
           {prayContext?.from === 'devotional' && prayContext.devotionalSnapshot && !contextDismissed && !isLoading && !prayer && (
-            <DevotionalPreviewPanel snapshot={prayContext.devotionalSnapshot} />
+            <DevotionalPreviewPanel
+              snapshot={prayContext.devotionalSnapshot}
+              onDismiss={() => setContextDismissed(true)}
+            />
           )}
 
-          {/* Devotional Context Banner */}
-          {prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed && !isLoading && !prayer && (
-            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3" role="status" aria-live="polite">
-              <p className="text-sm text-white/80">
-                Praying about today&apos;s devotional on{' '}
-                <span className="font-medium">{prayContext.topic ?? 'today\u2019s reading'}</span>
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
-                <button
-                  type="button"
-                  onClick={() => setContextDismissed(true)}
-                  className="inline-flex min-h-[44px] items-center text-xs text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-                >
-                  Pray about something else
-                </button>
-                <a
-                  href="/daily?tab=devotional"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[44px] items-center gap-1 text-xs text-white/60 underline hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-                >
-                  View full devotional
-                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                </a>
-              </div>
-            </div>
-          )}
 
           {/* Prayer Response (loading + display + actions) */}
           {(isLoading || prayer) && (

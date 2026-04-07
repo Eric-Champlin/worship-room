@@ -192,7 +192,7 @@ function StepOne({
           onChange={(e) => onTopicChange(e.target.value)}
           maxLength={500}
           placeholder="I'm struggling with anxiety about my job..."
-          className="w-full resize-none rounded-xl border border-glow-cyan/30 bg-white/5 p-4 text-white backdrop-blur-sm placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 motion-safe:animate-glow-pulse min-h-[120px]"
+          className="w-full resize-none rounded-xl border border-glow-cyan/30 bg-white/5 p-4 text-white backdrop-blur-sm placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-[0_0_12px_2px_rgba(0,212,255,0.35),0_0_27px_5px_rgba(139,92,246,0.26)] min-h-[120px]"
           aria-label="What's on your heart"
           aria-describedby="plan-char-count"
         />

@@ -195,53 +195,12 @@ export function JournalInput({
 
       {/* Devotional Preview Panel */}
       {prayContext?.from === 'devotional' && prayContext.devotionalSnapshot && !contextDismissed && (
-        <DevotionalPreviewPanel snapshot={prayContext.devotionalSnapshot} />
+        <DevotionalPreviewPanel
+          snapshot={prayContext.devotionalSnapshot}
+          onDismiss={onDismissContext}
+        />
       )}
 
-      {/* Context Banner (Guided mode) */}
-      <div aria-live="polite">
-        {mode === 'guided' && prayContext?.from === 'pray' && !contextDismissed && (
-          <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3" role="status">
-            <p className="text-sm text-white/80">
-              Continuing from your prayer about{' '}
-              <span className="font-medium">{prayContext.topic ?? 'what you shared'}</span>
-            </p>
-            <button
-              type="button"
-              onClick={onDismissContext}
-              className="mt-1 text-xs text-white/80 underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-            >
-              Write about something else
-            </button>
-          </div>
-        )}
-        {mode === 'guided' && prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed && (
-          <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3" role="status">
-            <p className="text-sm text-white/80">
-              Reflecting on today&apos;s devotional on{' '}
-              <span className="font-medium">{prayContext.topic ?? 'today\u2019s reading'}</span>
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
-              <button
-                type="button"
-                onClick={onDismissContext}
-                className="inline-flex min-h-[44px] items-center text-xs text-white/80 underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-              >
-                Write about something else
-              </button>
-              <a
-                href="/daily?tab=devotional"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-[44px] items-center gap-1 text-xs text-white/60 underline hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-              >
-                View full devotional
-                <ExternalLink className="h-3 w-3" aria-hidden="true" />
-              </a>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Guided Mode Prompt Card */}
       {mode === 'guided' && (
@@ -251,7 +210,7 @@ export function JournalInput({
               {currentPrompt}
             </p>
           </div>
-          {showPromptRefresh && (
+          {showPromptRefresh && prayContext?.from !== 'devotional' && (
             <div className="mt-2 text-center">
               <button
                 type="button"
@@ -317,7 +276,7 @@ export function JournalInput({
           placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
           maxLength={JOURNAL_MAX_LENGTH}
           rows={6}
-          className="min-h-[200px] w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/50 motion-safe:animate-glow-pulse focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="min-h-[200px] w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/50 shadow-[0_0_12px_2px_rgba(0,212,255,0.35),0_0_27px_5px_rgba(139,92,246,0.26)] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
           aria-label="Journal entry"
           aria-describedby="journal-char-count"
         />

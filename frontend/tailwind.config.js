@@ -36,16 +36,6 @@ export default {
         script: ['Caveat', 'cursive'],
       },
       keyframes: {
-        'glow-pulse': {
-          '0%, 100%': {
-            boxShadow:
-              '0 0 10px 2px rgba(0, 212, 255, 0.30), 0 0 24px 4px rgba(139, 92, 246, 0.22)',
-          },
-          '50%': {
-            boxShadow:
-              '0 0 14px 3px rgba(0, 212, 255, 0.40), 0 0 30px 6px rgba(139, 92, 246, 0.30)',
-          },
-        },
         'cursor-blink': {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },
@@ -297,7 +287,6 @@ export default {
         },
       },
       animation: {
-        'glow-pulse': 'glow-pulse 6s ease-in-out infinite',
         'cursor-blink': 'cursor-blink 1s step-end infinite',
         'dropdown-in': 'dropdown-in 150ms ease-out',
         'slide-from-right': 'slide-from-right 300ms ease-out forwards',

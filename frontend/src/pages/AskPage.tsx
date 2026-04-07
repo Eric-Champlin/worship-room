@@ -247,7 +247,7 @@ export function AskPage() {
                       className={cn(
                         'w-full resize-none rounded-lg border border-glow-cyan/30 bg-white/[0.06] py-3 px-4',
                         'text-base text-white placeholder:text-white/50',
-                        'motion-safe:animate-glow-pulse',
+                        'shadow-[0_0_12px_2px_rgba(0,212,255,0.35),0_0_27px_5px_rgba(139,92,246,0.26)]',
                         'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
                       )}
                     />

@@ -602,24 +602,20 @@ describe('JournalTabContent devotional context', () => {
     expect(screen.getByText(/Where are you relying on your own understanding/)).toBeInTheDocument()
   })
 
-  it('existing Pray → Journal context still works', () => {
+  it('no guided-mode pray-to-journal context banner rendered', () => {
     renderJournalTab({
       prayContext: { from: 'pray', topic: 'anxiety' },
     })
-    expect(screen.getByText(/Continuing from your prayer about/)).toBeInTheDocument()
-    expect(screen.getByText('anxiety')).toBeInTheDocument()
+    // Guided-mode context banners have been removed
+    expect(screen.queryByText(/Continuing from your prayer about/)).not.toBeInTheDocument()
   })
 
-  it('"Write about something else" dismisses devotional context', async () => {
-    const user = userEvent.setup()
+  it('no guided-mode devotional context banner rendered', () => {
     renderJournalTab({
       prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
     })
-    // The "Write about something else" link should be present
-    const dismissLink = screen.getByRole('button', { name: /write about something else/i })
-    await user.click(dismissLink)
-    // Devotional prompt should be gone, rotating prompt shown
-    expect(screen.queryByText(/Where are you relying on your own understanding/)).not.toBeInTheDocument()
+    // Guided-mode context banners have been removed; DevotionalPreviewPanel handles dismiss
+    expect(screen.queryByRole('button', { name: /write about something else/i })).not.toBeInTheDocument()
   })
 
   it('free-write mode shows devotional context note', async () => {
@@ -632,17 +628,7 @@ describe('JournalTabContent devotional context', () => {
     expect(screen.getByText(/Reflecting on today.s devotional on Trust/)).toBeInTheDocument()
   })
 
-  it('guided-mode devotional banner has "View full devotional" link', () => {
-    renderJournalTab({
-      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
-    })
-    const link = screen.getByRole('link', { name: /view full devotional/i })
-    expect(link).toHaveAttribute('href', '/daily?tab=devotional')
-    expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-  })
-
-  it('free-write mode devotional banner has "View full devotional" link', async () => {
+  it('free-write mode devotional note has "View full devotional" link', async () => {
     const user = userEvent.setup()
     renderJournalTab({
       prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
@@ -654,33 +640,14 @@ describe('JournalTabContent devotional context', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
-  it('ExternalLink icon is aria-hidden in guided mode', () => {
-    renderJournalTab({
-      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
-    })
-    const link = screen.getByRole('link', { name: /view full devotional/i })
-    const svg = link.querySelector('svg')
-    expect(svg).toHaveAttribute('aria-hidden', 'true')
-  })
-
-  it('pray context banner does not have "View full devotional" link', () => {
+  it('pray context does not have "View full devotional" link', () => {
     renderJournalTab({
       prayContext: { from: 'pray', topic: 'anxiety' },
     })
     expect(screen.queryByRole('link', { name: /view full devotional/i })).not.toBeInTheDocument()
   })
 
-  it('dismiss still works in guided mode alongside "View full devotional"', async () => {
-    const user = userEvent.setup()
-    renderJournalTab({
-      prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
-    })
-    expect(screen.getByRole('link', { name: /view full devotional/i })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /write about something else/i }))
-    expect(screen.queryByRole('link', { name: /view full devotional/i })).not.toBeInTheDocument()
-  })
-
-  it('dismiss still works in free-write mode alongside "View full devotional"', async () => {
+  it('dismiss works in free-write mode alongside "View full devotional"', async () => {
     const user = userEvent.setup()
     renderJournalTab({
       prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?' },
@@ -723,13 +690,13 @@ describe('JournalTabContent devotional context', () => {
     expect(screen.queryByRole('button', { name: /today's devotional/i })).not.toBeInTheDocument()
   })
 
-  it('preview panel disappears when "Write about something else" clicked', async () => {
+  it('preview panel disappears when dismiss button clicked', async () => {
     const user = userEvent.setup()
     renderJournalTab({
       prayContext: { from: 'devotional', topic: 'Trust', customPrompt: 'Where are you relying on your own understanding?', devotionalSnapshot: mockSnapshot },
     })
     expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /write about something else/i }))
+    await user.click(screen.getByRole('button', { name: /dismiss devotional preview/i }))
     expect(screen.queryByRole('button', { name: /today's devotional/i })).not.toBeInTheDocument()
   })
 
