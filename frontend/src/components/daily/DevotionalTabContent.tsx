@@ -235,6 +235,17 @@ export function DevotionalTabContent({
             />
           </div>
 
+          {/* Reflection section */}
+          <div className="py-6 sm:py-8">
+            <FrostedCard className="p-5 sm:p-8">
+              <div className="space-y-5 text-[17px] leading-[1.8] text-white sm:text-lg">
+                {devotional.reflection.map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            </FrostedCard>
+          </div>
+
           {/* Quote section */}
           <div className="py-6 sm:py-8">
             <FrostedCard className="p-5 sm:p-6">
@@ -245,17 +256,6 @@ export function DevotionalTabContent({
                 {devotional.quote.text}
               </blockquote>
               <p className="mt-3 text-sm text-white/80">&mdash; {devotional.quote.attribution}</p>
-            </FrostedCard>
-          </div>
-
-          {/* Reflection section */}
-          <div className="py-6 sm:py-8">
-            <FrostedCard className="p-5 sm:p-8">
-              <div className="space-y-5 text-[17px] leading-[1.8] text-white sm:text-lg">
-                {devotional.reflection.map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </div>
             </FrostedCard>
           </div>
 
