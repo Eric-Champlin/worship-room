@@ -256,10 +256,11 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
             />
           )}
 
-          {/* Guided Prayer Sessions — always visible */}
-          <div className="mt-12">
-            <GuidedPrayerSection onStartSession={handleStartGuidedSession} />
-          </div>
+        </div>
+
+        {/* Guided Prayer Sessions — wider container for square cards */}
+        <div className="mx-auto mt-12 max-w-4xl px-4 pb-10 sm:pb-14">
+          <GuidedPrayerSection onStartSession={handleStartGuidedSession} />
         </div>
       </GlowBackground>
 
