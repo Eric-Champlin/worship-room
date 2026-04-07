@@ -146,7 +146,7 @@ export function PrayerInput({
         </div>
       </div>
 
-      <div className="mb-4 flex h-5 items-center justify-end" aria-live="polite">
+      <div className="mb-2 flex h-4 items-center justify-end" aria-live="polite">
         {draftSaved && (
           <p className="motion-safe:animate-fade-in flex items-center gap-1 text-xs text-white/50">
             <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />

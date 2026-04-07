@@ -199,7 +199,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
   return (
     <>
       <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
-        <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+        <div className="mx-auto max-w-2xl px-4 pt-10 pb-4 sm:pt-14 sm:pb-6">
           {/* Devotional Context Banner */}
           {prayContext?.from === 'devotional' && prayContext.customPrompt && !contextDismissed && !isLoading && !prayer && (
             <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3" role="status" aria-live="polite">
@@ -259,7 +259,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
         </div>
 
         {/* Guided Prayer Sessions — wider container for square cards */}
-        <div className="mx-auto mt-12 max-w-4xl px-4 pb-10 sm:pb-14">
+        <div className="mx-auto mt-6 max-w-4xl px-4 pb-10 sm:pb-14">
           <GuidedPrayerSection onStartSession={handleStartGuidedSession} />
         </div>
       </GlowBackground>
