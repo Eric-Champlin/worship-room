@@ -203,7 +203,7 @@ export function JournalInput({
             <button
               type="button"
               onClick={onDismissContext}
-              className="mt-1 text-xs text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="mt-1 text-xs text-white/80 underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
             >
               Write about something else
             </button>
@@ -219,7 +219,7 @@ export function JournalInput({
               <button
                 type="button"
                 onClick={onDismissContext}
-                className="inline-flex min-h-[44px] items-center text-xs text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="inline-flex min-h-[44px] items-center text-xs text-white/80 underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
               >
                 Write about something else
               </button>
@@ -241,7 +241,7 @@ export function JournalInput({
       {mode === 'guided' && (
         <div className="mb-4">
           <div className="rounded-lg border-l-2 border-primary bg-white/[0.06] p-6">
-            <p className="font-serif text-lg italic leading-relaxed text-white/80 sm:text-xl">
+            <p className="font-sans text-base leading-relaxed text-white sm:text-lg">
               {currentPrompt}
             </p>
           </div>
@@ -268,7 +268,7 @@ export function JournalInput({
           <button
             type="button"
             onClick={onDismissContext}
-            className="text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="text-white/80 underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
           >
             Dismiss
           </button>
@@ -281,7 +281,7 @@ export function JournalInput({
             <button
               type="button"
               onClick={onDismissContext}
-              className="inline-flex min-h-[44px] items-center text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+              className="inline-flex min-h-[44px] items-center text-white/80 underline transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
             >
               Dismiss
             </button>
