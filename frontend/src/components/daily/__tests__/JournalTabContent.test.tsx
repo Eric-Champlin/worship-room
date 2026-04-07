@@ -439,9 +439,9 @@ describe('JournalTabContent (accessibility)', () => {
 })
 
 describe('JournalTabContent atmospheric visuals', () => {
-  it('renders glow background with center variant (>= 1 orb)', () => {
+  it('renders without GlowBackground (stars/glows provided by DailyHub root)', () => {
     renderJournalTab()
-    expect(screen.getAllByTestId('glow-orb').length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByTestId('glow-orb')).not.toBeInTheDocument()
   })
 
   it('renders gradient heading text "What\'s On Your Mind?"', () => {
@@ -470,18 +470,13 @@ describe('JournalTabContent atmospheric visuals', () => {
     expect(heading.className).not.toContain('text-white')
   })
 
-  it('empty state renders inside GlowBackground wrapper', () => {
+  it('empty state renders in the component', () => {
     renderJournalTab()
     const emptyStateText = screen.getByText('Your journal is waiting')
-    const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    // GlowBackground's wrapper (overflow-clip) must contain both the glow orb
-    // and the empty state — they share the same wrapper as siblings of content.
-    const glowWrapper = glowOrb.closest('.overflow-clip')
-    expect(glowWrapper).not.toBeNull()
-    expect(glowWrapper!.contains(emptyStateText)).toBe(true)
+    expect(emptyStateText).toBeInTheDocument()
   })
 
-  it('saved entries list renders inside GlowBackground wrapper', async () => {
+  it('saved entries list renders in the component', async () => {
     const user = userEvent.setup()
     renderJournalTab()
     // Save an entry to populate SavedEntriesList
@@ -489,14 +484,9 @@ describe('JournalTabContent atmospheric visuals', () => {
     await user.type(textarea, 'Today I feel grateful for many things')
     const saveBtn = screen.getByRole('button', { name: /save entry/i })
     await user.click(saveBtn)
-    // SavedEntriesList now rendered — locate by its content
+    // SavedEntriesList now rendered
     const savedEntryContent = screen.getByText('Today I feel grateful for many things')
-    // GlowBackground's wrapper (overflow-clip) must contain the saved entry,
-    // confirming saved entries are part of the same atmospheric context.
-    const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    const glowWrapper = glowOrb.closest('.overflow-clip')
-    expect(glowWrapper).not.toBeNull()
-    expect(glowWrapper!.contains(savedEntryContent)).toBe(true)
+    expect(savedEntryContent).toBeInTheDocument()
   })
 
   it('ambient sound pill renders inline with mode toggle (same flex container)', () => {

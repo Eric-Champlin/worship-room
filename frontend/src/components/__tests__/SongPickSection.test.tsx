@@ -49,9 +49,9 @@ describe('SongPickSection', () => {
     expect(card).not.toBeInTheDocument()
   })
 
-  it('renders GlowBackground with glow orb', () => {
+  it('renders without GlowBackground (stars/glows provided by DailyHub root)', () => {
     renderComponent()
-    expect(screen.getAllByTestId('glow-orb').length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByTestId('glow-orb')).not.toBeInTheDocument()
   })
 
   it('renders Spotify iframe with 352px height', () => {

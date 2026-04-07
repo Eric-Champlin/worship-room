@@ -2,7 +2,6 @@ import { useState } from 'react'
 
 import { getSongOfTheDay } from '@/mocks/daily-experience-mock-data'
 import { SPOTIFY_EMBED_BASE, SPOTIFY_PLAYLIST_URL } from '@/constants/daily-experience'
-import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SkeletonBlock } from '@/components/skeletons/SkeletonBlock'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -16,7 +15,7 @@ export function SongPickSection() {
   const song = getSongOfTheDay(today)
 
   return (
-    <GlowBackground variant="left" glowOpacity={0.30} className="!bg-transparent">
+    <div>
       <section aria-labelledby="song-pick-heading" className="px-4 py-12 sm:px-6 sm:py-16">
         {/* Section divider */}
         <div
@@ -82,6 +81,6 @@ export function SongPickSection() {
           )}
         </div>
       </section>
-    </GlowBackground>
+    </div>
   )
 }

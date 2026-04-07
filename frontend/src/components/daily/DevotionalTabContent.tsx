@@ -2,7 +2,6 @@ import { useCallback, useRef, useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Share2, Volume2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getTodaysDevotional, formatDevotionalDate } from '@/data/devotionals'
 import { useSwipe } from '@/hooks/useSwipe'
@@ -150,7 +149,7 @@ export function DevotionalTabContent({
   }, [readAloud, devotional])
 
   return (
-    <GlowBackground variant="center" glowOpacity={0.18} className="!bg-transparent">
+    <div>
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14" {...swipeHandlers}>
         <div className="relative">
           {/* Date navigation */}
@@ -348,6 +347,6 @@ export function DevotionalTabContent({
           <div className="pb-8 sm:pb-12" />
         </div>
       </div>
-    </GlowBackground>
+    </div>
   )
 }

@@ -68,7 +68,7 @@ vi.mock('@/hooks/useReducedMotion', () => ({
 }))
 
 // Mock GuidedPrayerPlayer to avoid TTS/speechSynthesis/wakeLock/timer complexity.
-// We only need to verify its structural placement relative to GlowBackground.
+// We only need to verify its structural placement relative to the content wrapper.
 vi.mock('@/components/daily/GuidedPrayerPlayer', () => ({
   GuidedPrayerPlayer: ({ session }: { session: { title: string } }) => (
     <div role="dialog" aria-label={`Guided prayer: ${session.title}`} data-testid="mock-guided-player">
@@ -775,9 +775,9 @@ describe('PrayTabContent (accessibility)', () => {
 })
 
 describe('PrayTabContent atmospheric visuals', () => {
-  it('renders glow background with center variant (>= 1 orb)', () => {
+  it('renders without GlowBackground (stars/glows provided by DailyHub root)', () => {
     renderPrayTab()
-    expect(screen.getAllByTestId('glow-orb').length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByTestId('glow-orb')).not.toBeInTheDocument()
   })
 
   it('pray tab heading "What\'s On Your Heart?" is removed', () => {
@@ -785,7 +785,7 @@ describe('PrayTabContent atmospheric visuals', () => {
     expect(screen.queryByRole('heading', { name: /what's on your heart\?/i })).not.toBeInTheDocument()
   })
 
-  it('GuidedPrayerPlayer renders as sibling of GlowBackground, not a descendant', async () => {
+  it('GuidedPrayerPlayer renders as sibling of the content wrapper, not a descendant', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderPrayTab()
     // Trigger guided session by clicking the first session card
@@ -795,13 +795,12 @@ describe('PrayTabContent atmospheric visuals', () => {
     await user.click(sessionCard!)
     // Player dialog now rendered (mocked)
     const playerDialog = screen.getByTestId('mock-guided-player')
-    // GlowBackground's wrapper has the overflow-clip class
-    const glowOrb = screen.getAllByTestId('glow-orb')[0]
-    const glowWrapper = glowOrb.closest('.overflow-clip')
-    expect(glowWrapper).not.toBeNull()
-    // CRITICAL INVARIANT: Player must NOT be inside GlowBackground's overflow-clip
-    // wrapper — it renders as a sibling, not a descendant.
-    expect(glowWrapper!.contains(playerDialog)).toBe(false)
+    // The content wrapper div contains the prayer input/response and guided section
+    const guidedSection = screen.getByText('Morning Offering').closest('.max-w-4xl')
+    const contentWrapper = guidedSection?.parentElement
+    expect(contentWrapper).not.toBeNull()
+    // CRITICAL INVARIANT: Player must NOT be inside the content wrapper
+    expect(contentWrapper!.contains(playerDialog)).toBe(false)
   })
 
   it('submit button reads "Help Me Pray"', () => {

@@ -8,7 +8,6 @@ import {
   Search,
   Check,
 } from 'lucide-react'
-import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
@@ -56,7 +55,7 @@ export function MeditateTabContent() {
     : null
 
   return (
-    <GlowBackground variant="split" glowOpacity={0.30} className="!bg-transparent">
+    <div>
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         {isAuthenticated && allComplete && (
           <div className="mb-8 motion-safe:animate-golden-glow rounded-xl border border-amber-200/30 bg-amber-900/20 p-6 text-center">
@@ -144,6 +143,6 @@ export function MeditateTabContent() {
           <AmbientSoundPill context="meditate" variant="dark" className="!mb-0 !w-auto" />
         </div>
       </div>
-    </GlowBackground>
+    </div>
   )
 }

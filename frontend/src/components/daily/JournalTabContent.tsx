@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { BookOpen, PenLine } from 'lucide-react'
-import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
@@ -250,7 +249,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   }
 
   return (
-    <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
+    <div>
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         {draftConflictPending && prayContext?.from === 'devotional' && (
           <div
@@ -322,6 +321,6 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
           />
         )}
       </div>
-    </GlowBackground>
+    </div>
   )
 }

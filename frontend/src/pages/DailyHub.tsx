@@ -2,7 +2,8 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams, useLocation } from 'react-router-dom'
 import { Heart, PenLine, Wind, BookOpen, Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
-import { GlowBackground } from '@/components/homepage/GlowBackground'
+import { StarField } from '@/components/daily/StarField'
+import { HorizonGlow } from '@/components/daily/HorizonGlow'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
@@ -180,7 +181,9 @@ function DailyHubContent() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-hero-bg font-sans">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
+      <StarField />
+      <HorizonGlow />
       <SEO title="Daily Prayer, Journal & Meditation" description="Start your day with AI-powered prayer, guided journaling, and Christian meditation rooted in Scripture." jsonLd={dailyHubBreadcrumbs} />
       <a
         href="#main-content"
@@ -192,11 +195,10 @@ function DailyHubContent() {
 
       <main id="main-content">
         {/* Hero Section — Greeting + Content Cards */}
-        <GlowBackground variant="center">
-          <section
-            aria-labelledby="daily-hub-heading"
-            className="relative flex w-full flex-col items-center px-4 pt-36 pb-6 text-center antialiased sm:pt-40 sm:pb-8 lg:pt-44"
-          >
+        <section
+          aria-labelledby="daily-hub-heading"
+          className="relative z-10 flex w-full flex-col items-center px-4 pt-36 pb-6 text-center antialiased sm:pt-40 sm:pb-8 lg:pt-44"
+        >
           <h1
             id="daily-hub-heading"
             className="mb-1 text-4xl font-bold leading-[1.15] pb-2 sm:text-5xl lg:text-6xl"
@@ -204,9 +206,7 @@ function DailyHubContent() {
           >
             {displayName}
           </h1>
-
-          </section>
-        </GlowBackground>
+        </section>
 
         {/* Sentinel for sticky tab bar shadow */}
         <div ref={sentinelRef} aria-hidden="true" />
@@ -214,7 +214,7 @@ function DailyHubContent() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 backdrop-blur-md transition-shadow',
+            'relative sticky top-0 z-40 backdrop-blur-md transition-shadow',
             isSticky && 'shadow-md shadow-black/20',
           )}
         >
@@ -275,6 +275,7 @@ function DailyHubContent() {
 
         {/* Tab Panels — all mounted, CSS show/hide for state preservation */}
         <div
+          className="relative z-10"
           role="tabpanel"
           id="tabpanel-devotional"
           aria-labelledby="tab-devotional"
@@ -289,6 +290,7 @@ function DailyHubContent() {
         </div>
 
         <div
+          className="relative z-10"
           role="tabpanel"
           id="tabpanel-pray"
           aria-labelledby="tab-pray"
@@ -303,6 +305,7 @@ function DailyHubContent() {
         </div>
 
         <div
+          className="relative z-10"
           role="tabpanel"
           id="tabpanel-journal"
           aria-labelledby="tab-journal"
@@ -317,6 +320,7 @@ function DailyHubContent() {
         </div>
 
         <div
+          className="relative z-10"
           role="tabpanel"
           id="tabpanel-meditate"
           aria-labelledby="tab-meditate"
@@ -327,11 +331,15 @@ function DailyHubContent() {
         </div>
 
         {/* Today's Song Pick */}
-        <SongPickSection />
+        <div className="relative z-10">
+          <SongPickSection />
+        </div>
 
       </main>
 
-      <SiteFooter />
+      <div className="relative z-10">
+        <SiteFooter />
+      </div>
       {tabBarTooltip.shouldShow && (
         <TooltipCallout
           targetRef={tabBarRef}

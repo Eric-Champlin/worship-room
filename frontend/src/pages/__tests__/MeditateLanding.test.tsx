@@ -99,10 +99,9 @@ describe('MeditateTabContent', () => {
     expect(scriptSpan).toBeNull()
   })
 
-  it('renders glow background with split variant', () => {
+  it('renders without GlowBackground (stars/glows provided by DailyHub root)', () => {
     renderComponent()
-    const orbs = screen.getAllByTestId('glow-orb')
-    expect(orbs.length).toBeGreaterThanOrEqual(2)
+    expect(screen.queryByTestId('glow-orb')).not.toBeInTheDocument()
   })
 
   it('standard card has frosted glass classes', () => {

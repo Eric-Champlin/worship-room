@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { GlowBackground } from '@/components/homepage/GlowBackground'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerInput } from '@/components/daily/PrayerInput'
 import { PrayerResponse } from '@/components/daily/PrayerResponse'
@@ -198,7 +197,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
 
   return (
     <>
-      <GlowBackground variant="center" glowOpacity={0.30} className="!bg-transparent">
+      <div>
         <div className="mx-auto max-w-2xl px-4 pt-10 pb-4 sm:pt-14 sm:pb-6">
           {/* Devotional Preview Panel */}
           {prayContext?.from === 'devotional' && prayContext.devotionalSnapshot && !contextDismissed && !isLoading && !prayer && (
@@ -243,7 +242,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
         <div className="mx-auto mt-6 max-w-4xl px-4 pb-10 sm:pb-14">
           <GuidedPrayerSection onStartSession={handleStartGuidedSession} />
         </div>
-      </GlowBackground>
+      </div>
 
       {/* Player overlay (fixed positioning, visually covers full viewport) */}
       {activeGuidedSession && (

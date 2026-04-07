@@ -299,10 +299,39 @@ describe('DailyHub', () => {
     expect(root.className).not.toContain('bg-dashboard-dark')
   })
 
-  it('hero has GlowBackground with glow orb', () => {
+  it('hero does not have GlowBackground glow orbs', () => {
     renderPage()
-    const glowOrb = document.querySelector('[data-testid="glow-orb"]')
-    expect(glowOrb).toBeInTheDocument()
+    const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+    expect(hero.querySelector('[data-testid="glow-orb"]')).toBeNull()
+  })
+
+  it('root has relative overflow-hidden bg-hero-bg', () => {
+    const { container } = renderPage()
+    const root = container.firstElementChild as HTMLElement
+    expect(root.className).toContain('relative')
+    expect(root.className).toContain('overflow-hidden')
+    expect(root.className).toContain('bg-hero-bg')
+  })
+
+  it('renders StarField as a root-level decorative layer', () => {
+    const { container } = renderPage()
+    const root = container.firstElementChild as HTMLElement
+    // StarField renders a div with aria-hidden and pointer-events-none containing ~110 star dots
+    const starFieldContainer = root.querySelector('[aria-hidden="true"].pointer-events-none')
+    expect(starFieldContainer).toBeInTheDocument()
+    const stars = starFieldContainer!.querySelectorAll('.bg-white')
+    expect(stars.length).toBeGreaterThanOrEqual(100)
+  })
+
+  it('renders HorizonGlow as a root-level decorative layer', () => {
+    const { container } = renderPage()
+    const root = container.firstElementChild as HTMLElement
+    // HorizonGlow container is the second aria-hidden + pointer-events-none div (after StarField)
+    const decorativeLayers = root.querySelectorAll(':scope > [aria-hidden="true"].pointer-events-none')
+    expect(decorativeLayers.length).toBeGreaterThanOrEqual(2)
+    // Second decorative layer is HorizonGlow with exactly 5 glow spots
+    const horizonGlow = decorativeLayers[1]
+    expect(horizonGlow.children.length).toBe(5)
   })
 
   it('tab bar has pill-shaped container', () => {
