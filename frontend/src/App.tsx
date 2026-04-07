@@ -25,6 +25,7 @@ import {
   MyPrayersSkeleton,
   MusicSkeleton,
   GrowPageSkeleton,
+  BibleLandingSkeleton,
   BibleBrowserSkeleton,
   ProfileSkeleton,
 } from '@/components/skeletons'
@@ -60,7 +61,9 @@ const MyPrayers = lazy(() => import('./pages/MyPrayers').then((m) => ({ default:
 const GrowPage = lazy(() => import('./pages/GrowPage').then((m) => ({ default: m.GrowPage })))
 const ReadingPlanDetail = lazy(() => import('./pages/ReadingPlanDetail').then((m) => ({ default: m.ReadingPlanDetail })))
 const ChallengeDetail = lazy(() => import('./pages/ChallengeDetail').then((m) => ({ default: m.ChallengeDetail })))
-const BibleBrowser = lazy(() => import('./pages/BibleBrowser').then((m) => ({ default: m.BibleBrowser })))
+const BibleLanding = lazy(() => import('./pages/BibleLanding').then((m) => ({ default: m.BibleLanding })))
+const BibleBrowse = lazy(() => import('./pages/BibleBrowse').then((m) => ({ default: m.BibleBrowse })))
+const BibleStub = lazy(() => import('./pages/BibleStub').then((m) => ({ default: m.BibleStub })))
 const BibleReader = lazy(() => import('./pages/BibleReader').then((m) => ({ default: m.BibleReader })))
 const AskPage = lazy(() => import('./pages/AskPage').then((m) => ({ default: m.AskPage })))
 const MoodCheckInPreview = lazy(() =>
@@ -177,7 +180,11 @@ function App() {
           <Route path="/reading-plans/:planId" element={<ReadingPlanDetail />} />
           <Route path="/challenges" element={<Navigate to="/grow?tab=challenges" replace />} />
           <Route path="/challenges/:challengeId" element={<ChallengeDetail />} />
-          <Route path="/bible" element={<Suspense fallback={<BibleBrowserSkeleton />}><BibleBrowser /></Suspense>} />
+          <Route path="/bible" element={<Suspense fallback={<BibleLandingSkeleton />}><BibleLanding /></Suspense>} />
+          <Route path="/bible/browse" element={<Suspense fallback={<BibleBrowserSkeleton />}><BibleBrowse /></Suspense>} />
+          <Route path="/bible/my" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="my" /></Suspense>} />
+          <Route path="/bible/plans" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="plans" /></Suspense>} />
+          <Route path="/bible/search" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="search" /></Suspense>} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />
           <Route path="/journal" element={<Navigate to="/daily?tab=journal" replace />} />

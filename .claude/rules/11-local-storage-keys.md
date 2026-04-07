@@ -87,9 +87,12 @@ All keys use the `wr_` prefix. Data persists across page refreshes and survives 
 
 | Key                   | Type                       | Feature                     |
 | --------------------- | -------------------------- | --------------------------- |
-| `wr_bible_progress`   | {book: number[]}           | Chapters read per book      |
-| `wr_bible_highlights` | BibleHighlight[] (max 500) | Verse highlights (4 colors) |
-| `wr_bible_notes`      | BibleNote[] (max 200)      | Personal verse notes        |
+| `wr_bible_progress`     | {book: number[]}           | Chapters read per book      |
+| `wr_bible_highlights`  | BibleHighlight[] (max 500) | Verse highlights (4 colors) |
+| `wr_bible_notes`       | BibleNote[] (max 200)      | Personal verse notes        |
+| `wr_bible_last_read`   | `{ book: string, chapter: number, verse: number, timestamp: number }` | Resume Reading card — last viewed position (BB-0 reads, BB-4 writes) |
+| `wr_bible_active_plans` | `Array<{ planId: string, currentDay: number, totalDays: number, planName: string, todayReading: string, startedAt: number }>` | Today's Plan card — active reading plan progress (BB-0 reads, BB-21 writes) |
+| `wr_bible_streak`      | `{ count: number, lastReadDate: string }` | Reading streak chip — Bible-specific streak count (BB-0 reads, BB-17 writes) |
 
 ### Community Challenges
 

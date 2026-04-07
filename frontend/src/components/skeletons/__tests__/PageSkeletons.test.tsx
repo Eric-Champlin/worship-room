@@ -4,7 +4,7 @@ import {
   DashboardSkeleton,
   DailyHubSkeleton,
   PrayerWallSkeleton,
-  BibleBrowserSkeleton,
+  BibleLandingSkeleton,
   BibleReaderSkeleton,
   GrowPageSkeleton,
   InsightsSkeleton,
@@ -19,7 +19,7 @@ const skeletons = [
   { name: 'DashboardSkeleton', Component: DashboardSkeleton },
   { name: 'DailyHubSkeleton', Component: DailyHubSkeleton },
   { name: 'PrayerWallSkeleton', Component: PrayerWallSkeleton },
-  { name: 'BibleBrowserSkeleton', Component: BibleBrowserSkeleton },
+  { name: 'BibleLandingSkeleton', Component: BibleLandingSkeleton },
   { name: 'BibleReaderSkeleton', Component: BibleReaderSkeleton },
   { name: 'GrowPageSkeleton', Component: GrowPageSkeleton },
   { name: 'InsightsSkeleton', Component: InsightsSkeleton },
@@ -94,10 +94,14 @@ describe('Page Skeletons', () => {
     expect(filterRow!.children.length).toBe(6)
   })
 
-  it('BibleBrowserSkeleton renders OT and NT sections', () => {
-    const { container } = render(<BibleBrowserSkeleton />)
-    const cards = container.querySelectorAll('[aria-hidden="true"].bg-white\\/\\[0\\.06\\].border')
-    expect(cards.length).toBe(2)
+  it('BibleLandingSkeleton renders with aria-busy', () => {
+    const { container } = render(<BibleLandingSkeleton />)
+    expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument()
+  })
+
+  it('BibleLandingSkeleton renders sr-only loading text', () => {
+    render(<BibleLandingSkeleton />)
+    expect(screen.getByText('Loading')).toBeInTheDocument()
   })
 
   it('BibleReaderSkeleton renders 20 verse blocks', () => {

@@ -374,7 +374,7 @@ function DailyHubContent() {
 // Loading state: use DailyHubSkeleton
 export function DailyHub() {
   useRoutePreload([
-    () => import('@/pages/BibleBrowser'),
+    () => import('@/pages/BibleLanding'),
   ])
   return <DailyHubContent />
 }

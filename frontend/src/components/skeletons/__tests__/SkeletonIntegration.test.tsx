@@ -57,6 +57,7 @@ describe('Index re-exports', () => {
       'DashboardSkeleton',
       'DailyHubSkeleton',
       'PrayerWallSkeleton',
+      'BibleLandingSkeleton',
       'BibleBrowserSkeleton',
       'BibleReaderSkeleton',
       'GrowPageSkeleton',
