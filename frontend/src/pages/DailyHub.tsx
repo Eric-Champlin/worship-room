@@ -26,6 +26,8 @@ const dailyHubBreadcrumbs = {
 }
 import { cn } from '@/lib/utils'
 import { useRoutePreload } from '@/hooks/useRoutePreload'
+import { DailyAmbientPillFAB } from '@/components/daily/DailyAmbientPillFAB'
+import type { AmbientContext } from '@/constants/ambient-suggestions'
 import type { PrayContext, DevotionalSnapshot } from '@/types/daily-experience'
 
 const TABS = [
@@ -160,6 +162,21 @@ function DailyHubContent() {
       window.history.replaceState({}, '', window.location.href)
     }
   }, [location.state])
+
+  const getAmbientContextForTab = (tab: TabId): AmbientContext => {
+    switch (tab) {
+      case 'pray':
+        return 'pray'
+      case 'journal':
+        return 'journal'
+      case 'meditate':
+        return 'meditate'
+      case 'devotional':
+        return 'meditate'
+      default:
+        return 'meditate'
+    }
+  }
 
   // Arrow key navigation for tab bar (WAI-ARIA Tabs pattern)
   const tabButtonRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -347,6 +364,9 @@ function DailyHubContent() {
           onDismiss={tabBarTooltip.dismiss}
         />
       )}
+
+      {/* Sticky ambient pill FAB */}
+      <DailyAmbientPillFAB context={getAmbientContextForTab(activeTab)} />
     </div>
   )
 }

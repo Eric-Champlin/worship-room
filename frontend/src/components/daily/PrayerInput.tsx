@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
-import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { DEFAULT_PRAYER_CHIPS, PRAYER_DRAFT_KEY } from '@/constants/daily-experience'
 
 export interface PrayerInputProps {
@@ -108,20 +107,17 @@ export function PrayerInput({
       )}
 
       {showChips && (
-        <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:flex-nowrap sm:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            {DEFAULT_PRAYER_CHIPS.map((chip) => (
-              <button
-                key={chip}
-                type="button"
-                onClick={() => handleChipClick(chip)}
-                className="min-h-[44px] shrink-0 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:border-primary hover:text-primary"
-              >
-                {chip}
-              </button>
-            ))}
-          </div>
-          <AmbientSoundPill context="pray" variant="dark" className="!mb-0 !w-auto flex-shrink-0" />
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+          {DEFAULT_PRAYER_CHIPS.map((chip) => (
+            <button
+              key={chip}
+              type="button"
+              onClick={() => handleChipClick(chip)}
+              className="min-h-[44px] shrink-0 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:border-primary hover:text-primary"
+            >
+              {chip}
+            </button>
+          ))}
         </div>
       )}
 
@@ -138,7 +134,7 @@ export function PrayerInput({
           placeholder="Start typing here..."
           maxLength={500}
           rows={8}
-          className="w-full resize-y min-h-[200px] max-h-[500px] rounded-lg border border-white/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 shadow-[0_0_15px_2px_rgba(255,255,255,0.25),0_0_30px_5px_rgba(255,255,255,0.15)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="w-full resize-y min-h-[200px] max-h-[500px] rounded-lg border border-white/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 shadow-[0_0_20px_3px_rgba(255,255,255,0.50),0_0_40px_8px_rgba(255,255,255,0.30)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
           aria-label="Prayer request"
           aria-describedby={nudge ? 'pray-error pray-char-count' : 'pray-char-count'}
           aria-invalid={nudge ? 'true' : undefined}

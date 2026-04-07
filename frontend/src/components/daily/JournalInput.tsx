@@ -9,7 +9,6 @@ import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useAnnounce } from '@/hooks/useAnnounce'
-import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { DevotionalPreviewPanel } from '@/components/daily/DevotionalPreviewPanel'
 import { JOURNAL_DRAFT_KEY } from '@/constants/daily-experience'
 import { cn } from '@/lib/utils'
@@ -160,7 +159,7 @@ export function JournalInput({
     <>
       <AnnouncerRegion />
 
-      {/* Mode Toggle + Ambient Pill */}
+      {/* Mode Toggle */}
       <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
         <div className="inline-flex rounded-lg border border-white/10" role="group" aria-label="Journal mode">
           <button
@@ -190,7 +189,6 @@ export function JournalInput({
             Free Write
           </button>
         </div>
-        <AmbientSoundPill context="journal" variant="dark" className="!mb-0 !w-auto" />
       </div>
 
       {/* Devotional Preview Panel */}
@@ -276,7 +274,7 @@ export function JournalInput({
           placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
           maxLength={JOURNAL_MAX_LENGTH}
           rows={6}
-          className="min-h-[200px] w-full resize-none rounded-lg border border-white/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/50 shadow-[0_0_15px_2px_rgba(255,255,255,0.25),0_0_30px_5px_rgba(255,255,255,0.15)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="min-h-[200px] w-full resize-none rounded-lg border border-white/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/50 shadow-[0_0_20px_3px_rgba(255,255,255,0.50),0_0_40px_8px_rgba(255,255,255,0.30)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
           aria-label="Journal entry"
           aria-describedby="journal-char-count"
         />

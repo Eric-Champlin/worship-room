@@ -85,18 +85,9 @@ function renderComponent(locationState?: Record<string, unknown>) {
 }
 
 describe('MeditateTabContent', () => {
-  it('renders gradient heading text', () => {
+  it('renders without heading (removed in favor of card grid)', () => {
     renderComponent()
-    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
-    expect(heading).toBeInTheDocument()
-    expect(heading).toHaveStyle({ backgroundImage: expect.stringContaining('linear-gradient') })
-  })
-
-  it('heading has no Caveat script font span', () => {
-    renderComponent()
-    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
-    const scriptSpan = heading.querySelector('.font-script')
-    expect(scriptSpan).toBeNull()
+    expect(screen.queryByRole('heading', { name: /what's on your spirit\?/i })).not.toBeInTheDocument()
   })
 
   it('renders without GlowBackground (stars/glows provided by DailyHub root)', () => {
@@ -176,33 +167,6 @@ describe('MeditateTabContent', () => {
     renderComponent()
     const checkmarks = screen.queryAllByText(/completed/i)
     expect(checkmarks).toHaveLength(0)
-  })
-
-  it('ambient sound pill renders inline with heading (same flex container)', () => {
-    renderComponent()
-    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
-    const pillButton = screen.getByLabelText(/enhance with sound/i)
-    const headingParent = heading.parentElement
-    expect(headingParent).not.toBeNull()
-    expect(headingParent!.contains(pillButton)).toBe(true)
-  })
-
-  it('heading flex container has responsive inline classes', () => {
-    renderComponent()
-    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
-    const container = heading.parentElement!
-    expect(container.className).toContain('flex')
-    expect(container.className).toContain('flex-col')
-    expect(container.className).toContain('items-center')
-    expect(container.className).toContain('gap-3')
-    expect(container.className).toContain('sm:flex-row')
-    expect(container.className).toContain('sm:gap-4')
-  })
-
-  it('heading does not have text-center (flex parent handles centering)', () => {
-    renderComponent()
-    const heading = screen.getByRole('heading', { name: /what's on your spirit\?/i })
-    expect(heading.className).not.toContain('text-center')
   })
 
   it('does not render BackgroundSquiggle', () => {

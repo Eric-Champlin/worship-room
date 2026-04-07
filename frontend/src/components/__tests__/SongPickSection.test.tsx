@@ -114,20 +114,17 @@ describe('SongPickSection', () => {
     expect(heading).toHaveClass('flex', 'flex-col')
     const spans = heading.querySelectorAll('span')
     expect(spans).toHaveLength(2)
-    // First span = "Today's" (gradient, larger, leading-none)
+    // First span = "Today's" (gradient, larger)
     expect(spans[0]).toHaveTextContent("Today's")
     expect(spans[0].className).toContain('text-4xl')
     expect(spans[0].className).toContain('sm:text-5xl')
     expect(spans[0].className).toContain('lg:text-6xl')
-    expect(spans[0].className).toContain('leading-none')
-    // Second span = "Song Pick" (white, smaller, leading-none, no tracking)
+    // Second span = "Song Pick" (white, smaller)
     expect(spans[1]).toHaveTextContent('Song Pick')
     expect(spans[1]).toHaveClass('text-white')
-    expect(spans[1].className).toContain('text-2xl')
-    expect(spans[1].className).toContain('sm:text-3xl')
-    expect(spans[1].className).toContain('lg:text-4xl')
-    expect(spans[1].className).toContain('leading-none')
-    expect(spans[1].className).not.toContain('tracking-')
+    expect(spans[1].className).toContain('text-3xl')
+    expect(spans[1].className).toContain('sm:text-4xl')
+    expect(spans[1].className).toContain('lg:text-5xl')
   })
 
   it('uses max-w-2xl centered column layout', () => {
@@ -140,11 +137,13 @@ describe('SongPickSection', () => {
     expect(container?.className).not.toContain('max-w-4xl')
   })
 
-  it('Song Pick has no letter-spacing manipulation', () => {
+  it('Song Pick uses responsive tracking for visual refinement', () => {
     renderComponent()
     const heading = screen.getByRole('heading', { level: 2 })
     const spans = heading.querySelectorAll('span')
     expect(spans[1]).toHaveTextContent('Song Pick')
-    expect(spans[1].className).not.toContain('tracking-')
+    // Responsive tracking: sm adds slight tracking, lg resets to normal
+    expect(spans[1].className).toContain('sm:tracking-[0.02em]')
+    expect(spans[1].className).toContain('lg:tracking-normal')
   })
 })

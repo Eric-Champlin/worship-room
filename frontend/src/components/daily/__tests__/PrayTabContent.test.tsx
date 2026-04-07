@@ -808,29 +808,11 @@ describe('PrayTabContent atmospheric visuals', () => {
     expect(screen.getByRole('button', { name: 'Help Me Pray' })).toBeInTheDocument()
   })
 
-  it('ambient sound pill renders inside chips row (same container)', () => {
-    renderPrayTab()
-    const chip = screen.getByText("I'm struggling with...")
-    const pillButton = screen.getByLabelText(/enhance with sound/i)
-    // Chips are in an inner flex div; pill is a sibling in the outer flex wrapper
-    const outerRow = chip.closest('div.flex')!.parentElement!.closest('div.flex')
-    expect(outerRow).toContainElement(pillButton)
-  })
-
   it('chips row has items-center for vertical alignment', () => {
     renderPrayTab()
     const chip = screen.getByText("I'm struggling with...")
     const chipsContainer = chip.closest('div.flex')
     expect(chipsContainer).toHaveClass('items-center')
-  })
-
-  it('pill disappears when user types in textarea', async () => {
-    const user = userEvent.setup()
-    renderPrayTab()
-    expect(screen.getByLabelText(/enhance with sound/i)).toBeInTheDocument()
-    const textarea = screen.getByLabelText('Prayer request')
-    await user.type(textarea, 'Help me')
-    expect(screen.queryByLabelText(/enhance with sound/i)).not.toBeInTheDocument()
   })
 
   it('does not render BackgroundSquiggle', () => {

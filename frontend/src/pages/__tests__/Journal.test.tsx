@@ -133,21 +133,18 @@ describe('JournalTabContent', () => {
     expect(textarea).toHaveValue('Hello world')
   })
 
-  it('shows context banner when prayContext prop is provided', () => {
-    renderComponent({ prayContext: { from: 'pray', topic: 'anxiety' } })
-    expect(
-      screen.getByText(/continuing from your prayer about/i),
-    ).toBeInTheDocument()
-    expect(screen.getByText('anxiety')).toBeInTheDocument()
-  })
-
-  it('dismisses context banner with "Write about something else"', async () => {
+  it('pray context banner only shows in free-write mode', async () => {
     const user = userEvent.setup()
     renderComponent({ prayContext: { from: 'pray', topic: 'anxiety' } })
-    await user.click(screen.getByText('Write about something else'))
+    // In guided mode (default), the context banner is not shown
     expect(
       screen.queryByText(/continuing from your prayer about/i),
     ).not.toBeInTheDocument()
+    // Switch to free write mode to see the banner
+    await user.click(screen.getByText('Free Write'))
+    expect(
+      screen.getByText(/continuing from your prayer about.*anxiety/i),
+    ).toBeInTheDocument()
   })
 
   it('save entry button is disabled when textarea is empty', () => {
@@ -242,12 +239,12 @@ describe('JournalTabContent', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument()
   })
 
-  // C7: use getByRole('heading') for robust heading assertion
-  it('renders the "What\'s On Your Mind?" heading', () => {
+  // Heading was removed in favor of compact layout
+  it('does not render "What\'s On Your Mind?" heading', () => {
     renderComponent()
     expect(
-      screen.getByRole('heading', { name: /what's on your mind\?/i }),
-    ).toBeInTheDocument()
+      screen.queryByRole('heading', { name: /what's on your mind\?/i }),
+    ).not.toBeInTheDocument()
   })
 
   // A4: saved entries use semantic section

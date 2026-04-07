@@ -444,30 +444,9 @@ describe('JournalTabContent atmospheric visuals', () => {
     expect(screen.queryByTestId('glow-orb')).not.toBeInTheDocument()
   })
 
-  it('renders gradient heading text "What\'s On Your Mind?"', () => {
+  it('does not render "What\'s On Your Mind?" heading (removed in favor of compact layout)', () => {
     renderJournalTab()
-    const heading = screen.getByRole('heading', { name: /what's on your mind\?/i })
-    expect(heading).toBeInTheDocument()
-    expect(heading).toHaveStyle({ backgroundImage: expect.stringContaining('linear-gradient') })
-  })
-
-  it('heading has no Caveat script font span', () => {
-    renderJournalTab()
-    const heading = screen.getByRole('heading', { name: /what's on your mind\?/i })
-    expect(heading.querySelector('.font-script')).toBeNull()
-  })
-
-  it('heading is a single text node (no inner span)', () => {
-    renderJournalTab()
-    const heading = screen.getByRole('heading', { name: /what's on your mind\?/i })
-    expect(heading.querySelector('span')).toBeNull()
-  })
-
-  it('heading has leading-tight class and no text-white class', () => {
-    renderJournalTab()
-    const heading = screen.getByRole('heading', { name: /what's on your mind\?/i })
-    expect(heading.className).toContain('leading-tight')
-    expect(heading.className).not.toContain('text-white')
+    expect(screen.queryByRole('heading', { name: /what's on your mind\?/i })).not.toBeInTheDocument()
   })
 
   it('empty state renders in the component', () => {
@@ -489,17 +468,7 @@ describe('JournalTabContent atmospheric visuals', () => {
     expect(savedEntryContent).toBeInTheDocument()
   })
 
-  it('ambient sound pill renders inline with mode toggle (same flex container)', () => {
-    renderJournalTab()
-    const guidedButton = screen.getByRole('button', { name: 'Guided' })
-    const pillButton = screen.getByLabelText(/enhance with sound/i)
-    const toggleGroup = guidedButton.closest('[role="group"]')
-    const sharedParent = toggleGroup?.parentElement
-    expect(sharedParent).not.toBeNull()
-    expect(sharedParent!.contains(pillButton)).toBe(true)
-  })
-
-  it('mode toggle + pill container has flex-wrap and items-center', () => {
+  it('mode toggle has flex-wrap and items-center', () => {
     renderJournalTab()
     const guidedButton = screen.getByRole('button', { name: 'Guided' })
     const toggleGroup = guidedButton.closest('[role="group"]')
@@ -508,19 +477,6 @@ describe('JournalTabContent atmospheric visuals', () => {
     expect(container!.className).toContain('flex-wrap')
     expect(container!.className).toContain('items-center')
     expect(container!.className).toContain('gap-3')
-  })
-
-  it('pill is visible in Guided mode', () => {
-    renderJournalTab()
-    expect(screen.getByLabelText(/enhance with sound/i)).toBeInTheDocument()
-  })
-
-  it('pill is visible in Free Write mode', async () => {
-    const user = userEvent.setup()
-    renderJournalTab()
-    const freeWriteButton = screen.getByRole('button', { name: 'Free Write' })
-    await user.click(freeWriteButton)
-    expect(screen.getByLabelText(/enhance with sound/i)).toBeInTheDocument()
   })
 
   it('does not render BackgroundSquiggle', () => {

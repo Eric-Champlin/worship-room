@@ -160,7 +160,7 @@ describe('DailyHub', () => {
     const user = userEvent.setup()
     renderPage()
     await user.click(screen.getByRole('tab', { name: /journal/i }))
-    expect(screen.getByRole('heading', { name: /what's on your mind\?/i })).toBeInTheDocument()
+    expect(screen.getByLabelText('Journal entry')).toBeInTheDocument()
     await user.click(screen.getByRole('tab', { name: /meditate/i }))
     expect(screen.getByText('Breathing Exercise')).toBeInTheDocument()
   })
@@ -187,9 +187,7 @@ describe('DailyHub', () => {
 
   it('shows Journal tab content when ?tab=journal', () => {
     renderPage('/daily?tab=journal')
-    expect(
-      screen.getByRole('heading', { name: /what's on your mind\?/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByLabelText('Journal entry')).toBeInTheDocument()
   })
 
   it('shows Meditate tab content when ?tab=meditate', () => {
@@ -210,9 +208,7 @@ describe('DailyHub', () => {
 
     // Click Journal tab
     await user.click(screen.getByRole('tab', { name: /journal/i }))
-    expect(
-      screen.getByRole('heading', { name: /what's on your mind\?/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByLabelText('Journal entry')).toBeInTheDocument()
   })
 
   it('renders the Spotify embed', () => {
@@ -287,9 +283,7 @@ describe('DailyHub', () => {
     renderPage()
     // Ensure basic tab switching still works (no regressions)
     await user.click(screen.getByRole('tab', { name: /journal/i }))
-    expect(
-      screen.getByRole('heading', { name: /what's on your mind\?/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByLabelText('Journal entry')).toBeInTheDocument()
   })
 
   it('root background uses hero-bg, not dashboard-dark', () => {

@@ -1,11 +1,11 @@
 /** Five soft purple/lavender glow spots positioned at strategic vertical percentages. */
 
 const GLOWS = [
-  { top: 5, left: 50, width: 500, height: 400, blur: 120, color: '139, 92, 246', opacity: 0.60 },
-  { top: 15, left: 30, width: 450, height: 350, blur: 110, color: '186, 156, 255', opacity: 0.55 },
-  { top: 35, left: 65, width: 550, height: 450, blur: 120, color: '139, 92, 246', opacity: 0.65 },
-  { top: 60, left: 40, width: 500, height: 400, blur: 100, color: '168, 130, 255', opacity: 0.58 },
-  { top: 85, left: 55, width: 480, height: 380, blur: 110, color: '139, 92, 246', opacity: 0.55 },
+  { top: 5, left: 50, width: 500, height: 400, blur: 120, color: '139, 92, 246', opacity: 0.32 },
+  { top: 15, left: 30, width: 450, height: 350, blur: 110, color: '186, 156, 255', opacity: 0.28 },
+  { top: 35, left: 65, width: 550, height: 450, blur: 120, color: '139, 92, 246', opacity: 0.35 },
+  { top: 60, left: 40, width: 500, height: 400, blur: 100, color: '168, 130, 255', opacity: 0.30 },
+  { top: 85, left: 55, width: 480, height: 380, blur: 110, color: '139, 92, 246', opacity: 0.28 },
 ]
 
 export function HorizonGlow() {

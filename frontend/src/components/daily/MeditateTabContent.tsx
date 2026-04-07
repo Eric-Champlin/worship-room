@@ -11,7 +11,6 @@ import {
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
-import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { getMeditationSuggestion } from '@/data/challenge-prefills'
 import { cn } from '@/lib/utils'
 import { MEDITATION_TYPES } from '@/constants/daily-experience'
@@ -138,10 +137,6 @@ export function MeditateTabContent() {
           })}
         </div>
 
-        {/* Ambient sound pill — relocated below cards */}
-        <div className="mt-8 flex justify-center">
-          <AmbientSoundPill context="meditate" variant="dark" className="!mb-0 !w-auto" />
-        </div>
       </div>
     </div>
   )

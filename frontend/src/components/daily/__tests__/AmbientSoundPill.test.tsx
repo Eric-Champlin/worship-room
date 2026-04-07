@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
@@ -7,21 +7,6 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { AmbientSoundPill } from '../AmbientSoundPill'
 import type { AmbientContext } from '@/constants/ambient-suggestions'
-
-// Mock useScenePlayer
-const mockLoadScene = vi.fn()
-vi.mock('@/hooks/useScenePlayer', () => ({
-  useScenePlayer: () => ({
-    activeSceneId: null,
-    loadScene: mockLoadScene,
-    isLoading: false,
-    undoAvailable: false,
-    undoSceneSwitch: vi.fn(),
-    pendingRoutineInterrupt: null,
-    confirmRoutineInterrupt: vi.fn(),
-    cancelRoutineInterrupt: vi.fn(),
-  }),
-}))
 
 // Mock useAudioState — default: no audio playing
 let mockAudioState = {
@@ -64,7 +49,6 @@ beforeEach(() => {
   localStorage.clear()
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'Eric')
-  mockLoadScene.mockClear()
   mockDispatch.mockClear()
   // Reset audio state to defaults
   mockAudioState = {
@@ -106,10 +90,10 @@ describe('AmbientSoundPill', () => {
       expect(screen.getByLabelText('Enhance with sound')).toBeInTheDocument()
     })
 
-    it('pill button has aria-expanded=false by default', () => {
+    it('does not have aria-expanded attribute', () => {
       renderPill()
       const pill = screen.getByLabelText('Enhance with sound')
-      expect(pill).toHaveAttribute('aria-expanded', 'false')
+      expect(pill).not.toHaveAttribute('aria-expanded')
     })
   })
 
@@ -139,109 +123,23 @@ describe('AmbientSoundPill', () => {
     })
   })
 
-  describe('Panel expand/collapse', () => {
-    it('expands suggestion panel on click', async () => {
-      const user = userEvent.setup()
-      renderPill()
-      const pill = screen.getByLabelText('Enhance with sound')
-      await user.click(pill)
-      expect(screen.getByRole('region', { name: 'Ambient sound suggestions' })).toBeInTheDocument()
-      expect(pill).toHaveAttribute('aria-expanded', 'true')
-    })
-
-    it('shows 3 scene cards when expanded', async () => {
-      const user = userEvent.setup()
-      renderPill({ context: 'pray' })
-      await user.click(screen.getByLabelText('Enhance with sound'))
-      expect(screen.getByText('The Upper Room')).toBeInTheDocument()
-      expect(screen.getByText('Ember & Stone')).toBeInTheDocument()
-      expect(screen.getByText('Still Waters')).toBeInTheDocument()
-    })
-
-    it('shows correct scenes for journal context', async () => {
-      const user = userEvent.setup()
-      renderPill({ context: 'journal' })
-      await user.click(screen.getByLabelText('Enhance with sound'))
-      expect(screen.getByText('Midnight Rain')).toBeInTheDocument()
-      expect(screen.getByText('Morning Mist')).toBeInTheDocument()
-      expect(screen.getByText('Starfield')).toBeInTheDocument()
-    })
-
-    it('shows correct scenes for meditate context', async () => {
-      const user = userEvent.setup()
-      renderPill({ context: 'meditate' })
-      await user.click(screen.getByLabelText('Enhance with sound'))
-      expect(screen.getByText('Garden of Gethsemane')).toBeInTheDocument()
-      expect(screen.getByText('Still Waters')).toBeInTheDocument()
-      expect(screen.getByText('Mountain Refuge')).toBeInTheDocument()
-    })
-
-    it('collapses on click-outside', async () => {
-      // jsdom doesn't implement offsetParent, so mock it on the prototype
-      const origDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetParent')
-      Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
-        get() { return document.body },
-        configurable: true,
-      })
-
-      const user = userEvent.setup()
-      renderPill()
-      const pill = screen.getByLabelText('Enhance with sound')
-      await user.click(pill)
-      expect(screen.getByRole('region', { name: 'Ambient sound suggestions' })).toBeInTheDocument()
-
-      // fireEvent.mouseDown dispatches directly on document — bypasses userEvent limitations in jsdom
-      fireEvent.mouseDown(document)
-      expect(screen.queryByRole('region', { name: 'Ambient sound suggestions' })).not.toBeInTheDocument()
-
-      // Restore original
-      if (origDescriptor) {
-        Object.defineProperty(HTMLElement.prototype, 'offsetParent', origDescriptor)
-      }
-    })
-
-    it('collapses on Escape key and returns focus to pill', async () => {
-      const user = userEvent.setup()
-      renderPill()
-      const pill = screen.getByLabelText('Enhance with sound')
-      await user.click(pill)
-      expect(screen.getByRole('region', { name: 'Ambient sound suggestions' })).toBeInTheDocument()
-
-      await user.keyboard('{Escape}')
-      expect(screen.queryByRole('region', { name: 'Ambient sound suggestions' })).not.toBeInTheDocument()
-      expect(pill).toHaveFocus()
-    })
-  })
-
-  describe('Scene card interactions', () => {
-    it('calls loadScene on scene card click', async () => {
-      const user = userEvent.setup()
-      renderPill({ context: 'pray' })
-      await user.click(screen.getByLabelText('Enhance with sound'))
-      await user.click(screen.getByText('The Upper Room'))
-      expect(mockLoadScene).toHaveBeenCalledTimes(1)
-      expect(mockLoadScene).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'the-upper-room', name: 'The Upper Room' }),
-      )
-    })
-
-    it('collapses panel after scene card click', async () => {
-      const user = userEvent.setup()
-      renderPill({ context: 'pray' })
-      await user.click(screen.getByLabelText('Enhance with sound'))
-      await user.click(screen.getByText('The Upper Room'))
-
-      // Panel collapses after 300ms
-      await waitFor(
-        () => {
-          expect(screen.queryByRole('region', { name: 'Ambient sound suggestions' })).not.toBeInTheDocument()
-        },
-        { timeout: 1000 },
-      )
-    })
-  })
-
   describe('Audio drawer toggle', () => {
+    it('dispatches OPEN_DRAWER when idle pill clicked and drawer closed', async () => {
+      const user = userEvent.setup()
+      mockAudioState.drawerOpen = false
+      renderPill()
+      await user.click(screen.getByLabelText('Enhance with sound'))
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'OPEN_DRAWER' })
+    })
+
+    it('dispatches CLOSE_DRAWER when idle pill clicked and drawer open', async () => {
+      const user = userEvent.setup()
+      mockAudioState.drawerOpen = true
+      renderPill()
+      await user.click(screen.getByLabelText('Enhance with sound'))
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'CLOSE_DRAWER' })
+    })
+
     it('dispatches OPEN_DRAWER when playing pill clicked and drawer closed', async () => {
       const user = userEvent.setup()
       mockAudioState.activeSounds = [{ soundId: 'test', volume: 0.5, label: 'Test' }]
@@ -278,39 +176,6 @@ describe('AmbientSoundPill', () => {
     it('renders normally when visible is undefined (default)', () => {
       renderPill()
       expect(screen.getByText('Enhance with sound')).toBeInTheDocument()
-    })
-  })
-
-  describe('Accessibility', () => {
-    it('pill button has correct aria-controls when idle', async () => {
-      const user = userEvent.setup()
-      renderPill({ context: 'pray' })
-      const pill = screen.getByLabelText('Enhance with sound')
-      expect(pill).toHaveAttribute('aria-controls', 'ambient-panel-pray')
-
-      await user.click(pill)
-      const panel = screen.getByRole('region', { name: 'Ambient sound suggestions' })
-      expect(panel).toHaveAttribute('id', 'ambient-panel-pray')
-    })
-
-    it('scene cards are keyboard accessible', async () => {
-      const user = userEvent.setup()
-      renderPill({ context: 'pray' })
-      await user.click(screen.getByLabelText('Enhance with sound'))
-
-      const firstCard = screen.getByLabelText('The Upper Room')
-      // <button> elements are natively focusable — no tabindex needed
-      expect(firstCard.tagName).toBe('BUTTON')
-    })
-  })
-
-  describe('"Browse all sounds" link', () => {
-    it('links to /music?tab=ambient', async () => {
-      const user = userEvent.setup()
-      renderPill()
-      await user.click(screen.getByLabelText('Enhance with sound'))
-      const link = screen.getByText(/Browse all sounds/)
-      expect(link).toHaveAttribute('href', '/music?tab=ambient')
     })
   })
 

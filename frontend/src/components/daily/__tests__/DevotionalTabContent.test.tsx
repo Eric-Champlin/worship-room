@@ -495,13 +495,13 @@ describe('DevotionalTabContent', () => {
   describe('Meditate on passage link', () => {
     it('renders "Meditate on this passage" link in passage section', () => {
       renderComponent()
-      const meditateLink = screen.getByText('Meditate on this passage >')
+      const meditateLink = screen.getByText(/Meditate on this passage/)
       expect(meditateLink).toBeInTheDocument()
     })
 
     it('link has all 3 URL params from devotional passage', () => {
       renderComponent()
-      const meditateLink = screen.getByText('Meditate on this passage >')
+      const meditateLink = screen.getByText(/Meditate on this passage/)
       const href = meditateLink.closest('a')!.getAttribute('href')!
       expect(href).toContain('/meditate/soaking?verse=')
       expect(href).toContain('verseText=')
@@ -510,7 +510,7 @@ describe('DevotionalTabContent', () => {
 
     it('link meets 44px touch target', () => {
       renderComponent()
-      const meditateLink = screen.getByText('Meditate on this passage >')
+      const meditateLink = screen.getByText(/Meditate on this passage/)
       const anchor = meditateLink.closest('a')!
       expect(anchor.className).toContain('min-h-[44px]')
     })
