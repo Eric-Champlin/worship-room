@@ -224,7 +224,7 @@ The DailyHub root is structured as:
 <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
   <HorizonGlow />              {/* atmospheric purple glow layer, z-0 */}
   <Navbar />                   {/* z-10 */}
-  <Hero section>               {/* z-10, time-aware greeting in GRADIENT_TEXT_STYLE */}
+  <Hero section>               {/* z-10, time-aware greeting only */}
   <Tab bar>                    {/* z-40 sticky */}
   <Tab content>                {/* z-10, transparent backgrounds */}
   <SongPickSection />          {/* z-10, transparent */}
@@ -242,12 +242,19 @@ There is **no per-section GlowBackground** anywhere on the Daily Hub. The Horizo
 - Tab content is mounted at all times but hidden (preserves state between switches)
 - Sticky tab bar appears below hero on scroll (via Intersection Observer sentinel)
 - Tab transitions use opacity crossfade. Route flicker / white flash is prevented by setting `html`, `body`, and `#root` backgrounds to `#08051A` in `src/index.css` (PageTransition.tsx was removed in Wave 2).
+- **Tab state is derived from the URL `?tab=` query param on every render** (not stored in `useState`). Deep links to `/daily?tab=pray|journal|meditate` work correctly for both logged-in and logged-out users. There is no logged-out redirect that would force users back to the devotional tab.
  
 **Hero Section (above tabs):**
  
-- Time-aware greeting in GRADIENT_TEXT_STYLE (white-to-purple gradient, large text matching home hero size)
-- Compact Verse of the Day card (frosted glass, single-line on mobile)
-- Hero sits at `z-10 relative` over the HorizonGlow layer
+The hero section contains **only the time-aware greeting** — a single `<h1>` styled with `GRADIENT_TEXT_STYLE` (white-to-purple gradient via `background-clip: text`). The greeting reads "Good Morning!" / "Good Afternoon!" / "Good Evening!" when logged out, or "Good Morning, [Name]!" when logged in. The hero sits at `z-10 relative` over the HorizonGlow layer.
+ 
+**The hero does NOT contain:**
+- A Verse of the Day card (the `VerseOfTheDayBanner` was removed from the Daily Hub in commit `4da1b34` as part of the daily-hub-hero-redesign — the component still exists in the codebase for use elsewhere but is not mounted in DailyHub.tsx)
+- A VerseSharePanel
+- Any decorative cards
+- Any subtitle, tagline, or supporting copy
+ 
+The intentional minimalism is part of the Spec Y "looking out into space" atmospheric design — the HorizonGlow does the visual work, and the greeting alone sets the tone before the user engages with the tabs. Do NOT add cards or banners to the hero without an explicit spec; the minimalism is load-bearing.
  
 **Below Tab Content (always visible):**
  
@@ -460,6 +467,8 @@ See [02-security.md](02-security.md) for the canonical auth gating list.
 **Meditation auth gating is two-layered:** card-click level (auth modal) + route-level redirect on all 6 sub-pages.
  
 **Draft persistence preserves work across auth wall:** When a logged-out user types into the Pray or Journal textarea and clicks the submit button, the draft auto-saves to localStorage BEFORE the auth modal opens. The AuthModal subtitle shows "Your draft is safe — we'll bring it back after" (Spec V). After successful authentication, the user lands back on the same tab with their draft restored.
+ 
+**Daily Hub tab deep links work for all users:** Direct links to `/daily?tab=pray|journal|meditate` work correctly whether the user is logged in or logged out. Tab state is derived from the URL `?tab=` query param on every render rather than stored in `useState`, so there is no race condition between a default tab and the URL param. There is no logged-out redirect that would force users away from a deep-linked tab. (Verified manually after a Phase 4 false-positive caused by concurrent Playwright agents triggering Vite HMR module reloads.)
  
 ---
  
