@@ -108,18 +108,20 @@ export function PrayerInput({
       )}
 
       {showChips && (
-        <div className="mb-6 flex flex-wrap items-center justify-center gap-1.5">
-          {DEFAULT_PRAYER_CHIPS.map((chip) => (
-            <button
-              key={chip}
-              type="button"
-              onClick={() => handleChipClick(chip)}
-              className="min-h-[44px] shrink-0 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:border-primary hover:text-primary"
-            >
-              {chip}
-            </button>
-          ))}
-          <AmbientSoundPill context="pray" variant="dark" className="!mb-0 !w-auto" />
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:flex-nowrap sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            {DEFAULT_PRAYER_CHIPS.map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => handleChipClick(chip)}
+                className="min-h-[44px] shrink-0 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:border-primary hover:text-primary"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+          <AmbientSoundPill context="pray" variant="dark" className="!mb-0 !w-auto flex-shrink-0" />
         </div>
       )}
 
@@ -136,7 +138,7 @@ export function PrayerInput({
           placeholder="Start typing here..."
           maxLength={500}
           rows={8}
-          className="w-full resize-y min-h-[200px] max-h-[500px] rounded-lg border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 shadow-[0_0_12px_2px_rgba(0,212,255,0.35),0_0_27px_5px_rgba(139,92,246,0.26)] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="w-full resize-y min-h-[200px] max-h-[500px] rounded-lg border border-white/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 shadow-[0_0_15px_2px_rgba(255,255,255,0.25),0_0_30px_5px_rgba(255,255,255,0.15)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
           aria-label="Prayer request"
           aria-describedby={nudge ? 'pray-error pray-char-count' : 'pray-char-count'}
           aria-invalid={nudge ? 'true' : undefined}

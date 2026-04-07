@@ -812,7 +812,9 @@ describe('PrayTabContent atmospheric visuals', () => {
     renderPrayTab()
     const chip = screen.getByText("I'm struggling with...")
     const pillButton = screen.getByLabelText(/enhance with sound/i)
-    expect(chip.closest('div.flex')).toBe(pillButton.closest('div.flex'))
+    // Chips are in an inner flex div; pill is a sibling in the outer flex wrapper
+    const outerRow = chip.closest('div.flex')!.parentElement!.closest('div.flex')
+    expect(outerRow).toContainElement(pillButton)
   })
 
   it('chips row has items-center for vertical alignment', () => {
