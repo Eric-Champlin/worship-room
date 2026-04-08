@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { SEO } from '@/components/SEO'
@@ -12,14 +12,16 @@ import { ReaderChrome } from '@/components/bible/reader/ReaderChrome'
 import { ReaderChapterNav } from '@/components/bible/reader/ReaderChapterNav'
 import { TypographySheet } from '@/components/bible/reader/TypographySheet'
 import { VerseJumpPill } from '@/components/bible/reader/VerseJumpPill'
+import { VerseActionSheet } from '@/components/bible/reader/VerseActionSheet'
 import { FocusVignette } from '@/components/bible/reader/FocusVignette'
 import { useReaderSettings } from '@/hooks/useReaderSettings'
 import { useChapterSwipe } from '@/hooks/useChapterSwipe'
 import { useFocusMode } from '@/hooks/useFocusMode'
+import { useVerseTap } from '@/hooks/useVerseTap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
-import type { BibleVerse } from '@/types/bible'
+import type { BibleVerse, BibleHighlight } from '@/types/bible'
 
 function BibleReaderInner() {
   const { book: bookSlug, chapter: chapterParam } = useParams<{
@@ -35,6 +37,8 @@ function BibleReaderInner() {
   const reducedMotion = useReducedMotion()
   const focusMode = useFocusMode()
 
+  const readerBodyRef = useRef<HTMLElement>(null)
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [verses, setVerses] = useState<BibleVerse[]>([])
   const [paragraphs, setParagraphs] = useState<number[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -54,10 +58,60 @@ function BibleReaderInner() {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  // Verse tap handling
+  const { selection, isSheetOpen, closeSheet, extendSelection } = useVerseTap({
+    containerRef: readerBodyRef,
+    bookSlug: bookSlug ?? '',
+    bookName: book?.name ?? '',
+    chapter: chapterNumber,
+    verses,
+    enabled: !isLoading && !loadError && verses.length > 0,
+  })
+
+  // Selection visibility for fade-out animation
+  const [selectionVisible, setSelectionVisible] = useState(true)
+  const selectedVerseNumbers = useMemo(() => {
+    if (!selection) return [] as number[]
+    const nums: number[] = []
+    for (let i = selection.startVerse; i <= selection.endVerse; i++) nums.push(i)
+    return nums
+  }, [selection])
+
+  // Highlighted verse numbers (read from localStorage for ring vs fill decision)
+  const highlightedVerseNumbers = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('wr_bible_highlights')
+      if (!raw) return [] as number[]
+      const highlights: BibleHighlight[] = JSON.parse(raw)
+      return highlights
+        .filter((h) => h.book === bookSlug && h.chapter === chapterNumber)
+        .map((h) => h.verseNumber)
+    } catch {
+      return [] as number[]
+    }
+  }, [bookSlug, chapterNumber])
+
+  // Selection fade-out on close
+  const handleSheetClose = useCallback(() => {
+    setSelectionVisible(false)
+    fadeTimerRef.current = setTimeout(() => {
+      fadeTimerRef.current = null
+      closeSheet()
+      setSelectionVisible(true)
+    }, 200)
+  }, [closeSheet])
+
+  // Clean up fade timer on unmount
+  useEffect(() => {
+    return () => {
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current)
+    }
+  }, [])
+
   const { touchHandlers, swipeOffset, isSwiping } = useChapterSwipe({
     bookSlug: bookSlug ?? '',
     currentChapter: chapterNumber,
-    enabled: isSmallViewport && !isLoading && !typographyOpen,
+    enabled: isSmallViewport && !isLoading && !typographyOpen && !isSheetOpen,
   })
 
   // Load chapter from web/ JSON
@@ -113,6 +167,14 @@ function BibleReaderInner() {
     }
   }, [typographyOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Pause focus mode when verse action sheet is open
+  useEffect(() => {
+    if (isSheetOpen) {
+      focusMode.pauseFocusMode()
+      return () => focusMode.resumeFocusMode()
+    }
+  }, [isSheetOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Read tracking stub — writes for all users (no auth check)
   // TODO BB-17: replace stub
   useEffect(() => {
@@ -143,6 +205,8 @@ function BibleReaderInner() {
       // Don't fire if input/textarea is focused
       const tag = (e.target as HTMLElement).tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      // Sheet has its own keyboard handling
+      if (isSheetOpen) return
 
       if (e.key === 'ArrowLeft' && bookSlug) {
         const prev = getAdjacentChapter(bookSlug, chapterNumber, 'prev')
@@ -156,7 +220,7 @@ function BibleReaderInner() {
         bibleDrawer.open()
       }
     },
-    [bookSlug, chapterNumber, navigate, typographyOpen, bibleDrawer],
+    [bookSlug, chapterNumber, navigate, typographyOpen, bibleDrawer, isSheetOpen],
   )
 
   useEffect(() => {
@@ -280,6 +344,7 @@ function BibleReaderInner() {
 
       <div style={swipeStyle}>
         <main
+          ref={readerBodyRef}
           className="mx-auto max-w-2xl px-5 pb-8 pt-20 sm:px-6 sm:pt-24"
           aria-busy={isLoading}
         >
@@ -328,6 +393,9 @@ function BibleReaderInner() {
                 chapter={chapterNumber}
                 settings={settings}
                 paragraphs={paragraphs}
+                selectedVerses={selectedVerseNumbers}
+                highlightedVerseNumbers={highlightedVerseNumbers}
+                selectionVisible={selectionVisible}
               />
             </>
           )}
@@ -364,6 +432,16 @@ function BibleReaderInner() {
         visible={focusMode.vignetteVisible}
         reducedMotion={reducedMotion}
       />
+
+      {/* Verse Action Sheet */}
+      {selection && (
+        <VerseActionSheet
+          selection={selection}
+          isOpen={isSheetOpen}
+          onClose={handleSheetClose}
+          onExtendSelection={extendSelection}
+        />
+      )}
     </div>
   )
 }

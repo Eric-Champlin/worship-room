@@ -172,4 +172,98 @@ describe('ReaderBody', () => {
 
     expect(document.getElementById('verse-jump-sentinel')).toBeFalsy()
   })
+
+  // --- Selection highlight tests (BB-6) ---
+
+  it('no selection class without selectedVerses prop', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+      />,
+    )
+
+    const verseSpans = document.querySelectorAll('span[data-verse]')
+    for (const span of verseSpans) {
+      expect(span.className).not.toContain('bg-primary')
+      expect(span.className).not.toContain('outline')
+    }
+  })
+
+  it('selection class applied to selected verse', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        selectedVerses={[1]}
+        selectionVisible={true}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]')!
+    expect(verse1.className).toContain('bg-primary/[0.15]')
+    expect(verse1.className).toContain('rounded-sm')
+  })
+
+  it('outline ring on highlighted verse', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        selectedVerses={[1]}
+        highlightedVerseNumbers={[1]}
+        selectionVisible={true}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]')!
+    expect(verse1.className).toContain('outline')
+    expect(verse1.className).toContain('outline-primary/40')
+    expect(verse1.className).not.toContain('bg-primary/[0.15]')
+  })
+
+  it('multiple verses selected', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        selectedVerses={[1, 2, 3]}
+        selectionVisible={true}
+      />,
+    )
+
+    for (const num of [1, 2, 3]) {
+      const span = document.querySelector(`[data-verse="${num}"]`)!
+      expect(span.className).toContain('bg-primary/[0.15]')
+    }
+    // Verse 4 should NOT be selected
+    const verse4 = document.querySelector('[data-verse="4"]')!
+    expect(verse4.className).not.toContain('bg-primary')
+  })
+
+  it('transition class when fading', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        selectedVerses={[1]}
+        selectionVisible={false}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]')!
+    expect(verse1.className).toContain('transition-colors')
+    expect(verse1.className).toContain('duration-200')
+    expect(verse1.className).not.toContain('bg-primary/[0.15]')
+  })
 })

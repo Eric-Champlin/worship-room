@@ -271,6 +271,10 @@ export default {
           '0%': { transform: 'translateY(100%)' },
           '100%': { transform: 'translateY(0)' },
         },
+        'verse-sheet-slide-up': {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
         'view-slide-in': {
           '0%': { transform: 'translateX(100%)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
@@ -354,6 +358,7 @@ export default {
         'drawer-slide-in': 'drawer-slide-in 300ms cubic-bezier(0.34, 1.2, 0.64, 1) both',
         'drawer-slide-out': 'drawer-slide-out 200ms ease-in both',
         'bottom-sheet-slide-in': 'bottom-sheet-slide-in 300ms cubic-bezier(0.34, 1.2, 0.64, 1) both',
+        'verse-sheet-slide-up': 'verse-sheet-slide-up 240ms cubic-bezier(0.34, 1.2, 0.64, 1) both',
         'view-slide-in': 'view-slide-in 220ms cubic-bezier(0.34, 1.2, 0.64, 1) both',
         'view-slide-out': 'view-slide-out 220ms ease-in both',
         'view-slide-back-in': 'view-slide-back-in 220ms ease-out both',
