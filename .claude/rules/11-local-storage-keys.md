@@ -98,6 +98,9 @@ All keys use the `wr_` prefix. Data persists across page refreshes and survives 
 | `wr_bible_reader_type_size` | `'s' \| 'm' \| 'l' \| 'xl'` | Type size preference (default: m) |
 | `wr_bible_reader_line_height` | `'compact' \| 'normal' \| 'relaxed'` | Line height preference (default: normal) |
 | `wr_bible_reader_font_family` | `'serif' \| 'sans'` | Font family preference (default: serif) |
+| `wr_bible_focus_enabled` | `'true' \| 'false'` | Focus mode enabled (default: true) |
+| `wr_bible_focus_delay` | `'3000' \| '6000' \| '12000'` | Focus mode idle delay in ms (default: 6000) |
+| `wr_bible_focus_dim_orbs` | `'true' \| 'false'` | Dim orbs during focus (default: true, forward-compatible) |
 
 ### Community Challenges
 

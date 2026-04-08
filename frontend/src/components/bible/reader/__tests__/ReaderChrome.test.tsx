@@ -17,6 +17,11 @@ function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
           onTypographyToggle={props?.onTypographyToggle ?? vi.fn()}
           isTypographyOpen={props?.isTypographyOpen ?? false}
           aaRef={aaRef as React.RefObject<HTMLButtonElement | null>}
+          chromeOpacity={props?.chromeOpacity ?? 1}
+          chromePointerEvents={props?.chromePointerEvents ?? 'auto'}
+          chromeTransitionMs={props?.chromeTransitionMs ?? 200}
+          isManuallyArmed={props?.isManuallyArmed ?? false}
+          onFocusToggle={props?.onFocusToggle ?? vi.fn()}
         />
       </BibleDrawerProvider>
     </MemoryRouter>,
@@ -24,12 +29,13 @@ function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
 }
 
 describe('ReaderChrome', () => {
-  it('renders all 4 interactive elements with correct aria-labels', () => {
+  it('renders all 5 interactive elements with correct aria-labels', () => {
     renderChrome()
 
     expect(screen.getByLabelText('Back to Bible')).toBeTruthy()
     expect(screen.getByLabelText('Open chapter picker')).toBeTruthy()
     expect(screen.getByLabelText('Typography settings')).toBeTruthy()
+    expect(screen.getByLabelText('Toggle focus mode')).toBeTruthy()
     expect(screen.getByLabelText('Browse books')).toBeTruthy()
   })
 
@@ -78,5 +84,64 @@ describe('ReaderChrome', () => {
 
     const aaBtn = screen.getByLabelText('Typography settings')
     expect(aaBtn.getAttribute('aria-expanded')).toBe('true')
+  })
+
+  it('renders focus toggle between Aa and Books', () => {
+    renderChrome()
+
+    const buttons = screen.getAllByRole('button')
+    const aaIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Typography settings',
+    )
+    const focusIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Toggle focus mode',
+    )
+    const booksIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Browse books',
+    )
+
+    expect(focusIndex).toBeGreaterThan(aaIndex)
+    expect(focusIndex).toBeLessThan(booksIndex)
+  })
+
+  it('focus toggle calls onFocusToggle', async () => {
+    const user = userEvent.setup()
+    const onFocusToggle = vi.fn()
+    renderChrome({ onFocusToggle })
+
+    await user.click(screen.getByLabelText('Toggle focus mode'))
+    expect(onFocusToggle).toHaveBeenCalledOnce()
+  })
+
+  it('shows armed dot when isManuallyArmed is true', () => {
+    const { container } = renderChrome({ isManuallyArmed: true })
+
+    const dot = container.querySelector('.bg-primary-lt')
+    expect(dot).toBeTruthy()
+  })
+
+  it('hides armed dot when isManuallyArmed is false', () => {
+    const { container } = renderChrome({ isManuallyArmed: false })
+
+    const dot = container.querySelector('.bg-primary-lt')
+    expect(dot).toBeNull()
+  })
+
+  it('applies chromeOpacity and pointerEvents from props', () => {
+    const { container } = renderChrome({
+      chromeOpacity: 0,
+      chromePointerEvents: 'none',
+    })
+
+    const chromeDiv = container.firstElementChild as HTMLElement
+    expect(chromeDiv.style.opacity).toBe('0')
+    expect(chromeDiv.style.pointerEvents).toBe('none')
+  })
+
+  it('applies transition duration from chromeTransitionMs', () => {
+    const { container } = renderChrome({ chromeTransitionMs: 600 })
+
+    const chromeDiv = container.firstElementChild as HTMLElement
+    expect(chromeDiv.style.transition).toContain('600ms')
   })
 })

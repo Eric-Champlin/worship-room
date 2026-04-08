@@ -12,8 +12,11 @@ import { ReaderChrome } from '@/components/bible/reader/ReaderChrome'
 import { ReaderChapterNav } from '@/components/bible/reader/ReaderChapterNav'
 import { TypographySheet } from '@/components/bible/reader/TypographySheet'
 import { VerseJumpPill } from '@/components/bible/reader/VerseJumpPill'
+import { FocusVignette } from '@/components/bible/reader/FocusVignette'
 import { useReaderSettings } from '@/hooks/useReaderSettings'
 import { useChapterSwipe } from '@/hooks/useChapterSwipe'
+import { useFocusMode } from '@/hooks/useFocusMode'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
 import type { BibleVerse } from '@/types/bible'
@@ -29,6 +32,8 @@ function BibleReaderInner() {
   const bibleDrawer = useBibleDrawer()
   const [typographyOpen, setTypographyOpen] = useState(false)
   const aaRef = useRef<HTMLButtonElement>(null)
+  const reducedMotion = useReducedMotion()
+  const focusMode = useFocusMode()
 
   const [verses, setVerses] = useState<BibleVerse[]>([])
   const [paragraphs, setParagraphs] = useState<number[]>([])
@@ -91,6 +96,22 @@ function BibleReaderInner() {
   useEffect(() => {
     window.scrollTo({ top: 0 })
   }, [bookSlug, chapterNumber])
+
+  // Pause focus mode when drawer is open
+  useEffect(() => {
+    if (bibleDrawer.isOpen) {
+      focusMode.pauseFocusMode()
+      return () => focusMode.resumeFocusMode()
+    }
+  }, [bibleDrawer.isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pause focus mode when typography sheet is open
+  useEffect(() => {
+    if (typographyOpen) {
+      focusMode.pauseFocusMode()
+      return () => focusMode.resumeFocusMode()
+    }
+  }, [typographyOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Read tracking stub — writes for all users (no auth check)
   // TODO BB-17: replace stub
@@ -250,6 +271,11 @@ function BibleReaderInner() {
         onTypographyToggle={() => setTypographyOpen((p) => !p)}
         isTypographyOpen={typographyOpen}
         aaRef={aaRef}
+        chromeOpacity={focusMode.chromeOpacity}
+        chromePointerEvents={focusMode.chromePointerEvents}
+        chromeTransitionMs={focusMode.chromeTransitionMs}
+        isManuallyArmed={focusMode.isManuallyArmed}
+        onFocusToggle={focusMode.triggerFocused}
       />
 
       <TypographySheet
@@ -259,6 +285,8 @@ function BibleReaderInner() {
         onUpdate={updateSetting}
         onReset={resetToDefaults}
         anchorRef={aaRef}
+        focusSettings={focusMode.settings}
+        onFocusSettingUpdate={focusMode.updateFocusSetting}
       />
 
       <div style={swipeStyle}>
@@ -320,6 +348,9 @@ function BibleReaderInner() {
           <ReaderChapterNav
             bookSlug={bookSlug!}
             currentChapter={chapterNumber}
+            chromeOpacity={focusMode.chromeOpacity}
+            chromePointerEvents={focusMode.chromePointerEvents}
+            chromeTransitionMs={focusMode.chromeTransitionMs}
           />
         )}
 
@@ -345,6 +376,11 @@ function BibleReaderInner() {
           }}
         />
       </BibleDrawer>
+
+      <FocusVignette
+        visible={focusMode.vignetteVisible}
+        reducedMotion={reducedMotion}
+      />
     </div>
   )
 }

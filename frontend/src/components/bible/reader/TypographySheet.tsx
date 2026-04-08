@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { cn } from '@/lib/utils'
 import type { ReaderSettings } from '@/hooks/useReaderSettings'
+import type { FocusModeSettings } from '@/hooks/useFocusMode'
 
 interface TypographySheetProps {
   isOpen: boolean
@@ -11,6 +12,8 @@ interface TypographySheetProps {
   onUpdate: <K extends keyof ReaderSettings>(key: K, value: ReaderSettings[K]) => void
   onReset: () => void
   anchorRef?: React.RefObject<HTMLButtonElement | null>
+  focusSettings: FocusModeSettings
+  onFocusSettingUpdate: <K extends keyof FocusModeSettings>(key: K, value: FocusModeSettings[K]) => void
 }
 
 const THEMES: Array<{ value: ReaderSettings['theme']; label: string; bg: string; text: string }> = [
@@ -37,6 +40,12 @@ const FONTS: Array<{ value: ReaderSettings['fontFamily']; label: string; classNa
   { value: 'sans', label: 'Sans', className: 'font-sans' },
 ]
 
+const FOCUS_DELAYS: Array<{ value: string; label: string }> = [
+  { value: '3000', label: '3s' },
+  { value: '6000', label: '6s' },
+  { value: '12000', label: '12s' },
+]
+
 const PANEL_STYLE = {
   background: 'rgba(15, 10, 30, 0.95)',
   backdropFilter: 'blur(16px)',
@@ -50,6 +59,8 @@ export function TypographySheet({
   onUpdate,
   onReset,
   anchorRef,
+  focusSettings,
+  onFocusSettingUpdate,
 }: TypographySheetProps) {
   const containerRef = useFocusTrap(isOpen, onClose)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -222,6 +233,55 @@ export function TypographySheet({
               Reset to defaults
             </button>
           </div>
+
+          {/* Divider */}
+          <div className="border-t border-white/10" />
+
+          {/* Focus Mode Section */}
+          <section>
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+              Focus mode
+            </h3>
+
+            {/* Enabled toggle */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-white/70">Enabled</span>
+              <ToggleSwitch
+                checked={focusSettings.enabled}
+                onChange={(v) => onFocusSettingUpdate('enabled', v)}
+                label="Focus mode enabled"
+              />
+            </div>
+
+            {/* Timing — only visible when enabled */}
+            {focusSettings.enabled && (
+              <div className="mt-4">
+                <h4 className="mb-2 text-xs font-medium text-white/40">Timing</h4>
+                <SegmentedControl
+                  options={FOCUS_DELAYS}
+                  value={String(focusSettings.delay)}
+                  onChange={(v) => onFocusSettingUpdate('delay', Number(v))}
+                />
+              </div>
+            )}
+
+            {/* Dim orbs toggle — only visible when enabled */}
+            {focusSettings.enabled && (
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-sm text-white/70">Dim orbs in focus</span>
+                <ToggleSwitch
+                  checked={focusSettings.dimOrbs}
+                  onChange={(v) => onFocusSettingUpdate('dimOrbs', v)}
+                  label="Dim orbs in focus mode"
+                />
+              </div>
+            )}
+
+            {/* Caption */}
+            <p className="mt-3 text-xs leading-relaxed text-white/40">
+              The chrome fades when you're still. Move or tap to bring it back.
+            </p>
+          </section>
         </div>
       </div>
     </>
@@ -260,5 +320,38 @@ function SegmentedControl<T extends string>({
         </button>
       ))}
     </div>
+  )
+}
+
+// --- Toggle Switch sub-component ---
+
+function ToggleSwitch({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean
+  onChange: (value: boolean) => void
+  label: string
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={() => onChange(!checked)}
+      className={cn(
+        'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+        checked ? 'bg-primary' : 'bg-white/20',
+      )}
+    >
+      <span
+        className={cn(
+          'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform',
+          checked ? 'translate-x-5' : 'translate-x-0',
+        )}
+      />
+    </button>
   )
 }

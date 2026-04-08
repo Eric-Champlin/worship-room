@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BookOpen, Type } from 'lucide-react'
+import { ArrowLeft, BookOpen, Minimize2, Type } from 'lucide-react'
 import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
-import { useChromeDim } from '@/hooks/useChromeDim'
+import { cn } from '@/lib/utils'
 
 const ICON_BTN =
   'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white'
@@ -13,6 +13,12 @@ interface ReaderChromeProps {
   onTypographyToggle: () => void
   isTypographyOpen: boolean
   aaRef: React.RefObject<HTMLButtonElement | null>
+  // BB-5 focus mode
+  chromeOpacity: number
+  chromePointerEvents: 'auto' | 'none'
+  chromeTransitionMs: number
+  isManuallyArmed: boolean
+  onFocusToggle: () => void
 }
 
 export function ReaderChrome({
@@ -21,9 +27,13 @@ export function ReaderChrome({
   onTypographyToggle,
   isTypographyOpen,
   aaRef,
+  chromeOpacity,
+  chromePointerEvents,
+  chromeTransitionMs,
+  isManuallyArmed,
+  onFocusToggle,
 }: ReaderChromeProps) {
   const bibleDrawer = useBibleDrawer()
-  const { opacity } = useChromeDim()
   const centerRef = useRef<HTMLButtonElement>(null)
   const booksRef = useRef<HTMLButtonElement>(null)
 
@@ -37,8 +47,9 @@ export function ReaderChrome({
       className="fixed left-0 right-0 top-0 z-30"
       style={{
         paddingTop: 'env(safe-area-inset-top)',
-        opacity,
-        transition: 'opacity 500ms ease',
+        opacity: chromeOpacity,
+        pointerEvents: chromePointerEvents,
+        transition: `opacity ${chromeTransitionMs}ms ease`,
       }}
     >
       {/* Chrome background */}
@@ -62,7 +73,7 @@ export function ReaderChrome({
             </span>
           </button>
 
-          {/* Right: Aa + Books icons */}
+          {/* Right: Aa + Focus + Books icons */}
           <div className="flex items-center gap-1">
             <button
               ref={aaRef as React.RefObject<HTMLButtonElement>}
@@ -73,6 +84,20 @@ export function ReaderChrome({
               onClick={onTypographyToggle}
             >
               <Type className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              className={cn(ICON_BTN, 'relative')}
+              aria-label="Toggle focus mode"
+              onClick={onFocusToggle}
+            >
+              <Minimize2 className="h-5 w-5" />
+              {isManuallyArmed && (
+                <span
+                  className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary-lt"
+                  aria-hidden="true"
+                />
+              )}
             </button>
             <button
               ref={booksRef}
