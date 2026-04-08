@@ -3,6 +3,7 @@ import type { BibleBook, BibleCategory } from '@/types/bible'
 export const BIBLE_PROGRESS_KEY = 'wr_bible_progress'
 export const BIBLE_HIGHLIGHTS_KEY = 'wr_bible_highlights'
 export const BIBLE_NOTES_KEY = 'wr_bible_notes'
+export const BIBLE_BOOKMARKS_KEY = 'bible:bookmarks'
 /** @deprecated BB-7 removes highlight cap. Kept for useBibleHighlights backward compat. */
 export const MAX_HIGHLIGHTS = 500
 export const MAX_NOTES = 200

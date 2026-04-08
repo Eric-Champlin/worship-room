@@ -6,7 +6,8 @@ import {
 } from '@/hooks/useReaderSettings'
 import { VerseJumpSentinel } from '@/components/bible/reader/VerseJumpPill'
 import type { ReaderSettings } from '@/hooks/useReaderSettings'
-import type { BibleVerse, Highlight } from '@/types/bible'
+import { VerseBookmarkMarker } from '@/components/bible/reader/VerseBookmarkMarker'
+import type { BibleVerse, Bookmark, Highlight } from '@/types/bible'
 
 interface ReaderBodyProps {
   verses: BibleVerse[]
@@ -20,6 +21,8 @@ interface ReaderBodyProps {
   chapterHighlights?: Highlight[]
   /** Whether the selection is actively visible (false = fading out) */
   selectionVisible?: boolean
+  /** Bookmark data for this chapter */
+  chapterBookmarks?: Bookmark[]
   /** Verse numbers that just received a highlight (for pulse animation) */
   freshHighlightVerses?: number[]
   /** Whether user prefers reduced motion */
@@ -34,6 +37,7 @@ export function ReaderBody({
   paragraphs = [],
   selectedVerses,
   chapterHighlights,
+  chapterBookmarks,
   selectionVisible = true,
   freshHighlightVerses,
   reducedMotion,
@@ -67,6 +71,9 @@ export function ReaderBody({
             const isHighlighted = !!hl
             const isSelected = selectedVerses?.includes(verse.number)
             const isFresh = freshHighlightVerses?.includes(verse.number)
+            const isBookmarked = !!chapterBookmarks?.find(
+              (b) => verse.number >= b.startVerse && verse.number <= b.endVerse,
+            )
 
             return (
               <span
@@ -93,7 +100,9 @@ export function ReaderBody({
                       }
                     : undefined
                 }
+                aria-label={isBookmarked ? `${bookSlug} ${chapter}:${verse.number}, bookmarked` : undefined}
               >
+                {isBookmarked && <VerseBookmarkMarker />}
                 <sup
                   className="mr-1 align-super font-sans"
                   style={{ fontSize: '0.7em', color: 'var(--reader-verse-num)' }}

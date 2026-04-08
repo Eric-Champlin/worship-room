@@ -46,6 +46,6 @@ export interface VerseActionHandler {
 }
 
 export interface VerseActionContext {
-  showToast: (message: string, type?: string) => void
+  showToast: (message: string, type?: string, action?: { label: string; onClick: () => void }) => void
   closeSheet: () => void
 }

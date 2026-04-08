@@ -3,6 +3,7 @@ import { ChevronRight, X, ArrowLeft, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useLongPress } from '@/hooks/useLongPress'
 import { useToast } from '@/components/ui/Toast'
 import {
   getPrimaryActions,
@@ -10,6 +11,8 @@ import {
   formatReference,
   copyToClipboard,
 } from '@/lib/bible/verseActionRegistry'
+import { getBookmarkForVerse } from '@/lib/bible/bookmarkStore'
+import { BookmarkLabelEditor } from '@/components/bible/reader/BookmarkLabelEditor'
 import type { VerseSelection, VerseAction, VerseActionHandler } from '@/types/verse-actions'
 
 // ---------------------------------------------------------------------------
@@ -53,6 +56,30 @@ export function VerseActionSheet({
 
   // Track which action button pushed the sub-view for focus restore
   const subViewTriggerRef = useRef<HTMLButtonElement | null>(null)
+
+  // Bookmark label editor state (BB-7.5)
+  const [labelEditorOpen, setLabelEditorOpen] = useState(false)
+  const bookmarkBtnRef = useRef<HTMLButtonElement | null>(null)
+  const { didFire: longPressDidFire, ...longPressTouchHandlers } = useLongPress(() => setLabelEditorOpen(true))
+
+  // Forward showToast with optional action (for undo)
+  const forwardShowToast = useCallback(
+    (msg: string, type?: string, action?: { label: string; onClick: () => void }) => {
+      if (action !== undefined) {
+        showToast(msg, (type ?? 'success') as 'success' | 'error' | 'warning', action)
+      } else if (type !== undefined) {
+        showToast(msg, type as 'success' | 'error' | 'warning')
+      } else {
+        showToast(msg)
+      }
+    },
+    [showToast],
+  )
+
+  // Reset label editor when sheet closes
+  useEffect(() => {
+    if (!isOpen) setLabelEditorOpen(false)
+  }, [isOpen])
 
   // Swipe-down state
   const [swipeOffset, setSwipeOffset] = useState(0)
@@ -148,12 +175,12 @@ export function VerseActionSheet({
         setAnnounceText(handler.label)
       } else {
         handler.onInvoke(selection, {
-          showToast: (msg: string) => showToast(msg),
+          showToast: forwardShowToast,
           closeSheet: onClose,
         })
       }
     },
-    [selection, showToast, onClose],
+    [selection, forwardShowToast, onClose],
   )
 
   const handleSubViewBack = useCallback(() => {
@@ -218,6 +245,9 @@ export function VerseActionSheet({
 
   const primaryActions = getPrimaryActions()
   const secondaryActions = getSecondaryActions()
+  const labelEditorBookmark = labelEditorOpen
+    ? getBookmarkForVerse(selection.book, selection.chapter, selection.startVerse)
+    : null
 
   return (
     <>
@@ -280,7 +310,7 @@ export function VerseActionSheet({
                 selection,
                 onBack: handleSubViewBack,
                 context: {
-                  showToast: (msg: string) => showToast(msg),
+                  showToast: forwardShowToast,
                   closeSheet: onClose,
                 },
               })}
@@ -339,12 +369,17 @@ export function VerseActionSheet({
               {primaryActions.map((handler) => {
                 const Icon = handler.icon
                 const state = handler.getState?.(selection)
+                const isBookmark = handler.action === 'bookmark'
                 return (
                   <button
                     key={handler.action}
-                    onClick={(e) =>
+                    ref={isBookmark ? bookmarkBtnRef : undefined}
+                    onClick={(e) => {
+                      if (isBookmark && longPressDidFire.current) return
                       handleActionClick(handler, e.currentTarget)
-                    }
+                    }}
+                    onContextMenu={isBookmark ? (e) => { e.preventDefault(); setLabelEditorOpen(true) } : undefined}
+                    {...(isBookmark ? longPressTouchHandlers : {})}
                     className="flex min-h-[44px] min-w-[44px] flex-col items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors hover:bg-white/[0.06]"
                     aria-label={handler.label}
                   >
@@ -401,6 +436,17 @@ export function VerseActionSheet({
           </>
         )}
       </div>
+
+      {/* Bookmark label editor popover (BB-7.5) */}
+      {labelEditorOpen && (
+        <BookmarkLabelEditor
+          bookmarkId={labelEditorBookmark?.id ?? null}
+          currentLabel={labelEditorBookmark?.label ?? ''}
+          selection={selection}
+          anchorRef={bookmarkBtnRef}
+          onClose={() => setLabelEditorOpen(false)}
+        />
+      )}
     </>
   )
 }

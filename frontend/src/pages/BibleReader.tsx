@@ -25,7 +25,11 @@ import {
   getHighlightsForChapter,
   subscribe as subscribeHighlights,
 } from '@/lib/bible/highlightStore'
-import type { BibleVerse, Highlight } from '@/types/bible'
+import {
+  getBookmarksForChapter,
+  subscribe as subscribeBookmarks,
+} from '@/lib/bible/bookmarkStore'
+import type { BibleVerse, Bookmark, Highlight } from '@/types/bible'
 
 function BibleReaderInner() {
   const { book: bookSlug, chapter: chapterParam } = useParams<{
@@ -120,6 +124,23 @@ function BibleReaderInner() {
       if (newVerseNums.length > 0) {
         setFreshHighlightVerses(newVerseNums)
       }
+    })
+    return unsubscribe
+  }, [bookSlug, chapterNumber])
+
+  // Bookmark store subscription (BB-7.5)
+  const [chapterBookmarks, setChapterBookmarks] = useState<Bookmark[]>(() =>
+    getBookmarksForChapter(bookSlug ?? '', chapterNumber),
+  )
+
+  useEffect(() => {
+    const fresh = getBookmarksForChapter(bookSlug ?? '', chapterNumber)
+    setChapterBookmarks(fresh)
+  }, [bookSlug, chapterNumber])
+
+  useEffect(() => {
+    const unsubscribe = subscribeBookmarks(() => {
+      setChapterBookmarks(getBookmarksForChapter(bookSlug ?? '', chapterNumber))
     })
     return unsubscribe
   }, [bookSlug, chapterNumber])
@@ -436,6 +457,7 @@ function BibleReaderInner() {
                 paragraphs={paragraphs}
                 selectedVerses={selectedVerseNumbers}
                 chapterHighlights={chapterHighlights}
+                chapterBookmarks={chapterBookmarks}
                 selectionVisible={selectionVisible}
                 freshHighlightVerses={freshHighlightVerses}
                 reducedMotion={reducedMotion}

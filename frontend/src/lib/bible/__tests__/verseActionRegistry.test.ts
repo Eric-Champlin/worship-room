@@ -10,6 +10,7 @@ import {
   copyToClipboard,
 } from '../verseActionRegistry'
 import { applyHighlight } from '../highlightStore'
+import { toggleBookmark, getAllBookmarks, _resetCacheForTesting as resetBookmarkCache } from '../bookmarkStore'
 import type { VerseSelection, VerseActionContext } from '@/types/verse-actions'
 
 // ---------------------------------------------------------------------------
@@ -253,6 +254,103 @@ describe('verseActionRegistry', () => {
         onBack: () => {},
       })
       expect(element).toBeDefined()
+    })
+  })
+
+  describe('bookmark handler', () => {
+    beforeEach(() => {
+      localStorage.clear()
+      resetBookmarkCache()
+    })
+
+    it('returns active state when bookmarked', () => {
+      toggleBookmark({ book: 'john', chapter: 3, startVerse: 16, endVerse: 16 })
+
+      const handler = getActionByType('bookmark')!
+      const state = handler.getState!(SINGLE_VERSE)
+      expect(state.active).toBe(true)
+    })
+
+    it('returns inactive state when not bookmarked', () => {
+      const handler = getActionByType('bookmark')!
+      const state = handler.getState!(SINGLE_VERSE)
+      expect(state.active).toBe(false)
+    })
+
+    it('shows "Bookmarked" toast with undo on create', () => {
+      const handler = getActionByType('bookmark')!
+      const ctx = createMockContext()
+
+      handler.onInvoke(SINGLE_VERSE, ctx)
+
+      expect(ctx.showToast).toHaveBeenCalledWith('Bookmarked', undefined, expect.objectContaining({
+        label: 'Undo',
+        onClick: expect.any(Function),
+      }))
+    })
+
+    it('shows "Bookmark removed" toast with undo on remove', () => {
+      toggleBookmark({ book: 'john', chapter: 3, startVerse: 16, endVerse: 16 })
+
+      const handler = getActionByType('bookmark')!
+      const ctx = createMockContext()
+
+      handler.onInvoke(SINGLE_VERSE, ctx)
+
+      expect(ctx.showToast).toHaveBeenCalledWith('Bookmark removed', undefined, expect.objectContaining({
+        label: 'Undo',
+        onClick: expect.any(Function),
+      }))
+    })
+
+    it('does not close sheet', () => {
+      const handler = getActionByType('bookmark')!
+      const ctx = createMockContext()
+
+      handler.onInvoke(SINGLE_VERSE, ctx)
+
+      expect(ctx.closeSheet).not.toHaveBeenCalled()
+    })
+
+    it('rapid toggle undo guard prevents stale undo', () => {
+      const handler = getActionByType('bookmark')!
+
+      // First toggle: creates bookmark
+      const ctx1 = createMockContext()
+      handler.onInvoke(SINGLE_VERSE, ctx1)
+      const firstUndoAction = (ctx1.showToast as ReturnType<typeof vi.fn>).mock.calls[0][2] as { onClick: () => void }
+
+      // Second toggle: removes bookmark
+      const ctx2 = createMockContext()
+      handler.onInvoke(SINGLE_VERSE, ctx2)
+
+      // Try undo from first toggle — should be stale (no-op)
+      firstUndoAction.onClick()
+
+      // Bookmark was removed by toggle 2, stale undo should NOT have restored it
+      expect(getAllBookmarks()).toHaveLength(0)
+    })
+
+    it('catches BookmarkStorageFullError', () => {
+      const handler = getActionByType('bookmark')!
+      const ctx = createMockContext()
+
+      const original = Storage.prototype.setItem
+      const quotaError = new Error('quota exceeded')
+      quotaError.name = 'QuotaExceededError'
+      Storage.prototype.setItem = function (key: string) {
+        if (key === 'bible:bookmarks') {
+          throw quotaError
+        }
+        return original.apply(this, arguments as unknown as [string, string])
+      }
+
+      try {
+        handler.onInvoke(SINGLE_VERSE, ctx)
+        expect(ctx.showToast).toHaveBeenCalledWith('Storage full — export your bookmarks and clear old ones.')
+      } finally {
+        Storage.prototype.setItem = original
+      }
     })
   })
 

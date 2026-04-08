@@ -28,6 +28,13 @@ import {
   removeHighlightsInRange,
   HighlightStorageFullError,
 } from '@/lib/bible/highlightStore'
+import {
+  isSelectionBookmarked,
+  toggleBookmark as toggleBookmarkStore,
+  removeBookmark as removeBookmarkById,
+  restoreBookmarks,
+  BookmarkStorageFullError,
+} from '@/lib/bible/bookmarkStore'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -181,14 +188,76 @@ const note: VerseActionHandler = {
   onInvoke: () => {},
 }
 
+// Rapid-toggle guard for bookmark undo
+let lastToggleId: string | null = null
+
 const bookmark: VerseActionHandler = {
   action: 'bookmark',
   label: 'Bookmark',
   icon: Bookmark,
   category: 'primary',
   hasSubView: false,
+
+  getState: (selection: VerseSelection) => {
+    const active = isSelectionBookmarked(
+      selection.book,
+      selection.chapter,
+      selection.startVerse,
+      selection.endVerse,
+    )
+    return {
+      active,
+      activeColor: 'var(--bookmark-marker)',
+    }
+  },
+
   isAvailable: () => true,
-  onInvoke: () => {},
+
+  onInvoke: (selection: VerseSelection, ctx: VerseActionContext) => {
+    try {
+      const result = toggleBookmarkStore({
+        book: selection.book,
+        chapter: selection.chapter,
+        startVerse: selection.startVerse,
+        endVerse: selection.endVerse,
+      })
+
+      const toggleId = generateToggleId()
+      lastToggleId = toggleId
+
+      if (result.created) {
+        const createdBookmark = result.bookmark!
+        ctx.showToast('Bookmarked', undefined, {
+          label: 'Undo',
+          onClick: () => {
+            if (lastToggleId !== toggleId) return // Stale undo
+            removeBookmarkById(createdBookmark.id)
+          },
+        })
+      } else {
+        const removedBookmarks = result.removed ?? []
+        ctx.showToast('Bookmark removed', undefined, {
+          label: 'Undo',
+          onClick: () => {
+            if (lastToggleId !== toggleId) return // Stale undo
+            restoreBookmarks(removedBookmarks)
+          },
+        })
+      }
+      // Intentionally NOT calling ctx.closeSheet() — spec req 9
+    } catch (e) {
+      if (e instanceof BookmarkStorageFullError) {
+        ctx.showToast('Storage full — export your bookmarks and clear old ones.')
+      }
+    }
+  },
+}
+
+function generateToggleId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+  return Date.now().toString(36) + Math.random().toString(36).slice(2)
 }
 
 const share: VerseActionHandler = {

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import { ReaderBody } from '../ReaderBody'
 import type { ReaderSettings } from '@/hooks/useReaderSettings'
-import type { BibleVerse, Highlight } from '@/types/bible'
+import type { BibleVerse, Bookmark, Highlight } from '@/types/bible'
 
 const DEFAULT_SETTINGS: ReaderSettings = {
   theme: 'midnight',
@@ -400,5 +400,84 @@ describe('ReaderBody', () => {
 
     const verse1 = document.querySelector('[data-verse="1"]')!
     expect(verse1.className).not.toContain('animate-highlight-pulse')
+  })
+
+  // --- BB-7.5 Bookmark rendering tests ---
+
+  const makeBookmark = (overrides: Partial<Bookmark> = {}): Bookmark => ({
+    id: 'bm-1',
+    book: 'john',
+    chapter: 1,
+    startVerse: 1,
+    endVerse: 1,
+    createdAt: Date.now(),
+    ...overrides,
+  })
+
+  it('renders bookmark marker for bookmarked verse', () => {
+    const { container } = render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterBookmarks={[makeBookmark()]}
+      />,
+    )
+
+    const svgs = container.querySelectorAll('svg')
+    expect(svgs.length).toBeGreaterThanOrEqual(1)
+    // The bookmark marker SVG should be inside verse 1
+    const verse1 = document.querySelector('[data-verse="1"]')!
+    expect(verse1.querySelector('svg')).toBeTruthy()
+  })
+
+  it('does not render marker for non-bookmarked verse', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterBookmarks={[makeBookmark()]}
+      />,
+    )
+
+    const verse2 = document.querySelector('[data-verse="2"]')!
+    expect(verse2.querySelector('svg')).toBeFalsy()
+  })
+
+  it('adds aria-label for bookmarked verse', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterBookmarks={[makeBookmark()]}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]')!
+    expect(verse1.getAttribute('aria-label')).toContain('bookmarked')
+  })
+
+  it('bookmark marker coexists with highlight background', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterHighlights={[makeHighlight()]}
+        chapterBookmarks={[makeBookmark()]}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    // Has highlight background
+    expect(verse1.style.backgroundColor).toBe('var(--highlight-peace-bg)')
+    // Has bookmark marker
+    expect(verse1.querySelector('svg')).toBeTruthy()
   })
 })

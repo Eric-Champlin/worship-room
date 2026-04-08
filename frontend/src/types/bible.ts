@@ -77,6 +77,16 @@ export interface Highlight {
   updatedAt: number
 }
 
+export interface Bookmark {
+  id: string
+  book: string          // slug e.g. "john"
+  chapter: number
+  startVerse: number
+  endVerse: number      // equals startVerse for single-verse
+  label?: string        // optional, max 80 chars
+  createdAt: number     // epoch ms
+}
+
 /** A personal note attached to a verse */
 export interface BibleNote {
   id: string
