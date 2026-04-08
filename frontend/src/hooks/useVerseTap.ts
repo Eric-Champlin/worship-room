@@ -21,7 +21,7 @@ interface UseVerseTapReturn {
   /** Whether the action sheet should be open */
   isSheetOpen: boolean
   /** Close the sheet and clear selection */
-  closeSheet: () => void
+  closeSheet: (options?: { navigating?: boolean }) => void
   /** Extend selection to a new verse (for multi-verse from sheet) */
   extendSelection: (verseNumber: number) => void
 }
@@ -82,6 +82,7 @@ export function useVerseTap(options: UseVerseTapOptions): UseVerseTapReturn {
   const pointerStart = useRef<{ x: number; y: number; time: number; target: EventTarget | null } | null>(null)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const historyPushed = useRef(false)
+  const navigatingRef = useRef(false)
 
   // ---------------------------------------------------------------------------
   // Open / close
@@ -102,12 +103,17 @@ export function useVerseTap(options: UseVerseTapOptions): UseVerseTapReturn {
     [bookSlug, bookName, chapter, verses],
   )
 
-  const closeSheet = useCallback(() => {
+  const closeSheet = useCallback((options?: { navigating?: boolean }) => {
     setIsSheetOpen(false)
     setSelection(null)
 
-    // Pop the history entry we pushed
-    if (historyPushed.current) {
+    if (options?.navigating) {
+      // Cross-ref navigation: skip history.back() — the navigate call handles routing.
+      // Set flag so the chapter-change cleanup effect also skips history.back().
+      navigatingRef.current = true
+      historyPushed.current = false
+    } else if (historyPushed.current) {
+      // Normal close: pop the history entry we pushed
       historyPushed.current = false
       history.back()
     }
@@ -270,8 +276,11 @@ export function useVerseTap(options: UseVerseTapOptions): UseVerseTapReturn {
     setIsSheetOpen(false)
     if (historyPushed.current) {
       historyPushed.current = false
-      history.back()
+      if (!navigatingRef.current) {
+        history.back()
+      }
     }
+    navigatingRef.current = false
   }, [bookSlug, chapter])
 
   return { selection, isSheetOpen, closeSheet, extendSelection }

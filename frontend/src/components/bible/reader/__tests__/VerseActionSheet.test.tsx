@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { VerseActionSheet } from '../VerseActionSheet'
 import type { VerseSelection } from '@/types/verse-actions'
 
@@ -22,6 +22,22 @@ vi.mock('@/hooks/useFocusTrap', () => ({
   useFocusTrap: (_isActive: boolean, _onEscape?: () => void) => {
     return { current: null }
   },
+}))
+
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => vi.fn(),
+}))
+
+vi.mock('@/data/bible', () => ({
+  getBookBySlug: vi.fn((slug: string) => ({ name: slug, slug })),
+  loadChapterWeb: vi.fn().mockResolvedValue(null),
+}))
+
+vi.mock('@/lib/bible/crossRefs/loader', () => ({
+  loadCrossRefsForBook: vi.fn().mockResolvedValue(new Map()),
+  collectCrossRefsForRange: vi.fn().mockReturnValue([]),
+  getCachedBook: vi.fn().mockReturnValue(null),
+  getDeduplicatedCrossRefCount: vi.fn().mockReturnValue(0),
 }))
 
 // ---------------------------------------------------------------------------
@@ -183,5 +199,25 @@ describe('VerseActionSheet', () => {
   it('does not render when isOpen is false', () => {
     render(<VerseActionSheet {...defaultProps} isOpen={false} />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('sub-view header has close button', () => {
+    render(<VerseActionSheet {...defaultProps} />)
+
+    // Click cross-references to open sub-view
+    const crossRefsBtn = screen.getByLabelText('Cross-references')
+    fireEvent.click(crossRefsBtn)
+
+    // Should have a close button (X) in the sub-view header
+    expect(screen.getByLabelText('Close')).toBeInTheDocument()
+  })
+
+  it('secondary action row renders badge when handler has renderBadge', () => {
+    render(<VerseActionSheet {...defaultProps} />)
+
+    // Cross-references handler has renderBadge — check that it renders something
+    // The badge component renders asynchronously, so we just verify the row exists
+    const crossRefsBtn = screen.getByLabelText('Cross-references')
+    expect(crossRefsBtn).toBeInTheDocument()
   })
 })

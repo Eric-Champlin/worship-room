@@ -196,9 +196,14 @@ describe('verseActionRegistry', () => {
     })
 
     it('sub-view stubs render placeholder containing "ships in BB-"', () => {
-      // Exclude highlight (BB-7) and note (BB-8) — only stubs match this pattern
+      // Exclude highlight (BB-7), note (BB-8), cross-refs (BB-9) — only stubs match this pattern
       const withSubViews = getAllActions().filter(
-        (h) => h.hasSubView && h.renderSubView && h.action !== 'highlight' && h.action !== 'note',
+        (h) =>
+          h.hasSubView &&
+          h.renderSubView &&
+          h.action !== 'highlight' &&
+          h.action !== 'note' &&
+          h.action !== 'cross-refs',
       )
       expect(withSubViews.length).toBeGreaterThan(0)
 
@@ -386,6 +391,27 @@ describe('verseActionRegistry', () => {
 
     it('renderSubView returns a valid React element', () => {
       const handler = getActionByType('note')!
+      const element = handler.renderSubView!({
+        selection: SINGLE_VERSE,
+        onBack: () => {},
+      })
+      expect(element).toBeDefined()
+    })
+  })
+
+  describe('cross-refs handler (BB-9)', () => {
+    it('has hasSubView true', () => {
+      const handler = getActionByType('cross-refs')!
+      expect(handler.hasSubView).toBe(true)
+    })
+
+    it('has renderBadge defined', () => {
+      const handler = getActionByType('cross-refs')!
+      expect(handler.renderBadge).toBeDefined()
+    })
+
+    it('renderSubView returns a valid React element', () => {
+      const handler = getActionByType('cross-refs')!
       const element = handler.renderSubView!({
         selection: SINGLE_VERSE,
         onBack: () => {},

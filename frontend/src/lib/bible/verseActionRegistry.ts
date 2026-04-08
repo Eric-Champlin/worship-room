@@ -13,6 +13,7 @@ import {
   Copy,
   ClipboardCopy,
 } from 'lucide-react'
+import { CrossRefsSubView, CrossRefBadge } from '@/components/bible/reader/CrossRefsSubView'
 import type {
   VerseSelection,
   VerseAction,
@@ -334,7 +335,8 @@ const crossRefs: VerseActionHandler = {
   icon: Link2,
   category: 'secondary',
   hasSubView: true,
-  renderSubView: stubSubView('Cross-references ship in BB-9'),
+  renderSubView: (props) => React.createElement(CrossRefsSubView, props),
+  renderBadge: (selection) => React.createElement(CrossRefBadge, { selection }),
   isAvailable: () => true,
   onInvoke: () => {},
 }

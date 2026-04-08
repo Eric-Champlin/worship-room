@@ -39,6 +39,13 @@ vi.mock('@/components/ui/Toast', () => ({
   useToastSafe: () => ({ showToast: vi.fn() }),
 }))
 
+vi.mock('@/lib/bible/crossRefs/loader', () => ({
+  loadCrossRefsForBook: vi.fn().mockResolvedValue(new Map()),
+  collectCrossRefsForRange: vi.fn().mockReturnValue([]),
+  getCachedBook: vi.fn().mockReturnValue(null),
+  getDeduplicatedCrossRefCount: vi.fn().mockReturnValue(0),
+}))
+
 vi.mock('@/hooks/useWhisperToast', () => ({
   useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
 }))

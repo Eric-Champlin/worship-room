@@ -31,7 +31,7 @@ const SWIPE_DISMISS_THRESHOLD = 80
 interface VerseActionSheetProps {
   selection: VerseSelection
   isOpen: boolean
-  onClose: () => void
+  onClose: (options?: { navigating?: boolean }) => void
   onExtendSelection: (verseNumber: number) => void
 }
 
@@ -254,7 +254,7 @@ export function VerseActionSheet({
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-[10000] bg-black/30"
-        onClick={onClose}
+        onClick={() => onClose()}
         aria-hidden="true"
       />
 
@@ -302,7 +302,10 @@ export function VerseActionSheet({
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              <span className="font-semibold text-white">{subView.handler.label}</span>
+              <span className="flex-1 font-semibold text-white">{subView.handler.label}</span>
+              <button onClick={() => onClose()} className={ICON_BTN_SM} aria-label="Close">
+                <X className="h-5 w-5" />
+              </button>
             </div>
             <div className="border-t border-white/[0.08]" />
             <div className="flex-1 overflow-y-auto">
@@ -345,7 +348,7 @@ export function VerseActionSheet({
                 <Copy className="h-4 w-4" />
               </button>
               <button
-                onClick={onClose}
+                onClick={() => onClose()}
                 className={ICON_BTN_SM}
                 aria-label="Close"
               >
@@ -421,6 +424,7 @@ export function VerseActionSheet({
                         </span>
                       )}
                     </div>
+                    {handler.renderBadge?.(selection)}
                     {handler.hasSubView && (
                       <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/30" />
                     )}

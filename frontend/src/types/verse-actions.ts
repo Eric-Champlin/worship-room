@@ -41,11 +41,13 @@ export interface VerseActionHandler {
   isAvailable: (selection: VerseSelection) => boolean
   /** Get active/filled state — e.g. already highlighted, already bookmarked */
   getState?: (selection: VerseSelection) => { active: boolean; activeColor?: string }
+  /** Optional badge to render next to the chevron in secondary action rows */
+  renderBadge?: (selection: VerseSelection) => React.ReactNode
   /** Execute the action */
   onInvoke: (selection: VerseSelection, ctx: VerseActionContext) => void
 }
 
 export interface VerseActionContext {
   showToast: (message: string, type?: string, action?: { label: string; onClick: () => void }) => void
-  closeSheet: () => void
+  closeSheet: (options?: { navigating?: boolean }) => void
 }

@@ -21,6 +21,7 @@ import { useVerseTap } from '@/hooks/useVerseTap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
+import { loadCrossRefsForBook } from '@/lib/bible/crossRefs/loader'
 import {
   getHighlightsForChapter,
   subscribe as subscribeHighlights,
@@ -165,6 +166,14 @@ function BibleReaderInner() {
     return unsubscribe
   }, [bookSlug, chapterNumber])
 
+  // Cross-reference preloading (BB-9)
+  // Fire-and-forget — populates in-memory cache so badge count is instant
+  useEffect(() => {
+    if (bookSlug) {
+      void loadCrossRefsForBook(bookSlug)
+    }
+  }, [bookSlug])
+
   // Track freshly highlighted verses for pulse animation
   const [freshHighlightVerses, setFreshHighlightVerses] = useState<number[]>([])
   useEffect(() => {
@@ -174,14 +183,22 @@ function BibleReaderInner() {
   }, [freshHighlightVerses])
 
   // Selection fade-out on close
-  const handleSheetClose = useCallback(() => {
-    setSelectionVisible(false)
-    fadeTimerRef.current = setTimeout(() => {
-      fadeTimerRef.current = null
-      closeSheet()
-      setSelectionVisible(true)
-    }, 200)
-  }, [closeSheet])
+  const handleSheetClose = useCallback(
+    (options?: { navigating?: boolean }) => {
+      if (options?.navigating) {
+        // Cross-ref navigation: close immediately, skip fade animation
+        closeSheet(options)
+      } else {
+        setSelectionVisible(false)
+        fadeTimerRef.current = setTimeout(() => {
+          fadeTimerRef.current = null
+          closeSheet()
+          setSelectionVisible(true)
+        }, 200)
+      }
+    },
+    [closeSheet],
+  )
 
   // Clean up fade timer on unmount
   useEffect(() => {

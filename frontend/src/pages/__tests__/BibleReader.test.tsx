@@ -29,6 +29,11 @@ vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
 }))
 
+const mockLoadCrossRefsForBook = vi.fn().mockResolvedValue(new Map())
+vi.mock('@/lib/bible/crossRefs/loader', () => ({
+  loadCrossRefsForBook: (...args: unknown[]) => mockLoadCrossRefsForBook(...args),
+}))
+
 // Minimal mocks for components that use audio/toast/auth providers
 vi.mock('@/components/audio/AudioProvider', () => ({
   useAudioState: () => ({ drawerOpen: false }),
@@ -228,5 +233,28 @@ describe('BibleReader (BB-4 Immersive Reader)', () => {
 
     // Verifies the page renders without errors when all interaction modes coexist
     expect(document.querySelector('main')).toBeTruthy()
+  })
+
+  it('preloads cross-refs for current book on mount (BB-9)', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      expect(mockLoadCrossRefsForBook).toHaveBeenCalledWith('john')
+    })
+  })
+
+  it('preloads new book when navigating to different book', async () => {
+    const { unmount } = renderReader('/bible/john/3')
+    await waitFor(() => {
+      expect(mockLoadCrossRefsForBook).toHaveBeenCalledWith('john')
+    })
+
+    unmount()
+    mockLoadCrossRefsForBook.mockClear()
+
+    renderReader('/bible/genesis/1')
+    await waitFor(() => {
+      expect(mockLoadCrossRefsForBook).toHaveBeenCalledWith('genesis')
+    })
   })
 })

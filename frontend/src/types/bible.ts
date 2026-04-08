@@ -98,6 +98,34 @@ export interface Note {
   updatedAt: number     // epoch ms
 }
 
+/** Raw cross-reference entry from JSON data */
+export interface CrossRefEntry {
+  ref: string     // "bookSlug.chapter.verse" e.g. "romans.5.8"
+  rank: number    // 1-4, 1 = strongest
+}
+
+/** Parsed cross-reference with resolved book/chapter/verse */
+export interface CrossRef {
+  ref: string
+  rank: number
+  parsed: {
+    book: string    // slug
+    chapter: number
+    verse: number
+  }
+  sourceVerse?: number  // which source verse this came from (multi-verse selections)
+}
+
+/** Map of "{chapter}.{verse}" → CrossRef[] for a single book */
+export type CrossRefMap = Map<string, CrossRef[]>
+
+/** Shape of per-book cross-reference JSON file */
+export interface CrossRefBookJson {
+  book: string
+  slug: string
+  entries: Record<string, CrossRefEntry[]>
+}
+
 /** @deprecated BB-8 uses Note interface instead. Kept for pre-redesign compat. */
 export interface BibleNote {
   id: string
