@@ -9,6 +9,7 @@ const ICON_BTN =
 
 interface ReaderChromeProps {
   bookName: string
+  bookSlug: string
   chapter: number
   onTypographyToggle: () => void
   isTypographyOpen: boolean
@@ -23,6 +24,7 @@ interface ReaderChromeProps {
 
 export function ReaderChrome({
   bookName,
+  bookSlug,
   chapter,
   onTypographyToggle,
   isTypographyOpen,
@@ -37,8 +39,13 @@ export function ReaderChrome({
   const centerRef = useRef<HTMLButtonElement>(null)
   const booksRef = useRef<HTMLButtonElement>(null)
 
-  const handleOpenDrawer = (el: HTMLButtonElement | null) => {
-    bibleDrawer.triggerRef.current = el
+  const handleCenterClick = () => {
+    bibleDrawer.triggerRef.current = centerRef.current
+    bibleDrawer.open({ type: 'chapters', bookSlug })
+  }
+
+  const handleBooksClick = () => {
+    bibleDrawer.triggerRef.current = booksRef.current
     bibleDrawer.open()
   }
 
@@ -66,7 +73,7 @@ export function ReaderChrome({
             type="button"
             className="flex min-h-[44px] items-center text-base font-medium text-white/90 transition-colors hover:text-white"
             aria-label="Open chapter picker"
-            onClick={() => handleOpenDrawer(centerRef.current)}
+            onClick={handleCenterClick}
           >
             <span className="text-sm sm:text-base">
               {bookName} {chapter}
@@ -104,7 +111,7 @@ export function ReaderChrome({
               type="button"
               className={ICON_BTN}
               aria-label="Browse books"
-              onClick={() => handleOpenDrawer(booksRef.current)}
+              onClick={handleBooksClick}
             >
               <BookOpen className="h-5 w-5" />
             </button>

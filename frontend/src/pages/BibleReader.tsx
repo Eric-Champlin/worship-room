@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { SEO } from '@/components/SEO'
 import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
-import { BooksDrawerContent } from '@/components/bible/BooksDrawerContent'
+import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
 import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { ChapterHeading } from '@/components/bible/reader/ChapterHeading'
 import { ReaderBody } from '@/components/bible/reader/ReaderBody'
@@ -187,13 +187,7 @@ function BibleReaderInner() {
           </FrostedCard>
         </div>
         <BibleDrawer isOpen={bibleDrawer.isOpen} onClose={bibleDrawer.close} ariaLabel="Browse books">
-          <BooksDrawerContent
-            onClose={bibleDrawer.close}
-            onSelectBook={(slug) => {
-              bibleDrawer.close()
-              navigate(`/bible/${slug}/1`)
-            }}
-          />
+          <DrawerViewRouter onClose={bibleDrawer.close} />
         </BibleDrawer>
       </div>
     )
@@ -233,13 +227,7 @@ function BibleReaderInner() {
           </FrostedCard>
         </div>
         <BibleDrawer isOpen={bibleDrawer.isOpen} onClose={bibleDrawer.close} ariaLabel="Browse books">
-          <BooksDrawerContent
-            onClose={bibleDrawer.close}
-            onSelectBook={(slug) => {
-              bibleDrawer.close()
-              navigate(`/bible/${slug}/1`)
-            }}
-          />
+          <DrawerViewRouter onClose={bibleDrawer.close} />
         </BibleDrawer>
       </div>
     )
@@ -267,6 +255,7 @@ function BibleReaderInner() {
 
       <ReaderChrome
         bookName={book.name}
+        bookSlug={bookSlug!}
         chapter={chapterNumber}
         onTypographyToggle={() => setTypographyOpen((p) => !p)}
         isTypographyOpen={typographyOpen}
@@ -368,13 +357,7 @@ function BibleReaderInner() {
         onClose={bibleDrawer.close}
         ariaLabel="Browse books"
       >
-        <BooksDrawerContent
-          onClose={bibleDrawer.close}
-          onSelectBook={(slug) => {
-            bibleDrawer.close()
-            navigate(`/bible/${slug}/1`)
-          }}
-        />
+        <DrawerViewRouter onClose={bibleDrawer.close} />
       </BibleDrawer>
 
       <FocusVignette

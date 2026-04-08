@@ -13,6 +13,7 @@ function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
       <BibleDrawerProvider>
         <ReaderChrome
           bookName="John"
+          bookSlug="john"
           chapter={3}
           onTypographyToggle={props?.onTypographyToggle ?? vi.fn()}
           isTypographyOpen={props?.isTypographyOpen ?? false}

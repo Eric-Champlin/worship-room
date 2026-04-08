@@ -9,6 +9,7 @@ import {
   getReadingTimeMinutes,
 } from '@/constants/bookMetadata'
 import { BIBLE_PROGRESS_KEY } from '@/constants/bible'
+import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import type { BibleCategory } from '@/types/bible'
 import type { BibleProgressMap } from '@/types/bible'
 import type { BookMetadata } from '@/constants/bookMetadata'
@@ -19,10 +20,10 @@ const TAB_STORAGE_KEY = 'wr_bible_books_tab'
 
 interface BooksDrawerContentProps {
   onClose: () => void
-  onSelectBook: (slug: string) => void
 }
 
-export function BooksDrawerContent({ onClose, onSelectBook }: BooksDrawerContentProps) {
+export function BooksDrawerContent({ onClose }: BooksDrawerContentProps) {
+  const { pushView, returnFocusSlugRef } = useBibleDrawer()
   const [searchQuery, setSearchQuery] = useState('')
   const [testament, setTestament] = useState<Testament>(() => {
     const stored = localStorage.getItem(TAB_STORAGE_KEY)
@@ -30,14 +31,26 @@ export function BooksDrawerContent({ onClose, onSelectBook }: BooksDrawerContent
   })
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-focus search input on mount
+  // Focus management on mount: restore focus to previously-tapped book card (on pop),
+  // or auto-focus search input (on initial open)
   useEffect(() => {
-    // Small delay to let the focus trap initialize first, then steal focus to search
     const timer = setTimeout(() => {
+      const returnSlug = returnFocusSlugRef.current
+      if (returnSlug) {
+        returnFocusSlugRef.current = null
+        const el = document.querySelector(
+          `[data-book-slug="${returnSlug}"]`,
+        ) as HTMLElement | null
+        if (el) {
+          el.focus()
+          el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+          return
+        }
+      }
       searchInputRef.current?.focus()
     }, 50)
     return () => clearTimeout(timer)
-  }, [])
+  }, [returnFocusSlugRef])
 
   // '/' key focuses search input
   useEffect(() => {
@@ -106,9 +119,10 @@ export function BooksDrawerContent({ onClose, onSelectBook }: BooksDrawerContent
 
   const handleSelectBook = useCallback(
     (slug: string) => {
-      onSelectBook(slug)
+      returnFocusSlugRef.current = slug
+      pushView({ type: 'chapters', bookSlug: slug })
     },
-    [onSelectBook]
+    [pushView, returnFocusSlugRef],
   )
 
   const handleSearchKeyDown = useCallback(
@@ -314,6 +328,7 @@ function BookCard({
   return (
     <button
       type="button"
+      data-book-slug={book.slug}
       onClick={() => onSelect(book.slug)}
       className="relative min-h-[44px] w-full overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.06] p-4 text-left backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.18] hover:bg-white/[0.09] hover:shadow-[0_0_35px_rgba(139,92,246,0.10),0_6px_25px_rgba(0,0,0,0.35)] motion-reduce:hover:translate-y-0"
     >

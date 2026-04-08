@@ -101,6 +101,7 @@ All keys use the `wr_` prefix. Data persists across page refreshes and survives 
 | `wr_bible_focus_enabled` | `'true' \| 'false'` | Focus mode enabled (default: true) |
 | `wr_bible_focus_delay` | `'3000' \| '6000' \| '12000'` | Focus mode idle delay in ms (default: 6000) |
 | `wr_bible_focus_dim_orbs` | `'true' \| 'false'` | Dim orbs during focus (default: true, forward-compatible) |
+| `wr_bible_drawer_stack` | `{ stack: DrawerView[], timestamp: number }` | Drawer view stack persistence (24-hour TTL) |
 
 ### Community Challenges
 

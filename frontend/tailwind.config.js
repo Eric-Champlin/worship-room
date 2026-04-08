@@ -271,6 +271,18 @@ export default {
           '0%': { transform: 'translateY(100%)' },
           '100%': { transform: 'translateY(0)' },
         },
+        'view-slide-in': {
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'view-slide-out': {
+          '0%': { transform: 'translateX(0)', opacity: '1' },
+          '100%': { transform: 'translateX(100%)', opacity: '0' },
+        },
+        'view-slide-back-in': {
+          '0%': { transform: 'translateX(-30%)', opacity: '0.5' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
         'golden-sparkle': {
           '0%': { transform: 'translateY(-10px) scale(0)', opacity: '0' },
           '20%': { opacity: '1', transform: 'translateY(10vh) scale(1)' },
@@ -342,6 +354,9 @@ export default {
         'drawer-slide-in': 'drawer-slide-in 300ms cubic-bezier(0.34, 1.2, 0.64, 1) both',
         'drawer-slide-out': 'drawer-slide-out 200ms ease-in both',
         'bottom-sheet-slide-in': 'bottom-sheet-slide-in 300ms cubic-bezier(0.34, 1.2, 0.64, 1) both',
+        'view-slide-in': 'view-slide-in 220ms cubic-bezier(0.34, 1.2, 0.64, 1) both',
+        'view-slide-out': 'view-slide-out 220ms ease-in both',
+        'view-slide-back-in': 'view-slide-back-in 220ms ease-out both',
         'golden-sparkle': 'golden-sparkle var(--sparkle-duration, 3.5s) ease-in-out forwards',
         'tab-fade-in': 'content-fade-in 200ms ease-out both',
         'slide-from-right-spring': 'slide-from-right 300ms cubic-bezier(0.34, 1.3, 0.64, 1) both',

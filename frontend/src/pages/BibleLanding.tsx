@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
@@ -12,7 +11,7 @@ import { QuickActionsRow } from '@/components/bible/landing/QuickActionsRow'
 import { BibleSearchEntry } from '@/components/bible/landing/BibleSearchEntry'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
-import { BooksDrawerContent } from '@/components/bible/BooksDrawerContent'
+import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
 import { getLastRead, getActivePlans, getBibleStreak } from '@/lib/bible/landingState'
 import type { LastRead, ActivePlan, BibleStreak } from '@/types/bible-landing'
 
@@ -40,7 +39,6 @@ function BibleLandingInner() {
   const [plans, setPlans] = useState<ActivePlan[]>([])
   const [streak, setStreak] = useState<BibleStreak | null>(null)
   const { isOpen, close, toggle } = useBibleDrawer()
-  const navigate = useNavigate()
 
   useEffect(() => {
     setLastRead(getLastRead())
@@ -59,14 +57,6 @@ function BibleLandingInner() {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [toggle])
-
-  const handleSelectBook = useCallback(
-    (slug: string) => {
-      navigate(`/bible/${slug}/1`)
-      close()
-    },
-    [navigate, close]
-  )
 
   return (
     <Layout>
@@ -117,7 +107,7 @@ function BibleLandingInner() {
 
       {/* Books Drawer */}
       <BibleDrawer isOpen={isOpen} onClose={close} ariaLabel="Books of the Bible">
-        <BooksDrawerContent onClose={close} onSelectBook={handleSelectBook} />
+        <DrawerViewRouter onClose={close} />
       </BibleDrawer>
     </Layout>
   )
