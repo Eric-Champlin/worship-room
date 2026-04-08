@@ -2,12 +2,18 @@ import type { BibleBook, BibleCategory } from '@/types/bible'
 
 export const BIBLE_PROGRESS_KEY = 'wr_bible_progress'
 export const BIBLE_HIGHLIGHTS_KEY = 'wr_bible_highlights'
+/** @deprecated BB-8 uses BIBLE_NOTES_STORAGE_KEY ('bible:notes'). Kept for pre-redesign compat. */
 export const BIBLE_NOTES_KEY = 'wr_bible_notes'
 export const BIBLE_BOOKMARKS_KEY = 'bible:bookmarks'
 /** @deprecated BB-7 removes highlight cap. Kept for useBibleHighlights backward compat. */
 export const MAX_HIGHLIGHTS = 500
+/** @deprecated BB-8 removes note cap. Kept for pre-redesign compat. */
 export const MAX_NOTES = 200
+/** @deprecated BB-8 uses NOTE_BODY_MAX_CHARS (10000). Kept for pre-redesign compat. */
 export const NOTE_MAX_CHARS = 300
+
+export const BIBLE_NOTES_STORAGE_KEY = 'bible:notes'
+export const NOTE_BODY_MAX_CHARS = 10_000
 
 /** @deprecated Use HIGHLIGHT_EMOTIONS instead. Kept for migration compatibility. */
 export const HIGHLIGHT_COLORS = [

@@ -29,7 +29,11 @@ import {
   getBookmarksForChapter,
   subscribe as subscribeBookmarks,
 } from '@/lib/bible/bookmarkStore'
-import type { BibleVerse, Bookmark, Highlight } from '@/types/bible'
+import {
+  getNotesForChapter,
+  subscribe as subscribeNotes,
+} from '@/lib/bible/notes/store'
+import type { BibleVerse, Bookmark, Highlight, Note } from '@/types/bible'
 
 function BibleReaderInner() {
   const { book: bookSlug, chapter: chapterParam } = useParams<{
@@ -141,6 +145,22 @@ function BibleReaderInner() {
   useEffect(() => {
     const unsubscribe = subscribeBookmarks(() => {
       setChapterBookmarks(getBookmarksForChapter(bookSlug ?? '', chapterNumber))
+    })
+    return unsubscribe
+  }, [bookSlug, chapterNumber])
+
+  // Note store subscription (BB-8)
+  const [chapterNotes, setChapterNotes] = useState<Note[]>(() =>
+    getNotesForChapter(bookSlug ?? '', chapterNumber),
+  )
+
+  useEffect(() => {
+    setChapterNotes(getNotesForChapter(bookSlug ?? '', chapterNumber))
+  }, [bookSlug, chapterNumber])
+
+  useEffect(() => {
+    const unsubscribe = subscribeNotes(() => {
+      setChapterNotes(getNotesForChapter(bookSlug ?? '', chapterNumber))
     })
     return unsubscribe
   }, [bookSlug, chapterNumber])
@@ -458,6 +478,7 @@ function BibleReaderInner() {
                 selectedVerses={selectedVerseNumbers}
                 chapterHighlights={chapterHighlights}
                 chapterBookmarks={chapterBookmarks}
+                chapterNotes={chapterNotes}
                 selectionVisible={selectionVisible}
                 freshHighlightVerses={freshHighlightVerses}
                 reducedMotion={reducedMotion}

@@ -36,6 +36,8 @@
   --highlight-promise-ring: rgba(110, 231, 183, 0.40);
   --bookmark-marker: rgba(168, 162, 200, 0.50);
   --bookmark-marker-hover: rgba(168, 162, 200, 0.75);
+  --note-marker: rgba(168, 162, 200, 0.50);
+  --note-marker-hover: rgba(168, 162, 200, 0.75);
 }
 [data-reader-theme="parchment"] {
   --reader-bg: #F5F0E8;
@@ -59,6 +61,8 @@
   --highlight-promise-ring: rgba(5, 150, 105, 0.35);
   --bookmark-marker: rgba(120, 90, 50, 0.50);
   --bookmark-marker-hover: rgba(120, 90, 50, 0.75);
+  --note-marker: rgba(120, 90, 50, 0.50);
+  --note-marker-hover: rgba(120, 90, 50, 0.75);
 }
 [data-reader-theme="sepia"] {
   --reader-bg: #E8D5B7;
@@ -82,12 +86,17 @@
   --highlight-promise-ring: rgba(4, 120, 87, 0.35);
   --bookmark-marker: rgba(90, 60, 30, 0.50);
   --bookmark-marker-hover: rgba(90, 60, 30, 0.75);
+  --note-marker: rgba(90, 60, 30, 0.50);
+  --note-marker-hover: rgba(90, 60, 30, 0.75);
 }
 
 /* Bookmark marker hover brightening (desktop) */
 @media (hover: hover) {
   [data-verse]:hover .bookmark-marker svg {
     color: var(--bookmark-marker-hover);
+  }
+  [data-verse]:hover .note-marker svg {
+    color: var(--note-marker-hover);
   }
 }
 

@@ -7,7 +7,8 @@ import {
 import { VerseJumpSentinel } from '@/components/bible/reader/VerseJumpPill'
 import type { ReaderSettings } from '@/hooks/useReaderSettings'
 import { VerseBookmarkMarker } from '@/components/bible/reader/VerseBookmarkMarker'
-import type { BibleVerse, Bookmark, Highlight } from '@/types/bible'
+import { VerseNoteMarker } from '@/components/bible/reader/VerseNoteMarker'
+import type { BibleVerse, Bookmark, Highlight, Note } from '@/types/bible'
 
 interface ReaderBodyProps {
   verses: BibleVerse[]
@@ -23,6 +24,8 @@ interface ReaderBodyProps {
   selectionVisible?: boolean
   /** Bookmark data for this chapter */
   chapterBookmarks?: Bookmark[]
+  /** Note data for this chapter */
+  chapterNotes?: Note[]
   /** Verse numbers that just received a highlight (for pulse animation) */
   freshHighlightVerses?: number[]
   /** Whether user prefers reduced motion */
@@ -38,6 +41,7 @@ export function ReaderBody({
   selectedVerses,
   chapterHighlights,
   chapterBookmarks,
+  chapterNotes,
   selectionVisible = true,
   freshHighlightVerses,
   reducedMotion,
@@ -74,6 +78,9 @@ export function ReaderBody({
             const isBookmarked = !!chapterBookmarks?.find(
               (b) => verse.number >= b.startVerse && verse.number <= b.endVerse,
             )
+            const hasNote = !!chapterNotes?.find(
+              (n) => verse.number >= n.startVerse && verse.number <= n.endVerse,
+            )
 
             return (
               <span
@@ -100,7 +107,15 @@ export function ReaderBody({
                       }
                     : undefined
                 }
-                aria-label={isBookmarked ? `${bookSlug} ${chapter}:${verse.number}, bookmarked` : undefined}
+                aria-label={
+                  isBookmarked && hasNote
+                    ? `${bookSlug} ${chapter}:${verse.number}, bookmarked, has a note`
+                    : isBookmarked
+                      ? `${bookSlug} ${chapter}:${verse.number}, bookmarked`
+                      : hasNote
+                        ? `${bookSlug} ${chapter}:${verse.number}, has a note`
+                        : undefined
+                }
               >
                 {isBookmarked && <VerseBookmarkMarker />}
                 <sup
@@ -109,6 +124,7 @@ export function ReaderBody({
                 >
                   {verse.number}
                 </sup>
+                {hasNote && <VerseNoteMarker />}
                 {verse.text}{' '}
               </span>
             )

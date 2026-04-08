@@ -11,6 +11,7 @@ import {
 } from '../verseActionRegistry'
 import { applyHighlight } from '../highlightStore'
 import { toggleBookmark, getAllBookmarks, _resetCacheForTesting as resetBookmarkCache } from '../bookmarkStore'
+import { upsertNote, _resetCacheForTesting as resetNoteCache } from '../notes/store'
 import type { VerseSelection, VerseActionContext } from '@/types/verse-actions'
 
 // ---------------------------------------------------------------------------
@@ -195,9 +196,9 @@ describe('verseActionRegistry', () => {
     })
 
     it('sub-view stubs render placeholder containing "ships in BB-"', () => {
-      // Exclude highlight (BB-7 implemented) — only stubs match this pattern
+      // Exclude highlight (BB-7) and note (BB-8) — only stubs match this pattern
       const withSubViews = getAllActions().filter(
-        (h) => h.hasSubView && h.renderSubView && h.action !== 'highlight',
+        (h) => h.hasSubView && h.renderSubView && h.action !== 'highlight' && h.action !== 'note',
       )
       expect(withSubViews.length).toBeGreaterThan(0)
 
@@ -351,6 +352,45 @@ describe('verseActionRegistry', () => {
       } finally {
         Storage.prototype.setItem = original
       }
+    })
+  })
+
+  describe('note handler', () => {
+    beforeEach(() => {
+      localStorage.clear()
+      resetNoteCache()
+    })
+
+    it('getState returns { active: false } when no note exists', () => {
+      const handler = getActionByType('note')!
+      const state = handler.getState!(SINGLE_VERSE)
+      expect(state.active).toBe(false)
+    })
+
+    it('getState returns { active: true, activeColor } when note exists for selection', () => {
+      upsertNote({ book: 'john', chapter: 3, startVerse: 16, endVerse: 16 }, 'Test note')
+
+      const handler = getActionByType('note')!
+      const state = handler.getState!(SINGLE_VERSE)
+      expect(state.active).toBe(true)
+      expect(state.activeColor).toBe('var(--note-marker)')
+    })
+
+    it('getState returns active for multi-verse selection where one verse has a note', () => {
+      upsertNote({ book: 'john', chapter: 3, startVerse: 17, endVerse: 17 }, 'Note on v17')
+
+      const handler = getActionByType('note')!
+      const state = handler.getState!(MULTI_VERSE)
+      expect(state.active).toBe(true)
+    })
+
+    it('renderSubView returns a valid React element', () => {
+      const handler = getActionByType('note')!
+      const element = handler.renderSubView!({
+        selection: SINGLE_VERSE,
+        onBack: () => {},
+      })
+      expect(element).toBeDefined()
     })
   })
 

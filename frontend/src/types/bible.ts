@@ -87,7 +87,18 @@ export interface Bookmark {
   createdAt: number     // epoch ms
 }
 
-/** A personal note attached to a verse */
+export interface Note {
+  id: string
+  book: string          // slug e.g. "john"
+  chapter: number
+  startVerse: number
+  endVerse: number      // equals startVerse for single-verse
+  body: string          // plain text, max 10,000 chars
+  createdAt: number     // epoch ms
+  updatedAt: number     // epoch ms
+}
+
+/** @deprecated BB-8 uses Note interface instead. Kept for pre-redesign compat. */
 export interface BibleNote {
   id: string
   book: string

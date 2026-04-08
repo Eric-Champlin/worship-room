@@ -35,6 +35,8 @@ import {
   restoreBookmarks,
   BookmarkStorageFullError,
 } from '@/lib/bible/bookmarkStore'
+import { getNoteForVerse } from '@/lib/bible/notes/store'
+import { NoteEditorSubView } from '@/components/bible/reader/NoteEditorSubView'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -183,7 +185,24 @@ const note: VerseActionHandler = {
   icon: PenLine,
   category: 'primary',
   hasSubView: true,
-  renderSubView: stubSubView('Note editor ships in BB-8'),
+
+  getState: (selection: VerseSelection) => {
+    for (let v = selection.startVerse; v <= selection.endVerse; v++) {
+      if (getNoteForVerse(selection.book, selection.chapter, v)) {
+        return { active: true, activeColor: 'var(--note-marker)' }
+      }
+    }
+    return { active: false }
+  },
+
+  renderSubView: ({ selection, onBack, context }) => {
+    return React.createElement(NoteEditorSubView, {
+      selection,
+      onBack,
+      context,
+    })
+  },
+
   isAvailable: () => true,
   onInvoke: () => {},
 }

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import { ReaderBody } from '../ReaderBody'
 import type { ReaderSettings } from '@/hooks/useReaderSettings'
-import type { BibleVerse, Bookmark, Highlight } from '@/types/bible'
+import type { BibleVerse, Bookmark, Highlight, Note } from '@/types/bible'
 
 const DEFAULT_SETTINGS: ReaderSettings = {
   theme: 'midnight',
@@ -479,5 +479,143 @@ describe('ReaderBody', () => {
     expect(verse1.style.backgroundColor).toBe('var(--highlight-peace-bg)')
     // Has bookmark marker
     expect(verse1.querySelector('svg')).toBeTruthy()
+  })
+
+  // --- Note marker tests (BB-8) ---
+
+  it('renders note marker when verse has a note', () => {
+    const notes: Note[] = [
+      {
+        id: 'n1',
+        book: 'john',
+        chapter: 1,
+        startVerse: 1,
+        endVerse: 1,
+        body: 'Test note',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+    ]
+
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterNotes={notes}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    expect(verse1.querySelector('.note-marker')).toBeTruthy()
+  })
+
+  it('does not render note marker when verse has no note', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterNotes={[]}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    expect(verse1.querySelector('.note-marker')).toBeFalsy()
+  })
+
+  it('aria-label includes "has a note" for noted verses', () => {
+    const notes: Note[] = [
+      {
+        id: 'n1',
+        book: 'john',
+        chapter: 1,
+        startVerse: 2,
+        endVerse: 2,
+        body: 'My note',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+    ]
+
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterNotes={notes}
+      />,
+    )
+
+    const verse2 = document.querySelector('[data-verse="2"]') as HTMLElement
+    expect(verse2.getAttribute('aria-label')).toBe('john 1:2, has a note')
+  })
+
+  it('aria-label includes "bookmarked, has a note" when both present', () => {
+    const bookmarks: Bookmark[] = [
+      { id: 'b1', book: 'john', chapter: 1, startVerse: 1, endVerse: 1, createdAt: Date.now() },
+    ]
+    const notes: Note[] = [
+      {
+        id: 'n1',
+        book: 'john',
+        chapter: 1,
+        startVerse: 1,
+        endVerse: 1,
+        body: 'Note',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+    ]
+
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterBookmarks={bookmarks}
+        chapterNotes={notes}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    expect(verse1.getAttribute('aria-label')).toBe('john 1:1, bookmarked, has a note')
+  })
+
+  it('note marker and bookmark marker coexist on same verse', () => {
+    const bookmarks: Bookmark[] = [
+      { id: 'b1', book: 'john', chapter: 1, startVerse: 1, endVerse: 1, createdAt: Date.now() },
+    ]
+    const notes: Note[] = [
+      {
+        id: 'n1',
+        book: 'john',
+        chapter: 1,
+        startVerse: 1,
+        endVerse: 1,
+        body: 'Both',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+    ]
+
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterBookmarks={bookmarks}
+        chapterNotes={notes}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    expect(verse1.querySelector('.bookmark-marker')).toBeTruthy()
+    expect(verse1.querySelector('.note-marker')).toBeTruthy()
   })
 })
