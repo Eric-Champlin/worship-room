@@ -10,6 +10,7 @@ import {
   JOURNAL_MILESTONES_KEY,
   JOURNAL_MODE_KEY,
   JOURNAL_DRAFT_KEY,
+  VERSE_FRAMINGS,
 } from '@/constants/daily-experience'
 import {
   getJournalPrompts,
@@ -18,7 +19,9 @@ import {
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { JournalInput } from '@/components/daily/JournalInput'
 import { SavedEntriesList } from '@/components/daily/SavedEntriesList'
-import type { JournalMode, SavedJournalEntry, PrayContext } from '@/types/daily-experience'
+import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
+import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
+import type { JournalMode, SavedJournalEntry, PrayContext, JournalVerseContext } from '@/types/daily-experience'
 
 const JOURNAL_MILESTONES: Record<number, string> = {
   10: '10 entries! Your journal is becoming a treasure.',
@@ -41,8 +44,13 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   const { recordActivity } = useFaithPoints()
   const location = useLocation()
   const navigate = useNavigate()
+  const { verseContext, isHydrating, clearVerseContext } = useVerseContextPreload('journal')
   const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
   const challengeContext = (location.state as { challengeContext?: { actionType: string; dailyAction: string } } | null)?.challengeContext
+
+  const journalVerseContext: JournalVerseContext | null = verseContext
+    ? { book: verseContext.book, chapter: verseContext.chapter, startVerse: verseContext.startVerse, endVerse: verseContext.endVerse, reference: verseContext.reference }
+    : null
 
   // Mode toggle
   const [mode, setMode] = useState<JournalMode>(() => {
@@ -184,6 +192,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
       timestamp: new Date().toISOString(),
       mode: entry.mode,
       promptText: entry.promptText,
+      ...(journalVerseContext && { verseContext: journalVerseContext }),
     }
     setSavedEntries((prev) => [savedEntry, ...prev])
     markJournalComplete()
@@ -281,6 +290,16 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
               </button>
             </div>
           </div>
+        )}
+
+        {/* Verse Prompt Card (from Bible bridge) */}
+        {isHydrating && <VersePromptSkeleton />}
+        {verseContext && (
+          <VersePromptCard
+            context={verseContext}
+            onRemove={clearVerseContext}
+            framingLine={VERSE_FRAMINGS.journal}
+          />
         )}
 
         <JournalInput

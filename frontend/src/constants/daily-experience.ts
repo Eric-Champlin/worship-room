@@ -66,4 +66,10 @@ export const BREATHING_PHASES = {
   breatheOut: { label: 'Breathe out', duration: 8 },
 } as const
 
+export const VERSE_FRAMINGS = {
+  pray: 'What do you want to say to God about this?',
+  journal: 'What comes up as you sit with this?',
+  meditate: '',
+} as const
+
 export const DURATION_OPTIONS = [2, 5, 10] as const

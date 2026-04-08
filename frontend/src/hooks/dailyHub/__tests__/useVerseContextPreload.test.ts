@@ -39,7 +39,7 @@ describe('useVerseContextPreload', () => {
   it('returns verseContext after successful hydration', async () => {
     vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
 
-    const { result } = renderHook(() => useVerseContextPreload(), {
+    const { result } = renderHook(() => useVerseContextPreload('pray'), {
       wrapper: createWrapper([
         '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible',
       ]),
@@ -61,7 +61,7 @@ describe('useVerseContextPreload', () => {
   })
 
   it('returns null for missing verse params', () => {
-    const { result } = renderHook(() => useVerseContextPreload(), {
+    const { result } = renderHook(() => useVerseContextPreload('pray'), {
       wrapper: createWrapper(['/daily?tab=pray']),
     })
 
@@ -70,7 +70,7 @@ describe('useVerseContextPreload', () => {
   })
 
   it('returns null for invalid params', () => {
-    const { result } = renderHook(() => useVerseContextPreload(), {
+    const { result } = renderHook(() => useVerseContextPreload('pray'), {
       wrapper: createWrapper([
         '/daily?tab=pray&verseBook=fakebook&verseChapter=1&verseStart=1&verseEnd=1&src=bible',
       ]),
@@ -83,7 +83,7 @@ describe('useVerseContextPreload', () => {
   it('cleans URL params after parse', async () => {
     vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
 
-    const { result } = renderHook(() => useVerseContextPreload(), {
+    const { result } = renderHook(() => useVerseContextPreload('pray'), {
       wrapper: createWrapper([
         '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible',
       ]),
@@ -102,7 +102,7 @@ describe('useVerseContextPreload', () => {
   it('clearVerseContext sets context to null', async () => {
     vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
 
-    const { result } = renderHook(() => useVerseContextPreload(), {
+    const { result } = renderHook(() => useVerseContextPreload('pray'), {
       wrapper: createWrapper([
         '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible',
       ]),
@@ -122,7 +122,7 @@ describe('useVerseContextPreload', () => {
   it('does not fire when tab is not pray', () => {
     vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
 
-    const { result } = renderHook(() => useVerseContextPreload(), {
+    const { result } = renderHook(() => useVerseContextPreload('pray'), {
       wrapper: createWrapper([
         '/daily?tab=journal&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible',
       ]),
@@ -135,7 +135,7 @@ describe('useVerseContextPreload', () => {
   it('handles hydration failure', async () => {
     vi.mocked(loadChapterWeb).mockResolvedValue(null)
 
-    const { result } = renderHook(() => useVerseContextPreload(), {
+    const { result } = renderHook(() => useVerseContextPreload('pray'), {
       wrapper: createWrapper([
         '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible',
       ]),
@@ -147,6 +147,53 @@ describe('useVerseContextPreload', () => {
     })
 
     expect(result.current.verseContext).toBeNull()
+    expect(loadChapterWeb).toHaveBeenCalledWith('john', 3)
+  })
+
+  it('returns verseContext for journal tab', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
+
+    const { result } = renderHook(() => useVerseContextPreload('journal'), {
+      wrapper: createWrapper([
+        '/daily?tab=journal&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible',
+      ]),
+    })
+
+    await waitFor(() => {
+      expect(result.current.verseContext).not.toBeNull()
+    })
+
+    expect(result.current.verseContext!.reference).toBe('John 3:16')
+    expect(result.current.verseContext!.book).toBe('john')
+    expect(loadChapterWeb).toHaveBeenCalledWith('john', 3)
+  })
+
+  it('does not fire when tab does not match argument', () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
+
+    const { result } = renderHook(() => useVerseContextPreload('journal'), {
+      wrapper: createWrapper([
+        '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible',
+      ]),
+    })
+
+    expect(result.current.verseContext).toBeNull()
+    expect(loadChapterWeb).not.toHaveBeenCalled()
+  })
+
+  it('cleans URL to tab=journal after parse', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
+
+    const { result } = renderHook(() => useVerseContextPreload('journal'), {
+      wrapper: createWrapper([
+        '/daily?tab=journal&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible',
+      ]),
+    })
+
+    await waitFor(() => {
+      expect(result.current.verseContext).not.toBeNull()
+    })
+
     expect(loadChapterWeb).toHaveBeenCalledWith('john', 3)
   })
 })

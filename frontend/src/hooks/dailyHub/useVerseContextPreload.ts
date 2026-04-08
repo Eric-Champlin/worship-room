@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { parseVerseContextFromUrl, hydrateVerseContext } from '@/lib/dailyHub/verseContext'
 import type { VerseContext } from '@/types/daily-experience'
 
-export function useVerseContextPreload() {
+export function useVerseContextPreload(tab: string) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [verseContext, setVerseContext] = useState<VerseContext | null>(null)
   const [isHydrating, setIsHydrating] = useState(false)
@@ -13,8 +13,7 @@ export function useVerseContextPreload() {
   useEffect(() => {
     if (hydrating.current) return
 
-    const tab = searchParams.get('tab')
-    if (tab !== 'pray') return
+    if (searchParams.get('tab') !== tab) return
 
     const partial = parseVerseContextFromUrl(searchParams)
     if (!partial) return
@@ -27,7 +26,7 @@ export function useVerseContextPreload() {
     setIsHydrating(true)
 
     // Clean URL immediately to prevent race conditions with tab switching
-    setSearchParams({ tab: 'pray' }, { replace: true })
+    setSearchParams({ tab }, { replace: true })
 
     hydrateVerseContext(partial).then((ctx) => {
       if (ctx) {
@@ -36,7 +35,7 @@ export function useVerseContextPreload() {
       setIsHydrating(false)
       hydrating.current = false
     })
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, tab])
 
   const clearVerseContext = useCallback(() => {
     setVerseContext(null)

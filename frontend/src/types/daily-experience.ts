@@ -102,6 +102,7 @@ export interface SavedJournalEntry {
   mode: JournalMode
   promptText?: string
   reflection?: string
+  verseContext?: JournalVerseContext
 }
 
 export interface DevotionalSnapshot {
@@ -148,6 +149,15 @@ export interface VerseContext {
 
 /** Verse context attached to saved prayers */
 export interface PrayerVerseContext {
+  book: string
+  chapter: number
+  startVerse: number
+  endVerse: number
+  reference: string
+}
+
+/** Verse context attached to saved journal entries */
+export interface JournalVerseContext {
   book: string
   chapter: number
   startVerse: number

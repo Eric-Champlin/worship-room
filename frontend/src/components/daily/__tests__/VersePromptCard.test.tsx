@@ -55,12 +55,12 @@ describe('VersePromptCard', () => {
   })
 
   it('renders verse reference', () => {
-    render(<VersePromptCard context={singleVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     expect(screen.getByText('John 3:16')).toBeInTheDocument()
   })
 
   it('renders single verse text without verse number superscript', () => {
-    render(<VersePromptCard context={singleVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     expect(
       screen.getByText(
         /For God so loved the world, that he gave his only born Son/,
@@ -71,7 +71,7 @@ describe('VersePromptCard', () => {
   })
 
   it('renders multi-verse with superscript numbers', () => {
-    render(<VersePromptCard context={multiVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={multiVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     const sup16 = screen.getByText('16')
     const sup17 = screen.getByText('17')
     const sup18 = screen.getByText('18')
@@ -81,28 +81,28 @@ describe('VersePromptCard', () => {
   })
 
   it('renders framing line', () => {
-    render(<VersePromptCard context={singleVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     expect(
       screen.getByText('What do you want to say to God about this?'),
     ).toBeInTheDocument()
   })
 
   it('X button has aria-label', () => {
-    render(<VersePromptCard context={singleVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     expect(
       screen.getByRole('button', { name: 'Remove verse prompt' }),
     ).toBeInTheDocument()
   })
 
   it('X button has 44px tap target', () => {
-    render(<VersePromptCard context={singleVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     const button = screen.getByRole('button', { name: 'Remove verse prompt' })
     expect(button.className).toContain('min-h-[44px]')
     expect(button.className).toContain('min-w-[44px]')
   })
 
   it('X button calls onRemove', () => {
-    render(<VersePromptCard context={singleVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     fireEvent.click(
       screen.getByRole('button', { name: 'Remove verse prompt' }),
     )
@@ -110,7 +110,7 @@ describe('VersePromptCard', () => {
   })
 
   it('card has accessible region', () => {
-    render(<VersePromptCard context={singleVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     const region = screen.getByRole('region')
     expect(region).toHaveAttribute(
       'aria-label',
@@ -126,8 +126,15 @@ describe('VersePromptCard', () => {
 
   it('respects prefers-reduced-motion', () => {
     vi.mocked(useReducedMotion).mockReturnValue(true)
-    render(<VersePromptCard context={singleVerseContext} onRemove={noop} />)
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     const region = screen.getByRole('region')
     expect(region.className).not.toContain('animate-fade-in')
+  })
+
+  it('renders custom framing line', () => {
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What comes up as you sit with this?" />)
+    expect(
+      screen.getByText('What comes up as you sit with this?'),
+    ).toBeInTheDocument()
   })
 })

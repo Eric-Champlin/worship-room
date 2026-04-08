@@ -14,7 +14,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAudioState, useAudioDispatch } from '@/components/audio/AudioProvider'
 import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { SCENE_BY_ID } from '@/data/scenes'
-import { PRAYER_DRAFT_KEY } from '@/constants/daily-experience'
+import { PRAYER_DRAFT_KEY, VERSE_FRAMINGS } from '@/constants/daily-experience'
 import { DevotionalPreviewPanel } from '@/components/daily/DevotionalPreviewPanel'
 import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
 import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
@@ -40,7 +40,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
   const { loadScene } = useScenePlayer()
   const location = useLocation()
   const navigate = useNavigate()
-  const { verseContext, isHydrating, clearVerseContext } = useVerseContextPreload()
+  const { verseContext, isHydrating, clearVerseContext } = useVerseContextPreload('pray')
   const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
   const challengeContext = (location.state as { challengeContext?: { actionType: string; dayTitle: string; dayNumber: number } } | null)?.challengeContext
 
@@ -217,7 +217,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
           {/* Verse Prompt Card (from Bible bridge) */}
           {isHydrating && !isLoading && !prayer && <VersePromptSkeleton />}
           {verseContext && !isLoading && !prayer && (
-            <VersePromptCard context={verseContext} onRemove={clearVerseContext} />
+            <VersePromptCard context={verseContext} onRemove={clearVerseContext} framingLine={VERSE_FRAMINGS.pray} />
           )}
 
           {/* Prayer Response (loading + display + actions) */}

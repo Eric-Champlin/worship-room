@@ -319,7 +319,11 @@ const journal: VerseActionHandler = {
   category: 'secondary',
   hasSubView: false,
   isAvailable: () => true,
-  onInvoke: () => {},
+  onInvoke: (selection, ctx) => {
+    const url = buildDailyHubVerseUrl('journal', selection)
+    ctx.closeSheet({ navigating: true })
+    ctx.navigate(url)
+  },
 }
 
 const meditate: VerseActionHandler = {

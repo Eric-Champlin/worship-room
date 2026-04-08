@@ -6,9 +6,10 @@ import type { VerseContext } from '@/types/daily-experience'
 interface VersePromptCardProps {
   context: VerseContext
   onRemove: () => void
+  framingLine: string
 }
 
-export function VersePromptCard({ context, onRemove }: VersePromptCardProps) {
+export function VersePromptCard({ context, onRemove, framingLine }: VersePromptCardProps) {
   const prefersReduced = useReducedMotion()
 
   return (
@@ -46,7 +47,7 @@ export function VersePromptCard({ context, onRemove }: VersePromptCardProps) {
       </div>
 
       <p className="mt-3 text-sm text-white/60">
-        What do you want to say to God about this?
+        {framingLine}
       </p>
     </div>
   )
