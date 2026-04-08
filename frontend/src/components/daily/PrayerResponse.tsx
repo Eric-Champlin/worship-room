@@ -22,7 +22,7 @@ import { SaveToPrayerListForm } from '@/components/daily/SaveToPrayerListForm'
 import { getPrayers, MAX_PRAYERS } from '@/services/prayer-list-storage'
 import { cn } from '@/lib/utils'
 import { getClassicPrayers } from '@/mocks/daily-experience-mock-data'
-import type { MockPrayer, ClassicPrayer } from '@/types/daily-experience'
+import type { MockPrayer, ClassicPrayer, PrayerVerseContext } from '@/types/daily-experience'
 
 export interface PrayerResponseProps {
   prayer: MockPrayer | null
@@ -35,6 +35,8 @@ export interface PrayerResponseProps {
   audioActiveSounds: number
   onToggleAudioDrawer: () => void
   onStopAudio: () => void
+  /** Verse context from Bible bridge — forward-compatible prop for Phase 3 save flow */
+  verseContext?: PrayerVerseContext | null
 }
 
 export function PrayerResponse({
@@ -48,6 +50,7 @@ export function PrayerResponse({
   audioActiveSounds,
   onToggleAudioDrawer,
   onStopAudio,
+  verseContext: _verseContext,
 }: PrayerResponseProps) {
   const { showToast } = useToast()
   const authModal = useAuthModal()

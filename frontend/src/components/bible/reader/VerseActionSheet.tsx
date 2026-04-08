@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ChevronRight, X, ArrowLeft, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -45,6 +46,7 @@ export function VerseActionSheet({
   onClose,
   onExtendSelection: _onExtendSelection, // reserved for future in-sheet selection UI
 }: VerseActionSheetProps) {
+  const routerNavigate = useNavigate()
   const reducedMotion = useReducedMotion()
   const { showToast } = useToast()
   const [isEntering, setIsEntering] = useState(true)
@@ -177,10 +179,11 @@ export function VerseActionSheet({
         handler.onInvoke(selection, {
           showToast: forwardShowToast,
           closeSheet: onClose,
+          navigate: (url) => routerNavigate(url),
         })
       }
     },
-    [selection, forwardShowToast, onClose],
+    [selection, forwardShowToast, onClose, routerNavigate],
   )
 
   const handleSubViewBack = useCallback(() => {
@@ -315,6 +318,7 @@ export function VerseActionSheet({
                 context: {
                   showToast: forwardShowToast,
                   closeSheet: onClose,
+                  navigate: (url) => routerNavigate(url),
                 },
               })}
             </div>

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { VerseActionSheet } from '../VerseActionSheet'
 import type { VerseSelection } from '@/types/verse-actions'
 
@@ -59,6 +60,14 @@ const defaultProps = {
   onExtendSelection: vi.fn(),
 }
 
+function renderSheet(props = defaultProps) {
+  return render(
+    <MemoryRouter>
+      <VerseActionSheet {...props} />
+    </MemoryRouter>,
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -72,29 +81,27 @@ describe('VerseActionSheet accessibility', () => {
   })
 
   it('dialog role and aria attributes', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     const dialog = screen.getByRole('dialog')
     expect(dialog).toHaveAttribute('aria-modal', 'true')
     expect(dialog).toHaveAttribute('aria-label', 'Actions for John 3:16')
   })
 
   it('aria-live announces single selection on open', () => {
-    const { container } = render(<VerseActionSheet {...defaultProps} />)
+    const { container } = renderSheet()
     const live = container.querySelector('[aria-live="polite"]')
     expect(live).toBeTruthy()
     expect(live!.textContent).toContain('Actions for John 3:16')
   })
 
   it('aria-live announces range selection', () => {
-    const { container } = render(
-      <VerseActionSheet {...defaultProps} selection={MULTI_VERSE} />,
-    )
+    const { container } = renderSheet({ ...defaultProps, selection: MULTI_VERSE })
     const live = container.querySelector('[aria-live="polite"]')
     expect(live!.textContent).toContain('Selected John 3:16 through 18')
   })
 
   it('all primary action buttons have min 44px tap targets', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     const highlight = screen.getByLabelText('Highlight')
     const note = screen.getByLabelText('Note')
     const bookmark = screen.getByLabelText('Bookmark')
@@ -107,7 +114,7 @@ describe('VerseActionSheet accessibility', () => {
   })
 
   it('all secondary action buttons have min 44px height', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     const secondary = [
       'Pray about this',
       'Journal about this',
@@ -126,30 +133,30 @@ describe('VerseActionSheet accessibility', () => {
   })
 
   it('keyboard shortcut 1 activates first primary action (Highlight)', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     fireEvent.keyDown(window, { key: '1' })
     // Highlight has a sub-view — BB-7 color picker renders
     expect(screen.getByLabelText('Peace highlight')).toBeInTheDocument()
   })
 
   it('keyboard c activates copy', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     fireEvent.keyDown(window, { key: 'c' })
     expect(navigator.clipboard.writeText).toHaveBeenCalled()
   })
 
   it('close button has accessible label', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     expect(screen.getByLabelText('Close')).toBeInTheDocument()
   })
 
   it('copy-ref button has accessible label', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     expect(screen.getByLabelText('Copy reference')).toBeInTheDocument()
   })
 
   it('sub-view back button has accessible label', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     fireEvent.click(screen.getByLabelText('Highlight'))
     expect(screen.getByLabelText('Back')).toBeInTheDocument()
   })

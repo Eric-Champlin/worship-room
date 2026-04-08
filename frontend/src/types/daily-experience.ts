@@ -125,3 +125,32 @@ export interface PrayContext {
   customPrompt?: string
   devotionalSnapshot?: DevotionalSnapshot
 }
+
+/** Partial context parsed from URL (before hydration — no verse text) */
+export interface VerseContextPartial {
+  book: string
+  chapter: number
+  startVerse: number
+  endVerse: number
+  source: 'bible'
+}
+
+/** Full hydrated verse context (after loading verse text from WEB JSON) */
+export interface VerseContext {
+  book: string
+  chapter: number
+  startVerse: number
+  endVerse: number
+  verses: Array<{ number: number; text: string }>
+  reference: string
+  source: 'bible'
+}
+
+/** Verse context attached to saved prayers */
+export interface PrayerVerseContext {
+  book: string
+  chapter: number
+  startVerse: number
+  endVerse: number
+  reference: string
+}

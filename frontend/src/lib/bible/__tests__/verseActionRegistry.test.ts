@@ -58,6 +58,7 @@ function createMockContext(): VerseActionContext {
   return {
     showToast: vi.fn(),
     closeSheet: vi.fn(),
+    navigate: vi.fn(),
   }
 }
 
@@ -417,6 +418,55 @@ describe('verseActionRegistry', () => {
         onBack: () => {},
       })
       expect(element).toBeDefined()
+    })
+  })
+
+  describe('pray handler', () => {
+    it('calls closeSheet with navigating flag', () => {
+      const handler = getActionByType('pray')!
+      const ctx = createMockContext()
+      handler.onInvoke(SINGLE_VERSE, ctx)
+      expect(ctx.closeSheet).toHaveBeenCalledWith({ navigating: true })
+    })
+
+    it('calls navigate with built URL', () => {
+      const handler = getActionByType('pray')!
+      const ctx = createMockContext()
+      handler.onInvoke(SINGLE_VERSE, ctx)
+      expect(ctx.navigate).toHaveBeenCalledWith(
+        expect.stringContaining('/daily?tab=pray&verseBook=')
+      )
+    })
+
+    it('builds URL with correct verse params for single verse', () => {
+      const handler = getActionByType('pray')!
+      const ctx = createMockContext()
+      handler.onInvoke(SINGLE_VERSE, ctx)
+      const url = (ctx.navigate as ReturnType<typeof vi.fn>).mock.calls[0][0]
+      expect(url).toContain('verseStart=16')
+      expect(url).toContain('verseEnd=16')
+      expect(url).toContain('src=bible')
+    })
+
+    it('builds URL with correct verse params for range', () => {
+      const handler = getActionByType('pray')!
+      const ctx = createMockContext()
+      handler.onInvoke(MULTI_VERSE, ctx)
+      const url = (ctx.navigate as ReturnType<typeof vi.fn>).mock.calls[0][0]
+      expect(url).toContain('verseStart=16')
+      expect(url).toContain('verseEnd=18')
+    })
+
+    it('calls closeSheet before navigate', () => {
+      const handler = getActionByType('pray')!
+      const callOrder: string[] = []
+      const ctx: VerseActionContext = {
+        showToast: vi.fn(),
+        closeSheet: vi.fn(() => callOrder.push('closeSheet')),
+        navigate: vi.fn(() => callOrder.push('navigate')),
+      }
+      handler.onInvoke(SINGLE_VERSE, ctx)
+      expect(callOrder).toEqual(['closeSheet', 'navigate'])
     })
   })
 

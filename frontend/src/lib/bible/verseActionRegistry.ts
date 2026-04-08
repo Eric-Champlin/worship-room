@@ -38,6 +38,7 @@ import {
 } from '@/lib/bible/bookmarkStore'
 import { getNoteForVerse } from '@/lib/bible/notes/store'
 import { NoteEditorSubView } from '@/components/bible/reader/NoteEditorSubView'
+import { buildDailyHubVerseUrl } from '@/lib/bible/verseActions/buildDailyHubVerseUrl'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -303,7 +304,11 @@ const pray: VerseActionHandler = {
   category: 'secondary',
   hasSubView: false,
   isAvailable: () => true,
-  onInvoke: () => {},
+  onInvoke: (selection, ctx) => {
+    const url = buildDailyHubVerseUrl('pray', selection)
+    ctx.closeSheet({ navigating: true })
+    ctx.navigate(url)
+  },
 }
 
 const journal: VerseActionHandler = {

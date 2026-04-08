@@ -55,6 +55,7 @@ const makeSelection = (overrides: Partial<VerseSelection> = {}): VerseSelection 
 const makeContext = (): VerseActionContext => ({
   showToast: vi.fn(),
   closeSheet: vi.fn(),
+  navigate: vi.fn(),
 })
 
 const makeNote = (overrides: Partial<Note> = {}): Note => ({
