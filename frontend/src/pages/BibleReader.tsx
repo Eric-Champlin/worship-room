@@ -21,7 +21,11 @@ import { useVerseTap } from '@/hooks/useVerseTap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
-import type { BibleVerse, BibleHighlight } from '@/types/bible'
+import {
+  getHighlightsForChapter,
+  subscribe as subscribeHighlights,
+} from '@/lib/bible/highlightStore'
+import type { BibleVerse, Highlight } from '@/types/bible'
 
 function BibleReaderInner() {
   const { book: bookSlug, chapter: chapterParam } = useParams<{
@@ -77,19 +81,56 @@ function BibleReaderInner() {
     return nums
   }, [selection])
 
-  // Highlighted verse numbers (read from localStorage for ring vs fill decision)
-  const highlightedVerseNumbers = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('wr_bible_highlights')
-      if (!raw) return [] as number[]
-      const highlights: BibleHighlight[] = JSON.parse(raw)
-      return highlights
-        .filter((h) => h.book === bookSlug && h.chapter === chapterNumber)
-        .map((h) => h.verseNumber)
-    } catch {
-      return [] as number[]
+  // Highlight store subscription (BB-7)
+  const [chapterHighlights, setChapterHighlights] = useState<Highlight[]>(() =>
+    getHighlightsForChapter(bookSlug ?? '', chapterNumber),
+  )
+  const prevHighlightVersesRef = useRef<Set<string>>(new Set())
+
+  useEffect(() => {
+    const fresh = getHighlightsForChapter(bookSlug ?? '', chapterNumber)
+    setChapterHighlights(fresh)
+    // Rebuild the prev-verses set when chapter changes (no pulse on navigation)
+    const verseKeys = new Set<string>()
+    for (const hl of fresh) {
+      for (let v = hl.startVerse; v <= hl.endVerse; v++) verseKeys.add(`${hl.color}:${v}`)
     }
+    prevHighlightVersesRef.current = verseKeys
   }, [bookSlug, chapterNumber])
+
+  useEffect(() => {
+    const unsubscribe = subscribeHighlights(() => {
+      const updated = getHighlightsForChapter(bookSlug ?? '', chapterNumber)
+      setChapterHighlights(updated)
+
+      // Diff previous vs new to find only newly highlighted verses
+      const currentKeys = new Set<string>()
+      const newVerseNums: number[] = []
+      for (const hl of updated) {
+        for (let v = hl.startVerse; v <= hl.endVerse; v++) {
+          const key = `${hl.color}:${v}`
+          currentKeys.add(key)
+          if (!prevHighlightVersesRef.current.has(key)) {
+            newVerseNums.push(v)
+          }
+        }
+      }
+      prevHighlightVersesRef.current = currentKeys
+
+      if (newVerseNums.length > 0) {
+        setFreshHighlightVerses(newVerseNums)
+      }
+    })
+    return unsubscribe
+  }, [bookSlug, chapterNumber])
+
+  // Track freshly highlighted verses for pulse animation
+  const [freshHighlightVerses, setFreshHighlightVerses] = useState<number[]>([])
+  useEffect(() => {
+    if (freshHighlightVerses.length === 0) return
+    const timer = setTimeout(() => setFreshHighlightVerses([]), 500)
+    return () => clearTimeout(timer)
+  }, [freshHighlightVerses])
 
   // Selection fade-out on close
   const handleSheetClose = useCallback(() => {
@@ -394,8 +435,10 @@ function BibleReaderInner() {
                 settings={settings}
                 paragraphs={paragraphs}
                 selectedVerses={selectedVerseNumbers}
-                highlightedVerseNumbers={highlightedVerseNumbers}
+                chapterHighlights={chapterHighlights}
                 selectionVisible={selectionVisible}
+                freshHighlightVerses={freshHighlightVerses}
+                reducedMotion={reducedMotion}
               />
             </>
           )}

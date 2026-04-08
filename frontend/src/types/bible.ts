@@ -64,6 +64,19 @@ export interface BibleHighlight {
   createdAt: string
 }
 
+export type HighlightColor = 'peace' | 'conviction' | 'joy' | 'struggle' | 'promise'
+
+export interface Highlight {
+  id: string
+  book: string
+  chapter: number
+  startVerse: number
+  endVerse: number
+  color: HighlightColor
+  createdAt: number
+  updatedAt: number
+}
+
 /** A personal note attached to a verse */
 export interface BibleNote {
   id: string

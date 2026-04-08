@@ -19,6 +19,15 @@ import type {
   VerseActionHandler,
   VerseActionContext,
 } from '@/types/verse-actions'
+import type { HighlightColor } from '@/types/bible'
+import { HighlightColorPicker } from '@/components/bible/reader/HighlightColorPicker'
+import {
+  getHighlightForVerse,
+  getHighlightsForChapter,
+  applyHighlight,
+  removeHighlightsInRange,
+  HighlightStorageFullError,
+} from '@/lib/bible/highlightStore'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -84,6 +93,7 @@ function stubSubView(text: string) {
 // ---------------------------------------------------------------------------
 
 const COPY_CLOSE_DELAY = 400
+const SHEET_CLOSE_DELAY = 300
 
 // ---------------------------------------------------------------------------
 // Primary actions (display order)
@@ -95,7 +105,67 @@ const highlight: VerseActionHandler = {
   icon: Paintbrush,
   category: 'primary',
   hasSubView: true,
-  renderSubView: stubSubView('Color picker ships in BB-7'),
+
+  getState: (selection: VerseSelection) => {
+    const hl = getHighlightForVerse(selection.book, selection.chapter, selection.startVerse)
+    if (!hl) return { active: false }
+    return { active: true, activeColor: `var(--highlight-${hl.color})` }
+  },
+
+  renderSubView: ({ selection, onBack, context }) => {
+    const chapterHighlights = getHighlightsForChapter(selection.book, selection.chapter)
+    const selectedVerses = new Set<number>()
+    for (let v = selection.startVerse; v <= selection.endVerse; v++) selectedVerses.add(v)
+
+    const colorsInSelection = new Set<HighlightColor>()
+    for (const hl of chapterHighlights) {
+      for (let v = hl.startVerse; v <= hl.endVerse; v++) {
+        if (selectedVerses.has(v)) colorsInSelection.add(hl.color)
+      }
+    }
+
+    const isMixed = colorsInSelection.size > 1
+    const currentColor = colorsInSelection.size === 1 ? [...colorsInSelection][0] : null
+
+    return React.createElement(HighlightColorPicker, {
+      selection,
+      onBack,
+      currentColor,
+      isMixedSelection: isMixed,
+      onApply: (color: HighlightColor) => {
+        try {
+          applyHighlight(
+            {
+              book: selection.book,
+              chapter: selection.chapter,
+              startVerse: selection.startVerse,
+              endVerse: selection.endVerse,
+            },
+            color,
+          )
+          if (context) {
+            setTimeout(() => context.closeSheet(), SHEET_CLOSE_DELAY)
+          }
+        } catch (e) {
+          if (e instanceof HighlightStorageFullError && context) {
+            context.showToast('Storage full — export your highlights and clear old ones.')
+          }
+        }
+      },
+      onRemove: () => {
+        removeHighlightsInRange({
+          book: selection.book,
+          chapter: selection.chapter,
+          startVerse: selection.startVerse,
+          endVerse: selection.endVerse,
+        })
+        if (context) {
+          setTimeout(() => context.closeSheet(), SHEET_CLOSE_DELAY)
+        }
+      },
+    })
+  },
+
   isAvailable: () => true,
   onInvoke: () => {},
 }

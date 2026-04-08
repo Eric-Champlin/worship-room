@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import { ReaderBody } from '../ReaderBody'
 import type { ReaderSettings } from '@/hooks/useReaderSettings'
-import type { BibleVerse } from '@/types/bible'
+import type { BibleVerse, Highlight } from '@/types/bible'
 
 const DEFAULT_SETTINGS: ReaderSettings = {
   theme: 'midnight',
@@ -209,7 +209,17 @@ describe('ReaderBody', () => {
     expect(verse1.className).toContain('rounded-sm')
   })
 
-  it('outline ring on highlighted verse', () => {
+  it('outline ring on highlighted + selected verse', () => {
+    const highlights: Highlight[] = [{
+      id: 'test-1',
+      book: 'john',
+      chapter: 1,
+      startVerse: 1,
+      endVerse: 1,
+      color: 'peace',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }]
     render(
       <ReaderBody
         verses={MOCK_VERSES}
@@ -217,14 +227,13 @@ describe('ReaderBody', () => {
         chapter={1}
         settings={DEFAULT_SETTINGS}
         selectedVerses={[1]}
-        highlightedVerseNumbers={[1]}
+        chapterHighlights={highlights}
         selectionVisible={true}
       />,
     )
 
     const verse1 = document.querySelector('[data-verse="1"]')!
     expect(verse1.className).toContain('outline')
-    expect(verse1.className).toContain('outline-primary/40')
     expect(verse1.className).not.toContain('bg-primary/[0.15]')
   })
 
@@ -265,5 +274,131 @@ describe('ReaderBody', () => {
     expect(verse1.className).toContain('transition-colors')
     expect(verse1.className).toContain('duration-200')
     expect(verse1.className).not.toContain('bg-primary/[0.15]')
+  })
+
+  // --- BB-7 Highlight rendering tests ---
+
+  const makeHighlight = (overrides: Partial<Highlight> = {}): Highlight => ({
+    id: 'hl-1',
+    book: 'john',
+    chapter: 1,
+    startVerse: 1,
+    endVerse: 1,
+    color: 'peace',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    ...overrides,
+  })
+
+  it('verse with highlight shows background color style', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterHighlights={[makeHighlight()]}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    expect(verse1.style.backgroundColor).toBe('var(--highlight-peace-bg)')
+  })
+
+  it('verse without highlight has no background', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterHighlights={[makeHighlight()]}
+      />,
+    )
+
+    const verse2 = document.querySelector('[data-verse="2"]') as HTMLElement
+    expect(verse2.style.backgroundColor).toBe('')
+  })
+
+  it('highlighted + selected verse ring uses highlight color', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        selectedVerses={[1]}
+        chapterHighlights={[makeHighlight({ color: 'joy' })]}
+        selectionVisible={true}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    expect(verse1.style.outlineColor).toBe('var(--highlight-joy-ring)')
+  })
+
+  it('selected + not highlighted verse shows default purple bg', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        selectedVerses={[2]}
+        chapterHighlights={[makeHighlight()]}
+        selectionVisible={true}
+      />,
+    )
+
+    const verse2 = document.querySelector('[data-verse="2"]')!
+    expect(verse2.className).toContain('bg-primary/[0.15]')
+  })
+
+  it('box-decoration-break clone applied to highlighted verse', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterHighlights={[makeHighlight()]}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    expect(verse1.style.boxDecorationBreak).toBe('clone')
+  })
+
+  it('fresh highlight verse gets pulse class', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterHighlights={[makeHighlight()]}
+        freshHighlightVerses={[1]}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]')!
+    expect(verse1.className).toContain('animate-highlight-pulse')
+  })
+
+  it('pulse class absent when reduced motion', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterHighlights={[makeHighlight()]}
+        freshHighlightVerses={[1]}
+        reducedMotion={true}
+      />,
+    )
+
+    const verse1 = document.querySelector('[data-verse="1"]')!
+    expect(verse1.className).not.toContain('animate-highlight-pulse')
   })
 })

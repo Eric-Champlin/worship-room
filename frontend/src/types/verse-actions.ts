@@ -35,6 +35,7 @@ export interface VerseActionHandler {
   renderSubView?: (props: {
     selection: VerseSelection
     onBack: () => void
+    context?: VerseActionContext
   }) => React.ReactNode
   /** Whether this action is available for the current selection */
   isAvailable: (selection: VerseSelection) => boolean

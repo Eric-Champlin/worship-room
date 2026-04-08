@@ -19,18 +19,63 @@
   --reader-text: rgba(255, 255, 255, 0.90);
   --reader-verse-num: rgba(255, 255, 255, 0.30);
   --reader-divider: rgba(255, 255, 255, 0.10);
+  --highlight-peace: #7DD3FC;
+  --highlight-peace-bg: rgba(125, 211, 252, 0.15);
+  --highlight-peace-ring: rgba(125, 211, 252, 0.40);
+  --highlight-conviction: #FB923C;
+  --highlight-conviction-bg: rgba(251, 146, 60, 0.18);
+  --highlight-conviction-ring: rgba(251, 146, 60, 0.40);
+  --highlight-joy: #FDE047;
+  --highlight-joy-bg: rgba(253, 224, 71, 0.15);
+  --highlight-joy-ring: rgba(253, 224, 71, 0.40);
+  --highlight-struggle: #C4B5FD;
+  --highlight-struggle-bg: rgba(196, 181, 253, 0.15);
+  --highlight-struggle-ring: rgba(196, 181, 253, 0.40);
+  --highlight-promise: #6EE7B7;
+  --highlight-promise-bg: rgba(110, 231, 183, 0.15);
+  --highlight-promise-ring: rgba(110, 231, 183, 0.40);
 }
 [data-reader-theme="parchment"] {
   --reader-bg: #F5F0E8;
   --reader-text: #3E2C1A;
   --reader-verse-num: rgba(62, 44, 26, 0.35);
   --reader-divider: rgba(62, 44, 26, 0.15);
+  --highlight-peace: #3B82F6;
+  --highlight-peace-bg: rgba(59, 130, 246, 0.20);
+  --highlight-peace-ring: rgba(59, 130, 246, 0.35);
+  --highlight-conviction: #EA580C;
+  --highlight-conviction-bg: rgba(234, 88, 12, 0.18);
+  --highlight-conviction-ring: rgba(234, 88, 12, 0.35);
+  --highlight-joy: #CA8A04;
+  --highlight-joy-bg: rgba(202, 138, 4, 0.20);
+  --highlight-joy-ring: rgba(202, 138, 4, 0.35);
+  --highlight-struggle: #7C3AED;
+  --highlight-struggle-bg: rgba(124, 58, 237, 0.18);
+  --highlight-struggle-ring: rgba(124, 58, 237, 0.35);
+  --highlight-promise: #059669;
+  --highlight-promise-bg: rgba(5, 150, 105, 0.20);
+  --highlight-promise-ring: rgba(5, 150, 105, 0.35);
 }
 [data-reader-theme="sepia"] {
   --reader-bg: #E8D5B7;
   --reader-text: #2C1A0A;
   --reader-verse-num: rgba(44, 26, 10, 0.35);
   --reader-divider: rgba(44, 26, 10, 0.15);
+  --highlight-peace: #2563EB;
+  --highlight-peace-bg: rgba(37, 99, 235, 0.22);
+  --highlight-peace-ring: rgba(37, 99, 235, 0.35);
+  --highlight-conviction: #C2410C;
+  --highlight-conviction-bg: rgba(194, 65, 12, 0.20);
+  --highlight-conviction-ring: rgba(194, 65, 12, 0.35);
+  --highlight-joy: #A16207;
+  --highlight-joy-bg: rgba(161, 98, 7, 0.22);
+  --highlight-joy-ring: rgba(161, 98, 7, 0.35);
+  --highlight-struggle: #6D28D9;
+  --highlight-struggle-bg: rgba(109, 40, 217, 0.20);
+  --highlight-struggle-ring: rgba(109, 40, 217, 0.35);
+  --highlight-promise: #047857;
+  --highlight-promise-bg: rgba(4, 120, 87, 0.22);
+  --highlight-promise-ring: rgba(4, 120, 87, 0.35);
 }
 
 /* Audio slider thumb/track styling (vendor-prefixed, can't use Tailwind) */
@@ -120,6 +165,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .animate-highlight-pulse {
+    animation: none !important;
+    opacity: 1 !important;
+  }
   .animate-cursor-blink {
     animation: none;
     opacity: 1;

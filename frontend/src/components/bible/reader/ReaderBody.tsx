@@ -6,7 +6,7 @@ import {
 } from '@/hooks/useReaderSettings'
 import { VerseJumpSentinel } from '@/components/bible/reader/VerseJumpPill'
 import type { ReaderSettings } from '@/hooks/useReaderSettings'
-import type { BibleVerse } from '@/types/bible'
+import type { BibleVerse, Highlight } from '@/types/bible'
 
 interface ReaderBodyProps {
   verses: BibleVerse[]
@@ -16,10 +16,14 @@ interface ReaderBodyProps {
   paragraphs?: number[]
   /** Verse numbers currently selected for the action sheet (empty = no selection) */
   selectedVerses?: number[]
-  /** Verse numbers that have a BB-7 highlight color (for ring vs fill decision) */
-  highlightedVerseNumbers?: number[]
+  /** Full highlight data for this chapter (for background color + ring color) */
+  chapterHighlights?: Highlight[]
   /** Whether the selection is actively visible (false = fading out) */
   selectionVisible?: boolean
+  /** Verse numbers that just received a highlight (for pulse animation) */
+  freshHighlightVerses?: number[]
+  /** Whether user prefers reduced motion */
+  reducedMotion?: boolean
 }
 
 export function ReaderBody({
@@ -29,8 +33,10 @@ export function ReaderBody({
   settings,
   paragraphs = [],
   selectedVerses,
-  highlightedVerseNumbers,
+  chapterHighlights,
   selectionVisible = true,
+  freshHighlightVerses,
+  reducedMotion,
 }: ReaderBodyProps) {
   const paragraphSet = new Set(paragraphs)
   const filteredVerses = verses.filter((v) => v.text.trim() !== '')
@@ -54,33 +60,50 @@ export function ReaderBody({
               <br />
             </>
           )}
-          <span
-            data-verse={String(verse.number)}
-            data-book={bookSlug}
-            data-chapter={String(chapter)}
-            id={`verse-${verse.number}`}
-            className={cn(
-              selectedVerses?.includes(verse.number) &&
-                !highlightedVerseNumbers?.includes(verse.number) &&
-                selectionVisible &&
-                'bg-primary/[0.15] rounded-sm',
-              selectedVerses?.includes(verse.number) &&
-                highlightedVerseNumbers?.includes(verse.number) &&
-                selectionVisible &&
-                'outline outline-2 outline-primary/40 outline-offset-1 rounded-sm',
-              selectedVerses?.includes(verse.number) &&
-                !selectionVisible &&
-                'transition-colors duration-200',
-            )}
-          >
-            <sup
-              className="mr-1 align-super font-sans"
-              style={{ fontSize: '0.7em', color: 'var(--reader-verse-num)' }}
-            >
-              {verse.number}
-            </sup>
-            {verse.text}{' '}
-          </span>
+          {(() => {
+            const hl = chapterHighlights?.find(
+              (h) => verse.number >= h.startVerse && verse.number <= h.endVerse,
+            )
+            const isHighlighted = !!hl
+            const isSelected = selectedVerses?.includes(verse.number)
+            const isFresh = freshHighlightVerses?.includes(verse.number)
+
+            return (
+              <span
+                data-verse={String(verse.number)}
+                data-book={bookSlug}
+                data-chapter={String(chapter)}
+                id={`verse-${verse.number}`}
+                className={cn(
+                  isHighlighted && 'rounded-sm',
+                  isSelected && !isHighlighted && selectionVisible && 'bg-primary/[0.15] rounded-sm',
+                  isSelected && isHighlighted && selectionVisible && 'outline outline-2 outline-offset-1 rounded-sm',
+                  isSelected && !selectionVisible && 'transition-colors duration-200',
+                  isFresh && !reducedMotion && 'animate-highlight-pulse',
+                )}
+                style={
+                  isHighlighted
+                    ? {
+                        backgroundColor: `var(--highlight-${hl!.color}-bg)`,
+                        WebkitBoxDecorationBreak: 'clone' as const,
+                        boxDecorationBreak: 'clone' as const,
+                        ...(isSelected && selectionVisible
+                          ? { outlineColor: `var(--highlight-${hl!.color}-ring)` }
+                          : {}),
+                      }
+                    : undefined
+                }
+              >
+                <sup
+                  className="mr-1 align-super font-sans"
+                  style={{ fontSize: '0.7em', color: 'var(--reader-verse-num)' }}
+                >
+                  {verse.number}
+                </sup>
+                {verse.text}{' '}
+              </span>
+            )
+          })()}
           {/* Sentinel after verse 20 for verse jump pill visibility */}
           {showSentinel && verse.number === 20 && <VerseJumpSentinel />}
         </span>

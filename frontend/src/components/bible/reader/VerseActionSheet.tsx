@@ -279,6 +279,10 @@ export function VerseActionSheet({
               {subView.handler.renderSubView?.({
                 selection,
                 onBack: handleSubViewBack,
+                context: {
+                  showToast: (msg: string) => showToast(msg),
+                  closeSheet: onClose,
+                },
               })}
             </div>
           </>
@@ -292,6 +296,17 @@ export function VerseActionSheet({
               <span className="flex-1 truncate font-serif text-lg font-semibold text-white">
                 {formatReference(selection)}
               </span>
+              {(() => {
+                const hlState = primaryActions.find((h) => h.action === 'highlight')?.getState?.(selection)
+                if (!hlState?.active) return null
+                return (
+                  <span
+                    className="inline-block h-3 w-3 flex-shrink-0 rounded-full"
+                    style={{ backgroundColor: hlState.activeColor }}
+                    aria-hidden="true"
+                  />
+                )
+              })()}
               <button
                 onClick={handleCopyReference}
                 className={ICON_BTN_SM}
@@ -323,6 +338,7 @@ export function VerseActionSheet({
             <div className="flex justify-around px-4 py-3">
               {primaryActions.map((handler) => {
                 const Icon = handler.icon
+                const state = handler.getState?.(selection)
                 return (
                   <button
                     key={handler.action}
@@ -332,7 +348,13 @@ export function VerseActionSheet({
                     className="flex min-h-[44px] min-w-[44px] flex-col items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors hover:bg-white/[0.06]"
                     aria-label={handler.label}
                   >
-                    <Icon className="h-6 w-6 text-white/70" />
+                    <span
+                      style={state?.active ? { color: state.activeColor } : undefined}
+                    >
+                      <Icon
+                        className={cn('h-6 w-6', state?.active ? '[&>*]:fill-current' : 'text-white/70')}
+                      />
+                    </span>
                     <span className="text-xs text-white/60">{handler.label}</span>
                   </button>
                 )

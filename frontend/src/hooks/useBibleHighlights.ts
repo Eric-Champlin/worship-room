@@ -1,3 +1,9 @@
+/**
+ * @deprecated Use the highlight store module (`lib/bible/highlightStore`) instead.
+ * This hook has auth-gating that conflicts with BB-7 spec (highlights are public).
+ * The store module supports range-based highlights, subscribe/unsubscribe, and auto-migration.
+ * Will be removed after BB-14.
+ */
 import { useCallback, useState } from 'react'
 
 import { BIBLE_HIGHLIGHTS_KEY, MAX_HIGHLIGHTS } from '@/constants/bible'

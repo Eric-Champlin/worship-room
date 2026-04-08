@@ -131,18 +131,19 @@ describe('VerseActionSheet', () => {
   it('sub-view push on highlight click', () => {
     render(<VerseActionSheet {...defaultProps} />)
     fireEvent.click(screen.getByLabelText('Highlight'))
-    expect(screen.getByText('Color picker ships in BB-7')).toBeInTheDocument()
+    // BB-7: real color picker renders with 5 emotion swatches
+    expect(screen.getByLabelText('Peace highlight')).toBeInTheDocument()
   })
 
   it('sub-view back button returns to root', () => {
     render(<VerseActionSheet {...defaultProps} />)
     fireEvent.click(screen.getByLabelText('Highlight'))
-    expect(screen.getByText('Color picker ships in BB-7')).toBeInTheDocument()
+    expect(screen.getByLabelText('Peace highlight')).toBeInTheDocument()
 
     fireEvent.click(screen.getByLabelText('Back'))
     // Root view should be visible again
     expect(screen.getByText('John 3:16')).toBeInTheDocument()
-    expect(screen.queryByText('Color picker ships in BB-7')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Peace highlight')).not.toBeInTheDocument()
   })
 
   it('escape closes sheet (via onClose prop)', () => {

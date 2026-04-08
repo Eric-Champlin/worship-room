@@ -128,8 +128,8 @@ describe('VerseActionSheet accessibility', () => {
   it('keyboard shortcut 1 activates first primary action (Highlight)', () => {
     render(<VerseActionSheet {...defaultProps} />)
     fireEvent.keyDown(window, { key: '1' })
-    // Highlight has a sub-view, so sub-view text should appear
-    expect(screen.getByText('Color picker ships in BB-7')).toBeInTheDocument()
+    // Highlight has a sub-view — BB-7 color picker renders
+    expect(screen.getByLabelText('Peace highlight')).toBeInTheDocument()
   })
 
   it('keyboard c activates copy', () => {

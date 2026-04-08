@@ -3,14 +3,25 @@ import type { BibleBook, BibleCategory } from '@/types/bible'
 export const BIBLE_PROGRESS_KEY = 'wr_bible_progress'
 export const BIBLE_HIGHLIGHTS_KEY = 'wr_bible_highlights'
 export const BIBLE_NOTES_KEY = 'wr_bible_notes'
+/** @deprecated BB-7 removes highlight cap. Kept for useBibleHighlights backward compat. */
 export const MAX_HIGHLIGHTS = 500
 export const MAX_NOTES = 200
 export const NOTE_MAX_CHARS = 300
+
+/** @deprecated Use HIGHLIGHT_EMOTIONS instead. Kept for migration compatibility. */
 export const HIGHLIGHT_COLORS = [
   { name: 'Yellow', hex: '#FBBF24' },
   { name: 'Green', hex: '#34D399' },
   { name: 'Blue', hex: '#60A5FA' },
   { name: 'Pink', hex: '#F472B6' },
+] as const
+
+export const HIGHLIGHT_EMOTIONS = [
+  { key: 'peace' as const, label: 'Peace', hex: '#7DD3FC' },
+  { key: 'conviction' as const, label: 'Conviction', hex: '#FB923C' },
+  { key: 'joy' as const, label: 'Joy', hex: '#FDE047' },
+  { key: 'struggle' as const, label: 'Struggle', hex: '#C4B5FD' },
+  { key: 'promise' as const, label: 'Promise', hex: '#6EE7B7' },
 ] as const
 
 export const BIBLE_CATEGORIES: ReadonlyArray<{

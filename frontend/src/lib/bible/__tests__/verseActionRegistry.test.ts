@@ -9,6 +9,7 @@ import {
   getSelectionTextWithRef,
   copyToClipboard,
 } from '../verseActionRegistry'
+import { applyHighlight } from '../highlightStore'
 import type { VerseSelection, VerseActionContext } from '@/types/verse-actions'
 
 // ---------------------------------------------------------------------------
@@ -193,7 +194,10 @@ describe('verseActionRegistry', () => {
     })
 
     it('sub-view stubs render placeholder containing "ships in BB-"', () => {
-      const withSubViews = getAllActions().filter((h) => h.hasSubView && h.renderSubView)
+      // Exclude highlight (BB-7 implemented) — only stubs match this pattern
+      const withSubViews = getAllActions().filter(
+        (h) => h.hasSubView && h.renderSubView && h.action !== 'highlight',
+      )
       expect(withSubViews.length).toBeGreaterThan(0)
 
       for (const handler of withSubViews) {
@@ -201,11 +205,54 @@ describe('verseActionRegistry', () => {
           selection: SINGLE_VERSE,
           onBack: () => {},
         })
-        // renderSubView returns a React element — check its props.children
         expect(element).toBeDefined()
         const el = element as { props: { children: string } }
         expect(el.props.children).toMatch(/ships? in BB-\d/)
       }
+    })
+  })
+
+  describe('highlight handler', () => {
+    beforeEach(() => {
+      localStorage.clear()
+    })
+
+    it('has hasSubView: true', () => {
+      const handler = getActionByType('highlight')!
+      expect(handler.hasSubView).toBe(true)
+    })
+
+    it('getState returns active for highlighted verse', () => {
+      applyHighlight({ book: 'john', chapter: 3, startVerse: 16, endVerse: 16 }, 'peace')
+
+      const handler = getActionByType('highlight')!
+      const state = handler.getState!(SINGLE_VERSE)
+      expect(state.active).toBe(true)
+      expect(state.activeColor).toBe('var(--highlight-peace)')
+    })
+
+    it('getState returns inactive for unhighlighted verse', () => {
+      const handler = getActionByType('highlight')!
+      // Use a verse in a different chapter that has no highlights
+      const unhighlightedSel: VerseSelection = {
+        book: 'genesis',
+        bookName: 'Genesis',
+        chapter: 1,
+        startVerse: 1,
+        endVerse: 1,
+        verses: [{ number: 1, text: 'In the beginning...' }],
+      }
+      const state = handler.getState!(unhighlightedSel)
+      expect(state.active).toBe(false)
+    })
+
+    it('renderSubView returns a React element', () => {
+      const handler = getActionByType('highlight')!
+      const element = handler.renderSubView!({
+        selection: SINGLE_VERSE,
+        onBack: () => {},
+      })
+      expect(element).toBeDefined()
     })
   })
 
