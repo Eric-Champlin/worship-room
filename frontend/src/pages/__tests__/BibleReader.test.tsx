@@ -1,108 +1,40 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { BibleReader } from '../BibleReader'
-import type { BibleChapter } from '@/types/bible'
 
-const mockAuth = {
-  isAuthenticated: false,
-  user: null,
-  login: vi.fn(),
-  logout: vi.fn(),
-}
+// Mock loadChapterWeb to avoid loading real JSON in tests
+vi.mock('@/data/bible', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/data/bible')>()
+  return {
+    ...actual,
+    loadChapterWeb: vi.fn(async (bookSlug: string, chapter: number) => {
+      if (bookSlug === 'john' && chapter === 3) {
+        return {
+          bookSlug: 'john',
+          chapter: 3,
+          verses: Array.from({ length: 36 }, (_, i) => ({
+            number: i + 1,
+            text: `Verse ${i + 1} of John chapter three.`,
+          })),
+          paragraphs: [],
+        }
+      }
+      return null
+    }),
+  }
+})
 
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => mockAuth,
-}))
-
-vi.mock('@/contexts/AuthContext', () => ({
-  useAuth: () => mockAuth,
-}))
-
-vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
-  useAuthModal: () => ({ openAuthModal: vi.fn() }),
-}))
-
-vi.mock('@/hooks/useNotificationActions', () => ({
-  useNotificationActions: () => ({
-    notifications: [],
-    unreadCount: 0,
-    markAllAsRead: vi.fn(),
-    markAsRead: vi.fn(),
-    clearAll: vi.fn(),
-  }),
-}))
-
-vi.mock('@/components/ui/Toast', () => ({
-  useToast: () => ({ showToast: vi.fn() }),
-  useToastSafe: () => ({ showToast: vi.fn() }),
-}))
-
-vi.mock('@/hooks/useWhisperToast', () => ({
-  useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
-}))
-
-vi.mock('@/hooks/useBibleHighlights', () => ({
-  useBibleHighlights: () => ({
-    getHighlightsForChapter: vi.fn().mockReturnValue([]),
-    getHighlightForVerse: vi.fn().mockReturnValue(undefined),
-    setHighlight: vi.fn(),
-    removeHighlight: vi.fn(),
-    getAllHighlights: vi.fn().mockReturnValue([]),
-  }),
-}))
-
-vi.mock('@/hooks/useBibleNotes', () => ({
-  useBibleNotes: () => ({
-    getNotesForChapter: vi.fn().mockReturnValue([]),
-    getNoteForVerse: vi.fn().mockReturnValue(undefined),
-    saveNote: vi.fn().mockReturnValue(true),
-    deleteNote: vi.fn(),
-    getAllNotes: vi.fn().mockReturnValue([]),
-  }),
-}))
-
-vi.mock('@/hooks/useBibleAudio', () => ({
-  useBibleAudio: () => ({
-    playbackState: 'idle',
-    currentVerseIndex: -1,
-    totalVerses: 0,
-    speed: 1,
-    setSpeed: vi.fn(),
-    voiceGender: 'female',
-    setVoiceGender: vi.fn(),
-    availableVoiceCount: 2,
-    play: vi.fn(),
-    pause: vi.fn(),
-    stop: vi.fn(),
-    isSupported: true,
-  }),
-}))
-
+// Minimal mocks for components that use audio/toast/auth providers
 vi.mock('@/components/audio/AudioProvider', () => ({
-  useAudioState: () => ({
-    activeSounds: [],
-    masterVolume: 0.8,
-    isPlaying: false,
-    pillVisible: false,
-    drawerOpen: false,
-    currentSceneName: null,
-    foregroundContent: null,
-    sleepTimer: null,
-    activeRoutine: null,
-  }),
+  useAudioState: () => ({ drawerOpen: false }),
   useAudioDispatch: () => vi.fn(),
   useAudioEngine: () => null,
   useSleepTimerControls: () => ({
     remainingMs: 0,
     totalDurationMs: 0,
-    fadeDurationMs: 0,
-    phase: null,
     isActive: false,
     isPaused: false,
-    fadeStatus: 'none',
-    fadeRemainingMs: 0,
     start: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
@@ -110,265 +42,128 @@ vi.mock('@/components/audio/AudioProvider', () => ({
   }),
 }))
 
-vi.mock('@/hooks/useScenePlayer', () => ({
-  useScenePlayer: () => ({
-    activeSceneId: null,
-    loadScene: vi.fn(),
-    isLoading: false,
-    undoAvailable: false,
-    undoSceneSwitch: vi.fn(),
-    pendingRoutineInterrupt: null,
-    confirmRoutineInterrupt: vi.fn(),
-    cancelRoutineInterrupt: vi.fn(),
-  }),
-}))
-
-const mockMarkChapterRead = vi.fn()
-const mockIsChapterRead = vi.fn().mockReturnValue(false)
-
-vi.mock('@/hooks/useBibleProgress', () => ({
-  useBibleProgress: () => ({
-    progress: {},
-    markChapterRead: mockMarkChapterRead,
-    getBookProgress: vi.fn().mockReturnValue([]),
-    isChapterRead: mockIsChapterRead,
-  }),
-}))
-
-const mockGenesisChapter1: BibleChapter = {
-  bookSlug: 'genesis',
-  chapter: 1,
-  verses: [
-    { number: 1, text: 'In the beginning, God created the heavens and the earth.' },
-    { number: 2, text: 'The earth was formless and empty.' },
-    { number: 3, text: 'God said, "Let there be light," and there was light.' },
-  ],
-}
-
-vi.mock('@/data/bible', async () => {
-  const actual = await vi.importActual('@/data/bible')
-  return {
-    ...actual,
-    loadChapter: vi.fn().mockImplementation((slug: string, chapter: number) => {
-      if (slug === 'genesis' && chapter === 1) return Promise.resolve(mockGenesisChapter1)
-      if (slug === 'genesis') return Promise.resolve({ bookSlug: 'genesis', chapter, verses: [{ number: 1, text: 'Test verse.' }] })
-      return Promise.resolve(null)
-    }),
-  }
-})
-
 function renderReader(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <Routes>
         <Route path="/bible/:book/:chapter" element={<BibleReader />} />
-        <Route path="/bible" element={<div>Browser Page</div>} />
+        <Route path="/bible" element={<div>Bible Browser</div>} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
-describe('BibleReader', () => {
+describe('BibleReader (BB-4 Immersive Reader)', () => {
   beforeEach(() => {
     localStorage.clear()
-    mockAuth.isAuthenticated = false
-    mockMarkChapterRead.mockClear()
-    mockIsChapterRead.mockReturnValue(false)
+    vi.clearAllMocks()
   })
 
-  describe('Hero section', () => {
-    it('renders book name and chapter in heading', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Genesis')
-        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Chapter 1')
-      })
-    })
+  it('renders John 3 with 36 verse spans', async () => {
+    renderReader('/bible/john/3')
 
-    it('book name links back to /bible?book=slug', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        const heading = screen.getByRole('heading', { level: 1 })
-        const link = heading.querySelector('a')
-        expect(link).toHaveAttribute('href', '/bible?book=genesis')
-      })
+    await waitFor(() => {
+      const spans = document.querySelectorAll('span[data-verse]')
+      expect(spans.length).toBe(36)
     })
   })
 
-  describe('Verse display', () => {
-    it('renders verses with superscript numbers', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
-      })
-      // Verify superscript verse numbers
-      const sups = document.querySelectorAll('sup')
-      expect(sups.length).toBe(3)
-      expect(sups[0].textContent).toBe('1')
+  it('every verse span has data-verse, data-book, data-chapter', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      const spans = document.querySelectorAll('span[data-verse]')
+      expect(spans.length).toBeGreaterThan(0)
+      for (const span of spans) {
+        expect(span.hasAttribute('data-verse')).toBe(true)
+        expect(span.getAttribute('data-book')).toBe('john')
+        expect(span.getAttribute('data-chapter')).toBe('3')
+      }
     })
   })
 
-  describe('Chapter selector', () => {
-    it('shows "Chapter X of Y"', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByText('Chapter 1 of 50')).toBeInTheDocument()
-      })
+  it('shows chapter heading with book name and number', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      const heading = screen.getByRole('heading', { level: 1 })
+      expect(heading).toBeTruthy()
+      expect(heading.textContent).toContain('John')
+      expect(heading.textContent).toContain('3')
     })
   })
 
-  describe('Navigation', () => {
-    it('first chapter hides Previous button', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.queryByText('Previous Chapter')).not.toBeInTheDocument()
-      })
-      expect(screen.getByText('Next Chapter')).toBeInTheDocument()
-    })
+  it('invalid book shows error state', async () => {
+    renderReader('/bible/notabook/1')
 
-    it('last chapter hides Next button', async () => {
-      renderReader('/bible/genesis/50')
-      await waitFor(() => {
-        expect(screen.queryByText('Next Chapter')).not.toBeInTheDocument()
-      })
-      expect(screen.getByText('Previous Chapter')).toBeInTheDocument()
-    })
-
-    it('Previous/Next buttons link to correct chapters', async () => {
-      renderReader('/bible/genesis/5')
-      await waitFor(() => {
-        const prev = screen.getByText('Previous Chapter').closest('a')
-        expect(prev).toHaveAttribute('href', '/bible/genesis/4')
-        const next = screen.getByText('Next Chapter').closest('a')
-        expect(next).toHaveAttribute('href', '/bible/genesis/6')
-      })
+    await waitFor(() => {
+      expect(screen.getByText("That book doesn't exist.")).toBeTruthy()
     })
   })
 
-  describe('Invalid routes', () => {
-    it('invalid book slug shows BookNotFound', async () => {
-      renderReader('/bible/not-a-book/1')
-      await waitFor(() => {
-        expect(screen.getByText('Book not found')).toBeInTheDocument()
-      })
-    })
+  it('invalid chapter shows chapter count', async () => {
+    renderReader('/bible/john/99')
 
-    it('chapter out of range redirects to chapter 1', async () => {
-      renderReader('/bible/genesis/999')
-      await waitFor(() => {
-        // Should redirect to genesis/1 which means the heading should show chapter 1
-        expect(screen.getByText('Chapter 1 of 50')).toBeInTheDocument()
-      })
+    await waitFor(() => {
+      expect(screen.getByText('John only has 21 chapters.')).toBeTruthy()
     })
   })
 
-  describe('Engagement bridges', () => {
-    it('CTA strip renders on Bible reader page', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByText('Continue your time with Genesis 1')).toBeInTheDocument()
-      })
-    })
+  it('invalid chapter has jump-to-last button', async () => {
+    renderReader('/bible/john/99')
 
-    it('CTA strip renders above ChapterNav', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByText('Continue your time with Genesis 1')).toBeInTheDocument()
-      })
-      const ctaHeading = screen.getByText('Continue your time with Genesis 1')
-      const nextChapter = screen.getByText('Next Chapter')
-      // CTA heading should appear before Next Chapter in DOM order
-      const ctaSection = ctaHeading.closest('section')
-      expect(ctaSection).not.toBeNull()
-      const navDiv = nextChapter.closest('div.mt-12')
-      expect(navDiv).not.toBeNull()
-      expect(ctaSection!.compareDocumentPosition(navDiv!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    })
-
-    it('CTA strip renders on chapter with placeholder content', async () => {
-      // 3 John has hasFullText: false in BIBLE_BOOKS
-      renderReader('/bible/3-john/1')
-      await waitFor(() => {
-        expect(screen.getByText('Continue your time with 3 John 1')).toBeInTheDocument()
-      })
-    })
-
-    it('old cross-feature CTAs are removed', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByText('Continue your time with Genesis 1')).toBeInTheDocument()
-      })
-      expect(screen.queryByText(/Pray about this chapter/)).not.toBeInTheDocument()
-      expect(screen.queryByText(/Journal your thoughts/)).not.toBeInTheDocument()
-    })
-
-    it('existing Bible reader functionality preserved', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        // Breadcrumb
-        const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
-        expect(nav).toBeInTheDocument()
-        // Chapter selector
-        expect(screen.getByText('Chapter 1 of 50')).toBeInTheDocument()
-        // Verse content
-        expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
-      })
+    await waitFor(() => {
+      const btn = screen.getByText('Go to Chapter 21')
+      expect(btn).toBeTruthy()
+      const link = btn.closest('a')
+      expect(link?.getAttribute('href')).toBe('/bible/john/21')
     })
   })
 
-  describe('Auth gating', () => {
-    it('IO does not fire for logged-out users (markChapterRead not called)', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
-      })
-      // markChapterRead should not be called for logged-out users
-      expect(mockMarkChapterRead).not.toHaveBeenCalled()
+  it('writes wr_bible_last_read on chapter load', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      const raw = localStorage.getItem('wr_bible_last_read')
+      expect(raw).toBeTruthy()
+      const data = JSON.parse(raw!)
+      expect(data.book).toBe('John')
+      expect(data.chapter).toBe(3)
     })
   })
 
-  describe('Breadcrumb', () => {
-    it('renders breadcrumb with Bible trail', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
-        expect(nav).toBeInTheDocument()
-        expect(nav).toHaveTextContent('Bible')
-        expect(nav).toHaveTextContent('Genesis')
-        expect(nav).toHaveTextContent('Chapter 1')
-      })
+  it('writes wr_bible_progress on chapter load', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      const raw = localStorage.getItem('wr_bible_progress')
+      expect(raw).toBeTruthy()
+      const data = JSON.parse(raw!)
+      expect(data.john).toContain(3)
+    })
+  })
+
+  it('has no global navbar (immersive mode)', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      expect(document.querySelectorAll('span[data-verse]').length).toBeGreaterThan(0)
     })
 
-    it('Bible link points to /bible', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        screen.getByRole('navigation', { name: /breadcrumb/i })
-      })
-      const bibleLinks = screen.getAllByRole('link', { name: 'Bible' })
-      const breadcrumbBibleLink = bibleLinks.find(
-        (link) => link.closest('nav[aria-label]') !== null
-      )
-      expect(breadcrumbBibleLink).toHaveAttribute('href', '/bible')
-    })
+    // No global nav — only chapter navigation
+    const navs = document.querySelectorAll('nav')
+    for (const nav of navs) {
+      expect(nav.getAttribute('aria-label')).not.toBe('Main navigation')
+    }
+  })
 
-    it('Book name link points to /bible?book=slug', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        screen.getByRole('navigation', { name: /breadcrumb/i })
-      })
-      // The breadcrumb Genesis link (inside nav) should go to /bible?book=genesis
-      const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
-      const genesisLink = nav.querySelector('a[href="/bible?book=genesis"]')
-      expect(genesisLink).toBeInTheDocument()
-      expect(genesisLink).toHaveTextContent('Genesis')
-    })
+  it('has correct data-reader-theme attribute', async () => {
+    renderReader('/bible/john/3')
 
-    it('displays full book name', async () => {
-      renderReader('/bible/1-corinthians/1')
-      await waitFor(() => {
-        const nav = screen.getByRole('navigation', { name: /breadcrumb/i })
-        expect(nav).toHaveTextContent('1 Corinthians')
-      })
+    await waitFor(() => {
+      const themed = document.querySelector('[data-reader-theme]')
+      expect(themed).toBeTruthy()
+      expect(themed!.getAttribute('data-reader-theme')).toBe('midnight')
     })
   })
 })

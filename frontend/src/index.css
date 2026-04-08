@@ -13,6 +13,26 @@
   }
 }
 
+/* Bible Reader theme tokens (BB-4) */
+[data-reader-theme="midnight"] {
+  --reader-bg: #08051A;
+  --reader-text: rgba(255, 255, 255, 0.90);
+  --reader-verse-num: rgba(255, 255, 255, 0.30);
+  --reader-divider: rgba(255, 255, 255, 0.10);
+}
+[data-reader-theme="parchment"] {
+  --reader-bg: #F5F0E8;
+  --reader-text: #3E2C1A;
+  --reader-verse-num: rgba(62, 44, 26, 0.35);
+  --reader-divider: rgba(62, 44, 26, 0.15);
+}
+[data-reader-theme="sepia"] {
+  --reader-bg: #E8D5B7;
+  --reader-text: #2C1A0A;
+  --reader-verse-num: rgba(44, 26, 10, 0.35);
+  --reader-divider: rgba(44, 26, 10, 0.15);
+}
+
 /* Audio slider thumb/track styling (vendor-prefixed, can't use Tailwind) */
 .audio-slider::-webkit-slider-thumb {
   -webkit-appearance: none;

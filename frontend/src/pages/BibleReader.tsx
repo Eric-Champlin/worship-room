@@ -1,107 +1,61 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
-import { Layout } from '@/components/Layout'
-import { SEO, SITE_URL } from '@/components/SEO'
-import { AudioControlBar } from '@/components/bible/AudioControlBar'
-import { BibleAmbientChip } from '@/components/bible/BibleAmbientChip'
-import { SleepTimerPanel } from '@/components/bible/SleepTimerPanel'
-import { useSleepTimerControls } from '@/components/audio/AudioProvider'
-import { BookNotFound } from '@/components/bible/BookNotFound'
-import { ChapterEngagementBridge } from '@/components/bible/ChapterEngagementBridge'
-import { ChapterNav } from '@/components/bible/ChapterNav'
-import { ChapterPlaceholder } from '@/components/bible/ChapterPlaceholder'
-import { BibleReaderSkeleton } from '@/components/skeletons/BibleReaderSkeleton'
-import { ChapterSelector } from '@/components/bible/ChapterSelector'
-import { VerseDisplay } from '@/components/bible/VerseDisplay'
-import { BookCompletionCard } from '@/components/bible/BookCompletionCard'
-import { BIBLE_BOOKS } from '@/constants/bible'
-import { getBookBySlug, loadChapter } from '@/data/bible'
-import { useAuth } from '@/hooks/useAuth'
-import { useBibleAudio } from '@/hooks/useBibleAudio'
-import { useBibleHighlights } from '@/hooks/useBibleHighlights'
-import { useBibleNotes } from '@/hooks/useBibleNotes'
-import { useBibleProgress } from '@/hooks/useBibleProgress'
-import { useToast } from '@/components/ui/Toast'
-import { useScriptureEcho } from '@/hooks/useScriptureEcho'
-import { useSoundEffects } from '@/hooks/useSoundEffects'
-import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
-import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { SEO } from '@/components/SEO'
+import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
+import { BibleDrawer } from '@/components/bible/BibleDrawer'
+import { BooksDrawerContent } from '@/components/bible/BooksDrawerContent'
+import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
+import { ChapterHeading } from '@/components/bible/reader/ChapterHeading'
+import { ReaderBody } from '@/components/bible/reader/ReaderBody'
+import { ReaderChrome } from '@/components/bible/reader/ReaderChrome'
+import { ReaderChapterNav } from '@/components/bible/reader/ReaderChapterNav'
+import { TypographySheet } from '@/components/bible/reader/TypographySheet'
+import { VerseJumpPill } from '@/components/bible/reader/VerseJumpPill'
+import { useReaderSettings } from '@/hooks/useReaderSettings'
+import { useChapterSwipe } from '@/hooks/useChapterSwipe'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
 import type { BibleVerse } from '@/types/bible'
 
-// Loading state: use BibleReaderSkeleton
-export function BibleReader() {
+function BibleReaderInner() {
   const { book: bookSlug, chapter: chapterParam } = useParams<{
     book: string
     chapter: string
   }>()
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
-  const { markChapterRead, isChapterRead, justCompletedBook, progress } = useBibleProgress()
-  const { getHighlightsForChapter, getHighlightForVerse, setHighlight: applyHighlight } =
-    useBibleHighlights()
-  const { getNotesForChapter, getNoteForVerse, saveNote, deleteNote } = useBibleNotes()
-  const { showToast } = useToast()
-  const { playSoundEffect } = useSoundEffects()
+
+  const { settings, updateSetting, resetToDefaults } = useReaderSettings()
+  const bibleDrawer = useBibleDrawer()
+  const [typographyOpen, setTypographyOpen] = useState(false)
+  const aaRef = useRef<HTMLButtonElement>(null)
 
   const [verses, setVerses] = useState<BibleVerse[]>([])
+  const [paragraphs, setParagraphs] = useState<number[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
-  const [timerPanelOpen, setTimerPanelOpen] = useState(false)
-  const [ambientForceCollapse, setAmbientForceCollapse] = useState(false)
-  const [cardDismissed, setCardDismissed] = useState(() =>
-    bookSlug ? sessionStorage.getItem(`wr_bible_book_complete_dismissed_${bookSlug}`) === 'true' : false,
-  )
-
-  const sleepTimer = useSleepTimerControls()
-  const announceRef = useRef<HTMLDivElement>(null)
-
-  const [searchParams] = useSearchParams()
-  const autoplay = searchParams.get('autoplay') === 'true'
 
   const book = bookSlug ? getBookBySlug(bookSlug) : undefined
   const chapterNumber = chapterParam ? parseInt(chapterParam, 10) : NaN
 
-  useScriptureEcho(bookSlug ?? '', chapterNumber, isLoading)
-
-  const announce = useCallback((message: string) => {
-    if (announceRef.current) {
-      announceRef.current.textContent = message
-    }
+  // Swipe gesture (mobile/tablet only)
+  const [isSmallViewport, setIsSmallViewport] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const handler = (e: MediaQueryListEvent) => setIsSmallViewport(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
-  const bibleAudio = useBibleAudio({
-    verses,
+  const { touchHandlers, swipeOffset, isSwiping } = useChapterSwipe({
     bookSlug: bookSlug ?? '',
-    chapterNumber,
-    isAuthenticated,
-    hasFullText: book?.hasFullText ?? false,
-    isChapterAlreadyRead: bookSlug ? isChapterRead(bookSlug, chapterNumber) : false,
-    onChapterComplete: () => {
-      if (bookSlug) markChapterRead(bookSlug, chapterNumber)
-    },
-    onAnnounce: announce,
+    currentChapter: chapterNumber,
+    enabled: isSmallViewport && !isLoading && !typographyOpen,
   })
 
-  // Autoplay: start TTS after 2s delay
-  const autoplayFiredRef = useRef(false)
-  useEffect(() => {
-    if (!autoplay || !isAuthenticated || !bibleAudio.isSupported) return
-    if (isLoading || verses.length === 0) return
-    if (bibleAudio.playbackState !== 'idle') return
-    if (autoplayFiredRef.current) return
-
-    autoplayFiredRef.current = true
-    const timer = setTimeout(() => {
-      bibleAudio.play()
-    }, 2000)
-
-    return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoplay, isAuthenticated, isLoading, verses.length, bibleAudio.isSupported])
-
-  // Load chapter text
+  // Load chapter from web/ JSON
   useEffect(() => {
     if (!bookSlug || !book || isNaN(chapterNumber)) return
 
@@ -109,11 +63,17 @@ export function BibleReader() {
     setIsLoading(true)
     setLoadError(false)
     setVerses([])
+    setParagraphs([])
 
-    loadChapter(bookSlug, chapterNumber)
+    loadChapterWeb(bookSlug, chapterNumber)
       .then((data) => {
         if (cancelled) return
-        setVerses(data?.verses ?? [])
+        if (data) {
+          setVerses(data.verses)
+          setParagraphs(data.paragraphs ?? [])
+        } else {
+          setLoadError(true)
+        }
         setIsLoading(false)
       })
       .catch(() => {
@@ -127,238 +87,272 @@ export function BibleReader() {
     }
   }, [bookSlug, book, chapterNumber])
 
-  // Book completion toast
+  // Scroll to top on chapter change
   useEffect(() => {
-    if (!justCompletedBook || justCompletedBook !== bookSlug) return
-    const bookData = BIBLE_BOOKS.find(b => b.slug === justCompletedBook)
-    if (!bookData) return
-    playSoundEffect('bell')
-    showToast(`${bookData.name} Complete! You've read all ${bookData.chapters} chapters.`, 'success')
-  }, [justCompletedBook, bookSlug, showToast, playSoundEffect])
+    window.scrollTo({ top: 0 })
+  }, [bookSlug, chapterNumber])
 
-  const isBookComplete = book && bookSlug
-    ? (progress[bookSlug]?.length ?? 0) >= book.chapters
-    : false
+  // Read tracking stub — writes for all users (no auth check)
+  // TODO BB-17: replace stub
+  useEffect(() => {
+    if (!bookSlug || !book || isLoading || loadError || verses.length === 0) return
 
-  const handleChapterSelect = useCallback(
-    (chapter: number) => {
-      if (!bookSlug) return
-      navigate(`/bible/${bookSlug}/${chapter}`)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+    localStorage.setItem(
+      'wr_bible_last_read',
+      JSON.stringify({
+        book: book.name,
+        chapter: chapterNumber,
+        verse: 1,
+        timestamp: Date.now(),
+      }),
+    )
+
+    const progressRaw = localStorage.getItem('wr_bible_progress')
+    const progress: Record<string, number[]> = progressRaw ? JSON.parse(progressRaw) : {}
+    const bookChapters = progress[bookSlug] ?? []
+    if (!bookChapters.includes(chapterNumber)) {
+      progress[bookSlug] = [...bookChapters, chapterNumber]
+      localStorage.setItem('wr_bible_progress', JSON.stringify(progress))
+    }
+  }, [bookSlug, book, chapterNumber, isLoading, loadError, verses.length])
+
+  // Keyboard shortcuts
+  const handleKeyboard = useCallback(
+    (e: KeyboardEvent) => {
+      // Don't fire if input/textarea is focused
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+
+      if (e.key === 'ArrowLeft' && bookSlug) {
+        const prev = getAdjacentChapter(bookSlug, chapterNumber, 'prev')
+        if (prev) navigate(`/bible/${prev.bookSlug}/${prev.chapter}`)
+      } else if (e.key === 'ArrowRight' && bookSlug) {
+        const next = getAdjacentChapter(bookSlug, chapterNumber, 'next')
+        if (next) navigate(`/bible/${next.bookSlug}/${next.chapter}`)
+      } else if (e.key === ',') {
+        setTypographyOpen((p) => !p)
+      } else if (e.key === 'b' && !typographyOpen) {
+        bibleDrawer.open()
+      }
     },
-    [bookSlug, navigate],
+    [bookSlug, chapterNumber, navigate, typographyOpen, bibleDrawer],
   )
 
-  // Validation
-  if (!book) return <BookNotFound />
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyboard)
+    return () => window.removeEventListener('keydown', handleKeyboard)
+  }, [handleKeyboard])
 
-  if (
-    isNaN(chapterNumber) ||
-    chapterNumber < 1 ||
-    chapterNumber > book.chapters
-  ) {
-    return <Navigate to={`/bible/${book.slug}/1`} replace />
-  }
-
-  const bookName = book.name
-  const chapter = chapterNumber
-  const breadcrumbs = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Bible', item: `${SITE_URL}/bible` },
-      { '@type': 'ListItem', position: 3, name: bookName, item: `${SITE_URL}/bible/${bookSlug}/1` },
-      { '@type': 'ListItem', position: 4, name: `Chapter ${chapter}` },
-    ],
-  }
-
-  return (
-    <Layout>
-      {isLoading ? (
-        <SEO title="Loading..." description="Loading Bible chapter..." />
-      ) : (
-        <SEO
-          title={`${bookName} Chapter ${chapter} (WEB)`}
-          description={`Read ${bookName} chapter ${chapter} from the World English Bible with highlights and notes.`}
-          canonical={`/bible/${bookSlug}/${chapter}`}
-          jsonLd={breadcrumbs}
-        />
-      )}
-      <div className="min-h-screen bg-dashboard-dark">
-        {/* Screen reader announcements */}
-        <div
-          ref={announceRef}
-          role="status"
-          aria-live="polite"
-          className="sr-only"
-        />
-
-        {/* Hero section */}
-        <section
-          aria-labelledby="bible-reader-heading"
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
-          style={ATMOSPHERIC_HERO_BG}
-        >
-          <h1 id="bible-reader-heading" className="px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl" style={GRADIENT_TEXT_STYLE}>
-            <Link
-              to={`/bible?book=${book.slug}`}
-              className="font-script underline transition-opacity hover:opacity-80"
-              style={{ color: 'inherit', WebkitTextFillColor: 'inherit' }}
-            >
-              {book.name}
-            </Link>{' '}
-            Chapter {chapterNumber}
-          </h1>
-        </section>
-
-        {/* Breadcrumb */}
-        <Breadcrumb
-          items={[
-            { label: 'Bible', href: '/bible' },
-            { label: book.name, href: `/bible?book=${book.slug}` },
-            { label: `Chapter ${chapterNumber}` },
-          ]}
-          maxWidth="max-w-2xl"
-        />
-
-        {/* Chapter selector */}
-        <div className="mx-auto max-w-2xl px-4 pt-4 sm:px-6">
-          <ChapterSelector
-            currentChapter={chapterNumber}
-            totalChapters={book.chapters}
-            onSelectChapter={handleChapterSelect}
-          />
-        </div>
-
-        {/* Audio control bar */}
-        {bibleAudio.isSupported && book.hasFullText && !isLoading && verses.length > 0 && (
-          <div className="mx-auto max-w-2xl px-4 sm:px-6">
-            <div className="mt-4">
-              <AudioControlBar
-                playbackState={bibleAudio.playbackState}
-                currentVerseIndex={bibleAudio.currentVerseIndex}
-                totalVerses={bibleAudio.totalVerses}
-                speed={bibleAudio.speed}
-                onSpeedChange={bibleAudio.setSpeed}
-                voiceGender={bibleAudio.voiceGender}
-                onVoiceGenderChange={bibleAudio.setVoiceGender}
-                availableVoiceCount={bibleAudio.availableVoiceCount}
-                onPlay={bibleAudio.play}
-                onPause={bibleAudio.pause}
-                onStop={bibleAudio.stop}
-                onTimerClick={() => {
-                  setTimerPanelOpen((prev) => !prev)
-                  setAmbientForceCollapse(true)
-                  setTimeout(() => setAmbientForceCollapse(false), 0)
-                }}
-                isTimerActive={sleepTimer.isActive}
-                isTimerPanelOpen={timerPanelOpen}
-                timerRemainingMs={sleepTimer.remainingMs}
-                timerTotalDurationMs={sleepTimer.totalDurationMs}
-              />
-              <SleepTimerPanel
-                isOpen={timerPanelOpen}
-                onClose={() => setTimerPanelOpen(false)}
-              />
-              <div className="mt-2">
-                <BibleAmbientChip
-                  onExpand={() => setTimerPanelOpen(false)}
-                  forceCollapse={ambientForceCollapse}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Book completion card */}
-        {isAuthenticated && bookSlug && isBookComplete && !cardDismissed && (
-          <div className="mx-auto max-w-2xl px-4 sm:px-6">
-            <BookCompletionCard
-              bookName={book.name}
-              bookSlug={bookSlug}
-              onDismiss={() => {
-                sessionStorage.setItem(`wr_bible_book_complete_dismissed_${bookSlug}`, 'true')
-                setCardDismissed(true)
-              }}
-            />
-          </div>
-        )}
-
-        {/* Content */}
-        <div className="mx-auto max-w-2xl px-4 sm:px-6">
-          {loadError ? (
-            <div className="py-16 text-center">
-              <p className="mb-4 text-white/50">
-                Something went wrong loading this chapter.
-              </p>
+  // Validation: invalid book
+  if (!book) {
+    return (
+      <div className="flex min-h-screen flex-col bg-hero-bg">
+        <SEO title="Book Not Found" description="This Bible book doesn't exist." />
+        <div className="flex flex-1 items-center justify-center px-4">
+          <FrostedCard className="max-w-md text-center">
+            <p className="mb-6 text-lg text-white">That book doesn't exist.</p>
+            <div className="flex flex-col items-center gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setLoadError(false)
-                  setIsLoading(true)
-                  loadChapter(bookSlug!, chapterNumber)
-                    .then((data) => {
-                      setVerses(data?.verses ?? [])
-                      setIsLoading(false)
-                    })
-                    .catch(() => {
-                      setLoadError(true)
-                      setIsLoading(false)
-                    })
-                }}
-                className="rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary-lt"
+                onClick={() => bibleDrawer.open()}
+                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary-lt"
               >
-                Try Again
+                Browse books
               </button>
+              <Link to="/bible" className="text-sm text-white/50 transition-colors hover:text-white/70">
+                &larr; Back to Bible
+              </Link>
             </div>
-          ) : !book.hasFullText ? (
-            <ChapterPlaceholder
-              bookName={book.name}
-              chapter={chapterNumber}
-            />
-          ) : isLoading ? (
-            <BibleReaderSkeleton />
-          ) : verses.length === 0 ? (
-            <div className="py-16 text-center text-white/50">
-              No content available for this chapter.
+          </FrostedCard>
+        </div>
+        <BibleDrawer isOpen={bibleDrawer.isOpen} onClose={bibleDrawer.close} ariaLabel="Browse books">
+          <BooksDrawerContent
+            onClose={bibleDrawer.close}
+            onSelectBook={(slug) => {
+              bibleDrawer.close()
+              navigate(`/bible/${slug}/1`)
+            }}
+          />
+        </BibleDrawer>
+      </div>
+    )
+  }
+
+  // Validation: invalid chapter
+  if (isNaN(chapterNumber) || chapterNumber < 1 || chapterNumber > book.chapters) {
+    return (
+      <div className="flex min-h-screen flex-col bg-hero-bg">
+        <SEO
+          title="Chapter Not Found"
+          description={`${book.name} only has ${book.chapters} chapters.`}
+        />
+        <div className="flex flex-1 items-center justify-center px-4">
+          <FrostedCard className="max-w-md text-center">
+            <p className="mb-6 text-lg text-white">
+              {book.name} only has {book.chapters} chapter{book.chapters !== 1 ? 's' : ''}.
+            </p>
+            <div className="flex flex-col items-center gap-3">
+              <Link
+                to={`/bible/${book.slug}/${book.chapters}`}
+                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary-lt"
+              >
+                Go to Chapter {book.chapters}
+              </Link>
+              <button
+                type="button"
+                onClick={() => bibleDrawer.open()}
+                className="text-sm text-white/50 transition-colors hover:text-white/70"
+              >
+                Browse books
+              </button>
+              <Link to="/bible" className="text-sm text-white/50 transition-colors hover:text-white/70">
+                &larr; Back to Bible
+              </Link>
+            </div>
+          </FrostedCard>
+        </div>
+        <BibleDrawer isOpen={bibleDrawer.isOpen} onClose={bibleDrawer.close} ariaLabel="Browse books">
+          <BooksDrawerContent
+            onClose={bibleDrawer.close}
+            onSelectBook={(slug) => {
+              bibleDrawer.close()
+              navigate(`/bible/${slug}/1`)
+            }}
+          />
+        </BibleDrawer>
+      </div>
+    )
+  }
+
+  const swipeStyle =
+    isSwiping && swipeOffset !== 0
+      ? { transform: `translateX(${swipeOffset}px)`, transition: 'none' }
+      : isSwiping
+        ? { transform: 'translateX(0)', transition: 'transform 200ms ease-out' }
+        : undefined
+
+  return (
+    <div
+      className="relative min-h-screen"
+      style={{ background: 'var(--reader-bg)' }}
+      data-reader-theme={settings.theme}
+      {...touchHandlers}
+    >
+      <SEO
+        title={`${book.name} ${chapterNumber} (WEB)`}
+        description={`Read ${book.name} chapter ${chapterNumber} from the World English Bible.`}
+        canonical={`/bible/${bookSlug}/${chapterNumber}`}
+      />
+
+      <ReaderChrome
+        bookName={book.name}
+        chapter={chapterNumber}
+        onTypographyToggle={() => setTypographyOpen((p) => !p)}
+        isTypographyOpen={typographyOpen}
+        aaRef={aaRef}
+      />
+
+      <TypographySheet
+        isOpen={typographyOpen}
+        onClose={() => setTypographyOpen(false)}
+        settings={settings}
+        onUpdate={updateSetting}
+        onReset={resetToDefaults}
+        anchorRef={aaRef}
+      />
+
+      <div style={swipeStyle}>
+        <main
+          className="mx-auto max-w-2xl px-5 pb-8 pt-20 sm:px-6 sm:pt-24"
+          aria-busy={isLoading}
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center py-32">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
+            </div>
+          ) : loadError ? (
+            <div className="flex items-center justify-center py-16">
+              <FrostedCard className="max-w-md text-center">
+                <p className="mb-6 text-lg text-white">
+                  Couldn't load this chapter. Check your connection.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoadError(false)
+                    setIsLoading(true)
+                    loadChapterWeb(bookSlug!, chapterNumber)
+                      .then((data) => {
+                        if (data) {
+                          setVerses(data.verses)
+                          setParagraphs(data.paragraphs ?? [])
+                        } else {
+                          setLoadError(true)
+                        }
+                        setIsLoading(false)
+                      })
+                      .catch(() => {
+                        setLoadError(true)
+                        setIsLoading(false)
+                      })
+                  }}
+                  className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary-lt"
+                >
+                  Try Again
+                </button>
+              </FrostedCard>
             </div>
           ) : (
-            <VerseDisplay
-              verses={verses}
-              book={book}
-              chapterNumber={chapterNumber}
-              isAuthenticated={isAuthenticated}
-              getHighlightsForChapter={getHighlightsForChapter}
-              getHighlightForVerse={getHighlightForVerse}
-              setHighlight={applyHighlight}
-              getNotesForChapter={getNotesForChapter}
-              getNoteForVerse={getNoteForVerse}
-              saveNote={saveNote}
-              deleteNote={deleteNote}
-              currentVerseIndex={bibleAudio.currentVerseIndex}
-              isChapterRead={isChapterRead}
-              markChapterRead={markChapterRead}
-              announce={announce}
-            />
+            <>
+              <ChapterHeading bookName={book.name} chapter={chapterNumber} />
+              <ReaderBody
+                verses={verses}
+                bookSlug={bookSlug!}
+                chapter={chapterNumber}
+                settings={settings}
+                paragraphs={paragraphs}
+              />
+            </>
           )}
+        </main>
 
-          {/* Engagement bridges */}
-          <ChapterEngagementBridge
-            bookName={book.name}
-            chapterNumber={chapterNumber}
-          />
-
-          {/* Chapter navigation */}
-          <ChapterNav
-            bookSlug={book.slug}
+        {!isLoading && !loadError && (
+          <ReaderChapterNav
+            bookSlug={bookSlug!}
             currentChapter={chapterNumber}
-            totalChapters={book.chapters}
           />
+        )}
 
-          <div className="pb-16" />
-        </div>
+        <div className="pb-16" />
       </div>
-    </Layout>
+
+      {/* Verse Jump Pill — long chapters only */}
+      {!isLoading && !loadError && (
+        <VerseJumpPill totalVerses={verses.length} />
+      )}
+
+      {/* Books Drawer */}
+      <BibleDrawer
+        isOpen={bibleDrawer.isOpen}
+        onClose={bibleDrawer.close}
+        ariaLabel="Browse books"
+      >
+        <BooksDrawerContent
+          onClose={bibleDrawer.close}
+          onSelectBook={(slug) => {
+            bibleDrawer.close()
+            navigate(`/bible/${slug}/1`)
+          }}
+        />
+      </BibleDrawer>
+    </div>
+  )
+}
+
+export function BibleReader() {
+  return (
+    <BibleDrawerProvider>
+      <BibleReaderInner />
+    </BibleDrawerProvider>
   )
 }

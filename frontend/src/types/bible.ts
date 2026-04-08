@@ -36,6 +36,7 @@ export interface BibleChapter {
   bookSlug: string
   chapter: number
   verses: BibleVerse[]
+  paragraphs?: number[]
 }
 
 /** Search result from Bible text search */

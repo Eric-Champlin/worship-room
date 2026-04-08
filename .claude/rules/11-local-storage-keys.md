@@ -94,6 +94,10 @@ All keys use the `wr_` prefix. Data persists across page refreshes and survives 
 | `wr_bible_active_plans` | `Array<{ planId: string, currentDay: number, totalDays: number, planName: string, todayReading: string, startedAt: number }>` | Today's Plan card — active reading plan progress (BB-0 reads, BB-21 writes) |
 | `wr_bible_streak`      | `{ count: number, lastReadDate: string }` | Reading streak chip — Bible-specific streak count (BB-0 reads, BB-17 writes) |
 | `wr_bible_books_tab`   | `'OT' \| 'NT'`            | Books drawer testament tab selection |
+| `wr_bible_reader_theme` | `'midnight' \| 'parchment' \| 'sepia'` | Reading theme selection (default: midnight) |
+| `wr_bible_reader_type_size` | `'s' \| 'm' \| 'l' \| 'xl'` | Type size preference (default: m) |
+| `wr_bible_reader_line_height` | `'compact' \| 'normal' \| 'relaxed'` | Line height preference (default: normal) |
+| `wr_bible_reader_font_family` | `'serif' \| 'sans'` | Font family preference (default: serif) |
 
 ### Community Challenges
 
