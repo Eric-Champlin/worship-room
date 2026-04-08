@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
 import { CompletionScreen } from '@/components/daily/CompletionScreen'
@@ -14,6 +14,7 @@ import { playChime } from '@/lib/audio'
 import { cn } from '@/lib/utils'
 import { SEO } from '@/components/SEO'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 type Phase = 'breatheIn' | 'hold' | 'breatheOut'
 type Screen = 'prestart' | 'exercise' | 'complete'
@@ -41,6 +42,8 @@ export function BreathingExercise() {
 }
 
 function BreathingExerciseContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const [screen, setScreen] = useState<Screen>('prestart')
   const [duration, setDuration] = useState<number | null>(null)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
@@ -116,6 +119,7 @@ function BreathingExerciseContent() {
           date: getLocalDateString(),
           durationMinutes: duration!,
           completedAt: new Date().toISOString(),
+          ...(meditationVerseContext && { verseContext: meditationVerseContext }),
         })
         setScreen('complete')
         return

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, SkipForward } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -12,6 +12,7 @@ import { getLocalDateString } from '@/utils/date'
 import { SEO } from '@/components/SEO'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { getACTSSteps } from '@/mocks/daily-experience-mock-data'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 export function ActsPrayerWalk() {
   const { isAuthenticated } = useAuth()
@@ -20,6 +21,8 @@ export function ActsPrayerWalk() {
 }
 
 function ActsPrayerWalkContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const steps = getACTSSteps()
   const [currentStep, setCurrentStep] = useState(0)
   const [notes, setNotes] = useState<Record<number, string>>({})
@@ -42,6 +45,7 @@ function ActsPrayerWalkContent() {
       date: getLocalDateString(),
       durationMinutes: minutes,
       completedAt: new Date().toISOString(),
+      ...(meditationVerseContext && { verseContext: meditationVerseContext }),
     })
     setIsComplete(true)
   }

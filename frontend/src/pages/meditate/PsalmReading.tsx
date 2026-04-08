@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -16,6 +16,7 @@ import { getLocalDateString } from '@/utils/date'
 import { SEO } from '@/components/SEO'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { PsalmInfo, Psalm119Section } from '@/types/daily-experience'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 type Screen = 'selection' | 'reading' | 'section-selection' | 'complete'
 
@@ -26,6 +27,8 @@ export function PsalmReading() {
 }
 
 function PsalmReadingContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const psalms = getPsalms()
   const psalm119Sections = getPsalm119Sections()
 
@@ -79,6 +82,7 @@ function PsalmReadingContent() {
       date: getLocalDateString(),
       durationMinutes: minutes,
       completedAt: new Date().toISOString(),
+      ...(meditationVerseContext && { verseContext: meditationVerseContext }),
     })
     setScreen('complete')
   }

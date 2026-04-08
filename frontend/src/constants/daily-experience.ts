@@ -69,7 +69,7 @@ export const BREATHING_PHASES = {
 export const VERSE_FRAMINGS = {
   pray: 'What do you want to say to God about this?',
   journal: 'What comes up as you sit with this?',
-  meditate: '',
+  meditate: 'Return to these words whenever your mind wanders.',
 } as const
 
 export const DURATION_OPTIONS = [2, 5, 10] as const

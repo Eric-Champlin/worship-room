@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -15,6 +15,7 @@ import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/m
 import { getLocalDateString } from '@/utils/date'
 import { SEO } from '@/components/SEO'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 export function GratitudeReflection() {
   const { isAuthenticated } = useAuth()
@@ -25,6 +26,8 @@ export function GratitudeReflection() {
 let nextItemId = 3
 
 function GratitudeReflectionContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const [items, setItems] = useState<{ id: number; text: string }[]>([
     { id: 0, text: '' },
     { id: 1, text: '' },
@@ -79,6 +82,7 @@ function GratitudeReflectionContent() {
       date: getLocalDateString(),
       durationMinutes: minutes,
       completedAt: new Date().toISOString(),
+      ...(meditationVerseContext && { verseContext: meditationVerseContext }),
     })
     setIsComplete(true)
   }

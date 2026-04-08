@@ -10,7 +10,7 @@ describe('VERSE_FRAMINGS', () => {
     expect(VERSE_FRAMINGS.journal).toBe('What comes up as you sit with this?')
   })
 
-  it('has meditate key as empty string placeholder', () => {
-    expect(VERSE_FRAMINGS.meditate).toBe('')
+  it('has meditate key with correct framing line', () => {
+    expect(VERSE_FRAMINGS.meditate).toBe('Return to these words whenever your mind wanders.')
   })
 })

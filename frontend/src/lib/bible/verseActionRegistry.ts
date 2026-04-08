@@ -334,7 +334,11 @@ const meditate: VerseActionHandler = {
   category: 'secondary',
   hasSubView: false,
   isAvailable: () => true,
-  onInvoke: () => {},
+  onInvoke: (selection, ctx) => {
+    const url = buildDailyHubVerseUrl('meditate', selection)
+    ctx.closeSheet({ navigating: true })
+    ctx.navigate(url)
+  },
 }
 
 const crossRefs: VerseActionHandler = {

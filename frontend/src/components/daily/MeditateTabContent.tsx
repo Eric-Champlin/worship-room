@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Wind,
@@ -11,11 +12,14 @@ import {
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
+import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
 import { getMeditationSuggestion } from '@/data/challenge-prefills'
 import { cn } from '@/lib/utils'
-import { MEDITATION_TYPES } from '@/constants/daily-experience'
+import { MEDITATION_TYPES, VERSE_FRAMINGS } from '@/constants/daily-experience'
+import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
 import type { ChallengeActionType } from '@/types/challenges'
 import type { MeditationType } from '@/types/daily-experience'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Wind,
@@ -35,13 +39,28 @@ const ROUTE_MAP: Record<string, string> = {
   examen: '/meditate/examen',
 }
 
-export function MeditateTabContent() {
+interface MeditateTabContentProps {
+  isActive?: boolean
+}
+
+export function MeditateTabContent({ isActive = true }: MeditateTabContentProps) {
   const { isAuthenticated } = useAuth()
   const { completedMeditationTypes } = useCompletionTracking()
   const allComplete = completedMeditationTypes.length === 6
   const location = useLocation()
   const navigate = useNavigate()
   const authModal = useAuthModal()
+  const { verseContext, isHydrating, clearVerseContext } = useVerseContextPreload('meditate')
+
+  const meditationVerseContext: MeditationVerseContext | null = verseContext
+    ? { book: verseContext.book, chapter: verseContext.chapter, startVerse: verseContext.startVerse, endVerse: verseContext.endVerse, reference: verseContext.reference }
+    : null
+
+  useEffect(() => {
+    if (!isActive) {
+      clearVerseContext()
+    }
+  }, [isActive, clearVerseContext])
 
   // Challenge context: highlight a suggested meditation type
   const challengeContext = (location.state as { challengeContext?: { actionType: string; dayTitle: string } } | null)?.challengeContext
@@ -65,6 +84,16 @@ export function MeditateTabContent() {
           </div>
         )}
 
+        {/* Verse Prompt Card (from Bible bridge) */}
+        {isHydrating && <VersePromptSkeleton />}
+        {verseContext && (
+          <VersePromptCard
+            context={verseContext}
+            onRemove={clearVerseContext}
+            framingLine={VERSE_FRAMINGS.meditate}
+          />
+        )}
+
         <div className="grid grid-cols-2 gap-4 sm:gap-6">
           {MEDITATION_TYPES.map((type) => {
             const Icon = ICON_MAP[type.icon]
@@ -85,7 +114,9 @@ export function MeditateTabContent() {
                   if (challengeContext) {
                     navigate(location.pathname + location.search, { replace: true, state: null })
                   }
-                  navigate(ROUTE_MAP[type.id])
+                  navigate(ROUTE_MAP[type.id], {
+                    ...(meditationVerseContext && { state: { meditationVerseContext } }),
+                  })
                 }}
                 className={cn(
                   'group rounded-2xl p-4 text-left sm:p-5',

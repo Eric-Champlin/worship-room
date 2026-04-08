@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useSearchParams, useLocation } from 'react-router-dom'
 import { Pause, Play } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { SEO } from '@/components/SEO'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { DailyVerse } from '@/types/daily-experience'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 type Screen = 'prestart' | 'exercise' | 'complete'
 
@@ -27,6 +28,8 @@ export function ScriptureSoaking() {
 }
 
 function ScriptureSoakingContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const verses = getSoakingVerses()
   const [searchParams] = useSearchParams()
   const verseParam = searchParams.get('verse')
@@ -108,6 +111,7 @@ function ScriptureSoakingContent() {
             date: getLocalDateString(),
             durationMinutes: duration!,
             completedAt: new Date().toISOString(),
+            ...(meditationVerseContext && { verseContext: meditationVerseContext }),
           })
           setScreen('complete')
           return

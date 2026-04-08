@@ -342,7 +342,7 @@ function DailyHubContent() {
           tabIndex={0}
           hidden={activeTab !== 'meditate'}
         >
-          <MeditateTabContent />
+          <MeditateTabContent isActive={activeTab === 'meditate'} />
         </div>
 
         {/* Today's Song Pick */}
