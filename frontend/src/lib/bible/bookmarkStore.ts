@@ -1,5 +1,6 @@
 import { BIBLE_BOOKMARKS_KEY } from '@/constants/bible'
 import type { Bookmark } from '@/types/bible'
+import type { MergeResult } from '@/types/bible-export'
 
 // --- Module-level state ---
 let cache: Bookmark[] | null = null
@@ -228,6 +229,37 @@ export function restoreBookmarks(bookmarks: Bookmark[]): void {
   cache = [...current, ...toAdd]
   writeToStorage(cache)
   notifyListeners()
+}
+
+// --- Bulk import API ---
+
+export function replaceAllBookmarks(records: Bookmark[]): void {
+  cache = [...records]
+  writeToStorage(cache)
+  notifyListeners()
+}
+
+export function mergeInBookmarks(incoming: Bookmark[]): MergeResult {
+  const local = getCache()
+  const localMap = new Map(local.map((r) => [r.id, r]))
+  const result: MergeResult = { added: 0, updated: 0, skipped: 0 }
+
+  for (const record of incoming) {
+    const existing = localMap.get(record.id)
+    if (!existing) {
+      localMap.set(record.id, record)
+      result.added++
+    } else {
+      // No updatedAt — incoming wins on conflict
+      localMap.set(record.id, record)
+      result.updated++
+    }
+  }
+
+  cache = Array.from(localMap.values())
+  writeToStorage(cache)
+  notifyListeners()
+  return result
 }
 
 // --- Testing ---

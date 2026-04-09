@@ -1,5 +1,6 @@
 import { BIBLE_NOTES_STORAGE_KEY } from '@/constants/bible'
 import type { Note } from '@/types/bible'
+import type { MergeResult } from '@/types/bible-export'
 
 // --- Module-level state ---
 let cache: Note[] | null = null
@@ -196,6 +197,38 @@ export function restoreNote(note: Note): void {
   cache = [...notes, note]
   writeToStorage(cache)
   notifyListeners()
+}
+
+// --- Bulk import API ---
+
+export function replaceAllNotes(records: Note[]): void {
+  cache = [...records]
+  writeToStorage(cache)
+  notifyListeners()
+}
+
+export function mergeInNotes(incoming: Note[]): MergeResult {
+  const local = getCache()
+  const localMap = new Map(local.map((r) => [r.id, r]))
+  const result: MergeResult = { added: 0, updated: 0, skipped: 0 }
+
+  for (const record of incoming) {
+    const existing = localMap.get(record.id)
+    if (!existing) {
+      localMap.set(record.id, record)
+      result.added++
+    } else if (record.updatedAt > existing.updatedAt) {
+      localMap.set(record.id, record)
+      result.updated++
+    } else {
+      result.skipped++
+    }
+  }
+
+  cache = Array.from(localMap.values())
+  writeToStorage(cache)
+  notifyListeners()
+  return result
 }
 
 // --- Subscription ---

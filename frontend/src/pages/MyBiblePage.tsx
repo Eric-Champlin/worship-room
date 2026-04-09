@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Paintbrush, PenLine, Bookmark as BookmarkIcon, Filter, Flame } from 'lucide-react'
 import { Layout } from '@/components/Layout'
@@ -20,6 +20,12 @@ import { useActivityFeed } from '@/hooks/bible/useActivityFeed'
 import { navigateToActivityItem } from '@/lib/bible/navigateToActivityItem'
 import { BIBLE_BOOKS } from '@/constants/bible'
 import type { ActivityItem, ActivityFilter } from '@/types/my-bible'
+
+const BibleSettingsModal = lazy(() =>
+  import('@/components/bible/my-bible/BibleSettingsModal').then((m) => ({
+    default: m.BibleSettingsModal,
+  }))
+)
 
 const myBibleBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -54,7 +60,12 @@ function MyBiblePageInner() {
     getVerseText,
   } = useActivityFeed()
 
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [actionMenu, setActionMenu] = useState<{ item: ActivityItem; x: number; y: number } | null>(null)
+
+  const handleImportComplete = useCallback(() => {
+    window.location.reload()
+  }, [])
 
   const handleOpenMenu = useCallback((item: ActivityItem, x: number, y: number) => {
     setActionMenu({ item, x, y })
@@ -225,7 +236,15 @@ function MyBiblePageInner() {
 
           {/* Footer trust signal */}
           <p className="py-8 text-center text-xs text-white/40">
-            Stored on this device. Export anytime in Settings.
+            Stored on this device. Export anytime in{' '}
+            <button
+              type="button"
+              className="text-white/60 underline underline-offset-2 hover:text-white/80"
+              onClick={() => setSettingsOpen(true)}
+            >
+              Settings
+            </button>
+            .
           </p>
         </div>
       </div>
@@ -244,6 +263,15 @@ function MyBiblePageInner() {
       <BibleDrawer isOpen={drawerOpen} onClose={closeDrawer} ariaLabel="Books of the Bible">
         <DrawerViewRouter onClose={closeDrawer} />
       </BibleDrawer>
+
+      {/* Settings modal (lazy-loaded) */}
+      <Suspense fallback={null}>
+        <BibleSettingsModal
+          isOpen={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          onImportComplete={handleImportComplete}
+        />
+      </Suspense>
     </Layout>
   )
 }

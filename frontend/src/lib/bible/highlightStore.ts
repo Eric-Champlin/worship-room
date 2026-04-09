@@ -1,5 +1,6 @@
 import { BIBLE_HIGHLIGHTS_KEY } from '@/constants/bible'
 import type { Highlight, HighlightColor } from '@/types/bible'
+import type { MergeResult } from '@/types/bible-export'
 
 // --- Module-level state ---
 let cache: Highlight[] | null = null
@@ -296,6 +297,38 @@ export function updateHighlightColor(id: string, color: HighlightColor): void {
   cache = [...highlights]
   writeToStorage(cache)
   notifyListeners()
+}
+
+// --- Bulk import API ---
+
+export function replaceAllHighlights(records: Highlight[]): void {
+  cache = [...records]
+  writeToStorage(cache)
+  notifyListeners()
+}
+
+export function mergeInHighlights(incoming: Highlight[]): MergeResult {
+  const local = getCache()
+  const localMap = new Map(local.map((r) => [r.id, r]))
+  const result: MergeResult = { added: 0, updated: 0, skipped: 0 }
+
+  for (const record of incoming) {
+    const existing = localMap.get(record.id)
+    if (!existing) {
+      localMap.set(record.id, record)
+      result.added++
+    } else if (record.updatedAt > existing.updatedAt) {
+      localMap.set(record.id, record)
+      result.updated++
+    } else {
+      result.skipped++
+    }
+  }
+
+  cache = Array.from(localMap.values())
+  writeToStorage(cache)
+  notifyListeners()
+  return result
 }
 
 // --- Subscription ---
