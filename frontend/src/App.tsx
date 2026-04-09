@@ -28,6 +28,7 @@ import {
   BibleLandingSkeleton,
   BibleBrowserSkeleton,
   ProfileSkeleton,
+  MyBibleSkeleton,
 } from '@/components/skeletons'
 
 // Route-level lazy loading for code splitting
@@ -64,6 +65,7 @@ const ChallengeDetail = lazy(() => import('./pages/ChallengeDetail').then((m) =>
 const BibleLanding = lazy(() => import('./pages/BibleLanding').then((m) => ({ default: m.BibleLanding })))
 const BibleBrowse = lazy(() => import('./pages/BibleBrowse').then((m) => ({ default: m.BibleBrowse })))
 const BibleStub = lazy(() => import('./pages/BibleStub').then((m) => ({ default: m.BibleStub })))
+const MyBiblePage = lazy(() => import('./pages/MyBiblePage'))
 const BibleReader = lazy(() => import('./pages/BibleReader').then((m) => ({ default: m.BibleReader })))
 const AskPage = lazy(() => import('./pages/AskPage').then((m) => ({ default: m.AskPage })))
 const MoodCheckInPreview = lazy(() =>
@@ -182,7 +184,7 @@ function App() {
           <Route path="/challenges/:challengeId" element={<ChallengeDetail />} />
           <Route path="/bible" element={<Suspense fallback={<BibleLandingSkeleton />}><BibleLanding /></Suspense>} />
           <Route path="/bible/browse" element={<Suspense fallback={<BibleBrowserSkeleton />}><BibleBrowse /></Suspense>} />
-          <Route path="/bible/my" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="my" /></Suspense>} />
+          <Route path="/bible/my" element={<Suspense fallback={<MyBibleSkeleton />}><MyBiblePage /></Suspense>} />
           <Route path="/bible/plans" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="plans" /></Suspense>} />
           <Route path="/bible/search" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="search" /></Suspense>} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />

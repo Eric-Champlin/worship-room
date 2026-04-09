@@ -104,8 +104,8 @@ describe('SectionHeading', () => {
     render(<SectionHeading topLine="Top" bottomLine="Bottom" />)
     const h2 = screen.getByRole('heading', { level: 2 })
     const bottomSpan = h2.querySelectorAll('span')[1]
-    expect(bottomSpan.className).toContain('text-4xl')
-    expect(bottomSpan.className).toContain('sm:text-5xl')
+    expect(bottomSpan.className).toContain('text-3xl')
+    expect(bottomSpan.className).toContain('sm:text-4xl')
     expect(bottomSpan.className).toContain('lg:text-6xl')
   })
 })
