@@ -50,7 +50,7 @@ export function PrayerResponse({
   audioActiveSounds,
   onToggleAudioDrawer,
   onStopAudio,
-  verseContext: _verseContext,
+  verseContext,
 }: PrayerResponseProps) {
   const { showToast } = useToast()
   const authModal = useAuthModal()
@@ -382,6 +382,7 @@ export function PrayerResponse({
                 showToast('Added to your prayer list.')
               }}
               onCancel={() => setSaveToListOpen(false)}
+              verseContext={verseContext}
             />
           )}
 

@@ -1,4 +1,5 @@
 import type { PrayerCategory } from '@/constants/prayer-categories'
+import type { PrayerVerseContext } from '@/types/daily-experience'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 import { getLocalDateString } from '@/utils/date'
 
@@ -38,6 +39,7 @@ export function addPrayer(input: {
   category: PrayerCategory
   sourceType?: 'prayer_wall'
   sourceId?: string
+  verseContext?: PrayerVerseContext
 }): PersonalPrayer | null {
   const prayers = readPrayers()
   if (prayers.length >= MAX_PRAYERS) return null
@@ -56,6 +58,7 @@ export function addPrayer(input: {
     lastPrayedAt: null,
     sourceType: input.sourceType,
     sourceId: input.sourceId,
+    verseContext: input.verseContext,
   }
 
   writePrayers([...prayers, prayer])

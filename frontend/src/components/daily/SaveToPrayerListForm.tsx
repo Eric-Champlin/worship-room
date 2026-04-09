@@ -5,12 +5,14 @@ import { addPrayer } from '@/services/prayer-list-storage'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS } from '@/constants/prayer-categories'
 import { useToast } from '@/components/ui/Toast'
 import type { PrayerCategory } from '@/constants/prayer-categories'
+import type { PrayerVerseContext } from '@/types/daily-experience'
 
 interface SaveToPrayerListFormProps {
   topicText: string
   prayerText: string
   onSave: () => void
   onCancel: () => void
+  verseContext?: PrayerVerseContext | null
 }
 
 function extractDefaultTitle(topicText: string): string {
@@ -25,6 +27,7 @@ export function SaveToPrayerListForm({
   prayerText,
   onSave,
   onCancel,
+  verseContext,
 }: SaveToPrayerListFormProps) {
   const [title, setTitle] = useState(() => extractDefaultTitle(topicText))
   const [category, setCategory] = useState<PrayerCategory | null>(null)
@@ -37,6 +40,7 @@ export function SaveToPrayerListForm({
       title: title.trim() || 'My prayer',
       description: prayerText,
       category,
+      verseContext: verseContext ?? undefined,
     })
 
     if (!result) {
