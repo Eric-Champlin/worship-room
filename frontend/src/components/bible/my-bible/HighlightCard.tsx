@@ -1,12 +1,14 @@
 import { HIGHLIGHT_EMOTIONS } from '@/constants/bible'
+import { HighlightedText } from './HighlightedText'
 import type { HighlightData } from '@/types/my-bible'
 
 interface HighlightCardProps {
   data: HighlightData
   verseText: string | null
+  searchQuery?: string
 }
 
-export function HighlightCard({ data, verseText }: HighlightCardProps) {
+export function HighlightCard({ data, verseText, searchQuery }: HighlightCardProps) {
   const emotion = HIGHLIGHT_EMOTIONS.find((e) => e.key === data.color)
   const hex = emotion?.hex ?? '#FDE047'
   const label = emotion?.label ?? data.color
@@ -18,7 +20,7 @@ export function HighlightCard({ data, verseText }: HighlightCardProps) {
           className="rounded-lg px-3 py-2 text-sm text-white"
           style={{ backgroundColor: `${hex}15` }}
         >
-          {verseText}
+          <HighlightedText text={verseText} query={searchQuery ?? ''} />
         </p>
       ) : (
         <div className="h-4 w-3/4 animate-pulse rounded bg-white/10" />

@@ -5,7 +5,7 @@ import { ActivityFilterBar } from '../ActivityFilterBar'
 import { ColorFilterStrip } from '../ColorFilterStrip'
 import type { ActivityFilter, ActivitySort } from '@/types/my-bible'
 
-const DEFAULT_FILTER: ActivityFilter = { type: 'all', book: 'all', color: 'all' }
+const DEFAULT_FILTER: ActivityFilter = { type: 'all', book: 'all', color: 'all', searchQuery: '' }
 const DEFAULT_SORT: ActivitySort = 'recent'
 
 function makeBookCounts(): Map<string, number> {
@@ -19,6 +19,7 @@ function makeBookCounts(): Map<string, number> {
 describe('ActivityFilterBar', () => {
   const mockOnFilterChange = vi.fn()
   const mockOnSortChange = vi.fn()
+  const mockOnSearchChange = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -43,6 +44,8 @@ describe('ActivityFilterBar', () => {
         onFilterChange={mockOnFilterChange}
         onSortChange={mockOnSortChange}
         bookCounts={makeBookCounts()}
+        searchQuery={filter.searchQuery}
+        onSearchChange={mockOnSearchChange}
       />,
     )
   }

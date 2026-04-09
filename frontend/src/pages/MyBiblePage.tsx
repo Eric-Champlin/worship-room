@@ -14,6 +14,7 @@ import { ActivityCard } from '@/components/bible/my-bible/ActivityCard'
 import { ActivityActionMenu } from '@/components/bible/my-bible/ActivityActionMenu'
 import { ActivityFilterBar } from '@/components/bible/my-bible/ActivityFilterBar'
 import { ColorFilterStrip } from '@/components/bible/my-bible/ColorFilterStrip'
+import { EmptySearchResults } from '@/components/bible/my-bible/EmptySearchResults'
 import { useLongPress } from '@/hooks/bible/useLongPress'
 import { useActivityFeed } from '@/hooks/bible/useActivityFeed'
 import { navigateToActivityItem } from '@/lib/bible/navigateToActivityItem'
@@ -164,6 +165,8 @@ function MyBiblePageInner() {
               onFilterChange={setFilter}
               onSortChange={setSort}
               bookCounts={bookCounts}
+              searchQuery={filter.searchQuery}
+              onSearchChange={(q) => setFilter((prev) => ({ ...prev, searchQuery: q }))}
             />
           )}
 
@@ -183,6 +186,11 @@ function MyBiblePageInner() {
                 ctaHref="/bible"
               />
             </div>
+          ) : isFilteredEmpty && filter.searchQuery.trim() ? (
+            <EmptySearchResults
+              query={filter.searchQuery.trim()}
+              onClear={() => setFilter((prev) => ({ ...prev, searchQuery: '' }))}
+            />
           ) : isFilteredEmpty ? (
             <div className="py-16">
               <FeatureEmptyState
@@ -209,6 +217,7 @@ function MyBiblePageInner() {
                   verseText={getVerseText(item.book, item.chapter, item.startVerse, item.endVerse)}
                   onNavigate={() => navigateToActivityItem(navigate, item)}
                   onOpenMenu={handleOpenMenu}
+                  searchQuery={filter.searchQuery}
                 />
               ))}
             </div>
@@ -244,9 +253,10 @@ interface ActivityCardWithActionsProps {
   verseText: string | null
   onNavigate: () => void
   onOpenMenu: (item: ActivityItem, x: number, y: number) => void
+  searchQuery?: string
 }
 
-function ActivityCardWithActions({ item, verseText, onNavigate, onOpenMenu }: ActivityCardWithActionsProps) {
+function ActivityCardWithActions({ item, verseText, onNavigate, onOpenMenu, searchQuery }: ActivityCardWithActionsProps) {
   const longPress = useLongPress((e) => {
     onOpenMenu(item, e.clientX, e.clientY)
   })
@@ -264,6 +274,7 @@ function ActivityCardWithActions({ item, verseText, onNavigate, onOpenMenu }: Ac
       onPointerUp={longPress.onPointerUp}
       onPointerMove={longPress.onPointerMove}
       onPointerCancel={longPress.onPointerCancel}
+      searchQuery={searchQuery}
     />
   )
 }

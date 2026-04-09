@@ -111,7 +111,7 @@ function makeJournalEntry(overrides: Partial<JournalEntry> = {}): JournalEntry {
   }
 }
 
-const DEFAULT_FILTER: ActivityFilter = { type: 'all', book: 'all', color: 'all' }
+const DEFAULT_FILTER: ActivityFilter = { type: 'all', book: 'all', color: 'all', searchQuery: '' }
 
 describe('activityLoader', () => {
   beforeEach(() => {
@@ -273,7 +273,7 @@ describe('activityLoader', () => {
 
     it('filters by color', () => {
       const items = makeItems()
-      const filtered = filterActivity(items, { type: 'highlights', book: 'all', color: 'joy' })
+      const filtered = filterActivity(items, { type: 'highlights', book: 'all', color: 'joy', searchQuery: '' })
       expect(filtered).toHaveLength(1)
       expect(filtered[0].data.type).toBe('highlight')
       if (filtered[0].data.type === 'highlight') {
@@ -283,10 +283,59 @@ describe('activityLoader', () => {
 
     it('combines type and book filters', () => {
       const items = makeItems()
-      const filtered = filterActivity(items, { type: 'highlights', book: 'genesis', color: 'all' })
+      const filtered = filterActivity(items, { type: 'highlights', book: 'genesis', color: 'all', searchQuery: '' })
       expect(filtered).toHaveLength(1)
       expect(filtered[0].type).toBe('highlight')
       expect(filtered[0].book).toBe('genesis')
+    })
+    it('filters items by searchQuery', () => {
+      const items: ActivityItem[] = [
+        { type: 'note', id: '1', createdAt: 1000, updatedAt: 1000, book: 'john', bookName: 'John', chapter: 3, startVerse: 16, endVerse: 16, data: { type: 'note', body: 'feeling joyful today' } },
+        { type: 'note', id: '2', createdAt: 2000, updatedAt: 2000, book: 'john', bookName: 'John', chapter: 3, startVerse: 17, endVerse: 17, data: { type: 'note', body: 'anxious but hopeful' } },
+      ]
+      const filtered = filterActivity(items, { ...DEFAULT_FILTER, searchQuery: 'joyful' })
+      expect(filtered).toHaveLength(1)
+      expect(filtered[0].id).toBe('1')
+    })
+
+    it('empty searchQuery returns all items', () => {
+      const items: ActivityItem[] = [
+        { type: 'note', id: '1', createdAt: 1000, updatedAt: 1000, book: 'john', bookName: 'John', chapter: 3, startVerse: 16, endVerse: 16, data: { type: 'note', body: 'note a' } },
+        { type: 'note', id: '2', createdAt: 2000, updatedAt: 2000, book: 'john', bookName: 'John', chapter: 3, startVerse: 17, endVerse: 17, data: { type: 'note', body: 'note b' } },
+      ]
+      const filtered = filterActivity(items, { ...DEFAULT_FILTER, searchQuery: '' })
+      expect(filtered).toHaveLength(2)
+    })
+
+    it('composes search with type filter', () => {
+      const items: ActivityItem[] = [
+        { type: 'note', id: '1', createdAt: 1000, updatedAt: 1000, book: 'john', bookName: 'John', chapter: 3, startVerse: 16, endVerse: 16, data: { type: 'note', body: 'anxious today' } },
+        { type: 'highlight', id: '2', createdAt: 2000, updatedAt: 2000, book: 'john', bookName: 'John', chapter: 3, startVerse: 17, endVerse: 17, data: { type: 'highlight', color: 'joy' } },
+      ]
+      const filtered = filterActivity(items, { type: 'notes', book: 'all', color: 'all', searchQuery: 'anxious' })
+      expect(filtered).toHaveLength(1)
+      expect(filtered[0].type).toBe('note')
+    })
+
+    it('uses getVerseText in search when provided', () => {
+      const items: ActivityItem[] = [
+        { type: 'highlight', id: '1', createdAt: 1000, updatedAt: 1000, book: 'john', bookName: 'John', chapter: 3, startVerse: 16, endVerse: 16, data: { type: 'highlight', color: 'joy' } },
+      ]
+      const getVT = () => 'For God so loved the world'
+      const filtered = filterActivity(items, { ...DEFAULT_FILTER, searchQuery: 'loved' }, getVT)
+      expect(filtered).toHaveLength(1)
+    })
+
+    it('search works without getVerseText', () => {
+      const items: ActivityItem[] = [
+        { type: 'note', id: '1', createdAt: 1000, updatedAt: 1000, book: 'john', bookName: 'John', chapter: 3, startVerse: 16, endVerse: 16, data: { type: 'note', body: 'finding peace' } },
+      ]
+      const filtered = filterActivity(items, { ...DEFAULT_FILTER, searchQuery: 'peace' })
+      expect(filtered).toHaveLength(1)
+    })
+
+    it('DEFAULT_FILTER includes searchQuery empty string', () => {
+      expect(DEFAULT_FILTER.searchQuery).toBe('')
     })
   })
 

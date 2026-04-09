@@ -26,6 +26,7 @@ interface ActivityCardProps {
   onPointerUp?: (e: React.PointerEvent) => void
   onPointerMove?: (e: React.PointerEvent) => void
   onPointerCancel?: (e: React.PointerEvent) => void
+  searchQuery?: string
 }
 
 export function ActivityCard({
@@ -37,6 +38,7 @@ export function ActivityCard({
   onPointerUp,
   onPointerMove,
   onPointerCancel,
+  searchQuery,
 }: ActivityCardProps) {
   const Icon = TYPE_ICONS[item.type]
   const reference = formatReference(item.bookName, item.chapter, item.startVerse, item.endVerse)
@@ -91,10 +93,10 @@ export function ActivityCard({
 
         {/* Type-specific content */}
         {item.data.type === 'highlight' && (
-          <HighlightCard data={item.data} verseText={verseText} />
+          <HighlightCard data={item.data} verseText={verseText} searchQuery={searchQuery} />
         )}
         {item.data.type === 'bookmark' && (
-          <BookmarkCard data={item.data} verseText={verseText} />
+          <BookmarkCard data={item.data} verseText={verseText} searchQuery={searchQuery} />
         )}
         {item.data.type === 'note' && (
           <NoteCard
@@ -102,13 +104,14 @@ export function ActivityCard({
             verseText={verseText}
             createdAt={item.createdAt}
             updatedAt={item.updatedAt}
+            searchQuery={searchQuery}
           />
         )}
         {item.data.type === 'meditation' && (
-          <MeditationCard data={item.data} verseText={verseText} />
+          <MeditationCard data={item.data} verseText={verseText} searchQuery={searchQuery} />
         )}
         {item.data.type === 'journal' && (
-          <JournalCard data={item.data} verseText={verseText} />
+          <JournalCard data={item.data} verseText={verseText} searchQuery={searchQuery} />
         )}
       </div>
     </FrostedCard>

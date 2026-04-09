@@ -50,7 +50,7 @@ function computeTotalCounts(allItems: ActivityItem[]): TotalCounts {
   return counts
 }
 
-const DEFAULT_FILTER: ActivityFilter = { type: 'all', book: 'all', color: 'all' }
+const DEFAULT_FILTER: ActivityFilter = { type: 'all', book: 'all', color: 'all', searchQuery: '' }
 const DEFAULT_SORT: ActivitySort = 'recent'
 
 export function useActivityFeed() {
@@ -75,9 +75,9 @@ export function useActivityFeed() {
   const totalCounts = useMemo(() => computeTotalCounts(allItems), [allItems])
 
   const items = useMemo(() => {
-    const filtered = filterActivity(allItems, filter)
+    const filtered = filterActivity(allItems, filter, getVerseText)
     return sortActivity(filtered, sort)
-  }, [allItems, filter, sort])
+  }, [allItems, filter, sort, getVerseText])
 
   // Preload verse text for filtered items
   useEffect(() => {

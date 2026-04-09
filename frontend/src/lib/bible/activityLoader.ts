@@ -4,6 +4,7 @@ import { getAllBookmarks } from '@/lib/bible/bookmarkStore'
 import { getAllNotes } from '@/lib/bible/notes/store'
 import { getAllJournalEntries } from '@/lib/bible/journalStore'
 import { getMeditationHistory } from '@/services/meditation-storage'
+import { matchesSearch } from '@/lib/bible/myBible/searchPredicate'
 import type { ActivityItem, ActivityFilter, ActivitySort } from '@/types/my-bible'
 
 function resolveBookName(slug: string): string {
@@ -104,7 +105,11 @@ export function loadAllActivity(): ActivityItem[] {
   return items
 }
 
-export function filterActivity(items: ActivityItem[], filter: ActivityFilter): ActivityItem[] {
+export function filterActivity(
+  items: ActivityItem[],
+  filter: ActivityFilter,
+  getVerseText?: (book: string, chapter: number, startVerse: number, endVerse: number) => string | null,
+): ActivityItem[] {
   let result = items
 
   if (filter.type !== 'all') {
@@ -130,6 +135,13 @@ export function filterActivity(items: ActivityItem[], filter: ActivityFilter): A
     result = result.filter(
       (item) => item.data.type === 'highlight' && item.data.color === filter.color,
     )
+  }
+
+  if (filter.searchQuery.trim()) {
+    result = result.filter((item) => {
+      const vt = getVerseText?.(item.book, item.chapter, item.startVerse, item.endVerse) ?? null
+      return matchesSearch(item, filter.searchQuery, vt)
+    })
   }
 
   return result

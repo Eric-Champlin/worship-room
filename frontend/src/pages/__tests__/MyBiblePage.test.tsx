@@ -68,7 +68,7 @@ function makeItem(overrides: Partial<ActivityItem> = {}): ActivityItem {
 function makeDefaultFeed(overrides: Partial<ReturnType<typeof mockUseActivityFeed>> = {}) {
   return {
     items: [],
-    filter: { type: 'all' as const, book: 'all', color: 'all' as const },
+    filter: { type: 'all' as const, book: 'all', color: 'all' as const, searchQuery: '' },
     sort: 'recent' as const,
     setFilter: vi.fn(),
     setSort: vi.fn(),
@@ -234,7 +234,7 @@ describe('MyBiblePage', () => {
       isFilteredEmpty: true,
       items: [],
       clearFilters,
-      filter: { type: 'notes', book: 'all', color: 'all' as const },
+      filter: { type: 'notes', book: 'all', color: 'all' as const, searchQuery: '' },
       totalCounts: {
         highlights: 5,
         notes: 0,
@@ -255,7 +255,7 @@ describe('MyBiblePage', () => {
       isFilteredEmpty: true,
       items: [],
       clearFilters,
-      filter: { type: 'notes', book: 'all', color: 'all' as const },
+      filter: { type: 'notes', book: 'all', color: 'all' as const, searchQuery: '' },
       totalCounts: {
         highlights: 5,
         notes: 0,

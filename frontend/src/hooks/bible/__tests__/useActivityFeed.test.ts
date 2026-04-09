@@ -146,7 +146,7 @@ describe('useActivityFeed', () => {
 
     const { result } = renderHook(() => useActivityFeed())
     act(() => {
-      result.current.setFilter({ type: 'highlights', book: 'all', color: 'all' })
+      result.current.setFilter({ type: 'highlights', book: 'all', color: 'all', searchQuery: '' })
     })
     expect(result.current.items.every((i) => i.type === 'highlight')).toBe(true)
   })
@@ -159,7 +159,7 @@ describe('useActivityFeed', () => {
 
     const { result } = renderHook(() => useActivityFeed())
     act(() => {
-      result.current.setFilter({ type: 'all', book: 'john', color: 'all' })
+      result.current.setFilter({ type: 'all', book: 'john', color: 'all', searchQuery: '' })
     })
     expect(result.current.items.every((i) => i.book === 'john')).toBe(true)
   })
@@ -216,7 +216,7 @@ describe('useActivityFeed', () => {
 
     // Filter by type=highlights — bookCounts should NOT change (independent filter)
     act(() => {
-      result.current.setFilter({ type: 'highlights', book: 'all', color: 'all' })
+      result.current.setFilter({ type: 'highlights', book: 'all', color: 'all', searchQuery: '' })
     })
     expect(result.current.bookCounts.get('john')).toBe(2)
     expect(result.current.bookCounts.get('genesis')).toBe(1)
@@ -233,7 +233,7 @@ describe('useActivityFeed', () => {
     const { result } = renderHook(() => useActivityFeed())
 
     act(() => {
-      result.current.setFilter({ type: 'notes', book: 'all', color: 'all' })
+      result.current.setFilter({ type: 'notes', book: 'all', color: 'all', searchQuery: '' })
     })
     expect(result.current.isFilteredEmpty).toBe(true)
   })
@@ -243,13 +243,13 @@ describe('useActivityFeed', () => {
     const { result } = renderHook(() => useActivityFeed())
 
     act(() => {
-      result.current.setFilter({ type: 'highlights', book: 'john', color: 'joy' })
+      result.current.setFilter({ type: 'highlights', book: 'john', color: 'joy', searchQuery: '' })
       result.current.setSort('canonical')
     })
     act(() => {
       result.current.clearFilters()
     })
-    expect(result.current.filter).toEqual({ type: 'all', book: 'all', color: 'all' })
+    expect(result.current.filter).toEqual({ type: 'all', book: 'all', color: 'all', searchQuery: '' })
     expect(result.current.sort).toBe('recent')
   })
 

@@ -1,6 +1,7 @@
 import { useState, useCallback, Fragment } from 'react'
 import { parseReferences } from '@/lib/bible/notes/referenceParser'
 import { useToastSafe } from '@/components/ui/Toast'
+import { HighlightedText } from './HighlightedText'
 import type { NoteData } from '@/types/my-bible'
 import { timeAgo } from '@/lib/time'
 
@@ -9,6 +10,7 @@ interface NoteCardProps {
   verseText: string | null
   createdAt: number
   updatedAt: number
+  searchQuery?: string
 }
 
 function NoteBody({ body }: { body: string }) {
@@ -56,7 +58,7 @@ function NoteBody({ body }: { body: string }) {
   )
 }
 
-export function NoteCard({ data, verseText, createdAt, updatedAt }: NoteCardProps) {
+export function NoteCard({ data, verseText, createdAt, updatedAt, searchQuery }: NoteCardProps) {
   const [expanded, setExpanded] = useState(false)
   const isEdited = updatedAt > createdAt
 
@@ -68,13 +70,19 @@ export function NoteCard({ data, verseText, createdAt, updatedAt }: NoteCardProp
   return (
     <div className="mt-2 space-y-2">
       {verseText ? (
-        <p className="text-sm text-white/60">{verseText}</p>
+        <p className="text-sm text-white/60">
+          <HighlightedText text={verseText} query={searchQuery ?? ''} />
+        </p>
       ) : (
         <div className="h-4 w-3/4 animate-pulse rounded bg-white/10" />
       )}
       <div className={expanded ? '' : 'line-clamp-4'}>
         <p className="text-sm text-white">
-          <NoteBody body={data.body} />
+          {searchQuery ? (
+            <HighlightedText text={data.body} query={searchQuery} />
+          ) : (
+            <NoteBody body={data.body} />
+          )}
         </p>
       </div>
       {data.body.length > 150 && (

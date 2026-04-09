@@ -50,6 +50,7 @@ export interface ActivityFilter {
   type: 'all' | 'highlights' | 'notes' | 'bookmarks' | 'daily-hub'
   book: string
   color: HighlightColor | 'all'
+  searchQuery: string
 }
 
 export type ActivitySort = 'recent' | 'canonical'
