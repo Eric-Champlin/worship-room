@@ -4,9 +4,8 @@ import { SEO, SITE_URL } from '@/components/SEO'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
 import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
 import { StreakChip } from '@/components/bible/landing/StreakChip'
-import { ResumeReadingCard } from '@/components/bible/landing/ResumeReadingCard'
+import { BibleHeroSlot } from '@/components/bible/landing/BibleHeroSlot'
 import { TodaysPlanCard } from '@/components/bible/landing/TodaysPlanCard'
-import { VerseOfTheDay } from '@/components/bible/landing/VerseOfTheDay'
 import { QuickActionsRow } from '@/components/bible/landing/QuickActionsRow'
 import { BibleSearchEntry } from '@/components/bible/landing/BibleSearchEntry'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
@@ -18,9 +17,9 @@ import { StreakResetWelcome } from '@/components/bible/streak/StreakResetWelcome
 import { useStreakStore } from '@/hooks/bible/useStreakStore'
 import { useToast } from '@/components/ui/Toast'
 import { getTodayLocal } from '@/lib/bible/dateUtils'
-import { getLastRead, getActivePlans } from '@/lib/bible/landingState'
+import { getActivePlans } from '@/lib/bible/landingState'
 import { BIBLE_STREAK_RESET_ACK_KEY } from '@/constants/bible'
-import type { LastRead, ActivePlan } from '@/types/bible-landing'
+import type { ActivePlan } from '@/types/bible-landing'
 
 const bibleBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -42,7 +41,6 @@ function isInputFocused(): boolean {
 }
 
 function BibleLandingInner() {
-  const [lastRead, setLastRead] = useState<LastRead | null>(null)
   const [plans, setPlans] = useState<ActivePlan[]>([])
   const { streak, atRisk } = useStreakStore()
   const [modalOpen, setModalOpen] = useState(false)
@@ -55,7 +53,6 @@ function BibleLandingInner() {
   const { isOpen, close, toggle } = useBibleDrawer()
 
   useEffect(() => {
-    setLastRead(getLastRead())
     setPlans(getActivePlans())
   }, [])
 
@@ -130,16 +127,13 @@ function BibleLandingInner() {
             </div>
           )}
 
-          {/* Resume Reading + Today's Plan — side by side on tablet+ */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <ResumeReadingCard lastRead={lastRead} />
-            <TodaysPlanCard plans={plans} />
-          </div>
+          {/* Hero slot: resume card / VOTD / lapsed link based on reader state */}
+          <BibleHeroSlot />
 
-          {/* Verse of the Day */}
-          <VerseOfTheDay />
+          {/* Today's Plan — standalone below hero slot */}
+          <TodaysPlanCard plans={plans} />
 
-          {/* Section divider: VOTD → Quick Actions */}
+          {/* Section divider → Quick Actions */}
           <div className="border-t border-white/[0.08]" />
 
           {/* Quick Actions */}

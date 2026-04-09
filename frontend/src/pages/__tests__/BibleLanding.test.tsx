@@ -39,6 +39,22 @@ vi.mock('@/lib/bible/bookmarkStore', () => ({
   subscribe: vi.fn().mockReturnValue(() => {}),
 }))
 
+vi.mock('@/data/bible', () => ({
+  loadChapterWeb: vi.fn().mockResolvedValue({
+    bookSlug: 'john',
+    chapter: 3,
+    verses: [
+      { number: 1, text: 'Now there was a man of the Pharisees named Nicodemus, a ruler of the Jews.' },
+    ],
+    paragraphs: [],
+  }),
+  getAdjacentChapter: vi.fn().mockReturnValue({
+    bookSlug: 'john',
+    bookName: 'John',
+    chapter: 4,
+  }),
+}))
+
 function renderLanding() {
   return render(
     <MemoryRouter>
@@ -64,21 +80,24 @@ describe('BibleLanding', () => {
     expect(() => renderLanding()).not.toThrow()
   })
 
-  it('empty state: shows first-run cards', () => {
+  it('empty state: shows VOTD for first-time reader', () => {
     renderLanding()
-    expect(screen.getByText('Start your first reading')).toBeInTheDocument()
+    // First-time reader: VOTD shown, no resume card
+    expect(screen.getByText('Verse of the Day')).toBeInTheDocument()
+    expect(screen.queryByText('Continue reading')).not.toBeInTheDocument()
+    // Plan card still shows empty state
     expect(screen.getByText('Try a reading plan')).toBeInTheDocument()
     // No streak chip visible
     expect(screen.queryByText(/day streak/)).not.toBeInTheDocument()
   })
 
-  it('resume state: shows Resume Reading card', () => {
+  it('resume state: shows Resume Reading card (active reader)', () => {
     localStorage.setItem(
       'wr_bible_last_read',
       JSON.stringify({ book: 'John', chapter: 3, verse: 16, timestamp: Date.now() })
     )
     renderLanding()
-    expect(screen.getByText('Pick up where you left off')).toBeInTheDocument()
+    expect(screen.getByText('Continue reading')).toBeInTheDocument()
     expect(screen.getByText('John 3')).toBeInTheDocument()
   })
 
@@ -184,5 +203,17 @@ describe('BibleLanding', () => {
     expect(progressbar.getAttribute('aria-valuenow')).toBe('7')
     expect(progressbar.getAttribute('aria-valuemin')).toBe('1')
     expect(progressbar.getAttribute('aria-valuemax')).toBe('21')
+  })
+
+  it('BibleHeroSlot renders within the page', () => {
+    renderLanding()
+    // Verify the VOTD renders as part of the hero slot composition
+    expect(screen.getByText('Verse of the Day')).toBeInTheDocument()
+  })
+
+  it('TodaysPlanCard still renders', () => {
+    renderLanding()
+    // Empty plan state shows the CTA
+    expect(screen.getByText('Try a reading plan')).toBeInTheDocument()
   })
 })

@@ -3,76 +3,83 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { ResumeReadingCard } from '../ResumeReadingCard'
 
-function renderWithRouter(ui: React.ReactElement) {
-  return render(<MemoryRouter>{ui}</MemoryRouter>)
+const DEFAULT_PROPS = {
+  book: 'John',
+  chapter: 3,
+  slug: 'john',
+  relativeTime: '3 hours ago',
+  firstLine: 'There was a man of the Pharisees named Nicodemus, a ruler of the Jews.',
+  nextChapter: { bookSlug: 'john', bookName: 'John', chapter: 4 },
+}
+
+function renderCard(overrides: Partial<typeof DEFAULT_PROPS> = {}) {
+  return render(
+    <MemoryRouter>
+      <ResumeReadingCard {...DEFAULT_PROPS} {...overrides} />
+    </MemoryRouter>,
+  )
 }
 
 describe('ResumeReadingCard', () => {
-  it('renders resume state with book and chapter', () => {
-    renderWithRouter(
-      <ResumeReadingCard
-        lastRead={{ book: 'John', chapter: 3, verse: 16, timestamp: Date.now() }}
-      />
-    )
-    expect(screen.getByText('Pick up where you left off')).toBeInTheDocument()
+  it('renders book name and chapter', () => {
+    renderCard()
     expect(screen.getByText('John 3')).toBeInTheDocument()
   })
 
-  it('links to correct chapter route', () => {
-    renderWithRouter(
-      <ResumeReadingCard
-        lastRead={{ book: 'John', chapter: 3, verse: 16, timestamp: Date.now() }}
-      />
-    )
-    const link = screen.getByRole('link')
+  it('renders first-line preview', () => {
+    renderCard()
+    expect(
+      screen.getByText(/There was a man of the Pharisees/),
+    ).toBeInTheDocument()
+  })
+
+  it('renders relative time label', () => {
+    renderCard()
+    expect(screen.getByText('Read 3 hours ago')).toBeInTheDocument()
+  })
+
+  it('Continue link navigates to correct URL', () => {
+    renderCard()
+    const link = screen.getByRole('link', { name: /continue reading john chapter 3/i })
     expect(link.getAttribute('href')).toBe('/bible/john/3')
   })
 
-  it('shows relative timestamp', () => {
-    const fiveMinAgo = Date.now() - 5 * 60 * 1000
-    renderWithRouter(
-      <ResumeReadingCard
-        lastRead={{ book: 'John', chapter: 3, verse: 16, timestamp: fiveMinAgo }}
-      />
-    )
-    expect(screen.getByText('5 minutes ago')).toBeInTheDocument()
+  it('"next chapter" link visible when nextChapter provided', () => {
+    renderCard()
+    const link = screen.getByRole('link', { name: /or read the next chapter/i })
+    expect(link).toBeInTheDocument()
+    expect(link.getAttribute('href')).toBe('/bible/john/4')
   })
 
-  it('renders first-run state when lastRead is null', () => {
-    renderWithRouter(<ResumeReadingCard lastRead={null} />)
-    expect(screen.getByText('Start your first reading')).toBeInTheDocument()
-    expect(screen.getByText('Open the Bible and begin anywhere')).toBeInTheDocument()
+  it('"next chapter" link hidden when nextChapter is null', () => {
+    renderCard({ nextChapter: null })
+    expect(screen.queryByText(/or read the next chapter/i)).not.toBeInTheDocument()
   })
 
-  it('first-run links to /bible/browse', () => {
-    renderWithRouter(<ResumeReadingCard lastRead={null} />)
-    const link = screen.getByRole('link')
-    expect(link.getAttribute('href')).toBe('/bible/browse')
-  })
-
-  it('populated card has stronger shadow', () => {
-    const { container } = renderWithRouter(
-      <ResumeReadingCard
-        lastRead={{ book: 'John', chapter: 3, verse: 16, timestamp: Date.now() }}
-      />
-    )
+  it('has accent border', () => {
+    const { container } = renderCard()
     const article = container.querySelector('article')
-    expect(article?.className).toContain('0.12')
+    expect(article?.className).toContain('border-l-primary/60')
   })
 
-  it('empty state card has primary weight', () => {
-    const { container } = renderWithRouter(<ResumeReadingCard lastRead={null} />)
-    const article = container.querySelector('article')
-    expect(article?.className).toContain('0.12')
+  it('"Continue" button has 44px min height', () => {
+    renderCard()
+    const link = screen.getByRole('link', { name: /continue reading/i })
+    expect(link.className).toContain('min-h-[44px]')
   })
 
-  it('link has focus-visible ring', () => {
-    renderWithRouter(
-      <ResumeReadingCard
-        lastRead={{ book: 'John', chapter: 3, verse: 16, timestamp: Date.now() }}
-      />
-    )
-    const link = screen.getByRole('link')
-    expect(link.className).toContain('focus-visible:ring-2')
+  it('has appropriate aria-label', () => {
+    renderCard()
+    expect(
+      screen.getByLabelText('Continue reading John chapter 3'),
+    ).toBeInTheDocument()
+  })
+
+  it('focus-visible ring on links', () => {
+    renderCard()
+    const continueLink = screen.getByRole('link', { name: /continue reading/i })
+    expect(continueLink.className).toContain('focus-visible:ring-2')
+    const nextLink = screen.getByRole('link', { name: /or read the next chapter/i })
+    expect(nextLink.className).toContain('focus-visible:ring-2')
   })
 })

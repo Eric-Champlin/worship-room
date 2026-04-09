@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getTodayLocal, getYesterday } from '@/lib/bible/dateUtils'
 import { getStreak, subscribe } from '@/lib/bible/streakStore'
+import { useTimeTick } from './useTimeTick'
 import type { StreakRecord } from '@/types/bible-streak'
 
 export function useStreakStore() {
   const [streak, setStreak] = useState<StreakRecord>(getStreak)
   const [atRisk, setAtRisk] = useState(false)
+  const { currentMinute } = useTimeTick()
 
   // Subscribe to store changes
   useEffect(() => {
@@ -27,12 +29,10 @@ export function useStreakStore() {
     setAtRisk(s.lastReadDate === yesterday && isPast6PM)
   }, [])
 
-  // Check on mount, on store change, and on 1-minute interval
+  // Check on mount, on store change, and on each time tick
   useEffect(() => {
     checkAtRisk()
-    const interval = setInterval(checkAtRisk, 60_000)
-    return () => clearInterval(interval)
-  }, [checkAtRisk, streak])
+  }, [checkAtRisk, streak, currentMinute])
 
   return { streak, atRisk }
 }

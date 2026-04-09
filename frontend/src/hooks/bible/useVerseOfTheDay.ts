@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { selectVotdForDate, getDayOfYear } from '@/lib/bible/votdSelector'
 import { loadChapterWeb } from '@/data/bible'
 import { BIBLE_BOOKS } from '@/constants/bible'
+import { useTimeTick } from './useTimeTick'
 import type { VotdHydrated } from '@/types/bible-landing'
 
 const FALLBACK_TEXT =
   'For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.'
 const FALLBACK_REF = 'John 3:16'
-const POLL_INTERVAL_MS = 60_000 // 1 minute
 
 export function useVerseOfTheDay(date?: Date): {
   votd: VotdHydrated | null
@@ -16,7 +16,7 @@ export function useVerseOfTheDay(date?: Date): {
   const [votd, setVotd] = useState<VotdHydrated | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const currentDayRef = useRef<number>(0)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const { currentMinute } = useTimeTick()
 
   const loadVotd = useCallback(async (targetDate: Date) => {
     const entry = selectVotdForDate(targetDate)
@@ -103,26 +103,16 @@ export function useVerseOfTheDay(date?: Date): {
     loadVotd(date ?? new Date())
   }, [date, loadVotd])
 
-  // Midnight polling (only when no fixed date is provided)
+  // Midnight polling via shared time tick (only when no fixed date is provided)
   useEffect(() => {
     if (date) return // Skip polling for fixed dates
-
-    intervalRef.current = setInterval(() => {
-      const now = new Date()
-      const todayDay = getDayOfYear(now)
-      if (todayDay !== currentDayRef.current) {
-        setIsLoading(true)
-        loadVotd(now)
-      }
-    }, POLL_INTERVAL_MS)
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
+    const now = new Date()
+    const todayDay = getDayOfYear(now)
+    if (todayDay !== currentDayRef.current) {
+      setIsLoading(true)
+      loadVotd(now)
     }
-  }, [date, loadVotd])
+  }, [date, loadVotd, currentMinute])
 
   return { votd, isLoading }
 }

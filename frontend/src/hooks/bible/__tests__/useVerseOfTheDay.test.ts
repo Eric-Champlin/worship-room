@@ -45,6 +45,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
 })
 
@@ -127,7 +128,7 @@ describe('useVerseOfTheDay', () => {
     expect(result.current.votd!.wordCount).toBe(7)
   })
 
-  it('midnight poll detects date change', async () => {
+  it('midnight poll detects date change via useTimeTick', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
 
     // Initial day = 99
@@ -157,7 +158,7 @@ describe('useVerseOfTheDay', () => {
       paragraphs: [],
     })
 
-    // Advance past poll interval (60s)
+    // Advance past useTimeTick interval (60s) — triggers currentMinute change
     await act(async () => {
       await vi.advanceTimersByTimeAsync(61_000)
     })
@@ -170,21 +171,17 @@ describe('useVerseOfTheDay', () => {
   })
 
   it('no polling when date prop provided', async () => {
-    const setIntervalSpy = vi.spyOn(global, 'setInterval')
-
-    const { result } = renderHook(() => useVerseOfTheDay(new Date('2026-04-09')))
+    // Use a stable date reference to avoid re-render loop from new Date() per render
+    const fixedDate = new Date('2026-04-09')
+    const { result } = renderHook(() => useVerseOfTheDay(fixedDate))
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     })
 
-    // No 60-second polling interval should have been created
-    const pollCalls = setIntervalSpy.mock.calls.filter(
-      ([, interval]) => interval === 60_000,
-    )
-    expect(pollCalls).toHaveLength(0)
-
-    setIntervalSpy.mockRestore()
+    // selectVotdForDate should only have been called once (initial mount load)
+    // The midnight-poll useEffect skips entirely when `date` is provided
+    expect(mockSelectVotdForDate).toHaveBeenCalledTimes(1)
   })
 
   it('console error logged on missing verse', async () => {
