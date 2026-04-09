@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { SEO } from '@/components/SEO'
 import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
@@ -51,12 +51,16 @@ function BibleReaderInner() {
   const reducedMotion = useReducedMotion()
   const focusMode = useFocusMode()
 
+  const [searchParams, setSearchParams] = useSearchParams()
+
   const readerBodyRef = useRef<HTMLElement>(null)
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const arrivalHighlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [verses, setVerses] = useState<BibleVerse[]>([])
   const [paragraphs, setParagraphs] = useState<number[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  const [arrivalHighlightVerses, setArrivalHighlightVerses] = useState<number[]>([])
 
   const book = bookSlug ? getBookBySlug(bookSlug) : undefined
   const chapterNumber = chapterParam ? parseInt(chapterParam, 10) : NaN
@@ -246,10 +250,68 @@ function BibleReaderInner() {
     }
   }, [bookSlug, book, chapterNumber])
 
-  // Scroll to top on chapter change
+  // Scroll to top on chapter change (skip when highlight param will handle scrolling)
+  const highlightParamRef = useRef(searchParams.get('highlight'))
   useEffect(() => {
+    if (highlightParamRef.current) {
+      highlightParamRef.current = null
+      return
+    }
     window.scrollTo({ top: 0 })
   }, [bookSlug, chapterNumber])
+
+  // ?highlight= param processing: scroll to verse and apply arrival glow
+  useEffect(() => {
+    if (isLoading || loadError || verses.length === 0) return
+
+    const highlightParam = searchParams.get('highlight')
+    if (!highlightParam) return
+
+    // Parse single verse or range: "16" or "1-3"
+    let startVerse: number
+    let endVerse: number
+    if (highlightParam.includes('-')) {
+      const parts = highlightParam.split('-')
+      startVerse = parseInt(parts[0], 10)
+      endVerse = parseInt(parts[1], 10)
+    } else {
+      startVerse = parseInt(highlightParam, 10)
+      endVerse = startVerse
+    }
+
+    // Ignore invalid values
+    if (isNaN(startVerse) || isNaN(endVerse) || startVerse < 1 || endVerse < startVerse) {
+      setSearchParams((prev) => { prev.delete('highlight'); return prev }, { replace: true })
+      return
+    }
+
+    // Build the list of verse numbers to highlight
+    const verseNums: number[] = []
+    for (let v = startVerse; v <= endVerse; v++) verseNums.push(v)
+    setArrivalHighlightVerses(verseNums)
+
+    // Scroll to the first verse
+    const el = document.querySelector(`[data-verse="${startVerse}"]`)
+    if (el) {
+      el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' })
+    }
+
+    // Clear the highlight param from URL
+    setSearchParams((prev) => { prev.delete('highlight'); return prev }, { replace: true })
+
+    // Fade out glow after 1.5s
+    arrivalHighlightTimerRef.current = setTimeout(() => {
+      setArrivalHighlightVerses([])
+      arrivalHighlightTimerRef.current = null
+    }, 1500)
+  }, [isLoading, loadError, verses.length, searchParams, setSearchParams, reducedMotion])
+
+  // Clean up arrival highlight timer on unmount
+  useEffect(() => {
+    return () => {
+      if (arrivalHighlightTimerRef.current) clearTimeout(arrivalHighlightTimerRef.current)
+    }
+  }, [])
 
   // Pause focus mode when drawer is open
   useEffect(() => {
@@ -501,6 +563,7 @@ function BibleReaderInner() {
                 chapterNotes={chapterNotes}
                 selectionVisible={selectionVisible}
                 freshHighlightVerses={freshHighlightVerses}
+                arrivalHighlightVerses={arrivalHighlightVerses}
                 reducedMotion={reducedMotion}
               />
             </>

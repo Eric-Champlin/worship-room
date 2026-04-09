@@ -10,6 +10,7 @@ import { VerseOfTheDay } from '@/components/bible/landing/VerseOfTheDay'
 import { QuickActionsRow } from '@/components/bible/landing/QuickActionsRow'
 import { BibleSearchEntry } from '@/components/bible/landing/BibleSearchEntry'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
+import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
 import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
 import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
@@ -187,7 +188,9 @@ function BibleLandingInner() {
 export function BibleLanding() {
   return (
     <BibleDrawerProvider>
-      <BibleLandingInner />
+      <AuthModalProvider>
+        <BibleLandingInner />
+      </AuthModalProvider>
     </BibleDrawerProvider>
   )
 }

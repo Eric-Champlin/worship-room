@@ -28,6 +28,8 @@ interface ReaderBodyProps {
   chapterNotes?: Note[]
   /** Verse numbers that just received a highlight (for pulse animation) */
   freshHighlightVerses?: number[]
+  /** Verse numbers glowing from ?highlight= arrival (VOTD "Read in context") */
+  arrivalHighlightVerses?: number[]
   /** Whether user prefers reduced motion */
   reducedMotion?: boolean
 }
@@ -44,6 +46,7 @@ export function ReaderBody({
   chapterNotes,
   selectionVisible = true,
   freshHighlightVerses,
+  arrivalHighlightVerses,
   reducedMotion,
 }: ReaderBodyProps) {
   const paragraphSet = new Set(paragraphs)
@@ -75,6 +78,7 @@ export function ReaderBody({
             const isHighlighted = !!hl
             const isSelected = selectedVerses?.includes(verse.number)
             const isFresh = freshHighlightVerses?.includes(verse.number)
+            const isArrivalHighlight = arrivalHighlightVerses?.includes(verse.number)
             const isBookmarked = !!chapterBookmarks?.find(
               (b) => verse.number >= b.startVerse && verse.number <= b.endVerse,
             )
@@ -94,18 +98,24 @@ export function ReaderBody({
                   isSelected && isHighlighted && selectionVisible && 'outline outline-2 outline-offset-1 rounded-sm',
                   isSelected && !selectionVisible && 'transition-colors duration-200',
                   isFresh && !reducedMotion && 'animate-highlight-pulse',
+                  isArrivalHighlight && 'rounded',
                 )}
                 style={
-                  isHighlighted
+                  isArrivalHighlight
                     ? {
-                        backgroundColor: `var(--highlight-${hl!.color}-bg)`,
-                        WebkitBoxDecorationBreak: 'clone' as const,
-                        boxDecorationBreak: 'clone' as const,
-                        ...(isSelected && selectionVisible
-                          ? { outlineColor: `var(--highlight-${hl!.color}-ring)` }
-                          : {}),
+                        boxShadow: '0 0 12px 2px rgba(139, 92, 246, 0.4)',
+                        transition: reducedMotion ? 'none' : 'box-shadow 1.5s ease-out',
                       }
-                    : undefined
+                    : isHighlighted
+                      ? {
+                          backgroundColor: `var(--highlight-${hl!.color}-bg)`,
+                          WebkitBoxDecorationBreak: 'clone' as const,
+                          boxDecorationBreak: 'clone' as const,
+                          ...(isSelected && selectionVisible
+                            ? { outlineColor: `var(--highlight-${hl!.color}-ring)` }
+                            : {}),
+                        }
+                      : undefined
                 }
                 aria-label={
                   isBookmarked && hasNote

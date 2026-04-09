@@ -13,14 +13,30 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => mockNavigate }
 })
 
-vi.mock('@/lib/bible/votdSelector', () => ({
-  getTodaysBibleVotd: () => ({
-    reference: 'Psalms 23:1',
-    book: 'Psalms',
-    chapter: 23,
-    verse: 1,
-    text: 'Yahweh is my shepherd; I shall lack nothing.',
+vi.mock('@/hooks/bible/useVerseOfTheDay', () => ({
+  useVerseOfTheDay: () => ({
+    votd: {
+      entry: {
+        ref: 'Psalms 23:1',
+        book: 'psalms',
+        chapter: 23,
+        startVerse: 1,
+        endVerse: 1,
+        theme: 'provision',
+      },
+      verseText: 'Yahweh is my shepherd; I shall lack nothing.',
+      bookName: 'Psalms',
+      wordCount: 8,
+    },
+    isLoading: false,
   }),
+}))
+
+vi.mock('@/lib/bible/bookmarkStore', () => ({
+  toggleBookmark: vi.fn().mockReturnValue({ created: false, bookmark: null }),
+  isSelectionBookmarked: vi.fn().mockReturnValue(false),
+  setBookmarkLabel: vi.fn(),
+  subscribe: vi.fn().mockReturnValue(() => {}),
 }))
 
 function renderLanding() {

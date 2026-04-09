@@ -1,0 +1,2930 @@
+[
+  {
+    "ref": "Psalms 23:1",
+    "book": "psalms",
+    "chapter": 23,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "provision"
+  },
+  {
+    "ref": "John 3:16",
+    "book": "john",
+    "chapter": 3,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "love"
+  },
+  {
+    "ref": "Philippians 4:13",
+    "book": "philippians",
+    "chapter": 4,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "strength"
+  },
+  {
+    "ref": "Romans 8:28",
+    "book": "romans",
+    "chapter": 8,
+    "startVerse": 28,
+    "endVerse": 28,
+    "theme": "hope"
+  },
+  {
+    "ref": "Jeremiah 29:11",
+    "book": "jeremiah",
+    "chapter": 29,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "hope"
+  },
+  {
+    "ref": "Isaiah 40:31",
+    "book": "isaiah",
+    "chapter": 40,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "strength"
+  },
+  {
+    "ref": "Psalms 46:1",
+    "book": "psalms",
+    "chapter": 46,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "strength"
+  },
+  {
+    "ref": "Proverbs 3:5",
+    "book": "proverbs",
+    "chapter": 3,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "faith"
+  },
+  {
+    "ref": "Hebrews 11:1",
+    "book": "hebrews",
+    "chapter": 11,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "faith"
+  },
+  {
+    "ref": "Psalms 27:1",
+    "book": "psalms",
+    "chapter": 27,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "strength"
+  },
+  {
+    "ref": "Isaiah 41:10",
+    "book": "isaiah",
+    "chapter": 41,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "comfort"
+  },
+  {
+    "ref": "Psalms 119:105",
+    "book": "psalms",
+    "chapter": 119,
+    "startVerse": 105,
+    "endVerse": 105,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Matthew 11:28",
+    "book": "matthew",
+    "chapter": 11,
+    "startVerse": 28,
+    "endVerse": 28,
+    "theme": "comfort"
+  },
+  {
+    "ref": "Psalms 34:18",
+    "book": "psalms",
+    "chapter": 34,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "comfort"
+  },
+  {
+    "ref": "Ephesians 2:8",
+    "book": "ephesians",
+    "chapter": 2,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "faith"
+  },
+  {
+    "ref": "Joshua 1:9",
+    "book": "joshua",
+    "chapter": 1,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "strength"
+  },
+  {
+    "ref": "Romans 8:31",
+    "book": "romans",
+    "chapter": 8,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "faith"
+  },
+  {
+    "ref": "Psalms 139:14",
+    "book": "psalms",
+    "chapter": 139,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "provision"
+  },
+  {
+    "ref": "1 John 4:19",
+    "book": "1-john",
+    "chapter": 4,
+    "startVerse": 19,
+    "endVerse": 19,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 37:4",
+    "book": "psalms",
+    "chapter": 37,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "joy"
+  },
+  {
+    "ref": "Genesis 1:1",
+    "book": "genesis",
+    "chapter": 1,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "faith"
+  },
+  {
+    "ref": "2 Corinthians 5:17",
+    "book": "2-corinthians",
+    "chapter": 5,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 118:24",
+    "book": "psalms",
+    "chapter": 118,
+    "startVerse": 24,
+    "endVerse": 24,
+    "theme": "joy"
+  },
+  {
+    "ref": "Matthew 6:33",
+    "book": "matthew",
+    "chapter": 6,
+    "startVerse": 33,
+    "endVerse": 33,
+    "theme": "provision"
+  },
+  {
+    "ref": "Colossians 3:23",
+    "book": "colossians",
+    "chapter": 3,
+    "startVerse": 23,
+    "endVerse": 23,
+    "theme": "faith"
+  },
+  {
+    "ref": "Psalms 46:10",
+    "book": "psalms",
+    "chapter": 46,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "peace"
+  },
+  {
+    "ref": "Psalms 51:10",
+    "book": "psalms",
+    "chapter": 51,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "praise"
+  },
+  {
+    "ref": "John 14:27",
+    "book": "john",
+    "chapter": 14,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "peace"
+  },
+  {
+    "ref": "Psalms 91:1",
+    "book": "psalms",
+    "chapter": 91,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "peace"
+  },
+  {
+    "ref": "1 Peter 5:7",
+    "book": "1-peter",
+    "chapter": 5,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "faith"
+  },
+  {
+    "ref": "Galatians 5:22",
+    "book": "galatians",
+    "chapter": 5,
+    "startVerse": 22,
+    "endVerse": 22,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 103:1",
+    "book": "psalms",
+    "chapter": 103,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "praise"
+  },
+  {
+    "ref": "Romans 12:2",
+    "book": "romans",
+    "chapter": 12,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 23:4",
+    "book": "psalms",
+    "chapter": 23,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "comfort"
+  },
+  {
+    "ref": "2 Timothy 1:7",
+    "book": "2-timothy",
+    "chapter": 1,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 34:8",
+    "book": "psalms",
+    "chapter": 34,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "praise"
+  },
+  {
+    "ref": "Isaiah 26:3",
+    "book": "isaiah",
+    "chapter": 26,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "peace"
+  },
+  {
+    "ref": "Romans 15:13",
+    "book": "romans",
+    "chapter": 15,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "hope"
+  },
+  {
+    "ref": "Psalms 16:11",
+    "book": "psalms",
+    "chapter": 16,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "joy"
+  },
+  {
+    "ref": "Deuteronomy 31:6",
+    "book": "deuteronomy",
+    "chapter": 31,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "strength"
+  },
+  {
+    "ref": "Nahum 1:7",
+    "book": "nahum",
+    "chapter": 1,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "strength"
+  },
+  {
+    "ref": "Psalms 55:22",
+    "book": "psalms",
+    "chapter": 55,
+    "startVerse": 22,
+    "endVerse": 22,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 107:1",
+    "book": "psalms",
+    "chapter": 107,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "love"
+  },
+  {
+    "ref": "John 16:33",
+    "book": "john",
+    "chapter": 16,
+    "startVerse": 33,
+    "endVerse": 33,
+    "theme": "peace"
+  },
+  {
+    "ref": "Psalms 100:4",
+    "book": "psalms",
+    "chapter": 100,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "provision"
+  },
+  {
+    "ref": "Psalms 147:3",
+    "book": "psalms",
+    "chapter": 147,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "comfort"
+  },
+  {
+    "ref": "Philippians 4:6",
+    "book": "philippians",
+    "chapter": 4,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "praise"
+  },
+  {
+    "ref": "Romans 5:8",
+    "book": "romans",
+    "chapter": 5,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 28:7",
+    "book": "psalms",
+    "chapter": 28,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "strength"
+  },
+  {
+    "ref": "Isaiah 53:5",
+    "book": "isaiah",
+    "chapter": 53,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "peace"
+  },
+  {
+    "ref": "Ephesians 4:32",
+    "book": "ephesians",
+    "chapter": 4,
+    "startVerse": 32,
+    "endVerse": 32,
+    "theme": "comfort"
+  },
+  {
+    "ref": "Romans 12:12",
+    "book": "romans",
+    "chapter": 12,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "hope"
+  },
+  {
+    "ref": "Psalms 62:1",
+    "book": "psalms",
+    "chapter": 62,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "peace"
+  },
+  {
+    "ref": "Psalms 18:2",
+    "book": "psalms",
+    "chapter": 18,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "praise"
+  },
+  {
+    "ref": "Ephesians 6:10",
+    "book": "ephesians",
+    "chapter": 6,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "strength"
+  },
+  {
+    "ref": "Psalms 150:6",
+    "book": "psalms",
+    "chapter": 150,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 30:5",
+    "book": "psalms",
+    "chapter": 30,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "joy"
+  },
+  {
+    "ref": "James 1:5",
+    "book": "james",
+    "chapter": 1,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Psalms 84:11",
+    "book": "psalms",
+    "chapter": 84,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Proverbs 18:10",
+    "book": "proverbs",
+    "chapter": 18,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "strength"
+  },
+  {
+    "ref": "1 Corinthians 13:13",
+    "book": "1-corinthians",
+    "chapter": 13,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 121:1",
+    "book": "psalms",
+    "chapter": 121,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 103:8",
+    "book": "psalms",
+    "chapter": 103,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "love"
+  },
+  {
+    "ref": "John 14:6",
+    "book": "john",
+    "chapter": 14,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "love"
+  },
+  {
+    "ref": "2 Corinthians 12:9",
+    "book": "2-corinthians",
+    "chapter": 12,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "peace"
+  },
+  {
+    "ref": "Psalms 37:5",
+    "book": "psalms",
+    "chapter": 37,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "faith"
+  },
+  {
+    "ref": "Habakkuk 3:19",
+    "book": "habakkuk",
+    "chapter": 3,
+    "startVerse": 19,
+    "endVerse": 19,
+    "theme": "strength"
+  },
+  {
+    "ref": "Psalms 73:26",
+    "book": "psalms",
+    "chapter": 73,
+    "startVerse": 26,
+    "endVerse": 26,
+    "theme": "strength"
+  },
+  {
+    "ref": "Revelation 21:4",
+    "book": "revelation",
+    "chapter": 21,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "faith"
+  },
+  {
+    "ref": "Psalms 34:4",
+    "book": "psalms",
+    "chapter": 34,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 9:10",
+    "book": "psalms",
+    "chapter": 9,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "faith"
+  },
+  {
+    "ref": "Psalms 62:8",
+    "book": "psalms",
+    "chapter": 62,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "faith"
+  },
+  {
+    "ref": "Isaiah 12:2",
+    "book": "isaiah",
+    "chapter": 12,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "strength"
+  },
+  {
+    "ref": "Psalms 20:7",
+    "book": "psalms",
+    "chapter": 20,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 Thessalonians 5:18",
+    "book": "1-thessalonians",
+    "chapter": 5,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "provision"
+  },
+  {
+    "ref": "Psalms 63:3",
+    "book": "psalms",
+    "chapter": 63,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 18:32",
+    "book": "psalms",
+    "chapter": 18,
+    "startVerse": 32,
+    "endVerse": 32,
+    "theme": "strength"
+  },
+  {
+    "ref": "Psalms 96:1",
+    "book": "psalms",
+    "chapter": 96,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 95:1",
+    "book": "psalms",
+    "chapter": 95,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 86:5",
+    "book": "psalms",
+    "chapter": 86,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "love"
+  },
+  {
+    "ref": "Philippians 1:6",
+    "book": "philippians",
+    "chapter": 1,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "faith"
+  },
+  {
+    "ref": "Proverbs 16:3",
+    "book": "proverbs",
+    "chapter": 16,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Psalms 4:8",
+    "book": "psalms",
+    "chapter": 4,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "peace"
+  },
+  {
+    "ref": "John 10:10",
+    "book": "john",
+    "chapter": 10,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "provision"
+  },
+  {
+    "ref": "Psalms 32:8",
+    "book": "psalms",
+    "chapter": 32,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Psalms 42:1",
+    "book": "psalms",
+    "chapter": 42,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 19:14",
+    "book": "psalms",
+    "chapter": 19,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Psalms 5:3",
+    "book": "psalms",
+    "chapter": 5,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "praise"
+  },
+  {
+    "ref": "Lamentations 3:22",
+    "book": "lamentations",
+    "chapter": 3,
+    "startVerse": 22,
+    "endVerse": 22,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 40:1",
+    "book": "psalms",
+    "chapter": 40,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "praise"
+  },
+  {
+    "ref": "Isaiah 43:2",
+    "book": "isaiah",
+    "chapter": 43,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "presence"
+  },
+  {
+    "ref": "Psalms 34:1",
+    "book": "psalms",
+    "chapter": 34,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "praise"
+  },
+  {
+    "ref": "Psalms 29:11",
+    "book": "psalms",
+    "chapter": 29,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "peace"
+  },
+  {
+    "ref": "Romans 8:37",
+    "book": "romans",
+    "chapter": 8,
+    "startVerse": 37,
+    "endVerse": 37,
+    "theme": "love"
+  },
+  {
+    "ref": "John 15:5",
+    "book": "john",
+    "chapter": 15,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 145:18",
+    "book": "psalms",
+    "chapter": 145,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "presence"
+  },
+  {
+    "ref": "Matthew 5:16",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Psalms 136:1",
+    "book": "psalms",
+    "chapter": 136,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "love"
+  },
+  {
+    "ref": "Isaiah 40:29",
+    "book": "isaiah",
+    "chapter": 40,
+    "startVerse": 29,
+    "endVerse": 29,
+    "theme": "strength"
+  },
+  {
+    "ref": "Psalms 119:11",
+    "book": "psalms",
+    "chapter": 119,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Proverbs 4:23",
+    "book": "proverbs",
+    "chapter": 4,
+    "startVerse": 23,
+    "endVerse": 23,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Psalms 100:5",
+    "book": "psalms",
+    "chapter": 100,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "love"
+  },
+  {
+    "ref": "Romans 6:23",
+    "book": "romans",
+    "chapter": 6,
+    "startVerse": 23,
+    "endVerse": 23,
+    "theme": "hope"
+  },
+  {
+    "ref": "John 8:12",
+    "book": "john",
+    "chapter": 8,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Psalms 16:8",
+    "book": "psalms",
+    "chapter": 16,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "praise"
+  },
+  {
+    "ref": "1 John 4:18",
+    "book": "1-john",
+    "chapter": 4,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 94:19",
+    "book": "psalms",
+    "chapter": 94,
+    "startVerse": 19,
+    "endVerse": 19,
+    "theme": "joy"
+  },
+  {
+    "ref": "Proverbs 15:1",
+    "book": "proverbs",
+    "chapter": 15,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "comfort"
+  },
+  {
+    "ref": "John 13:34",
+    "book": "john",
+    "chapter": 13,
+    "startVerse": 34,
+    "endVerse": 34,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 33:4",
+    "book": "psalms",
+    "chapter": 33,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "faith"
+  },
+  {
+    "ref": "Isaiah 43:19",
+    "book": "isaiah",
+    "chapter": 43,
+    "startVerse": 19,
+    "endVerse": 19,
+    "theme": "faith"
+  },
+  {
+    "ref": "Psalms 112:7",
+    "book": "psalms",
+    "chapter": 112,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "faith"
+  },
+  {
+    "ref": "Proverbs 17:17",
+    "book": "proverbs",
+    "chapter": 17,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "love"
+  },
+  {
+    "ref": "Psalms 118:6",
+    "book": "psalms",
+    "chapter": 118,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "praise"
+  },
+  {
+    "ref": "Exodus 14:14",
+    "book": "exodus",
+    "chapter": 14,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "peace"
+  },
+  {
+    "ref": "Psalms 90:12",
+    "book": "psalms",
+    "chapter": 90,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Proverbs 16:9",
+    "book": "proverbs",
+    "chapter": 16,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Psalms 23:6",
+    "book": "psalms",
+    "chapter": 23,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "love"
+  },
+  {
+    "ref": "John 14:1",
+    "book": "john",
+    "chapter": 14,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "faith"
+  },
+  {
+    "ref": "Psalms 103:12",
+    "book": "psalms",
+    "chapter": 103,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "praise"
+  },
+  {
+    "ref": "Isaiah 49:13",
+    "book": "isaiah",
+    "chapter": 49,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "joy"
+  },
+  {
+    "ref": "Proverbs 27:17",
+    "book": "proverbs",
+    "chapter": 27,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Romans 8:1",
+    "book": "romans",
+    "chapter": 8,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "faith"
+  },
+  {
+    "ref": "Hebrews 13:8",
+    "book": "hebrews",
+    "chapter": 13,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "faith"
+  },
+  {
+    "ref": "Proverbs 12:25",
+    "book": "proverbs",
+    "chapter": 12,
+    "startVerse": 25,
+    "endVerse": 25,
+    "theme": "joy"
+  },
+  {
+    "ref": "Matthew 7:7",
+    "book": "matthew",
+    "chapter": 7,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "provision"
+  },
+  {
+    "ref": "Isaiah 32:17",
+    "book": "isaiah",
+    "chapter": 32,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "peace"
+  },
+  {
+    "ref": "John 15:9",
+    "book": "john",
+    "chapter": 15,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "love"
+  },
+  {
+    "ref": "Philippians 4:8",
+    "book": "philippians",
+    "chapter": 4,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "love"
+  },
+  {
+    "ref": "Proverbs 31:25",
+    "book": "proverbs",
+    "chapter": 31,
+    "startVerse": 25,
+    "endVerse": 25,
+    "theme": "strength"
+  },
+  {
+    "ref": "Romans 5:1",
+    "book": "romans",
+    "chapter": 5,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "peace"
+  },
+  {
+    "ref": "Hebrews 4:16",
+    "book": "hebrews",
+    "chapter": 4,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "strength"
+  },
+  {
+    "ref": "Isaiah 54:10",
+    "book": "isaiah",
+    "chapter": 54,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "love"
+  },
+  {
+    "ref": "Proverbs 14:26",
+    "book": "proverbs",
+    "chapter": 14,
+    "startVerse": 26,
+    "endVerse": 26,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Exodus 15:2",
+    "book": "exodus",
+    "chapter": 15,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "strength"
+  },
+  {
+    "ref": "John 1:5",
+    "book": "john",
+    "chapter": 1,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Genesis 28:15",
+    "book": "genesis",
+    "chapter": 28,
+    "startVerse": 15,
+    "endVerse": 15,
+    "theme": "presence"
+  },
+  {
+    "ref": "Galatians 6:9",
+    "book": "galatians",
+    "chapter": 6,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "provision"
+  },
+  {
+    "ref": "John 8:32",
+    "book": "john",
+    "chapter": 8,
+    "startVerse": 32,
+    "endVerse": 32,
+    "theme": "love"
+  },
+  {
+    "ref": "Isaiah 58:11",
+    "book": "isaiah",
+    "chapter": 58,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "strength"
+  },
+  {
+    "ref": "Proverbs 3:24",
+    "book": "proverbs",
+    "chapter": 3,
+    "startVerse": 24,
+    "endVerse": 24,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "2 Thessalonians 3:16",
+    "book": "2-thessalonians",
+    "chapter": 3,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "peace"
+  },
+  {
+    "ref": "Philippians 4:19",
+    "book": "philippians",
+    "chapter": 4,
+    "startVerse": 19,
+    "endVerse": 19,
+    "theme": "provision"
+  },
+  {
+    "ref": "Ecclesiastes 3:1",
+    "book": "ecclesiastes",
+    "chapter": 3,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "faith"
+  },
+  {
+    "ref": "Isaiah 40:8",
+    "book": "isaiah",
+    "chapter": 40,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "John 10:28",
+    "book": "john",
+    "chapter": 10,
+    "startVerse": 28,
+    "endVerse": 28,
+    "theme": "hope"
+  },
+  {
+    "ref": "1 Corinthians 10:13",
+    "book": "1-corinthians",
+    "chapter": 10,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "faith"
+  },
+  {
+    "ref": "Proverbs 16:24",
+    "book": "proverbs",
+    "chapter": 16,
+    "startVerse": 24,
+    "endVerse": 24,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Jeremiah 33:3",
+    "book": "jeremiah",
+    "chapter": 33,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 John 1:9",
+    "book": "1-john",
+    "chapter": 1,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "faith"
+  },
+  {
+    "ref": "Proverbs 19:21",
+    "book": "proverbs",
+    "chapter": 19,
+    "startVerse": 21,
+    "endVerse": 21,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Hebrews 4:12",
+    "book": "hebrews",
+    "chapter": 4,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Isaiah 41:13",
+    "book": "isaiah",
+    "chapter": 41,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "faith"
+  },
+  {
+    "ref": "Philippians 4:4",
+    "book": "philippians",
+    "chapter": 4,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "joy"
+  },
+  {
+    "ref": "Zephaniah 3:17",
+    "book": "zephaniah",
+    "chapter": 3,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "love"
+  },
+  {
+    "ref": "1 Corinthians 15:57",
+    "book": "1-corinthians",
+    "chapter": 15,
+    "startVerse": 57,
+    "endVerse": 57,
+    "theme": "provision"
+  },
+  {
+    "ref": "Ephesians 3:20",
+    "book": "ephesians",
+    "chapter": 3,
+    "startVerse": 20,
+    "endVerse": 20,
+    "theme": "strength"
+  },
+  {
+    "ref": "Joel 2:25",
+    "book": "joel",
+    "chapter": 2,
+    "startVerse": 25,
+    "endVerse": 25,
+    "theme": "peace"
+  },
+  {
+    "ref": "1 John 4:7",
+    "book": "1-john",
+    "chapter": 4,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "love"
+  },
+  {
+    "ref": "Micah 6:8",
+    "book": "micah",
+    "chapter": 6,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "love"
+  },
+  {
+    "ref": "Romans 8:18",
+    "book": "romans",
+    "chapter": 8,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "praise"
+  },
+  {
+    "ref": "John 15:12",
+    "book": "john",
+    "chapter": 15,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "love"
+  },
+  {
+    "ref": "Hebrews 10:23",
+    "book": "hebrews",
+    "chapter": 10,
+    "startVerse": 23,
+    "endVerse": 23,
+    "theme": "hope"
+  },
+  {
+    "ref": "Deuteronomy 31:8",
+    "book": "deuteronomy",
+    "chapter": 31,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "strength"
+  },
+  {
+    "ref": "2 Corinthians 4:16",
+    "book": "2-corinthians",
+    "chapter": 4,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "love"
+  },
+  {
+    "ref": "James 4:8",
+    "book": "james",
+    "chapter": 4,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Isaiah 9:6",
+    "book": "isaiah",
+    "chapter": 9,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "hope"
+  },
+  {
+    "ref": "Jeremiah 31:3",
+    "book": "jeremiah",
+    "chapter": 31,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "love"
+  },
+  {
+    "ref": "Galatians 2:20",
+    "book": "galatians",
+    "chapter": 2,
+    "startVerse": 20,
+    "endVerse": 20,
+    "theme": "love"
+  },
+  {
+    "ref": "Colossians 3:15",
+    "book": "colossians",
+    "chapter": 3,
+    "startVerse": 15,
+    "endVerse": 15,
+    "theme": "peace"
+  },
+  {
+    "ref": "Nehemiah 8:10",
+    "book": "nehemiah",
+    "chapter": 8,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "strength"
+  },
+  {
+    "ref": "Matthew 5:4",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "comfort"
+  },
+  {
+    "ref": "John 11:25",
+    "book": "john",
+    "chapter": 11,
+    "startVerse": 25,
+    "endVerse": 25,
+    "theme": "peace"
+  },
+  {
+    "ref": "Ezekiel 36:26",
+    "book": "ezekiel",
+    "chapter": 36,
+    "startVerse": 26,
+    "endVerse": 26,
+    "theme": "provision"
+  },
+  {
+    "ref": "Ephesians 2:10",
+    "book": "ephesians",
+    "chapter": 2,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "faith"
+  },
+  {
+    "ref": "Job 19:25",
+    "book": "job",
+    "chapter": 19,
+    "startVerse": 25,
+    "endVerse": 25,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "1 Peter 1:3",
+    "book": "1-peter",
+    "chapter": 1,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "hope"
+  },
+  {
+    "ref": "Lamentations 3:25",
+    "book": "lamentations",
+    "chapter": 3,
+    "startVerse": 25,
+    "endVerse": 25,
+    "theme": "faith"
+  },
+  {
+    "ref": "Philippians 2:13",
+    "book": "philippians",
+    "chapter": 2,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "faith"
+  },
+  {
+    "ref": "Colossians 1:17",
+    "book": "colossians",
+    "chapter": 1,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 John 3:1",
+    "book": "1-john",
+    "chapter": 3,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "love"
+  },
+  {
+    "ref": "Romans 5:5",
+    "book": "romans",
+    "chapter": 5,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "love"
+  },
+  {
+    "ref": "Isaiah 40:11",
+    "book": "isaiah",
+    "chapter": 40,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "provision"
+  },
+  {
+    "ref": "Exodus 33:14",
+    "book": "exodus",
+    "chapter": 33,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "peace"
+  },
+  {
+    "ref": "James 1:17",
+    "book": "james",
+    "chapter": 1,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "2 Corinthians 5:7",
+    "book": "2-corinthians",
+    "chapter": 5,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "faith"
+  },
+  {
+    "ref": "Luke 1:37",
+    "book": "luke",
+    "chapter": 1,
+    "startVerse": 37,
+    "endVerse": 37,
+    "theme": "faith"
+  },
+  {
+    "ref": "Hebrews 11:6",
+    "book": "hebrews",
+    "chapter": 11,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 Thessalonians 5:11",
+    "book": "1-thessalonians",
+    "chapter": 5,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "faith"
+  },
+  {
+    "ref": "John 3:17",
+    "book": "john",
+    "chapter": 3,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "love"
+  },
+  {
+    "ref": "Genesis 50:20",
+    "book": "genesis",
+    "chapter": 50,
+    "startVerse": 20,
+    "endVerse": 20,
+    "theme": "faith"
+  },
+  {
+    "ref": "Colossians 3:16",
+    "book": "colossians",
+    "chapter": 3,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Isaiah 43:1",
+    "book": "isaiah",
+    "chapter": 43,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "2 Corinthians 4:17",
+    "book": "2-corinthians",
+    "chapter": 4,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Mark 9:23",
+    "book": "mark",
+    "chapter": 9,
+    "startVerse": 23,
+    "endVerse": 23,
+    "theme": "faith"
+  },
+  {
+    "ref": "Deuteronomy 7:9",
+    "book": "deuteronomy",
+    "chapter": 7,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "love"
+  },
+  {
+    "ref": "Hebrews 12:2",
+    "book": "hebrews",
+    "chapter": 12,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "faith"
+  },
+  {
+    "ref": "James 1:12",
+    "book": "james",
+    "chapter": 1,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "love"
+  },
+  {
+    "ref": "1 John 4:4",
+    "book": "1-john",
+    "chapter": 4,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "love"
+  },
+  {
+    "ref": "Isaiah 61:1",
+    "book": "isaiah",
+    "chapter": 61,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "comfort"
+  },
+  {
+    "ref": "Ecclesiastes 3:11",
+    "book": "ecclesiastes",
+    "chapter": 3,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "faith"
+  },
+  {
+    "ref": "Colossians 3:13",
+    "book": "colossians",
+    "chapter": 3,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Ephesians 1:7",
+    "book": "ephesians",
+    "chapter": 1,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Matthew 6:14",
+    "book": "matthew",
+    "chapter": 6,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Revelation 3:20",
+    "book": "revelation",
+    "chapter": 3,
+    "startVerse": 20,
+    "endVerse": 20,
+    "theme": "faith"
+  },
+  {
+    "ref": "Deuteronomy 33:27",
+    "book": "deuteronomy",
+    "chapter": 33,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "hope"
+  },
+  {
+    "ref": "2 Thessalonians 3:3",
+    "book": "2-thessalonians",
+    "chapter": 3,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "faith"
+  },
+  {
+    "ref": "Hebrews 13:5",
+    "book": "hebrews",
+    "chapter": 13,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "love"
+  },
+  {
+    "ref": "1 Peter 2:9",
+    "book": "1-peter",
+    "chapter": 2,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Philippians 4:11",
+    "book": "philippians",
+    "chapter": 4,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "faith"
+  },
+  {
+    "ref": "Isaiah 46:4",
+    "book": "isaiah",
+    "chapter": 46,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "faith"
+  },
+  {
+    "ref": "Micah 7:7",
+    "book": "micah",
+    "chapter": 7,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "faith"
+  },
+  {
+    "ref": "Acts 1:8",
+    "book": "acts",
+    "chapter": 1,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "strength"
+  },
+  {
+    "ref": "John 4:14",
+    "book": "john",
+    "chapter": 4,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "hope"
+  },
+  {
+    "ref": "Hosea 6:3",
+    "book": "hosea",
+    "chapter": 6,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "James 5:16",
+    "book": "james",
+    "chapter": 5,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "strength"
+  },
+  {
+    "ref": "Ephesians 3:16",
+    "book": "ephesians",
+    "chapter": 3,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "strength"
+  },
+  {
+    "ref": "Joel 2:13",
+    "book": "joel",
+    "chapter": 2,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "love"
+  },
+  {
+    "ref": "1 Peter 5:10",
+    "book": "1-peter",
+    "chapter": 5,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "strength"
+  },
+  {
+    "ref": "Revelation 1:8",
+    "book": "revelation",
+    "chapter": 1,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "strength"
+  },
+  {
+    "ref": "2 Chronicles 7:14",
+    "book": "2-chronicles",
+    "chapter": 7,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "John 6:35",
+    "book": "john",
+    "chapter": 6,
+    "startVerse": 35,
+    "endVerse": 35,
+    "theme": "faith"
+  },
+  {
+    "ref": "Esther 4:14",
+    "book": "esther",
+    "chapter": 4,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 John 4:16",
+    "book": "1-john",
+    "chapter": 4,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "love"
+  },
+  {
+    "ref": "2 Corinthians 9:8",
+    "book": "2-corinthians",
+    "chapter": 9,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "1 Chronicles 16:11",
+    "book": "1-chronicles",
+    "chapter": 16,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "strength"
+  },
+  {
+    "ref": "2 Peter 3:9",
+    "book": "2-peter",
+    "chapter": 3,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "hope"
+  },
+  {
+    "ref": "Matthew 19:26",
+    "book": "matthew",
+    "chapter": 19,
+    "startVerse": 26,
+    "endVerse": 26,
+    "theme": "faith"
+  },
+  {
+    "ref": "Job 23:10",
+    "book": "job",
+    "chapter": 23,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "faith"
+  },
+  {
+    "ref": "John 8:36",
+    "book": "john",
+    "chapter": 8,
+    "startVerse": 36,
+    "endVerse": 36,
+    "theme": "love"
+  },
+  {
+    "ref": "Matthew 28:20",
+    "book": "matthew",
+    "chapter": 28,
+    "startVerse": 20,
+    "endVerse": 20,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Isaiah 1:18",
+    "book": "isaiah",
+    "chapter": 1,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "faith"
+  },
+  {
+    "ref": "Colossians 3:2",
+    "book": "colossians",
+    "chapter": 3,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 Corinthians 1:9",
+    "book": "1-corinthians",
+    "chapter": 1,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "faith"
+  },
+  {
+    "ref": "Isaiah 6:8",
+    "book": "isaiah",
+    "chapter": 6,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "faith"
+  },
+  {
+    "ref": "Philippians 3:14",
+    "book": "philippians",
+    "chapter": 3,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "faith"
+  },
+  {
+    "ref": "Jeremiah 17:7",
+    "book": "jeremiah",
+    "chapter": 17,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "faith"
+  },
+  {
+    "ref": "Ruth 1:16",
+    "book": "ruth",
+    "chapter": 1,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "faith"
+  },
+  {
+    "ref": "2 Timothy 4:7",
+    "book": "2-timothy",
+    "chapter": 4,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "faith"
+  },
+  {
+    "ref": "Luke 12:32",
+    "book": "luke",
+    "chapter": 12,
+    "startVerse": 32,
+    "endVerse": 32,
+    "theme": "provision"
+  },
+  {
+    "ref": "Song of Solomon 2:4",
+    "book": "song-of-solomon",
+    "chapter": 2,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "love"
+  },
+  {
+    "ref": "Matthew 5:9",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "peace"
+  },
+  {
+    "ref": "Colossians 1:27",
+    "book": "colossians",
+    "chapter": 1,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "hope"
+  },
+  {
+    "ref": "Mark 11:24",
+    "book": "mark",
+    "chapter": 11,
+    "startVerse": 24,
+    "endVerse": 24,
+    "theme": "faith"
+  },
+  {
+    "ref": "Genesis 1:27",
+    "book": "genesis",
+    "chapter": 1,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "faith"
+  },
+  {
+    "ref": "Titus 2:11",
+    "book": "titus",
+    "chapter": 2,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Ephesians 5:2",
+    "book": "ephesians",
+    "chapter": 5,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "love"
+  },
+  {
+    "ref": "2 Corinthians 4:18",
+    "book": "2-corinthians",
+    "chapter": 4,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "love"
+  },
+  {
+    "ref": "Zechariah 4:6",
+    "book": "zechariah",
+    "chapter": 4,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "strength"
+  },
+  {
+    "ref": "John 15:13",
+    "book": "john",
+    "chapter": 15,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "love"
+  },
+  {
+    "ref": "James 4:10",
+    "book": "james",
+    "chapter": 4,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "praise"
+  },
+  {
+    "ref": "Luke 6:38",
+    "book": "luke",
+    "chapter": 6,
+    "startVerse": 38,
+    "endVerse": 38,
+    "theme": "provision"
+  },
+  {
+    "ref": "1 Peter 3:15",
+    "book": "1-peter",
+    "chapter": 3,
+    "startVerse": 15,
+    "endVerse": 15,
+    "theme": "hope"
+  },
+  {
+    "ref": "Jeremiah 32:17",
+    "book": "jeremiah",
+    "chapter": 32,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "strength"
+  },
+  {
+    "ref": "John 1:14",
+    "book": "john",
+    "chapter": 1,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "1 Samuel 16:7",
+    "book": "1-samuel",
+    "chapter": 16,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "faith"
+  },
+  {
+    "ref": "Revelation 21:5",
+    "book": "revelation",
+    "chapter": 21,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 Timothy 4:12",
+    "book": "1-timothy",
+    "chapter": 4,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "love"
+  },
+  {
+    "ref": "Matthew 18:20",
+    "book": "matthew",
+    "chapter": 18,
+    "startVerse": 20,
+    "endVerse": 20,
+    "theme": "faith"
+  },
+  {
+    "ref": "Galatians 5:1",
+    "book": "galatians",
+    "chapter": 5,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "faith"
+  },
+  {
+    "ref": "John 14:26",
+    "book": "john",
+    "chapter": 14,
+    "startVerse": 26,
+    "endVerse": 26,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Ezekiel 34:26",
+    "book": "ezekiel",
+    "chapter": 34,
+    "startVerse": 26,
+    "endVerse": 26,
+    "theme": "praise"
+  },
+  {
+    "ref": "1 Peter 4:8",
+    "book": "1-peter",
+    "chapter": 4,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "love"
+  },
+  {
+    "ref": "Acts 2:28",
+    "book": "acts",
+    "chapter": 2,
+    "startVerse": 28,
+    "endVerse": 28,
+    "theme": "joy"
+  },
+  {
+    "ref": "Malachi 4:2",
+    "book": "malachi",
+    "chapter": 4,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "faith"
+  },
+  {
+    "ref": "John 16:22",
+    "book": "john",
+    "chapter": 16,
+    "startVerse": 22,
+    "endVerse": 22,
+    "theme": "joy"
+  },
+  {
+    "ref": "1 Corinthians 15:58",
+    "book": "1-corinthians",
+    "chapter": 15,
+    "startVerse": 58,
+    "endVerse": 58,
+    "theme": "love"
+  },
+  {
+    "ref": "Mark 5:36",
+    "book": "mark",
+    "chapter": 5,
+    "startVerse": 36,
+    "endVerse": 36,
+    "theme": "faith"
+  },
+  {
+    "ref": "Daniel 2:20",
+    "book": "daniel",
+    "chapter": 2,
+    "startVerse": 20,
+    "endVerse": 20,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "2 Peter 1:3",
+    "book": "2-peter",
+    "chapter": 1,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "strength"
+  },
+  {
+    "ref": "John 15:4",
+    "book": "john",
+    "chapter": 15,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "love"
+  },
+  {
+    "ref": "Micah 7:18",
+    "book": "micah",
+    "chapter": 7,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "love"
+  },
+  {
+    "ref": "Luke 15:10",
+    "book": "luke",
+    "chapter": 15,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "joy"
+  },
+  {
+    "ref": "2 Timothy 3:16",
+    "book": "2-timothy",
+    "chapter": 3,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Jonah 2:9",
+    "book": "jonah",
+    "chapter": 2,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "praise"
+  },
+  {
+    "ref": "1 Chronicles 29:11",
+    "book": "1-chronicles",
+    "chapter": 29,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "strength"
+  },
+  {
+    "ref": "Matthew 5:6",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "faith"
+  },
+  {
+    "ref": "Hosea 14:4",
+    "book": "hosea",
+    "chapter": 14,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "love"
+  },
+  {
+    "ref": "1 Peter 4:10",
+    "book": "1-peter",
+    "chapter": 4,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Matthew 5:8",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "faith"
+  },
+  {
+    "ref": "2 Samuel 22:31",
+    "book": "2-samuel",
+    "chapter": 22,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Revelation 22:5",
+    "book": "revelation",
+    "chapter": 22,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "James 3:17",
+    "book": "james",
+    "chapter": 3,
+    "startVerse": 17,
+    "endVerse": 17,
+    "theme": "peace"
+  },
+  {
+    "ref": "Jeremiah 1:5",
+    "book": "jeremiah",
+    "chapter": 1,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 Corinthians 3:16",
+    "book": "1-corinthians",
+    "chapter": 3,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "love"
+  },
+  {
+    "ref": "Habakkuk 2:3",
+    "book": "habakkuk",
+    "chapter": 2,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "faith"
+  },
+  {
+    "ref": "Luke 18:27",
+    "book": "luke",
+    "chapter": 18,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "faith"
+  },
+  {
+    "ref": "2 Chronicles 15:7",
+    "book": "2-chronicles",
+    "chapter": 15,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "strength"
+  },
+  {
+    "ref": "Amos 5:24",
+    "book": "amos",
+    "chapter": 5,
+    "startVerse": 24,
+    "endVerse": 24,
+    "theme": "strength"
+  },
+  {
+    "ref": "1 Timothy 6:6",
+    "book": "1-timothy",
+    "chapter": 6,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "faith"
+  },
+  {
+    "ref": "Acts 16:31",
+    "book": "acts",
+    "chapter": 16,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "faith"
+  },
+  {
+    "ref": "Micah 7:8",
+    "book": "micah",
+    "chapter": 7,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "joy"
+  },
+  {
+    "ref": "1 Corinthians 6:19",
+    "book": "1-corinthians",
+    "chapter": 6,
+    "startVerse": 19,
+    "endVerse": 19,
+    "theme": "love"
+  },
+  {
+    "ref": "Genesis 18:14",
+    "book": "genesis",
+    "chapter": 18,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "faith"
+  },
+  {
+    "ref": "Acts 4:12",
+    "book": "acts",
+    "chapter": 4,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "provision"
+  },
+  {
+    "ref": "Philippians 1:21",
+    "book": "philippians",
+    "chapter": 1,
+    "startVerse": 21,
+    "endVerse": 21,
+    "theme": "faith"
+  },
+  {
+    "ref": "Song of Solomon 8:7",
+    "book": "song-of-solomon",
+    "chapter": 8,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "love"
+  },
+  {
+    "ref": "Ecclesiastes 7:8",
+    "book": "ecclesiastes",
+    "chapter": 7,
+    "startVerse": 8,
+    "endVerse": 8,
+    "theme": "faith"
+  },
+  {
+    "ref": "Job 42:2",
+    "book": "job",
+    "chapter": 42,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "peace"
+  },
+  {
+    "ref": "2 Peter 3:18",
+    "book": "2-peter",
+    "chapter": 3,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Luke 11:9",
+    "book": "luke",
+    "chapter": 11,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "provision"
+  },
+  {
+    "ref": "1 Chronicles 16:34",
+    "book": "1-chronicles",
+    "chapter": 16,
+    "startVerse": 34,
+    "endVerse": 34,
+    "theme": "love"
+  },
+  {
+    "ref": "Deuteronomy 4:31",
+    "book": "deuteronomy",
+    "chapter": 4,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "comfort"
+  },
+  {
+    "ref": "Haggai 2:9",
+    "book": "haggai",
+    "chapter": 2,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "peace"
+  },
+  {
+    "ref": "1 Corinthians 2:9",
+    "book": "1-corinthians",
+    "chapter": 2,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "love"
+  },
+  {
+    "ref": "Genesis 9:13",
+    "book": "genesis",
+    "chapter": 9,
+    "startVerse": 13,
+    "endVerse": 13,
+    "theme": "faith"
+  },
+  {
+    "ref": "2 Kings 6:16",
+    "book": "2-kings",
+    "chapter": 6,
+    "startVerse": 16,
+    "endVerse": 16,
+    "theme": "faith"
+  },
+  {
+    "ref": "Joel 2:28",
+    "book": "joel",
+    "chapter": 2,
+    "startVerse": 28,
+    "endVerse": 28,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 Kings 19:12",
+    "book": "1-kings",
+    "chapter": 19,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "peace"
+  },
+  {
+    "ref": "Exodus 3:14",
+    "book": "exodus",
+    "chapter": 3,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 Samuel 2:2",
+    "book": "1-samuel",
+    "chapter": 2,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "faith"
+  },
+  {
+    "ref": "Daniel 6:27",
+    "book": "daniel",
+    "chapter": 6,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "strength"
+  },
+  {
+    "ref": "Acts 20:24",
+    "book": "acts",
+    "chapter": 20,
+    "startVerse": 24,
+    "endVerse": 24,
+    "theme": "joy"
+  },
+  {
+    "ref": "Titus 3:5",
+    "book": "titus",
+    "chapter": 3,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "faith"
+  },
+  {
+    "ref": "Judges 6:12",
+    "book": "judges",
+    "chapter": 6,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "strength"
+  },
+  {
+    "ref": "1 Timothy 6:11",
+    "book": "1-timothy",
+    "chapter": 6,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "love"
+  },
+  {
+    "ref": "Genesis 15:6",
+    "book": "genesis",
+    "chapter": 15,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "faith"
+  },
+  {
+    "ref": "2 Timothy 2:15",
+    "book": "2-timothy",
+    "chapter": 2,
+    "startVerse": 15,
+    "endVerse": 15,
+    "theme": "wisdom"
+  },
+  {
+    "ref": "Job 11:18",
+    "book": "job",
+    "chapter": 11,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "hope"
+  },
+  {
+    "ref": "Luke 2:10",
+    "book": "luke",
+    "chapter": 2,
+    "startVerse": 10,
+    "endVerse": 10,
+    "theme": "joy"
+  },
+  {
+    "ref": "Deuteronomy 6:5",
+    "book": "deuteronomy",
+    "chapter": 6,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "love"
+  },
+  {
+    "ref": "2 Samuel 7:22",
+    "book": "2-samuel",
+    "chapter": 7,
+    "startVerse": 22,
+    "endVerse": 22,
+    "theme": "faith"
+  },
+  {
+    "ref": "Zechariah 9:9",
+    "book": "zechariah",
+    "chapter": 9,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "joy"
+  },
+  {
+    "ref": "Hosea 2:19",
+    "book": "hosea",
+    "chapter": 2,
+    "startVerse": 19,
+    "endVerse": 19,
+    "theme": "love"
+  },
+  {
+    "ref": "Jeremiah 24:7",
+    "book": "jeremiah",
+    "chapter": 24,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "provision"
+  },
+  {
+    "ref": "Luke 4:18",
+    "book": "luke",
+    "chapter": 4,
+    "startVerse": 18,
+    "endVerse": 18,
+    "theme": "comfort"
+  },
+  {
+    "ref": "1 Kings 8:56",
+    "book": "1-kings",
+    "chapter": 8,
+    "startVerse": 56,
+    "endVerse": 56,
+    "theme": "hope"
+  },
+  {
+    "ref": "Genesis 12:2",
+    "book": "genesis",
+    "chapter": 12,
+    "startVerse": 2,
+    "endVerse": 2,
+    "theme": "praise"
+  },
+  {
+    "ref": "2 Timothy 1:9",
+    "book": "2-timothy",
+    "chapter": 1,
+    "startVerse": 9,
+    "endVerse": 9,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Acts 3:19",
+    "book": "acts",
+    "chapter": 3,
+    "startVerse": 19,
+    "endVerse": 19,
+    "theme": "faith"
+  },
+  {
+    "ref": "Malachi 3:6",
+    "book": "malachi",
+    "chapter": 3,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "faith"
+  },
+  {
+    "ref": "1 Corinthians 12:27",
+    "book": "1-corinthians",
+    "chapter": 12,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "love"
+  },
+  {
+    "ref": "Matthew 4:4",
+    "book": "matthew",
+    "chapter": 4,
+    "startVerse": 4,
+    "endVerse": 4,
+    "theme": "faith"
+  },
+  {
+    "ref": "Matthew 5:3",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 3,
+    "endVerse": 3,
+    "theme": "comfort"
+  },
+  {
+    "ref": "Matthew 5:7",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "forgiveness"
+  },
+  {
+    "ref": "Matthew 5:14",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "joy"
+  },
+  {
+    "ref": "Matthew 5:44",
+    "book": "matthew",
+    "chapter": 5,
+    "startVerse": 44,
+    "endVerse": 44,
+    "theme": "love"
+  },
+  {
+    "ref": "Matthew 6:6",
+    "book": "matthew",
+    "chapter": 6,
+    "startVerse": 6,
+    "endVerse": 6,
+    "theme": "presence"
+  },
+  {
+    "ref": "Matthew 6:26",
+    "book": "matthew",
+    "chapter": 6,
+    "startVerse": 26,
+    "endVerse": 26,
+    "theme": "provision"
+  },
+  {
+    "ref": "Matthew 6:34",
+    "book": "matthew",
+    "chapter": 6,
+    "startVerse": 34,
+    "endVerse": 34,
+    "theme": "peace"
+  },
+  {
+    "ref": "Matthew 7:12",
+    "book": "matthew",
+    "chapter": 7,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "love"
+  },
+  {
+    "ref": "Matthew 10:31",
+    "book": "matthew",
+    "chapter": 10,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "provision"
+  },
+  {
+    "ref": "Matthew 11:29",
+    "book": "matthew",
+    "chapter": 11,
+    "startVerse": 29,
+    "endVerse": 29,
+    "theme": "peace"
+  },
+  {
+    "ref": "Matthew 17:20",
+    "book": "matthew",
+    "chapter": 17,
+    "startVerse": 20,
+    "endVerse": 20,
+    "theme": "faith"
+  },
+  {
+    "ref": "Matthew 19:14",
+    "book": "matthew",
+    "chapter": 19,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "love"
+  },
+  {
+    "ref": "Matthew 22:37",
+    "book": "matthew",
+    "chapter": 22,
+    "startVerse": 37,
+    "endVerse": 37,
+    "theme": "love"
+  },
+  {
+    "ref": "Mark 4:39",
+    "book": "mark",
+    "chapter": 4,
+    "startVerse": 39,
+    "endVerse": 39,
+    "theme": "peace"
+  },
+  {
+    "ref": "Mark 10:27",
+    "book": "mark",
+    "chapter": 10,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "faith"
+  },
+  {
+    "ref": "Mark 10:45",
+    "book": "mark",
+    "chapter": 10,
+    "startVerse": 45,
+    "endVerse": 45,
+    "theme": "love"
+  },
+  {
+    "ref": "Mark 12:30",
+    "book": "mark",
+    "chapter": 12,
+    "startVerse": 30,
+    "endVerse": 30,
+    "theme": "love"
+  },
+  {
+    "ref": "Mark 12:31",
+    "book": "mark",
+    "chapter": 12,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "love"
+  },
+  {
+    "ref": "Luke 1:79",
+    "book": "luke",
+    "chapter": 1,
+    "startVerse": 79,
+    "endVerse": 79,
+    "theme": "hope"
+  },
+  {
+    "ref": "Luke 6:27",
+    "book": "luke",
+    "chapter": 6,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "love"
+  },
+  {
+    "ref": "Luke 6:31",
+    "book": "luke",
+    "chapter": 6,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "love"
+  },
+  {
+    "ref": "Luke 10:27",
+    "book": "luke",
+    "chapter": 10,
+    "startVerse": 27,
+    "endVerse": 27,
+    "theme": "love"
+  },
+  {
+    "ref": "Luke 12:24",
+    "book": "luke",
+    "chapter": 12,
+    "startVerse": 24,
+    "endVerse": 24,
+    "theme": "provision"
+  },
+  {
+    "ref": "Luke 15:7",
+    "book": "luke",
+    "chapter": 15,
+    "startVerse": 7,
+    "endVerse": 7,
+    "theme": "joy"
+  },
+  {
+    "ref": "John 1:1",
+    "book": "john",
+    "chapter": 1,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "presence"
+  },
+  {
+    "ref": "Genesis 1:31",
+    "book": "genesis",
+    "chapter": 1,
+    "startVerse": 31,
+    "endVerse": 31,
+    "theme": "praise"
+  },
+  {
+    "ref": "Genesis 15:1",
+    "book": "genesis",
+    "chapter": 15,
+    "startVerse": 1,
+    "endVerse": 1,
+    "theme": "provision"
+  },
+  {
+    "ref": "Genesis 22:14",
+    "book": "genesis",
+    "chapter": 22,
+    "startVerse": 14,
+    "endVerse": 14,
+    "theme": "provision"
+  },
+  {
+    "ref": "Ezra 3:11",
+    "book": "ezra",
+    "chapter": 3,
+    "startVerse": 11,
+    "endVerse": 11,
+    "theme": "praise"
+  },
+  {
+    "ref": "Joshua 24:15",
+    "book": "joshua",
+    "chapter": 24,
+    "startVerse": 15,
+    "endVerse": 15,
+    "theme": "faith"
+  },
+  {
+    "ref": "Ruth 2:12",
+    "book": "ruth",
+    "chapter": 2,
+    "startVerse": 12,
+    "endVerse": 12,
+    "theme": "provision"
+  },
+  {
+    "ref": "1 Samuel 12:24",
+    "book": "1-samuel",
+    "chapter": 12,
+    "startVerse": 24,
+    "endVerse": 24,
+    "theme": "faith"
+  },
+  {
+    "ref": "Nehemiah 1:5",
+    "book": "nehemiah",
+    "chapter": 1,
+    "startVerse": 5,
+    "endVerse": 5,
+    "theme": "praise"
+  }
+]
