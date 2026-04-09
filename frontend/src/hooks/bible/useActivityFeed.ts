@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { subscribe as subscribeHighlights } from '@/lib/bible/highlightStore'
 import { subscribe as subscribeBookmarks } from '@/lib/bible/bookmarkStore'
 import { subscribe as subscribeNotes } from '@/lib/bible/notes/store'
+import { subscribe as subscribeStreak } from '@/lib/bible/streakStore'
 import { loadAllActivity, filterActivity, sortActivity } from '@/lib/bible/activityLoader'
 import { getBibleStreak } from '@/lib/bible/landingState'
 import { useVerseTextCache } from '@/hooks/bible/useVerseTextCache'
@@ -68,6 +69,7 @@ export function useActivityFeed() {
       subscribeHighlights(reload),
       subscribeBookmarks(reload),
       subscribeNotes(reload),
+      subscribeStreak(reload),
     ]
     return () => unsubs.forEach((fn) => fn())
   }, [])

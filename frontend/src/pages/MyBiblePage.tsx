@@ -1,6 +1,8 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Paintbrush, PenLine, Bookmark as BookmarkIcon, Filter, Flame } from 'lucide-react'
+import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
+import { useStreakStore } from '@/hooks/bible/useStreakStore'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
@@ -61,6 +63,8 @@ function MyBiblePageInner() {
   } = useActivityFeed()
 
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [streakModalOpen, setStreakModalOpen] = useState(false)
+  const { streak: streakRecord, atRisk } = useStreakStore()
   const [actionMenu, setActionMenu] = useState<{ item: ActivityItem; x: number; y: number } | null>(null)
 
   const handleImportComplete = useCallback(() => {
@@ -159,11 +163,16 @@ function MyBiblePageInner() {
                 </div>
               )}
               {totalCounts.streak > 0 && (
-                <div className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm">
+                <button
+                  type="button"
+                  onClick={() => setStreakModalOpen(true)}
+                  className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-colors hover:bg-white/[0.09] min-h-[44px]"
+                  aria-label={`Reading streak: ${totalCounts.streak} days. Tap for details.`}
+                >
                   <Flame size={16} className="text-white/40" />
                   <span className="text-xl font-bold text-white">{totalCounts.streak}</span>
                   <span className="text-xs text-white/50">Streak</span>
-                </div>
+                </button>
               )}
             </div>
           )}
@@ -272,6 +281,16 @@ function MyBiblePageInner() {
           onImportComplete={handleImportComplete}
         />
       </Suspense>
+
+      {/* Streak detail modal */}
+      {streakModalOpen && (
+        <StreakDetailModal
+          isOpen={streakModalOpen}
+          onClose={() => setStreakModalOpen(false)}
+          streak={streakRecord}
+          atRisk={atRisk}
+        />
+      )}
     </Layout>
   )
 }

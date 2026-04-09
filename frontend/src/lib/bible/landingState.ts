@@ -1,3 +1,4 @@
+import { getStreak } from '@/lib/bible/streakStore'
 import type { LastRead, ActivePlan, BibleStreak } from '@/types/bible-landing'
 
 export function getLastRead(): LastRead | null {
@@ -26,12 +27,7 @@ export function getActivePlans(): ActivePlan[] {
 }
 
 export function getBibleStreak(): BibleStreak | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = localStorage.getItem('wr_bible_streak')
-    if (!raw) return null
-    return JSON.parse(raw) as BibleStreak
-  } catch {
-    return null
-  }
+  const record = getStreak()
+  if (record.currentStreak <= 0) return null
+  return { count: record.currentStreak, lastReadDate: record.lastReadDate }
 }

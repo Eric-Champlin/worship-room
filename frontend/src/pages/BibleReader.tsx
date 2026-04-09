@@ -20,6 +20,7 @@ import { useFocusMode } from '@/hooks/useFocusMode'
 import { useVerseTap } from '@/hooks/useVerseTap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { recordReadToday } from '@/lib/bible/streakStore'
 import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
 import { loadCrossRefsForBook } from '@/lib/bible/crossRefs/loader'
 import {
@@ -274,8 +275,7 @@ function BibleReaderInner() {
     }
   }, [isSheetOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Read tracking stub — writes for all users (no auth check)
-  // TODO BB-17: replace stub
+  // Read tracking — writes for all users (no auth check)
   useEffect(() => {
     if (!bookSlug || !book || isLoading || loadError || verses.length === 0) return
 
@@ -296,6 +296,9 @@ function BibleReaderInner() {
       progress[bookSlug] = [...bookChapters, chapterNumber]
       localStorage.setItem('wr_bible_progress', JSON.stringify(progress))
     }
+
+    // Record today's read for the streak system (idempotent within a day)
+    recordReadToday()
   }, [bookSlug, book, chapterNumber, isLoading, loadError, verses.length])
 
   // Keyboard shortcuts

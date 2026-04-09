@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
@@ -12,8 +12,14 @@ import { BibleSearchEntry } from '@/components/bible/landing/BibleSearchEntry'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
 import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
-import { getLastRead, getActivePlans, getBibleStreak } from '@/lib/bible/landingState'
-import type { LastRead, ActivePlan, BibleStreak } from '@/types/bible-landing'
+import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
+import { StreakResetWelcome } from '@/components/bible/streak/StreakResetWelcome'
+import { useStreakStore } from '@/hooks/bible/useStreakStore'
+import { useToast } from '@/components/ui/Toast'
+import { getTodayLocal } from '@/lib/bible/dateUtils'
+import { getLastRead, getActivePlans } from '@/lib/bible/landingState'
+import { BIBLE_STREAK_RESET_ACK_KEY } from '@/constants/bible'
+import type { LastRead, ActivePlan } from '@/types/bible-landing'
 
 const bibleBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -37,14 +43,51 @@ function isInputFocused(): boolean {
 function BibleLandingInner() {
   const [lastRead, setLastRead] = useState<LastRead | null>(null)
   const [plans, setPlans] = useState<ActivePlan[]>([])
-  const [streak, setStreak] = useState<BibleStreak | null>(null)
+  const { streak, atRisk } = useStreakStore()
+  const [modalOpen, setModalOpen] = useState(false)
+  const [showReset, setShowReset] = useState(false)
+  const previousStreakRef = useRef(0)
+  const [pendingMilestone, setPendingMilestone] = useState<number | null>(null)
+  const displayedMilestones = useRef(new Set<number>())
+  const { showToast } = useToast()
+  const handleMilestoneDismissed = useCallback(() => setPendingMilestone(null), [])
   const { isOpen, close, toggle } = useBibleDrawer()
 
   useEffect(() => {
     setLastRead(getLastRead())
     setPlans(getActivePlans())
-    setStreak(getBibleStreak())
   }, [])
+
+  // Check for streak reset on mount
+  useEffect(() => {
+    if (streak.currentStreak === 1 && streak.longestStreak > 1) {
+      const today = getTodayLocal()
+      try {
+        const ackRaw = localStorage.getItem(BIBLE_STREAK_RESET_ACK_KEY)
+        const ack = ackRaw ? JSON.parse(ackRaw) : null
+        if (ack?.date !== today) {
+          previousStreakRef.current = streak.longestStreak
+          setShowReset(true)
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  }, [streak.currentStreak, streak.longestStreak])
+
+  // Detect new milestones and show toast
+  useEffect(() => {
+    const lastMilestone = streak.milestones[streak.milestones.length - 1]
+    if (
+      lastMilestone != null &&
+      lastMilestone === streak.currentStreak &&
+      !displayedMilestones.current.has(lastMilestone)
+    ) {
+      displayedMilestones.current.add(lastMilestone)
+      setPendingMilestone(lastMilestone)
+      showToast(`${lastMilestone} day streak!`, 'success')
+    }
+  }, [streak, showToast])
 
   // Keyboard shortcut: 'b' to toggle drawer
   useEffect(() => {
@@ -74,9 +117,15 @@ function BibleLandingInner() {
 
         <div className="relative z-10 mx-auto max-w-4xl space-y-8 px-4 pb-16">
           {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap */}
-          {streak && streak.count > 0 && (
+          {streak.currentStreak > 0 && (
             <div className="flex justify-center">
-              <StreakChip streak={streak} onClick={() => console.log('Streak chip clicked')} />
+              <StreakChip
+                streak={streak}
+                atRisk={atRisk}
+                pendingMilestone={pendingMilestone}
+                onMilestoneDismissed={handleMilestoneDismissed}
+                onClick={() => setModalOpen(true)}
+              />
             </div>
           )}
 
@@ -109,6 +158,28 @@ function BibleLandingInner() {
       <BibleDrawer isOpen={isOpen} onClose={close} ariaLabel="Books of the Bible">
         <DrawerViewRouter onClose={close} />
       </BibleDrawer>
+
+      {/* Streak Detail Modal */}
+      {modalOpen && (
+        <StreakDetailModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          streak={streak}
+          atRisk={atRisk}
+        />
+      )}
+
+      {/* Streak Reset Welcome */}
+      {showReset && (
+        <StreakResetWelcome
+          previousStreak={previousStreakRef.current}
+          onContinue={() => {
+            const today = getTodayLocal()
+            localStorage.setItem(BIBLE_STREAK_RESET_ACK_KEY, JSON.stringify({ date: today }))
+            setShowReset(false)
+          }}
+        />
+      )}
     </Layout>
   )
 }

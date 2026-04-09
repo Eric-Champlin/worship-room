@@ -40,6 +40,15 @@ vi.mock('@/components/ui/Toast', () => ({
   useToastSafe: () => ({ showToast: vi.fn() }),
 }))
 
+vi.mock('@/lib/bible/streakStore', () => ({
+  recordReadToday: vi.fn().mockReturnValue({
+    previousStreak: 0, newStreak: 1, delta: 'first-read' as const,
+    milestoneReached: null, graceDaysRemaining: 1, isFirstReadEver: true,
+  }),
+  getStreak: () => ({ currentStreak: 0, longestStreak: 0, lastReadDate: '', streakStartDate: '', graceDaysAvailable: 1, graceDaysUsedThisWeek: 0, lastGraceUsedDate: null, weekResetDate: '', milestones: [], totalDaysRead: 0 }),
+  subscribe: () => () => {},
+}))
+
 vi.mock('@/lib/bible/crossRefs/loader', () => ({
   loadCrossRefsForBook: vi.fn().mockResolvedValue(new Map()),
   collectCrossRefsForRange: vi.fn().mockReturnValue([]),

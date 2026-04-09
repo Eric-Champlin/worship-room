@@ -12,6 +12,9 @@ export const MAX_NOTES = 200
 /** @deprecated BB-8 uses NOTE_BODY_MAX_CHARS (10000). Kept for pre-redesign compat. */
 export const NOTE_MAX_CHARS = 300
 
+export const BIBLE_STREAK_KEY = 'bible:streak'
+export const BIBLE_STREAK_RESET_ACK_KEY = 'bible:streakResetAcknowledged'
+
 export const BIBLE_JOURNAL_ENTRIES_KEY = 'bible:journalEntries'
 export const BIBLE_NOTES_STORAGE_KEY = 'bible:notes'
 export const NOTE_BODY_MAX_CHARS = 10_000

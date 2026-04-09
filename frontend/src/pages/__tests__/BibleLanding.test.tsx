@@ -4,6 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { _resetForTesting as resetStreakStore } from '@/lib/bible/streakStore'
 import { BibleLanding } from '../BibleLanding'
 
 const mockNavigate = vi.fn()
@@ -39,6 +40,7 @@ function renderLanding() {
 describe('BibleLanding', () => {
   beforeEach(() => {
     localStorage.clear()
+    resetStreakStore()
     mockNavigate.mockClear()
   })
 
@@ -85,18 +87,25 @@ describe('BibleLanding', () => {
 
   it('streak chip visible when count > 0', () => {
     localStorage.setItem(
-      'wr_bible_streak',
-      JSON.stringify({ count: 5, lastReadDate: '2026-04-07' })
+      'bible:streak',
+      JSON.stringify({
+        currentStreak: 5,
+        longestStreak: 5,
+        lastReadDate: '2026-04-07',
+        streakStartDate: '2026-04-03',
+        graceDaysAvailable: 1,
+        graceDaysUsedThisWeek: 0,
+        lastGraceUsedDate: null,
+        weekResetDate: '2026-04-06',
+        milestones: [3],
+        totalDaysRead: 5,
+      }),
     )
     renderLanding()
     expect(screen.getByText('5 day streak')).toBeInTheDocument()
   })
 
   it('streak chip hidden when count is 0', () => {
-    localStorage.setItem(
-      'wr_bible_streak',
-      JSON.stringify({ count: 0, lastReadDate: '2026-04-07' })
-    )
     renderLanding()
     expect(screen.queryByText(/day streak/)).not.toBeInTheDocument()
   })

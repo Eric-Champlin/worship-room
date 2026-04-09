@@ -34,6 +34,20 @@ vi.mock('@/lib/bible/crossRefs/loader', () => ({
   loadCrossRefsForBook: (...args: unknown[]) => mockLoadCrossRefsForBook(...args),
 }))
 
+const mockRecordReadToday = vi.fn().mockReturnValue({
+  previousStreak: 0,
+  newStreak: 1,
+  delta: 'first-read' as const,
+  milestoneReached: null,
+  graceDaysRemaining: 1,
+  isFirstReadEver: true,
+})
+vi.mock('@/lib/bible/streakStore', () => ({
+  recordReadToday: (...args: unknown[]) => mockRecordReadToday(...args),
+  getStreak: () => ({ currentStreak: 0, longestStreak: 0, lastReadDate: '', streakStartDate: '', graceDaysAvailable: 1, graceDaysUsedThisWeek: 0, lastGraceUsedDate: null, weekResetDate: '', milestones: [], totalDaysRead: 0 }),
+  subscribe: () => () => {},
+}))
+
 // Minimal mocks for components that use audio/toast/auth providers
 vi.mock('@/components/audio/AudioProvider', () => ({
   useAudioState: () => ({ drawerOpen: false }),
@@ -256,5 +270,25 @@ describe('BibleReader (BB-4 Immersive Reader)', () => {
     await waitFor(() => {
       expect(mockLoadCrossRefsForBook).toHaveBeenCalledWith('genesis')
     })
+  })
+
+  it('calls recordReadToday on chapter load (BB-17)', async () => {
+    mockRecordReadToday.mockClear()
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      expect(mockRecordReadToday).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('does not call recordReadToday on load error', async () => {
+    mockRecordReadToday.mockClear()
+    renderReader('/bible/notabook/1')
+
+    await waitFor(() => {
+      expect(screen.getByText("That book doesn't exist.")).toBeTruthy()
+    })
+
+    expect(mockRecordReadToday).not.toHaveBeenCalled()
   })
 })
