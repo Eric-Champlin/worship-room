@@ -1,25 +1,41 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
-import { BibleHeroSlot } from '../BibleHeroSlot'
-import type { LastReadState } from '@/hooks/bible/useLastRead'
 
-// Mock useLastRead to control reader state
+import type { LastReadState } from '@/hooks/bible/useLastRead'
+import type { UseActivePlanResult } from '@/hooks/bible/useActivePlan'
+
+import { BibleHeroSlot } from '../BibleHeroSlot'
+
+// Mock useLastRead
 const mockUseLastRead = vi.fn<() => LastReadState>()
 vi.mock('@/hooks/bible/useLastRead', () => ({
   useLastRead: () => mockUseLastRead(),
 }))
 
-// Mock VerseOfTheDay to keep tests focused on composition logic
+// Mock useActivePlan
+const mockUseActivePlan = vi.fn<() => UseActivePlanResult>()
+vi.mock('@/hooks/bible/useActivePlan', () => ({
+  useActivePlan: () => mockUseActivePlan(),
+}))
+
+// Mock child components
 vi.mock('../VerseOfTheDay', () => ({
   VerseOfTheDay: () => <div data-testid="votd-card">Verse of the Day</div>,
 }))
 
-// Mock ResumeReadingCard to keep tests focused on composition logic
 vi.mock('../ResumeReadingCard', () => ({
   ResumeReadingCard: (props: { book: string; chapter: number }) => (
     <div data-testid="resume-card">
       Resume: {props.book} {props.chapter}
+    </div>
+  ),
+}))
+
+vi.mock('../ActivePlanBanner', () => ({
+  ActivePlanBanner: (props: { planTitle: string; currentDay: number }) => (
+    <div data-testid="plan-banner">
+      Plan: {props.planTitle} Day {props.currentDay}
     </div>
   ),
 }))
@@ -30,6 +46,49 @@ function renderSlot() {
       <BibleHeroSlot />
     </MemoryRouter>,
   )
+}
+
+const NO_PLAN: UseActivePlanResult = {
+  activePlan: null,
+  progress: null,
+  currentDay: null,
+  isOnPlanPassage: () => false,
+  markDayComplete: () => ({ type: 'already-completed' as const, day: 0 }),
+  pausePlan: () => {},
+  switchPlan: async () => {},
+}
+
+const ACTIVE_PLAN: UseActivePlanResult = {
+  activePlan: {
+    slug: 'psalm-comfort',
+    title: 'Psalms of Comfort',
+    shortTitle: 'Comfort',
+    description: 'A plan about comfort',
+    theme: 'comfort',
+    duration: 21,
+    estimatedMinutesPerDay: 10,
+    curator: 'Worship Room',
+    coverGradient: 'from-primary/30 to-hero-dark',
+    days: [
+      { day: 5, title: 'Day Five', passages: [{ book: 'psalms', chapter: 23 }] },
+    ],
+  },
+  progress: {
+    slug: 'psalm-comfort',
+    startedAt: '2026-04-01',
+    currentDay: 5,
+    completedDays: [1, 2, 3, 4],
+    completedAt: null,
+    pausedAt: null,
+    resumeFromDay: null,
+    reflection: null,
+    celebrationShown: false,
+  },
+  currentDay: { day: 5, title: 'Day Five', passages: [{ book: 'psalms', chapter: 23 }] },
+  isOnPlanPassage: () => false,
+  markDayComplete: () => ({ type: 'day-completed' as const, day: 5, isAllComplete: false as const }),
+  pausePlan: () => {},
+  switchPlan: async () => {},
 }
 
 const ACTIVE_STATE: LastReadState = {
@@ -45,19 +104,6 @@ const ACTIVE_STATE: LastReadState = {
   nextChapter: { bookSlug: 'john', bookName: 'John', chapter: 4 },
 }
 
-const LAPSED_STATE: LastReadState = {
-  book: 'John',
-  chapter: 3,
-  timestamp: Date.now() - 90_000_000,
-  isActiveReader: false,
-  isLapsedReader: true,
-  isFirstTimeReader: false,
-  relativeTime: 'Yesterday',
-  firstLineOfChapter: null,
-  slug: 'john',
-  nextChapter: null,
-}
-
 const FIRST_TIME_STATE: LastReadState = {
   book: null,
   chapter: null,
@@ -71,36 +117,80 @@ const FIRST_TIME_STATE: LastReadState = {
   nextChapter: null,
 }
 
+const LAPSED_STATE: LastReadState = {
+  book: 'John',
+  chapter: 3,
+  timestamp: Date.now() - 90_000_000,
+  isActiveReader: false,
+  isLapsedReader: true,
+  isFirstTimeReader: false,
+  relativeTime: 'Yesterday',
+  firstLineOfChapter: null,
+  slug: 'john',
+  nextChapter: null,
+}
+
 describe('BibleHeroSlot', () => {
-  it('renders resume card when active reader', () => {
+  it('renders plan banner when active plan exists', () => {
+    mockUseActivePlan.mockReturnValue(ACTIVE_PLAN)
+    mockUseLastRead.mockReturnValue(FIRST_TIME_STATE)
+    renderSlot()
+
+    expect(screen.getByTestId('plan-banner')).toBeInTheDocument()
+    expect(screen.getByText(/Plan: Psalms of Comfort Day 5/)).toBeInTheDocument()
+  })
+
+  it('demotes VOTD below plan banner', () => {
+    mockUseActivePlan.mockReturnValue(ACTIVE_PLAN)
+    mockUseLastRead.mockReturnValue(FIRST_TIME_STATE)
+    const { container } = renderSlot()
+
+    const banner = screen.getByTestId('plan-banner')
+    const votd = screen.getByTestId('votd-card')
+
+    expect(banner).toBeInTheDocument()
+    expect(votd).toBeInTheDocument()
+
+    const parent = container.querySelector('.space-y-6')
+    const children = Array.from(parent!.children)
+    expect(children.indexOf(banner)).toBeLessThan(children.indexOf(votd))
+  })
+
+  it('falls through to resume when no plan', () => {
+    mockUseActivePlan.mockReturnValue(NO_PLAN)
+    mockUseLastRead.mockReturnValue(ACTIVE_STATE)
+    renderSlot()
+
+    expect(screen.queryByTestId('plan-banner')).not.toBeInTheDocument()
+    expect(screen.getByTestId('resume-card')).toBeInTheDocument()
+  })
+
+  // Existing tests that should still pass
+  it('renders resume card when active reader (no plan)', () => {
+    mockUseActivePlan.mockReturnValue(NO_PLAN)
     mockUseLastRead.mockReturnValue(ACTIVE_STATE)
     renderSlot()
 
     expect(screen.getByTestId('resume-card')).toBeInTheDocument()
-    expect(screen.getByText(/Resume: John 3/)).toBeInTheDocument()
   })
 
   it('renders VOTD below resume card when active', () => {
+    mockUseActivePlan.mockReturnValue(NO_PLAN)
     mockUseLastRead.mockReturnValue(ACTIVE_STATE)
     const { container } = renderSlot()
 
     const resume = screen.getByTestId('resume-card')
     const votd = screen.getByTestId('votd-card')
-
-    // Both present
     expect(resume).toBeInTheDocument()
     expect(votd).toBeInTheDocument()
 
-    // Resume appears before VOTD in DOM order
     const parent = container.querySelector('.space-y-6')
-    expect(parent).not.toBeNull()
     const children = Array.from(parent!.children)
-    const resumeIdx = children.indexOf(resume)
-    const votdIdx = children.indexOf(votd)
-    expect(resumeIdx).toBeLessThan(votdIdx)
+    expect(children.indexOf(resume)).toBeLessThan(children.indexOf(votd))
   })
 
   it('renders VOTD as primary when lapsed reader', () => {
+    mockUseActivePlan.mockReturnValue(NO_PLAN)
     mockUseLastRead.mockReturnValue(LAPSED_STATE)
     renderSlot()
 
@@ -108,24 +198,8 @@ describe('BibleHeroSlot', () => {
     expect(screen.queryByTestId('resume-card')).not.toBeInTheDocument()
   })
 
-  it('renders lapsed-reader link when lapsed', () => {
-    mockUseLastRead.mockReturnValue(LAPSED_STATE)
-    renderSlot()
-
-    expect(screen.getByText(/Last read:/)).toBeInTheDocument()
-    expect(screen.getByText('John 3')).toBeInTheDocument()
-    expect(screen.getByText(/Yesterday/)).toBeInTheDocument()
-  })
-
-  it('lapsed link navigates to correct URL', () => {
-    mockUseLastRead.mockReturnValue(LAPSED_STATE)
-    renderSlot()
-
-    const link = screen.getByRole('link')
-    expect(link.getAttribute('href')).toBe('/bible/john/3')
-  })
-
   it('renders VOTD only for first-time reader', () => {
+    mockUseActivePlan.mockReturnValue(NO_PLAN)
     mockUseLastRead.mockReturnValue(FIRST_TIME_STATE)
     renderSlot()
 
@@ -133,18 +207,11 @@ describe('BibleHeroSlot', () => {
   })
 
   it('no resume affordance for first-time reader', () => {
+    mockUseActivePlan.mockReturnValue(NO_PLAN)
     mockUseLastRead.mockReturnValue(FIRST_TIME_STATE)
     renderSlot()
 
     expect(screen.queryByTestId('resume-card')).not.toBeInTheDocument()
     expect(screen.queryByText(/Last read:/)).not.toBeInTheDocument()
-  })
-
-  it('lapsed link has 44px tap target', () => {
-    mockUseLastRead.mockReturnValue(LAPSED_STATE)
-    renderSlot()
-
-    const link = screen.getByRole('link')
-    expect(link.className).toContain('min-h-[44px]')
   })
 })

@@ -1,9 +1,10 @@
 import type { Highlight, Bookmark, Note, JournalEntry } from './bible'
+import type { PlansStoreState } from './bible-plans'
 import type { PersonalPrayer } from './personal-prayer'
 import type { MeditationSession } from './meditation'
 
-export const CURRENT_SCHEMA_VERSION = 1
-export const APP_VERSION = 'worship-room-bible-wave-1'
+export const CURRENT_SCHEMA_VERSION = 2
+export const APP_VERSION = 'worship-room-bible-wave-2'
 
 export interface BibleExportV1 {
   schemaVersion: 1
@@ -18,6 +19,18 @@ export interface BibleExportV1 {
     meditations: MeditationSession[]
   }
 }
+
+export interface BibleExportV2 {
+  schemaVersion: 2
+  exportedAt: string
+  appVersion: string
+  data: BibleExportV1['data'] & {
+    plans?: PlansStoreState
+  }
+}
+
+// Union type for import parsing
+export type BibleExport = BibleExportV1 | BibleExportV2
 
 export interface MergeResult {
   added: number
@@ -34,4 +47,5 @@ export interface ImportResult {
   prayers: MergeResult
   journals: MergeResult
   meditations: MergeResult
+  plans?: MergeResult
 }

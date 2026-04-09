@@ -120,9 +120,16 @@ describe('validateExport', () => {
     expect(result).toEqual({ valid: false, error: ERROR_MISSING_DATA })
   })
 
-  it('returns newer version error for schemaVersion 2', () => {
+  it('accepts schemaVersion 2 (current version)', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const input = makeValidExport({ schemaVersion: 2 as any })
+    const result = validateExport(input)
+    expect(result.valid).toBe(true)
+  })
+
+  it('returns newer version error for schemaVersion 3', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const input = makeValidExport({ schemaVersion: 3 as any })
     const result = validateExport(input)
     expect(result).toEqual({ valid: false, error: ERROR_NEWER_VERSION })
   })

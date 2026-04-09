@@ -20,9 +20,13 @@ import { useFocusMode } from '@/hooks/useFocusMode'
 import { useVerseTap } from '@/hooks/useVerseTap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAudioState, useReadingContext } from '@/components/audio/AudioProvider'
+import { PlanCompletionCelebration } from '@/components/bible/plans/PlanCompletionCelebration'
+import { ActivePlanReaderBanner } from '@/components/bible/reader/ActivePlanReaderBanner'
 import { AmbientAudioPicker } from '@/components/bible/reader/AmbientAudioPicker'
 import { useReaderAudioAutoStart } from '@/hooks/useReaderAudioAutoStart'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { useActivePlan } from '@/hooks/bible/useActivePlan'
+import { setCelebrationShown } from '@/lib/bible/plansStore'
 import { recordReadToday } from '@/lib/bible/streakStore'
 import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
 import { loadCrossRefsForBook } from '@/lib/bible/crossRefs/loader'
@@ -72,8 +76,25 @@ function BibleReaderInner() {
   const [loadError, setLoadError] = useState(false)
   const [arrivalHighlightVerses, setArrivalHighlightVerses] = useState<number[]>([])
 
+  // BB-21 plan reader banner
+  const { activePlan, progress: planProgress, currentDay: planCurrentDay, isOnPlanPassage, markDayComplete: planMarkDayComplete } = useActivePlan()
+  const [readerBannerDismissed, setReaderBannerDismissed] = useState(false)
+  const [celebrationData, setCelebrationData] = useState<{
+    planTitle: string
+    planDescription: string
+    daysCompleted: number
+    dateRange: string
+    passageCount: number
+    slug: string
+  } | null>(null)
+
   const book = bookSlug ? getBookBySlug(bookSlug) : undefined
   const chapterNumber = chapterParam ? parseInt(chapterParam, 10) : NaN
+
+  // Reset plan banner dismissed state on chapter change
+  useEffect(() => {
+    setReaderBannerDismissed(false)
+  }, [bookSlug, chapterNumber])
 
   // Swipe gesture (mobile/tablet only)
   const [isSmallViewport, setIsSmallViewport] = useState(
@@ -583,6 +604,35 @@ function BibleReaderInner() {
         onVolumeChange={(v) => updateSetting('ambientAudioVolume', v)}
       />
 
+      {/* BB-21: Active plan reader banner */}
+      {activePlan && planProgress && planCurrentDay && !readerBannerDismissed && bookSlug && isOnPlanPassage(bookSlug, chapterNumber) && (
+        <div className="pt-16 sm:pt-20">
+          <ActivePlanReaderBanner
+            planTitle={activePlan.title}
+            currentDay={planProgress.currentDay}
+            isDayCompleted={planProgress.completedDays.includes(planCurrentDay.day)}
+            onMarkComplete={() => {
+              const result = planMarkDayComplete(planCurrentDay.day)
+              if (result.type === 'plan-completed' && planProgress && !planProgress.celebrationShown) {
+                setCelebrationShown(activePlan.slug)
+                setCelebrationData({
+                  planTitle: activePlan.title,
+                  planDescription: activePlan.description,
+                  daysCompleted: activePlan.days.length,
+                  dateRange: `${new Date(planProgress.startedAt).toLocaleDateString()} – ${new Date().toLocaleDateString()}`,
+                  passageCount: activePlan.days.reduce((sum, d) => sum + d.passages.length, 0),
+                  slug: activePlan.slug,
+                })
+              }
+            }}
+            onDismiss={() => setReaderBannerDismissed(true)}
+            chromeOpacity={focusMode.chromeOpacity}
+            chromePointerEvents={focusMode.chromePointerEvents}
+            chromeTransitionMs={focusMode.chromeTransitionMs}
+          />
+        </div>
+      )}
+
       <div style={swipeStyle}>
         <main
           ref={readerBodyRef}
@@ -686,6 +736,17 @@ function BibleReaderInner() {
           isOpen={isSheetOpen}
           onClose={handleSheetClose}
           onExtendSelection={extendSelection}
+        />
+      )}
+
+      {/* BB-21: Plan completion celebration */}
+      {celebrationData && (
+        <PlanCompletionCelebration
+          {...celebrationData}
+          onClose={() => {
+            setCelebrationData(null)
+            navigate(`/bible/plans/${celebrationData.slug}`)
+          }}
         />
       )}
     </div>

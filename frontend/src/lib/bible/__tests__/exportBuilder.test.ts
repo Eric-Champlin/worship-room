@@ -23,6 +23,9 @@ vi.mock('@/services/prayer-list-storage', () => ({
 vi.mock('@/services/meditation-storage', () => ({
   getMeditationHistory: vi.fn(() => []),
 }))
+vi.mock('@/lib/bible/plansStore', () => ({
+  getPlansState: vi.fn(() => ({ activePlanSlug: null, plans: {} })),
+}))
 
 import { buildExport } from '../exportBuilder'
 import { getAllHighlights } from '@/lib/bible/highlightStore'
@@ -229,13 +232,18 @@ describe('buildExport', () => {
     expect(Number.isNaN(parsed.getTime())).toBe(false)
   })
 
-  it('schemaVersion is 1', () => {
+  it('schemaVersion is 2', () => {
     const result = buildExport()
-    expect(result.schemaVersion).toBe(1)
+    expect(result.schemaVersion).toBe(2)
   })
 
   it('appVersion matches APP_VERSION constant', () => {
     const result = buildExport()
-    expect(result.appVersion).toBe('worship-room-bible-wave-1')
+    expect(result.appVersion).toBe('worship-room-bible-wave-2')
+  })
+
+  it('includes plans data', () => {
+    const result = buildExport()
+    expect(result.data.plans).toEqual({ activePlanSlug: null, plans: {} })
   })
 })

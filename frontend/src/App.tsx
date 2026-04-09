@@ -65,6 +65,8 @@ const ChallengeDetail = lazy(() => import('./pages/ChallengeDetail').then((m) =>
 const BibleLanding = lazy(() => import('./pages/BibleLanding').then((m) => ({ default: m.BibleLanding })))
 const BibleBrowse = lazy(() => import('./pages/BibleBrowse').then((m) => ({ default: m.BibleBrowse })))
 const BibleStub = lazy(() => import('./pages/BibleStub').then((m) => ({ default: m.BibleStub })))
+const BiblePlanDetail = lazy(() => import('./pages/BiblePlanDetail').then((m) => ({ default: m.BiblePlanDetail })))
+const BiblePlanDay = lazy(() => import('./pages/BiblePlanDay').then((m) => ({ default: m.BiblePlanDay })))
 const MyBiblePage = lazy(() => import('./pages/MyBiblePage'))
 const BibleReader = lazy(() => import('./pages/BibleReader').then((m) => ({ default: m.BibleReader })))
 const AskPage = lazy(() => import('./pages/AskPage').then((m) => ({ default: m.AskPage })))
@@ -186,6 +188,8 @@ function App() {
           <Route path="/bible/browse" element={<Suspense fallback={<BibleBrowserSkeleton />}><BibleBrowse /></Suspense>} />
           <Route path="/bible/my" element={<Suspense fallback={<MyBibleSkeleton />}><MyBiblePage /></Suspense>} />
           <Route path="/bible/plans" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="plans" /></Suspense>} />
+          <Route path="/bible/plans/:slug" element={<Suspense fallback={<RouteLoadingFallback />}><BiblePlanDetail /></Suspense>} />
+          <Route path="/bible/plans/:slug/day/:dayNumber" element={<Suspense fallback={<RouteLoadingFallback />}><BiblePlanDay /></Suspense>} />
           <Route path="/bible/search" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="search" /></Suspense>} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />

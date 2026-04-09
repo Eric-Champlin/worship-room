@@ -26,6 +26,10 @@ vi.mock('@/services/meditation-storage', () => ({
   replaceAllMeditations: vi.fn(),
   mergeInMeditations: vi.fn(() => ({ added: 0, updated: 0, skipped: 0 })),
 }))
+vi.mock('@/lib/bible/plansStore', () => ({
+  replaceAllPlans: vi.fn(() => ({ added: 1, updated: 0, skipped: 0 })),
+  mergeInPlans: vi.fn(() => ({ added: 0, updated: 1, skipped: 0 })),
+}))
 
 import { applyReplace, applyMerge } from '../importApplier'
 import { replaceAllHighlights, mergeInHighlights } from '@/lib/bible/highlightStore'
@@ -34,6 +38,7 @@ import { replaceAllNotes, mergeInNotes } from '@/lib/bible/notes/store'
 import { replaceAllJournals, mergeInJournals } from '@/lib/bible/journalStore'
 import { replaceAllPrayers, mergeInPrayers } from '@/services/prayer-list-storage'
 import { replaceAllMeditations, mergeInMeditations } from '@/services/meditation-storage'
+import { replaceAllPlans, mergeInPlans } from '@/lib/bible/plansStore'
 
 function makeData(counts: {
   highlights?: number
@@ -144,5 +149,41 @@ describe('applyMerge', () => {
   it('returns mode "merge"', () => {
     const result = applyMerge(makeData())
     expect(result.mode).toBe('merge')
+  })
+})
+
+describe('v1/v2 plan handling', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('applyReplace handles v1 without plans (no error)', () => {
+    const data = makeData({ highlights: 1 })
+    const result = applyReplace(data)
+    expect(result.plans).toBeUndefined()
+  })
+
+  it('applyReplace handles v2 with plans', () => {
+    const data = {
+      ...makeData(),
+      plans: { activePlanSlug: 'test', plans: { test: { slug: 'test', completedDays: [1, 2] } } },
+    }
+    const result = applyReplace(data as any)
+    expect(replaceAllPlans).toHaveBeenCalled()
+    expect(result.plans).toBeDefined()
+  })
+
+  it('applyMerge handles v2 with plans', () => {
+    const data = {
+      ...makeData(),
+      plans: { activePlanSlug: null, plans: { test: { slug: 'test', completedDays: [1, 2, 3, 4, 5] } } },
+    }
+    const result = applyMerge(data as any)
+    expect(mergeInPlans).toHaveBeenCalled()
+    expect(result.plans).toBeDefined()
+  })
+
+  it('applyMerge skips plans for v1 data (no plans field)', () => {
+    const data = makeData()
+    const result = applyMerge(data)
+    expect(result.plans).toBeUndefined()
   })
 })

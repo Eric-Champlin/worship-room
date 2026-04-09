@@ -6,7 +6,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { buildExport } from '@/lib/bible/exportBuilder'
 import { validateExport } from '@/lib/bible/importValidator'
 import { applyReplace, applyMerge } from '@/lib/bible/importApplier'
-import type { BibleExportV1 } from '@/types/bible-export'
+import type { BibleExport } from '@/types/bible-export'
 
 interface BibleSettingsModalProps {
   isOpen: boolean
@@ -16,7 +16,7 @@ interface BibleSettingsModalProps {
 
 type ImportState =
   | { step: 'idle' }
-  | { step: 'preview'; export: BibleExportV1 }
+  | { step: 'preview'; export: BibleExport }
   | { step: 'error'; message: string }
   | { step: 'importing' }
 
@@ -119,7 +119,7 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
   }
 
   // --- Import: apply ---
-  function handleReplace(data: BibleExportV1['data']) {
+  function handleReplace(data: BibleExport['data']) {
     setImportState({ step: 'importing' })
     const result = applyReplace(data)
     showToast(`Imported ${result.totalItems} items`, 'success')
@@ -127,7 +127,7 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
     onImportComplete()
   }
 
-  function handleMerge(data: BibleExportV1['data']) {
+  function handleMerge(data: BibleExport['data']) {
     setImportState({ step: 'importing' })
     const result = applyMerge(data)
     showToast(`Imported ${result.totalItems} items`, 'success')
@@ -136,7 +136,7 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
   }
 
   // --- Counts for preview ---
-  function getCounts(data: BibleExportV1['data']) {
+  function getCounts(data: BibleExport['data']) {
     return [
       { label: 'highlights', count: data.highlights.length },
       { label: 'bookmarks', count: data.bookmarks.length },

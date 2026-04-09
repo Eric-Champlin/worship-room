@@ -1,8 +1,8 @@
-import type { BibleExportV1 } from '@/types/bible-export'
+import type { BibleExport } from '@/types/bible-export'
 import { CURRENT_SCHEMA_VERSION } from '@/types/bible-export'
 
 export type ValidationResult =
-  | { valid: true; export: BibleExportV1 }
+  | { valid: true; export: BibleExport }
   | { valid: false; error: string }
 
 const ERROR_INVALID =
@@ -166,5 +166,5 @@ export function validateExport(parsed: unknown): ValidationResult {
     }
   }
 
-  return { valid: true, export: parsed as unknown as BibleExportV1 }
+  return { valid: true, export: parsed as unknown as BibleExport }
 }
