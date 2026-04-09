@@ -1,4 +1,4 @@
-import { Paintbrush, Bookmark, PenLine, Brain } from 'lucide-react'
+import { Paintbrush, Bookmark, PenLine, Brain, BookOpenText } from 'lucide-react'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { formatReference } from '@/lib/dailyHub/verseContext'
 import { timeAgo, formatFullDate } from '@/lib/time'
@@ -6,6 +6,7 @@ import { HighlightCard } from './HighlightCard'
 import { BookmarkCard } from './BookmarkCard'
 import { NoteCard } from './NoteCard'
 import { MeditationCard } from './MeditationCard'
+import { JournalCard } from './JournalCard'
 import type { ActivityItem } from '@/types/my-bible'
 
 const TYPE_ICONS = {
@@ -13,6 +14,7 @@ const TYPE_ICONS = {
   bookmark: Bookmark,
   note: PenLine,
   meditation: Brain,
+  journal: BookOpenText,
 } as const
 
 interface ActivityCardProps {
@@ -73,6 +75,11 @@ export function ActivityCard({
               Meditate
             </span>
           )}
+          {item.type === 'journal' && (
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
+              Journal
+            </span>
+          )}
           <time
             className="ml-auto flex-shrink-0 text-xs text-white/50"
             title={absoluteTime}
@@ -99,6 +106,9 @@ export function ActivityCard({
         )}
         {item.data.type === 'meditation' && (
           <MeditationCard data={item.data} verseText={verseText} />
+        )}
+        {item.data.type === 'journal' && (
+          <JournalCard data={item.data} verseText={verseText} />
         )}
       </div>
     </FrostedCard>

@@ -1,7 +1,7 @@
 import type { HighlightColor } from '@/types/bible'
 import type { MeditationType } from '@/types/daily-experience'
 
-export type ActivityItemType = 'highlight' | 'bookmark' | 'note' | 'meditation'
+export type ActivityItemType = 'highlight' | 'bookmark' | 'note' | 'meditation' | 'journal'
 
 export interface HighlightData {
   type: 'highlight'
@@ -25,7 +25,13 @@ export interface MeditationData {
   reference: string
 }
 
-export type ActivityItemData = HighlightData | BookmarkData | NoteData | MeditationData
+export interface JournalData {
+  type: 'journal'
+  body: string
+  reference: string
+}
+
+export type ActivityItemData = HighlightData | BookmarkData | NoteData | MeditationData | JournalData
 
 export interface ActivityItem {
   type: ActivityItemType

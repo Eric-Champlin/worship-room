@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Highlight, Bookmark, Note } from '@/types/bible'
+import type { Highlight, Bookmark, Note, JournalEntry } from '@/types/bible'
 import type { MeditationSession } from '@/types/meditation'
 import type { ActivityItem, ActivityFilter } from '@/types/my-bible'
 
@@ -15,6 +15,10 @@ vi.mock('@/lib/bible/notes/store', () => ({
   getAllNotes: vi.fn(() => []),
 }))
 
+vi.mock('@/lib/bible/journalStore', () => ({
+  getAllJournalEntries: vi.fn(() => []),
+}))
+
 vi.mock('@/services/meditation-storage', () => ({
   getMeditationHistory: vi.fn(() => []),
 }))
@@ -22,12 +26,14 @@ vi.mock('@/services/meditation-storage', () => ({
 import { getAllHighlights } from '@/lib/bible/highlightStore'
 import { getAllBookmarks } from '@/lib/bible/bookmarkStore'
 import { getAllNotes } from '@/lib/bible/notes/store'
+import { getAllJournalEntries } from '@/lib/bible/journalStore'
 import { getMeditationHistory } from '@/services/meditation-storage'
 import { loadAllActivity, filterActivity, sortActivity } from '../activityLoader'
 
 const mockGetAllHighlights = vi.mocked(getAllHighlights)
 const mockGetAllBookmarks = vi.mocked(getAllBookmarks)
 const mockGetAllNotes = vi.mocked(getAllNotes)
+const mockGetAllJournalEntries = vi.mocked(getAllJournalEntries)
 const mockGetMeditationHistory = vi.mocked(getMeditationHistory)
 
 function makeHighlight(overrides: Partial<Highlight> = {}): Highlight {
@@ -88,6 +94,23 @@ function makeMeditationSession(overrides: Partial<MeditationSession> = {}): Medi
   }
 }
 
+function makeJournalEntry(overrides: Partial<JournalEntry> = {}): JournalEntry {
+  return {
+    id: 'journal-1',
+    body: 'My journal reflection',
+    createdAt: 5000,
+    updatedAt: 5000,
+    verseContext: {
+      book: 'john',
+      chapter: 3,
+      startVerse: 16,
+      endVerse: 18,
+      reference: 'John 3:16–18',
+    },
+    ...overrides,
+  }
+}
+
 const DEFAULT_FILTER: ActivityFilter = { type: 'all', book: 'all', color: 'all' }
 
 describe('activityLoader', () => {
@@ -96,6 +119,7 @@ describe('activityLoader', () => {
     mockGetAllHighlights.mockReturnValue([])
     mockGetAllBookmarks.mockReturnValue([])
     mockGetAllNotes.mockReturnValue([])
+    mockGetAllJournalEntries.mockReturnValue([])
     mockGetMeditationHistory.mockReturnValue([])
   })
 
@@ -156,18 +180,40 @@ describe('activityLoader', () => {
       expect(items).toHaveLength(0)
     })
 
+    it('includes journal entries with verseContext', () => {
+      mockGetAllJournalEntries.mockReturnValue([makeJournalEntry()])
+      const items = loadAllActivity()
+      expect(items).toHaveLength(1)
+      expect(items[0].type).toBe('journal')
+      expect(items[0].data).toEqual({
+        type: 'journal',
+        body: 'My journal reflection',
+        reference: 'John 3:16–18',
+      })
+    })
+
+    it('excludes journal entries without verseContext', () => {
+      mockGetAllJournalEntries.mockReturnValue([
+        makeJournalEntry({ verseContext: undefined }),
+      ])
+      const items = loadAllActivity()
+      expect(items).toHaveLength(0)
+    })
+
     it('merges all types', () => {
       mockGetAllHighlights.mockReturnValue([makeHighlight()])
       mockGetAllBookmarks.mockReturnValue([makeBookmark()])
       mockGetAllNotes.mockReturnValue([makeNote()])
+      mockGetAllJournalEntries.mockReturnValue([makeJournalEntry()])
       mockGetMeditationHistory.mockReturnValue([makeMeditationSession()])
       const items = loadAllActivity()
-      expect(items).toHaveLength(4)
+      expect(items).toHaveLength(5)
       const types = items.map((i) => i.type)
       expect(types).toContain('highlight')
       expect(types).toContain('bookmark')
       expect(types).toContain('note')
       expect(types).toContain('meditation')
+      expect(types).toContain('journal')
     })
   })
 
@@ -180,13 +226,14 @@ describe('activityLoader', () => {
       ])
       mockGetAllBookmarks.mockReturnValue([makeBookmark({ id: 'bm-1' })])
       mockGetAllNotes.mockReturnValue([makeNote({ id: 'note-1', book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1 })])
+      mockGetAllJournalEntries.mockReturnValue([makeJournalEntry({ id: 'journal-1' })])
       mockGetMeditationHistory.mockReturnValue([makeMeditationSession({ id: 'med-1' })])
       return loadAllActivity()
     }
 
     it('returns all items with default filter', () => {
       const items = makeItems()
-      expect(filterActivity(items, DEFAULT_FILTER)).toHaveLength(6)
+      expect(filterActivity(items, DEFAULT_FILTER)).toHaveLength(7)
     })
 
     it('filters by type=highlights', () => {
@@ -210,11 +257,11 @@ describe('activityLoader', () => {
       expect(filtered).toHaveLength(1)
     })
 
-    it('filters by type=daily-hub', () => {
+    it('filters by type=daily-hub matches both meditation and journal', () => {
       const items = makeItems()
       const filtered = filterActivity(items, { ...DEFAULT_FILTER, type: 'daily-hub' })
-      expect(filtered.every((i) => i.type === 'meditation')).toBe(true)
-      expect(filtered).toHaveLength(1)
+      expect(filtered.every((i) => i.type === 'meditation' || i.type === 'journal')).toBe(true)
+      expect(filtered).toHaveLength(2)
     })
 
     it('filters by book', () => {

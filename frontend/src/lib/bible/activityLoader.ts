@@ -2,6 +2,7 @@ import { BIBLE_BOOKS } from '@/constants/bible'
 import { getAllHighlights } from '@/lib/bible/highlightStore'
 import { getAllBookmarks } from '@/lib/bible/bookmarkStore'
 import { getAllNotes } from '@/lib/bible/notes/store'
+import { getAllJournalEntries } from '@/lib/bible/journalStore'
 import { getMeditationHistory } from '@/services/meditation-storage'
 import type { ActivityItem, ActivityFilter, ActivitySort } from '@/types/my-bible'
 
@@ -79,6 +80,27 @@ export function loadAllActivity(): ActivityItem[] {
     })
   }
 
+  for (const entry of getAllJournalEntries()) {
+    if (!entry.verseContext) continue
+    const vc = entry.verseContext
+    items.push({
+      type: 'journal',
+      id: entry.id,
+      createdAt: entry.createdAt,
+      updatedAt: entry.updatedAt,
+      book: vc.book,
+      bookName: resolveBookName(vc.book),
+      chapter: vc.chapter,
+      startVerse: vc.startVerse,
+      endVerse: vc.endVerse,
+      data: {
+        type: 'journal',
+        body: entry.body,
+        reference: vc.reference,
+      },
+    })
+  }
+
   return items
 }
 
@@ -95,7 +117,7 @@ export function filterActivity(items: ActivityItem[], filter: ActivityFilter): A
         case 'bookmarks':
           return item.type === 'bookmark'
         case 'daily-hub':
-          return item.type === 'meditation'
+          return item.type === 'meditation' || item.type === 'journal'
       }
     })
   }

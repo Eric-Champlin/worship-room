@@ -98,6 +98,20 @@ export interface Note {
   updatedAt: number     // epoch ms
 }
 
+export interface JournalEntry {
+  id: string              // UUID
+  body: string            // plain text
+  createdAt: number       // epoch ms
+  updatedAt: number       // epoch ms, equals createdAt unless edited
+  verseContext?: {
+    book: string          // slug
+    chapter: number
+    startVerse: number
+    endVerse: number
+    reference: string     // pre-formatted
+  }
+}
+
 /** Raw cross-reference entry from JSON data */
 export interface CrossRefEntry {
   ref: string     // "bookSlug.chapter.verse" e.g. "romans.5.8"

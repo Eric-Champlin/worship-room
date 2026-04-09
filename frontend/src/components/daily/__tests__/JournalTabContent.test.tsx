@@ -41,6 +41,21 @@ vi.mock('@/hooks/useScenePlayer', () => ({
   }),
 }))
 
+// Mock journalStore to prevent module-level cache from leaking between tests
+const mockCreateJournalEntry = vi.fn((body: string) => ({
+  id: `entry-${Date.now()}`,
+  body,
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
+}))
+vi.mock('@/lib/bible/journalStore', () => ({
+  getAllJournalEntries: vi.fn(() => []),
+  createJournalEntry: (...args: unknown[]) => mockCreateJournalEntry(args[0] as string),
+  JournalStorageFullError: class extends Error {
+    constructor() { super('Storage full') }
+  },
+}))
+
 // Mock useFaithPoints to spy on recordActivity
 const mockRecordActivity = vi.fn()
 vi.mock('@/hooks/useFaithPoints', () => ({

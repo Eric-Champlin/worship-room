@@ -190,3 +190,60 @@ describe('MeditationCard', () => {
     expect(screen.getByText(/You meditated on this verse/)).toBeInTheDocument()
   })
 })
+
+describe('JournalCard', () => {
+  it('renders body text', () => {
+    renderCard(makeItem({
+      type: 'journal',
+      data: { type: 'journal', body: 'My reflection on God\'s love', reference: 'John 3:16' },
+    }))
+    expect(screen.getByText(/My reflection on God's love/)).toBeInTheDocument()
+  })
+
+  it('renders verse text when available', () => {
+    renderCard(makeItem({
+      type: 'journal',
+      data: { type: 'journal', body: 'Short reflection', reference: 'John 3:16' },
+    }), 'For God so loved the world')
+    expect(screen.getByText('For God so loved the world')).toBeInTheDocument()
+  })
+
+  it('shows loading skeleton when verseText is null', () => {
+    const { container } = renderCard(makeItem({
+      type: 'journal',
+      data: { type: 'journal', body: 'Short reflection', reference: 'John 3:16' },
+    }), null)
+    expect(container.querySelector('.animate-pulse')).toBeInTheDocument()
+  })
+
+  it('shows expand/collapse for long entries', async () => {
+    const user = userEvent.setup()
+    const longBody = 'A'.repeat(400)
+    const { container } = renderCard(makeItem({
+      type: 'journal',
+      data: { type: 'journal', body: longBody, reference: 'John 3:16' },
+    }))
+    expect(container.querySelector('.line-clamp-3')).toBeInTheDocument()
+    expect(screen.getByText('Show more')).toBeInTheDocument()
+
+    await user.click(screen.getByText('Show more'))
+    expect(container.querySelector('.line-clamp-3')).not.toBeInTheDocument()
+    expect(screen.getByText('Show less')).toBeInTheDocument()
+  })
+
+  it('shows Journal badge', () => {
+    renderCard(makeItem({
+      type: 'journal',
+      data: { type: 'journal', body: 'My reflection', reference: 'John 3:16' },
+    }))
+    expect(screen.getByText('Journal')).toBeInTheDocument()
+  })
+
+  it('shows journal context text', () => {
+    renderCard(makeItem({
+      type: 'journal',
+      data: { type: 'journal', body: 'My reflection', reference: 'John 3:16' },
+    }))
+    expect(screen.getByText('You journaled about this verse')).toBeInTheDocument()
+  })
+})

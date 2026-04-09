@@ -21,6 +21,7 @@ import { JournalInput } from '@/components/daily/JournalInput'
 import { SavedEntriesList } from '@/components/daily/SavedEntriesList'
 import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
 import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
+import { getAllJournalEntries, createJournalEntry, JournalStorageFullError } from '@/lib/bible/journalStore'
 import type { JournalMode, SavedJournalEntry, PrayContext, JournalVerseContext } from '@/types/daily-experience'
 
 const JOURNAL_MILESTONES: Record<number, string> = {
@@ -71,8 +72,22 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
     Math.floor(Math.random() * allPrompts.length),
   )
 
-  // Saved entries
-  const [savedEntries, setSavedEntries] = useState<SavedJournalEntry[]>([])
+  // Saved entries — load from persistent store on mount
+  const [savedEntries, setSavedEntries] = useState<SavedJournalEntry[]>(() => {
+    try {
+      return getAllJournalEntries()
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .map((e) => ({
+          id: e.id,
+          content: e.body,
+          timestamp: new Date(e.createdAt).toISOString(),
+          mode: 'free' as JournalMode,
+          ...(e.verseContext && { verseContext: e.verseContext }),
+        }))
+    } catch {
+      return []
+    }
+  })
 
   // Parent textarea ref for scroll-to-focus
   const parentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -186,10 +201,24 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   )
 
   const handleEntrySave = (entry: { content: string; mode: JournalMode; promptText?: string }) => {
+    // Persist to journal store
+    let storeEntry: { id: string; createdAt: number }
+    try {
+      storeEntry = createJournalEntry(
+        entry.content,
+        journalVerseContext ?? undefined,
+      )
+    } catch (e) {
+      if (e instanceof JournalStorageFullError) {
+        showToast('Storage full — clear some journal entries to free space.')
+      }
+      storeEntry = { id: `entry-${Date.now()}`, createdAt: Date.now() }
+    }
+
     const savedEntry: SavedJournalEntry = {
-      id: `entry-${Date.now()}`,
+      id: storeEntry.id,
       content: entry.content,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(storeEntry.createdAt).toISOString(),
       mode: entry.mode,
       promptText: entry.promptText,
       ...(journalVerseContext && { verseContext: journalVerseContext }),
