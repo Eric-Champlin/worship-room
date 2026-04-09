@@ -77,7 +77,7 @@ export function NoteCard({ data, verseText, createdAt, updatedAt }: NoteCardProp
           <NoteBody body={data.body} />
         </p>
       </div>
-      {data.body.length > 400 && (
+      {data.body.length > 150 && (
         <button
           type="button"
           onClick={toggleExpand}

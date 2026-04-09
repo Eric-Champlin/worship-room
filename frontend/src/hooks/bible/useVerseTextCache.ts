@@ -43,17 +43,21 @@ export function useVerseTextCache() {
       const [book, chapterStr] = key.split(':')
       const chapter = parseInt(chapterStr, 10)
 
-      loadChapterWeb(book, chapter).then((chapterData) => {
-        loading.current.delete(key)
-        if (!chapterData) return
+      loadChapterWeb(book, chapter)
+        .then((chapterData) => {
+          loading.current.delete(key)
+          if (!chapterData) return
 
-        const verseMap: VerseMap = new Map()
-        for (const verse of chapterData.verses) {
-          verseMap.set(verse.number, verse.text)
-        }
-        cache.current.set(key, verseMap)
-        setVersion((v) => v + 1)
-      })
+          const verseMap: VerseMap = new Map()
+          for (const verse of chapterData.verses) {
+            verseMap.set(verse.number, verse.text)
+          }
+          cache.current.set(key, verseMap)
+          setVersion((v) => v + 1)
+        })
+        .catch(() => {
+          loading.current.delete(key)
+        })
     }
   }, [])
 

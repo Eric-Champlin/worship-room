@@ -30,7 +30,7 @@ export function SectionHeading({
             {topLine}
           </span>
           <span
-            className="block text-3xl sm:text-4xl lg:text-6xl font-bold leading-tight mt-1 pb-2 max-w-full break-words"
+            className="block text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mt-1 pb-2"
             style={GRADIENT_TEXT_STYLE}
           >
             {bottomLine}

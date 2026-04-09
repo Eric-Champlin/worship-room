@@ -111,7 +111,7 @@ function MyBiblePageInner() {
         {/* Hero section */}
         <section className="relative z-10 w-full px-4 pb-8 pt-24 sm:pt-28" style={ATMOSPHERIC_HERO_BG}>
           <div className="mx-auto max-w-2xl text-center">
-            <SectionHeading topLine="My Bible" bottomLine="everything you've marked" />
+            <SectionHeading topLine="My Bible" bottomLine="everything you've marked" className="[&_span:last-child]:max-w-full [&_span:last-child]:break-words [&_span:last-child]:!text-3xl [&_span:last-child]:sm:!text-4xl" />
             <p className="mt-3 text-base text-white/60 sm:text-lg">{subhead}</p>
           </div>
         </section>

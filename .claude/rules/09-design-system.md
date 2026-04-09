@@ -425,7 +425,7 @@ These patterns were established during the GitHub-inspired homepage redesign (HP
 Use `SectionHeading` component from `src/components/homepage/SectionHeading.tsx`:
  
 - **Top line:** `text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight`
-- **Bottom line:** `text-3xl sm:text-4xl lg:text-6xl font-bold leading-tight max-w-full break-words` with `WHITE_PURPLE_GRADIENT` via `background-clip: text` and `text-transparent`
+- **Bottom line:** `text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight` with `WHITE_PURPLE_GRADIENT` via `background-clip: text` and `text-transparent`
 - Size ratio: bottom line is ~1.5x larger than top line
 - `mt-1` between lines (tight coupling)
 - Props: `topLine`, `bottomLine`, `tagline?`, `align?`

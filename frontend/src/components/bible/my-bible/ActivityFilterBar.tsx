@@ -82,7 +82,7 @@ export function ActivityFilterBar({
               type="button"
               onClick={() => handleTypeChange(option.key)}
               className={cn(
-                'flex-shrink-0 rounded-full px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+                'flex-shrink-0 rounded-full px-3 py-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                 filter.type === option.key
                   ? 'bg-primary font-medium text-white shadow-[0_0_12px_rgba(109,40,217,0.3)]'
                   : 'text-white/60 hover:bg-white/[0.06] hover:text-white/80',
