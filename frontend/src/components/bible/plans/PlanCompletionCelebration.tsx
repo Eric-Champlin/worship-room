@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
@@ -115,6 +116,13 @@ export function PlanCompletionCelebration({
           >
             Continue
           </button>
+
+          <Link
+            to="/bible/plans"
+            className="inline-flex min-h-[44px] items-center justify-center text-sm text-white/60 transition-colors hover:text-white"
+          >
+            Start another plan
+          </Link>
 
           <button
             onClick={handleShare}

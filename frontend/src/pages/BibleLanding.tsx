@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
@@ -132,6 +133,14 @@ function BibleLandingInner() {
 
           {/* Today's Plan — standalone below hero slot */}
           <TodaysPlanCard plans={plans} />
+          <div className="flex justify-center">
+            <Link
+              to="/bible/plans"
+              className="inline-flex min-h-[44px] items-center text-sm font-medium text-white/60 transition-colors hover:text-white"
+            >
+              Browse all plans →
+            </Link>
+          </div>
 
           {/* Section divider → Quick Actions */}
           <div className="border-t border-white/[0.08]" />

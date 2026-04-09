@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -41,19 +42,19 @@ beforeEach(() => {
 
 describe('PlanCompletionCelebration', () => {
   it('renders plan title and description', () => {
-    render(<PlanCompletionCelebration {...DEFAULT_PROPS} />)
+    render(<MemoryRouter><PlanCompletionCelebration {...DEFAULT_PROPS} /></MemoryRouter>)
     expect(screen.getByText('You finished Psalms of Comfort')).toBeInTheDocument()
     expect(screen.getByText('Find comfort in the Psalms')).toBeInTheDocument()
   })
 
   it('renders stats', () => {
-    render(<PlanCompletionCelebration {...DEFAULT_PROPS} />)
+    render(<MemoryRouter><PlanCompletionCelebration {...DEFAULT_PROPS} /></MemoryRouter>)
     expect(screen.getByText(/21 days completed/)).toBeInTheDocument()
     expect(screen.getByText(/42 passages read/)).toBeInTheDocument()
   })
 
   it('textarea captures reflection text', () => {
-    render(<PlanCompletionCelebration {...DEFAULT_PROPS} />)
+    render(<MemoryRouter><PlanCompletionCelebration {...DEFAULT_PROPS} /></MemoryRouter>)
     const textarea = screen.getByPlaceholderText('Optional — share your thoughts...')
     fireEvent.change(textarea, { target: { value: 'Very meaningful' } })
     expect(textarea).toHaveValue('Very meaningful')
@@ -61,7 +62,7 @@ describe('PlanCompletionCelebration', () => {
 
   it('continue button fires onClose', () => {
     const onClose = vi.fn()
-    render(<PlanCompletionCelebration {...DEFAULT_PROPS} onClose={onClose} />)
+    render(<MemoryRouter><PlanCompletionCelebration {...DEFAULT_PROPS} onClose={onClose} /></MemoryRouter>)
 
     fireEvent.click(screen.getByText('Continue'))
     expect(onClose).toHaveBeenCalled()
@@ -69,7 +70,7 @@ describe('PlanCompletionCelebration', () => {
 
   it('share button triggers canvas render', async () => {
     const { renderPlanCompletionCard } = await import('@/lib/bible/planShareCanvas')
-    render(<PlanCompletionCelebration {...DEFAULT_PROPS} />)
+    render(<MemoryRouter><PlanCompletionCelebration {...DEFAULT_PROPS} /></MemoryRouter>)
 
     fireEvent.click(screen.getByText('Share your completion'))
     expect(renderPlanCompletionCard).toHaveBeenCalled()
@@ -77,14 +78,14 @@ describe('PlanCompletionCelebration', () => {
 
   it('focus trapped inside overlay (useFocusTrap called)', async () => {
     const { useFocusTrap } = await import('@/hooks/useFocusTrap')
-    render(<PlanCompletionCelebration {...DEFAULT_PROPS} />)
+    render(<MemoryRouter><PlanCompletionCelebration {...DEFAULT_PROPS} /></MemoryRouter>)
     expect(useFocusTrap).toHaveBeenCalledWith(true, expect.any(Function))
   })
 
   it('escape closes overlay (onClose passed to useFocusTrap)', async () => {
     const { useFocusTrap } = await import('@/hooks/useFocusTrap')
     const onClose = vi.fn()
-    render(<PlanCompletionCelebration {...DEFAULT_PROPS} onClose={onClose} />)
+    render(<MemoryRouter><PlanCompletionCelebration {...DEFAULT_PROPS} onClose={onClose} /></MemoryRouter>)
 
     // useFocusTrap receives onClose as the escape handler
     expect(useFocusTrap).toHaveBeenCalledWith(true, onClose)

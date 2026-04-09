@@ -100,10 +100,10 @@ export function BiblePlanDetail() {
 
         <div className="relative z-10 mx-auto max-w-3xl px-4">
           <Link
-            to="/bible"
+            to="/bible/plans"
             className="inline-flex min-h-[44px] items-center text-sm text-white/60 hover:text-white"
           >
-            ← Bible
+            ← All plans
           </Link>
 
           {isCompleted && (
