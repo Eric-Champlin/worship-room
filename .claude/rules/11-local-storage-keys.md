@@ -105,6 +105,10 @@ Most keys use the `wr_` prefix. Bible redesign keys use the `bible:` prefix inst
 | `wr_bible_focus_delay` | `'3000' \| '6000' \| '12000'` | Focus mode idle delay in ms (default: 6000) |
 | `wr_bible_focus_dim_orbs` | `'true' \| 'false'` | Dim orbs during focus (default: true, forward-compatible) |
 | `wr_bible_drawer_stack` | `{ stack: DrawerView[], timestamp: number }` | Drawer view stack persistence (24-hour TTL) |
+| `wr_bible_reader_ambient_visible` | `'true' \| 'false'` | Show audio control in reader chrome (default: true) |
+| `wr_bible_reader_ambient_autostart` | `'true' \| 'false'` | Auto-start sound on chapter open (default: false) |
+| `wr_bible_reader_ambient_autostart_sound` | `string \| null` | Sound ID for auto-start (default: null = last played) |
+| `wr_bible_reader_ambient_volume` | `string (number)` | Last-used reader volume 0-100 (default: 35) |
 
 ### Community Challenges
 

@@ -307,6 +307,10 @@ export default {
           '60%': { opacity: '1', filter: 'brightness(1.3)' },
           '100%': { opacity: '1', filter: 'brightness(1)' },
         },
+        'audio-pulse': {
+          '0%, 100%': { opacity: '0' },
+          '50%': { opacity: '1' },
+        },
       },
       animation: {
         'cursor-blink': 'cursor-blink 1s step-end infinite',
@@ -375,6 +379,7 @@ export default {
         shimmer: 'shimmer 1.5s ease-in-out infinite',
         'glow-float': 'glow-float 20s ease-in-out infinite',
         'highlight-pulse': 'highlight-pulse 400ms ease-out forwards',
+        'audio-pulse': 'audio-pulse 2s ease-in-out infinite',
       },
     },
   },

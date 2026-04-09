@@ -19,6 +19,9 @@ import { useChapterSwipe } from '@/hooks/useChapterSwipe'
 import { useFocusMode } from '@/hooks/useFocusMode'
 import { useVerseTap } from '@/hooks/useVerseTap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useAudioState, useReadingContext } from '@/components/audio/AudioProvider'
+import { AmbientAudioPicker } from '@/components/bible/reader/AmbientAudioPicker'
+import { useReaderAudioAutoStart } from '@/hooks/useReaderAudioAutoStart'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { recordReadToday } from '@/lib/bible/streakStore'
 import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
@@ -47,9 +50,16 @@ function BibleReaderInner() {
   const { settings, updateSetting, resetToDefaults } = useReaderSettings()
   const bibleDrawer = useBibleDrawer()
   const [typographyOpen, setTypographyOpen] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const aaRef = useRef<HTMLButtonElement>(null)
+  const audioButtonRef = useRef<HTMLButtonElement>(null)
   const reducedMotion = useReducedMotion()
   const focusMode = useFocusMode()
+
+  // BB-20 ambient audio
+  const audioState = useAudioState()
+  const readingContextControl = useReadingContext()
+  const isAudioPlaying = audioState.isPlaying && audioState.activeSounds.length > 0
 
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -337,6 +347,58 @@ function BibleReaderInner() {
     }
   }, [isSheetOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Pause focus mode when audio picker is open (BB-20)
+  useEffect(() => {
+    if (pickerOpen) {
+      focusMode.pauseFocusMode()
+      return () => focusMode.resumeFocusMode()
+    }
+  }, [pickerOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Mutual exclusion: verse sheet closes picker (BB-20)
+  useEffect(() => {
+    if (isSheetOpen && pickerOpen) {
+      setPickerOpen(false)
+    }
+  }, [isSheetOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // BB-20 audio toggle handler with mutual exclusion
+  const handleAudioToggle = useCallback(() => {
+    if (isSheetOpen) closeSheet()
+    if (typographyOpen) setTypographyOpen(false)
+    setPickerOpen((prev) => !prev)
+  }, [isSheetOpen, closeSheet, typographyOpen])
+
+  // BB-20 typography toggle with picker mutual exclusion
+  const handleTypographyToggle = useCallback(() => {
+    if (pickerOpen) setPickerOpen(false)
+    setTypographyOpen((prev) => !prev)
+  }, [pickerOpen])
+
+  // BB-20 reading context: set when audio is playing in reader
+  useEffect(() => {
+    if (book && !isNaN(chapterNumber) && isAudioPlaying) {
+      readingContextControl.setReadingContext({ book: book.name, chapter: chapterNumber })
+    }
+  }, [book?.name, chapterNumber, isAudioPlaying]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // BB-20 reading context: clear on unmount
+  useEffect(() => {
+    return () => {
+      readingContextControl.clearReadingContext()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // BB-20 auto-start ambient audio
+  useReaderAudioAutoStart({
+    enabled: settings.ambientAudioAutoStart,
+    preferredSoundId: settings.ambientAudioAutoStartSound,
+    volume: settings.ambientAudioVolume,
+    bookName: book?.name ?? '',
+    chapter: chapterNumber,
+    isReady: !isLoading && verses.length > 0,
+  })
+
   // Read tracking — writes for all users (no auth check)
   useEffect(() => {
     if (!bookSlug || !book || isLoading || loadError || verses.length === 0) return
@@ -485,7 +547,7 @@ function BibleReaderInner() {
         bookName={book.name}
         bookSlug={bookSlug!}
         chapter={chapterNumber}
-        onTypographyToggle={() => setTypographyOpen((p) => !p)}
+        onTypographyToggle={handleTypographyToggle}
         isTypographyOpen={typographyOpen}
         aaRef={aaRef}
         chromeOpacity={focusMode.chromeOpacity}
@@ -493,6 +555,12 @@ function BibleReaderInner() {
         chromeTransitionMs={focusMode.chromeTransitionMs}
         isManuallyArmed={focusMode.isManuallyArmed}
         onFocusToggle={focusMode.triggerFocused}
+        ambientAudioVisible={settings.ambientAudioVisible}
+        isAudioPlaying={isAudioPlaying}
+        onAudioToggle={handleAudioToggle}
+        audioButtonRef={audioButtonRef}
+        isAudioPickerOpen={pickerOpen}
+        reducedMotion={reducedMotion}
       />
 
       <TypographySheet
@@ -504,6 +572,15 @@ function BibleReaderInner() {
         anchorRef={aaRef}
         focusSettings={focusMode.settings}
         onFocusSettingUpdate={focusMode.updateFocusSetting}
+      />
+
+      <AmbientAudioPicker
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        anchorRef={audioButtonRef}
+        bookName={book.name}
+        chapter={chapterNumber}
+        onVolumeChange={(v) => updateSetting('ambientAudioVolume', v)}
       />
 
       <div style={swipeStyle}>

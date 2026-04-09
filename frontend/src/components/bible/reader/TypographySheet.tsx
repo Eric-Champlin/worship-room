@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { cn } from '@/lib/utils'
+import { SOUND_BY_ID } from '@/data/sound-catalog'
 import type { ReaderSettings } from '@/hooks/useReaderSettings'
 import type { FocusModeSettings } from '@/hooks/useFocusMode'
 
@@ -128,7 +129,7 @@ export function TypographySheet({
           // Mobile/Tablet: bottom sheet
           'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl border-t animate-bottom-sheet-slide-in',
           // Desktop: floating panel
-          'lg:inset-x-auto lg:bottom-auto lg:top-16 lg:right-20 lg:max-h-none lg:w-[320px] lg:rounded-2xl lg:border lg:animate-none',
+          'lg:inset-x-auto lg:bottom-auto lg:top-16 lg:right-20 lg:max-h-[calc(100vh-5rem)] lg:w-[320px] lg:rounded-2xl lg:border lg:animate-none',
         )}
         style={PANEL_STYLE}
       >
@@ -282,6 +283,52 @@ export function TypographySheet({
               The chrome fades when you're still. Move or tap to bring it back.
             </p>
           </section>
+
+          {/* Divider */}
+          <div className="border-t border-white/10" />
+
+          {/* Background Sound Section (BB-20) */}
+          <section>
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+              Background sound
+            </h3>
+
+            {/* Show audio control toggle */}
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-white/70">Show audio control</span>
+              <ToggleSwitch
+                checked={settings.ambientAudioVisible}
+                onChange={(v) => onUpdate('ambientAudioVisible', v)}
+                label="Show audio control in reader"
+              />
+            </div>
+
+            {/* Auto-start toggle */}
+            <div
+              className={cn(
+                'flex items-center justify-between py-2',
+                !settings.ambientAudioVisible && 'pointer-events-none opacity-40',
+              )}
+            >
+              <span className="text-sm text-white/70">Auto-start on chapter open</span>
+              <ToggleSwitch
+                checked={settings.ambientAudioAutoStart}
+                onChange={(v) => onUpdate('ambientAudioAutoStart', v)}
+                label="Auto-start sound when opening a chapter"
+              />
+            </div>
+
+            {/* Default sound picker (visible only when auto-start is on) */}
+            {settings.ambientAudioAutoStart && (
+              <div className="py-2">
+                <span className="mb-2 block text-sm text-white/60">Default sound</span>
+                <SoundPicker
+                  value={settings.ambientAudioAutoStartSound}
+                  onChange={(id) => onUpdate('ambientAudioAutoStartSound', id)}
+                />
+              </div>
+            )}
+          </section>
         </div>
       </div>
     </>
@@ -315,6 +362,44 @@ function SegmentedControl<T extends string>({
               : 'text-white/50 hover:text-white/70',
           )}
           aria-pressed={value === opt.value}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// --- Sound Picker sub-component (BB-20) ---
+
+const SOUND_PICKER_OPTIONS: Array<{ id: string | null; label: string }> = [
+  { id: null, label: 'Last played sound' },
+  ...['gentle-rain', 'ocean-waves', 'fireplace', 'soft-piano'].map((id) => ({
+    id,
+    label: SOUND_BY_ID.get(id)?.name ?? id,
+  })),
+]
+
+function SoundPicker({
+  value,
+  onChange,
+}: {
+  value: string | null
+  onChange: (id: string | null) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {SOUND_PICKER_OPTIONS.map((opt) => (
+        <button
+          key={opt.id ?? 'last-played'}
+          type="button"
+          onClick={() => onChange(opt.id)}
+          className={cn(
+            'rounded-lg px-3 py-1.5 text-xs transition-colors',
+            value === opt.id
+              ? 'bg-primary text-white'
+              : 'bg-white/[0.06] text-white/60 hover:bg-white/[0.10] hover:text-white',
+          )}
         >
           {opt.label}
         </button>

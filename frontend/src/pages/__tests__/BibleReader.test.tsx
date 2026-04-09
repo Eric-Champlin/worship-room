@@ -48,11 +48,45 @@ vi.mock('@/lib/bible/streakStore', () => ({
   subscribe: () => () => {},
 }))
 
+// --- BB-20 mocks ---
+vi.mock('@/hooks/useReaderAudioAutoStart', () => ({
+  useReaderAudioAutoStart: vi.fn(),
+}))
+
+vi.mock('@/components/bible/reader/AmbientAudioPicker', () => ({
+  AmbientAudioPicker: () => null,
+}))
+
 // Minimal mocks for components that use audio/toast/auth providers
+const mockSetReadingContext = vi.fn()
+const mockClearReadingContext = vi.fn()
+
+const DEFAULT_MOCK_AUDIO_STATE = {
+  drawerOpen: false,
+  activeSounds: [] as Array<{ soundId: string; volume: number; label: string }>,
+  isPlaying: false,
+  pillVisible: false,
+  masterVolume: 0.8,
+  foregroundContent: null,
+  foregroundBackgroundBalance: 0.8,
+  sleepTimer: null,
+  activeRoutine: null,
+  currentSceneName: null,
+  currentSceneId: null,
+  foregroundEndedCounter: 0,
+  readingContext: null,
+}
+
+let mockAudioState = { ...DEFAULT_MOCK_AUDIO_STATE }
+
 vi.mock('@/components/audio/AudioProvider', () => ({
-  useAudioState: () => ({ drawerOpen: false }),
+  useAudioState: () => mockAudioState,
   useAudioDispatch: () => vi.fn(),
   useAudioEngine: () => null,
+  useReadingContext: () => ({
+    setReadingContext: mockSetReadingContext,
+    clearReadingContext: mockClearReadingContext,
+  }),
   useSleepTimerControls: () => ({
     remainingMs: 0,
     totalDurationMs: 0,
@@ -79,6 +113,7 @@ function renderReader(route: string) {
 describe('BibleReader (BB-4 Immersive Reader)', () => {
   beforeEach(() => {
     localStorage.clear()
+    mockAudioState = { ...DEFAULT_MOCK_AUDIO_STATE }
     vi.clearAllMocks()
   })
 
@@ -290,5 +325,42 @@ describe('BibleReader (BB-4 Immersive Reader)', () => {
     })
 
     expect(mockRecordReadToday).not.toHaveBeenCalled()
+  })
+
+  // --- BB-20: Ambient audio integration ---
+
+  it('sets reading context when audio is playing in reader', async () => {
+    mockAudioState = {
+      ...DEFAULT_MOCK_AUDIO_STATE,
+      activeSounds: [{ soundId: 'gentle-rain', volume: 0.6, label: 'Gentle Rain' }],
+      isPlaying: true,
+    }
+
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      expect(mockSetReadingContext).toHaveBeenCalledWith({ book: 'John', chapter: 3 })
+    })
+  })
+
+  it('does not set reading context when no audio playing', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      expect(document.querySelectorAll('span[data-verse]').length).toBeGreaterThan(0)
+    })
+
+    expect(mockSetReadingContext).not.toHaveBeenCalled()
+  })
+
+  it('clears reading context on unmount', async () => {
+    const { unmount } = renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      expect(document.querySelectorAll('span[data-verse]').length).toBeGreaterThan(0)
+    })
+
+    unmount()
+    expect(mockClearReadingContext).toHaveBeenCalled()
   })
 })

@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BookOpen, Minimize2, Type } from 'lucide-react'
+import { ArrowLeft, BookOpen, Minimize2, Type, Volume2 } from 'lucide-react'
 import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { cn } from '@/lib/utils'
 
@@ -20,6 +20,13 @@ interface ReaderChromeProps {
   chromeTransitionMs: number
   isManuallyArmed: boolean
   onFocusToggle: () => void
+  // BB-20 ambient audio
+  ambientAudioVisible: boolean
+  isAudioPlaying: boolean
+  onAudioToggle: () => void
+  audioButtonRef: React.RefObject<HTMLButtonElement | null>
+  isAudioPickerOpen: boolean
+  reducedMotion: boolean
 }
 
 export function ReaderChrome({
@@ -34,6 +41,12 @@ export function ReaderChrome({
   chromeTransitionMs,
   isManuallyArmed,
   onFocusToggle,
+  ambientAudioVisible,
+  isAudioPlaying,
+  onAudioToggle,
+  audioButtonRef,
+  isAudioPickerOpen,
+  reducedMotion,
 }: ReaderChromeProps) {
   const bibleDrawer = useBibleDrawer()
   const centerRef = useRef<HTMLButtonElement>(null)
@@ -92,6 +105,38 @@ export function ReaderChrome({
             >
               <Type className="h-5 w-5" />
             </button>
+            {ambientAudioVisible && (
+              <button
+                ref={audioButtonRef as React.RefObject<HTMLButtonElement>}
+                type="button"
+                className={cn(ICON_BTN, 'relative')}
+                aria-label={
+                  isAudioPlaying
+                    ? 'Ambient audio playing — tap to open sound controls'
+                    : 'Open ambient sounds'
+                }
+                aria-expanded={isAudioPickerOpen}
+                onClick={onAudioToggle}
+              >
+                <Volume2
+                  className={cn(
+                    'h-5 w-5',
+                    isAudioPlaying
+                      ? reducedMotion
+                        ? 'text-primary-lt'
+                        : 'text-white'
+                      : 'opacity-50',
+                  )}
+                />
+                {isAudioPlaying && !reducedMotion && (
+                  <span
+                    className="pointer-events-none absolute inset-0 rounded-full animate-audio-pulse"
+                    style={{ boxShadow: '0 0 0 2px rgba(139, 92, 246, 0.4)' }}
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            )}
             <button
               type="button"
               className={cn(ICON_BTN, 'relative')}

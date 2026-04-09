@@ -10,6 +10,10 @@ const DEFAULT_SETTINGS: ReaderSettings = {
   typeSize: 'm',
   lineHeight: 'normal',
   fontFamily: 'serif',
+  ambientAudioVisible: true,
+  ambientAudioAutoStart: false,
+  ambientAudioAutoStartSound: null,
+  ambientAudioVolume: 35,
 }
 
 const DEFAULT_FOCUS_SETTINGS: FocusModeSettings = {
@@ -159,5 +163,72 @@ describe('TypographySheet', () => {
     const toggle = screen.getByLabelText('Focus mode enabled')
     expect(toggle.getAttribute('role')).toBe('switch')
     expect(toggle.getAttribute('aria-checked')).toBe('true')
+  })
+
+  // --- Background sound section (BB-20) ---
+
+  it('renders "Background sound" section heading', () => {
+    renderSheet()
+    expect(screen.getByText('Background sound')).toBeInTheDocument()
+  })
+
+  it('"Show audio control" toggle reflects setting', () => {
+    renderSheet({ settings: { ...DEFAULT_SETTINGS, ambientAudioVisible: true } })
+    const toggle = screen.getByLabelText('Show audio control in reader')
+    expect(toggle.getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('toggling "Show audio control" calls onUpdate', async () => {
+    const user = userEvent.setup()
+    const { onUpdate } = renderSheet()
+    await user.click(screen.getByLabelText('Show audio control in reader'))
+    expect(onUpdate).toHaveBeenCalledWith('ambientAudioVisible', false)
+  })
+
+  it('"Auto-start" toggle disabled when visibility off', () => {
+    renderSheet({ settings: { ...DEFAULT_SETTINGS, ambientAudioVisible: false } })
+    const container = screen.getByLabelText('Auto-start sound when opening a chapter').closest('div')
+    expect(container?.className).toContain('pointer-events-none')
+    expect(container?.className).toContain('opacity-40')
+  })
+
+  it('"Auto-start" toggle enabled when visibility on', () => {
+    renderSheet({ settings: { ...DEFAULT_SETTINGS, ambientAudioVisible: true } })
+    const container = screen.getByLabelText('Auto-start sound when opening a chapter').closest('div')
+    expect(container?.className).not.toContain('pointer-events-none')
+  })
+
+  it('sound picker visible only when auto-start on', () => {
+    renderSheet({ settings: { ...DEFAULT_SETTINGS, ambientAudioAutoStart: false } })
+    expect(screen.queryByText('Last played sound')).not.toBeInTheDocument()
+
+    renderSheet({ settings: { ...DEFAULT_SETTINGS, ambientAudioAutoStart: true } })
+    expect(screen.getByText('Last played sound')).toBeInTheDocument()
+  })
+
+  it('sound picker shows "Last played" + 4 curated sounds', () => {
+    renderSheet({ settings: { ...DEFAULT_SETTINGS, ambientAudioAutoStart: true } })
+    expect(screen.getByText('Last played sound')).toBeInTheDocument()
+    expect(screen.getByText('Gentle Rain')).toBeInTheDocument()
+    expect(screen.getByText('Ocean Waves')).toBeInTheDocument()
+    expect(screen.getByText('Fireplace')).toBeInTheDocument()
+    expect(screen.getByText('Soft Piano')).toBeInTheDocument()
+  })
+
+  it('selecting a sound calls onUpdate', async () => {
+    const user = userEvent.setup()
+    const { onUpdate } = renderSheet({
+      settings: { ...DEFAULT_SETTINGS, ambientAudioAutoStart: true },
+    })
+    await user.click(screen.getByText('Ocean Waves'))
+    expect(onUpdate).toHaveBeenCalledWith('ambientAudioAutoStartSound', 'ocean-waves')
+  })
+
+  it('"Last played" option selected when value is null', () => {
+    renderSheet({
+      settings: { ...DEFAULT_SETTINGS, ambientAudioAutoStart: true, ambientAudioAutoStartSound: null },
+    })
+    const btn = screen.getByText('Last played sound')
+    expect(btn.className).toContain('bg-primary')
   })
 })

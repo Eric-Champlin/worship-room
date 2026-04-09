@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
 } from 'react'
@@ -22,10 +23,16 @@ import { useAnnounce } from '@/hooks/useAnnounce'
 
 type AudioDispatch = (action: AudioAction) => void
 
+interface ReadingContextControl {
+  setReadingContext: (ctx: { book: string; chapter: number }) => void
+  clearReadingContext: () => void
+}
+
 const AudioStateContext = createContext<AudioState | null>(null)
 const AudioDispatchContext = createContext<AudioDispatch | null>(null)
 const SleepTimerControlsContext = createContext<SleepTimerControls | null>(null)
 const AudioEngineContext = createContext<AudioEngineService | null>(null)
+const ReadingContextControlContext = createContext<ReadingContextControl | null>(null)
 
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(audioReducer, initialAudioState)
@@ -191,6 +198,17 @@ export function AudioProvider({ children }: { children: ReactNode }) {
             ? 'Scripture Readings'
             : 'Bedtime Stories',
       })
+    } else if (
+      state.readingContext &&
+      state.activeSounds.length > 0 &&
+      state.pillVisible
+    ) {
+      const sceneName =
+        state.currentSceneName ?? state.activeSounds[0]?.label ?? 'Ambient'
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: sceneName,
+        artist: `Worship Room — Reading ${state.readingContext.book} ${state.readingContext.chapter}`,
+      })
     } else if (state.currentSceneName && state.pillVisible) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: state.currentSceneName,
@@ -207,7 +225,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.setActionHandler('nexttrack', () => {
       enhancedDispatch({ type: 'SKIP_ROUTINE_STEP' })
     })
-  }, [state.foregroundContent, state.currentSceneName, state.pillVisible, enhancedDispatch])
+  }, [state.foregroundContent, state.currentSceneName, state.pillVisible, state.readingContext, state.activeSounds, enhancedDispatch])
 
   // Browser tab title — capture the page's title before we override it
   useEffect(() => {
@@ -236,6 +254,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
   }, [state.isPlaying, state.currentSceneName, state.foregroundContent, state.pillVisible])
 
+  // Reading context control (BB-20)
+  const readingContextControl = useMemo<ReadingContextControl>(
+    () => ({
+      setReadingContext: (ctx) =>
+        dispatch({ type: 'SET_READING_CONTEXT', payload: ctx }),
+      clearReadingContext: () => dispatch({ type: 'CLEAR_READING_CONTEXT' }),
+    }),
+    [],
+  )
+
   // Route change auto-collapse
   useEffect(() => {
     if (location.pathname !== prevPathRef.current && state.drawerOpen) {
@@ -250,15 +278,17 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     <AudioStateContext.Provider value={state}>
       <AudioDispatchContext.Provider value={enhancedDispatch}>
         <AudioEngineContext.Provider value={getEngine()}>
-          <SleepTimerBridge>
-            {children}
-            <AudioDrawer />
-            <ListeningLogger />
-            <ListenTracker />
-            <SessionAutoSave />
-          </SleepTimerBridge>
-          <AudioPill />
-          <AnnouncerRegion />
+          <ReadingContextControlContext.Provider value={readingContextControl}>
+            <SleepTimerBridge>
+              {children}
+              <AudioDrawer />
+              <ListeningLogger />
+              <ListenTracker />
+              <SessionAutoSave />
+            </SleepTimerBridge>
+            <AudioPill />
+            <AnnouncerRegion />
+          </ReadingContextControlContext.Provider>
         </AudioEngineContext.Provider>
       </AudioDispatchContext.Provider>
     </AudioStateContext.Provider>
@@ -303,6 +333,14 @@ export function useSleepTimerControls(): SleepTimerControls {
   const ctx = useContext(SleepTimerControlsContext)
   if (!ctx) {
     throw new Error('useSleepTimerControls must be used within an AudioProvider')
+  }
+  return ctx
+}
+
+export function useReadingContext(): ReadingContextControl {
+  const ctx = useContext(ReadingContextControlContext)
+  if (!ctx) {
+    throw new Error('useReadingContext must be used within an AudioProvider')
   }
   return ctx
 }
