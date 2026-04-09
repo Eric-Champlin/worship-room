@@ -197,16 +197,19 @@ describe('verseActionRegistry', () => {
     })
 
     it('sub-view stubs render placeholder containing "ships in BB-"', () => {
-      // Exclude highlight (BB-7), note (BB-8), cross-refs (BB-9) — only stubs match this pattern
+      // Exclude implemented sub-views: highlight (BB-7), note (BB-8), cross-refs (BB-9), share (BB-13)
       const withSubViews = getAllActions().filter(
         (h) =>
           h.hasSubView &&
           h.renderSubView &&
           h.action !== 'highlight' &&
           h.action !== 'note' &&
-          h.action !== 'cross-refs',
+          h.action !== 'cross-refs' &&
+          h.action !== 'share',
       )
-      expect(withSubViews.length).toBeGreaterThan(0)
+
+      // If no stubs remain, this test is no longer needed — skip gracefully
+      if (withSubViews.length === 0) return
 
       for (const handler of withSubViews) {
         const element = handler.renderSubView!({
@@ -217,6 +220,22 @@ describe('verseActionRegistry', () => {
         const el = element as { props: { children: string } }
         expect(el.props.children).toMatch(/ships? in BB-\d/)
       }
+    })
+
+    it('share handler renderSubView returns React element', () => {
+      const handler = getActionByType('share')
+      expect(handler).toBeDefined()
+      expect(handler!.hasSubView).toBe(true)
+      const element = handler!.renderSubView!({
+        selection: SINGLE_VERSE,
+        onBack: () => {},
+      })
+      expect(element).toBeDefined()
+    })
+
+    it('share handler isAvailable returns true', () => {
+      const handler = getActionByType('share')
+      expect(handler!.isAvailable(SINGLE_VERSE)).toBe(true)
     })
   })
 

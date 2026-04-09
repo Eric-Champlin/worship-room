@@ -38,6 +38,7 @@ import {
 } from '@/lib/bible/bookmarkStore'
 import { getNoteForVerse } from '@/lib/bible/notes/store'
 import { NoteEditorSubView } from '@/components/bible/reader/NoteEditorSubView'
+import { ShareSubView } from '@/components/bible/reader/ShareSubView'
 import { buildDailyHubVerseUrl } from '@/lib/bible/verseActions/buildDailyHubVerseUrl'
 
 // ---------------------------------------------------------------------------
@@ -287,7 +288,7 @@ const share: VerseActionHandler = {
   icon: Share2,
   category: 'primary',
   hasSubView: true,
-  renderSubView: stubSubView('Share panel ships in BB-13'),
+  renderSubView: (props) => React.createElement(ShareSubView, props),
   isAvailable: () => true,
   onInvoke: () => {},
 }
