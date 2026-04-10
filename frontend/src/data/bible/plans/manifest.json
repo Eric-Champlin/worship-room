@@ -9,5 +9,16 @@
     "estimatedMinutesPerDay": 7,
     "curator": "Worship Room",
     "coverGradient": "from-indigo-500/30 to-hero-dark"
+  },
+  {
+    "slug": "john-story-of-jesus",
+    "title": "The Story of Jesus",
+    "shortTitle": "John",
+    "description": "John was the last of the four Gospels written. By the time John picked up his pen, three other accounts of Jesus's life were already in circulation. So John didn't write another biography. He wrote a meditation. He picked seven miracles, seven \"I am\" statements, seven long conversations, and built them into a portrait of who Jesus actually was.\n\nThis plan walks through John in order — chapter 1 to chapter 21, one chapter per day for three weeks. You'll read the prologue (\"In the beginning was the Word\") on day one and the post-resurrection breakfast on the beach on day 21. In between, you'll meet Nicodemus in the dark, the Samaritan woman at the well, the man born blind, Lazarus walking out of the tomb, and a Jesus who washes feet and weeps and asks Peter three times if he loves him.\n\nIf you've never read a Gospel all the way through, this is the one to start with. If you've read John before, read it again. Twenty-one days is enough time for it to change shape in you.",
+    "theme": "foundation",
+    "duration": 21,
+    "estimatedMinutesPerDay": 10,
+    "curator": "Worship Room",
+    "coverGradient": "from-amber-500/30 to-hero-dark"
   }
 ]
