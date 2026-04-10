@@ -1,0 +1,90 @@
+{
+  "slug": "when-you-cant-sleep",
+  "title": "When You Can't Sleep",
+  "shortTitle": "Sleep",
+  "description": "If you're reading this, it's probably late. Or early — the kind of early that doesn't feel like morning yet. You've been trying to sleep and it isn't working. Your mind won't slow down or your body won't settle or both, and you reached for your phone, and you ended up here.\n\nThis plan is seven short readings for nights like that. Each one is brief on purpose. You shouldn't have to scroll much. You shouldn't have to think hard. The Bible has more night passages than you might expect, written by people who were also awake when they didn't want to be. David's late prayers. Jacob alone in the dark. The disciples in a boat through the small hours. None of them got fixed by reading scripture either. Some of them just got accompanied through it.\n\nRead one tonight. Maybe read another tomorrow night if you need to. The plan will wait.",
+  "theme": "emotional",
+  "duration": 7,
+  "estimatedMinutesPerDay": 3,
+  "curator": "Worship Room",
+  "coverGradient": "from-blue-950/40 to-hero-dark",
+  "days": [
+    {
+      "day": 1,
+      "title": "Lying down in peace",
+      "passages": [
+        { "book": "psalms", "chapter": 4, "startVerse": 1, "endVerse": 8 }
+      ],
+      "devotional": "David wrote this at the end of a hard day. Read the last verse: 'In peace I will both lay myself down and sleep, for you alone, the LORD, make me live in safety.' You may read that tonight and not feel it. The room may still feel loud. Your chest may still feel tight.\n\nScripture doesn't need your feelings to be true. David said these words to God in the dark. Let them be true over you now, even if you don't feel them yet. Sometimes faith is just lying down while the verse stays true above you.",
+      "reflectionPrompts": [
+        "Read the last verse one more time. Let it be true even if you don't feel it yet."
+      ]
+    },
+    {
+      "day": 2,
+      "title": "Jacob's stone",
+      "passages": [
+        { "book": "genesis", "chapter": 28, "startVerse": 10, "endVerse": 17 }
+      ],
+      "devotional": "Jacob was running from his brother when the sun went down. He had no tent. No bed. Just a stone for a pillow, and whatever sleep the ground would give him. That was where God met him. Not in a temple. Not after a prayer he'd rehearsed. On the hard dirt, at the worst moment he'd had in weeks.\n\nWhen Jacob woke up he said, 'Surely the LORD is in this place, and I didn't know it.' Whatever place you're reading from tonight, whatever floor or bed or couch — the LORD is in this place too. Even if you don't know it yet.",
+      "reflectionPrompts": [
+        "The Lord is in this place. Even now. Even here."
+      ]
+    },
+    {
+      "day": 3,
+      "title": "Elijah under the broom tree",
+      "passages": [
+        { "book": "1-kings", "chapter": 19, "startVerse": 4, "endVerse": 8 }
+      ],
+      "devotional": "Elijah had watched God answer prayer with fire. The next day, he ran for his life, collapsed under a tree in the wilderness, and asked God to let him die. He was exhausted. He thought he was done.\n\nWhat God sent was not a sermon. Not a rebuke. God sent an angel with bread and water, and told him to lie back down, and then to eat again. That was it. God let him rest first. If tonight you are too tired to pray, too tired to think, too tired to want anything — you are not too much for God. Not even now.",
+      "reflectionPrompts": [
+        "You are not too much for God. Not even tonight."
+      ]
+    },
+    {
+      "day": 4,
+      "title": "Jesus asleep in the boat",
+      "passages": [
+        { "book": "mark", "chapter": 4, "startVerse": 35, "endVerse": 41 }
+      ],
+      "devotional": "A storm came up while the disciples were crossing the lake at night. The waves were filling the boat. Jesus was in the back, asleep on the cushion. They woke him, afraid.\n\nNotice something the text never says. It never says they were wrong to be awake. It never says they were supposed to sleep through it. They were not shamed for being awake. Jesus got up, and he was with them in the storm. You are not being shamed for being awake tonight either. The one who slept through the storm is also the one who stays with you in it.",
+      "reflectionPrompts": [
+        "You are not being shamed for being awake tonight."
+      ]
+    },
+    {
+      "day": 5,
+      "title": "On my bed I remember you",
+      "passages": [
+        { "book": "psalms", "chapter": 63, "startVerse": 1, "endVerse": 8 }
+      ],
+      "devotional": "This psalm says David wrote it in a desert, far from home. Somewhere in it he talks about remembering God 'on my bed,' in 'the night watches.' The night watches. The hours when the rest of the world is quiet and you are not.\n\nDavid knew those hours. He was not writing poetry about a peaceful evening — he was writing from the place you are right now. Awake, thinking, remembering. You are not the first one to be up in these hours. And the one David was remembering is with you in them now.",
+      "reflectionPrompts": [
+        "The watches of the night. You're not the first one to be up."
+      ]
+    },
+    {
+      "day": 6,
+      "title": "Mercies new every morning",
+      "passages": [
+        { "book": "lamentations", "chapter": 3, "startVerse": 21, "endVerse": 26 }
+      ],
+      "devotional": "Lamentations is a book about grief. The person writing it has seen the city fall. He cannot rest — the verses right before this say so. And from inside that, he writes: 'his mercies don't fail. They are new every morning.'\n\nNotice: not 'the morning will fix it.' Not 'by sunrise you will feel whole.' Just — mercy that keeps showing up, morning after morning, whether or not you were ready for it. Tonight you may not be ready. That's alright. The mercy is not waiting for you to be ready. It will still be there when morning comes.",
+      "reflectionPrompts": [
+        "Sunrise will come. That's all you need to believe right now."
+      ]
+    },
+    {
+      "day": 7,
+      "title": "The blessing",
+      "passages": [
+        { "book": "numbers", "chapter": 6, "startVerse": 24, "endVerse": 26 }
+      ],
+      "devotional": "These are the oldest words of blessing in scripture. Aaron said them over his people. They have been said over tired people for thousands of years. Tonight they are said over you:\n\n'The LORD bless you, and keep you. The LORD make his face to shine on you, and be gracious to you. The LORD lift up his face towards you, and give you peace.'\n\nYou do not need to respond. You do not need to feel anything. This is the end of the plan. You can put the phone down now. The blessing has already been spoken over you.",
+      "reflectionPrompts": [
+        "Goodnight."
+      ]
+    }
+  ]
+}

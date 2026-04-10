@@ -31,5 +31,16 @@
     "estimatedMinutesPerDay": 7,
     "curator": "Worship Room",
     "coverGradient": "from-emerald-600/30 to-hero-dark"
+  },
+  {
+    "slug": "when-you-cant-sleep",
+    "title": "When You Can't Sleep",
+    "shortTitle": "Sleep",
+    "description": "If you're reading this, it's probably late. Or early — the kind of early that doesn't feel like morning yet. You've been trying to sleep and it isn't working. Your mind won't slow down or your body won't settle or both, and you reached for your phone, and you ended up here.\n\nThis plan is seven short readings for nights like that. Each one is brief on purpose. You shouldn't have to scroll much. You shouldn't have to think hard. The Bible has more night passages than you might expect, written by people who were also awake when they didn't want to be. David's late prayers. Jacob alone in the dark. The disciples in a boat through the small hours. None of them got fixed by reading scripture either. Some of them just got accompanied through it.\n\nRead one tonight. Maybe read another tomorrow night if you need to. The plan will wait.",
+    "theme": "emotional",
+    "duration": 7,
+    "estimatedMinutesPerDay": 3,
+    "curator": "Worship Room",
+    "coverGradient": "from-blue-950/40 to-hero-dark"
   }
 ]
