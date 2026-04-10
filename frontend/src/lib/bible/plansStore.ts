@@ -92,8 +92,7 @@ function recalcCurrentDay(completedDays: number[], totalDays: number): number {
 
 // --- Read API ---
 export function getPlansState(): PlansStoreState {
-  const state = getCache()
-  return { activePlanSlug: state.activePlanSlug, plans: { ...state.plans } }
+  return getCache()
 }
 
 export function getActivePlanProgress(): PlanProgress | null {

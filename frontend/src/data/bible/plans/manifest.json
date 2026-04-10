@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "slug": "psalms-30-days",
+    "title": "30 Days in the Psalms",
+    "shortTitle": "Psalms",
+    "description": "The Psalms are the prayer book of the Bible. For three thousand years, people have turned to these poems when they needed language for what they were feeling — grief, joy, rage, wonder, loneliness, hope. They are the book David wrote, and the book Jesus prayed, and the book the church has held closest in its hardest centuries.\n\nThis plan walks through thirty Psalms over thirty days. Not every Psalm, not in order — a curated path through the ones that most often carry people through difficult seasons. Some are short. Some are long. All of them are honest.\n\nEach day has one Psalm, a few sentences of context, and a question to sit with. You don't need to understand everything. You don't need to feel something specific. You just need to read.\n\nThirty days is a long time. Some days you'll read and nothing will happen. Other days a single line will land and stay with you for weeks. Both are normal. Both are the point.",
+    "theme": "comfort",
+    "duration": 30,
+    "estimatedMinutesPerDay": 7,
+    "curator": "Worship Room",
+    "coverGradient": "from-indigo-500/30 to-hero-dark"
+  }
+]
