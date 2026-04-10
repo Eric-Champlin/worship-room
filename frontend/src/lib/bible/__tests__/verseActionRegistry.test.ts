@@ -87,6 +87,49 @@ describe('verseActionRegistry', () => {
     })
   })
 
+  describe('explain action (BB-30)', () => {
+    it('is registered in the secondary actions category', () => {
+      const explain = getActionByType('explain')
+      expect(explain).toBeDefined()
+      expect(explain!.category).toBe('secondary')
+    })
+
+    it('has label, sublabel, icon, and hasSubView=true', () => {
+      const explain = getActionByType('explain')!
+      expect(explain.label).toBe('Explain this passage')
+      expect(explain.sublabel).toBe('Understand the context')
+      expect(explain.icon).toBeDefined()
+      expect(explain.hasSubView).toBe(true)
+    })
+
+    it('isAvailable returns true for any selection (no auth gate)', () => {
+      const explain = getActionByType('explain')!
+      expect(explain.isAvailable(SINGLE_VERSE)).toBe(true)
+      expect(explain.isAvailable(MULTI_VERSE)).toBe(true)
+    })
+
+    it('renderSubView returns a non-null React element', () => {
+      const explain = getActionByType('explain')!
+      const element = explain.renderSubView?.({
+        selection: SINGLE_VERSE,
+        onBack: vi.fn(),
+        context: createMockContext(),
+      })
+      expect(element).not.toBeNull()
+      expect(element).not.toBeUndefined()
+    })
+
+    it('appears in SECONDARY_ACTIONS between cross-refs and memorize', () => {
+      const secondary = getSecondaryActions()
+      const crossRefsIdx = secondary.findIndex((a) => a.action === 'cross-refs')
+      const explainIdx = secondary.findIndex((a) => a.action === 'explain')
+      const memorizeIdx = secondary.findIndex((a) => a.action === 'memorize')
+      expect(crossRefsIdx).toBeGreaterThanOrEqual(0)
+      expect(explainIdx).toBe(crossRefsIdx + 1)
+      expect(memorizeIdx).toBe(explainIdx + 1)
+    })
+  })
+
   describe('formatReference', () => {
     it('formats single verse', () => {
       expect(formatReference(SINGLE_VERSE)).toBe('John 3:16')
@@ -197,7 +240,8 @@ describe('verseActionRegistry', () => {
     })
 
     it('sub-view stubs render placeholder containing "ships in BB-"', () => {
-      // Exclude implemented sub-views: highlight (BB-7), note (BB-8), cross-refs (BB-9), share (BB-13)
+      // Exclude implemented sub-views: highlight (BB-7), note (BB-8),
+      // cross-refs (BB-9), share (BB-13), explain (BB-30)
       const withSubViews = getAllActions().filter(
         (h) =>
           h.hasSubView &&
@@ -205,7 +249,8 @@ describe('verseActionRegistry', () => {
           h.action !== 'highlight' &&
           h.action !== 'note' &&
           h.action !== 'cross-refs' &&
-          h.action !== 'share',
+          h.action !== 'share' &&
+          h.action !== 'explain',
       )
 
       // If no stubs remain, this test is no longer needed — skip gracefully

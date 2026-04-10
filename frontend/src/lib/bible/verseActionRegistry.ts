@@ -14,6 +14,7 @@ import {
   ClipboardCopy,
 } from 'lucide-react'
 import { CrossRefsSubView, CrossRefBadge } from '@/components/bible/reader/CrossRefsSubView'
+import { ExplainSubView } from '@/components/bible/reader/ExplainSubView'
 import type {
   VerseSelection,
   VerseAction,
@@ -362,7 +363,7 @@ const explain: VerseActionHandler = {
   icon: Brain,
   category: 'secondary',
   hasSubView: true,
-  renderSubView: stubSubView('AI explain ships in BB-30'),
+  renderSubView: (props) => React.createElement(ExplainSubView, props),
   isAvailable: () => true,
   onInvoke: () => {},
 }
