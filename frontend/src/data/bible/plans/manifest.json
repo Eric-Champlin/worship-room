@@ -20,5 +20,16 @@
     "estimatedMinutesPerDay": 10,
     "curator": "Worship Room",
     "coverGradient": "from-amber-500/30 to-hero-dark"
+  },
+  {
+    "slug": "when-youre-anxious",
+    "title": "When You're Anxious",
+    "shortTitle": "Anxious",
+    "description": "If you're reading this, you might already know the verses. Be anxious for nothing. Do not fear. Cast your cares on him. Maybe people have quoted them at you. Maybe they've helped, and maybe they've hurt — sometimes both. This plan exists for the people who need scripture that meets them in the actual feeling of anxiety, not scripture used as a club against it.\n\nFourteen days. Some of the readings are familiar. Some aren't. They're not arranged to talk you out of how you feel. They're arranged to give you somewhere to put your attention when your attention won't stay still.\n\nThe Bible has a lot of anxious people in it. Hannah, who couldn't stop crying. Elijah, who hid in a cave. The disciples in the boat in the storm, and the disciples in the upper room after the crucifixion. David, all the time. Jesus himself in Gethsemane. None of them were told to calm down. Most of them were just... met.\n\nThis plan won't fix your anxiety. Nothing in fourteen days will. But you can read it on a hard day and not feel worse, and on a good day you might feel a little less alone. That's what scripture does at its best. That's what we're trying to do here.",
+    "theme": "emotional",
+    "duration": 14,
+    "estimatedMinutesPerDay": 7,
+    "curator": "Worship Room",
+    "coverGradient": "from-emerald-600/30 to-hero-dark"
   }
 ]
