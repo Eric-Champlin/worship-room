@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { PlanCompletionCelebration } from '@/components/bible/plans/PlanCompletionCelebration'
@@ -32,6 +32,10 @@ export function BiblePlanDay() {
   const authModal = useAuthModal()
   const navigate = useNavigate()
   const [celebrationData, setCelebrationData] = useState<CelebrationData | null>(null)
+  // BB-38: if the plan day URL has ?verse=N, flow it through to the reader
+  // as a persistent selection parameter (not the one-shot ?scroll-to=).
+  const [planSearchParams] = useSearchParams()
+  const planVerseParam = planSearchParams.get('verse')
 
   if (isLoading) {
     return (
@@ -142,9 +146,17 @@ export function BiblePlanDay() {
           )}>
             {day.passages.map((passage, i) => {
               const ref = formatPassageRef(passage.book, passage.chapter, passage.startVerse, passage.endVerse)
-              const readerUrl = passage.startVerse
-                ? `/bible/${passage.book}/${passage.chapter}?highlight=${passage.startVerse}`
-                : `/bible/${passage.book}/${passage.chapter}`
+              // BB-38: compose ?scroll-to= (renamed from ?highlight=) for the
+              // one-shot arrival glow, AND forward ?verse= from the plan day
+              // URL if present (persistent selection in the reader).
+              const readerUrl = (() => {
+                const base = `/bible/${passage.book}/${passage.chapter}`
+                const params = new URLSearchParams()
+                if (passage.startVerse) params.set('scroll-to', String(passage.startVerse))
+                if (planVerseParam) params.set('verse', planVerseParam)
+                const query = params.toString()
+                return query ? `${base}?${query}` : base
+              })()
 
               return (
                 <FrostedCard key={i}>

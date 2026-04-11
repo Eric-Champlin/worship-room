@@ -19,6 +19,9 @@ import { useChapterSwipe } from '@/hooks/useChapterSwipe'
 import { useFocusMode } from '@/hooks/useFocusMode'
 import { useVerseTap } from '@/hooks/useVerseTap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useVerseSelection } from '@/hooks/url/useVerseSelection'
+import { useActionSheetState } from '@/hooks/url/useActionSheetState'
+import { validateAction } from '@/lib/url/validateAction'
 import { useAudioState, useReadingContext } from '@/components/audio/AudioProvider'
 import { PlanCompletionCelebration } from '@/components/bible/plans/PlanCompletionCelebration'
 import { ActivePlanReaderBanner } from '@/components/bible/reader/ActivePlanReaderBanner'
@@ -107,15 +110,107 @@ function BibleReaderInner() {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  // BB-38: URL-driven verse selection + action sheet state
+  const { verseRange, setVerse, clearVerse } = useVerseSelection()
+  const { action, setAction, clearAction } = useActionSheetState()
+
+  // BB-38: Sheet-open React state follows the URL lifecycle rules:
+  //   Rule 1 (mount): open iff URL has a valid action (cold-load sub-view)
+  //   Rule 2 (tap): setSheetOpen(true) + setVerse(N)
+  //   Rule 3 (URL verse→null): setSheetOpen(false) — handles browser back
+  //   Rule 4 (close button): clearVerse() → verse & action cleared → Rule 3 fires
+  //   Rule 5 (sub-view close): clearAction() — sheet stays open
+  const [sheetOpen, setSheetOpen] = useState<boolean>(() =>
+    Boolean(validateAction(searchParams.get('action'))),
+  )
+
+  // Rule 3: URL verse→null watcher (handles browser back to no-params state)
+  useEffect(() => {
+    if (!verseRange) {
+      setSheetOpen(false)
+    }
+  }, [verseRange])
+
+  // Rule 1 (redux): URL action changes → ensure sheet is open when action is
+  // present AND a verse is selected. The spec invariant "action without verse
+  // is meaningless" is enforced at the state layer here so render-time gating
+  // isn't the only line of defense.
+  useEffect(() => {
+    if (action && verseRange) setSheetOpen(true)
+  }, [action, verseRange])
+
+  // Interactive tap handlers for useVerseTap
+  const handleVerseTap = useCallback(
+    (verseNumber: number) => {
+      setVerse(verseNumber)
+      setSheetOpen(true)
+    },
+    [setVerse],
+  )
+
+  const handleExtendSelectionFromTap = useCallback(
+    (newStart: number, newEnd: number) => {
+      setVerse(newStart, newEnd)
+      // sheetOpen remains true
+    },
+    [setVerse],
+  )
+
   // Verse tap handling
-  const { selection, isSheetOpen, closeSheet, extendSelection } = useVerseTap({
+  const { selection } = useVerseTap({
     containerRef: readerBodyRef,
     bookSlug: bookSlug ?? '',
     bookName: book?.name ?? '',
     chapter: chapterNumber,
     verses,
     enabled: !isLoading && !loadError && verses.length > 0,
+    verseRange,
+    onVerseTap: handleVerseTap,
+    onExtendSelection: handleExtendSelectionFromTap,
   })
+
+  // Dismiss the sheet: flip React state and (unless we're navigating away via a
+  // cross-ref click, which produces its own URL change) clear the verse/action
+  // params from the URL.
+  const dismissSheet = useCallback(
+    (options?: { navigating?: boolean }) => {
+      setSheetOpen(false)
+      if (!options?.navigating) {
+        clearVerse()
+      }
+    },
+    [clearVerse],
+  )
+
+  // Callback passed to VerseActionSheet's onExtendSelection prop. It takes a
+  // single verse number and extends the existing URL-driven selection.
+  // Currently unused by the sheet (useVerseTap handles range extension via
+  // pointer events on the reader body) but kept wired for future in-sheet
+  // selection UI.
+  const handleSheetExtendSelection = useCallback(
+    (verseNumber: number) => {
+      if (!verseRange) {
+        setVerse(verseNumber)
+        return
+      }
+      // Mirror the computeExtendedRange logic from useVerseTap
+      if (verseRange.start !== verseRange.end) {
+        if (verseNumber === verseRange.start) {
+          setVerse(verseRange.start + 1, verseRange.end)
+          return
+        }
+        if (verseNumber === verseRange.end) {
+          setVerse(verseRange.start, verseRange.end - 1)
+          return
+        }
+      }
+      setVerse(
+        Math.min(verseRange.start, verseNumber),
+        Math.max(verseRange.end, verseNumber),
+      )
+    },
+    [verseRange, setVerse],
+  )
 
   // Selection visibility for fade-out animation
   const [selectionVisible, setSelectionVisible] = useState(true)
@@ -223,17 +318,17 @@ function BibleReaderInner() {
     (options?: { navigating?: boolean }) => {
       if (options?.navigating) {
         // Cross-ref navigation: close immediately, skip fade animation
-        closeSheet(options)
+        dismissSheet(options)
       } else {
         setSelectionVisible(false)
         fadeTimerRef.current = setTimeout(() => {
           fadeTimerRef.current = null
-          closeSheet()
+          dismissSheet()
           setSelectionVisible(true)
         }, 200)
       }
     },
-    [closeSheet],
+    [dismissSheet],
   )
 
   // Clean up fade timer on unmount
@@ -246,7 +341,7 @@ function BibleReaderInner() {
   const { touchHandlers, swipeOffset, isSwiping } = useChapterSwipe({
     bookSlug: bookSlug ?? '',
     currentChapter: chapterNumber,
-    enabled: isSmallViewport && !isLoading && !typographyOpen && !isSheetOpen,
+    enabled: isSmallViewport && !isLoading && !typographyOpen && !sheetOpen,
   })
 
   // Load chapter from web/ JSON
@@ -281,38 +376,50 @@ function BibleReaderInner() {
     }
   }, [bookSlug, book, chapterNumber])
 
-  // Scroll to top on chapter change (skip when highlight param will handle scrolling)
-  const highlightParamRef = useRef(searchParams.get('highlight'))
+  // BB-38: Scroll to top on chapter change (skip when scroll-to param will handle scrolling)
+  const scrollToParamRef = useRef<string | null>(
+    searchParams.get('scroll-to') ?? searchParams.get('highlight'),
+  )
   useEffect(() => {
-    if (highlightParamRef.current) {
-      highlightParamRef.current = null
+    if (scrollToParamRef.current) {
+      scrollToParamRef.current = null
       return
     }
     window.scrollTo({ top: 0 })
   }, [bookSlug, chapterNumber])
 
-  // ?highlight= param processing: scroll to verse and apply arrival glow
+  // BB-38: ?scroll-to= (+ legacy ?highlight= alias) param processing:
+  // one-shot scroll to verse with arrival glow, then param is deleted.
   useEffect(() => {
     if (isLoading || loadError || verses.length === 0) return
 
-    const highlightParam = searchParams.get('highlight')
-    if (!highlightParam) return
+    // Read scroll-to first; fall back to legacy highlight for backward compatibility.
+    const scrollToParam = searchParams.get('scroll-to') ?? searchParams.get('highlight')
+    if (!scrollToParam) return
 
     // Parse single verse or range: "16" or "1-3"
     let startVerse: number
     let endVerse: number
-    if (highlightParam.includes('-')) {
-      const parts = highlightParam.split('-')
+    if (scrollToParam.includes('-')) {
+      const parts = scrollToParam.split('-')
       startVerse = parseInt(parts[0], 10)
       endVerse = parseInt(parts[1], 10)
     } else {
-      startVerse = parseInt(highlightParam, 10)
+      startVerse = parseInt(scrollToParam, 10)
       endVerse = startVerse
     }
 
-    // Ignore invalid values
+    // Ignore invalid values — delete BOTH legacy and new param names
     if (isNaN(startVerse) || isNaN(endVerse) || startVerse < 1 || endVerse < startVerse) {
-      setSearchParams((prev) => { prev.delete('highlight'); return prev }, { replace: true })
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.delete('scroll-to')
+          next.delete('highlight')
+          return next
+        },
+        { replace: true },
+      )
       return
     }
 
@@ -327,8 +434,16 @@ function BibleReaderInner() {
       el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' })
     }
 
-    // Clear the highlight param from URL
-    setSearchParams((prev) => { prev.delete('highlight'); return prev }, { replace: true })
+    // Clear BOTH the scroll-to and legacy highlight params from the URL
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('scroll-to')
+        next.delete('highlight')
+        return next
+      },
+      { replace: true },
+    )
 
     // Fade out glow after 1.5s
     arrivalHighlightTimerRef.current = setTimeout(() => {
@@ -362,11 +477,11 @@ function BibleReaderInner() {
 
   // Pause focus mode when verse action sheet is open
   useEffect(() => {
-    if (isSheetOpen) {
+    if (sheetOpen) {
       focusMode.pauseFocusMode()
       return () => focusMode.resumeFocusMode()
     }
-  }, [isSheetOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sheetOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Pause focus mode when audio picker is open (BB-20)
   useEffect(() => {
@@ -378,17 +493,17 @@ function BibleReaderInner() {
 
   // Mutual exclusion: verse sheet closes picker (BB-20)
   useEffect(() => {
-    if (isSheetOpen && pickerOpen) {
+    if (sheetOpen && pickerOpen) {
       setPickerOpen(false)
     }
-  }, [isSheetOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sheetOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // BB-20 audio toggle handler with mutual exclusion
   const handleAudioToggle = useCallback(() => {
-    if (isSheetOpen) closeSheet()
+    if (sheetOpen) dismissSheet()
     if (typographyOpen) setTypographyOpen(false)
     setPickerOpen((prev) => !prev)
-  }, [isSheetOpen, closeSheet, typographyOpen])
+  }, [sheetOpen, dismissSheet, typographyOpen])
 
   // BB-20 typography toggle with picker mutual exclusion
   const handleTypographyToggle = useCallback(() => {
@@ -453,7 +568,7 @@ function BibleReaderInner() {
       const tag = (e.target as HTMLElement).tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
       // Sheet has its own keyboard handling
-      if (isSheetOpen) return
+      if (sheetOpen) return
 
       if (e.key === 'ArrowLeft' && bookSlug) {
         const prev = getAdjacentChapter(bookSlug, chapterNumber, 'prev')
@@ -467,7 +582,7 @@ function BibleReaderInner() {
         bibleDrawer.open()
       }
     },
-    [bookSlug, chapterNumber, navigate, typographyOpen, bibleDrawer, isSheetOpen],
+    [bookSlug, chapterNumber, navigate, typographyOpen, bibleDrawer, sheetOpen],
   )
 
   useEffect(() => {
@@ -733,9 +848,12 @@ function BibleReaderInner() {
       {selection && (
         <VerseActionSheet
           selection={selection}
-          isOpen={isSheetOpen}
+          isOpen={sheetOpen}
           onClose={handleSheetClose}
-          onExtendSelection={extendSelection}
+          onExtendSelection={handleSheetExtendSelection}
+          action={action}
+          onOpenAction={setAction}
+          onCloseAction={clearAction}
         />
       )}
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
@@ -9,6 +10,8 @@ import { BibleHeroSlot } from '@/components/bible/landing/BibleHeroSlot'
 import { TodaysPlanCard } from '@/components/bible/landing/TodaysPlanCard'
 import { QuickActionsRow } from '@/components/bible/landing/QuickActionsRow'
 import { BibleSearchEntry } from '@/components/bible/landing/BibleSearchEntry'
+import { BibleSearchMode } from '@/components/bible/BibleSearchMode'
+import { useSearchQuery } from '@/hooks/url/useSearchQuery'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
@@ -42,6 +45,30 @@ function isInputFocused(): boolean {
 }
 
 function BibleLandingInner() {
+  // BB-38 search deep-link consumer: `/bible?mode=search&q=<query>` renders
+  // BibleSearchMode in place of the landing content. `?q=` flows through via
+  // `useSearchQuery` (debounced URL writer, 250ms). When mode is not 'search',
+  // the landing page renders its normal content (hero slot, today's plan,
+  // quick actions, BibleSearchEntry). This is BB-38 Finding 1's fix —
+  // BibleBrowser.tsx used to own this behavior but was orphaned when the
+  // Bible redesign moved `/bible` to BibleLanding. See
+  // `_plans/recon/bb38-url-formats.md` for the contract.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const isSearchMode = searchParams.get('mode') === 'search'
+  const { query: searchQuery, setQuery: setSearchQuery } = useSearchQuery()
+
+  const exitSearchMode = useCallback(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('mode')
+        next.delete('q')
+        return next
+      },
+      { replace: false },
+    )
+  }, [setSearchParams])
+
   const [plans, setPlans] = useState<ActivePlan[]>([])
   const { streak, atRisk } = useStreakStore()
   const [modalOpen, setModalOpen] = useState(false)
@@ -115,7 +142,8 @@ function BibleLandingInner() {
         <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
 
         <div className="relative z-10 mx-auto max-w-4xl space-y-8 px-4 pb-16">
-          {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap */}
+          {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap.
+              Visible in both landing and search mode so streak context never disappears. */}
           {streak.currentStreak > 0 && (
             <div className="flex justify-center">
               <StreakChip
@@ -128,33 +156,55 @@ function BibleLandingInner() {
             </div>
           )}
 
-          {/* Hero slot: resume card / VOTD / lapsed link based on reader state */}
-          <BibleHeroSlot />
+          {isSearchMode ? (
+            /* BB-38 search mode: render BibleSearchMode in place of landing content.
+               Empty query keeps mode=search active (matches segmented control semantics);
+               the user exits search mode via the "Back to Bible" link or global nav. */
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={exitSearchMode}
+                className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                Back to Bible
+              </button>
+              <BibleSearchMode
+                query={searchQuery}
+                onQueryChange={setSearchQuery}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Hero slot: resume card / VOTD / lapsed link based on reader state */}
+              <BibleHeroSlot />
 
-          {/* Today's Plan — standalone below hero slot */}
-          <TodaysPlanCard plans={plans} />
-          <div className="flex justify-center">
-            <Link
-              to="/bible/plans"
-              className="inline-flex min-h-[44px] items-center text-sm font-medium text-white/60 transition-colors hover:text-white"
-            >
-              Browse all plans →
-            </Link>
-          </div>
+              {/* Today's Plan — standalone below hero slot */}
+              <TodaysPlanCard plans={plans} />
+              <div className="flex justify-center">
+                <Link
+                  to="/bible/plans"
+                  className="inline-flex min-h-[44px] items-center text-sm font-medium text-white/60 transition-colors hover:text-white"
+                >
+                  Browse all plans →
+                </Link>
+              </div>
 
-          {/* Section divider → Quick Actions */}
-          <div className="border-t border-white/[0.08]" />
+              {/* Section divider → Quick Actions */}
+              <div className="border-t border-white/[0.08]" />
 
-          {/* Quick Actions */}
-          <QuickActionsRow />
+              {/* Quick Actions */}
+              <QuickActionsRow />
 
-          {/* Search */}
-          <BibleSearchEntry />
+              {/* Search */}
+              <BibleSearchEntry />
 
-          {/* Footer note */}
-          <p className="text-center text-sm text-white/50">
-            World English Bible (WEB) — Public Domain — No account, ever.
-          </p>
+              {/* Footer note */}
+              <p className="text-center text-sm text-white/50">
+                World English Bible (WEB) — Public Domain — No account, ever.
+              </p>
+            </>
+          )}
         </div>
       </div>
 

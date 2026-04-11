@@ -1,5 +1,6 @@
-import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
+import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMyBibleView, type MyBibleViewId } from '@/hooks/url/useMyBibleView'
 import { BookOpen, Paintbrush, PenLine, Bookmark as BookmarkIcon, Filter, Flame } from 'lucide-react'
 import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
 import { useStreakStore } from '@/hooks/bible/useStreakStore'
@@ -66,6 +67,34 @@ function MyBiblePageInner() {
   const [streakModalOpen, setStreakModalOpen] = useState(false)
   const { streak: streakRecord, atRisk } = useStreakStore()
   const [actionMenu, setActionMenu] = useState<{ item: ActivityItem; x: number; y: number } | null>(null)
+
+  // BB-38: URL-driven filter type via ?view=<section>. Syncs both directions —
+  // URL changes flow into `filter.type` via the useEffect below, and filter
+  // type changes from the UI flow back to URL via `handleFilterTypeChange`.
+  const { view, setView } = useMyBibleView()
+
+  // Sync URL → filter.type (handles cold-load + browser back/forward)
+  useEffect(() => {
+    if (filter.type !== view) {
+      setFilter({ ...filter, type: view, color: view !== 'highlights' ? 'all' : filter.color })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view])
+
+  // Intercept filter changes from the ActivityFilterBar: if the type changed,
+  // route through setView (URL write) — the useEffect above then syncs the
+  // filter state. Other filter field changes (book, color, searchQuery) pass
+  // through directly.
+  const handleFilterChange = useCallback(
+    (newFilter: ActivityFilter) => {
+      if (newFilter.type !== filter.type) {
+        setView(newFilter.type as MyBibleViewId)
+      } else {
+        setFilter(newFilter)
+      }
+    },
+    [filter.type, setFilter, setView],
+  )
 
   const handleImportComplete = useCallback(() => {
     window.location.reload()
@@ -146,7 +175,7 @@ function MyBiblePageInner() {
                     <button
                       key={stat.key}
                       type="button"
-                      onClick={() => setFilter({ ...filter, type: stat.filterType })}
+                      onClick={() => setView(stat.filterType as MyBibleViewId)}
                       className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-colors hover:border-white/[0.18] hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                     >
                       <stat.icon size={16} className="text-white/40" />
@@ -182,7 +211,7 @@ function MyBiblePageInner() {
             <ActivityFilterBar
               filter={filter}
               sort={sort}
-              onFilterChange={setFilter}
+              onFilterChange={handleFilterChange}
               onSortChange={setSort}
               bookCounts={bookCounts}
               searchQuery={filter.searchQuery}

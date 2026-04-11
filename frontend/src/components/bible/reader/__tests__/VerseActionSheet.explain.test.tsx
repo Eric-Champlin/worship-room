@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useState } from 'react'
 import type { VerseSelection } from '@/types/verse-actions'
+import type { DeepLinkableAction } from '@/lib/url/validateAction'
 
 // ---------------------------------------------------------------------------
 // Mocks — mirror VerseActionSheet.test.tsx baseline
@@ -69,15 +71,25 @@ const SELECTION: VerseSelection = {
   ],
 }
 
-function renderSheet(selection: VerseSelection = SELECTION) {
-  return render(
+// BB-38: Stateful wrapper — tests click Explain button, `onOpenAction` callback
+// updates local state, sub-view mounts via the updated `action` prop.
+function SheetWithState({ selection }: { selection: VerseSelection }) {
+  const [action, setAction] = useState<DeepLinkableAction | null>(null)
+  return (
     <VerseActionSheet
       selection={selection}
       isOpen
       onClose={vi.fn()}
       onExtendSelection={vi.fn()}
-    />,
+      action={action}
+      onOpenAction={setAction}
+      onCloseAction={() => setAction(null)}
+    />
   )
+}
+
+function renderSheet(selection: VerseSelection = SELECTION) {
+  return render(<SheetWithState selection={selection} />)
 }
 
 beforeEach(() => {

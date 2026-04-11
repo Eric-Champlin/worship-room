@@ -1,8 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { useState } from 'react'
 import { VerseActionSheet } from '../VerseActionSheet'
 import type { VerseSelection } from '@/types/verse-actions'
+import type { DeepLinkableAction } from '@/lib/url/validateAction'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -53,17 +55,34 @@ const MULTI_VERSE: VerseSelection = {
   ],
 }
 
-const defaultProps = {
-  selection: SINGLE_VERSE,
-  isOpen: true,
-  onClose: vi.fn(),
-  onExtendSelection: vi.fn(),
+// BB-38: Stateful wrapper for sub-view mounting via action prop.
+type SheetWithStateProps = {
+  selection?: VerseSelection
+  isOpen?: boolean
+  initialAction?: DeepLinkableAction | null
+  onClose?: (options?: { navigating?: boolean }) => void
+  onExtendSelection?: (verseNumber: number) => void
 }
 
-function renderSheet(props = defaultProps) {
+function SheetWithState(props: SheetWithStateProps) {
+  const [action, setAction] = useState<DeepLinkableAction | null>(props.initialAction ?? null)
+  return (
+    <VerseActionSheet
+      selection={props.selection ?? SINGLE_VERSE}
+      isOpen={props.isOpen ?? true}
+      onClose={props.onClose ?? vi.fn()}
+      onExtendSelection={props.onExtendSelection ?? vi.fn()}
+      action={action}
+      onOpenAction={setAction}
+      onCloseAction={() => setAction(null)}
+    />
+  )
+}
+
+function renderSheet(overrides: SheetWithStateProps = {}) {
   return render(
     <MemoryRouter>
-      <VerseActionSheet {...props} />
+      <SheetWithState {...overrides} />
     </MemoryRouter>,
   )
 }
@@ -95,7 +114,7 @@ describe('VerseActionSheet accessibility', () => {
   })
 
   it('aria-live announces range selection', () => {
-    const { container } = renderSheet({ ...defaultProps, selection: MULTI_VERSE })
+    const { container } = renderSheet({ selection: MULTI_VERSE })
     const live = container.querySelector('[aria-live="polite"]')
     expect(live!.textContent).toContain('Selected John 3:16 through 18')
   })

@@ -71,9 +71,9 @@ const PROGRESS_DAY_1 = {
   celebrationShown: false,
 }
 
-function renderDay(dayNumber = 1) {
+function renderDay(dayNumber = 1, search = '') {
   return render(
-    <MemoryRouter initialEntries={[`/bible/plans/psalm-comfort/day/${dayNumber}`]}>
+    <MemoryRouter initialEntries={[`/bible/plans/psalm-comfort/day/${dayNumber}${search}`]}>
       <Routes>
         <Route path="/bible/plans/:slug/day/:dayNumber" element={<BiblePlanDay />} />
       </Routes>
@@ -110,12 +110,20 @@ describe('BiblePlanDay', () => {
     expect(screen.getByText('Read this passage')).toBeInTheDocument()
   })
 
-  it('passage link includes highlight param', () => {
+  it('passage link includes scroll-to param', () => {
     mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
     renderDay(1)
 
     const link = screen.getByText('Read this passage').closest('a')
-    expect(link).toHaveAttribute('href', '/bible/psalms/23?highlight=1')
+    expect(link).toHaveAttribute('href', '/bible/psalms/23?scroll-to=1')
+  })
+
+  it('BB-38: passage link forwards ?verse= from the plan day URL', () => {
+    mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+    renderDay(1, '?verse=3')
+
+    const link = screen.getByText('Read this passage').closest('a')
+    expect(link).toHaveAttribute('href', '/bible/psalms/23?scroll-to=1&verse=3')
   })
 
   it('renders reflection prompts with journal link', () => {

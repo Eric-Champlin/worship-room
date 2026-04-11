@@ -1,7 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { useState } from 'react'
 import { VerseActionSheet } from '../VerseActionSheet'
 import type { VerseSelection } from '@/types/verse-actions'
+import type { DeepLinkableAction } from '@/lib/url/validateAction'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -80,11 +82,35 @@ const MULTI_VERSE: VerseSelection = {
   ],
 }
 
-const defaultProps = {
-  selection: SINGLE_VERSE,
-  isOpen: true,
-  onClose: vi.fn(),
-  onExtendSelection: vi.fn(),
+// BB-38: Stateful wrapper that mirrors BibleReader.tsx's action-prop
+// management. Tests that click an action button to mount a sub-view need the
+// wrapper to track the action prop locally; tests that only inspect the root
+// view can use it with no initialAction and it behaves as a simple passthrough.
+type SheetWithStateProps = {
+  selection?: VerseSelection
+  isOpen?: boolean
+  initialAction?: DeepLinkableAction | null
+  onClose?: (options?: { navigating?: boolean }) => void
+  onExtendSelection?: (verseNumber: number) => void
+}
+
+function SheetWithState(props: SheetWithStateProps) {
+  const [action, setAction] = useState<DeepLinkableAction | null>(props.initialAction ?? null)
+  return (
+    <VerseActionSheet
+      selection={props.selection ?? SINGLE_VERSE}
+      isOpen={props.isOpen ?? true}
+      onClose={props.onClose ?? vi.fn()}
+      onExtendSelection={props.onExtendSelection ?? vi.fn()}
+      action={action}
+      onOpenAction={setAction}
+      onCloseAction={() => setAction(null)}
+    />
+  )
+}
+
+function renderSheet(overrides: SheetWithStateProps = {}) {
+  return render(<SheetWithState {...overrides} />)
 }
 
 // ---------------------------------------------------------------------------
@@ -100,17 +126,17 @@ describe('VerseActionSheet', () => {
   })
 
   it('renders header with formatted reference', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     expect(screen.getByText('John 3:16')).toBeInTheDocument()
   })
 
   it('renders verse preview text', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     expect(screen.getByText(/For God so loved the world/)).toBeInTheDocument()
   })
 
   it('renders 4 primary action buttons', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     expect(screen.getByLabelText('Highlight')).toBeInTheDocument()
     expect(screen.getByLabelText('Note')).toBeInTheDocument()
     expect(screen.getByLabelText('Bookmark')).toBeInTheDocument()
@@ -118,7 +144,7 @@ describe('VerseActionSheet', () => {
   })
 
   it('renders 8 secondary action items', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     expect(screen.getByLabelText('Pray about this')).toBeInTheDocument()
     expect(screen.getByLabelText('Journal about this')).toBeInTheDocument()
     expect(screen.getByLabelText('Meditate on this')).toBeInTheDocument()
@@ -130,14 +156,14 @@ describe('VerseActionSheet', () => {
   })
 
   it('copy action copies text and shows toast', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     fireEvent.click(screen.getByLabelText('Copy'))
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(SINGLE_VERSE.verses[0].text)
     expect(mockShowToast).toHaveBeenCalledWith('Copied')
   })
 
   it('copy-with-ref includes reference', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     fireEvent.click(screen.getByLabelText('Copy with reference'))
     const arg = (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
     expect(arg).toContain('\u2014 John 3:16 (WEB)')
@@ -145,14 +171,14 @@ describe('VerseActionSheet', () => {
   })
 
   it('sub-view push on highlight click', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     fireEvent.click(screen.getByLabelText('Highlight'))
     // BB-7: real color picker renders with 5 emotion swatches
     expect(screen.getByLabelText('Peace highlight')).toBeInTheDocument()
   })
 
   it('sub-view back button returns to root', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     fireEvent.click(screen.getByLabelText('Highlight'))
     expect(screen.getByLabelText('Peace highlight')).toBeInTheDocument()
 
@@ -164,20 +190,21 @@ describe('VerseActionSheet', () => {
 
   it('escape closes sheet (via onClose prop)', () => {
     // Since useFocusTrap is mocked, test the close button instead
-    render(<VerseActionSheet {...defaultProps} />)
+    const onClose = vi.fn()
+    renderSheet({ onClose })
     fireEvent.click(screen.getByLabelText('Close'))
-    expect(defaultProps.onClose).toHaveBeenCalledOnce()
+    expect(onClose).toHaveBeenCalledOnce()
   })
 
   it('footer shows WEB caption', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     expect(screen.getByText('WEB · Public Domain')).toBeInTheDocument()
   })
 
   it('reduced motion skips animation', () => {
     mockUseReducedMotion.mockReturnValue(true)
 
-    const { container } = render(<VerseActionSheet {...defaultProps} />)
+    const { container } = renderSheet()
     const panel = container.querySelector('[role="dialog"]')
     expect(panel?.className).not.toContain('animate-')
 
@@ -185,24 +212,24 @@ describe('VerseActionSheet', () => {
   })
 
   it('multi-verse header shows range', () => {
-    render(<VerseActionSheet {...defaultProps} selection={MULTI_VERSE} />)
+    renderSheet({ selection: MULTI_VERSE })
     expect(screen.getByText('John 3:16\u201318')).toBeInTheDocument()
   })
 
   it('aria attributes correct', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
     const dialog = screen.getByRole('dialog')
     expect(dialog).toHaveAttribute('aria-modal', 'true')
     expect(dialog).toHaveAttribute('aria-label', 'Actions for John 3:16')
   })
 
   it('does not render when isOpen is false', () => {
-    render(<VerseActionSheet {...defaultProps} isOpen={false} />)
+    renderSheet({ isOpen: false })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('sub-view header has close button', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
 
     // Click cross-references to open sub-view
     const crossRefsBtn = screen.getByLabelText('Cross-references')
@@ -213,7 +240,7 @@ describe('VerseActionSheet', () => {
   })
 
   it('secondary action row renders badge when handler has renderBadge', () => {
-    render(<VerseActionSheet {...defaultProps} />)
+    renderSheet()
 
     // Cross-references handler has renderBadge — check that it renders something
     // The badge component renders asynchronously, so we just verify the row exists

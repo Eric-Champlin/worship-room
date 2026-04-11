@@ -28,7 +28,7 @@ interface ReaderBodyProps {
   chapterNotes?: Note[]
   /** Verse numbers that just received a highlight (for pulse animation) */
   freshHighlightVerses?: number[]
-  /** Verse numbers glowing from ?highlight= arrival (VOTD "Read in context") */
+  /** Verse numbers glowing from ?scroll-to= arrival (VOTD "Read in context" and similar one-shot scroll targets; legacy ?highlight= is still read but deprecated) */
   arrivalHighlightVerses?: number[]
   /** Whether user prefers reduced motion */
   reducedMotion?: boolean

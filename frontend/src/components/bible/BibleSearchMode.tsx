@@ -30,9 +30,21 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
   )
 }
 
-export function BibleSearchMode() {
+interface BibleSearchModeProps {
+  /**
+   * BB-38: optional controlled query. When provided, the component becomes a
+   * controlled input — the parent (`BibleLanding`) owns the query via
+   * `useSearchQuery()` and the query flows through to the URL.
+   * When undefined, the component falls back to `useBibleSearch`'s internal
+   * state (backward-compatible with any consumer that didn't migrate yet).
+   */
+  query?: string
+  onQueryChange?: (query: string) => void
+}
+
+export function BibleSearchMode({ query: controlledQuery, onQueryChange }: BibleSearchModeProps = {}) {
   const { query, setQuery, results, isSearching, isLoadingBooks } =
-    useBibleSearch()
+    useBibleSearch({ controlledQuery, onQueryChange })
   const { containerRef: searchResultsRef, getStaggerProps: getSearchStaggerProps } =
     useStaggeredEntrance({ staggerDelay: 50, itemCount: results.length })
 

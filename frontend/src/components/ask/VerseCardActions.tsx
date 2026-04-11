@@ -44,7 +44,8 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
       authModal?.openAuthModal('Sign in to save highlights and notes')
       return
     }
-    navigate(`/bible/${parsedRef.bookSlug}/${parsedRef.chapter}?highlight=${parsedRef.verseStart}#verse-${parsedRef.verseStart}`)
+    // BB-38: write ?scroll-to= (renamed from ?highlight=) for the one-shot arrival glow.
+    navigate(`/bible/${parsedRef.bookSlug}/${parsedRef.chapter}?scroll-to=${parsedRef.verseStart}#verse-${parsedRef.verseStart}`)
   }
 
   const handleSaveNoteClick = () => {

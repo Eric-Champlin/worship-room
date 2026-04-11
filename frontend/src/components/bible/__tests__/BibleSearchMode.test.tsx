@@ -24,7 +24,10 @@ vi.mock('@/hooks/useStaggeredEntrance', () => ({
 function renderSearch() {
   return render(
     <MemoryRouter>
-      <BibleSearchMode />
+      {/* BB-38: BibleSearchMode now accepts controlled query props. Pass empty
+          query + noop callback so the component's behavior matches its pre-BB-38
+          uncontrolled path from the test's perspective. */}
+      <BibleSearchMode query="" onQueryChange={vi.fn()} />
     </MemoryRouter>,
   )
 }

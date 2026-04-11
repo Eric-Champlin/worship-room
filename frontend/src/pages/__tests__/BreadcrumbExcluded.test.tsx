@@ -90,26 +90,12 @@ vi.mock('@/hooks/useScenePlayer', () => ({
 }))
 
 describe('Breadcrumb excluded pages', () => {
-  it('BibleBrowser does not render a breadcrumb', async () => {
-    const { BibleBrowser } = await import('../BibleBrowser')
-    render(
-      <MemoryRouter
-        initialEntries={['/bible']}
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
-        <ToastProvider>
-          <AuthModalProvider>
-            <Routes>
-              <Route path="/bible" element={<BibleBrowser />} />
-            </Routes>
-          </AuthModalProvider>
-        </ToastProvider>
-      </MemoryRouter>,
-    )
-    expect(
-      screen.queryByRole('navigation', { name: /breadcrumb/i }),
-    ).not.toBeInTheDocument()
-  })
+  // BB-38 (verification fix): BibleBrowser.tsx was deleted as an orphan when
+  // the Bible redesign moved /bible routing to BibleLanding. The BibleBrowser
+  // breadcrumb-exclusion test was removed along with it. BibleLanding and
+  // BibleBrowse (the current /bible and /bible/browse pages) also do not
+  // render a Breadcrumb component — both intentionally omit breadcrumb
+  // navigation on their hero sections.
 
   it('PrayerWall does not render a breadcrumb', async () => {
     const { PrayerWall } = await import('../PrayerWall')

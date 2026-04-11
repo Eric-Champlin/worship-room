@@ -113,7 +113,7 @@ describe('VerseOfTheDay', () => {
   it('"Read in context" links to correct URL with highlight', () => {
     renderComponent()
     const link = screen.getByText('Read in context').closest('a')
-    expect(link?.getAttribute('href')).toBe('/bible/psalms/23?highlight=1')
+    expect(link?.getAttribute('href')).toBe('/bible/psalms/23?scroll-to=1')
   })
 
   it('"Share" opens share modal', () => {

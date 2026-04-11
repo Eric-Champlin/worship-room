@@ -64,7 +64,9 @@ const ReadingPlanDetail = lazy(() => import('./pages/ReadingPlanDetail').then((m
 const ChallengeDetail = lazy(() => import('./pages/ChallengeDetail').then((m) => ({ default: m.ChallengeDetail })))
 const BibleLanding = lazy(() => import('./pages/BibleLanding').then((m) => ({ default: m.BibleLanding })))
 const BibleBrowse = lazy(() => import('./pages/BibleBrowse').then((m) => ({ default: m.BibleBrowse })))
-const BibleStub = lazy(() => import('./pages/BibleStub').then((m) => ({ default: m.BibleStub })))
+// BB-38: BibleStub was used only for `/bible/search` — that route is now a redirect.
+// BibleSearchRedirect is tiny (just reads URL and issues <Navigate>) so it's imported synchronously.
+import { BibleSearchRedirect } from './components/BibleSearchRedirect'
 const PlanBrowserPage = lazy(() => import('./pages/bible/PlanBrowserPage').then((m) => ({ default: m.PlanBrowserPage })))
 const BiblePlanDetail = lazy(() => import('./pages/BiblePlanDetail').then((m) => ({ default: m.BiblePlanDetail })))
 const BiblePlanDay = lazy(() => import('./pages/BiblePlanDay').then((m) => ({ default: m.BiblePlanDay })))
@@ -191,7 +193,8 @@ function App() {
           <Route path="/bible/plans" element={<Suspense fallback={<RouteLoadingFallback />}><PlanBrowserPage /></Suspense>} />
           <Route path="/bible/plans/:slug" element={<Suspense fallback={<RouteLoadingFallback />}><BiblePlanDetail /></Suspense>} />
           <Route path="/bible/plans/:slug/day/:dayNumber" element={<Suspense fallback={<RouteLoadingFallback />}><BiblePlanDay /></Suspense>} />
-          <Route path="/bible/search" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="search" /></Suspense>} />
+          {/* BB-38: /bible/search is a legacy path that redirects to /bible?mode=search, forwarding any ?q= */}
+          <Route path="/bible/search" element={<BibleSearchRedirect />} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />
           <Route path="/journal" element={<Navigate to="/daily?tab=journal" replace />} />

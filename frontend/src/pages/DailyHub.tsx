@@ -29,6 +29,7 @@ import { useRoutePreload } from '@/hooks/useRoutePreload'
 import { DailyAmbientPillFAB } from '@/components/daily/DailyAmbientPillFAB'
 import type { AmbientContext } from '@/constants/ambient-suggestions'
 import type { PrayContext, DevotionalSnapshot } from '@/types/daily-experience'
+import { useDailyHubTab } from '@/hooks/url/useDailyHubTab'
 
 const TABS = [
   { id: 'devotional', label: 'Devotional', mobileLabel: 'Devos', icon: BookOpen },
@@ -38,10 +39,6 @@ const TABS = [
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
-
-function isValidTab(value: string | null): value is TabId {
-  return value === 'devotional' || value === 'pray' || value === 'journal' || value === 'meditate'
-}
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -53,8 +50,9 @@ function getGreeting(): string {
 function DailyHubContent() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const rawTab = searchParams.get('tab')
-  const activeTab: TabId = isValidTab(rawTab) ? rawTab : 'devotional'
+  // BB-38: tab state extracted into useDailyHubTab. Existing behavior unchanged —
+  // the hook wraps the same useSearchParams pattern that lived inline here.
+  const { tab: activeTab, setTab } = useDailyHubTab()
 
   const { user, isAuthenticated } = useAuth()
   const { isPrayComplete, isJournalComplete, isMeditateComplete } =
@@ -111,33 +109,33 @@ function DailyHubContent() {
   const switchTab = useCallback(
     (tab: TabId) => {
       setPrayContext(null)
-      setSearchParams({ tab })
+      setTab(tab)
     },
-    [setSearchParams],
+    [setTab],
   )
 
   const handleSwitchToJournal = useCallback(
     (topic: string) => {
       setPrayContext({ from: 'pray', topic })
-      setSearchParams({ tab: 'journal' })
+      setTab('journal')
     },
-    [setSearchParams],
+    [setTab],
   )
 
   const handleSwitchToDevotionalJournal = useCallback(
     (topic: string, customPrompt: string, snapshot?: DevotionalSnapshot) => {
       setPrayContext({ from: 'devotional', topic, customPrompt, devotionalSnapshot: snapshot })
-      setSearchParams({ tab: 'journal' })
+      setTab('journal')
     },
-    [setSearchParams],
+    [setTab],
   )
 
   const handleSwitchToDevotionalPray = useCallback(
     (topic: string, customPrompt: string, snapshot?: DevotionalSnapshot) => {
       setPrayContext({ from: 'devotional', topic, customPrompt, devotionalSnapshot: snapshot })
-      setSearchParams({ tab: 'pray' })
+      setTab('pray')
     },
-    [setSearchParams],
+    [setTab],
   )
 
   const greeting = getGreeting()

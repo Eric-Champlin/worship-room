@@ -118,3 +118,65 @@ describe('useBibleSearch', () => {
     expect(result.current.results).toEqual([])
   })
 })
+
+// ---------------------------------------------------------------------------
+// BB-38: controlled mode
+// ---------------------------------------------------------------------------
+
+describe('useBibleSearch — controlled mode (BB-38)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('returns controlledQuery when the option is provided', () => {
+    const { result } = renderHook(() =>
+      useBibleSearch({ controlledQuery: 'love', onQueryChange: vi.fn() }),
+    )
+    expect(result.current.query).toBe('love')
+  })
+
+  it('setQuery calls onQueryChange instead of updating internal state', () => {
+    const onQueryChange = vi.fn()
+    const { result } = renderHook(() =>
+      useBibleSearch({ controlledQuery: 'initial', onQueryChange }),
+    )
+    act(() => result.current.setQuery('peace'))
+    expect(onQueryChange).toHaveBeenCalledWith('peace')
+    // `query` still reflects the prop — parent is responsible for rerendering
+    expect(result.current.query).toBe('initial')
+  })
+
+  it('controlled query updates on prop change between renders', () => {
+    const onQueryChange = vi.fn()
+    const { result, rerender } = renderHook(
+      ({ q }: { q: string }) =>
+        useBibleSearch({ controlledQuery: q, onQueryChange }),
+      { initialProps: { q: 'love' } },
+    )
+    expect(result.current.query).toBe('love')
+    rerender({ q: 'peace' })
+    expect(result.current.query).toBe('peace')
+  })
+
+  it('switches back to uncontrolled when options are omitted on rerender', () => {
+    const onQueryChange = vi.fn()
+    const { result, rerender } = renderHook(
+      ({ controlled }: { controlled: boolean }) =>
+        useBibleSearch(
+          controlled
+            ? { controlledQuery: 'control-value', onQueryChange }
+            : undefined,
+        ),
+      { initialProps: { controlled: true } },
+    )
+    expect(result.current.query).toBe('control-value')
+
+    rerender({ controlled: false })
+    // Internal state starts fresh from its useState('') initializer
+    expect(result.current.query).toBe('')
+  })
+})

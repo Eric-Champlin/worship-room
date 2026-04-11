@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, X, ArrowLeft, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -9,12 +9,15 @@ import { useToast } from '@/components/ui/Toast'
 import {
   getPrimaryActions,
   getSecondaryActions,
+  getActionByType,
   formatReference,
   copyToClipboard,
 } from '@/lib/bible/verseActionRegistry'
 import { getBookmarkForVerse } from '@/lib/bible/bookmarkStore'
 import { BookmarkLabelEditor } from '@/components/bible/reader/BookmarkLabelEditor'
-import type { VerseSelection, VerseAction, VerseActionHandler } from '@/types/verse-actions'
+import type { VerseSelection, VerseActionHandler } from '@/types/verse-actions'
+import type { DeepLinkableAction } from '@/lib/url/validateAction'
+import { DEEP_LINKABLE_ACTIONS } from '@/lib/url/validateAction'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -34,6 +37,28 @@ interface VerseActionSheetProps {
   isOpen: boolean
   onClose: (options?: { navigating?: boolean }) => void
   onExtendSelection: (verseNumber: number) => void
+  /**
+   * BB-38: URL-derived sub-view action. When non-null and the matched handler
+   * has `hasSubView: true`, the sheet mounts the corresponding sub-view.
+   * Source of truth for which sub-view is currently open — there is no
+   * internal state backing this. Only deep-linkable actions are representable
+   * here; sub-view-less actions (bookmark, pray, journal, meditate, copy,
+   * copy-with-ref) never flow through this prop.
+   */
+  action: DeepLinkableAction | null
+  /**
+   * BB-38: Called when the user taps an action button that opens a sub-view.
+   * The parent writes `?action=<action>` to the URL, which re-renders the sheet
+   * with the new `action` prop and mounts the sub-view. Only fires for actions
+   * in the deep-linkable subset (handlers with `hasSubView: true` AND in the
+   * DEEP_LINKABLE_ACTIONS allowlist).
+   */
+  onOpenAction: (action: DeepLinkableAction) => void
+  /**
+   * BB-38: Called when the user dismisses a sub-view via the back arrow. The
+   * parent removes `?action=` from the URL.
+   */
+  onCloseAction: () => void
 }
 
 // ---------------------------------------------------------------------------
@@ -45,15 +70,21 @@ export function VerseActionSheet({
   isOpen,
   onClose,
   onExtendSelection: _onExtendSelection, // reserved for future in-sheet selection UI
+  action,
+  onOpenAction,
+  onCloseAction,
 }: VerseActionSheetProps) {
   const routerNavigate = useNavigate()
   const reducedMotion = useReducedMotion()
   const { showToast } = useToast()
   const [isEntering, setIsEntering] = useState(true)
-  const [subView, setSubView] = useState<{
-    action: VerseAction
-    handler: VerseActionHandler
-  } | null>(null)
+  // BB-38: subView is derived from the `action` prop (URL-driven), not internal state.
+  const subView = useMemo(() => {
+    if (!action) return null
+    const handler = getActionByType(action)
+    if (!handler || !handler.hasSubView) return null
+    return { action, handler }
+  }, [action])
   const [announceText, setAnnounceText] = useState('')
 
   // Track which action button pushed the sub-view for focus restore
@@ -91,11 +122,12 @@ export function VerseActionSheet({
   // Focus trap — Escape pops sub-view or closes sheet
   const handleEscape = useCallback(() => {
     if (subView) {
-      setSubView(null)
+      // BB-38: clear ?action= to close sub-view while keeping sheet open
+      onCloseAction()
     } else {
       onClose()
     }
-  }, [subView, onClose])
+  }, [subView, onClose, onCloseAction])
 
   const containerRef = useFocusTrap(isOpen, handleEscape)
 
@@ -122,12 +154,9 @@ export function VerseActionSheet({
     }
   }, [isOpen, selection])
 
-  // Reset sub-view when sheet closes
-  useEffect(() => {
-    if (!isOpen) {
-      setSubView(null)
-    }
-  }, [isOpen])
+  // BB-38: subView is URL-derived — no internal reset needed.
+  // When the sheet closes via onClose, the parent clears ?verse= and ?action=,
+  // which drops the action prop to null and unmounts the sub-view.
 
   // ---------------------------------------------------------------------------
   // Keyboard shortcuts
@@ -172,9 +201,14 @@ export function VerseActionSheet({
   const handleActionClick = useCallback(
     (handler: VerseActionHandler, triggerButton: HTMLButtonElement | null) => {
       if (handler.hasSubView) {
-        subViewTriggerRef.current = triggerButton
-        setSubView({ action: handler.action, handler })
-        setAnnounceText(handler.label)
+        // BB-38: only the 7 deep-linkable actions can be written to the URL.
+        // In practice every handler with `hasSubView: true` is in the allowlist,
+        // but narrow the type at runtime for defense-in-depth.
+        if ((DEEP_LINKABLE_ACTIONS as readonly string[]).includes(handler.action)) {
+          subViewTriggerRef.current = triggerButton
+          onOpenAction(handler.action as DeepLinkableAction)
+          setAnnounceText(handler.label)
+        }
       } else {
         handler.onInvoke(selection, {
           showToast: forwardShowToast,
@@ -183,16 +217,17 @@ export function VerseActionSheet({
         })
       }
     },
-    [selection, forwardShowToast, onClose, routerNavigate],
+    [selection, forwardShowToast, onClose, routerNavigate, onOpenAction],
   )
 
   const handleSubViewBack = useCallback(() => {
-    setSubView(null)
+    // BB-38: clear ?action= from URL; sub-view unmounts via prop re-render
+    onCloseAction()
     // Focus restore happens via useFocusTrap re-query + manual restore
     requestAnimationFrame(() => {
       subViewTriggerRef.current?.focus()
     })
-  }, [])
+  }, [onCloseAction])
 
   // ---------------------------------------------------------------------------
   // Copy reference (header button)

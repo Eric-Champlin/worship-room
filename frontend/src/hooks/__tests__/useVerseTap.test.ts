@@ -1,7 +1,8 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useVerseTap } from '../useVerseTap'
+import { useVerseTap, computeExtendedRange } from '../useVerseTap'
 import type { BibleVerse } from '@/types/bible'
+import type { VerseRange } from '@/lib/url/parseVerseParam'
 
 // Polyfill PointerEvent for jsdom
 class MockPointerEvent extends MouseEvent {
@@ -25,7 +26,7 @@ if (typeof globalThis.PointerEvent === 'undefined') {
 const TEST_VERSES: BibleVerse[] = [
   { number: 16, text: 'For God so loved the world...' },
   { number: 17, text: "For God didn't send his Son..." },
-  { number: 18, text: "He who believes in him..." },
+  { number: 18, text: 'He who believes in him...' },
   { number: 19, text: 'This is the judgment...' },
   { number: 20, text: 'For everyone who does evil...' },
 ]
@@ -49,7 +50,7 @@ function createContainer(): HTMLDivElement {
   return container
 }
 
-function simulateQuickTap(target: HTMLElement, options?: Partial<PointerEvent>) {
+function simulateQuickTap(target: HTMLElement, options?: PointerEventInit) {
   const rect = target.getBoundingClientRect()
   const x = rect.left + rect.width / 2
   const y = rect.top + rect.height / 2
@@ -72,7 +73,12 @@ function simulateQuickTap(target: HTMLElement, options?: Partial<PointerEvent>) 
   )
 }
 
-function defaultOptions(container: HTMLDivElement) {
+type UseVerseTapOptions = Parameters<typeof useVerseTap>[0]
+
+function defaultOptions(
+  container: HTMLDivElement,
+  overrides: Partial<UseVerseTapOptions> = {},
+): UseVerseTapOptions {
   return {
     containerRef: { current: container },
     bookSlug: 'john',
@@ -80,11 +86,15 @@ function defaultOptions(container: HTMLDivElement) {
     chapter: 3,
     verses: TEST_VERSES,
     enabled: true,
+    verseRange: null,
+    onVerseTap: vi.fn(),
+    onExtendSelection: vi.fn(),
+    ...overrides,
   }
 }
 
 // ---------------------------------------------------------------------------
-// Tests
+// Tests (BB-38: callback-driven API)
 // ---------------------------------------------------------------------------
 
 describe('useVerseTap', () => {
@@ -93,9 +103,6 @@ describe('useVerseTap', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     container = createContainer()
-    // Mock history.pushState and history.back
-    vi.spyOn(history, 'pushState').mockImplementation(() => {})
-    vi.spyOn(history, 'back').mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -104,61 +111,101 @@ describe('useVerseTap', () => {
     vi.restoreAllMocks()
   })
 
-  it('returns null selection initially', () => {
+  // ---------------------------------------------------------------------------
+  // Selection derivation
+  // ---------------------------------------------------------------------------
+
+  it('returns null selection when verseRange is null', () => {
     const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
     expect(result.current.selection).toBeNull()
-    expect(result.current.isSheetOpen).toBe(false)
   })
 
-  it('quick tap on verse opens sheet', () => {
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
-    const verseSpan = container.querySelector('[data-verse="16"]')!
-
-    act(() => {
-      simulateQuickTap(verseSpan as HTMLElement)
-    })
-
-    expect(result.current.isSheetOpen).toBe(true)
+  it('derives a single-verse selection from verseRange prop + verses list', () => {
+    const { result } = renderHook(() =>
+      useVerseTap(defaultOptions(container, { verseRange: { start: 16, end: 16 } })),
+    )
     expect(result.current.selection).not.toBeNull()
     expect(result.current.selection!.startVerse).toBe(16)
     expect(result.current.selection!.endVerse).toBe(16)
     expect(result.current.selection!.bookName).toBe('John')
+    expect(result.current.selection!.verses).toHaveLength(1)
   })
 
-  it('tap on non-verse element is no-op', () => {
-    // Add a non-verse element
+  it('derives a multi-verse range selection from verseRange prop', () => {
+    const { result } = renderHook(() =>
+      useVerseTap(defaultOptions(container, { verseRange: { start: 16, end: 18 } })),
+    )
+    expect(result.current.selection!.startVerse).toBe(16)
+    expect(result.current.selection!.endVerse).toBe(18)
+    expect(result.current.selection!.verses).toHaveLength(3)
+  })
+
+  it('selection updates when verseRange prop changes between renders', () => {
+    const { result, rerender } = renderHook(
+      ({ verseRange }: { verseRange: VerseRange | null }) =>
+        useVerseTap(defaultOptions(container, { verseRange })),
+      { initialProps: { verseRange: null as VerseRange | null } },
+    )
+    expect(result.current.selection).toBeNull()
+
+    rerender({ verseRange: { start: 17, end: 19 } })
+    expect(result.current.selection!.startVerse).toBe(17)
+    expect(result.current.selection!.endVerse).toBe(19)
+  })
+
+  // ---------------------------------------------------------------------------
+  // Tap callbacks (onVerseTap fires when no prior selection)
+  // ---------------------------------------------------------------------------
+
+  it('quick tap on verse calls onVerseTap with the verse number (no prior selection)', () => {
+    const onVerseTap = vi.fn()
+    renderHook(() => useVerseTap(defaultOptions(container, { onVerseTap })))
+    const verseSpan = container.querySelector('[data-verse="16"]') as HTMLElement
+
+    act(() => {
+      simulateQuickTap(verseSpan)
+    })
+
+    expect(onVerseTap).toHaveBeenCalledWith(16)
+    expect(onVerseTap).toHaveBeenCalledTimes(1)
+  })
+
+  it('tap on non-verse element does not fire either callback', () => {
+    const onVerseTap = vi.fn()
+    const onExtendSelection = vi.fn()
     const heading = document.createElement('h2')
     heading.textContent = 'Chapter 3'
     container.prepend(heading)
 
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
+    renderHook(() => useVerseTap(defaultOptions(container, { onVerseTap, onExtendSelection })))
 
     act(() => {
       simulateQuickTap(heading)
     })
 
-    expect(result.current.selection).toBeNull()
-    expect(result.current.isSheetOpen).toBe(false)
+    expect(onVerseTap).not.toHaveBeenCalled()
+    expect(onExtendSelection).not.toHaveBeenCalled()
   })
 
-  it('tap with text selection is no-op', () => {
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
-    const verseSpan = container.querySelector('[data-verse="16"]')!
+  it('tap with active text selection does not fire callbacks', () => {
+    const onVerseTap = vi.fn()
+    renderHook(() => useVerseTap(defaultOptions(container, { onVerseTap })))
+    const verseSpan = container.querySelector('[data-verse="16"]') as HTMLElement
 
-    // Mock window.getSelection to return non-empty
     vi.spyOn(window, 'getSelection').mockReturnValue({
       toString: () => 'selected text',
     } as Selection)
 
     act(() => {
-      simulateQuickTap(verseSpan as HTMLElement)
+      simulateQuickTap(verseSpan)
     })
 
-    expect(result.current.isSheetOpen).toBe(false)
+    expect(onVerseTap).not.toHaveBeenCalled()
   })
 
-  it('long press opens sheet', () => {
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
+  it('long press calls onVerseTap', () => {
+    const onVerseTap = vi.fn()
+    renderHook(() => useVerseTap(defaultOptions(container, { onVerseTap })))
     const verseSpan = container.querySelector('[data-verse="16"]') as HTMLElement
 
     act(() => {
@@ -167,17 +214,16 @@ describe('useVerseTap', () => {
       )
     })
 
-    // Advance past long-press delay
     act(() => {
       vi.advanceTimersByTime(500)
     })
 
-    expect(result.current.isSheetOpen).toBe(true)
-    expect(result.current.selection!.startVerse).toBe(16)
+    expect(onVerseTap).toHaveBeenCalledWith(16)
   })
 
-  it('long press cancelled by movement', () => {
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
+  it('long press cancelled by movement does not fire callback', () => {
+    const onVerseTap = vi.fn()
+    renderHook(() => useVerseTap(defaultOptions(container, { onVerseTap })))
     const verseSpan = container.querySelector('[data-verse="16"]') as HTMLElement
 
     act(() => {
@@ -197,94 +243,119 @@ describe('useVerseTap', () => {
       vi.advanceTimersByTime(500)
     })
 
-    expect(result.current.isSheetOpen).toBe(false)
+    expect(onVerseTap).not.toHaveBeenCalled()
   })
 
-  it('multi-verse extends range', () => {
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
+  // ---------------------------------------------------------------------------
+  // Extend callbacks (onExtendSelection fires when verseRange is already set)
+  // ---------------------------------------------------------------------------
+
+  it('tap on new verse while selection exists calls onExtendSelection with the expanded range', () => {
+    const onExtendSelection = vi.fn()
+    renderHook(() =>
+      useVerseTap(
+        defaultOptions(container, {
+          verseRange: { start: 16, end: 16 },
+          onExtendSelection,
+        }),
+      ),
+    )
+    const verseSpan18 = container.querySelector('[data-verse="18"]') as HTMLElement
+
+    act(() => {
+      simulateQuickTap(verseSpan18)
+    })
+
+    expect(onExtendSelection).toHaveBeenCalledWith(16, 18)
+  })
+
+  it('tap on verse at the start of a multi-verse range shrinks the range', () => {
+    const onExtendSelection = vi.fn()
+    renderHook(() =>
+      useVerseTap(
+        defaultOptions(container, {
+          verseRange: { start: 16, end: 18 },
+          onExtendSelection,
+        }),
+      ),
+    )
+    const verseSpan16 = container.querySelector('[data-verse="16"]') as HTMLElement
+
+    act(() => {
+      simulateQuickTap(verseSpan16)
+    })
+
+    expect(onExtendSelection).toHaveBeenCalledWith(17, 18)
+  })
+
+  it('tap on verse at the end of a multi-verse range shrinks the range', () => {
+    const onExtendSelection = vi.fn()
+    renderHook(() =>
+      useVerseTap(
+        defaultOptions(container, {
+          verseRange: { start: 16, end: 18 },
+          onExtendSelection,
+        }),
+      ),
+    )
+    const verseSpan18 = container.querySelector('[data-verse="18"]') as HTMLElement
+
+    act(() => {
+      simulateQuickTap(verseSpan18)
+    })
+
+    expect(onExtendSelection).toHaveBeenCalledWith(16, 17)
+  })
+
+  // ---------------------------------------------------------------------------
+  // Disabled mode
+  // ---------------------------------------------------------------------------
+
+  it('does not fire callbacks when enabled is false', () => {
+    const onVerseTap = vi.fn()
+    const onExtendSelection = vi.fn()
+    renderHook(() =>
+      useVerseTap(defaultOptions(container, { enabled: false, onVerseTap, onExtendSelection })),
+    )
     const verseSpan = container.querySelector('[data-verse="16"]') as HTMLElement
 
     act(() => {
       simulateQuickTap(verseSpan)
     })
 
-    expect(result.current.selection!.startVerse).toBe(16)
-    expect(result.current.selection!.endVerse).toBe(16)
+    expect(onVerseTap).not.toHaveBeenCalled()
+    expect(onExtendSelection).not.toHaveBeenCalled()
+  })
+})
 
-    act(() => {
-      result.current.extendSelection(18)
-    })
+// ---------------------------------------------------------------------------
+// computeExtendedRange pure helper
+// ---------------------------------------------------------------------------
 
-    expect(result.current.selection!.startVerse).toBe(16)
-    expect(result.current.selection!.endVerse).toBe(18)
-    expect(result.current.selection!.verses).toHaveLength(3)
+describe('computeExtendedRange', () => {
+  it('shrinks from start when tapping the start verse of a multi-verse range', () => {
+    expect(computeExtendedRange({ start: 16, end: 18 }, 16)).toEqual({ start: 17, end: 18 })
   })
 
-  it('shift+click extends range', () => {
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
-    const verse16 = container.querySelector('[data-verse="16"]') as HTMLElement
-    const verse20 = container.querySelector('[data-verse="20"]') as HTMLElement
-
-    act(() => {
-      simulateQuickTap(verse16)
-    })
-
-    expect(result.current.isSheetOpen).toBe(true)
-
-    act(() => {
-      simulateQuickTap(verse20, { shiftKey: true })
-    })
-
-    expect(result.current.selection!.startVerse).toBe(16)
-    expect(result.current.selection!.endVerse).toBe(20)
+  it('shrinks from end when tapping the end verse of a multi-verse range', () => {
+    expect(computeExtendedRange({ start: 16, end: 18 }, 18)).toEqual({ start: 16, end: 17 })
   })
 
-  it('closeSheet clears selection', () => {
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
-    const verseSpan = container.querySelector('[data-verse="16"]') as HTMLElement
-
-    act(() => {
-      simulateQuickTap(verseSpan)
-    })
-
-    expect(result.current.isSheetOpen).toBe(true)
-
-    act(() => {
-      result.current.closeSheet()
-    })
-
-    expect(result.current.selection).toBeNull()
-    expect(result.current.isSheetOpen).toBe(false)
+  it('expands upward when tapping a verse after a single-verse selection', () => {
+    expect(computeExtendedRange({ start: 16, end: 16 }, 20)).toEqual({ start: 16, end: 20 })
   })
 
-  it('does not fire when disabled', () => {
-    const opts = { ...defaultOptions(container), enabled: false }
-    const { result } = renderHook(() => useVerseTap(opts))
-    const verseSpan = container.querySelector('[data-verse="16"]') as HTMLElement
-
-    act(() => {
-      simulateQuickTap(verseSpan)
-    })
-
-    expect(result.current.isSheetOpen).toBe(false)
+  it('expands downward when tapping a verse before a single-verse selection', () => {
+    expect(computeExtendedRange({ start: 16, end: 16 }, 14)).toEqual({ start: 14, end: 16 })
   })
 
-  it('browser back closes sheet', () => {
-    const { result } = renderHook(() => useVerseTap(defaultOptions(container)))
-    const verseSpan = container.querySelector('[data-verse="16"]') as HTMLElement
+  it('expands outward when tapping a verse outside a multi-verse range', () => {
+    expect(computeExtendedRange({ start: 16, end: 18 }, 20)).toEqual({ start: 16, end: 20 })
+  })
 
-    act(() => {
-      simulateQuickTap(verseSpan)
-    })
-
-    expect(result.current.isSheetOpen).toBe(true)
-
-    // Simulate browser back (popstate without verseSheet state)
-    act(() => {
-      window.dispatchEvent(new PopStateEvent('popstate', { state: null }))
-    })
-
-    expect(result.current.isSheetOpen).toBe(false)
-    expect(result.current.selection).toBeNull()
+  it('is a no-op when tapping the sole selected verse', () => {
+    // Tapping verse 16 when selection is { 16, 16 } — not an edge shrink (range === 1),
+    // so it falls through to the expand branch, which produces the same range.
+    expect(computeExtendedRange({ start: 16, end: 16 }, 16)).toEqual({ start: 16, end: 16 })
   })
 })
