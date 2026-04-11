@@ -98,6 +98,7 @@ export function ReflectSubView({
             kind={state.errorKind}
             message={state.errorMessage}
             onRetry={state.retry}
+            retryAfterSeconds={state.retryAfterSeconds ?? undefined}
           />
         )}
 

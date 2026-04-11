@@ -14,7 +14,18 @@ import {
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
+  RateLimitError,
 } from '@/lib/ai/errors'
+import {
+  clearAllAICache,
+  getCachedAIResult,
+  setCachedAIResult,
+  type AIFeature,
+} from '@/lib/ai/cache'
+import {
+  consumeRateLimitToken,
+  resetRateLimitForTests,
+} from '@/lib/ai/rateLimit'
 
 /**
  * The Gemini model used for BB-30 "Explain this passage".
@@ -87,9 +98,155 @@ function getClient(): GoogleGenAI {
 /**
  * Test-only hook to reset the memoized client between tests. Never called
  * from production code — exported solely for the unit test suite.
+ *
+ * BB-32 extension: also clears the BB-32 cache and rate-limit state. This
+ * keeps the "full module reset" contract intact — callers that reset the
+ * client expect a clean slate, and BB-32 added transitive module-level
+ * state (cache writes in localStorage, in-memory rate-limit buckets) that
+ * would otherwise leak across tests. The existing `geminiClient.test.ts`
+ * beforeEach ALSO calls `clearAllAICache()` + `resetRateLimitForTests()`
+ * directly as belt-and-suspenders — but a mid-test call to
+ * `__resetGeminiClientForTests` (e.g., in the "reuses the client
+ * (memoized)" regression test) needs this extension to keep the existing
+ * assertion `GoogleGenAI.toHaveBeenCalledTimes(2)` passing after the
+ * cache layer was introduced.
  */
 export function __resetGeminiClientForTests(): void {
   client = null
+  clearAllAICache()
+  resetRateLimitForTests()
+}
+
+/**
+ * BB-32 — Shared helper that wraps a Gemini call with cache and rate-limit
+ * layers. Both `generateExplanation` and `generateReflection` route through
+ * this helper so the cache + rate-limit logic lives in exactly one place.
+ *
+ * The composition order is load-bearing:
+ *   1. Cache lookup — synchronous, returns a hit WITHOUT consuming a
+ *      rate-limit token and WITHOUT calling the SDK. This is the most
+ *      important property of BB-32: repeated requests for the same passage
+ *      are completely free.
+ *   2. Rate-limit check — consumes one token if allowed, throws
+ *      `RateLimitError` BEFORE the SDK is called if denied.
+ *   3. SDK call with the existing abort-signal composition and error
+ *      mapping preserved verbatim from BB-30/BB-31.
+ *   4. Safety-block detection (three-path check preserved verbatim).
+ *   5. On success: cache the result and return it. On any error: do NOT
+ *      cache — retrying after a transient failure should fire a fresh
+ *      request, not return the old failure for 7 days.
+ *
+ * The function signature keeps `feature`, `systemPrompt`, and
+ * `buildUserPrompt` injected by the caller so Explain and Reflect can
+ * share this helper without cross-contaminating their prompts.
+ */
+async function generateWithPromptAndCacheAndRateLimit(
+  feature: AIFeature,
+  systemPrompt: string,
+  reference: string,
+  verseText: string,
+  buildUserPrompt: (ref: string, text: string) => string,
+  signal?: AbortSignal,
+): Promise<{ content: string; model: string }> {
+  // 1. Cache lookup — no rate-limit consumption, no API call
+  const cached = getCachedAIResult(feature, reference, verseText)
+  if (cached) return cached
+
+  // 2. Rate-limit check — denial throws BEFORE any SDK work
+  const decision = consumeRateLimitToken(feature)
+  if (!decision.allowed) {
+    throw new RateLimitError(decision.retryAfterSeconds)
+  }
+
+  // 3. Lazy SDK client — preserves all existing key-missing semantics
+  const ai = getClient()
+
+  // 4. Build the user prompt via the caller-provided builder
+  const userPrompt = buildUserPrompt(reference, verseText)
+
+  // 5. Compose abort signals — caller's optional signal + internal timeout
+  const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+  const combinedSignal = signal
+    ? AbortSignal.any([signal, timeoutSignal])
+    : timeoutSignal
+
+  // 6. SDK call + error mapping — preserved verbatim from BB-30/BB-31
+  let response
+  try {
+    response = await ai.models.generateContent({
+      model: MODEL,
+      contents: userPrompt,
+      config: {
+        systemInstruction: systemPrompt,
+        temperature: TEMPERATURE,
+        maxOutputTokens: MAX_OUTPUT_TOKENS,
+        abortSignal: combinedSignal,
+      },
+    })
+  } catch (err) {
+    // Caller-driven abort: re-throw the original AbortError unchanged so the
+    // hook can detect it and silently discard (the component is unmounting or
+    // a replacement request is already in flight — there is no one to show
+    // an error to). Do NOT wrap as GeminiTimeoutError.
+    if (signal?.aborted && err instanceof Error && err.name === 'AbortError') {
+      throw err
+    }
+    // Internal timeout signal: AbortSignal.timeout fires a DOMException with
+    // name 'TimeoutError' (distinct from 'AbortError').
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      throw new GeminiTimeoutError(undefined, { cause: err })
+    }
+    // Any other AbortError source is also surfaced as a timeout from the
+    // user's POV.
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new GeminiTimeoutError('Gemini request was aborted', { cause: err })
+    }
+    // Network failures — TypeError from fetch, or errors with network-ish messages
+    if (
+      err instanceof TypeError ||
+      (err instanceof Error && /network|fetch|offline/i.test(err.message))
+    ) {
+      throw new GeminiNetworkError(undefined, { cause: err })
+    }
+    // Everything else — invalid key, quota, 5xx, malformed response, unknown
+    throw new GeminiApiError(
+      err instanceof Error ? err.message : 'Unknown Gemini API error',
+      { cause: err },
+    )
+  }
+
+  // 7. Safety block detection — belt-and-suspenders, check three places:
+  //   1. Prompt-level block:    response.promptFeedback?.blockReason
+  //   2. Output-level block:    candidates[0]?.finishReason === 'SAFETY'
+  //   3. Silent block (empty):  response.text is empty/whitespace
+  const promptBlockReason = response.promptFeedback?.blockReason
+  if (promptBlockReason) {
+    throw new GeminiSafetyBlockError(
+      `Gemini blocked the prompt: ${promptBlockReason}`,
+    )
+  }
+
+  const firstCandidate = response.candidates?.[0]
+  const finishReason = firstCandidate?.finishReason
+  if (finishReason === 'SAFETY' || finishReason === 'PROHIBITED_CONTENT') {
+    throw new GeminiSafetyBlockError(
+      `Gemini blocked the response: finishReason=${finishReason}`,
+    )
+  }
+
+  const content = response.text?.trim()
+  if (!content) {
+    throw new GeminiSafetyBlockError(
+      'Gemini returned an empty response (likely a silent safety block)',
+    )
+  }
+
+  // 8. Build the result and cache it. Cache writes are fire-and-forget —
+  //    any storage failure (quota, private browsing, disabled) degrades
+  //    silently to no-cache behavior inside the cache module.
+  const result = { content, model: MODEL }
+  setCachedAIResult(feature, reference, verseText, result)
+  return result
 }
 
 /**
@@ -120,89 +277,14 @@ export async function generateExplanation(
   verseText: string,
   signal?: AbortSignal,
 ): Promise<ExplainResult> {
-  const ai = getClient() // throws GeminiKeyMissingError if key not set
-
-  const userPrompt = buildExplainPassageUserPrompt(reference, verseText)
-  const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
-  // Compose the caller's signal with the internal timeout signal. Whichever
-  // aborts first wins. If the caller didn't pass a signal, use the timeout
-  // signal alone (preserves pre-fix behavior).
-  const combinedSignal = signal
-    ? AbortSignal.any([signal, timeoutSignal])
-    : timeoutSignal
-
-  let response
-  try {
-    response = await ai.models.generateContent({
-      model: MODEL,
-      contents: userPrompt,
-      config: {
-        systemInstruction: EXPLAIN_PASSAGE_SYSTEM_PROMPT,
-        temperature: TEMPERATURE,
-        maxOutputTokens: MAX_OUTPUT_TOKENS,
-        abortSignal: combinedSignal,
-      },
-    })
-  } catch (err) {
-    // Caller-driven abort: re-throw the original AbortError unchanged so the
-    // hook can detect it and silently discard (the component is unmounting or
-    // a replacement request is already in flight — there is no one to show
-    // an error to). Do NOT wrap as GeminiTimeoutError.
-    if (signal?.aborted && err instanceof Error && err.name === 'AbortError') {
-      throw err
-    }
-    // Internal timeout signal: AbortSignal.timeout fires a DOMException with
-    // name 'TimeoutError' (distinct from 'AbortError').
-    if (err instanceof DOMException && err.name === 'TimeoutError') {
-      throw new GeminiTimeoutError(undefined, { cause: err })
-    }
-    // Any other AbortError source is also surfaced as a timeout from the
-    // user's POV (e.g., the internal timeout signal reported via AbortError
-    // on some SDK paths).
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new GeminiTimeoutError('Gemini request was aborted', { cause: err })
-    }
-    // Network failures — TypeError from fetch, or errors with network-ish messages
-    if (
-      err instanceof TypeError ||
-      (err instanceof Error && /network|fetch|offline/i.test(err.message))
-    ) {
-      throw new GeminiNetworkError(undefined, { cause: err })
-    }
-    // Everything else — invalid key, quota, 5xx, malformed response, unknown
-    throw new GeminiApiError(
-      err instanceof Error ? err.message : 'Unknown Gemini API error',
-      { cause: err },
-    )
-  }
-
-  // Safety block detection — belt-and-suspenders, check three places:
-  //   1. Prompt-level block:    response.promptFeedback?.blockReason
-  //   2. Output-level block:    candidates[0]?.finishReason === 'SAFETY'
-  //   3. Silent block (empty):  response.text is empty/whitespace
-  const promptBlockReason = response.promptFeedback?.blockReason
-  if (promptBlockReason) {
-    throw new GeminiSafetyBlockError(
-      `Gemini blocked the prompt: ${promptBlockReason}`,
-    )
-  }
-
-  const firstCandidate = response.candidates?.[0]
-  const finishReason = firstCandidate?.finishReason
-  if (finishReason === 'SAFETY' || finishReason === 'PROHIBITED_CONTENT') {
-    throw new GeminiSafetyBlockError(
-      `Gemini blocked the response: finishReason=${finishReason}`,
-    )
-  }
-
-  const content = response.text?.trim()
-  if (!content) {
-    throw new GeminiSafetyBlockError(
-      'Gemini returned an empty response (likely a silent safety block)',
-    )
-  }
-
-  return { content, model: MODEL }
+  return generateWithPromptAndCacheAndRateLimit(
+    'explain',
+    EXPLAIN_PASSAGE_SYSTEM_PROMPT,
+    reference,
+    verseText,
+    buildExplainPassageUserPrompt,
+    signal,
+  )
 }
 
 /**
@@ -240,87 +322,12 @@ export async function generateReflection(
   verseText: string,
   signal?: AbortSignal,
 ): Promise<ReflectResult> {
-  const ai = getClient() // throws GeminiKeyMissingError if key not set
-
-  const userPrompt = buildReflectPassageUserPrompt(reference, verseText)
-  const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
-  // Compose the caller's signal with the internal timeout signal. Whichever
-  // aborts first wins. If the caller didn't pass a signal, use the timeout
-  // signal alone (preserves pre-fix behavior).
-  const combinedSignal = signal
-    ? AbortSignal.any([signal, timeoutSignal])
-    : timeoutSignal
-
-  let response
-  try {
-    response = await ai.models.generateContent({
-      model: MODEL,
-      contents: userPrompt,
-      config: {
-        systemInstruction: REFLECT_PASSAGE_SYSTEM_PROMPT,
-        temperature: TEMPERATURE,
-        maxOutputTokens: MAX_OUTPUT_TOKENS,
-        abortSignal: combinedSignal,
-      },
-    })
-  } catch (err) {
-    // Caller-driven abort: re-throw the original AbortError unchanged so the
-    // hook can detect it and silently discard (the component is unmounting or
-    // a replacement request is already in flight — there is no one to show
-    // an error to). Do NOT wrap as GeminiTimeoutError.
-    if (signal?.aborted && err instanceof Error && err.name === 'AbortError') {
-      throw err
-    }
-    // Internal timeout signal: AbortSignal.timeout fires a DOMException with
-    // name 'TimeoutError' (distinct from 'AbortError').
-    if (err instanceof DOMException && err.name === 'TimeoutError') {
-      throw new GeminiTimeoutError(undefined, { cause: err })
-    }
-    // Any other AbortError source is also surfaced as a timeout from the
-    // user's POV (e.g., the internal timeout signal reported via AbortError
-    // on some SDK paths).
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new GeminiTimeoutError('Gemini request was aborted', { cause: err })
-    }
-    // Network failures — TypeError from fetch, or errors with network-ish messages
-    if (
-      err instanceof TypeError ||
-      (err instanceof Error && /network|fetch|offline/i.test(err.message))
-    ) {
-      throw new GeminiNetworkError(undefined, { cause: err })
-    }
-    // Everything else — invalid key, quota, 5xx, malformed response, unknown
-    throw new GeminiApiError(
-      err instanceof Error ? err.message : 'Unknown Gemini API error',
-      { cause: err },
-    )
-  }
-
-  // Safety block detection — belt-and-suspenders, check three places:
-  //   1. Prompt-level block:    response.promptFeedback?.blockReason
-  //   2. Output-level block:    candidates[0]?.finishReason === 'SAFETY'
-  //   3. Silent block (empty):  response.text is empty/whitespace
-  const promptBlockReason = response.promptFeedback?.blockReason
-  if (promptBlockReason) {
-    throw new GeminiSafetyBlockError(
-      `Gemini blocked the prompt: ${promptBlockReason}`,
-    )
-  }
-
-  const firstCandidate = response.candidates?.[0]
-  const finishReason = firstCandidate?.finishReason
-  if (finishReason === 'SAFETY' || finishReason === 'PROHIBITED_CONTENT') {
-    throw new GeminiSafetyBlockError(
-      `Gemini blocked the response: finishReason=${finishReason}`,
-    )
-  }
-
-  const content = response.text?.trim()
-  if (!content) {
-    throw new GeminiSafetyBlockError(
-      'Gemini returned an empty response (likely a silent safety block)',
-    )
-  }
-
-  return { content, model: MODEL }
+  return generateWithPromptAndCacheAndRateLimit(
+    'reflect',
+    REFLECT_PASSAGE_SYSTEM_PROMPT,
+    reference,
+    verseText,
+    buildReflectPassageUserPrompt,
+    signal,
+  )
 }

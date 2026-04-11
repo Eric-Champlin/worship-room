@@ -111,6 +111,23 @@ Most keys use the `wr_` prefix. Bible redesign keys use the `bible:` prefix inst
 | `wr_bible_reader_ambient_volume` | `string (number)` | Last-used reader volume 0-100 (default: 35) |
 | `bible:plans`         | `PlansStoreState`              | Reading plan progress — activePlanSlug + per-plan progress (BB-21) |
 
+### AI Cache (BB-32)
+
+Cache entries for AI features (Explain this passage, Reflect on this passage). Managed by `frontend/src/lib/ai/cache.ts`. Uses the `bb32-v1:` prefix instead of `wr_` because BB-32 entries are namespaced as a self-contained pool managed by the cache module's eviction and version logic — same exception precedent as the `bible:` prefix used by other Bible-redesign storage.
+
+| Key                                                                       | Type                                                                              | Feature                                                               |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `bb32-v1:explain:gemini-2.5-flash-lite:<reference>:<verseTextHash>`       | `{ v: 1, feature: 'explain', model: string, reference: string, content: string, createdAt: number }` | Explain this passage cache (BB-30 + BB-32)                            |
+| `bb32-v1:reflect:gemini-2.5-flash-lite:<reference>:<verseTextHash>`       | `{ v: 1, feature: 'reflect', model: string, reference: string, content: string, createdAt: number }` | Reflect on this passage cache (BB-31 + BB-32)                         |
+
+- **TTL:** 7 days from `createdAt`. Expired entries return `null` on lookup and are removed as a side effect.
+- **Total cap:** 2 MB (soft limit) across all `bb32-v1:*` entries. When adding a new entry would exceed the cap, oldest entries (by `createdAt`) are evicted one at a time until the cap is satisfied. A single entry larger than 2 MB silently fails to write.
+- **Cleanup:** `clearExpiredAICache()` sweeps expired and version-mismatched entries in one pass. `clearAllAICache()` nukes every `bb32-v1:*` key (used by tests and reserved for a future admin button — no UI trigger exists).
+- **Hash:** verse text is hashed via DJB2 (32-bit, base-36 encoded, non-cryptographic) — compact enough to keep the key short, collision-free across the 16 BB-30/BB-31 prompt-test passages.
+- **Version:** the `bb32-v1` key prefix allows future invalidation. Bumping to `bb32-v2` in a later spec will orphan all existing entries, and the version mismatch on `entry.v` will catch any survivors.
+- **Failure mode:** all cache operations are wrapped in try/catch. Private browsing, quota exceeded, and disabled localStorage all degrade to no-op behavior — the cache is a courtesy layer, never a guarantee. Cache failures never propagate to the UI.
+- **Not cached:** error results. Network errors, API errors, safety blocks, timeouts, key-missing — retrying after a transient failure should fire a fresh request, not return the old failure for 7 days.
+
 ### Community Challenges
 
 | Key                        | Type                             | Feature                          |

@@ -10,13 +10,14 @@ vi.mock('@/lib/ai/geminiClient', () => ({
   generateExplanation: (...args: unknown[]) => mockGenerateExplanation(...args),
 }))
 
-import { useExplainPassage } from '../useExplainPassage'
+import { useExplainPassage, ERROR_COPY } from '../useExplainPassage'
 import {
   GeminiApiError,
   GeminiKeyMissingError,
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
+  RateLimitError,
 } from '@/lib/ai/errors'
 
 const REFERENCE = '1 Corinthians 13:4-7'
@@ -394,6 +395,54 @@ describe('useExplainPassage', () => {
         expect(result.current.status).toBe('success')
       })
       expect(result.current.result).toEqual(SUCCESS_RESULT)
+    })
+  })
+
+  // ────────────────────────────────────────────────────────────────────────
+  // BB-32 — rate-limit error path
+  // ────────────────────────────────────────────────────────────────────────
+
+  describe('rate-limit error kind (BB-32)', () => {
+    it('maps RateLimitError to the "rate-limit" kind', async () => {
+      mockGenerateExplanation.mockRejectedValue(new RateLimitError(8))
+      const { result } = renderHook(() => useExplainPassage(REFERENCE, VERSE_TEXT))
+      await waitFor(() => {
+        expect(result.current.status).toBe('error')
+      })
+      expect(result.current.errorKind).toBe('rate-limit')
+    })
+
+    it('exposes retryAfterSeconds from the RateLimitError on state', async () => {
+      mockGenerateExplanation.mockRejectedValue(new RateLimitError(12))
+      const { result } = renderHook(() => useExplainPassage(REFERENCE, VERSE_TEXT))
+      await waitFor(() => {
+        expect(result.current.status).toBe('error')
+      })
+      expect(result.current.retryAfterSeconds).toBe(12)
+    })
+
+    it('leaves retryAfterSeconds null in the success state', async () => {
+      mockGenerateExplanation.mockResolvedValue(SUCCESS_RESULT)
+      const { result } = renderHook(() => useExplainPassage(REFERENCE, VERSE_TEXT))
+      await waitFor(() => {
+        expect(result.current.status).toBe('success')
+      })
+      expect(result.current.retryAfterSeconds).toBeNull()
+    })
+
+    it('leaves retryAfterSeconds null for non-rate-limit error kinds', async () => {
+      mockGenerateExplanation.mockRejectedValue(new GeminiNetworkError())
+      const { result } = renderHook(() => useExplainPassage(REFERENCE, VERSE_TEXT))
+      await waitFor(() => {
+        expect(result.current.status).toBe('error')
+      })
+      expect(result.current.errorKind).toBe('network')
+      expect(result.current.retryAfterSeconds).toBeNull()
+    })
+
+    it('ERROR_COPY["rate-limit"] contains the {seconds} placeholder', () => {
+      expect(ERROR_COPY['rate-limit']).toContain('{seconds}')
+      expect(ERROR_COPY['rate-limit']).toMatch(/Try again in \{seconds\} seconds/)
     })
   })
 })

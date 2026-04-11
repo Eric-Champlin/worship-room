@@ -97,6 +97,7 @@ export function ExplainSubView({
             kind={state.errorKind}
             message={state.errorMessage}
             onRetry={state.retry}
+            retryAfterSeconds={state.retryAfterSeconds ?? undefined}
           />
         )}
 

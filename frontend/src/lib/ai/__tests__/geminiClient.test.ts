@@ -31,12 +31,18 @@ import {
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
+  RateLimitError,
 } from '../errors'
 import { EXPLAIN_PASSAGE_SYSTEM_PROMPT } from '../prompts/explainPassagePrompt'
 import {
   REFLECT_PASSAGE_SYSTEM_PROMPT,
   buildReflectPassageUserPrompt,
 } from '../prompts/reflectPassagePrompt'
+// BB-32: reset the cache and rate-limit state between tests so each `it()`
+// block runs in isolation. This is the only addition to this test file
+// required by BB-32 — every pre-existing test body remains byte-unchanged.
+import { clearAllAICache } from '../cache'
+import { getRateLimitState, resetRateLimitForTests } from '../rateLimit'
 
 const REFERENCE = '1 Corinthians 13:4-7'
 const VERSE_TEXT = 'Love is patient and is kind; love doesn\'t envy.'
@@ -50,6 +56,13 @@ beforeEach(() => {
   __resetGeminiClientForTests()
   vi.clearAllMocks()
   mockRequireGeminiApiKey.mockReturnValue('fake-test-key')
+  // BB-32 infrastructure reset — pre-existing tests were written before
+  // the cache and rate-limit layers existed and share fixture values
+  // (REFERENCE / VERSE_TEXT), so without this reset, a cache hit from an
+  // earlier test would short-circuit a later test's SDK mock, or the
+  // 10-token bucket would drain partway through the 43-test file.
+  clearAllAICache()
+  resetRateLimitForTests()
 })
 
 describe('generateExplanation — key missing', () => {
@@ -500,5 +513,183 @@ describe('generateReflection — error classification', () => {
       expect((err as Error).name).toBe('AbortError')
       expect(err).not.toBeInstanceOf(GeminiTimeoutError)
     }
+  })
+})
+
+// ──────────────────────────────────────────────────────────────────────────
+// BB-32: helper-integration tests — appended only, existing 43 untouched.
+// ──────────────────────────────────────────────────────────────────────────
+
+describe('BB-32 — cache layer integration', () => {
+  it('generateExplanation returns cached result on second call without firing the SDK', async () => {
+    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+
+    const first = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(mockGenerateContent).toHaveBeenCalledTimes(1)
+
+    // Clear the spy so we can assert NO further SDK calls
+    mockGenerateContent.mockClear()
+
+    const second = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(mockGenerateContent).not.toHaveBeenCalled()
+    expect(second).toEqual(first)
+  })
+
+  it('generateReflection returns cached result on second call without firing the SDK', async () => {
+    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+
+    const first = await generateReflection(REFERENCE, VERSE_TEXT)
+    expect(mockGenerateContent).toHaveBeenCalledTimes(1)
+    mockGenerateContent.mockClear()
+
+    const second = await generateReflection(REFERENCE, VERSE_TEXT)
+    expect(mockGenerateContent).not.toHaveBeenCalled()
+    expect(second).toEqual(first)
+  })
+
+  it('cache hit does NOT consume a rate-limit token', async () => {
+    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+
+    // Cache miss — one token consumed
+    await generateExplanation(REFERENCE, VERSE_TEXT)
+    const afterFirst = getRateLimitState('explain').tokensRemaining
+
+    // Cache hit — zero tokens consumed
+    await generateExplanation(REFERENCE, VERSE_TEXT)
+    const afterSecond = getRateLimitState('explain').tokensRemaining
+
+    expect(afterFirst).toBe(9) // 10 - 1
+    expect(afterSecond).toBe(9) // unchanged — the cache hit was free
+  })
+
+  it('cache hit returns the same {content, model} shape as the SDK call', async () => {
+    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+
+    const first = await generateExplanation(REFERENCE, VERSE_TEXT)
+    const second = await generateExplanation(REFERENCE, VERSE_TEXT)
+
+    expect(Object.keys(second).sort()).toEqual(['content', 'model'])
+    expect(second.content).toBe(first.content)
+    expect(second.model).toBe(first.model)
+  })
+})
+
+describe('BB-32 — rate-limit denial integration', () => {
+  it('generateExplanation throws RateLimitError after the 11th rapid call', async () => {
+    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+
+    // Fire 10 distinct calls — each consumes one token, each misses the cache
+    for (let i = 0; i < 10; i++) {
+      await generateExplanation(`Ref${i}`, `VerseText${i}`)
+    }
+    expect(mockGenerateContent).toHaveBeenCalledTimes(10)
+    mockGenerateContent.mockClear()
+
+    // 11th call — bucket empty → denial BEFORE the SDK is called
+    await expect(
+      generateExplanation('Ref11', 'VerseText11'),
+    ).rejects.toBeInstanceOf(RateLimitError)
+
+    // And the SDK was NOT called for the rejected request
+    expect(mockGenerateContent).not.toHaveBeenCalled()
+  })
+
+  it('the thrown RateLimitError carries retryAfterSeconds > 0', async () => {
+    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+    for (let i = 0; i < 10; i++) {
+      await generateExplanation(`Ref${i}`, `VerseText${i}`)
+    }
+
+    try {
+      await generateExplanation('Ref11', 'VerseText11')
+      expect.fail('should have thrown')
+    } catch (err) {
+      expect(err).toBeInstanceOf(RateLimitError)
+      expect((err as RateLimitError).retryAfterSeconds).toBeGreaterThan(0)
+    }
+  })
+
+  it('Explain rate limit and Reflect rate limit are independent', async () => {
+    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+
+    // Drain the explain bucket
+    for (let i = 0; i < 10; i++) {
+      await generateExplanation(`ExRef${i}`, `ExText${i}`)
+    }
+    // Explain now denies
+    await expect(
+      generateExplanation('ExRef11', 'ExText11'),
+    ).rejects.toBeInstanceOf(RateLimitError)
+
+    // But Reflect still has a full bucket
+    const reflectResult = await generateReflection('RfRef0', 'RfText0')
+    expect(reflectResult.content).toBeTruthy()
+    expect(getRateLimitState('reflect').tokensRemaining).toBe(9)
+  })
+})
+
+describe('BB-32 — errors are NOT cached', () => {
+  it('network errors are not cached — retry fires the SDK again', async () => {
+    const networkErr = new TypeError('NetworkError: fetch failed')
+    mockGenerateContent.mockRejectedValueOnce(networkErr)
+
+    await expect(
+      generateExplanation(REFERENCE, VERSE_TEXT),
+    ).rejects.toBeInstanceOf(GeminiNetworkError)
+
+    // Second call — same args, but the error was NOT cached, so the SDK
+    // fires again. This time it succeeds.
+    mockGenerateContent.mockResolvedValueOnce(HAPPY_RESPONSE)
+    const result = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(result.content).toBeTruthy()
+    expect(mockGenerateContent).toHaveBeenCalledTimes(2)
+  })
+
+  it('safety errors are not cached — retry fires the SDK again', async () => {
+    mockGenerateContent.mockResolvedValueOnce({
+      text: '',
+      candidates: [{ finishReason: 'STOP', content: { parts: [] } }],
+      promptFeedback: { blockReason: 'HARM_CATEGORY_HARASSMENT' },
+    })
+
+    await expect(
+      generateExplanation(REFERENCE, VERSE_TEXT),
+    ).rejects.toBeInstanceOf(GeminiSafetyBlockError)
+
+    // Retry with a fresh successful response — SDK fires, result returned
+    mockGenerateContent.mockResolvedValueOnce(HAPPY_RESPONSE)
+    const result = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(result.content).toBeTruthy()
+    expect(mockGenerateContent).toHaveBeenCalledTimes(2)
+  })
+
+  it('api errors are not cached — retry fires the SDK again', async () => {
+    const apiErr = new Error('503 Service Unavailable')
+    mockGenerateContent.mockRejectedValueOnce(apiErr)
+
+    await expect(
+      generateExplanation(REFERENCE, VERSE_TEXT),
+    ).rejects.toBeInstanceOf(GeminiApiError)
+
+    mockGenerateContent.mockResolvedValueOnce(HAPPY_RESPONSE)
+    const result = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(result.content).toBeTruthy()
+    expect(mockGenerateContent).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('BB-32 — cache + client reset interaction', () => {
+  it('__resetGeminiClientForTests also clears cache (so next call hits the SDK)', async () => {
+    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+
+    await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(mockGenerateContent).toHaveBeenCalledTimes(1)
+
+    __resetGeminiClientForTests() // BB-32 extension: also nukes cache + rate limit
+    mockGenerateContent.mockClear()
+
+    await generateExplanation(REFERENCE, VERSE_TEXT)
+    // SDK was called again because the cache was cleared
+    expect(mockGenerateContent).toHaveBeenCalledTimes(1)
   })
 })

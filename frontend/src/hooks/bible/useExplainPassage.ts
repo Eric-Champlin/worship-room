@@ -6,6 +6,7 @@ import {
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
+  RateLimitError,
 } from '@/lib/ai/errors'
 
 export type ExplainErrorKind =
@@ -14,19 +15,28 @@ export type ExplainErrorKind =
   | 'safety'
   | 'timeout'
   | 'unavailable'
+  | 'rate-limit'
 
 export interface ExplainState {
   status: 'loading' | 'success' | 'error'
   result: ExplainResult | null
   errorKind: ExplainErrorKind | null
   errorMessage: string | null
+  /**
+   * Wall-clock seconds until a retry should be allowed, populated only
+   * when `errorKind === 'rate-limit'`. For every other error kind this
+   * is `null`. The component (`ExplainSubViewError`) uses this as the
+   * initial value for its local per-second countdown — the hook itself
+   * does NOT tick; only the component re-renders every second.
+   */
+  retryAfterSeconds: number | null
 }
 
 /**
  * User-facing copy for each error kind. Copied verbatim from the spec.
  * Do NOT paraphrase. If copy needs to change, edit the spec first.
  */
-const ERROR_COPY: Record<ExplainErrorKind, string> = {
+export const ERROR_COPY: Record<ExplainErrorKind, string> = {
   network:
     "Couldn't load an explanation right now. Check your connection and try again.",
   api: 'This feature is temporarily unavailable. Try again in a few minutes.',
@@ -34,9 +44,17 @@ const ERROR_COPY: Record<ExplainErrorKind, string> = {
     'This passage is too difficult for our AI helper to explain well. Consider reading a scholarly commentary or asking a trusted teacher.',
   timeout: 'The request took too long. Try again in a moment.',
   unavailable: 'This feature is temporarily unavailable. Try again in a few minutes.',
+  // BB-32: `{seconds}` is a literal placeholder — the component substitutes
+  // the live countdown value at render time. The hook stores the template
+  // so it does not re-render every second.
+  'rate-limit':
+    "You're going faster than our AI helper can keep up. Try again in {seconds} seconds.",
 }
 
 function classifyError(err: unknown): ExplainErrorKind {
+  // BB-32: rate-limit check must come first so it is not misclassified as
+  // a generic `unavailable` fallback.
+  if (err instanceof RateLimitError) return 'rate-limit'
   if (err instanceof GeminiSafetyBlockError) return 'safety'
   if (err instanceof GeminiTimeoutError) return 'timeout'
   if (err instanceof GeminiNetworkError) return 'network'
@@ -63,6 +81,7 @@ export function useExplainPassage(
     result: null,
     errorKind: null,
     errorMessage: null,
+    retryAfterSeconds: null,
   })
 
   // Bumped by retry() to force the request effect to re-run
@@ -91,7 +110,13 @@ export function useExplainPassage(
     // user navigates away mid-request or when `retry()` re-fires the effect.
     const controller = new AbortController()
 
-    setState({ status: 'loading', result: null, errorKind: null, errorMessage: null })
+    setState({
+      status: 'loading',
+      result: null,
+      errorKind: null,
+      errorMessage: null,
+      retryAfterSeconds: null,
+    })
 
     // Defer the actual request start by one microtask tick. This is
     // load-bearing for StrictMode correctness: the Gemini SDK dispatches
@@ -114,6 +139,7 @@ export function useExplainPassage(
             result,
             errorKind: null,
             errorMessage: null,
+            retryAfterSeconds: null,
           })
         })
         .catch((err: unknown) => {
@@ -124,11 +150,14 @@ export function useExplainPassage(
           if (err instanceof Error && err.name === 'AbortError') return
           if (!isMountedRef.current) return
           const kind = classifyError(err)
+          const retryAfterSeconds =
+            err instanceof RateLimitError ? err.retryAfterSeconds : null
           setState({
             status: 'error',
             result: null,
             errorKind: kind,
             errorMessage: ERROR_COPY[kind],
+            retryAfterSeconds,
           })
         })
     })

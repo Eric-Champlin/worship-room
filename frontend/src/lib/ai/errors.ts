@@ -118,3 +118,30 @@ export class GeminiKeyMissingError extends Error {
     assignCause(this, options)
   }
 }
+
+/**
+ * Thrown when a request was denied by the client-side rate limiter (BB-32).
+ *
+ * Carries `retryAfterSeconds` so the UI can render a live countdown. The
+ * hook exposes this on its state via the `'rate-limit'` error kind.
+ *
+ * Mental model: BB-32's rate limiter is courtesy, not security — it
+ * protects against accidental bursts and dev-tools loops, not coordinated
+ * abuse. A `RateLimitError` means "you're tapping faster than our AI
+ * helper can keep up", not "you've hit a hard quota".
+ *
+ * User-facing copy (assembled by the hook's `ERROR_COPY['rate-limit']`):
+ * "You're going faster than our AI helper can keep up. Try again in
+ * {seconds} seconds." — where `{seconds}` is a live countdown rendered
+ * by `ExplainSubViewError`.
+ */
+export class RateLimitError extends Error {
+  retryAfterSeconds: number
+
+  constructor(retryAfterSeconds: number, options?: ErrorOptions) {
+    super(`Too many requests. Try again in ${retryAfterSeconds} seconds.`)
+    this.name = 'RateLimitError'
+    this.retryAfterSeconds = retryAfterSeconds
+    assignCause(this, options)
+  }
+}
