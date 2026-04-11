@@ -68,11 +68,11 @@ function createMockContext(): VerseActionContext {
 
 describe('verseActionRegistry', () => {
   describe('registry structure', () => {
-    it('exports all 12 actions (4 primary + 8 secondary)', () => {
+    it('exports all 13 actions (4 primary + 9 secondary)', () => {
       const all = getAllActions()
-      expect(all).toHaveLength(12)
+      expect(all).toHaveLength(13)
       expect(getPrimaryActions()).toHaveLength(4)
-      expect(getSecondaryActions()).toHaveLength(8)
+      expect(getSecondaryActions()).toHaveLength(9)
     })
 
     it('getActionByType returns correct handler', () => {
@@ -119,14 +119,94 @@ describe('verseActionRegistry', () => {
       expect(element).not.toBeUndefined()
     })
 
-    it('appears in SECONDARY_ACTIONS between cross-refs and memorize', () => {
+    it('appears in SECONDARY_ACTIONS between cross-refs and reflect', () => {
+      // BB-31 inserted `reflect` immediately after `explain`, so `explain`'s
+      // successor is now `reflect` (not `memorize`). `explain` remains the
+      // first AI action in the sheet; `reflect` is its sibling. The original
+      // assertion (memorize = explain + 1) is inherently stale the moment
+      // BB-31 ships because another action sits between them — updating this
+      // single line is the minimal change forced by spec AC 2.
       const secondary = getSecondaryActions()
       const crossRefsIdx = secondary.findIndex((a) => a.action === 'cross-refs')
       const explainIdx = secondary.findIndex((a) => a.action === 'explain')
-      const memorizeIdx = secondary.findIndex((a) => a.action === 'memorize')
+      const reflectIdx = secondary.findIndex((a) => a.action === 'reflect')
       expect(crossRefsIdx).toBeGreaterThanOrEqual(0)
       expect(explainIdx).toBe(crossRefsIdx + 1)
-      expect(memorizeIdx).toBe(explainIdx + 1)
+      expect(reflectIdx).toBe(explainIdx + 1)
+    })
+  })
+
+  describe('reflect action (BB-31)', () => {
+    it('is registered in the secondary actions category', () => {
+      const reflect = getActionByType('reflect')
+      expect(reflect).toBeDefined()
+      expect(reflect!.category).toBe('secondary')
+    })
+
+    it('has the spec-locked label, sublabel, icon, and hasSubView=true', () => {
+      const reflect = getActionByType('reflect')!
+      expect(reflect.label).toBe('Reflect on this passage')
+      expect(reflect.sublabel).toBe('See how it might land today')
+      expect(reflect.icon).toBeDefined()
+      expect(reflect.hasSubView).toBe(true)
+    })
+
+    it('uses the Lightbulb icon (not Sparkles, not Brain)', async () => {
+      const reflect = getActionByType('reflect')!
+      const { Lightbulb, Sparkles, Brain } = await import('lucide-react')
+      expect(reflect.icon).toBe(Lightbulb)
+      expect(reflect.icon).not.toBe(Sparkles)
+      expect(reflect.icon).not.toBe(Brain)
+    })
+
+    it('isAvailable returns true for any selection (no auth gate)', () => {
+      const reflect = getActionByType('reflect')!
+      expect(reflect.isAvailable(SINGLE_VERSE)).toBe(true)
+      expect(reflect.isAvailable(MULTI_VERSE)).toBe(true)
+    })
+
+    it('renderSubView returns a non-null React element', () => {
+      const reflect = getActionByType('reflect')!
+      const element = reflect.renderSubView?.({
+        selection: SINGLE_VERSE,
+        onBack: vi.fn(),
+        context: createMockContext(),
+      })
+      expect(element).not.toBeNull()
+      expect(element).not.toBeUndefined()
+    })
+
+    it('appears in SECONDARY_ACTIONS immediately after explain and before memorize', () => {
+      const secondary = getSecondaryActions()
+      const explainIdx = secondary.findIndex((a) => a.action === 'explain')
+      const reflectIdx = secondary.findIndex((a) => a.action === 'reflect')
+      const memorizeIdx = secondary.findIndex((a) => a.action === 'memorize')
+      expect(explainIdx).toBeGreaterThanOrEqual(0)
+      expect(reflectIdx).toBe(explainIdx + 1)
+      expect(memorizeIdx).toBe(reflectIdx + 1)
+    })
+
+    it('onInvoke is a no-op (sub-view opens via renderSubView contract)', () => {
+      const reflect = getActionByType('reflect')!
+      const ctx = createMockContext()
+      expect(() => reflect.onInvoke(SINGLE_VERSE, ctx)).not.toThrow()
+      // Empty onInvoke should not trigger navigate/toast/closeSheet
+      expect(ctx.navigate).not.toHaveBeenCalled()
+      expect(ctx.showToast).not.toHaveBeenCalled()
+      expect(ctx.closeSheet).not.toHaveBeenCalled()
+    })
+
+    it('explain handler remains byte-unchanged (regression guard)', () => {
+      // Hardcoded expected values — if BB-31 accidentally mutated the explain
+      // handler, this test fires loudly. Spec AC 20 (BB-31): "generateExplanation,
+      // ExplainSubView, useExplainPassage, ExplainSubViewDisclaimer, and the
+      // explain registry entry are NOT modified by this spec."
+      const explain = getActionByType('explain')!
+      expect(explain.action).toBe('explain')
+      expect(explain.label).toBe('Explain this passage')
+      expect(explain.sublabel).toBe('Understand the context')
+      expect(explain.category).toBe('secondary')
+      expect(explain.hasSubView).toBe(true)
     })
   })
 
@@ -241,7 +321,7 @@ describe('verseActionRegistry', () => {
 
     it('sub-view stubs render placeholder containing "ships in BB-"', () => {
       // Exclude implemented sub-views: highlight (BB-7), note (BB-8),
-      // cross-refs (BB-9), share (BB-13), explain (BB-30)
+      // cross-refs (BB-9), share (BB-13), explain (BB-30), reflect (BB-31)
       const withSubViews = getAllActions().filter(
         (h) =>
           h.hasSubView &&
@@ -250,7 +330,8 @@ describe('verseActionRegistry', () => {
           h.action !== 'note' &&
           h.action !== 'cross-refs' &&
           h.action !== 'share' &&
-          h.action !== 'explain',
+          h.action !== 'explain' &&
+          h.action !== 'reflect',
       )
 
       // If no stubs remain, this test is no longer needed — skip gracefully

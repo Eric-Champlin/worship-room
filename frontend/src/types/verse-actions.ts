@@ -17,6 +17,7 @@ export type VerseAction =
   | 'meditate'
   | 'cross-refs'
   | 'explain'
+  | 'reflect'
   | 'memorize'
   | 'copy'
   | 'copy-with-ref'

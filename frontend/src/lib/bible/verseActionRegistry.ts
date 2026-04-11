@@ -9,12 +9,14 @@ import {
   Sparkles,
   Link2,
   Brain,
+  Lightbulb,
   Layers,
   Copy,
   ClipboardCopy,
 } from 'lucide-react'
 import { CrossRefsSubView, CrossRefBadge } from '@/components/bible/reader/CrossRefsSubView'
 import { ExplainSubView } from '@/components/bible/reader/ExplainSubView'
+import { ReflectSubView } from '@/components/bible/reader/ReflectSubView'
 import type {
   VerseSelection,
   VerseAction,
@@ -368,6 +370,18 @@ const explain: VerseActionHandler = {
   onInvoke: () => {},
 }
 
+const reflect: VerseActionHandler = {
+  action: 'reflect',
+  label: 'Reflect on this passage',
+  sublabel: 'See how it might land today',
+  icon: Lightbulb,
+  category: 'secondary',
+  hasSubView: true,
+  renderSubView: (props) => React.createElement(ReflectSubView, props),
+  isAvailable: () => true,
+  onInvoke: () => {},
+}
+
 const memorize: VerseActionHandler = {
   action: 'memorize',
   label: 'Memorize',
@@ -423,6 +437,7 @@ const SECONDARY_ACTIONS: VerseActionHandler[] = [
   meditate,
   crossRefs,
   explain,
+  reflect,
   memorize,
   copy,
   copyWithRef,
