@@ -62,7 +62,7 @@ export function BibleSearchMode({ query: controlledQuery, onQueryChange }: Bible
           placeholder="Search the Bible..."
           aria-label="Search the Bible"
           aria-describedby="bible-search-status"
-          className="w-full rounded-xl border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder-white/50 outline-none transition-colors shadow-[0_0_12px_2px_rgba(0,212,255,0.35),0_0_27px_5px_rgba(139,92,246,0.26)] focus:border-primary focus:ring-2 focus:ring-primary/50"
+          className="min-h-[44px] w-full rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 transition-colors focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
         />
         <p className="mt-2 text-center text-sm text-white/60">
           Searching all 66 books of the Bible

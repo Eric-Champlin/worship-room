@@ -55,6 +55,26 @@ vi.mock('@/data/bible', () => ({
   }),
 }))
 
+// Mock useActivePlan so BibleHeroSlot doesn't trigger its bridge-writing
+// useEffect, which would clobber the `wr_bible_active_plans` localStorage
+// entries that several tests below write directly. BB-21's plansStore writes
+// to that key as a downstream bridge; if the bridge fires during mount it
+// overwrites any test-authored value before BibleLanding's own `getActivePlans`
+// call reads it. The mock returns null progress, which makes BibleHeroSlot
+// fall through to its default render (VOTD only, no plan resume card), and
+// the test's localStorage write reaches BibleLanding's useEffect intact.
+vi.mock('@/hooks/bible/useActivePlan', () => ({
+  useActivePlan: () => ({
+    activePlan: null,
+    progress: null,
+    currentDay: null,
+    isOnPlanPassage: () => false,
+    markDayComplete: vi.fn(),
+    pausePlan: vi.fn(),
+    switchPlan: vi.fn(),
+  }),
+}))
+
 function renderLanding() {
   return render(
     <MemoryRouter>
@@ -101,7 +121,7 @@ describe('BibleLanding', () => {
     expect(screen.getByText('John 3')).toBeInTheDocument()
   })
 
-  it('plan state: shows Today\'s Plan card', () => {
+  it('plan state: shows Today\'s Plan card', async () => {
     localStorage.setItem(
       'wr_bible_active_plans',
       JSON.stringify([
@@ -116,8 +136,11 @@ describe('BibleLanding', () => {
       ])
     )
     renderLanding()
-    expect(screen.getByText('Gospel of John')).toBeInTheDocument()
-    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+    // Plans are loaded inside a useEffect via getActivePlans(), so the first
+    // render has plans=[] and the assertions must wait for the post-effect
+    // render where TodaysPlanCard rehydrates from localStorage.
+    expect(await screen.findByText('Gospel of John')).toBeInTheDocument()
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument()
   })
 
   it('streak chip visible when count > 0', () => {
@@ -184,7 +207,7 @@ describe('BibleLanding', () => {
     expect(heroSection?.querySelector('.font-script')).toBeNull()
   })
 
-  it('progress bar has correct ARIA attributes', () => {
+  it('progress bar has correct ARIA attributes', async () => {
     localStorage.setItem(
       'wr_bible_active_plans',
       JSON.stringify([
@@ -199,7 +222,9 @@ describe('BibleLanding', () => {
       ])
     )
     renderLanding()
-    const progressbar = screen.getByRole('progressbar')
+    // Plans load via useEffect → getActivePlans(); progressbar appears after
+    // the post-effect render rehydrates from localStorage.
+    const progressbar = await screen.findByRole('progressbar')
     expect(progressbar.getAttribute('aria-valuenow')).toBe('7')
     expect(progressbar.getAttribute('aria-valuemin')).toBe('1')
     expect(progressbar.getAttribute('aria-valuemax')).toBe('21')
