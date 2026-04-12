@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { SEO } from '@/components/SEO'
+import { PRAYER_WALL_PROFILE_METADATA } from '@/lib/seo/routeMetadata'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
@@ -119,7 +120,9 @@ function PrayerWallProfileContent() {
 
   return (
     <PageShell>
+      {/* BB-40: dynamic title overrides static base; ogImage/alt from constant */}
       <SEO
+        {...PRAYER_WALL_PROFILE_METADATA}
         title={`${profileUser.firstName}'s Prayers`}
         description={`Prayers shared by ${profileUser.firstName} on the Worship Room community prayer wall.`}
       />

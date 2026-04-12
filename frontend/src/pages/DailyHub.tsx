@@ -16,6 +16,22 @@ import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { SEO, SITE_URL } from '@/components/SEO'
+import {
+  DAILY_HUB_DEVOTIONAL_METADATA,
+  DAILY_HUB_PRAY_METADATA,
+  DAILY_HUB_JOURNAL_METADATA,
+  DAILY_HUB_MEDITATE_METADATA,
+} from '@/lib/seo/routeMetadata'
+
+// BB-40: tab-aware metadata picker. Maps the 4 Daily Hub tab IDs to their
+// corresponding metadata constants. All 4 tabs share canonical /daily because
+// `tab` is in UI_STATE_PARAMS (see @/lib/seo/canonicalUrl).
+const TAB_METADATA = {
+  devotional: DAILY_HUB_DEVOTIONAL_METADATA,
+  pray: DAILY_HUB_PRAY_METADATA,
+  journal: DAILY_HUB_JOURNAL_METADATA,
+  meditate: DAILY_HUB_MEDITATE_METADATA,
+} as const
 const dailyHubBreadcrumbs = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -197,7 +213,7 @@ function DailyHubContent() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
       <HorizonGlow />
-      <SEO title="Daily Prayer, Journal & Meditation" description="Start your day with AI-powered prayer, guided journaling, and Christian meditation rooted in Scripture." jsonLd={dailyHubBreadcrumbs} />
+      <SEO {...TAB_METADATA[activeTab]} jsonLd={dailyHubBreadcrumbs} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"

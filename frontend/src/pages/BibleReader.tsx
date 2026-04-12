@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { SEO } from '@/components/SEO'
+import { buildBibleChapterMetadata } from '@/lib/seo/routeMetadata'
 import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
 import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
@@ -594,7 +595,7 @@ function BibleReaderInner() {
   if (!book) {
     return (
       <div className="flex min-h-screen flex-col bg-hero-bg">
-        <SEO title="Book Not Found" description="This Bible book doesn't exist." />
+        <SEO title="Book Not Found" description="This Bible book doesn't exist." noIndex />
         <div className="flex flex-1 items-center justify-center px-4">
           <FrostedCard className="max-w-md text-center">
             <p className="mb-6 text-lg text-white">That book doesn't exist.</p>
@@ -626,6 +627,7 @@ function BibleReaderInner() {
         <SEO
           title="Chapter Not Found"
           description={`${book.name} only has ${book.chapters} chapters.`}
+          noIndex
         />
         <div className="flex flex-1 items-center justify-center px-4">
           <FrostedCard className="max-w-md text-center">
@@ -673,11 +675,9 @@ function BibleReaderInner() {
       data-reader-theme={settings.theme}
       {...touchHandlers}
     >
-      <SEO
-        title={`${book.name} ${chapterNumber} (WEB)`}
-        description={`Read ${book.name} chapter ${chapterNumber} from the World English Bible.`}
-        canonical={`/bible/${bookSlug}/${chapterNumber}`}
-      />
+      {/* BB-40: builder returns title/description/canonical/ogImage/jsonLd together.
+          Step 9 tests the BreadcrumbList JSON-LD emission. */}
+      <SEO {...buildBibleChapterMetadata(book.name, chapterNumber, bookSlug!)} />
 
       <ReaderChrome
         bookName={book.name}

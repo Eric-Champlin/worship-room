@@ -17,6 +17,7 @@ import { GratitudeCorrelationCard } from '@/components/insights/GratitudeCorrela
 import { PrayerLifeSection } from '@/components/insights/PrayerLifeSection'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { SEO } from '@/components/SEO'
+import { INSIGHTS_METADATA } from '@/lib/seo/routeMetadata'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import { getMoodEntries } from '@/services/mood-storage'
@@ -178,7 +179,7 @@ export function Insights() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="Mood Insights & Spiritual Growth" description="Track your mood patterns, meditation minutes, and spiritual growth over time." noIndex />
+      <SEO {...INSIGHTS_METADATA} />
       <a
         href="#insights-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

@@ -6,6 +6,7 @@ import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
+import { FRIENDS_METADATA } from '@/lib/seo/routeMetadata'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import {
   FriendSearch,
@@ -65,7 +66,7 @@ export function Friends() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="Friends & Leaderboard" description="Grow together in faith with friends, encouragement, and friendly accountability." noIndex />
+      <SEO {...FRIENDS_METADATA} />
       <a
         href="#friends-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

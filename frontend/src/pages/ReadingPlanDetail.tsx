@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { READING_PLAN_DETAIL_METADATA } from '@/lib/seo/routeMetadata'
 import { DayCompletionCelebration } from '@/components/reading-plans/DayCompletionCelebration'
 import { DayContent } from '@/components/reading-plans/DayContent'
 import { DaySelector } from '@/components/reading-plans/DaySelector'
@@ -175,7 +176,9 @@ export function ReadingPlanDetail() {
 
   return (
     <Layout>
+      {/* BB-40: spread static base for ogImage/alt, preserve dynamic title/description. */}
       <SEO
+        {...READING_PLAN_DETAIL_METADATA}
         title={`${plan.title} | Reading Plans`}
         description={plan.description.slice(0, 155).trim()}
         jsonLd={breadcrumbs}

@@ -7,6 +7,7 @@ import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
+import { INSIGHTS_MONTHLY_METADATA } from '@/lib/seo/routeMetadata'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import {
@@ -92,7 +93,7 @@ export function MonthlyReport() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="Monthly Mood Report" description="Your monthly spiritual growth and mood tracking summary." noIndex />
+      <SEO {...INSIGHTS_MONTHLY_METADATA} />
       <a
         href="#monthly-report-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

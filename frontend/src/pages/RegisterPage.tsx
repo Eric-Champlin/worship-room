@@ -3,6 +3,7 @@ import { Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
+import { REGISTER_METADATA } from '@/lib/seo/routeMetadata'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useInView } from '@/hooks/useInView'
@@ -62,11 +63,8 @@ export function RegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
-      <SEO
-        title="Get Started"
-        description="Create your free Worship Room account — AI-powered prayer, Bible reading, journaling, meditation, worship music, and community. Completely free, forever."
-        canonical="/register"
-      />
+      {/* BB-40: noIndex added; drop inline canonical (default resolves to /register). */}
+      <SEO {...REGISTER_METADATA} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"

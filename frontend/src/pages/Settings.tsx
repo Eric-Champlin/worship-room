@@ -13,6 +13,7 @@ import { AccountSection } from '@/components/settings/AccountSection'
 import { AppSection } from '@/components/settings/AppSection'
 import { DashboardSection } from '@/components/settings/DashboardSection'
 import { SEO } from '@/components/SEO'
+import { SETTINGS_METADATA } from '@/lib/seo/routeMetadata'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
@@ -40,7 +41,7 @@ export function Settings() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="Settings" description="Manage your Worship Room account, notifications, and privacy preferences." noIndex />
+      <SEO {...SETTINGS_METADATA} />
       <a
         href="#settings-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

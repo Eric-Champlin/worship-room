@@ -4,6 +4,8 @@ import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { PlanCompletionCelebration } from '@/components/bible/plans/PlanCompletionCelebration'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { SEO } from '@/components/SEO'
+import { buildBiblePlanDayMetadata } from '@/lib/seo/routeMetadata'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { usePlan } from '@/hooks/bible/usePlan'
@@ -48,6 +50,12 @@ export function BiblePlanDay() {
   if (isError || !plan) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-dashboard-dark px-4">
+        {/* BB-40 Step 8: noIndex on plan-not-found error */}
+        <SEO
+          title="Reading Plan Not Found"
+          description="This reading plan doesn't exist or may have been removed."
+          noIndex
+        />
         <p className="text-lg text-white/70">This plan couldn&apos;t be loaded.</p>
         <Link to="/bible" className="mt-4 text-sm text-white/60 hover:text-white">
           ← Back to Bible
@@ -60,6 +68,12 @@ export function BiblePlanDay() {
   if (!day) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-dashboard-dark px-4">
+        {/* BB-40 Step 8: noIndex on day-not-found error */}
+        <SEO
+          title="Day Not Found"
+          description={`Day ${dayNumber} doesn't exist in this plan.`}
+          noIndex
+        />
         <p className="text-lg text-white/70">Day {dayNumber} doesn&apos;t exist in this plan.</p>
         <Link
           to={`/bible/plans/${slug}`}
@@ -97,6 +111,11 @@ export function BiblePlanDay() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
+      {/* BB-40 Step 8: dynamic metadata from builder. `day.title` is the curated
+          day heading (e.g., "Psalm 23 — The Lord is my Shepherd"). Canonical
+          override strips any `?verse=` query param. BreadcrumbList JSON-LD
+          with 4 items (Bible → Plans → <plan> → Day <n>). */}
+      <SEO {...buildBiblePlanDayMetadata(plan.slug, plan.title, dayNumber, day.title)} />
       {/* Header */}
       <div className="relative overflow-hidden pb-6 pt-20" style={{ background: ATMOSPHERIC_HERO_BG }}>
         <div className="relative z-10 mx-auto max-w-2xl px-4">

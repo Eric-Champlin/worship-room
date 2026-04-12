@@ -1,41 +1,24 @@
 import { Helmet } from 'react-helmet-async'
 import { useLocation } from 'react-router-dom'
+import { buildCanonicalUrl, SITE_URL } from '@/lib/seo/canonicalUrl'
 
-// eslint-disable-next-line react-refresh/only-export-components -- Constant co-located with SEO component
-export const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://worshiproom.com'
-
-/** Query params that represent UI state (not content) and should be stripped from canonical URLs */
-const UI_STATE_PARAMS = ['tab']
+// Re-export preserved for backwards compatibility. `Home.tsx`, `MyBiblePage.tsx`,
+// `MusicPage.tsx`, `PrayerWall.tsx`, `ReadingPlanDetail.tsx`, `Churches.tsx`,
+// `Counselors.tsx`, and `CelebrateRecovery.tsx` all `import { SEO, SITE_URL }`
+// from this module. BB-40 moved the canonical definition into
+// `@/lib/seo/canonicalUrl` for reuse by `routeMetadata.ts` builders.
+export { SITE_URL }
 
 interface SEOProps {
   title: string
   description: string
   noSuffix?: boolean
   ogImage?: string
+  ogImageAlt?: string
   ogType?: string
   canonical?: string
   noIndex?: boolean
   jsonLd?: Record<string, unknown> | Record<string, unknown>[]
-}
-
-function buildCanonicalUrl(pathname: string, search: string, canonicalOverride?: string): string {
-  const path = canonicalOverride ?? pathname
-
-  // Parse and filter query params — keep content params, strip UI state params
-  const params = new URLSearchParams(search)
-  const filteredParams = new URLSearchParams()
-  params.forEach((value, key) => {
-    if (!UI_STATE_PARAMS.includes(key)) {
-      filteredParams.set(key, value)
-    }
-  })
-
-  // If canonical is overridden, don't append query params from current URL
-  const queryString = canonicalOverride ? '' : filteredParams.toString()
-  const cleanPath = path.replace(/\/+$/, '') || '/'
-  const url = `${SITE_URL}${cleanPath}`
-
-  return queryString ? `${url}?${queryString}` : url
 }
 
 export function SEO({
@@ -43,6 +26,7 @@ export function SEO({
   description,
   noSuffix,
   ogImage,
+  ogImageAlt,
   ogType = 'website',
   canonical,
   noIndex,
@@ -67,12 +51,14 @@ export function SEO({
       <meta property="og:type" content={ogType} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={ogImageUrl} />
+      {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
       <meta property="og:site_name" content="Worship Room" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImageUrl} />
+      {ogImageAlt && <meta name="twitter:image:alt" content={ogImageAlt} />}
 
       {noIndex && <meta name="robots" content="noindex" />}
 

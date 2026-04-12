@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { SEO } from '@/components/SEO'
+import { SHARED_VERSE_METADATA } from '@/lib/seo/routeMetadata'
 import { SiteFooter } from '@/components/SiteFooter'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { SharePanel } from '@/components/sharing/SharePanel'
@@ -22,7 +23,7 @@ export function SharedVerse() {
   if (!verse) {
     return (
       <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
-        <SEO title="Verse Not Found" description="This verse may no longer be available on Worship Room." />
+        <SEO title="Verse Not Found" description="This verse may no longer be available on Worship Room." noIndex />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
@@ -59,7 +60,9 @@ export function SharedVerse() {
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
+      {/* BB-40: dynamic verse.reference title overrides static base; description comes from verse content */}
       <SEO
+        {...SHARED_VERSE_METADATA}
         title={verse.reference}
         description={verseDescription}
       />

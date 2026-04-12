@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { SEO } from '@/components/SEO'
+import { SHARED_PRAYER_METADATA } from '@/lib/seo/routeMetadata'
 import { SiteFooter } from '@/components/SiteFooter'
 import { getSongOfTheDay } from '@/mocks/daily-experience-mock-data'
 import {
@@ -54,10 +55,7 @@ export function SharedPrayer() {
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
-      <SEO
-        title="Shared Prayer"
-        description="A prayer shared from Worship Room — Christian emotional healing and worship."
-      />
+      <SEO {...SHARED_PRAYER_METADATA} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"

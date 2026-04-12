@@ -26,6 +26,7 @@ import { useChallengeAutoDetect } from '@/hooks/useChallengeAutoDetect'
 import { useChallengeNudge } from '@/hooks/useChallengeNudge'
 import { useWeeklyRecap } from '@/hooks/useWeeklyRecap'
 import { SEO } from '@/components/SEO'
+import { HOME_METADATA } from '@/lib/seo/routeMetadata'
 import { ChallengeCompletionOverlay } from '@/components/challenges/ChallengeCompletionOverlay'
 import { useToastSafe } from '@/components/ui/Toast'
 import { hasCheckedInToday } from '@/services/mood-storage'
@@ -372,40 +373,52 @@ export function Dashboard() {
 
   if (phase === 'onboarding') {
     return (
-      <WelcomeWizard
-        userName={user.name}
-        onComplete={handleOnboardingComplete}
-      />
+      <>
+        <SEO {...HOME_METADATA} />
+        <WelcomeWizard
+          userName={user.name}
+          onComplete={handleOnboardingComplete}
+        />
+      </>
     )
   }
 
   if (phase === 'welcome_back') {
     return (
-      <WelcomeBack
-        userName={user.name}
-        faithPoints={faithPoints}
-        onStepIn={handleWelcomeBackStepIn}
-        onSkipToDashboard={handleWelcomeBackSkip}
-      />
+      <>
+        <SEO {...HOME_METADATA} />
+        <WelcomeBack
+          userName={user.name}
+          faithPoints={faithPoints}
+          onStepIn={handleWelcomeBackStepIn}
+          onSkipToDashboard={handleWelcomeBackSkip}
+        />
+      </>
     )
   }
 
   if (phase === 'check_in') {
     return (
-      <MoodCheckIn
-        userName={user.name}
-        onComplete={handleCheckInComplete}
-        onSkip={handleCheckInSkip}
-      />
+      <>
+        <SEO {...HOME_METADATA} />
+        <MoodCheckIn
+          userName={user.name}
+          onComplete={handleCheckInComplete}
+          onSkip={handleCheckInSkip}
+        />
+      </>
     )
   }
 
   if (phase === 'recommendations' && lastMoodEntry) {
     return (
-      <MoodRecommendations
-        moodValue={lastMoodEntry.mood}
-        onAdvanceToDashboard={handleRecommendationsAdvance}
-      />
+      <>
+        <SEO {...HOME_METADATA} />
+        <MoodRecommendations
+          moodValue={lastMoodEntry.mood}
+          onAdvanceToDashboard={handleRecommendationsAdvance}
+        />
+      </>
     )
   }
 
@@ -415,10 +428,10 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO
-        title="Dashboard"
-        description="Your daily spiritual growth dashboard — mood tracking, streaks, faith points, and personalized encouragement."
-      />
+      {/* BB-40: Dashboard serves the root `/` route for logged-in users. Crawlers
+          never see this render (they always see Home). We spread HOME_METADATA
+          so the canonical root metadata is identical regardless of auth state. */}
+      <SEO {...HOME_METADATA} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

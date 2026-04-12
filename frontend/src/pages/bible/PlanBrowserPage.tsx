@@ -7,6 +7,7 @@ import { PlanFilterBar } from '@/components/bible/plans/PlanFilterBar'
 import { PlanInProgressCard } from '@/components/bible/plans/PlanInProgressCard'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
+import { BIBLE_PLANS_BROWSER_METADATA } from '@/lib/seo/routeMetadata'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { usePlanBrowser } from '@/hooks/bible/usePlanBrowser'
 
@@ -26,7 +27,7 @@ export function PlanBrowserPage() {
 
   return (
     <Layout>
-      <SEO title="Reading Plans — Bible (WEB)" description="Guided daily reading plans to deepen your walk with Scripture." />
+      <SEO {...BIBLE_PLANS_BROWSER_METADATA} />
       <div className="min-h-screen bg-dashboard-dark">
         {/* Hero */}
         <section

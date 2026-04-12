@@ -17,6 +17,7 @@ import { ASK_TOPIC_CHIPS, ASK_MAX_LENGTH, ASK_LOADING_DELAY_MS, ASK_FEEDBACK_KEY
 import { getAskResponse } from '@/mocks/ask-mock-data'
 import type { AskResponse, AskFeedback } from '@/types/ask'
 import { SEO } from '@/components/SEO'
+import { ASK_METADATA } from '@/lib/seo/routeMetadata'
 import { cn } from '@/lib/utils'
 
 interface ConversationPair {
@@ -209,7 +210,7 @@ export function AskPage() {
 
   return (
     <Layout>
-      <SEO title="Ask God's Word" description="Ask life questions and receive AI-powered answers grounded in Biblical wisdom and Scripture." />
+      <SEO {...ASK_METADATA} />
       <div className="min-h-screen bg-dashboard-dark">
         <PageHero title="Ask God's Word" scriptWord="Word" showDivider>
           <p className="mx-auto max-w-xl font-serif italic text-base text-white/60 sm:text-lg">

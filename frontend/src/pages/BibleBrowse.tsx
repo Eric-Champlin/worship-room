@@ -3,11 +3,12 @@ import { BibleBooksMode } from '@/components/bible/BibleBooksMode'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SEO } from '@/components/SEO'
+import { BIBLE_BROWSE_METADATA } from '@/lib/seo/routeMetadata'
 
 export function BibleBrowse() {
   return (
     <Layout>
-      <SEO title="Browse Books — Bible (WEB)" description="Browse all 66 books of the World English Bible." />
+      <SEO {...BIBLE_BROWSE_METADATA} />
       <div className="min-h-screen bg-dashboard-dark">
         <section
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"

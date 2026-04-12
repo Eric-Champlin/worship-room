@@ -14,6 +14,7 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_PSALMS_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { PsalmInfo, Psalm119Section } from '@/types/daily-experience'
 import type { MeditationVerseContext } from '@/types/meditation'
@@ -219,7 +220,7 @@ function PsalmReadingContent() {
   // Selection screen
   return (
     <Layout hero={<PageHero title="Psalm Reading" subtitle="Choose a Psalm to read slowly, one verse at a time." scriptWord="Reading" />}>
-      <SEO title="Psalm Reading" description="Read and reflect on a Psalm with historical context and guided meditation." noIndex />
+      <SEO {...MEDITATE_PSALMS_METADATA} />
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />
 

@@ -1,5 +1,6 @@
 import { LocalSupportPage } from '@/components/local-support/LocalSupportPage'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { CHURCHES_METADATA } from '@/lib/seo/routeMetadata'
 import { DENOMINATION_OPTIONS } from '@/types/local-support'
 const churchesBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -14,7 +15,7 @@ const churchesBreadcrumbs = {
 export function Churches() {
   return (
     <>
-      <SEO title="Find Churches Near You" description="Locate churches in your area with service times, directions, and contact information." jsonLd={churchesBreadcrumbs} />
+      <SEO {...CHURCHES_METADATA} jsonLd={churchesBreadcrumbs} />
       <LocalSupportPage
       config={{
         category: 'churches',

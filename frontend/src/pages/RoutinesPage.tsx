@@ -3,6 +3,7 @@ import { Layout } from '@/components/Layout'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SEO } from '@/components/SEO'
+import { MUSIC_ROUTINES_METADATA } from '@/lib/seo/routeMetadata'
 import { HeadingDivider } from '@/components/HeadingDivider'
 import { useElementWidth } from '@/hooks/useElementWidth'
 import { RoutineCard } from '@/components/music/RoutineCard'
@@ -110,7 +111,7 @@ export function RoutinesPage() {
 
   return (
     <Layout>
-      <SEO title="Bedtime Routines" description="Wind down with guided bedtime routines combining Scripture, ambient sounds, and gentle prayers." />
+      <SEO {...MUSIC_ROUTINES_METADATA} />
       {/* Hero */}
       <section
         className="px-4 pt-32 pb-8 text-center sm:pt-36 sm:pb-12 lg:pt-40"

@@ -10,6 +10,7 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_ACTS_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { getACTSSteps } from '@/mocks/daily-experience-mock-data'
 import type { MeditationVerseContext } from '@/types/meditation'
@@ -84,7 +85,7 @@ function ActsPrayerWalkContent() {
 
   return (
     <Layout hero={<PageHero title="ACTS Prayer Walk" scriptWord="Walk" />}>
-      <SEO title="ACTS Prayer Walk" description="A structured prayer using the ACTS framework — Adoration, Confession, Thanksgiving, Supplication." noIndex />
+      <SEO {...MEDITATE_ACTS_METADATA} />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />
 

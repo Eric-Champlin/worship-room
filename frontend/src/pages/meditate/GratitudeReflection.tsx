@@ -14,6 +14,7 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_GRATITUDE_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { MeditationVerseContext } from '@/types/meditation'
 
@@ -133,7 +134,7 @@ function GratitudeReflectionContent() {
 
   return (
     <Layout hero={<PageHero title="Gratitude Reflection" subtitle="Name the things you're thankful for today." scriptWord="Reflection" />}>
-      <SEO title="Gratitude Reflection" description="A guided gratitude journaling meditation rooted in Scripture." noIndex />
+      <SEO {...MEDITATE_GRATITUDE_METADATA} />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />
 

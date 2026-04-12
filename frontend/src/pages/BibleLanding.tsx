@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { BIBLE_LANDING_METADATA, buildBibleSearchMetadata } from '@/lib/seo/routeMetadata'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
 import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
 import { StreakChip } from '@/components/bible/landing/StreakChip'
@@ -127,13 +128,15 @@ function BibleLandingInner() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [toggle])
 
+  // BB-40: swap metadata when in search mode so the search query becomes
+  // part of the rendered title/description.
+  const seoMetadata = isSearchMode
+    ? buildBibleSearchMetadata(searchQuery)
+    : BIBLE_LANDING_METADATA
+
   return (
     <Layout>
-      <SEO
-        title="Read the Bible (WEB)"
-        description="Read the full World English Bible — free, public domain, no account needed. Resume reading, daily verse, reading plans, and more."
-        jsonLd={bibleBreadcrumbs}
-      />
+      <SEO {...seoMetadata} jsonLd={bibleBreadcrumbs} />
       <div className="relative min-h-screen bg-dashboard-dark">
         <BibleLandingOrbs />
         <BibleHero />

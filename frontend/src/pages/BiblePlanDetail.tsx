@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { SEO } from '@/components/SEO'
+import { buildBiblePlanMetadata } from '@/lib/seo/routeMetadata'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { usePlan } from '@/hooks/bible/usePlan'
@@ -35,6 +37,12 @@ export function BiblePlanDetail() {
   if (isError || !plan) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-dashboard-dark px-4">
+        {/* BB-40 Step 8: noIndex on error state so 404-ish URLs don't pollute search */}
+        <SEO
+          title="Reading Plan Not Found"
+          description="This reading plan doesn't exist or may have been removed."
+          noIndex
+        />
         <p className="text-lg text-white/70">This plan couldn&apos;t be loaded. Try again later.</p>
         <Link
           to="/bible"
@@ -90,6 +98,9 @@ export function BiblePlanDetail() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
+      {/* BB-40 Step 8: dynamic metadata from builder. Includes BreadcrumbList JSON-LD
+          (Bible → Plans → <plan>) and canonical override that strips any query params. */}
+      <SEO {...buildBiblePlanMetadata(plan.slug, plan.title, plan.description)} />
       {/* Hero */}
       <div className="relative overflow-hidden pb-8 pt-20" style={{ background: ATMOSPHERIC_HERO_BG }}>
         {/* Plan cover gradient accent */}

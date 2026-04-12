@@ -15,6 +15,7 @@ import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/m
 import { getLocalDateString } from '@/utils/date'
 import { cn } from '@/lib/utils'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_SOAKING_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { DailyVerse } from '@/types/daily-experience'
 import type { MeditationVerseContext } from '@/types/meditation'
@@ -236,7 +237,7 @@ function ScriptureSoakingContent() {
   // Pre-start
   return (
     <Layout hero={<PageHero title="Scripture Soaking" subtitle="Sit quietly with a single verse. No analyzing — just being present with God's word." scriptWord="Soaking" />}>
-      <SEO title="Scripture Soaking" description="Contemplate and meditate on a Bible verse with guided reflection." noIndex />
+      <SEO {...MEDITATE_SOAKING_METADATA} />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="soaking" />
 

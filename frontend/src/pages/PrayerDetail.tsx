@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { SEO } from '@/components/SEO'
+import { PRAYER_DETAIL_METADATA } from '@/lib/seo/routeMetadata'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
@@ -131,10 +132,7 @@ function PrayerDetailContent() {
 
   return (
     <PageShell>
-      <SEO
-        title="Prayer Request"
-        description="A prayer request shared on the Worship Room community prayer wall."
-      />
+      <SEO {...PRAYER_DETAIL_METADATA} />
       <main
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"

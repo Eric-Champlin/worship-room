@@ -1,5 +1,6 @@
 import { LocalSupportPage } from '@/components/local-support/LocalSupportPage'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { COUNSELORS_METADATA } from '@/lib/seo/routeMetadata'
 import { SPECIALTY_OPTIONS } from '@/types/local-support'
 const counselorsBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -14,7 +15,7 @@ const counselorsBreadcrumbs = {
 export function Counselors() {
   return (
     <>
-      <SEO title="Find Christian Counselors Near You" description="Locate Christian counselors and therapists in your area for professional faith-based support." jsonLd={counselorsBreadcrumbs} />
+      <SEO {...COUNSELORS_METADATA} jsonLd={counselorsBreadcrumbs} />
       <LocalSupportPage
       config={{
         category: 'counselors',

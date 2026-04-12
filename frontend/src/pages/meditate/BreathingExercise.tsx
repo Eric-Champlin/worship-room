@@ -13,6 +13,7 @@ import { getLocalDateString } from '@/utils/date'
 import { playChime } from '@/lib/audio'
 import { cn } from '@/lib/utils'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_BREATHING_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { MeditationVerseContext } from '@/types/meditation'
 
@@ -258,7 +259,7 @@ function BreathingExerciseContent() {
   // Pre-start screen
   return (
     <Layout hero={<PageHero title="Breathing Exercise" subtitle="Follow a 4-7-8 breathing pattern with scripture to focus your mind." scriptWord="Exercise" />}>
-      <SEO title="Breathing Exercise" description="A calming 4-7-8 breathing exercise for peace and focus." noIndex />
+      <SEO {...MEDITATE_BREATHING_METADATA} />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="breathing" />
         {/* Duration selector */}

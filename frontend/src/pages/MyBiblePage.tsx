@@ -6,6 +6,7 @@ import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
 import { useStreakStore } from '@/hooks/bible/useStreakStore'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { MY_BIBLE_METADATA } from '@/lib/seo/routeMetadata'
 import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
@@ -145,11 +146,7 @@ function MyBiblePageInner() {
 
   return (
     <Layout>
-      <SEO
-        title="My Bible"
-        description="Your highlights, notes, and bookmarks — all in one place. Stored locally, no account needed."
-        jsonLd={myBibleBreadcrumbs}
-      />
+      <SEO {...MY_BIBLE_METADATA} jsonLd={myBibleBreadcrumbs} />
       <div className="relative min-h-screen max-w-[100vw] overflow-hidden bg-dashboard-dark">
         <BibleLandingOrbs />
 

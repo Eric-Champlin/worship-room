@@ -31,6 +31,7 @@ import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/gett
 import { isValidCategory, PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 import { getTodaysQuestion } from '@/constants/question-of-the-day'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { PRAYER_WALL_METADATA } from '@/lib/seo/routeMetadata'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 const prayerWallBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -344,7 +345,7 @@ function PrayerWallContent() {
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-dashboard-dark font-sans">
-      <SEO title="Community Prayer Wall" description="Share prayer requests and pray for others in a supportive Christian community." jsonLd={prayerWallBreadcrumbs} />
+      <SEO {...PRAYER_WALL_METADATA} jsonLd={prayerWallBreadcrumbs} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

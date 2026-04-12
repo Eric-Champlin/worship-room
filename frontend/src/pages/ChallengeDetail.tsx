@@ -6,6 +6,7 @@ import { Layout } from '@/components/Layout'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SEO } from '@/components/SEO'
+import { CHALLENGE_DETAIL_METADATA } from '@/lib/seo/routeMetadata'
 import { ChallengeIcon } from '@/components/challenges/ChallengeIcon'
 import { ChallengeDayContent } from '@/components/challenges/ChallengeDayContent'
 import { ChallengeDaySelector } from '@/components/challenges/ChallengeDaySelector'
@@ -219,7 +220,9 @@ export function ChallengeDetail() {
 
   return (
     <Layout>
+      {/* BB-40: spread static base, preserve dynamic title/description. */}
       <SEO
+        {...CHALLENGE_DETAIL_METADATA}
         title={`${challenge.title} | Community Challenges`}
         description={challenge.description.slice(0, 155).trim()}
       />

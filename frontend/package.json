@@ -10,7 +10,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "og-generate": "node scripts/generate-og-cards.mjs",
+    "og-check": "node scripts/check-og-sizes.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.49.0",
