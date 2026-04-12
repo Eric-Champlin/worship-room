@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -38,6 +40,7 @@ export function AskPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
   const [searchParams] = useSearchParams()
+  const { isOnline } = useOnlineStatus()
   const handleSubmitRef = useRef<() => void>(() => {})
   const pendingAutoSubmitRef = useRef<string | null>(null)
   const loadingTimerRef = useRef<ReturnType<typeof setTimeout>>()
@@ -207,6 +210,16 @@ export function AskPage() {
   const charCount = text.length
 
   const showInput = conversation.length === 0 && !isLoading
+
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Ask"
+        fallbackRoute="/bible"
+        fallbackLabel="Read the Bible"
+      />
+    )
+  }
 
   return (
     <Layout>

@@ -9,11 +9,29 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
-      manifest: false,
+      includeAssets: ['apple-touch-icon.png', 'icons/*.png', 'og-default.png'],
+      manifest: {
+        name: 'Worship Room',
+        short_name: 'Worship Room',
+        description: 'A safe place to heal, grow, and connect with God',
+        start_url: '/',
+        display: 'standalone',
+        theme_color: '#08051A',
+        background_color: '#08051A',
+        orientation: 'portrait-primary',
+        categories: ['books', 'lifestyle', 'education'],
+        icons: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-256.png', sizes: '256x256', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-384.png', sizes: '384x384', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+        ],
+      },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: '/offline.html',
+        navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {

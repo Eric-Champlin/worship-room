@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Heart, LayoutDashboard, Search } from 'lucide-react'
@@ -550,5 +552,17 @@ function PrayerWallContent() {
 
 // Loading state: use PrayerWallSkeleton
 export function PrayerWall() {
+  const { isOnline } = useOnlineStatus()
+
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Prayer Wall"
+        fallbackRoute="/daily"
+        fallbackLabel="Go to Daily Hub"
+      />
+    )
+  }
+
   return <PrayerWallContent />
 }

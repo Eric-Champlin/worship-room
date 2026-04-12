@@ -1,4 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { Link, Navigate } from 'react-router-dom'
 import { Pencil } from 'lucide-react'
 import { SEO } from '@/components/SEO'
@@ -494,5 +496,17 @@ function DashboardContent() {
 }
 
 export function PrayerWallDashboard() {
+  const { isOnline } = useOnlineStatus()
+
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Prayer Wall"
+        fallbackRoute="/daily"
+        fallbackLabel="Go to Daily Hub"
+      />
+    )
+  }
+
   return <DashboardContent />
 }

@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   InstallPromptContext,
   type InstallPromptContextValue,
@@ -77,13 +78,27 @@ export function InstallPromptProvider({ children }: { children: ReactNode }) {
     }
   })
   const [visitCount, setVisitCount] = useState(0)
+  const [isSessionDismissed, setIsSessionDismissed] = useState(false)
+  const [sessionPageCount, setSessionPageCount] = useState(0)
+  const visitedPagesRef = useRef(new Set<string>())
+  const sessionStartRef = useRef(Date.now())
   const ios = useMemo(() => isIOSSafari(), [])
+
+  const location = useLocation()
 
   // Increment visit count on mount (once per session)
   useEffect(() => {
     const count = incrementVisitCount()
     setVisitCount(count)
   }, [])
+
+  // Track distinct page visits within the session
+  useEffect(() => {
+    if (!visitedPagesRef.current.has(location.pathname)) {
+      visitedPagesRef.current.add(location.pathname)
+      setSessionPageCount(visitedPagesRef.current.size)
+    }
+  }, [location.pathname])
 
   // Listen for beforeinstallprompt
   useEffect(() => {
@@ -140,6 +155,32 @@ export function InstallPromptProvider({ children }: { children: ReactNode }) {
     setDashboardCardShown(true)
   }, [])
 
+  const dismissSession = useCallback(() => {
+    setIsSessionDismissed(true)
+  }, [])
+
+  const shouldShowPrompt = useCallback(
+    (pathname: string): boolean => {
+      // Must be installable
+      if (!promptAvailable && !ios) return false
+      // Must not be installed
+      if (installed) return false
+      // Must not be permanently dismissed
+      if (dismissed) return false
+      // Must not be session-dismissed
+      if (isSessionDismissed) return false
+      // 3+ distinct pages in session
+      if (visitedPagesRef.current.size < 3) return false
+      // 2+ minutes elapsed
+      if (Date.now() - sessionStartRef.current < 120_000) return false
+      // Not on excluded pages
+      const EXCLUDED_RE = /^\/bible\/[^/]+\/\d+$|^\/ask$/
+      if (EXCLUDED_RE.test(pathname)) return false
+      return true
+    },
+    [promptAvailable, ios, installed, dismissed, isSessionDismissed],
+  )
+
   const value = useMemo<InstallPromptContextValue>(
     () => ({
       isInstallable: promptAvailable || ios,
@@ -151,8 +192,12 @@ export function InstallPromptProvider({ children }: { children: ReactNode }) {
       promptInstall,
       dismissBanner,
       markDashboardCardShown,
+      sessionPageCount,
+      isSessionDismissed,
+      dismissSession,
+      shouldShowPrompt,
     }),
-    [promptAvailable, ios, installed, visitCount, dismissed, dashboardCardShown, promptInstall, dismissBanner, markDashboardCardShown]
+    [promptAvailable, ios, installed, visitCount, dismissed, dashboardCardShown, promptInstall, dismissBanner, markDashboardCardShown, sessionPageCount, isSessionDismissed, dismissSession, shouldShowPrompt]
   )
 
   return (

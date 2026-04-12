@@ -9,12 +9,16 @@
  * The scale is intentionally sparse to leave room for future layers.
  */
 export const Z = {
+  /** Offline status indicator */
+  OFFLINE_INDICATOR: 50,
   /** Celebration overlays, notification panels, floating toolbars */
   OVERLAY: 60,
   /** Tooltip callouts */
   TOOLTIP: 70,
   /** Skip-to-content links */
   SKIP_LINK: 100,
+  /** Install prompt card */
+  INSTALL_PROMPT: 9997,
   /** PWA update prompt, scene undo toast */
   UPDATE_PROMPT: 9998,
   /** Audio pill (persistent mini-player) */

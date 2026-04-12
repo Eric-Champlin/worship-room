@@ -6,6 +6,8 @@ import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { AudioProvider } from '@/components/audio/AudioProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
+import { OfflineIndicator } from '@/components/pwa/OfflineIndicator'
+import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 import { InstallPromptProvider } from '@/contexts/InstallPromptProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
@@ -171,6 +173,8 @@ function App() {
         <WhisperToastProvider>
         <MidnightVerse />
         <UpdatePrompt />
+        <OfflineIndicator />
+        <InstallPrompt />
         <ChunkErrorBoundary>
         <Suspense fallback={<RouteLoadingFallback />}>
         <Routes>

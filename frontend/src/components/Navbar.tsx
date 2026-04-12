@@ -10,7 +10,6 @@ import { LocalSupportDropdown } from '@/components/LocalSupportDropdown'
 import { MobileDrawer, MobileNotificationSheet } from '@/components/MobileDrawer'
 import { DesktopUserActions } from '@/components/DesktopUserActions'
 import { SeasonalBanner } from '@/components/SeasonalBanner'
-import { InstallBanner } from '@/components/pwa/InstallBanner'
 
 const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> = [
   { label: 'Daily Hub', to: '/daily', icon: Calendar },
@@ -232,7 +231,6 @@ export function Navbar({ transparent = false, hideBanner = false }: NavbarProps)
         />
 
         {!hideBanner && <SeasonalBanner />}
-        <InstallBanner />
       </div>
 
       {/* Mobile notification bottom sheet — auth-gated to prevent localStorage writes for logged-out users */}

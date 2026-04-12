@@ -11,6 +11,10 @@ const NOOP_CONTEXT: InstallPromptContextValue = {
   promptInstall: async () => null,
   dismissBanner: () => {},
   markDashboardCardShown: () => {},
+  sessionPageCount: 0,
+  isSessionDismissed: false,
+  dismissSession: () => {},
+  shouldShowPrompt: () => false,
 }
 
 export function useInstallPrompt(): InstallPromptContextValue {

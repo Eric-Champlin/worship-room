@@ -1,4 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { Link, useParams } from 'react-router-dom'
 import { SEO } from '@/components/SEO'
 import { PRAYER_WALL_PROFILE_METADATA } from '@/lib/seo/routeMetadata'
@@ -311,5 +313,17 @@ function PrayerWallProfileContent() {
 }
 
 export function PrayerWallProfile() {
+  const { isOnline } = useOnlineStatus()
+
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Prayer Wall"
+        fallbackRoute="/daily"
+        fallbackLabel="Go to Daily Hub"
+      />
+    )
+  }
+
   return <PrayerWallProfileContent />
 }
