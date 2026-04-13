@@ -145,7 +145,7 @@ export function ReadingPlanDetail() {
       <Layout>
         <div className="flex min-h-screen items-center justify-center bg-dashboard-dark">
           <div className="text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
+            <div className="mx-auto h-8 w-8 motion-safe:animate-spin rounded-full border-2 border-white/20 border-t-primary" />
             <p className="mt-4 text-sm text-white/50">Loading plan...</p>
           </div>
         </div>
@@ -221,7 +221,7 @@ export function ReadingPlanDetail() {
                 aria-label={`${completionPercent}% complete`}
               >
                 <div
-                  className="h-2 rounded-full bg-primary transition-all duration-500"
+                  className="h-2 rounded-full bg-primary transition-all motion-reduce:transition-none duration-slow"
                   style={{ width: `${completionPercent}%` }}
                 />
               </div>

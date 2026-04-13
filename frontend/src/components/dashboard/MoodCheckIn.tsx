@@ -159,7 +159,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
                     aria-label={mood.label}
                     tabIndex={focusedIndex === index ? 0 : -1}
                     onClick={() => handleMoodSelect(mood, index)}
-                    className={`flex flex-col items-center gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded-xl ${
+                    className={`flex flex-col items-center gap-2 transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded-xl ${
                       isSelected
                         ? 'scale-[1.15]'
                         : hasSelection
@@ -168,7 +168,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
                     }`}
                   >
                     <div
-                      className={`h-14 w-14 rounded-full transition-all duration-200 sm:h-[60px] sm:w-[60px] lg:h-16 lg:w-16 ${
+                      className={`h-14 w-14 rounded-full transition-all motion-reduce:transition-none duration-base sm:h-[60px] sm:w-[60px] lg:h-16 lg:w-16 ${
                         isSelected
                           ? ''
                           : !hasSelection
@@ -250,7 +250,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
             </div>
             <p
               className={cn(
-                'mt-3 text-center font-sans text-sm transition-opacity duration-300',
+                'mt-3 text-center font-sans text-sm transition-opacity motion-reduce:transition-none duration-base',
                 verseRevealed ? 'opacity-100' : 'opacity-0'
               )}
             >

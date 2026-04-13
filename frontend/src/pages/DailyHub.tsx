@@ -243,7 +243,7 @@ function DailyHubContent() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'relative sticky top-0 z-40 backdrop-blur-md transition-shadow',
+            'relative sticky top-0 z-40 backdrop-blur-md transition-shadow motion-reduce:transition-none',
             isSticky && 'shadow-md shadow-black/20',
           )}
         >
@@ -272,7 +272,7 @@ function DailyHubContent() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:text-base',
+                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:text-base active:scale-[0.98]',
                       isActive
                         ? 'bg-white/[0.12] border border-white/[0.15] text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
                         : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',

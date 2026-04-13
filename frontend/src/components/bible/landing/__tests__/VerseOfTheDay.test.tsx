@@ -159,7 +159,7 @@ describe('VerseOfTheDay', () => {
   it('skeleton shows during loading', () => {
     mockIsLoading = true
     renderComponent()
-    const pulseEl = document.querySelector('.animate-pulse')
+    const pulseEl = document.querySelector('[class*="animate-pulse"]')
     expect(pulseEl).toBeInTheDocument()
   })
 

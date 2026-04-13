@@ -46,7 +46,7 @@ export function DashboardCard({
     <section
       aria-labelledby={titleId}
       className={cn(
-        'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6 transition-colors duration-150 hover:border-white/20 motion-reduce:transition-none',
+        'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6 transition-colors duration-fast hover:border-white/20 motion-reduce:transition-none',
         className,
       )}
       style={style}
@@ -85,7 +85,7 @@ export function DashboardCard({
             >
               <ChevronDown
                 className={cn(
-                  'h-5 w-5 transition-transform duration-200 motion-reduce:transition-none',
+                  'h-5 w-5 transition-transform duration-base motion-reduce:transition-none',
                   !collapsed && 'rotate-180',
                 )}
               />
@@ -97,7 +97,7 @@ export function DashboardCard({
       <div
         id={contentId}
         className={cn(
-          'grid transition-[grid-template-rows] duration-200 ease-in-out motion-reduce:transition-none',
+          'grid transition-[grid-template-rows] duration-base ease-standard motion-reduce:transition-none',
           collapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
         )}
       >

@@ -32,7 +32,7 @@ export function ReminderToggle({
         >
           <span
             className={cn(
-              'inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform',
+              'inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none',
               enabled ? 'translate-x-5' : 'translate-x-0.5',
             )}
           />

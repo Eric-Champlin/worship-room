@@ -127,7 +127,7 @@ export function TypographySheet({
         className={cn(
           'fixed z-50 overflow-y-auto border border-white/10',
           // Mobile/Tablet: bottom sheet
-          'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl border-t animate-bottom-sheet-slide-in',
+          'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl border-t motion-safe:animate-bottom-sheet-slide-in',
           // Desktop: floating panel
           'lg:inset-x-auto lg:bottom-auto lg:top-16 lg:right-20 lg:max-h-[calc(100vh-5rem)] lg:w-[320px] lg:rounded-2xl lg:border lg:animate-none',
         )}
@@ -161,7 +161,7 @@ export function TypographySheet({
                   type="button"
                   onClick={() => onUpdate('theme', t.value)}
                   className={cn(
-                    'aspect-[3/2] w-full rounded-xl border-2 transition-all',
+                    'aspect-[3/2] w-full rounded-xl border-2 transition-all motion-reduce:transition-none',
                     settings.theme === t.value
                       ? 'border-primary ring-2 ring-primary/30'
                       : 'border-white/10 hover:border-white/20',
@@ -433,7 +433,7 @@ function ToggleSwitch({
     >
       <span
         className={cn(
-          'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform',
+          'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none',
           checked ? 'translate-x-5' : 'translate-x-0',
         )}
       />

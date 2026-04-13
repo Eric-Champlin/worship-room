@@ -288,7 +288,7 @@ export function DevotionalTabContent({
                     )
                     onSwitchToJournal?.(devotional.theme, reflectionQuestion, buildSnapshot())
                   }}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-[colors,transform] duration-fast hover:bg-gray-100 active:scale-[0.98]"
                 >
                   Journal about this question &rarr;
                 </button>
@@ -307,7 +307,7 @@ export function DevotionalTabContent({
                   const customPrompt = `I'm reflecting on today's devotional about ${devotional.theme}. The passage is ${devotional.passage.reference}: "${verseText}". Help me pray about what I've read.`
                   onSwitchToPray?.(devotional.theme, customPrompt, buildSnapshot())
                 }}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-[colors,transform] duration-fast hover:bg-gray-100 active:scale-[0.98]"
               >
                 Pray about today&apos;s reading &rarr;
               </button>
@@ -338,14 +338,14 @@ export function DevotionalTabContent({
           <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:justify-center">
             <button
               onClick={handleShareClick}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)] active:scale-[0.98]"
             >
               <Share2 size={18} />
               Share today&apos;s devotional
             </button>
             <button
               onClick={handleReadAloudClick}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)] active:scale-[0.98]"
             >
               <Volume2 size={18} />
               {readAloud.state === 'idle'

@@ -167,7 +167,7 @@ export function TestimonyShareActions({
             <button
               onClick={handleDownload}
               disabled={isActioning}
-              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-3 font-medium text-white transition-colors hover:bg-amber-500 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-3 font-medium text-white transition-[colors,transform] duration-fast hover:bg-amber-500 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98]"
             >
               <Download className="h-4 w-4" />
               Download
@@ -175,7 +175,7 @@ export function TestimonyShareActions({
             <button
               onClick={handleShare}
               disabled={isActioning}
-              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-white/20 px-4 py-3 font-medium text-white transition-colors hover:bg-white/10 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-white/50"
+              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-white/20 px-4 py-3 font-medium text-white transition-[colors,transform] duration-fast hover:bg-white/10 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
             >
               {showWebShare ? (
                 <>

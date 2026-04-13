@@ -127,7 +127,7 @@ function PsalmReadingContent() {
                 key={section.id}
                 type="button"
                 onClick={() => handleSelectSection(section)}
-                className="rounded-lg border border-gray-200 bg-white p-4 text-left transition-shadow hover:shadow-md"
+                className="rounded-lg border border-gray-200 bg-white p-4 text-left transition-shadow motion-reduce:transition-none hover:shadow-md"
               >
                 <p className="font-semibold text-text-dark">
                   {section.hebrewLetter}
@@ -230,7 +230,7 @@ function PsalmReadingContent() {
               key={psalm.id}
               type="button"
               onClick={() => handleSelectPsalm(psalm)}
-              className="w-full rounded-lg border border-gray-200 bg-white p-4 text-left transition-shadow hover:shadow-md"
+              className="w-full rounded-lg border border-gray-200 bg-white p-4 text-left transition-shadow motion-reduce:transition-none hover:shadow-md"
             >
               <p className="font-semibold text-text-dark">{psalm.title}</p>
               <p className="text-sm text-text-light">{psalm.description}</p>

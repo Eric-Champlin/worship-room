@@ -88,7 +88,7 @@ export function ShareImageButton({
       onClick={handleShare}
       disabled={isGenerating}
       className={cn(
-        'inline-flex min-h-[44px] items-center justify-center gap-2 px-6 py-3 transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+        'inline-flex min-h-[44px] items-center justify-center gap-2 px-6 py-3 transition-all motion-reduce:transition-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
         variantClasses,
         className,
       )}

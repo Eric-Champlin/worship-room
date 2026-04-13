@@ -110,7 +110,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
       />
 
       {showNoteInput && (
-        <div className="mt-3 overflow-hidden transition-all duration-300">
+        <div className="mt-3 overflow-hidden transition-all motion-reduce:transition-none duration-base">
           <label htmlFor={`note-${verse.reference}`} className="sr-only">
             Note for {verse.reference}
           </label>

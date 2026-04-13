@@ -25,7 +25,7 @@ export function BoardSelector({ activeBoard, onBoardChange }: BoardSelectorProps
             role="tab"
             aria-selected={isActive}
             onClick={() => onBoardChange(board.id)}
-            className={`min-h-[44px] rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 ${
+            className={`min-h-[44px] rounded-full px-4 py-1.5 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 active:scale-[0.98] ${
               isActive
                 ? 'bg-primary/20 text-primary-lt'
                 : 'text-white/60 hover:text-white/80'

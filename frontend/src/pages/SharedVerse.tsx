@@ -95,7 +95,7 @@ export function SharedVerse() {
           </blockquote>
           <p
             className={cn(
-              'mt-3 text-sm text-white/80 transition-opacity duration-300',
+              'mt-3 text-sm text-white/80 transition-opacity motion-reduce:transition-none duration-base',
               referenceVisible ? 'opacity-100' : 'opacity-0',
             )}
           >
@@ -108,7 +108,7 @@ export function SharedVerse() {
             aria-hidden={!referenceVisible}
             tabIndex={referenceVisible ? 0 : -1}
             className={cn(
-              'mt-6 rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white transition-all hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark',
+              'mt-6 rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white transition-all motion-reduce:transition-none hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark',
               referenceVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
             )}
           >

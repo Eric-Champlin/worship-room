@@ -111,7 +111,7 @@ export function Friends() {
                   aria-selected={isActive}
                   aria-controls={`panel-${tab.id}`}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`min-h-[44px] rounded-full px-6 py-2 text-sm font-medium transition-colors ${
+                  className={`min-h-[44px] rounded-full px-6 py-2 text-sm font-medium transition-[colors,transform] duration-fast active:scale-[0.98] ${
                     isActive
                       ? 'text-white font-semibold'
                       : 'border border-white/20 text-white/60 hover:text-white/80'
@@ -123,7 +123,7 @@ export function Friends() {
             })}
             {/* Animated underline */}
             <div
-              className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out"
+              className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-standard"
               style={{
                 width: `${100 / TAB_CONFIG.length}%`,
                 transform: `translateX(${TAB_CONFIG.findIndex(t => t.id === activeTab) * 100}%)`,

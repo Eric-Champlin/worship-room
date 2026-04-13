@@ -47,7 +47,7 @@ function SearchSkeleton() {
     <div aria-busy="true" className="space-y-4">
       <span className="sr-only">Loading search results</span>
       {[80, 60, 90, 70].map((width, i) => (
-        <div key={i} className="animate-pulse space-y-2">
+        <div key={i} className="motion-safe:animate-pulse space-y-2">
           <div className="h-4 w-24 rounded bg-white/10" />
           <div className="h-4 rounded bg-white/10" style={{ width: `${width}%` }} />
           <div className="h-4 rounded bg-white/10" style={{ width: `${width - 20}%` }} />

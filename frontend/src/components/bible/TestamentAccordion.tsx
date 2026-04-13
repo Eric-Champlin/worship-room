@@ -48,7 +48,7 @@ export function TestamentAccordion({
         <ChevronDown
           size={20}
           className={cn(
-            'text-white/50 transition-transform',
+            'text-white/50 transition-transform motion-reduce:transition-none',
             isExpanded && 'rotate-180',
           )}
         />

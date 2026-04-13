@@ -51,7 +51,7 @@ export function BibleSleepSection() {
           e.preventDefault()
           navigate('/bible')
         }}
-        className="group block overflow-hidden rounded-xl border border-white/10 bg-white/[0.06] transition-shadow hover:shadow-md hover:shadow-black/20"
+        className="group block overflow-hidden rounded-xl border border-white/10 bg-white/[0.06] transition-shadow motion-reduce:transition-none hover:shadow-md hover:shadow-black/20"
       >
         <div className="h-1 bg-gradient-to-r from-amber-500 to-purple-600" />
         <div className="flex items-center gap-4 p-5">
@@ -80,7 +80,7 @@ export function BibleSleepSection() {
               key={option.sceneId}
               type="button"
               onClick={() => handleQuickStart(option.sceneId, option.bookPath)}
-              className="flex min-h-[44px] items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] p-4 transition-shadow hover:shadow-md hover:shadow-black/20"
+              className="flex min-h-[44px] items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] p-4 transition-shadow motion-reduce:transition-none hover:shadow-md hover:shadow-black/20"
               aria-label={`Start ${scene.name} and read ${option.bookLabel}`}
             >
               <Play className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />

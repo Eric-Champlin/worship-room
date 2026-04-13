@@ -27,7 +27,7 @@ export function PrayerListActionBar({
         <button
           type="button"
           onClick={onAddPrayer}
-          className="flex min-h-[44px] items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-lt"
+          className="flex min-h-[44px] items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
         >
           <Plus className="h-5 w-5" aria-hidden="true" />
           Add Prayer

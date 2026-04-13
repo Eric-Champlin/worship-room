@@ -317,7 +317,7 @@ function DashboardContent() {
             </button>
           ))}
           <div
-            className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out"
+            className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-standard"
             style={{
               width: `${100 / tabs.length}%`,
               transform: `translateX(${tabs.findIndex(t => t.key === activeTab) * 100}%)`,

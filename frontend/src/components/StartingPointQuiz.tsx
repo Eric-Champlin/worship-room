@@ -92,7 +92,7 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
               className={cn(
                 'h-full rounded-full',
                 isDark
-                  ? 'bg-gradient-to-r from-purple-500 to-white/80 transition-all duration-300 ease-out'
+                  ? 'bg-gradient-to-r from-purple-500 to-white/80 transition-all motion-reduce:transition-none duration-slow ease-decelerate'
                   : 'bg-primary'
               )}
               style={{
@@ -289,11 +289,11 @@ function QuestionCard({ questionIndex, selectedAnswer, onSelect, onBack, isDark 
               onClick={() => onSelect(index)}
               aria-pressed={isSelected}
               className={cn(
-                'flex w-full items-center justify-between rounded-xl border text-left text-sm transition-all sm:text-base',
+                'flex w-full items-center justify-between rounded-xl border text-left text-sm transition-all motion-reduce:transition-none sm:text-base',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 isDark
-                  ? 'px-4 py-3 min-h-[44px] duration-150'
-                  : 'p-4 duration-200',
+                  ? 'px-4 py-3 min-h-[44px] duration-fast'
+                  : 'p-4 duration-base',
                 isDark ? 'text-white' : '',
                 isSelected
                   ? isDark
@@ -351,7 +351,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
         />&rdquo;
         <cite
           className={cn(
-            'mt-1 block font-sans text-sm not-italic transition-opacity duration-300',
+            'mt-1 block font-sans text-sm not-italic transition-opacity motion-reduce:transition-none duration-base',
             referenceVisible ? 'opacity-100' : 'opacity-0',
             isDark ? 'text-white' : 'text-text-light',
           )}
@@ -365,7 +365,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           to={destination.route}
           className={cn(
             'mx-6 mt-6 inline-block rounded-full bg-white px-6 py-3 text-base font-semibold text-hero-bg',
-            'transition-colors duration-200 hover:bg-white/90',
+            'transition-colors duration-base hover:bg-white/90',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
           )}
         >
@@ -376,7 +376,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           to={destination.route}
           className={cn(
             'mx-6 mt-6 inline-block rounded-full bg-primary px-8 py-3 text-base font-medium text-white',
-            'transition-all hover:bg-primary-lt hover:shadow-lg',
+            'transition-all motion-reduce:transition-none hover:bg-primary-lt hover:shadow-lg',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
           )}
         >

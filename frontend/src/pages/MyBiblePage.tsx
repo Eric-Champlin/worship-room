@@ -223,7 +223,7 @@ function MyBiblePageInner() {
                       key={stat.key}
                       type="button"
                       onClick={() => setView(stat.filterType as MyBibleViewId)}
-                      className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-colors hover:border-white/[0.18] hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                      className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-[colors,transform] duration-fast hover:border-white/[0.18] hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
                     >
                       <stat.icon size={16} className="text-white/40" />
                       <span className="text-xl font-bold text-white">{totalCounts[stat.key]}</span>
@@ -242,7 +242,7 @@ function MyBiblePageInner() {
                 <button
                   type="button"
                   onClick={() => setStreakModalOpen(true)}
-                  className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-colors hover:bg-white/[0.09] min-h-[44px]"
+                  className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-[colors,transform] duration-fast hover:bg-white/[0.09] min-h-[44px] active:scale-[0.98]"
                   aria-label={`Reading streak: ${totalCounts.streak} days. Tap for details.`}
                 >
                   <Flame size={16} className="text-white/40" />
@@ -298,7 +298,7 @@ function MyBiblePageInner() {
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="mt-3 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  className="mt-3 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
                 >
                   Clear filters
                 </button>

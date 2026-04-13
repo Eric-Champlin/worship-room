@@ -3,6 +3,7 @@ import { Flame, Wind } from 'lucide-react'
 import { LEVEL_THRESHOLDS } from '@/constants/dashboard/levels'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { AnimatedCounter } from './AnimatedCounter'
 
 interface DashboardHeroProps {
@@ -168,7 +169,7 @@ export function DashboardHero({
                     boxShadow: glowColor ?? 'none',
                     transition: prefersReduced
                       ? 'none'
-                      : 'width 600ms ease-out, box-shadow 300ms ease-out',
+                      : `width ${ANIMATION_DURATIONS.slow}ms ${ANIMATION_EASINGS.decelerate}, box-shadow ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
                   }}
                 />
               </div>

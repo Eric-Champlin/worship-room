@@ -99,7 +99,7 @@ function BookCard({
               type="button"
               onClick={() => onNavigate(`/bible/${book.slug}/${chapter}`)}
               className={cn(
-                'h-1.5 w-1.5 rounded-[1px] transition-opacity hover:opacity-80 sm:h-2 sm:w-2 lg:h-2.5 lg:w-2.5',
+                'h-1.5 w-1.5 rounded-[1px] transition-opacity motion-reduce:transition-none hover:opacity-80 sm:h-2 sm:w-2 lg:h-2.5 lg:w-2.5',
                 state === 'unread' && 'bg-white/[0.08]',
                 state === 'read' && 'bg-primary/60',
                 state === 'highlighted' && 'bg-primary/80',

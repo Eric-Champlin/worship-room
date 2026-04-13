@@ -1,7 +1,7 @@
 export function VerseNoteMarker() {
   return (
     <span
-      className="note-marker ml-0.5 inline-block align-super transition-colors duration-150"
+      className="note-marker ml-0.5 inline-block align-super transition-colors duration-fast"
       style={{ fontSize: '0.7em' }}
       aria-hidden="true"
     >

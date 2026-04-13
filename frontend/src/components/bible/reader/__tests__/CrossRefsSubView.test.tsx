@@ -135,7 +135,7 @@ describe('CrossRefsSubView', () => {
     render(<CrossRefsSubView selection={makeSelection()} context={makeContext()} />)
 
     // Skeleton elements should be visible (animate-pulse spans)
-    const skeletons = document.querySelectorAll('.animate-pulse')
+    const skeletons = document.querySelectorAll('[class*="animate-pulse"]')
     expect(skeletons.length).toBeGreaterThan(0)
   })
 

@@ -74,7 +74,7 @@ export function ListingCard({
     <article
       aria-label={`${place.name} — ${place.address}`}
       className={cn(
-        'rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20',
+        'rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20',
         isHighlighted && 'ring-2 ring-primary',
       )}
     >
@@ -175,7 +175,7 @@ export function ListingCard({
             size={18}
             aria-hidden="true"
             className={cn(
-              'text-white/50 transition-transform duration-200',
+              'text-white/50 transition-transform motion-reduce:transition-none duration-base',
               isExpanded && 'rotate-180',
             )}
           />
@@ -192,7 +192,7 @@ export function ListingCard({
         id={detailsId}
         {...(!isExpanded ? { inert: '' as unknown as string } : {})}
         className={cn(
-          'overflow-hidden transition-all duration-200',
+          'overflow-hidden transition-all motion-reduce:transition-none duration-base',
           isExpanded ? 'mt-4 max-h-[500px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >

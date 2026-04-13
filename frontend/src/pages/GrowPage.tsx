@@ -117,7 +117,7 @@ export function GrowPage() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-white/[0.08] backdrop-blur-xl transition-shadow',
+            'sticky top-0 z-40 bg-white/[0.08] backdrop-blur-xl transition-shadow motion-reduce:transition-none',
             isSticky && 'shadow-md shadow-black/20',
           )}
         >
@@ -143,7 +143,7 @@ export function GrowPage() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base',
+                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base active:scale-[0.98]',
                       isActive
                         ? 'text-white'
                         : 'text-white/60 hover:text-white/80',
@@ -163,7 +163,7 @@ export function GrowPage() {
               })}
               {/* Animated underline */}
               <div
-                className="absolute bottom-0 h-0.5 bg-primary transition-transform duration-200 ease-in-out"
+                className="absolute bottom-0 h-0.5 bg-primary transition-transform motion-reduce:transition-none duration-base ease-standard"
                 style={{
                   width: `${100 / TABS.length}%`,
                   transform: `translateX(${activeTabIndex * 100}%)`,

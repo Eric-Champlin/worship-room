@@ -94,7 +94,7 @@ export function ChallengeDayContent({
             <button
               type="button"
               onClick={onMarkComplete}
-              className="mt-4 w-full min-h-[44px] rounded-lg py-3 text-center font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+              className="mt-4 w-full min-h-[44px] rounded-lg py-3 text-center font-semibold text-white transition-opacity motion-reduce:transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
               style={{ backgroundColor: themeColor }}
             >
               Mark Complete
@@ -122,7 +122,7 @@ export function ChallengeDayContent({
                   }
                 : undefined
             }
-            className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+            className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium transition-opacity motion-reduce:transition-none hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
             style={{ color: themeColor }}
           >
             Go to {actionLabel} &rarr;

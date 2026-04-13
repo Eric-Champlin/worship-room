@@ -15,7 +15,7 @@ export function MeditationCard({ data, verseText, searchQuery }: MeditationCardP
           <HighlightedText text={verseText} query={searchQuery ?? ''} />
         </p>
       ) : (
-        <div className="h-4 w-3/4 animate-pulse rounded bg-white/10" />
+        <div className="h-4 w-3/4 motion-safe:animate-pulse rounded bg-white/10" />
       )}
       <p className="text-xs text-white/50">
         You meditated on this verse &middot; {data.durationMinutes} min

@@ -4,6 +4,7 @@ import { ChevronDown, Circle, CircleCheck, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { getCollapseState, setCollapseState } from '@/services/dashboard-collapse-storage'
 import type { GettingStartedItem } from '@/hooks/useGettingStarted'
 
@@ -104,7 +105,7 @@ export function GettingStartedCard({
     <section
       aria-labelledby={titleId}
       className={cn(
-        'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6 transition-opacity duration-300 motion-reduce:transition-none',
+        'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6 transition-opacity duration-base motion-reduce:transition-none',
         fadingOut && 'opacity-0',
       )}
     >
@@ -149,7 +150,7 @@ export function GettingStartedCard({
                 style={
                   prefersReduced
                     ? undefined
-                    : { transition: 'stroke-dashoffset 500ms ease-out' }
+                    : { transition: `stroke-dashoffset ${ANIMATION_DURATIONS.slow}ms ${ANIMATION_EASINGS.decelerate}` }
                 }
               />
             </svg>
@@ -168,7 +169,7 @@ export function GettingStartedCard({
           >
             <ChevronDown
               className={cn(
-                'h-5 w-5 transition-transform duration-200 motion-reduce:transition-none',
+                'h-5 w-5 transition-transform duration-base motion-reduce:transition-none',
                 !collapsed && 'rotate-180',
               )}
             />
@@ -189,7 +190,7 @@ export function GettingStartedCard({
       <div
         id={contentId}
         className={cn(
-          'grid transition-[grid-template-rows] duration-200 ease-in-out motion-reduce:transition-none',
+          'grid transition-[grid-template-rows] duration-base ease-standard motion-reduce:transition-none',
           collapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
         )}
       >
@@ -214,7 +215,7 @@ export function GettingStartedCard({
                 <div
                   key={item.key}
                   className={cn(
-                    'flex min-h-[44px] items-center gap-3 transition-opacity duration-300 motion-reduce:transition-none',
+                    'flex min-h-[44px] items-center gap-3 transition-opacity duration-base motion-reduce:transition-none',
                     item.completed && 'opacity-50',
                   )}
                   aria-label={

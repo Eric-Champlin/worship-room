@@ -9,7 +9,7 @@ export function ChapterJumpOverlay({ digits, visible }: ChapterJumpOverlayProps)
   return (
     <div
       className={cn(
-        'pointer-events-none absolute inset-x-0 bottom-4 flex justify-center transition-opacity duration-200',
+        'pointer-events-none absolute inset-x-0 bottom-4 flex justify-center transition-opacity motion-reduce:transition-none duration-base',
         visible ? 'opacity-100' : 'opacity-0',
       )}
       aria-live="polite"

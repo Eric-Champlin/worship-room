@@ -38,7 +38,7 @@ export function AskResponseDisplay({
   onFeedback,
 }: AskResponseDisplayProps) {
   return (
-    <div className={prefersReducedMotion ? '' : 'animate-fade-in'}>
+    <div className={prefersReducedMotion ? '' : 'animate-fade-in-up'}>
       {/* Direct answer */}
       <div className="mb-8">
         {response.answer.split('\n\n').map((p, i) => (

@@ -72,7 +72,7 @@ export function MemorizationFlipCard({
         }
         onClick={handleFlip}
         onKeyDown={handleKeyDown}
-        className="relative h-full w-full transition-transform duration-300 ease-out motion-reduce:duration-0"
+        className="relative h-full w-full transition-transform motion-reduce:transition-none duration-base ease-decelerate motion-reduce:duration-0"
         style={{
           transformStyle: 'preserve-3d',
           transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',

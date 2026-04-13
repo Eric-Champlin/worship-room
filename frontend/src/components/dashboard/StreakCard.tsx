@@ -6,6 +6,7 @@ import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useToastSafe } from '@/components/ui/Toast'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { AnimatedCounter } from './AnimatedCounter'
 import { BadgeGrid } from './BadgeGrid'
 
@@ -228,7 +229,7 @@ export function StreakCard({
                     <>
                       <button
                         onClick={() => handleRepair(true)}
-                        className="min-h-[44px] w-full rounded-lg bg-amber-500/20 px-4 py-2.5 text-sm font-medium text-amber-300 transition-all hover:bg-amber-500/30 motion-safe:hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-amber-400/50 sm:w-auto"
+                        className="min-h-[44px] w-full rounded-lg bg-amber-500/20 px-4 py-2.5 text-sm font-medium text-amber-300 transition-all motion-reduce:transition-none hover:bg-amber-500/30 motion-safe:hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-amber-400/50 sm:w-auto active:scale-[0.98]"
                         type="button"
                       >
                         Restore Streak
@@ -239,7 +240,7 @@ export function StreakCard({
                     <>
                       <button
                         onClick={() => handleRepair(false)}
-                        className="min-h-[44px] w-full rounded-lg bg-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition-all hover:bg-white/15 motion-safe:hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-white/30 sm:w-auto"
+                        className="min-h-[44px] w-full rounded-lg bg-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition-all motion-reduce:transition-none hover:bg-white/15 motion-safe:hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-white/30 sm:w-auto active:scale-[0.98]"
                         type="button"
                       >
                         Repair with 50 points
@@ -321,7 +322,7 @@ export function StreakCard({
               boxShadow: glowColor ?? 'none',
               transition: prefersReduced
                 ? 'none'
-                : 'width 600ms ease-out, box-shadow 300ms ease-out',
+                : `width ${ANIMATION_DURATIONS.slow}ms ${ANIMATION_EASINGS.decelerate}, box-shadow ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
             }}
           />
         </div>

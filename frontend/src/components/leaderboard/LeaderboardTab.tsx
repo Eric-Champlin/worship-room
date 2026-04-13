@@ -12,7 +12,7 @@ export function LeaderboardTab() {
         <BoardSelector activeBoard={activeBoard} onBoardChange={setActiveBoard} />
       </div>
 
-      <div className="motion-safe:transition-opacity motion-safe:duration-150">
+      <div className="motion-safe:transition-opacity motion-safe:duration-fast">
         {activeBoard === 'friends' && <FriendsLeaderboard />}
         {activeBoard === 'global' && <GlobalLeaderboard />}
       </div>

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 
 const SWIPE_THRESHOLD = 50
 
@@ -87,7 +88,7 @@ export function BibleDrawer({ isOpen, onClose, ariaLabel, children }: BibleDrawe
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           transform: swipeOffset > 0 ? `translateX(${swipeOffset}px)` : undefined,
-          transition: swipeOffset > 0 ? 'none' : 'transform 300ms ease-out',
+          transition: swipeOffset > 0 ? 'none' : `transform ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

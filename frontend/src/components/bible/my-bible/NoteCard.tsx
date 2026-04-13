@@ -74,7 +74,7 @@ export function NoteCard({ data, verseText, createdAt, updatedAt, searchQuery }:
           <HighlightedText text={verseText} query={searchQuery ?? ''} />
         </p>
       ) : (
-        <div className="h-4 w-3/4 animate-pulse rounded bg-white/10" />
+        <div className="h-4 w-3/4 motion-safe:animate-pulse rounded bg-white/10" />
       )}
       <div className={expanded ? '' : 'line-clamp-4'}>
         <p className="text-sm text-white">

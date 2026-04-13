@@ -351,7 +351,7 @@ export function TimerTabContent() {
             : 'Select a timer duration to start'
         }
         className={cn(
-          'w-full rounded-lg bg-primary py-3 px-8 font-semibold text-white transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt',
+          'w-full rounded-lg bg-primary py-3 px-8 font-semibold text-white transition-opacity motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt',
           !hasValidDuration && 'cursor-not-allowed opacity-50',
         )}
       >

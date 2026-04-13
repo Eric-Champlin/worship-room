@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { ANIMATION_EASINGS } from '@/constants/animation'
 import {
   TYPE_SIZE_CLASSES,
   LINE_HEIGHT_CLASSES,
@@ -96,7 +97,7 @@ export function ReaderBody({
                   isHighlighted && 'rounded-sm',
                   isSelected && !isHighlighted && selectionVisible && 'bg-primary/[0.15] rounded-sm',
                   isSelected && isHighlighted && selectionVisible && 'outline outline-2 outline-offset-1 rounded-sm',
-                  isSelected && !selectionVisible && 'transition-colors duration-200',
+                  isSelected && !selectionVisible && 'transition-colors duration-base',
                   isFresh && !reducedMotion && 'animate-highlight-pulse',
                   isArrivalHighlight && 'rounded',
                 )}
@@ -104,7 +105,7 @@ export function ReaderBody({
                   isArrivalHighlight
                     ? {
                         boxShadow: '0 0 12px 2px rgba(139, 92, 246, 0.4)',
-                        transition: reducedMotion ? 'none' : 'box-shadow 1.5s ease-out',
+                        transition: reducedMotion ? 'none' : `box-shadow 1.5s ${ANIMATION_EASINGS.decelerate}`,
                       }
                     : isHighlighted
                       ? {

@@ -27,7 +27,7 @@ export function EchoCard({ echo, onNavigate }: EchoCardProps) {
       to={to}
       onClick={() => onNavigate?.()}
       aria-label={`Echo: you ${verb} ${echo.reference} ${echo.relativeLabel}. Tap to open.`}
-      className="block rounded-2xl bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] p-4 sm:p-5 hover:bg-white/[0.08] transition-colors duration-150 motion-reduce:transition-none"
+      className="block rounded-2xl bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] p-4 sm:p-5 hover:bg-white/[0.08] transition-colors duration-fast motion-reduce:transition-none"
     >
       <div className="flex items-center gap-1.5 mb-3">
         <Icon className="h-3.5 w-3.5 text-white/30 shrink-0" />

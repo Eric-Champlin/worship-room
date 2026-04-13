@@ -86,9 +86,9 @@ export function DrawerViewRouter({ onClose }: DrawerViewRouterProps) {
   if (transition) {
     const { direction, outgoingView } = transition
     const outAnim =
-      direction === 'push' ? '' : 'animate-view-slide-out'
+      direction === 'push' ? '' : 'motion-safe:animate-view-slide-out'
     const inAnim =
-      direction === 'push' ? 'animate-view-slide-in' : 'animate-view-slide-back-in'
+      direction === 'push' ? 'motion-safe:animate-view-slide-in' : 'motion-safe:animate-view-slide-back-in'
 
     return (
       <div className="relative h-full w-full overflow-hidden">

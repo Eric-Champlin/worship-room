@@ -193,7 +193,7 @@ export function MusicPage() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-dashboard-dark transition-shadow',
+            'sticky top-0 z-40 bg-dashboard-dark transition-shadow motion-reduce:transition-none',
             isSticky && 'shadow-md',
           )}
         >
@@ -235,7 +235,7 @@ export function MusicPage() {
               })}
               {/* Animated underline */}
               <div
-                className="absolute bottom-0 h-0.5 bg-primary transition-transform duration-200 ease-in-out"
+                className="absolute bottom-0 h-0.5 bg-primary transition-transform motion-reduce:transition-none duration-base ease-standard"
                 style={{
                   width: `${100 / TABS.length}%`,
                   transform: `translateX(${activeTabIndex * 100}%)`,

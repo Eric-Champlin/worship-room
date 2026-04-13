@@ -16,7 +16,7 @@ export function VersePromptCard({ context, onRemove, framingLine }: VersePromptC
     <div
       className={cn(
         'relative mb-4 rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-4 py-4',
-        !prefersReduced && 'animate-fade-in',
+        !prefersReduced && 'motion-safe:animate-fade-in',
       )}
       role="region"
       aria-label={`Verse prompt: ${context.reference}`}
@@ -59,9 +59,9 @@ export function VersePromptSkeleton() {
       className="mb-4 rounded-xl border-l-4 border-l-primary/30 bg-white/[0.04] px-4 py-4"
       aria-hidden="true"
     >
-      <div className="h-5 w-32 animate-pulse rounded bg-white/10" />
-      <div className="mt-2 h-16 w-full animate-pulse rounded bg-white/10" />
-      <div className="mt-3 h-4 w-48 animate-pulse rounded bg-white/10" />
+      <div className="h-5 w-32 motion-safe:animate-pulse rounded bg-white/10" />
+      <div className="mt-2 h-16 w-full motion-safe:animate-pulse rounded bg-white/10" />
+      <div className="mt-3 h-4 w-48 motion-safe:animate-pulse rounded bg-white/10" />
     </div>
   )
 }

@@ -61,7 +61,7 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
               key={session.id}
               type="button"
               onClick={() => handleCardClick(session)}
-              className="relative w-[220px] min-w-[220px] flex flex-col flex-shrink-0 snap-center rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 text-left transition-all duration-200 hover:bg-white/[0.10] hover:border-white/20 hover:shadow-[0_0_25px_rgba(139,92,246,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:w-auto sm:min-w-0 sm:min-h-[260px]"
+              className="relative w-[220px] min-w-[220px] flex flex-col flex-shrink-0 snap-center rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 text-left transition-all motion-reduce:transition-none duration-base hover:bg-white/[0.10] hover:border-white/20 hover:shadow-[0_0_25px_rgba(139,92,246,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:w-auto sm:min-w-0 sm:min-h-[260px] active:scale-[0.98]"
             >
               {isComplete && (
                 <CheckCircle2

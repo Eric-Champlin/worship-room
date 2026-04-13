@@ -19,7 +19,7 @@ export function StreakResetWelcome({ previousStreak, onContinue }: StreakResetWe
         <button
           type="button"
           onClick={onContinue}
-          className="min-h-[44px] rounded-full bg-white px-8 py-3 font-semibold text-hero-bg transition-all hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+          className="min-h-[44px] rounded-full bg-white px-8 py-3 font-semibold text-hero-bg transition-all motion-reduce:transition-none hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-[0.98]"
         >
           Continue
         </button>

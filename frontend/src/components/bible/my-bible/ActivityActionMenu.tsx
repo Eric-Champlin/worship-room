@@ -110,7 +110,7 @@ export function ActivityActionMenu({ item, position, onClose, onMutate }: Activi
                   key={emotion.key}
                   type="button"
                   onClick={() => handleChangeColor(emotion.key)}
-                  className="h-7 w-7 rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(15,10,30,0.95)]"
+                  className="h-7 w-7 rounded-full transition-transform motion-reduce:transition-none hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(15,10,30,0.95)]"
                   style={{ backgroundColor: emotion.hex }}
                   aria-label={`Change to ${emotion.label}`}
                   title={emotion.label}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 
 interface DayCompletionCelebrationProps {
   dayNumber: number
@@ -45,7 +46,7 @@ export function DayCompletionCelebration({
           : {
               opacity: visible ? 1 : 0,
               transform: visible ? 'translateY(0)' : 'translateY(10px)',
-              transition: 'opacity 300ms ease-out, transform 300ms ease-out',
+              transition: `opacity ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}, transform ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
             }
       }
     >
@@ -80,7 +81,7 @@ export function DayCompletionCelebration({
             style={
               prefersReducedMotion
                 ? undefined
-                : { transition: 'stroke-dashoffset 500ms ease-out 200ms' }
+                : { transition: `stroke-dashoffset ${ANIMATION_DURATIONS.slow}ms ${ANIMATION_EASINGS.decelerate} 200ms` }
             }
           />
         </svg>

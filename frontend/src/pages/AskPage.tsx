@@ -283,7 +283,7 @@ export function AskPage() {
                           'text-sm text-white/70',
                           'hover:bg-white/15 hover:text-white',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                          'transition-colors',
+                          'transition-[colors,transform] duration-fast active:scale-[0.98]',
                         )}
                       >
                         {chip}
@@ -300,7 +300,7 @@ export function AskPage() {
                       className={cn(
                         'min-h-[44px] rounded-lg bg-primary py-3 px-8 font-semibold text-white',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                        'transition-colors hover:bg-primary-lt',
+                        'transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]',
                         !text.trim() && 'cursor-not-allowed opacity-50',
                       )}
                     >

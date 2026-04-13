@@ -5,6 +5,7 @@ import { HIGHLIGHT_COLORS } from '@/constants/bible'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { COPY_RESET_DELAY } from '@/constants/timing'
 import { Z } from '@/constants/z-index'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 
 interface FloatingActionBarProps {
   verseNumber: number
@@ -158,7 +159,7 @@ export function FloatingActionBar({
         top: position?.top ?? -9999,
         left: position?.left ?? -9999,
         opacity: prefersReduced ? 1 : isVisible ? 1 : 0,
-        transition: prefersReduced ? 'none' : 'opacity 150ms ease-out',
+        transition: prefersReduced ? 'none' : `opacity ${ANIMATION_DURATIONS.fast}ms ${ANIMATION_EASINGS.decelerate}`,
         pointerEvents: isVisible ? 'auto' : 'none',
       }}
     >

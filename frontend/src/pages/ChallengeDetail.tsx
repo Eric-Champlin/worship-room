@@ -271,7 +271,7 @@ export function ChallengeDetail() {
                 aria-label={`${completionPercent}% complete`}
               >
                 <div
-                  className="h-2 rounded-full transition-all duration-500"
+                  className="h-2 rounded-full transition-all motion-reduce:transition-none duration-slow"
                   style={{
                     width: `${completionPercent}%`,
                     backgroundColor: challenge.themeColor,
@@ -304,7 +304,7 @@ export function ChallengeDetail() {
                 aria-label={`Community goal: ${Math.round(communityPercent)}% complete`}
               >
                 <div
-                  className="h-1.5 rounded-full transition-all duration-500"
+                  className="h-1.5 rounded-full transition-all motion-reduce:transition-none duration-slow"
                   style={{
                     width: `${communityPercent}%`,
                     backgroundColor: challenge.themeColor,
@@ -322,7 +322,7 @@ export function ChallengeDetail() {
             <button
               type="button"
               onClick={handleJoin}
-              className="mt-6 inline-flex min-h-[44px] items-center rounded-full px-8 py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+              className="mt-6 inline-flex min-h-[44px] items-center rounded-full px-8 py-3 text-base font-semibold text-white transition-[opacity,transform] duration-fast hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 active:scale-[0.98]"
               style={{ backgroundColor: challenge.themeColor }}
             >
               Join Challenge
@@ -353,7 +353,7 @@ export function ChallengeDetail() {
                     if (challengeId) toggleReminder(challengeId)
                   }}
                   className={cn(
-                    'inline-flex min-h-[44px] items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                    'inline-flex min-h-[44px] items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 active:scale-[0.98]',
                     getReminders().includes(challengeId ?? '')
                       ? 'bg-white/20 text-white/70'
                       : 'border border-white/20 bg-white/10 text-white hover:bg-white/15',

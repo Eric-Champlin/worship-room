@@ -155,13 +155,13 @@ describe('Progress Bar Glow — DashboardHero', () => {
   it('transition style includes box-shadow', () => {
     const { container } = renderHero({ totalPoints: 100 })
     const fill = getProgressBarFill(container)
-    expect(fill!.style.transition).toContain('box-shadow 300ms ease-out')
+    expect(fill!.style.transition).toContain('box-shadow 250ms cubic-bezier(0, 0, 0.2, 1)')
   })
 
-  it('transition style includes width 600ms', () => {
+  it('transition style includes width 400ms', () => {
     const { container } = renderHero({ totalPoints: 100 })
     const fill = getProgressBarFill(container)
-    expect(fill!.style.transition).toContain('width 600ms ease-out')
+    expect(fill!.style.transition).toContain('width 400ms cubic-bezier(0, 0, 0.2, 1)')
   })
 })
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 
 interface KaraokeTextRevealProps {
   text: string
@@ -110,7 +111,7 @@ export function KaraokeTextReveal({
           style={{
             opacity: index < revealedCount ? 1 : 0,
             transform: index < revealedCount ? 'translateY(0)' : 'translateY(4px)',
-            transition: 'opacity 200ms ease-out, transform 200ms ease-out',
+            transition: `opacity ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}, transform ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
             display: 'inline',
           }}
         >

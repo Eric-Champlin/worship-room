@@ -21,7 +21,7 @@ export function PastChallengeCard({ challenge, isCompleted, onClick }: PastChall
           onClick()
         }
       }}
-      className="min-h-[44px] cursor-pointer rounded-xl border border-white/[0.06] bg-white/[0.04] p-4 transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+      className="min-h-[44px] cursor-pointer rounded-xl border border-white/[0.06] bg-white/[0.04] p-4 transition-shadow motion-reduce:transition-none hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

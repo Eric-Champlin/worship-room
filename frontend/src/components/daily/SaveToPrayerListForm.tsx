@@ -83,7 +83,7 @@ export function SaveToPrayerListForm({
             type="button"
             onClick={() => setCategory(cat)}
             className={cn(
-              'min-h-[44px] shrink-0 rounded-full px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+              'min-h-[44px] shrink-0 rounded-full px-3 py-1.5 text-xs transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]',
               category === cat
                 ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
@@ -100,7 +100,7 @@ export function SaveToPrayerListForm({
           onClick={handleSave}
           disabled={!category}
           className={cn(
-            'rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors',
+            'rounded-lg px-4 py-2 text-sm font-semibold text-white transition-[colors,transform] duration-fast active:scale-[0.98]',
             category
               ? 'bg-primary hover:bg-primary-lt'
               : 'cursor-not-allowed bg-gray-300',

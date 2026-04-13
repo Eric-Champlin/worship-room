@@ -113,7 +113,7 @@ export function MonthlyStatCards({
           aria-label="Level progress"
         >
           <div
-            className="h-full rounded-full bg-primary transition-all duration-700"
+            className="h-full rounded-full bg-primary transition-all motion-reduce:transition-none duration-slow"
             style={{ width: `${animatedPct}%` }}
           />
         </div>

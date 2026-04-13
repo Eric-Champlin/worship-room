@@ -73,7 +73,7 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={handleInstall}
-              className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#08051A] shadow-sm transition-all hover:bg-white/90 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#08051A] shadow-sm transition-all motion-reduce:transition-none hover:bg-white/90 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 active:scale-[0.98]"
             >
               Install
             </button>

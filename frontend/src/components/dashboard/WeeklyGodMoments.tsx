@@ -54,7 +54,7 @@ export function WeeklyGodMoments({
 
   return (
     <div
-      className="relative rounded-2xl border border-primary/20 bg-primary/10 p-4 transition-opacity duration-300 md:p-6"
+      className="relative rounded-2xl border border-primary/20 bg-primary/10 p-4 transition-opacity motion-reduce:transition-none duration-base md:p-6"
       style={{ opacity: fading ? 0 : 1 }}
       role="region"
       aria-label="Your week with God summary"

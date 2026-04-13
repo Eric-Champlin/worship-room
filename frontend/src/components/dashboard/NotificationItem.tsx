@@ -120,7 +120,7 @@ export function NotificationItem({
         notification.read ? 'bg-transparent' : 'bg-white/10',
         !isMobile && 'hover:bg-white/5',
         isMobile && 'min-h-[48px]',
-        isDismissing && !prefersReducedMotion && 'translate-x-[-100%] opacity-0 transition-all duration-200',
+        isDismissing && !prefersReducedMotion && 'translate-x-[-100%] opacity-0 transition-all motion-reduce:transition-none duration-base',
       )}
       style={isMobile && swipeX < 0 ? { transform: `translateX(${swipeX}px)` } : undefined}
       onClick={handleRowClick}
@@ -154,7 +154,7 @@ export function NotificationItem({
               onClick={handleAccept}
               disabled={processingAction !== null}
               aria-label={`Accept friend request from ${friendName}`}
-              className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+              className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-white transition-opacity motion-reduce:transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
             >
               Accept
             </button>
@@ -163,7 +163,7 @@ export function NotificationItem({
               onClick={handleDecline}
               disabled={processingAction !== null}
               aria-label={`Decline friend request from ${friendName}`}
-              className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/60 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+              className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/60 transition-opacity motion-reduce:transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
             >
               Decline
             </button>
@@ -181,7 +181,7 @@ export function NotificationItem({
           type="button"
           onClick={handleDismissClick}
           aria-label="Dismiss notification"
-          className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 rounded p-1 text-white/50 hover:text-white/70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="shrink-0 opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100 rounded p-1 text-white/50 hover:text-white/70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>

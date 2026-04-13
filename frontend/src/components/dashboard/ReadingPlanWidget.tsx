@@ -141,7 +141,7 @@ export function ReadingPlanWidget() {
           aria-label="Reading plan progress"
         >
           <div
-            className="h-2 rounded-full bg-primary transition-all duration-500"
+            className="h-2 rounded-full bg-primary transition-all motion-reduce:transition-none duration-slow"
             style={{ width: `${completionPercent}%` }}
           />
         </div>

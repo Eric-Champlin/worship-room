@@ -275,7 +275,7 @@ export function PrayerResponse({
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/15"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
               aria-label="Copy prayer"
             >
               <Copy className="h-4 w-4" />
@@ -295,7 +295,7 @@ export function PrayerResponse({
             <button
               type="button"
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/15"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
               aria-label="Save prayer"
             >
               <Bookmark className="h-4 w-4" />
@@ -307,7 +307,7 @@ export function PrayerResponse({
               <button
                 type="button"
                 onClick={handleSaveToList}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/15"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
                 aria-label="Save to prayer list"
               >
                 <ListPlus className="h-4 w-4" />
@@ -390,8 +390,8 @@ export function PrayerResponse({
           {reflectionVisible && !reflectionDismissed && (
             <div className={cn(
               'mb-4 mt-6',
-              !sectionFading && 'animate-fade-in',
-              sectionFading && 'opacity-0 transition-opacity duration-500',
+              !sectionFading && 'motion-safe:animate-fade-in',
+              sectionFading && 'opacity-0 transition-opacity motion-reduce:transition-none duration-slow',
             )}>
               <p className="mb-3 text-sm font-medium text-white">
                 How did that prayer land?
@@ -400,7 +400,7 @@ export function PrayerResponse({
                 <button
                   type="button"
                   onClick={handleResonated}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.98]"
                   aria-label="It resonated — show encouraging message"
                 >
                   <Heart className="h-4 w-4" aria-hidden="true" />
@@ -409,7 +409,7 @@ export function PrayerResponse({
                 <button
                   type="button"
                   onClick={handleSomethingDifferent}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.98]"
                   aria-label="Something different — try a new prayer"
                 >
                   <RefreshCw className="h-4 w-4" aria-hidden="true" />
@@ -418,7 +418,7 @@ export function PrayerResponse({
                 <button
                   type="button"
                   onClick={handleJournalReflection}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.98]"
                   aria-label="Journal about this prayer"
                 >
                   <PenLine className="h-4 w-4" aria-hidden="true" />
@@ -429,7 +429,7 @@ export function PrayerResponse({
               {resonatedMessage && (
                 <p
                   className={cn(
-                    'mt-3 text-center text-sm italic text-white/50 transition-opacity duration-300',
+                    'mt-3 text-center text-sm italic text-white/50 transition-opacity motion-reduce:transition-none duration-base',
                     resonatedFading ? 'opacity-0' : 'opacity-100',
                   )}
                   aria-live="polite"

@@ -69,7 +69,7 @@ function StepCircle({ number }: { number: number }) {
   return (
     <span
       aria-hidden="true"
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-purple-400/40 bg-purple-500/20 text-sm font-semibold text-white shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-shadow duration-200 group-hover:shadow-[0_0_30px_rgba(139,92,246,0.4)]"
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-purple-400/40 bg-purple-500/20 text-sm font-semibold text-white shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-shadow motion-reduce:transition-none duration-base group-hover:shadow-[0_0_30px_rgba(139,92,246,0.4)]"
     >
       {number}
     </span>
@@ -152,14 +152,14 @@ export function JourneySection() {
             <li
               key={step.route}
               className={cn(
-                'relative transition-all duration-500 ease-out',
+                'relative transition-all motion-reduce:transition-none duration-slow ease-decelerate',
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
               )}
               style={isVisible ? staggerDelay(index, 120, 200) : { transitionDelay: '0ms' }}
             >
               <Link
                 to={step.route}
-                className="group flex items-start gap-4 rounded-xl px-3 py-4 transition-colors duration-200 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
+                className="group flex items-start gap-4 rounded-xl px-3 py-4 transition-colors duration-base hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
               >
                 {/* Circle column — contains circle and connecting line */}
                 <div className="relative flex flex-col items-center shrink-0">
@@ -178,7 +178,7 @@ export function JourneySection() {
                   </p>
                 </div>
                 <ArrowRight
-                  className="mt-2 h-5 w-5 text-white/0 transition-all duration-200 group-hover:translate-x-1 group-hover:text-white/60"
+                  className="mt-2 h-5 w-5 text-white/0 transition-all motion-reduce:transition-none duration-base group-hover:translate-x-1 group-hover:text-white/60"
                   aria-hidden="true"
                 />
               </Link>

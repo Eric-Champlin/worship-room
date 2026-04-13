@@ -191,7 +191,7 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
             <button
               type="button"
               onClick={handleExport}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-hero-bg transition-all hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-hero-bg transition-all motion-reduce:transition-none hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-[0.98]"
             >
               <Download size={16} />
               Download export
@@ -233,7 +233,7 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
               <button
                 type="button"
                 onClick={() => setImportState({ step: 'idle' })}
-                className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white/60 transition-all hover:bg-white/5"
+                className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white/60 transition-all motion-reduce:transition-none hover:bg-white/5"
               >
                 Cancel
               </button>
@@ -267,7 +267,7 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
               <p
                 role="alert"
                 id="replace-warning"
-                className={`text-xs text-danger transition-opacity ${replaceWarningVisible ? 'opacity-100' : 'opacity-0'}`}
+                className={`text-xs text-danger transition-opacity motion-reduce:transition-none ${replaceWarningVisible ? 'opacity-100' : 'opacity-0'}`}
               >
                 Replace will delete your current highlights, notes, and saved entries. This cannot be undone.
               </p>
@@ -282,21 +282,21 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
                   onMouseEnter={() => setReplaceWarningVisible(true)}
                   onMouseLeave={() => setReplaceWarningVisible(false)}
                   aria-describedby="replace-warning"
-                  className="min-h-[44px] rounded-full border border-danger/40 bg-danger/10 px-5 py-2.5 text-sm font-semibold text-danger transition-all hover:bg-danger/20"
+                  className="min-h-[44px] rounded-full border border-danger/40 bg-danger/10 px-5 py-2.5 text-sm font-semibold text-danger transition-all motion-reduce:transition-none hover:bg-danger/20"
                 >
                   Replace local data
                 </button>
                 <button
                   type="button"
                   onClick={() => handleMerge(importState.export.data)}
-                  className="min-h-[44px] rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/80"
+                  className="min-h-[44px] rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-all motion-reduce:transition-none hover:bg-primary/80"
                 >
                   Merge with local data
                 </button>
                 <button
                   type="button"
                   onClick={() => setImportState({ step: 'idle' })}
-                  className="min-h-[44px] rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white/60 transition-all hover:bg-white/5"
+                  className="min-h-[44px] rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white/60 transition-all motion-reduce:transition-none hover:bg-white/5"
                 >
                   Cancel
                 </button>

@@ -93,7 +93,7 @@ export function CustomizePanel({
       {/* Backdrop */}
       <div
         className={cn(
-          'fixed inset-0 z-40 transition-opacity duration-300 motion-reduce:transition-none',
+          'fixed inset-0 z-40 transition-opacity duration-base motion-reduce:transition-none',
           isAnimating ? 'bg-black/40' : 'bg-black/0',
         )}
         onClick={onClose}
@@ -117,7 +117,7 @@ export function CustomizePanel({
           'sm:bottom-auto sm:top-0 sm:left-auto sm:right-0 sm:max-h-none sm:rounded-none sm:border-l sm:border-t-0 sm:border-r-0 sm:border-b-0',
           'sm:w-[360px] lg:w-[400px]',
           // Animation
-          'transition-transform duration-300 ease-in-out motion-reduce:transition-none',
+          'transition-transform duration-base ease-standard motion-reduce:transition-none',
           // Mobile animation
           isAnimating ? 'translate-y-0' : 'translate-y-full',
           // Desktop animation override
@@ -213,7 +213,7 @@ export function CustomizePanel({
                 >
                   <span
                     className={cn(
-                      'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-150 motion-reduce:transition-none',
+                      'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-fast motion-reduce:transition-none',
                       !isHidden ? 'translate-x-[26px]' : 'translate-x-[2px]',
                     )}
                   />
@@ -230,13 +230,13 @@ export function CustomizePanel({
               onResetToDefault()
               onClose()
             }}
-            className="rounded-lg bg-white/10 px-4 py-2 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="rounded-lg bg-white/10 px-4 py-2 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
           >
             Reset to Default
           </button>
           <button
             onClick={onClose}
-            className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
           >
             Done
           </button>

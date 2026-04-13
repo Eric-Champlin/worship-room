@@ -45,7 +45,7 @@ export function ActivePlanBanner({
           aria-label={`Plan progress: day ${currentDay} of ${totalDays}`}
         >
           <div
-            className="h-full rounded-full bg-primary transition-all duration-300"
+            className="h-full rounded-full bg-primary transition-all motion-reduce:transition-none duration-base"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -60,7 +60,7 @@ export function ActivePlanBanner({
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Link
           to={`/bible/plans/${planSlug}/day/${currentDay}`}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all motion-reduce:transition-none duration-base hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
         >
           Continue today&apos;s reading
         </Link>

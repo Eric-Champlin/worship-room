@@ -21,7 +21,7 @@ export function NotificationPrompt({ onEnable, onDismiss, iosNeedsInstall }: Not
       aria-label="Notification prompt"
       className={[
         // Base
-        'fixed z-50 transition-all duration-300 ease-out',
+        'fixed z-50 transition-all duration-base ease-decelerate motion-reduce:transition-none',
         // Mobile: full-width bottom
         'bottom-0 left-0 right-0 rounded-t-2xl',
         // Desktop: bottom-right card
@@ -50,7 +50,7 @@ export function NotificationPrompt({ onEnable, onDismiss, iosNeedsInstall }: Not
           <button
             type="button"
             onClick={onDismiss}
-            className="bg-white text-hero-dark rounded-full px-6 py-2 font-semibold text-sm hover:bg-white/90 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full sm:w-auto"
+            className="bg-white text-hero-dark rounded-full px-6 py-2 font-semibold text-sm hover:bg-white/90 transition-[colors,transform] duration-fast min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full sm:w-auto active:scale-[0.98]"
           >
             Got it
           </button>
@@ -68,7 +68,7 @@ export function NotificationPrompt({ onEnable, onDismiss, iosNeedsInstall }: Not
             <button
               type="button"
               onClick={onEnable}
-              className="bg-white text-hero-dark rounded-full px-6 py-2 font-semibold text-sm hover:bg-white/90 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full sm:w-auto"
+              className="bg-white text-hero-dark rounded-full px-6 py-2 font-semibold text-sm hover:bg-white/90 transition-[colors,transform] duration-fast min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full sm:w-auto active:scale-[0.98]"
             >
               Enable
             </button>

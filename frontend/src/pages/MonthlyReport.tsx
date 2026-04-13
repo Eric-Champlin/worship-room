@@ -35,7 +35,7 @@ function AnimatedSection({
 }) {
   return (
     <div
-      className="opacity-0 animate-fade-in motion-reduce:animate-none motion-reduce:opacity-100"
+      className="opacity-0 animate-fade-in-up motion-reduce:animate-none motion-reduce:opacity-100"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {children}

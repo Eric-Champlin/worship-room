@@ -182,8 +182,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
     ? 'motion-safe:animate-backdrop-fade-out'
     : 'motion-safe:animate-backdrop-fade-in'
   const panelClass = isClosing
-    ? 'motion-safe:animate-modal-spring-out'
-    : 'motion-safe:animate-modal-spring-in'
+    ? 'motion-safe:animate-fade-out'
+    : 'motion-safe:animate-scale-in'
 
   return (
     <div
@@ -251,7 +251,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 )}
               </div>
 
-              <button type="submit" className="w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg">
+              <button type="submit" className="w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all motion-reduce:transition-none hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]">
                 Send Reset Link
               </button>
             </form>
@@ -427,7 +427,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 </button>
               )}
 
-              <button type="submit" className="w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg">
+              <button type="submit" className="w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all motion-reduce:transition-none hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]">
                 {view === 'login' ? 'Log In' : 'Create Account'}
               </button>
             </form>

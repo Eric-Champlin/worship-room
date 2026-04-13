@@ -146,7 +146,7 @@ export function AmbientAudioPicker({
               type="button"
               onClick={() => handleSoundTap(sound)}
               className={cn(
-                'flex min-h-[72px] min-w-[72px] flex-col items-center justify-center gap-1 rounded-xl border p-2 transition-all',
+                'flex min-h-[72px] min-w-[72px] flex-col items-center justify-center gap-1 rounded-xl border p-2 transition-all motion-reduce:transition-none',
                 'cursor-pointer bg-white/[0.06]',
                 isActive
                   ? 'border-primary/60 bg-white/[0.10]'

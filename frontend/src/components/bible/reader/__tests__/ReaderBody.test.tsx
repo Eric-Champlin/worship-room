@@ -272,7 +272,7 @@ describe('ReaderBody', () => {
 
     const verse1 = document.querySelector('[data-verse="1"]')!
     expect(verse1.className).toContain('transition-colors')
-    expect(verse1.className).toContain('duration-200')
+    expect(verse1.className).toContain('duration-base')
     expect(verse1.className).not.toContain('bg-primary/[0.15]')
   })
 

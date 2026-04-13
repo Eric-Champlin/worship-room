@@ -23,7 +23,7 @@ export function JournalCard({ data, verseText, searchQuery }: JournalCardProps) 
           <HighlightedText text={verseText} query={searchQuery ?? ''} />
         </p>
       ) : (
-        <div className="h-4 w-3/4 animate-pulse rounded bg-white/10" />
+        <div className="h-4 w-3/4 motion-safe:animate-pulse rounded bg-white/10" />
       )}
       <div className={expanded ? '' : 'line-clamp-3'}>
         <p className="text-sm text-white">

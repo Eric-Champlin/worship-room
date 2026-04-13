@@ -8,6 +8,7 @@ import { DrawerNowPlaying } from './DrawerNowPlaying'
 import { DrawerTabs } from './DrawerTabs'
 import { RoutineStepper } from './RoutineStepper'
 import { Z } from '@/constants/z-index'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 
 const SWIPE_THRESHOLD = 50
 
@@ -111,7 +112,7 @@ export function AudioDrawer() {
           WebkitBackdropFilter: 'blur(16px)',
           transform:
             swipeOffset > 0 ? `translateY(${swipeOffset}px)` : undefined,
-          transition: swipeOffset > 0 ? 'none' : 'transform 300ms ease-out',
+          transition: swipeOffset > 0 ? 'none' : `transform ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

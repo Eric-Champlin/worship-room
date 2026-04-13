@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { createPortal } from 'react-dom'
 import { BookCheck, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -113,13 +114,13 @@ export function PlanCompletionOverlay({
     return () => clearTimeout(timer)
   }, [onDismiss])
 
-  const fadeStyle = (threshold: number, durationMs = 300): React.CSSProperties =>
+  const fadeStyle = (threshold: number, durationMs: number = ANIMATION_DURATIONS.base): React.CSSProperties =>
     reducedMotion
       ? {}
       : {
           opacity: step >= threshold ? 1 : 0,
           transform: step >= threshold ? 'translateY(0)' : 'translateY(10px)',
-          transition: `opacity ${durationMs}ms ease-out, transform ${durationMs}ms ease-out`,
+          transition: `opacity ${durationMs}ms ${ANIMATION_EASINGS.decelerate}, transform ${durationMs}ms ${ANIMATION_EASINGS.decelerate}`,
         }
 
   const handleShare = useCallback(async () => {
@@ -161,7 +162,7 @@ export function PlanCompletionOverlay({
       ref={containerRef}
       style={{
         opacity: reducedMotion ? 1 : step >= 1 ? 1 : 0,
-        transition: reducedMotion ? undefined : 'opacity 300ms ease-out',
+        transition: reducedMotion ? undefined : `opacity ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
       }}
     >
       {/* Confetti */}

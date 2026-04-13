@@ -272,7 +272,7 @@ export function ReadingHeatmap({ dailyActivity, currentStreak, activeDays }: Rea
                         }
                         tabIndex={0}
                         className={cn(
-                          'w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 rounded-[1px] sm:rounded-[2px] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50',
+                          'w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 rounded-[1px] sm:rounded-[2px] transition-opacity motion-reduce:transition-none hover:opacity-80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50',
                           INTENSITY_CLASSES[intensity],
                           cell.isToday && 'ring-2 ring-white/50',
                         )}

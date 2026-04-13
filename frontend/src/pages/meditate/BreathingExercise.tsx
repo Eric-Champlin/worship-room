@@ -212,10 +212,10 @@ function BreathingExerciseContent() {
 
     const circleTransition =
       currentPhase === 'breatheIn'
-        ? 'transition-transform duration-[4000ms] ease-in-out'
+        ? 'transition-transform motion-reduce:transition-none duration-[4000ms] ease-in-out'
         : currentPhase === 'hold'
-          ? 'transition-transform duration-[7000ms]'
-          : 'transition-transform duration-[8000ms] ease-in-out'
+          ? 'transition-transform motion-reduce:transition-none duration-[7000ms]'
+          : 'transition-transform motion-reduce:transition-none duration-[8000ms] ease-in-out'
 
     return (
       <Layout hero={<PageHero title="Breathing Exercise" scriptWord="Exercise" />}>

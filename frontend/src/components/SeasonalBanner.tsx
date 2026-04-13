@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { Link } from 'react-router-dom'
 import { Sparkles, X } from 'lucide-react'
 import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
@@ -69,7 +70,7 @@ export function SeasonalBanner() {
         overflow: 'hidden',
         transition: prefersReduced
           ? 'none'
-          : 'max-height 200ms ease-out, opacity 200ms ease-out',
+          : `max-height ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}, opacity ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
       }}
       role="complementary"
       aria-label="Seasonal announcement"

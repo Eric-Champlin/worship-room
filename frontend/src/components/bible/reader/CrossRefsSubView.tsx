@@ -26,8 +26,8 @@ function LoadingSkeleton() {
       {Array.from({ length: 5 }, (_, i) => (
         <div key={i} className="flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-3">
           <div className="flex-1 space-y-2">
-            <span className="block h-4 w-1/3 animate-pulse rounded bg-white/[0.08]" />
-            <span className="block h-3 w-3/4 animate-pulse rounded bg-white/[0.08]" />
+            <span className="block h-4 w-1/3 motion-safe:animate-pulse rounded bg-white/[0.08]" />
+            <span className="block h-3 w-3/4 motion-safe:animate-pulse rounded bg-white/[0.08]" />
           </div>
           <span className="h-1.5 w-1.5 rounded-full bg-white/[0.08]" />
           <ChevronRight className="h-4 w-4 text-white/10" />
@@ -76,7 +76,7 @@ function CrossRefRow({
         {verseText !== undefined ? (
           <span className="mt-0.5 block text-xs text-white/50 line-clamp-2">{verseText}</span>
         ) : (
-          <span className="mt-1 block h-3 w-3/4 animate-pulse rounded bg-white/[0.08]" />
+          <span className="mt-1 block h-3 w-3/4 motion-safe:animate-pulse rounded bg-white/[0.08]" />
         )}
       </div>
       {/* Rank indicator */}
@@ -130,7 +130,7 @@ export function CrossRefBadge({ selection }: { selection: VerseSelection }) {
   if (count === null) {
     return (
       <span
-        className="inline-block h-2 w-2 rounded-full bg-white/40 animate-pulse"
+        className="inline-block h-2 w-2 rounded-full bg-white/40 motion-safe:animate-pulse"
         aria-label="Loading cross-reference count"
       />
     )

@@ -50,7 +50,7 @@ export function MarkAnsweredForm({ onConfirm, onCancel }: MarkAnsweredFormProps)
         <button
           type="button"
           onClick={handleConfirm}
-          className="rounded-lg bg-success px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2"
+          className="rounded-lg bg-success px-4 py-2 text-sm font-semibold text-white transition-[colors,transform] duration-fast hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 active:scale-[0.98]"
         >
           Confirm
         </button>

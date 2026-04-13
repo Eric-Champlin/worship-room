@@ -45,7 +45,7 @@ export function ToggleSwitch({ checked, onChange, label, description, id }: Togg
       >
         <span
           className={cn(
-            'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-150 motion-reduce:transition-none',
+            'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-fast motion-reduce:transition-none',
             checked ? 'translate-x-[26px]' : 'translate-x-[2px]',
           )}
         />

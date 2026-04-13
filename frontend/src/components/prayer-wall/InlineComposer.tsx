@@ -100,7 +100,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
   return (
     <div
       className={cn(
-        'overflow-hidden transition-all duration-300 ease-in-out',
+        'overflow-hidden transition-all motion-reduce:transition-none duration-base ease-standard',
         isOpen ? 'visible mb-4 max-h-[800px] opacity-100' : 'invisible max-h-0 opacity-0',
       )}
       aria-hidden={!isOpen}
@@ -168,7 +168,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
                   aria-checked={selectedCategory === cat}
                   onClick={() => { setSelectedCategory(cat); setShowCategoryError(false); setCategoryFocusedIndex(index) }}
                   className={cn(
-                    'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 ease-in-out whitespace-nowrap',
+                    'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-fast ease-standard whitespace-nowrap',
                     selectedCategory === cat
                       ? 'border-primary/40 bg-primary/20 text-primary-lt'
                       : 'border-white/10 bg-white/10 text-white/70 hover:bg-white/15',

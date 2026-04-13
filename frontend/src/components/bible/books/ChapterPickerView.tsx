@@ -259,7 +259,7 @@ export function ChapterPickerView({ onClose }: ChapterPickerViewProps) {
                 role="gridcell"
                 aria-label={`${book.name} chapter ${ch}, ${isRead ? 'read' : 'unread'}`}
                 className={cn(
-                  'relative flex aspect-square min-h-[44px] items-center justify-center rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                  'relative flex aspect-square min-h-[44px] items-center justify-center rounded-lg text-sm font-medium transition-all motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                   isLastRead
                     ? 'border border-white/15 bg-white/10 text-white ring-2 ring-primary/50 shadow-[0_0_12px_rgba(109,40,217,0.3)]'
                     : isRead

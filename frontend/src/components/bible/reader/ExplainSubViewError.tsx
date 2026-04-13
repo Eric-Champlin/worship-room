@@ -95,7 +95,7 @@ export function ExplainSubViewError({
         onClick={isDisabled ? undefined : onRetry}
         disabled={isDisabled}
         aria-disabled={isDisabled || undefined}
-        className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/[0.14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-white/[0.14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
         data-error-kind={kind}
       >
         <RotateCw className="h-4 w-4" aria-hidden="true" />

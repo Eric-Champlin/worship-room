@@ -51,7 +51,7 @@ export function ChallengeWidget() {
               strokeLinecap="round" transform="rotate(-90 24 24)"
               strokeDasharray={RING_CIRCUMFERENCE}
               strokeDashoffset={dashOffset}
-              className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-500 motion-safe:ease-out"
+              className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-slow motion-safe:ease-decelerate"
             />
           </svg>
           <span className="absolute inset-0 flex flex-col items-center justify-center">

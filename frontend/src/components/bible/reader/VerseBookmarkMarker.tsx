@@ -1,7 +1,7 @@
 export function VerseBookmarkMarker() {
   return (
     <span
-      className="bookmark-marker mr-0.5 inline-block align-super transition-colors duration-150"
+      className="bookmark-marker mr-0.5 inline-block align-super transition-colors duration-fast"
       style={{ fontSize: '0.7em' }}
       aria-hidden="true"
     >

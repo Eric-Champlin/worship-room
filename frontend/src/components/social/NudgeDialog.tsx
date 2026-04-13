@@ -54,7 +54,7 @@ export function NudgeDialog({ friendName, onConfirm, onCancel }: NudgeDialogProp
           </button>
           <button
             onClick={handleConfirm}
-            className="min-h-[44px] rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-lt"
+            className="min-h-[44px] rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
           >
             Send
           </button>

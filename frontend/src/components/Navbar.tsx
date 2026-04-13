@@ -35,7 +35,7 @@ function getNavLinkClass(transparent: boolean) {
   return ({ isActive }: { isActive: boolean }) =>
     cn(
       'relative py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
-      "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+      "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-base after:ease-decelerate after:origin-center after:content-[''] motion-reduce:after:transition-none",
       transparent ? 'after:bg-white' : 'after:bg-primary',
       isActive
         ? cn(
@@ -112,7 +112,7 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
         onClick={() => authModal?.openAuthModal(undefined, 'login')}
         className={cn(
           'relative py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded',
-          "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+          "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-base after:ease-decelerate after:origin-center after:content-[''] motion-reduce:after:transition-none",
           transparent ? 'after:bg-white' : 'after:bg-primary',
           transparent
             ? 'text-white/90 hover:text-white after:scale-x-0 hover:after:scale-x-100'
@@ -124,7 +124,7 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
       <Link
         to="/register"
         className={cn(
-          'inline-flex items-center rounded-full px-5 py-2 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+          'inline-flex items-center rounded-full px-5 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]',
           transparent
             ? 'bg-white/20 hover:bg-white/30 border border-white/30'
             : 'bg-primary hover:bg-primary-lt'

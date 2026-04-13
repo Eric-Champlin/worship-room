@@ -58,7 +58,7 @@ export function JournalSearchFilter({
                 onClick={() => onModeFilterChange(m)}
                 aria-pressed={modeFilter === m}
                 className={cn(
-                  'min-h-[44px] rounded-full px-3 py-1 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                  'min-h-[44px] rounded-full px-3 py-1 text-sm font-medium transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                   modeFilter === m
                     ? 'bg-primary/20 text-primary'
                     : 'bg-white/10 text-white/70 hover:bg-white/15',

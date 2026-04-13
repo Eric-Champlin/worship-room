@@ -71,7 +71,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
 
   return (
     <>
-      <div className="group relative rounded-xl border border-white/10 bg-white/[0.06] p-4 transition-shadow hover:shadow-md hover:shadow-black/20">
+      <div className="group relative rounded-xl border border-white/10 bg-white/[0.06] p-4 transition-shadow motion-reduce:transition-none hover:shadow-md hover:shadow-black/20">
         {/* Favorite button */}
         <FavoriteButton
           type="custom_mix"

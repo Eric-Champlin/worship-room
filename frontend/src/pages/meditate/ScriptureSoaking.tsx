@@ -194,7 +194,7 @@ function ScriptureSoakingContent() {
           </blockquote>
           <p
             className={cn(
-              'mt-4 text-sm text-text-light transition-opacity duration-300',
+              'mt-4 text-sm text-text-light transition-opacity motion-reduce:transition-none duration-base',
               referenceVisible ? 'opacity-100' : 'opacity-0',
             )}
           >
@@ -226,7 +226,7 @@ function ScriptureSoakingContent() {
           aria-label="Soaking timer progress"
         >
           <div
-            className="h-full bg-primary transition-[width] duration-200"
+            className="h-full bg-primary transition-[width] duration-base"
             style={{ width: `${progress * 100}%` }}
           />
         </div>

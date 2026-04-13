@@ -120,7 +120,8 @@ export function MeditateTabContent({ isActive = true }: MeditateTabContentProps)
                 }}
                 className={cn(
                   'group rounded-2xl p-4 text-left sm:p-5',
-                  'transition-all duration-200 ease-out',
+                  'transition-all motion-reduce:transition-none duration-base ease-decelerate',
+                  'active:scale-[0.98]',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
                   isSuggested
                     ? [

@@ -47,7 +47,7 @@ function CustomDot({ cx, cy, payload }: DotProps) {
       cy={cy}
       r={5}
       fill={payload.color}
-      className="transition-transform duration-150 motion-reduce:transition-none"
+      className="transition-transform duration-fast motion-reduce:transition-none"
     />
   );
 }

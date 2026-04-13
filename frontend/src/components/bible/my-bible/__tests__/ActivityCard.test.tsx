@@ -67,7 +67,7 @@ describe('ActivityCard', () => {
 
   it('shows skeleton while verse text loading', () => {
     const { container } = renderCard(makeItem(), null)
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument()
+    expect(container.querySelector('[class*="animate-pulse"]')).toBeInTheDocument()
   })
 
   it('shows verse text after loading', () => {
@@ -213,7 +213,7 @@ describe('JournalCard', () => {
       type: 'journal',
       data: { type: 'journal', body: 'Short reflection', reference: 'John 3:16' },
     }), null)
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument()
+    expect(container.querySelector('[class*="animate-pulse"]')).toBeInTheDocument()
   })
 
   it('shows expand/collapse for long entries', async () => {

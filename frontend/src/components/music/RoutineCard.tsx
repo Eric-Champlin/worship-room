@@ -101,7 +101,7 @@ export function RoutineCard({
     <div
       role="article"
       aria-label={`${routine.name} routine — ${routine.steps.length} steps, approximately ${durationEstimate} minutes`}
-      className="relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+      className="relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow motion-reduce:transition-none hover:shadow-md"
     >
       {/* Template badge */}
       {routine.isTemplate && (

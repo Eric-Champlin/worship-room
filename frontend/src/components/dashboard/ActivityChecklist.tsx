@@ -3,6 +3,7 @@ import { BookOpen, CircleCheck, Circle, Moon } from 'lucide-react'
 import { ACTIVITY_CHECKLIST_NAMES, ACTIVITY_POINTS } from '@/constants/dashboard/activity-points'
 import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { isEveningTime } from '@/services/evening-reflection-storage'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import type { ActivityType } from '@/types/dashboard'
 
 interface ActivityChecklistProps {
@@ -156,7 +157,7 @@ export function ActivityChecklist({
               style={
                 prefersReducedMotion
                   ? undefined
-                  : { transition: 'stroke-dashoffset 500ms ease-out' }
+                  : { transition: `stroke-dashoffset ${ANIMATION_DURATIONS.slow}ms ${ANIMATION_EASINGS.decelerate}` }
               }
             />
           </svg>

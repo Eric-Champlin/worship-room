@@ -19,7 +19,7 @@ export function KaraokeText({
         <span
           key={`${index}-${word}`}
           className={cn(
-            'transition-colors duration-150 motion-reduce:transition-none',
+            'transition-colors duration-fast motion-reduce:transition-none',
             index === currentWordIndex && 'rounded bg-primary/20',
           )}
         >

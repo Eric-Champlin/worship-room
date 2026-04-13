@@ -366,7 +366,7 @@ function PrayerWallContent() {
               <button
                 type="button"
                 onClick={() => setComposerOpen(!composerOpen)}
-                className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-[colors,transform] duration-fast hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent active:scale-[0.98]"
               >
                 Share a Prayer Request
               </button>
@@ -395,7 +395,7 @@ function PrayerWallContent() {
 
       {/* Filter Bar */}
       <div className={cn(
-        'sticky top-0 z-30 transition-shadow',
+        'sticky top-0 z-30 transition-shadow motion-reduce:transition-none',
         isFilterSticky && 'shadow-md',
       )}>
         <CategoryFilterBar

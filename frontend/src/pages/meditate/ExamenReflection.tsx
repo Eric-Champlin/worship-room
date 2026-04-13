@@ -112,7 +112,7 @@ function ExamenReflectionContent() {
           aria-label={`Step ${currentStep + 1} of ${steps.length}`}
         >
           <div
-            className="h-full rounded-full bg-primary transition-[width] duration-300"
+            className="h-full rounded-full bg-primary transition-[width] duration-slow"
             style={{
               width: `${((currentStep + 1) / steps.length) * 100}%`,
             }}

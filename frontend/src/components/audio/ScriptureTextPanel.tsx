@@ -41,7 +41,7 @@ export function ScriptureTextPanel({
           key={i}
           ref={i === activeIndex ? activeRef : undefined}
           className={cn(
-            'py-1 font-serif text-sm leading-relaxed text-white/85 transition-colors duration-300',
+            'py-1 font-serif text-sm leading-relaxed text-white/85 transition-colors duration-base',
             i === activeIndex && 'border-l-2 border-primary bg-primary/10 pl-3',
           )}
         >

@@ -28,7 +28,7 @@ export function DigDeeperSection({
               'inline-flex items-center gap-2 min-h-[44px] rounded-full bg-white/10 px-4 py-2',
               'text-sm text-white/70 hover:bg-white/15 hover:text-white',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-              'transition-colors',
+              'transition-[colors,transform] duration-fast active:scale-[0.98]',
               disabled && 'opacity-50 cursor-not-allowed',
             )}
           >

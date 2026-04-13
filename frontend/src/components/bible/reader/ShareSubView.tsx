@@ -247,7 +247,7 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
               aria-label={`${dims.label} — ${dims.hint}`}
               tabIndex={isSelected ? 0 : -1}
               className={cn(
-                'relative flex flex-col items-center gap-1 rounded-lg p-1 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'relative flex flex-col items-center gap-1 rounded-lg p-1 transition-all motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 isSelected &&
                   'ring-2 ring-primary shadow-[0_0_12px_rgba(109,40,217,0.5)]',
               )}
@@ -263,11 +263,11 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
                     alt={`${dims.label} preview`}
                     className={cn(
                       'h-full w-full object-cover',
-                      !reducedMotion && 'transition-opacity duration-200',
+                      !reducedMotion && 'transition-opacity duration-base',
                     )}
                   />
                 ) : (
-                  <div className="h-full w-full animate-pulse bg-white/[0.08]" />
+                  <div className="h-full w-full motion-safe:animate-pulse bg-white/[0.08]" />
                 )}
               </div>
               <span className="text-xs text-white/60">{dims.label}</span>
@@ -281,7 +281,7 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
         <div className="flex items-center justify-center rounded-lg bg-black/20 p-2">
           {isRendering || !previewUrl ? (
             <div
-              className="w-full animate-pulse rounded bg-white/[0.08]"
+              className="w-full motion-safe:animate-pulse rounded bg-white/[0.08]"
               style={{ aspectRatio }}
             />
           ) : (
@@ -313,7 +313,7 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
             >
               <span
                 className={cn(
-                  'absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform',
+                  'absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform motion-reduce:transition-none',
                   matchHighlight && 'translate-x-5',
                 )}
               />
@@ -336,7 +336,7 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
           >
             <span
               className={cn(
-                'absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform',
+                'absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform motion-reduce:transition-none',
                 includeReference && 'translate-x-5',
               )}
             />
@@ -348,14 +348,14 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
       <div className="flex gap-3 px-4 pb-3">
         <button
           onClick={handleDownload}
-          className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-colors hover:bg-white/15"
+          className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
         >
           <Download className="h-4 w-4" />
           Download
         </button>
         <button
           onClick={handleCopy}
-          className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-colors hover:bg-white/15"
+          className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
         >
           <Copy className="h-4 w-4" />
           Copy
@@ -363,7 +363,7 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
         {canShare && (
           <button
             onClick={handleShare}
-            className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-colors hover:bg-white/15"
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
           >
             <Share2 className="h-4 w-4" />
             Share

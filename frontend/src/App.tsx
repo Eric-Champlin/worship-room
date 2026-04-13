@@ -13,7 +13,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
 import { LOGIN_METADATA, NOT_FOUND_METADATA } from '@/lib/seo/routeMetadata'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
 import { WhisperToastProvider } from '@/components/ui/WhisperToast'
@@ -141,6 +142,11 @@ function NotFound() {
   )
 }
 
+function RouteTransition({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  return <div key={location.pathname} className="motion-safe:animate-fade-in">{children}</div>
+}
+
 function RootRoute() {
   const { isAuthenticated } = useAuth()
   return isAuthenticated ? <Dashboard /> : <Home />
@@ -202,6 +208,7 @@ function App() {
         <NotificationSchedulerEffect />
         <ChunkErrorBoundary>
         <Suspense fallback={<RouteLoadingFallback />}>
+        <RouteTransition>
         <Routes>
           <Route path="/" element={<Suspense fallback={<DashboardSkeleton />}><RootRoute /></Suspense>} />
           <Route path="/health" element={<Health />} />
@@ -260,6 +267,7 @@ function App() {
           <Route path="/register" element={<Suspense fallback={null}><RegisterPage /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </RouteTransition>
         </Suspense>
         </ChunkErrorBoundary>
         </WhisperToastProvider>

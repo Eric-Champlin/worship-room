@@ -330,7 +330,7 @@ function BookCard({
       type="button"
       data-book-slug={book.slug}
       onClick={() => onSelect(book.slug)}
-      className="relative min-h-[44px] w-full overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.06] p-4 text-left backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.18] hover:bg-white/[0.09] hover:shadow-[0_0_35px_rgba(139,92,246,0.10),0_6px_25px_rgba(0,0,0,0.35)] motion-reduce:hover:translate-y-0"
+      className="relative min-h-[44px] w-full overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.06] p-4 text-left backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] transition-all motion-reduce:transition-none duration-base hover:-translate-y-0.5 hover:border-white/[0.18] hover:bg-white/[0.09] hover:shadow-[0_0_35px_rgba(139,92,246,0.10),0_6px_25px_rgba(0,0,0,0.35)] motion-reduce:hover:translate-y-0 active:scale-[0.98]"
     >
       <span className="block text-base font-semibold text-white">{book.name}</span>
       <span className="block text-sm text-white/60">
@@ -342,7 +342,7 @@ function BookCard({
       {progressPct > 0 && (
         <div className="absolute right-0 bottom-0 left-0 h-0.5 overflow-hidden rounded-b-2xl bg-white/[0.06]">
           <div
-            className="h-full bg-primary/60 transition-all duration-300"
+            className="h-full bg-primary/60 transition-all motion-reduce:transition-none duration-base"
             style={{ width: `${Math.min(progressPct, 100)}%` }}
           />
         </div>

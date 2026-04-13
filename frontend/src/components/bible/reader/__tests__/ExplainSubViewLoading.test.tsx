@@ -33,14 +33,14 @@ describe('ExplainSubViewLoading', () => {
   it('renders 4 animated skeleton bars when motion is allowed', () => {
     mockUseReducedMotion.mockReturnValue(false)
     const { container } = render(<ExplainSubViewLoading />)
-    const pulseBars = container.querySelectorAll('.animate-pulse')
+    const pulseBars = container.querySelectorAll('[class*="animate-pulse"]')
     expect(pulseBars.length).toBe(4)
   })
 
   it('hides skeleton bars when prefers-reduced-motion is set', () => {
     mockUseReducedMotion.mockReturnValue(true)
     const { container } = render(<ExplainSubViewLoading />)
-    const pulseBars = container.querySelectorAll('.animate-pulse')
+    const pulseBars = container.querySelectorAll('[class*="animate-pulse"]')
     expect(pulseBars.length).toBe(0)
     // Static label still renders
     expect(screen.getByText('Thinking…')).toBeInTheDocument()

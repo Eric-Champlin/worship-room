@@ -28,6 +28,7 @@ import { PlanCompletionCelebration } from '@/components/bible/plans/PlanCompleti
 import { ActivePlanReaderBanner } from '@/components/bible/reader/ActivePlanReaderBanner'
 import { AmbientAudioPicker } from '@/components/bible/reader/AmbientAudioPicker'
 import { useReaderAudioAutoStart } from '@/hooks/useReaderAudioAutoStart'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useActivePlan } from '@/hooks/bible/useActivePlan'
 import { setCelebrationShown } from '@/lib/bible/plansStore'
@@ -620,7 +621,7 @@ function BibleReaderInner() {
               <button
                 type="button"
                 onClick={() => bibleDrawer.open()}
-                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary-lt"
+                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
               >
                 Browse books
               </button>
@@ -654,7 +655,7 @@ function BibleReaderInner() {
             <div className="flex flex-col items-center gap-3">
               <Link
                 to={`/bible/${book.slug}/${book.chapters}`}
-                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary-lt"
+                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
               >
                 Go to Chapter {book.chapters}
               </Link>
@@ -682,7 +683,7 @@ function BibleReaderInner() {
     isSwiping && swipeOffset !== 0
       ? { transform: `translateX(${swipeOffset}px)`, transition: 'none' }
       : isSwiping
-        ? { transform: 'translateX(0)', transition: 'transform 200ms ease-out' }
+        ? { transform: 'translateX(0)', transition: `transform ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}` }
         : undefined
 
   return (
@@ -773,7 +774,7 @@ function BibleReaderInner() {
         >
           {isLoading ? (
             <div className="flex items-center justify-center py-32">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
+              <div className="h-8 w-8 motion-safe:animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
             </div>
           ) : loadError ? (
             <div className="flex items-center justify-center py-16">
@@ -801,7 +802,7 @@ function BibleReaderInner() {
                         setIsLoading(false)
                       })
                   }}
-                  className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-colors hover:bg-primary-lt"
+                  className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
                 >
                   Try Again
                 </button>

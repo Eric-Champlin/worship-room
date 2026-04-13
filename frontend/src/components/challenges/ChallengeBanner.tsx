@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { useNavigate } from 'react-router-dom'
 import { Users, X } from 'lucide-react'
 
@@ -122,7 +123,7 @@ export function ChallengeBanner() {
           maxHeight: hiding ? 0 : 500,
           overflow: 'hidden',
           opacity: hiding ? 0 : 1,
-          transition: prefersReduced ? 'none' : 'max-height 200ms ease-out, opacity 200ms ease-out',
+          transition: prefersReduced ? 'none' : `max-height ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}, opacity ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
         }}
         aria-label={`${challenge.title} challenge banner`}
       >

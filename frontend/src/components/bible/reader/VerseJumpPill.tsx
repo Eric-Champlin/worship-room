@@ -47,7 +47,7 @@ export function VerseJumpPill({ totalVerses }: VerseJumpPillProps) {
 
   return (
     <div
-      className="pointer-events-none fixed z-30 transition-opacity duration-200"
+      className="pointer-events-none fixed z-30 transition-opacity duration-base motion-reduce:transition-none"
       style={{
         bottom: 'max(1.5rem, env(safe-area-inset-bottom))',
         right: 'max(1.5rem, env(safe-area-inset-right))',

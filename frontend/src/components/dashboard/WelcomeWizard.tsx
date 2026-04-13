@@ -265,7 +265,7 @@ export function WelcomeWizard({ userName, onComplete }: WelcomeWizardProps) {
               <div
                 key={i}
                 className={cn(
-                  'rounded-full transition-all duration-200',
+                  'rounded-full transition-all motion-reduce:transition-none duration-base',
                   i === currentScreen
                     ? 'h-3 w-3 bg-primary'
                     : 'h-2 w-2 bg-white/30',
@@ -400,7 +400,7 @@ const Screen2Avatar = forwardRef<HTMLHeadingElement, Screen2Props>(
                       aria-label={preset.name}
                       onClick={() => onSelectAvatar(preset.id)}
                       className={cn(
-                        'flex items-center justify-center rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                        'flex items-center justify-center rounded-full transition-all motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                         'h-14 w-14 sm:h-16 sm:w-16 lg:h-[72px] lg:w-[72px]',
                         selectedAvatarId === preset.id &&
                           'ring-2 ring-primary ring-offset-2 ring-offset-dashboard-dark',
@@ -473,7 +473,7 @@ const Screen3Quiz = forwardRef<HTMLHeadingElement, Screen3Props>(
                 aria-checked={isSelected}
                 onClick={() => onSelect(index)}
                 className={cn(
-                  'flex w-full items-center justify-between rounded-xl border p-4 text-left text-sm text-white/80 transition-all duration-200 sm:text-base',
+                  'flex w-full items-center justify-between rounded-xl border p-4 text-left text-sm text-white/80 transition-all motion-reduce:transition-none duration-base sm:text-base',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                   isSelected
                     ? 'border-primary bg-primary/20'

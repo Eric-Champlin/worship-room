@@ -325,7 +325,7 @@ export function EveningReflection({
       aria-labelledby="evening-reflection-heading"
       className={cn(
         "fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(ellipse_at_50%_30%,_rgb(59,7,100)_0%,_transparent_60%),_linear-gradient(rgb(13,6,32)_0%,_rgb(30,11,62)_50%,_rgb(13,6,32)_100%)]",
-        isClosing && "transition-opacity duration-500 opacity-0",
+        isClosing && "transition-opacity motion-reduce:transition-none duration-slow opacity-0",
       )}
     >
       <div className="flex h-full w-full max-w-[640px] flex-col px-4">
@@ -383,7 +383,7 @@ export function EveningReflection({
                       tabIndex={focusedIndex === index ? 0 : -1}
                       onClick={() => handleMoodSelect(mood, index)}
                       className={cn(
-                        'flex flex-col items-center gap-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50 focus:rounded-xl',
+                        'flex flex-col items-center gap-2 transition-all motion-reduce:transition-none duration-base focus:outline-none focus:ring-2 focus:ring-white/50 focus:rounded-xl',
                         hasSelection && !isSelected && 'opacity-30',
                         isSelected && 'scale-[1.15]',
                         !hasSelection && 'motion-safe:animate-mood-pulse',
@@ -471,7 +471,7 @@ export function EveningReflection({
               <button
                 type="button"
                 onClick={handleStep2Next}
-                className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto sm:px-8"
+                className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto sm:px-8 active:scale-[0.98]"
               >
                 Next
               </button>
@@ -527,7 +527,7 @@ export function EveningReflection({
               <button
                 type="button"
                 onClick={handleStep3Next}
-                className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto sm:px-8"
+                className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto sm:px-8 active:scale-[0.98]"
               >
                 Next
               </button>
@@ -551,7 +551,7 @@ export function EveningReflection({
                   <button
                     type="button"
                     onClick={handleGoodnight}
-                    className="rounded-lg bg-indigo-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-dashboard-dark"
+                    className="rounded-lg bg-indigo-600 px-8 py-3 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-dashboard-dark active:scale-[0.98]"
                   >
                     Goodnight
                   </button>
@@ -583,14 +583,14 @@ export function EveningReflection({
                     <button
                       type="button"
                       onClick={handleDone}
-                      className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto"
+                      className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto active:scale-[0.98]"
                     >
                       Done
                     </button>
                     <button
                       type="button"
                       onClick={handleSleepTransition}
-                      className="w-full rounded-lg border border-white/20 px-8 py-3 text-center font-semibold text-white transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto"
+                      className="w-full rounded-lg border border-white/20 px-8 py-3 text-center font-semibold text-white transition-[colors,transform] duration-fast hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto active:scale-[0.98]"
                     >
                       Go to Sleep &amp; Rest
                     </button>

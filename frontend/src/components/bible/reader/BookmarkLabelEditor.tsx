@@ -148,7 +148,7 @@ export function BookmarkLabelEditor({
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-lt"
+            className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
           >
             Save
           </button>

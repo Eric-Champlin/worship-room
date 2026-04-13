@@ -133,7 +133,7 @@ describe('MeditateTabContent verse context (Bible bridge)', () => {
     await act(async () => {
       await new Promise((r) => setTimeout(r, 50))
     })
-    const pulseElements = container.querySelectorAll('.animate-pulse')
+    const pulseElements = container.querySelectorAll('[class*="animate-pulse"]')
     expect(pulseElements.length).toBeGreaterThan(0)
 
     // Resolve the promise to clean up

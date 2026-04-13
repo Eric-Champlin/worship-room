@@ -195,7 +195,7 @@ export function ResultsList({
             disabled={isLoadingMore}
             className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-6 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 disabled:opacity-50"
           >
-            {isLoadingMore && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
+            {isLoadingMore && <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden="true" />}
             Load More
           </button>
           {loadMoreError && (

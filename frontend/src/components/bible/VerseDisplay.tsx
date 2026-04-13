@@ -310,7 +310,7 @@ export function VerseDisplay({
             <div
               key={verse.number}
               className={cn(
-                'motion-safe:transition-all motion-safe:duration-200',
+                'motion-safe:transition-all motion-safe:duration-base',
                 isTtsActive && 'border-l-2 border-primary bg-primary/5 pl-2',
               )}
               aria-current={isTtsActive ? 'true' : undefined}

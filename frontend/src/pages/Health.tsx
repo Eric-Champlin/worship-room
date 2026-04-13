@@ -47,7 +47,7 @@ export function Health() {
 
           {loading && (
             <div className="flex items-center gap-2 text-blue-600">
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+              <Loader2 className="h-5 w-5 motion-safe:animate-spin" aria-hidden="true" />
               <p>Loading...</p>
             </div>
           )}

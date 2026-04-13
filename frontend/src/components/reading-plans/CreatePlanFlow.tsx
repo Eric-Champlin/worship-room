@@ -260,7 +260,7 @@ function StepTwo({
             onClick={() => onDurationChange(days)}
             aria-pressed={selectedDuration === days}
             className={cn(
-              'min-h-[44px] w-full rounded-xl border bg-white/5 p-5 text-left transition-all sm:flex-1',
+              'min-h-[44px] w-full rounded-xl border bg-white/5 p-5 text-left transition-all motion-reduce:transition-none sm:flex-1',
               selectedDuration === days
                 ? 'border-primary shadow-[0_0_15px_rgba(109,40,217,0.3)]'
                 : 'border-white/10 hover:bg-white/10',

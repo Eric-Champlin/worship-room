@@ -128,7 +128,7 @@ export function DaySelector({
         Day {selectedDay} of {totalDays}
         <ChevronDown
           size={16}
-          className={cn('transition-transform', isOpen && 'rotate-180')}
+          className={cn('transition-transform motion-reduce:transition-none', isOpen && 'rotate-180')}
         />
       </button>
 

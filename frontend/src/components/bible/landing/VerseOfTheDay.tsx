@@ -89,7 +89,7 @@ export function VerseOfTheDay() {
     return (
       <div className="mx-auto max-w-2xl">
         <FrostedCard as="article">
-          <div className="animate-pulse space-y-4">
+          <div className="motion-safe:animate-pulse space-y-4">
             <div className="h-3 w-32 rounded bg-white/10" />
             <div className="space-y-2">
               <div className="h-6 w-full rounded bg-white/10" />
