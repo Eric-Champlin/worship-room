@@ -100,7 +100,22 @@ registerRoute(
   }),
 )
 
-// Rule 6: Same-origin catch-all
+// Rule 6: Search index — CacheFirst after initial fetch (removed from precache in BB-36)
+registerRoute(
+  /\/search\/.*\.json$/,
+  new CacheFirst({
+    cacheName: 'wr-search-index-v1',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 5,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+      }),
+    ],
+  }),
+)
+
+// Rule 7: Same-origin catch-all
 registerRoute(
   ({ sameOrigin }) => sameOrigin,
   new NetworkFirst({
