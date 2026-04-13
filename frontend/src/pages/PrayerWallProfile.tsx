@@ -244,7 +244,7 @@ function PrayerWallProfileContent() {
                 ))
               ) : (
                 <p className="py-8 text-center text-sm text-white/50">
-                  No prayers shared yet.
+                  This person hasn't shared any prayers yet.
                 </p>
               )}
             </div>

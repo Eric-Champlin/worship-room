@@ -48,7 +48,7 @@ describe('MemorizationDeck', () => {
   it('renders empty state when no cards', () => {
     mockedUseStore.mockReturnValue([])
     renderDeck()
-    expect(screen.getByText('No memorization cards yet')).toBeInTheDocument()
+    expect(screen.getByText('Your memorization deck is ready')).toBeInTheDocument()
   })
 
   it('renders card count in summary', () => {

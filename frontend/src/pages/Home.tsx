@@ -8,6 +8,8 @@ import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { HOME_METADATA } from '@/lib/seo/routeMetadata'
 import { useRoutePreload } from '@/hooks/useRoutePreload'
+import { useFirstRun } from '@/hooks/useFirstRun'
+import { FirstRunWelcome } from '@/components/onboarding/FirstRunWelcome'
 
 const homepageJsonLd = [
   {
@@ -39,6 +41,7 @@ export function Home() {
   useRoutePreload([
     () => import('@/pages/DailyHub'),
   ])
+  const { isFirstRun, dismissFirstRun } = useFirstRun()
 
   return (
     <div className="min-h-screen bg-neutral-bg font-sans">
@@ -66,6 +69,7 @@ export function Home() {
       </main>
       <SiteFooter />
       {import.meta.env.DEV && <DevAuthToggle />}
+      {isFirstRun && <FirstRunWelcome onDismiss={dismissFirstRun} />}
     </div>
   )
 }

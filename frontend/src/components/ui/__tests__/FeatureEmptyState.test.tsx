@@ -130,7 +130,51 @@ describe('FeatureEmptyState', () => {
     )
     const button = screen.getByRole('button', { name: /click me/i })
     expect(button.className).toContain('focus-visible:ring-2')
-    expect(button.className).toContain('focus-visible:ring-purple-400')
+    expect(button.className).toContain('focus-visible:ring-primary/50')
+  })
+
+  it('CTA has white pill styling', () => {
+    renderWithRouter(
+      <FeatureEmptyState
+        icon={Heart}
+        heading="Heading"
+        description="Description"
+        ctaLabel="Click me"
+        onCtaClick={() => {}}
+      />,
+    )
+    const button = screen.getByRole('button', { name: /click me/i })
+    expect(button.className).toContain('rounded-full')
+    expect(button.className).toContain('bg-white')
+    expect(button.className).toContain('text-primary')
+  })
+
+  it('CTA has active scale', () => {
+    renderWithRouter(
+      <FeatureEmptyState
+        icon={Heart}
+        heading="Heading"
+        description="Description"
+        ctaLabel="Click me"
+        onCtaClick={() => {}}
+      />,
+    )
+    const button = screen.getByRole('button', { name: /click me/i })
+    expect(button.className).toContain('active:scale-[0.98]')
+  })
+
+  it('CTA text does not contain arrow', () => {
+    renderWithRouter(
+      <FeatureEmptyState
+        icon={Heart}
+        heading="Heading"
+        description="Description"
+        ctaLabel="Start reading"
+        ctaHref="/bible"
+      />,
+    )
+    const link = screen.getByRole('link', { name: /start reading/i })
+    expect(link.textContent).not.toContain('→')
   })
 
   it('renders children between description and CTA', () => {

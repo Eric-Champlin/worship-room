@@ -242,7 +242,7 @@ describe('MyBiblePage', () => {
   it('truly empty state renders with CTA', () => {
     mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
     renderPage()
-    expect(screen.getByText(/Nothing here yet/)).toBeInTheDocument()
+    expect(screen.getByText(/Your Bible highlights will show up here/)).toBeInTheDocument()
     expect(screen.getAllByText(/Open the reader/).length).toBeGreaterThanOrEqual(1)
   })
 

@@ -50,7 +50,7 @@ describe('MonthlyHighlights', () => {
   it('shows best day empty state when null', () => {
     render(<MonthlyHighlights {...defaultProps} bestDay={null} />)
     expect(
-      screen.getByText(/start checking in to see your journey/i),
+      screen.getByText(/highlights will appear here once you've been checking in/i),
     ).toBeInTheDocument()
   })
 

@@ -198,7 +198,7 @@ describe('MyBiblePage — Heatmap & Progress Map integration (BB-43)', () => {
   it('progress map appears above activity feed empty state', () => {
     renderPage()
     const progressMap = screen.getByLabelText('Bible progress map')
-    const emptyState = screen.getByText('Nothing here yet.')
+    const emptyState = screen.getByText('Your Bible highlights will show up here')
     expect(progressMap.compareDocumentPosition(emptyState) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
@@ -211,6 +211,6 @@ describe('MyBiblePage — Heatmap & Progress Map integration (BB-43)', () => {
 
   it('existing empty state still renders', () => {
     renderPage()
-    expect(screen.getByText('Nothing here yet.')).toBeDefined()
+    expect(screen.getByText('Your Bible highlights will show up here')).toBeDefined()
   })
 })

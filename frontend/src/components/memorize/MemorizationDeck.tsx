@@ -12,8 +12,8 @@ export function MemorizationDeck() {
     return (
       <FeatureEmptyState
         icon={Bookmark}
-        heading="No memorization cards yet"
-        description="Tap the memorize action on any verse in the Bible reader to start your deck."
+        heading="Your memorization deck is ready"
+        description="Tap the memorize action on any verse in the Bible reader, and it'll appear here as a flip card."
         ctaLabel="Open the reader"
         ctaHref="/bible"
       />

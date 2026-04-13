@@ -276,8 +276,8 @@ function MyBiblePageInner() {
             <div className="py-16">
               <FeatureEmptyState
                 icon={BookOpen}
-                heading="Nothing here yet."
-                description="Tap a verse in the reader and choose Highlight, Bookmark, or Note. They'll show up here."
+                heading="Your Bible highlights will show up here"
+                description="Tap any verse in the reader to highlight, bookmark, or add a note. They'll all be collected here for you."
                 ctaLabel="Open the reader"
                 ctaHref="/bible"
               />

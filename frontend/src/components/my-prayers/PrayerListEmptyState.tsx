@@ -1,4 +1,5 @@
-import { Heart, Plus } from 'lucide-react'
+import { Heart } from 'lucide-react'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 
 interface PrayerListEmptyStateProps {
   onAddPrayer: () => void
@@ -6,22 +7,12 @@ interface PrayerListEmptyStateProps {
 
 export function PrayerListEmptyState({ onAddPrayer }: PrayerListEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <Heart className="mb-4 h-16 w-16 text-white/30" aria-hidden="true" />
-      <h2 className="mb-2 text-xl font-semibold text-white/70">
-        Your prayer list is waiting.
-      </h2>
-      <p className="mb-6 text-white/50">
-        Bring what&apos;s on your heart. God is already listening.
-      </p>
-      <button
-        type="button"
-        onClick={onAddPrayer}
-        className="flex min-h-[44px] items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 active:scale-[0.98]"
-      >
-        <Plus className="h-5 w-5" aria-hidden="true" />
-        Add Prayer
-      </button>
-    </div>
+    <FeatureEmptyState
+      icon={Heart}
+      heading="Your prayer list is waiting."
+      description="Bring what's on your heart. God is already listening."
+      ctaLabel="Add a prayer"
+      onCtaClick={onAddPrayer}
+    />
   )
 }

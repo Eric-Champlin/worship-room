@@ -46,6 +46,7 @@ Most keys use the `wr_` prefix. Bible redesign keys use the `bible:` prefix inst
 | `wr_getting_started`          | GettingStartedData   | Getting started checklist progress            |
 | `wr_getting_started_complete` | "true"               | Getting started checklist completed/dismissed |
 | `wr_weekly_summary_dismissed` | string (Monday date) | Weekly summary banner dismissal               |
+| `wr_first_run_completed`      | timestamp string     | FirstRunWelcome completion (BB-34) — when set, welcome overlay never shows again |
 
 ### Music & Audio
 
