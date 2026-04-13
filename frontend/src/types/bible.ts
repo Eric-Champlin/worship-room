@@ -46,10 +46,10 @@ export interface BibleSearchResult {
   chapter: number
   verseNumber: number
   verseText: string
-  /** Verse before the match (if exists) */
-  contextBefore?: string
-  /** Verse after the match (if exists) */
-  contextAfter?: string
+  /** Relevance score for ranking */
+  score: number
+  /** Query tokens that matched in this verse (for highlight rendering) */
+  matchedTokens: string[]
 }
 
 /** Progress map: book slug -> array of completed chapter numbers */
