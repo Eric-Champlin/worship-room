@@ -43,7 +43,9 @@ import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { CHALLENGES } from '@/data/challenges'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
+import { EchoCard } from '@/components/echoes/EchoCard'
 import { cn } from '@/lib/utils'
+import { useEcho, markEchoSeen } from '@/hooks/useEcho'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { useAnniversaryMoment } from '@/hooks/useAnniversaryMoment'
 import { useGratitudeCallback } from '@/hooks/useGratitudeCallback'
@@ -97,6 +99,7 @@ export function Dashboard() {
   const gardenRef = useRef<SVGSVGElement>(null)
   const { isVisible: recapVisible, hasFriends: recapHasFriends } = useWeeklyRecap()
   const godMoments = useWeeklyGodMoments()
+  const topEcho = useEcho()
   usePrayerReminders(phase === 'dashboard')
 
   // Challenge hooks
@@ -510,6 +513,20 @@ export function Dashboard() {
             }
           />
         </div>
+        {topEcho && (
+          <div
+            className={cn(
+              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
+              shouldAnimate && 'motion-safe:animate-widget-enter',
+            )}
+            style={shouldAnimate ? { animationDelay: '100ms' } : undefined}
+          >
+            <EchoCard
+              echo={topEcho}
+              onNavigate={() => markEchoSeen(topEcho.id)}
+            />
+          </div>
+        )}
         {godMoments.isVisible && (
           <div
             className={cn(

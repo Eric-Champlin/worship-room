@@ -1,11 +1,13 @@
 import { useCallback, useRef, useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Share2, Volume2, Check } from 'lucide-react'
+import { EchoCard } from '@/components/echoes/EchoCard'
 import { cn } from '@/lib/utils'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getTodaysDevotional, formatDevotionalDate } from '@/data/devotionals'
 import { useSwipe } from '@/hooks/useSwipe'
 import { useAuth } from '@/hooks/useAuth'
+import { useEcho, markEchoSeen } from '@/hooks/useEcho'
 import { useToast } from '@/components/ui/Toast'
 import { useReadAloud } from '@/hooks/useReadAloud'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
@@ -49,6 +51,7 @@ export function DevotionalTabContent({
   const { recordActivity } = useFaithPoints()
   const { playSoundEffect } = useSoundEffects()
   const { getPlanStatus } = useReadingPlanProgress()
+  const topEcho = useEcho()
   const [isCompleted, setIsCompleted] = useState(false)
   const [showPassageShare, setShowPassageShare] = useState(false)
 
@@ -319,6 +322,16 @@ export function DevotionalTabContent({
               planDuration={matchingPlan.durationDays}
               planStatus={matchingPlanStatus as 'unstarted' | 'active' | 'paused'}
             />
+          )}
+
+          {/* Verse echo — quiet callback to user's history */}
+          {topEcho && (
+            <div className="py-6 sm:py-8">
+              <EchoCard
+                echo={topEcho}
+                onNavigate={() => markEchoSeen(topEcho.id)}
+              />
+            </div>
           )}
 
           {/* Share & Read Aloud */}
