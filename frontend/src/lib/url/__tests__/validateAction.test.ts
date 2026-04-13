@@ -42,8 +42,8 @@ describe('validateAction', () => {
     expect(validateAction('share')).toBe('share')
   })
 
-  it('accepts memorize', () => {
-    expect(validateAction('memorize')).toBe('memorize')
+  it('rejects memorize (BB-45: no longer deep-linkable — immediate toggle)', () => {
+    expect(validateAction('memorize')).toBeNull()
   })
 
   // ---------------------------------------------------------------------------
@@ -94,8 +94,8 @@ describe('validateAction', () => {
   // Constant inventory sanity check
   // ---------------------------------------------------------------------------
 
-  it('DEEP_LINKABLE_ACTIONS contains exactly 7 actions', () => {
-    expect(DEEP_LINKABLE_ACTIONS).toHaveLength(7)
+  it('DEEP_LINKABLE_ACTIONS contains exactly 6 actions', () => {
+    expect(DEEP_LINKABLE_ACTIONS).toHaveLength(6)
   })
 
   it('every DEEP_LINKABLE_ACTIONS entry round-trips through validateAction', () => {

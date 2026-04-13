@@ -111,6 +111,7 @@ Most keys use the `wr_` prefix. Bible redesign keys use the `bible:` prefix inst
 | `wr_bible_reader_ambient_autostart_sound` | `string \| null` | Sound ID for auto-start (default: null = last played) |
 | `wr_bible_reader_ambient_volume` | `string (number)` | Last-used reader volume 0-100 (default: 35) |
 | `bible:plans`         | `PlansStoreState`              | Reading plan progress — activePlanSlug + per-plan progress (BB-21) |
+| `wr_memorization_cards` | `MemorizationCard[]`         | Verse memorization deck — flip cards with captured verse text (BB-45) |
 
 ### AI Cache (BB-32)
 

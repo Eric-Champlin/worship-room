@@ -26,6 +26,7 @@ import { BIBLE_BOOKS } from '@/constants/bible'
 import { useBibleProgress } from '@/hooks/useBibleProgress'
 import { ReadingHeatmap } from '@/components/bible/my-bible/ReadingHeatmap'
 import { BibleProgressMap } from '@/components/bible/my-bible/BibleProgressMap'
+import { MemorizationDeck } from '@/components/memorize/MemorizationDeck'
 import {
   getDailyActivityForLastYear,
   getBibleCoverage,
@@ -199,6 +200,14 @@ function MyBiblePageInner() {
             />
           </div>
 
+          <div className="border-t border-white/[0.08]" />
+        </div>
+
+        {/* BB-45: Memorization Deck */}
+        <div className="relative z-10 mx-auto max-w-2xl px-4">
+          <div className="py-8">
+            <MemorizationDeck />
+          </div>
           <div className="border-t border-white/[0.08]" />
         </div>
 

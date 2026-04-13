@@ -93,7 +93,16 @@ export function ActivityCard({
 
         {/* Type-specific content */}
         {item.data.type === 'highlight' && (
-          <HighlightCard data={item.data} verseText={verseText} searchQuery={searchQuery} />
+          <HighlightCard
+            data={item.data}
+            verseText={verseText}
+            searchQuery={searchQuery}
+            book={item.book}
+            bookName={item.bookName}
+            chapter={item.chapter}
+            startVerse={item.startVerse}
+            endVerse={item.endVerse}
+          />
         )}
         {item.data.type === 'bookmark' && (
           <BookmarkCard data={item.data} verseText={verseText} searchQuery={searchQuery} />

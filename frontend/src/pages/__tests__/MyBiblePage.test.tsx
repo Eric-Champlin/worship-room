@@ -243,7 +243,7 @@ describe('MyBiblePage', () => {
     mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
     renderPage()
     expect(screen.getByText(/Nothing here yet/)).toBeInTheDocument()
-    expect(screen.getByText(/Open the reader/)).toBeInTheDocument()
+    expect(screen.getAllByText(/Open the reader/).length).toBeGreaterThanOrEqual(1)
   })
 
   it('filtered empty state renders', () => {

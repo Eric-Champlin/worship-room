@@ -43,6 +43,12 @@ import { getNoteForVerse } from '@/lib/bible/notes/store'
 import { NoteEditorSubView } from '@/components/bible/reader/NoteEditorSubView'
 import { ShareSubView } from '@/components/bible/reader/ShareSubView'
 import { buildDailyHubVerseUrl } from '@/lib/bible/verseActions/buildDailyHubVerseUrl'
+import {
+  isCardForVerse,
+  getCardForVerse,
+  addCard as addMemorizeCard,
+  removeCard as removeMemorizeCard,
+} from '@/lib/memorize'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -88,19 +94,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   const success = document.execCommand('copy')
   document.body.removeChild(textarea)
   return success
-}
-
-// ---------------------------------------------------------------------------
-// Stub sub-view helper
-// ---------------------------------------------------------------------------
-
-function stubSubView(text: string) {
-  return (_props: { selection: VerseSelection; onBack: () => void }) =>
-    React.createElement(
-      'div',
-      { className: 'flex items-center justify-center px-4 py-12 text-white/50 text-sm' },
-      text,
-    )
 }
 
 // ---------------------------------------------------------------------------
@@ -388,10 +381,46 @@ const memorize: VerseActionHandler = {
   sublabel: 'Add to your deck',
   icon: Layers,
   category: 'secondary',
-  hasSubView: true,
-  renderSubView: stubSubView('Memorize ships in BB-45'),
+  hasSubView: false,
+
+  getState: (selection: VerseSelection) => {
+    const inDeck = isCardForVerse(
+      selection.book,
+      selection.chapter,
+      selection.startVerse,
+      selection.endVerse,
+    )
+    return { active: inDeck }
+  },
+
   isAvailable: () => true,
-  onInvoke: () => {},
+
+  onInvoke: (sel: VerseSelection, ctx: VerseActionContext) => {
+    const existing = getCardForVerse(
+      sel.book,
+      sel.chapter,
+      sel.startVerse,
+      sel.endVerse,
+    )
+
+    if (existing) {
+      removeMemorizeCard(existing.id)
+      ctx.showToast('Removed from memorization deck')
+    } else {
+      const verseText = getSelectionText(sel)
+      const reference = formatReference(sel)
+      addMemorizeCard({
+        book: sel.book,
+        bookName: sel.bookName,
+        chapter: sel.chapter,
+        startVerse: sel.startVerse,
+        endVerse: sel.endVerse,
+        verseText,
+        reference,
+      })
+      ctx.showToast('Added to memorization deck')
+    }
+  },
 }
 
 const copy: VerseActionHandler = {

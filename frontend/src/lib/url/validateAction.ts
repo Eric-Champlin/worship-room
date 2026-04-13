@@ -19,7 +19,6 @@ export const DEEP_LINKABLE_ACTIONS = [
   'note',
   'highlight',
   'share',
-  'memorize',
 ] as const satisfies readonly VerseAction[]
 
 export type DeepLinkableAction = (typeof DEEP_LINKABLE_ACTIONS)[number]
