@@ -278,7 +278,7 @@ export function PrayerResponse({
               className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
               aria-label="Copy prayer"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Copy</span>
             </button>
 
@@ -298,7 +298,7 @@ export function PrayerResponse({
               className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
               aria-label="Save prayer"
             >
-              <Bookmark className="h-4 w-4" />
+              <Bookmark className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Save</span>
             </button>
 
@@ -310,12 +310,12 @@ export function PrayerResponse({
                 className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
                 aria-label="Save to prayer list"
               >
-                <ListPlus className="h-4 w-4" />
+                <ListPlus className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Save to List</span>
               </button>
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-success">
-                <Check className="h-4 w-4" />
+                <Check className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Saved</span>
               </span>
             )}
@@ -347,7 +347,7 @@ export function PrayerResponse({
                       }}
                       className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-white/70 hover:bg-white/10"
                     >
-                      <ListPlus className="h-4 w-4" />
+                      <ListPlus className="h-4 w-4" aria-hidden="true" />
                       Save to List
                     </button>
                   )}
@@ -474,9 +474,9 @@ export function PrayerResponse({
             Classic Prayers
           </h2>
           {classicOpen ? (
-            <ChevronUp className="h-5 w-5 text-white/50" />
+            <ChevronUp className="h-5 w-5 text-white/50" aria-hidden="true" />
           ) : (
-            <ChevronDown className="h-5 w-5 text-white/50" />
+            <ChevronDown className="h-5 w-5 text-white/50" aria-hidden="true" />
           )}
         </button>
 
@@ -531,7 +531,7 @@ function ClassicPrayerCard({
           className="inline-flex items-center gap-1 rounded bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/15"
           aria-label={`Copy ${prayer.title}`}
         >
-          <Copy className="h-3 w-3" />
+          <Copy className="h-3 w-3" aria-hidden="true" />
           Copy
         </button>
         <ReadAloudButton

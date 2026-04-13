@@ -438,12 +438,6 @@ export function Dashboard() {
           never see this render (they always see Home). We spread HOME_METADATA
           so the canonical root metadata is identical regardless of auth state. */}
       <SEO {...HOME_METADATA} />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
       <Navbar transparent />
       <main
         id="main-content"
@@ -468,7 +462,7 @@ export function Dashboard() {
                   onClick={() => setCustomizePanelOpen(true)}
                   className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <SlidersHorizontal className="h-4 w-4" />
+                  <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
                   Customize
                 </button>
               ) : undefined

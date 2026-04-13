@@ -350,14 +350,14 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
           onClick={handleDownload}
           className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-4 w-4" aria-hidden="true" />
           Download
         </button>
         <button
           onClick={handleCopy}
           className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
         >
-          <Copy className="h-4 w-4" />
+          <Copy className="h-4 w-4" aria-hidden="true" />
           Copy
         </button>
         {canShare && (
@@ -365,7 +365,7 @@ export function ShareSubView({ selection, context }: ShareSubViewProps) {
             onClick={handleShare}
             className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm text-white transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
           >
-            <Share2 className="h-4 w-4" />
+            <Share2 className="h-4 w-4" aria-hidden="true" />
             Share
           </button>
         )}

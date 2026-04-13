@@ -159,7 +159,7 @@ function GratitudeReflectionContent() {
             onClick={handleAddAnother}
             className="mt-4 inline-flex items-center gap-1 text-sm text-primary transition-colors hover:text-primary-light"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
             Add another
           </button>
         )}

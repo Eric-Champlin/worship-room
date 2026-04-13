@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import { loadChapterWeb } from '@/data/bible'
 import { getAllHighlights, subscribe as hlSubscribe } from '@/lib/bible/highlightStore'

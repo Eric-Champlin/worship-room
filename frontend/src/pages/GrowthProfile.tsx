@@ -113,6 +113,7 @@ export function GrowthProfile() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-dashboard-dark">
       <Navbar transparent />
+      <main id="main-content">
       {/* BB-40: dynamic title overrides static base; constant provides noIndex */}
       <SEO
         {...GROWTH_PROFILE_METADATA}
@@ -173,6 +174,7 @@ export function GrowthProfile() {
           <ProfileStats profileData={profileData} />
         </div>
       </div>
+      </main>
       <SiteFooter />
     </div>
   )

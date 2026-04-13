@@ -61,7 +61,7 @@ export function HighlightColorPicker({
           className="flex min-h-[44px] min-w-[44px] flex-col items-center gap-2"
         >
           <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-white/20 sm:h-16 sm:w-16">
-            <X className="h-6 w-6 text-white/60" />
+            <X className="h-6 w-6 text-white/60" aria-hidden="true" />
           </span>
           <span className="text-xs text-white/60">Remove</span>
         </button>

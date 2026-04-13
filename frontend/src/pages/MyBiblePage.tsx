@@ -172,6 +172,7 @@ function MyBiblePageInner() {
         {/* Hero section */}
         <section className="relative z-10 w-full px-4 pb-8 pt-24 sm:pt-28" style={ATMOSPHERIC_HERO_BG}>
           <div className="mx-auto max-w-2xl text-center">
+            <h1 className="sr-only">My Bible</h1>
             <SectionHeading topLine="My Bible" bottomLine="everything you've marked" className="[&_span:last-child]:max-w-full [&_span:last-child]:break-words [&_span:last-child]:!text-3xl [&_span:last-child]:sm:!text-4xl" />
             <p className="mt-3 text-base text-white/60 sm:text-lg">{subhead}</p>
           </div>
@@ -225,7 +226,7 @@ function MyBiblePageInner() {
                       onClick={() => setView(stat.filterType as MyBibleViewId)}
                       className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-[colors,transform] duration-fast hover:border-white/[0.18] hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
                     >
-                      <stat.icon size={16} className="text-white/40" />
+                      <stat.icon size={16} className="text-white/40" aria-hidden="true" />
                       <span className="text-xl font-bold text-white">{totalCounts[stat.key]}</span>
                       <span className="text-xs text-white/50">{stat.label}</span>
                     </button>
@@ -233,7 +234,7 @@ function MyBiblePageInner() {
               )}
               {totalCounts.booksSet.size > 0 && (
                 <div className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm">
-                  <BookOpen size={16} className="text-white/40" />
+                  <BookOpen size={16} className="text-white/40" aria-hidden="true" />
                   <span className="text-xl font-bold text-white">{totalCounts.booksSet.size}</span>
                   <span className="text-xs text-white/50">Books</span>
                 </div>
@@ -245,7 +246,7 @@ function MyBiblePageInner() {
                   className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-[colors,transform] duration-fast hover:bg-white/[0.09] min-h-[44px] active:scale-[0.98]"
                   aria-label={`Reading streak: ${totalCounts.streak} days. Tap for details.`}
                 >
-                  <Flame size={16} className="text-white/40" />
+                  <Flame size={16} className="text-white/40" aria-hidden="true" />
                   <span className="text-xl font-bold text-white">{totalCounts.streak}</span>
                   <span className="text-xs text-white/50">Streak</span>
                 </button>

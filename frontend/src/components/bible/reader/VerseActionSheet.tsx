@@ -430,6 +430,7 @@ export function VerseActionSheet({
                     >
                       <Icon
                         className={cn('h-6 w-6', state?.active ? '[&>*]:fill-current' : 'text-white/70')}
+                        aria-hidden="true"
                       />
                     </span>
                     <span className="text-xs text-white/60">{handler.label}</span>
@@ -454,7 +455,7 @@ export function VerseActionSheet({
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-3 min-h-[44px] text-left text-white transition-colors hover:bg-white/[0.06]"
                     aria-label={handler.label}
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0 text-white/60" />
+                    <Icon className="h-5 w-5 flex-shrink-0 text-white/60" aria-hidden="true" />
                     <div className="flex-1 min-w-0">
                       <span className="text-sm text-white">{handler.label}</span>
                       {handler.sublabel && (
@@ -465,7 +466,7 @@ export function VerseActionSheet({
                     </div>
                     {handler.renderBadge?.(selection)}
                     {handler.hasSubView && (
-                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/30" />
+                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/30" aria-hidden="true" />
                     )}
                   </button>
                 )

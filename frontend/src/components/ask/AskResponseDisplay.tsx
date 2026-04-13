@@ -110,7 +110,7 @@ export function AskResponseDisplay({
                 'transition-colors',
               )}
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
               Ask another question
             </button>
             <button
@@ -123,7 +123,7 @@ export function AskResponseDisplay({
                 'transition-colors',
               )}
             >
-              <BookOpen className="h-4 w-4" />
+              <BookOpen className="h-4 w-4" aria-hidden="true" />
               Journal about this
             </button>
             <button
@@ -136,7 +136,7 @@ export function AskResponseDisplay({
                 'transition-colors',
               )}
             >
-              <Heart className="h-4 w-4" />
+              <Heart className="h-4 w-4" aria-hidden="true" />
               Pray about this
             </button>
             <button
@@ -149,7 +149,7 @@ export function AskResponseDisplay({
                 'transition-colors',
               )}
             >
-              <Share2 className="h-4 w-4" />
+              <Share2 className="h-4 w-4" aria-hidden="true" />
               Share
             </button>
           </div>

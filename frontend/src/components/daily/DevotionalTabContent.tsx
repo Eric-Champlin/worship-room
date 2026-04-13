@@ -340,14 +340,14 @@ export function DevotionalTabContent({
               onClick={handleShareClick}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)] active:scale-[0.98]"
             >
-              <Share2 size={18} />
+              <Share2 size={18} aria-hidden="true" />
               Share today&apos;s devotional
             </button>
             <button
               onClick={handleReadAloudClick}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)] active:scale-[0.98]"
             >
-              <Volume2 size={18} />
+              <Volume2 size={18} aria-hidden="true" />
               {readAloud.state === 'idle'
                 ? 'Read aloud'
                 : readAloud.state === 'playing'

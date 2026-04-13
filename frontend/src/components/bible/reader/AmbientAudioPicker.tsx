@@ -183,7 +183,7 @@ export function AmbientAudioPicker({
           onClick={handleBrowse}
           className="flex items-center gap-2 py-2 text-sm text-white/60 transition-colors hover:text-white"
         >
-          <ListMusic className="h-4 w-4" />
+          <ListMusic className="h-4 w-4" aria-hidden="true" />
           Browse all sounds
         </button>
         <button
@@ -191,7 +191,7 @@ export function AmbientAudioPicker({
           onClick={handleBrowse}
           className="flex items-center gap-2 py-2 text-sm text-white/60 transition-colors hover:text-white"
         >
-          <Timer className="h-4 w-4" />
+          <Timer className="h-4 w-4" aria-hidden="true" />
           Set a sleep timer
         </button>
       </div>
@@ -203,7 +203,7 @@ export function AmbientAudioPicker({
           onClick={handleStop}
           className="flex items-center gap-2 py-2 text-sm text-white/50 transition-colors hover:text-white"
         >
-          <StopCircle className="h-4 w-4" />
+          <StopCircle className="h-4 w-4" aria-hidden="true" />
           Stop sound
         </button>
       )}

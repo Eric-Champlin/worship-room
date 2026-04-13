@@ -226,21 +226,21 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
                 onClick={() => handleAddStepType('scene')}
                 className="flex items-center gap-1.5 rounded-lg border border-glow-cyan/30 bg-glow-cyan/10 px-3 py-2 text-xs font-medium text-glow-cyan transition-colors hover:bg-glow-cyan/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
               >
-                <Mountain size={14} /> Scene
+                <Mountain size={14} aria-hidden="true" /> Scene
               </button>
               <button
                 type="button"
                 onClick={() => handleAddStepType('scripture')}
                 className="flex items-center gap-1.5 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
               >
-                <BookOpen size={14} /> Scripture
+                <BookOpen size={14} aria-hidden="true" /> Scripture
               </button>
               <button
                 type="button"
                 onClick={() => handleAddStepType('story')}
                 className="flex items-center gap-1.5 rounded-lg border border-primary-lt/30 bg-primary-lt/10 px-3 py-2 text-xs font-medium text-primary-lt transition-colors hover:bg-primary-lt/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
               >
-                <Moon size={14} /> Story
+                <Moon size={14} aria-hidden="true" /> Story
               </button>
               <button
                 type="button"
@@ -256,7 +256,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
               onClick={() => setShowTypePicker(true)}
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-white/20 py-3 text-sm text-white/50 transition-colors hover:border-white/40 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <Plus size={16} /> Add Step
+              <Plus size={16} aria-hidden="true" /> Add Step
             </button>
           )}
         </div>

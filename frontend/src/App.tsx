@@ -81,6 +81,7 @@ const MoodCheckInPreview = lazy(() =>
   import('./pages/MoodCheckInPreview').then((m) => ({ default: m.MoodCheckInPreview }))
 )
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })))
+const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage').then((m) => ({ default: m.AccessibilityPage })))
 
 function RouteLoadingFallback() {
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -265,6 +266,7 @@ function App() {
           )}
           <Route path="/login" element={<ComingSoon title="Log In" />} />
           <Route path="/register" element={<Suspense fallback={null}><RegisterPage /></Suspense>} />
+          <Route path="/accessibility" element={<Suspense fallback={<RouteLoadingFallback />}><AccessibilityPage /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </RouteTransition>

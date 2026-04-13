@@ -24,12 +24,6 @@ export function SharedVerse() {
     return (
       <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
         <SEO title="Verse Not Found" description="This verse may no longer be available on Worship Room." noIndex />
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
-        >
-          Skip to content
-        </a>
         <Navbar />
         <main id="main-content" className="flex flex-1 items-center justify-center">
           <div className="text-center">
@@ -66,15 +60,10 @@ export function SharedVerse() {
         title={verse.reference}
         description={verseDescription}
       />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
-      >
-        Skip to content
-      </a>
       <Navbar transparent />
 
       <main id="main-content">
+        <h1 className="sr-only">Shared Verse</h1>
         {/* Hero */}
         <section
           className="relative flex w-full flex-col items-center px-4 pb-10 pt-32 text-center antialiased sm:pb-12 sm:pt-36 lg:pb-14 lg:pt-40"

@@ -30,7 +30,7 @@ export function VerseOfTheDayCard() {
           aria-haspopup="dialog"
           aria-expanded={sharePanelOpen}
         >
-          <Share2 className="h-4 w-4" />
+          <Share2 className="h-4 w-4" aria-hidden="true" />
           <span>Share</span>
         </button>
       </div>

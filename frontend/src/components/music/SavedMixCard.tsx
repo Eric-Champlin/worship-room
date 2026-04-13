@@ -140,7 +140,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
             aria-label={`Play ${mix.name}`}
             className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
           >
-            <Play size={12} fill="currentColor" />
+            <Play size={12} fill="currentColor" aria-hidden="true" />
             Play
           </button>
 

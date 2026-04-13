@@ -199,6 +199,7 @@ export function WelcomeWizard({ userName, onComplete }: WelcomeWizardProps) {
   return (
     <div
       role="dialog"
+      aria-modal="true"
       aria-labelledby={HEADING_IDS[currentScreen]}
       className="fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-dashboard-dark motion-safe:animate-continue-fade-in motion-reduce:animate-none"
     >

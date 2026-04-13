@@ -180,12 +180,6 @@ export function Insights() {
   return (
     <div className="min-h-screen bg-dashboard-dark">
       <SEO {...INSIGHTS_METADATA} />
-      <a
-        href="#insights-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
       <Navbar transparent />
 
       {/* Hero section */}
@@ -237,7 +231,7 @@ export function Insights() {
 
       {/* Content area */}
       <main
-        id="insights-content"
+        id="main-content"
         className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6"
       >
         {/* Insufficient data banner (2-6 entries) */}

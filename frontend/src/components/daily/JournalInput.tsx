@@ -216,7 +216,7 @@ export function JournalInput({
                 className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="New prompt"
               >
-                <RefreshCw className="h-3.5 w-3.5" />
+                <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
                 Try a different prompt
               </button>
             </div>

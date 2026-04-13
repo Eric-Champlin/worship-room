@@ -228,12 +228,12 @@ export function BiblePlanDay() {
                 to={`/bible/plans/${slug}/day/${dayNumber - 1}`}
                 className="inline-flex min-h-[44px] items-center gap-1 text-sm text-white/60 hover:text-white"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 Day {dayNumber - 1}
               </Link>
             ) : (
               <span className="inline-flex min-h-[44px] items-center gap-1 text-sm text-white/20">
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 Day 0
               </span>
             )}
@@ -244,12 +244,12 @@ export function BiblePlanDay() {
                 className="inline-flex min-h-[44px] items-center gap-1 text-sm text-white/60 hover:text-white"
               >
                 Day {dayNumber + 1}
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             ) : (
               <span className="inline-flex min-h-[44px] items-center gap-1 text-sm text-white/20">
                 Day {dayNumber + 1}
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </span>
             )}
           </div>
@@ -260,7 +260,7 @@ export function BiblePlanDay() {
               disabled
               className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white/10 px-8 py-3.5 text-base font-semibold text-white/50 sm:sticky sm:static"
             >
-              <CheckCircle2 className="h-5 w-5" />
+              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
               Day complete
             </button>
           ) : (

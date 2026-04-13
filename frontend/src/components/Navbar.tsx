@@ -169,13 +169,20 @@ export function Navbar({ transparent = false, hideBanner = false }: NavbarProps)
   }, [isMenuOpen])
 
   return (
-    <nav
-      className={cn(
-        'top-0 z-50',
-        transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-hero-dark'
-      )}
-      aria-label="Main navigation"
-    >
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+      >
+        Skip to content
+      </a>
+      <nav
+        className={cn(
+          'top-0 z-50',
+          transparent ? 'absolute inset-x-0 bg-transparent' : 'bg-hero-dark'
+        )}
+        aria-label="Main navigation"
+      >
       <div className="mx-auto max-w-6xl px-4 pt-5 pb-2 sm:px-6">
         <div
           className={cn(
@@ -241,5 +248,6 @@ export function Navbar({ transparent = false, hideBanner = false }: NavbarProps)
         />
       )}
     </nav>
+    </>
   )
 }

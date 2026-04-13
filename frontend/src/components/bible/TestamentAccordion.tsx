@@ -51,6 +51,7 @@ export function TestamentAccordion({
             'text-white/50 transition-transform motion-reduce:transition-none',
             isExpanded && 'rotate-180',
           )}
+          aria-hidden="true"
         />
       </button>
 

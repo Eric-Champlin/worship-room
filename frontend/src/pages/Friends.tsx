@@ -67,12 +67,6 @@ export function Friends() {
   return (
     <div className="min-h-screen bg-dashboard-dark">
       <SEO {...FRIENDS_METADATA} />
-      <a
-        href="#friends-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
       <Navbar transparent />
 
       {/* Hero section */}
@@ -135,7 +129,7 @@ export function Friends() {
       </div>
 
       {/* Tab panels */}
-      <main id="friends-content" className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">
         <div
           role="tabpanel"
           id="panel-friends"

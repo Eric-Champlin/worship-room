@@ -204,7 +204,7 @@ export function MyPrayers() {
         onAddPrayer={() => setComposerOpen(true)}
       />
 
-      <main className="min-h-[50vh] px-4 py-4">
+      <main id="main-content" className="min-h-[50vh] px-4 py-4">
         <div className="mx-auto max-w-3xl">
           <PrayerComposer
             isOpen={composerOpen}

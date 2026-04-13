@@ -115,10 +115,10 @@ describe('Friends Page', () => {
     expect(tab).toHaveAttribute('aria-controls', 'panel-leaderboard')
   })
 
-  it('skip to content link exists', () => {
+  it('skip to content link exists (via Navbar)', () => {
     renderFriends()
     const skipLink = screen.getByText('Skip to content')
-    expect(skipLink).toHaveAttribute('href', '#friends-content')
+    expect(skipLink).toHaveAttribute('href', '#main-content')
   })
 
   // --- Integration: All sections render ---

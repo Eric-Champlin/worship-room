@@ -81,7 +81,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
           onClick={handleHighlight}
           className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
         >
-          <Highlighter className="h-3.5 w-3.5" />
+          <Highlighter className="h-3.5 w-3.5" aria-hidden="true" />
           Highlight in Bible
         </button>
         <button
@@ -89,7 +89,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
           onClick={handleSaveNoteClick}
           className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
         >
-          <StickyNote className="h-3.5 w-3.5" />
+          <StickyNote className="h-3.5 w-3.5" aria-hidden="true" />
           Save note
         </button>
         <button
@@ -98,7 +98,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
           className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
           aria-label={`Share ${verse.reference}`}
         >
-          <Share2 className="h-3.5 w-3.5" />
+          <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
           Share
         </button>
       </div>

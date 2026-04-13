@@ -139,6 +139,7 @@ function PrayerDetailContent() {
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
       >
+        <h1 className="sr-only">Prayer Detail</h1>
         <div className="mb-6">
           <Breadcrumb
             items={[

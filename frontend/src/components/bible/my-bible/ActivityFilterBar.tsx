@@ -144,7 +144,7 @@ export function ActivityFilterBar({
                 className="flex min-h-[44px] items-center gap-1 rounded-lg border border-white/[0.12] px-2.5 py-1 text-xs text-white/70 transition-colors hover:border-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
               >
                 <span className="max-w-[80px] truncate">{activeBookName}</span>
-                <ChevronDown size={12} />
+                <ChevronDown size={12} aria-hidden="true" />
               </button>
 
               {/* Desktop dropdown */}

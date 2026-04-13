@@ -188,7 +188,7 @@ function PsalmReadingContent() {
               className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50 disabled:opacity-50"
               aria-label="Previous verse"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               Previous
             </button>
 
@@ -208,7 +208,7 @@ function PsalmReadingContent() {
                 aria-label="Next verse"
               >
                 Next
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
           </div>

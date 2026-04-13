@@ -389,7 +389,7 @@ export function AvatarPickerModal({
                   disabled={isProcessing}
                   className="bg-white/10 text-white border border-white/20 rounded-lg py-3 px-6 hover:bg-white/15 transition-colors disabled:opacity-50 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
-                  <Upload className="h-4 w-4" />
+                  <Upload className="h-4 w-4" aria-hidden="true" />
                   {isProcessing ? 'Processing...' : 'Choose File'}
                 </button>
 

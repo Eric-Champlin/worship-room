@@ -25,6 +25,7 @@ const FOOTER_SUPPORT_LINKS = [
   { label: 'Churches', to: '/local-support/churches' },
   { label: 'Counselors', to: '/local-support/counselors' },
   { label: 'Celebrate Recovery', to: '/local-support/celebrate-recovery' },
+  { label: 'Accessibility', to: '/accessibility' },
 ]
 
 const FOOTER_COLUMNS = [

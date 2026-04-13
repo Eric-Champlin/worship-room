@@ -75,7 +75,7 @@ export function AudioPill() {
           aria-label={`Start ${suggested.name}`}
           className="flex min-h-[44px] flex-1 items-center gap-3 rounded-full transition-transform duration-fast active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
         >
-          <Play size={16} className="shrink-0 text-white" />
+          <Play size={16} className="shrink-0 text-white" aria-hidden="true" />
           <span className="max-w-[150px] truncate text-sm font-medium text-white">
             Start {suggested.name}
           </span>

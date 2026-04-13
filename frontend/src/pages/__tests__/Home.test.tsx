@@ -34,7 +34,7 @@ describe('Home', () => {
     expect(screen.getByRole('main')).toBeInTheDocument()
   })
 
-  it('renders skip-to-content link', () => {
+  it('renders skip-to-content link (via Navbar)', () => {
     renderHome()
     const skipLink = screen.getByText('Skip to content')
     expect(skipLink).toHaveAttribute('href', '#main-content')

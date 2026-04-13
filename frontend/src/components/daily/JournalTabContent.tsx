@@ -292,6 +292,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
         {draftConflictPending && prayContext?.from === 'devotional' && (
           <div
             role="dialog"
+            aria-modal="true"
             aria-labelledby="draft-conflict-title"
             className="mb-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] p-6 backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]"
           >

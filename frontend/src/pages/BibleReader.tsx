@@ -693,6 +693,15 @@ function BibleReaderInner() {
       data-reader-theme={settings.theme}
       {...touchHandlers}
     >
+      {/* BB-35: Skip link — BibleReader uses ReaderChrome instead of Navbar,
+          so it needs its own skip link to match the global pattern. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+      >
+        Skip to content
+      </a>
+
       {/* BB-40: builder returns title/description/canonical/ogImage/jsonLd together.
           Step 9 tests the BreadcrumbList JSON-LD emission. */}
       <SEO {...buildBibleChapterMetadata(book.name, chapterNumber, bookSlug!)} />
@@ -768,6 +777,7 @@ function BibleReaderInner() {
 
       <div style={swipeStyle}>
         <main
+          id="main-content"
           ref={readerBodyRef}
           className="mx-auto max-w-2xl px-5 pb-8 pt-20 sm:px-6 sm:pt-24"
           aria-busy={isLoading}

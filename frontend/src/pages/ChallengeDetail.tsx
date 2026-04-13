@@ -481,7 +481,7 @@ export function ChallengeDetail() {
                       : 'hover:bg-white/15',
                   )}
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={16} aria-hidden="true" />
                   Previous Day
                 </button>
 
@@ -498,7 +498,7 @@ export function ChallengeDetail() {
                   )}
                 >
                   Next Day
-                  <ChevronRight size={16} />
+                  <ChevronRight size={16} aria-hidden="true" />
                 </button>
               </div>
             </div>

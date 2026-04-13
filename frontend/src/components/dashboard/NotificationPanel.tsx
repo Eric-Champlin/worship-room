@@ -53,6 +53,7 @@ export function NotificationPanel({
     <div
       ref={containerRef}
       role="dialog"
+      aria-modal="true"
       aria-label="Notifications"
       className={cn(
         'flex flex-col bg-hero-mid/95 backdrop-blur-md border border-white/15 shadow-lg',

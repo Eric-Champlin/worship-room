@@ -193,7 +193,7 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
               onClick={handleExport}
               className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-hero-bg transition-all motion-reduce:transition-none hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-[0.98]"
             >
-              <Download size={16} />
+              <Download size={16} aria-hidden="true" />
               Download export
             </button>
           </section>
@@ -221,7 +221,7 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
               onClick={() => fileInputRef.current?.click()}
               className="inline-flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm text-white/60 transition-colors hover:bg-white/[0.09]"
             >
-              <Upload size={16} />
+              <Upload size={16} aria-hidden="true" />
               Choose file
             </button>
           </section>

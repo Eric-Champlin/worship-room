@@ -61,7 +61,7 @@ export function MixerTabContent() {
         className="mt-4 flex items-center gap-2 rounded text-sm text-primary-lt transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
         onClick={handleAddSoundClick}
       >
-        <Plus size={16} /> Add Sound
+        <Plus size={16} aria-hidden="true" /> Add Sound
       </button>
     </div>
   )

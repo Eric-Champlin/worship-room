@@ -63,7 +63,8 @@ export function ReaderChrome({
   }
 
   return (
-    <div
+    <nav
+      aria-label="Reader controls"
       className="fixed left-0 right-0 top-0 z-30"
       style={{
         paddingTop: 'env(safe-area-inset-top)',
@@ -166,6 +167,6 @@ export function ReaderChrome({
 
       {/* Gradient fade below chrome */}
       <div className="h-4 bg-gradient-to-b from-hero-bg/80 to-transparent" />
-    </div>
+    </nav>
   )
 }

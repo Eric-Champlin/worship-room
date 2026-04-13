@@ -97,6 +97,7 @@ export function GuidedPrayerPlayer({
         ref={containerRef}
         className="fixed inset-0 z-50 flex items-center justify-center bg-hero-dark"
         role="dialog"
+        aria-modal="true"
         aria-label={`${session.title} complete`}
       >
         <div className="flex w-full max-w-lg flex-col items-center px-4 text-center">
@@ -156,6 +157,7 @@ export function GuidedPrayerPlayer({
       ref={containerRef}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-hero-dark"
       role="dialog"
+      aria-modal="true"
       aria-label={`Guided prayer: ${session.title}`}
     >
       {/* Screen reader announcements */}

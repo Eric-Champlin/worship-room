@@ -86,7 +86,7 @@ function CrossRefRow({
         aria-hidden="true"
         data-testid="rank-indicator"
       />
-      <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/30" />
+      <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/30" aria-hidden="true" />
     </button>
   )
 }

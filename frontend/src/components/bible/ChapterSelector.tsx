@@ -106,6 +106,7 @@ export function ChapterSelector({
         <ChevronDown
           size={16}
           className={cn('transition-transform motion-reduce:transition-none', isOpen && 'rotate-180')}
+          aria-hidden="true"
         />
       </button>
 

@@ -123,6 +123,7 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
   return (
     <div
       role="dialog"
+      aria-modal="true"
       aria-labelledby="checkin-greeting"
       className="fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(ellipse_at_50%_30%,_rgb(59,7,100)_0%,_transparent_60%),_linear-gradient(rgb(13,6,32)_0%,_rgb(30,11,62)_50%,_rgb(13,6,32)_100%)]"
     >

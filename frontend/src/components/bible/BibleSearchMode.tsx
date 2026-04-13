@@ -90,7 +90,7 @@ export function BibleSearchMode({ query: controlledQuery, onQueryChange }: Bible
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search the Bible..."
           aria-label="Search the Bible"
-          aria-describedby="bible-search-status"
+          aria-describedby="bible-search-hint bible-search-status"
           className="min-h-[44px] w-full rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 transition-colors focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
         />
         <p className="mt-2 text-center text-sm text-white/60">
@@ -122,7 +122,7 @@ export function BibleSearchMode({ query: controlledQuery, onQueryChange }: Bible
 
         {/* Minimum characters hint */}
         {query.length === 1 && (
-          <p className="text-center text-white/50">
+          <p id="bible-search-hint" className="text-center text-white/50">
             Type at least 2 characters to search
           </p>
         )}

@@ -252,7 +252,7 @@ export function BiblePlanDetail() {
             onClick={() => setShowAllDays(true)}
             className="flex min-h-[44px] w-full items-center justify-center gap-1 text-sm text-white/60 hover:text-white"
           >
-            Show all {plan.days.length} days <ChevronDown className="h-4 w-4" />
+            Show all {plan.days.length} days <ChevronDown className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
 
@@ -261,7 +261,7 @@ export function BiblePlanDetail() {
             onClick={() => setShowAllDays(false)}
             className="flex min-h-[44px] w-full items-center justify-center gap-1 text-sm text-white/60 hover:text-white"
           >
-            Show fewer <ChevronUp className="h-4 w-4" />
+            Show fewer <ChevronUp className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
       </div>

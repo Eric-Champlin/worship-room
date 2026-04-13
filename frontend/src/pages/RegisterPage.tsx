@@ -65,12 +65,6 @@ export function RegisterPage() {
     <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
       {/* BB-40: noIndex added; drop inline canonical (default resolves to /register). */}
       <SEO {...REGISTER_METADATA} />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
-      >
-        Skip to content
-      </a>
       <Navbar />
 
       <main id="main-content">

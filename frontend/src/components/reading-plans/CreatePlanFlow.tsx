@@ -113,7 +113,7 @@ export function CreatePlanFlow({ onClose }: CreatePlanFlowProps) {
             className="mb-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 transition-colors hover:text-white"
             aria-label="Go back"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={18} aria-hidden="true" />
             Back
           </button>
         )}
@@ -287,7 +287,7 @@ function StepTwo({
               : 'cursor-not-allowed opacity-50',
           )}
         >
-          <Sparkles className="mr-2 inline-block h-4 w-4" />
+          <Sparkles className="mr-2 inline-block h-4 w-4" aria-hidden="true" />
           Generate My Plan
         </button>
       </div>

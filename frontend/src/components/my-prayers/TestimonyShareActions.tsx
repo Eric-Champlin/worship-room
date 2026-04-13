@@ -169,7 +169,7 @@ export function TestimonyShareActions({
               disabled={isActioning}
               className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-3 font-medium text-white transition-[colors,transform] duration-fast hover:bg-amber-500 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98]"
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4" aria-hidden="true" />
               Download
             </button>
             <button
@@ -179,12 +179,12 @@ export function TestimonyShareActions({
             >
               {showWebShare ? (
                 <>
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-4 w-4" aria-hidden="true" />
                   Share
                 </>
               ) : (
                 <>
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-4 w-4" aria-hidden="true" />
                   Copy Image
                 </>
               )}

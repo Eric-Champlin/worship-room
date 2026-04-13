@@ -32,7 +32,7 @@ export function DigDeeperSection({
               disabled && 'opacity-50 cursor-not-allowed',
             )}
           >
-            <MessageCircle className="h-4 w-4 shrink-0" />
+            <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
             {question}
           </button>
         ))}
