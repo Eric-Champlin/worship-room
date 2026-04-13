@@ -13,6 +13,7 @@ export const MAX_NOTES = 200
 export const NOTE_MAX_CHARS = 300
 
 export const BIBLE_STREAK_KEY = 'bible:streak'
+export const CHAPTERS_VISITED_KEY = 'wr_chapters_visited'
 export const BIBLE_STREAK_RESET_ACK_KEY = 'bible:streakResetAcknowledged'
 
 export const BIBLE_PLANS_KEY = 'bible:plans'

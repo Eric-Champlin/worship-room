@@ -23,6 +23,16 @@ import { useLongPress } from '@/hooks/bible/useLongPress'
 import { useActivityFeed } from '@/hooks/bible/useActivityFeed'
 import { navigateToActivityItem } from '@/lib/bible/navigateToActivityItem'
 import { BIBLE_BOOKS } from '@/constants/bible'
+import { useBibleProgress } from '@/hooks/useBibleProgress'
+import { ReadingHeatmap } from '@/components/bible/my-bible/ReadingHeatmap'
+import { BibleProgressMap } from '@/components/bible/my-bible/BibleProgressMap'
+import {
+  getDailyActivityForLastYear,
+  getBibleCoverage,
+  countActiveDays,
+  countTotalChaptersRead,
+  countBooksVisited,
+} from '@/lib/heatmap'
 import type { ActivityItem, ActivityFilter } from '@/types/my-bible'
 
 const BibleSettingsModal = lazy(() =>
@@ -67,7 +77,15 @@ function MyBiblePageInner() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [streakModalOpen, setStreakModalOpen] = useState(false)
   const { streak: streakRecord, atRisk } = useStreakStore()
+  const { progress } = useBibleProgress()
   const [actionMenu, setActionMenu] = useState<{ item: ActivityItem; x: number; y: number } | null>(null)
+
+  // BB-43: Heatmap + Progress Map data
+  const dailyActivity = useMemo(() => getDailyActivityForLastYear(), [])
+  const activeDays = useMemo(() => countActiveDays(dailyActivity), [dailyActivity])
+  const coverage = useMemo(() => getBibleCoverage(progress), [progress])
+  const totalChaptersRead = useMemo(() => countTotalChaptersRead(progress), [progress])
+  const booksVisited = useMemo(() => countBooksVisited(progress), [progress])
 
   // BB-38: URL-driven filter type via ?view=<section>. Syncs both directions —
   // URL changes flow into `filter.type` via the useEffect below, and filter
@@ -160,6 +178,29 @@ function MyBiblePageInner() {
 
         {/* Section divider */}
         <div className="mx-auto max-w-6xl border-t border-white/[0.08]" />
+
+        {/* Heatmap + Progress Map (BB-43) */}
+        <div className="relative z-10 mx-auto max-w-2xl px-4">
+          <div className="py-8">
+            <ReadingHeatmap
+              dailyActivity={dailyActivity}
+              currentStreak={streakRecord.currentStreak}
+              activeDays={activeDays}
+            />
+          </div>
+
+          <div className="border-t border-white/[0.08]" />
+
+          <div className="py-8">
+            <BibleProgressMap
+              coverage={coverage}
+              totalChaptersRead={totalChaptersRead}
+              booksVisited={booksVisited}
+            />
+          </div>
+
+          <div className="border-t border-white/[0.08]" />
+        </div>
 
         {/* Main content */}
         <div className="relative z-10 mx-auto max-w-2xl px-4 pb-16">

@@ -94,6 +94,7 @@ Most keys use the `wr_` prefix. Bible redesign keys use the `bible:` prefix inst
 | `bible:notes`          | `Note[]`                   | Verse notes — range-based, 10K char limit (BB-8) |
 | `bible:journalEntries` | `JournalEntry[]`           | Journal entries — verse-linked and freeform (BB-11b) |
 | `wr_bible_last_read`   | `{ book: string, chapter: number, verse: number, timestamp: number }` | Resume Reading card — last viewed position (BB-0 reads, BB-4 writes) |
+| `wr_chapters_visited`  | `Record<string, Array<{ book: string; chapter: number }>>` | Per-day chapter visit log for heatmap (BB-43). Key: YYYY-MM-DD date, value: array of visited chapters. Capped at 400 days. Written on chapter mount in BibleReader, read by My Bible heatmap. |
 | `wr_bible_active_plans` | `Array<{ planId: string, currentDay: number, totalDays: number, planName: string, todayReading: string, startedAt: number }>` | Today's Plan card — active reading plan progress (BB-0 reads, BB-21 writes) |
 | `wr_bible_streak`      | `{ count: number, lastReadDate: string }` | Reading streak chip — Bible-specific streak count (BB-0 reads, BB-17 writes) |
 | `wr_bible_books_tab`   | `'OT' \| 'NT'`            | Books drawer testament tab selection |

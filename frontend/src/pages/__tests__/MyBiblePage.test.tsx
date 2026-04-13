@@ -47,6 +47,25 @@ vi.mock('@/lib/bible/notes/referenceParser', () => ({
   parseReferences: vi.fn(() => []),
 }))
 
+// BB-43: Mock useBibleProgress (calls useAuth internally)
+vi.mock('@/hooks/useBibleProgress', () => ({
+  useBibleProgress: () => ({
+    progress: {},
+    isChapterRead: vi.fn(() => false),
+    markChapterRead: vi.fn(),
+  }),
+}))
+
+// BB-43: Mock heatmap aggregation functions
+vi.mock('@/lib/heatmap', () => ({
+  getDailyActivityForLastYear: () => [],
+  getBibleCoverage: () => [],
+  countActiveDays: () => 0,
+  countTotalChaptersRead: () => 0,
+  countBooksVisited: () => 0,
+  getIntensity: () => 0,
+}))
+
 import MyBiblePage from '../MyBiblePage'
 
 function makeItem(overrides: Partial<ActivityItem> = {}): ActivityItem {
