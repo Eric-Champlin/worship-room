@@ -167,3 +167,11 @@ Cache entries for AI features (Explain this passage, Reflect on this passage). M
 | `wr_surprise_shown_rainbow`        | "true"                 | Rainbow surprise one-time dismissal             |
 | `wr_anniversary_milestones_shown`  | number[]               | Fired anniversary milestone celebrations        |
 | `wr_gratitude_callback_last_shown` | string (date)          | Gratitude callback toast last-shown tracking    |
+
+### Push Notifications (BB-41)
+
+| Key                                | Type                   | Feature                                           |
+| ---------------------------------- | ---------------------- | ------------------------------------------------- |
+| `wr_push_subscription`             | PushSubscriptionRecord | Push API subscription (endpoint, keys, VAPID key) |
+| `wr_notification_prefs`            | NotificationPrefs      | User notification preferences (types, time, last-fired dates) |
+| `wr_notification_prompt_dismissed` | `"true"`               | BibleReader contextual prompt once-per-user flag  |

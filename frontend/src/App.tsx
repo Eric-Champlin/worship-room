@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
 import { LOGIN_METADATA, NOT_FOUND_METADATA } from '@/lib/seo/routeMetadata'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
 import { WhisperToastProvider } from '@/components/ui/WhisperToast'
@@ -160,6 +160,30 @@ function ReadingPlansRedirect() {
   return <Navigate to={target} replace />
 }
 
+/** BB-41: Fire-and-forget notification scheduling on app load */
+function NotificationSchedulerEffect() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
+
+    // Dynamic import to avoid loading notification code for users who haven't opted in
+    import('@/lib/notifications/preferences').then(({ getNotificationPrefs }) => {
+      const prefs = getNotificationPrefs()
+      if (!prefs.enabled) return
+
+      import('@/lib/notifications/subscription').then(({ ensureSubscription }) => {
+        ensureSubscription().catch(() => {})
+      })
+      import('@/lib/notifications/scheduler').then(({ prepareAndSchedule, registerPeriodicSync }) => {
+        prepareAndSchedule().catch(() => {})
+        registerPeriodicSync().catch(() => {})
+      })
+    })
+  }, [])
+
+  return null
+}
+
 function App() {
   return (
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -175,6 +199,7 @@ function App() {
         <UpdatePrompt />
         <OfflineIndicator />
         <InstallPrompt />
+        <NotificationSchedulerEffect />
         <ChunkErrorBoundary>
         <Suspense fallback={<RouteLoadingFallback />}>
         <Routes>

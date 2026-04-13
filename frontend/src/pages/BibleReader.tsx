@@ -32,6 +32,10 @@ import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useActivePlan } from '@/hooks/bible/useActivePlan'
 import { setCelebrationShown } from '@/lib/bible/plansStore'
 import { recordReadToday } from '@/lib/bible/streakStore'
+import { NotificationPrompt } from '@/components/bible/reader/NotificationPrompt'
+import { getPushSupportStatus, getPermissionState, requestPermission } from '@/lib/notifications/permissions'
+import { subscribeToPush } from '@/lib/notifications/subscription'
+import { updateNotificationPrefs } from '@/lib/notifications/preferences'
 import { getBookBySlug, getAdjacentChapter, loadChapterWeb } from '@/data/bible'
 import { loadCrossRefsForBook } from '@/lib/bible/crossRefs/loader'
 import {
@@ -91,6 +95,9 @@ function BibleReaderInner() {
     passageCount: number
     slug: string
   } | null>(null)
+
+  // BB-41: Notification prompt (shows after 2nd reading session of the day)
+  const [showNotifPrompt, setShowNotifPrompt] = useState(false)
 
   const book = bookSlug ? getBookBySlug(bookSlug) : undefined
   const chapterNumber = chapterParam ? parseInt(chapterParam, 10) : NaN
@@ -559,7 +566,17 @@ function BibleReaderInner() {
     }
 
     // Record today's read for the streak system (idempotent within a day)
-    recordReadToday()
+    const streakResult = recordReadToday()
+
+    // BB-41: Show notification prompt on 2nd+ reading session of the day
+    if (
+      streakResult.delta === 'same-day' &&
+      getPushSupportStatus() !== 'unsupported' &&
+      getPermissionState() === 'default' &&
+      localStorage.getItem('wr_notification_prompt_dismissed') !== 'true'
+    ) {
+      setShowNotifPrompt(true)
+    }
   }, [bookSlug, book, chapterNumber, isLoading, loadError, verses.length])
 
   // Keyboard shortcuts
@@ -864,6 +881,26 @@ function BibleReaderInner() {
           onClose={() => {
             setCelebrationData(null)
             navigate(`/bible/plans/${celebrationData.slug}`)
+          }}
+        />
+      )}
+
+      {/* BB-41: Contextual notification prompt */}
+      {showNotifPrompt && (
+        <NotificationPrompt
+          iosNeedsInstall={getPushSupportStatus() === 'ios-needs-install'}
+          onEnable={async () => {
+            const result = await requestPermission()
+            if (result === 'granted') {
+              await subscribeToPush()
+              updateNotificationPrefs({ enabled: true })
+            }
+            localStorage.setItem('wr_notification_prompt_dismissed', 'true')
+            setShowNotifPrompt(false)
+          }}
+          onDismiss={() => {
+            localStorage.setItem('wr_notification_prompt_dismissed', 'true')
+            setShowNotifPrompt(false)
           }}
         />
       )}

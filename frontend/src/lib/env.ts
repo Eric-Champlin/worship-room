@@ -22,6 +22,7 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as
   | string
   | undefined
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
 
 /**
  * Returns the Google Gemini API key, or throws if it is not configured.
@@ -76,4 +77,40 @@ export function isGeminiApiKeyConfigured(): boolean {
  */
 export function isGoogleMapsApiKeyConfigured(): boolean {
   return !!GOOGLE_MAPS_API_KEY
+}
+
+/**
+ * Returns the VAPID public key for Web Push subscriptions, or undefined if
+ * not configured. Used by the subscription manager to decide whether push
+ * is available in this environment.
+ *
+ * Used by: BB-41 (Web Push Notifications).
+ */
+export function getVapidPublicKey(): string | undefined {
+  return VAPID_PUBLIC_KEY
+}
+
+/**
+ * Returns the VAPID public key, or throws if it is not configured.
+ * Call this from the subscription manager when actually creating a push
+ * subscription — not at module load.
+ *
+ * Used by: BB-41 (Web Push Notifications).
+ */
+export function requireVapidPublicKey(): string {
+  if (!VAPID_PUBLIC_KEY) {
+    throw new Error(
+      'VAPID public key is not configured. Add VITE_VAPID_PUBLIC_KEY to frontend/.env.local. ' +
+        'See frontend/.env.example for a dev placeholder.',
+    )
+  }
+  return VAPID_PUBLIC_KEY
+}
+
+/**
+ * Non-throwing check for VAPID key availability — use to conditionally
+ * show push notification UI elements.
+ */
+export function isVapidKeyConfigured(): boolean {
+  return !!VAPID_PUBLIC_KEY
 }
