@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { BIBLE_STREAK_KEY } from '@/constants/bible'
-import { _resetForTesting, recordReadToday, subscribe } from '@/lib/bible/streakStore'
+import { _resetForTesting, recordReadToday } from '@/lib/bible/streakStore'
 import { getTodayLocal } from '@/lib/bible/dateUtils'
 
 // Mock useTimeTick to avoid real timers
@@ -88,8 +88,6 @@ describe('useStreakStore', () => {
   })
 
   it('unsubscribes on unmount without errors', () => {
-    const subscribeSpy = vi.spyOn({ subscribe }, 'subscribe')
-
     const { result, unmount } = renderHook(() => useStreakStore())
     expect(result.current.streak.currentStreak).toBe(0)
 
