@@ -83,19 +83,19 @@ export function ListingSkeleton() {
           className="rounded-xl border border-white/10 bg-white/[0.06] p-5 sm:p-6"
         >
           <div className="flex gap-4">
-            <div className="hidden h-20 w-20 animate-pulse rounded-lg bg-white/[0.08] sm:block" />
+            <div className="hidden h-20 w-20 motion-safe:animate-pulse rounded-lg bg-white/[0.08] sm:block" />
             <div className="min-w-0 flex-1 space-y-3">
-              <div className="h-5 w-3/4 animate-pulse rounded bg-white/[0.08]" />
-              <div className="h-4 w-1/2 animate-pulse rounded bg-white/[0.08]" />
-              <div className="h-4 w-1/3 animate-pulse rounded bg-white/[0.08]" />
+              <div className="h-5 w-3/4 motion-safe:animate-pulse rounded bg-white/[0.08]" />
+              <div className="h-4 w-1/2 motion-safe:animate-pulse rounded bg-white/[0.08]" />
+              <div className="h-4 w-1/3 motion-safe:animate-pulse rounded bg-white/[0.08]" />
             </div>
           </div>
           <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
             <div className="flex gap-2">
-              <div className="h-8 w-8 animate-pulse rounded-lg bg-white/[0.08]" />
-              <div className="h-8 w-8 animate-pulse rounded-lg bg-white/[0.08]" />
+              <div className="h-8 w-8 motion-safe:animate-pulse rounded-lg bg-white/[0.08]" />
+              <div className="h-8 w-8 motion-safe:animate-pulse rounded-lg bg-white/[0.08]" />
             </div>
-            <div className="h-8 w-8 animate-pulse rounded-lg bg-white/[0.08]" />
+            <div className="h-8 w-8 motion-safe:animate-pulse rounded-lg bg-white/[0.08]" />
           </div>
         </div>
       ))}

@@ -156,7 +156,7 @@ export function PrayerLifeSection() {
             {categoryBreakdown.segments.map((seg) => (
               <div
                 key={seg.category}
-                className="transition-all"
+                className="transition-all motion-reduce:transition-none"
                 style={{
                   flex: seg.fraction,
                   backgroundColor: CATEGORY_COLORS[seg.category],

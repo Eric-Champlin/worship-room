@@ -79,10 +79,10 @@ export function WhisperToastProvider({ children }: { children: ReactNode }) {
           data-testid="whisper-toast"
           className={cn(
             'fixed bottom-6 left-1/2 z-50 mx-4 w-[calc(100%-2rem)] -translate-x-1/2 cursor-pointer sm:mx-0 sm:w-auto sm:max-w-sm',
-            'transition-all',
+            'transition-all motion-reduce:transition-none',
             reducedMotion
-              ? 'duration-100'
-              : 'duration-200 ease-out',
+              ? 'duration-fast'
+              : 'duration-base ease-decelerate',
             visible
               ? 'translate-y-0 opacity-100'
               : reducedMotion

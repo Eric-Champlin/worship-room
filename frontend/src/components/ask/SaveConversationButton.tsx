@@ -47,7 +47,7 @@ export function SaveConversationButton({ conversation }: SaveConversationButtonP
           'transition-colors',
         )}
       >
-        <ClipboardCopy className="h-4 w-4" />
+        <ClipboardCopy className="h-4 w-4" aria-hidden="true" />
         Save this conversation
       </button>
     </div>

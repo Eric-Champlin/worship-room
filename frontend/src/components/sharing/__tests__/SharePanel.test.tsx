@@ -251,7 +251,7 @@ describe('SharePanel', () => {
   it('loading shimmer shown during render', () => {
     renderPanel()
     // On first render, before canvas completes, shimmer should be visible
-    const shimmer = document.querySelector('.animate-pulse')
+    const shimmer = document.querySelector('[class*="animate-pulse"]')
     expect(shimmer).toBeInTheDocument()
   })
 })

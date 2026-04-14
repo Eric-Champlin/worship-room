@@ -276,8 +276,8 @@ export function MoodTrendChart({ rangeDays }: MoodTrendChartProps) {
           onClick={() => setShowAverage((prev) => !prev)}
           className={
             showAverage
-              ? 'rounded-full border border-purple-500/30 bg-purple-600/30 px-3 py-1 text-xs text-white transition-colors duration-150 motion-reduce:transition-none'
-              : 'rounded-full border border-white/15 px-3 py-1 text-xs text-white/50 transition-colors duration-150 hover:text-white/70 motion-reduce:transition-none'
+              ? 'rounded-full border border-purple-500/30 bg-purple-600/30 px-3 py-1 text-xs text-white transition-colors duration-fast motion-reduce:transition-none'
+              : 'rounded-full border border-white/15 px-3 py-1 text-xs text-white/50 transition-colors duration-fast hover:text-white/70 motion-reduce:transition-none'
           }
         >
           7-day average

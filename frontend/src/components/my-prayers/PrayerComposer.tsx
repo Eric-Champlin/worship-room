@@ -68,7 +68,7 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
   return (
     <div
       className={cn(
-        'overflow-hidden transition-all duration-300 ease-in-out',
+        'overflow-hidden transition-all motion-reduce:transition-none duration-base ease-standard',
         isOpen ? 'visible mb-4 max-h-[800px] opacity-100' : 'invisible max-h-0 opacity-0',
       )}
       aria-hidden={!isOpen}
@@ -154,7 +154,7 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
                     setCategoryFocusedIndex(index)
                   }}
                   className={cn(
-                    'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-150 ease-in-out whitespace-nowrap',
+                    'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-fast ease-standard whitespace-nowrap',
                     selectedCategory === cat
                       ? 'border-primary/40 bg-primary/10 text-primary'
                       : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10',
@@ -187,7 +187,7 @@ export function PrayerComposer({ isOpen, onClose, onSave }: PrayerComposerProps)
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
           >
             Save Prayer
           </button>

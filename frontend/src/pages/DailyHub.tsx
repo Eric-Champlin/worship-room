@@ -16,6 +16,22 @@ import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { SEO, SITE_URL } from '@/components/SEO'
+import {
+  DAILY_HUB_DEVOTIONAL_METADATA,
+  DAILY_HUB_PRAY_METADATA,
+  DAILY_HUB_JOURNAL_METADATA,
+  DAILY_HUB_MEDITATE_METADATA,
+} from '@/lib/seo/routeMetadata'
+
+// BB-40: tab-aware metadata picker. Maps the 4 Daily Hub tab IDs to their
+// corresponding metadata constants. All 4 tabs share canonical /daily because
+// `tab` is in UI_STATE_PARAMS (see @/lib/seo/canonicalUrl).
+const TAB_METADATA = {
+  devotional: DAILY_HUB_DEVOTIONAL_METADATA,
+  pray: DAILY_HUB_PRAY_METADATA,
+  journal: DAILY_HUB_JOURNAL_METADATA,
+  meditate: DAILY_HUB_MEDITATE_METADATA,
+} as const
 const dailyHubBreadcrumbs = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -29,6 +45,7 @@ import { useRoutePreload } from '@/hooks/useRoutePreload'
 import { DailyAmbientPillFAB } from '@/components/daily/DailyAmbientPillFAB'
 import type { AmbientContext } from '@/constants/ambient-suggestions'
 import type { PrayContext, DevotionalSnapshot } from '@/types/daily-experience'
+import { useDailyHubTab } from '@/hooks/url/useDailyHubTab'
 
 const TABS = [
   { id: 'devotional', label: 'Devotional', mobileLabel: 'Devos', icon: BookOpen },
@@ -38,10 +55,6 @@ const TABS = [
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
-
-function isValidTab(value: string | null): value is TabId {
-  return value === 'devotional' || value === 'pray' || value === 'journal' || value === 'meditate'
-}
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -53,8 +66,9 @@ function getGreeting(): string {
 function DailyHubContent() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const rawTab = searchParams.get('tab')
-  const activeTab: TabId = isValidTab(rawTab) ? rawTab : 'devotional'
+  // BB-38: tab state extracted into useDailyHubTab. Existing behavior unchanged —
+  // the hook wraps the same useSearchParams pattern that lived inline here.
+  const { tab: activeTab, setTab } = useDailyHubTab()
 
   const { user, isAuthenticated } = useAuth()
   const { isPrayComplete, isJournalComplete, isMeditateComplete } =
@@ -111,33 +125,33 @@ function DailyHubContent() {
   const switchTab = useCallback(
     (tab: TabId) => {
       setPrayContext(null)
-      setSearchParams({ tab })
+      setTab(tab)
     },
-    [setSearchParams],
+    [setTab],
   )
 
   const handleSwitchToJournal = useCallback(
     (topic: string) => {
       setPrayContext({ from: 'pray', topic })
-      setSearchParams({ tab: 'journal' })
+      setTab('journal')
     },
-    [setSearchParams],
+    [setTab],
   )
 
   const handleSwitchToDevotionalJournal = useCallback(
     (topic: string, customPrompt: string, snapshot?: DevotionalSnapshot) => {
       setPrayContext({ from: 'devotional', topic, customPrompt, devotionalSnapshot: snapshot })
-      setSearchParams({ tab: 'journal' })
+      setTab('journal')
     },
-    [setSearchParams],
+    [setTab],
   )
 
   const handleSwitchToDevotionalPray = useCallback(
     (topic: string, customPrompt: string, snapshot?: DevotionalSnapshot) => {
       setPrayContext({ from: 'devotional', topic, customPrompt, devotionalSnapshot: snapshot })
-      setSearchParams({ tab: 'pray' })
+      setTab('pray')
     },
-    [setSearchParams],
+    [setTab],
   )
 
   const greeting = getGreeting()
@@ -199,13 +213,7 @@ function DailyHubContent() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
       <HorizonGlow />
-      <SEO title="Daily Prayer, Journal & Meditation" description="Start your day with AI-powered prayer, guided journaling, and Christian meditation rooted in Scripture." jsonLd={dailyHubBreadcrumbs} />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
-      >
-        Skip to content
-      </a>
+      <SEO {...TAB_METADATA[activeTab]} jsonLd={dailyHubBreadcrumbs} />
       <Navbar transparent />
 
       <main id="main-content">
@@ -229,7 +237,7 @@ function DailyHubContent() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'relative sticky top-0 z-40 backdrop-blur-md transition-shadow',
+            'relative sticky top-0 z-40 backdrop-blur-md transition-shadow motion-reduce:transition-none',
             isSticky && 'shadow-md shadow-black/20',
           )}
         >
@@ -258,7 +266,7 @@ function DailyHubContent() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:text-base',
+                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:text-base active:scale-[0.98]',
                       isActive
                         ? 'bg-white/[0.12] border border-white/[0.15] text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
                         : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
@@ -342,7 +350,7 @@ function DailyHubContent() {
           tabIndex={0}
           hidden={activeTab !== 'meditate'}
         >
-          <MeditateTabContent />
+          <MeditateTabContent isActive={activeTab === 'meditate'} />
         </div>
 
         {/* Today's Song Pick */}

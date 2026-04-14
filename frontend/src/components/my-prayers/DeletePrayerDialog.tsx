@@ -61,7 +61,7 @@ export function DeletePrayerDialog({ isOpen, onClose, onDelete }: DeletePrayerDi
           <button
             type="button"
             onClick={handleDelete}
-            className="rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
+            className="rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2 active:scale-[0.98]"
           >
             Remove
           </button>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import type { LeaderboardEntry } from '@/types/dashboard'
@@ -123,8 +124,8 @@ export function GlobalLeaderboard() {
           return (
             <li
               key={entry.id}
-              className="relative motion-safe:opacity-0 motion-safe:animate-fade-in"
-              style={{ animationDelay: `${Math.min(index * 50, 500)}ms`, animationDuration: '300ms' }}
+              className="relative motion-safe:opacity-0 motion-safe:animate-fade-in-up"
+              style={{ animationDelay: `${Math.min(index * 50, 500)}ms`, animationDuration: `${ANIMATION_DURATIONS.base}ms` }}
               aria-label={isCurrentUser ? `Your position: rank ${rank}` : undefined}
             >
               <GlobalRow

@@ -1,42 +1,55 @@
-import { BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
-import { timeAgo } from '@/lib/time'
-import { BIBLE_BOOKS } from '@/constants/bible'
-import type { LastRead } from '@/types/bible-landing'
 
 interface ResumeReadingCardProps {
-  lastRead: LastRead | null
+  book: string
+  chapter: number
+  slug: string
+  relativeTime: string
+  firstLine: string | null
+  nextChapter: { bookSlug: string; bookName: string; chapter: number } | null
 }
 
-export function ResumeReadingCard({ lastRead }: ResumeReadingCardProps) {
-  if (!lastRead) {
-    return (
-      <FrostedCard as="article">
-        <Link to="/bible/browse" className="flex flex-col items-center gap-3 text-center">
-          <BookOpen className="h-8 w-8 text-white/60" aria-hidden="true" />
-          <div>
-            <h3 className="text-lg font-bold text-white">Start your first reading</h3>
-            <p className="mt-1 text-sm text-white/60">Open the Bible and begin anywhere</p>
-          </div>
-        </Link>
-      </FrostedCard>
-    )
-  }
-
-  const book = BIBLE_BOOKS.find((b) => b.name === lastRead.book)
-  const slug = book?.slug ?? lastRead.book.toLowerCase()
-  const relativeTime = timeAgo(new Date(lastRead.timestamp).toISOString())
-
+export function ResumeReadingCard({
+  book,
+  chapter,
+  slug,
+  relativeTime,
+  firstLine,
+  nextChapter,
+}: ResumeReadingCardProps) {
   return (
-    <FrostedCard as="article">
-      <Link to={`/bible/${slug}/${lastRead.chapter}`} className="block">
-        <p className="text-sm text-white/60">Pick up where you left off</p>
-        <h3 className="mt-1 text-xl font-bold text-white">
-          {lastRead.book} {lastRead.chapter}
-        </h3>
-        <p className="mt-1 text-sm text-white/60">{relativeTime}</p>
-      </Link>
+    <FrostedCard
+      as="article"
+      className="border-l-4 border-l-primary/60 shadow-[0_0_35px_rgba(139,92,246,0.12),0_4px_25px_rgba(0,0,0,0.35)]"
+    >
+      <p className="text-xs font-medium uppercase tracking-widest text-white/60">
+        Continue reading
+      </p>
+      <h3 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
+        {book} {chapter}
+      </h3>
+      {firstLine && (
+        <p className="mt-2 line-clamp-1 text-sm text-white/70 sm:text-base">{firstLine}</p>
+      )}
+      <p className="mt-1 text-xs text-white/50 sm:text-sm">Read {relativeTime.toLowerCase()}</p>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <Link
+          to={`/bible/${slug}/${chapter}`}
+          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-hero-bg shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all motion-reduce:transition-none duration-base hover:shadow-[0_0_20px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+          aria-label={`Continue reading ${book} chapter ${chapter}`}
+        >
+          Continue
+        </Link>
+        {nextChapter && (
+          <Link
+            to={`/bible/${nextChapter.bookSlug}/${nextChapter.chapter}`}
+            className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+          >
+            Or read the next chapter
+          </Link>
+        )}
+      </div>
     </FrostedCard>
   )
 }

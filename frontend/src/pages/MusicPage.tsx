@@ -20,6 +20,7 @@ import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { useAuth } from '@/hooks/useAuth'
 import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/getting-started-storage'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { MUSIC_METADATA } from '@/lib/seo/routeMetadata'
 import { cn } from '@/lib/utils'
 const musicBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -169,13 +170,7 @@ export function MusicPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
-      <SEO title="Worship Music & Ambient Sounds" description="Listen to worship playlists, mix ambient sounds for prayer and meditation, and fall asleep to Scripture readings." jsonLd={musicBreadcrumbs} />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-primary focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
-      >
-        Skip to content
-      </a>
+      <SEO {...MUSIC_METADATA} jsonLd={musicBreadcrumbs} />
       <Navbar transparent />
 
       <main id="main-content">
@@ -192,7 +187,7 @@ export function MusicPage() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-dashboard-dark transition-shadow',
+            'sticky top-0 z-40 bg-dashboard-dark transition-shadow motion-reduce:transition-none',
             isSticky && 'shadow-md',
           )}
         >
@@ -234,7 +229,7 @@ export function MusicPage() {
               })}
               {/* Animated underline */}
               <div
-                className="absolute bottom-0 h-0.5 bg-primary transition-transform duration-200 ease-in-out"
+                className="absolute bottom-0 h-0.5 bg-primary transition-transform motion-reduce:transition-none duration-base ease-standard"
                 style={{
                   width: `${100 / TABS.length}%`,
                   transform: `translateX(${activeTabIndex * 100}%)`,

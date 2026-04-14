@@ -8,88 +8,34 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'prompt',
-      includeAssets: ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
-      manifest: false,
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: '/offline.html',
-        navigateFallbackDenylist: [/^\/api\//],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'wr-google-fonts-stylesheets',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'wr-google-fonts-webfonts',
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /\/api\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'wr-api-v1',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7,
-              },
-              networkTimeoutSeconds: 10,
-            },
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'wr-images-v1',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-            },
-          },
-          // Audio files (ambient sounds) — cache on first play for offline use
-          {
-            urlPattern: /\.(?:mp3|wav|ogg|m4a)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'wr-audio-cache',
-              expiration: {
-                maxEntries: 10,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-              rangeRequests: true,
-            },
-          },
-          {
-            urlPattern: ({ sameOrigin }) => sameOrigin,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'wr-runtime-v1',
-              expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 7,
-              },
-            },
-          },
+      includeAssets: ['apple-touch-icon.png', 'icons/*.png', 'og-default.png'],
+      manifest: {
+        name: 'Worship Room',
+        short_name: 'Worship Room',
+        description: 'A safe place to heal, grow, and connect with God',
+        start_url: '/',
+        display: 'standalone',
+        theme_color: '#08051A',
+        background_color: '#08051A',
+        orientation: 'portrait-primary',
+        categories: ['books', 'lifestyle', 'education'],
+        icons: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-256.png', sizes: '256x256', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-384.png', sizes: '384x384', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+        ],
+      },
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
+        globIgnores: [
+          '**/og/**',           // OG card images (only used as meta tags for link previews)
         ],
       },
     }),
@@ -124,6 +70,6 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
-    exclude: ['e2e/**', 'node_modules/**'],
+    exclude: ['e2e/**', 'node_modules/**', 'tests/**'],
   },
 })

@@ -167,7 +167,7 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
         type="button"
         onClick={handleSave}
         disabled={!hasContent}
-        className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto w-full"
+        className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-opacity motion-reduce:transition-none hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto w-full"
       >
         Save
       </button>

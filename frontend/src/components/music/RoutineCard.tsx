@@ -101,7 +101,7 @@ export function RoutineCard({
     <div
       role="article"
       aria-label={`${routine.name} routine — ${routine.steps.length} steps, approximately ${durationEstimate} minutes`}
-      className="relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+      className="relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow motion-reduce:transition-none hover:shadow-md"
     >
       {/* Template badge */}
       {routine.isTemplate && (
@@ -146,7 +146,7 @@ export function RoutineCard({
           onClick={handleStart}
           className="flex min-h-[44px] items-center gap-1.5 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
         >
-          <Play size={14} fill="currentColor" /> Start
+          <Play size={14} fill="currentColor" aria-hidden="true" /> Start
         </button>
 
         {/* Three-dot menu */}

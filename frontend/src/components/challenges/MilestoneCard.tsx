@@ -125,7 +125,7 @@ export function MilestoneCard({
             onClick={handleShare}
             disabled={isSharing}
             style={{ backgroundColor: themeColor }}
-            className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg px-8 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+            className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg px-8 py-3 font-semibold text-white transition-opacity motion-reduce:transition-none hover:opacity-90 disabled:opacity-60 sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
             aria-label={`Share your ${milestoneTitle} milestone for ${challengeTitle}`}
           >
             <Share2 className="h-4 w-4" aria-hidden="true" />

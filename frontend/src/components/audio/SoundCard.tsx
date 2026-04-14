@@ -32,7 +32,7 @@ export function SoundCard({ sound, isActive, isLoading, hasError, onToggle, tabI
       data-sound-id={sound.id}
       onClick={() => onToggle(sound)}
       className={cn(
-        'relative flex w-20 h-20 sm:w-[90px] sm:h-[90px] flex-col items-center justify-center gap-1 rounded-xl bg-white/[0.06] transition-shadow',
+        'relative flex w-20 h-20 sm:w-[90px] sm:h-[90px] flex-col items-center justify-center gap-1 rounded-xl bg-white/[0.06] transition-shadow motion-reduce:transition-none',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e]',
         isActive && 'shadow-[0_0_12px_rgba(147,51,234,0.4)] motion-safe:animate-sound-pulse',
       )}

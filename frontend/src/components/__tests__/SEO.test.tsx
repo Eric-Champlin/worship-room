@@ -149,4 +149,41 @@ describe('SEO', () => {
       expect(robots).toBeNull()
     })
   })
+
+  // BB-40: ogImageAlt prop
+  it('renders og:image:alt when ogImageAlt is provided', async () => {
+    renderSEO({
+      title: 'Pray',
+      description: 'Test',
+      ogImageAlt: 'Daily Hub pray tab preview',
+    })
+    await waitFor(() => {
+      const alt = document.querySelector('meta[property="og:image:alt"]')
+      expect(alt).not.toBeNull()
+      expect(alt!.getAttribute('content')).toBe('Daily Hub pray tab preview')
+    })
+  })
+
+  it('does not render og:image:alt when ogImageAlt is absent', async () => {
+    renderSEO({ title: 'Pray', description: 'Test' })
+    await waitFor(() => {
+      // Assert that og:image is present (so we know Helmet has rendered)
+      expect(document.querySelector('meta[property="og:image"]')).not.toBeNull()
+      // og:image:alt should NOT be rendered
+      expect(document.querySelector('meta[property="og:image:alt"]')).toBeNull()
+    })
+  })
+
+  it('renders twitter:image:alt when ogImageAlt is provided', async () => {
+    renderSEO({
+      title: 'Pray',
+      description: 'Test',
+      ogImageAlt: 'Daily Hub pray tab preview',
+    })
+    await waitFor(() => {
+      const alt = document.querySelector('meta[name="twitter:image:alt"]')
+      expect(alt).not.toBeNull()
+      expect(alt!.getAttribute('content')).toBe('Daily Hub pray tab preview')
+    })
+  })
 })

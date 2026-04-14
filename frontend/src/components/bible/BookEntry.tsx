@@ -48,7 +48,7 @@ export function BookEntry({ book, isExpanded, onToggle }: BookEntryProps) {
           <ChevronDown
             size={16}
             className={cn(
-              'text-white/50 transition-transform',
+              'text-white/50 transition-transform motion-reduce:transition-none',
               isExpanded && 'rotate-180',
             )}
           />

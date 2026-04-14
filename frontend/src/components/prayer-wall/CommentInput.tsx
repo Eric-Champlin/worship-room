@@ -34,7 +34,7 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
       <button
         type="button"
         onClick={onLoginClick ?? (() => authModal?.openAuthModal())}
-        className="mt-3 block min-h-[44px] w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-sm text-white/50 transition-colors hover:border-primary"
+        className="mt-3 block min-h-[44px] w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-left text-sm text-white/50 transition-[colors,transform] duration-fast hover:border-primary active:scale-[0.98]"
       >
         Log in to comment
       </button>

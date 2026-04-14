@@ -85,7 +85,7 @@ export function FavoriteButton({
         }
         onClick={handleClick}
         className={cn(
-          'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/20 transition-transform duration-100',
+          'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/20 transition-transform motion-reduce:transition-none duration-fast',
           favorited ? 'text-danger' : 'text-white/50',
           bouncing && 'scale-125',
           className,

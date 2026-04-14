@@ -38,17 +38,17 @@ export function MarkAsAnsweredForm({ onConfirm }: MarkAsAnsweredFormProps) {
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/[0.06] p-4">
-      <p className="mb-2 text-sm font-medium text-white">
+      <label htmlFor="testimony-textarea" className="mb-2 block text-sm font-medium text-white">
         Share how God answered this prayer (optional):
-      </p>
+      </label>
       <textarea
+        id="testimony-textarea"
         ref={textareaRef}
         value={praiseText}
         onChange={(e) => setPraiseText(e.target.value)}
         placeholder="Share your testimony..."
         className="mb-3 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         rows={3}
-        aria-label="Share how God answered this prayer"
       />
       <div className="flex gap-2">
         <Button variant="primary" size="sm" onClick={handleConfirm}>

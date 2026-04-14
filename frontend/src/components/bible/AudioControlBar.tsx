@@ -79,7 +79,7 @@ export function AudioControlBar({
 
       <div
         className={cn(
-          'sticky top-0 z-30 rounded-xl border border-white/10 bg-white/[0.06] p-3 backdrop-blur-sm transition-shadow',
+          'sticky top-0 z-30 rounded-xl border border-white/10 bg-white/[0.06] p-3 backdrop-blur-sm transition-shadow motion-reduce:transition-none',
           isStuck && 'shadow-md',
         )}
       >

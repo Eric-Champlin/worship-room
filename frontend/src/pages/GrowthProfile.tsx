@@ -6,6 +6,10 @@ import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
+import {
+  GROWTH_PROFILE_METADATA,
+  GROWTH_PROFILE_NOT_FOUND_METADATA,
+} from '@/lib/seo/routeMetadata'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileBadgeShowcase } from '@/components/profile/ProfileBadgeShowcase'
 import { ProfileStats } from '@/components/profile/ProfileStats'
@@ -78,7 +82,7 @@ export function GrowthProfile() {
   if (!profileData.found) {
     return (
       <div className="min-h-screen overflow-x-hidden bg-dashboard-dark">
-        <SEO title="Profile Not Found" description="This user profile doesn't exist or may have been removed." noIndex />
+        <SEO {...GROWTH_PROFILE_NOT_FOUND_METADATA} />
         <Navbar transparent />
         <div className="mx-auto max-w-3xl px-4 pt-8 pb-12 text-center sm:px-6 md:pt-12">
           <h1 className="text-2xl font-bold text-white">Profile not found</h1>
@@ -109,10 +113,12 @@ export function GrowthProfile() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-dashboard-dark">
       <Navbar transparent />
+      <main id="main-content">
+      {/* BB-40: dynamic title overrides static base; constant provides noIndex */}
       <SEO
+        {...GROWTH_PROFILE_METADATA}
         title={`${profileData.displayName}'s Growth Profile`}
         description={`See ${profileData.displayName}'s spiritual growth journey, badges, and encouragement on Worship Room.`}
-        noIndex
       />
       <section
         aria-labelledby="profile-heading"
@@ -168,6 +174,7 @@ export function GrowthProfile() {
           <ProfileStats profileData={profileData} />
         </div>
       </div>
+      </main>
       <SiteFooter />
     </div>
   )

@@ -17,6 +17,7 @@ import { GratitudeCorrelationCard } from '@/components/insights/GratitudeCorrela
 import { PrayerLifeSection } from '@/components/insights/PrayerLifeSection'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { SEO } from '@/components/SEO'
+import { INSIGHTS_METADATA } from '@/lib/seo/routeMetadata'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import { getMoodEntries } from '@/services/mood-storage'
@@ -117,8 +118,8 @@ function TimeRangePills({
             onClick={() => onChange(option.value)}
             className={
               selected
-                ? 'min-h-[44px] rounded-full bg-primary/20 px-4 py-2 text-sm font-medium text-primary-lt transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
-                : 'min-h-[44px] rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors duration-150 hover:text-white/80 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
+                ? 'min-h-[44px] rounded-full bg-primary/20 px-4 py-2 text-sm font-medium text-primary-lt transition-colors duration-fast motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
+                : 'min-h-[44px] rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors duration-fast hover:text-white/80 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
             }
           >
             {option.label}
@@ -138,7 +139,7 @@ function AnimatedSection({
 }) {
   return (
     <div
-      className="opacity-0 animate-fade-in motion-reduce:animate-none motion-reduce:opacity-100"
+      className="opacity-0 animate-fade-in-up motion-reduce:animate-none motion-reduce:opacity-100"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {children}
@@ -178,13 +179,7 @@ export function Insights() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="Mood Insights & Spiritual Growth" description="Track your mood patterns, meditation minutes, and spiritual growth over time." noIndex />
-      <a
-        href="#insights-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
+      <SEO {...INSIGHTS_METADATA} />
       <Navbar transparent />
 
       {/* Hero section */}
@@ -236,7 +231,7 @@ export function Insights() {
 
       {/* Content area */}
       <main
-        id="insights-content"
+        id="main-content"
         className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6"
       >
         {/* Insufficient data banner (2-6 entries) */}

@@ -133,7 +133,7 @@ export function ProfileHeader({
           <div className="mt-2 w-full max-w-xs">
             <div className="h-2 rounded-full bg-white/10">
               <div
-                className="h-full rounded-full bg-primary transition-all"
+                className="h-full rounded-full bg-primary transition-all motion-reduce:transition-none"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -169,7 +169,7 @@ export function ProfileHeader({
                 aria-haspopup="menu"
                 aria-expanded={popoverOpen}
               >
-                <Heart className="h-4 w-4" />
+                <Heart className="h-4 w-4" aria-hidden="true" />
                 {sentFeedback
                   ? 'Encouragement Sent ✓'
                   : canEncourageToday

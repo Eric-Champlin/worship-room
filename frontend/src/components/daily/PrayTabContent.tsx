@@ -14,11 +14,13 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAudioState, useAudioDispatch } from '@/components/audio/AudioProvider'
 import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { SCENE_BY_ID } from '@/data/scenes'
-import { PRAYER_DRAFT_KEY } from '@/constants/daily-experience'
+import { PRAYER_DRAFT_KEY, VERSE_FRAMINGS } from '@/constants/daily-experience'
 import { DevotionalPreviewPanel } from '@/components/daily/DevotionalPreviewPanel'
+import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
+import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
 import { getPrayerPrefill } from '@/data/challenge-prefills'
 import { getMockPrayer } from '@/mocks/daily-experience-mock-data'
-import type { MockPrayer, PrayContext } from '@/types/daily-experience'
+import type { MockPrayer, PrayContext, PrayerVerseContext } from '@/types/daily-experience'
 import type { GuidedPrayerSession } from '@/types/guided-prayer'
 
 interface PrayTabContentProps {
@@ -38,6 +40,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
   const { loadScene } = useScenePlayer()
   const location = useLocation()
   const navigate = useNavigate()
+  const { verseContext, isHydrating, clearVerseContext } = useVerseContextPreload('pray')
   const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
   const challengeContext = (location.state as { challengeContext?: { actionType: string; dayTitle: string; dayNumber: number } } | null)?.challengeContext
 
@@ -48,6 +51,10 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
   const [retryPrompt, setRetryPrompt] = useState<string | null>(null)
   const [activeGuidedSession, setActiveGuidedSession] = useState<GuidedPrayerSession | null>(null)
   const [contextDismissed, setContextDismissed] = useState(false)
+
+  const prayerVerseContext: PrayerVerseContext | null = verseContext
+    ? { book: verseContext.book, chapter: verseContext.chapter, startVerse: verseContext.startVerse, endVerse: verseContext.endVerse, reference: verseContext.reference }
+    : null
 
   const submittedTextRef = useRef('')
   const initialContextConsumed = useRef(false)
@@ -207,6 +214,11 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
             />
           )}
 
+          {/* Verse Prompt Card (from Bible bridge) */}
+          {isHydrating && !isLoading && !prayer && <VersePromptSkeleton />}
+          {verseContext && !isLoading && !prayer && (
+            <VersePromptCard context={verseContext} onRemove={clearVerseContext} framingLine={VERSE_FRAMINGS.pray} />
+          )}
 
           {/* Prayer Response (loading + display + actions) */}
           {(isLoading || prayer) && (
@@ -222,6 +234,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
               audioActiveSounds={audioState.activeSounds.length}
               onToggleAudioDrawer={() => audioDispatch({ type: audioState.drawerOpen ? 'CLOSE_DRAWER' : 'OPEN_DRAWER' })}
               onStopAudio={() => { audioDispatch({ type: 'STOP_ALL' }); setAutoPlayedAudio(false) }}
+              verseContext={prayerVerseContext}
             />
           )}
 

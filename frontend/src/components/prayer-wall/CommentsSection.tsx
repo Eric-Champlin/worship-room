@@ -36,7 +36,7 @@ export function CommentsSection({
   return (
     <div
       className={cn(
-        '-m-0.5 overflow-hidden p-0.5 transition-all duration-300 ease-in-out',
+        '-m-0.5 overflow-hidden p-0.5 transition-all motion-reduce:transition-none duration-base ease-standard',
         isOpen ? 'visible max-h-[1200px] opacity-100' : 'invisible max-h-0 opacity-0',
       )}
       aria-hidden={!isOpen}

@@ -1,0 +1,616 @@
+{
+  "book": "2 John",
+  "slug": "2-john",
+  "entries": {
+    "1.1": [
+      {
+        "ref": "1-peter.1.22",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "2-john.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.10.26",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.5.7",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "2-john.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "john.8.32",
+        "rank": 3
+      },
+      {
+        "ref": "2-john.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.21",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.2.13",
+        "rank": 3
+      }
+    ],
+    "1.2": [
+      {
+        "ref": "1-corinthians.9.23",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.7",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.23",
+        "rank": 3
+      }
+    ],
+    "1.3": [
+      {
+        "ref": "galatians.5.6",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.8.19",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.23",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-john.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "romans.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.1.2",
+        "rank": 3
+      }
+    ],
+    "1.4": [
+      {
+        "ref": "1-thessalonians.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "3-john.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.9",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.2.19",
+        "rank": 4
+      }
+    ],
+    "1.5": [
+      {
+        "ref": "hebrews.13.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.4.20",
+        "rank": 3
+      },
+      {
+        "ref": "john.13.34",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.22",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.3.23",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.4.9",
+        "rank": 3
+      }
+    ],
+    "1.6": [
+      {
+        "ref": "galatians.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.5.15",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.21",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.5.3",
+        "rank": 3
+      },
+      {
+        "ref": "2-john.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.24",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.14",
+        "rank": 3
+      },
+      {
+        "ref": "romans.13.8",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.15",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.5",
+        "rank": 3
+      }
+    ],
+    "1.7": [
+      {
+        "ref": "1-john.2.26",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.12.9",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.18",
+        "rank": 3
+      },
+      {
+        "ref": "john.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.13.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.3.16",
+        "rank": 3
+      }
+    ],
+    "1.8": [
+      {
+        "ref": "philippians.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.10.32",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.10.35",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.24.24",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "mark.13.5",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.24.4",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.15.8",
+        "rank": 3
+      },
+      {
+        "ref": "john.4.36",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.4.11",
+        "rank": 3
+      },
+      {
+        "ref": "mark.13.9",
+        "rank": 3
+      },
+      {
+        "ref": "mark.13.23",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.12.15",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "luke.21.8",
+        "rank": 3
+      }
+    ],
+    "1.9": [
+      {
+        "ref": "john.15.6",
+        "rank": 3
+      },
+      {
+        "ref": "john.5.23",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "acts.2.42",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.22",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "titus.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "john.7.16",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.6",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.11.27",
+        "rank": 3
+      },
+      {
+        "ref": "luke.10.22",
+        "rank": 3
+      }
+    ],
+    "1.10": [
+      {
+        "ref": "titus.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "romans.16.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.16.22",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-john.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.24.12",
+        "rank": 4
+      },
+      {
+        "ref": "psalms.129.8",
+        "rank": 4
+      }
+    ],
+    "1.11": [
+      {
+        "ref": "revelation.18.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.11",
+        "rank": 3
+      }
+    ],
+    "1.12": [
+      {
+        "ref": "numbers.12.8",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.19",
+        "rank": 3
+      },
+      {
+        "ref": "john.16.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "john.16.24",
+        "rank": 3
+      },
+      {
+        "ref": "john.17.13",
+        "rank": 3
+      },
+      {
+        "ref": "3-john.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "philemon.1.22",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.24",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.16.5",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.11",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.23",
+        "rank": 3
+      }
+    ],
+    "1.13": [
+      {
+        "ref": "1-peter.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "2-john.1.1",
+        "rank": 3
+      }
+    ]
+  }
+}

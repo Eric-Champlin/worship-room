@@ -351,6 +351,88 @@ describe('sourceType and sourceId', () => {
   })
 })
 
+describe('verseContext persistence', () => {
+  it('persists verseContext when provided', () => {
+    const verseContext = {
+      book: 'john',
+      chapter: 3,
+      startVerse: 16,
+      endVerse: 16,
+      reference: 'John 3:16',
+    }
+    const result = addPrayer({
+      title: 'Verse prayer',
+      description: 'Prayer about John 3:16',
+      category: 'gratitude',
+      verseContext,
+    })
+
+    expect(result).not.toBeNull()
+    expect(result!.verseContext).toEqual(verseContext)
+
+    const stored = getPrayers()
+    expect(stored[0].verseContext).toEqual(verseContext)
+  })
+
+  it('omits verseContext when not provided', () => {
+    const result = addPrayer({
+      title: 'Normal prayer',
+      description: 'No verse',
+      category: 'health',
+    })
+
+    expect(result).not.toBeNull()
+    expect(result!.verseContext).toBeUndefined()
+
+    // Verify it's not in the serialized JSON
+    const raw = localStorage.getItem('wr_prayer_list')!
+    const parsed = JSON.parse(raw)
+    expect('verseContext' in parsed[0]).toBe(false)
+  })
+
+  it('deserializes existing records without verseContext correctly', () => {
+    const oldRecord = {
+      id: 'old-1',
+      title: 'Old Prayer',
+      description: 'Before verseContext existed',
+      category: 'health',
+      status: 'active',
+      createdAt: '2026-03-01T10:00:00.000Z',
+      updatedAt: '2026-03-01T10:00:00.000Z',
+      answeredAt: null,
+      answeredNote: null,
+      lastPrayedAt: null,
+    }
+    localStorage.setItem('wr_prayer_list', JSON.stringify([oldRecord]))
+
+    const prayers = getPrayers()
+    expect(prayers).toHaveLength(1)
+    expect(prayers[0].verseContext).toBeUndefined()
+  })
+
+  it('round-trips multi-verse verseContext correctly', () => {
+    const verseContext = {
+      book: 'john',
+      chapter: 3,
+      startVerse: 16,
+      endVerse: 18,
+      reference: 'John 3:16–18',
+    }
+    addPrayer({
+      title: 'Multi-verse prayer',
+      description: 'Prayer about John 3:16-18',
+      category: 'other',
+      verseContext,
+    })
+
+    const stored = getPrayers()
+    expect(stored[0].verseContext).toEqual(verseContext)
+    expect(stored[0].verseContext!.startVerse).toBe(16)
+    expect(stored[0].verseContext!.endVerse).toBe(18)
+    expect(stored[0].verseContext!.reference).toBe('John 3:16–18')
+  })
+})
+
 describe('backwards compatibility', () => {
   it('existing prayers without reminder fields work in all functions', () => {
     // Prayer without reminderEnabled or reminderTime (pre-Spec 19 format)

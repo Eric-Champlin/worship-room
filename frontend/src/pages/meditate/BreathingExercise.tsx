@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
 import { CompletionScreen } from '@/components/daily/CompletionScreen'
@@ -13,7 +13,9 @@ import { getLocalDateString } from '@/utils/date'
 import { playChime } from '@/lib/audio'
 import { cn } from '@/lib/utils'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_BREATHING_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 type Phase = 'breatheIn' | 'hold' | 'breatheOut'
 type Screen = 'prestart' | 'exercise' | 'complete'
@@ -41,6 +43,8 @@ export function BreathingExercise() {
 }
 
 function BreathingExerciseContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const [screen, setScreen] = useState<Screen>('prestart')
   const [duration, setDuration] = useState<number | null>(null)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
@@ -116,6 +120,7 @@ function BreathingExerciseContent() {
           date: getLocalDateString(),
           durationMinutes: duration!,
           completedAt: new Date().toISOString(),
+          ...(meditationVerseContext && { verseContext: meditationVerseContext }),
         })
         setScreen('complete')
         return
@@ -162,7 +167,7 @@ function BreathingExerciseContent() {
     if (voiceEnabled) speakPhase(BREATHING_PHASES.breatheIn.label)
 
     rafRef.current = requestAnimationFrame(tick)
-  }, [duration, chimeEnabled, voiceEnabled, cleanup, markMeditationComplete, recordActivity])
+  }, [duration, chimeEnabled, voiceEnabled, cleanup, markMeditationComplete, recordActivity, meditationVerseContext])
 
   if (screen === 'complete') {
     const weeklyTotal = getMeditationMinutesForWeek()
@@ -207,10 +212,10 @@ function BreathingExerciseContent() {
 
     const circleTransition =
       currentPhase === 'breatheIn'
-        ? 'transition-transform duration-[4000ms] ease-in-out'
+        ? 'transition-transform motion-reduce:transition-none duration-[4000ms] ease-in-out'
         : currentPhase === 'hold'
-          ? 'transition-transform duration-[7000ms]'
-          : 'transition-transform duration-[8000ms] ease-in-out'
+          ? 'transition-transform motion-reduce:transition-none duration-[7000ms]'
+          : 'transition-transform motion-reduce:transition-none duration-[8000ms] ease-in-out'
 
     return (
       <Layout hero={<PageHero title="Breathing Exercise" scriptWord="Exercise" />}>
@@ -254,7 +259,7 @@ function BreathingExerciseContent() {
   // Pre-start screen
   return (
     <Layout hero={<PageHero title="Breathing Exercise" subtitle="Follow a 4-7-8 breathing pattern with scripture to focus your mind." scriptWord="Exercise" />}>
-      <SEO title="Breathing Exercise" description="A calming 4-7-8 breathing exercise for peace and focus." noIndex />
+      <SEO {...MEDITATE_BREATHING_METADATA} />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="breathing" />
         {/* Duration selector */}

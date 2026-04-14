@@ -62,7 +62,7 @@ export function PendingRequests({
               return (
                 <div
                   key={req.id}
-                  className={`flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 transition-opacity duration-300 motion-reduce:duration-0 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                  className={`flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 transition-opacity motion-reduce:transition-none duration-base motion-reduce:duration-0 ${isFading ? 'opacity-0' : 'opacity-100'}`}
                 >
                   <Avatar
                     firstName={first}
@@ -111,7 +111,7 @@ export function PendingRequests({
               return (
                 <div
                   key={req.id}
-                  className={`flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 transition-opacity duration-300 motion-reduce:duration-0 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                  className={`flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 transition-opacity motion-reduce:transition-none duration-base motion-reduce:duration-0 ${isFading ? 'opacity-0' : 'opacity-100'}`}
                 >
                   <Avatar
                     firstName={first}

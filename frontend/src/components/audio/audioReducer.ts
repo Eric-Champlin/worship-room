@@ -14,6 +14,7 @@ export const initialAudioState: AudioState = {
   currentSceneName: null,
   currentSceneId: null,
   foregroundEndedCounter: 0,
+  readingContext: null,
 }
 
 export function audioReducer(state: AudioState, action: AudioAction): AudioState {
@@ -318,6 +319,12 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         },
       }
     }
+
+    case 'SET_READING_CONTEXT':
+      return { ...state, readingContext: action.payload }
+
+    case 'CLEAR_READING_CONTEXT':
+      return { ...state, readingContext: null }
 
     default:
       return state

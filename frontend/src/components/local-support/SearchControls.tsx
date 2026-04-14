@@ -131,7 +131,7 @@ export function SearchControls({
           className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50"
         >
           {isGeolocating ? (
-            <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+            <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden="true" />
           ) : (
             <MapPin size={18} aria-hidden="true" />
           )}

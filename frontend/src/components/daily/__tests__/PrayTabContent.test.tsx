@@ -67,6 +67,12 @@ vi.mock('@/hooks/useReducedMotion', () => ({
   useReducedMotion: () => mockReducedMotion,
 }))
 
+// Mock loadChapterWeb for Bible bridge verse hydration
+const mockLoadChapterWeb = vi.fn()
+vi.mock('@/data/bible/index', () => ({
+  loadChapterWeb: (...args: unknown[]) => mockLoadChapterWeb(...args),
+}))
+
 // Mock GuidedPrayerPlayer to avoid TTS/speechSynthesis/wakeLock/timer complexity.
 // We only need to verify its structural placement relative to the content wrapper.
 vi.mock('@/components/daily/GuidedPrayerPlayer', () => ({
@@ -114,9 +120,10 @@ function resetAudioState(overrides: Partial<MockAudioState> = {}) {
 
 const mockOnSwitchToJournal = vi.fn()
 
-function renderPrayTab(props: { onSwitchToJournal?: (topic: string) => void; prayContext?: PrayContext | null } = {}) {
+function renderPrayTab(props: { onSwitchToJournal?: (topic: string) => void; prayContext?: PrayContext | null; initialUrl?: string } = {}) {
+  const initialEntries = props.initialUrl ? [props.initialUrl] : undefined
   return render(
-    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter initialEntries={initialEntries} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <AuthModalProvider>
@@ -141,6 +148,7 @@ beforeEach(() => {
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'Eric')
   mockRecordActivity.mockClear()
+  mockLoadChapterWeb.mockReset()
   mockLoadScene.mockClear()
   mockAudioDispatch.mockClear()
   mockOnSwitchToJournal.mockClear()
@@ -1045,5 +1053,78 @@ describe('prayer draft persistence', () => {
     expect(screen.getByText('Draft saved')).toBeInTheDocument()
     act(() => { vi.advanceTimersByTime(2100) })
     expect(screen.queryByText('Draft saved')).not.toBeInTheDocument()
+  })
+})
+
+// --- Bible Bridge (Verse Context) tests ---
+
+const JOHN_3_CHAPTER = {
+  book: 'john',
+  chapter: 3,
+  verses: Array.from({ length: 36 }, (_, i) => ({
+    number: i + 1,
+    text: i === 15
+      ? 'For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.'
+      : `Verse ${i + 1} text.`,
+  })),
+}
+
+describe('PrayTabContent verse context (Bible bridge)', () => {
+  it('renders VersePromptCard when verse params in URL', async () => {
+    mockLoadChapterWeb.mockResolvedValue(JOHN_3_CHAPTER)
+    renderPrayTab({ initialUrl: '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible' })
+
+    const card = await screen.findByRole('region', { name: /verse prompt/i })
+    expect(card).toBeInTheDocument()
+    expect(screen.getByText('John 3:16')).toBeInTheDocument()
+  })
+
+  it('does not render card when no verse params', () => {
+    renderPrayTab({ initialUrl: '/daily?tab=pray' })
+    expect(screen.queryByRole('region', { name: /verse prompt/i })).not.toBeInTheDocument()
+  })
+
+  it('removing card via X does not affect textarea draft', async () => {
+    mockLoadChapterWeb.mockResolvedValue(JOHN_3_CHAPTER)
+    localStorage.setItem('wr_prayer_draft', 'My existing draft')
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab({ initialUrl: '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible' })
+
+    await screen.findByRole('region', { name: /verse prompt/i })
+    const removeBtn = screen.getByRole('button', { name: /remove verse prompt/i })
+    await user.click(removeBtn)
+    expect(screen.queryByRole('region', { name: /verse prompt/i })).not.toBeInTheDocument()
+
+    const textarea = screen.getByLabelText('Prayer request') as HTMLTextAreaElement
+    expect(textarea.value).toBe('My existing draft')
+  })
+
+  it('card hidden after prayer generation', async () => {
+    mockLoadChapterWeb.mockResolvedValue(JOHN_3_CHAPTER)
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderPrayTab({ initialUrl: '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible' })
+
+    await screen.findByRole('region', { name: /verse prompt/i })
+
+    await generatePrayer(user)
+    act(() => { vi.advanceTimersByTime(2000) })
+
+    expect(screen.queryByRole('region', { name: /verse prompt/i })).not.toBeInTheDocument()
+  })
+
+  it('invalid params show no card', () => {
+    mockLoadChapterWeb.mockResolvedValue(null)
+    renderPrayTab({ initialUrl: '/daily?tab=pray&verseBook=fakebook&verseChapter=1&verseStart=1&verseEnd=1&src=bible' })
+    expect(screen.queryByRole('region', { name: /verse prompt/i })).not.toBeInTheDocument()
+  })
+
+  it('existing draft preserved with verse context', async () => {
+    mockLoadChapterWeb.mockResolvedValue(JOHN_3_CHAPTER)
+    localStorage.setItem('wr_prayer_draft', 'Already writing')
+    renderPrayTab({ initialUrl: '/daily?tab=pray&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible' })
+
+    await screen.findByRole('region', { name: /verse prompt/i })
+    const textarea = screen.getByLabelText('Prayer request') as HTMLTextAreaElement
+    expect(textarea.value).toBe('Already writing')
   })
 })

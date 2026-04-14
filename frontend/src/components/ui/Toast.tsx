@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { CONFETTI_COLORS } from '@/constants/dashboard/badge-icons'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 
 // --- Types ---
 
@@ -101,7 +102,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id))
       setExitingIds((prev) => { const next = new Set(prev); next.delete(id); return next })
-    }, 200)
+    }, ANIMATION_DURATIONS.fast)
   }, [])
 
   const dismissCelebration = useCallback((id: number, resolve?: () => void) => {
@@ -110,7 +111,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       setCelebrationToasts((prev) => prev.filter((t) => t.id !== id))
       setExitingIds((prev) => { const next = new Set(prev); next.delete(id); return next })
       resolve?.()
-    }, 200)
+    }, ANIMATION_DURATIONS.fast)
   }, [])
 
   const showToast = useCallback((message: string, type: StandardToastType = 'success', action?: ToastAction) => {
@@ -169,8 +170,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             className={cn(
               'rounded-lg border bg-white px-4 py-3 shadow-lg',
               exitingIds.has(toast.id)
-                ? 'motion-safe:animate-toast-out'
-                : 'motion-safe:animate-toast-spring-in',
+                ? 'motion-safe:animate-fade-out'
+                : 'motion-safe:animate-slide-up',
               toast.type === 'success'
                 ? 'border-l-4 border-l-success'
                 : toast.type === 'warning'
@@ -210,10 +211,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               className={cn(
                 'relative overflow-hidden rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white backdrop-blur-md motion-reduce:animate-none',
                 exitingIds.has(toast.id)
-                  ? 'motion-safe:animate-toast-out'
+                  ? 'motion-safe:animate-fade-out'
                   : isMobile
-                    ? 'motion-safe:animate-slide-from-bottom-spring'
-                    : 'motion-safe:animate-slide-from-right-spring',
+                    ? 'motion-safe:animate-slide-up'
+                    : 'motion-safe:animate-fade-in',
                 toast.type === 'special-celebration' &&
                   'border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.2)]',
               )}

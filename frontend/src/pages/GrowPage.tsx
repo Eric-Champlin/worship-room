@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SEO } from '@/components/SEO'
+import { GROW_METADATA } from '@/lib/seo/routeMetadata'
 import { SiteFooter } from '@/components/SiteFooter'
 import { ReadingPlansContent } from '@/pages/ReadingPlans'
 import { ChallengesContent } from '@/pages/Challenges'
@@ -82,16 +83,7 @@ export function GrowPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
-      <SEO
-        title="Grow in Faith"
-        description="Discover Bible reading plans and seasonal community challenges to deepen your walk with God."
-      />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
-      >
-        Skip to content
-      </a>
+      <SEO {...GROW_METADATA} />
       <Navbar transparent />
 
       <main id="main-content">
@@ -119,7 +111,7 @@ export function GrowPage() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-white/[0.08] backdrop-blur-xl transition-shadow',
+            'sticky top-0 z-40 bg-white/[0.08] backdrop-blur-xl transition-shadow motion-reduce:transition-none',
             isSticky && 'shadow-md shadow-black/20',
           )}
         >
@@ -145,7 +137,7 @@ export function GrowPage() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base',
+                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base active:scale-[0.98]',
                       isActive
                         ? 'text-white'
                         : 'text-white/60 hover:text-white/80',
@@ -165,7 +157,7 @@ export function GrowPage() {
               })}
               {/* Animated underline */}
               <div
-                className="absolute bottom-0 h-0.5 bg-primary transition-transform duration-200 ease-in-out"
+                className="absolute bottom-0 h-0.5 bg-primary transition-transform motion-reduce:transition-none duration-base ease-standard"
                 style={{
                   width: `${100 / TABS.length}%`,
                   transform: `translateX(${activeTabIndex * 100}%)`,

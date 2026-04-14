@@ -26,6 +26,7 @@ import { useChallengeAutoDetect } from '@/hooks/useChallengeAutoDetect'
 import { useChallengeNudge } from '@/hooks/useChallengeNudge'
 import { useWeeklyRecap } from '@/hooks/useWeeklyRecap'
 import { SEO } from '@/components/SEO'
+import { HOME_METADATA } from '@/lib/seo/routeMetadata'
 import { ChallengeCompletionOverlay } from '@/components/challenges/ChallengeCompletionOverlay'
 import { useToastSafe } from '@/components/ui/Toast'
 import { hasCheckedInToday } from '@/services/mood-storage'
@@ -37,12 +38,16 @@ import { getRecentBibleAnnotations } from '@/services/bible-annotations-storage'
 import { READING_PLAN_PROGRESS_KEY } from '@/constants/reading-plans'
 import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
 import { WelcomeBack } from '@/components/dashboard/WelcomeBack'
+import { useFirstRun } from '@/hooks/useFirstRun'
+import { FirstRunWelcome } from '@/components/onboarding/FirstRunWelcome'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { CHALLENGES } from '@/data/challenges'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
+import { EchoCard } from '@/components/echoes/EchoCard'
 import { cn } from '@/lib/utils'
+import { useEcho, markEchoSeen } from '@/hooks/useEcho'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { useAnniversaryMoment } from '@/hooks/useAnniversaryMoment'
 import { useGratitudeCallback } from '@/hooks/useGratitudeCallback'
@@ -62,6 +67,7 @@ const DASHBOARD_ENTER_DURATION_MS = 800
 // Loading state: use DashboardSkeleton
 export function Dashboard() {
   const { user } = useAuth()
+  const { isFirstRun, dismissFirstRun } = useFirstRun()
   const prefersReduced = useReducedMotion()
   useRoutePreload([
     () => import('@/pages/DailyHub'),
@@ -96,6 +102,7 @@ export function Dashboard() {
   const gardenRef = useRef<SVGSVGElement>(null)
   const { isVisible: recapVisible, hasFriends: recapHasFriends } = useWeeklyRecap()
   const godMoments = useWeeklyGodMoments()
+  const topEcho = useEcho()
   usePrayerReminders(phase === 'dashboard')
 
   // Challenge hooks
@@ -372,40 +379,58 @@ export function Dashboard() {
 
   if (phase === 'onboarding') {
     return (
-      <WelcomeWizard
-        userName={user.name}
-        onComplete={handleOnboardingComplete}
-      />
+      <>
+        <SEO {...HOME_METADATA} />
+        <WelcomeWizard
+          userName={user.name}
+          onComplete={handleOnboardingComplete}
+        />
+      </>
     )
   }
 
   if (phase === 'welcome_back') {
     return (
-      <WelcomeBack
-        userName={user.name}
-        faithPoints={faithPoints}
-        onStepIn={handleWelcomeBackStepIn}
-        onSkipToDashboard={handleWelcomeBackSkip}
-      />
+      <>
+        <SEO {...HOME_METADATA} />
+        <main>
+          <WelcomeBack
+            userName={user.name}
+            faithPoints={faithPoints}
+            onStepIn={handleWelcomeBackStepIn}
+            onSkipToDashboard={handleWelcomeBackSkip}
+          />
+        </main>
+      </>
     )
   }
 
   if (phase === 'check_in') {
     return (
-      <MoodCheckIn
-        userName={user.name}
-        onComplete={handleCheckInComplete}
-        onSkip={handleCheckInSkip}
-      />
+      <>
+        <SEO {...HOME_METADATA} />
+        <main>
+          <MoodCheckIn
+            userName={user.name}
+            onComplete={handleCheckInComplete}
+            onSkip={handleCheckInSkip}
+          />
+        </main>
+      </>
     )
   }
 
   if (phase === 'recommendations' && lastMoodEntry) {
     return (
-      <MoodRecommendations
-        moodValue={lastMoodEntry.mood}
-        onAdvanceToDashboard={handleRecommendationsAdvance}
-      />
+      <>
+        <SEO {...HOME_METADATA} />
+        <main>
+          <MoodRecommendations
+            moodValue={lastMoodEntry.mood}
+            onAdvanceToDashboard={handleRecommendationsAdvance}
+          />
+        </main>
+      </>
     )
   }
 
@@ -415,16 +440,10 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO
-        title="Dashboard"
-        description="Your daily spiritual growth dashboard — mood tracking, streaks, faith points, and personalized encouragement."
-      />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
+      {/* BB-40: Dashboard serves the root `/` route for logged-in users. Crawlers
+          never see this render (they always see Home). We spread HOME_METADATA
+          so the canonical root metadata is identical regardless of auth state. */}
+      <SEO {...HOME_METADATA} />
       <Navbar transparent />
       <main
         id="main-content"
@@ -449,7 +468,7 @@ export function Dashboard() {
                   onClick={() => setCustomizePanelOpen(true)}
                   className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <SlidersHorizontal className="h-4 w-4" />
+                  <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
                   Customize
                 </button>
               ) : undefined
@@ -497,6 +516,20 @@ export function Dashboard() {
             }
           />
         </div>
+        {topEcho && (
+          <div
+            className={cn(
+              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
+              shouldAnimate && 'motion-safe:animate-widget-enter',
+            )}
+            style={shouldAnimate ? { animationDelay: '100ms' } : undefined}
+          >
+            <EchoCard
+              echo={topEcho}
+              onNavigate={() => markEchoSeen(topEcho.id)}
+            />
+          </div>
+        )}
         {godMoments.isVisible && (
           <div
             className={cn(
@@ -595,6 +628,7 @@ export function Dashboard() {
         />
       )}
       {import.meta.env.DEV && <DevAuthToggle />}
+      {isFirstRun && <FirstRunWelcome onDismiss={dismissFirstRun} />}
     </div>
   )
 }

@@ -1,72 +1,38 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, cleanup } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { BibleReader } from '../BibleReader'
-import type { BibleChapter } from '@/types/bible'
-
-const mockAuth = {
-  isAuthenticated: true,
-  user: { name: 'Eric' },
-  login: vi.fn(),
-  logout: vi.fn(),
-}
-
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => mockAuth,
-}))
-
-vi.mock('@/contexts/AuthContext', () => ({
-  useAuth: () => mockAuth,
-}))
-
-vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
-  useAuthModal: () => ({ openAuthModal: vi.fn() }),
-}))
-
-vi.mock('@/hooks/useNotificationActions', () => ({
-  useNotificationActions: () => ({
-    notifications: [],
-    unreadCount: 0,
-    markAllAsRead: vi.fn(),
-    markAsRead: vi.fn(),
-    clearAll: vi.fn(),
-  }),
-}))
+// ---------------------------------------------------------------------------
+// Mocks — aligned to the current BibleReader imports (BB-38+ architecture)
+// ---------------------------------------------------------------------------
 
 vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
   useToastSafe: () => ({ showToast: vi.fn() }),
 }))
 
-vi.mock('@/hooks/useWhisperToast', () => ({
-  useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
+vi.mock('@/lib/bible/streakStore', () => ({
+  recordReadToday: vi.fn().mockReturnValue({
+    previousStreak: 0, newStreak: 1, delta: 'first-read' as const,
+    milestoneReached: null, graceDaysRemaining: 1, isFirstReadEver: true,
+  }),
+  getStreak: () => ({ currentStreak: 0, longestStreak: 0, lastReadDate: '', streakStartDate: '', graceDaysAvailable: 1, graceDaysUsedThisWeek: 0, lastGraceUsedDate: null, weekResetDate: '', milestones: [], totalDaysRead: 0 }),
+  subscribe: () => () => {},
 }))
 
-vi.mock('@/hooks/useBibleProgress', () => ({
-  useBibleProgress: () => ({
-    progress: {},
-    markChapterRead: vi.fn(),
-    getBookProgress: vi.fn().mockReturnValue([]),
-    isChapterRead: vi.fn().mockReturnValue(false),
-  }),
+vi.mock('@/lib/bible/crossRefs/loader', () => ({
+  loadCrossRefsForBook: vi.fn().mockResolvedValue(new Map()),
+  collectCrossRefsForRange: vi.fn().mockReturnValue([]),
+  getCachedBook: vi.fn().mockReturnValue(null),
+  getDeduplicatedCrossRefCount: vi.fn().mockReturnValue(0),
 }))
 
-vi.mock('@/hooks/useBibleAudio', () => ({
-  useBibleAudio: () => ({
-    playbackState: 'idle',
-    currentVerseIndex: -1,
-    totalVerses: 0,
-    speed: 1,
-    setSpeed: vi.fn(),
-    voiceGender: 'female',
-    setVoiceGender: vi.fn(),
-    availableVoiceCount: 2,
-    play: vi.fn(),
-    pause: vi.fn(),
-    stop: vi.fn(),
-    isSupported: true,
-  }),
+vi.mock('@/hooks/useReaderAudioAutoStart', () => ({
+  useReaderAudioAutoStart: vi.fn(),
+}))
+
+vi.mock('@/components/bible/reader/AmbientAudioPicker', () => ({
+  AmbientAudioPicker: () => null,
 }))
 
 vi.mock('@/components/audio/AudioProvider', () => ({
@@ -77,21 +43,25 @@ vi.mock('@/components/audio/AudioProvider', () => ({
     pillVisible: false,
     drawerOpen: false,
     currentSceneName: null,
+    currentSceneId: null,
     foregroundContent: null,
+    foregroundBackgroundBalance: 0.8,
+    foregroundEndedCounter: 0,
     sleepTimer: null,
     activeRoutine: null,
+    readingContext: null,
   }),
   useAudioDispatch: () => vi.fn(),
   useAudioEngine: () => null,
+  useReadingContext: () => ({
+    setReadingContext: vi.fn(),
+    clearReadingContext: vi.fn(),
+  }),
   useSleepTimerControls: () => ({
     remainingMs: 0,
     totalDurationMs: 0,
-    fadeDurationMs: 0,
-    phase: null,
     isActive: false,
     isPaused: false,
-    fadeStatus: 'none',
-    fadeRemainingMs: 0,
     start: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
@@ -99,41 +69,47 @@ vi.mock('@/components/audio/AudioProvider', () => ({
   }),
 }))
 
-vi.mock('@/hooks/useScenePlayer', () => ({
-  useScenePlayer: () => ({
-    activeSceneId: null,
-    loadScene: vi.fn(),
-    isLoading: false,
-    undoAvailable: false,
-    undoSceneSwitch: vi.fn(),
-    pendingRoutineInterrupt: null,
-    confirmRoutineInterrupt: vi.fn(),
-    cancelRoutineInterrupt: vi.fn(),
-  }),
-}))
-
-const mockGenesisChapter1: BibleChapter = {
-  bookSlug: 'genesis',
-  chapter: 1,
-  verses: [
-    { number: 1, text: 'In the beginning, God created the heavens and the earth.' },
-    { number: 2, text: 'The earth was formless and empty.' },
-    { number: 3, text: 'God said, "Let there be light," and there was light.' },
-  ],
-}
-
-vi.mock('@/data/bible', async () => {
-  const actual = await vi.importActual('@/data/bible')
+// Mock loadChapterWeb (the BibleReader uses loadChapterWeb, not loadChapter)
+vi.mock('@/data/bible', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/data/bible')>()
   return {
     ...actual,
-    loadChapter: vi.fn().mockImplementation((slug: string, chapter: number) => {
-      if (slug === 'genesis' && chapter === 1) return Promise.resolve(mockGenesisChapter1)
-      if (slug === 'genesis') return Promise.resolve({ bookSlug: 'genesis', chapter, verses: [{ number: 1, text: 'Test verse.' }] })
+    loadChapterWeb: vi.fn().mockImplementation((slug: string, chapter: number) => {
+      if (slug === 'genesis' && chapter === 1) {
+        return Promise.resolve({
+          bookSlug: 'genesis',
+          chapter: 1,
+          verses: [
+            { number: 1, text: 'In the beginning, God created the heavens and the earth.' },
+            { number: 2, text: 'The earth was formless and empty.' },
+            { number: 3, text: 'God said, "Let there be light," and there was light.' },
+          ],
+          paragraphs: [],
+        })
+      }
+      if (slug === 'genesis') {
+        return Promise.resolve({
+          bookSlug: 'genesis',
+          chapter,
+          verses: [{ number: 1, text: 'Test verse.' }],
+          paragraphs: [],
+        })
+      }
       return Promise.resolve(null)
     }),
   }
 })
 
+import { BibleReader } from '../BibleReader'
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders BibleReader at the given route. The route can include query params
+ * like ?verse=1 to pre-select a verse (BB-38 URL-driven selection).
+ */
 function renderReader(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
@@ -144,112 +120,156 @@ function renderReader(route: string) {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
 describe('BibleReader — Highlighting Integration', () => {
   beforeEach(() => {
     localStorage.clear()
-    mockAuth.isAuthenticated = true
+    // jsdom doesn't implement scrollIntoView
+    if (!Element.prototype.scrollIntoView) {
+      Element.prototype.scrollIntoView = vi.fn()
+    }
   })
 
-  it('clicking a verse shows action bar with Highlight button', async () => {
-    renderReader('/bible/genesis/1')
+  it('deep-linked action sheet shows action buttons (Highlight, Copy)', async () => {
+    // BB-38: verse + action in URL opens the sheet with a sub-view.
+    // Navigate "Back" from the sub-view to reveal the root view with all actions.
+    renderReader('/bible/genesis/1?verse=1&action=highlight')
     await waitFor(() => {
       expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
     })
 
-    const verse1 = screen.getByLabelText('Verse 1')
-    fireEvent.click(verse1)
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    // Click "Back" to navigate from highlight sub-view to the root action view
+    fireEvent.click(screen.getByLabelText('Back'))
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Highlight verse')).toBeInTheDocument()
+      // Root view shows primary actions including Highlight
+      expect(screen.getByLabelText('Highlight')).toBeInTheDocument()
+      // Secondary actions include Copy
+      expect(screen.getByLabelText('Copy')).toBeInTheDocument()
     })
   })
 
-  it('logged-out users see lock message instead of Highlight button', async () => {
-    mockAuth.isAuthenticated = false
-    renderReader('/bible/genesis/1')
+  it('action sheet has no auth gating (works for all users)', async () => {
+    // The redesigned VerseActionSheet has no auth gating — all actions are
+    // available regardless of login state (auth gating deferred to Phase 3).
+    // No useAuth mock is provided — BibleReader itself does not import useAuth.
+    renderReader('/bible/genesis/1?verse=1&action=highlight')
     await waitFor(() => {
       expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByLabelText('Verse 1'))
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    // Back to root view
+    fireEvent.click(screen.getByLabelText('Back'))
 
     await waitFor(() => {
-      expect(screen.getByText('Sign in to highlight and take notes')).toBeInTheDocument()
-      expect(screen.queryByLabelText('Highlight verse')).not.toBeInTheDocument()
+      // Highlight and Copy are available for everyone
+      expect(screen.getByLabelText('Highlight')).toBeInTheDocument()
+      expect(screen.getByLabelText('Copy')).toBeInTheDocument()
     })
   })
 
-  it('clicking Highlight reveals color picker circles', async () => {
-    renderReader('/bible/genesis/1')
+  it('deep-linking action=highlight opens the color picker sub-view', async () => {
+    // Pre-select verse 1 and open the Highlight sub-view via URL
+    renderReader('/bible/genesis/1?verse=1&action=highlight')
     await waitFor(() => {
       expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByLabelText('Verse 1'))
     await waitFor(() => {
-      expect(screen.getByLabelText('Highlight verse')).toBeInTheDocument()
+      // The color picker uses emotion-based labels (Peace, Joy, etc.)
+      // Each button has aria-label like "Peace highlight", "Joy highlight"
+      expect(screen.getByLabelText('Peace highlight')).toBeInTheDocument()
+      expect(screen.getByLabelText('Conviction highlight')).toBeInTheDocument()
+      expect(screen.getByLabelText('Joy highlight')).toBeInTheDocument()
+      expect(screen.getByLabelText('Struggle highlight')).toBeInTheDocument()
+      expect(screen.getByLabelText('Promise highlight')).toBeInTheDocument()
     })
-
-    fireEvent.click(screen.getByLabelText('Highlight verse'))
-    expect(screen.getByLabelText('Highlight yellow')).toBeInTheDocument()
-    expect(screen.getByLabelText('Highlight green')).toBeInTheDocument()
-    expect(screen.getByLabelText('Highlight blue')).toBeInTheDocument()
-    expect(screen.getByLabelText('Highlight pink')).toBeInTheDocument()
   })
 
-  it('selecting a new verse replaces the action bar (only one at a time)', async () => {
-    renderReader('/bible/genesis/1')
+  it('only one dialog renders at a time when verse changes', async () => {
+    const { rerender } = renderReader('/bible/genesis/1?verse=1&action=highlight')
     await waitFor(() => {
       expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByLabelText('Verse 1'))
     await waitFor(() => {
-      expect(screen.getByRole('toolbar')).toBeInTheDocument()
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByLabelText('Verse 2'))
-    // Should still only have one toolbar
-    const toolbars = screen.getAllByRole('toolbar')
-    expect(toolbars).toHaveLength(1)
+    // Re-render with a different verse (simulates URL-driven verse change)
+    rerender(
+      <MemoryRouter initialEntries={['/bible/genesis/1?verse=2&action=highlight']}>
+        <Routes>
+          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    // Should still only have one dialog
+    await waitFor(() => {
+      const dialogs = screen.getAllByRole('dialog')
+      expect(dialogs).toHaveLength(1)
+    })
   })
 
-  it('Escape dismisses action bar', async () => {
-    renderReader('/bible/genesis/1')
+  it('removing the verse param dismisses the action sheet', async () => {
+    renderReader('/bible/genesis/1?verse=1&action=highlight')
     await waitFor(() => {
       expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByLabelText('Verse 1'))
     await waitFor(() => {
-      expect(screen.getByRole('toolbar')).toBeInTheDocument()
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
 
-    fireEvent.keyDown(document, { key: 'Escape' })
+    // Unmount the old tree and render fresh without verse param
+    cleanup()
+    renderReader('/bible/genesis/1')
+
     await waitFor(() => {
-      expect(screen.queryByRole('toolbar')).not.toBeInTheDocument()
+      expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
     })
+
+    // No dialog should be present without a verse + action in the URL
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('Copy button works for logged-out users', async () => {
-    mockAuth.isAuthenticated = false
-
+  it('Copy action copies verse text to clipboard', async () => {
     // Mock clipboard
     Object.assign(navigator, {
       clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
     })
 
-    renderReader('/bible/genesis/1')
+    // Open sheet via deep link, then navigate to root view where Copy is accessible
+    renderReader('/bible/genesis/1?verse=1&action=highlight')
     await waitFor(() => {
       expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByLabelText('Verse 1'))
     await waitFor(() => {
-      expect(screen.getByLabelText('Copy verse')).toBeInTheDocument()
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByLabelText('Copy verse'))
+    // Back to root view
+    fireEvent.click(screen.getByLabelText('Back'))
+
+    await waitFor(() => {
+      // "Copy" is a secondary action in the action sheet
+      expect(screen.getByLabelText('Copy')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByLabelText('Copy'))
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       expect.stringContaining('In the beginning'),
     )

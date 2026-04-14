@@ -102,6 +102,56 @@ describe('SaveToPrayerListForm', () => {
     expect(onCancel).toHaveBeenCalledOnce()
   })
 
+  it('saves verseContext when provided', async () => {
+    const user = userEvent.setup()
+    renderForm({
+      verseContext: {
+        book: 'john',
+        chapter: 3,
+        startVerse: 16,
+        endVerse: 16,
+        reference: 'John 3:16',
+      },
+    })
+
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByText('Save'))
+
+    const prayers = getPrayers()
+    expect(prayers).toHaveLength(1)
+    expect(prayers[0].verseContext).toEqual({
+      book: 'john',
+      chapter: 3,
+      startVerse: 16,
+      endVerse: 16,
+      reference: 'John 3:16',
+    })
+  })
+
+  it('omits verseContext when null', async () => {
+    const user = userEvent.setup()
+    renderForm({ verseContext: null })
+
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByText('Save'))
+
+    const prayers = getPrayers()
+    expect(prayers).toHaveLength(1)
+    expect(prayers[0].verseContext).toBeUndefined()
+  })
+
+  it('omits verseContext when not passed', async () => {
+    const user = userEvent.setup()
+    renderForm()
+
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByText('Save'))
+
+    const prayers = getPrayers()
+    expect(prayers).toHaveLength(1)
+    expect(prayers[0].verseContext).toBeUndefined()
+  })
+
   it('has crisis detection on title input', async () => {
     const user = userEvent.setup()
     renderForm()

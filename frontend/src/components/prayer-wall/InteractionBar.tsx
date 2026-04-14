@@ -20,7 +20,7 @@ interface InteractionBarProps {
 }
 
 const btnBase =
-  'flex items-center gap-1 text-sm min-h-[44px] min-w-[44px] justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded'
+  'flex items-center gap-1 text-sm min-h-[44px] min-w-[44px] justify-center transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded active:scale-[0.98]'
 
 export function InteractionBar({
   prayer,

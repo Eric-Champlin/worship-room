@@ -7,6 +7,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { FAITHFULNESS_SCRIPTURES } from '@/constants/faithfulness-scriptures'
 import type { FaithfulnessScripture } from '@/constants/faithfulness-scriptures'
 import { Z } from '@/constants/z-index'
+import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 
 const GOLDEN_COLORS = ['#D97706', '#F59E0B', '#FBBF24']
 
@@ -105,7 +106,7 @@ export function PrayerAnsweredCelebration({
       : {
           opacity: step >= threshold ? 1 : 0,
           transform: step >= threshold ? 'translateY(0)' : 'translateY(10px)',
-          transition: `opacity ${durationMs}ms ease-out, transform ${durationMs}ms ease-out`,
+          transition: `opacity ${durationMs}ms ${ANIMATION_EASINGS.decelerate}, transform ${durationMs}ms ${ANIMATION_EASINGS.decelerate}`,
         }
 
   return createPortal(
@@ -121,7 +122,7 @@ export function PrayerAnsweredCelebration({
         style={{
           background: 'radial-gradient(ellipse at center, rgba(217, 119, 6, 0.15) 0%, rgba(13, 6, 32, 0.95) 60%)',
           opacity: reducedMotion ? 1 : step >= 1 ? 1 : 0,
-          transition: reducedMotion ? undefined : 'opacity 300ms ease-out',
+          transition: reducedMotion ? undefined : `opacity ${ANIMATION_DURATIONS.base}ms ${ANIMATION_EASINGS.decelerate}`,
         }}
         onClick={onDismiss}
         aria-hidden="true"

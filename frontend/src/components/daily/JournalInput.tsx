@@ -166,7 +166,7 @@ export function JournalInput({
             type="button"
             onClick={() => onModeChange('guided')}
             className={cn(
-              'min-h-[44px] rounded-l-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+              'min-h-[44px] rounded-l-lg px-4 py-2 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]',
               mode === 'guided'
                 ? 'bg-primary/20 text-white'
                 : 'bg-white/10 text-white/70 hover:bg-white/15',
@@ -179,7 +179,7 @@ export function JournalInput({
             type="button"
             onClick={() => onModeChange('free')}
             className={cn(
-              'min-h-[44px] rounded-r-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+              'min-h-[44px] rounded-r-lg px-4 py-2 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]',
               mode === 'free'
                 ? 'bg-primary/20 text-white'
                 : 'bg-white/10 text-white/70 hover:bg-white/15',
@@ -216,7 +216,7 @@ export function JournalInput({
                 className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="New prompt"
               >
-                <RefreshCw className="h-3.5 w-3.5" />
+                <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
                 Try a different prompt
               </button>
             </div>
@@ -274,7 +274,7 @@ export function JournalInput({
           placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
           maxLength={JOURNAL_MAX_LENGTH}
           rows={6}
-          className="min-h-[200px] w-full resize-none rounded-lg border border-white/30 bg-white/[0.06] px-4 pb-10 pt-3 font-serif text-lg leading-relaxed text-white placeholder:text-white/50 shadow-[0_0_20px_3px_rgba(255,255,255,0.50),0_0_40px_8px_rgba(255,255,255,0.30)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="min-h-[200px] w-full resize-none rounded-lg border border-white/30 bg-white/[0.06] px-4 pb-10 pt-3 text-lg leading-relaxed text-white placeholder:text-white/50 shadow-[0_0_20px_3px_rgba(255,255,255,0.50),0_0_40px_8px_rgba(255,255,255,0.30)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
           aria-label="Journal entry"
           aria-describedby="journal-char-count"
         />
@@ -338,7 +338,7 @@ export function JournalInput({
           type="button"
           onClick={handleSave}
           disabled={!text.trim()}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all motion-reduce:transition-none duration-base hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
         >
           Save Entry
         </button>

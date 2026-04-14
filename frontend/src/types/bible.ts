@@ -36,6 +36,7 @@ export interface BibleChapter {
   bookSlug: string
   chapter: number
   verses: BibleVerse[]
+  paragraphs?: number[]
 }
 
 /** Search result from Bible text search */
@@ -45,10 +46,10 @@ export interface BibleSearchResult {
   chapter: number
   verseNumber: number
   verseText: string
-  /** Verse before the match (if exists) */
-  contextBefore?: string
-  /** Verse after the match (if exists) */
-  contextAfter?: string
+  /** Relevance score for ranking */
+  score: number
+  /** Query tokens that matched in this verse (for highlight rendering) */
+  matchedTokens: string[]
 }
 
 /** Progress map: book slug -> array of completed chapter numbers */
@@ -63,7 +64,83 @@ export interface BibleHighlight {
   createdAt: string
 }
 
-/** A personal note attached to a verse */
+export type HighlightColor = 'peace' | 'conviction' | 'joy' | 'struggle' | 'promise'
+
+export interface Highlight {
+  id: string
+  book: string
+  chapter: number
+  startVerse: number
+  endVerse: number
+  color: HighlightColor
+  createdAt: number
+  updatedAt: number
+}
+
+export interface Bookmark {
+  id: string
+  book: string          // slug e.g. "john"
+  chapter: number
+  startVerse: number
+  endVerse: number      // equals startVerse for single-verse
+  label?: string        // optional, max 80 chars
+  createdAt: number     // epoch ms
+}
+
+export interface Note {
+  id: string
+  book: string          // slug e.g. "john"
+  chapter: number
+  startVerse: number
+  endVerse: number      // equals startVerse for single-verse
+  body: string          // plain text, max 10,000 chars
+  createdAt: number     // epoch ms
+  updatedAt: number     // epoch ms
+}
+
+export interface JournalEntry {
+  id: string              // UUID
+  body: string            // plain text
+  createdAt: number       // epoch ms
+  updatedAt: number       // epoch ms, equals createdAt unless edited
+  verseContext?: {
+    book: string          // slug
+    chapter: number
+    startVerse: number
+    endVerse: number
+    reference: string     // pre-formatted
+  }
+}
+
+/** Raw cross-reference entry from JSON data */
+export interface CrossRefEntry {
+  ref: string     // "bookSlug.chapter.verse" e.g. "romans.5.8"
+  rank: number    // 1-4, 1 = strongest
+}
+
+/** Parsed cross-reference with resolved book/chapter/verse */
+export interface CrossRef {
+  ref: string
+  rank: number
+  parsed: {
+    book: string    // slug
+    chapter: number
+    verse: number
+  }
+  sourceVerse?: number  // which source verse this came from (multi-verse selections)
+}
+
+/** Map of "{chapter}.{verse}" → CrossRef[] for a single book */
+export type CrossRefMap = Map<string, CrossRef[]>
+
+/** Shape of per-book cross-reference JSON file */
+export interface CrossRefBookJson {
+  book: string
+  slug: string
+  entries: Record<string, CrossRefEntry[]>
+}
+
+/** @deprecated BB-8 uses Note interface instead. Kept for pre-redesign compat. */
 export interface BibleNote {
   id: string
   book: string

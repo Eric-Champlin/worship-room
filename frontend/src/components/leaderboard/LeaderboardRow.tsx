@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { Flame, Sprout, Leaf, Flower2, TreePine, Trees, Landmark } from 'lucide-react'
 import type { FriendProfile } from '@/types/dashboard'
 import { Avatar } from '@/components/prayer-wall/Avatar'
@@ -50,14 +51,14 @@ export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index, sho
 
   return (
     <li
-      className={`group motion-safe:opacity-0 motion-safe:animate-fade-in transition-transform duration-300 ease-in-out motion-reduce:transition-none rounded-xl ${
+      className={`group motion-safe:opacity-0 motion-safe:animate-fade-in-up transition-transform duration-base ease-standard motion-reduce:transition-none rounded-xl ${
         isCurrentUser
           ? 'border-l-2 border-primary bg-primary/[0.08]'
           : index % 2 === 0
             ? 'bg-white/[0.04]'
             : 'bg-white/[0.06]'
       }`}
-      style={{ animationDelay: `${delay}ms`, animationDuration: '300ms' }}
+      style={{ animationDelay: `${delay}ms`, animationDuration: `${ANIMATION_DURATIONS.base}ms` }}
       aria-label={isCurrentUser ? `Your position: rank ${rank}` : undefined}
     >
       <div
@@ -122,7 +123,7 @@ export function LeaderboardRow({ rank, friend, isCurrentUser, metric, index, sho
 
         {/* Encourage — Friends board only, not current user */}
         {showEncourage && !isCurrentUser && (
-          <div className="sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+          <div className="sm:opacity-0 sm:transition-opacity motion-reduce:transition-none sm:group-hover:opacity-100">
             <EncourageButton
               friendId={friend.id}
               friendName={friend.displayName}

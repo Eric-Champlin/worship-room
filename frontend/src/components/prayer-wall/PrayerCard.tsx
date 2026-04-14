@@ -57,7 +57,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
     <PulseContext.Provider value={triggerPulse}>
     <article
       ref={articleRef}
-      className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20"
+      className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20"
       aria-label={`Prayer by ${prayer.authorName}`}
     >
       {prayer.qotdId && (

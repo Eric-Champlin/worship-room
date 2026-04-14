@@ -613,4 +613,26 @@ describe('audioReducer', () => {
       expect(result.activeRoutine).toBeNull()
     })
   })
+
+  describe('SET_READING_CONTEXT / CLEAR_READING_CONTEXT (BB-20)', () => {
+    it('SET_READING_CONTEXT sets context', () => {
+      const result = audioReducer(initialAudioState, {
+        type: 'SET_READING_CONTEXT',
+        payload: { book: 'John', chapter: 3 },
+      })
+      expect(result.readingContext).toEqual({ book: 'John', chapter: 3 })
+    })
+
+    it('CLEAR_READING_CONTEXT clears context', () => {
+      const state = stateWith({
+        readingContext: { book: 'John', chapter: 3 },
+      })
+      const result = audioReducer(state, { type: 'CLEAR_READING_CONTEXT' })
+      expect(result.readingContext).toBeNull()
+    })
+
+    it('initialAudioState has readingContext: null', () => {
+      expect(initialAudioState.readingContext).toBeNull()
+    })
+  })
 })

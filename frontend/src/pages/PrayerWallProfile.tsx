@@ -1,6 +1,9 @@
 import { useState, useCallback, useMemo } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { Link, useParams } from 'react-router-dom'
 import { SEO } from '@/components/SEO'
+import { PRAYER_WALL_PROFILE_METADATA } from '@/lib/seo/routeMetadata'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
@@ -119,7 +122,9 @@ function PrayerWallProfileContent() {
 
   return (
     <PageShell>
+      {/* BB-40: dynamic title overrides static base; ogImage/alt from constant */}
       <SEO
+        {...PRAYER_WALL_PROFILE_METADATA}
         title={`${profileUser.firstName}'s Prayers`}
         description={`Prayers shared by ${profileUser.firstName} on the Worship Room community prayer wall.`}
       />
@@ -198,7 +203,7 @@ function PrayerWallProfileContent() {
             </button>
           ))}
           <div
-            className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out"
+            className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-standard"
             style={{
               width: `${100 / tabs.length}%`,
               transform: `translateX(${tabs.findIndex(t => t.key === activeTab) * 100}%)`,
@@ -239,7 +244,7 @@ function PrayerWallProfileContent() {
                 ))
               ) : (
                 <p className="py-8 text-center text-sm text-white/50">
-                  No prayers shared yet.
+                  This person hasn't shared any prayers yet.
                 </p>
               )}
             </div>
@@ -308,5 +313,17 @@ function PrayerWallProfileContent() {
 }
 
 export function PrayerWallProfile() {
+  const { isOnline } = useOnlineStatus()
+
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Prayer Wall"
+        fallbackRoute="/daily"
+        fallbackLabel="Go to Daily Hub"
+      />
+    )
+  }
+
   return <PrayerWallProfileContent />
 }

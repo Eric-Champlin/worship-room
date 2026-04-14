@@ -2,34 +2,26 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest'
 
 import { useBibleSearch } from '../useBibleSearch'
-import type { BibleChapter } from '@/types/bible'
 
-const mockChapters: BibleChapter[] = [
-  {
-    bookSlug: 'john',
-    chapter: 3,
-    verses: [
-      { number: 15, text: 'that whoever believes in him should not perish, but have eternal life.' },
-      { number: 16, text: 'For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.' },
-      { number: 17, text: 'For God didn\'t send his Son into the world to judge the world, but that the world should be saved through him.' },
-    ],
-  },
-]
+// Mock the search engine
+const mockSearchBible = vi.fn().mockReturnValue({ results: [], total: 0 })
+const mockLoadSearchIndex = vi.fn().mockResolvedValue({})
+const mockLoadVerseTexts = vi.fn().mockResolvedValue(new Map())
+const mockApplyProximityBonus = vi.fn()
+const mockTokenize = vi.fn().mockReturnValue(['test'])
 
-vi.mock('@/data/bible', () => ({
-  loadAllBookText: vi.fn().mockImplementation((slug: string) => {
-    if (slug === 'john') return Promise.resolve(mockChapters)
-    return Promise.resolve([])
-  }),
-  getBookBySlug: vi.fn(),
-  getBooksByTestament: vi.fn(),
-  getBooksByCategory: vi.fn(),
-  getBibleGatewayUrl: vi.fn(),
+vi.mock('@/lib/search', () => ({
+  searchBible: (...args: unknown[]) => mockSearchBible(...args),
+  loadSearchIndex: (...args: unknown[]) => mockLoadSearchIndex(...args),
+  loadVerseTexts: (...args: unknown[]) => mockLoadVerseTexts(...args),
+  applyProximityBonus: (...args: unknown[]) => mockApplyProximityBonus(...args),
+  tokenize: (...args: unknown[]) => mockTokenize(...args),
 }))
 
 describe('useBibleSearch', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
@@ -41,6 +33,8 @@ describe('useBibleSearch', () => {
     expect(result.current.query).toBe('')
     expect(result.current.results).toEqual([])
     expect(result.current.isSearching).toBe(false)
+    expect(result.current.totalResults).toBe(0)
+    expect(result.current.error).toBeNull()
   })
 
   it('requires minimum 2 characters', () => {
@@ -49,72 +43,149 @@ describe('useBibleSearch', () => {
     expect(result.current.results).toEqual([])
   })
 
-  it('finds matching verses after debounce', async () => {
+  it('triggers search after debounce for valid query', async () => {
     vi.useRealTimers()
-    const { result } = renderHook(() => useBibleSearch())
+    mockSearchBible.mockReturnValue({
+      results: [{
+        bookSlug: 'john', bookName: 'John', chapter: 3, verse: 16,
+        text: '', score: 1, matchedTokens: ['love'],
+      }],
+      total: 1,
+    })
+    mockLoadVerseTexts.mockResolvedValue(new Map([['john:3:16', 'For God so loved...']]))
 
-    act(() => result.current.setQuery('loved the world'))
+    const { result } = renderHook(() => useBibleSearch())
+    act(() => result.current.setQuery('love'))
 
     await waitFor(() => {
       expect(result.current.results.length).toBeGreaterThan(0)
     })
 
-    expect(result.current.results[0].verseNumber).toBe(16)
     expect(result.current.results[0].bookSlug).toBe('john')
-    expect(result.current.results[0].chapter).toBe(3)
-  })
-
-  it('search is case-insensitive', async () => {
-    vi.useRealTimers()
-    const { result } = renderHook(() => useBibleSearch())
-
-    act(() => result.current.setQuery('FOR GOD SO LOVED'))
-
-    await waitFor(() => {
-      expect(result.current.results.length).toBeGreaterThan(0)
-    })
-  })
-
-  it('includes context verses before and after match', async () => {
-    vi.useRealTimers()
-    const { result } = renderHook(() => useBibleSearch())
-
-    act(() => result.current.setQuery('loved the world'))
-
-    await waitFor(() => {
-      expect(result.current.results.length).toBeGreaterThan(0)
-    })
-
-    const r = result.current.results[0]
-    expect(r.contextBefore).toBeDefined()
-    expect(r.contextAfter).toBeDefined()
-  })
-
-  it('special regex characters in query do not crash', async () => {
-    vi.useRealTimers()
-    const { result } = renderHook(() => useBibleSearch())
-
-    act(() => result.current.setQuery('test[.*+'))
-
-    await waitFor(() => {
-      expect(result.current.isSearching).toBe(false)
-    })
-
-    // Should not throw, just return no results
-    expect(result.current.results).toEqual([])
+    expect(mockLoadSearchIndex).toHaveBeenCalled()
   })
 
   it('clears results when query is cleared', async () => {
     vi.useRealTimers()
+    mockSearchBible.mockReturnValue({
+      results: [{ bookSlug: 'john', bookName: 'John', chapter: 3, verse: 16, text: '', score: 1, matchedTokens: ['love'] }],
+      total: 1,
+    })
+    mockLoadVerseTexts.mockResolvedValue(new Map([['john:3:16', 'text']]))
+
     const { result } = renderHook(() => useBibleSearch())
 
-    act(() => result.current.setQuery('loved the world'))
-
+    act(() => result.current.setQuery('love'))
     await waitFor(() => {
       expect(result.current.results.length).toBeGreaterThan(0)
     })
 
     act(() => result.current.setQuery(''))
     expect(result.current.results).toEqual([])
+    expect(result.current.totalResults).toBe(0)
+  })
+
+  it('isLoadingIndex is true during first load', async () => {
+    vi.useRealTimers()
+    let resolveIndex: () => void
+    mockLoadSearchIndex.mockReturnValue(new Promise<void>((r) => { resolveIndex = r }))
+
+    const { result } = renderHook(() => useBibleSearch())
+    act(() => result.current.setQuery('love'))
+
+    await waitFor(() => {
+      expect(result.current.isLoadingIndex).toBe(true)
+    })
+
+    act(() => resolveIndex!())
+  })
+
+  it('exposes totalResults and hasMore', async () => {
+    vi.useRealTimers()
+    const manyResults = Array.from({ length: 50 }, (_, i) => ({
+      bookSlug: 'psalms', bookName: 'Psalms', chapter: 1, verse: i + 1,
+      text: '', score: 1, matchedTokens: ['peace'],
+    }))
+    mockSearchBible.mockReturnValue({ results: manyResults, total: 120 })
+    mockLoadVerseTexts.mockResolvedValue(new Map())
+
+    const { result } = renderHook(() => useBibleSearch())
+    act(() => result.current.setQuery('peace'))
+
+    await waitFor(() => {
+      expect(result.current.results.length).toBe(50)
+    })
+    expect(result.current.totalResults).toBe(120)
+    expect(result.current.hasMore).toBe(true)
+  })
+
+  it('sets error when index load fails', async () => {
+    vi.useRealTimers()
+    mockLoadSearchIndex.mockRejectedValue(new Error('Network error'))
+
+    const { result } = renderHook(() => useBibleSearch())
+    act(() => result.current.setQuery('love'))
+
+    await waitFor(() => {
+      expect(result.current.error).toBe('Unable to load search. Please try again.')
+    })
+    expect(result.current.isSearching).toBe(false)
+  })
+})
+
+// BB-38 controlled mode tests
+describe('useBibleSearch — controlled mode (BB-38)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('returns controlledQuery when the option is provided', () => {
+    const { result } = renderHook(() =>
+      useBibleSearch({ controlledQuery: 'love', onQueryChange: vi.fn() }),
+    )
+    expect(result.current.query).toBe('love')
+  })
+
+  it('setQuery calls onQueryChange instead of updating internal state', () => {
+    const onQueryChange = vi.fn()
+    const { result } = renderHook(() =>
+      useBibleSearch({ controlledQuery: 'initial', onQueryChange }),
+    )
+    act(() => result.current.setQuery('peace'))
+    expect(onQueryChange).toHaveBeenCalledWith('peace')
+    expect(result.current.query).toBe('initial')
+  })
+
+  it('controlled query updates on prop change between renders', () => {
+    const onQueryChange = vi.fn()
+    const { result, rerender } = renderHook(
+      ({ q }: { q: string }) =>
+        useBibleSearch({ controlledQuery: q, onQueryChange }),
+      { initialProps: { q: 'love' } },
+    )
+    expect(result.current.query).toBe('love')
+    rerender({ q: 'peace' })
+    expect(result.current.query).toBe('peace')
+  })
+
+  it('switches back to uncontrolled when options are omitted on rerender', () => {
+    const onQueryChange = vi.fn()
+    const { result, rerender } = renderHook(
+      ({ controlled }: { controlled: boolean }) =>
+        useBibleSearch(
+          controlled
+            ? { controlledQuery: 'control-value', onQueryChange }
+            : undefined,
+        ),
+      { initialProps: { controlled: true } },
+    )
+    expect(result.current.query).toBe('control-value')
+    rerender({ controlled: false })
+    expect(result.current.query).toBe('')
   })
 })

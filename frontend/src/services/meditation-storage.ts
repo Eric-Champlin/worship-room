@@ -1,5 +1,6 @@
 import type { MeditationSession } from '@/types/meditation';
 import type { MeditationType } from '@/types/daily-experience';
+import type { MergeResult } from '@/types/bible-export';
 import { getLocalDateString, getCurrentWeekStart } from '@/utils/date';
 
 const STORAGE_KEY = 'wr_meditation_history';
@@ -25,6 +26,37 @@ export function saveMeditationSession(session: MeditationSession): void {
     entries.length = MAX_ENTRIES;
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+// ── Bulk Import Functions ────────────────────────────────────────────
+
+function writeMeditations(entries: MeditationSession[]): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+export function replaceAllMeditations(records: MeditationSession[]): void {
+  writeMeditations(records);
+}
+
+export function mergeInMeditations(incoming: MeditationSession[]): MergeResult {
+  const local = getMeditationHistory();
+  const localMap = new Map(local.map((r) => [r.id, r]));
+  const result: MergeResult = { added: 0, updated: 0, skipped: 0 };
+
+  for (const record of incoming) {
+    const existing = localMap.get(record.id);
+    if (!existing) {
+      localMap.set(record.id, record);
+      result.added++;
+    } else {
+      // No updatedAt — incoming wins on conflict
+      localMap.set(record.id, record);
+      result.updated++;
+    }
+  }
+
+  writeMeditations(Array.from(localMap.values()));
+  return result;
 }
 
 export function getMeditationMinutesForWeek(weekStartDate?: string): number {

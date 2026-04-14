@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { useParams } from 'react-router-dom'
 import { SEO } from '@/components/SEO'
+import { PRAYER_DETAIL_METADATA } from '@/lib/seo/routeMetadata'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
@@ -131,14 +134,12 @@ function PrayerDetailContent() {
 
   return (
     <PageShell>
-      <SEO
-        title="Prayer Request"
-        description="A prayer request shared on the Worship Room community prayer wall."
-      />
+      <SEO {...PRAYER_DETAIL_METADATA} />
       <main
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
       >
+        <h1 className="sr-only">Prayer Detail</h1>
         <div className="mb-6">
           <Breadcrumb
             items={[
@@ -202,5 +203,17 @@ function PrayerDetailContent() {
 }
 
 export function PrayerDetail() {
+  const { isOnline } = useOnlineStatus()
+
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Prayer Wall"
+        fallbackRoute="/daily"
+        fallbackLabel="Go to Daily Hub"
+      />
+    )
+  }
+
   return <PrayerDetailContent />
 }

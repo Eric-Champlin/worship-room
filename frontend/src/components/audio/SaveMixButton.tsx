@@ -118,7 +118,7 @@ export function SaveMixButton() {
           aria-label="Save this mix"
           className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-white/60 transition-colors hover:bg-white/10 hover:text-white/80"
         >
-          <Save size={16} />
+          <Save size={16} aria-hidden="true" />
           <span>Save Mix</span>
         </button>
       )}
@@ -141,7 +141,7 @@ export function SaveMixButton() {
               type="button"
               onClick={handleSubmit}
               disabled={!name.trim()}
-              className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+              className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt active:scale-[0.98]"
             >
               Save
             </button>

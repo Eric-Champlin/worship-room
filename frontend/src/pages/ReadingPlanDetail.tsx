@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { READING_PLAN_DETAIL_METADATA } from '@/lib/seo/routeMetadata'
 import { DayCompletionCelebration } from '@/components/reading-plans/DayCompletionCelebration'
 import { DayContent } from '@/components/reading-plans/DayContent'
 import { DaySelector } from '@/components/reading-plans/DaySelector'
@@ -144,7 +145,7 @@ export function ReadingPlanDetail() {
       <Layout>
         <div className="flex min-h-screen items-center justify-center bg-dashboard-dark">
           <div className="text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
+            <div className="mx-auto h-8 w-8 motion-safe:animate-spin rounded-full border-2 border-white/20 border-t-primary" />
             <p className="mt-4 text-sm text-white/50">Loading plan...</p>
           </div>
         </div>
@@ -175,7 +176,9 @@ export function ReadingPlanDetail() {
 
   return (
     <Layout>
+      {/* BB-40: spread static base for ogImage/alt, preserve dynamic title/description. */}
       <SEO
+        {...READING_PLAN_DETAIL_METADATA}
         title={`${plan.title} | Reading Plans`}
         description={plan.description.slice(0, 155).trim()}
         jsonLd={breadcrumbs}
@@ -218,7 +221,7 @@ export function ReadingPlanDetail() {
                 aria-label={`${completionPercent}% complete`}
               >
                 <div
-                  className="h-2 rounded-full bg-primary transition-all duration-500"
+                  className="h-2 rounded-full bg-primary transition-all motion-reduce:transition-none duration-slow"
                   style={{ width: `${completionPercent}%` }}
                 />
               </div>
@@ -283,7 +286,7 @@ export function ReadingPlanDetail() {
                     : 'hover:bg-white/15',
                 )}
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={16} aria-hidden="true" />
                 Previous Day
               </button>
 
@@ -300,7 +303,7 @@ export function ReadingPlanDetail() {
                 )}
               >
                 Next Day
-                <ChevronRight size={16} />
+                <ChevronRight size={16} aria-hidden="true" />
               </button>
             </div>
           </div>

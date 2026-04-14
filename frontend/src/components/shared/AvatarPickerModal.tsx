@@ -256,7 +256,7 @@ export function AvatarPickerModal({
                             aria-checked={isSelected}
                             tabIndex={isSelected ? 0 : -1}
                             className={cn(
-                              'flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                              'flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                               isSelected
                                 ? 'ring-2 ring-primary ring-offset-2 ring-offset-hero-mid'
                                 : 'hover:bg-white/5',
@@ -306,7 +306,7 @@ export function AvatarPickerModal({
                           aria-checked={isSelected}
                           tabIndex={isSelected ? 0 : isUnlocked ? -1 : undefined}
                           className={cn(
-                            'flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                            'flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
                             isSelected
                               ? 'ring-2 ring-primary ring-offset-2 ring-offset-hero-mid'
                               : isUnlocked
@@ -389,7 +389,7 @@ export function AvatarPickerModal({
                   disabled={isProcessing}
                   className="bg-white/10 text-white border border-white/20 rounded-lg py-3 px-6 hover:bg-white/15 transition-colors disabled:opacity-50 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
-                  <Upload className="h-4 w-4" />
+                  <Upload className="h-4 w-4" aria-hidden="true" />
                   {isProcessing ? 'Processing...' : 'Choose File'}
                 </button>
 

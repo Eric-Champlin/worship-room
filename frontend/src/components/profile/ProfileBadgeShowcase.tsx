@@ -83,7 +83,7 @@ function BadgeCell({ badge, earned, isOwnProfile }: BadgeCellProps) {
 
   return (
     <button
-      className="group relative flex items-center justify-center motion-safe:hover:scale-105 transition-transform duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+      className="group relative flex items-center justify-center motion-safe:hover:scale-105 transition-transform motion-reduce:transition-none duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
       aria-label={ariaLabel}
       type="button"
     >
@@ -111,7 +111,7 @@ function BadgeCell({ badge, earned, isOwnProfile }: BadgeCellProps) {
 
       {/* Tooltip */}
       <div
-        className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/15 bg-hero-mid px-3 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+        className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/15 bg-hero-mid px-3 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100"
         role="tooltip"
       >
         {tooltipText}

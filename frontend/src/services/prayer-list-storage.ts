@@ -1,4 +1,6 @@
 import type { PrayerCategory } from '@/constants/prayer-categories'
+import type { MergeResult } from '@/types/bible-export'
+import type { PrayerVerseContext } from '@/types/daily-experience'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 import { getLocalDateString } from '@/utils/date'
 
@@ -38,6 +40,7 @@ export function addPrayer(input: {
   category: PrayerCategory
   sourceType?: 'prayer_wall'
   sourceId?: string
+  verseContext?: PrayerVerseContext
 }): PersonalPrayer | null {
   const prayers = readPrayers()
   if (prayers.length >= MAX_PRAYERS) return null
@@ -56,6 +59,7 @@ export function addPrayer(input: {
     lastPrayedAt: null,
     sourceType: input.sourceType,
     sourceId: input.sourceId,
+    verseContext: input.verseContext,
   }
 
   writePrayers([...prayers, prayer])
@@ -111,6 +115,35 @@ export function getPrayerCounts(): { all: number; active: number; answered: numb
     active: prayers.filter((p) => p.status === 'active').length,
     answered: prayers.filter((p) => p.status === 'answered').length,
   }
+}
+
+// ── Bulk Import Functions ────────────────────────────────────────────
+
+export function replaceAllPrayers(records: PersonalPrayer[]): void {
+  writePrayers(records)
+}
+
+export function mergeInPrayers(incoming: PersonalPrayer[]): MergeResult {
+  const local = readPrayers()
+  const localMap = new Map(local.map((r) => [r.id, r]))
+  const result: MergeResult = { added: 0, updated: 0, skipped: 0 }
+
+  for (const record of incoming) {
+    const existing = localMap.get(record.id)
+    if (!existing) {
+      localMap.set(record.id, record)
+      result.added++
+    } else if (record.updatedAt > existing.updatedAt) {
+      // ISO 8601 strings are lexicographically orderable
+      localMap.set(record.id, record)
+      result.updated++
+    } else {
+      result.skipped++
+    }
+  }
+
+  writePrayers(Array.from(localMap.values()))
+  return result
 }
 
 // ── Reminder Functions ───────────────────────────────────────────────

@@ -6,11 +6,15 @@ import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { AudioProvider } from '@/components/audio/AudioProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
+import { OfflineIndicator } from '@/components/pwa/OfflineIndicator'
+import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 import { InstallPromptProvider } from '@/contexts/InstallPromptProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
+import { LOGIN_METADATA, NOT_FOUND_METADATA } from '@/lib/seo/routeMetadata'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
 import { WhisperToastProvider } from '@/components/ui/WhisperToast'
@@ -28,6 +32,7 @@ import {
   BibleLandingSkeleton,
   BibleBrowserSkeleton,
   ProfileSkeleton,
+  MyBibleSkeleton,
 } from '@/components/skeletons'
 
 // Route-level lazy loading for code splitting
@@ -63,13 +68,20 @@ const ReadingPlanDetail = lazy(() => import('./pages/ReadingPlanDetail').then((m
 const ChallengeDetail = lazy(() => import('./pages/ChallengeDetail').then((m) => ({ default: m.ChallengeDetail })))
 const BibleLanding = lazy(() => import('./pages/BibleLanding').then((m) => ({ default: m.BibleLanding })))
 const BibleBrowse = lazy(() => import('./pages/BibleBrowse').then((m) => ({ default: m.BibleBrowse })))
-const BibleStub = lazy(() => import('./pages/BibleStub').then((m) => ({ default: m.BibleStub })))
+// BB-38: BibleStub was used only for `/bible/search` — that route is now a redirect.
+// BibleSearchRedirect is tiny (just reads URL and issues <Navigate>) so it's imported synchronously.
+import { BibleSearchRedirect } from './components/BibleSearchRedirect'
+const PlanBrowserPage = lazy(() => import('./pages/bible/PlanBrowserPage').then((m) => ({ default: m.PlanBrowserPage })))
+const BiblePlanDetail = lazy(() => import('./pages/BiblePlanDetail').then((m) => ({ default: m.BiblePlanDetail })))
+const BiblePlanDay = lazy(() => import('./pages/BiblePlanDay').then((m) => ({ default: m.BiblePlanDay })))
+const MyBiblePage = lazy(() => import('./pages/MyBiblePage'))
 const BibleReader = lazy(() => import('./pages/BibleReader').then((m) => ({ default: m.BibleReader })))
 const AskPage = lazy(() => import('./pages/AskPage').then((m) => ({ default: m.AskPage })))
 const MoodCheckInPreview = lazy(() =>
   import('./pages/MoodCheckInPreview').then((m) => ({ default: m.MoodCheckInPreview }))
 )
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })))
+const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage').then((m) => ({ default: m.AccessibilityPage })))
 
 function RouteLoadingFallback() {
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -91,7 +103,8 @@ function RouteLoadingFallback() {
 function ComingSoon({ title }: { title: string }) {
   return (
     <Layout>
-      <SEO title={title} description={`${title} — coming soon to Worship Room.`} noIndex />
+      {/* BB-40: /login is the only caller of ComingSoon today. LOGIN_METADATA carries the noIndex + stub description. */}
+      <SEO {...LOGIN_METADATA} />
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-md text-center">
           <h1 className="mb-4 text-3xl font-bold text-text-dark sm:text-4xl">
@@ -109,7 +122,7 @@ function ComingSoon({ title }: { title: string }) {
 function NotFound() {
   return (
     <Layout dark>
-      <SEO title="Page Not Found" description="The page you're looking for doesn't exist." noIndex />
+      <SEO {...NOT_FOUND_METADATA} />
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-md text-center">
           <h1 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
@@ -128,6 +141,11 @@ function NotFound() {
       </div>
     </Layout>
   )
+}
+
+function RouteTransition({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  return <div key={location.pathname} className="motion-safe:animate-fade-in">{children}</div>
 }
 
 function RootRoute() {
@@ -149,6 +167,30 @@ function ReadingPlansRedirect() {
   return <Navigate to={target} replace />
 }
 
+/** BB-41: Fire-and-forget notification scheduling on app load */
+function NotificationSchedulerEffect() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
+
+    // Dynamic import to avoid loading notification code for users who haven't opted in
+    import('@/lib/notifications/preferences').then(({ getNotificationPrefs }) => {
+      const prefs = getNotificationPrefs()
+      if (!prefs.enabled) return
+
+      import('@/lib/notifications/subscription').then(({ ensureSubscription }) => {
+        ensureSubscription().catch(() => {})
+      })
+      import('@/lib/notifications/scheduler').then(({ prepareAndSchedule, registerPeriodicSync }) => {
+        prepareAndSchedule().catch(() => {})
+        registerPeriodicSync().catch(() => {})
+      })
+    })
+  }, [])
+
+  return null
+}
+
 function App() {
   return (
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -162,8 +204,12 @@ function App() {
         <WhisperToastProvider>
         <MidnightVerse />
         <UpdatePrompt />
+        <OfflineIndicator />
+        <InstallPrompt />
+        <NotificationSchedulerEffect />
         <ChunkErrorBoundary>
         <Suspense fallback={<RouteLoadingFallback />}>
+        <RouteTransition>
         <Routes>
           <Route path="/" element={<Suspense fallback={<DashboardSkeleton />}><RootRoute /></Suspense>} />
           <Route path="/health" element={<Health />} />
@@ -182,9 +228,12 @@ function App() {
           <Route path="/challenges/:challengeId" element={<ChallengeDetail />} />
           <Route path="/bible" element={<Suspense fallback={<BibleLandingSkeleton />}><BibleLanding /></Suspense>} />
           <Route path="/bible/browse" element={<Suspense fallback={<BibleBrowserSkeleton />}><BibleBrowse /></Suspense>} />
-          <Route path="/bible/my" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="my" /></Suspense>} />
-          <Route path="/bible/plans" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="plans" /></Suspense>} />
-          <Route path="/bible/search" element={<Suspense fallback={<RouteLoadingFallback />}><BibleStub page="search" /></Suspense>} />
+          <Route path="/bible/my" element={<Suspense fallback={<MyBibleSkeleton />}><MyBiblePage /></Suspense>} />
+          <Route path="/bible/plans" element={<Suspense fallback={<RouteLoadingFallback />}><PlanBrowserPage /></Suspense>} />
+          <Route path="/bible/plans/:slug" element={<Suspense fallback={<RouteLoadingFallback />}><BiblePlanDetail /></Suspense>} />
+          <Route path="/bible/plans/:slug/day/:dayNumber" element={<Suspense fallback={<RouteLoadingFallback />}><BiblePlanDay /></Suspense>} />
+          {/* BB-38: /bible/search is a legacy path that redirects to /bible?mode=search, forwarding any ?q= */}
+          <Route path="/bible/search" element={<BibleSearchRedirect />} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />
           <Route path="/pray" element={<Navigate to="/daily?tab=pray" replace />} />
           <Route path="/journal" element={<Navigate to="/daily?tab=journal" replace />} />
@@ -217,8 +266,10 @@ function App() {
           )}
           <Route path="/login" element={<ComingSoon title="Log In" />} />
           <Route path="/register" element={<Suspense fallback={null}><RegisterPage /></Suspense>} />
+          <Route path="/accessibility" element={<Suspense fallback={<RouteLoadingFallback />}><AccessibilityPage /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </RouteTransition>
         </Suspense>
         </ChunkErrorBoundary>
         </WhisperToastProvider>

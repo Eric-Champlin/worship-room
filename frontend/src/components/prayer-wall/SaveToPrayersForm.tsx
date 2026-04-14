@@ -56,7 +56,7 @@ export function SaveToPrayersForm({
   return (
     <div className="mt-3 border-t border-white/10 pt-3">
       <div
-        className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+        className="grid transition-[grid-template-rows] motion-reduce:transition-none duration-base ease-standard"
         style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
       >
         <div className="overflow-hidden">

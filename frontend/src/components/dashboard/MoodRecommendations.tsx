@@ -175,7 +175,7 @@ export function MoodRecommendations({ moodValue, onAdvanceToDashboard }: MoodRec
                 to={rec.route}
                 onClick={handleCardClick}
                 className={cn(
-                  'flex min-h-[44px] items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 lg:flex-1 lg:flex-col lg:items-start lg:gap-2',
+                  'flex min-h-[44px] items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-colors duration-base hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 lg:flex-1 lg:flex-col lg:items-start lg:gap-2',
                   !prefersReduced && 'motion-safe:animate-fade-in opacity-0',
                 )}
                 style={{

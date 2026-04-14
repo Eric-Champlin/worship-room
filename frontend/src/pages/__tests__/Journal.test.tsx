@@ -10,6 +10,7 @@ import {
   JOURNAL_MODE_KEY,
   DAILY_COMPLETION_KEY,
 } from '@/constants/daily-experience'
+import { _resetCacheForTesting as resetJournalCache } from '@/lib/bible/journalStore'
 import type { PrayContext } from '@/types/daily-experience'
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -64,6 +65,7 @@ const mockUseAuth = vi.mocked(useAuth)
 
 beforeEach(() => {
   localStorage.clear()
+  resetJournalCache()
   vi.resetAllMocks()
   mockUseAuth.mockReturnValue({ user: null, isAuthenticated: true, login: vi.fn(), logout: vi.fn() })
   vi.mocked(window.matchMedia).mockImplementation((query: string) => ({

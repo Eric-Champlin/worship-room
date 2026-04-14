@@ -22,11 +22,25 @@ export interface BibleStreak {
   lastReadDate: string // ISO date string, e.g. "2026-04-07"
 }
 
-/** Single entry in votd.json */
-export interface VotdEntry {
-  reference: string // e.g. "Psalm 23:1"
-  book: string // BIBLE_BOOKS name, e.g. "Psalms"
+/** Theme categories for Verse of the Day entries */
+export type VotdTheme =
+  | 'love' | 'hope' | 'peace' | 'strength' | 'faith' | 'joy'
+  | 'comfort' | 'wisdom' | 'forgiveness' | 'provision' | 'praise' | 'presence'
+
+/** Single entry in votd-list.json (no text — text loaded from WEB JSON) */
+export interface VotdListEntry {
+  ref: string           // human-readable reference, e.g. "John 3:16"
+  book: string          // lowercase slug, e.g. "john"
   chapter: number
-  verse: number
-  text: string // WEB translation text
+  startVerse: number
+  endVerse: number      // equals startVerse for single-verse entries
+  theme: VotdTheme
+}
+
+/** Hydrated VOTD entry with verse text (returned by useVerseOfTheDay) */
+export interface VotdHydrated {
+  entry: VotdListEntry
+  verseText: string     // assembled text from WEB JSON, or fallback
+  bookName: string      // display name from BIBLE_BOOKS, e.g. "John"
+  wordCount: number     // for long-verse font size decision
 }

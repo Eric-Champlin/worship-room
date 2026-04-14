@@ -6,7 +6,10 @@ import { StartingPointQuiz } from '@/components/StartingPointQuiz'
 import { SiteFooter } from '@/components/SiteFooter'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { HOME_METADATA } from '@/lib/seo/routeMetadata'
 import { useRoutePreload } from '@/hooks/useRoutePreload'
+import { useFirstRun } from '@/hooks/useFirstRun'
+import { FirstRunWelcome } from '@/components/onboarding/FirstRunWelcome'
 
 const homepageJsonLd = [
   {
@@ -38,21 +41,11 @@ export function Home() {
   useRoutePreload([
     () => import('@/pages/DailyHub'),
   ])
+  const { isFirstRun, dismissFirstRun } = useFirstRun()
 
   return (
     <div className="min-h-screen bg-neutral-bg font-sans">
-      <SEO
-        title="Worship Room — Christian Emotional Healing & Worship"
-        description="Find comfort, guidance, and spiritual support through AI-powered prayer, Scripture, journaling, meditation, worship music, and community."
-        noSuffix
-        jsonLd={homepageJsonLd}
-      />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
+      <SEO {...HOME_METADATA} jsonLd={homepageJsonLd} />
       <Navbar transparent hideBanner />
       <main id="main-content">
         <HeroSection />
@@ -70,6 +63,7 @@ export function Home() {
       </main>
       <SiteFooter />
       {import.meta.env.DEV && <DevAuthToggle />}
+      {isFirstRun && <FirstRunWelcome onDismiss={dismissFirstRun} />}
     </div>
   )
 }

@@ -1,0 +1,44 @@
+- generic [ref=e68]:
+  - link "Skip to content" [ref=e69] [cursor=pointer]:
+    - /url: "#main-content"
+  - navigation "Main navigation" [ref=e70]:
+    - generic [ref=e71]:
+      - generic [ref=e73]:
+        - link "Worship Room home" [ref=e74] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e76]
+        - generic [ref=e87]
+      - complementary "Seasonal announcement" [ref=e90]:
+        - generic [ref=e91]
+  - main [ref=e103]:
+    - generic [ref=e104]:
+      - generic [ref=e106]:
+        - heading "My Bible everything you've marked" [level=2] [ref=e108]
+        - paragraph [ref=e111]: 5 highlights, 2 notes, 2 bookmarks, across 5 books
+      - generic [ref=e113]:
+        - region "Reading heatmap" [ref=e115]
+        - region "Bible progress map" [ref=e567]
+      - generic [ref=e2032]:
+        - generic [ref=e2033]
+        - generic [ref=e2063]
+        - generic [ref=e2082]
+        - paragraph [ref=e2219]
+  - contentinfo [ref=e2221]:
+    - generic [ref=e2222]:
+      - link "Worship Room home" [ref=e2224] [cursor=pointer]:
+        - /url: /
+        - text: Worship Room
+      - navigation "Footer navigation" [ref=e2225]:
+        - generic [ref=e2226]
+      - separator [ref=e2267]
+      - generic [ref=e2268]:
+        - paragraph [ref=e2269]: Take Worship Room With You
+        - generic [ref=e2270]
+      - separator [ref=e2292]
+      - generic [ref=e2293]:
+        - generic [ref=e2294]: "If you're in crisis:"
+        - generic [ref=e2295]
+        - generic [ref=e2297]: "Crisis Text Line: Text HOME to 741741"
+        - generic [ref=e2298]
+      - paragraph [ref=e2300]: Worship Room provides spiritual encouragement and support. It is not a substitute for professional medical, psychological, or psychiatric care. If you are in crisis, please call 988 (Suicide & Crisis Lifeline) or contact a licensed mental health professional.
+      - paragraph [ref=e2301]: © 2026 Worship Room. All rights reserved.

@@ -150,8 +150,8 @@ describe('WhisperToast', () => {
       screen.getByText('Show Toast').click()
     })
     const toast = screen.getByTestId('whisper-toast')
-    // Reduced motion: no translate-y-4, uses duration-100
-    expect(toast.className).toContain('duration-100')
+    // Reduced motion: no translate-y-4, uses duration-fast (150ms token)
+    expect(toast.className).toContain('duration-fast')
   })
 
   it('only shows one toast at a time', async () => {

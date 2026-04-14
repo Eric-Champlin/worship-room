@@ -80,7 +80,7 @@ export function MonthlyHighlights({
           </>
         ) : (
           <p className="mt-2 text-sm text-white/60">
-            No data yet — start checking in to see your journey!
+            Your highlights will appear here once you've been checking in for a while.
           </p>
         )}
       </div>

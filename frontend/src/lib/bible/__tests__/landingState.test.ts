@@ -1,9 +1,12 @@
-import { describe, expect, it, beforeEach } from 'vitest'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { getLastRead, getActivePlans, getBibleStreak } from '../landingState'
+import { _resetForTesting as resetStreakStore } from '../streakStore'
 
 describe('landingState', () => {
   beforeEach(() => {
     localStorage.clear()
+    resetStreakStore()
+    vi.resetModules()
   })
 
   describe('getLastRead', () => {
@@ -55,14 +58,46 @@ describe('landingState', () => {
   })
 
   describe('getBibleStreak', () => {
-    it('returns null when key missing', () => {
+    it('returns null when no streak data', () => {
       expect(getBibleStreak()).toBeNull()
     })
 
-    it('parses valid data', () => {
-      const streak = { count: 7, lastReadDate: '2026-04-07' }
-      localStorage.setItem('wr_bible_streak', JSON.stringify(streak))
-      expect(getBibleStreak()).toEqual(streak)
+    it('returns BibleStreak shape from store', () => {
+      localStorage.setItem(
+        'bible:streak',
+        JSON.stringify({
+          currentStreak: 7,
+          longestStreak: 7,
+          lastReadDate: '2026-04-07',
+          streakStartDate: '2026-04-01',
+          graceDaysAvailable: 1,
+          graceDaysUsedThisWeek: 0,
+          lastGraceUsedDate: null,
+          weekResetDate: '2026-04-06',
+          milestones: [3, 7],
+          totalDaysRead: 7,
+        }),
+      )
+      expect(getBibleStreak()).toEqual({ count: 7, lastReadDate: '2026-04-07' })
+    })
+
+    it('returns null when currentStreak is 0', () => {
+      localStorage.setItem(
+        'bible:streak',
+        JSON.stringify({
+          currentStreak: 0,
+          longestStreak: 5,
+          lastReadDate: '2026-04-05',
+          streakStartDate: '',
+          graceDaysAvailable: 1,
+          graceDaysUsedThisWeek: 0,
+          lastGraceUsedDate: null,
+          weekResetDate: '',
+          milestones: [3],
+          totalDaysRead: 5,
+        }),
+      )
+      expect(getBibleStreak()).toBeNull()
     })
   })
 })

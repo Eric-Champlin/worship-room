@@ -88,7 +88,7 @@ export function UnsavedChangesModal({ isOpen, onLeave, onStay }: UnsavedChangesM
           <button
             type="button"
             onClick={handleLeave}
-            className="rounded-lg border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan focus-visible:rounded-lg"
+            className="rounded-lg border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan focus-visible:rounded-lg active:scale-[0.98]"
           >
             Leave without saving
           </button>
@@ -96,7 +96,7 @@ export function UnsavedChangesModal({ isOpen, onLeave, onStay }: UnsavedChangesM
             type="button"
             onClick={handleStay}
             autoFocus
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan focus-visible:rounded-lg"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan focus-visible:rounded-lg active:scale-[0.98]"
           >
             Keep editing
           </button>

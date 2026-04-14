@@ -169,7 +169,7 @@ export function WelcomeBack({ userName, faithPoints, onStepIn, onSkipToDashboard
             </p>
             <button
               onClick={handleRepair}
-              className="mt-3 min-h-[44px] w-full rounded-full bg-primary px-8 py-3 font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-transparent sm:w-auto"
+              className="mt-3 min-h-[44px] w-full rounded-full bg-primary px-8 py-3 font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-transparent sm:w-auto active:scale-[0.98]"
             >
               {canRepairFree ? 'Use Free Repair' : 'Repair for 50 pts'}
             </button>

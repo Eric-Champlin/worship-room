@@ -5,6 +5,7 @@ import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { PageHero } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
+import { MY_PRAYERS_METADATA } from '@/lib/seo/routeMetadata'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
 import type { FaithfulnessScripture } from '@/constants/faithfulness-scriptures'
@@ -176,7 +177,7 @@ export function MyPrayers() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="My Saved Prayers" description="Your saved prayers and prayer history on Worship Room." noIndex />
+      <SEO {...MY_PRAYERS_METADATA} />
       <Navbar transparent />
       <PageHero title="My Prayers" subtitle="Your personal conversation with God." scriptWord="Prayers" />
 
@@ -203,7 +204,7 @@ export function MyPrayers() {
         onAddPrayer={() => setComposerOpen(true)}
       />
 
-      <main className="min-h-[50vh] px-4 py-4">
+      <main id="main-content" className="min-h-[50vh] px-4 py-4">
         <div className="mx-auto max-w-3xl">
           <PrayerComposer
             isOpen={composerOpen}

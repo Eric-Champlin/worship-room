@@ -1,4 +1,5 @@
 import type { PrayerCategory } from '@/constants/prayer-categories'
+import type { PrayerVerseContext } from '@/types/daily-experience'
 
 export interface PersonalPrayer {
   id: string
@@ -15,6 +16,7 @@ export interface PersonalPrayer {
   reminderTime?: string
   sourceType?: 'prayer_wall'
   sourceId?: string
+  verseContext?: PrayerVerseContext
 }
 
 export type PrayerListFilter = 'all' | 'active' | 'answered'

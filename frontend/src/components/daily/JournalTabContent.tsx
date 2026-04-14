@@ -10,6 +10,7 @@ import {
   JOURNAL_MILESTONES_KEY,
   JOURNAL_MODE_KEY,
   JOURNAL_DRAFT_KEY,
+  VERSE_FRAMINGS,
 } from '@/constants/daily-experience'
 import {
   getJournalPrompts,
@@ -18,7 +19,10 @@ import {
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { JournalInput } from '@/components/daily/JournalInput'
 import { SavedEntriesList } from '@/components/daily/SavedEntriesList'
-import type { JournalMode, SavedJournalEntry, PrayContext } from '@/types/daily-experience'
+import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
+import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
+import { getAllJournalEntries, createJournalEntry, JournalStorageFullError } from '@/lib/bible/journalStore'
+import type { JournalMode, SavedJournalEntry, PrayContext, JournalVerseContext } from '@/types/daily-experience'
 
 const JOURNAL_MILESTONES: Record<number, string> = {
   10: '10 entries! Your journal is becoming a treasure.',
@@ -41,8 +45,13 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   const { recordActivity } = useFaithPoints()
   const location = useLocation()
   const navigate = useNavigate()
+  const { verseContext, isHydrating, clearVerseContext } = useVerseContextPreload('journal')
   const prayWallContext = (location.state as { prayWallContext?: string } | null)?.prayWallContext
   const challengeContext = (location.state as { challengeContext?: { actionType: string; dailyAction: string } } | null)?.challengeContext
+
+  const journalVerseContext: JournalVerseContext | null = verseContext
+    ? { book: verseContext.book, chapter: verseContext.chapter, startVerse: verseContext.startVerse, endVerse: verseContext.endVerse, reference: verseContext.reference }
+    : null
 
   // Mode toggle
   const [mode, setMode] = useState<JournalMode>(() => {
@@ -63,8 +72,22 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
     Math.floor(Math.random() * allPrompts.length),
   )
 
-  // Saved entries
-  const [savedEntries, setSavedEntries] = useState<SavedJournalEntry[]>([])
+  // Saved entries — load from persistent store on mount
+  const [savedEntries, setSavedEntries] = useState<SavedJournalEntry[]>(() => {
+    try {
+      return getAllJournalEntries()
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .map((e) => ({
+          id: e.id,
+          content: e.body,
+          timestamp: new Date(e.createdAt).toISOString(),
+          mode: 'free' as JournalMode,
+          ...(e.verseContext && { verseContext: e.verseContext }),
+        }))
+    } catch {
+      return []
+    }
+  })
 
   // Parent textarea ref for scroll-to-focus
   const parentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -178,12 +201,27 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   )
 
   const handleEntrySave = (entry: { content: string; mode: JournalMode; promptText?: string }) => {
+    // Persist to journal store
+    let storeEntry: { id: string; createdAt: number }
+    try {
+      storeEntry = createJournalEntry(
+        entry.content,
+        journalVerseContext ?? undefined,
+      )
+    } catch (e) {
+      if (e instanceof JournalStorageFullError) {
+        showToast('Storage full — clear some journal entries to free space.')
+      }
+      storeEntry = { id: `entry-${Date.now()}`, createdAt: Date.now() }
+    }
+
     const savedEntry: SavedJournalEntry = {
-      id: `entry-${Date.now()}`,
+      id: storeEntry.id,
       content: entry.content,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(storeEntry.createdAt).toISOString(),
       mode: entry.mode,
       promptText: entry.promptText,
+      ...(journalVerseContext && { verseContext: journalVerseContext }),
     }
     setSavedEntries((prev) => [savedEntry, ...prev])
     markJournalComplete()
@@ -254,6 +292,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
         {draftConflictPending && prayContext?.from === 'devotional' && (
           <div
             role="dialog"
+            aria-modal="true"
             aria-labelledby="draft-conflict-title"
             className="mb-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] p-6 backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]"
           >
@@ -281,6 +320,16 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
               </button>
             </div>
           </div>
+        )}
+
+        {/* Verse Prompt Card (from Bible bridge) */}
+        {isHydrating && <VersePromptSkeleton />}
+        {verseContext && (
+          <VersePromptCard
+            context={verseContext}
+            onRemove={clearVerseContext}
+            framingLine={VERSE_FRAMINGS.journal}
+          />
         )}
 
         <JournalInput

@@ -700,7 +700,7 @@ function SparkleOverlay({
       {particles.map((p) => (
         <div
           key={p.id}
-          className={`absolute h-1 w-1 rounded-full ${amplified ? 'bg-[rgba(109,40,217,0.7)]' : 'bg-[rgba(109,40,217,0.5)]'} animate-garden-sparkle-rise`}
+          className={`absolute h-1 w-1 rounded-full ${amplified ? 'bg-[rgba(109,40,217,0.7)]' : 'bg-[rgba(109,40,217,0.5)]'} motion-safe:animate-garden-sparkle-rise`}
           style={{
             left: `${p.x}%`,
             bottom: '30%',
@@ -823,7 +823,7 @@ export const GrowthGarden = forwardRef<SVGSVGElement, GrowthGardenProps>(functio
           viewBox="0 0 800 400"
           preserveAspectRatio="xMidYMid slice"
           aria-hidden="true"
-          className="absolute inset-0 animate-garden-fade-out"
+          className="absolute inset-0 motion-safe:animate-garden-fade-out"
           data-testid="garden-transition-old"
         >
           <SkyBackground uid={`${uid}-old`} streakActive={streakActive} hour={hour} />
@@ -841,7 +841,7 @@ export const GrowthGarden = forwardRef<SVGSVGElement, GrowthGardenProps>(functio
         preserveAspectRatio="xMidYMid slice"
         role="img"
         aria-label={getGardenAriaLabel(displayStage, seasonName, skyConfig.timeOfDay)}
-        className={isTransitioning ? 'animate-garden-fade-in' : undefined}
+        className={isTransitioning ? 'motion-safe:animate-garden-fade-in' : undefined}
         data-testid={isTransitioning ? 'garden-transition-new' : undefined}
       >
         <SkyBackground uid={uid} streakActive={streakActive} hour={hour} />

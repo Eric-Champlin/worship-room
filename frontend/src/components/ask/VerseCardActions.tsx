@@ -4,11 +4,11 @@ import { Highlighter, StickyNote, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
-import { useBibleNotes } from '@/hooks/useBibleNotes'
+import { getNoteForVerse, upsertNote, NoteStorageFullError } from '@/lib/bible/notes/store'
 import { useToast } from '@/components/ui/Toast'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { SharePanel } from '@/components/sharing/SharePanel'
-import { NOTE_MAX_CHARS } from '@/constants/bible'
+import { NOTE_BODY_MAX_CHARS } from '@/constants/bible'
 import type { AskVerse } from '@/types/ask'
 import type { ParsedVerseReference } from '@/lib/parse-verse-references'
 
@@ -22,7 +22,6 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
   const authModal = useAuthModal()
   const navigate = useNavigate()
   const { showToast } = useToast()
-  const { getNoteForVerse, saveNote } = useBibleNotes()
   const [showNoteInput, setShowNoteInput] = useState(false)
   const [noteText, setNoteText] = useState('')
   const [showSharePanel, setShowSharePanel] = useState(false)
@@ -32,10 +31,10 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
     if (showNoteInput && parsedRef) {
       const existing = getNoteForVerse(parsedRef.book, parsedRef.chapter, parsedRef.verseStart)
       if (existing) {
-        setNoteText(existing.text)
+        setNoteText(existing.body)
       }
     }
-  }, [showNoteInput, parsedRef, getNoteForVerse])
+  }, [showNoteInput, parsedRef])
 
   if (!parsedRef) return null
 
@@ -44,7 +43,8 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
       authModal?.openAuthModal('Sign in to save highlights and notes')
       return
     }
-    navigate(`/bible/${parsedRef.bookSlug}/${parsedRef.chapter}?highlight=${parsedRef.verseStart}#verse-${parsedRef.verseStart}`)
+    // BB-38: write ?scroll-to= (renamed from ?highlight=) for the one-shot arrival glow.
+    navigate(`/bible/${parsedRef.bookSlug}/${parsedRef.chapter}?scroll-to=${parsedRef.verseStart}#verse-${parsedRef.verseStart}`)
   }
 
   const handleSaveNoteClick = () => {
@@ -57,13 +57,23 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
 
   const handleSave = () => {
     if (!noteText.trim()) return
-    const success = saveNote(parsedRef.book, parsedRef.chapter, parsedRef.verseStart, noteText.trim())
-    if (success) {
+    try {
+      upsertNote(
+        {
+          book: parsedRef.book,
+          chapter: parsedRef.chapter,
+          startVerse: parsedRef.verseStart,
+          endVerse: parsedRef.verseEnd ?? parsedRef.verseStart,
+        },
+        noteText.trim(),
+      )
       setShowNoteInput(false)
       setNoteText('')
       showToast('Note saved.')
-    } else {
-      showToast("You've filled your notebook! Remove an older note to make room.", 'error')
+    } catch (e) {
+      if (e instanceof NoteStorageFullError) {
+        showToast("You've filled your notebook! Remove an older note to make room.", 'error')
+      }
     }
   }
 
@@ -80,7 +90,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
           onClick={handleHighlight}
           className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
         >
-          <Highlighter className="h-3.5 w-3.5" />
+          <Highlighter className="h-3.5 w-3.5" aria-hidden="true" />
           Highlight in Bible
         </button>
         <button
@@ -88,7 +98,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
           onClick={handleSaveNoteClick}
           className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
         >
-          <StickyNote className="h-3.5 w-3.5" />
+          <StickyNote className="h-3.5 w-3.5" aria-hidden="true" />
           Save note
         </button>
         <button
@@ -97,7 +107,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
           className="inline-flex min-h-[44px] items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-primary"
           aria-label={`Share ${verse.reference}`}
         >
-          <Share2 className="h-3.5 w-3.5" />
+          <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
           Share
         </button>
       </div>
@@ -109,7 +119,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
       />
 
       {showNoteInput && (
-        <div className="mt-3 overflow-hidden transition-all duration-300">
+        <div className="mt-3 overflow-hidden transition-all motion-reduce:transition-none duration-base">
           <label htmlFor={`note-${verse.reference}`} className="sr-only">
             Note for {verse.reference}
           </label>
@@ -118,9 +128,9 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
             placeholder="Add a note about this verse..."
-            maxLength={NOTE_MAX_CHARS}
+            maxLength={NOTE_BODY_MAX_CHARS}
             rows={3}
-            aria-invalid={noteText.length > NOTE_MAX_CHARS ? 'true' : undefined}
+            aria-invalid={noteText.length > NOTE_BODY_MAX_CHARS ? 'true' : undefined}
             aria-describedby={`note-count-${verse.reference}`}
             className={cn(
               'w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2',
@@ -130,7 +140,7 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
           />
           <div className="mt-1 flex items-center justify-between">
             <span id={`note-count-${verse.reference}`} className="text-xs text-white/60">
-              {noteText.length} / {NOTE_MAX_CHARS}
+              {noteText.length} / {NOTE_BODY_MAX_CHARS}
             </span>
             <div className="flex gap-2">
               <button

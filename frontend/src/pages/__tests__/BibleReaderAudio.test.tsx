@@ -1,163 +1,146 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+/**
+ * BibleReaderAudio.test.tsx — Audio integration tests for the redesigned BibleReader.
+ *
+ * History: The original tests (pre-BB-30+) covered AudioControlBar (TTS playback),
+ * BibleAmbientChip, useBibleAudio TTS verse highlighting (border-l-2, aria-current),
+ * ChapterNav ("Previous Chapter"/"Next Chapter"), ChapterEngagementBridge
+ * ("Continue your time with…"), IO sentinel, and role="button" verse spans.
+ *
+ * All of those features were removed in the BB-30+ Bible redesign wave:
+ *   - AudioControlBar + useBibleAudio → removed (no in-reader TTS)
+ *   - BibleAmbientChip → replaced by AmbientAudioPicker in ReaderChrome
+ *   - TTS verse highlighting → removed
+ *   - ChapterNav → replaced by ReaderChapterNav (shows "Book N" not "Previous/Next Chapter")
+ *   - ChapterEngagementBridge → removed
+ *   - IO scroll sentinel → removed
+ *   - role="button" verse spans → removed (useVerseTap container delegation)
+ *
+ * The tests below cover the CURRENT audio integration surface:
+ *   - ReaderChrome ambient audio button rendering
+ *   - AmbientAudioPicker toggle via chrome bar
+ *   - ReaderChapterNav (correct book/chapter links)
+ *   - Verse data attributes for container event delegation
+ *   - Reader theme attribute
+ */
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { BibleReader } from '../BibleReader'
-import type { BibleChapter } from '@/types/bible'
 
-// --- Auth mock ---
-const mockAuth = {
-  isAuthenticated: false,
-  user: null,
-  login: vi.fn(),
-  logout: vi.fn(),
-}
-
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => mockAuth,
-}))
-
-vi.mock('@/contexts/AuthContext', () => ({
-  useAuth: () => mockAuth,
-}))
-
-vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
-  useAuthModal: () => ({ openAuthModal: vi.fn() }),
-}))
-
-vi.mock('@/hooks/useNotificationActions', () => ({
-  useNotificationActions: () => ({
-    notifications: [],
-    unreadCount: 0,
-    markAllAsRead: vi.fn(),
-    markAsRead: vi.fn(),
-    clearAll: vi.fn(),
-  }),
-}))
+// --- Data mock: loadChapterWeb (replaces old loadChapter mock) ---
+vi.mock('@/data/bible', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/data/bible')>()
+  return {
+    ...actual,
+    loadChapterWeb: vi.fn(async (slug: string, chapter: number) => {
+      if (slug === 'genesis' && chapter === 1) {
+        return {
+          bookSlug: 'genesis',
+          chapter: 1,
+          verses: [
+            { number: 1, text: 'In the beginning, God created the heavens and the earth.' },
+            { number: 2, text: 'The earth was formless and empty.' },
+            { number: 3, text: 'God said, "Let there be light," and there was light.' },
+          ],
+          paragraphs: [],
+        }
+      }
+      if (slug === 'genesis') {
+        return {
+          bookSlug: 'genesis',
+          chapter,
+          verses: [{ number: 1, text: 'Test verse.' }],
+          paragraphs: [],
+        }
+      }
+      return null
+    }),
+  }
+})
 
 vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
-  useToastSafe: () => ({ showToast: vi.fn() }),
 }))
 
-vi.mock('@/hooks/useWhisperToast', () => ({
-  useWhisperToast: () => ({ showWhisperToast: vi.fn() }),
+vi.mock('@/lib/bible/crossRefs/loader', () => ({
+  loadCrossRefsForBook: vi.fn().mockResolvedValue(new Map()),
 }))
 
-vi.mock('@/hooks/useBibleHighlights', () => ({
-  useBibleHighlights: () => ({
-    getHighlightsForChapter: vi.fn().mockReturnValue([]),
-    getHighlightForVerse: vi.fn().mockReturnValue(undefined),
-    setHighlight: vi.fn(),
-    removeHighlight: vi.fn(),
-    getAllHighlights: vi.fn().mockReturnValue([]),
+vi.mock('@/lib/bible/streakStore', () => ({
+  recordReadToday: vi.fn().mockReturnValue({
+    previousStreak: 0,
+    newStreak: 1,
+    delta: 'first-read' as const,
+    milestoneReached: null,
+    graceDaysRemaining: 1,
+    isFirstReadEver: true,
   }),
-}))
-
-vi.mock('@/hooks/useBibleNotes', () => ({
-  useBibleNotes: () => ({
-    getNotesForChapter: vi.fn().mockReturnValue([]),
-    getNoteForVerse: vi.fn().mockReturnValue(undefined),
-    saveNote: vi.fn().mockReturnValue(true),
-    deleteNote: vi.fn(),
-    getAllNotes: vi.fn().mockReturnValue([]),
+  getStreak: () => ({
+    currentStreak: 0,
+    longestStreak: 0,
+    lastReadDate: '',
+    streakStartDate: '',
+    graceDaysAvailable: 1,
+    graceDaysUsedThisWeek: 0,
+    lastGraceUsedDate: null,
+    weekResetDate: '',
+    milestones: [],
+    totalDaysRead: 0,
   }),
+  subscribe: () => () => {},
 }))
 
-vi.mock('@/hooks/useBibleProgress', () => ({
-  useBibleProgress: () => ({
-    progress: {},
-    markChapterRead: vi.fn(),
-    getBookProgress: vi.fn().mockReturnValue([]),
-    isChapterRead: vi.fn().mockReturnValue(false),
-  }),
+// --- BB-20 mocks ---
+vi.mock('@/hooks/useReaderAudioAutoStart', () => ({
+  useReaderAudioAutoStart: vi.fn(),
 }))
 
-// --- Bible audio mock ---
-const mockBibleAudio = {
-  playbackState: 'idle' as 'idle' | 'playing' | 'paused',
-  currentVerseIndex: -1,
-  totalVerses: 3,
-  speed: 1,
-  setSpeed: vi.fn(),
-  voiceGender: 'female' as const,
-  setVoiceGender: vi.fn(),
-  availableVoiceCount: 2,
-  play: vi.fn(),
-  pause: vi.fn(),
-  stop: vi.fn(),
-  isSupported: true,
+vi.mock('@/components/bible/reader/AmbientAudioPicker', () => ({
+  AmbientAudioPicker: () => null,
+}))
+
+// --- AudioProvider mock (with useReadingContext) ---
+const mockSetReadingContext = vi.fn()
+const mockClearReadingContext = vi.fn()
+
+const DEFAULT_AUDIO_STATE = {
+  drawerOpen: false,
+  activeSounds: [] as Array<{ soundId: string; volume: number; label: string }>,
+  isPlaying: false,
+  pillVisible: false,
+  masterVolume: 0.8,
+  foregroundContent: null,
+  foregroundBackgroundBalance: 0.8,
+  sleepTimer: null,
+  activeRoutine: null,
+  currentSceneName: null,
+  currentSceneId: null,
+  foregroundEndedCounter: 0,
+  readingContext: null,
 }
 
-vi.mock('@/hooks/useBibleAudio', () => ({
-  useBibleAudio: () => mockBibleAudio,
-}))
+let mockAudioState = { ...DEFAULT_AUDIO_STATE }
 
 vi.mock('@/components/audio/AudioProvider', () => ({
-  useAudioState: () => ({
-    activeSounds: [],
-    masterVolume: 0.8,
-    isPlaying: false,
-    pillVisible: false,
-    drawerOpen: false,
-    currentSceneName: null,
-    foregroundContent: null,
-    sleepTimer: null,
-    activeRoutine: null,
-  }),
+  useAudioState: () => mockAudioState,
   useAudioDispatch: () => vi.fn(),
   useAudioEngine: () => null,
+  useReadingContext: () => ({
+    setReadingContext: mockSetReadingContext,
+    clearReadingContext: mockClearReadingContext,
+  }),
   useSleepTimerControls: () => ({
     remainingMs: 0,
     totalDurationMs: 0,
-    fadeDurationMs: 0,
-    phase: null,
     isActive: false,
     isPaused: false,
-    fadeStatus: 'none',
-    fadeRemainingMs: 0,
     start: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
     cancel: vi.fn(),
   }),
 }))
-
-vi.mock('@/hooks/useScenePlayer', () => ({
-  useScenePlayer: () => ({
-    activeSceneId: null,
-    loadScene: vi.fn(),
-    isLoading: false,
-    undoAvailable: false,
-    undoSceneSwitch: vi.fn(),
-    pendingRoutineInterrupt: null,
-    confirmRoutineInterrupt: vi.fn(),
-    cancelRoutineInterrupt: vi.fn(),
-  }),
-}))
-
-// --- Data mock ---
-const mockGenesisChapter1: BibleChapter = {
-  bookSlug: 'genesis',
-  chapter: 1,
-  verses: [
-    { number: 1, text: 'In the beginning, God created the heavens and the earth.' },
-    { number: 2, text: 'The earth was formless and empty.' },
-    { number: 3, text: 'God said, "Let there be light," and there was light.' },
-  ],
-}
-
-vi.mock('@/data/bible', async () => {
-  const actual = await vi.importActual('@/data/bible')
-  return {
-    ...actual,
-    loadChapter: vi.fn().mockImplementation((slug: string, chapter: number) => {
-      if (slug === 'genesis' && chapter === 1) return Promise.resolve(mockGenesisChapter1)
-      if (slug === 'genesis') return Promise.resolve({ bookSlug: 'genesis', chapter, verses: [{ number: 1, text: 'Test.' }] })
-      return Promise.resolve(null)
-    }),
-  }
-})
 
 function renderReader(route: string) {
   return render(
@@ -170,125 +153,110 @@ function renderReader(route: string) {
   )
 }
 
-describe('BibleReader — Audio Integration', () => {
+describe('BibleReader — Audio Integration (BB-20+ redesign)', () => {
   beforeEach(() => {
     localStorage.clear()
-    mockAuth.isAuthenticated = false
-    mockBibleAudio.isSupported = true
-    mockBibleAudio.playbackState = 'idle'
-    mockBibleAudio.currentVerseIndex = -1
+    mockAudioState = { ...DEFAULT_AUDIO_STATE }
+    vi.clearAllMocks()
   })
 
-  describe('Audio control bar', () => {
-    it('renders on full-text chapters', async () => {
+  describe('ReaderChrome ambient audio button', () => {
+    it('renders ambient audio button in the chrome bar', async () => {
       renderReader('/bible/genesis/1')
       await waitFor(() => {
-        expect(screen.getByLabelText('Play chapter')).toBeInTheDocument()
+        expect(screen.getByLabelText('Open ambient sounds')).toBeInTheDocument()
       })
     })
 
+    it('shows playing label when ambient audio is active', async () => {
+      mockAudioState = {
+        ...DEFAULT_AUDIO_STATE,
+        activeSounds: [{ soundId: 'gentle-rain', volume: 0.6, label: 'Gentle Rain' }],
+        isPlaying: true,
+      }
 
-    it('hidden when TTS unsupported', async () => {
-      mockBibleAudio.isSupported = false
       renderReader('/bible/genesis/1')
       await waitFor(() => {
-        expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
-      })
-      expect(screen.queryByLabelText('Play chapter')).not.toBeInTheDocument()
-    })
-  })
-
-  describe('Ambient chip', () => {
-    it('renders below audio bar', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByLabelText('Add background sounds')).toBeInTheDocument()
+        expect(
+          screen.getByLabelText('Ambient audio playing — tap to open sound controls'),
+        ).toBeInTheDocument()
       })
     })
   })
 
-  describe('TTS verse highlighting', () => {
-    it('applies border-l-2 class on active verse', async () => {
-      mockBibleAudio.currentVerseIndex = 1
+  describe('Reading context management', () => {
+    it('sets reading context when audio is playing', async () => {
+      mockAudioState = {
+        ...DEFAULT_AUDIO_STATE,
+        activeSounds: [{ soundId: 'gentle-rain', volume: 0.6, label: 'Gentle Rain' }],
+        isPlaying: true,
+      }
 
       renderReader('/bible/genesis/1')
       await waitFor(() => {
-        expect(screen.getByText('The earth was formless and empty.')).toBeInTheDocument()
+        expect(mockSetReadingContext).toHaveBeenCalledWith({
+          book: 'Genesis',
+          chapter: 1,
+        })
       })
-
-      // The 2nd verse's outer div should have TTS highlight classes
-      const verseSpan = screen.getByLabelText('Verse 2')
-      const outerDiv = verseSpan.parentElement!
-      expect(outerDiv.className).toContain('border-l-2')
-      expect(outerDiv.className).toContain('border-primary')
-      expect(outerDiv.className).toContain('bg-primary/5')
     })
 
-    it('has aria-current="true" on active verse', async () => {
-      mockBibleAudio.currentVerseIndex = 0
-
-      renderReader('/bible/genesis/1')
+    it('clears reading context on unmount', async () => {
+      const { unmount } = renderReader('/bible/genesis/1')
       await waitFor(() => {
-        expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
+        expect(document.querySelectorAll('span[data-verse]').length).toBeGreaterThan(0)
       })
 
-      const verseSpan = screen.getByLabelText('Verse 1')
-      const outerDiv = verseSpan.parentElement!
-      expect(outerDiv).toHaveAttribute('aria-current', 'true')
-    })
-
-    it('non-active verses do NOT have TTS highlight', async () => {
-      mockBibleAudio.currentVerseIndex = 0
-
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        expect(screen.getByText('The earth was formless and empty.')).toBeInTheDocument()
-      })
-
-      const verse2Span = screen.getByLabelText('Verse 2')
-      const verse2Div = verse2Span.parentElement!
-      expect(verse2Div.className).not.toContain('border-l-2')
-      expect(verse2Div).not.toHaveAttribute('aria-current')
+      unmount()
+      expect(mockClearReadingContext).toHaveBeenCalled()
     })
   })
 
-  describe('Non-regression checks', () => {
-    it('IO sentinel still present for scroll completion', async () => {
+  describe('Verse rendering', () => {
+    it('renders verses with data attributes for event delegation', async () => {
       renderReader('/bible/genesis/1')
       await waitFor(() => {
-        expect(screen.getByText('In the beginning, God created the heavens and the earth.')).toBeInTheDocument()
+        const spans = document.querySelectorAll('span[data-verse]')
+        expect(spans.length).toBe(3)
       })
 
-      const sentinel = document.querySelector('[aria-hidden="true"].h-1')
-      expect(sentinel).toBeInTheDocument()
+      const verse1 = document.querySelector('span[data-verse="1"]')!
+      expect(verse1).toBeInTheDocument()
+      expect(verse1.getAttribute('data-book')).toBe('genesis')
+      expect(verse1.getAttribute('data-chapter')).toBe('1')
     })
 
-    it('ChapterNav renders', async () => {
+    it('renders verse text correctly', async () => {
+      renderReader('/bible/genesis/1')
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'In the beginning, God created the heavens and the earth.',
+          ),
+        ).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('ReaderChapterNav', () => {
+    it('renders chapter navigation for middle chapters', async () => {
       renderReader('/bible/genesis/2')
       await waitFor(() => {
-        expect(screen.getByText('Previous Chapter')).toBeInTheDocument()
-        expect(screen.getByText('Next Chapter')).toBeInTheDocument()
+        expect(document.querySelectorAll('span[data-verse]').length).toBeGreaterThan(0)
       })
-    })
 
-    it('cross-feature CTAs present', async () => {
+      const nav = document.querySelector('nav[aria-label="Chapter navigation"]')
+      expect(nav).toBeInTheDocument()
+    })
+  })
+
+  describe('Reader theme', () => {
+    it('applies data-reader-theme attribute', async () => {
       renderReader('/bible/genesis/1')
       await waitFor(() => {
-        expect(screen.getByText('Continue your time with Genesis 1')).toBeInTheDocument()
-      })
-      // Engagement bridge section has Pray CTA linking to /daily?tab=pray
-      const heading = screen.getByText('Continue your time with Genesis 1')
-      const section = heading.closest('section')!
-      const prayLink = within(section).getByText('Pray').closest('a')
-      expect(prayLink).toHaveAttribute('href', expect.stringContaining('/daily?tab=pray'))
-    })
-
-    it('verse click still works (no broken interactions)', async () => {
-      renderReader('/bible/genesis/1')
-      await waitFor(() => {
-        const verse = screen.getByLabelText('Verse 1')
-        expect(verse).toHaveAttribute('role', 'button')
-        expect(verse).toHaveAttribute('tabindex', '0')
+        const themed = document.querySelector('[data-reader-theme]')
+        expect(themed).toBeTruthy()
+        expect(themed!.getAttribute('data-reader-theme')).toBe('midnight')
       })
     })
   })

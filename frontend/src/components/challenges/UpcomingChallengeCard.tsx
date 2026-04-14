@@ -36,7 +36,7 @@ export function UpcomingChallengeCard({
           onClick()
         }
       }}
-      className="cursor-pointer rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow lg:hover:shadow-md lg:hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+      className="cursor-pointer rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
     >
       <div className="mb-3 flex items-start justify-between">
         <div className="flex items-center gap-3">

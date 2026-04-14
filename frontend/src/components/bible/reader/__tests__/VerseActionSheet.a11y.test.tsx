@@ -1,0 +1,182 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import { useState } from 'react'
+import { VerseActionSheet } from '../VerseActionSheet'
+import type { VerseSelection } from '@/types/verse-actions'
+import type { DeepLinkableAction } from '@/lib/url/validateAction'
+
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+
+vi.mock('@/hooks/useReducedMotion', () => ({
+  useReducedMotion: () => false,
+}))
+
+vi.mock('@/hooks/useFocusTrap', () => ({
+  useFocusTrap: (_isActive: boolean, _onEscape?: () => void) => {
+    return { current: null }
+  },
+}))
+
+// ---------------------------------------------------------------------------
+// Test data
+// ---------------------------------------------------------------------------
+
+const SINGLE_VERSE: VerseSelection = {
+  book: 'john',
+  bookName: 'John',
+  chapter: 3,
+  startVerse: 16,
+  endVerse: 16,
+  verses: [
+    {
+      number: 16,
+      text: 'For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.',
+    },
+  ],
+}
+
+const MULTI_VERSE: VerseSelection = {
+  book: 'john',
+  bookName: 'John',
+  chapter: 3,
+  startVerse: 16,
+  endVerse: 18,
+  verses: [
+    { number: 16, text: 'For God so loved the world...' },
+    { number: 17, text: "For God didn't send his Son..." },
+    { number: 18, text: 'He who believes in him...' },
+  ],
+}
+
+// BB-38: Stateful wrapper for sub-view mounting via action prop.
+type SheetWithStateProps = {
+  selection?: VerseSelection
+  isOpen?: boolean
+  initialAction?: DeepLinkableAction | null
+  onClose?: (options?: { navigating?: boolean }) => void
+  onExtendSelection?: (verseNumber: number) => void
+}
+
+function SheetWithState(props: SheetWithStateProps) {
+  const [action, setAction] = useState<DeepLinkableAction | null>(props.initialAction ?? null)
+  return (
+    <VerseActionSheet
+      selection={props.selection ?? SINGLE_VERSE}
+      isOpen={props.isOpen ?? true}
+      onClose={props.onClose ?? vi.fn()}
+      onExtendSelection={props.onExtendSelection ?? vi.fn()}
+      action={action}
+      onOpenAction={setAction}
+      onCloseAction={() => setAction(null)}
+    />
+  )
+}
+
+function renderSheet(overrides: SheetWithStateProps = {}) {
+  return render(
+    <MemoryRouter>
+      <SheetWithState {...overrides} />
+    </MemoryRouter>,
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+describe('VerseActionSheet accessibility', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.assign(navigator, {
+      clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
+    })
+  })
+
+  it('dialog role and aria attributes', () => {
+    renderSheet()
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toHaveAttribute('aria-modal', 'true')
+    expect(dialog).toHaveAttribute('aria-label', 'Actions for John 3:16')
+  })
+
+  it('aria-live announces single selection on open', () => {
+    const { container } = renderSheet()
+    const live = container.querySelector('[aria-live="polite"]')
+    expect(live).toBeTruthy()
+    expect(live!.textContent).toContain('Actions for John 3:16')
+  })
+
+  it('aria-live announces range selection', () => {
+    const { container } = renderSheet({ selection: MULTI_VERSE })
+    const live = container.querySelector('[aria-live="polite"]')
+    expect(live!.textContent).toContain('Selected John 3:16 through 18')
+  })
+
+  it('all primary action buttons have min 44px tap targets', () => {
+    renderSheet()
+    const highlight = screen.getByLabelText('Highlight')
+    const note = screen.getByLabelText('Note')
+    const bookmark = screen.getByLabelText('Bookmark')
+    const share = screen.getByLabelText('Share')
+
+    for (const btn of [highlight, note, bookmark, share]) {
+      expect(btn.className).toContain('min-h-[44px]')
+      expect(btn.className).toContain('min-w-[44px]')
+    }
+  })
+
+  it('all secondary action buttons have min 44px height', () => {
+    renderSheet()
+    const secondary = [
+      'Pray about this',
+      'Journal about this',
+      'Meditate on this',
+      'Cross-references',
+      'Explain this passage',
+      'Memorize',
+      'Copy',
+      'Copy with reference',
+    ]
+
+    for (const label of secondary) {
+      const btn = screen.getByLabelText(label)
+      expect(btn.className).toContain('min-h-[44px]')
+    }
+  })
+
+  it('keyboard shortcut 1 activates first primary action (Highlight)', () => {
+    renderSheet()
+    fireEvent.keyDown(window, { key: '1' })
+    // Highlight has a sub-view — BB-7 color picker renders
+    expect(screen.getByLabelText('Peace highlight')).toBeInTheDocument()
+  })
+
+  it('keyboard c activates copy', () => {
+    renderSheet()
+    fireEvent.keyDown(window, { key: 'c' })
+    expect(navigator.clipboard.writeText).toHaveBeenCalled()
+  })
+
+  it('close button has accessible label', () => {
+    renderSheet()
+    expect(screen.getByLabelText('Close')).toBeInTheDocument()
+  })
+
+  it('copy-ref button has accessible label', () => {
+    renderSheet()
+    expect(screen.getByLabelText('Copy reference')).toBeInTheDocument()
+  })
+
+  it('sub-view back button has accessible label', () => {
+    renderSheet()
+    fireEvent.click(screen.getByLabelText('Highlight'))
+    expect(screen.getByLabelText('Back')).toBeInTheDocument()
+  })
+})

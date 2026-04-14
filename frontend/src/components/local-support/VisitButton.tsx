@@ -134,7 +134,7 @@ export function VisitNote({ visitState }: { visitState: VisitState }) {
     <div
       className={cn(
         'mt-2',
-        !prefersReducedMotion && 'animate-fade-in',
+        !prefersReducedMotion && 'motion-safe:animate-fade-in',
       )}
     >
       <textarea

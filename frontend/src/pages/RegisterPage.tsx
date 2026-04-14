@@ -3,6 +3,7 @@ import { Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
+import { REGISTER_METADATA } from '@/lib/seo/routeMetadata'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useInView } from '@/hooks/useInView'
@@ -62,17 +63,8 @@ export function RegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
-      <SEO
-        title="Get Started"
-        description="Create your free Worship Room account — AI-powered prayer, Bible reading, journaling, meditation, worship music, and community. Completely free, forever."
-        canonical="/register"
-      />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
-      >
-        Skip to content
-      </a>
+      {/* BB-40: noIndex added; drop inline canonical (default resolves to /register). */}
+      <SEO {...REGISTER_METADATA} />
       <Navbar />
 
       <main id="main-content">
@@ -81,7 +73,7 @@ export function RegisterPage() {
           ref={heroRef}
           aria-labelledby="register-hero-heading"
           className={cn(
-            'bg-gradient-to-b from-hero-dark to-hero-mid pt-32 pb-16 sm:pt-40 sm:pb-24 transition-all duration-500 ease-out',
+            'bg-gradient-to-b from-hero-dark to-hero-mid pt-32 pb-16 sm:pt-40 sm:pb-24 transition-all motion-reduce:transition-none duration-slow ease-decelerate',
             heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}
         >
@@ -100,7 +92,7 @@ export function RegisterPage() {
             <button
               type="button"
               onClick={() => authModal?.openAuthModal(undefined, 'register')}
-              className="mt-8 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-lg font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:w-auto"
+              className="mt-8 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-lg font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:w-auto active:scale-[0.98]"
             >
               Create Your Free Account
             </button>
@@ -128,7 +120,7 @@ export function RegisterPage() {
                 <div
                   key={feature.title}
                   className={cn(
-                    'rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-all duration-500 ease-out hover:bg-white/[0.07] sm:p-8',
+                    'rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-all motion-reduce:transition-none duration-slow ease-decelerate hover:bg-white/[0.07] sm:p-8',
                     featuresInView
                       ? 'opacity-100 translate-y-0'
                       : 'opacity-0 translate-y-4'
@@ -170,7 +162,7 @@ export function RegisterPage() {
                 <div
                   key={stat.value}
                   className={cn(
-                    'text-center transition-all duration-500 ease-out',
+                    'text-center transition-all motion-reduce:transition-none duration-slow ease-decelerate',
                     statsInView
                       ? 'opacity-100 translate-y-0'
                       : 'opacity-0 translate-y-4'
@@ -192,7 +184,7 @@ export function RegisterPage() {
           ref={diffRef}
           aria-labelledby="register-why-heading"
           className={cn(
-            'py-16 sm:py-24 transition-all duration-500 ease-out',
+            'py-16 sm:py-24 transition-all motion-reduce:transition-none duration-slow ease-decelerate',
             diffInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}
         >
@@ -223,7 +215,7 @@ export function RegisterPage() {
           ref={ctaRef}
           aria-labelledby="register-cta-heading"
           className={cn(
-            'py-16 text-center sm:py-24 transition-all duration-500 ease-out',
+            'py-16 text-center sm:py-24 transition-all motion-reduce:transition-none duration-slow ease-decelerate',
             ctaInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}
         >
@@ -237,7 +229,7 @@ export function RegisterPage() {
             <button
               type="button"
               onClick={() => authModal?.openAuthModal(undefined, 'register')}
-              className="mt-8 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-lg font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:w-auto"
+              className="mt-8 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-lg font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:w-auto active:scale-[0.98]"
             >
               Create Your Free Account
             </button>

@@ -1,108 +1,187 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { BIBLE_BOOKS, BOOKS_WITH_FULL_TEXT } from '@/constants/bible'
-import { loadAllBookText } from '@/data/bible'
-import type { BibleChapter, BibleSearchResult } from '@/types/bible'
+import { BIBLE_PROGRESS_KEY } from '@/constants/bible'
+import {
+  loadSearchIndex,
+  searchBible,
+  loadVerseTexts,
+  applyProximityBonus,
+  tokenize,
+} from '@/lib/search'
+import type { BibleSearchResult } from '@/types/bible'
+import type { VerseRef } from '@/lib/search/types'
 
-export function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+export interface UseBibleSearchOptions {
+  controlledQuery?: string
+  onQueryChange?: (query: string) => void
 }
 
-function searchAllBooks(
-  booksData: Map<string, BibleChapter[]>,
-  query: string,
-): BibleSearchResult[] {
-  const escaped = escapeRegex(query)
-  const regex = new RegExp(escaped, 'i')
-  const results: BibleSearchResult[] = []
-
-  for (const [bookSlug, chapters] of booksData) {
-    const bookMeta = BIBLE_BOOKS.find((b) => b.slug === bookSlug)
-    if (!bookMeta) continue
-
-    for (const chapter of chapters) {
-      for (let i = 0; i < chapter.verses.length; i++) {
-        const verse = chapter.verses[i]
-        if (!regex.test(verse.text)) continue
-
-        results.push({
-          bookName: bookMeta.name,
-          bookSlug,
-          chapter: chapter.chapter,
-          verseNumber: verse.number,
-          verseText: verse.text,
-          contextBefore: i > 0 ? chapter.verses[i - 1].text : undefined,
-          contextAfter:
-            i < chapter.verses.length - 1
-              ? chapter.verses[i + 1].text
-              : undefined,
-        })
-
-        if (results.length >= 100) return results
-      }
-    }
-  }
-
-  return results
-}
-
-export function useBibleSearch(): {
+export function useBibleSearch(options: UseBibleSearchOptions = {}): {
   query: string
-  setQuery: React.Dispatch<React.SetStateAction<string>>
+  setQuery: (q: string) => void
   results: BibleSearchResult[]
   isSearching: boolean
-  isLoadingBooks: boolean
-  allBooksLoaded: boolean
+  isLoadingIndex: boolean
+  hasMore: boolean
+  totalResults: number
+  loadMore: () => void
+  error: string | null
 } {
-  const [query, setQuery] = useState('')
+  const { controlledQuery, onQueryChange } = options
+  const isControlled = controlledQuery !== undefined
+
+  const [internalQuery, setInternalQuery] = useState('')
+  const query = isControlled ? controlledQuery : internalQuery
+
+  const setQuery = useCallback(
+    (q: string) => {
+      if (isControlled) {
+        onQueryChange?.(q)
+      } else {
+        setInternalQuery(q)
+      }
+    },
+    [isControlled, onQueryChange],
+  )
+
   const [results, setResults] = useState<BibleSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
-  const [isLoadingBooks, setIsLoadingBooks] = useState(false)
-  const [allBooksLoaded, setAllBooksLoaded] = useState(false)
-  const booksDataRef = useRef<Map<string, BibleChapter[]>>(new Map())
+  const [isLoadingIndex, setIsLoadingIndex] = useState(false)
+  const [totalResults, setTotalResults] = useState(0)
+  const [page, setPage] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const indexLoadedRef = useRef(false)
 
-  const ensureBooksLoaded = useCallback(async () => {
-    if (allBooksLoaded) return
-    setIsLoadingBooks(true)
+  const getRecentBooks = useCallback((): string[] => {
+    try {
+      const raw = localStorage.getItem(BIBLE_PROGRESS_KEY)
+      if (!raw) return []
+      const progress = JSON.parse(raw) as Record<string, number[]>
+      return Object.keys(progress).filter((k) => progress[k].length > 0)
+    } catch {
+      return []
+    }
+  }, [])
 
-    const slugs = Array.from(BOOKS_WITH_FULL_TEXT)
-    const loadPromises = slugs.map(async (slug) => {
-      if (booksDataRef.current.has(slug)) return
-      const chapters = await loadAllBookText(slug)
-      if (chapters.length > 0) {
-        booksDataRef.current.set(slug, chapters)
+  const performSearch = useCallback(
+    async (q: string, pageNum: number, append: boolean) => {
+      if (q.length < 2) {
+        if (!append) {
+          setResults([])
+          setTotalResults(0)
+        }
+        setIsSearching(false)
+        return
       }
-    })
 
-    await Promise.all(loadPromises)
-    setAllBooksLoaded(true)
-    setIsLoadingBooks(false)
-  }, [allBooksLoaded])
+      setIsSearching(true)
+      setError(null)
 
+      try {
+        // Ensure index is loaded
+        if (!indexLoadedRef.current) {
+          setIsLoadingIndex(true)
+          await loadSearchIndex()
+          indexLoadedRef.current = true
+          setIsLoadingIndex(false)
+        }
+
+        const recentBooks = getRecentBooks()
+        const { results: searchResults, total } = searchBible(q, {
+          pageSize: 50,
+          page: pageNum,
+          recentBooks,
+        })
+
+        // Load verse texts for this page
+        const refs: VerseRef[] = searchResults.map((r) => [
+          r.bookSlug,
+          r.chapter,
+          r.verse,
+        ])
+        const textMap = await loadVerseTexts(refs)
+
+        // Hydrate results with text
+        const hydrated: BibleSearchResult[] = searchResults.map((r) => ({
+          bookName: r.bookName,
+          bookSlug: r.bookSlug,
+          chapter: r.chapter,
+          verseNumber: r.verse,
+          verseText: textMap.get(`${r.bookSlug}:${r.chapter}:${r.verse}`) ?? '',
+          score: r.score,
+          matchedTokens: r.matchedTokens,
+        }))
+
+        // Apply proximity bonus now that text is available
+        const queryTokens = tokenize(q)
+        // Use the SearchResult type for proximity (convert temporarily)
+        const forProximity = hydrated.map((h) => ({
+          ...h,
+          verse: h.verseNumber,
+          text: h.verseText,
+        }))
+        applyProximityBonus(forProximity, queryTokens)
+
+        // Copy updated scores back
+        for (let i = 0; i < hydrated.length; i++) {
+          hydrated[i].score = forProximity[i].score
+        }
+
+        // Re-sort after proximity bonus
+        hydrated.sort((a, b) => b.score - a.score)
+
+        if (append) {
+          setResults((prev) => [...prev, ...hydrated])
+        } else {
+          setResults(hydrated)
+        }
+        setTotalResults(total)
+      } catch (err) {
+        setIsLoadingIndex(false)
+        setError('Unable to load search. Please try again.')
+      } finally {
+        setIsSearching(false)
+      }
+    },
+    [getRecentBooks],
+  )
+
+  // Debounced search on query change
   useEffect(() => {
     if (query.length < 2) {
       setResults([])
+      setTotalResults(0)
       setIsSearching(false)
+      setPage(0)
       return
     }
 
     setIsSearching(true)
-    const timer = setTimeout(async () => {
-      await ensureBooksLoaded()
-      const searchResults = searchAllBooks(booksDataRef.current, query)
-      setResults(searchResults)
-      setIsSearching(false)
+    setPage(0)
+    const timer = setTimeout(() => {
+      performSearch(query, 0, false)
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [query, ensureBooksLoaded])
+  }, [query, performSearch])
+
+  const loadMore = useCallback(() => {
+    const nextPage = page + 1
+    setPage(nextPage)
+    performSearch(query, nextPage, true)
+  }, [page, query, performSearch])
+
+  const hasMore = results.length < totalResults
 
   return {
     query,
     setQuery,
     results,
     isSearching,
-    isLoadingBooks,
-    allBooksLoaded,
+    isLoadingIndex,
+    hasMore,
+    totalResults,
+    loadMore,
+    error,
   }
 }

@@ -1,0 +1,8012 @@
+{
+  "book": "Micah",
+  "slug": "micah",
+  "entries": {
+    "1.1": [
+      {
+        "ref": "micah.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.5.5",
+        "rank": 3
+      },
+      {
+        "ref": "amos.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "amos.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.27.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.6.10",
+        "rank": 3
+      },
+      {
+        "ref": "amos.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "micah.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "amos.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.8.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.26.18",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.4.15",
+        "rank": 3
+      }
+    ],
+    "1.2": [
+      {
+        "ref": "revelation.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "jonah.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.22.29",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.22",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.24.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.29",
+        "rank": 3
+      },
+      {
+        "ref": "mark.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "micah.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.19",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.49.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.29.23",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.13",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.28.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.11.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.12",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.6",
+        "rank": 3
+      }
+    ],
+    "1.3": [
+      {
+        "ref": "isaiah.26.21",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.63.3",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.13",
+        "rank": 3
+      },
+      {
+        "ref": "job.40.12",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.25.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.115.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.64.1",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.3.19",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.33.29",
+        "rank": 3
+      },
+      {
+        "ref": "amos.4.13",
+        "rank": 3
+      }
+    ],
+    "1.4": [
+      {
+        "ref": "nahum.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.68.2",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.64.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.97.5",
+        "rank": 3
+      },
+      {
+        "ref": "amos.9.5",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.14.4",
+        "rank": 3
+      },
+      {
+        "ref": "judges.5.4",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.20.11",
+        "rank": 3
+      }
+    ],
+    "1.5": [
+      {
+        "ref": "jeremiah.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.25",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.13.32",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.17.7",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.28.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.28.23",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.14",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.16.3",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.16.10",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.50.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.7.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "amos.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.36.14",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.8.5",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.4.18",
+        "rank": 3
+      }
+    ],
+    "1.6": [
+      {
+        "ref": "ezekiel.13.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.37",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.9.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.25.2",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.13.16",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.3.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.25.12",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.25",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.19.25",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.24.2",
+        "rank": 3
+      }
+    ],
+    "1.7": [
+      {
+        "ref": "deuteronomy.9.21",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.27.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.18.3",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.44.17",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.31.1",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.30",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.34.6",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.23.14",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.18.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.18.12",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.8.6",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.23.18",
+        "rank": 3
+      },
+      {
+        "ref": "joel.3.3",
+        "rank": 3
+      }
+    ],
+    "1.8": [
+      {
+        "ref": "isaiah.22.4",
+        "rank": 3
+      },
+      {
+        "ref": "job.30.29",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.4.19",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.21.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.16.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.13.21",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.20.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.9.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.9.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.102.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.48.36",
+        "rank": 3
+      }
+    ],
+    "1.9": [
+      {
+        "ref": "isaiah.8.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.30.11",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.32.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.37.22",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.28",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.18.9",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.18",
+        "rank": 3
+      },
+      {
+        "ref": "micah.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.26",
+        "rank": 3
+      }
+    ],
+    "1.10": [
+      {
+        "ref": "2-samuel.1.20",
+        "rank": 3
+      },
+      {
+        "ref": "amos.6.10",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "job.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.18.23",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.26",
+        "rank": 3
+      }
+    ],
+    "1.11": [
+      {
+        "ref": "micah.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.23.29",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.48.9",
+        "rank": 3
+      },
+      {
+        "ref": "nahum.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.13.22",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.47.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.48.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.20.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.16.2",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.37",
+        "rank": 3
+      }
+    ],
+    "1.12": [
+      {
+        "ref": "ruth.1.20",
+        "rank": 3
+      },
+      {
+        "ref": "amos.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.45.7",
+        "rank": 3
+      },
+      {
+        "ref": "micah.1.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.9",
+        "rank": 3
+      },
+      {
+        "ref": "job.30.26",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.15",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.14.19",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.4.13",
+        "rank": 3
+      }
+    ],
+    "1.13": [
+      {
+        "ref": "revelation.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.23.11",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.32.21",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.18.17",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.16.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.16.31",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.18.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.4.29",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.11.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.14.16",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.18.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.32.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.37.8",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.10.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.31",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.8.18",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.15.39",
+        "rank": 3
+      },
+      {
+        "ref": "micah.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.13.33",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.19.17",
+        "rank": 3
+      }
+    ],
+    "1.14": [
+      {
+        "ref": "2-kings.16.8",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.15.44",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.18",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.16.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.62.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.118.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.30.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.18.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.146.3",
+        "rank": 3
+      }
+    ],
+    "1.15": [
+      {
+        "ref": "jeremiah.49.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.3",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.15.35",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.12.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.15.44",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.11.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.7.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.22.1",
+        "rank": 3
+      }
+    ],
+    "1.16": [
+      {
+        "ref": "deuteronomy.28.56",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.16.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.39.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.22.12",
+        "rank": 3
+      },
+      {
+        "ref": "job.1.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.17.6",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.7.29",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.15.2",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.28.41",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.26",
+        "rank": 3
+      }
+    ],
+    "2.1": [
+      {
+        "ref": "jeremiah.18.18",
+        "rank": 3
+      },
+      {
+        "ref": "esther.9.25",
+        "rank": 3
+      },
+      {
+        "ref": "luke.20.19",
+        "rank": 3
+      },
+      {
+        "ref": "esther.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "john.19.11",
+        "rank": 3
+      },
+      {
+        "ref": "acts.23.12",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.7.6",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.31.29",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.12.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.36.4",
+        "rank": 3
+      },
+      {
+        "ref": "nahum.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.28.32",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.11.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "esther.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.6.12",
+        "rank": 3
+      },
+      {
+        "ref": "romans.1.30",
+        "rank": 3
+      },
+      {
+        "ref": "mark.15.1",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.3.27",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.140.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.27.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.32.7",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "acts.23.15",
+        "rank": 3
+      },
+      {
+        "ref": "luke.22.2",
+        "rank": 3
+      }
+    ],
+    "2.2": [
+      {
+        "ref": "job.31.38",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.20.17",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.22.17",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.6.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.21.2",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.4",
+        "rank": 3
+      },
+      {
+        "ref": "job.24.2",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.23.13",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.22.21",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.9.26",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.18.12",
+        "rank": 3
+      }
+    ],
+    "2.3": [
+      {
+        "ref": "ephesians.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.1.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.28.14",
+        "rank": 3
+      },
+      {
+        "ref": "amos.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "james.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "amos.9.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.36.23",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.18.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.19",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.3",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.34.17",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.27.12",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.13.15",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.43.2",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.4.37",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.5.20",
+        "rank": 3
+      },
+      {
+        "ref": "romans.16.4",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.5.5",
+        "rank": 3
+      }
+    ],
+    "2.4": [
+      {
+        "ref": "jeremiah.9.17",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.24.3",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.28.29",
+        "rank": 3
+      },
+      {
+        "ref": "mark.12.12",
+        "rank": 3
+      },
+      {
+        "ref": "joel.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.14.18",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.35.25",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.14.4",
+        "rank": 3
+      },
+      {
+        "ref": "micah.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.17",
+        "rank": 3
+      },
+      {
+        "ref": "joel.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.44",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.63.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.17.23",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.24.15",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.36.20",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.25.9",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.1.17",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.7",
+        "rank": 3
+      },
+      {
+        "ref": "job.27.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.24.3",
+        "rank": 3
+      }
+    ],
+    "2.5": [
+      {
+        "ref": "deuteronomy.23.8",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.18.4",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.7.61",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.23.2",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.8",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.18.10",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.9.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.16.6",
+        "rank": 3
+      }
+    ],
+    "2.6": [
+      {
+        "ref": "amos.7.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.30.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.14",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.20.46",
+        "rank": 3
+      },
+      {
+        "ref": "acts.5.28",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.26.20",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.26.8",
+        "rank": 3
+      },
+      {
+        "ref": "acts.5.40",
+        "rank": 3
+      },
+      {
+        "ref": "micah.6.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.74.9",
+        "rank": 3
+      },
+      {
+        "ref": "acts.7.51",
+        "rank": 3
+      },
+      {
+        "ref": "amos.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.3.26",
+        "rank": 3
+      },
+      {
+        "ref": "acts.4.17",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.21.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.11",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.11",
+        "rank": 3
+      }
+    ],
+    "2.7": [
+      {
+        "ref": "2-corinthians.6.12",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.9",
+        "rank": 3
+      },
+      {
+        "ref": "romans.9.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.19.7",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.14.2",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.10.29",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.58.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.50.2",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.28.18",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.11.23",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.15.2",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.92",
+        "rank": 3
+      },
+      {
+        "ref": "john.8.39",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.99",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.65",
+        "rank": 3
+      },
+      {
+        "ref": "romans.2.28",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.10.9",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.48.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.70",
+        "rank": 3
+      },
+      {
+        "ref": "romans.7.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.84.11",
+        "rank": 3
+      }
+    ],
+    "2.8": [
+      {
+        "ref": "isaiah.9.21",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.55.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.28.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.20.19",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.120.6",
+        "rank": 3
+      }
+    ],
+    "2.9": [
+      {
+        "ref": "luke.20.47",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.39.21",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.23.13",
+        "rank": 3
+      },
+      {
+        "ref": "joel.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.10.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.19",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "mark.12.40",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.26.19",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.4.6",
+        "rank": 3
+      }
+    ],
+    "2.10": [
+      {
+        "ref": "leviticus.20.22",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.36.20",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.10.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.9.7",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.7.20",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.30.18",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.17.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.9.19",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.23.15",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.12.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.106.38",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.95.11",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.36.12",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.4.26",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.18.24",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.15.29",
+        "rank": 3
+      }
+    ],
+    "2.11": [
+      {
+        "ref": "ezekiel.13.3",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.32",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.13.22",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.18.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.14.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.31",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.27.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.28.2",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "romans.16.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.22.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.30.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.25",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.28.15",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.15",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.17",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.29.21",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.11.13",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.3.19",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.16.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.13",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.22.21",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.13.18",
+        "rank": 3
+      }
+    ],
+    "2.12": [
+      {
+        "ref": "ezekiel.34.31",
+        "rank": 3
+      },
+      {
+        "ref": "micah.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.22",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.11",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.7",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.36.37",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.8.22",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.11",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.37.21",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.10.6",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.27.12",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "amos.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.34.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.3",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.36.33",
+        "rank": 4
+      }
+    ],
+    "2.13": [
+      {
+        "ref": "zechariah.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.4",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.10.12",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.34",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.52.12",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.27",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.20",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.51.9",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.44",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.15.21",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.51.12",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.24",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.42.13",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.23",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.45.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.42.7",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.6.20",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.17.14",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.13.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.16",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.7.17",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.14",
+        "rank": 3
+      }
+    ],
+    "3.1": [
+      {
+        "ref": "amos.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.14.4",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.22.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.82.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.13.15",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.4",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.19.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.16.18",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.9",
+        "rank": 3
+      }
+    ],
+    "3.2": [
+      {
+        "ref": "ezekiel.34.3",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.19.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.139.21",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.28.4",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.18",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.4",
+        "rank": 3
+      },
+      {
+        "ref": "luke.19.14",
+        "rank": 3
+      },
+      {
+        "ref": "romans.12.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.22.6",
+        "rank": 3
+      },
+      {
+        "ref": "acts.7.51",
+        "rank": 3
+      },
+      {
+        "ref": "romans.1.32",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.53.4",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.11.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.15",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.23",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.15.4",
+        "rank": 3
+      },
+      {
+        "ref": "john.7.7",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.21.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.27",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.10",
+        "rank": 3
+      },
+      {
+        "ref": "john.18.40",
+        "rank": 3
+      }
+    ],
+    "3.3": [
+      {
+        "ref": "zephaniah.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.11.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.11.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.14.4",
+        "rank": 3
+      }
+    ],
+    "3.4": [
+      {
+        "ref": "jeremiah.2.27",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.19",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "romans.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.7.22",
+        "rank": 3
+      },
+      {
+        "ref": "james.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "john.9.31",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.18.41",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.8.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.33.5",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.31.17",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.28.9",
+        "rank": 3
+      },
+      {
+        "ref": "luke.13.25",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.1.28",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.31",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.7.13",
+        "rank": 3
+      }
+    ],
+    "3.5": [
+      {
+        "ref": "jeremiah.23.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.56.9",
+        "rank": 3
+      },
+      {
+        "ref": "romans.16.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.14",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.13.10",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.25",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.28.15",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.29.21",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.15.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.27",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.14.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.15",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.7.15",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.13.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.32",
+        "rank": 3
+      }
+    ],
+    "3.6": [
+      {
+        "ref": "isaiah.8.20",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.9",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.13.22",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.29.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.74.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.9",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.13.16",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.13.2",
+        "rank": 3
+      }
+    ],
+    "3.7": [
+      {
+        "ref": "zechariah.13.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.74.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.44.25",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.24.22",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.24.17",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.28.15",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.11",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.9.11",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.16",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.14.37",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.8.18",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.13.45",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.47.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.9.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.28.6",
+        "rank": 3
+      }
+    ],
+    "3.8": [
+      {
+        "ref": "acts.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.3.7",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.43.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.7.29",
+        "rank": 3
+      },
+      {
+        "ref": "acts.13.9",
+        "rank": 3
+      },
+      {
+        "ref": "acts.4.19",
+        "rank": 3
+      },
+      {
+        "ref": "acts.7.54",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "acts.7.51",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.58.1",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.20.9",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "acts.18.9",
+        "rank": 3
+      },
+      {
+        "ref": "acts.18.5",
+        "rank": 3
+      },
+      {
+        "ref": "mark.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.1.18",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.20.4",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.19",
+        "rank": 3
+      },
+      {
+        "ref": "job.32.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.2.12",
+        "rank": 3
+      }
+    ],
+    "3.9": [
+      {
+        "ref": "hosea.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.23",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.58.1",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.17.15",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.28",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.27.19",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.15",
+        "rank": 3
+      }
+    ],
+    "3.10": [
+      {
+        "ref": "matthew.27.25",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "john.11.50",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.22.13",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.25",
+        "rank": 3
+      }
+    ],
+    "3.11": [
+      {
+        "ref": "ezekiel.22.27",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.8.3",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.3",
+        "rank": 3
+      },
+      {
+        "ref": "amos.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.4.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.48.2",
+        "rank": 3
+      },
+      {
+        "ref": "titus.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "jude.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.23",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.13",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.4.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.7.4",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "acts.8.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.10",
+        "rank": 3
+      },
+      {
+        "ref": "romans.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.56.11",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.12",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.7.8",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.16.15",
+        "rank": 3
+      }
+    ],
+    "3.12": [
+      {
+        "ref": "micah.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.107.34",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.24.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.26.18",
+        "rank": 3
+      },
+      {
+        "ref": "acts.6.13",
+        "rank": 3
+      },
+      {
+        "ref": "micah.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.79.1",
+        "rank": 3
+      }
+    ],
+    "4.1": [
+      {
+        "ref": "isaiah.60.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.38.16",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.44",
+        "rank": 3
+      },
+      {
+        "ref": "acts.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.25",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.16.19",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.7.18",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.40.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.86.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.27.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.68.29",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.68.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.18",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.14.16",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.19",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.10.14",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.11.15",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.8.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.48.47",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.7.27",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.43.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.43.6",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.17.22",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.9",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.22.27",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.15.4",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.49.10",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.20.4",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.7.22",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.2",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.28",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.35",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.49.1",
+        "rank": 3
+      }
+    ],
+    "4.2": [
+      {
+        "ref": "zechariah.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.2",
+        "rank": 3
+      },
+      {
+        "ref": "acts.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "acts.10.32",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.14.8",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.6",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.25.8",
+        "rank": 3
+      },
+      {
+        "ref": "james.1.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.4",
+        "rank": 3
+      },
+      {
+        "ref": "acts.13.46",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.13",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.14.16",
+        "rank": 3
+      },
+      {
+        "ref": "mark.16.20",
+        "rank": 3
+      },
+      {
+        "ref": "romans.10.12",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.28.19",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.25.12",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.8.20",
+        "rank": 3
+      },
+      {
+        "ref": "luke.24.47",
+        "rank": 3
+      },
+      {
+        "ref": "mark.16.15",
+        "rank": 3
+      },
+      {
+        "ref": "john.6.45",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.19",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.51.4",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.11.25",
+        "rank": 3
+      },
+      {
+        "ref": "john.7.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.42.1",
+        "rank": 3
+      },
+      {
+        "ref": "acts.13.42",
+        "rank": 3
+      }
+    ],
+    "4.3": [
+      {
+        "ref": "isaiah.25.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.98.9",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.18",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.15",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.14.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.68.30",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.82.8",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.31",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.11",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.46.9",
+        "rank": 3
+      },
+      {
+        "ref": "acts.17.31",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.44",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.17",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.96.13",
+        "rank": 3
+      },
+      {
+        "ref": "joel.3.2",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.16",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.17",
+        "rank": 3
+      },
+      {
+        "ref": "john.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "john.5.27",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.51.5",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.14.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.25",
+        "rank": 3
+      },
+      {
+        "ref": "john.16.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.7",
+        "rank": 3
+      },
+      {
+        "ref": "joel.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.20.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.3",
+        "rank": 3
+      }
+    ],
+    "4.4": [
+      {
+        "ref": "1-kings.4.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.14",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.39.26",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.58.14",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.28",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.16",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.38.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.20",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.6",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.3.10",
+        "rank": 3
+      }
+    ],
+    "4.5": [
+      {
+        "ref": "exodus.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.17.29",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.145.1",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.24.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.48.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.71.16",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.17.1",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.10.12",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.17.34",
+        "rank": 3
+      }
+    ],
+    "4.6": [
+      {
+        "ref": "john.10.16",
+        "rank": 3
+      },
+      {
+        "ref": "luke.19.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.8",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.30.17",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.37.21",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.36.24",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.12",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.56.8",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.12.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.147.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.35.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.38.17",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.39.25",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.19",
+        "rank": 3
+      }
+    ],
+    "4.7": [
+      {
+        "ref": "micah.5.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.24.23",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.8",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.33",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.21",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.18",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.22",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "joel.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.6.13",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.25",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.7.27",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.21",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.5",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.3",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.11",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.13",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.11.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.6",
+        "rank": 3
+      }
+    ],
+    "4.8": [
+      {
+        "ref": "isaiah.1.26",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.48.12",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.7.18",
+        "rank": 3
+      },
+      {
+        "ref": "obadiah.1.21",
+        "rank": 3
+      },
+      {
+        "ref": "mark.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.32",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.5",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.44",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.24.19",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.5.7",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.35.21",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.21.33",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.21",
+        "rank": 3
+      }
+    ],
+    "4.9": [
+      {
+        "ref": "jeremiah.8.19",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.10.3",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.13.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.21.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.13.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.30.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.4.21",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.17",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.43",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.4.20",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.22.23",
+        "rank": 3
+      }
+    ],
+    "4.10": [
+      {
+        "ref": "2-kings.25.4",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.20.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.48.20",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.36.20",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.13.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.52.9",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.12.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.7",
+        "rank": 3
+      },
+      {
+        "ref": "john.16.20",
+        "rank": 3
+      },
+      {
+        "ref": "ezra.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.106.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.43.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.45.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.21",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.33.11",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.14",
+        "rank": 3
+      }
+    ],
+    "4.11": [
+      {
+        "ref": "obadiah.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.52.4",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.8.7",
+        "rank": 3
+      },
+      {
+        "ref": "joel.3.2",
+        "rank": 3
+      }
+    ],
+    "4.12": [
+      {
+        "ref": "zechariah.14.1",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.33",
+        "rank": 3
+      },
+      {
+        "ref": "luke.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "joel.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.8",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.14.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.29.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.21.10",
+        "rank": 3
+      }
+    ],
+    "4.13": [
+      {
+        "ref": "isaiah.60.6",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.18.7",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.24",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.16.2",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.4.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.23.18",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.25",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.68.29",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.10",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.6.19",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.44",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.26",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.33",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.8.10",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.41.15",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.33.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.28",
+        "rank": 3
+      }
+    ],
+    "5.1": [
+      {
+        "ref": "2-corinthians.11.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.25.1",
+        "rank": 3
+      },
+      {
+        "ref": "luke.19.43",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.5.39",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.22.24",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.27.30",
+        "rank": 3
+      },
+      {
+        "ref": "john.18.22",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.8.5",
+        "rank": 3
+      },
+      {
+        "ref": "amos.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "joel.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.24.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.6",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.67",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.21.21",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.28.49",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.28.51",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.24.2",
+        "rank": 3
+      },
+      {
+        "ref": "job.16.10",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "acts.23.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.8.9",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.30",
+        "rank": 3
+      },
+      {
+        "ref": "john.19.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.33.22",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.25.9",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.3.16",
+        "rank": 3
+      }
+    ],
+    "5.2": [
+      {
+        "ref": "john.7.42",
+        "rank": 2
+      },
+      {
+        "ref": "matthew.2.6",
+        "rank": 2
+      },
+      {
+        "ref": "isaiah.53.2",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.28.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-chronicles.4.4",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "1-chronicles.2.50",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.49.10",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.18.25",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.8.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-chronicles.2.54",
+        "rank": 3
+      },
+      {
+        "ref": "amos.9.11",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.30.21",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.1.27",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.17.22",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.10.19",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.31",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.8",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.17",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.8.22",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.6",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.18.21",
+        "rank": 3
+      },
+      {
+        "ref": "1-chronicles.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.23",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.35.19",
+        "rank": 3
+      },
+      {
+        "ref": "ruth.4.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.16",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.37.22",
+        "rank": 3
+      },
+      {
+        "ref": "luke.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "luke.23.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.102.25",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.90.2",
+        "rank": 3
+      },
+      {
+        "ref": "luke.23.38",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.17.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.17.12",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.132.6",
+        "rank": 3
+      },
+      {
+        "ref": "john.19.14",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.48.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.13.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.23.23",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.9",
+        "rank": 3
+      },
+      {
+        "ref": "john.1.1",
+        "rank": 3
+      }
+    ],
+    "5.3": [
+      {
+        "ref": "matthew.12.50",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.11",
+        "rank": 3
+      },
+      {
+        "ref": "romans.9.27",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.1.21",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "micah.6.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.20",
+        "rank": 3
+      },
+      {
+        "ref": "romans.8.29",
+        "rank": 3
+      },
+      {
+        "ref": "micah.4.9",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.4",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.7",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.40",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.14.16",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.11.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.30.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.7",
+        "rank": 3
+      },
+      {
+        "ref": "micah.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.1",
+        "rank": 3
+      }
+    ],
+    "5.4": [
+      {
+        "ref": "john.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.38",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.8",
+        "rank": 3
+      },
+      {
+        "ref": "jude.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.52.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.5",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.11.15",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.32",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.27",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.23.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.31",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.19",
+        "rank": 3
+      },
+      {
+        "ref": "1-chronicles.29.11",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.98.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.52.10",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.13",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.23.21",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.145.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.93.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.16.18",
+        "rank": 3
+      },
+      {
+        "ref": "john.20.17",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.9",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.22",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.22.27",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.9",
+        "rank": 4
+      }
+    ],
+    "5.5": [
+      {
+        "ref": "zechariah.10.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.7",
+        "rank": 3
+      },
+      {
+        "ref": "amos.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.1.18",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.6.16",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.33.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.44.28",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.8.7",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.11.2",
+        "rank": 3
+      },
+      {
+        "ref": "job.5.19",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.30.29",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.24",
+        "rank": 3
+      },
+      {
+        "ref": "luke.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "john.16.33",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.13",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.17.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.37.31",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.27",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.12.6",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.6",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.30.18",
+        "rank": 3
+      },
+      {
+        "ref": "amos.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.19",
+        "rank": 3
+      }
+    ],
+    "5.6": [
+      {
+        "ref": "genesis.10.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.19.32",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.71",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.15.29",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.14.2",
+        "rank": 3
+      },
+      {
+        "ref": "nahum.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.17.3",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.18.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.14.25",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.33.11",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.74",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.33.1",
+        "rank": 3
+      }
+    ],
+    "5.7": [
+      {
+        "ref": "romans.10.20",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.5",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.19",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.28.19",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.47.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.19",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.44.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.3",
+        "rank": 3
+      },
+      {
+        "ref": "joel.2.32",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.13",
+        "rank": 3
+      },
+      {
+        "ref": "acts.9.15",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "acts.16.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.32.15",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.6",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.10",
+        "rank": 3
+      },
+      {
+        "ref": "acts.13.46",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.14.8",
+        "rank": 3
+      },
+      {
+        "ref": "judges.6.36",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.2",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.12",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.14.22",
+        "rank": 3
+      },
+      {
+        "ref": "romans.9.30",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.14.22",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.5",
+        "rank": 3
+      },
+      {
+        "ref": "acts.11.15",
+        "rank": 3
+      }
+    ],
+    "5.8": [
+      {
+        "ref": "isaiah.41.15",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.12.25",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.5",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "obadiah.1.18",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.14",
+        "rank": 3
+      },
+      {
+        "ref": "micah.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.22",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.49.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.15",
+        "rank": 3
+      },
+      {
+        "ref": "acts.18.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.2.15",
+        "rank": 3
+      }
+    ],
+    "5.9": [
+      {
+        "ref": "psalms.21.8",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.15.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.33.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.10.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.14.2",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.20.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.14",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.37.36",
+        "rank": 3
+      },
+      {
+        "ref": "luke.19.27",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.106.26",
+        "rank": 4
+      }
+    ],
+    "5.10": [
+      {
+        "ref": "hosea.14.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.20.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.33.16",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.23",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.10",
+        "rank": 3
+      }
+    ],
+    "5.11": [
+      {
+        "ref": "zechariah.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.9",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.10.14",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.38.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.6.11",
+        "rank": 3
+      }
+    ],
+    "5.12": [
+      {
+        "ref": "revelation.22.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.27.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.8.19",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.13.2",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.18.10",
+        "rank": 3
+      }
+    ],
+    "5.13": [
+      {
+        "ref": "ezekiel.6.9",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.37.23",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.36.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.17.7",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.16",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.13.2",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.8",
+        "rank": 3
+      }
+    ],
+    "5.14": [
+      {
+        "ref": "exodus.34.13",
+        "rank": 3
+      }
+    ],
+    "5.15": [
+      {
+        "ref": "micah.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.149.7",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.1.8",
+        "rank": 3
+      }
+    ],
+    "6.1": [
+      {
+        "ref": "jeremiah.22.29",
+        "rank": 2
+      },
+      {
+        "ref": "psalms.50.4",
+        "rank": 2
+      },
+      {
+        "ref": "ezekiel.37.4",
+        "rank": 2
+      },
+      {
+        "ref": "micah.1.2",
+        "rank": 2
+      },
+      {
+        "ref": "psalms.50.1",
+        "rank": 2
+      },
+      {
+        "ref": "ezekiel.36.8",
+        "rank": 2
+      },
+      {
+        "ref": "luke.19.40",
+        "rank": 2
+      },
+      {
+        "ref": "jeremiah.13.15",
+        "rank": 2
+      },
+      {
+        "ref": "ezekiel.36.1",
+        "rank": 2
+      },
+      {
+        "ref": "deuteronomy.4.26",
+        "rank": 2
+      },
+      {
+        "ref": "micah.1.4",
+        "rank": 2
+      },
+      {
+        "ref": "isaiah.1.2",
+        "rank": 2
+      },
+      {
+        "ref": "deuteronomy.32.1",
+        "rank": 2
+      },
+      {
+        "ref": "1-samuel.15.16",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.3.7",
+        "rank": 3
+      },
+      {
+        "ref": "amos.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.12",
+        "rank": 3
+      }
+    ],
+    "6.2": [
+      {
+        "ref": "jeremiah.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.25.31",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.20.35",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.8.29",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.22.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.29",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.37",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.22.16",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.22",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.12.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.104.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.43.26",
+        "rank": 3
+      }
+    ],
+    "6.3": [
+      {
+        "ref": "psalms.50.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.81.8",
+        "rank": 3
+      },
+      {
+        "ref": "romans.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.81.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.43.22",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.51.4",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.31",
+        "rank": 3
+      },
+      {
+        "ref": "micah.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "romans.3.19",
+        "rank": 3
+      }
+    ],
+    "6.4": [
+      {
+        "ref": "nehemiah.9.9",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.14.30",
+        "rank": 3
+      },
+      {
+        "ref": "amos.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "acts.7.36",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.20.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.63.9",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.12.51",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.7.8",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.4.34",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.32.21",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.78.51",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.15.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.7.23",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.15.15",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.9.26",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.77.20",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.20.2",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.4.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.136.10",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.24.18",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.5.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.106.7",
+        "rank": 3
+      }
+    ],
+    "6.5": [
+      {
+        "ref": "ephesians.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.12.7",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.33.49",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.10.42",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.27",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.22.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.143.11",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.1.9",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.24.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.36.10",
+        "rank": 3
+      },
+      {
+        "ref": "jude.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.31.8",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.25.1",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.22.41",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.5.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.103.1",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.4.19",
+        "rank": 3
+      },
+      {
+        "ref": "romans.3.25",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.9.7",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "judges.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.71.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.111.4",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.8.18",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.16.3",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.13",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.71.19",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.23.4",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.31.16",
+        "rank": 3
+      }
+    ],
+    "6.6": [
+      {
+        "ref": "leviticus.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.4.9",
+        "rank": 3
+      },
+      {
+        "ref": "romans.10.2",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.14.18",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.95.6",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.5.18",
+        "rank": 3
+      },
+      {
+        "ref": "acts.16.30",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.51.16",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.14",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.10.4",
+        "rank": 3
+      },
+      {
+        "ref": "mark.5.7",
+        "rank": 3
+      },
+      {
+        "ref": "acts.2.37",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.1",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.5.21",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.40.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.21.3",
+        "rank": 3
+      },
+      {
+        "ref": "luke.10.25",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.12.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.22.29",
+        "rank": 3
+      },
+      {
+        "ref": "john.6.26",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.19.16",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.3.26",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.29",
+        "rank": 3
+      },
+      {
+        "ref": "acts.16.17",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.3.14",
+        "rank": 3
+      }
+    ],
+    "6.7": [
+      {
+        "ref": "2-kings.3.27",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.23.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.7.21",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "philemon.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.16",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.51.16",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.18.21",
+        "rank": 3
+      },
+      {
+        "ref": "judges.11.31",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.16.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.15.22",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.23.37",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.10.8",
+        "rank": 3
+      },
+      {
+        "ref": "judges.11.39",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.21.6",
+        "rank": 3
+      },
+      {
+        "ref": "job.29.6",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.6.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.19.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.9",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.7.31",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.11",
+        "rank": 3
+      }
+    ],
+    "6.8": [
+      {
+        "ref": "proverbs.21.3",
+        "rank": 1
+      },
+      {
+        "ref": "jeremiah.22.3",
+        "rank": 1
+      },
+      {
+        "ref": "deuteronomy.10.12",
+        "rank": 1
+      },
+      {
+        "ref": "colossians.3.12",
+        "rank": 1
+      },
+      {
+        "ref": "daniel.4.37",
+        "rank": 2
+      },
+      {
+        "ref": "luke.11.42",
+        "rank": 2
+      },
+      {
+        "ref": "zephaniah.2.3",
+        "rank": 2
+      },
+      {
+        "ref": "isaiah.57.15",
+        "rank": 2
+      },
+      {
+        "ref": "isaiah.1.16",
+        "rank": 2
+      },
+      {
+        "ref": "matthew.5.7",
+        "rank": 2
+      },
+      {
+        "ref": "matthew.5.3",
+        "rank": 2
+      },
+      {
+        "ref": "1-peter.3.8",
+        "rank": 2
+      },
+      {
+        "ref": "genesis.18.19",
+        "rank": 2
+      },
+      {
+        "ref": "amos.5.24",
+        "rank": 2
+      },
+      {
+        "ref": "mark.12.30",
+        "rank": 2
+      },
+      {
+        "ref": "luke.18.13",
+        "rank": 2
+      },
+      {
+        "ref": "luke.6.36",
+        "rank": 2
+      },
+      {
+        "ref": "isaiah.58.6",
+        "rank": 2
+      },
+      {
+        "ref": "1-samuel.15.22",
+        "rank": 2
+      },
+      {
+        "ref": "ecclesiastes.12.13",
+        "rank": 2
+      },
+      {
+        "ref": "2-peter.1.5",
+        "rank": 2
+      },
+      {
+        "ref": "hosea.6.6",
+        "rank": 2
+      },
+      {
+        "ref": "isaiah.66.2",
+        "rank": 2
+      },
+      {
+        "ref": "1-peter.5.5",
+        "rank": 2
+      },
+      {
+        "ref": "hosea.12.6",
+        "rank": 2
+      },
+      {
+        "ref": "ephesians.4.32",
+        "rank": 2
+      },
+      {
+        "ref": "matthew.18.32",
+        "rank": 3
+      },
+      {
+        "ref": "luke.10.42",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.37.26",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.34.27",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.30.11",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.12.23",
+        "rank": 3
+      },
+      {
+        "ref": "james.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.2.16",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.32.26",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.57.1",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.41",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.112.4",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "romans.9.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.73.28",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.7.16",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.63",
+        "rank": 3
+      },
+      {
+        "ref": "romans.10.1",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.9.13",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.33.23",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.33.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.7.3",
+        "rank": 3
+      },
+      {
+        "ref": "james.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.112.9",
+        "rank": 3
+      },
+      {
+        "ref": "romans.7.16",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.33.12",
+        "rank": 3
+      },
+      {
+        "ref": "titus.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.26",
+        "rank": 3
+      }
+    ],
+    "6.9": [
+      {
+        "ref": "amos.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.32.13",
+        "rank": 3
+      },
+      {
+        "ref": "job.5.6",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.19",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "haggai.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.13.16",
+        "rank": 3
+      },
+      {
+        "ref": "job.5.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.6",
+        "rank": 3
+      },
+      {
+        "ref": "amos.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.34.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.107.43",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.39",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.27.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.21.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "job.10.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.19.11",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.22.3",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.14.18",
+        "rank": 3
+      },
+      {
+        "ref": "joel.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.26.18",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.83.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.24.10",
+        "rank": 3
+      },
+      {
+        "ref": "amos.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "jonah.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.30.27",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.37.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.48.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.26.6",
+        "rank": 3
+      },
+      {
+        "ref": "amos.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.9.16",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.22.11",
+        "rank": 3
+      }
+    ],
+    "6.10": [
+      {
+        "ref": "proverbs.10.2",
+        "rank": 3
+      },
+      {
+        "ref": "james.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.21.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.5.23",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.1.9",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.45.9",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.12.7",
+        "rank": 3
+      },
+      {
+        "ref": "amos.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.19.35",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.26",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.11.1",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.7.1",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.20.23",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.25.13",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.5.3",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.5",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.20.10",
+        "rank": 3
+      }
+    ],
+    "6.11": [
+      {
+        "ref": "hosea.12.7",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.19.36",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.16.11",
+        "rank": 3
+      }
+    ],
+    "6.12": [
+      {
+        "ref": "micah.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.25",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "amos.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.9.2",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.7.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.26",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.23",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.7",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "romans.3.13",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.9.8",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.7.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.6",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.11",
+        "rank": 3
+      }
+    ],
+    "6.13": [
+      {
+        "ref": "psalms.107.17",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.13.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "job.33.19",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.28.21",
+        "rank": 3
+      },
+      {
+        "ref": "acts.12.23",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.14.18",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.5.9",
+        "rank": 3
+      }
+    ],
+    "6.14": [
+      {
+        "ref": "amos.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.30.6",
+        "rank": 3
+      },
+      {
+        "ref": "amos.9.1",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.5.12",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.26",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "haggai.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.22",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.20",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.48.44",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.24.17",
+        "rank": 3
+      },
+      {
+        "ref": "haggai.2.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.13",
+        "rank": 3
+      }
+    ],
+    "6.15": [
+      {
+        "ref": "jeremiah.12.13",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.28.38",
+        "rank": 3
+      },
+      {
+        "ref": "joel.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.21",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.20",
+        "rank": 3
+      },
+      {
+        "ref": "haggai.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.8",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.1.13",
+        "rank": 3
+      }
+    ],
+    "6.16": [
+      {
+        "ref": "1-kings.9.8",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.39.26",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.21.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.16.25",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.21.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.44.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.16",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.18.4",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.21.25",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.8.17",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.7.24",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.18.15",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.9.16",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.29.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.16.3",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.19.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.25.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.34.25",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.51",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.25.9",
+        "rank": 3
+      }
+    ],
+    "7.1": [
+      {
+        "ref": "jeremiah.15.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.45.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.120.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.24.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.4.31",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.24.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.17.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.28.4",
+        "rank": 3
+      }
+    ],
+    "7.2": [
+      {
+        "ref": "habakkuk.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.14.1",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.4.18",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "romans.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.26",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.16.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.57.1",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.26.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.57.6",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.12.6",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.24.11",
+        "rank": 3
+      }
+    ],
+    "7.3": [
+      {
+        "ref": "ezekiel.22.27",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.15",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.6",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.4.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.23",
+        "rank": 3
+      },
+      {
+        "ref": "luke.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.21.9",
+        "rank": 3
+      },
+      {
+        "ref": "amos.5.12",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.21",
+        "rank": 3
+      }
+    ],
+    "7.4": [
+      {
+        "ref": "nahum.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.3",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.6.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.23.6",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.10.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.13",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.9.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.22.5",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.12.23",
+        "rank": 3
+      },
+      {
+        "ref": "luke.21.25",
+        "rank": 3
+      }
+    ],
+    "7.5": [
+      {
+        "ref": "jeremiah.9.4",
+        "rank": 2
+      },
+      {
+        "ref": "psalms.118.8",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.16",
+        "rank": 3
+      },
+      {
+        "ref": "judges.16.5",
+        "rank": 3
+      },
+      {
+        "ref": "job.6.14",
+        "rank": 3
+      }
+    ],
+    "7.6": [
+      {
+        "ref": "luke.12.53",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.9.22",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.30.11",
+        "rank": 3
+      },
+      {
+        "ref": "luke.21.16",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.30.17",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.49.4",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.22.7",
+        "rank": 3
+      },
+      {
+        "ref": "john.13.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.20.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.55.12",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.49",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.3.2",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.16.21",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.15.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.12.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.16.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.41.9",
+        "rank": 3
+      },
+      {
+        "ref": "obadiah.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.23",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.35",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.21",
+        "rank": 3
+      }
+    ],
+    "7.7": [
+      {
+        "ref": "psalms.37.7",
+        "rank": 2
+      },
+      {
+        "ref": "lamentations.3.25",
+        "rank": 2
+      },
+      {
+        "ref": "psalms.62.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.12.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.27.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.65.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.45.22",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.130.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.40.1",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.49.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.8.17",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.38.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.142.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.34.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.109.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.25.5",
+        "rank": 3
+      },
+      {
+        "ref": "habakkuk.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.55.16",
+        "rank": 3
+      },
+      {
+        "ref": "luke.2.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.25.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.4.2",
+        "rank": 3
+      },
+      {
+        "ref": "luke.6.11",
+        "rank": 3
+      }
+    ],
+    "7.8": [
+      {
+        "ref": "revelation.22.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.84.11",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.25.6",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.4.21",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.38.16",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.35.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.37.21",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.13.4",
+        "rank": 3
+      },
+      {
+        "ref": "obadiah.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.41.10",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.23",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.35.15",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.50.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.97.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.27.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.11.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.37.24",
+        "rank": 3
+      },
+      {
+        "ref": "acts.26.18",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.112.4",
+        "rank": 3
+      },
+      {
+        "ref": "john.8.12",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.24.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.35.19",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.78",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.1",
+        "rank": 3
+      },
+      {
+        "ref": "job.31.29",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.19",
+        "rank": 3
+      },
+      {
+        "ref": "amos.9.11",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.11",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.4.2",
+        "rank": 3
+      },
+      {
+        "ref": "john.16.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.35.24",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.107.10",
+        "rank": 3
+      }
+    ],
+    "7.9": [
+      {
+        "ref": "lamentations.1.18",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.37.6",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.12.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.33",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.16.11",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.18",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.35",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.24.15",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.25.39",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.18.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.24.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.7.6",
+        "rank": 3
+      },
+      {
+        "ref": "job.34.31",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.41",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.46.13",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.17",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "job.23.10",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.39",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.43.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.6.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.26.10",
+        "rank": 3
+      }
+    ],
+    "7.10": [
+      {
+        "ref": "isaiah.25.10",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.27.43",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.37.10",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.42.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.7.18",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.9.33",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.22.43",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.35.26",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.51",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.18.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.41.15",
+        "rank": 3
+      },
+      {
+        "ref": "micah.4.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.18.42",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.3.15",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.17.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.24",
+        "rank": 3
+      },
+      {
+        "ref": "joel.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.42.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.115.2",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.4.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.79.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.63.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.33",
+        "rank": 3
+      },
+      {
+        "ref": "nahum.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "obadiah.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.47.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.58.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.51.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.137.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.51.22",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.109.29",
+        "rank": 3
+      }
+    ],
+    "7.11": [
+      {
+        "ref": "nehemiah.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.9.25",
+        "rank": 3
+      },
+      {
+        "ref": "ezra.4.12",
+        "rank": 3
+      },
+      {
+        "ref": "amos.9.11",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.11",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.4.3",
+        "rank": 3
+      }
+    ],
+    "7.12": [
+      {
+        "ref": "isaiah.66.19",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.29.21",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.43.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.27.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.16",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.19.23",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.11.11",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.37.21",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.18",
+        "rank": 3
+      }
+    ],
+    "7.13": [
+      {
+        "ref": "jeremiah.32.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.17.10",
+        "rank": 3
+      },
+      {
+        "ref": "micah.6.13",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.1.31",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.24.3",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.26.33",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.6.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.31.31",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "job.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.21.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.25.11",
+        "rank": 3
+      },
+      {
+        "ref": "luke.21.20",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.4.26",
+        "rank": 3
+      }
+    ],
+    "7.14": [
+      {
+        "ref": "zephaniah.3.13",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.33.28",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.77.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.23.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.35.2",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.9",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.33.16",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.4",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.19",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.143.5",
+        "rank": 3
+      },
+      {
+        "ref": "amos.9.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.28.9",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.37.24",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.5.21",
+        "rank": 3
+      },
+      {
+        "ref": "john.17.16",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.27",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.100.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.95.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.10",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.10",
+        "rank": 3
+      }
+    ],
+    "7.15": [
+      {
+        "ref": "isaiah.51.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.63.11",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.3.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.16",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.68.22",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.78.12",
+        "rank": 3
+      }
+    ],
+    "7.16": [
+      {
+        "ref": "romans.3.19",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.126.2",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.11.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.52.15",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.39.17",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.8.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.11",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.12.9",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.38.23",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.18",
+        "rank": 3
+      },
+      {
+        "ref": "job.21.5",
+        "rank": 3
+      },
+      {
+        "ref": "job.40.4",
+        "rank": 3
+      },
+      {
+        "ref": "job.29.9",
+        "rank": 3
+      }
+    ],
+    "7.17": [
+      {
+        "ref": "revelation.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.25.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.59.19",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.23",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.14.11",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.16.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.9.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.64.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.33.9",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.6.15",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.14.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.18.45",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.9.24",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.15.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.18.9",
+        "rank": 4
+      }
+    ],
+    "7.18": [
+      {
+        "ref": "isaiah.44.22",
+        "rank": 2
+      },
+      {
+        "ref": "isaiah.43.25",
+        "rank": 2
+      },
+      {
+        "ref": "psalms.130.4",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.8.9",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.14.18",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.65.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.1.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.25",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.71.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.38.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.103.8",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.8.23",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.32",
+        "rank": 3
+      },
+      {
+        "ref": "james.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.4",
+        "rank": 3
+      },
+      {
+        "ref": "amos.7.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.57.16",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.3",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.34.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.19",
+        "rank": 3
+      },
+      {
+        "ref": "joel.2.32",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.86.15",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.15.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.130.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "micah.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.5",
+        "rank": 3
+      },
+      {
+        "ref": "luke.24.47",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.85.4",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.33.26",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.18",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.9.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.57.10",
+        "rank": 3
+      },
+      {
+        "ref": "micah.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.31",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.23",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.34",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.77.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.103.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.89.6",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.9.9",
+        "rank": 3
+      },
+      {
+        "ref": "amos.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.20",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.33.11",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.33.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.46.8",
+        "rank": 3
+      },
+      {
+        "ref": "acts.13.38",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.34.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.89.8",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.86.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.113.5",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.32.41",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.103.2",
+        "rank": 3
+      },
+      {
+        "ref": "jonah.4.2",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.35.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.5",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.7",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.21",
+        "rank": 3
+      }
+    ],
+    "7.19": [
+      {
+        "ref": "deuteronomy.30.3",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.11.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.50.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.63.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.90.13",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.32",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.43.25",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.36",
+        "rank": 3
+      },
+      {
+        "ref": "romans.6.17",
+        "rank": 3
+      },
+      {
+        "ref": "james.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "romans.8.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.34",
+        "rank": 3
+      },
+      {
+        "ref": "romans.7.23",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.36.25",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.9.24",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.30.6",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.130.8",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "ezra.9.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.103.12",
+        "rank": 3
+      },
+      {
+        "ref": "romans.6.14",
+        "rank": 3
+      },
+      {
+        "ref": "romans.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "titus.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.38.17",
+        "rank": 3
+      }
+    ],
+    "7.20": [
+      {
+        "ref": "genesis.12.2",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.6.13",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.17.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.105.8",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.7.8",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.33.25",
+        "rank": 3
+      },
+      {
+        "ref": "romans.11.26",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.54",
+        "rank": 3
+      },
+      {
+        "ref": "acts.3.25",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.22.16",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.26.3",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.28.13",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.72",
+        "rank": 3
+      }
+    ]
+  }
+}

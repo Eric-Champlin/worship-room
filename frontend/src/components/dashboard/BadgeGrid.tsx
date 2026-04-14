@@ -159,7 +159,7 @@ const BadgeCellInner = function BadgeCell({ badge, earned }: BadgeCellProps) {
 
       {/* Tooltip */}
       <div
-        className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/15 bg-hero-mid px-3 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+        className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/15 bg-hero-mid px-3 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100"
         role="tooltip"
       >
         {tooltipText}

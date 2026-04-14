@@ -189,7 +189,7 @@ describe('MusicPage', () => {
     expect(ambientTab).toHaveAttribute('aria-selected', 'true')
   })
 
-  it('has skip-to-content link', () => {
+  it('has skip-to-content link (via Navbar)', () => {
     renderPage()
     expect(screen.getByText('Skip to content')).toBeInTheDocument()
   })

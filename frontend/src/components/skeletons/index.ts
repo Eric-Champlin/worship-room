@@ -17,6 +17,7 @@ export { SettingsSkeleton } from './SettingsSkeleton'
 export { MyPrayersSkeleton } from './MyPrayersSkeleton'
 export { MusicSkeleton } from './MusicSkeleton'
 export { ProfileSkeleton } from './ProfileSkeleton'
+export { MyBibleSkeleton } from './MyBibleSkeleton'
 
 // Hook
 export { useLoadingState } from '@/hooks/useLoadingState'

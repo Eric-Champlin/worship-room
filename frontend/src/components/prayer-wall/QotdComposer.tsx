@@ -49,7 +49,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
   return (
     <div
       className={cn(
-        'overflow-hidden transition-all duration-300 ease-in-out',
+        'overflow-hidden transition-all motion-reduce:transition-none duration-base ease-standard',
         isOpen ? 'visible mt-3 max-h-[600px] opacity-100' : 'invisible max-h-0 opacity-0',
       )}
       aria-hidden={!isOpen}

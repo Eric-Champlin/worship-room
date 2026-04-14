@@ -95,7 +95,7 @@ export function SharedMixHero({
           onClick={onPlay}
           className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
-          <Play size={20} fill="currentColor" />
+          <Play size={20} fill="currentColor" aria-hidden="true" />
           Play This Mix
         </button>
       </div>

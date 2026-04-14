@@ -10,6 +10,11 @@ export interface InstallPromptContextValue {
   promptInstall: () => Promise<'accepted' | 'dismissed' | null>
   dismissBanner: () => void
   markDashboardCardShown: () => void
+  // BB-39 fields
+  sessionPageCount: number
+  isSessionDismissed: boolean
+  dismissSession: () => void
+  shouldShowPrompt: (pathname: string) => boolean
 }
 
 export const InstallPromptContext = createContext<InstallPromptContextValue | null>(null)

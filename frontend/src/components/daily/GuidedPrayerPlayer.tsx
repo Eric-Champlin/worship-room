@@ -97,6 +97,7 @@ export function GuidedPrayerPlayer({
         ref={containerRef}
         className="fixed inset-0 z-50 flex items-center justify-center bg-hero-dark"
         role="dialog"
+        aria-modal="true"
         aria-label={`${session.title} complete`}
       >
         <div className="flex w-full max-w-lg flex-col items-center px-4 text-center">
@@ -119,14 +120,14 @@ export function GuidedPrayerPlayer({
             <button
               type="button"
               onClick={onJournalAboutThis}
-              className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 sm:w-auto"
+              className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 sm:w-auto active:scale-[0.98]"
             >
               Journal about this
             </button>
             <button
               type="button"
               onClick={onTryAnother}
-              className="w-full rounded-lg border border-white/30 px-8 py-3 text-white transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 sm:w-auto"
+              className="w-full rounded-lg border border-white/30 px-8 py-3 text-white transition-[colors,transform] duration-fast hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 sm:w-auto active:scale-[0.98]"
             >
               Try another session
             </button>
@@ -156,6 +157,7 @@ export function GuidedPrayerPlayer({
       ref={containerRef}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-hero-dark"
       role="dialog"
+      aria-modal="true"
       aria-label={`Guided prayer: ${session.title}`}
     >
       {/* Screen reader announcements */}
@@ -178,7 +180,7 @@ export function GuidedPrayerPlayer({
         <div className="min-h-[120px] w-full text-center">
           {segment?.type === 'narration' ? (
             <div
-              className={`transition-opacity duration-500 ${prefersReduced ? '' : 'animate-fade-in'}`}
+              className={`transition-opacity motion-reduce:transition-none duration-slow ${prefersReduced ? '' : 'animate-fade-in-up'}`}
               key={`narration-${player.currentSegmentIndex}`}
             >
               {player.ttsAvailable ? (
@@ -197,7 +199,7 @@ export function GuidedPrayerPlayer({
             </div>
           ) : (
             <div
-              className={`transition-opacity duration-500 ${prefersReduced ? '' : 'animate-fade-in'}`}
+              className={`transition-opacity motion-reduce:transition-none duration-slow ${prefersReduced ? '' : 'animate-fade-in-up'}`}
               key={`silence-${player.currentSegmentIndex}`}
             >
               <p className="font-serif italic text-white/60 text-xl">
@@ -230,7 +232,7 @@ export function GuidedPrayerPlayer({
           <button
             type="button"
             onClick={player.isPlaying ? player.pause : player.play}
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 transition-[colors,transform] duration-fast hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.98]"
             aria-label={player.isPlaying ? 'Pause' : 'Play'}
           >
             {player.isPlaying ? (
@@ -242,7 +244,7 @@ export function GuidedPrayerPlayer({
           <button
             type="button"
             onClick={player.stop}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-[colors,transform] duration-fast hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.98]"
             aria-label="Stop and close"
           >
             <Square className="h-5 w-5 text-white/60" />

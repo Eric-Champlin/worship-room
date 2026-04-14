@@ -146,7 +146,7 @@ export function EditPrayerForm({ prayer, onSave, onCancel }: EditPrayerFormProps
         <button
           type="button"
           onClick={handleSave}
-          className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
         >
           Save
         </button>

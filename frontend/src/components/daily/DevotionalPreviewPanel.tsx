@@ -19,7 +19,7 @@ export function DevotionalPreviewPanel({ snapshot, onDismiss }: DevotionalPrevie
         className={cn(
           'bg-white/[0.06] backdrop-blur-md border border-white/[0.12] rounded-2xl',
           'shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
-          'transition-all duration-200',
+          'transition-all motion-reduce:transition-none duration-base',
         )}
       >
         {/* Collapsed Pill (always visible) */}
@@ -42,7 +42,7 @@ export function DevotionalPreviewPanel({ snapshot, onDismiss }: DevotionalPrevie
             </div>
             <ChevronDown
               className={cn(
-                'h-5 w-5 shrink-0 text-white/60 transition-transform duration-300',
+                'h-5 w-5 shrink-0 text-white/60 transition-transform motion-reduce:transition-none duration-base',
                 isExpanded && 'rotate-180',
               )}
               aria-hidden="true"
@@ -63,7 +63,7 @@ export function DevotionalPreviewPanel({ snapshot, onDismiss }: DevotionalPrevie
           id={contentId}
           aria-hidden={!isExpanded}
           className={cn(
-            'overflow-hidden transition-[max-height] duration-300 ease-out',
+            'overflow-hidden transition-[max-height] motion-reduce:transition-none duration-base ease-decelerate',
             isExpanded ? 'max-h-[50vh]' : 'max-h-0',
           )}
         >

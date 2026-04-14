@@ -1,7 +1,10 @@
 import { useState, useCallback, useMemo } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { Link, Navigate } from 'react-router-dom'
 import { Pencil } from 'lucide-react'
 import { SEO } from '@/components/SEO'
+import { PRAYER_WALL_DASHBOARD_METADATA } from '@/lib/seo/routeMetadata'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
@@ -156,7 +159,7 @@ function DashboardContent() {
 
   return (
     <PageShell>
-      <SEO title="Prayer Dashboard" description="Your private prayer wall dashboard — track your requests and prayer activity." noIndex />
+      <SEO {...PRAYER_WALL_DASHBOARD_METADATA} />
       <main
         id="main-content"
         className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
@@ -314,7 +317,7 @@ function DashboardContent() {
             </button>
           ))}
           <div
-            className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out"
+            className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-standard"
             style={{
               width: `${100 / tabs.length}%`,
               transform: `translateX(${tabs.findIndex(t => t.key === activeTab) * 100}%)`,
@@ -493,5 +496,17 @@ function DashboardContent() {
 }
 
 export function PrayerWallDashboard() {
+  const { isOnline } = useOnlineStatus()
+
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Prayer Wall"
+        fallbackRoute="/daily"
+        fallbackLabel="Go to Daily Hub"
+      />
+    )
+  }
+
   return <DashboardContent />
 }

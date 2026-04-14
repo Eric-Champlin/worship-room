@@ -3,24 +3,11 @@ import { useAuth } from '@/hooks/useAuth'
 import { useWhisperToast } from '@/hooks/useWhisperToast'
 import { canShowSurprise, markSurpriseShown } from '@/services/surprise-storage'
 import { getBookDisplayName } from '@/services/bible-annotations-storage'
-import { BIBLE_HIGHLIGHTS_KEY } from '@/constants/bible'
-import type { BibleHighlight } from '@/types/bible'
+import { getAllHighlights } from '@/lib/bible/highlightStore'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 
 const PRAYER_LIST_KEY = 'wr_prayer_list'
 const ECHO_DELAY_MS = 3000
-
-function readHighlights(): BibleHighlight[] {
-  try {
-    const raw = localStorage.getItem(BIBLE_HIGHLIGHTS_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    return parsed
-  } catch (_e) {
-    return []
-  }
-}
 
 function readPrayers(): PersonalPrayer[] {
   try {
@@ -34,9 +21,10 @@ function readPrayers(): PersonalPrayer[] {
   }
 }
 
-function formatHighlightDate(createdAt: string): string {
+function formatHighlightDate(createdAt: number): string {
   try {
     const date = new Date(createdAt)
+    if (isNaN(date.getTime())) return 'a previous visit'
     return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
   } catch (_e) {
     return 'a previous visit'
@@ -62,7 +50,7 @@ export function useScriptureEcho(
     if (shownChaptersRef.current.has(key)) return
 
     // Check for highlight match
-    const highlights = readHighlights()
+    const highlights = getAllHighlights()
     const matchingHighlight = highlights.find(
       (h) => h.book === bookSlug && h.chapter === chapter,
     )

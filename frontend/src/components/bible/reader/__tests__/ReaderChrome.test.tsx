@@ -1,0 +1,241 @@
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import { ReaderChrome } from '../ReaderChrome'
+import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
+import { createRef } from 'react'
+
+function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
+  const aaRef = createRef<HTMLButtonElement>()
+  const audioButtonRef = createRef<HTMLButtonElement>()
+  return render(
+    <MemoryRouter>
+      <BibleDrawerProvider>
+        <ReaderChrome
+          bookName="John"
+          bookSlug="john"
+          chapter={3}
+          onTypographyToggle={props?.onTypographyToggle ?? vi.fn()}
+          isTypographyOpen={props?.isTypographyOpen ?? false}
+          aaRef={aaRef as React.RefObject<HTMLButtonElement | null>}
+          chromeOpacity={props?.chromeOpacity ?? 1}
+          chromePointerEvents={props?.chromePointerEvents ?? 'auto'}
+          chromeTransitionMs={props?.chromeTransitionMs ?? 200}
+          isManuallyArmed={props?.isManuallyArmed ?? false}
+          onFocusToggle={props?.onFocusToggle ?? vi.fn()}
+          ambientAudioVisible={props?.ambientAudioVisible ?? true}
+          isAudioPlaying={props?.isAudioPlaying ?? false}
+          onAudioToggle={props?.onAudioToggle ?? vi.fn()}
+          audioButtonRef={audioButtonRef as React.RefObject<HTMLButtonElement | null>}
+          isAudioPickerOpen={props?.isAudioPickerOpen ?? false}
+          reducedMotion={props?.reducedMotion ?? false}
+        />
+      </BibleDrawerProvider>
+    </MemoryRouter>,
+  )
+}
+
+describe('ReaderChrome', () => {
+  it('renders all 5 interactive elements with correct aria-labels', () => {
+    renderChrome()
+
+    expect(screen.getByLabelText('Back to Bible')).toBeTruthy()
+    expect(screen.getByLabelText('Open chapter picker')).toBeTruthy()
+    expect(screen.getByLabelText('Typography settings')).toBeTruthy()
+    expect(screen.getByLabelText('Toggle focus mode')).toBeTruthy()
+    expect(screen.getByLabelText('Browse books')).toBeTruthy()
+  })
+
+  it('back button links to /bible', () => {
+    renderChrome()
+
+    const backLink = screen.getByLabelText('Back to Bible')
+    expect(backLink.getAttribute('href')).toBe('/bible')
+  })
+
+  it('center label shows book name and chapter', () => {
+    renderChrome()
+
+    const label = screen.getByLabelText('Open chapter picker')
+    expect(label.textContent).toContain('John')
+    expect(label.textContent).toContain('3')
+  })
+
+  it('Aa button calls typography toggle', async () => {
+    const user = userEvent.setup()
+    const onToggle = vi.fn()
+    renderChrome({ onTypographyToggle: onToggle })
+
+    await user.click(screen.getByLabelText('Typography settings'))
+    expect(onToggle).toHaveBeenCalledOnce()
+  })
+
+  it('all icon buttons have 44px minimum size', () => {
+    renderChrome()
+
+    const backBtn = screen.getByLabelText('Back to Bible')
+    expect(backBtn.className).toContain('min-h-[44px]')
+    expect(backBtn.className).toContain('min-w-[44px]')
+
+    const aaBtn = screen.getByLabelText('Typography settings')
+    expect(aaBtn.className).toContain('min-h-[44px]')
+    expect(aaBtn.className).toContain('min-w-[44px]')
+
+    const booksBtn = screen.getByLabelText('Browse books')
+    expect(booksBtn.className).toContain('min-h-[44px]')
+    expect(booksBtn.className).toContain('min-w-[44px]')
+  })
+
+  it('Aa button has correct aria-expanded when open', () => {
+    renderChrome({ isTypographyOpen: true })
+
+    const aaBtn = screen.getByLabelText('Typography settings')
+    expect(aaBtn.getAttribute('aria-expanded')).toBe('true')
+  })
+
+  it('renders focus toggle between Aa and Books', () => {
+    renderChrome()
+
+    const buttons = screen.getAllByRole('button')
+    const aaIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Typography settings',
+    )
+    const focusIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Toggle focus mode',
+    )
+    const booksIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Browse books',
+    )
+
+    expect(focusIndex).toBeGreaterThan(aaIndex)
+    expect(focusIndex).toBeLessThan(booksIndex)
+  })
+
+  it('focus toggle calls onFocusToggle', async () => {
+    const user = userEvent.setup()
+    const onFocusToggle = vi.fn()
+    renderChrome({ onFocusToggle })
+
+    await user.click(screen.getByLabelText('Toggle focus mode'))
+    expect(onFocusToggle).toHaveBeenCalledOnce()
+  })
+
+  it('shows armed dot when isManuallyArmed is true', () => {
+    const { container } = renderChrome({ isManuallyArmed: true })
+
+    const dot = container.querySelector('.bg-primary-lt')
+    expect(dot).toBeTruthy()
+  })
+
+  it('hides armed dot when isManuallyArmed is false', () => {
+    const { container } = renderChrome({ isManuallyArmed: false })
+
+    const dot = container.querySelector('.bg-primary-lt')
+    expect(dot).toBeNull()
+  })
+
+  it('applies chromeOpacity and pointerEvents from props', () => {
+    const { container } = renderChrome({
+      chromeOpacity: 0,
+      chromePointerEvents: 'none',
+    })
+
+    const chromeDiv = container.firstElementChild as HTMLElement
+    expect(chromeDiv.style.opacity).toBe('0')
+    expect(chromeDiv.style.pointerEvents).toBe('none')
+  })
+
+  it('applies transition duration from chromeTransitionMs', () => {
+    const { container } = renderChrome({ chromeTransitionMs: 600 })
+
+    const chromeDiv = container.firstElementChild as HTMLElement
+    expect(chromeDiv.style.transition).toContain('600ms')
+  })
+
+  // --- BB-20: Ambient audio control ---
+
+  it('audio icon renders when ambientAudioVisible is true', () => {
+    renderChrome({ ambientAudioVisible: true })
+    expect(screen.getByLabelText('Open ambient sounds')).toBeTruthy()
+  })
+
+  it('audio icon hidden when ambientAudioVisible is false', () => {
+    renderChrome({ ambientAudioVisible: false })
+    expect(screen.queryByLabelText('Open ambient sounds')).toBeNull()
+    expect(screen.queryByLabelText(/Ambient audio playing/)).toBeNull()
+  })
+
+  it('audio icon at reduced opacity when no audio playing', () => {
+    renderChrome({ isAudioPlaying: false })
+    const svg = screen.getByLabelText('Open ambient sounds').querySelector('svg')!
+    expect(svg.getAttribute('class')).toContain('opacity-50')
+  })
+
+  it('audio icon at full opacity when audio playing', () => {
+    renderChrome({ isAudioPlaying: true, reducedMotion: false })
+    const svg = screen.getByLabelText(/Ambient audio playing/).querySelector('svg')!
+    expect(svg.getAttribute('class')).not.toContain('opacity-50')
+    expect(svg.getAttribute('class')).toContain('text-white')
+  })
+
+  it('pulse animation when audio playing and motion not reduced', () => {
+    renderChrome({ isAudioPlaying: true, reducedMotion: false })
+    const btn = screen.getByLabelText(/Ambient audio playing/)
+    const pulseSpan = btn.querySelector('span[aria-hidden="true"]')
+    expect(pulseSpan).toBeTruthy()
+    expect(pulseSpan!.className).toContain('animate-audio-pulse')
+  })
+
+  it('no pulse animation when reduced motion', () => {
+    renderChrome({ isAudioPlaying: true, reducedMotion: true })
+    const btn = screen.getByLabelText(/Ambient audio playing/)
+    const pulseSpan = btn.querySelector('span[aria-hidden="true"]')
+    expect(pulseSpan).toBeNull()
+  })
+
+  it('reduced motion uses text-primary-lt on icon', () => {
+    renderChrome({ isAudioPlaying: true, reducedMotion: true })
+    const svg = screen.getByLabelText(/Ambient audio playing/).querySelector('svg')!
+    expect(svg.getAttribute('class')).toContain('text-primary-lt')
+  })
+
+  it('clicking audio icon calls onAudioToggle', async () => {
+    const user = userEvent.setup()
+    const onAudioToggle = vi.fn()
+    renderChrome({ onAudioToggle })
+
+    await user.click(screen.getByLabelText('Open ambient sounds'))
+    expect(onAudioToggle).toHaveBeenCalledOnce()
+  })
+
+  it('audio button has correct aria-expanded when picker open', () => {
+    renderChrome({ isAudioPickerOpen: true })
+    const btn = screen.getByLabelText('Open ambient sounds')
+    expect(btn.getAttribute('aria-expanded')).toBe('true')
+  })
+
+  it('audio icon positioned between Aa and Focus buttons', () => {
+    renderChrome({ ambientAudioVisible: true })
+    const buttons = screen.getAllByRole('button')
+    const aaIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Typography settings',
+    )
+    const audioIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Open ambient sounds',
+    )
+    const focusIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Toggle focus mode',
+    )
+
+    expect(audioIndex).toBeGreaterThan(aaIndex)
+    expect(audioIndex).toBeLessThan(focusIndex)
+  })
+
+  it('audio icon has 44px minimum size', () => {
+    renderChrome({ ambientAudioVisible: true })
+    const audioBtn = screen.getByLabelText('Open ambient sounds')
+    expect(audioBtn.className).toContain('min-h-[44px]')
+    expect(audioBtn.className).toContain('min-w-[44px]')
+  })
+})

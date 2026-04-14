@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -17,6 +19,7 @@ import { ASK_TOPIC_CHIPS, ASK_MAX_LENGTH, ASK_LOADING_DELAY_MS, ASK_FEEDBACK_KEY
 import { getAskResponse } from '@/mocks/ask-mock-data'
 import type { AskResponse, AskFeedback } from '@/types/ask'
 import { SEO } from '@/components/SEO'
+import { ASK_METADATA } from '@/lib/seo/routeMetadata'
 import { cn } from '@/lib/utils'
 
 interface ConversationPair {
@@ -37,6 +40,7 @@ export function AskPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
   const [searchParams] = useSearchParams()
+  const { isOnline } = useOnlineStatus()
   const handleSubmitRef = useRef<() => void>(() => {})
   const pendingAutoSubmitRef = useRef<string | null>(null)
   const loadingTimerRef = useRef<ReturnType<typeof setTimeout>>()
@@ -207,9 +211,19 @@ export function AskPage() {
 
   const showInput = conversation.length === 0 && !isLoading
 
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Ask"
+        fallbackRoute="/bible"
+        fallbackLabel="Read the Bible"
+      />
+    )
+  }
+
   return (
     <Layout>
-      <SEO title="Ask God's Word" description="Ask life questions and receive AI-powered answers grounded in Biblical wisdom and Scripture." />
+      <SEO {...ASK_METADATA} />
       <div className="min-h-screen bg-dashboard-dark">
         <PageHero title="Ask God's Word" scriptWord="Word" showDivider>
           <p className="mx-auto max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
@@ -269,7 +283,7 @@ export function AskPage() {
                           'text-sm text-white/70',
                           'hover:bg-white/15 hover:text-white',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                          'transition-colors',
+                          'transition-[colors,transform] duration-fast active:scale-[0.98]',
                         )}
                       >
                         {chip}
@@ -286,7 +300,7 @@ export function AskPage() {
                       className={cn(
                         'min-h-[44px] rounded-lg bg-primary py-3 px-8 font-semibold text-white',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                        'transition-colors hover:bg-primary-lt',
+                        'transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]',
                         !text.trim() && 'cursor-not-allowed opacity-50',
                       )}
                     >

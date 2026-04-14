@@ -1,11 +1,13 @@
 import { useCallback, useRef, useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Share2, Volume2, Check } from 'lucide-react'
+import { EchoCard } from '@/components/echoes/EchoCard'
 import { cn } from '@/lib/utils'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getTodaysDevotional, formatDevotionalDate } from '@/data/devotionals'
 import { useSwipe } from '@/hooks/useSwipe'
 import { useAuth } from '@/hooks/useAuth'
+import { useEcho, markEchoSeen } from '@/hooks/useEcho'
 import { useToast } from '@/components/ui/Toast'
 import { useReadAloud } from '@/hooks/useReadAloud'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
@@ -49,6 +51,7 @@ export function DevotionalTabContent({
   const { recordActivity } = useFaithPoints()
   const { playSoundEffect } = useSoundEffects()
   const { getPlanStatus } = useReadingPlanProgress()
+  const topEcho = useEcho()
   const [isCompleted, setIsCompleted] = useState(false)
   const [showPassageShare, setShowPassageShare] = useState(false)
 
@@ -285,7 +288,7 @@ export function DevotionalTabContent({
                     )
                     onSwitchToJournal?.(devotional.theme, reflectionQuestion, buildSnapshot())
                   }}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-[colors,transform] duration-fast hover:bg-gray-100 active:scale-[0.98]"
                 >
                   Journal about this question &rarr;
                 </button>
@@ -304,7 +307,7 @@ export function DevotionalTabContent({
                   const customPrompt = `I'm reflecting on today's devotional about ${devotional.theme}. The passage is ${devotional.passage.reference}: "${verseText}". Help me pray about what I've read.`
                   onSwitchToPray?.(devotional.theme, customPrompt, buildSnapshot())
                 }}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-[colors,transform] duration-fast hover:bg-gray-100 active:scale-[0.98]"
               >
                 Pray about today&apos;s reading &rarr;
               </button>
@@ -321,20 +324,30 @@ export function DevotionalTabContent({
             />
           )}
 
+          {/* Verse echo — quiet callback to user's history */}
+          {topEcho && (
+            <div className="py-6 sm:py-8">
+              <EchoCard
+                echo={topEcho}
+                onNavigate={() => markEchoSeen(topEcho.id)}
+              />
+            </div>
+          )}
+
           {/* Share & Read Aloud */}
           <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:justify-center">
             <button
               onClick={handleShareClick}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)] active:scale-[0.98]"
             >
-              <Share2 size={18} />
+              <Share2 size={18} aria-hidden="true" />
               Share today&apos;s devotional
             </button>
             <button
               onClick={handleReadAloudClick}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)] active:scale-[0.98]"
             >
-              <Volume2 size={18} />
+              <Volume2 size={18} aria-hidden="true" />
               {readAloud.state === 'idle'
                 ? 'Read aloud'
                 : readAloud.state === 'playing'

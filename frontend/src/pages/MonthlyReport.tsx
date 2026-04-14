@@ -7,6 +7,7 @@ import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
+import { INSIGHTS_MONTHLY_METADATA } from '@/lib/seo/routeMetadata'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
 import {
@@ -34,7 +35,7 @@ function AnimatedSection({
 }) {
   return (
     <div
-      className="opacity-0 animate-fade-in motion-reduce:animate-none motion-reduce:opacity-100"
+      className="opacity-0 animate-fade-in-up motion-reduce:animate-none motion-reduce:opacity-100"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {children}
@@ -92,13 +93,7 @@ export function MonthlyReport() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="Monthly Mood Report" description="Your monthly spiritual growth and mood tracking summary." noIndex />
-      <a
-        href="#monthly-report-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
+      <SEO {...INSIGHTS_MONTHLY_METADATA} />
       <Navbar transparent />
 
       {/* Hero section */}
@@ -146,7 +141,7 @@ export function MonthlyReport() {
 
       {/* Content area */}
       <main
-        id="monthly-report-content"
+        id="main-content"
         key={`${selectedYear}-${selectedMonth}`}
         className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6 opacity-0 animate-fade-in motion-reduce:animate-none motion-reduce:opacity-100"
       >

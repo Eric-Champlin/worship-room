@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { ANIMATION_EASINGS } from '@/constants/animation'
 import { createPortal } from 'react-dom'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAnnounce } from '@/hooks/useAnnounce'
@@ -345,8 +346,8 @@ export function TooltipCallout({
     transition: prefersReduced
       ? 'none'
       : isDismissing
-        ? `opacity ${FADE_OUT_MS}ms ease-in, transform ${FADE_OUT_MS}ms ease-in`
-        : `opacity ${FADE_IN_MS}ms ease-out, transform ${FADE_IN_MS}ms ease-out`,
+        ? `opacity ${FADE_OUT_MS}ms ${ANIMATION_EASINGS.accelerate}, transform ${FADE_OUT_MS}ms ${ANIMATION_EASINGS.accelerate}`
+        : `opacity ${FADE_IN_MS}ms ${ANIMATION_EASINGS.decelerate}, transform ${FADE_IN_MS}ms ${ANIMATION_EASINGS.decelerate}`,
     pointerEvents: isDismissing ? 'none' : 'auto',
   }
 

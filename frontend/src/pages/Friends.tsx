@@ -6,6 +6,7 @@ import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
+import { FRIENDS_METADATA } from '@/lib/seo/routeMetadata'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import {
   FriendSearch,
@@ -65,13 +66,7 @@ export function Friends() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="Friends & Leaderboard" description="Grow together in faith with friends, encouragement, and friendly accountability." noIndex />
-      <a
-        href="#friends-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
+      <SEO {...FRIENDS_METADATA} />
       <Navbar transparent />
 
       {/* Hero section */}
@@ -110,7 +105,7 @@ export function Friends() {
                   aria-selected={isActive}
                   aria-controls={`panel-${tab.id}`}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`min-h-[44px] rounded-full px-6 py-2 text-sm font-medium transition-colors ${
+                  className={`min-h-[44px] rounded-full px-6 py-2 text-sm font-medium transition-[colors,transform] duration-fast active:scale-[0.98] ${
                     isActive
                       ? 'text-white font-semibold'
                       : 'border border-white/20 text-white/60 hover:text-white/80'
@@ -122,7 +117,7 @@ export function Friends() {
             })}
             {/* Animated underline */}
             <div
-              className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in-out"
+              className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-standard"
               style={{
                 width: `${100 / TAB_CONFIG.length}%`,
                 transform: `translateX(${TAB_CONFIG.findIndex(t => t.id === activeTab) * 100}%)`,
@@ -134,7 +129,7 @@ export function Friends() {
       </div>
 
       {/* Tab panels */}
-      <main id="friends-content" className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">
         <div
           role="tabpanel"
           id="panel-friends"

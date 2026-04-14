@@ -50,12 +50,12 @@ export function AmbientSoundPill({
         aria-label={pillAriaLabel}
         className={
           hasActiveAudio
-            ? `inline-flex w-full min-h-[44px] items-center gap-2 rounded-full border py-2 px-4 text-sm transition-colors sm:w-auto ${
+            ? `inline-flex w-full min-h-[44px] items-center gap-2 rounded-full border py-2 px-4 text-sm transition-[colors,transform] duration-fast active:scale-[0.98] sm:w-auto ${
                 isLight
                   ? 'border-gray-200/50 border-l-2 border-l-primary bg-gray-100/80 backdrop-blur-md hover:bg-gray-200/80'
                   : 'border-white/20 border-l-2 border-l-primary bg-white/10 backdrop-blur-md hover:bg-white/20'
               }`
-            : `inline-flex w-full min-h-[44px] items-center gap-2 rounded-full border py-2 px-4 text-sm transition-colors sm:w-auto ${
+            : `inline-flex w-full min-h-[44px] items-center gap-2 rounded-full border py-2 px-4 text-sm transition-[colors,transform] duration-fast active:scale-[0.98] sm:w-auto ${
                 isLight
                   ? 'border-gray-200/50 bg-gray-100/80 backdrop-blur-md hover:bg-gray-200/80'
                   : 'border-white/20 bg-white/10 backdrop-blur-md hover:bg-white/20'

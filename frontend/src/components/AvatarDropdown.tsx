@@ -32,7 +32,7 @@ export function AvatarDropdown({ user, isOpen, onToggle, onClose, onLogout, trig
         aria-expanded={isOpen}
         aria-controls={isOpen ? 'user-menu-dropdown' : undefined}
         aria-label="User menu"
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white transition-opacity motion-reduce:transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         {initial}
       </button>

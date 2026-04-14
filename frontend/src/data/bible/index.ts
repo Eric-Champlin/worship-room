@@ -1,5 +1,80 @@
 import { BIBLE_BOOKS } from '@/constants/bible'
-import type { BibleBook, BibleCategory, BibleChapter } from '@/types/bible'
+import type { BibleBook, BibleCategory, BibleChapter, BibleVerse } from '@/types/bible'
+
+// --- BB-4 WEB JSON format types and loaders ---
+
+interface WebBookJson {
+  book: string
+  slug: string
+  testament: string
+  chapters: Array<{
+    number: number
+    verses: BibleVerse[]
+    paragraphs: number[]
+  }>
+}
+
+type WebBookLoader = () => Promise<WebBookJson>
+
+// Dynamic import map for the web/ JSON files — one lazy loader per book slug
+const WEB_BOOK_LOADERS: Record<string, WebBookLoader> = Object.fromEntries(
+  BIBLE_BOOKS.map((b) => [
+    b.slug,
+    () => import(`./web/${b.slug}.json`).then((m) => m.default as WebBookJson),
+  ]),
+)
+
+export async function loadChapterWeb(
+  bookSlug: string,
+  chapter: number,
+): Promise<BibleChapter | null> {
+  const loader = WEB_BOOK_LOADERS[bookSlug]
+  if (!loader) return null
+
+  try {
+    const bookData = await loader()
+    const ch = bookData.chapters.find((c) => c.number === chapter)
+    if (!ch) return null
+
+    return {
+      bookSlug,
+      chapter,
+      verses: ch.verses.filter((v) => v.text.trim() !== ''),
+      paragraphs: ch.paragraphs,
+    }
+  } catch {
+    return null
+  }
+}
+
+export function getAdjacentChapter(
+  bookSlug: string,
+  chapter: number,
+  direction: 'prev' | 'next',
+): { bookSlug: string; bookName: string; chapter: number } | null {
+  const bookIndex = BIBLE_BOOKS.findIndex((b) => b.slug === bookSlug)
+  if (bookIndex === -1) return null
+
+  const currentBook = BIBLE_BOOKS[bookIndex]
+
+  if (direction === 'next') {
+    if (chapter < currentBook.chapters) {
+      return { bookSlug, bookName: currentBook.name, chapter: chapter + 1 }
+    }
+    // Cross-book: go to next book, chapter 1
+    const nextBook = BIBLE_BOOKS[bookIndex + 1]
+    if (!nextBook) return null // Revelation last chapter
+    return { bookSlug: nextBook.slug, bookName: nextBook.name, chapter: 1 }
+  } else {
+    if (chapter > 1) {
+      return { bookSlug, bookName: currentBook.name, chapter: chapter - 1 }
+    }
+    // Cross-book: go to previous book, last chapter
+    const prevBook = BIBLE_BOOKS[bookIndex - 1]
+    if (!prevBook) return null // Genesis chapter 1
+    return { bookSlug: prevBook.slug, bookName: prevBook.name, chapter: prevBook.chapters }
+  }
+}
 
 export function getBookBySlug(slug: string): BibleBook | undefined {
   return BIBLE_BOOKS.find((b) => b.slug === slug)

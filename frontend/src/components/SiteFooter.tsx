@@ -25,6 +25,7 @@ const FOOTER_SUPPORT_LINKS = [
   { label: 'Churches', to: '/local-support/churches' },
   { label: 'Counselors', to: '/local-support/counselors' },
   { label: 'Celebrate Recovery', to: '/local-support/celebrate-recovery' },
+  { label: 'Accessibility', to: '/accessibility' },
 ]
 
 const FOOTER_COLUMNS = [
@@ -104,7 +105,7 @@ export function SiteFooter() {
                     <li key={link.to}>
                       <Link
                         to={link.to}
-                        className="relative inline-block pb-0.5 text-sm text-muted-gray transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark rounded after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-center after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100"
+                        className="relative inline-block pb-0.5 text-sm text-muted-gray transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark rounded after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-center after:scale-x-0 after:bg-white after:transition-transform after:duration-base hover:after:scale-x-100 motion-reduce:after:transition-none"
                       >
                         {link.label}
                       </Link>

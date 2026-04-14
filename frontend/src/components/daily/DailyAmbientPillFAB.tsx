@@ -22,7 +22,7 @@ export function DailyAmbientPillFAB({ context }: DailyAmbientPillFABProps) {
   return (
     <div
       className={cn(
-        'pointer-events-none fixed z-40 transition-opacity duration-200',
+        'pointer-events-none fixed z-40 transition-opacity motion-reduce:transition-none duration-base',
         isHidden ? 'opacity-0' : 'opacity-100',
       )}
       style={{

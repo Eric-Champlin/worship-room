@@ -361,7 +361,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
                 >
                   <div
                     className={cn(
-                      'w-[70px] h-[70px] sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all',
+                      'w-[70px] h-[70px] sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all motion-reduce:transition-none',
                       selected
                         ? 'border-2 border-primary ring-2 ring-primary/30'
                         : 'border border-white/10 bg-white/[0.06]',
@@ -375,7 +375,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-white/5 animate-pulse" />
+                      <div className="w-full h-full bg-white/5 motion-safe:animate-pulse" />
                     )}
                   </div>
                   <span className="text-xs text-white/50 mt-1 text-center">
@@ -398,7 +398,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
           >
             {isRendering || !previewUrl ? (
               <div
-                className="w-full h-full bg-white/5 animate-pulse rounded-lg"
+                className="w-full h-full bg-white/5 motion-safe:animate-pulse rounded-lg"
                 style={{ aspectRatio: String(aspectRatio) }}
               />
             ) : (
@@ -431,7 +431,7 @@ export function SharePanel({ verseText, reference, isOpen, onClose }: SharePanel
                   onClick={() => handleSizeChange(s)}
                   onKeyDown={(e) => handleSizeKeyDown(e, i)}
                   className={cn(
-                    'px-4 py-2 rounded-full text-sm transition-all min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+                    'px-4 py-2 rounded-full text-sm transition-all motion-reduce:transition-none min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
                     selected
                       ? 'bg-primary/20 text-white border border-primary/30'
                       : 'bg-white/10 text-white/60 border border-transparent',

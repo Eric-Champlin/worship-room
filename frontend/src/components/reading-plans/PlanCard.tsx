@@ -44,7 +44,7 @@ function StatusButton({
         e.stopPropagation()
         onStart(planId)
       }}
-      className="min-h-[44px] w-full rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+      className="min-h-[44px] w-full rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 active:scale-[0.98]"
     >
       {label}
     </button>
@@ -55,7 +55,7 @@ export function PlanCard({ plan, status, progress, onStart, isCustom }: PlanCard
   return (
     <Link
       to={`/reading-plans/${plan.id}`}
-      className="block rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow lg:hover:shadow-md lg:hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+      className="block rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
     >
       <div className="mb-3 text-4xl" aria-hidden="true">
         {plan.coverEmoji}

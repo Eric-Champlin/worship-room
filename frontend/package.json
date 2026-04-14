@@ -10,18 +10,19 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "og-generate": "node scripts/generate-og-cards.mjs",
+    "og-check": "node scripts/check-og-sizes.mjs",
+    "build-search-index": "npx tsx scripts/build-search-index.mjs"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.3.4",
-    "@tanstack/react-query": "^5.28.0",
+    "@google/genai": "^1.49.0",
     "clsx": "^2.1.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.356.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet-async": "^3.0.0",
-    "react-hook-form": "^7.51.0",
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^6.22.0",
     "recharts": "^3.8.0",

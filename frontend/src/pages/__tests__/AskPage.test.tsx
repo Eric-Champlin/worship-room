@@ -329,9 +329,9 @@ describe('AskPage — Response Display', () => {
     ).toBeInTheDocument()
   })
 
-  it('response section uses animate-fade-in', () => {
+  it('response section uses animate-fade-in-up', () => {
     submitAndWait()
-    const responseSection = screen.getByText('What Scripture Says').closest('.animate-fade-in')
+    const responseSection = screen.getByText('What Scripture Says').closest('.animate-fade-in-up')
     expect(responseSection).toBeInTheDocument()
   })
 })

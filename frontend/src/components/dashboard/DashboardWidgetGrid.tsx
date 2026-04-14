@@ -102,7 +102,7 @@ export function DashboardWidgetGrid({
     const def = WIDGET_MAP[id]
     const animClass = animateEntrance ? 'motion-safe:animate-widget-enter' : undefined
     const animStyle = animateEntrance ? { animationDelay: `${(staggerStartIndex + index) * 100}ms` } : undefined
-    const transitionClass = isCustomizing ? 'transition-all duration-300 ease-in-out motion-reduce:transition-none' : undefined
+    const transitionClass = isCustomizing ? 'transition-all duration-base ease-standard motion-reduce:transition-none' : undefined
 
     switch (id) {
       case 'anniversary':

@@ -5,6 +5,9 @@ interface FrostedCardProps {
   onClick?: () => void
   className?: string
   as?: 'div' | 'button' | 'article'
+  tabIndex?: number
+  role?: string
+  onKeyDown?: React.KeyboardEventHandler
 }
 
 export function FrostedCard({
@@ -12,22 +15,30 @@ export function FrostedCard({
   onClick,
   className,
   as: Component = 'div',
+  tabIndex,
+  role,
+  onKeyDown,
 }: FrostedCardProps) {
   const isInteractive = !!onClick
 
   return (
     <Component
       onClick={onClick}
+      tabIndex={tabIndex}
+      role={role}
+      onKeyDown={onKeyDown}
       className={cn(
         'bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] rounded-2xl p-6',
         'shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]',
-        'transition-all duration-200 ease-out',
+        'transition-all motion-reduce:transition-none duration-base ease-decelerate',
         isInteractive && [
           'cursor-pointer',
           'hover:bg-white/[0.09] hover:border-white/[0.18]',
           'hover:shadow-[0_0_35px_rgba(139,92,246,0.10),0_6px_25px_rgba(0,0,0,0.35)]',
           'hover:-translate-y-0.5',
           'motion-reduce:hover:translate-y-0',
+          'active:scale-[0.98]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
         ],
         className
       )}

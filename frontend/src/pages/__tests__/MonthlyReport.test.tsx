@@ -235,9 +235,9 @@ describe('MonthlyReport — Empty State & Misc', () => {
     expect(highlightGrid).toBeInTheDocument()
   })
 
-  it('skip-to-content link present', () => {
+  it('skip-to-content link present (via Navbar)', () => {
     renderPage()
     const skipLink = screen.getByText('Skip to content')
-    expect(skipLink).toHaveAttribute('href', '#monthly-report-content')
+    expect(skipLink).toHaveAttribute('href', '#main-content')
   })
 })

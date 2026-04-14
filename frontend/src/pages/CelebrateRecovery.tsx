@@ -1,5 +1,6 @@
 import { LocalSupportPage } from '@/components/local-support/LocalSupportPage'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { CELEBRATE_RECOVERY_METADATA } from '@/lib/seo/routeMetadata'
 const crBreadcrumbs = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -13,7 +14,7 @@ const crBreadcrumbs = {
 export function CelebrateRecovery() {
   return (
     <>
-      <SEO title="Find Celebrate Recovery Near You" description="Locate Celebrate Recovery meetings in your area for faith-based addiction and hurt recovery support." jsonLd={crBreadcrumbs} />
+      <SEO {...CELEBRATE_RECOVERY_METADATA} jsonLd={crBreadcrumbs} />
       <LocalSupportPage
       config={{
         category: 'celebrate-recovery',

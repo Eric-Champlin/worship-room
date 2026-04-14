@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Heart, LayoutDashboard, Search } from 'lucide-react'
@@ -31,6 +33,7 @@ import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/gett
 import { isValidCategory, PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 import { getTodaysQuestion } from '@/constants/question-of-the-day'
 import { SEO, SITE_URL } from '@/components/SEO'
+import { PRAYER_WALL_METADATA } from '@/lib/seo/routeMetadata'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 const prayerWallBreadcrumbs = {
   '@context': 'https://schema.org',
@@ -344,13 +347,7 @@ function PrayerWallContent() {
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-dashboard-dark font-sans">
-      <SEO title="Community Prayer Wall" description="Share prayer requests and pray for others in a supportive Christian community." jsonLd={prayerWallBreadcrumbs} />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
+      <SEO {...PRAYER_WALL_METADATA} jsonLd={prayerWallBreadcrumbs} />
       <Navbar transparent />
       <PrayerWallHero
         action={
@@ -363,7 +360,7 @@ function PrayerWallContent() {
               <button
                 type="button"
                 onClick={() => setComposerOpen(!composerOpen)}
-                className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-[colors,transform] duration-fast hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent active:scale-[0.98]"
               >
                 Share a Prayer Request
               </button>
@@ -392,7 +389,7 @@ function PrayerWallContent() {
 
       {/* Filter Bar */}
       <div className={cn(
-        'sticky top-0 z-30 transition-shadow',
+        'sticky top-0 z-30 transition-shadow motion-reduce:transition-none',
         isFilterSticky && 'shadow-md',
       )}>
         <CategoryFilterBar
@@ -549,5 +546,17 @@ function PrayerWallContent() {
 
 // Loading state: use PrayerWallSkeleton
 export function PrayerWall() {
+  const { isOnline } = useOnlineStatus()
+
+  if (!isOnline) {
+    return (
+      <OfflineNotice
+        featureName="Prayer Wall"
+        fallbackRoute="/daily"
+        fallbackLabel="Go to Daily Hub"
+      />
+    )
+  }
+
   return <PrayerWallContent />
 }

@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "category": "easy",
+    "reference": "Psalm 23:1-4",
+    "verseText": "The LORD is my shepherd; I shall lack nothing. He makes me lie down in green pastures. He leads me beside still waters. He restores my soul. He guides me in the paths of righteousness for his name’s sake. Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me. Your rod and your staff, they comfort me.",
+    "output": "This passage describes a shepherd's care for their sheep, moving from provision and restoration to protection in a dangerous place.\n\nA reader might consider what \"lack nothing\" could mean in their own experience. Does it suggest a state of perfect contentment, or something else entirely? When this passage speaks of being led beside \"still waters,\" what kind of stillness might that evoke today? Is it a stillness of peace, or perhaps a stillness that allows for rest and recovery?\n\nThe phrase \"restore my soul\" could bring to mind times when one's inner life feels depleted or out of balance. How might the idea of being \"guided in the paths of righteousness\" land for someone today? Does \"righteousness\" here imply a moral code, a way of being, or something else?\n\nThe image of walking \"through the valley of the shadow of death\" is a stark one. Someone reading this might wonder about the nature of the \"shadows\" in their own life – the fears, uncertainties, or difficult circumstances they face. And in the midst of that imagery, the declaration \"I will fear no evil, for you are with me\" might raise questions about trust and presence. How does the presence of the \"rod and staff\" offer comfort, and what might those tools represent?\n\nIt's also possible that this passage might not resonate at all. A reader might find the imagery foreign, or the claims made within it hard to connect with their own life, and that too is a way of engaging with the text.",
+    "model": "gemini-2.5-flash-lite",
+    "wordCount": 254,
+    "capturedAt": "2026-04-11T03:20:15.598Z"
+  },
+  {
+    "id": 2,
+    "category": "easy",
+    "reference": "Ecclesiastes 3:1-8",
+    "verseText": "For everything there is a season, and a time for every purpose under heaven: a time to be born, and a time to die; a time to plant, and a time to pluck up that which is planted; a time to kill, and a time to heal; a time to break down, and a time to build up; a time to weep, and a time to laugh; a time to mourn, and a time to dance; a time to cast away stones, and a time to gather stones together; a time to embrace, and a time to refrain from embracing; a time to seek, and a time to lose; a time to keep, and a time to cast away; a time to tear, and a time to sew; a time to keep silence, and a time to speak; a time to love, and a time to hate; a time for war, and a time for peace.",
+    "output": "This passage presents a vision of life as a series of cyclical, often contrasting, experiences. A reader might find themselves considering the sheer breadth of human activity and emotion cataloged here. Does this list feel like a comforting acknowledgment of the natural rhythms of existence, or perhaps a stark reminder of forces beyond one's control?\n\nOne way this could land today is by prompting questions about how one navigates these different \"times.\" When faced with a season of difficulty—perhaps a \"time to weep\" or a \"time to break down\"—does this passage offer any particular perspective on how to endure it, or on what might come after? Conversely, during a \"time to laugh\" or a \"time to build up,\" how might this text shape one's experience of joy or productivity?\n\nIt's also possible that this passage might not resonate at all. A reader might feel that their own life doesn't fit neatly into these categories, or that the idea of predetermined \"times\" for everything feels too deterministic or even alienating. Perhaps the passage raises the question of agency: if there is a \"time for everything,\" what room is there for individual choice or intentional action?",
+    "model": "gemini-2.5-flash-lite",
+    "wordCount": 194,
+    "capturedAt": "2026-04-11T03:20:18.011Z"
+  },
+  {
+    "id": 3,
+    "category": "easy",
+    "reference": "Matthew 6:25-27",
+    "verseText": "Therefore I tell you, don’t be anxious for your life: what you will eat, or what you will drink; nor yet for your body, what you will wear. Isn’t life more than food, and the body more than clothing? See the birds of the sky, that they don’t sow, neither do they reap, nor gather into barns. Your heavenly Father feeds them. Aren’t you of much more value than they? “Which of you by being anxious, can add one moment to his lifespan?",
+    "output": "A reader might pause at the directness of \"don’t be anxious.\" This could raise the question of whether such a command is even possible, or if it’s meant to be taken literally, or perhaps as an encouragement toward a different way of orienting one's concerns.\n\nOne way this passage might land today is by prompting a consideration of the things we worry about concerning sustenance and provision. The text contrasts human striving with the way birds are fed, suggesting a different kind of trust or dependence. Someone reading this might wonder about the extent to which their own anxieties about survival and security are truly within their control, or if they are expending energy on things that are ultimately beyond their influence.\n\nAnother possibility is to explore the idea presented that life itself, and the body, are of greater value than the things we use to sustain or adorn them. This might lead a reader to reflect on what they truly value, and whether their anxieties are aligned with those deeper values, or if they are being consumed by worries about the superficial. It’s also possible that this passage might not resonate at all, or might even feel like an oversimplification of complex realities, and a reader might simply set it aside.",
+    "model": "gemini-2.5-flash-lite",
+    "wordCount": 212,
+    "capturedAt": "2026-04-11T03:20:20.471Z"
+  },
+  {
+    "id": 4,
+    "category": "easy",
+    "reference": "Romans 8:38-39",
+    "verseText": "For I am persuaded that neither death, nor life, nor angels, nor principalities, nor things present, nor things to come, nor powers, nor height, nor depth, nor any other created thing will be able to separate us from God’s love which is in Christ Jesus our Lord.",
+    "output": "Someone reading this might wonder about the nature of the \"separation\" being discussed. Is it a separation of experience, or a separation of essential being? The passage lists many powerful forces – death, life, angels, future events, even abstract concepts like height and depth – and asserts that none of them can sever a connection. This might prompt a reader to consider what kinds of things in their own life feel like they create distance, and whether the passage offers a different perspective on those experiences.\n\nAnother way this could land is by focusing on the source of the persuasion. The author states they are \"persuaded,\" which suggests a conviction arrived at through some process. A reader might explore what it would mean to arrive at such a deep conviction about an unbreakable connection, and what that process might entail for them. It's also possible, of course, that this passage might not resonate at all, or might raise more questions than it answers, or even feel like a statement that doesn't align with one's own lived reality.\n\nThis passage might also raise the question of what \"God's love which is in Christ Jesus our Lord\" actually entails. If these immense powers cannot separate someone from it, what is the quality or nature of that love? One possibility is that it refers to an inherent state of being, rather than an emotional feeling that can fluctuate.",
+    "model": "gemini-2.5-flash-lite",
+    "wordCount": 235,
+    "capturedAt": "2026-04-11T03:20:22.916Z"
+  },
+  {
+    "id": 5,
+    "category": "medium",
+    "reference": "Proverbs 13:11",
+    "verseText": "Wealth gained dishonestly dwindles away, but he who gathers by hand makes it grow.",
+    "output": "A reader might pause at this proverb, perhaps considering the different ways people acquire resources. The passage suggests a contrast between wealth obtained through dishonest means, which is presented as fleeting, and wealth accumulated through diligent effort, which is seen as increasing.\n\nOne way this could land today is by prompting a question about the sustainability of different economic practices. Does the passage offer a commentary on the long-term viability of wealth gained through exploitation or deceit, compared to that built through honest labor?\n\nSomeone reading this might find themselves wondering about the definition of \"dishonestly\" and \"by hand\" in contemporary contexts. How might these terms be interpreted in relation to modern economic systems, digital transactions, or inherited wealth?\n\nThis passage might also raise the question of personal values. If someone encounters this proverb, they might consider whether the way wealth is acquired holds significance for them, independent of its quantity or its tendency to grow or diminish. It's also possible, of course, that this passage might not resonate at all, or might feel irrelevant to a reader's current experiences or understanding of the world.",
+    "model": "gemini-2.5-flash-lite",
+    "wordCount": 185,
+    "capturedAt": "2026-04-11T03:23:01.255Z"
+  },
+  {
+    "id": 6,
+    "category": "medium",
+    "reference": "1 Corinthians 13:4-7",
+    "verseText": "Love is patient and is kind. Love doesn’t envy. Love doesn’t brag, is not proud, doesn’t behave itself inappropriately, doesn’t seek its own way, is not provoked, takes no account of evil; doesn’t rejoice in unrighteousness, but rejoices with the truth; bears all things, believes all things, hopes all things, and endures all things.",
+    "output": "This passage offers a detailed description of what love is and is not. A reader might find themselves considering the stark contrast between these qualities and their own experiences or observations of relationships.\n\nOne way this could land today is by prompting reflection on the *actions* described. For instance, the idea of love not seeking its own way or not being provoked might invite questions about how one navigates conflict or personal desire in their interactions. Does the way love is described here align with how one understands their own behavior, or the behavior of others?\n\nAnother possibility is to notice the aspirational quality of the list. The passage presents a very high bar for love—bearing, believing, hoping, and enduring *all* things. Someone reading this might wonder about the feasibility of such a standard. Is this presented as an achievable goal, an ideal to strive for, or perhaps a description of something divine rather than human?\n\nIt's also possible that this passage might not resonate at all. A reader might find these descriptions challenging, unrealistic, or even irrelevant to their current understanding of connection and care. The passage might raise questions about whether such a definition of love is universally applicable or even desirable in all contexts.",
+    "model": "gemini-2.5-flash-lite",
+    "wordCount": 207,
+    "capturedAt": "2026-04-11T11:58:40.763Z"
+  },
+  {
+    "id": 7,
+    "category": "medium",
+    "reference": "Ephesians 5:22-24",
+    "verseText": "Wives, be subject to your own husbands, as to the Lord. For the husband is the head of the wife, as Christ also is the head of the assembly, being himself the saviour of the body. But as the assembly is subject to Christ, so let the wives also be to their own husbands in everything.",
+    "output": "A reader encountering this passage today might pause at the instruction for wives to be subject to their husbands. One possibility is to consider the historical context in which such instructions were given, and how societal structures and understandings of marriage have evolved. This might lead to questions about whether and how these directives can be understood or applied in contemporary relationships, which often emphasize partnership and equality.\n\nAnother way this passage could land is by focusing on the analogy drawn between the wife-husband relationship and the relationship between the assembly and Christ. Someone reading this might explore what this analogy signifies for them, perhaps considering the concepts of mutual devotion, care, or leadership within a relationship, independent of gender roles.\n\nIt's also possible that this passage might not resonate at all, or might even feel troubling or alienating. A reader might find themselves questioning the underlying assumptions about authority and submission presented here, and wondering how such ideas align with their own experiences or values regarding relationships.",
+    "model": "gemini-2.5-flash-lite",
+    "wordCount": 168,
+    "capturedAt": "2026-04-11T03:20:27.078Z"
+  },
+  {
+    "id": 8,
+    "category": "medium",
+    "reference": "Philippians 4:6-7",
+    "verseText": "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts in Christ Jesus.",
+    "output": "A reader might first notice the direct instruction: \"In nothing be anxious.\" How does this command sit with you today? Does it feel like a possibility, a challenge, or perhaps something else entirely?\n\nOne way this passage might land is by highlighting a particular approach to difficult feelings or circumstances. The text suggests a response: \"by prayer and petition with thanksgiving, let your requests be made known to God.\" Someone reading this might wonder what it might look like to bring their concerns to God in this way, or perhaps they might question whether this is a path they wish to explore.\n\nAnother possibility is to consider the promised outcome: \"the peace of God, which surpasses all understanding, will guard your hearts and your thoughts in Christ Jesus.\" This might raise questions about what such peace could mean in a life that experiences anxiety. It's also possible that this passage resonates very little, or even feels troubling, and that is a valid response to encountering these words.",
+    "model": "gemini-2.5-flash-lite",
+    "wordCount": 167,
+    "capturedAt": "2026-04-11T03:24:33.502Z"
+  }
+]

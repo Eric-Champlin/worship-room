@@ -84,7 +84,7 @@ export function ChallengeShareButton({
         onClick={handleShare}
         disabled={isGenerating}
         style={{ backgroundColor: themeColor }}
-        className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+        className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-[opacity,transform] duration-fast motion-reduce:transition-none hover:opacity-90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 active:scale-[0.98]"
         aria-label={`Share your progress for ${challengeTitle}`}
       >
         {isGenerating ? (
@@ -99,7 +99,7 @@ export function ChallengeShareButton({
       <button
         type="button"
         onClick={handleCopyText}
-        className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/30 px-6 py-3 text-white/80 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+        className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/30 px-6 py-3 text-white/80 transition-[colors,transform] duration-fast hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 active:scale-[0.98]"
         aria-label="Copy share text to clipboard"
       >
         <Copy className="h-4 w-4" aria-hidden="true" />

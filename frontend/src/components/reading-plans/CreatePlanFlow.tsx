@@ -113,7 +113,7 @@ export function CreatePlanFlow({ onClose }: CreatePlanFlowProps) {
             className="mb-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 transition-colors hover:text-white"
             aria-label="Go back"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={18} aria-hidden="true" />
             Back
           </button>
         )}
@@ -260,7 +260,7 @@ function StepTwo({
             onClick={() => onDurationChange(days)}
             aria-pressed={selectedDuration === days}
             className={cn(
-              'min-h-[44px] w-full rounded-xl border bg-white/5 p-5 text-left transition-all sm:flex-1',
+              'min-h-[44px] w-full rounded-xl border bg-white/5 p-5 text-left transition-all motion-reduce:transition-none sm:flex-1',
               selectedDuration === days
                 ? 'border-primary shadow-[0_0_15px_rgba(109,40,217,0.3)]'
                 : 'border-white/10 hover:bg-white/10',
@@ -287,7 +287,7 @@ function StepTwo({
               : 'cursor-not-allowed opacity-50',
           )}
         >
-          <Sparkles className="mr-2 inline-block h-4 w-4" />
+          <Sparkles className="mr-2 inline-block h-4 w-4" aria-hidden="true" />
           Generate My Plan
         </button>
       </div>

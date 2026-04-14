@@ -3,10 +3,12 @@ import { renderHook } from '@testing-library/react'
 import { act } from '@testing-library/react'
 import { useScriptureEcho } from '../useScriptureEcho'
 import { getLocalDateString } from '@/utils/date'
+import type { Highlight } from '@/types/bible'
 
 // ── Mocks ───────────────────────────────────────────────────────────
 const mockShowWhisperToast = vi.fn()
 const mockIsAuthenticated = vi.hoisted(() => ({ value: true }))
+const mockGetAllHighlights = vi.fn((): Highlight[] => [])
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ isAuthenticated: mockIsAuthenticated.value }),
@@ -23,9 +25,19 @@ vi.mock('@/services/bible-annotations-storage', () => ({
   },
 }))
 
+vi.mock('@/lib/bible/highlightStore', () => ({
+  getAllHighlights: () => mockGetAllHighlights(),
+}))
+
 // ── Test helpers ────────────────────────────────────────────────────
-function setHighlights(highlights: Array<{ book: string; chapter: number; verseNumber: number; color: string; createdAt: string }>) {
-  localStorage.setItem('wr_bible_highlights', JSON.stringify(highlights))
+function setHighlights(highlights: Array<{ book: string; chapter: number; startVerse: number; endVerse: number; color: string; createdAt: number }>) {
+  mockGetAllHighlights.mockReturnValue(
+    highlights.map((h, i) => ({
+      id: `hl-${i}`,
+      ...h,
+      updatedAt: h.createdAt,
+    })),
+  )
 }
 
 function setPrayers(prayers: Array<{ id: string; title: string; description: string; category: string; status: string; createdAt: string; updatedAt: string; answeredAt: null; answeredNote: null; lastPrayedAt: null }>) {
@@ -55,6 +67,7 @@ describe('useScriptureEcho', () => {
     sessionStorage.clear()
     mockIsAuthenticated.value = true
     mockShowWhisperToast.mockClear()
+    mockGetAllHighlights.mockReturnValue([])
   })
 
   afterEach(() => {
@@ -63,7 +76,7 @@ describe('useScriptureEcho', () => {
 
   it('shows whisper-toast when chapter has highlight', () => {
     setHighlights([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
+      { book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, color: 'joy', createdAt: new Date('2026-03-15T10:00:00Z').getTime() },
     ])
 
     renderHook(() => useScriptureEcho('genesis', 1, false))
@@ -92,7 +105,7 @@ describe('useScriptureEcho', () => {
   it('does not trigger when not authenticated', () => {
     mockIsAuthenticated.value = false
     setHighlights([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
+      { book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, color: 'joy', createdAt: new Date('2026-03-15T10:00:00Z').getTime() },
     ])
 
     renderHook(() => useScriptureEcho('genesis', 1, false))
@@ -107,7 +120,7 @@ describe('useScriptureEcho', () => {
   it('does not trigger when canShowSurprise returns false', () => {
     localStorage.setItem('wr_last_surprise_date', getLocalDateString())
     setHighlights([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
+      { book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, color: 'joy', createdAt: new Date('2026-03-15T10:00:00Z').getTime() },
     ])
 
     renderHook(() => useScriptureEcho('genesis', 1, false))
@@ -121,7 +134,7 @@ describe('useScriptureEcho', () => {
 
   it('does not trigger twice for same chapter', () => {
     setHighlights([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
+      { book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, color: 'joy', createdAt: new Date('2026-03-15T10:00:00Z').getTime() },
     ])
 
     const { rerender } = renderHook(
@@ -150,7 +163,7 @@ describe('useScriptureEcho', () => {
 
   it('does not trigger while loading', () => {
     setHighlights([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
+      { book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, color: 'joy', createdAt: new Date('2026-03-15T10:00:00Z').getTime() },
     ])
 
     renderHook(() => useScriptureEcho('genesis', 1, true))
@@ -164,7 +177,7 @@ describe('useScriptureEcho', () => {
 
   it('highlight message includes formatted date', () => {
     setHighlights([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
+      { book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, color: 'joy', createdAt: new Date('2026-03-15T10:00:00Z').getTime() },
     ])
 
     renderHook(() => useScriptureEcho('genesis', 1, false))
@@ -192,7 +205,7 @@ describe('useScriptureEcho', () => {
 
   it('marks surprise shown after triggering', () => {
     setHighlights([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
+      { book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, color: 'joy', createdAt: new Date('2026-03-15T10:00:00Z').getTime() },
     ])
 
     renderHook(() => useScriptureEcho('genesis', 1, false))
@@ -206,7 +219,7 @@ describe('useScriptureEcho', () => {
 
   it('shows generic message when both highlight and prayer match', () => {
     setHighlights([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
+      { book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, color: 'joy', createdAt: new Date('2026-03-15T10:00:00Z').getTime() },
     ])
     setPrayers([makePrayer('Genesis Journey', 'Walking through Genesis')])
 

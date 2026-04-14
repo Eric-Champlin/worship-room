@@ -1,11 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { type ReactNode, createElement } from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { useInstallPrompt } from '../useInstallPrompt'
 import { InstallPromptProvider } from '@/contexts/InstallPromptProvider'
 
 function wrapper({ children }: { children: ReactNode }) {
-  return createElement(InstallPromptProvider, null, children)
+  return createElement(MemoryRouter, { initialEntries: ['/'] },
+    createElement(InstallPromptProvider, null, children)
+  )
 }
 
 describe('useInstallPrompt (via InstallPromptContext)', () => {
@@ -167,5 +170,74 @@ describe('useInstallPrompt (via InstallPromptContext)', () => {
     expect(result.current.isInstallable).toBe(false)
     expect(result.current.isInstalled).toBe(false)
     expect(result.current.visitCount).toBe(0)
+    expect(result.current.sessionPageCount).toBe(0)
+    expect(result.current.isSessionDismissed).toBe(false)
+    expect(typeof result.current.dismissSession).toBe('function')
+    expect(result.current.shouldShowPrompt('/')).toBe(false)
+  })
+
+  // BB-39: New session tracking and shouldShowPrompt tests
+
+  it('sessionPageCount starts at 1 (initial page)', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+    expect(result.current.sessionPageCount).toBe(1)
+  })
+
+  it('dismissSession sets isSessionDismissed', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    expect(result.current.isSessionDismissed).toBe(false)
+
+    act(() => {
+      result.current.dismissSession()
+    })
+
+    expect(result.current.isSessionDismissed).toBe(true)
+  })
+
+  it('shouldShowPrompt returns false when < 3 pages visited', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    // Only 1 page visited (the initial '/')
+    expect(result.current.sessionPageCount).toBe(1)
+    expect(result.current.shouldShowPrompt('/')).toBe(false)
+  })
+
+  it('shouldShowPrompt returns false when permanently dismissed', () => {
+    localStorage.setItem('wr_install_dismissed', String(Date.now()))
+
+    // Fire beforeinstallprompt so the prompt would otherwise be available
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    act(() => {
+      const event = new Event('beforeinstallprompt')
+      ;(event as Event & { prompt: () => Promise<void> }).prompt = vi.fn()
+      ;(event as Event & { userChoice: Promise<{ outcome: string }> }).userChoice = Promise.resolve({ outcome: 'dismissed' })
+      window.dispatchEvent(event)
+    })
+
+    expect(result.current.isDismissed).toBe(true)
+    expect(result.current.shouldShowPrompt('/')).toBe(false)
+  })
+
+  it('shouldShowPrompt returns false on excluded path /bible/genesis/1', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+    expect(result.current.shouldShowPrompt('/bible/genesis/1')).toBe(false)
+  })
+
+  it('shouldShowPrompt returns false on excluded path /ask', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+    expect(result.current.shouldShowPrompt('/ask')).toBe(false)
+  })
+
+  it('shouldShowPrompt returns false when session dismissed', () => {
+    const { result } = renderHook(() => useInstallPrompt(), { wrapper })
+
+    act(() => {
+      result.current.dismissSession()
+    })
+
+    expect(result.current.isSessionDismissed).toBe(true)
+    expect(result.current.shouldShowPrompt('/')).toBe(false)
   })
 })

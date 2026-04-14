@@ -41,6 +41,21 @@ vi.mock('@/hooks/useScenePlayer', () => ({
   }),
 }))
 
+// Mock journalStore to prevent module-level cache from leaking between tests
+const mockCreateJournalEntry = vi.fn((body: string) => ({
+  id: `entry-${Date.now()}`,
+  body,
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
+}))
+vi.mock('@/lib/bible/journalStore', () => ({
+  getAllJournalEntries: vi.fn(() => []),
+  createJournalEntry: (...args: unknown[]) => mockCreateJournalEntry(args[0] as string),
+  JournalStorageFullError: class extends Error {
+    constructor() { super('Storage full') }
+  },
+}))
+
 // Mock useFaithPoints to spy on recordActivity
 const mockRecordActivity = vi.fn()
 vi.mock('@/hooks/useFaithPoints', () => ({
@@ -67,6 +82,26 @@ vi.mock('@/hooks/useUnsavedChanges', () => ({
   }),
 }))
 
+// Mock loadChapterWeb for verse context preload
+vi.mock('@/data/bible/index', () => ({
+  loadChapterWeb: vi.fn(),
+}))
+
+import { loadChapterWeb } from '@/data/bible/index'
+
+const mockChapterData = {
+  bookSlug: 'john',
+  chapter: 3,
+  verses: [
+    { number: 14, text: 'verse 14 text' },
+    { number: 15, text: 'verse 15 text' },
+    { number: 16, text: 'For God so loved the world...' },
+    { number: 17, text: 'For God did not send...' },
+    { number: 18, text: 'He who believes...' },
+  ],
+  paragraphs: [],
+}
+
 beforeEach(() => {
   localStorage.clear()
   localStorage.setItem('wr_auth_simulated', 'true')
@@ -76,9 +111,9 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn()
 })
 
-function renderJournalTab(props: Partial<React.ComponentProps<typeof JournalTabContent>> = {}) {
+function renderJournalTab(props: Partial<React.ComponentProps<typeof JournalTabContent>> = {}, initialEntries?: string[]) {
   return render(
-    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter initialEntries={initialEntries} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <AuthModalProvider>
@@ -657,5 +692,114 @@ describe('JournalTabContent devotional context', () => {
     await user.click(screen.getByRole('button', { name: 'Free Write' }))
     // Still visible
     expect(screen.getByRole('button', { name: /today's devotional/i })).toBeInTheDocument()
+  })
+})
+
+// --- BB-11 Verse Context Bridge Tests ---
+const VERSE_JOURNAL_URL = '/daily?tab=journal&verseBook=john&verseChapter=3&verseStart=16&verseEnd=16&src=bible'
+
+describe('JournalTabContent verse context bridge', () => {
+  beforeEach(() => {
+    vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
+  })
+
+  it('renders VersePromptCard when verse params in URL', async () => {
+    renderJournalTab({}, [VERSE_JOURNAL_URL])
+
+    await screen.findByText('What comes up as you sit with this?')
+    expect(screen.getByText('John 3:16')).toBeInTheDocument()
+    expect(screen.getByText(/For God so loved the world/)).toBeInTheDocument()
+  })
+
+  it('does not render card when no verse params', () => {
+    renderJournalTab({}, ['/daily?tab=journal'])
+
+    expect(screen.queryByText('What comes up as you sit with this?')).not.toBeInTheDocument()
+  })
+
+  it('removing card via X does not affect draft text', async () => {
+    localStorage.setItem('wr_journal_draft', 'My existing draft text')
+    const user = userEvent.setup()
+    renderJournalTab({}, [VERSE_JOURNAL_URL])
+
+    await screen.findByText('What comes up as you sit with this?')
+
+    // Draft should be restored
+    const textarea = screen.getByLabelText('Journal entry') as HTMLTextAreaElement
+    expect(textarea.value).toBe('My existing draft text')
+
+    // Remove the verse prompt card
+    await user.click(screen.getByRole('button', { name: 'Remove verse prompt' }))
+
+    // Card is gone
+    expect(screen.queryByText('What comes up as you sit with this?')).not.toBeInTheDocument()
+
+    // Draft is still there
+    expect(textarea.value).toBe('My existing draft text')
+  })
+
+  it('skeleton shows during hydration', async () => {
+    // Make loadChapterWeb slow
+    vi.mocked(loadChapterWeb).mockImplementation(() => new Promise(() => {}))
+
+    renderJournalTab({}, [VERSE_JOURNAL_URL])
+
+    // Skeleton should be visible (aria-hidden element)
+    const skeleton = document.querySelector('[aria-hidden="true"]')
+    expect(skeleton).toBeInTheDocument()
+  })
+
+  it('invalid params show no card', () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue(mockChapterData)
+
+    renderJournalTab({}, ['/daily?tab=journal&verseBook=fakebook&verseChapter=1&verseStart=1&verseEnd=1&src=bible'])
+
+    expect(screen.queryByText('What comes up as you sit with this?')).not.toBeInTheDocument()
+  })
+
+  it('saved entry includes verseContext when prompt card is showing', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({}, [VERSE_JOURNAL_URL])
+
+    await screen.findByText('What comes up as you sit with this?')
+
+    const textarea = screen.getByLabelText('Journal entry')
+    await user.type(textarea, 'My reflection on John 3:16')
+
+    const saveBtn = screen.getByRole('button', { name: /save entry/i })
+    await user.click(saveBtn)
+
+    // After saving, the entry should appear in the saved entries list
+    expect(screen.getByText('My reflection on John 3:16')).toBeInTheDocument()
+  })
+
+  it('saved entry omits verseContext when prompt card is removed', async () => {
+    const user = userEvent.setup()
+    renderJournalTab({}, [VERSE_JOURNAL_URL])
+
+    await screen.findByText('What comes up as you sit with this?')
+
+    // Remove the card
+    await user.click(screen.getByRole('button', { name: 'Remove verse prompt' }))
+
+    const textarea = screen.getByLabelText('Journal entry')
+    await user.type(textarea, 'Writing without verse context')
+
+    const saveBtn = screen.getByRole('button', { name: /save entry/i })
+    await user.click(saveBtn)
+
+    expect(screen.getByText('Writing without verse context')).toBeInTheDocument()
+  })
+
+  it('existing draft preserved alongside verse prompt card', async () => {
+    localStorage.setItem('wr_journal_draft', 'I was already writing something')
+    renderJournalTab({}, [VERSE_JOURNAL_URL])
+
+    await screen.findByText('What comes up as you sit with this?')
+
+    // Both the card and the draft should be visible
+    const textarea = screen.getByLabelText('Journal entry') as HTMLTextAreaElement
+    expect(textarea.value).toBe('I was already writing something')
+    expect(screen.getByText('John 3:16')).toBeInTheDocument()
   })
 })

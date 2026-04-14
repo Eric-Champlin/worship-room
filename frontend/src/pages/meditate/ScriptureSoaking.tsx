@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useSearchParams, useLocation } from 'react-router-dom'
 import { Pause, Play } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -15,8 +15,10 @@ import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/m
 import { getLocalDateString } from '@/utils/date'
 import { cn } from '@/lib/utils'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_SOAKING_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import type { DailyVerse } from '@/types/daily-experience'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 type Screen = 'prestart' | 'exercise' | 'complete'
 
@@ -27,6 +29,8 @@ export function ScriptureSoaking() {
 }
 
 function ScriptureSoakingContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const verses = getSoakingVerses()
   const [searchParams] = useSearchParams()
   const verseParam = searchParams.get('verse')
@@ -108,6 +112,7 @@ function ScriptureSoakingContent() {
             date: getLocalDateString(),
             durationMinutes: duration!,
             completedAt: new Date().toISOString(),
+            ...(meditationVerseContext && { verseContext: meditationVerseContext }),
           })
           setScreen('complete')
           return
@@ -117,7 +122,7 @@ function ScriptureSoakingContent() {
       }
       rafRef.current = requestAnimationFrame(tick)
     },
-    [cleanup, markMeditationComplete, recordActivity, duration],
+    [cleanup, markMeditationComplete, recordActivity, duration, meditationVerseContext],
   )
 
   const handleBegin = () => {
@@ -189,7 +194,7 @@ function ScriptureSoakingContent() {
           </blockquote>
           <p
             className={cn(
-              'mt-4 text-sm text-text-light transition-opacity duration-300',
+              'mt-4 text-sm text-text-light transition-opacity motion-reduce:transition-none duration-base',
               referenceVisible ? 'opacity-100' : 'opacity-0',
             )}
           >
@@ -221,7 +226,7 @@ function ScriptureSoakingContent() {
           aria-label="Soaking timer progress"
         >
           <div
-            className="h-full bg-primary transition-[width] duration-200"
+            className="h-full bg-primary transition-[width] duration-base"
             style={{ width: `${progress * 100}%` }}
           />
         </div>
@@ -232,7 +237,7 @@ function ScriptureSoakingContent() {
   // Pre-start
   return (
     <Layout hero={<PageHero title="Scripture Soaking" subtitle="Sit quietly with a single verse. No analyzing — just being present with God's word." scriptWord="Soaking" />}>
-      <SEO title="Scripture Soaking" description="Contemplate and meditate on a Bible verse with guided reflection." noIndex />
+      <SEO {...MEDITATE_SOAKING_METADATA} />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="soaking" />
 

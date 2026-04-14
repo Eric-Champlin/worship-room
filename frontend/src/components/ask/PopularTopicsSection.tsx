@@ -27,7 +27,7 @@ export function PopularTopicsSection({ onTopicClick }: PopularTopicsSectionProps
               <p className="font-semibold text-white/80">{topic.topic}</p>
               <p className="mt-1 text-sm text-white/50">{topic.description}</p>
             </div>
-            <ChevronRight className="h-5 w-5 shrink-0 text-white/40" />
+            <ChevronRight className="h-5 w-5 shrink-0 text-white/40" aria-hidden="true" />
           </button>
         ))}
       </div>

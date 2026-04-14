@@ -7,7 +7,7 @@ export function SpotifyBadge() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Listen on Spotify (opens in new tab)"
-      className="inline-flex h-[40px] items-center gap-2 rounded-md border border-white/20 bg-black px-3 transition-opacity hover:opacity-80"
+      className="inline-flex h-[40px] items-center gap-2 rounded-md border border-white/20 bg-black px-3 transition-opacity motion-reduce:transition-none hover:opacity-80"
     >
       <svg
         viewBox="0 0 24 24"

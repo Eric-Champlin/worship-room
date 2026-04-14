@@ -1,0 +1,6908 @@
+{
+  "book": "Song of Solomon",
+  "slug": "song-of-solomon",
+  "entries": {
+    "1.1": [
+      {
+        "ref": "isaiah.5.1",
+        "rank": 4
+      },
+      {
+        "ref": "1-kings.4.32",
+        "rank": 4
+      },
+      {
+        "ref": "psalms.14.1",
+        "rank": 4
+      }
+    ],
+    "1.2": [
+      {
+        "ref": "isaiah.25.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.36.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.12",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.26",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.1",
+        "rank": 3
+      },
+      {
+        "ref": "acts.21.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.3",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.45.15",
+        "rank": 4
+      },
+      {
+        "ref": "1-peter.5.14",
+        "rank": 4
+      },
+      {
+        "ref": "genesis.29.11",
+        "rank": 4
+      },
+      {
+        "ref": "genesis.27.26",
+        "rank": 4
+      }
+    ],
+    "1.3": [
+      {
+        "ref": "song-of-solomon.5.5",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.14.4",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.7",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.34.5",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.33.12",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.23.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.11.2",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.133.2",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.7.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "john.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.30.23",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.3",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.1.21",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.27.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.8",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.4.18",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.33.19",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.89.15",
+        "rank": 3
+      }
+    ],
+    "1.4": [
+      {
+        "ref": "john.14.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.3",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "luke.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.32",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.48.9",
+        "rank": 3
+      },
+      {
+        "ref": "john.21.15",
+        "rank": 3
+      },
+      {
+        "ref": "john.6.44",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.10",
+        "rank": 3
+      },
+      {
+        "ref": "luke.22.19",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.42.4",
+        "rank": 3
+      },
+      {
+        "ref": "john.12.32",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.149.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.111.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.5",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.45.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.63.7",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.98.4",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.4.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.25.8",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.6.24",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.11.23",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.103.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.60",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.11.4",
+        "rank": 3
+      }
+    ],
+    "1.5": [
+      {
+        "ref": "luke.13.34",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.53.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.4",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.4.26",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.120.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.4",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.25",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.3",
+        "rank": 3
+      },
+      {
+        "ref": "romans.13.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.149.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.7",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.22",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.5.21",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.26",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.90.17",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.22.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.9",
+        "rank": 3
+      }
+    ],
+    "1.6": [
+      {
+        "ref": "matthew.10.22",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.11",
+        "rank": 3
+      },
+      {
+        "ref": "acts.14.22",
+        "rank": 3
+      },
+      {
+        "ref": "luke.12.51",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.21",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.4.29",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.12.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.69.8",
+        "rank": 3
+      },
+      {
+        "ref": "ruth.1.19",
+        "rank": 3
+      },
+      {
+        "ref": "job.30.30",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.35",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.6",
+        "rank": 3
+      },
+      {
+        "ref": "mark.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.25",
+        "rank": 3
+      }
+    ],
+    "1.7": [
+      {
+        "ref": "psalms.18.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.33.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.12.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.13.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.116.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.11",
+        "rank": 3
+      },
+      {
+        "ref": "john.6.67",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "john.21.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.37.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.23.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "micah.5.4",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.28",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.80.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.10",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.7.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.28.1",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.37",
+        "rank": 3
+      }
+    ],
+    "1.8": [
+      {
+        "ref": "song-of-solomon.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.8.34",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.6.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.9",
+        "rank": 3
+      },
+      {
+        "ref": "james.2.25",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.16.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.11.4",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.13",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.6.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.4",
+        "rank": 3
+      },
+      {
+        "ref": "james.5.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.11.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.1",
+        "rank": 3
+      },
+      {
+        "ref": "john.21.15",
+        "rank": 3
+      },
+      {
+        "ref": "james.2.21",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.27",
+        "rank": 3
+      }
+    ],
+    "1.9": [
+      {
+        "ref": "john.15.14",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.31.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.10.28",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.7",
+        "rank": 3
+      }
+    ],
+    "1.10": [
+      {
+        "ref": "song-of-solomon.4.9",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.24.22",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.31.50",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.1.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.10",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.41.42",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.11",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.24.47",
+        "rank": 3
+      }
+    ],
+    "1.11": [
+      {
+        "ref": "philippians.3.21",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.9",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.25",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.149.4",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.1.26",
+        "rank": 3
+      }
+    ],
+    "1.12": [
+      {
+        "ref": "philippians.4.18",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.8.3",
+        "rank": 3
+      },
+      {
+        "ref": "john.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.22.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.20",
+        "rank": 3
+      },
+      {
+        "ref": "mark.14.3",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.22.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.26",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "luke.24.30",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.34",
+        "rank": 3
+      }
+    ],
+    "1.13": [
+      {
+        "ref": "song-of-solomon.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.14",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.43.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "john.19.39",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.8",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.3.17",
+        "rank": 3
+      }
+    ],
+    "1.14": [
+      {
+        "ref": "joshua.15.62",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.23.29",
+        "rank": 3
+      }
+    ],
+    "1.15": [
+      {
+        "ref": "song-of-solomon.5.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.11.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.6",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.4",
+        "rank": 3
+      }
+    ],
+    "1.16": [
+      {
+        "ref": "zechariah.9.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.7",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.2",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.10",
+        "rank": 3
+      }
+    ],
+    "1.17": [
+      {
+        "ref": "2-chronicles.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.42.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.92.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.6.9",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.11.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.3.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.5",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.41.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.2.4",
+        "rank": 3
+      }
+    ],
+    "2.1": [
+      {
+        "ref": "isaiah.57.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.85.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.35.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.16",
+        "rank": 3
+      }
+    ],
+    "2.2": [
+      {
+        "ref": "isaiah.55.13",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.6.28",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.16",
+        "rank": 3
+      }
+    ],
+    "2.3": [
+      {
+        "ref": "genesis.3.22",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.9",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.7.23",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.17.23",
+        "rank": 3
+      },
+      {
+        "ref": "judges.9.19",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.57.1",
+        "rank": 3
+      },
+      {
+        "ref": "john.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.25.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.91.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.32.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.89.6",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.12.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.47.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.4.2",
+        "rank": 3
+      },
+      {
+        "ref": "judges.9.15",
+        "rank": 3
+      },
+      {
+        "ref": "john.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.5",
+        "rank": 3
+      }
+    ],
+    "2.4": [
+      {
+        "ref": "song-of-solomon.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.20",
+        "rank": 3
+      },
+      {
+        "ref": "esther.7.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.11.10",
+        "rank": 3
+      },
+      {
+        "ref": "romans.8.28",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.84.10",
+        "rank": 3
+      },
+      {
+        "ref": "romans.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.1",
+        "rank": 3
+      },
+      {
+        "ref": "job.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.60.4",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.21",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.20.5",
+        "rank": 3
+      }
+    ],
+    "2.5": [
+      {
+        "ref": "2-samuel.6.19",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.13.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.42.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.130",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.1.23",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-chronicles.16.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "luke.24.32",
+        "rank": 3
+      }
+    ],
+    "2.6": [
+      {
+        "ref": "song-of-solomon.8.3",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.4",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.32.41",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.5",
+        "rank": 3
+      },
+      {
+        "ref": "john.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.25",
+        "rank": 3
+      }
+    ],
+    "2.7": [
+      {
+        "ref": "song-of-solomon.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.5.19",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.63",
+        "rank": 4
+      }
+    ],
+    "2.8": [
+      {
+        "ref": "revelation.3.20",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "luke.6.23",
+        "rank": 3
+      },
+      {
+        "ref": "john.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.48.27",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.35.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.52.7",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.27",
+        "rank": 3
+      },
+      {
+        "ref": "acts.14.10",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.4",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.6.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.44.23",
+        "rank": 3
+      },
+      {
+        "ref": "acts.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "luke.3.4",
+        "rank": 3
+      }
+    ],
+    "2.9": [
+      {
+        "ref": "luke.24.35",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.10.19",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "john.5.39",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.10.1",
+        "rank": 3
+      },
+      {
+        "ref": "john.12.41",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.13.12",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.2.18",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.10",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.9.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.3.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "john.5.46",
+        "rank": 3
+      }
+    ],
+    "2.10": [
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.6.17",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.11.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.85.8",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.17",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.23.3",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.4.19",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.3",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.7",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.9.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.8",
+        "rank": 3
+      }
+    ],
+    "2.11": [
+      {
+        "ref": "revelation.11.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.5.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.1",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.2",
+        "rank": 3
+      }
+    ],
+    "2.12": [
+      {
+        "ref": "isaiah.35.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.8.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.89.15",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.42.10",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.9",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.18",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.148.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.40.1",
+        "rank": 3
+      }
+    ],
+    "2.13": [
+      {
+        "ref": "2-corinthians.5.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.18.5",
+        "rank": 3
+      },
+      {
+        "ref": "luke.13.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.24.32",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.8",
+        "rank": 3
+      },
+      {
+        "ref": "haggai.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "luke.19.42",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.10",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.6",
+        "rank": 3
+      }
+    ],
+    "2.14": [
+      {
+        "ref": "jude.1.24",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.10.22",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.15.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "ezra.9.5",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.33.22",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.21",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.4.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.23",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.27",
+        "rank": 3
+      },
+      {
+        "ref": "job.9.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.74.19",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.68.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.51.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.22.3",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.22",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.7.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.14",
+        "rank": 3
+      },
+      {
+        "ref": "luke.8.47",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.10.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.9.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.48.28",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.3",
+        "rank": 3
+      },
+      {
+        "ref": "obadiah.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.49.16",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.13",
+        "rank": 3
+      }
+    ],
+    "2.15": [
+      {
+        "ref": "luke.13.32",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.80.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.12",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.13.4",
+        "rank": 3
+      }
+    ],
+    "2.16": [
+      {
+        "ref": "revelation.21.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.13",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.33",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.3.21",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.48.14",
+        "rank": 3
+      }
+    ],
+    "2.17": [
+      {
+        "ref": "song-of-solomon.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.78",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.1.19",
+        "rank": 3
+      },
+      {
+        "ref": "romans.13.12",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.10.1",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.8.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.14",
+        "rank": 3
+      }
+    ],
+    "3.1": [
+      {
+        "ref": "psalms.63.6",
+        "rank": 3
+      },
+      {
+        "ref": "luke.13.24",
+        "rank": 3
+      },
+      {
+        "ref": "job.23.8",
+        "rank": 3
+      },
+      {
+        "ref": "john.21.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.6.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.130.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.22.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.77.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.4.4",
+        "rank": 3
+      }
+    ],
+    "3.2": [
+      {
+        "ref": "1-corinthians.15.34",
+        "rank": 3
+      },
+      {
+        "ref": "romans.13.11",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.40",
+        "rank": 3
+      },
+      {
+        "ref": "john.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.22.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.77.7",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.42.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.43.2",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.8.34",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.5",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.1.20",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.64.7",
+        "rank": 3
+      },
+      {
+        "ref": "luke.14.21",
+        "rank": 3
+      }
+    ],
+    "3.3": [
+      {
+        "ref": "ezekiel.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.56.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.21.11",
+        "rank": 3
+      },
+      {
+        "ref": "john.20.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.21.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.6",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.33.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.7",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.17",
+        "rank": 3
+      }
+    ],
+    "3.4": [
+      {
+        "ref": "proverbs.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.32.26",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.29.13",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.7.7",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.25",
+        "rank": 3
+      },
+      {
+        "ref": "john.20.16",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.4.26",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.28.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.12",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.45.19",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.8.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.14",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.5",
+        "rank": 3
+      }
+    ],
+    "3.5": [
+      {
+        "ref": "song-of-solomon.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.4",
+        "rank": 3
+      },
+      {
+        "ref": "micah.4.8",
+        "rank": 3
+      }
+    ],
+    "3.6": [
+      {
+        "ref": "deuteronomy.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.31.2",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.12.14",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.12.6",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.30.34",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.12",
+        "rank": 3
+      },
+      {
+        "ref": "joel.2.29",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.13.21",
+        "rank": 3
+      },
+      {
+        "ref": "acts.2.18",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.4.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.43.19",
+        "rank": 3
+      }
+    ],
+    "3.7": [
+      {
+        "ref": "1-kings.14.27",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.14.52",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "2-kings.6.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.16",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.8.16",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.9.22",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.28.2",
+        "rank": 3
+      }
+    ],
+    "3.8": [
+      {
+        "ref": "1-thessalonians.5.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.149.5",
+        "rank": 3
+      },
+      {
+        "ref": "nehemiah.4.21",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.6.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.27.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.91.5",
+        "rank": 3
+      }
+    ],
+    "3.9": [
+      {
+        "ref": "revelation.14.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.23.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.7",
+        "rank": 3
+      }
+    ],
+    "3.10": [
+      {
+        "ref": "1-timothy.3.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.87.3",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "romans.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.5",
+        "rank": 3
+      }
+    ],
+    "3.11": [
+      {
+        "ref": "revelation.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.4.4",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.32.41",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "john.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.9.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.5",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.7",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.5.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.48.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.12",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.18",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.23",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.9",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.12.42",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.53.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.6",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.32",
+        "rank": 3
+      }
+    ],
+    "4.1": [
+      {
+        "ref": "ezekiel.16.14",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.32.40",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.11",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.32.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.7",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.11.29",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.9",
+        "rank": 3
+      }
+    ],
+    "4.2": [
+      {
+        "ref": "deuteronomy.7.13",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.16",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.23.26",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.6",
+        "rank": 3
+      }
+    ],
+    "4.3": [
+      {
+        "ref": "numbers.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "luke.4.22",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.31.26",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.2",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.19.6",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.16.21",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.32.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.37.30",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.9.19",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.14.6",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.13",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.14.4",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.4.29",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "leviticus.14.49",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.10.13",
+        "rank": 3
+      },
+      {
+        "ref": "ezra.9.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.2.18",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.12.35",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.63",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.5.18",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.10.20",
+        "rank": 3
+      }
+    ],
+    "4.4": [
+      {
+        "ref": "nehemiah.3.19",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.22.51",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.4.15",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.27.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.1.21",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.4",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.9.15",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.12.9",
+        "rank": 3
+      }
+    ],
+    "4.5": [
+      {
+        "ref": "song-of-solomon.8.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.5.19",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.7",
+        "rank": 3
+      }
+    ],
+    "4.6": [
+      {
+        "ref": "2-peter.1.19",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.78",
+        "rank": 3
+      },
+      {
+        "ref": "1-john.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.37.29",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.20.24",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.12.5",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.30.23",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.66.15",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.4.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.14",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.30.8",
+        "rank": 3
+      }
+    ],
+    "4.7": [
+      {
+        "ref": "psalms.45.13",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.25",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "jude.1.24",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.3.14",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.24.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.11",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.22",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.2",
+        "rank": 4
+      }
+    ],
+    "4.8": [
+      {
+        "ref": "song-of-solomon.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-chronicles.5.23",
+        "rank": 3
+      },
+      {
+        "ref": "joshua.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.3.25",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.5",
+        "rank": 3
+      },
+      {
+        "ref": "john.12.26",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.76.1",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.4.33",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.76.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.11",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.9.6",
+        "rank": 3
+      }
+    ],
+    "4.9": [
+      {
+        "ref": "song-of-solomon.4.12",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.12",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.7",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.12.50",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.41.42",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.5",
+        "rank": 3
+      },
+      {
+        "ref": "john.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.9.5",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.8",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.5.19",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.11.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.20.12",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.17",
+        "rank": 3
+      }
+    ],
+    "4.10": [
+      {
+        "ref": "song-of-solomon.5.5",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.1.21",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.4.18",
+        "rank": 3
+      }
+    ],
+    "4.11": [
+      {
+        "ref": "proverbs.24.13",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.7.15",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.27.27",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.71.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.71.23",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.19.10",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.5.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.16.24",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.2",
+        "rank": 3
+      }
+    ],
+    "4.12": [
+      {
+        "ref": "jeremiah.31.12",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.27",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.5.15",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.6.19",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.10",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.1.22",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.7.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.7.34",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.58.11",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.29.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.6.13",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.4.30",
+        "rank": 3
+      }
+    ],
+    "4.13": [
+      {
+        "ref": "john.15.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.21",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.92.14",
+        "rank": 3
+      },
+      {
+        "ref": "john.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "mark.14.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.12",
+        "rank": 3
+      }
+    ],
+    "4.14": [
+      {
+        "ref": "numbers.24.6",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.30.23",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "john.19.39",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.18.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.10.10",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.43.11",
+        "rank": 3
+      },
+      {
+        "ref": "mark.16.1",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.27.19",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.9.9",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.7.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.6",
+        "rank": 3
+      }
+    ],
+    "4.15": [
+      {
+        "ref": "john.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.18.13",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.17.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.12",
+        "rank": 3
+      },
+      {
+        "ref": "john.4.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.36.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.46.4",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.1",
+        "rank": 3
+      },
+      {
+        "ref": "john.7.38",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.13",
+        "rank": 3
+      }
+    ],
+    "4.16": [
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "acts.4.31",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.10",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.51.9",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.16",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.37.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.12",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.9",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.20",
+        "rank": 3
+      },
+      {
+        "ref": "john.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "2-peter.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.28",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.64.1",
+        "rank": 3
+      },
+      {
+        "ref": "acts.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "john.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.12",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.1.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.1",
+        "rank": 3
+      }
+    ],
+    "5.1": [
+      {
+        "ref": "john.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.65.13",
+        "rank": 3
+      },
+      {
+        "ref": "luke.12.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.51.3",
+        "rank": 3
+      },
+      {
+        "ref": "acts.11.29",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.55.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.9.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.16.3",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.9.5",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.58.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.147.11",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.6",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.21",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.13",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.31.6",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.26.10",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.14",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.18",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.17",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.53.11",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.40",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.16.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.23.18",
+        "rank": 3
+      }
+    ],
+    "5.2": [
+      {
+        "ref": "zechariah.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "luke.22.44",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.9",
+        "rank": 3
+      },
+      {
+        "ref": "mark.1.35",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.81.10",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.20",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.1",
+        "rank": 3
+      },
+      {
+        "ref": "luke.9.32",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.7",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.29.20",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.14.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.8.18",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "luke.6.12",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.8.17",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.53.3",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.40",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.35",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.23.26",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.50.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.24.7",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.52.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.31.40",
+        "rank": 3
+      }
+    ],
+    "5.3": [
+      {
+        "ref": "proverbs.3.28",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.13.4",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.5",
+        "rank": 3
+      },
+      {
+        "ref": "luke.11.7",
+        "rank": 3
+      },
+      {
+        "ref": "romans.7.22",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.38",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.22.13",
+        "rank": 3
+      }
+    ],
+    "5.4": [
+      {
+        "ref": "1-john.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.3.26",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.110.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.8.16",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.43.30",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.8.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.8",
+        "rank": 3
+      },
+      {
+        "ref": "acts.16.14",
+        "rank": 3
+      }
+    ],
+    "5.5": [
+      {
+        "ref": "2-corinthians.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "luke.12.36",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.7.7",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.20",
+        "rank": 3
+      }
+    ],
+    "5.6": [
+      {
+        "ref": "luke.22.61",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.28.6",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.5.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.80.4",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.3.19",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.3.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.88.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.50.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.28.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.7.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.8.17",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.77.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.42.28",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.26.75",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.58.2",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.16.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.57.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.22.1",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.5.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.30.7",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.1.28",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.15.22",
+        "rank": 3
+      },
+      {
+        "ref": "mark.14.72",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.69.3",
+        "rank": 3
+      }
+    ],
+    "5.7": [
+      {
+        "ref": "john.16.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.12.2",
+        "rank": 3
+      },
+      {
+        "ref": "acts.5.40",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.17.5",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.9.7",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.11.13",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.21.33",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.11.36",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.23.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.6.10",
+        "rank": 3
+      },
+      {
+        "ref": "luke.6.22",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.11",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "acts.20.29",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.4.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.141.5",
+        "rank": 3
+      },
+      {
+        "ref": "acts.26.9",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.23.29",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.6",
+        "rank": 3
+      }
+    ],
+    "5.8": [
+      {
+        "ref": "james.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.77.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.42.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.30",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.81",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.7",
+        "rank": 3
+      }
+    ],
+    "5.9": [
+      {
+        "ref": "matthew.21.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.87.3",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.4.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.13",
+        "rank": 3
+      },
+      {
+        "ref": "john.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.53.2",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.16.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.9",
+        "rank": 3
+      }
+    ],
+    "5.10": [
+      {
+        "ref": "isaiah.59.19",
+        "rank": 3
+      },
+      {
+        "ref": "1-samuel.16.12",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.10.18",
+        "rank": 3
+      },
+      {
+        "ref": "romans.9.5",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.18",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.19",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.31",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.2",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.7.26",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.17",
+        "rank": 3
+      }
+    ],
+    "5.11": [
+      {
+        "ref": "revelation.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.21",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.37",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.7.9",
+        "rank": 3
+      }
+    ],
+    "5.12": [
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.1",
+        "rank": 3
+      }
+    ],
+    "5.13": [
+      {
+        "ref": "psalms.89.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.2",
+        "rank": 3
+      },
+      {
+        "ref": "luke.4.22",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.50.4",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.23",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.50.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.27.4",
+        "rank": 3
+      }
+    ],
+    "5.14": [
+      {
+        "ref": "isaiah.9.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.52.13",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.24.10",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.1.26",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.11",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.1.16",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.28.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.99.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.44.4",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.15.6",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.39.13",
+        "rank": 3
+      }
+    ],
+    "5.15": [
+      {
+        "ref": "acts.2.28",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.17.2",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.4.33",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.7",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.28.3",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.26.19",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.92.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.4",
+        "rank": 3
+      },
+      {
+        "ref": "judges.13.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.11",
+        "rank": 3
+      }
+    ],
+    "5.16": [
+      {
+        "ref": "galatians.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.89.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "james.4.4",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.148.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.19.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.119.103",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.2.6",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.2",
+        "rank": 3
+      },
+      {
+        "ref": "james.2.23",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.3.8",
+        "rank": 3
+      }
+    ],
+    "6.1": [
+      {
+        "ref": "jeremiah.14.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.9",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "ruth.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "ruth.1.16",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.8.21",
+        "rank": 3
+      },
+      {
+        "ref": "acts.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.2",
+        "rank": 3
+      }
+    ],
+    "6.2": [
+      {
+        "ref": "john.4.34",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.57.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "john.17.24",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.28.20",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.34.23",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.58.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.11",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.1.21",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.12",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.7.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.18.20",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.13",
+        "rank": 3
+      }
+    ],
+    "6.3": [
+      {
+        "ref": "hebrews.8.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.10",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.2",
+        "rank": 3
+      }
+    ],
+    "6.4": [
+      {
+        "ref": "psalms.144.4",
+        "rank": 3
+      },
+      {
+        "ref": "lamentations.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.10.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.12.3",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.48.2",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.27",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.24.5",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.14.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.15.33",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.15.21",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.2",
+        "rank": 3
+      }
+    ],
+    "6.5": [
+      {
+        "ref": "genesis.32.26",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.32.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.15.27",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.15.1",
+        "rank": 3
+      }
+    ],
+    "6.6": [
+      {
+        "ref": "matthew.25.30",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.21.19",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.2",
+        "rank": 3
+      }
+    ],
+    "6.7": [
+      {
+        "ref": "song-of-solomon.4.3",
+        "rank": 3
+      }
+    ],
+    "6.8": [
+      {
+        "ref": "psalms.45.14",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.11.21",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.11.3",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.11.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.7.9",
+        "rank": 3
+      }
+    ],
+    "6.9": [
+      {
+        "ref": "deuteronomy.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.33.29",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.31.28",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.9",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.4.26",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.30.13",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.23.9",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.4.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.126.2",
+        "rank": 3
+      }
+    ],
+    "6.10": [
+      {
+        "ref": "isaiah.58.8",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "job.31.26",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.5",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.10.1",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.5",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.16",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.4.18",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.4",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.23",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.14.5",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.13.43",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.17.2",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.23.4",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.4.2",
+        "rank": 3
+      },
+      {
+        "ref": "job.11.17",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.10",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.27",
+        "rank": 3
+      },
+      {
+        "ref": "romans.8.37",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.63.1",
+        "rank": 3
+      }
+    ],
+    "6.11": [
+      {
+        "ref": "song-of-solomon.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.92.12",
+        "rank": 3
+      },
+      {
+        "ref": "acts.15.36",
+        "rank": 3
+      },
+      {
+        "ref": "mark.11.13",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.16",
+        "rank": 3
+      },
+      {
+        "ref": "luke.13.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.2.9",
+        "rank": 3
+      }
+    ],
+    "6.12": [
+      {
+        "ref": "jeremiah.31.18",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.11.8",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.20",
+        "rank": 3
+      }
+    ],
+    "6.13": [
+      {
+        "ref": "hebrews.7.2",
+        "rank": 3
+      },
+      {
+        "ref": "romans.7.23",
+        "rank": 3
+      },
+      {
+        "ref": "judges.21.21",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.22",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.14.1",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.17.24",
+        "rank": 3
+      },
+      {
+        "ref": "luke.7.44",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.32.2",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "2-thessalonians.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.16",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.76.2",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.5.17",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "romans.3.29",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.3.12",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.6.10",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.49.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.8.6",
+        "rank": 3
+      },
+      {
+        "ref": "john.9.7",
+        "rank": 3
+      }
+    ],
+    "7.1": [
+      {
+        "ref": "philippians.1.27",
+        "rank": 3
+      },
+      {
+        "ref": "luke.15.22",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.6.15",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.4.15",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.28.15",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.6.18",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.35.35",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.13",
+        "rank": 3
+      },
+      {
+        "ref": "daniel.2.32",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.2.19",
+        "rank": 3
+      }
+    ],
+    "7.2": [
+      {
+        "ref": "isaiah.46.3",
+        "rank": 3
+      },
+      {
+        "ref": "romans.7.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.1.5",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.3.8",
+        "rank": 3
+      }
+    ],
+    "7.3": [
+      {
+        "ref": "song-of-solomon.6.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.5",
+        "rank": 3
+      }
+    ],
+    "7.4": [
+      {
+        "ref": "1-kings.10.18",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.7.2",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.10.22",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.5",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.22.39",
+        "rank": 3
+      },
+      {
+        "ref": "2-samuel.8.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.144.12",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.1.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.54.4",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.9.19",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.15.2",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.21.25",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.3.18",
+        "rank": 3
+      },
+      {
+        "ref": "2-chronicles.8.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.8",
+        "rank": 3
+      }
+    ],
+    "7.5": [
+      {
+        "ref": "song-of-solomon.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.18.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.68.24",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "micah.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.4.15",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.1",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.22",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.17",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.32.26",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.28.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.87.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.35.2",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.1.18",
+        "rank": 3
+      }
+    ],
+    "7.6": [
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "zephaniah.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.15",
+        "rank": 3
+      }
+    ],
+    "7.7": [
+      {
+        "ref": "song-of-solomon.7.3",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.10",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.10.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.92.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.4.13",
+        "rank": 3
+      }
+    ],
+    "7.8": [
+      {
+        "ref": "song-of-solomon.2.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.21",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.3",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.32.41",
+        "rank": 3
+      }
+    ],
+    "7.9": [
+      {
+        "ref": "ephesians.4.29",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.2",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.16",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.62.8",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.16.24",
+        "rank": 3
+      },
+      {
+        "ref": "acts.2.46",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.14",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.13.15",
+        "rank": 3
+      },
+      {
+        "ref": "acts.2.11",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "romans.13.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.14.13",
+        "rank": 3
+      },
+      {
+        "ref": "acts.4.31",
+        "rank": 3
+      },
+      {
+        "ref": "acts.16.30",
+        "rank": 3
+      }
+    ],
+    "7.10": [
+      {
+        "ref": "psalms.45.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.16",
+        "rank": 3
+      },
+      {
+        "ref": "acts.27.23",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.6.19",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.5",
+        "rank": 3
+      },
+      {
+        "ref": "job.14.15",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "john.17.24",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.3",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.147.11",
+        "rank": 3
+      }
+    ],
+    "7.11": [
+      {
+        "ref": "song-of-solomon.1.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.10",
+        "rank": 3
+      }
+    ],
+    "7.12": [
+      {
+        "ref": "ezekiel.20.40",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.8.17",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.18.5",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.13.5",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.6.24",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.24.30",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.25.22",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.6",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.122.5",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.12.15",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.3",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.73.25",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.3.5",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.9.10",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.43.4",
+        "rank": 3
+      },
+      {
+        "ref": "romans.5.11",
+        "rank": 3
+      },
+      {
+        "ref": "acts.15.36",
+        "rank": 3
+      }
+    ],
+    "7.13": [
+      {
+        "ref": "1-corinthians.8.8",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.23.18",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.5.22",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.5.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.30.14",
+        "rank": 3
+      },
+      {
+        "ref": "colossians.3.17",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.13.52",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.16.2",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.4.11",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.1.11",
+        "rank": 3
+      },
+      {
+        "ref": "john.15.8",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.25.40",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.13",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.25",
+        "rank": 3
+      }
+    ],
+    "8.1": [
+      {
+        "ref": "mark.12.42",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.1.28",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.51.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.2",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.66.11",
+        "rank": 3
+      },
+      {
+        "ref": "luke.9.26",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.9.9",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "luke.7.45",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.14",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.4.26",
+        "rank": 3
+      },
+      {
+        "ref": "john.13.3",
+        "rank": 3
+      },
+      {
+        "ref": "luke.12.8",
+        "rank": 3
+      },
+      {
+        "ref": "john.3.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.102.16",
+        "rank": 3
+      },
+      {
+        "ref": "luke.2.38",
+        "rank": 3
+      },
+      {
+        "ref": "luke.10.16",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.3.16",
+        "rank": 3
+      },
+      {
+        "ref": "john.1.14",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.9.6",
+        "rank": 3
+      },
+      {
+        "ref": "mark.14.6",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.3.3",
+        "rank": 3
+      },
+      {
+        "ref": "luke.10.23",
+        "rank": 3
+      },
+      {
+        "ref": "haggai.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "john.16.28",
+        "rank": 3
+      },
+      {
+        "ref": "john.9.25",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.13.16",
+        "rank": 3
+      },
+      {
+        "ref": "luke.18.9",
+        "rank": 3
+      },
+      {
+        "ref": "john.7.46",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.6.14",
+        "rank": 3
+      },
+      {
+        "ref": "luke.2.26",
+        "rank": 3
+      },
+      {
+        "ref": "malachi.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "john.8.42",
+        "rank": 3
+      },
+      {
+        "ref": "hebrews.9.26",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.7.14",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.3.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.2.12",
+        "rank": 3
+      }
+    ],
+    "8.2": [
+      {
+        "ref": "luke.16.29",
+        "rank": 3
+      },
+      {
+        "ref": "john.5.39",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.10",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.4.26",
+        "rank": 3
+      },
+      {
+        "ref": "john.5.46",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.12",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.9",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.9.2",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.3.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.19.10",
+        "rank": 4
+      },
+      {
+        "ref": "acts.17.11",
+        "rank": 4
+      },
+      {
+        "ref": "2-peter.1.19",
+        "rank": 4
+      }
+    ],
+    "8.3": [
+      {
+        "ref": "isaiah.62.4",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.33.27",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.12.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.6",
+        "rank": 3
+      }
+    ],
+    "8.4": [
+      {
+        "ref": "song-of-solomon.2.7",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.5",
+        "rank": 3
+      }
+    ],
+    "8.5": [
+      {
+        "ref": "2-chronicles.32.8",
+        "rank": 3
+      },
+      {
+        "ref": "hosea.12.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.8",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.1",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.1.21",
+        "rank": 3
+      },
+      {
+        "ref": "jeremiah.2.2",
+        "rank": 3
+      },
+      {
+        "ref": "romans.7.4",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.12.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.10",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.36.6",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.43.19",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.12.9",
+        "rank": 3
+      },
+      {
+        "ref": "john.1.48",
+        "rank": 3
+      },
+      {
+        "ref": "micah.3.11",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.40.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.20",
+        "rank": 3
+      },
+      {
+        "ref": "acts.27.23",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.3",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.26.3",
+        "rank": 3
+      },
+      {
+        "ref": "galatians.4.19",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.107.2",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.12",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.8",
+        "rank": 3
+      },
+      {
+        "ref": "john.13.23",
+        "rank": 3
+      }
+    ],
+    "8.6": [
+      {
+        "ref": "jeremiah.22.24",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.32.21",
+        "rank": 3
+      },
+      {
+        "ref": "haggai.2.23",
+        "rank": 3
+      },
+      {
+        "ref": "philippians.1.20",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.28.21",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.28.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.8",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.63.1",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.25.11",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.11.2",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.16",
+        "rank": 3
+      },
+      {
+        "ref": "exodus.28.29",
+        "rank": 3
+      },
+      {
+        "ref": "numbers.5.14",
+        "rank": 3
+      },
+      {
+        "ref": "romans.12.20",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.84.2",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.6.34",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.25.22",
+        "rank": 3
+      },
+      {
+        "ref": "2-timothy.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "acts.21.13",
+        "rank": 3
+      },
+      {
+        "ref": "john.21.15",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.12.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.42.1",
+        "rank": 3
+      },
+      {
+        "ref": "acts.20.24",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.3.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.120.4",
+        "rank": 3
+      }
+    ],
+    "8.7": [
+      {
+        "ref": "isaiah.43.2",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.6.31",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.6.35",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.7.24",
+        "rank": 3
+      },
+      {
+        "ref": "romans.8.28",
+        "rank": 3
+      },
+      {
+        "ref": "romans.13.8",
+        "rank": 3
+      }
+    ],
+    "8.8": [
+      {
+        "ref": "psalms.72.17",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "acts.7.38",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.61",
+        "rank": 3
+      },
+      {
+        "ref": "acts.26.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-peter.2.12",
+        "rank": 3
+      },
+      {
+        "ref": "acts.10.1",
+        "rank": 3
+      },
+      {
+        "ref": "romans.15.9",
+        "rank": 3
+      },
+      {
+        "ref": "acts.16.9",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.2.8",
+        "rank": 3
+      },
+      {
+        "ref": "john.10.16",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.49.6",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.23.33",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.8.10",
+        "rank": 3
+      },
+      {
+        "ref": "romans.10.12",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.7",
+        "rank": 3
+      },
+      {
+        "ref": "acts.15.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.55",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.10",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.3",
+        "rank": 3
+      },
+      {
+        "ref": "romans.3.1",
+        "rank": 3
+      },
+      {
+        "ref": "luke.19.44",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.46",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.147.19",
+        "rank": 3
+      },
+      {
+        "ref": "acts.22.21",
+        "rank": 3
+      }
+    ],
+    "8.9": [
+      {
+        "ref": "acts.15.16",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.21.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.17",
+        "rank": 3
+      },
+      {
+        "ref": "acts.14.27",
+        "rank": 3
+      },
+      {
+        "ref": "zechariah.6.12",
+        "rank": 3
+      },
+      {
+        "ref": "1-kings.6.15",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.58.12",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.61.4",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.2.20",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.3.10",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.16.18",
+        "rank": 3
+      }
+    ],
+    "8.10": [
+      {
+        "ref": "song-of-solomon.7.3",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.5",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.1.16",
+        "rank": 3
+      },
+      {
+        "ref": "ezekiel.16.7",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.8",
+        "rank": 3
+      },
+      {
+        "ref": "deuteronomy.7.7",
+        "rank": 3
+      },
+      {
+        "ref": "luke.1.30",
+        "rank": 3
+      },
+      {
+        "ref": "ephesians.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "romans.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.7",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.6.8",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.3.4",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.60.10",
+        "rank": 3
+      }
+    ],
+    "8.11": [
+      {
+        "ref": "mark.12.1",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.7.23",
+        "rank": 3
+      },
+      {
+        "ref": "genesis.20.16",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.21.33",
+        "rank": 3
+      },
+      {
+        "ref": "isaiah.5.1",
+        "rank": 3
+      },
+      {
+        "ref": "ecclesiastes.2.4",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.12",
+        "rank": 3
+      },
+      {
+        "ref": "luke.20.9",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.6",
+        "rank": 3
+      }
+    ],
+    "8.12": [
+      {
+        "ref": "romans.14.7",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.72.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.4.15",
+        "rank": 3
+      },
+      {
+        "ref": "proverbs.4.23",
+        "rank": 3
+      },
+      {
+        "ref": "1-timothy.5.17",
+        "rank": 3
+      },
+      {
+        "ref": "1-corinthians.6.20",
+        "rank": 3
+      },
+      {
+        "ref": "1-thessalonians.2.19",
+        "rank": 3
+      },
+      {
+        "ref": "2-corinthians.5.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.6",
+        "rank": 3
+      },
+      {
+        "ref": "acts.20.28",
+        "rank": 3
+      }
+    ],
+    "8.13": [
+      {
+        "ref": "john.15.7",
+        "rank": 3
+      },
+      {
+        "ref": "judges.11.38",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.18.20",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.13",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.11",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.50.15",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.3.7",
+        "rank": 3
+      },
+      {
+        "ref": "matthew.28.20",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.7.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.13",
+        "rank": 3
+      },
+      {
+        "ref": "psalms.45.14",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.6.2",
+        "rank": 3
+      },
+      {
+        "ref": "john.14.21",
+        "rank": 3
+      },
+      {
+        "ref": "john.16.24",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.1.7",
+        "rank": 3
+      },
+      {
+        "ref": "judges.14.11",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.16",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.5.9",
+        "rank": 3
+      }
+    ],
+    "8.14": [
+      {
+        "ref": "philippians.1.23",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.17",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.4.6",
+        "rank": 3
+      },
+      {
+        "ref": "song-of-solomon.2.9",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.20",
+        "rank": 3
+      },
+      {
+        "ref": "revelation.22.17",
+        "rank": 3
+      },
+      {
+        "ref": "luke.19.12",
+        "rank": 3
+      }
+    ]
+  }
+}

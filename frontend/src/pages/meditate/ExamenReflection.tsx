@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, SkipForward } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -10,8 +10,10 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_EXAMEN_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
 import { getExamenSteps } from '@/mocks/daily-experience-mock-data'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 export function ExamenReflection() {
   const { isAuthenticated } = useAuth()
@@ -20,6 +22,8 @@ export function ExamenReflection() {
 }
 
 function ExamenReflectionContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const steps = getExamenSteps()
   const [currentStep, setCurrentStep] = useState(0)
   const [notes, setNotes] = useState<Record<number, string>>({})
@@ -42,6 +46,7 @@ function ExamenReflectionContent() {
       date: getLocalDateString(),
       durationMinutes: minutes,
       completedAt: new Date().toISOString(),
+      ...(meditationVerseContext && { verseContext: meditationVerseContext }),
     })
     setIsComplete(true)
   }
@@ -80,7 +85,7 @@ function ExamenReflectionContent() {
 
   return (
     <Layout hero={<PageHero title="Examen Reflection" scriptWord="Reflection" />}>
-      <SEO title="Examen Reflection" description="The Ignatian Examen — a reflective prayer reviewing your day with God." noIndex />
+      <SEO {...MEDITATE_EXAMEN_METADATA} />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />
 
@@ -107,7 +112,7 @@ function ExamenReflectionContent() {
           aria-label={`Step ${currentStep + 1} of ${steps.length}`}
         >
           <div
-            className="h-full rounded-full bg-primary transition-[width] duration-300"
+            className="h-full rounded-full bg-primary transition-[width] duration-slow"
             style={{
               width: `${((currentStep + 1) / steps.length) * 100}%`,
             }}
@@ -155,7 +160,7 @@ function ExamenReflectionContent() {
             className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50 disabled:opacity-50"
             aria-label="Previous step"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             Previous
           </button>
 
@@ -177,7 +182,7 @@ function ExamenReflectionContent() {
                 className="inline-flex items-center gap-1 text-sm text-text-light transition-colors hover:text-text-dark"
                 aria-label="Skip to next step"
               >
-                <SkipForward className="h-4 w-4" />
+                <SkipForward className="h-4 w-4" aria-hidden="true" />
                 Skip
               </button>
               <button
@@ -189,7 +194,7 @@ function ExamenReflectionContent() {
                 aria-label="Next step"
               >
                 Next
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           )}

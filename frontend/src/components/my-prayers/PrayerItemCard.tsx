@@ -26,7 +26,7 @@ export function PrayerItemCard({ prayer, children, glowing, onToggleReminder, on
   return (
     <article
       className={cn(
-        'rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 transition-all sm:p-6 lg:hover:bg-white/[0.07]',
+        'rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 transition-all motion-reduce:transition-none sm:p-6 lg:hover:bg-white/[0.07]',
         prayer.status === 'answered' && 'border-l-4 border-l-success',
         glowing && 'ring-2 ring-primary/30 bg-primary/10',
       )}

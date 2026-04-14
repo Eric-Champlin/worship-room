@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { recordChapterVisit } from '@/lib/heatmap/chapterVisitStore'
 import { FloatingActionBar } from '@/components/bible/FloatingActionBar'
 import { NoteEditor } from '@/components/bible/NoteEditor'
 import { NoteIndicator } from '@/components/bible/NoteIndicator'
@@ -126,6 +127,13 @@ export function VerseDisplay({
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [isAuthenticated, bookSlug, book, chapterNumber, verses, isChapterRead, markChapterRead])
+
+  // Record chapter visit for heatmap (BB-43)
+  useEffect(() => {
+    if (!isAuthenticated) return
+    if (verses.length === 0) return
+    recordChapterVisit(bookSlug, chapterNumber)
+  }, [isAuthenticated, bookSlug, chapterNumber, verses.length])
 
   const handleVerseClick = useCallback(
     (verseNumber: number) => {
@@ -302,7 +310,7 @@ export function VerseDisplay({
             <div
               key={verse.number}
               className={cn(
-                'motion-safe:transition-all motion-safe:duration-200',
+                'motion-safe:transition-all motion-safe:duration-base',
                 isTtsActive && 'border-l-2 border-primary bg-primary/5 pl-2',
               )}
               aria-current={isTtsActive ? 'true' : undefined}

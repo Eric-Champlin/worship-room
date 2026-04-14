@@ -1,0 +1,167 @@
+{
+  "slug": "when-youre-anxious",
+  "title": "When You're Anxious",
+  "shortTitle": "Anxious",
+  "description": "If you're reading this, you might already know the verses. Be anxious for nothing. Do not fear. Cast your cares on him. Maybe people have quoted them at you. Maybe they've helped, and maybe they've hurt — sometimes both. This plan exists for the people who need scripture that meets them in the actual feeling of anxiety, not scripture used as a club against it.\n\nFourteen days. Some of the readings are familiar. Some aren't. They're not arranged to talk you out of how you feel. They're arranged to give you somewhere to put your attention when your attention won't stay still.\n\nThe Bible has a lot of anxious people in it. Hannah, who couldn't stop crying. Elijah, who hid in a cave. The disciples in the boat in the storm, and the disciples in the upper room after the crucifixion. David, all the time. Jesus himself in Gethsemane. None of them were told to calm down. Most of them were just... met.\n\nThis plan won't fix your anxiety. Nothing in fourteen days will. But you can read it on a hard day and not feel worse, and on a good day you might feel a little less alone. That's what scripture does at its best. That's what we're trying to do here.",
+  "theme": "emotional",
+  "duration": 14,
+  "estimatedMinutesPerDay": 7,
+  "curator": "Worship Room",
+  "coverGradient": "from-emerald-600/30 to-hero-dark",
+  "days": [
+    {
+      "day": 1,
+      "title": "You are seen",
+      "passages": [
+        { "book": "psalms", "chapter": 139, "startVerse": 1, "endVerse": 12 }
+      ],
+      "devotional": "Psalm 139 is one of the most-quoted psalms in Christian writing. You've probably heard parts of it at weddings and funerals. But read the first twelve verses slowly. David is describing what it feels like to be completely known by God. And he's not entirely sure how he feels about it.\n\nThere's a word for what he's describing. Exposed. God knows when David sits down and when he stands up. God knows his thoughts before he speaks them. There's nowhere David can go to get away. If he climbs to heaven, God is there. If he goes down to the dead, God is there. Even darkness isn't dark to God.\n\nFor some people, that's a comfort. For some people, it's unsettling. Both are honest readings. David holds both of them in the same poem. You're allowed to, too.",
+      "reflectionPrompts": [
+        "Does being fully known feel more like comfort or exposure to you right now?"
+      ]
+    },
+    {
+      "day": 2,
+      "title": "Elijah in the cave",
+      "passages": [
+        { "book": "1-kings", "chapter": 19, "startVerse": 1, "endVerse": 13 }
+      ],
+      "devotional": "Elijah has just performed the biggest miracle of his career. Fire from heaven. A public demolition of the prophets of Baal. By every metric, he won. The very next chapter, he runs for his life, sits under a juniper tree in the wilderness, and asks God to let him die.\n\nNotice what God does. Not a sermon. Not a correction. An angel touches him and says, arise and eat. There's bread and water. Elijah eats and lies back down. The angel comes a second time with more food. Only after Elijah has eaten and slept and eaten again does God even start talking to him.\n\nIf you're anxious right now, read this slowly. Before the still small voice, there is food. There is rest. The prophet who called down fire was allowed to collapse. So are you.",
+      "reflectionPrompts": [
+        "What would it look like to let yourself eat and rest before trying to figure anything out?"
+      ]
+    },
+    {
+      "day": 3,
+      "title": "Look at the birds",
+      "passages": [
+        { "book": "matthew", "chapter": 6, "startVerse": 25, "endVerse": 34 }
+      ],
+      "devotional": "This is probably the passage that's been quoted at you more than any other. Jesus telling anxious people not to worry. If someone has ever used it to make you feel worse about being anxious, I'm sorry. That's not what the passage is doing.\n\nRead it slowly. Jesus isn't issuing a command. He's pointing at something. See the birds. Consider the lilies. His strategy for anxious minds is not try harder to stop being anxious. It's to give the mind somewhere specific to look. Not an abstraction. A bird. A lily. Something small and alive that is being cared for right now.\n\nYou don't have to feel less anxious to do this. You just have to look at something. That's what Jesus is actually suggesting here. It's much gentler than you've been told.",
+      "reflectionPrompts": [
+        "What's one small thing you could look at right now — a bird, a plant, a tree — instead of trying to fix the feeling?"
+      ]
+    },
+    {
+      "day": 4,
+      "title": "Hannah's prayer",
+      "passages": [
+        { "book": "1-samuel", "chapter": 1, "startVerse": 1, "endVerse": 20 }
+      ],
+      "devotional": "Hannah wants a child. She has wanted one for years. Her husband loves her but doesn't understand; her rival mocks her; the text says she is in bitterness of soul. She goes to the temple and prays. Here's what's remarkable about her prayer: her lips move, but no sound comes out. The priest watching her assumes she's drunk. He's the priest. He can't tell the difference between drunk and devastated.\n\nShe's not drunk. She is praying the way people actually pray when they've run out of words. Not in polished sentences. Not even out loud. Just her lips moving while her soul pours out. And the text is careful to tell us God hears her.\n\nIf your prayers haven't been working lately, read Hannah. The prayer she prayed that got her a son was a prayer the priest thought was drunken nonsense. God heard her anyway.",
+      "reflectionPrompts": [
+        "What would you pray if you didn't have to make it sound like a prayer?"
+      ]
+    },
+    {
+      "day": 5,
+      "title": "How long, O Lord?",
+      "passages": [
+        { "book": "psalms", "chapter": 13 }
+      ],
+      "devotional": "Psalm 13 is six verses long. David starts by asking God how much longer this is going to go on. He asks four times. How long will you forget me? How long will you hide your face? How long will I have sorrow in my heart? How long will my enemy triumph?\n\nNo theological softening. No moment of walking it back. Just the question, asked four times, to God's face.\n\nAnd then, in the last two verses, David shifts. He says he still trusts God's loving kindness. He says his heart will rejoice. Notice: the rejoicing comes after the complaint, not instead of it. David is not pretending the sorrow is gone. He's saying both things at once — the sorrow and the trust, held in the same breath.\n\nYou're allowed to do that. The psalm is there to show you how.",
+      "reflectionPrompts": [
+        "What would it look like to be that honest with God about what you're feeling?"
+      ]
+    },
+    {
+      "day": 6,
+      "title": "The disciples in the storm",
+      "passages": [
+        { "book": "mark", "chapter": 4, "startVerse": 35, "endVerse": 41 }
+      ],
+      "devotional": "The boat is filling with water. The disciples are fishermen — several of them have spent their whole lives on this sea — and they are terrified. Jesus is asleep in the back of the boat. They wake him up with what is maybe the most honest question in the Gospels: don't you care that we are dying?\n\nHe gets up and rebukes the wind. The sea goes still. Then he turns to them and asks why they were afraid. And here is the part that matters: he asks after the rescue. He doesn't lecture them mid-storm. He doesn't shame them in the middle of the chaos. He stops the water first, and only then talks to them about it.\n\nIf you are in the water right now, the order of operations matters. Rescue, then conversation. Not the other way around.",
+      "reflectionPrompts": [
+        "Does your image of Jesus match a God who rescues first and asks questions second?"
+      ]
+    },
+    {
+      "day": 7,
+      "title": "Be anxious for nothing",
+      "passages": [
+        { "book": "philippians", "chapter": 4, "startVerse": 4, "endVerse": 9 }
+      ],
+      "devotional": "You may have heard this verse used to make you feel guilty for being anxious. That is not what Paul is doing here. Paul is writing from prison. He's not speaking from a calm life. He's speaking from a cell.\n\nThe line everyone knows — be anxious for nothing — is not a command issued from above. It's an invitation from someone who learned, slowly and painfully, what it looks like on the other side. Paul is not telling you to flip a switch. He is describing what he found and pointing at it.\n\nRead the next line slowly. The peace of God, which surpasses all understanding, will guard your hearts. That is not a promise that your anxiety will go away. It is a promise that something else is also there when it doesn't. A peace that shows up around the anxiety, not instead of it. Paul knew the difference. He's trying to tell you.",
+      "reflectionPrompts": [
+        "What changes if you imagine this letter being written by someone in a cell, not someone in a pulpit?"
+      ]
+    },
+    {
+      "day": 8,
+      "title": "Be still, and know",
+      "passages": [
+        { "book": "psalms", "chapter": 46 }
+      ],
+      "devotional": "This is another famous verse. Maybe it's been put on a coffee mug, or quoted at you as a command to calm down. Read the context. The psalm opens with the mountains shaking and the seas roaring. It's a psalm about the world falling apart. In the middle of the chaos, God says: be still, and know that I am God.\n\nThe Hebrew phrase behind be still is closer to let your hands fall. It's not a meditation technique. It's the posture of someone who has been holding on too tightly and finally stops. It's giving up control that wasn't yours anyway.\n\nYou're not being asked to feel peaceful. You're being told you can let your hands drop. Not because the waters have calmed. Because even in the roaring, God is still there. The mountains are shaking in verse two. God is God in verse ten. Both are true at the same time.",
+      "reflectionPrompts": [
+        "What are you holding on to right now that you could let your hands fall from?"
+      ]
+    },
+    {
+      "day": 9,
+      "title": "Gethsemane",
+      "passages": [
+        { "book": "matthew", "chapter": 26, "startVerse": 36, "endVerse": 46 }
+      ],
+      "devotional": "Jesus himself was in this much distress. That is the first thing to notice, and it is enough on its own. The most trusting person in human history was sorrowful to the point of death, fell on his face, and asked his Father to let the cup pass away from him.\n\nHe was not given the deliverance he asked for. He asked three times. Three times the answer was no. The cup did not pass. He drank it.\n\nLuke's account adds a detail Matthew leaves out: an angel came and strengthened him. Not rescued. Strengthened. He was not being spared the cup. But he was not alone with it either.\n\nIf you have ever been told that anxiety means you don't trust God enough, read this passage. Read it slowly. Jesus was in agony and was not removed from it. He asked to be rescued and was not rescued — at least, not in the way he asked. He went to the cross anyway.\n\nWhatever you are feeling right now, Jesus felt something close enough that the distinction doesn't really matter. You're not alone in it. He was there first.",
+      "reflectionPrompts": [
+        "What does it change to know Jesus asked to be spared and wasn't?"
+      ]
+    },
+    {
+      "day": 10,
+      "title": "I have called you by name",
+      "passages": [
+        { "book": "isaiah", "chapter": 43, "startVerse": 1, "endVerse": 5 }
+      ],
+      "devotional": "Read verse two carefully. God isn't saying you won't pass through waters or through fire. He's saying when. When you pass through the waters. When you walk through the fire. The Hebrew is specific. Not if. When.\n\nAnd the word that carries the whole promise is the smallest one. Through. Not around. Not instead of. Through. God's promise here isn't that you won't go through hard things. It's that when you do, you won't go through them alone, and you won't be destroyed by them.\n\nFor a reader in anxiety, this is more honest than the usual reading. Anxiety is a kind of fire. You are walking through it right now. The verse does not say the fire will stop burning. It says the fire will not consume you. Those are different promises. The second one is smaller. It is also the one you can actually hold.",
+      "reflectionPrompts": [
+        "What's the difference between a God who keeps you from fire and a God who walks through it with you?"
+      ]
+    },
+    {
+      "day": 11,
+      "title": "The woman who touched the hem",
+      "passages": [
+        { "book": "luke", "chapter": 8, "startVerse": 40, "endVerse": 48 }
+      ],
+      "devotional": "Twelve years of shame. Twelve years of being considered unclean by her community. Twelve years of doctors who took her money and couldn't help her. She has given up on being approached, so she approaches. In a crowded street, she reaches out and touches the edge of Jesus's cloak. Just the fringe. The smallest possible contact.\n\nJesus stops the entire crowd. Someone did touch me, he says, for I perceived that power has gone out of me. He asks who. She is terrified. She comes forward shaking and tells him everything. He calls her daughter. Not woman. Not sinner. Daughter.\n\nNotice what she brought. Not confidence. Not a strong prayer. Not even a request out loud. She brought the smallest gesture she could make. And it was enough. If all you can do right now is reach out a finger in the direction of God, that counts. It is more than enough.",
+      "reflectionPrompts": [
+        "What's the smallest possible reach toward God you could make today — and what if that's enough?"
+      ]
+    },
+    {
+      "day": 12,
+      "title": "A weaned child",
+      "passages": [
+        { "book": "psalms", "chapter": 131 }
+      ],
+      "devotional": "Psalm 131 is three verses. You can read it in under a minute. David says his heart isn't proud, his eyes aren't lofty, he doesn't concern himself with things too great for him. Then comes the image: he has stilled and quieted his soul like a weaned child with his mother.\n\nThe detail matters. A nursing child is with its mother to get something. A weaned child is with its mother just to be with her. No demand, no request, no crying. Just present. David is describing a kind of spiritual maturity that is very rare and very quiet. You are there without needing to get anything.\n\nMost of us don't come to God like that. We come with requests. With fear. With a list. That's fine. But on a day when you have no list, no words, no specific need — you are allowed to just be present. That's what this psalm is for.",
+      "reflectionPrompts": [
+        "What would it look like to come to God today without needing anything from him?"
+      ]
+    },
+    {
+      "day": 13,
+      "title": "My grace is sufficient",
+      "passages": [
+        { "book": "2-corinthians", "chapter": 12, "startVerse": 7, "endVerse": 10 }
+      ],
+      "devotional": "Paul has something he calls a thorn in the flesh. We don't know what it is. People have guessed for centuries: chronic illness, bad eyesight, some recurring temptation, some enemy who wouldn't leave him alone. He never tells us. What he tells us is that he asked God three times to take it away, and God said no.\n\nLet that land. Paul — the Paul who wrote most of the New Testament, the Paul who planted churches across the Roman Empire — asked for deliverance from something painful three times and did not get it. The thorn stayed. It was still there when he wrote this letter.\n\nWhat God gave him instead was a sentence: My grace is sufficient for you, for my power is made perfect in weakness. Paul did not get the thing he asked for. He got enough. If you have been asking for your anxiety to be taken away and it hasn't, you are in Paul's company.",
+      "reflectionPrompts": [
+        "What would enough look like for you today, even if the thorn is still there?"
+      ]
+    },
+    {
+      "day": 14,
+      "title": "Mercies new every morning",
+      "passages": [
+        { "book": "lamentations", "chapter": 3, "startVerse": 19, "endVerse": 26 }
+      ],
+      "devotional": "You made it through fourteen days. Tomorrow you'll probably still be anxious sometimes. The plan did not fix that. It was not going to.\n\nWhat it did, hopefully, is give you fourteen places to put your attention when your attention wouldn't stay still. Fourteen reminders that the Bible has room for anxious people, and that the people in it weren't lectured for being anxious.\n\nThis last reading is the famous mercies new every morning passage. Almost everyone has heard the phrase. Almost no one has read it in context. Lamentations is a book of grief. It was written after Jerusalem had been destroyed and the temple burned. The author is writing from inside the wreckage. And from inside the wreckage, he says the mercies are new every morning.\n\nHe doesn't say the grief is over. He says the mercy is new today. That's the move. Tomorrow is a new day. That's not triumphant. It's just true. And it's enough for today.",
+      "reflectionPrompts": [
+        "What's one verse from these 14 days you want to remember on a hard day?"
+      ]
+    }
+  ]
+}

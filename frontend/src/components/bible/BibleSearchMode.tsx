@@ -1,40 +1,81 @@
 import { Link } from 'react-router-dom'
 
-import { cn } from '@/lib/utils'
-import { escapeRegex, useBibleSearch } from '@/hooks/useBibleSearch'
-import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
+import { useBibleSearch } from '@/hooks/useBibleSearch'
+import { stem } from '@/lib/search/tokenizer'
 
-function HighlightedText({ text, query }: { text: string; query: string }) {
-  if (!query || query.length < 2) return <>{text}</>
+const EXAMPLE_CHIPS = ['anxiety', 'rest', 'forgiveness', 'courage', 'hope', 'fear'] as const
 
-  const escaped = escapeRegex(query)
-  const splitRegex = new RegExp(`(${escaped})`, 'gi')
-  const testRegex = new RegExp(`^${escaped}$`, 'i')
-  const parts = text.split(splitRegex)
+function HighlightedTokens({ text, tokens }: { text: string; tokens: string[] }) {
+  if (tokens.length === 0) return <>{text}</>
+
+  const tokenSet = new Set(tokens)
+
+  // Split text into words (preserving whitespace and punctuation for reconstruction)
+  const parts = text.split(/(\s+)/)
 
   return (
     <>
-      {parts.map((part, i) =>
-        testRegex.test(part) ? (
-          <mark
-            key={i}
-            className="rounded bg-primary/20 px-0.5 font-semibold text-white"
-          >
-            {part}
-          </mark>
-        ) : (
-          <span key={i}>{part}</span>
-        ),
-      )}
+      {parts.map((part, i) => {
+        // Whitespace — render as-is
+        if (/^\s+$/.test(part)) return <span key={i}>{part}</span>
+
+        // Extract the word (strip punctuation for matching)
+        const cleaned = part.toLowerCase().replace(/[^a-z0-9']/g, '').replace(/^'+|'+$/g, '')
+        // Strip possessive for matching
+        const forMatch = cleaned.endsWith("'s") ? cleaned.slice(0, -2) : cleaned
+        const stemmed = stem(forMatch)
+
+        if (tokenSet.has(stemmed) || tokenSet.has(forMatch)) {
+          return (
+            <mark
+              key={i}
+              className="rounded bg-primary/20 px-0.5 font-semibold text-white"
+            >
+              {part}
+            </mark>
+          )
+        }
+
+        return <span key={i}>{part}</span>
+      })}
     </>
   )
 }
 
-export function BibleSearchMode() {
-  const { query, setQuery, results, isSearching, isLoadingBooks } =
-    useBibleSearch()
-  const { containerRef: searchResultsRef, getStaggerProps: getSearchStaggerProps } =
-    useStaggeredEntrance({ staggerDelay: 50, itemCount: results.length })
+function SearchSkeleton() {
+  return (
+    <div aria-busy="true" className="space-y-4">
+      <span className="sr-only">Loading search results</span>
+      {[80, 60, 90, 70].map((width, i) => (
+        <div key={i} className="motion-safe:animate-pulse space-y-2">
+          <div className="h-4 w-24 rounded bg-white/10" />
+          <div className="h-4 rounded bg-white/10" style={{ width: `${width}%` }} />
+          <div className="h-4 rounded bg-white/10" style={{ width: `${width - 20}%` }} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+interface BibleSearchModeProps {
+  query?: string
+  onQueryChange?: (query: string) => void
+}
+
+export function BibleSearchMode({ query: controlledQuery, onQueryChange }: BibleSearchModeProps = {}) {
+  const {
+    query,
+    setQuery,
+    results,
+    isSearching,
+    isLoadingIndex,
+    hasMore,
+    totalResults,
+    loadMore,
+    error,
+  } = useBibleSearch({ controlledQuery, onQueryChange })
+
+  const isLoading = isSearching || isLoadingIndex
 
   return (
     <div className="mt-6">
@@ -49,8 +90,8 @@ export function BibleSearchMode() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search the Bible..."
           aria-label="Search the Bible"
-          aria-describedby="bible-search-status"
-          className="w-full rounded-xl border border-glow-cyan/30 bg-white/[0.06] px-4 py-3 text-white placeholder-white/50 outline-none transition-colors shadow-[0_0_12px_2px_rgba(0,212,255,0.35),0_0_27px_5px_rgba(139,92,246,0.26)] focus:border-primary focus:ring-2 focus:ring-primary/50"
+          aria-describedby="bible-search-hint bible-search-status"
+          className="min-h-[44px] w-full rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 transition-colors focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"
         />
         <p className="mt-2 text-center text-sm text-white/60">
           Searching all 66 books of the Bible
@@ -58,69 +99,100 @@ export function BibleSearchMode() {
       </div>
 
       <div className="mx-auto mt-6 max-w-2xl">
+        {/* Empty-query state: prompt + example chips */}
         {query.length === 0 && (
-          <p className="text-center text-white/50">
-            Type to search across Scripture
-          </p>
+          <div className="space-y-4 text-center">
+            <p className="text-white/50">
+              Search the Bible for any word, phrase, or theme
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {EXAMPLE_CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => setQuery(chip)}
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-white/80 transition-colors hover:bg-white/15"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
+        {/* Minimum characters hint */}
         {query.length === 1 && (
-          <p className="text-center text-white/50">
+          <p id="bible-search-hint" className="text-center text-white/50">
             Type at least 2 characters to search
           </p>
         )}
 
+        {/* Status region for screen readers */}
         <div id="bible-search-status" aria-live="polite" aria-atomic="true">
-        {query.length >= 2 && (isSearching || isLoadingBooks) && (
-          <p className="text-center text-white/50">Searching...</p>
-        )}
+          {query.length >= 2 && isLoading && !results.length && (
+            <p className="sr-only">Searching...</p>
+          )}
 
-        {query.length >= 2 &&
-          !isSearching &&
-          !isLoadingBooks &&
-          results.length === 0 && (
+          {query.length >= 2 && !isLoading && !error && results.length === 0 && (
             <p className="text-center text-white/50">
-              No verses found matching &ldquo;{query}&rdquo;. Try different
-              words or check spelling.
+              No verses found for &ldquo;{query}&rdquo;. Try a different word or phrase.
+            </p>
+          )}
+
+          {error && (
+            <p className="text-center text-white/50">
+              {error}
             </p>
           )}
         </div>
 
+        {/* Loading skeleton */}
+        {query.length >= 2 && isLoading && !results.length && (
+          <SearchSkeleton />
+        )}
+
+        {/* Results */}
         {results.length > 0 && (
-          <div className="flex flex-col gap-4" ref={searchResultsRef}>
-            <p className="text-sm text-white/60" aria-live="polite">
-              {results.length >= 100
-                ? '100+ results found (showing first 100)'
-                : `${results.length} result${results.length === 1 ? '' : 's'} found`}
+          <div>
+            {/* Result count */}
+            <p className="mb-4 text-sm text-white/60" aria-live="polite">
+              {totalResults > results.length
+                ? `${totalResults} verses found (showing ${results.length})`
+                : `${totalResults} verse${totalResults === 1 ? '' : 's'} found`}
             </p>
-            {results.map((result, i) => {
-              const stagger = getSearchStaggerProps(i)
-              return (
-              <Link
-                key={`${result.bookSlug}-${result.chapter}-${result.verseNumber}-${i}`}
-                to={`/bible/${result.bookSlug}/${result.chapter}#verse-${result.verseNumber}`}
-                className={cn('block rounded-xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10', stagger.className)}
-                style={stagger.style}
+
+            {/* Result list */}
+            <div>
+              {results.map((result, i) => (
+                <Link
+                  key={`${result.bookSlug}-${result.chapter}-${result.verseNumber}-${i}`}
+                  to={`/bible/${result.bookSlug}/${result.chapter}?verse=${result.verseNumber}`}
+                  className="block border-b border-white/10 py-4 transition-colors hover:bg-white/[0.03]"
+                >
+                  <p className="text-sm font-medium text-white/70">
+                    {result.bookName} {result.chapter}:{result.verseNumber}
+                  </p>
+                  <p className="mt-1 leading-relaxed text-white">
+                    <HighlightedTokens
+                      text={result.verseText}
+                      tokens={result.matchedTokens}
+                    />
+                  </p>
+                </Link>
+              ))}
+            </div>
+
+            {/* Load more button */}
+            {hasMore && (
+              <button
+                type="button"
+                onClick={loadMore}
+                disabled={isSearching}
+                className="mt-6 min-h-[44px] w-full rounded-lg border border-white/20 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 disabled:opacity-50"
               >
-                <h3 className="font-semibold text-white">
-                  {result.bookName} {result.chapter}:{result.verseNumber}
-                </h3>
-                {result.contextBefore && (
-                  <p className="mt-2 text-sm text-white/60">
-                    {result.contextBefore}
-                  </p>
-                )}
-                <p className="mt-1 font-serif text-white/90">
-                  <HighlightedText text={result.verseText} query={query} />
-                </p>
-                {result.contextAfter && (
-                  <p className="mt-1 text-sm text-white/60">
-                    {result.contextAfter}
-                  </p>
-                )}
-              </Link>
-              )
-            })}
+                {isSearching ? 'Loading...' : 'Show more results'}
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -58,6 +58,8 @@ export interface AudioState {
   currentSceneId: string | null
   /** Incremented each time foreground audio reaches its natural end (not manual pause) */
   foregroundEndedCounter: number
+  /** Bible reader reading context for media session metadata (BB-20) */
+  readingContext: { book: string; chapter: number } | null
 }
 
 export type AudioAction =
@@ -90,3 +92,5 @@ export type AudioAction =
   | { type: 'SET_ROUTINE_PHASE'; payload: { phase: AudioRoutine['phase'] } }
   | { type: 'END_ROUTINE' }
   | { type: 'SET_SCENE_NAME'; payload: { sceneName: string | null; sceneId: string | null } }
+  | { type: 'SET_READING_CONTEXT'; payload: { book: string; chapter: number } }
+  | { type: 'CLEAR_READING_CONTEXT' }

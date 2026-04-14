@@ -1,0 +1,160 @@
+{
+  "slug": "john-story-of-jesus",
+  "title": "The Story of Jesus",
+  "shortTitle": "John",
+  "description": "John was the last of the four Gospels written. By the time John picked up his pen, three other accounts of Jesus's life were already in circulation. So John didn't write another biography. He wrote a meditation. He picked seven miracles, seven \"I am\" statements, seven long conversations, and built them into a portrait of who Jesus actually was.\n\nThis plan walks through John in order — chapter 1 to chapter 21, one chapter per day for three weeks. You'll read the prologue (\"In the beginning was the Word\") on day one and the post-resurrection breakfast on the beach on day 21. In between, you'll meet Nicodemus in the dark, the Samaritan woman at the well, the man born blind, Lazarus walking out of the tomb, and a Jesus who washes feet and weeps and asks Peter three times if he loves him.\n\nIf you've never read a Gospel all the way through, this is the one to start with. If you've read John before, read it again. Twenty-one days is enough time for it to change shape in you.",
+  "theme": "foundation",
+  "duration": 21,
+  "estimatedMinutesPerDay": 10,
+  "curator": "Worship Room",
+  "coverGradient": "from-amber-500/30 to-hero-dark",
+  "days": [
+    {
+      "day": 1,
+      "title": "The Word becomes flesh",
+      "passages": [{ "book": "john", "chapter": 1 }],
+      "devotional": "John doesn't start where you'd expect. There's no manger, no angels, no shepherds. He starts before the beginning — before Genesis, before light, before anything. \"In the beginning was the Word, and the Word was with God, and the Word was God.\" That's his opening line. It's a poem, and it's making a claim that would have been staggering to any first-century reader.\n\nThen the poem lands. Verse 14: \"The Word became flesh and lived amongst us.\" The eternal enters a body, a specific place, a specific time. The rest of the chapter moves quickly — John the Baptist points, two disciples follow, Andrew finds Peter, Philip finds Nathanael. But all of it flows from that opening claim. Everything that happens in the next twenty chapters is the story of what the Word-made-flesh did when he got here.",
+      "reflectionPrompts": ["What does it mean that the Word was there before the beginning?"]
+    },
+    {
+      "day": 2,
+      "title": "Water into wine, and a temple cleared",
+      "passages": [{ "book": "john", "chapter": 2 }],
+      "devotional": "Two scenes in one chapter, and the contrast is the point. At a wedding in Cana, Jesus quietly turns water into wine — not cheap wine, but the best. \"You have kept the good wine until now,\" the headwaiter says, confused. It's generous, abundant, understated. Nobody at the party seems to know it happened.\n\nThen John cuts to Jerusalem. Jesus walks into the temple, finds merchants and moneychangers, and drives them out. He makes a whip. He flips tables. Same person, same chapter.\n\nJohn puts these two stories side by side deliberately. The man who quietly makes wine for a party he wasn't hosting is the same man who overturns furniture in the house of God. Neither scene alone tells you who he is. You need both — the gentleness and the fierceness, held together without apology.",
+      "reflectionPrompts": ["Which side of Jesus in this chapter — the wedding or the temple — surprises you more?"]
+    },
+    {
+      "day": 3,
+      "title": "Nicodemus in the dark",
+      "passages": [{ "book": "john", "chapter": 3 }],
+      "devotional": "Nicodemus comes at night. John doesn't say why, but the darkness is hard to miss — a Pharisee, a member of the ruling council, sneaking to see Jesus after hours. He opens by acknowledging that Jesus is a teacher come from God. Jesus doesn't return the compliment. He goes straight to the thing Nicodemus isn't ready for: \"Unless one is born anew, he can't see God's Kingdom.\"\n\nNicodemus is confused. He's a theologian, and this language doesn't fit his categories. \"How can a man be born when he is old?\" He's thinking literally. Jesus is not.\n\nThe conversation builds to the most quoted verse in the Bible — John 3:16. But read the whole chapter slowly. Notice that Nicodemus doesn't respond after Jesus finishes speaking. He just disappears back into the dark. He'll come back — twice more in this Gospel — but tonight he leaves silent.",
+      "reflectionPrompts": ["Why do you think Nicodemus came at night?"]
+    },
+    {
+      "day": 4,
+      "title": "The woman at the well",
+      "passages": [{ "book": "john", "chapter": 4 }],
+      "devotional": "This is Jesus's longest recorded conversation, and it happens with someone no rabbi in first-century Palestine would have spoken to: a Samaritan woman, alone at a well in the middle of the day. Jews and Samaritans didn't share meals, didn't worship together, avoided contact. Jesus asks her for water.\n\nThe conversation moves through layers. Water, worship, her history, the nature of God. She keeps trying to deflect — \"Our fathers worshipped in this mountain\" — and he keeps bringing her back. When she mentions the Messiah, he says plainly: \"I am he, the one who speaks to you.\"\n\nShe leaves her water jar at the well and goes back into town. That detail matters. She came for water and left without it because she found something she wasn't looking for. The whole town comes out to meet him because of what she said.",
+      "reflectionPrompts": ["What did the woman leave behind at the well, and what did she walk away with?"]
+    },
+    {
+      "day": 5,
+      "title": "The man at the pool",
+      "passages": [{ "book": "john", "chapter": 5 }],
+      "devotional": "By the pool at Bethesda, a man has been lying on a mat for thirty-eight years, waiting for the water to move. Thirty-eight years. John lets that number sit.\n\nJesus walks up and asks what sounds like a strange question: \"Do you want to be made well?\" The man doesn't say yes. He explains why he can't get to the water in time — nobody helps him, someone else always gets there first. He's been waiting so long that he answers the question with his reasons for why healing hasn't happened yet.\n\nJesus doesn't address the reasons. \"Arise, take up your mat, and walk.\" The man does.\n\nThen the chapter shifts. The healing happened on the Sabbath, and the religious leaders are furious — not about the miracle, but about the rule-breaking. John spends the second half of the chapter on the argument that follows, and it's the first time in this Gospel that the tension turns dangerous.",
+      "reflectionPrompts": ["If Jesus asked you today, 'Do you want to be made well?' — what would you say?"]
+    },
+    {
+      "day": 6,
+      "title": "Bread for everyone",
+      "passages": [{ "book": "john", "chapter": 6 }],
+      "devotional": "The feeding of the five thousand takes up only a few verses. A boy's lunch, five barley loaves and two fish, twelve baskets left over. The crowd is amazed. They try to make Jesus king by force. He withdraws.\n\nBut John gives the miracle one paragraph and the conversation that follows three pages. The next day, the crowd tracks Jesus down across the lake, and he says something that unsettles them: \"I am the bread of life. Whoever comes to me will not be hungry.\" They wanted more bread. He's offering himself.\n\nThe teaching gets harder from there. The crowd thins. Even some of his followers leave. Jesus turns to the twelve and asks, \"You don't also want to go away, do you?\" Peter answers: \"Lord, to whom would we go? You have the words of eternal life.\" It's not a confident declaration. It's the response of someone who has nowhere else to turn.",
+      "reflectionPrompts": ["Where are you in Peter's answer — staying because you want to, or because there's nowhere else?"]
+    },
+    {
+      "day": 7,
+      "title": "Brothers and skeptics",
+      "passages": [{ "book": "john", "chapter": 7 }],
+      "devotional": "This chapter is mostly other people talking about Jesus. His brothers mock him — \"Reveal yourself to the world,\" they say, not believing. The crowds in Jerusalem argue: some think he's a prophet, some think he's the Messiah, some think he's a fraud. The religious leaders send officers to arrest him. The officers come back empty-handed: \"No man ever spoke like this man!\"\n\nJohn 7 doesn't have a single miracle. It's a chapter about confusion, suspicion, and divided opinion. People who want to believe can't quite get there. People who want to dismiss him can't quite manage it either. The authorities are frustrated because they can't control the conversation.\n\nPay attention to Nicodemus — he reappears briefly, defending Jesus from inside the council. It's a small moment. He doesn't declare loyalty. He just says the law requires hearing a man before judging him. It costs him. The council mocks him for it.",
+      "reflectionPrompts": ["Which reaction to Jesus in this chapter is closest to your own?"]
+    },
+    {
+      "day": 8,
+      "title": "The woman, the stones, and the light",
+      "passages": [{ "book": "john", "chapter": 8 }],
+      "devotional": "The chapter opens with a trap. A woman caught in adultery is dragged before Jesus. The law says she should be stoned. The men who brought her want Jesus to either endorse the execution or contradict Moses. He does neither. He bends down and writes something in the dirt — John never says what — and then stands and says, \"He who is without sin amongst you, let him throw the first stone at her.\"\n\nThey leave. One by one, starting with the oldest. When they're gone, Jesus tells her, \"Neither do I condemn you. Go your way. From now on, sin no more.\"\n\nThen the chapter pivots. \"I am the light of the world,\" Jesus says. \"He who follows me will not walk in the darkness, but will have the light of life.\" It's the first of the great \"I am\" claims in John, and it comes right after a scene where light fell on everyone in the room and found them all wanting.",
+      "reflectionPrompts": ["What do you think Jesus was writing in the dirt?"]
+    },
+    {
+      "day": 9,
+      "title": "The man born blind",
+      "passages": [{ "book": "john", "chapter": 9 }],
+      "devotional": "This chapter reads like a trial transcript. Jesus heals a man born blind, and instead of celebration, there's an investigation. The Pharisees interrogate the man. They interrogate his parents. They interrogate him again. They want him to say Jesus is a sinner.\n\nWatch the man's faith grow as the pressure increases. At first he refers to Jesus as just a man. Under questioning, he upgrades to \"a prophet.\" When pushed harder, he delivers the line that echoes through history: \"One thing I do know: that though I was blind, now I see.\" Finally, thrown out of the synagogue, he meets Jesus again and says, \"Lord, I believe!\"\n\nThe journey from a stranger's name to \"Lord, I believe\" happens in one chapter, under duress, while the religious authorities grow angrier with every answer. John is showing you what faith looks like when it's forming — not a sudden flash, but a slow recognition that costs something.",
+      "reflectionPrompts": ["How has your own understanding of Jesus changed over time?"]
+    },
+    {
+      "day": 10,
+      "title": "The shepherd",
+      "passages": [{ "book": "john", "chapter": 10 }],
+      "devotional": "\"I am the good shepherd. The good shepherd lays down his life for the sheep.\" When first-century listeners heard this, they would have heard an echo of Psalm 23 — the Lord as shepherd. But they would also have heard a claim about Israel's leaders. The prophets spent centuries criticizing Israel's shepherds — kings, priests, teachers — for abandoning the flock. Now Jesus claims the title for himself.\n\nThe chapter's central idea is that the shepherd is not hired help. A hired worker runs when the wolf comes. The shepherd stays. John is drawing a distinction between authority that serves and authority that protects itself.\n\nThis chapter also contains one of John's most intimate images: the shepherd knows his sheep by name, and they know his voice. Not by sight, not by argument — by voice. If you've ever heard something in Scripture that felt like it was addressed to you specifically, John would say that's not a coincidence.",
+      "reflectionPrompts": ["What does it mean to recognize someone by their voice rather than by sight?"]
+    },
+    {
+      "day": 11,
+      "title": "Lazarus, come out",
+      "passages": [{ "book": "john", "chapter": 11 }],
+      "devotional": "Martha and Mary send word to Jesus: \"Lord, behold, he for whom you have great affection is sick.\" Jesus hears the message and stays where he is for two more days. When he arrives in Bethany, Lazarus has been in the tomb four days.\n\nMartha meets him on the road. \"Lord, if you would have been here, my brother wouldn't have died.\" It's not anger — not quite. It's the grief of someone who believes Jesus could have prevented this and didn't. Jesus tells her, \"I am the resurrection and the life.\" Then Mary comes and says the exact same words: \"Lord, if you would have been here, my brother wouldn't have died.\"\n\nJesus sees her weeping. He sees the crowd weeping. And the text says two words: \"Jesus wept.\"\n\nHe doesn't explain the delay. He doesn't offer a reason. He stands at the tomb with people who are grieving, and he grieves with them. He knows what he is about to do — he is about to call Lazarus out — and he weeps anyway. The power and the tears exist in the same moment, and John doesn't try to resolve the tension.\n\n\"Lazarus, come out!\" And he does.",
+      "reflectionPrompts": ["Why did Jesus weep if he already knew what he was about to do?"]
+    },
+    {
+      "day": 12,
+      "title": "Mary's perfume, the donkey, the seed",
+      "passages": [{ "book": "john", "chapter": 12 }],
+      "devotional": "Three scenes close out the public ministry. Mary takes a pound of expensive nard and anoints Jesus's feet, then wipes them with her hair. The house fills with the fragrance. Judas objects — the money could have gone to the poor. Jesus says to leave her alone.\n\nThen Jesus rides into Jerusalem on a donkey, and the crowd waves palm branches. It looks like a coronation. But in the middle of the chapter, Jesus says something the crowd doesn't want to hear: \"Unless a grain of wheat falls into the earth and dies, it remains by itself alone. But if it dies, it bears much fruit.\"\n\nA seed that stays intact is just a seed. A seed that breaks open becomes something else entirely. John places this image at the hinge of his Gospel — the public ministry ends here, and what follows happens behind closed doors.",
+      "reflectionPrompts": ["What would it look like for something in your life to break open like a seed?"]
+    },
+    {
+      "day": 13,
+      "title": "The towel",
+      "passages": [{ "book": "john", "chapter": 13 }],
+      "devotional": "Before dinner, Jesus gets up from the table, takes off his outer garment, wraps a towel around his waist, pours water into a basin, and begins to wash the disciples' feet. In the ancient world, this was the work of the lowest household servant. No teacher would do it. No rabbi. No guest of honor.\n\nPeter refuses. \"You will never wash my feet!\" Jesus tells him that unless he allows it, Peter has no part with him. Peter, characteristically, overcorrects: \"Lord, not my feet only, but also my hands and my head!\"\n\nHere's the detail John wants you to see: Jesus knew who would betray him. He washed Judas's feet anyway. He knelt before the man who was already planning to hand him over and cleaned the dust from between his toes.\n\nAfter he finishes, he gives them a new commandment: \"Love one another. Just as I have loved you, you also love one another.\" He's just shown them what that looks like.",
+      "reflectionPrompts": ["Jesus washed the feet of the man about to betray him. What does that change for you?"]
+    },
+    {
+      "day": 14,
+      "title": "Do not let your hearts be troubled",
+      "passages": [{ "book": "john", "chapter": 14 }],
+      "devotional": "The Farewell Discourse begins here, and the setting matters. Jesus is in a room with people who are about to lose him. He knows what's coming. They don't, not fully. And the first words out of his mouth are: \"Don't let your heart be troubled. Believe in God. Believe also in me.\"\n\nThis chapter is full of promises — a place prepared, the coming of the Spirit, the assurance that he won't leave them as orphans. Thomas interrupts to say he doesn't know where Jesus is going. Philip asks to see the Father. They're confused, and Jesus doesn't scold them for it.\n\nThe chapter ends with a line that has carried people through centuries of difficulty: \"Peace I leave with you. My peace I give to you; not as the world gives, I give to you.\" Notice the distinction. Not the world's peace — something else. Something that holds even when the circumstances don't.",
+      "reflectionPrompts": ["What is the difference between the peace Jesus offers and the peace the world gives?"]
+    },
+    {
+      "day": 15,
+      "title": "I am the vine",
+      "passages": [{ "book": "john", "chapter": 15 }],
+      "devotional": "\"I am the true vine, and my Father is the farmer.\" It's the last of the great \"I am\" statements in John, and it's the most intimate. The others are public declarations — bread, light, shepherd, resurrection, way. This one is whispered in a room, to a small group, on the last night.\n\nThe image is simple. A branch connected to a vine bears fruit without effort — not because it's trying, but because it's attached. \"Remain in me, and I in you. As the branch can't bear fruit by itself unless it remains in the vine, so neither can you, unless you remain in me.\"\n\nThe word \"remain\" appears eleven times in this chapter. It's not a command to work harder. It's an invitation to stay connected. For anyone who is exhausted from striving — from trying to produce enough, perform enough, earn enough — this chapter says the alternative is not giving up. It's abiding.",
+      "reflectionPrompts": ["What are you trying to produce on your own that might grow better through remaining?"]
+    },
+    {
+      "day": 16,
+      "title": "Sorrow into joy",
+      "passages": [{ "book": "john", "chapter": 16 }],
+      "devotional": "Jesus is honest about what's coming. \"You will weep and lament, but the world will rejoice.\" He doesn't minimize the pain his followers are about to experience. He names it. They will grieve. They will be scattered. They will feel abandoned.\n\nThen he makes a promise: \"Your sorrow will be turned into joy.\" Not replaced — turned. Like a woman in labor, he says. The pain is real, the pain is necessary, and then the child arrives and the memory of the anguish gives way to something else. \"No one will take your joy away from you.\"\n\nThe chapter ends with a sentence that has been both comfort and challenge for two thousand years: \"In the world you have trouble; but cheer up! I have overcome the world.\" He says this on the night before his execution. He hasn't overcome anything yet, not visibly. He's speaking from a certainty that exists ahead of the evidence.",
+      "reflectionPrompts": ["What sorrow in your life might be in the process of turning into joy?"]
+    },
+    {
+      "day": 17,
+      "title": "The high priestly prayer",
+      "passages": [{ "book": "john", "chapter": 17 }],
+      "devotional": "This entire chapter is a prayer. Jesus prays aloud, in the presence of his disciples, to the Father. It's overheard rather than addressed to the reader.\n\nHe prays for himself. He prays for the eleven men in the room. And then he says something remarkable: \"Not for these only do I pray, but for those also who will believe in me through their word.\" Verse 20. That's you. Two thousand years before you existed, in a room in Jerusalem on the night before he died, Jesus prayed for the people who would come to believe through the chain of testimony that started with these eleven.\n\nThe prayer asks for unity, protection, joy, and sanctification. But the fact of the prayer may matter more than its content. Before the arrest, before the trial, before everything falls apart, Jesus's last act of freedom is intercession. He spends it on other people.",
+      "reflectionPrompts": ["What does it feel like to know that Jesus prayed for you before you existed?"]
+    },
+    {
+      "day": 18,
+      "title": "The arrest, the trial",
+      "passages": [{ "book": "john", "chapter": 18 }],
+      "devotional": "In the garden, soldiers arrive with lanterns, torches, and weapons. Jesus steps forward and asks who they're looking for. \"Jesus of Nazareth,\" they say. \"I am he,\" Jesus answers, and they fall to the ground. John wants you to notice: Jesus is not captured. He surrenders.\n\nPeter draws a sword and cuts off a servant's ear. Jesus tells him to put it away. It's the last time Peter acts with courage in this chapter.\n\nThe trial moves from the high priest's house to Pilate's headquarters. Peter follows at a distance and denies knowing Jesus three times — by a fire of coals, in the cold. John records each denial without commentary. No excuses, no softening.\n\nInside, Pilate asks Jesus, \"What is truth?\" and doesn't wait for an answer. He walks out. It's one of the most devastating lines in Scripture — the man with the authority to free the truth asks what truth is and then turns his back on it.",
+      "reflectionPrompts": ["Have you ever denied something you believed in because the cost felt too high?"]
+    },
+    {
+      "day": 19,
+      "title": "The crucifixion",
+      "passages": [{ "book": "john", "chapter": 19 }],
+      "devotional": "John tells the crucifixion with a strange composure. He focuses on details that read like a coronation. Pilate writes a title in three languages — Hebrew, Latin, Greek — and nails it to the cross: \"JESUS OF NAZARETH, THE KING OF THE JEWS.\" The chief priests object. Pilate refuses to change it. \"What I have written, I have written.\"\n\nThe soldiers divide his garments and cast lots for his tunic. Jesus speaks to his mother and to the disciple he loves, arranging care for her even now. He says, \"I am thirsty!\" He receives the vinegar.\n\nThen: \"It is finished!\" He bows his head and gives up his spirit.\n\nNotice John's verb. He doesn't say Jesus died. He says Jesus gave up his spirit — as if this, too, was an act of will. John has been building toward this moment for nineteen chapters. The Word who became flesh gives up the flesh. It is finished. Not failed — finished.",
+      "reflectionPrompts": ["What does it mean that Jesus said 'It is finished' — not 'It is failed'?"]
+    },
+    {
+      "day": 20,
+      "title": "Mary in the garden",
+      "passages": [{ "book": "john", "chapter": 20 }],
+      "devotional": "Resurrection in John is not a trumpet blast. It's a woman walking to a tomb in the dark.\n\nMary Magdalene goes early, while it is still dark, and finds the stone moved. She runs to tell Peter and the other disciple. They run to the tomb, see the linen wrappings, and leave. Mary stays. She stands outside the tomb, weeping.\n\nTwo angels ask her why she's crying. She turns and sees someone she thinks is the gardener. \"Sir, if you have carried him away, tell me where you have laid him, and I will take him away.\" She's still looking for a body.\n\nJesus says one word: \"Mary.\"\n\nShe recognizes his voice. \"Rabboni!\" — Teacher.\n\nThe entire scene turns on a single word — her name, spoken by someone she thought was dead. John's resurrection is not a crowd scene. It's a private moment between two people in a garden at dawn, and the thing that changes everything is being known by name.",
+      "reflectionPrompts": ["Mary recognized Jesus when he spoke her name. How do you recognize him?"]
+    },
+    {
+      "day": 21,
+      "title": "Breakfast on the beach",
+      "passages": [{ "book": "john", "chapter": 21 }],
+      "devotional": "The Gospel could have ended at chapter 20. But John adds this — a quiet, domestic final chapter.\n\nThe disciples have gone back to fishing. Peter says, \"I'm going fishing,\" and the others follow. They fish all night. Nothing. At dawn, a figure on the shore calls out: \"Children, have you anything to eat?\" They don't recognize him. He tells them to cast the net on the right side. They do, and the net fills — a hundred and fifty-three fish. John counts them.\n\nWhen they reach the shore, they find a fire of coals with fish and bread already laid on it. Jesus says, \"Come and eat breakfast!\" He's made them a meal. After everything — the arrest, the cross, the empty tomb — he's cooking.\n\nAfter breakfast, Jesus walks down the beach with Peter. Three times he asks: \"Do you love me?\" Once for each denial. Peter is grieved the third time. But Jesus isn't punishing him. He's restoring him. Each question ends with a commission: \"Feed my lambs.\" \"Tend my sheep.\" \"Feed my sheep.\"\n\nThe Gospel of John ends with a beach, a breakfast, and a conversation about love. Not a theology lecture. Not a speech. Breakfast.",
+      "reflectionPrompts": ["After everything that has happened, Jesus makes breakfast. What does that tell you?"]
+    }
+  ]
+}

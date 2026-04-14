@@ -45,18 +45,18 @@ export function FeatureEmptyState({
       {ctaLabel && ctaHref && (
         <Link
           to={ctaHref}
-          className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+          className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]"
         >
-          {ctaLabel} →
+          {ctaLabel}
         </Link>
       )}
       {ctaLabel && onCtaClick && !ctaHref && (
         <button
           type="button"
           onClick={onCtaClick}
-          className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+          className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]"
         >
-          {ctaLabel} →
+          {ctaLabel}
         </button>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { PageHero } from '@/components/PageHero'
@@ -14,7 +14,9 @@ import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { saveMeditationSession, getMeditationMinutesForWeek } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
 import { SEO } from '@/components/SEO'
+import { MEDITATE_GRATITUDE_METADATA } from '@/lib/seo/routeMetadata'
 import { AmbientSoundPill } from '@/components/daily/AmbientSoundPill'
+import type { MeditationVerseContext } from '@/types/meditation'
 
 export function GratitudeReflection() {
   const { isAuthenticated } = useAuth()
@@ -25,6 +27,8 @@ export function GratitudeReflection() {
 let nextItemId = 3
 
 function GratitudeReflectionContent() {
+  const location = useLocation()
+  const meditationVerseContext = (location.state as { meditationVerseContext?: MeditationVerseContext } | null)?.meditationVerseContext ?? null
   const [items, setItems] = useState<{ id: number; text: string }[]>([
     { id: 0, text: '' },
     { id: 1, text: '' },
@@ -79,6 +83,7 @@ function GratitudeReflectionContent() {
       date: getLocalDateString(),
       durationMinutes: minutes,
       completedAt: new Date().toISOString(),
+      ...(meditationVerseContext && { verseContext: meditationVerseContext }),
     })
     setIsComplete(true)
   }
@@ -129,7 +134,7 @@ function GratitudeReflectionContent() {
 
   return (
     <Layout hero={<PageHero title="Gratitude Reflection" subtitle="Name the things you're thankful for today." scriptWord="Reflection" />}>
-      <SEO title="Gratitude Reflection" description="A guided gratitude journaling meditation rooted in Scripture." noIndex />
+      <SEO {...MEDITATE_GRATITUDE_METADATA} />
       <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
         <AmbientSoundPill context="other-meditation" />
 
@@ -154,7 +159,7 @@ function GratitudeReflectionContent() {
             onClick={handleAddAnother}
             className="mt-4 inline-flex items-center gap-1 text-sm text-primary transition-colors hover:text-primary-light"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
             Add another
           </button>
         )}

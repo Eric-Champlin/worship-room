@@ -13,6 +13,7 @@ import { AccountSection } from '@/components/settings/AccountSection'
 import { AppSection } from '@/components/settings/AppSection'
 import { DashboardSection } from '@/components/settings/DashboardSection'
 import { SEO } from '@/components/SEO'
+import { SETTINGS_METADATA } from '@/lib/seo/routeMetadata'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
@@ -40,13 +41,7 @@ export function Settings() {
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
-      <SEO title="Settings" description="Manage your Worship Room account, notifications, and privacy preferences." noIndex />
-      <a
-        href="#settings-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-      >
-        Skip to content
-      </a>
+      <SEO {...SETTINGS_METADATA} />
       <Navbar transparent />
 
       {/* Hero section */}
@@ -97,7 +92,7 @@ export function Settings() {
       </div>
 
       {/* Content area with sidebar */}
-      <main id="settings-content" className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
+      <main id="main-content" className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="flex gap-8">
           {/* Desktop sidebar */}
           <nav

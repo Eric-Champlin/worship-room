@@ -115,7 +115,7 @@ function NavDropdown({
       ref={wrapperRef}
       className={cn(
         'relative flex items-center py-2',
-        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+        "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-base after:ease-decelerate after:origin-center after:content-[''] motion-reduce:after:transition-none",
         transparent ? 'after:bg-white' : 'after:bg-primary',
         isActive
           ? 'after:scale-x-100'
@@ -157,7 +157,7 @@ function NavDropdown({
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <ChevronDown
-          className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
+          className={cn('h-4 w-4 transition-transform motion-reduce:transition-none', isOpen && 'rotate-180')}
           aria-hidden="true"
         />
       </button>
@@ -190,7 +190,7 @@ function NavDropdown({
                   <span
                     className={cn(
                       'relative pb-0.5',
-                      "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-300 after:ease-out after:origin-center after:content-['']",
+                      "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:transition-transform after:duration-base after:ease-decelerate after:origin-center after:content-[''] motion-reduce:after:transition-none",
                       transparent ? 'after:bg-white' : 'after:bg-primary',
                       'after:scale-x-0 group-hover:after:scale-x-100'
                     )}

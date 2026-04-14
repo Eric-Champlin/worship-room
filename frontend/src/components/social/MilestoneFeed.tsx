@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { Link } from 'react-router-dom'
 import type { MilestoneEvent } from '@/types/dashboard'
 import { getMilestoneFeed, saveMilestoneFeed } from '@/services/social-storage'
@@ -55,8 +56,8 @@ export function MilestoneFeed({ maxItems = 3 }: MilestoneFeedProps) {
         return (
           <li
             key={event.id}
-            className="flex items-start gap-2 motion-safe:opacity-0 motion-safe:animate-fade-in"
-            style={{ animationDelay: `${delay}ms`, animationDuration: '300ms' }}
+            className="flex items-start gap-2 motion-safe:opacity-0 motion-safe:animate-fade-in-up"
+            style={{ animationDelay: `${delay}ms`, animationDuration: `${ANIMATION_DURATIONS.base}ms` }}
           >
             <Link to={`/profile/${event.userId}`} className="flex-shrink-0">
               <div

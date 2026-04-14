@@ -85,7 +85,7 @@ describe('PrayerWall', () => {
     expect(screen.getByRole('region', { name: 'Prayer Wall' })).toBeInTheDocument()
   })
 
-  it('renders skip to content link', () => {
+  it('renders skip to content link (via Navbar)', () => {
     renderPage()
     expect(screen.getByText('Skip to content')).toBeInTheDocument()
   })

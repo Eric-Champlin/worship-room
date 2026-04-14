@@ -5,12 +5,14 @@ import { addPrayer } from '@/services/prayer-list-storage'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS } from '@/constants/prayer-categories'
 import { useToast } from '@/components/ui/Toast'
 import type { PrayerCategory } from '@/constants/prayer-categories'
+import type { PrayerVerseContext } from '@/types/daily-experience'
 
 interface SaveToPrayerListFormProps {
   topicText: string
   prayerText: string
   onSave: () => void
   onCancel: () => void
+  verseContext?: PrayerVerseContext | null
 }
 
 function extractDefaultTitle(topicText: string): string {
@@ -25,6 +27,7 @@ export function SaveToPrayerListForm({
   prayerText,
   onSave,
   onCancel,
+  verseContext,
 }: SaveToPrayerListFormProps) {
   const [title, setTitle] = useState(() => extractDefaultTitle(topicText))
   const [category, setCategory] = useState<PrayerCategory | null>(null)
@@ -37,6 +40,7 @@ export function SaveToPrayerListForm({
       title: title.trim() || 'My prayer',
       description: prayerText,
       category,
+      verseContext: verseContext ?? undefined,
     })
 
     if (!result) {
@@ -48,7 +52,7 @@ export function SaveToPrayerListForm({
     }
 
     onSave()
-  }, [title, category, prayerText, onSave, showToast])
+  }, [title, category, prayerText, onSave, showToast, verseContext])
 
   return (
     <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
@@ -79,7 +83,7 @@ export function SaveToPrayerListForm({
             type="button"
             onClick={() => setCategory(cat)}
             className={cn(
-              'min-h-[44px] shrink-0 rounded-full px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+              'min-h-[44px] shrink-0 rounded-full px-3 py-1.5 text-xs transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]',
               category === cat
                 ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
@@ -96,7 +100,7 @@ export function SaveToPrayerListForm({
           onClick={handleSave}
           disabled={!category}
           className={cn(
-            'rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors',
+            'rounded-lg px-4 py-2 text-sm font-semibold text-white transition-[colors,transform] duration-fast active:scale-[0.98]',
             category
               ? 'bg-primary hover:bg-primary-lt'
               : 'cursor-not-allowed bg-gray-300',
