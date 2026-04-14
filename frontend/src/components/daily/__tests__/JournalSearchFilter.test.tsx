@@ -5,6 +5,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { JournalTabContent } from '../JournalTabContent'
+import { _resetCacheForTesting } from '@/lib/bible/journalStore'
 
 // Mock AudioProvider (needed by AmbientSoundPill embedded in JournalTabContent)
 vi.mock('@/components/audio/AudioProvider', () => ({
@@ -58,6 +59,7 @@ vi.mock('@/hooks/useFaithPoints', () => ({
 beforeEach(() => {
   vi.useFakeTimers()
   localStorage.clear()
+  _resetCacheForTesting()
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'Eric')
 })
@@ -88,7 +90,8 @@ function saveEntry(content: string) {
 
 /** Click a mode toggle button in the journal mode group (Guided / Free Write) */
 function clickModeToggle(name: RegExp) {
-  fireEvent.click(screen.getByRole('button', { name, pressed: false }))
+  const modeGroup = screen.getByRole('group', { name: /journal mode/i })
+  fireEvent.click(within(modeGroup).getByRole('button', { name, pressed: false }))
 }
 
 describe('JournalSearchFilter', () => {

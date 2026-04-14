@@ -393,12 +393,14 @@ export function Dashboard() {
     return (
       <>
         <SEO {...HOME_METADATA} />
-        <WelcomeBack
-          userName={user.name}
-          faithPoints={faithPoints}
-          onStepIn={handleWelcomeBackStepIn}
-          onSkipToDashboard={handleWelcomeBackSkip}
-        />
+        <main>
+          <WelcomeBack
+            userName={user.name}
+            faithPoints={faithPoints}
+            onStepIn={handleWelcomeBackStepIn}
+            onSkipToDashboard={handleWelcomeBackSkip}
+          />
+        </main>
       </>
     )
   }
@@ -407,11 +409,13 @@ export function Dashboard() {
     return (
       <>
         <SEO {...HOME_METADATA} />
-        <MoodCheckIn
-          userName={user.name}
-          onComplete={handleCheckInComplete}
-          onSkip={handleCheckInSkip}
-        />
+        <main>
+          <MoodCheckIn
+            userName={user.name}
+            onComplete={handleCheckInComplete}
+            onSkip={handleCheckInSkip}
+          />
+        </main>
       </>
     )
   }
@@ -420,10 +424,12 @@ export function Dashboard() {
     return (
       <>
         <SEO {...HOME_METADATA} />
-        <MoodRecommendations
-          moodValue={lastMoodEntry.mood}
-          onAdvanceToDashboard={handleRecommendationsAdvance}
-        />
+        <main>
+          <MoodRecommendations
+            moodValue={lastMoodEntry.mood}
+            onAdvanceToDashboard={handleRecommendationsAdvance}
+          />
+        </main>
       </>
     )
   }

@@ -83,7 +83,7 @@ export function AmbientAudioPicker({
 
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [isOpen, isDesktop, onClose, anchorRef])
+  }, [isOpen, isDesktop, onClose, anchorRef, panelRef])
 
   const handleSoundTap = useCallback(
     (sound: Sound) => {

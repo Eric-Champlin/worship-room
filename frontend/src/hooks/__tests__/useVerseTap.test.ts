@@ -16,7 +16,7 @@ class MockPointerEvent extends MouseEvent {
 }
 if (typeof globalThis.PointerEvent === 'undefined') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(globalThis as any).PointerEvent = MockPointerEvent
+  (globalThis as any).PointerEvent = MockPointerEvent
 }
 
 // ---------------------------------------------------------------------------

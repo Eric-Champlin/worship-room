@@ -21,7 +21,6 @@ describe('loadChapterWeb', () => {
     // Luke 17:36 is a known WEB blank verse
     const result = await loadChapterWeb('luke', 17)
     expect(result).not.toBeNull()
-    const verseNumbers = result!.verses.map((v) => v.number)
     // All returned verses should have non-empty text
     for (const verse of result!.verses) {
       expect(verse.text.trim()).not.toBe('')

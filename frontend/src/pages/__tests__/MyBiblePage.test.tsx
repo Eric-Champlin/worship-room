@@ -130,7 +130,7 @@ describe('MyBiblePage', () => {
   it('renders hero with gradient heading', () => {
     mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
     renderPage()
-    expect(screen.getByText('My Bible')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
     expect(screen.getByText('everything you\'ve marked')).toBeInTheDocument()
   })
 
@@ -322,6 +322,6 @@ describe('MyBiblePage', () => {
     renderPage()
     // SEO component uses Helmet which may not update document.title in jsdom.
     // Verify the page renders without errors — SEO is tested indirectly.
-    expect(screen.getByText('My Bible')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('My Bible')
   })
 })

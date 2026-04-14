@@ -5,6 +5,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { JournalTabContent } from '../JournalTabContent'
 import { JOURNAL_MILESTONES_KEY } from '@/constants/daily-experience'
+import { _resetCacheForTesting as resetJournalCache } from '@/lib/bible/journalStore'
 
 // Mock AudioProvider
 vi.mock('@/components/audio/AudioProvider', () => ({
@@ -68,6 +69,7 @@ vi.mock('@/components/ui/Toast', () => ({
 
 beforeEach(() => {
   localStorage.clear()
+  resetJournalCache()
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'Eric')
   mockShowCelebrationToast.mockClear()

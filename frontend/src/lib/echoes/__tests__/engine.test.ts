@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import type { Highlight } from '@/types/bible'
 import type { ChapterVisitStore } from '@/types/heatmap'

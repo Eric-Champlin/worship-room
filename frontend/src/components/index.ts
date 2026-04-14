@@ -1,7 +1,0 @@
-export { HeroSection } from './HeroSection'
-export { Layout } from './Layout'
-export { Navbar } from './Navbar'
-export { SiteFooter } from './SiteFooter'
-export { StartingPointQuiz } from './StartingPointQuiz'
-export { TypewriterInput } from './TypewriterInput'
-export * from './ui'

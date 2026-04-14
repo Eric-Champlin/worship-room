@@ -215,7 +215,6 @@ describe('BB-35: Heading hierarchy', () => {
 
     // Ensure no h3 or h4 appears without a preceding h2
     // (the AccessibilityPage should have h1 -> h2 only, no h3s)
-    const h3s = screen.queryAllByRole('heading', { level: 3 })
     // Footer renders h3s (column headings), which are inside the footer landmark, not the main content
     // So filter to only h3s inside main content
     const main = screen.getByRole('main')

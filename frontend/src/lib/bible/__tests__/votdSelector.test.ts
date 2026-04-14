@@ -1,7 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { selectVotdForDate, getDayOfYear } from '../votdSelector'
 import votdList from '@/data/bible/votd/votd-list.json'
-import type { VotdListEntry } from '@/types/bible-landing'
 
 describe('votdSelector', () => {
   it('same date returns same entry', () => {

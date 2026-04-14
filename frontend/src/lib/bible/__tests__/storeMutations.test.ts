@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Highlight, Bookmark, Note, JournalEntry } from '@/types/bible'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 import type { MeditationSession } from '@/types/meditation'
-import type { MergeResult } from '@/types/bible-export'
 
 // --- Factories ---
 

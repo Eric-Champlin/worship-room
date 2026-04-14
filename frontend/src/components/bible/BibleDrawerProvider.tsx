@@ -97,6 +97,7 @@ export function BibleDrawerProvider({ children }: { children: React.ReactNode })
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Provider + context hook export is standard React pattern
 export function useBibleDrawer() {
   const ctx = useContext(BibleDrawerContext)
   if (!ctx) throw new Error('useBibleDrawer must be used within BibleDrawerProvider')

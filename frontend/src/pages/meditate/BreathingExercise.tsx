@@ -167,7 +167,7 @@ function BreathingExerciseContent() {
     if (voiceEnabled) speakPhase(BREATHING_PHASES.breatheIn.label)
 
     rafRef.current = requestAnimationFrame(tick)
-  }, [duration, chimeEnabled, voiceEnabled, cleanup, markMeditationComplete, recordActivity])
+  }, [duration, chimeEnabled, voiceEnabled, cleanup, markMeditationComplete, recordActivity, meditationVerseContext])
 
   if (screen === 'complete') {
     const weeklyTotal = getMeditationMinutesForWeek()

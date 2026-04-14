@@ -166,6 +166,7 @@ describe('v1/v2 plan handling', () => {
       ...makeData(),
       plans: { activePlanSlug: 'test', plans: { test: { slug: 'test', completedDays: [1, 2] } } },
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- testing untyped import data
     const result = applyReplace(data as any)
     expect(replaceAllPlans).toHaveBeenCalled()
     expect(result.plans).toBeDefined()
@@ -176,6 +177,7 @@ describe('v1/v2 plan handling', () => {
       ...makeData(),
       plans: { activePlanSlug: null, plans: { test: { slug: 'test', completedDays: [1, 2, 3, 4, 5] } } },
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- testing untyped import data
     const result = applyMerge(data as any)
     expect(mergeInPlans).toHaveBeenCalled()
     expect(result.plans).toBeDefined()

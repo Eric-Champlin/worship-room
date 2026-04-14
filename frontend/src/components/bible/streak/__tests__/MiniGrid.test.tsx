@@ -5,7 +5,6 @@ import type { StreakRecord } from '@/types/bible-streak'
 import { getTodayLocal, getYesterday } from '@/lib/bible/dateUtils'
 
 const today = getTodayLocal()
-const yesterday = getYesterday(today)
 
 const BASE_STREAK: StreakRecord = {
   currentStreak: 3,

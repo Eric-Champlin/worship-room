@@ -50,7 +50,7 @@ describe('BibleSearchMode — accessibility', () => {
   it('search input has aria-describedby linking to status', () => {
     renderSearch()
     const input = screen.getByLabelText('Search the Bible')
-    expect(input).toHaveAttribute('aria-describedby', 'bible-search-status')
+    expect(input).toHaveAttribute('aria-describedby', 'bible-search-hint bible-search-status')
   })
 
   it('status element has matching id and aria-live', () => {

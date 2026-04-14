@@ -1,25 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { BIBLE_HIGHLIGHTS_KEY } from '@/constants/bible'
-import type { Highlight, HighlightColor } from '@/types/bible'
 
 // Dynamic import so we get a fresh module per test via vi.resetModules()
 async function loadStore() {
   const mod = await import('../highlightStore')
   return mod
-}
-
-function makeHighlight(overrides: Partial<Highlight> = {}): Highlight {
-  return {
-    id: crypto.randomUUID(),
-    book: 'john',
-    chapter: 3,
-    startVerse: 16,
-    endVerse: 16,
-    color: 'peace',
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    ...overrides,
-  }
 }
 
 describe('highlightStore', () => {
@@ -446,11 +431,11 @@ describe('highlightStore', () => {
       const original = Storage.prototype.setItem
       const quotaError = new Error('quota exceeded')
       quotaError.name = 'QuotaExceededError'
-      Storage.prototype.setItem = function (key: string) {
+      Storage.prototype.setItem = function (key: string, ...args: unknown[]) {
         if (key === BIBLE_HIGHLIGHTS_KEY) {
           throw quotaError
         }
-        return original.apply(this, arguments as unknown as [string, string])
+        return original.apply(this, [key, ...args] as [string, string])
       }
 
       try {

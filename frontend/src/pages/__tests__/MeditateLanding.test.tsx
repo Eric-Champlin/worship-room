@@ -139,7 +139,7 @@ describe('MeditateTabContent', () => {
     const user = userEvent.setup()
     renderComponent()
     await user.click(screen.getByText('Breathing Exercise'))
-    expect(mockNavigate).toHaveBeenCalledWith('/meditate/breathing')
+    expect(mockNavigate).toHaveBeenCalledWith('/meditate/breathing', {})
   })
 
   it('logged-out user clicking card opens auth modal', async () => {

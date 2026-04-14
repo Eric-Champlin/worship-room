@@ -52,7 +52,7 @@ export function SaveToPrayerListForm({
     }
 
     onSave()
-  }, [title, category, prayerText, onSave, showToast])
+  }, [title, category, prayerText, onSave, showToast, verseContext])
 
   return (
     <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">

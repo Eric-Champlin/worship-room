@@ -254,11 +254,11 @@ describe('journalStore', () => {
       const original = Storage.prototype.setItem
       const quotaError = new Error('quota exceeded')
       quotaError.name = 'QuotaExceededError'
-      Storage.prototype.setItem = function (key: string) {
+      Storage.prototype.setItem = function (key: string, ...args: unknown[]) {
         if (key === BIBLE_JOURNAL_ENTRIES_KEY) {
           throw quotaError
         }
-        return original.apply(this, arguments as unknown as [string, string])
+        return original.apply(this, [key, ...args] as [string, string])
       }
 
       try {

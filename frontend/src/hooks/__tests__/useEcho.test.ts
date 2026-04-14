@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Highlight } from '@/types/bible'
 
@@ -159,7 +159,7 @@ describe('useEcho', () => {
       updatedAt: daysAgo(7),
     })
     const { useEcho, markEchoSeen } = await import('../useEcho')
-    const { result, rerender } = renderHook(() => useEcho())
+    const { result } = renderHook(() => useEcho())
     const echoId = result.current!.id
     const scoreBefore = result.current!.score
 

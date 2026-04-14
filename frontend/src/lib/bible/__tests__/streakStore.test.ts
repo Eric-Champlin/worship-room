@@ -132,12 +132,16 @@ describe('streakStore', () => {
   })
 
   it('recordReadToday 2-day gap without grace', async () => {
-    const { getTodayLocal } = await loadDateUtils()
+    const { getTodayLocal, getISOWeekStart } = await loadDateUtils()
 
     const today = getTodayLocal()
     const twoDaysAgo = new Date(today + 'T00:00:00')
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
     const tdaStr = `${twoDaysAgo.getFullYear()}-${String(twoDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(twoDaysAgo.getDate()).padStart(2, '0')}`
+
+    // Use the current ISO week start so the weekly grace reset does NOT fire —
+    // we want to test the "grace already used this week" path.
+    const currentWeekStart = getISOWeekStart(today)
 
     localStorage.setItem(
       BIBLE_STREAK_KEY,
@@ -147,9 +151,9 @@ describe('streakStore', () => {
         lastReadDate: tdaStr,
         streakStartDate: '2026-04-01',
         graceDaysAvailable: 1,
-        graceDaysUsedThisWeek: 1, // grace already used
-        lastGraceUsedDate: '2026-04-07',
-        weekResetDate: '2026-04-06',
+        graceDaysUsedThisWeek: 1, // grace already used this week
+        lastGraceUsedDate: tdaStr,
+        weekResetDate: currentWeekStart,
         milestones: [3],
         totalDaysRead: 5,
       }),
