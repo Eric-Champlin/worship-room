@@ -225,6 +225,7 @@ export function AmbientAudioPicker({
         }}
         className="w-80 rounded-2xl border border-white/10 p-4"
         role="dialog"
+        aria-modal="true"
         aria-label="Ambient sound picker"
       >
         {pickerContent}
@@ -248,6 +249,7 @@ export function AmbientAudioPicker({
           'sm:inset-x-auto sm:left-1/2 sm:w-[480px] sm:-translate-x-1/2',
         )}
         role="dialog"
+        aria-modal="true"
         aria-label="Ambient sound picker"
       >
         {pickerContent}

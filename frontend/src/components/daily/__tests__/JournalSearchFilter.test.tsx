@@ -160,15 +160,15 @@ describe('JournalSearchFilter', () => {
 
     it('search is case-insensitive', () => {
       renderJournalTab()
-      saveEntry('Peace and comfort')
+      saveEntry('Serenity and comfort')
       saveEntry('Something else entirely')
 
-      fireEvent.change(screen.getByLabelText('Search your entries'), { target: { value: 'peace' } })
+      fireEvent.change(screen.getByLabelText('Search your entries'), { target: { value: 'serenity' } })
       act(() => { vi.advanceTimersByTime(300) })
 
       const entries = screen.getAllByRole('article')
       expect(entries).toHaveLength(1)
-      expect(entries[0]).toHaveTextContent('Peace and comfort')
+      expect(entries[0]).toHaveTextContent('Serenity and comfort')
     })
 
     it('search debounce 300ms', () => {

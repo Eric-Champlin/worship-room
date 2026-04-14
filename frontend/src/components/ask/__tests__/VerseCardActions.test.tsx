@@ -8,7 +8,8 @@ import { VerseCardActions } from '../VerseCardActions'
 import type { AskVerse } from '@/types/ask'
 import type { ParsedVerseReference } from '@/lib/parse-verse-references'
 import type { AuthContextValue } from '@/contexts/AuthContext'
-import type { BibleNote } from '@/types/bible'
+import type { Note } from '@/types/bible'
+import { NoteStorageFullError } from '@/lib/bible/notes/store'
 
 const { mockAuthFn } = vi.hoisted(() => {
   const mockAuthFn = vi.fn((): AuthContextValue => ({
@@ -28,18 +29,17 @@ vi.mock('@/contexts/AuthContext', () => ({
   useAuth: mockAuthFn,
 }))
 
-const mockSaveNote = vi.fn(() => true)
-const mockGetNoteForVerse = vi.fn((): BibleNote | undefined => undefined)
+const mockUpsertNote = vi.fn()
+const mockGetNoteForVerse = vi.fn((): Note | null => null)
 
-vi.mock('@/hooks/useBibleNotes', () => ({
-  useBibleNotes: () => ({
-    saveNote: mockSaveNote,
-    getNoteForVerse: mockGetNoteForVerse,
-    getNotesForChapter: vi.fn(() => []),
-    deleteNote: vi.fn(),
-    getAllNotes: vi.fn(() => []),
-  }),
-}))
+vi.mock('@/lib/bible/notes/store', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/bible/notes/store')>()
+  return {
+    ...actual,
+    upsertNote: (...args: Parameters<typeof actual.upsertNote>) => mockUpsertNote(...args),
+    getNoteForVerse: (...args: Parameters<typeof actual.getNoteForVerse>) => mockGetNoteForVerse(...args),
+  }
+})
 
 const VERSE: AskVerse = {
   reference: 'Romans 8:28',
@@ -81,8 +81,8 @@ beforeEach(() => {
     login: vi.fn(),
     logout: vi.fn(),
   })
-  mockSaveNote.mockReturnValue(true)
-  mockGetNoteForVerse.mockReturnValue(undefined)
+  mockUpsertNote.mockReset()
+  mockGetNoteForVerse.mockReturnValue(null)
 })
 
 describe('VerseCardActions', () => {
@@ -129,7 +129,7 @@ describe('VerseCardActions', () => {
     expect(screen.getByPlaceholderText('Add a note about this verse...')).toBeInTheDocument()
   })
 
-  it('inline textarea has 300 char max', async () => {
+  it('inline textarea has 10000 char max', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: true,
       user: { name: 'Test', id: 'test' },
@@ -140,10 +140,10 @@ describe('VerseCardActions', () => {
     renderActions()
     await user.click(screen.getByRole('button', { name: /Save note/i }))
     const textarea = screen.getByPlaceholderText('Add a note about this verse...')
-    expect(textarea).toHaveAttribute('maxLength', '300')
+    expect(textarea).toHaveAttribute('maxLength', '10000')
   })
 
-  it('Save button saves note via useBibleNotes', async () => {
+  it('Save button saves note via canonical notes store', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: true,
       user: { name: 'Test', id: 'test' },
@@ -156,17 +156,20 @@ describe('VerseCardActions', () => {
     const textarea = screen.getByPlaceholderText('Add a note about this verse...')
     await user.type(textarea, 'My note')
     await user.click(screen.getByRole('button', { name: /^Save$/i }))
-    expect(mockSaveNote).toHaveBeenCalledWith('Romans', 8, 28, 'My note')
+    expect(mockUpsertNote).toHaveBeenCalledWith(
+      { book: 'Romans', chapter: 8, startVerse: 28, endVerse: 28 },
+      'My note',
+    )
   })
 
-  it('note limit reached shows error toast', async () => {
+  it('note storage full shows error toast', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: true,
       user: { name: 'Test', id: 'test' },
       login: vi.fn(),
       logout: vi.fn(),
     })
-    mockSaveNote.mockReturnValue(false)
+    mockUpsertNote.mockImplementation(() => { throw new NoteStorageFullError() })
     const user = userEvent.setup()
     renderActions()
     await user.click(screen.getByRole('button', { name: /Save note/i }))
@@ -186,10 +189,11 @@ describe('VerseCardActions', () => {
       id: '1',
       book: 'Romans',
       chapter: 8,
-      verseNumber: 28,
-      text: 'Existing note text',
-      createdAt: '2026-01-01',
-      updatedAt: '2026-01-01',
+      startVerse: 28,
+      endVerse: 28,
+      body: 'Existing note text',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     })
     const user = userEvent.setup()
     renderActions()
