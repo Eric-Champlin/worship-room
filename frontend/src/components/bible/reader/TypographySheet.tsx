@@ -116,10 +116,8 @@ export function TypographySheet({
       {/* Single panel — responsive positioning */}
       <div
         ref={(el) => {
-          /* eslint-disable no-extra-semi */
           ;(containerRef as React.MutableRefObject<HTMLDivElement | null>).current = el
           ;(panelRef as React.MutableRefObject<HTMLDivElement | null>).current = el
-          /* eslint-enable no-extra-semi */
         }}
         role="dialog"
         aria-modal="true"

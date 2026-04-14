@@ -97,9 +97,9 @@ export function SiteFooter() {
           <div className="mx-auto grid max-w-lg grid-cols-1 gap-8 text-center sm:max-w-2xl sm:grid-cols-2 lg:grid-cols-4">
             {FOOTER_COLUMNS.map((column) => (
               <div key={column.heading}>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+                <p className="text-sm font-semibold uppercase tracking-wider text-white">
                   {column.heading}
-                </h3>
+                </p>
                 <ul className="mt-3 space-y-2">
                   {column.links.map((link) => (
                     <li key={link.to}>

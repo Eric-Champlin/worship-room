@@ -289,8 +289,8 @@ The BibleReader was rebuilt during the Bible wave (BB-0 through BB-29) and exten
 - **ReaderChrome.tsx** — Top and bottom toolbars for the reader. Replaces `Navbar` and `SiteFooter` for the BibleReader page. Top bar: theme switcher, type size, line height, font family, focus mode toggle, back button, chapter selector, AI Explain button, AI Reflect button. Bottom bar: audio controls, drawer trigger, verse number toggle. Toolbars dim after `wr_bible_focus_delay` ms of inactivity when focus mode is enabled.
 - **BibleBrowser.tsx** — The 66-book browser at `/bible`. Hosts the OT/NT testament tabs (`wr_bible_books_tab`), the book grid, the recent chapters list, the BB-42 search mode, and the Resume Reading card.
 - **BibleSearchMode.tsx** — Full-text search UI (BB-42). Wired into BibleBrowser via the `?mode=search` query param. Loads the pre-built inverted index on demand, renders results with verse text, supports keyboard navigation, links each result to the verse via BB-38 deep link contract.
-- **MyBible.tsx** (`/bible/my`) — Personal layer page. From top to bottom: the BB-43 reading heatmap, the BB-43 Bible progress map, the BB-45 memorization deck, the unified activity feed (highlights, notes, bookmarks, journal entries). Reads from `useHighlightStore`, `useBookmarkStore`, `useNoteStore`, `useJournalStore`, `useChapterVisitStore`, `useMemorizationStore`. Subscribes via hooks — **does NOT use local `useState` mirrors** (BB-45 anti-pattern).
-- **ReadingHeatmap.tsx** (BB-43) — GitHub-contribution-style heatmap showing daily reading activity for the past 365 days. Each cell is a day; color intensity represents number of chapters read. Hover/tap shows the date and references. Reads from `useChapterVisitStore()`. Anti-pressure tone — sparse activity is treated as valid.
+- **MyBible.tsx** (`/bible/my`) — Personal layer page. From top to bottom: the BB-43 reading heatmap, the BB-43 Bible progress map, the BB-45 memorization deck, the unified activity feed (highlights, notes, bookmarks, journal entries). Reads from highlight, bookmark, note, journal, chapter visit, and memorization stores. Subscribes to each via inline `subscribe()` or standalone hook — **does NOT use local `useState` snapshots without subscription** (BB-45 anti-pattern).
+- **ReadingHeatmap.tsx** (BB-43) — GitHub-contribution-style heatmap showing daily reading activity for the past 365 days. Each cell is a day; color intensity represents number of chapters read. Hover/tap shows the date and references. Subscribes to `chapterVisitStore` via inline `subscribe()`. Anti-pressure tone — sparse activity is treated as valid.
 - **BibleProgressMap.tsx** (BB-43) — Visual map of all 66 books showing read/partially read/unread chapters. Tap a chapter cell to navigate to that chapter via BB-38 deep link.
 - **MemorizationDeck.tsx** (BB-45) — Flip-card memorization grid on My Bible. Cards have a front (reference) and back (verse text). Tap to flip. No quiz, no scoring, no spaced repetition. Reads from `useMemorizationStore()`. Add cards via the BibleReader verse menu.
 - **EchoCard.tsx** (BB-46) — Single-card display of a verse the user has engaged with in the past. Shows context ("30 days ago you highlighted this") + verse reference + verse text. Tappable, navigates to the verse via BB-38 deep link. Mounted on the home page and Daily Hub. Selection driven by the echo engine at `frontend/src/lib/echoes/`.
@@ -377,17 +377,21 @@ The BibleReader was rebuilt during the Bible wave (BB-0 through BB-29) and exten
 - **useSoundEffects()** — Web Audio API sound effect playback. 6 sounds (chime, ascending, harp, bell, whisper, sparkle). Gated behind `wr_sound_effects_enabled` and `prefers-reduced-motion`.
 - **useLiturgicalSeason()** — Returns current liturgical season via Computus algorithm. Used for seasonal content priority.
  
-### Bible Reactive Store Hooks (BB-7 through BB-46)
+### Bible Reactive Store Hooks & Subscription (BB-7 through BB-45)
  
-These hooks subscribe to reactive stores via `useSyncExternalStore`. **Components consuming these stores MUST use the hook** — never call `getAllX()` and store the result in local `useState`. See `11-local-storage-keys.md` § "Reactive Store Consumption" for the BB-45 anti-pattern.
+Bible-wave stores use two subscription patterns. **Components consuming these stores MUST subscribe** — never call `getAllX()` and store the result in local `useState` without a `subscribe()` call. See `11-local-storage-keys.md` § "Reactive Store Consumption" for the full pattern documentation and the BB-45 anti-pattern.
  
-- **useHighlightStore()** (BB-7) — Returns the current array of highlights. Subscribes to mutations from any surface.
-- **useBookmarkStore()** (BB-7) — Returns the current array of bookmarks.
-- **useNoteStore()** (BB-8) — Returns the current array of range-based notes.
-- **useJournalStore()** (BB-11b) — Returns the current array of Bible journal entries (verse-linked + freeform).
-- **useChapterVisitStore()** (BB-43) — Returns the chapter visit log keyed by date. Used by ReadingHeatmap and BibleProgressMap.
-- **useMemorizationStore()** (BB-45) — Returns the current array of memorization cards. Used by MemorizationDeck on My Bible.
-- **useEchoStore()** (BB-46) — Returns the current echo dismissals list. The echo selection engine consumes this to filter out dismissed echoes when picking what to surface.
+**Standalone hooks (Pattern A — `useSyncExternalStore`):**
+- **useMemorizationStore()** (BB-45) — Returns the current array of memorization cards. Hook at `hooks/bible/useMemorizationStore.ts`.
+- **useStreakStore()** (BB-17) — Returns `{ streak, atRisk }`. Hook at `hooks/bible/useStreakStore.ts`.
+ 
+**Inline subscription stores (Pattern B — `subscribe()` + `useState` + `useEffect`):**
+- **highlightStore** (BB-7) — `lib/bible/highlightStore.ts`. API: `getHighlightsForChapter()`, `applyHighlight()`, `subscribe()`.
+- **bookmarkStore** (BB-7) — `lib/bible/bookmarkStore.ts`. API: `getBookmarksForChapter()`, `toggleBookmark()`, `subscribe()`.
+- **noteStore** (BB-8) — `lib/bible/notes/store.ts`. API: `getNotesForChapter()`, `upsertNote()`, `subscribe()`.
+- **journalStore** (BB-11b) — `lib/bible/journalStore.ts`. API: `getAllJournalEntries()`, `createJournalEntry()`, `subscribe()`.
+- **chapterVisitStore** (BB-43) — `lib/heatmap/chapterVisitStore.ts`. API: `getAllVisits()`, `recordChapterVisit()`, `subscribe()`.
+- **plansStore** (BB-21) — `lib/bible/plansStore.ts`. API: `getPlansState()`, `markDayComplete()`, `subscribe()`.
  
 ### Dashboard & Growth Hooks
  
@@ -527,7 +531,7 @@ This pattern is canonical for any feature where users invest emotional/time effo
  
 ### Reactive Store Pattern (BB-7 onward)
  
-Bible-wave personal-layer features use reactive stores instead of plain CRUD services. Each store exposes a custom hook (`useHighlightStore()`, `useBookmarkStore()`, etc.) that internally subscribes to changes via `useSyncExternalStore`. Components must use the hook so they re-render when the store mutates from any surface. **Local `useState` mirrors of store data are the BB-45 anti-pattern and ship as silent correctness bugs.** See `11-local-storage-keys.md` § "Reactive Store Consumption" for the full pattern documentation.
+Bible-wave personal-layer features use reactive stores instead of plain CRUD services. Two subscription patterns coexist: standalone hooks via `useSyncExternalStore` (memorization, streak) and inline `useState` + `subscribe()` (highlights, bookmarks, notes, journals, chapter visits, plans). Both patterns are correct. **Storing a snapshot in `useState` without calling the store's `subscribe()` function is the BB-45 anti-pattern and ships as a silent correctness bug.** See `11-local-storage-keys.md` § "Reactive Store Consumption" for the full pattern documentation.
  
 ---
  
@@ -550,7 +554,7 @@ Global `AudioProvider` wraps the app (between `AuthModalProvider` and `Routes` i
  
 Music tabs: dark `#0f0a1e` (`bg-dashboard-dark`) background with frosted glass cards (`bg-white/[0.06] border border-white/10 rounded-xl`) and white text. AudioDrawer/AudioPill/overlays: dark-themed (`rgba(15,10,30,0.85)` with white text). Consistent with the rest of the dark-theme app.
  
-Components built but not rendered (kept for re-enable): `TimeOfDaySection`, `PersonalizationSection`, `RecentlyAddedSection`, `ResumePrompt`, `MusicHint`, `LofiCrossReference`, `AmbientSearchBar`, `AmbientFilterBar`. Hooks kept: `useSpotifyAutoPause`, `useMusicHints`, `useTimeOfDayRecommendations`.
+Hooks kept for potential re-enable: `useSpotifyAutoPause` (commented-out import in `WorshipPlaylistsTab.tsx`). All other previously listed music re-enable components (`TimeOfDaySection`, `PersonalizationSection`, `RecentlyAddedSection`, `ResumePrompt`, `MusicHint`, `LofiCrossReference`, `AmbientSearchBar`, `AmbientFilterBar`) and hooks (`useMusicHints`, `useTimeOfDayRecommendations`) have been deleted from the codebase.
  
 ### Key Audio Components
  
@@ -830,6 +834,28 @@ The following patterns have been replaced by Round 3 / Daily Hub Round 3 / Bible
 | Welcome modals that gate content for new visitors                 | `FirstRunWelcome` — informational layer, never a gate, suppressed on deep links (BB-34) |
 | Mocking the entire reactive store in tests                        | Use real store + mutate from outside the component to verify subscription (BB-45)   |
  
+---
+
+## Error UX Tier System
+
+When handling errors in UI code, choose the appropriate tier based on user impact:
+
+**Tier 1 — Inline error state with retry (for primary actions):**
+Use when the error affects a core user action the user is actively trying to complete. The error state should replace the failed UI region with a clear explanation and a "Try again" button. Example: AI Explain/Reflect panels. The retry button should re-attempt the same operation without losing user context.
+
+**Tier 2 — Fallback UI with alternative (for secondary content):**
+Use when the error affects a secondary feature but the user has a way to continue. The fallback should acknowledge the failure briefly and point at the alternative. Example: Spotify embed falls back to a "Listen on Spotify" link. Map tile failure falls back to the list view.
+
+**Tier 3 — Toast notification (for background operations):**
+Use when the error affects a background operation that the user initiated but isn't actively watching. The toast should explain briefly and auto-dismiss after a few seconds. Don't use for errors during primary actions — those need Tier 1.
+
+**Tier 4 — Silent fallback (for non-essential features):**
+Use when the feature is truly non-essential and the error is expected/common. Example: localStorage quota exceeded during analytics write. The code should catch and swallow silently, but add a comment explaining why.
+
+**When in doubt, escalate tiers rather than downgrade.** A user who sees a clear error message is better served than one who sees silent failure.
+
+**Avoid:** Logging to console only without user-visible feedback for user-initiated actions. Users don't read the console.
+
 ---
  
 ## Known Issues

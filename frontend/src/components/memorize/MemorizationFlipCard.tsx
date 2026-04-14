@@ -93,7 +93,7 @@ export function MemorizationFlipCard({
           </div>
           <RotateCcw
             size={14}
-            className="absolute top-3 right-3 text-white/30"
+            className="absolute top-3 right-3 text-white/50"
             aria-hidden="true"
           />
           {footer}

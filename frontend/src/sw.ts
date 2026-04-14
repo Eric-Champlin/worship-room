@@ -167,7 +167,9 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
-  const targetUrl = (event.notification.data?.url as string) || '/'
+  const rawUrl = (event.notification.data?.url as string) || '/'
+  // Validate the URL is a same-origin relative path to prevent open-redirect via crafted push payloads
+  const targetUrl = rawUrl.startsWith('/') ? rawUrl : '/'
 
   event.waitUntil(
     self.clients

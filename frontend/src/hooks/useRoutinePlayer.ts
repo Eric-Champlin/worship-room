@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import {
@@ -56,6 +57,7 @@ function resolveScriptureId(contentId: string): ScriptureReading | null {
 
 export function useRoutinePlayer(): UseRoutinePlayerReturn {
   const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const authModal = useAuthModal()
   const audioState = useAudioState()
   const dispatch = useAudioDispatch()
@@ -217,7 +219,7 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
           const book = getBookBySlug(step.contentId)
           if (book) {
             const randomChapter = Math.floor(Math.random() * book.chapters) + 1
-            window.location.href = `/bible/${book.slug}/${randomChapter}?autoplay=true`
+            navigate(`/bible/${book.slug}/${randomChapter}?autoplay=true`)
             success = true // Navigation initiated
           }
         } else {
@@ -236,7 +238,7 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
       showToast(`Skipped ${step.label} — couldn't load audio`)
       return false
     },
-    [loadSceneStep, loadForegroundStep, showToast],
+    [loadSceneStep, loadForegroundStep, navigate, showToast],
   )
 
   // ── Advance to next step or finish routine ──────────────────────────
@@ -313,7 +315,7 @@ export function useRoutinePlayer(): UseRoutinePlayerReturn {
       }
       // For foreground steps that fail, executeStep already shows a toast and
       // the foregroundContent watcher will handle advancing
-    })
+    }).catch(() => { /* silent — executeStep handles its own error UI */ })
   }, [
     audioState.activeRoutine,
     executeStep,

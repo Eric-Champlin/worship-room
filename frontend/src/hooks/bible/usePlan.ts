@@ -29,6 +29,11 @@ export function usePlan(slug: string): UsePlanResult {
       setPlan(loaded)
       setIsError(!!error)
       setIsLoading(false)
+    }).catch(() => {
+      if (!cancelled) {
+        setIsError(true)
+        setIsLoading(false)
+      }
     })
 
     return () => {

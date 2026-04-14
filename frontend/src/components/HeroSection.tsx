@@ -62,6 +62,7 @@ function useVideoFade(video: HTMLVideoElement | null) {
       video.style.opacity = '0'
       restartTimeoutId = setTimeout(() => {
         video.currentTime = 0
+        // play() can reject if the user navigated away — non-fatal for a looping background video
         video.play().catch(() => {})
       }, 100)
     }

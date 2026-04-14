@@ -105,4 +105,52 @@ The following frontend patterns are deprecated and must not be used in new compo
 - `PageTransition` component (removed in Wave 2; route background continuity is handled by `html`/`body`/`#root` background colors in `src/index.css`)
  
 When in doubt about whether a pattern is current or deprecated, check `09-design-system.md` first.
- 
+
+### CRUD Verb Conventions
+
+When adding new functions to stores, services, or modules, follow these naming conventions:
+
+**Read operations:**
+- `get*` for synchronous reads (e.g., `getHighlight(id)`, `getAllNotes()`)
+- `load*` for asynchronous bulk reads or data that requires I/O (e.g., `loadChapter(book, chapter)`, `loadActivity()`)
+
+**Create operations:**
+- `add*` for adding items to a collection (e.g., `addBookmark`, `addCard`)
+- `create*` for creating new standalone entities (e.g., `createJournalEntry`, `createPlan`)
+- `upsert*` for idempotent writes that create or update based on key (e.g., `upsertNote`)
+
+**Delete operations:**
+- `remove*` is the preferred verb (e.g., `removeHighlight`, `removeBookmark`)
+- `delete*` is acceptable where it's already established (e.g., `deleteJournalEntry`) but new code should prefer `remove*`
+
+**Update operations:**
+- `update*` for partial data changes to an existing entity (e.g., `updateHighlightColor`)
+- `set*` for full-value replacement of state or metadata (e.g., `setActivePlan`, `setTheme`)
+
+**Existing inconsistencies:** This convention is forward-looking. Existing code that uses non-conforming verbs does not need to be migrated unless it's being modified for other reasons. Rename opportunistically during other work, not as a dedicated sweep.
+
+### Concept Naming Conventions
+
+**Scripture references:**
+- `Verse` — a single verse (e.g., "John 3:16")
+- `VerseRange` or `Selection` — a multi-verse span (e.g., "John 3:16-18"). Use `Selection` when describing UI state (what the user has selected) and `VerseRange` when describing data (a stored span).
+- `Reference` — a display-formatted string (e.g., "John 3:16 (WEB)"). The canonical "pretty" form.
+- `Passage` — deprecated; prefer `VerseRange` or `Selection` depending on context.
+
+**User-created persistent content:**
+Different features use different nouns for the items users create, and these are intentional:
+- `Card` — memorization cards (spaced-repetition vocabulary metaphor)
+- `Entry` — journal entries (diary metaphor)
+- `Item` — activity feed items (generic feed metaphor)
+- `Highlight` — scripture highlights (visual metaphor)
+- `Bookmark` — saved verse locations (browser metaphor)
+- `Note` — scripture notes (annotation metaphor)
+
+Do not rename these to be consistent — each noun carries domain meaning.
+
+**Data persistence modules:**
+- `Store` — reactive stores with `subscribe()` pattern (Bible wave and new modules)
+- `Storage` — CRUD service pattern (pre-wave modules, no subscribe)
+- `Service` — older generic helpers; prefer `Storage` or `Store` in new code
+
+Existing modules that use `Service` do not need to be renamed.

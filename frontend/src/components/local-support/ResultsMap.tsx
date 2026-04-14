@@ -5,6 +5,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import type { LocalSupportPlace } from '@/types/local-support'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const CARTO_DARK_TILE_URL =
   'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
@@ -58,6 +59,18 @@ function SelectedMarkerOpener({ selectedPlaceId, places }: { selectedPlaceId: st
   return null
 }
 
+function MapFallback() {
+  return (
+    <div
+      className="flex h-[400px] w-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] lg:h-full"
+      role="region"
+      aria-label="Map unavailable"
+    >
+      <p className="text-sm text-white/60">Map unavailable right now — use the list below to browse locations.</p>
+    </div>
+  )
+}
+
 export function ResultsMap({
   places,
   center,
@@ -66,6 +79,7 @@ export function ResultsMap({
   distanceMap,
 }: ResultsMapProps) {
   return (
+    <ErrorBoundary fallback={<MapFallback />}>
     <div
       className="h-[400px] w-full overflow-hidden rounded-xl border border-white/10 lg:h-full"
       role="region"
@@ -117,5 +131,6 @@ export function ResultsMap({
         })}
       </MapContainer>
     </div>
+    </ErrorBoundary>
   )
 }

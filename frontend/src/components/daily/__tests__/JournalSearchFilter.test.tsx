@@ -320,7 +320,7 @@ describe('JournalSearchFilter', () => {
       fireEvent.change(screen.getByLabelText('Search your entries'), { target: { value: 'nonexistent xyz content' } })
       act(() => { vi.advanceTimersByTime(300) })
 
-      expect(screen.getByText('No entries match your search')).toBeInTheDocument()
+      expect(screen.getByText('No matching entries')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /clear filters/i })).toBeInTheDocument()
     })
 
@@ -374,8 +374,8 @@ describe('JournalSearchFilter', () => {
       fireEvent.change(screen.getByLabelText('Search your entries'), { target: { value: 'nonexistent content' } })
       act(() => { vi.advanceTimersByTime(300) })
 
-      expect(screen.getByText('No entries match your search')).toBeInTheDocument()
-      expect(screen.getByText('No entries match your search').closest('[role="status"]')).toBeInTheDocument()
+      expect(screen.getByText('No matching entries')).toBeInTheDocument()
+      expect(screen.getByText('No matching entries').closest('[role="status"]')).toBeInTheDocument()
     })
   })
 })

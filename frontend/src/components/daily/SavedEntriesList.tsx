@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { SearchX } from 'lucide-react'
 import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { JournalSearchFilter } from '@/components/daily/JournalSearchFilter'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { cn } from '@/lib/utils'
 import type { JournalMode, SavedJournalEntry } from '@/types/daily-experience'
 
@@ -148,15 +150,15 @@ export function SavedEntriesList({
 
       {/* Empty filter state */}
       {filteredEntries.length === 0 && entries.length >= 2 && (
-        <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6 text-center" role="status">
-          <p className="text-sm text-white/50">No entries match your search</p>
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="mt-2 text-sm text-primary underline hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          >
-            Clear filters
-          </button>
+        <div role="status">
+          <FeatureEmptyState
+            icon={SearchX}
+            heading="No matching entries"
+            description="Try adjusting your search or filters."
+            ctaLabel="Clear filters"
+            onCtaClick={clearFilters}
+            compact
+          />
         </div>
       )}
 

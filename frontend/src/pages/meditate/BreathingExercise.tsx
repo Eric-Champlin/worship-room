@@ -66,6 +66,7 @@ function BreathingExerciseContent() {
 
   const cleanup = useCallback(() => {
     cancelAnimationFrame(rafRef.current)
+    // Wake lock release can reject if already released or not supported — safe to ignore
     wakeLockRef.current?.release().catch(() => {})
     wakeLockRef.current = null
   }, [])
@@ -100,6 +101,7 @@ function BreathingExerciseContent() {
     setScreen('exercise')
 
     // Request wake lock
+    // Wake lock request fails on unsupported browsers or when page is hidden — non-fatal
     navigator.wakeLock?.request('screen').then((lock) => {
       wakeLockRef.current = lock
     }).catch(() => {})

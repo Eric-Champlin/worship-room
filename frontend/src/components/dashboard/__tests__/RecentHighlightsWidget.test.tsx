@@ -2,34 +2,42 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { RecentHighlightsWidget } from '../RecentHighlightsWidget'
-import type { BibleHighlight, BibleNote } from '@/types/bible'
+import { replaceAllHighlights } from '@/lib/bible/highlightStore'
+import { replaceAllNotes } from '@/lib/bible/notes/store'
+import type { Highlight, Note } from '@/types/bible'
 
-function makeHighlight(overrides: Partial<BibleHighlight> = {}): BibleHighlight {
+function makeHighlight(overrides: Partial<Highlight> = {}): Highlight {
   return {
+    id: crypto.randomUUID(),
     book: 'john',
     chapter: 3,
-    verseNumber: 16,
-    color: '#2DD4BF',
-    createdAt: '2026-03-01T10:00:00.000Z',
+    startVerse: 16,
+    endVerse: 16,
+    color: 'peace',
+    createdAt: new Date('2026-03-01T10:00:00.000Z').getTime(),
+    updatedAt: new Date('2026-03-01T10:00:00.000Z').getTime(),
     ...overrides,
   }
 }
 
-function makeNote(overrides: Partial<BibleNote> = {}): BibleNote {
+function makeNote(overrides: Partial<Note> = {}): Note {
   return {
     id: 'note-1',
     book: 'psalms',
     chapter: 23,
-    verseNumber: 1,
-    text: 'The Lord is my shepherd',
-    createdAt: '2026-03-02T10:00:00.000Z',
-    updatedAt: '2026-03-02T10:00:00.000Z',
+    startVerse: 1,
+    endVerse: 1,
+    body: 'The Lord is my shepherd',
+    createdAt: new Date('2026-03-02T10:00:00.000Z').getTime(),
+    updatedAt: new Date('2026-03-02T10:00:00.000Z').getTime(),
     ...overrides,
   }
 }
 
 beforeEach(() => {
   localStorage.clear()
+  replaceAllHighlights([])
+  replaceAllNotes([])
 })
 
 describe('RecentHighlightsWidget', () => {
@@ -45,17 +53,15 @@ describe('RecentHighlightsWidget', () => {
   })
 
   it('renders 3 most recent items sorted by date', () => {
-    const highlights = [
-      makeHighlight({ verseNumber: 1, createdAt: '2026-03-01T10:00:00.000Z' }),
-      makeHighlight({ verseNumber: 2, createdAt: '2026-03-02T10:00:00.000Z' }),
-      makeHighlight({ verseNumber: 3, createdAt: '2026-03-03T10:00:00.000Z' }),
-    ]
-    const notes = [
-      makeNote({ id: 'n1', createdAt: '2026-03-04T10:00:00.000Z' }),
-      makeNote({ id: 'n2', verseNumber: 5, createdAt: '2026-03-05T10:00:00.000Z' }),
-    ]
-    localStorage.setItem('wr_bible_highlights', JSON.stringify(highlights))
-    localStorage.setItem('wr_bible_notes', JSON.stringify(notes))
+    replaceAllHighlights([
+      makeHighlight({ startVerse: 1, endVerse: 1, createdAt: new Date('2026-03-01T10:00:00.000Z').getTime(), updatedAt: new Date('2026-03-01T10:00:00.000Z').getTime() }),
+      makeHighlight({ startVerse: 2, endVerse: 2, createdAt: new Date('2026-03-02T10:00:00.000Z').getTime(), updatedAt: new Date('2026-03-02T10:00:00.000Z').getTime() }),
+      makeHighlight({ startVerse: 3, endVerse: 3, createdAt: new Date('2026-03-03T10:00:00.000Z').getTime(), updatedAt: new Date('2026-03-03T10:00:00.000Z').getTime() }),
+    ])
+    replaceAllNotes([
+      makeNote({ id: 'n1', createdAt: new Date('2026-03-04T10:00:00.000Z').getTime(), updatedAt: new Date('2026-03-04T10:00:00.000Z').getTime() }),
+      makeNote({ id: 'n2', startVerse: 5, endVerse: 5, createdAt: new Date('2026-03-05T10:00:00.000Z').getTime(), updatedAt: new Date('2026-03-05T10:00:00.000Z').getTime() }),
+    ])
 
     render(
       <MemoryRouter>
@@ -67,7 +73,7 @@ describe('RecentHighlightsWidget', () => {
   })
 
   it('renders colored dot for highlights', () => {
-    localStorage.setItem('wr_bible_highlights', JSON.stringify([makeHighlight({ color: '#2DD4BF' })]))
+    replaceAllHighlights([makeHighlight({ color: 'peace' })])
 
     const { container } = render(
       <MemoryRouter>
@@ -80,7 +86,7 @@ describe('RecentHighlightsWidget', () => {
   })
 
   it('renders StickyNote icon for notes', () => {
-    localStorage.setItem('wr_bible_notes', JSON.stringify([makeNote()]))
+    replaceAllNotes([makeNote()])
 
     const { container } = render(
       <MemoryRouter>
@@ -93,7 +99,7 @@ describe('RecentHighlightsWidget', () => {
   })
 
   it('click navigates to correct Bible chapter with verse anchor', () => {
-    localStorage.setItem('wr_bible_highlights', JSON.stringify([makeHighlight({ book: 'john', chapter: 3, verseNumber: 16 })]))
+    replaceAllHighlights([makeHighlight({ book: 'john', chapter: 3, startVerse: 16, endVerse: 16 })])
 
     render(
       <MemoryRouter>
@@ -106,7 +112,7 @@ describe('RecentHighlightsWidget', () => {
   })
 
   it('"See all" link points to /bible', () => {
-    localStorage.setItem('wr_bible_highlights', JSON.stringify([makeHighlight()]))
+    replaceAllHighlights([makeHighlight()])
 
     render(
       <MemoryRouter>
@@ -118,8 +124,8 @@ describe('RecentHighlightsWidget', () => {
   })
 
   it('shows relative timestamp via timeAgo', () => {
-    const recent = new Date(Date.now() - 60 * 60 * 1000).toISOString() // 1 hour ago
-    localStorage.setItem('wr_bible_highlights', JSON.stringify([makeHighlight({ createdAt: recent })]))
+    const recentMs = Date.now() - 60 * 60 * 1000 // 1 hour ago
+    replaceAllHighlights([makeHighlight({ createdAt: recentMs, updatedAt: recentMs })])
 
     render(
       <MemoryRouter>

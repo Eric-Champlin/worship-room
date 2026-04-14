@@ -1,13 +1,35 @@
-import { BIBLE_HIGHLIGHTS_KEY, BIBLE_NOTES_KEY, BIBLE_BOOKS } from '@/constants/bible'
-import type { BibleHighlight, BibleNote } from '@/types/bible'
+import { BIBLE_BOOKS, HIGHLIGHT_EMOTIONS } from '@/constants/bible'
+import { getAllHighlights } from '@/lib/bible/highlightStore'
+import { getAllNotes } from '@/lib/bible/notes/store'
+import type { BibleHighlight, BibleNote, HighlightColor } from '@/types/bible'
+
+const COLOR_HEX_MAP: Record<HighlightColor, string> = Object.fromEntries(
+  HIGHLIGHT_EMOTIONS.map((e) => [e.key, e.hex]),
+) as Record<HighlightColor, string>
 
 type AnnotationItem =
   | (BibleHighlight & { type: 'highlight' })
   | (BibleNote & { type: 'note' })
 
 export function getRecentBibleAnnotations(limit: number = 3): AnnotationItem[] {
-  const highlights = readHighlightsStatic().map((h) => ({ ...h, type: 'highlight' as const }))
-  const notes = readNotesStatic().map((n) => ({ ...n, type: 'note' as const }))
+  const highlights = getAllHighlights().map((hl) => ({
+    book: hl.book,
+    chapter: hl.chapter,
+    verseNumber: hl.startVerse,
+    color: COLOR_HEX_MAP[hl.color] ?? hl.color,
+    createdAt: new Date(hl.createdAt).toISOString(),
+    type: 'highlight' as const,
+  }))
+  const notes = getAllNotes().map((n) => ({
+    id: n.id,
+    book: n.book,
+    chapter: n.chapter,
+    verseNumber: n.startVerse,
+    text: n.body,
+    createdAt: new Date(n.createdAt).toISOString(),
+    updatedAt: new Date(n.updatedAt).toISOString(),
+    type: 'note' as const,
+  }))
 
   return [...highlights, ...notes]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -21,30 +43,4 @@ export function getBookDisplayName(slug: string): string {
 
 export function formatVerseReference(bookSlug: string, chapter: number, verseNumber: number): string {
   return `${getBookDisplayName(bookSlug)} ${chapter}:${verseNumber}`
-}
-
-function readHighlightsStatic(): BibleHighlight[] {
-  try {
-    const raw = localStorage.getItem(BIBLE_HIGHLIGHTS_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    return parsed
-  } catch (_e) {
-    // localStorage may be unavailable or data malformed
-    return []
-  }
-}
-
-function readNotesStatic(): BibleNote[] {
-  try {
-    const raw = localStorage.getItem(BIBLE_NOTES_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    return parsed
-  } catch (_e) {
-    // localStorage may be unavailable or data malformed
-    return []
-  }
 }

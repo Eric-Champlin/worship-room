@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "check": "Mobile menu opens",
+      "status": "PASS",
+      "detail": "Drawer visible after click"
+    },
+    {
+      "check": "Mobile menu closes on Escape",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Reduced motion safety net",
+      "status": "PASS",
+      "detail": "Animation durations forced to near-zero"
+    },
+    {
+      "check": "prefers-reduced-motion CSS rule present",
+      "status": "PASS",
+      "detail": "Found @media (prefers-reduced-motion: reduce) rule"
+    },
+    {
+      "check": "Dark mode preference",
+      "status": "PASS",
+      "detail": "Body bg: rgb(8, 5, 26) — app is always dark, no breaking changes"
+    },
+    {
+      "check": "Forced colors mode",
+      "status": "PASS",
+      "detail": "Page renders (3822 chars). Custom colors replaced with system colors."
+    },
+    {
+      "check": "First-run welcome appears on /",
+      "status": "PASS",
+      "detail": "Welcome content detected"
+    },
+    {
+      "check": "First-run welcome suppressed on deep link",
+      "status": "PASS",
+      "detail": "/bible/john/3?verse=16 — no welcome overlay"
+    }
+  ]
+}

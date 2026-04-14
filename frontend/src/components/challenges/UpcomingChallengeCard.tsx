@@ -27,16 +27,7 @@ export function UpcomingChallengeCard({
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onClick()
-        }
-      }}
-      className="cursor-pointer rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+      className="rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20"
     >
       <div className="mb-3 flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -67,35 +58,39 @@ export function UpcomingChallengeCard({
           <span>Starts {formattedStartDate}</span>
         </div>
 
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleReminder()
-          }}
-          onKeyDown={(e) => {
-            e.stopPropagation()
-          }}
-          className={
-            isReminderSet
-              ? 'inline-flex min-h-[44px] items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
-              : 'inline-flex min-h-[44px] items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
-          }
-          aria-label={isReminderSet ? 'Remove reminder' : 'Set reminder'}
-          aria-pressed={isReminderSet}
-        >
-          {isReminderSet ? (
-            <>
-              <Check className="h-4 w-4" aria-hidden="true" />
-              Reminder set
-            </>
-          ) : (
-            <>
-              <Bell className="h-4 w-4" aria-hidden="true" />
-              Remind me
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onToggleReminder}
+            className={
+              isReminderSet
+                ? 'inline-flex min-h-[44px] items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
+                : 'inline-flex min-h-[44px] items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
+            }
+            aria-label={isReminderSet ? 'Remove reminder' : 'Set reminder'}
+            aria-pressed={isReminderSet}
+          >
+            {isReminderSet ? (
+              <>
+                <Check className="h-4 w-4" aria-hidden="true" />
+                Reminder set
+              </>
+            ) : (
+              <>
+                <Bell className="h-4 w-4" aria-hidden="true" />
+                Remind me
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={onClick}
+            className="inline-flex min-h-[44px] items-center rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+          >
+            View Details
+          </button>
+        </div>
       </div>
     </div>
   )

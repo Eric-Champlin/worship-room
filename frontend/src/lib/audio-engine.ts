@@ -263,6 +263,7 @@ export class AudioEngineService {
   resumeAll(): void {
     this.ensureContext()
     if (this.foregroundElement && this.foregroundElement.src) {
+      // play() rejects if autoplay policy blocks it or the element has no valid src — non-fatal
       this.foregroundElement.play().catch(() => {})
     }
   }

@@ -101,7 +101,7 @@ export function RoutineCard({
     <div
       role="article"
       aria-label={`${routine.name} routine — ${routine.steps.length} steps, approximately ${durationEstimate} minutes`}
-      className="relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow motion-reduce:transition-none hover:shadow-md"
+      className="relative rounded-2xl border border-white/[0.12] bg-white/[0.06] p-5 backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] transition-[background-color,border-color] motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18]"
     >
       {/* Template badge */}
       {routine.isTemplate && (
@@ -111,11 +111,11 @@ export function RoutineCard({
       )}
 
       {/* Name */}
-      <h3 className="text-base font-semibold text-text-dark">{routine.name}</h3>
+      <h3 className="text-base font-semibold text-white">{routine.name}</h3>
 
       {/* Description (templates only) */}
       {routine.description && (
-        <p className="mt-1 text-sm text-text-light">{routine.description}</p>
+        <p className="mt-1 text-sm text-white/60">{routine.description}</p>
       )}
 
       {/* Step icons */}
@@ -125,17 +125,18 @@ export function RoutineCard({
           return (
             <span
               key={step.id}
-              className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100"
+              role="img"
+              className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10"
               aria-label={step.type}
             >
-              <Icon size={12} className="text-text-light" aria-hidden="true" />
+              <Icon size={12} className="text-white/60" aria-hidden="true" />
             </span>
           )
         })}
       </div>
 
       {/* Meta */}
-      <p className="mt-2 text-xs text-text-light">
+      <p className="mt-2 text-xs text-white/60">
         {routine.steps.length} steps &middot; ~{durationEstimate} min
       </p>
 
@@ -158,7 +159,7 @@ export function RoutineCard({
             aria-label="Routine options"
             aria-haspopup="menu"
             aria-expanded={menuOpen}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-light transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           >
             <MoreVertical size={18} aria-hidden="true" />
           </button>
@@ -168,14 +169,15 @@ export function RoutineCard({
               role="menu"
               aria-label="Routine options"
               onKeyDown={handleMenuKeyDown}
-              className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+              className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-lg border border-white/10 py-1 shadow-lg"
+              style={{ background: 'rgba(15, 10, 30, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
             >
               {routine.isTemplate ? (
                 <button
                   type="button"
                   role="menuitem"
                   onClick={handleClone}
-                  className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                 >
                   Clone &amp; Customize
                 </button>
@@ -189,7 +191,7 @@ export function RoutineCard({
                         setMenuOpen(false)
                         onEdit()
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                      className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                     >
                       Edit
                     </button>
@@ -202,7 +204,7 @@ export function RoutineCard({
                         setMenuOpen(false)
                         onDuplicate()
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-text-dark hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                      className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                     >
                       Duplicate
                     </button>
@@ -215,7 +217,7 @@ export function RoutineCard({
                         setMenuOpen(false)
                         onDelete()
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-danger hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                      className="w-full px-4 py-2 text-left text-sm text-danger hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                     >
                       Delete
                     </button>

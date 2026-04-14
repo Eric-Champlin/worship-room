@@ -210,18 +210,20 @@ export function Insights() {
       {/* Sentinel for sticky detection */}
       <div ref={sentinelRef} aria-hidden="true" />
 
-      {/* Time range pills - inline */}
-      <div className="bg-dashboard-dark py-3">
+      {/* Time range pills - inline (inert when sticky duplicate is visible) */}
+      <div
+        className="bg-dashboard-dark py-3"
+        {...(isSticky ? { inert: '' as unknown as string, 'aria-hidden': true as unknown as boolean } : {})}
+      >
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <TimeRangePills range={range} onChange={setRange} />
         </div>
       </div>
 
-      {/* Time range pills - sticky */}
+      {/* Time range pills - sticky (interactive when visible) */}
       {isSticky && (
         <div
           className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-white/[0.08] py-3 backdrop-blur-xl"
-          aria-hidden="true"
         >
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
             <TimeRangePills range={range} onChange={setRange} />

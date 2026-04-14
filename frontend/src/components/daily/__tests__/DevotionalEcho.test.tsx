@@ -10,7 +10,6 @@ let mockEchoValue: Echo | null = null
 
 vi.mock('@/hooks/useEcho', () => ({
   useEcho: () => mockEchoValue,
-  useEchoes: () => (mockEchoValue ? [mockEchoValue] : []),
   markEchoSeen: vi.fn(),
 }))
 

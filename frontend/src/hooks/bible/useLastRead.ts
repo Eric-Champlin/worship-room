@@ -84,7 +84,7 @@ export function useLastRead(): LastReadState {
           ? text.slice(0, FIRST_LINE_MAX_CHARS).trimEnd() + '…'
           : text
       setState((prev) => ({ ...prev, firstLineOfChapter: firstLine }))
-    })
+    }).catch(() => { /* silent — first line is a nice-to-have */ })
     // Re-derive on every time tick (picks up fresh localStorage writes too)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [now])

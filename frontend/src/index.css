@@ -3,6 +3,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Metric-adjusted fallbacks for web fonts — minimizes CLS during font swap.
+   Overrides computed from @capsizecss/metrics.
+   See: https://github.com/seek-oss/capsize */
+@font-face {
+  font-family: 'Lora Fallback';
+  src: local('Georgia');
+  size-adjust: 104.98%;
+  ascent-override: 95.83%;
+  descent-override: 26.10%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 107.12%;
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+}
+
 @layer base {
   html,
   body,

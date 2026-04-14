@@ -31,8 +31,8 @@ export default {
         'surface-dark': '#1a0f2e',
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-        serif: ['Lora', 'ui-serif', 'Georgia'],
+        sans: ['Inter', 'Inter Fallback', 'ui-sans-serif', 'system-ui'],
+        serif: ['Lora', 'Lora Fallback', 'ui-serif', 'Georgia', 'serif'],
         script: ['Caveat', 'cursive'],
       },
       transitionDuration: {

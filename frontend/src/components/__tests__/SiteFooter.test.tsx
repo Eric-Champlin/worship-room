@@ -29,17 +29,12 @@ describe('SiteFooter', () => {
     expect(screen.getByText('Worship Room')).toBeInTheDocument()
   })
 
-  it('renders 3 column headings at level 3', () => {
+  it('renders 4 column labels (non-heading elements)', () => {
     renderSiteFooter()
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Daily' })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Music' })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Support' })
-    ).toBeInTheDocument()
+    expect(screen.getByText('Daily')).toBeInTheDocument()
+    expect(screen.getByText('Study')).toBeInTheDocument()
+    expect(screen.getByText('Music')).toBeInTheDocument()
+    expect(screen.getByText('Support')).toBeInTheDocument()
   })
 
   it('renders all 11 nav links with correct hrefs', () => {

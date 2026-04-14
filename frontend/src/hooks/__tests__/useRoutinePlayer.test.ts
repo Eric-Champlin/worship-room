@@ -7,6 +7,7 @@ import type { RoutineDefinition } from '@/types/storage'
 // ── Mocks ────────────────────────────────────────────────────────────
 
 const mockOpenAuthModal = vi.fn()
+const mockNavigate = vi.fn()
 const mockDispatch = vi.fn()
 const mockShowToast = vi.fn()
 
@@ -24,6 +25,10 @@ const mockEngine = {
 
 let mockIsAuthenticated = false
 let mockAudioState: Partial<AudioState> = {}
+
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockNavigate,
+}))
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),

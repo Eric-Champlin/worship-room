@@ -14,6 +14,8 @@ import { useMoodChartData } from '@/hooks/useMoodChartData'
 import { MOOD_LABELS } from '@/constants/dashboard/mood'
 import type { MoodChartDataPoint } from '@/hooks/useMoodChartData'
 import type { MoodLabel, MoodValue } from '@/types/dashboard'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ChartFallback } from '@/components/ui/ChartFallback'
 
 interface MoodTrendChartProps {
   rangeDays: number
@@ -226,6 +228,14 @@ function MoodTrendEmptyState() {
 }
 
 export function MoodTrendChart({ rangeDays }: MoodTrendChartProps) {
+  return (
+    <ErrorBoundary fallback={<ChartFallback />}>
+      <MoodTrendChartInner rangeDays={rangeDays} />
+    </ErrorBoundary>
+  )
+}
+
+function MoodTrendChartInner({ rangeDays }: MoodTrendChartProps) {
   const rawData = useMoodChartData(rangeDays)
   const hasData = rawData.some((d) => d.mood !== null)
   const [showAverage, setShowAverage] = useState(false)

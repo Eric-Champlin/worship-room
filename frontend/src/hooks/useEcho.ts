@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 
 import { loadChapterWeb } from '@/data/bible'
 import { getAllHighlights, subscribe as hlSubscribe } from '@/lib/bible/highlightStore'
-import { getEchoes, getEchoForHomePage } from '@/lib/echoes'
+import { getEchoForHomePage } from '@/lib/echoes'
 import { getAllVisits, subscribe as visitSubscribe } from '@/lib/heatmap/chapterVisitStore'
 import { getAllCards, subscribe as memSubscribe } from '@/lib/memorize'
 import type { Echo, EchoKind } from '@/types/echoes'
@@ -74,7 +74,7 @@ export function useEcho(options?: { kinds?: EchoKind[] }): Echo | null {
       if (raw.kind === 'highlighted' && !raw.text) {
         resolveVerseText(raw).then((resolved) => {
           setEcho(resolved)
-        })
+        }).catch(() => { /* silent — echo displays without text */ })
       }
     }
 
@@ -94,57 +94,3 @@ export function useEcho(options?: { kinds?: EchoKind[] }): Echo | null {
   return echo
 }
 
-/**
- * Returns an array of echoes. Subscribes to all three source stores reactively.
- * Highlight echoes have their verse text async-resolved.
- */
-export function useEchoes(options?: {
-  limit?: number
-  kinds?: EchoKind[]
-}): Echo[] {
-  const [echoes, setEchoes] = useState<Echo[]>([])
-  const optionsRef = useRef(options)
-
-  useEffect(() => {
-    function compute() {
-      const results = getEchoes(
-        getAllHighlights(),
-        getAllCards(),
-        getAllVisits(),
-        optionsRef.current,
-        seenSet,
-      )
-
-      setEchoes(results)
-
-      // Async-resolve verse text for any highlight echoes
-      const highlightEchoes = results.filter(
-        (e) => e.kind === 'highlighted' && !e.text,
-      )
-      if (highlightEchoes.length > 0) {
-        Promise.all(highlightEchoes.map(resolveVerseText)).then(
-          (resolved) => {
-            const resolvedMap = new Map(resolved.map((r) => [r.id, r]))
-            setEchoes((prev) =>
-              prev.map((e) => resolvedMap.get(e.id) ?? e),
-            )
-          },
-        )
-      }
-    }
-
-    compute()
-
-    const unsubHl = hlSubscribe(compute)
-    const unsubMem = memSubscribe(compute)
-    const unsubVisit = visitSubscribe(compute)
-
-    return () => {
-      unsubHl()
-      unsubMem()
-      unsubVisit()
-    }
-  }, [])
-
-  return echoes
-}
