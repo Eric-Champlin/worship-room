@@ -461,6 +461,7 @@ export function PrayerResponse({
       )}
 
       {/* Classic Prayers Section — hidden; re-enable by removing false guard */}
+      {/* eslint-disable-next-line no-constant-binary-expression -- intentional dead-code guard */}
       {false && (
       <div className="mt-12 border-t border-b border-white/10 pt-8 pb-8">
         <button

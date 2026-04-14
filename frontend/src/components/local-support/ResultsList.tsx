@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, SearchX } from 'lucide-react'
 import type { LocalSupportPlace, SortOption, LocalSupportCategory } from '@/types/local-support'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { ListingCard } from './ListingCard'
 import { ListingShareDropdown, tryWebShare } from './ListingShareDropdown'
 
@@ -208,9 +209,12 @@ export function ResultsList({
 
       {/* Empty filtered state */}
       {sortedPlaces.length === 0 && places.length > 0 && (
-        <p className="py-8 text-center text-sm text-white/60">
-          No results match the selected filter. Try selecting a different {filterLabel?.toLowerCase() ?? 'option'}.
-        </p>
+        <FeatureEmptyState
+          icon={SearchX}
+          heading="No matching results"
+          description={`No results match the selected filter. Try selecting a different ${filterLabel?.toLowerCase() ?? 'option'}.`}
+          compact
+        />
       )}
     </div>
   )

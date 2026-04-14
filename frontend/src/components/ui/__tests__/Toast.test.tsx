@@ -322,13 +322,13 @@ describe('Toast (celebration)', () => {
       screen.getByText('Celeb').click()
     })
 
-    // Standard toast is in top-right container (bg-white)
+    // Standard toast has colored left border (success/warning/error indicator)
     const standardToast = screen.getByText('Standard msg').closest('[role="status"]')
-    expect(standardToast?.className).toContain('bg-white')
+    expect(standardToast?.className).toContain('border-l-success')
 
-    // Celebration toast is in bottom container (backdrop-blur-md)
+    // Celebration toast uses rounded-xl (different shape from standard rounded-lg)
     const celebrationToast = screen.getByText('Celeb Badge').closest('[role="status"]')
-    expect(celebrationToast?.className).toContain('backdrop-blur-md')
+    expect(celebrationToast?.className).toContain('rounded-xl')
 
     vi.useRealTimers()
   })

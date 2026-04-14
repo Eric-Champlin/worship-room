@@ -44,6 +44,9 @@ export function ReadingPlanDetail() {
     loadReadingPlan(planId).then((p) => {
       setPlan(p ?? null)
       setPlanLoading(false)
+    }).catch(() => {
+      setPlan(null)
+      setPlanLoading(false)
     })
   }, [planId])
 

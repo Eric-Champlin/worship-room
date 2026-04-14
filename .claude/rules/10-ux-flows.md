@@ -13,10 +13,10 @@ Detailed user experience flows for every major feature. Read this file before im
 ### Desktop Navbar (Logged Out)
  
 ```
-[Worship Room logo]   Daily Hub   Prayer Wall   Music   [Local Support ▾]   [Log In]  [Get Started]
+[Worship Room logo]   Daily Hub   Bible   Grow   Prayer Wall   Music   [Local Support ▾]   [Log In]  [Get Started]
 ```
  
-**Top-level links (3):** Daily Hub, Prayer Wall, and Music — all always visible, no dropdowns. Music links directly to `/music`.
+**Top-level links:** Daily Hub, Bible, Grow, Prayer Wall, and Music — all always visible, no dropdowns. Bible links to `/bible` (BibleBrowser). Grow links to `/grow` (Reading Plans + Challenges).
  
 **"Local Support" dropdown** (clickable label goes to `/local-support/churches`; dropdown expands on hover/click):
  
@@ -29,7 +29,7 @@ Detailed user experience flows for every major feature. Read this file before im
 ### Desktop Navbar (Logged In)
  
 ```
-[Worship Room logo]   Daily Hub   Prayer Wall   Music   [Local Support ▾]   [🔔]  [Avatar ▾]
+[Worship Room logo]   Daily Hub   Bible   Grow   Prayer Wall   Music   [Local Support ▾]   [🔔]  [Avatar ▾]
 ```
  
 **Notification bell** (🔔): Lucide `Bell` icon. Badge count for unread notifications (red circle, white text, top-right). Only shows when count > 0. Click opens dropdown panel (see Notification Flow below).
@@ -39,6 +39,7 @@ Detailed user experience flows for every major feature. Read this file before im
 ```
 ├── Dashboard
 ├── Friends
+├── My Bible
 ├── My Journal Entries
 ├── My Prayer Requests
 ├── My Favorites
@@ -52,6 +53,10 @@ Detailed user experience flows for every major feature. Read this file before im
  
 ```
 Daily Hub
+──────────────
+Bible
+──────────────
+Grow
 ──────────────
 Prayer Wall
 ──────────────
@@ -73,6 +78,10 @@ Dashboard
 ──────────────
 Daily Hub
 ──────────────
+Bible
+──────────────
+Grow
+──────────────
 Prayer Wall
 ──────────────
 Music
@@ -83,6 +92,7 @@ LOCAL SUPPORT
   Celebrate Recovery
 ──────────────
 Friends
+My Bible
 Mood Insights
 My Journal Entries
 My Prayer Requests
@@ -95,6 +105,8 @@ Settings
  
 **Implementation:** The Navbar component checks `isAuthenticated` from the auth context and conditionally renders the appropriate button set. The logged-in state applies on ALL pages, not just the dashboard.
  
+**BibleReader exception:** The Navbar is NOT mounted on the BibleReader page (`/bible/:book/:chapter`). The BibleReader uses its own `ReaderChrome` component with reader-specific top and bottom toolbars. See "Bible Reader Flow" section below.
+ 
 ---
  
 ## Landing Page Structure
@@ -102,7 +114,7 @@ Settings
 Round 3 redesign (HP-1 through HP-15) established the current structure. All sections sit on the dark `bg-hero-bg` background with thin `border-white/[0.08] max-w-6xl mx-auto` dividers between each major section.
  
 ```
-1. Navbar (transparent glassmorphic — Daily Hub, Prayer Wall, Music, Local Support dropdown)
+1. Navbar (transparent glassmorphic — Daily Hub, Bible, Grow, Prayer Wall, Music, Local Support dropdown)
 2. HeroSection (dark purple gradient, "How're You Feeling Today?", typewriter input → /daily?tab=pray, quiz teaser link scrolls to #quiz)
 3. JourneySection (7-step vertical timeline: Devotional → Pray → Journal → Meditate → Music → Prayer Wall → Local Support)
    ─── section divider ───
@@ -115,10 +127,63 @@ Round 3 redesign (HP-1 through HP-15) established the current structure. All sec
 7. StartingPointQuiz (id="quiz" — 5-question points-based quiz, result card routes to recommended feature)
    ─── section divider ───
 8. FinalCTA ("Your Healing Starts Here" — no glow orb, "Get Started — It's Free" button with white shadow → auth modal)
-9. SiteFooter (nav columns, crisis resources, app download badges, "Listen on Spotify" badge, copyright)
+9. SiteFooter (nav columns, crisis resources, app download badges, "Listen on Spotify" badge, accessibility statement link, copyright)
 ```
  
 See `09-design-system.md` § "Round 3 Visual Patterns" for the visual specs (glow opacities, frosted card styles, section heading treatment).
+ 
+---
+ 
+## First-Run Welcome Flow (BB-34)
+ 
+For visitors who have never used Worship Room before, a single-screen welcome card appears once and never again. **It is not a tour, not a quiz, not an account gate, and not a feature walkthrough.**
+ 
+### Detection
+ 
+- New localStorage key `wr_first_run_completed` (stores a timestamp when the user dismisses or completes the welcome).
+- If the key is absent, the user is on their first run.
+- If the key is present, the welcome never shows again on any future visit.
+ 
+### Trigger conditions
+ 
+The first-run welcome appears ONLY when ALL of the following are true:
+ 
+1. `wr_first_run_completed` is absent
+2. The user is on the home page (`/`) or Dashboard (logged-in version of `/`)
+3. The current route was reached without a deep link (no path beyond `/`, no `?verse=`, no `?tab=`, no `?mode=`)
+ 
+**The welcome does NOT appear on deep-linked routes.** A user who arrives via a shared Bible verse URL (`/bible/john/3?verse=16`) sees the verse, not the welcome. A user who arrives at `/daily?tab=pray` from a shared link sees the Pray tab, not the welcome. This is non-negotiable — deep links are for users who came for a specific thing, and a welcome modal would block their actual goal.
+ 
+### The welcome card
+ 
+A single FrostedCard centered on the page with:
+ 
+- A warm one-line headline ("Welcome to your quiet place" or similar)
+- 2-3 sentences of brand voice describing what Worship Room is
+- 3-4 tappable "start here" cards with icons and short labels:
+  - **Read a verse** → `/bible`
+  - **Today's devotional** → `/daily?tab=devotional`
+  - **Pray** → `/daily?tab=pray`
+  - **Browse the Bible** → `/bible` (alternative entry; could be combined with "Read a verse")
+- An X close button in the top-right corner
+- An optional "Take the Starting Point Quiz" link below the start-here cards (links to `#quiz` on the homepage)
+ 
+### Dismissal
+ 
+- Tap the X button → set `wr_first_run_completed` to a timestamp, fade out the card.
+- Tap any "start here" card → set `wr_first_run_completed` to a timestamp AND navigate to the destination.
+- The card cannot be dismissed by clicking outside it (avoids accidental dismissal).
+ 
+### What the first-run welcome explicitly is NOT
+ 
+- NOT a multi-step tour or walkthrough
+- NOT a forced account creation flow
+- NOT a personality quiz on first run (the existing Starting Point Quiz is OPTIONAL via the link, not mandatory)
+- NOT an email capture
+- NOT a celebration animation or "you unlocked X" toast
+- NOT a getting-started checklist
+ 
+The welcome is a single screen that takes 5 seconds to read and 1 tap to leave.
  
 ---
  
@@ -157,6 +222,8 @@ If mood already logged today, skip check-in and show dashboard directly.
  
 **Hero section (dark gradient):** Time-of-day greeting + streak (🔥 + count) + level badge + faith points + progress bar.
  
+**Echo card (BB-46):** A small `EchoCard` mounts between the hero greeting and the VOTD card. The card surfaces a single verse the user has engaged with in the past — typically a recent highlight, a verse they memorized, or a verse from a significant past reading day. Format: "30 days ago you highlighted this" + verse reference + verse text. Tappable, navigates to the verse via BB-38 deep link. **Renders nothing if the user has zero history** (brand-new users see no echo card placeholder).
+ 
 **Widget grid (frosted glass cards, priority order):**
  
 1. Streak & Faith Points (right column on desktop)
@@ -174,6 +241,9 @@ Desktop: 2-column (60%/40%). Mobile: single column stacked. All cards collapsibl
 - **Badges**: Locked silhouettes + glowing "Welcome to Worship Room" badge (earned on signup)
 - **Friends/Leaderboard**: "Faith grows stronger together" + invite CTA + "You vs. Yesterday"
 - **Activity checklist**: All 6 unchecked + "A new day, a new opportunity to grow"
+- **Echo card**: Renders nothing (no placeholder)
+ 
+All empty states use the canonical `FeatureEmptyState` component standardized in BB-34. See `09-design-system.md` § "First-Run & Empty State Components".
  
 ---
  
@@ -185,13 +255,22 @@ Desktop: 2-column (60%/40%). Mobile: single column stacked. All cards collapsibl
  
 **Leaderboard tab:** Friends (default, weekly + all-time toggle) | Global (weekly only, display names only, resets Monday). Current user highlighted. Dashboard widget shows top 3 + "See all."
  
-### Notification Flow — Phase 2.75
+### Notification Flow — Phase 2.75 + BB-41
  
-**Bell icon in navbar** → dropdown panel (dark frosted glass, ~360px desktop, full-width mobile). 7 notification types: encouragement, friend_request, milestone, friend_milestone, nudge, weekly_recap, level_up. Each: icon + message + relative timestamp. Unread dot indicator. "Mark all as read" link.
+**Bell icon in navbar** → dropdown panel (dark frosted glass, ~360px desktop, full-width mobile). Notification types include: encouragement, friend_request, milestone, friend_milestone, nudge, weekly_recap, level_up, daily_verse (BB-41), streak_reminder (BB-41). Each: icon + message + relative timestamp. Unread dot indicator. "Mark all as read" link.
  
-### Settings Flow — Phase 2.75
+In-app notifications (the bell) and BB-41 push notifications (system-level) are independent channels — user preferences in `wr_notification_prefs` control push delivery. Some notification types appear in both channels (daily verse, streak reminders); some only in the bell (friend interactions).
  
-**Route:** `/settings` (from avatar dropdown). Left sidebar desktop / top tabs mobile. 4 sections: Profile (name, avatar, bio stub), Notifications (per-channel toggles), Privacy (6 controls: global leaderboard visibility, activity status, nudge permissions, streak/level visibility, blocked users), Account (email, password, delete account).
+### Settings Flow — Phase 2.75 + BB-41
+ 
+**Route:** `/settings` (from avatar dropdown). Left sidebar desktop / top tabs mobile. Sections:
+ 
+- **Profile** — name, avatar, bio stub
+- **Notifications** — per-channel in-app toggles + BB-41 push notification preferences (enable/disable push, daily verse delivery time, streak reminder enable/disable)
+- **Privacy** — 6 controls: global leaderboard visibility, activity status, nudge permissions, streak/level visibility, blocked users
+- **Account** — email, password, delete account
+ 
+The Notifications section also includes the "Enable push notifications" entry point that triggers the browser permission flow. This is the explicit opt-in path; the contextual prompt in BibleReader is the implicit path.
  
 ### Social Interactions — Phase 2.75
  
@@ -203,6 +282,8 @@ Desktop: 2-column (60%/40%). Mobile: single column stacked. All cards collapsibl
 ### Streak Reset Messaging Guidelines
  
 **Never punitive.** When streak resets: "Every day is a new beginning. Start fresh today." No mention of how many days were lost. No red/negative colors. The longest streak record persists as encouragement.
+ 
+This anti-pressure tone applies to BB-41 streak reminder push notifications too. Acceptable copy: "Still time to read a verse today if you'd like." Unacceptable copy: "Don't break your streak!"
  
 ---
  
@@ -256,6 +337,8 @@ The hero section contains **only the time-aware greeting** — a single `<h1>` s
  
 The intentional minimalism is part of the Spec Y "looking out into space" atmospheric design — the HorizonGlow does the visual work, and the greeting alone sets the tone before the user engages with the tabs. Do NOT add cards or banners to the hero without an explicit spec; the minimalism is load-bearing.
  
+**Echo card on Devotional tab (BB-46):** The devotional tab includes a single `EchoCard` mounted below the devotional content, before the footer area. Same component as the Dashboard echo card — surfaces a verse from the user's past engagement. Renders nothing if the user has no history. See "Verse Echoes Flow" below.
+ 
 **Below Tab Content (always visible):**
  
 1. **SongPickSection** — Centered single-column layout: "Today's" (GRADIENT_TEXT_STYLE) + "Song Pick" (white) heading stacked vertically, equal-width treatment via tracking adjustment, Spotify 352px iframe centered below, `max-w-2xl` container. Transparent background — no GlowBackground.
@@ -299,6 +382,7 @@ The Daily Hub supports passing context between tabs via the `PrayContext` state 
 7. **Reflection question** rendered in Tier 1 FrostedCard with the question prominent, and an embedded "Journal about this question" white pill button INSIDE the card (Spec O — the CTA is part of the question card, not a separate section below)
 8. **Authentic Pray flow CTA** (Spec P) — "Pray about today's reading" white pill button. The static "Closing Prayer" section was removed; clicking this button uses an enhanced `getMockPrayer` function that detects the devotional context and generates a contextual prayer.
 9. **Meditate on this passage** white pill button (Wave 5 — restyled to match other CTAs). Clicking this navigates to `/daily?tab=meditate&verseRef=...&verseText=...&verseTheme=...` (Spec Z — see "Verse-Aware Meditation Flow" below).
+10. **EchoCard (BB-46)** — Below the devotional content, before the footer. Surfaces a verse from past engagement. Renders nothing if no history.
  
 **No "Closing Prayer" section** — removed in Spec P. The authentic Pray flow replaces the static closing prayer.
  
@@ -319,7 +403,7 @@ The Daily Hub supports passing context between tabs via the `PrayContext` state 
 4. `DailyHub.tsx` stores this in `prayContext` state with `from: 'devotional'`, then navigates to `/daily?tab=journal`
 5. Journal tab renders. **`DevotionalPreviewPanel` mounts at the top** of the page (Spec X) — sticky `top-2 z-30`, collapsed by default, showing a small pill with the devotional title + reference + chevron
 6. User can:
-   - Click the chevron to expand the panel — reveals the full passage, reflection question, reflection body, and quote in an animated max-height transition (300ms). Internal scroll capped at `max-h-[50vh]` so long devotionals don't push the textarea off-screen.
+   - Click the chevron to expand the panel — reveals the full passage, reflection question, reflection body, and quote in an animated max-height transition (300ms `decelerate`). Internal scroll capped at `max-h-[50vh]` so long devotionals don't push the textarea off-screen.
    - Dismiss the panel via the X close button (Wave 6) — clears `contextDismissed` state, panel disappears, user can write about something else
 7. Journal mode is set to **Guided** automatically with the reflection question as the prompt
 8. The "Try a different prompt" link is HIDDEN when `prayContext.from === 'devotional'` (Wave 6) — it would be irrelevant since the prompt IS the reflection question
@@ -436,6 +520,349 @@ When a user clicks "Meditate on this passage" from a devotional, the verse conte
  
 ---
  
+## Bible Reader Flow
+ 
+The BibleReader at `/bible/:book/:chapter` is the primary scripture reading surface and was substantially rebuilt during the Bible wave (BB-0 through BB-29) and extended throughout the polish cluster (BB-30 through BB-46). It is a documented layout exception — uses `ReaderChrome` instead of `Navbar`/`SiteFooter`.
+ 
+### Entry points
+ 
+- `/bible` (BibleBrowser) → tap a book → tap a chapter → BibleReader
+- Daily Hub Devotional tab → "Meditate on this passage" → Scripture Soaking → tap the reference → BibleReader
+- Search results (BB-42) → tap a verse → BibleReader scrolled to that verse
+- Deep link from anywhere: `/bible/john/3?verse=16` (BB-38)
+- Echo card (BB-46) → tap → BibleReader at the echo's verse
+- Memorization deck (BB-45) → tap a card → BibleReader at the card's verse
+- My Bible heatmap (BB-43) → tap a chapter cell → BibleReader
+- Push notification (BB-41) → tap → BibleReader at the daily verse
+- Resume Reading card on `/bible` → tap → BibleReader at last-read position
+ 
+### Reader chrome
+ 
+- **Top toolbar:** theme switcher (`midnight` / `parchment` / `sepia`), type size (s/m/l/xl), line height (compact/normal/relaxed), font family (serif/sans), focus mode toggle, back button, chapter selector, AI Explain button, AI Reflect button.
+- **Bottom toolbar:** audio playback controls (BB-26-29 cluster, deferred), drawer trigger (highlights/notes/bookmarks/journal entries), verse number toggle.
+- All preference selections persist to localStorage (`wr_bible_reader_theme`, `wr_bible_reader_type_size`, `wr_bible_reader_line_height`, `wr_bible_reader_font_family`).
+ 
+### Focus mode
+ 
+- Enabled by default (`wr_bible_focus_enabled = 'true'`).
+- After `wr_bible_focus_delay` ms of inactivity (default 6 seconds, configurable to 3000/6000/12000), the top and bottom toolbars dim.
+- Any tap, scroll, or keyboard interaction resets the timer and brings the chrome back to full opacity.
+- The skip-to-main-content link remains accessible regardless of focus mode state.
+- Per-user override via the focus mode toggle in the top toolbar.
+ 
+### Verse interaction
+ 
+- **Tap or long-press a verse** → verse action menu opens with: Highlight (4 colors), Bookmark, Add Note, Add Journal Entry, Add to Memorize (BB-45), Share, Copy.
+- **Highlights (BB-7):** Tap a color to highlight. Highlights persist via `useHighlightStore()` and appear in the My Bible activity feed.
+- **Bookmarks (BB-7):** Toggle to bookmark/unbookmark. Persists via `useBookmarkStore()`.
+- **Notes (BB-8):** Opens the note composer. Notes are range-based (can span multiple verses) with a 10K char limit. Persists via `useNoteStore()`.
+- **Journal entries (BB-11b):** Opens a journal composer linked to the verse range. Persists via `useJournalStore()`.
+- **Add to Memorize (BB-45):** Captures the verse text into a memorization card. If already in the deck, the action becomes "Remove from Memorize". See "Verse Memorization Flow" below.
+- **Multi-verse range selection:** If the BibleReader exposes a range selection, all actions apply to the range. A single memorization card represents the range with `startVerse` and `endVerse` and concatenated text.
+ 
+### AI Explain Panel (BB-30)
+ 
+- Triggered from the top toolbar "Explain" button.
+- Opens a side panel (desktop) or bottom sheet (mobile) with the explanation streaming in from Gemini 2.5 Flash Lite via the BB-32 cache layer.
+- First request hits Gemini, subsequent requests for the same verse range return from the local `bb32-v1:explain:*` cache (7-day TTL).
+- Explanations are short (3-4 paragraphs), theologically careful, anti-pressure tone — never claim divine authority, never make denominational arguments.
+- Loading state: skeleton text + subtle shimmer. Error state: gentle copy ("We couldn't load the explanation right now") with a retry button.
+- The panel can be dismissed via X button or by tapping outside on desktop. State persists in `wr_bible_drawer_stack` for cross-chapter continuity.
+ 
+### AI Reflect Panel (BB-31)
+ 
+- Triggered from the top toolbar "Reflect" button.
+- Same panel surface and same Gemini model as Explain, but generates first-person reflection prompts instead of explanations.
+- Prompts are personal: "What in this passage speaks to your current circumstances?" rather than "This passage means X."
+- Cached separately from Explain in `bb32-v1:reflect:*`.
+- Same anti-pressure voice, same loading/error states.
+ 
+### Notification Permission Prompt (BB-41)
+ 
+After the user completes a reading session (chapter scroll past 80% + 3+ seconds spent on the chapter), the BibleReader may show the BB-41 notification permission prompt:
+ 
+- Conditions: it's the user's second or later reading session of the day (not the first), `wr_notification_prompt_dismissed` is not set, and the browser supports push notifications.
+- A small non-modal card appears at the bottom of the screen: "Want a daily verse to keep this rhythm going? Enable notifications" with "Enable" and "Maybe later" buttons.
+- "Enable" → triggers the browser permission flow → on grant, creates a Push API subscription via `lib/notifications/` and stores it in `wr_push_subscription`. On deny or grant, sets `wr_notification_prompt_dismissed = "true"`.
+- "Maybe later" → sets `wr_notification_prompt_dismissed = "true"` and the prompt never appears again.
+- The prompt is never shown on a user's first reading session of the day — that's too early to pitch a permission ask.
+ 
+### iOS-specific behavior
+ 
+- iOS Safari before 16.4 does not support web push at all. The BB-41 prompt is never shown on these versions.
+- iOS Safari 16.4+ supports push only for PWAs added to the home screen. The prompt shows a modified message with PWA install instructions, mirroring BB-39's install prompt approach.
+ 
+### Reading session tracking
+ 
+- On chapter mount, BibleReader writes to `wr_chapters_visited` with today's date and the `{ book, chapter }` pair via `useChapterVisitStore()`.
+- This data feeds the BB-43 reading heatmap and the Bible progress map on the My Bible page.
+- The store caps at 400 days of history; older entries are pruned.
+ 
+---
+ 
+## Personal Layer Overview (My Bible at `/bible/my`)
+ 
+The My Bible page consolidates everything the user has personally engaged with into a single feed. It is the canonical "your stuff" surface for the Bible features.
+ 
+### Page structure (top to bottom)
+ 
+1. **Page header** — "My Bible" + brief description
+2. **Reading Heatmap (BB-43)** — GitHub-contribution-style 365-day grid
+3. **Bible Progress Map (BB-43)** — All 66 books with visual chapter completion indicators
+4. **Memorization Deck (BB-45)** — Flip card grid for verses the user is memorizing
+5. **Activity feed** — Unified chronological feed of highlights, notes, bookmarks, and journal entries
+ 
+The page reads from seven reactive stores via hooks: `useChapterVisitStore()`, `useHighlightStore()`, `useBookmarkStore()`, `useNoteStore()`, `useJournalStore()`, `useMemorizationStore()`, and `useEchoStore()`. **Components on this page must use the hooks, never local `useState` mirrors.** See `11-local-storage-keys.md` § "Reactive Store Consumption" for the BB-45 anti-pattern.
+ 
+---
+ 
+## Reading Heatmap Flow (BB-43)
+ 
+A GitHub-contribution-style heatmap showing daily reading activity for the past year, mounted on the My Bible page.
+ 
+### Visual
+ 
+- A grid of cells, one per day, for the past 365 days
+- Each cell is 8-12px on mobile, 12-14px on desktop, with subtle 2px rounded corners
+- Empty cells (no reading): `bg-white/5`
+- Active cells use a 4-step intensity scale based on chapter count read that day (1-2, 3-5, 6-10, 11+ chapters)
+- Today's cell has a subtle border to mark the current day
+- Month labels along the top, day-of-week labels along the left
+- Total chapters read in the past year shown in a summary line below
+ 
+### Interaction
+ 
+- **Hover (desktop) or tap (mobile)** any cell → tooltip shows the date and a summary ("March 12, 2026 — 3 chapters read: John 3, Romans 8, Psalm 23")
+- **Tap-and-hold** keeps the tooltip open on mobile
+- **Tap a chapter reference** in the tooltip → navigates to that chapter via `/bible/<book>/<chapter>` (BB-38 deep link)
+ 
+### Anti-pressure tone
+ 
+- No "you missed N days" copy
+- No streak shaming
+- No completion percentage
+- No comparative messaging ("you read less than last month")
+- Sparse activity is treated as visually valid — gaps are not a failure state
+- The summary line uses neutral framing: "245 days of reading in the past year" not "120 days missed"
+ 
+### Data source
+ 
+Reads from `useChapterVisitStore()` which aggregates `wr_chapters_visited`. The store is written to on every BibleReader chapter mount.
+ 
+---
+ 
+## Bible Progress Map Flow (BB-43)
+ 
+A visual map of all 66 Bible books showing read/partially read/unread chapters, mounted on the My Bible page below the heatmap.
+ 
+### Visual
+ 
+- Two sections: Old Testament (39 books) and New Testament (27 books)
+- Each book is a labeled row with chapter cells
+- Cells are colored:
+  - Unread chapter: muted gray
+  - Partially read (e.g., highlights present but not flagged as fully read): light primary tint
+  - Fully read: solid primary
+- Books with all chapters read get a subtle completion indicator
+- Hover/tap a chapter cell shows a tooltip with the chapter reference and read status
+ 
+### Interaction
+ 
+- **Tap any chapter cell** → navigates to that chapter via `/bible/<book>/<chapter>` (BB-38 deep link)
+- **Tap a book name** → navigates to chapter 1 of that book
+ 
+### Use case
+ 
+The user wants to see how much of the Bible they've covered. The map answers "what should I read next?" by visually surfacing gaps. Same anti-pressure tone as the heatmap — sparse coverage is valid.
+ 
+---
+ 
+## Verse Memorization Flow (BB-45)
+ 
+A quiet flip-card memorization feature on the My Bible page. **No quiz, no scoring, no spaced repetition** — closer to a notecard in your wallet than a Duolingo drill.
+ 
+### Adding a card
+ 
+**From the BibleReader verse menu:**
+ 
+1. User taps or long-presses a verse in the BibleReader
+2. The verse action menu opens with the existing actions (Highlight, Bookmark, Note, etc.)
+3. BB-45 adds a new action: "Add to memorize" with a bookmark-with-flip icon
+4. Tapping it captures the verse data and creates a card via `useMemorizationStore()`
+5. If the verse is already in the deck, the action becomes "Remove from memorize" instead
+6. **Multi-verse selection:** If the user has selected a range (e.g., Psalm 23:1-3), the action creates a single card with `startVerse: 1`, `endVerse: 3`, and concatenated text. The card displays "Psalm 23:1-3" as the reference.
+ 
+**From the My Bible activity feed:**
+ 
+1. User browses their existing highlights in the activity feed
+2. Each highlight item has an "Add to memorize" affordance (icon button or menu item)
+3. Tapping it promotes the highlight to a memorization card without requiring the user to navigate back to the BibleReader
+ 
+### The deck
+ 
+Mounted on the My Bible page between the BB-43 progress map and the activity feed.
+ 
+- Cards rendered as a grid (3 columns desktop, 2 tablet, 1 mobile)
+- Each card has a front (reference) and a back (verse text)
+- **Tap a card → flip animation reveals the back** (300ms `decelerate` easing per BB-33 animation tokens)
+- Tap again → flip back to the front
+- Long-press or menu icon on a card → "Remove from deck" confirmation
+- Empty state: `FeatureEmptyState` component with friendly copy ("Cards you want to remember will live here") and a CTA pointing to the BibleReader
+ 
+### What memorization deck does NOT do
+ 
+- **No quiz mode.** The user reads the cards. They are not tested.
+- **No scoring or completion tracking.** The card store records `reviewCount` and `lastReviewedAt` for sorting, but there's no "you mastered this verse" celebration.
+- **No spaced repetition algorithm.** Cards are sorted by recency or alphabetically, never by "next review date."
+- **No streak pressure.** Reviewing cards is not part of the reading streak system.
+- **No notifications nudging review.** BB-41 notifications are limited to daily verse and reading streak; memorization is not a notification source.
+- **No leaderboard or social comparison.** The deck is private.
+ 
+The point is that memorization should feel like a quiet companion, not a productivity tool.
+ 
+---
+ 
+## Verse Echoes Flow (BB-46)
+ 
+Contextual callbacks to verses the user has engaged with in the past, surfaced on the home page and the Daily Hub. **No new tracking** — the echo selection engine reads from existing user history (highlights, memorization, reading activity).
+ 
+### Where echoes appear
+ 
+1. **Home page / Dashboard** — A single `EchoCard` mounted between the hero greeting and the VOTD card
+2. **Daily Hub Devotional tab** — A single `EchoCard` mounted below the devotional content, before the footer
+ 
+Both surfaces use the same `EchoCard` component and the same `useEcho()` hook. Each surface shows at most one echo.
+ 
+### The echo
+ 
+A small frosted-glass card containing:
+ 
+- A relative label: "30 days ago you highlighted this" / "You memorized this 2 weeks ago" / "From your reading on March 12"
+- The verse reference (e.g., "John 3:16")
+- The verse text (rendered in Lora serif for reading weight)
+ 
+### Interaction
+ 
+- **Tap the card** → navigates to the verse via BB-38 deep link (`/bible/<book>/<chapter>?verse=<n>`)
+- **Tap the X (if shown)** → dismisses this specific echo. Dismissed echo IDs persist in `wr_echo_dismissals` via `useEchoStore()`. The selection engine excludes dismissed echoes from future picks.
+ 
+### Selection engine
+ 
+A pure TypeScript module at `frontend/src/lib/echoes/`. Inputs:
+ 
+- Current date
+- Current surface (home / daily hub)
+- User history: highlights, memorization cards, reading activity
+ 
+The engine scores candidate verses based on:
+ 
+- Significance of the date interval (30 days, 7 days, 1 year — anniversary-style intervals score higher than random gaps)
+- Source type (highlights and memorization weighted higher than passive reading)
+- Recency tiebreaker (more recent within the same interval scores higher)
+- Dismissal exclusion (anything in `wr_echo_dismissals` is filtered out)
+ 
+Returns the top candidate, or `null` if there are zero candidates.
+ 
+### Brand-new user behavior
+ 
+A user with no history sees no echo card. The component renders nothing — **no placeholder, no "come back when you've read more" message, no first-run hint.** Echoes are a quiet feature that only exists for users who have something to be reminded of.
+ 
+### Anti-pressure tone
+ 
+- "30 days ago you highlighted this" — a quiet observation
+- NOT "REMEMBER WHAT YOU HIGHLIGHTED?!" or "Don't forget your highlights!"
+- The card is present-tense and reflective, never urgent
+- Echoes are dismissable; users who don't want them can dismiss them and the engine respects that
+ 
+---
+ 
+## Full-Text Scripture Search Flow (BB-42)
+ 
+Client-side full-text search across the entire WEB Bible, integrated into `/bible` via the existing `BibleSearchMode` component.
+ 
+### Entry
+ 
+1. User navigates to `/bible` (BibleBrowser)
+2. Tap the search input at the top of the browser
+3. The browser switches to search mode (URL becomes `/bible?mode=search`)
+ 
+Alternatively, deep link directly to `/bible?mode=search&q=peace` to load search mode with a pre-filled query.
+ 
+### Index loading
+ 
+- The pre-built inverted index lives at `frontend/public/search/bible-index.json` and is generated at build time
+- The index is loaded on demand the first time the user enters search mode
+- Loading state: skeleton with shimmer
+- The PWA service worker (BB-39) precaches the index so search works offline after the first visit
+ 
+### Querying
+ 
+- User types a query into the search input
+- Debounced 200ms after last keystroke
+- Tokenization matches the index: lowercase, punctuation stripped (except apostrophes inside words), 20 stopwords removed, light stemming for plurals/tense
+- Multi-word queries are AND'd by default (all tokens must appear in the same verse)
+- Phrase search (with quotes) matches exact sequences
+ 
+### Results
+ 
+- Verse text rendered with the matching tokens highlighted
+- Reference shown above each verse (e.g., "Psalm 23:1")
+- Results sorted by relevance (token frequency + position)
+- Tap any result to navigate to the verse via BB-38 deep link
+- Pagination or infinite scroll for large result sets
+- Empty state: friendly "no results" copy with a suggestion to try a broader query
+ 
+### Performance
+ 
+- Target: sub-100ms query time for typical searches on the WEB Bible
+- The index is loaded once per session and held in memory; subsequent queries are pure lookups
+ 
+### Offline behavior
+ 
+- Once the index is in the service worker cache, search works fully offline
+- The Bible JSON files for results are also cached, so tapping a result navigates to a working chapter even without network
+ 
+---
+ 
+## PWA Install Flow (BB-39)
+ 
+Worship Room is a real Progressive Web App. Users can install it to their home screen on iOS, Android, and desktop.
+ 
+### The install prompt
+ 
+Triggered after the user has visited the app at least 2-3 times (tracked via `wr_visit_count`). Surfaces as:
+ 
+- A dismissible card on the Dashboard for logged-in users (`wr_install_dashboard_shown` flag prevents repeat showings)
+- An entry point in the BibleReader settings drawer
+- The browser's native install affordance (Chrome address bar icon, etc.)
+ 
+### iOS-specific instructions
+ 
+iOS Safari does not support the standard `beforeinstallprompt` event. For iOS users, the install prompt shows a modal with step-by-step instructions:
+ 
+1. Tap the Share icon at the bottom of the browser
+2. Scroll down and tap "Add to Home Screen"
+3. Confirm by tapping "Add"
+ 
+The instructions include screenshots or icons matching iOS Safari's actual UI.
+ 
+### After install
+ 
+- App opens in standalone mode (no browser chrome)
+- Splash screen shows the Worship Room logo on `#08051A` background
+- Theme color `#08051A` matches the app's dark theme
+ 
+### Offline indicator
+ 
+When the user goes offline, a small indicator appears at the top of the page (or in the BibleReader chrome) acknowledging offline mode. Cached chapters and the search index continue to work; uncached content shows a friendly offline message.
+ 
+### Dismissal
+ 
+- The install prompt is dismissible via X button → sets `wr_install_dismissed` timestamp → the prompt is suppressed for at least 30 days
+- Users can always install via the browser's native affordance even if they dismissed the prompt
+ 
+---
+ 
 ### Mood Tracking Flow
  
 1. Mood submitted → save to `mood_selections` table (Phase 3) or `wr_mood_entries` localStorage (Phase 2.75)
@@ -466,6 +893,10 @@ See [02-security.md](02-security.md) for the canonical auth gating list.
  
 **Meditation auth gating is two-layered:** card-click level (auth modal) + route-level redirect on all 6 sub-pages.
  
+**Bible features have NO auth gating.** Reading the Bible, highlighting verses, taking notes, bookmarking, building memorization decks, viewing the heatmap, and using AI Explain/Reflect are all available without an account. The Bible wave deliberately does not require login for any of its core features. Phase 3 backend wiring will introduce optional sync for users who DO have accounts, but the unauthenticated experience remains complete.
+ 
+**Push notifications (BB-41) are auth-independent.** A logged-out user can grant notification permission and receive daily verse pushes. The subscription is keyed by browser, not by user account.
+ 
 **Draft persistence preserves work across auth wall:** When a logged-out user types into the Pray or Journal textarea and clicks the submit button, the draft auto-saves to localStorage BEFORE the auth modal opens. The AuthModal subtitle shows "Your draft is safe — we'll bring it back after" (Spec V). After successful authentication, the user lands back on the same tab with their draft restored.
  
 **Daily Hub tab deep links work for all users:** Direct links to `/daily?tab=pray|journal|meditate` work correctly whether the user is logged in or logged out. Tab state is derived from the URL `?tab=` query param on every render rather than stored in `useState`, so there is no race condition between a default tab and the URL param. There is no logged-out redirect that would force users away from a deep-linked tab. (Verified manually after a Phase 4 false-positive caused by concurrent Playwright agents triggering Vite HMR module reloads.)
@@ -492,6 +923,8 @@ The Daily Hub has a single, persistent ambient sound entry point: the `DailyAmbi
  
 **Inline ambient pills removed from tab content (Wave 7):** Previous waves placed the AmbientSoundPill inline within the chip rows of PrayerInput, JournalInput, and below the meditation cards in MeditateTabContent. All of those inline placements were REMOVED in Wave 7. The single FAB is the canonical entry point.
  
+**BibleReader audio:** The BibleReader has its own audio entry point in the bottom toolbar of `ReaderChrome` (BB-26-29 cluster, currently deferred). It does NOT use the DailyAmbientPillFAB.
+ 
 ---
  
 ### Growth Teasers Section
@@ -502,13 +935,13 @@ The Daily Hub has a single, persistent ambient sound entry point: the `DailyAmbi
  
 ### Footer
  
-Dark purple (#0D0620). 3 nav columns (Daily, Music, Support) + crisis resources + app download badges (Coming Soon) + "Listen on Spotify" badge + copyright.
+Dark purple (#0D0620). 3 nav columns (Daily, Music, Support) + crisis resources + app download badges (Coming Soon) + "Listen on Spotify" badge + accessibility statement link (BB-35) + copyright.
  
 ---
  
 ### Starting Point Quiz Flow
  
-5-question points-based quiz. `id="quiz"` scroll target on the homepage. Single-select, auto-advance. Points-based scoring → result card with CTA. 100% client-side, no persistence. Only appears on the landing page (removed from Daily Hub in Round 3 redesign).
+5-question points-based quiz. `id="quiz"` scroll target on the homepage. Single-select, auto-advance. Points-based scoring → result card with CTA. 100% client-side, no persistence. Only appears on the landing page (removed from Daily Hub in Round 3 redesign). Optionally linked from the BB-34 first-run welcome.
  
 ---
  
@@ -521,3 +954,5 @@ Dark purple (#0D0620). 3 nav columns (Daily, Music, Support) + crisis resources 
 **Triggers (Phase 3+):** Blurred mood chart after praying, save prompt after journaling, streak teaser after 2-3 visits, "Week at a Glance" preview on daily page.
  
 **Draft persistence is the conversion bridge:** A logged-out user who has invested time in writing a prayer or journal entry is the ideal conversion candidate. The draft auto-save + "Your draft is safe — we'll bring it back after" pattern (Specs J + V) reduces the perceived risk of signing up at exactly the moment the user is most invested.
+ 
+**Bible features intentionally bypass conversion pressure.** The Bible reader, search, highlights, notes, memorization, and AI features are fully available without an account. A logged-out user can build up significant personal history (highlights, memorization cards, notes) in localStorage. Phase 3 will offer optional account sync to preserve that history across devices, but the unauthenticated experience is never crippled to push signup.

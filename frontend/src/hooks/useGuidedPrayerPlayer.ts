@@ -114,6 +114,7 @@ export function useGuidedPrayerPlayer({
   }, [ttsAvailable])
 
   const releaseWakeLock = useCallback(() => {
+    // Wake lock release can reject if already released or not supported — safe to ignore
     wakeLockRef.current?.release().catch(() => {})
     wakeLockRef.current = null
   }, [])

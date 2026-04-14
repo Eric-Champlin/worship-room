@@ -133,14 +133,14 @@ export function ShareDropdown({
   const encodedText = encodeURIComponent(shareText)
 
   const itemClass =
-    'flex w-full items-center gap-3 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:bg-gray-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary'
+    'flex w-full items-center gap-3 px-4 py-2 text-sm text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:bg-white/10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary'
 
   return (
     <div
       ref={dropdownRef}
       role="menu"
       aria-label="Share options"
-      className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-2 shadow-lg"
+      className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-white/10 bg-hero-bg py-2 shadow-xl shadow-black/40"
       onKeyDown={handleKeyDown}
     >
       <button

@@ -120,7 +120,7 @@ export function CrossRefBadge({ selection }: { selection: VerseSelection }) {
           selection.endVerse,
         ),
       )
-    })
+    }).catch(() => { /* silent — badge stays in loading state */ })
     return () => {
       cancelled = true
     }
@@ -179,6 +179,8 @@ export function CrossRefsSubView({ selection, context }: CrossRefsSubViewProps) 
       )
       setCrossRefs(refs)
       setIsLoading(false)
+    }).catch(() => {
+      if (!cancelled) setIsLoading(false)
     })
 
     return () => {
@@ -214,7 +216,7 @@ export function CrossRefsSubView({ selection, context }: CrossRefsSubViewProps) 
           }
           return next
         })
-      })
+      }).catch(() => { /* silent — verse preview text is a nice-to-have */ })
     }
 
     return () => {

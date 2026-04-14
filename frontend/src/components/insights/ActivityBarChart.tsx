@@ -10,6 +10,8 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ChartFallback } from '@/components/ui/ChartFallback'
 
 interface ActivityBarChartProps {
   activityCounts: Record<string, number>
@@ -43,6 +45,14 @@ function CustomTooltip({
 }
 
 export function ActivityBarChart({ activityCounts }: ActivityBarChartProps) {
+  return (
+    <ErrorBoundary fallback={<ChartFallback />}>
+      <ActivityBarChartInner activityCounts={activityCounts} />
+    </ErrorBoundary>
+  )
+}
+
+function ActivityBarChartInner({ activityCounts }: ActivityBarChartProps) {
   const chartData = useMemo(
     () =>
       ACTIVITY_CONFIG.map((cfg) => ({

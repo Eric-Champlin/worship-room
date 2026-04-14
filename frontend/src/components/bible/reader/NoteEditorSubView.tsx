@@ -301,7 +301,7 @@ export function NoteEditorSubView({ selection, onBack, context }: NoteEditorSubV
           placeholder="Write what this passage means to you…"
           aria-label={`Note for ${displayRef}`}
           aria-describedby="note-char-count"
-          className="h-full w-full resize-none bg-transparent placeholder:text-white/30 focus:outline-none"
+          className="h-full w-full resize-none bg-transparent placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/20 rounded"
           style={{
             color: 'var(--reader-text)',
             fontFamily,
@@ -325,7 +325,7 @@ export function NoteEditorSubView({ selection, onBack, context }: NoteEditorSubV
         <div className="text-xs text-white/50" aria-live="polite">
           {statusText}
         </div>
-        <div className="text-xs text-white/30">Autosaves every 2 seconds</div>
+        <div className="text-xs text-white/50">Autosaves every 2 seconds</div>
       </div>
     </div>
   )

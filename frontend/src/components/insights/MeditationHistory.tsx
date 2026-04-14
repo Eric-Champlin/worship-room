@@ -9,6 +9,8 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import type { MeditationType } from '@/types/daily-experience'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ChartFallback } from '@/components/ui/ChartFallback'
 import {
   getMeditationHistory,
   getMeditationMinutesForWeek,
@@ -108,6 +110,14 @@ function getChartHeight(width: number): number {
 }
 
 export function MeditationHistory({ rangeDays }: MeditationHistoryProps) {
+  return (
+    <ErrorBoundary fallback={<ChartFallback />}>
+      <MeditationHistoryInner rangeDays={rangeDays} />
+    </ErrorBoundary>
+  )
+}
+
+function MeditationHistoryInner({ rangeDays }: MeditationHistoryProps) {
   const [chartHeight, setChartHeight] = useState(250)
 
   useEffect(() => {

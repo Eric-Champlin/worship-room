@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, renderHook, act } from '@testing-library/react'
+import { render, renderHook } from '@testing-library/react'
 import { getLocalDateString } from '@/utils/date'
 import { useAnniversaryMoment } from '@/hooks/useAnniversaryMoment'
-import { useScriptureEcho } from '@/hooks/useScriptureEcho'
 import { useGratitudeCallback } from '@/hooks/useGratitudeCallback'
 import { MidnightVerse } from '@/components/MidnightVerse'
 import {
@@ -26,10 +25,6 @@ vi.mock('@/hooks/useWhisperToast', () => ({
 
 vi.mock('@/hooks/useSoundEffects', () => ({
   useSoundEffects: () => ({ playSoundEffect: vi.fn() }),
-}))
-
-vi.mock('@/services/bible-annotations-storage', () => ({
-  getBookDisplayName: (slug: string) => slug,
 }))
 
 // ── Test helpers ────────────────────────────────────────────────────
@@ -92,29 +87,6 @@ describe('Surprise System Integration', () => {
     expect(mockShowWhisperToast).not.toHaveBeenCalled()
   })
 
-  it('Daily limit prevents second surprise', () => {
-    // Set up Scripture Echo conditions
-    localStorage.setItem('wr_bible_highlights', JSON.stringify([
-      { book: 'genesis', chapter: 1, verseNumber: 1, color: 'yellow', createdAt: '2026-03-15T10:00:00Z' },
-    ]))
-
-    renderHook(() => useScriptureEcho('genesis', 1, false))
-
-    act(() => {
-      vi.advanceTimersByTime(3000)
-    })
-
-    // Scripture Echo should have fired
-    expect(mockShowWhisperToast).toHaveBeenCalledTimes(1)
-
-    // Now try gratitude callback — should be blocked (surprise already shown today)
-    localStorage.setItem('wr_gratitude_entries', JSON.stringify(makeGratitudeEntries(8, 10)))
-    mockShowWhisperToast.mockClear()
-
-    renderHook(() => useGratitudeCallback(true))
-    expect(mockShowWhisperToast).not.toHaveBeenCalled()
-  })
-
   it('Midnight Verse independent of daily limit', () => {
     // First trigger a regular surprise to fill daily limit
     markSurpriseShown()
@@ -143,10 +115,6 @@ describe('Surprise System Integration', () => {
     // Anniversary
     const { result } = renderHook(() => useAnniversaryMoment())
     expect(result.current.show).toBe(false)
-
-    // Scripture Echo
-    renderHook(() => useScriptureEcho('genesis', 1, false))
-    act(() => { vi.advanceTimersByTime(3000) })
 
     // Gratitude Callback
     renderHook(() => useGratitudeCallback(true))

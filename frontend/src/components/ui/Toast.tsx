@@ -168,7 +168,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
             data-toast-type={toast.type}
             className={cn(
-              'rounded-lg border bg-white px-4 py-3 shadow-lg',
+              'rounded-lg border border-white/15 bg-white/10 px-4 py-3 shadow-lg backdrop-blur-md',
               exitingIds.has(toast.id)
                 ? 'motion-safe:animate-fade-out'
                 : 'motion-safe:animate-slide-up',
@@ -180,7 +180,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             )}
           >
             <div className="flex items-center gap-2">
-              <p className="text-sm text-text-dark">{toast.message}</p>
+              <p className="text-sm text-white">{toast.message}</p>
               {toast.action && (
                 <button
                   type="button"

@@ -34,6 +34,9 @@ export function useVerseContextPreload(tab: string) {
       }
       setIsHydrating(false)
       hydrating.current = false
+    }).catch(() => {
+      setIsHydrating(false)
+      hydrating.current = false
     })
   }, [searchParams, setSearchParams, tab])
 

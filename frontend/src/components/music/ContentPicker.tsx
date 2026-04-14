@@ -67,25 +67,26 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative flex max-h-[90vh] w-full flex-col rounded-t-2xl bg-white sm:mx-4 sm:max-w-2xl sm:rounded-2xl"
+        className="relative flex max-h-[90vh] w-full flex-col rounded-t-2xl border border-white/10 sm:mx-4 sm:max-w-2xl sm:rounded-2xl"
+        style={{ background: 'rgba(15, 10, 30, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-          <h2 id={titleId} className="text-lg font-semibold text-text-dark">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <h2 id={titleId} className="text-lg font-semibold text-white">
             Choose Content
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close picker"
-            className="rounded-lg p-1.5 text-text-light transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+            className="rounded-lg p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div role="tablist" aria-label="Content type" className="flex border-b border-gray-200 px-5">
+        <div role="tablist" aria-label="Content type" className="flex border-b border-white/10 px-5">
           {TAB_KEYS.map((key, index) => {
             const { label, Icon } = TAB_CONFIG[key]
             const isActive = activeTab === key
@@ -106,7 +107,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                 className={`flex items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 ${
                   isActive
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-text-light hover:text-text-dark'
+                    : 'border-transparent text-white/60 hover:text-white'
                 }`}
               >
                 <Icon size={16} aria-hidden="true" />
@@ -130,13 +131,13 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                   key={scene.id}
                   type="button"
                   onClick={() => onSelect('scene', scene.id, scene.name)}
-                  className="rounded-lg border border-gray-200 p-4 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                  className="rounded-lg border border-white/10 p-4 text-left transition-colors hover:border-primary hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
-                  <p className="font-medium text-text-dark">{scene.name}</p>
-                  <p className="mt-1 line-clamp-2 text-xs text-text-light">
+                  <p className="font-medium text-white">{scene.name}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-white/60">
                     {scene.description}
                   </p>
-                  <p className="mt-2 text-xs text-text-light">
+                  <p className="mt-2 text-xs text-white/60">
                     {scene.sounds.length} sounds
                   </p>
                 </button>
@@ -148,7 +149,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
             <div className="space-y-6">
               {SCRIPTURE_COLLECTIONS.map((collection) => (
                 <div key={collection.id}>
-                  <h3 className="mb-3 text-sm font-semibold text-text-dark">
+                  <h3 className="mb-3 text-sm font-semibold text-white">
                     {collection.name}
                   </h3>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -159,12 +160,12 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                         onClick={() =>
                           onSelect('scripture', reading.id, reading.title)
                         }
-                        className="rounded-lg border border-gray-200 p-3 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                        className="rounded-lg border border-white/10 p-3 text-left transition-colors hover:border-primary hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                       >
-                        <p className="text-sm font-medium text-text-dark">
+                        <p className="text-sm font-medium text-white">
                           {reading.title}
                         </p>
-                        <p className="mt-0.5 text-xs text-text-light">
+                        <p className="mt-0.5 text-xs text-white/60">
                           {reading.scriptureReference}
                         </p>
                       </button>
@@ -182,13 +183,13 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                   key={story.id}
                   type="button"
                   onClick={() => onSelect('story', story.id, story.title)}
-                  className="rounded-lg border border-gray-200 p-4 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                  className="rounded-lg border border-white/10 p-4 text-left transition-colors hover:border-primary hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
-                  <p className="font-medium text-text-dark">{story.title}</p>
-                  <p className="mt-1 line-clamp-2 text-xs text-text-light">
+                  <p className="font-medium text-white">{story.title}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-white/60">
                     {story.description}
                   </p>
-                  <p className="mt-2 text-xs text-text-light">
+                  <p className="mt-2 text-xs text-white/60">
                     {Math.round(story.durationSeconds / 60)} min
                   </p>
                 </button>

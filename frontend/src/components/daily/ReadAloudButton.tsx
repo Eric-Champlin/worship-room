@@ -22,7 +22,7 @@ export function ReadAloudButton({
   }, [currentWordIndex, onWordIndexChange])
 
   const buttonBase =
-    'inline-flex items-center justify-center rounded-lg border border-gray-200 p-2 text-text-dark transition-colors hover:bg-gray-100'
+    'inline-flex items-center justify-center rounded-lg border border-white/15 p-2 text-white/80 transition-colors hover:bg-white/10'
 
   if (state === 'idle') {
     return (

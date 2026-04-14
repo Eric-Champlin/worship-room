@@ -55,12 +55,12 @@ export function SaveToPrayerListForm({
   }, [title, category, prayerText, onSave, showToast, verseContext])
 
   return (
-    <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
-      <h4 className="mb-3 text-sm font-semibold text-text-dark">
+    <div className="mt-4 rounded-lg border border-white/[0.12] bg-white/[0.06] p-4 backdrop-blur-sm">
+      <h4 className="mb-3 text-sm font-semibold text-white">
         Save to your prayer list
       </h4>
 
-      <label htmlFor="save-prayer-title" className="mb-1 block text-xs text-text-light">
+      <label htmlFor="save-prayer-title" className="mb-1 block text-xs text-white/60">
         Title
       </label>
       <input
@@ -69,13 +69,13 @@ export function SaveToPrayerListForm({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         maxLength={100}
-        className="mb-2 w-full rounded border border-gray-200 px-3 py-2 text-sm text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="mb-2 w-full rounded border border-white/15 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         aria-label="Prayer title"
       />
 
       <CrisisBanner text={title} />
 
-      <p className="mb-2 mt-3 text-xs text-text-light">Category</p>
+      <p className="mb-2 mt-3 text-xs text-white/60">Category</p>
       <div className="flex flex-wrap gap-2 overflow-x-auto sm:overflow-visible">
         {PRAYER_CATEGORIES.map((cat) => (
           <button
@@ -86,7 +86,7 @@ export function SaveToPrayerListForm({
               'min-h-[44px] shrink-0 rounded-full px-3 py-1.5 text-xs transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]',
               category === cat
                 ? 'bg-primary text-white'
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
+                : 'bg-white/10 text-white/60 hover:bg-white/15',
             )}
           >
             {CATEGORY_LABELS[cat]}
@@ -103,7 +103,7 @@ export function SaveToPrayerListForm({
             'rounded-lg px-4 py-2 text-sm font-semibold text-white transition-[colors,transform] duration-fast active:scale-[0.98]',
             category
               ? 'bg-primary hover:bg-primary-lt'
-              : 'cursor-not-allowed bg-gray-300',
+              : 'cursor-not-allowed bg-white/20',
           )}
         >
           Save
@@ -111,7 +111,7 @@ export function SaveToPrayerListForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-text-light hover:text-text-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+          className="text-sm text-white/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
         >
           Cancel
         </button>

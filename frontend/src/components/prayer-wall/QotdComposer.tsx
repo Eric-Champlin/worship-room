@@ -55,8 +55,8 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
-      <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
-        <h3 className="mb-3 text-base font-semibold text-text-dark">
+      <div className="rounded-xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-sm sm:p-5">
+        <h3 className="mb-3 text-base font-semibold text-white">
           Share Your Thoughts
         </h3>
 
@@ -66,7 +66,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
           onChange={handleChange}
           placeholder="Share your thoughts..."
           maxLength={QOTD_MAX_LENGTH}
-          className="w-full resize-none rounded-lg border border-gray-200 p-3 leading-relaxed text-text-dark placeholder:text-text-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="w-full resize-none rounded-lg border border-white/10 bg-white/5 p-3 leading-relaxed text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           style={{ minHeight: '100px' }}
           aria-label="Your response to the question of the day"
           aria-invalid={content.length > QOTD_MAX_LENGTH ? 'true' : undefined}
@@ -98,14 +98,14 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
         </div>
 
         {crisisDetected && (
-          <div role="alert" className="mt-4 rounded-lg border border-danger/30 bg-red-50 p-4">
+          <div role="alert" className="mt-4 rounded-lg border border-danger/30 bg-danger/10 p-4">
             <p className="mb-2 text-sm font-semibold text-danger">
               It sounds like you may be going through a difficult time.
             </p>
-            <p className="mb-3 text-sm text-text-dark">
+            <p className="mb-3 text-sm text-white/90">
               If you or someone you know is in crisis, please reach out for help:
             </p>
-            <ul className="space-y-1 text-sm text-text-dark">
+            <ul className="space-y-1 text-sm text-white/90">
               <li>
                 <strong>{CRISIS_RESOURCES.suicide_prevention.name}:</strong>{' '}
                 <a href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`} className="font-medium text-primary underline">

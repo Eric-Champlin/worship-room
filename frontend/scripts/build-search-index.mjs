@@ -60,14 +60,11 @@ function buildIndex() {
       continue
     }
 
-    let bookVerses = 0
-
     for (const chapter of bookData.chapters) {
       for (const verse of chapter.verses) {
         if (!verse.text || verse.text.trim() === '') continue
 
         totalVerses++
-        bookVerses++
 
         const verseTokens = tokenize(verse.text)
         const ref = [slug, chapter.number, verse.number]

@@ -215,21 +215,22 @@ describe('BB-35: Heading hierarchy', () => {
 
     // Ensure no h3 or h4 appears without a preceding h2
     // (the AccessibilityPage should have h1 -> h2 only, no h3s)
-    // Footer renders h3s (column headings), which are inside the footer landmark, not the main content
-    // So filter to only h3s inside main content
+    // Footer column labels are now <p> elements (not headings), but check main content to be safe
     const main = screen.getByRole('main')
     const mainH3s = within(main).queryAllByRole('heading', { level: 3 })
     expect(mainH3s).toHaveLength(0)
   })
 
-  it('SiteFooter column headings are h3 (appropriate within the document outline)', () => {
+  it('SiteFooter column labels are non-heading elements (avoids h1→h3 skip)', () => {
     renderFooter()
     const footer = screen.getByRole('contentinfo')
-    const h3s = within(footer).getAllByRole('heading', { level: 3 })
-    expect(h3s.length).toBeGreaterThanOrEqual(3)
-    expect(h3s.map((h) => h.textContent)).toEqual(
-      expect.arrayContaining(['Daily', 'Music', 'Support']),
-    )
+    // Column labels are now <p> elements, not headings — fixes the h1→h3 skip on 20 pages
+    const h3s = within(footer).queryAllByRole('heading', { level: 3 })
+    expect(h3s).toHaveLength(0)
+    // Labels still render as text
+    expect(within(footer).getByText('Daily')).toBeInTheDocument()
+    expect(within(footer).getByText('Music')).toBeInTheDocument()
+    expect(within(footer).getByText('Support')).toBeInTheDocument()
   })
 })
 

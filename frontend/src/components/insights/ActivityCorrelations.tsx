@@ -10,6 +10,8 @@ import {
 import { BarChart3 } from 'lucide-react'
 import { MOOD_LABELS } from '@/constants/dashboard/mood'
 import type { MoodValue } from '@/types/dashboard'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ChartFallback } from '@/components/ui/ChartFallback'
 
 interface ActivityCorrelationsProps {
   hasData: boolean
@@ -50,6 +52,14 @@ function CorrelationTooltip({ active, label, payload }: CorrelationTooltipProps)
 }
 
 export function ActivityCorrelations({ hasData }: ActivityCorrelationsProps) {
+  return (
+    <ErrorBoundary fallback={<ChartFallback />}>
+      <ActivityCorrelationsInner hasData={hasData} />
+    </ErrorBoundary>
+  )
+}
+
+function ActivityCorrelationsInner({ hasData }: ActivityCorrelationsProps) {
   return (
     <section
       aria-labelledby="correlations-title"

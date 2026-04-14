@@ -136,7 +136,7 @@ export function useBibleSearch(options: UseBibleSearchOptions = {}): {
           setResults(hydrated)
         }
         setTotalResults(total)
-      } catch (err) {
+      } catch (_err) {
         setIsLoadingIndex(false)
         setError('Unable to load search. Please try again.')
       } finally {

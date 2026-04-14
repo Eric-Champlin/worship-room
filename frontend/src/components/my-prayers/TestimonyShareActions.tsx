@@ -46,7 +46,7 @@ export function TestimonyShareActions({
     generateTestimonyCardImage(options).then((blob) => {
       if (revoked) return
       setPreviewUrl(URL.createObjectURL(blob))
-    })
+    }).catch(() => { /* silent — preview image is non-critical */ })
     return () => {
       revoked = true
       setPreviewUrl((prev) => {

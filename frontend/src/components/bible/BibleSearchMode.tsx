@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 
 import { useBibleSearch } from '@/hooks/useBibleSearch'
 import { stem } from '@/lib/search/tokenizer'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const EXAMPLE_CHIPS = ['anxiety', 'rest', 'forgiveness', 'courage', 'hope', 'fear'] as const
 
@@ -152,6 +153,13 @@ export function BibleSearchMode({ query: controlledQuery, onQueryChange }: Bible
         )}
 
         {/* Results */}
+        <ErrorBoundary
+          fallback={
+            <p className="py-6 text-center text-sm text-white/50">
+              Search unavailable right now — try refreshing the page.
+            </p>
+          }
+        >
         {results.length > 0 && (
           <div>
             {/* Result count */}
@@ -195,6 +203,7 @@ export function BibleSearchMode({ query: controlledQuery, onQueryChange }: Bible
             )}
           </div>
         )}
+        </ErrorBoundary>
       </div>
     </div>
   )

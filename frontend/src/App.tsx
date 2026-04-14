@@ -17,6 +17,7 @@ import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
+import { RouteErrorBoundary } from '@/components/RouteErrorBoundary'
 import { WhisperToastProvider } from '@/components/ui/WhisperToast'
 import { MidnightVerse } from '@/components/MidnightVerse'
 import {
@@ -179,9 +180,11 @@ function NotificationSchedulerEffect() {
       if (!prefs.enabled) return
 
       import('@/lib/notifications/subscription').then(({ ensureSubscription }) => {
+        // Subscription renewal is best-effort — failure is non-fatal
         ensureSubscription().catch(() => {})
       })
       import('@/lib/notifications/scheduler').then(({ prepareAndSchedule, registerPeriodicSync }) => {
+        // Notification scheduling is fire-and-forget — failure doesn't affect app functionality
         prepareAndSchedule().catch(() => {})
         registerPeriodicSync().catch(() => {})
       })
@@ -211,27 +214,27 @@ function App() {
         <Suspense fallback={<RouteLoadingFallback />}>
         <RouteTransition>
         <Routes>
-          <Route path="/" element={<Suspense fallback={<DashboardSkeleton />}><RootRoute /></Suspense>} />
+          <Route path="/" element={<RouteErrorBoundary><Suspense fallback={<DashboardSkeleton />}><RootRoute /></Suspense></RouteErrorBoundary>} />
           <Route path="/health" element={<Health />} />
-          <Route path="/insights" element={<Suspense fallback={<InsightsSkeleton />}><Insights /></Suspense>} />
+          <Route path="/insights" element={<RouteErrorBoundary><Suspense fallback={<InsightsSkeleton />}><Insights /></Suspense></RouteErrorBoundary>} />
           <Route path="/insights/monthly" element={<MonthlyReport />} />
-          <Route path="/friends" element={<Suspense fallback={<FriendsSkeleton />}><Friends /></Suspense>} />
-          <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
-          <Route path="/my-prayers" element={<Suspense fallback={<MyPrayersSkeleton />}><MyPrayers /></Suspense>} />
-          <Route path="/daily" element={<Suspense fallback={<DailyHubSkeleton />}><DailyHub /></Suspense>} />
+          <Route path="/friends" element={<RouteErrorBoundary><Suspense fallback={<FriendsSkeleton />}><Friends /></Suspense></RouteErrorBoundary>} />
+          <Route path="/settings" element={<RouteErrorBoundary><Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense></RouteErrorBoundary>} />
+          <Route path="/my-prayers" element={<RouteErrorBoundary><Suspense fallback={<MyPrayersSkeleton />}><MyPrayers /></Suspense></RouteErrorBoundary>} />
+          <Route path="/daily" element={<RouteErrorBoundary><Suspense fallback={<DailyHubSkeleton />}><DailyHub /></Suspense></RouteErrorBoundary>} />
           <Route path="/ask" element={<AskPage />} />
           <Route path="/devotional" element={<DevotionalRedirect />} />
-          <Route path="/grow" element={<Suspense fallback={<GrowPageSkeleton />}><GrowPage /></Suspense>} />
+          <Route path="/grow" element={<RouteErrorBoundary><Suspense fallback={<GrowPageSkeleton />}><GrowPage /></Suspense></RouteErrorBoundary>} />
           <Route path="/reading-plans" element={<ReadingPlansRedirect />} />
           <Route path="/reading-plans/:planId" element={<ReadingPlanDetail />} />
           <Route path="/challenges" element={<Navigate to="/grow?tab=challenges" replace />} />
           <Route path="/challenges/:challengeId" element={<ChallengeDetail />} />
-          <Route path="/bible" element={<Suspense fallback={<BibleLandingSkeleton />}><BibleLanding /></Suspense>} />
-          <Route path="/bible/browse" element={<Suspense fallback={<BibleBrowserSkeleton />}><BibleBrowse /></Suspense>} />
-          <Route path="/bible/my" element={<Suspense fallback={<MyBibleSkeleton />}><MyBiblePage /></Suspense>} />
-          <Route path="/bible/plans" element={<Suspense fallback={<RouteLoadingFallback />}><PlanBrowserPage /></Suspense>} />
-          <Route path="/bible/plans/:slug" element={<Suspense fallback={<RouteLoadingFallback />}><BiblePlanDetail /></Suspense>} />
-          <Route path="/bible/plans/:slug/day/:dayNumber" element={<Suspense fallback={<RouteLoadingFallback />}><BiblePlanDay /></Suspense>} />
+          <Route path="/bible" element={<RouteErrorBoundary><Suspense fallback={<BibleLandingSkeleton />}><BibleLanding /></Suspense></RouteErrorBoundary>} />
+          <Route path="/bible/browse" element={<RouteErrorBoundary><Suspense fallback={<BibleBrowserSkeleton />}><BibleBrowse /></Suspense></RouteErrorBoundary>} />
+          <Route path="/bible/my" element={<RouteErrorBoundary><Suspense fallback={<MyBibleSkeleton />}><MyBiblePage /></Suspense></RouteErrorBoundary>} />
+          <Route path="/bible/plans" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><PlanBrowserPage /></Suspense></RouteErrorBoundary>} />
+          <Route path="/bible/plans/:slug" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><BiblePlanDetail /></Suspense></RouteErrorBoundary>} />
+          <Route path="/bible/plans/:slug/day/:dayNumber" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><BiblePlanDay /></Suspense></RouteErrorBoundary>} />
           {/* BB-38: /bible/search is a legacy path that redirects to /bible?mode=search, forwarding any ?q= */}
           <Route path="/bible/search" element={<BibleSearchRedirect />} />
           <Route path="/bible/:book/:chapter" element={<BibleReader />} />
@@ -247,26 +250,26 @@ function App() {
           <Route path="/verse/:id" element={<SharedVerse />} />
           <Route path="/prayer/:id" element={<SharedPrayer />} />
           <Route path="/scripture" element={<Navigate to="/daily?tab=pray" replace />} />
-          <Route path="/music" element={<Suspense fallback={<MusicSkeleton />}><MusicPage /></Suspense>} />
+          <Route path="/music" element={<RouteErrorBoundary><Suspense fallback={<MusicSkeleton />}><MusicPage /></Suspense></RouteErrorBoundary>} />
           <Route path="/music/playlists" element={<Navigate to="/music?tab=playlists" replace />} />
           <Route path="/music/ambient" element={<Navigate to="/music?tab=ambient" replace />} />
           <Route path="/music/sleep" element={<Navigate to="/music?tab=sleep" replace />} />
           <Route path="/music/routines" element={<RoutinesPage />} />
-          <Route path="/prayer-wall" element={<Suspense fallback={<PrayerWallSkeleton />}><PrayerWall /></Suspense>} />
+          <Route path="/prayer-wall" element={<RouteErrorBoundary><Suspense fallback={<PrayerWallSkeleton />}><PrayerWall /></Suspense></RouteErrorBoundary>} />
           {/* Static segments must precede :id to avoid matching "dashboard"/"user" as a prayer ID */}
           <Route path="/prayer-wall/dashboard" element={<PrayerWallDashboard />} />
           <Route path="/prayer-wall/user/:id" element={<PrayerWallProfile />} />
           <Route path="/prayer-wall/:id" element={<PrayerDetail />} />
           <Route path="/local-support/churches" element={<Churches />} />
           <Route path="/local-support/counselors" element={<Counselors />} />
-          <Route path="/profile/:userId" element={<Suspense fallback={<ProfileSkeleton />}><GrowthProfile /></Suspense>} />
+          <Route path="/profile/:userId" element={<RouteErrorBoundary><Suspense fallback={<ProfileSkeleton />}><GrowthProfile /></Suspense></RouteErrorBoundary>} />
           <Route path="/local-support/celebrate-recovery" element={<CelebrateRecovery />} />
           {import.meta.env.DEV && (
             <Route path="/dev/mood-checkin" element={<MoodCheckInPreview />} />
           )}
           <Route path="/login" element={<ComingSoon title="Log In" />} />
-          <Route path="/register" element={<Suspense fallback={null}><RegisterPage /></Suspense>} />
-          <Route path="/accessibility" element={<Suspense fallback={<RouteLoadingFallback />}><AccessibilityPage /></Suspense>} />
+          <Route path="/register" element={<RouteErrorBoundary><Suspense fallback={null}><RegisterPage /></Suspense></RouteErrorBoundary>} />
+          <Route path="/accessibility" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><AccessibilityPage /></Suspense></RouteErrorBoundary>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </RouteTransition>

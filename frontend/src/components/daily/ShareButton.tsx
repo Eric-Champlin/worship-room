@@ -134,7 +134,7 @@ export function ShareButton({
   const encodedText = encodeURIComponent(shareText)
 
   const itemClass =
-    'flex w-full items-center gap-3 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:bg-gray-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary'
+    'flex w-full items-center gap-3 px-4 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:bg-white/10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary'
 
   return (
     <div className={cn('relative', className)}>
@@ -142,7 +142,7 @@ export function ShareButton({
         ref={triggerRef}
         type="button"
         onClick={handleToggle}
-        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-gray-200 p-2 text-text-dark transition-colors hover:bg-gray-100"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/15 p-2 text-white/80 transition-colors hover:bg-white/10"
         aria-label="Share"
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -155,7 +155,7 @@ export function ShareButton({
           ref={dropdownRef}
           role="menu"
           aria-label="Share options"
-          className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-2 shadow-lg"
+          className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-white/15 bg-white/10 py-2 shadow-lg backdrop-blur-md"
           onKeyDown={handleKeyDown}
         >
           <button

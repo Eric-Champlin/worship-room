@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { Link, Navigate } from 'react-router-dom'
-import { Pencil } from 'lucide-react'
+import { Bookmark, Heart, MessageCircle, Pencil } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { PRAYER_WALL_DASHBOARD_METADATA } from '@/lib/seo/routeMetadata'
 import { PageShell } from '@/components/prayer-wall/PageShell'
@@ -14,6 +14,7 @@ import { MarkAsAnsweredForm } from '@/components/prayer-wall/MarkAsAnsweredForm'
 import { DeletePrayerDialog } from '@/components/prayer-wall/DeletePrayerDialog'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
@@ -369,9 +370,14 @@ function DashboardContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-white/50">
-                  You haven't shared any prayer requests yet.
-                </p>
+                <FeatureEmptyState
+                  icon={Heart}
+                  heading="No shared prayers yet"
+                  description="Share your first prayer request and invite the community to pray with you."
+                  ctaLabel="Visit Prayer Wall"
+                  ctaHref="/prayer-wall"
+                  compact
+                />
               )}
             </div>
           )}
@@ -396,9 +402,14 @@ function DashboardContent() {
                   </div>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-white/50">
-                  No comments yet. Be the first to encourage.
-                </p>
+                <FeatureEmptyState
+                  icon={MessageCircle}
+                  heading="No comments yet"
+                  description="Encourage someone by commenting on their prayer."
+                  ctaLabel="Visit Prayer Wall"
+                  ctaHref="/prayer-wall"
+                  compact
+                />
               )}
             </div>
           )}
@@ -426,9 +437,14 @@ function DashboardContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-white/50">
-                  No bookmarked prayers.
-                </p>
+                <FeatureEmptyState
+                  icon={Bookmark}
+                  heading="No bookmarked prayers"
+                  description="Bookmark prayers you want to remember or revisit."
+                  ctaLabel="Visit Prayer Wall"
+                  ctaHref="/prayer-wall"
+                  compact
+                />
               )}
             </div>
           )}
@@ -456,9 +472,14 @@ function DashboardContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-white/50">
-                  No reactions yet.
-                </p>
+                <FeatureEmptyState
+                  icon={Heart}
+                  heading="No reactions yet"
+                  description="Pray for someone's request to show you care."
+                  ctaLabel="Visit Prayer Wall"
+                  ctaHref="/prayer-wall"
+                  compact
+                />
               )}
             </div>
           )}

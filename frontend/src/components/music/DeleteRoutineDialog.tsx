@@ -21,19 +21,20 @@ export function DeleteRoutineDialog({
         aria-modal="true"
         aria-labelledby="delete-routine-title"
         aria-describedby="delete-routine-desc"
-        className="mx-4 max-w-sm rounded-xl bg-white p-6 shadow-xl"
+        className="mx-4 max-w-sm rounded-2xl border border-white/10 p-6"
+        style={{ background: 'rgba(15, 10, 30, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       >
-        <h2 id="delete-routine-title" className="text-lg font-semibold text-text-dark">
+        <h2 id="delete-routine-title" className="text-lg font-semibold text-white">
           Delete {routineName}?
         </h2>
-        <p id="delete-routine-desc" className="mt-2 text-sm text-text-light">
+        <p id="delete-routine-desc" className="mt-2 text-sm text-white/70">
           This action cannot be undone.
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-text-dark transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+            className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
           >
             Cancel
           </button>

@@ -11,6 +11,8 @@ import {
 } from 'recharts';
 import { useMoodChartData } from '@/hooks/useMoodChartData';
 import type { MoodChartDataPoint } from '@/hooks/useMoodChartData';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ChartFallback } from '@/components/ui/ChartFallback';
 
 const MOOD_LABELS: Record<number, string> = {
   1: 'Struggling',
@@ -210,6 +212,14 @@ interface MoodChartProps {
 }
 
 export function MoodChart({ onRequestCheckIn }: MoodChartProps) {
+  return (
+    <ErrorBoundary fallback={<ChartFallback />}>
+      <MoodChartInner onRequestCheckIn={onRequestCheckIn} />
+    </ErrorBoundary>
+  );
+}
+
+function MoodChartInner({ onRequestCheckIn }: MoodChartProps) {
   const data = useMoodChartData(7);
   const hasData = data.some((d) => d.mood !== null);
 

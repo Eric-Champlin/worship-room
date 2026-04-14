@@ -4,34 +4,43 @@ import {
   formatVerseReference,
   getBookDisplayName,
 } from '../bible-annotations-storage'
-import type { BibleHighlight, BibleNote } from '@/types/bible'
+import { replaceAllHighlights } from '@/lib/bible/highlightStore'
+import { replaceAllNotes } from '@/lib/bible/notes/store'
+import type { Highlight, Note } from '@/types/bible'
 
-function makeHighlight(overrides: Partial<BibleHighlight> = {}): BibleHighlight {
+function makeHighlight(overrides: Partial<Highlight> = {}): Highlight {
   return {
+    id: crypto.randomUUID(),
     book: 'john',
     chapter: 3,
-    verseNumber: 16,
-    color: '#2DD4BF',
-    createdAt: '2026-03-01T10:00:00.000Z',
+    startVerse: 16,
+    endVerse: 16,
+    color: 'peace',
+    createdAt: new Date('2026-03-01T10:00:00.000Z').getTime(),
+    updatedAt: new Date('2026-03-01T10:00:00.000Z').getTime(),
     ...overrides,
   }
 }
 
-function makeNote(overrides: Partial<BibleNote> = {}): BibleNote {
+function makeNote(overrides: Partial<Note> = {}): Note {
   return {
     id: 'note-1',
     book: 'psalms',
     chapter: 23,
-    verseNumber: 1,
-    text: 'The Lord is my shepherd',
-    createdAt: '2026-03-02T10:00:00.000Z',
-    updatedAt: '2026-03-02T10:00:00.000Z',
+    startVerse: 1,
+    endVerse: 1,
+    body: 'The Lord is my shepherd',
+    createdAt: new Date('2026-03-02T10:00:00.000Z').getTime(),
+    updatedAt: new Date('2026-03-02T10:00:00.000Z').getTime(),
     ...overrides,
   }
 }
 
 beforeEach(() => {
   localStorage.clear()
+  // Reset store caches by replacing with empty arrays
+  replaceAllHighlights([])
+  replaceAllNotes([])
 })
 
 describe('getRecentBibleAnnotations', () => {
@@ -41,14 +50,14 @@ describe('getRecentBibleAnnotations', () => {
 
   it('combines and sorts highlights and notes by createdAt', () => {
     const highlights = [
-      makeHighlight({ createdAt: '2026-03-01T10:00:00.000Z' }),
-      makeHighlight({ book: 'genesis', chapter: 1, verseNumber: 1, createdAt: '2026-03-05T10:00:00.000Z' }),
+      makeHighlight({ createdAt: new Date('2026-03-01T10:00:00.000Z').getTime(), updatedAt: new Date('2026-03-01T10:00:00.000Z').getTime() }),
+      makeHighlight({ book: 'genesis', chapter: 1, startVerse: 1, endVerse: 1, createdAt: new Date('2026-03-05T10:00:00.000Z').getTime(), updatedAt: new Date('2026-03-05T10:00:00.000Z').getTime() }),
     ]
     const notes = [
-      makeNote({ createdAt: '2026-03-03T10:00:00.000Z' }),
+      makeNote({ createdAt: new Date('2026-03-03T10:00:00.000Z').getTime(), updatedAt: new Date('2026-03-03T10:00:00.000Z').getTime() }),
     ]
-    localStorage.setItem('wr_bible_highlights', JSON.stringify(highlights))
-    localStorage.setItem('wr_bible_notes', JSON.stringify(notes))
+    replaceAllHighlights(highlights)
+    replaceAllNotes(notes)
 
     const result = getRecentBibleAnnotations(3)
     expect(result).toHaveLength(3)
@@ -62,13 +71,25 @@ describe('getRecentBibleAnnotations', () => {
 
   it('limits to requested count', () => {
     const highlights = Array.from({ length: 5 }, (_, i) =>
-      makeHighlight({ verseNumber: i + 1, createdAt: `2026-03-0${i + 1}T10:00:00.000Z` }),
+      makeHighlight({
+        id: `hl-${i}`,
+        startVerse: i + 1,
+        endVerse: i + 1,
+        createdAt: new Date(`2026-03-0${i + 1}T10:00:00.000Z`).getTime(),
+        updatedAt: new Date(`2026-03-0${i + 1}T10:00:00.000Z`).getTime(),
+      }),
     )
     const notes = Array.from({ length: 3 }, (_, i) =>
-      makeNote({ id: `note-${i}`, verseNumber: i + 1, createdAt: `2026-03-0${i + 6}T10:00:00.000Z` }),
+      makeNote({
+        id: `note-${i}`,
+        startVerse: i + 1,
+        endVerse: i + 1,
+        createdAt: new Date(`2026-03-0${i + 6}T10:00:00.000Z`).getTime(),
+        updatedAt: new Date(`2026-03-0${i + 6}T10:00:00.000Z`).getTime(),
+      }),
     )
-    localStorage.setItem('wr_bible_highlights', JSON.stringify(highlights))
-    localStorage.setItem('wr_bible_notes', JSON.stringify(notes))
+    replaceAllHighlights(highlights)
+    replaceAllNotes(notes)
 
     const result = getRecentBibleAnnotations(3)
     expect(result).toHaveLength(3)

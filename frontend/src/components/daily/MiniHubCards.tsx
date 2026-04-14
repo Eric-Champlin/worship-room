@@ -31,7 +31,7 @@ export function MiniHubCards({ className }: MiniHubCardsProps) {
           <Link
             key={label}
             to={to}
-            className="flex flex-col items-center gap-1 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm transition-colors hover:bg-gray-50"
+            className="flex flex-col items-center gap-1 rounded-lg border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm transition-colors hover:bg-white/10"
           >
             <div className="relative">
               <Icon className="h-5 w-5 text-primary" />
@@ -42,7 +42,7 @@ export function MiniHubCards({ className }: MiniHubCardsProps) {
                 />
               )}
             </div>
-            <span className="font-medium text-text-dark">{label}</span>
+            <span className="font-medium text-white">{label}</span>
           </Link>
         )
       })}

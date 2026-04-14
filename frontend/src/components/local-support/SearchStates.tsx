@@ -1,5 +1,6 @@
 import { AlertCircle, MapPin, SearchX } from 'lucide-react'
 import type { LocalSupportCategory } from '@/types/local-support'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 
 function categoryNoun(category: LocalSupportCategory): string {
   switch (category) {
@@ -20,12 +21,11 @@ interface SearchPromptProps {
 
 export function SearchPrompt({ category }: SearchPromptProps) {
   return (
-    <div className="flex flex-col items-center py-12 text-center">
-      <MapPin size={48} className="mb-4 text-white/40" aria-hidden="true" />
-      <p className="max-w-sm text-base text-white/60">
-        Enter your location to find {categoryNoun(category)} near you.
-      </p>
-    </div>
+    <FeatureEmptyState
+      icon={MapPin}
+      heading="Find support near you"
+      description={`Enter your location to find ${categoryNoun(category)} near you.`}
+    />
   )
 }
 
@@ -38,13 +38,11 @@ interface NoResultsProps {
 
 export function NoResults({ radius, category }: NoResultsProps) {
   return (
-    <div className="flex flex-col items-center py-12 text-center">
-      <SearchX size={48} className="mb-4 text-white/40" aria-hidden="true" />
-      <p className="max-w-md text-base text-white/60">
-        We couldn&apos;t find any {categoryNoun(category)} within {radius} miles.
-        Try expanding your search radius or searching a different area.
-      </p>
-    </div>
+    <FeatureEmptyState
+      icon={SearchX}
+      heading="No results found"
+      description={`We couldn't find any ${categoryNoun(category)} within ${radius} miles. Try expanding your search radius or searching a different area.`}
+    />
   )
 }
 

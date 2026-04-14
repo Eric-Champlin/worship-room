@@ -71,7 +71,7 @@ export function VerseJumpPill({ totalVerses }: VerseJumpPillProps) {
             onChange={(e) => setVerseInput(e.target.value)}
             placeholder="v."
             aria-label="Verse number"
-            className="w-12 bg-transparent text-center text-sm text-white placeholder:text-white/30 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="w-12 bg-transparent text-center text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/20 rounded [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
           <button
             type="submit"

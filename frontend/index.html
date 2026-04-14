@@ -10,6 +10,12 @@
     <meta name="theme-color" content="#08051A">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Preload Latin subsets for Inter and Lora so they arrive before first paint,
+         eliminating layout shift from font swap. URLs are from Google Fonts v20/v37
+         for Chrome (woff2). If Google updates the font version, these preloads become
+         harmless no-ops — the CSS link below still loads the correct files. -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/lora/v37/0QIvMX1D_JOuMwr7I_FMl_E.woff2" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;700&display=swap"
       rel="stylesheet"

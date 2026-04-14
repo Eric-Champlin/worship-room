@@ -53,7 +53,7 @@ export function useActivePlan(): UseActivePlanResult {
       if (!cancelled) {
         setActivePlan(plan)
       }
-    })
+    }).catch(() => { /* silent — active plan card degrades gracefully */ })
     return () => {
       cancelled = true
     }

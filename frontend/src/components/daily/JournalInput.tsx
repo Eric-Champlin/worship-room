@@ -297,7 +297,7 @@ export function JournalInput({
                 ? 'cursor-not-allowed opacity-40'
                 : isListening
                   ? 'bg-red-500/20 text-red-400 motion-safe:animate-mic-pulse'
-                  : 'bg-white/10 text-white/30 hover:bg-white/15 hover:text-white/50',
+                  : 'bg-white/10 text-white/50 hover:bg-white/15 hover:text-white/70',
             )}
             aria-label={
               isPermissionDenied
