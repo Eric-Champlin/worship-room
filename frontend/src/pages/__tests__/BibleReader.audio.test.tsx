@@ -48,6 +48,7 @@ const hoisted = vi.hoisted(() => ({
 }))
 vi.mock('@/lib/audio/dbp-client', () => ({
   getChapterAudio: hoisted.getChapterAudio,
+  getChapterTimestamps: vi.fn().mockResolvedValue([]),
 }))
 
 // Engine mock — simulates Howler resolving with onLoad + onPlay after a tick.
@@ -208,6 +209,24 @@ describe('BibleReader + Audio integration (BB-26)', () => {
     expect(
       screen.queryByRole('button', { name: /Play audio for/ }),
     ).toBeNull()
+  })
+
+  // BB-44 F2 fix — error state must not produce read-along highlighting.
+  // When playbackState is 'error', the BibleReader guard sets readAlongVerse
+  // to null so no verse has aria-current. We verify this by rendering the
+  // reader after a failed audio load and asserting no aria-current attributes.
+  it('no verse has aria-current when audio is in error state', async () => {
+    hoisted.getChapterAudio.mockRejectedValue({
+      kind: 'http',
+      status: 500,
+      message: 'server error',
+    })
+    renderReader('/bible/john/3')
+    // Wait for the chapter content to render
+    await waitFor(() => expect(screen.getByText(/Nicodemus/)).toBeInTheDocument())
+    // No verse should have aria-current — error state disqualifies read-along
+    const withAriaCurrent = document.querySelectorAll('[aria-current]')
+    expect(withAriaCurrent).toHaveLength(0)
   })
 
   // NTH-1 — End-to-end provider + sheet integration test.

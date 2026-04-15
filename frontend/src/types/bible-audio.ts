@@ -81,6 +81,12 @@ export interface SleepFadeInfo {
   remainingMs: number
 }
 
+/** BB-44 — verse-level timing entry from DBP /timestamps endpoint. */
+export interface VerseTimestamp {
+  verse: number // verse number (parsed from string)
+  timestamp: number // start time in seconds
+}
+
 export interface AudioPlayerState {
   track: PlayerTrack | null
   playbackState: PlaybackState
@@ -95,6 +101,10 @@ export interface AudioPlayerState {
   // BB-28 — sleep timer
   sleepTimer: SleepTimerInfo | null
   sleepFade: SleepFadeInfo | null
+  // BB-44 — read-along verse highlighting
+  readAlongEnabled: boolean
+  readAlongTimestamps: VerseTimestamp[] | null
+  readAlongVerse: number | null
 }
 
 /**
@@ -118,4 +128,6 @@ export interface AudioPlayerActions {
   // BB-28 — sleep timer
   setSleepTimer: (timer: SleepTimerInfo) => void
   cancelSleepTimer: () => void
+  // BB-44 — read-along
+  setReadAlong: (enabled: boolean) => void
 }

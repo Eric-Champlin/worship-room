@@ -180,4 +180,63 @@ describe('DBP client (BB-26)', () => {
       expect(result.book).toBe('jhn')
     })
   })
+
+  describe('getChapterTimestamps (BB-44)', () => {
+    it('parses valid response correctly', async () => {
+      mockFetchJson({
+        data: [
+          { book: 'JHN', chapter: '3', verse_start: '0', verse_start_alt: '0', timestamp: 0 },
+          { book: 'JHN', chapter: '3', verse_start: '1', verse_start_alt: '1', timestamp: 3.64 },
+          { book: 'JHN', chapter: '3', verse_start: '2', verse_start_alt: '2', timestamp: 10.48 },
+        ],
+      })
+      const { getChapterTimestamps } = await importClient()
+      const result = await getChapterTimestamps('EN1WEBN2DA', 'JHN', 3)
+      expect(result).toEqual([
+        { verse: 1, timestamp: 3.64 },
+        { verse: 2, timestamp: 10.48 },
+      ])
+    })
+
+    it('filters out verse_start "0" (chapter intro marker)', async () => {
+      mockFetchJson({
+        data: [
+          { book: 'JHN', chapter: '3', verse_start: '0', verse_start_alt: '0', timestamp: 0 },
+          { book: 'JHN', chapter: '3', verse_start: '1', verse_start_alt: '1', timestamp: 3.64 },
+        ],
+      })
+      const { getChapterTimestamps } = await importClient()
+      const result = await getChapterTimestamps('EN1WEBN2DA', 'JHN', 3)
+      expect(result).toHaveLength(1)
+      expect(result[0].verse).toBe(1)
+    })
+
+    it('returns empty array for empty data (OT chapters)', async () => {
+      mockFetchJson({ data: [] })
+      const { getChapterTimestamps } = await importClient()
+      const result = await getChapterTimestamps('EN1WEBO2DA', 'GEN', 1)
+      expect(result).toEqual([])
+    })
+
+    it('returns empty array for malformed response', async () => {
+      mockFetchJson({ notData: true })
+      const { getChapterTimestamps } = await importClient()
+      const result = await getChapterTimestamps('EN1WEBN2DA', 'JHN', 3)
+      expect(result).toEqual([])
+    })
+
+    it('sorts by timestamp ascending', async () => {
+      mockFetchJson({
+        data: [
+          { book: 'JHN', chapter: '3', verse_start: '3', verse_start_alt: '3', timestamp: 18.2 },
+          { book: 'JHN', chapter: '3', verse_start: '1', verse_start_alt: '1', timestamp: 3.64 },
+          { book: 'JHN', chapter: '3', verse_start: '2', verse_start_alt: '2', timestamp: 10.48 },
+        ],
+      })
+      const { getChapterTimestamps } = await importClient()
+      const result = await getChapterTimestamps('EN1WEBN2DA', 'JHN', 3)
+      expect(result.map((t) => t.verse)).toEqual([1, 2, 3])
+      expect(result.map((t) => t.timestamp)).toEqual([3.64, 10.48, 18.2])
+    })
+  })
 })

@@ -169,6 +169,20 @@ Preference for continuous playback in the Bible audio player. Managed by `fronte
 - **Cross-tab:** Not synchronized. Two concurrent audio Bible sessions in separate tabs are not a real use case.
 - **Version:** `bb29-v1` prefix allows future invalidation by bumping to `bb29-v2`.
 
+### Read-Along Preference (BB-44)
+
+Preference for verse highlighting during Bible audio playback. Managed by `frontend/src/lib/audio/read-along.ts`. Uses the `bb44-v1:` prefix, following the BB-26/BB-29/BB-32 `bb*-v1:` convention.
+
+| Key                  | Type      | Feature                                                                                 |
+| -------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `bb44-v1:readAlong`  | `boolean` | Read-along verse highlighting preference (BB-44). Defaults to `true` when absent. No TTL. |
+
+- **Default:** `true` — read-along is on by default (spec req 19).
+- **Read:** Loaded once on `AudioPlayerProvider` mount via lazy reducer init.
+- **Write:** Updated synchronously by the `setReadAlong` action, which mirrors the new value into the reducer state and writes to localStorage.
+- **Corruption:** Non-JSON or non-boolean values fall back to `true`. All localStorage operations are wrapped in try/catch.
+- **Version:** `bb44-v1` prefix allows future invalidation by bumping to `bb44-v2`.
+
 ### Community Challenges
  
 | Key                        | Type                             | Feature                          |

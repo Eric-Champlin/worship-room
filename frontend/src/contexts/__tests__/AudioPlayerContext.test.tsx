@@ -168,6 +168,9 @@ describe('AudioPlayerContext reducer (BB-26)', () => {
     endOfBible: false,
     sleepTimer: null,
     sleepFade: null,
+    readAlongEnabled: true,
+    readAlongTimestamps: null,
+    readAlongVerse: null,
   }
 
   it('LOAD_START transitions to loading with track set and sheet expanded', () => {
@@ -1260,5 +1263,148 @@ describe('AudioPlayerProvider BB-28 — sleep timer lifecycle', () => {
 
     expect(result.current!.state.sleepTimer).toBeNull()
     expect(result.current!.state.sleepFade).toBeNull()
+  })
+})
+
+describe('AudioPlayerContext reducer (BB-44 — read-along)', () => {
+  const init: AudioPlayerState = {
+    track: null,
+    playbackState: 'idle',
+    currentTime: 0,
+    duration: 0,
+    playbackSpeed: 1.0,
+    sheetState: 'closed',
+    errorMessage: null,
+    continuousPlayback: true,
+    endOfBible: false,
+    sleepTimer: null,
+    sleepFade: null,
+    readAlongEnabled: true,
+    readAlongTimestamps: null,
+    readAlongVerse: null,
+  }
+
+  const sampleTimestamps = [
+    { verse: 1, timestamp: 3.64 },
+    { verse: 2, timestamp: 10.48 },
+    { verse: 3, timestamp: 18.2 },
+  ]
+
+  it('SET_READ_ALONG toggles readAlongEnabled', () => {
+    const s = reducer(init, { type: 'SET_READ_ALONG', enabled: false })
+    expect(s.readAlongEnabled).toBe(false)
+    const s2 = reducer(s, { type: 'SET_READ_ALONG', enabled: true })
+    expect(s2.readAlongEnabled).toBe(true)
+  })
+
+  it('SET_READ_ALONG clears readAlongVerse when disabled', () => {
+    const playing = { ...init, readAlongVerse: 5 }
+    const s = reducer(playing, { type: 'SET_READ_ALONG', enabled: false })
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('SET_READ_ALONG preserves readAlongVerse when re-enabled', () => {
+    const playing = { ...init, readAlongVerse: 5 }
+    const s = reducer(playing, { type: 'SET_READ_ALONG', enabled: true })
+    expect(s.readAlongVerse).toBe(5)
+  })
+
+  it('SET_READ_ALONG_TIMESTAMPS sets timestamps and clears verse', () => {
+    const withVerse = { ...init, readAlongVerse: 3 }
+    const s = reducer(withVerse, { type: 'SET_READ_ALONG_TIMESTAMPS', timestamps: sampleTimestamps })
+    expect(s.readAlongTimestamps).toEqual(sampleTimestamps)
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('SET_READ_ALONG_TIMESTAMPS accepts null', () => {
+    const withTimestamps = { ...init, readAlongTimestamps: sampleTimestamps }
+    const s = reducer(withTimestamps, { type: 'SET_READ_ALONG_TIMESTAMPS', timestamps: null })
+    expect(s.readAlongTimestamps).toBeNull()
+  })
+
+  it('TICK with read-along enabled + timestamps computes correct verse', () => {
+    const state = { ...init, readAlongTimestamps: sampleTimestamps, readAlongEnabled: true }
+    const s = reducer(state, { type: 'TICK', currentTime: 12.0 })
+    expect(s.readAlongVerse).toBe(2) // 10.48 <= 12.0 < 18.2
+  })
+
+  it('TICK with read-along disabled keeps verse null', () => {
+    const state = { ...init, readAlongTimestamps: sampleTimestamps, readAlongEnabled: false }
+    const s = reducer(state, { type: 'TICK', currentTime: 12.0 })
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('TICK with null timestamps keeps verse null', () => {
+    const state = { ...init, readAlongTimestamps: null, readAlongEnabled: true }
+    const s = reducer(state, { type: 'TICK', currentTime: 12.0 })
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('TICK with verse change updates readAlongVerse', () => {
+    const state = {
+      ...init,
+      readAlongTimestamps: sampleTimestamps,
+      readAlongEnabled: true,
+      readAlongVerse: 1,
+    }
+    const s = reducer(state, { type: 'TICK', currentTime: 12.0 })
+    expect(s.readAlongVerse).toBe(2)
+  })
+
+  it('TICK without verse change preserves readAlongVerse', () => {
+    const state = {
+      ...init,
+      readAlongTimestamps: sampleTimestamps,
+      readAlongEnabled: true,
+      readAlongVerse: 2,
+    }
+    const s = reducer(state, { type: 'TICK', currentTime: 12.0 })
+    expect(s.readAlongVerse).toBe(2)
+  })
+
+  it('LOAD_START clears timestamps and verse', () => {
+    const state = { ...init, readAlongTimestamps: sampleTimestamps, readAlongVerse: 2 }
+    const s = reducer(state, { type: 'LOAD_START', track: TRACK_A })
+    expect(s.readAlongTimestamps).toBeNull()
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('STOP clears timestamps and verse', () => {
+    const state = { ...init, readAlongTimestamps: sampleTimestamps, readAlongVerse: 2, playbackState: 'playing' as const }
+    const s = reducer(state, { type: 'STOP' })
+    expect(s.readAlongTimestamps).toBeNull()
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('CLOSE clears timestamps and verse', () => {
+    const state = { ...init, readAlongTimestamps: sampleTimestamps, readAlongVerse: 2, track: TRACK_A }
+    const s = reducer(state, { type: 'CLOSE' })
+    expect(s.readAlongTimestamps).toBeNull()
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('LOAD_NEXT_CHAPTER_START clears timestamps and verse', () => {
+    const state = { ...init, readAlongTimestamps: sampleTimestamps, readAlongVerse: 2 }
+    const s = reducer(state, { type: 'LOAD_NEXT_CHAPTER_START', track: TRACK_A })
+    expect(s.readAlongTimestamps).toBeNull()
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('TICK clears verse when read-along is disabled and verse was set', () => {
+    const state = {
+      ...init,
+      readAlongTimestamps: sampleTimestamps,
+      readAlongEnabled: false,
+      readAlongVerse: 3,
+    }
+    const s = reducer(state, { type: 'TICK', currentTime: 12.0 })
+    expect(s.readAlongVerse).toBeNull()
+  })
+
+  it('END_OF_BIBLE clears read-along timestamps and verse', () => {
+    const state = { ...init, readAlongTimestamps: sampleTimestamps, readAlongVerse: 2 }
+    const s = reducer(state, { type: 'END_OF_BIBLE' })
+    expect(s.readAlongTimestamps).toBeNull()
+    expect(s.readAlongVerse).toBeNull()
   })
 })

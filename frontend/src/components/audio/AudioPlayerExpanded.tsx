@@ -297,6 +297,17 @@ export function AudioPlayerExpanded() {
               description="Auto-play next chapter"
             />
           </div>
+
+          {/* BB-44 — Read-along verse highlighting toggle */}
+          <div className="mt-1 px-0">
+            <ToggleSwitch
+              id="bb44-read-along"
+              checked={state.readAlongEnabled}
+              onChange={actions.setReadAlong}
+              label="Read along"
+              description="Highlight verses as you listen"
+            />
+          </div>
         </>
       )}
 

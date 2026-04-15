@@ -619,3 +619,137 @@ describe('ReaderBody', () => {
     expect(verse1.querySelector('.note-marker')).toBeTruthy()
   })
 })
+
+describe('ReaderBody (BB-44 — read-along highlighting)', () => {
+  it('when readAlongVerse is null, no verse has aria-current', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        readAlongVerse={null}
+      />,
+    )
+    const withAriaCurrent = document.querySelectorAll('[aria-current]')
+    expect(withAriaCurrent).toHaveLength(0)
+  })
+
+  it('when readAlongVerse is 5, verse 5 has aria-current="true" and others do not', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        readAlongVerse={5}
+      />,
+    )
+    const verse5 = document.querySelector('[data-verse="5"]') as HTMLElement
+    expect(verse5.getAttribute('aria-current')).toBe('true')
+
+    const verse1 = document.querySelector('[data-verse="1"]') as HTMLElement
+    expect(verse1.getAttribute('aria-current')).toBeNull()
+  })
+
+  it('verse with readAlongVerse has the read-along background tint style', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        readAlongVerse={3}
+      />,
+    )
+    const verse3 = document.querySelector('[data-verse="3"]') as HTMLElement
+    expect(verse3.style.backgroundColor).toBe('rgba(255, 255, 255, 0.04)')
+  })
+
+  it('verse with readAlongVerse has the left accent bar box-shadow', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        readAlongVerse={3}
+      />,
+    )
+    const verse3 = document.querySelector('[data-verse="3"]') as HTMLElement
+    expect(verse3.style.boxShadow).toContain('inset 3px 0 0 0 rgba(109, 40, 217, 0.6)')
+  })
+
+  it('read-along highlight coexists with user highlight — user color preserved, accent bar added', () => {
+    const highlights: Highlight[] = [
+      {
+        id: 'h1',
+        book: 'john',
+        chapter: 1,
+        startVerse: 3,
+        endVerse: 3,
+        color: 'yellow',
+        createdAt: Date.now(),
+      },
+    ]
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        chapterHighlights={highlights}
+        readAlongVerse={3}
+      />,
+    )
+    const verse3 = document.querySelector('[data-verse="3"]') as HTMLElement
+    // User highlight backgroundColor is preserved (NOT overridden by read-along tint)
+    expect(verse3.style.backgroundColor).toBe('var(--highlight-yellow-bg)')
+    // Read-along adds the left accent bar via boxShadow
+    expect(verse3.style.boxShadow).toContain('inset 3px 0 0 0 rgba(109, 40, 217, 0.6)')
+    expect(verse3.getAttribute('aria-current')).toBe('true')
+  })
+
+  it('read-along highlight coexists with selection styling', () => {
+    render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        selectedVerses={[3]}
+        selectionVisible={true}
+        readAlongVerse={3}
+      />,
+    )
+    const verse3 = document.querySelector('[data-verse="3"]') as HTMLElement
+    expect(verse3.getAttribute('aria-current')).toBe('true')
+    expect(verse3.style.backgroundColor).toBe('rgba(255, 255, 255, 0.04)')
+  })
+
+  it('changing readAlongVerse prop from 5 to 3 moves aria-current', () => {
+    const { rerender } = render(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        readAlongVerse={5}
+      />,
+    )
+    expect(document.querySelector('[data-verse="5"]')?.getAttribute('aria-current')).toBe('true')
+    expect(document.querySelector('[data-verse="3"]')?.getAttribute('aria-current')).toBeNull()
+
+    rerender(
+      <ReaderBody
+        verses={MOCK_VERSES}
+        bookSlug="john"
+        chapter={1}
+        settings={DEFAULT_SETTINGS}
+        readAlongVerse={3}
+      />,
+    )
+    expect(document.querySelector('[data-verse="3"]')?.getAttribute('aria-current')).toBe('true')
+    expect(document.querySelector('[data-verse="5"]')?.getAttribute('aria-current')).toBeNull()
+  })
+})

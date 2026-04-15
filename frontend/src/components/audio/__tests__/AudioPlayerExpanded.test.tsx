@@ -22,6 +22,9 @@ const mockState: AudioPlayerState = {
   endOfBible: false,
   sleepTimer: null,
   sleepFade: null,
+  readAlongEnabled: true,
+  readAlongTimestamps: null,
+  readAlongVerse: null,
 }
 
 const mockActions = {
@@ -39,6 +42,7 @@ const mockActions = {
   startFromGenesis: vi.fn(),
   setSleepTimer: vi.fn(),
   cancelSleepTimer: vi.fn(),
+  setReadAlong: vi.fn(),
 }
 
 vi.mock('@/hooks/audio/useAudioPlayer', () => ({
@@ -66,6 +70,9 @@ function resetMockState() {
   mockState.endOfBible = false
   mockState.sleepTimer = null
   mockState.sleepFade = null
+  mockState.readAlongEnabled = true
+  mockState.readAlongTimestamps = null
+  mockState.readAlongVerse = null
 }
 
 describe('AudioPlayerExpanded (BB-26)', () => {
@@ -397,5 +404,67 @@ describe('AudioPlayerExpanded (BB-28) — sleep timer', () => {
     expect(screen.queryByText('Fading...')).toBeNull()
     expect(screen.queryByText('Ends with chapter')).toBeNull()
     expect(screen.queryByText('Ends with book')).toBeNull()
+  })
+})
+
+describe('AudioPlayerExpanded (BB-44 — read-along toggle)', () => {
+  beforeEach(() => {
+    resetMockState()
+    Object.values(mockActions).forEach((fn) => fn.mockClear())
+  })
+
+  afterEach(() => cleanup())
+
+  it('renders read-along toggle with correct label and description', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.getByText('Read along')).toBeInTheDocument()
+    expect(screen.getByText('Highlight verses as you listen')).toBeInTheDocument()
+  })
+
+  it('toggle reflects state.readAlongEnabled = true', () => {
+    mockState.readAlongEnabled = true
+    render(<AudioPlayerExpanded />)
+    const toggle = screen.getByRole('switch', { name: /read along/i })
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('toggle reflects state.readAlongEnabled = false', () => {
+    mockState.readAlongEnabled = false
+    render(<AudioPlayerExpanded />)
+    const toggle = screen.getByRole('switch', { name: /read along/i })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('clicking toggle calls actions.setReadAlong with inverted value', async () => {
+    mockState.readAlongEnabled = true
+    const user = userEvent.setup()
+    render(<AudioPlayerExpanded />)
+    const toggle = screen.getByRole('switch', { name: /read along/i })
+    await user.click(toggle)
+    expect(mockActions.setReadAlong).toHaveBeenCalledWith(false)
+  })
+
+  it('toggle is NOT rendered in error state', () => {
+    mockState.playbackState = 'error'
+    mockState.errorMessage = 'Audio unavailable'
+    render(<AudioPlayerExpanded />)
+    expect(screen.queryByText('Read along')).not.toBeInTheDocument()
+  })
+
+  it('toggle is NOT rendered in end-of-Bible state', () => {
+    mockState.endOfBible = true
+    render(<AudioPlayerExpanded />)
+    expect(screen.queryByText('Read along')).not.toBeInTheDocument()
+  })
+
+  it('toggle appears after BB-29 continuous playback toggle in DOM order', () => {
+    render(<AudioPlayerExpanded />)
+    const continuousLabel = screen.getByText('Continuous playback')
+    const readAlongLabel = screen.getByText('Read along')
+    // Verify DOM order: continuous playback appears before read along
+    expect(
+      continuousLabel.compareDocumentPosition(readAlongLabel) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 })

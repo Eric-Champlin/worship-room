@@ -1,3 +1,4 @@
+import type React from 'react'
 import { cn } from '@/lib/utils'
 import { ANIMATION_EASINGS } from '@/constants/animation'
 import {
@@ -33,6 +34,8 @@ interface ReaderBodyProps {
   arrivalHighlightVerses?: number[]
   /** Whether user prefers reduced motion */
   reducedMotion?: boolean
+  /** BB-44 — verse number currently being narrated by audio (null = no read-along active) */
+  readAlongVerse?: number | null
 }
 
 export function ReaderBody({
@@ -49,6 +52,7 @@ export function ReaderBody({
   freshHighlightVerses,
   arrivalHighlightVerses,
   reducedMotion,
+  readAlongVerse,
 }: ReaderBodyProps) {
   const paragraphSet = new Set(paragraphs)
   const filteredVerses = verses.filter((v) => v.text.trim() !== '')
@@ -80,6 +84,7 @@ export function ReaderBody({
             const isSelected = selectedVerses?.includes(verse.number)
             const isFresh = freshHighlightVerses?.includes(verse.number)
             const isArrivalHighlight = arrivalHighlightVerses?.includes(verse.number)
+            const isReadAlong = readAlongVerse === verse.number
             const isBookmarked = !!chapterBookmarks?.find(
               (b) => verse.number >= b.startVerse && verse.number <= b.endVerse,
             )
@@ -100,9 +105,11 @@ export function ReaderBody({
                   isSelected && !selectionVisible && 'transition-colors duration-base',
                   isFresh && !reducedMotion && 'animate-highlight-pulse',
                   isArrivalHighlight && 'rounded',
+                  isReadAlong && 'transition-colors duration-fast',
                 )}
-                style={
-                  isArrivalHighlight
+                style={(() => {
+                  // Base style from existing features
+                  const baseStyle: React.CSSProperties | undefined = isArrivalHighlight
                     ? {
                         boxShadow: '0 0 12px 2px rgba(139, 92, 246, 0.4)',
                         transition: reducedMotion ? 'none' : `box-shadow 1.5s ${ANIMATION_EASINGS.decelerate}`,
@@ -117,7 +124,21 @@ export function ReaderBody({
                             : {}),
                         }
                       : undefined
-                }
+
+                  // BB-44 — read-along layer (bg tint + left accent bar)
+                  // When a user highlight exists, preserve its backgroundColor and
+                  // only add the left accent bar. The user's highlight color wins.
+                  if (!isReadAlong) return baseStyle
+                  const readAlongStyle: React.CSSProperties = {
+                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                    boxShadow: 'inset 3px 0 0 0 rgba(109, 40, 217, 0.6)',
+                  }
+                  if (baseStyle) {
+                    return { ...baseStyle, boxShadow: readAlongStyle.boxShadow }
+                  }
+                  return readAlongStyle
+                })()}
+                aria-current={isReadAlong ? 'true' : undefined}
                 aria-label={
                   isBookmarked && hasNote
                     ? `${bookSlug} ${chapter}:${verse.number}, bookmarked, has a note`

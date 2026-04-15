@@ -21,6 +21,7 @@ import type {
   DbpChapterAudio,
   DbpError,
   DbpFileset,
+  VerseTimestamp,
 } from '@/types/bible-audio'
 
 const DBP_BASE_URL = 'https://4.dbt.io/api'
@@ -159,4 +160,41 @@ export async function getChapterAudio(
     url,
     durationSeconds,
   }
+}
+
+/** Raw DBP timestamp entry before parsing. */
+interface DbpTimestampRaw {
+  book: string
+  chapter: string
+  verse_start: string
+  verse_start_alt: string
+  timestamp: number
+}
+
+/**
+ * BB-44 — Fetches verse-level timing data for a chapter.
+ * Returns parsed VerseTimestamp[] (filtered: verse 0 removed, sorted by timestamp).
+ * Returns empty array if no timing data exists (OT dramatized filesets return empty).
+ */
+export async function getChapterTimestamps(
+  filesetId: string,
+  bookCode: string,
+  chapter: number,
+): Promise<VerseTimestamp[]> {
+  const raw = await dbpFetch<DbpEnvelope<unknown>>(
+    `/timestamps/${encodeURIComponent(filesetId)}/${encodeURIComponent(bookCode)}/${chapter}`,
+  )
+  if (!isObject(raw) || !Array.isArray(raw.data)) return []
+
+  const entries = raw.data as DbpTimestampRaw[]
+  return entries
+    .filter((e) => {
+      const v = parseInt(e.verse_start, 10)
+      return !isNaN(v) && v > 0 // Filter out verse 0 (chapter intro marker)
+    })
+    .map((e) => ({
+      verse: parseInt(e.verse_start, 10),
+      timestamp: typeof e.timestamp === 'number' ? e.timestamp : 0,
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp)
 }

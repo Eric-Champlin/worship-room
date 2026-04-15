@@ -17,8 +17,10 @@ import type {
   PlaybackSpeed,
   PlayerTrack,
   SleepTimerInfo,
+  VerseTimestamp,
 } from '@/types/bible-audio'
 import { SLEEP_FADE_DURATION_MS } from '@/lib/audio/sleep-timer'
+import { findCurrentVerse } from '@/lib/audio/timestamps'
 
 export type Action =
   | { type: 'LOAD_START'; track: PlayerTrack }
@@ -41,6 +43,9 @@ export type Action =
   | { type: 'SET_SLEEP_TIMER'; timer: SleepTimerInfo }
   | { type: 'START_SLEEP_FADE' }
   | { type: 'CANCEL_SLEEP_TIMER' }
+  // BB-44 — read-along verse highlighting
+  | { type: 'SET_READ_ALONG'; enabled: boolean }
+  | { type: 'SET_READ_ALONG_TIMESTAMPS'; timestamps: VerseTimestamp[] | null }
 
 export const initialState: AudioPlayerState = {
   track: null,
@@ -54,6 +59,9 @@ export const initialState: AudioPlayerState = {
   endOfBible: false,
   sleepTimer: null,
   sleepFade: null,
+  readAlongEnabled: true,
+  readAlongTimestamps: null,
+  readAlongVerse: null,
 }
 
 export function reducer(state: AudioPlayerState, action: Action): AudioPlayerState {
@@ -68,6 +76,8 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         sheetState: 'expanded',
         errorMessage: null,
         endOfBible: false,
+        readAlongTimestamps: null,
+        readAlongVerse: null,
       }
     case 'LOAD_NEXT_CHAPTER_START':
       return {
@@ -78,6 +88,8 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         duration: 0,
         errorMessage: null,
         endOfBible: false,
+        readAlongTimestamps: null,
+        readAlongVerse: null,
         // sheetState intentionally preserved — auto-advance must not
         // re-expand a minimized sheet.
       }
@@ -113,7 +125,18 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         sleepFade = { remainingMs: newRemaining }
       }
 
-      return { ...state, currentTime: action.currentTime, sleepTimer, sleepFade }
+      // BB-44 — read-along verse detection
+      let readAlongVerse = state.readAlongVerse
+      if (state.readAlongEnabled && state.readAlongTimestamps && state.readAlongTimestamps.length > 0) {
+        const newVerse = findCurrentVerse(state.readAlongTimestamps, action.currentTime)
+        if (newVerse !== readAlongVerse) {
+          readAlongVerse = newVerse
+        }
+      } else if (readAlongVerse !== null) {
+        readAlongVerse = null
+      }
+
+      return { ...state, currentTime: action.currentTime, sleepTimer, sleepFade, readAlongVerse }
     }
     case 'SEEK':
       return { ...state, currentTime: action.seconds }
@@ -126,6 +149,8 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         currentTime: 0,
         sleepTimer: null,
         sleepFade: null,
+        readAlongTimestamps: null,
+        readAlongVerse: null,
       }
     case 'EXPAND':
       return { ...state, sheetState: 'expanded' }
@@ -143,6 +168,8 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         endOfBible: false,
         sleepTimer: null,
         sleepFade: null,
+        readAlongTimestamps: null,
+        readAlongVerse: null,
       }
     case 'DISMISS_ERROR':
       return { ...state, playbackState: 'idle', errorMessage: null }
@@ -156,6 +183,8 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         endOfBible: true,
         sleepTimer: null,
         sleepFade: null,
+        readAlongTimestamps: null,
+        readAlongVerse: null,
         // track + sheetState preserved so "Revelation 22" stays visible.
       }
     // BB-28 — sleep timer actions
@@ -165,6 +194,16 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
       return { ...state, sleepTimer: null, sleepFade: { remainingMs: SLEEP_FADE_DURATION_MS } }
     case 'CANCEL_SLEEP_TIMER':
       return { ...state, sleepTimer: null, sleepFade: null }
+    // BB-44 — read-along actions
+    case 'SET_READ_ALONG':
+      return {
+        ...state,
+        readAlongEnabled: action.enabled,
+        // If disabling mid-playback, clear the active verse immediately (spec req 21)
+        readAlongVerse: action.enabled ? state.readAlongVerse : null,
+      }
+    case 'SET_READ_ALONG_TIMESTAMPS':
+      return { ...state, readAlongTimestamps: action.timestamps, readAlongVerse: null }
     default:
       return state
   }

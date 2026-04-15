@@ -24,6 +24,8 @@ import { useVerseSelection } from '@/hooks/url/useVerseSelection'
 import { useActionSheetState } from '@/hooks/url/useActionSheetState'
 import { validateAction } from '@/lib/url/validateAction'
 import { useAudioState, useReadingContext } from '@/components/audio/AudioProvider'
+import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer'
+import { useReadAlongScroll } from '@/hooks/bible/useReadAlongScroll'
 import { PlanCompletionCelebration } from '@/components/bible/plans/PlanCompletionCelebration'
 import { ActivePlanReaderBanner } from '@/components/bible/reader/ActivePlanReaderBanner'
 import { AmbientAudioPicker } from '@/components/bible/reader/AmbientAudioPicker'
@@ -74,6 +76,9 @@ function BibleReaderInner() {
   const readingContextControl = useReadingContext()
   const isAudioPlaying = audioState.isPlaying && audioState.activeSounds.length > 0
 
+  // BB-44 — read-along verse highlighting
+  const { state: bibleAudioState } = useAudioPlayer()
+
   const [searchParams, setSearchParams] = useSearchParams()
 
   const readerBodyRef = useRef<HTMLElement>(null)
@@ -102,6 +107,21 @@ function BibleReaderInner() {
 
   const book = bookSlug ? getBookBySlug(bookSlug) : undefined
   const chapterNumber = chapterParam ? parseInt(chapterParam, 10) : NaN
+
+  // BB-44 — read-along verse highlighting
+  // Only active when the current audio track matches this chapter
+  const isAudioForThisChapter =
+    bibleAudioState.track?.book === bookSlug &&
+    bibleAudioState.track?.chapter === chapterNumber &&
+    bibleAudioState.playbackState !== 'idle' &&
+    bibleAudioState.playbackState !== 'error'
+
+  const readAlongVerse = isAudioForThisChapter ? bibleAudioState.readAlongVerse : null
+
+  useReadAlongScroll({
+    readAlongVerse,
+    enabled: isAudioForThisChapter && bibleAudioState.readAlongEnabled,
+  })
 
   // Reset plan banner dismissed state on chapter change
   useEffect(() => {
@@ -835,6 +855,7 @@ function BibleReaderInner() {
                 freshHighlightVerses={freshHighlightVerses}
                 arrivalHighlightVerses={arrivalHighlightVerses}
                 reducedMotion={reducedMotion}
+                readAlongVerse={readAlongVerse}
               />
             </>
           )}

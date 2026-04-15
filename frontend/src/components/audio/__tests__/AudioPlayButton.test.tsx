@@ -31,6 +31,7 @@ vi.mock('@/lib/audio/audio-cache', async (importOriginal) => {
 })
 vi.mock('@/lib/audio/dbp-client', () => ({
   getChapterAudio: hoisted.getChapterAudio,
+  getChapterTimestamps: vi.fn().mockResolvedValue([]),
 }))
 // BB-27 — AudioPlayerProvider requires AudioProvider; mock its deps
 vi.mock('@/lib/audio-engine', () => {

@@ -53,6 +53,9 @@ import {
   readContinuousPlayback,
   writeContinuousPlayback,
 } from '@/lib/audio/continuous-playback'
+import { readReadAlong, writeReadAlong } from '@/lib/audio/read-along'
+import { getChapterTimestamps } from '@/lib/audio/dbp-client'
+import { getCachedTimestamps, setCachedTimestamps } from '@/lib/audio/timestamps'
 import { SLEEP_FADE_DURATION_MS } from '@/lib/audio/sleep-timer'
 import { BIBLE_BOOKS } from '@/constants/bible'
 import {
@@ -87,6 +90,7 @@ export function AudioPlayerProvider({
     (): AudioPlayerState => ({
       ...initialState,
       continuousPlayback: readContinuousPlayback(),
+      readAlongEnabled: readReadAlong(),
     }),
   )
   const navigate = useNavigate()
@@ -105,6 +109,44 @@ export function AudioPlayerProvider({
   // BB-28 — ref mirror for sleep timer (same pattern)
   const latestSleepTimerRef = useRef(state.sleepTimer)
   latestSleepTimerRef.current = state.sleepTimer
+
+  // BB-44 — fetch timestamps for a track (parallel with audio load)
+  const fetchTimestampsForTrack = useCallback(
+    (track: PlayerTrack, requestId: number) => {
+      const bookCode = resolveFcbhBookCode(track.book)
+      if (!bookCode) {
+        dispatch({ type: 'SET_READ_ALONG_TIMESTAMPS', timestamps: null })
+        return
+      }
+
+      // Check in-memory cache first
+      const cached = getCachedTimestamps(track.filesetId, bookCode, track.chapter)
+      if (cached !== undefined) {
+        if (requestId !== lastPlayRequestIdRef.current) return
+        dispatch({
+          type: 'SET_READ_ALONG_TIMESTAMPS',
+          timestamps: cached.length > 0 ? cached : null,
+        })
+        return
+      }
+
+      // Fetch from DBP (fire-and-forget — doesn't block audio playback)
+      getChapterTimestamps(track.filesetId, bookCode, track.chapter)
+        .then((timestamps) => {
+          if (requestId !== lastPlayRequestIdRef.current) return
+          setCachedTimestamps(track.filesetId, bookCode, track.chapter, timestamps)
+          dispatch({
+            type: 'SET_READ_ALONG_TIMESTAMPS',
+            timestamps: timestamps.length > 0 ? timestamps : null,
+          })
+        })
+        .catch(() => {
+          if (requestId !== lastPlayRequestIdRef.current) return
+          dispatch({ type: 'SET_READ_ALONG_TIMESTAMPS', timestamps: null })
+        })
+    },
+    [],
+  )
 
   // Shared end-of-track handler. Both play() and autoAdvance wire their
   // engine's onEnd here so the continuous-playback gate lives in a single
@@ -144,6 +186,9 @@ export function AudioPlayerProvider({
       clearTickInterval()
 
       dispatch({ type: 'LOAD_START', track })
+
+      // BB-44 — fetch timestamps in parallel with audio load
+      fetchTimestampsForTrack(track, myId)
 
       let newEngine: AudioEngineInstance | null = null
       try {
@@ -194,7 +239,7 @@ export function AudioPlayerProvider({
         dispatch({ type: 'LOAD_ERROR', message: audioErrorMessageFor(err) })
       }
     },
-    [clearTickInterval, startTickInterval],
+    [clearTickInterval, startTickInterval, fetchTimestampsForTrack],
   )
 
   // BB-29 — auto-advance: fetch the next chapter and swap engines in-place
@@ -227,6 +272,10 @@ export function AudioPlayerProvider({
 
       const nextTrack = result.track
       dispatch({ type: 'LOAD_NEXT_CHAPTER_START', track: nextTrack })
+
+      // BB-44 — fetch timestamps for the next chapter
+      fetchTimestampsForTrack(nextTrack, myId)
+
       navigate(`/bible/${nextTrack.book}/${nextTrack.chapter}`, { replace: true })
 
       let newEngine: AudioEngineInstance | null = null
@@ -277,7 +326,7 @@ export function AudioPlayerProvider({
         dispatch({ type: 'LOAD_ERROR', message: audioErrorMessageFor(err) })
       }
     },
-    [clearTickInterval, startTickInterval, navigate, __resolveNextTrackDeps],
+    [clearTickInterval, startTickInterval, navigate, __resolveNextTrackDeps, fetchTimestampsForTrack],
   )
 
   // Wire the shared end-of-track handler on every render so it always
@@ -383,6 +432,11 @@ export function AudioPlayerProvider({
     dispatch({ type: 'SET_CONTINUOUS_PLAYBACK', enabled })
   }, [])
 
+  const setReadAlong = useCallback((enabled: boolean) => {
+    writeReadAlong(enabled)
+    dispatch({ type: 'SET_READ_ALONG', enabled })
+  }, [])
+
   const startFromGenesis = useCallback(async (): Promise<void> => {
     const filesetId = resolveFcbhFilesetForBook('genesis')
     const bookCode = resolveFcbhBookCode('genesis')
@@ -453,6 +507,7 @@ export function AudioPlayerProvider({
       startFromGenesis,
       setSleepTimer,
       cancelSleepTimer,
+      setReadAlong,
     }),
     [
       play,
@@ -469,6 +524,7 @@ export function AudioPlayerProvider({
       startFromGenesis,
       setSleepTimer,
       cancelSleepTimer,
+      setReadAlong,
     ],
   )
 
