@@ -43,6 +43,7 @@ export interface AudioEngineInstance {
   getCurrentTime(): number
   getDuration(): number
   setRate(rate: number): void
+  setVolume(volume: number): void
   destroy(): void
 }
 
@@ -178,6 +179,9 @@ export async function createEngineInstance(
     getDuration: () => howl.duration(),
     setRate: (r: number) => {
       howl.rate(r)
+    },
+    setVolume: (v: number) => {
+      howl.volume(Math.max(0, Math.min(1, v)))
     },
     destroy: () => {
       clearStallTimer()

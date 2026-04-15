@@ -1,203 +1,213 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { SleepTimerPanel } from '../SleepTimerPanel'
+import type { AudioPlayerState, AudioPlayerActions } from '@/types/bible-audio'
 
-// --- Mock Auth ---
-const mockAuth = { isAuthenticated: true, user: { name: 'Eric', id: 'u1' }, login: vi.fn(), logout: vi.fn() }
-vi.mock('@/contexts/AuthContext', () => ({
-  useAuth: () => mockAuth,
-}))
-
-const mockOpenAuthModal = vi.fn()
-vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
-  useAuthModal: () => ({ openAuthModal: mockOpenAuthModal }),
-}))
-
-// --- Mock Audio Provider ---
-const mockSleepTimer = {
-  remainingMs: 0,
-  totalDurationMs: 0,
-  fadeDurationMs: 0,
-  phase: null as 'full-volume' | 'fading' | 'complete' | null,
-  isActive: false,
-  isPaused: false,
-  fadeStatus: 'none' as const,
-  fadeRemainingMs: 0,
-  start: vi.fn(),
+// Mock useAudioPlayer
+const mockActions: AudioPlayerActions = {
+  play: vi.fn(),
   pause: vi.fn(),
-  resume: vi.fn(),
-  cancel: vi.fn(),
+  toggle: vi.fn(),
+  seek: vi.fn(),
+  setSpeed: vi.fn(),
+  stop: vi.fn(),
+  expand: vi.fn(),
+  minimize: vi.fn(),
+  close: vi.fn(),
+  dismissError: vi.fn(),
+  setContinuousPlayback: vi.fn(),
+  startFromGenesis: vi.fn(),
+  setSleepTimer: vi.fn(),
+  cancelSleepTimer: vi.fn(),
 }
 
-const mockDispatch = vi.fn()
+const IDLE_STATE: AudioPlayerState = {
+  track: null,
+  playbackState: 'idle',
+  currentTime: 0,
+  duration: 0,
+  playbackSpeed: 1.0,
+  sheetState: 'expanded',
+  errorMessage: null,
+  continuousPlayback: true,
+  endOfBible: false,
+  sleepTimer: null,
+  sleepFade: null,
+}
 
-vi.mock('@/components/audio/AudioProvider', () => ({
-  useSleepTimerControls: () => mockSleepTimer,
-  useAudioDispatch: () => mockDispatch,
+const PLAYING_STATE: AudioPlayerState = {
+  ...IDLE_STATE,
+  track: {
+    filesetId: 'EN1WEBN2DA',
+    book: 'john',
+    bookDisplayName: 'John',
+    chapter: 3,
+    translation: 'World English Bible',
+    url: 'https://cdn.example.com/JHN/3.mp3',
+  },
+  playbackState: 'playing',
+}
+
+let mockState = IDLE_STATE
+vi.mock('@/hooks/audio/useAudioPlayer', () => ({
+  useAudioPlayer: () => ({ state: mockState, actions: mockActions }),
 }))
 
-function renderPanel(isOpen = true) {
-  const onClose = vi.fn()
-  const result = render(<SleepTimerPanel isOpen={isOpen} onClose={onClose} />)
-  return { ...result, onClose }
-}
+// Mock useFocusTrap — return a ref-like object
+vi.mock('@/hooks/useFocusTrap', () => ({
+  useFocusTrap: () => ({ current: null }),
+}))
 
 describe('SleepTimerPanel', () => {
+  const onClose = vi.fn()
+
   beforeEach(() => {
     vi.clearAllMocks()
-    mockAuth.isAuthenticated = true
-    mockSleepTimer.isActive = false
-    mockSleepTimer.remainingMs = 0
-    mockSleepTimer.totalDurationMs = 0
-    mockSleepTimer.phase = null
+    mockState = IDLE_STATE
   })
 
-  it('renders nothing when closed', () => {
-    renderPanel(false)
-    expect(screen.queryByRole('region')).not.toBeInTheDocument()
-  })
-
-  it('renders duration pills', () => {
-    renderPanel()
-    const durationGroup = screen.getByRole('radiogroup', { name: 'Timer duration' })
-    const radios = Array.from(durationGroup.querySelectorAll('[role="radio"]'))
-    const labels = radios.map((r) => r.textContent)
-    expect(labels).toEqual(['15m', '30m', '45m', '60m', '90m', 'Custom'])
-  })
-
-  it('renders fade duration pills with 10m selected by default', () => {
-    renderPanel()
-    const fadeGroup = screen.getByRole('radiogroup', { name: 'Fade duration' })
-    expect(fadeGroup).toBeInTheDocument()
-
-    const fade10 = screen.getAllByRole('radio').find(
-      (r) => r.textContent === '10m' && r.getAttribute('aria-checked') === 'true',
+  it('renders nothing when isOpen is false', () => {
+    const { container } = render(
+      <SleepTimerPanel isOpen={false} onClose={onClose} />,
     )
-    expect(fade10).toBeTruthy()
+    expect(container.innerHTML).toBe('')
   })
 
-  it('Start Timer disabled until duration selected', () => {
-    renderPanel()
-    const startBtn = screen.getByRole('button', { name: /start sleep timer/i })
-    expect(startBtn).toBeDisabled()
+  it('renders panel with title and presets when open', () => {
+    mockState = PLAYING_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    expect(screen.getByText('Sleep timer')).toBeInTheDocument()
+    expect(screen.getByText('15 min')).toBeInTheDocument()
+    expect(screen.getByText('30 min')).toBeInTheDocument()
+    expect(screen.getByText('45 min')).toBeInTheDocument()
+    expect(screen.getByText('1 hour')).toBeInTheDocument()
+    expect(screen.getByText('1 hr 30 min')).toBeInTheDocument()
+    expect(screen.getByText('2 hours')).toBeInTheDocument()
+    expect(screen.getByText('End of chapter')).toBeInTheDocument()
+    expect(screen.getByText('End of book')).toBeInTheDocument()
   })
 
-  it('Start Timer enabled after selecting duration', async () => {
+  it('shows "Start audio first" when no audio playing', () => {
+    mockState = IDLE_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    expect(
+      screen.getByText('Start audio first, then set a timer'),
+    ).toBeInTheDocument()
+    const presetBtn = screen.getByText('30 min')
+    expect(presetBtn).toBeDisabled()
+  })
+
+  it('shows "Choose how long to listen" when audio playing, no timer', () => {
+    mockState = PLAYING_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    expect(
+      screen.getByText('Choose how long to listen'),
+    ).toBeInTheDocument()
+    const presetBtn = screen.getByText('30 min')
+    expect(presetBtn).not.toBeDisabled()
+  })
+
+  it('clicking a preset calls setSleepTimer and onClose', async () => {
+    mockState = PLAYING_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
     const user = userEvent.setup()
-    renderPanel()
-
-    await user.click(screen.getByText('30m'))
-    const startBtn = screen.getByRole('button', { name: /start 30 minute sleep timer/i })
-    expect(startBtn).toBeEnabled()
-  })
-
-  it('custom input appears when Custom pill selected', async () => {
-    const user = userEvent.setup()
-    renderPanel()
-
-    await user.click(screen.getByText('Custom'))
-    expect(screen.getByPlaceholderText('Minutes (5-480)')).toBeInTheDocument()
-  })
-
-  it('auth modal shown for logged-out user clicking Start Timer', async () => {
-    mockAuth.isAuthenticated = false
-    const user = userEvent.setup()
-    renderPanel()
-
-    await user.click(screen.getByText('30m'))
-    await user.click(screen.getByRole('button', { name: /start 30 minute sleep timer/i }))
-
-    expect(mockOpenAuthModal).toHaveBeenCalledWith('Sign in to use the sleep timer')
-    expect(mockSleepTimer.start).not.toHaveBeenCalled()
-  })
-
-  it('Start Timer calls sleepTimerControls.start with correct ms values', async () => {
-    const user = userEvent.setup()
-    const { onClose } = renderPanel()
-
-    await user.click(screen.getByText('30m'))
-    await user.click(screen.getByRole('button', { name: /start 30 minute sleep timer/i }))
-
-    expect(mockSleepTimer.start).toHaveBeenCalledWith(30 * 60 * 1000, 10 * 60 * 1000)
+    await user.click(screen.getByText('30 min'))
+    expect(mockActions.setSleepTimer).toHaveBeenCalledWith({
+      type: 'duration',
+      remainingMs: 1_800_000,
+      preset: '30',
+    })
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('shows active timer with remaining time', () => {
-    mockSleepTimer.isActive = true
-    mockSleepTimer.remainingMs = 15 * 60 * 1000
-
-    // Need to simulate "started from here" — render, start, then check.
-    // Since the panel tracks startedFromHere internally, for a timer
-    // that was NOT started from this panel, it shows conflict state.
-    // We test the active state indirectly via the start flow.
-    renderPanel()
-    // Timer active but not started from here = conflict state
-    expect(screen.getByText('Timer already running from Music')).toBeInTheDocument()
+  it('shows countdown subtitle when duration timer active', () => {
+    mockState = {
+      ...PLAYING_STATE,
+      sleepTimer: { type: 'duration', remainingMs: 1_500_000, preset: '30' },
+    }
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    expect(screen.getByText('Stopping in 25:00')).toBeInTheDocument()
   })
 
-  it('conflict state shows "Timer already running from Music" and Adjust button', () => {
-    mockSleepTimer.isActive = true
-    mockSleepTimer.remainingMs = 20 * 60 * 1000
-
-    renderPanel()
-    expect(screen.getByText('Timer already running from Music')).toBeInTheDocument()
-    expect(screen.getByText('Adjust')).toBeInTheDocument()
+  it('shows "Ends with chapter" for structural preset', () => {
+    mockState = {
+      ...PLAYING_STATE,
+      sleepTimer: {
+        type: 'end-of-chapter',
+        remainingMs: 0,
+        preset: 'chapter',
+      },
+    }
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    expect(screen.getByText('Ends with chapter')).toBeInTheDocument()
   })
 
-  it('Adjust button opens drawer', async () => {
-    mockSleepTimer.isActive = true
-    mockSleepTimer.remainingMs = 20 * 60 * 1000
+  it('shows "Fading..." during fade', () => {
+    mockState = {
+      ...PLAYING_STATE,
+      sleepFade: { remainingMs: 15_000 },
+    }
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    expect(screen.getByText('Fading...')).toBeInTheDocument()
+  })
+
+  it('highlights the selected preset', () => {
+    mockState = {
+      ...PLAYING_STATE,
+      sleepTimer: { type: 'duration', remainingMs: 1_800_000, preset: '30' },
+    }
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    const selectedBtn = screen.getByText('30 min')
+    expect(selectedBtn.className).toContain('bg-white/15')
+  })
+
+  it('cancel button calls cancelSleepTimer', async () => {
+    mockState = {
+      ...PLAYING_STATE,
+      sleepTimer: { type: 'duration', remainingMs: 1_800_000, preset: '30' },
+    }
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
     const user = userEvent.setup()
+    await user.click(screen.getByText('Cancel timer'))
+    expect(mockActions.cancelSleepTimer).toHaveBeenCalled()
+  })
 
-    const { onClose } = renderPanel()
-    await user.click(screen.getByText('Adjust'))
+  it('cancel button not shown when no timer', () => {
+    mockState = PLAYING_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    expect(screen.queryByText('Cancel timer')).not.toBeInTheDocument()
+  })
 
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'OPEN_DRAWER' })
+  it('scrim click calls onClose', async () => {
+    mockState = PLAYING_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    const user = userEvent.setup()
+    const scrim = document.querySelector('[aria-hidden="true"]')!
+    await user.click(scrim)
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('duration pills use role="radiogroup"', () => {
-    renderPanel()
-    expect(screen.getByRole('radiogroup', { name: 'Timer duration' })).toBeInTheDocument()
+  it('focus trap is applied when open', () => {
+    mockState = PLAYING_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toBeInTheDocument()
   })
 
-  it('fade pills use role="radiogroup"', () => {
-    renderPanel()
-    expect(screen.getByRole('radiogroup', { name: 'Fade duration' })).toBeInTheDocument()
+  it('has correct ARIA attributes', () => {
+    mockState = PLAYING_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toHaveAttribute('aria-modal', 'true')
+    expect(dialog).toHaveAttribute('aria-labelledby', 'sleep-timer-title')
   })
 
-  it('Escape closes panel', async () => {
-    const user = userEvent.setup()
-    const { onClose } = renderPanel()
-
-    await user.keyboard('{Escape}')
-    expect(onClose).toHaveBeenCalled()
-  })
-
-  it('click outside closes panel', async () => {
-    const user = userEvent.setup()
-    const { onClose } = renderPanel()
-
-    await user.click(document.body)
-    expect(onClose).toHaveBeenCalled()
-  })
-
-  it('custom input has accessible name via label association', async () => {
-    const user = userEvent.setup()
-    renderPanel()
-    await user.click(screen.getByRole('radio', { name: 'Custom' }))
-    const input = screen.getByLabelText('Custom timer duration in minutes')
-    expect(input).toBeInTheDocument()
-  })
-
-  it('custom input has aria-invalid for out-of-range value', async () => {
-    const user = userEvent.setup()
-    renderPanel()
-    await user.click(screen.getByRole('radio', { name: 'Custom' }))
-    const input = screen.getByLabelText('Custom timer duration in minutes')
-    await user.type(input, '3')
-    expect(input).toHaveAttribute('aria-invalid', 'true')
+  it('close button has 44x44 outer hit area', () => {
+    mockState = PLAYING_STATE
+    render(<SleepTimerPanel isOpen={true} onClose={onClose} />)
+    const closeBtn = screen.getByRole('button', { name: /close sleep timer/i })
+    expect(closeBtn.className).toContain('h-[44px]')
+    expect(closeBtn.className).toContain('w-[44px]')
   })
 })

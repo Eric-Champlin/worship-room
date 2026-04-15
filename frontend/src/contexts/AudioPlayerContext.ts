@@ -16,7 +16,9 @@ import type {
   AudioPlayerState,
   PlaybackSpeed,
   PlayerTrack,
+  SleepTimerInfo,
 } from '@/types/bible-audio'
+import { SLEEP_FADE_DURATION_MS } from '@/lib/audio/sleep-timer'
 
 export type Action =
   | { type: 'LOAD_START'; track: PlayerTrack }
@@ -35,6 +37,10 @@ export type Action =
   | { type: 'DISMISS_ERROR' }
   | { type: 'SET_CONTINUOUS_PLAYBACK'; enabled: boolean }
   | { type: 'END_OF_BIBLE' }
+  // BB-28 — sleep timer
+  | { type: 'SET_SLEEP_TIMER'; timer: SleepTimerInfo }
+  | { type: 'START_SLEEP_FADE' }
+  | { type: 'CANCEL_SLEEP_TIMER' }
 
 export const initialState: AudioPlayerState = {
   track: null,
@@ -46,6 +52,8 @@ export const initialState: AudioPlayerState = {
   errorMessage: null,
   continuousPlayback: true,
   endOfBible: false,
+  sleepTimer: null,
+  sleepFade: null,
 }
 
 export function reducer(state: AudioPlayerState, action: Action): AudioPlayerState {
@@ -81,8 +89,32 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
       return { ...state, playbackState: 'playing' }
     case 'PAUSE':
       return { ...state, playbackState: 'paused' }
-    case 'TICK':
-      return { ...state, currentTime: action.currentTime }
+    case 'TICK': {
+      let sleepTimer = state.sleepTimer
+      let sleepFade = state.sleepFade
+      let fadeJustStarted = false
+
+      // Duration timer countdown (ticks even during pause)
+      if (sleepTimer?.type === 'duration') {
+        const newRemaining = sleepTimer.remainingMs - 200
+        if (newRemaining <= 0) {
+          // Timer expired — transition to fade phase
+          sleepTimer = null
+          sleepFade = { remainingMs: SLEEP_FADE_DURATION_MS }
+          fadeJustStarted = true
+        } else {
+          sleepTimer = { ...sleepTimer, remainingMs: newRemaining }
+        }
+      }
+
+      // Fade countdown (skip on the tick that just created the fade)
+      if (sleepFade && !fadeJustStarted) {
+        const newRemaining = Math.max(0, sleepFade.remainingMs - 200)
+        sleepFade = { remainingMs: newRemaining }
+      }
+
+      return { ...state, currentTime: action.currentTime, sleepTimer, sleepFade }
+    }
     case 'SEEK':
       return { ...state, currentTime: action.seconds }
     case 'SET_SPEED':
@@ -92,6 +124,8 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         ...state,
         playbackState: 'idle',
         currentTime: 0,
+        sleepTimer: null,
+        sleepFade: null,
       }
     case 'EXPAND':
       return { ...state, sheetState: 'expanded' }
@@ -107,6 +141,8 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         sheetState: 'closed',
         errorMessage: null,
         endOfBible: false,
+        sleepTimer: null,
+        sleepFade: null,
       }
     case 'DISMISS_ERROR':
       return { ...state, playbackState: 'idle', errorMessage: null }
@@ -118,8 +154,17 @@ export function reducer(state: AudioPlayerState, action: Action): AudioPlayerSta
         playbackState: 'idle',
         currentTime: 0,
         endOfBible: true,
+        sleepTimer: null,
+        sleepFade: null,
         // track + sheetState preserved so "Revelation 22" stays visible.
       }
+    // BB-28 — sleep timer actions
+    case 'SET_SLEEP_TIMER':
+      return { ...state, sleepTimer: action.timer, sleepFade: null }
+    case 'START_SLEEP_FADE':
+      return { ...state, sleepTimer: null, sleepFade: { remainingMs: SLEEP_FADE_DURATION_MS } }
+    case 'CANCEL_SLEEP_TIMER':
+      return { ...state, sleepTimer: null, sleepFade: null }
     default:
       return state
   }

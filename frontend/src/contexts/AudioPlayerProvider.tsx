@@ -40,6 +40,7 @@ import type {
   AudioPlayerState,
   PlaybackSpeed,
   PlayerTrack,
+  SleepTimerInfo,
 } from '@/types/bible-audio'
 import type { AudioEngineInstance } from '@/lib/audio/engine'
 import { audioErrorMessageFor } from '@/lib/audio/error-messages'
@@ -51,6 +52,8 @@ import {
   readContinuousPlayback,
   writeContinuousPlayback,
 } from '@/lib/audio/continuous-playback'
+import { SLEEP_FADE_DURATION_MS } from '@/lib/audio/sleep-timer'
+import { BIBLE_BOOKS } from '@/constants/bible'
 import {
   resolveNextTrack,
   type ResolveNextTrackDeps,
@@ -97,6 +100,10 @@ export function AudioPlayerProvider({
   // value instead of capturing a stale one. Updated on every render.
   const latestContinuousPlaybackRef = useRef(state.continuousPlayback)
   latestContinuousPlaybackRef.current = state.continuousPlayback
+
+  // BB-28 — ref mirror for sleep timer (same pattern)
+  const latestSleepTimerRef = useRef(state.sleepTimer)
+  latestSleepTimerRef.current = state.sleepTimer
 
   // Shared end-of-track handler. Both play() and autoAdvance wire their
   // engine's onEnd here so the continuous-playback gate lives in a single
@@ -274,7 +281,27 @@ export function AudioPlayerProvider({
 
   // Wire the shared end-of-track handler on every render so it always
   // reflects the latest autoAdvance closure and the latest preference.
+  // BB-28 extends this to handle structural sleep timer presets.
   handleEndRef.current = (endedTrack: PlayerTrack) => {
+    const timer = latestSleepTimerRef.current
+
+    if (timer?.type === 'end-of-chapter') {
+      dispatch({ type: 'START_SLEEP_FADE' })
+      return
+    }
+
+    if (timer?.type === 'end-of-book') {
+      const book = BIBLE_BOOKS.find((b) => b.slug === endedTrack.book)
+      if (book && endedTrack.chapter >= book.chapters) {
+        dispatch({ type: 'START_SLEEP_FADE' })
+        return
+      }
+      // Not last chapter of book — force auto-advance within book
+      void autoAdvance(endedTrack)
+      return
+    }
+
+    // Normal behavior (duration timer continues counting, or no timer)
     if (latestContinuousPlaybackRef.current) {
       void autoAdvance(endedTrack)
     } else {
@@ -365,6 +392,29 @@ export function AudioPlayerProvider({
     navigate('/bible/genesis/1', { replace: true })
   }, [play, navigate])
 
+  // BB-28 — sleep timer action callbacks
+  const setSleepTimer = useCallback((timer: SleepTimerInfo) => {
+    dispatch({ type: 'SET_SLEEP_TIMER', timer })
+  }, [])
+
+  const cancelSleepTimer = useCallback(() => {
+    // Restore volume before clearing state
+    engineRef.current?.setVolume(1.0)
+    dispatch({ type: 'CANCEL_SLEEP_TIMER' })
+  }, [])
+
+  // BB-28 — fade volume management via useEffect
+  useEffect(() => {
+    if (!state.sleepFade || !engineRef.current) return
+    const { remainingMs } = state.sleepFade
+    const progress = (SLEEP_FADE_DURATION_MS - remainingMs) / SLEEP_FADE_DURATION_MS
+    const volume = Math.pow(1 - progress, 2)
+    engineRef.current.setVolume(volume)
+    if (remainingMs <= 0) {
+      stop()
+    }
+  }, [state.sleepFade, stop])
+
   const actions = useMemo<AudioPlayerActions>(
     () => ({
       play,
@@ -379,6 +429,8 @@ export function AudioPlayerProvider({
       dismissError,
       setContinuousPlayback,
       startFromGenesis,
+      setSleepTimer,
+      cancelSleepTimer,
     }),
     [
       play,
@@ -393,6 +445,8 @@ export function AudioPlayerProvider({
       dismissError,
       setContinuousPlayback,
       startFromGenesis,
+      setSleepTimer,
+      cancelSleepTimer,
     ],
   )
 

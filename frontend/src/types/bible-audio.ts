@@ -69,6 +69,18 @@ export interface PlayerTrack {
 
 export type SheetState = 'closed' | 'minimized' | 'expanded'
 
+/** BB-28 — sleep timer countdown state. */
+export interface SleepTimerInfo {
+  type: 'duration' | 'end-of-chapter' | 'end-of-book'
+  remainingMs: number
+  preset: string
+}
+
+/** BB-28 — sleep fade-out state. */
+export interface SleepFadeInfo {
+  remainingMs: number
+}
+
 export interface AudioPlayerState {
   track: PlayerTrack | null
   playbackState: PlaybackState
@@ -80,6 +92,9 @@ export interface AudioPlayerState {
   // BB-29 — continuous playback / auto-advance
   continuousPlayback: boolean
   endOfBible: boolean
+  // BB-28 — sleep timer
+  sleepTimer: SleepTimerInfo | null
+  sleepFade: SleepFadeInfo | null
 }
 
 /**
@@ -100,4 +115,7 @@ export interface AudioPlayerActions {
   // BB-29 — continuous playback / auto-advance
   setContinuousPlayback: (enabled: boolean) => void
   startFromGenesis: () => Promise<void>
+  // BB-28 — sleep timer
+  setSleepTimer: (timer: SleepTimerInfo) => void
+  cancelSleepTimer: () => void
 }

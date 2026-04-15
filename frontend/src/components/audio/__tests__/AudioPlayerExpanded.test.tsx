@@ -20,6 +20,8 @@ const mockState: AudioPlayerState = {
   errorMessage: null,
   continuousPlayback: true,
   endOfBible: false,
+  sleepTimer: null,
+  sleepFade: null,
 }
 
 const mockActions = {
@@ -35,6 +37,8 @@ const mockActions = {
   dismissError: vi.fn(),
   setContinuousPlayback: vi.fn(),
   startFromGenesis: vi.fn(),
+  setSleepTimer: vi.fn(),
+  cancelSleepTimer: vi.fn(),
 }
 
 vi.mock('@/hooks/audio/useAudioPlayer', () => ({
@@ -60,6 +64,8 @@ function resetMockState() {
   mockState.errorMessage = null
   mockState.continuousPlayback = true
   mockState.endOfBible = false
+  mockState.sleepTimer = null
+  mockState.sleepFade = null
 }
 
 describe('AudioPlayerExpanded (BB-26)', () => {
@@ -322,5 +328,74 @@ describe('AudioPlayerExpanded (BB-29) — end-of-Bible state', () => {
       name: 'Start playback from Genesis 1',
     })
     expect(document.activeElement).toBe(btn)
+  })
+})
+
+describe('AudioPlayerExpanded (BB-28) — sleep timer', () => {
+  beforeEach(() => {
+    resetMockState()
+    Object.values(mockActions).forEach((fn) => fn.mockClear())
+  })
+
+  afterEach(() => cleanup())
+
+  it('renders moon button in corner row', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.getByRole('button', { name: 'Set sleep timer' })).toBeInTheDocument()
+  })
+
+  it('moon button shows active state when timer set', () => {
+    mockState.sleepTimer = { type: 'duration', remainingMs: 900_000, preset: '15' }
+    render(<AudioPlayerExpanded />)
+    expect(
+      screen.getByRole('button', { name: /sleep timer active/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('clicking moon button opens SleepTimerPanel', async () => {
+    const user = userEvent.setup()
+    render(<AudioPlayerExpanded />)
+    await user.click(screen.getByRole('button', { name: 'Set sleep timer' }))
+    expect(screen.getByRole('dialog', { name: /sleep timer/i })).toBeInTheDocument()
+  })
+
+  it('sleep timer indicator shows countdown when duration timer active', () => {
+    mockState.sleepTimer = { type: 'duration', remainingMs: 90_000, preset: '15' }
+    render(<AudioPlayerExpanded />)
+    expect(screen.getByText('1:30')).toBeInTheDocument()
+  })
+
+  it('sleep timer indicator shows "Ends with chapter"', () => {
+    mockState.sleepTimer = { type: 'end-of-chapter', remainingMs: 0, preset: 'chapter' }
+    render(<AudioPlayerExpanded />)
+    expect(screen.getByText('Ends with chapter')).toBeInTheDocument()
+  })
+
+  it('sleep timer indicator shows "Fading..."', () => {
+    mockState.sleepFade = { remainingMs: 15_000 }
+    render(<AudioPlayerExpanded />)
+    expect(screen.getByText('Fading...')).toBeInTheDocument()
+  })
+
+  it('clicking indicator opens panel', async () => {
+    const user = userEvent.setup()
+    mockState.sleepTimer = { type: 'duration', remainingMs: 90_000, preset: '15' }
+    render(<AudioPlayerExpanded />)
+    await user.click(screen.getByText('1:30'))
+    expect(screen.getByRole('dialog', { name: /sleep timer/i })).toBeInTheDocument()
+  })
+
+  it('indicator has aria-live="polite"', () => {
+    mockState.sleepTimer = { type: 'duration', remainingMs: 90_000, preset: '15' }
+    render(<AudioPlayerExpanded />)
+    const indicator = screen.getByRole('button', { name: /sleep timer:.*remaining/i })
+    expect(indicator).toHaveAttribute('aria-live', 'polite')
+  })
+
+  it('no indicator when no timer active', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.queryByText('Fading...')).toBeNull()
+    expect(screen.queryByText('Ends with chapter')).toBeNull()
+    expect(screen.queryByText('Ends with book')).toBeNull()
   })
 })

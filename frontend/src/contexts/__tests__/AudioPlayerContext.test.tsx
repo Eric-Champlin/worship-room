@@ -24,6 +24,7 @@ type EngineStub = {
   getCurrentTime: ReturnType<typeof vi.fn>
   getDuration: ReturnType<typeof vi.fn>
   setRate: ReturnType<typeof vi.fn>
+  setVolume: ReturnType<typeof vi.fn>
   destroy: ReturnType<typeof vi.fn>
   events: EngineEvents
 }
@@ -44,6 +45,7 @@ function makeEngineStub(events: EngineEvents): EngineStub {
     getCurrentTime: vi.fn().mockReturnValue(0),
     getDuration: vi.fn().mockReturnValue(180),
     setRate: vi.fn(),
+    setVolume: vi.fn(),
     destroy: vi.fn(),
     events,
   }
@@ -132,6 +134,8 @@ describe('AudioPlayerContext reducer (BB-26)', () => {
     errorMessage: null,
     continuousPlayback: true,
     endOfBible: false,
+    sleepTimer: null,
+    sleepFade: null,
   }
 
   it('LOAD_START transitions to loading with track set and sheet expanded', () => {
@@ -180,6 +184,8 @@ describe('AudioPlayerContext reducer (BB-29 — auto-advance)', () => {
     errorMessage: null,
     continuousPlayback: true,
     endOfBible: false,
+    sleepTimer: null,
+    sleepFade: null,
   }
 
   it('LOAD_NEXT_CHAPTER_START preserves minimized sheetState', () => {
@@ -1014,5 +1020,207 @@ describe('AudioPlayerProvider BB-29 — auto-advance + preference lifecycle', ()
     // Track unchanged — no adjacent chapter before Genesis 1
     expect(result.current.state.track?.book).toBe('genesis')
     expect(result.current.state.track?.chapter).toBe(1)
+  })
+})
+
+// ─── BB-28 — Sleep timer reducer tests ─────────────────────────────
+
+describe('AudioPlayerContext reducer (BB-28 — sleep timer)', () => {
+  const init: AudioPlayerState = {
+    track: null,
+    playbackState: 'idle',
+    currentTime: 0,
+    duration: 0,
+    playbackSpeed: 1.0,
+    sheetState: 'closed',
+    errorMessage: null,
+    continuousPlayback: true,
+    endOfBible: false,
+    sleepTimer: null,
+    sleepFade: null,
+  }
+
+  const TIMER_30: import('@/types/bible-audio').SleepTimerInfo = {
+    type: 'duration',
+    remainingMs: 1_800_000,
+    preset: '30',
+  }
+
+  const TIMER_CHAPTER: import('@/types/bible-audio').SleepTimerInfo = {
+    type: 'end-of-chapter',
+    remainingMs: 0,
+    preset: 'chapter',
+  }
+
+  it('SET_SLEEP_TIMER sets timer and clears fade', () => {
+    const state = { ...init, sleepFade: { remainingMs: 5000 } }
+    const s = reducer(state, { type: 'SET_SLEEP_TIMER', timer: TIMER_30 })
+    expect(s.sleepTimer).toEqual(TIMER_30)
+    expect(s.sleepFade).toBeNull()
+  })
+
+  it('SET_SLEEP_TIMER replaces existing timer', () => {
+    const state = { ...init, sleepTimer: TIMER_CHAPTER }
+    const s = reducer(state, { type: 'SET_SLEEP_TIMER', timer: TIMER_30 })
+    expect(s.sleepTimer).toEqual(TIMER_30)
+  })
+
+  it('TICK decrements duration timer', () => {
+    const state = { ...init, sleepTimer: { ...TIMER_30, remainingMs: 10_000 } }
+    const s = reducer(state, { type: 'TICK', currentTime: 5 })
+    expect(s.sleepTimer?.remainingMs).toBe(9_800)
+  })
+
+  it('TICK transitions to fade when timer hits 0', () => {
+    const state = { ...init, sleepTimer: { ...TIMER_30, remainingMs: 200 } }
+    const s = reducer(state, { type: 'TICK', currentTime: 5 })
+    expect(s.sleepTimer).toBeNull()
+    expect(s.sleepFade).toEqual({ remainingMs: 20_000 })
+  })
+
+  it('TICK decrements fade', () => {
+    const state = { ...init, sleepFade: { remainingMs: 5000 } }
+    const s = reducer(state, { type: 'TICK', currentTime: 5 })
+    expect(s.sleepFade?.remainingMs).toBe(4800)
+  })
+
+  it('TICK does not decrement structural timer', () => {
+    const state = { ...init, sleepTimer: TIMER_CHAPTER }
+    const s = reducer(state, { type: 'TICK', currentTime: 5 })
+    expect(s.sleepTimer?.remainingMs).toBe(0)
+  })
+
+  it('START_SLEEP_FADE clears timer and sets fade', () => {
+    const state = { ...init, sleepTimer: TIMER_30 }
+    const s = reducer(state, { type: 'START_SLEEP_FADE' })
+    expect(s.sleepTimer).toBeNull()
+    expect(s.sleepFade).toEqual({ remainingMs: 20_000 })
+  })
+
+  it('CANCEL_SLEEP_TIMER clears both', () => {
+    const state = {
+      ...init,
+      sleepTimer: TIMER_30,
+      sleepFade: { remainingMs: 5000 },
+    }
+    const s = reducer(state, { type: 'CANCEL_SLEEP_TIMER' })
+    expect(s.sleepTimer).toBeNull()
+    expect(s.sleepFade).toBeNull()
+  })
+
+  it('STOP clears timer and fade', () => {
+    const state = {
+      ...init,
+      sleepTimer: TIMER_30,
+      sleepFade: { remainingMs: 5000 },
+    }
+    const s = reducer(state, { type: 'STOP' })
+    expect(s.sleepTimer).toBeNull()
+    expect(s.sleepFade).toBeNull()
+  })
+
+  it('CLOSE clears timer and fade', () => {
+    const state = {
+      ...init,
+      sleepTimer: TIMER_30,
+      sleepFade: { remainingMs: 5000 },
+    }
+    const s = reducer(state, { type: 'CLOSE' })
+    expect(s.sleepTimer).toBeNull()
+    expect(s.sleepFade).toBeNull()
+  })
+
+  it('END_OF_BIBLE clears timer and fade', () => {
+    const state = {
+      ...init,
+      sleepTimer: TIMER_30,
+      sleepFade: { remainingMs: 5000 },
+    }
+    const s = reducer(state, { type: 'END_OF_BIBLE' })
+    expect(s.sleepTimer).toBeNull()
+    expect(s.sleepFade).toBeNull()
+  })
+})
+
+// ─── BB-28 — Sleep timer provider integration tests ────────────────
+
+describe('AudioPlayerProvider BB-28 — sleep timer lifecycle', () => {
+  beforeEach(() => {
+    createdEngines.length = 0
+    pendingResolvers.length = 0
+    deferMode = false
+    nextOverride = null
+    localStorage.clear()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+  })
+
+  afterEach(() => {
+    cleanup()
+    vi.useRealTimers()
+  })
+
+  // Stub deps so resolveNextTrack never hits real DBP
+  const bb28Deps: ResolveNextTrackDeps = {
+    getAdjacentChapter: () => null,
+    resolveFcbhBookCode: () => null,
+    resolveFcbhFilesetForBook: () => null,
+    getChapterAudio: async () => ({ book: 'JHN', chapter: 1, url: 'https://cdn.example.com/JHN/1.mp3' }),
+    getCachedChapterAudio: () => null,
+    setCachedChapterAudio: () => {},
+  }
+
+  function renderBB28Provider() {
+    return renderHook(() => useContext(AudioPlayerContext), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <MemoryRouter initialEntries={['/bible/john/3']}>
+          <AudioPlayerProvider __resolveNextTrackDeps={bb28Deps}>
+            {children}
+          </AudioPlayerProvider>
+        </MemoryRouter>
+      ),
+    })
+  }
+
+  it('provider setSleepTimer updates state', async () => {
+    const { result } = renderBB28Provider()
+    await act(async () => {
+      await result.current!.actions.play(TRACK_A)
+    })
+    await flush()
+
+    act(() => {
+      result.current!.actions.setSleepTimer({
+        type: 'duration',
+        remainingMs: 1_800_000,
+        preset: '30',
+      })
+    })
+
+    expect(result.current!.state.sleepTimer).toEqual({
+      type: 'duration',
+      remainingMs: 1_800_000,
+      preset: '30',
+    })
+  })
+
+  it('provider cancelSleepTimer clears timer and fade state', async () => {
+    const { result } = renderBB28Provider()
+
+    // Set a timer without requiring engine (setSleepTimer is dispatch-only)
+    act(() => {
+      result.current!.actions.setSleepTimer({
+        type: 'duration',
+        remainingMs: 1_800_000,
+        preset: '30',
+      })
+    })
+    expect(result.current!.state.sleepTimer).not.toBeNull()
+
+    act(() => {
+      result.current!.actions.cancelSleepTimer()
+    })
+
+    expect(result.current!.state.sleepTimer).toBeNull()
+    expect(result.current!.state.sleepFade).toBeNull()
   })
 })
