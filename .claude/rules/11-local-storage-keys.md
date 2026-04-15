@@ -139,7 +139,21 @@ Cache entries for AI features (Explain this passage, Reflect on this passage). M
 - **Version:** the `bb32-v1` key prefix allows future invalidation. Bumping to `bb32-v2` in a later spec will orphan all existing entries, and the version mismatch on `entry.v` will catch any survivors.
 - **Failure mode:** all cache operations are wrapped in try/catch. Private browsing, quota exceeded, and disabled localStorage all degrade to no-op behavior — the cache is a courtesy layer, never a guarantee. Cache failures never propagate to the UI.
 - **Not cached:** error results. Network errors, API errors, safety blocks, timeouts, key-missing — retrying after a transient failure should fire a fresh request, not return the old failure for 7 days.
- 
+
+### Audio Cache (BB-26)
+
+Cache entries for BB-26 Bible audio playback. Managed by `frontend/src/lib/audio/audio-cache.ts`. Uses the `bb26-v1:` prefix, mirroring the BB-32 AI cache convention — namespaced as a self-contained pool managed by the cache module's version logic.
+
+| Key                   | Type                    | Feature                                                    |
+| --------------------- | ----------------------- | ---------------------------------------------------------- |
+| `bb26-v1:audioBibles` | `AudioBiblesCacheEntry` | Cached DBP `listAudioBibles()` response (BB-26), 7-day TTL |
+
+- **TTL:** 7 days from `createdAt`. Expired entries return null on read.
+- **Cleanup:** Cache corruption or version mismatch returns null and removes the key as a side effect. `clearCachedAudioBibles()` provides explicit cleanup.
+- **Scope:** The only BB-26 localStorage key. Per-chapter audio URLs are held in an in-memory `Map<string, DbpChapterAudio>` keyed by `${filesetId}:${book}:${chapter}` and are NOT persisted — DBP URLs are signed and expire ~15 hours after issue, so persisting them would serve stale URLs on next visit.
+- **Version:** `bb26-v1` prefix allows future invalidation by bumping to `bb26-v2`.
+- **Failure mode:** all localStorage operations are wrapped in `safeLocalStorageGet/Set/Remove` try/catch helpers. Private browsing, quota exceeded, and disabled storage all degrade to no-op behavior. The stale-while-revalidate wrapper `loadAudioBibles()` falls back to stale cache data if the DBP fetch fails, or rethrows if no cache exists.
+
 ### Community Challenges
  
 | Key                        | Type                             | Feature                          |

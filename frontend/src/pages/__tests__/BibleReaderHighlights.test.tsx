@@ -1,6 +1,18 @@
 import { render, screen, waitFor, fireEvent, cleanup } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
+
+// BB-26: mock env + audio modules so ReaderChrome's AudioPlayButton renders null
+vi.mock('@/lib/env', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return { ...actual, isFcbhApiKeyConfigured: () => false }
+})
+vi.mock('@/lib/audio/engine', () => ({ createEngineInstance: vi.fn() }))
+vi.mock('@/lib/audio/media-session', () => ({
+  updateMediaSession: vi.fn(),
+  clearMediaSession: vi.fn(),
+}))
 
 // ---------------------------------------------------------------------------
 // Mocks — aligned to the current BibleReader imports (BB-38+ architecture)
@@ -113,9 +125,11 @@ import { BibleReader } from '../BibleReader'
 function renderReader(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <Routes>
-        <Route path="/bible/:book/:chapter" element={<BibleReader />} />
-      </Routes>
+      <AudioPlayerProvider>
+        <Routes>
+          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
+        </Routes>
+      </AudioPlayerProvider>
     </MemoryRouter>,
   )
 }
@@ -210,9 +224,11 @@ describe('BibleReader — Highlighting Integration', () => {
     // Re-render with a different verse (simulates URL-driven verse change)
     rerender(
       <MemoryRouter initialEntries={['/bible/genesis/1?verse=2&action=highlight']}>
-        <Routes>
-          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
-        </Routes>
+        <AudioPlayerProvider>
+          <Routes>
+            <Route path="/bible/:book/:chapter" element={<BibleReader />} />
+          </Routes>
+        </AudioPlayerProvider>
       </MemoryRouter>,
     )
 

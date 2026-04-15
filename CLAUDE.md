@@ -93,7 +93,7 @@ Mood Check-In (5 moods, crisis detection, mood-to-content recommendations), Pray
 - **Verse Memorization Deck (BB-45)** — Quiet flip-card memorization. No quiz, no scoring, no spaced repetition
 - **Verse Echoes (BB-46)** — Contextual callbacks to past engagement, surfaced on home and Daily Hub
 - **Web Push Notifications (BB-41)** — Daily verse and gentle streak reminders. iOS Safari 16.4+ via PWA install
-- **Bible Audio** — TTS chapter playback (BB-26-29 cluster currently deferred pending FCBH API key)
+- **Bible Audio (BB-26)** — FCBH DBP v4 audio playback via Howler.js with a non-modal bottom-sheet player (expanded + minimized states), lazy-loaded engine, rapid-navigation supersession, Media Session integration, scrubber, 5-speed picker, FCBH attribution footer. Ships the dramatized WEB (ENGWWH variant, `EN1WEBN2DA`/`EN1WEBO2DA` filesets) with full 66-book coverage. Ambient layering (BB-27), sleep timer (BB-28), auto-advance (BB-29), and read-along highlighting (BB-44) are follow-on specs.
 - **Verse of the Day** — 60 verses with daily rotation, shareable Canvas image
  
 ### Devotional & Reading

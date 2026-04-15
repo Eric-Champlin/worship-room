@@ -19,6 +19,16 @@ import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary'
 import { WhisperToastProvider } from '@/components/ui/WhisperToast'
+import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
+
+// BB-26: AudioPlayerSheet is lazy-imported so the player JSX (and Howler,
+// indirectly via the engine module) stays out of the main bundle until a
+// user first hits play.
+const AudioPlayerSheet = lazy(() =>
+  import('@/components/audio/AudioPlayerSheet').then((m) => ({
+    default: m.AudioPlayerSheet,
+  })),
+)
 import { MidnightVerse } from '@/components/MidnightVerse'
 import {
   DashboardSkeleton,
@@ -204,6 +214,10 @@ function App() {
         <ToastProvider>
         <AuthModalProvider>
         <AudioProvider>
+        <AudioPlayerProvider>
+        <Suspense fallback={null}>
+          <AudioPlayerSheet />
+        </Suspense>
         <WhisperToastProvider>
         <MidnightVerse />
         <UpdatePrompt />
@@ -276,6 +290,7 @@ function App() {
         </Suspense>
         </ChunkErrorBoundary>
         </WhisperToastProvider>
+        </AudioPlayerProvider>
         </AudioProvider>
         </AuthModalProvider>
         </ToastProvider>

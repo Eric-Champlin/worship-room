@@ -25,6 +25,18 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { BibleReader } from '../BibleReader'
+import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
+
+// BB-26: mock env + audio modules so ReaderChrome's AudioPlayButton renders null
+vi.mock('@/lib/env', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return { ...actual, isFcbhApiKeyConfigured: () => false }
+})
+vi.mock('@/lib/audio/engine', () => ({ createEngineInstance: vi.fn() }))
+vi.mock('@/lib/audio/media-session', () => ({
+  updateMediaSession: vi.fn(),
+  clearMediaSession: vi.fn(),
+}))
 
 // ---------------------------------------------------------------------------
 // Auth mock
@@ -234,9 +246,11 @@ vi.mock('@/components/daily/CrisisBanner', () => ({
 function renderReader(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <Routes>
-        <Route path="/bible/:book/:chapter" element={<BibleReader />} />
-      </Routes>
+      <AudioPlayerProvider>
+        <Routes>
+          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
+        </Routes>
+      </AudioPlayerProvider>
     </MemoryRouter>,
   )
 }

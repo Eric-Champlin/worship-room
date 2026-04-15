@@ -27,6 +27,22 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { BibleReader } from '../BibleReader'
+import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
+
+// BB-26: the AudioPlayButton in ReaderChrome consumes AudioPlayerContext.
+// Stub the FCBH key so the button renders null and doesn't disrupt existing
+// ambient-audio integration assertions.
+vi.mock('@/lib/env', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return { ...actual, isFcbhApiKeyConfigured: () => false }
+})
+vi.mock('@/lib/audio/engine', () => ({
+  createEngineInstance: vi.fn(),
+}))
+vi.mock('@/lib/audio/media-session', () => ({
+  updateMediaSession: vi.fn(),
+  clearMediaSession: vi.fn(),
+}))
 
 // --- Data mock: loadChapterWeb (replaces old loadChapter mock) ---
 vi.mock('@/data/bible', async (importOriginal) => {
@@ -145,10 +161,12 @@ vi.mock('@/components/audio/AudioProvider', () => ({
 function renderReader(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <Routes>
-        <Route path="/bible/:book/:chapter" element={<BibleReader />} />
-        <Route path="/bible" element={<div>Browser</div>} />
-      </Routes>
+      <AudioPlayerProvider>
+        <Routes>
+          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
+          <Route path="/bible" element={<div>Browser</div>} />
+        </Routes>
+      </AudioPlayerProvider>
     </MemoryRouter>,
   )
 }

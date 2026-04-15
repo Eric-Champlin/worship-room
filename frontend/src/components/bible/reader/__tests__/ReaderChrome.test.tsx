@@ -4,13 +4,29 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ReaderChrome } from '../ReaderChrome'
 import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
+import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import { createRef } from 'react'
+
+// BB-26: AudioPlayButton mounts inside ReaderChrome. Stub the env so the
+// button stays null and doesn't disturb existing ReaderChrome tests.
+vi.mock('@/lib/env', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return { ...actual, isFcbhApiKeyConfigured: () => false }
+})
+vi.mock('@/lib/audio/engine', () => ({
+  createEngineInstance: vi.fn(),
+}))
+vi.mock('@/lib/audio/media-session', () => ({
+  updateMediaSession: vi.fn(),
+  clearMediaSession: vi.fn(),
+}))
 
 function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
   const aaRef = createRef<HTMLButtonElement>()
   const audioButtonRef = createRef<HTMLButtonElement>()
   return render(
     <MemoryRouter>
+      <AudioPlayerProvider>
       <BibleDrawerProvider>
         <ReaderChrome
           bookName="John"
@@ -32,6 +48,7 @@ function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
           reducedMotion={props?.reducedMotion ?? false}
         />
       </BibleDrawerProvider>
+      </AudioPlayerProvider>
     </MemoryRouter>,
   )
 }

@@ -862,4 +862,4 @@ Use when the feature is truly non-essential and the error is expected/common. Ex
  
 - **Footer touch targets**: Crisis resource links and App Store badges (40px) undersized on mobile (44px minimum). Pre-existing.
 - **Spotify embed loading**: May show fallback in headless/restricted environments.
-- **Audio cluster (BB-26 through BB-29, BB-44)**: Deferred pending FCBH API key. Will get a separate BB-37c audit when shipped — NOT a re-run of BB-37b.
+- **Audio cluster (BB-27, BB-28, BB-29, BB-44)**: BB-26 shipped the foundation (FCBH DBP v4 client, bottom-sheet player, Media Session). BB-27 (ambient layering / ducking), BB-28 (sleep timer), BB-29 (continuous playback / auto-advance), and BB-44 (read-along verse highlighting) remain as follow-on specs that build on BB-26's `useAudioPlayer` hook. BB-26 introduces a documented BB-27 CORS dependency: `crossOrigin='anonymous'` is pre-emptively set on Howler's internal `<audio>` element in `lib/audio/engine.ts` — if that line is removed, BB-27 ducking will silently break.
