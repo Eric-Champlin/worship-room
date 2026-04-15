@@ -44,6 +44,12 @@ export interface AudioRoutine {
   sleepTimerConfig: { durationMinutes: number; fadeDurationMinutes: number }
 }
 
+/** BB-27 — snapshot of ambient state captured when Bible audio pauses ambient */
+export interface PausedByBibleAudioSnapshot {
+  activeSounds: Array<{ soundId: string; volume: number; label: string }>
+  masterVolume: number
+}
+
 export interface AudioState {
   activeSounds: ActiveSound[]
   foregroundContent: ForegroundContent | null
@@ -60,6 +66,8 @@ export interface AudioState {
   foregroundEndedCounter: number
   /** Bible reader reading context for media session metadata (BB-20) */
   readingContext: { book: string; chapter: number } | null
+  /** BB-27 — ambient state snapshot captured when Bible audio triggers pause */
+  pausedByBibleAudio: PausedByBibleAudioSnapshot | null
 }
 
 export type AudioAction =
@@ -94,3 +102,5 @@ export type AudioAction =
   | { type: 'SET_SCENE_NAME'; payload: { sceneName: string | null; sceneId: string | null } }
   | { type: 'SET_READING_CONTEXT'; payload: { book: string; chapter: number } }
   | { type: 'CLEAR_READING_CONTEXT' }
+  | { type: 'PAUSE_BY_BIBLE_AUDIO' }
+  | { type: 'RESUME_FROM_BIBLE_AUDIO' }

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, cleanup, render, renderHook, waitFor } from '@testing-library/react'
 import { useContext, type ReactNode } from 'react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
+import { AudioProvider } from '@/components/audio/AudioProvider'
 import { AudioPlayerContext, reducer } from '@/contexts/AudioPlayerContext'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import type {
@@ -77,6 +78,35 @@ const latestMediaSessionHandlers: {
   current: { onNextTrack?: () => void; onPrevTrack?: () => void } | null
 } = { current: null }
 
+// BB-27 — AudioPlayerProvider now requires AudioProvider as a parent.
+// Mock AudioEngineService and its dependencies so AudioProvider works in tests.
+vi.mock('@/lib/audio-engine', () => {
+  class MockAudioEngineService {
+    ensureContext = vi.fn()
+    addSound = vi.fn().mockResolvedValue(undefined)
+    removeSound = vi.fn()
+    setSoundVolume = vi.fn()
+    setMasterVolume = vi.fn()
+    playForeground = vi.fn()
+    seekForeground = vi.fn()
+    setForegroundBalance = vi.fn()
+    pauseAll = vi.fn()
+    resumeAll = vi.fn()
+    stopAll = vi.fn()
+    getSoundCount = vi.fn(() => 0)
+    getForegroundElement = vi.fn(() => null)
+  }
+  return { AudioEngineService: MockAudioEngineService }
+})
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
+
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+
 vi.mock('@/lib/audio/media-session', () => ({
   updateMediaSession: vi.fn(
     (
@@ -106,7 +136,9 @@ const TRACK_C: PlayerTrack = { ...TRACK_A, chapter: 5, url: 'https://cdn.example
 function wrapper({ children }: { children: ReactNode }) {
   return (
     <MemoryRouter>
-      <AudioPlayerProvider>{children}</AudioPlayerProvider>
+      <AudioProvider>
+        <AudioPlayerProvider>{children}</AudioPlayerProvider>
+      </AudioProvider>
     </MemoryRouter>
   )
 }
@@ -453,9 +485,11 @@ describe('AudioPlayerProvider integration (BB-26)', () => {
 
     render(
       <MemoryRouter>
-        <AudioPlayerProvider>
-          <Root />
-        </AudioPlayerProvider>
+        <AudioProvider>
+          <AudioPlayerProvider>
+            <Root />
+          </AudioPlayerProvider>
+        </AudioProvider>
       </MemoryRouter>,
     )
 
@@ -513,10 +547,12 @@ function makeBB29Wrapper(
   return function BB29Wrapper({ children }: { children: ReactNode }) {
     return (
       <MemoryRouter initialEntries={['/']}>
-        <AudioPlayerProvider __resolveNextTrackDeps={deps}>
-          <LocationCapture />
-          {children}
-        </AudioPlayerProvider>
+        <AudioProvider>
+          <AudioPlayerProvider __resolveNextTrackDeps={deps}>
+            <LocationCapture />
+            {children}
+          </AudioPlayerProvider>
+        </AudioProvider>
       </MemoryRouter>
     )
   }
@@ -1173,9 +1209,11 @@ describe('AudioPlayerProvider BB-28 — sleep timer lifecycle', () => {
     return renderHook(() => useContext(AudioPlayerContext), {
       wrapper: ({ children }: { children: ReactNode }) => (
         <MemoryRouter initialEntries={['/bible/john/3']}>
-          <AudioPlayerProvider __resolveNextTrackDeps={bb28Deps}>
-            {children}
-          </AudioPlayerProvider>
+          <AudioProvider>
+            <AudioPlayerProvider __resolveNextTrackDeps={bb28Deps}>
+              {children}
+            </AudioPlayerProvider>
+          </AudioProvider>
         </MemoryRouter>
       ),
     })

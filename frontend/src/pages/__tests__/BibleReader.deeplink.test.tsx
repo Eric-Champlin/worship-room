@@ -3,6 +3,19 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
+import { AudioProvider } from '@/components/audio/AudioProvider'
+
+// BB-27: mock audio engine so AudioProvider/AudioPlayerProvider mount cleanly
+vi.mock('@/lib/audio-engine', () => {
+  class MockAudioEngineService {
+    ensureContext = vi.fn(); addSound = vi.fn().mockResolvedValue(undefined)
+    removeSound = vi.fn(); setSoundVolume = vi.fn(); setMasterVolume = vi.fn()
+    playForeground = vi.fn(); seekForeground = vi.fn(); setForegroundBalance = vi.fn()
+    pauseAll = vi.fn(); resumeAll = vi.fn(); stopAll = vi.fn()
+    getSoundCount = vi.fn(() => 0); getForegroundElement = vi.fn(() => null)
+  }
+  return { AudioEngineService: MockAudioEngineService }
+})
 
 // BB-26: mock env + audio modules so ReaderChrome's AudioPlayButton renders null
 vi.mock('@/lib/env', async (importOriginal) => {
@@ -127,6 +140,7 @@ const DEFAULT_AUDIO_STATE = {
 }
 
 vi.mock('@/components/audio/AudioProvider', () => ({
+  AudioProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useAudioState: () => DEFAULT_AUDIO_STATE,
   useAudioDispatch: () => vi.fn(),
   useAudioEngine: () => null,
@@ -242,13 +256,15 @@ const MOCK_PROGRESS = {
 function renderAtRoute(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <AudioPlayerProvider>
-        <Routes>
-          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
-          <Route path="/bible/plans/:slug/day/:dayNumber" element={<BiblePlanDay />} />
-          <Route path="/bible" element={<div>Bible Browser</div>} />
-        </Routes>
-      </AudioPlayerProvider>
+      <AudioProvider>
+        <AudioPlayerProvider>
+          <Routes>
+            <Route path="/bible/:book/:chapter" element={<BibleReader />} />
+            <Route path="/bible/plans/:slug/day/:dayNumber" element={<BiblePlanDay />} />
+            <Route path="/bible" element={<div>Bible Browser</div>} />
+          </Routes>
+        </AudioPlayerProvider>
+      </AudioProvider>
     </MemoryRouter>,
   )
 }

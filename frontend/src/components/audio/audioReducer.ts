@@ -15,6 +15,7 @@ export const initialAudioState: AudioState = {
   currentSceneId: null,
   foregroundEndedCounter: 0,
   readingContext: null,
+  pausedByBibleAudio: null,
 }
 
 export function audioReducer(state: AudioState, action: AudioAction): AudioState {
@@ -32,6 +33,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         activeSounds: [...state.activeSounds, sound],
         isPlaying: true,
         pillVisible: true,
+        pausedByBibleAudio: null,
       }
     }
 
@@ -45,6 +47,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         activeSounds: filtered,
         pillVisible: hasContent ? state.pillVisible : false,
         isPlaying: hasContent ? state.isPlaying : false,
+        pausedByBibleAudio: null,
       }
     }
 
@@ -56,6 +59,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
             ? { ...s, volume: action.payload.volume }
             : s,
         ),
+        pausedByBibleAudio: null,
       }
     }
 
@@ -63,6 +67,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
       return {
         ...state,
         masterVolume: Math.round(Math.max(0, Math.min(1, action.payload.volume)) * 100) / 100,
+        pausedByBibleAudio: null,
       }
     }
 
@@ -74,6 +79,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         foregroundContent: state.foregroundContent
           ? { ...state.foregroundContent, isPlaying: true }
           : null,
+        pausedByBibleAudio: null,
       }
     }
 
@@ -84,6 +90,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         foregroundContent: state.foregroundContent
           ? { ...state.foregroundContent, isPlaying: false }
           : null,
+        pausedByBibleAudio: null,
       }
     }
 
@@ -99,6 +106,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         currentSceneId: null,
         activeRoutine: null,
         sleepTimer: null,
+        pausedByBibleAudio: null,
       }
     }
 
@@ -112,6 +120,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         },
         isPlaying: true,
         pillVisible: true,
+        pausedByBibleAudio: null,
       }
     }
 
@@ -125,6 +134,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
           ...state.foregroundContent,
           isPlaying: false,
         },
+        pausedByBibleAudio: null,
       }
     }
 
@@ -171,6 +181,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
           0,
           Math.min(1, action.payload.balance),
         ),
+        pausedByBibleAudio: null,
       }
     }
 
@@ -250,6 +261,7 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
         ...state,
         currentSceneName: action.payload.sceneName,
         currentSceneId: action.payload.sceneId,
+        pausedByBibleAudio: null,
       }
     }
 
@@ -325,6 +337,38 @@ export function audioReducer(state: AudioState, action: AudioAction): AudioState
 
     case 'CLEAR_READING_CONTEXT':
       return { ...state, readingContext: null }
+
+    case 'PAUSE_BY_BIBLE_AUDIO': {
+      // No-op if nothing is playing
+      if (state.activeSounds.length === 0 && !state.isPlaying) {
+        return { ...state, pausedByBibleAudio: null }
+      }
+      return {
+        ...state,
+        pausedByBibleAudio: {
+          activeSounds: state.activeSounds.map((s) => ({
+            soundId: s.soundId,
+            volume: s.volume,
+            label: s.label,
+          })),
+          masterVolume: state.masterVolume,
+        },
+        isPlaying: false,
+        // activeSounds preserved — sounds are suspended, not removed
+      }
+    }
+
+    case 'RESUME_FROM_BIBLE_AUDIO': {
+      const snapshot = state.pausedByBibleAudio
+      if (!snapshot || snapshot.activeSounds.length === 0) {
+        return { ...state, pausedByBibleAudio: null }
+      }
+      return {
+        ...state,
+        pausedByBibleAudio: null,
+        isPlaying: true,
+      }
+    }
 
     default:
       return state

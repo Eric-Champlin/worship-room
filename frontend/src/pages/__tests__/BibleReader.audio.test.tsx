@@ -9,7 +9,23 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
+import { AudioProvider } from '@/components/audio/AudioProvider'
 import type { EngineEvents } from '@/lib/audio/engine'
+
+// BB-27: mock audio engine and auth so AudioProvider/AudioPlayerProvider mount cleanly
+vi.mock('@/lib/audio-engine', () => {
+  class MockAudioEngineService {
+    ensureContext = vi.fn(); addSound = vi.fn().mockResolvedValue(undefined)
+    removeSound = vi.fn(); setSoundVolume = vi.fn(); setMasterVolume = vi.fn()
+    playForeground = vi.fn(); seekForeground = vi.fn(); setForegroundBalance = vi.fn()
+    pauseAll = vi.fn(); resumeAll = vi.fn(); stopAll = vi.fn()
+    getSoundCount = vi.fn(() => 0); getForegroundElement = vi.fn(() => null)
+  }
+  return { AudioEngineService: MockAudioEngineService }
+})
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
 
 // Mock env + DBP so the button resolves
 vi.mock('@/lib/env', async (importOriginal) => {
@@ -85,6 +101,7 @@ vi.mock('@/components/ui/Toast', () => ({
 }))
 
 vi.mock('@/components/audio/AudioProvider', () => ({
+  AudioProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useAudioState: () => ({
     drawerOpen: false,
     activeSounds: [],
@@ -132,15 +149,17 @@ const AudioPlayerSheet = lazy(() =>
 function renderReader(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <AudioPlayerProvider>
-        <Suspense fallback={null}>
-          <AudioPlayerSheet />
-        </Suspense>
-        <Routes>
-          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
-          <Route path="/bible" element={<div>Browser</div>} />
-        </Routes>
-      </AudioPlayerProvider>
+      <AudioProvider>
+        <AudioPlayerProvider>
+          <Suspense fallback={null}>
+            <AudioPlayerSheet />
+          </Suspense>
+          <Routes>
+            <Route path="/bible/:book/:chapter" element={<BibleReader />} />
+            <Route path="/bible" element={<div>Browser</div>} />
+          </Routes>
+        </AudioPlayerProvider>
+      </AudioProvider>
     </MemoryRouter>,
   )
 }

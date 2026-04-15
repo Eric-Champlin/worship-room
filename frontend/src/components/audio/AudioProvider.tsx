@@ -150,6 +150,17 @@ export function AudioProvider({ children }: { children: ReactNode }) {
           }
         }
         break
+      // BB-27 — ambient pause coordination (no screen reader announcements)
+      case 'PAUSE_BY_BIBLE_AUDIO':
+        if (current.activeSounds.length > 0 || current.isPlaying) {
+          engine.pauseAll()
+        }
+        break
+      case 'RESUME_FROM_BIBLE_AUDIO':
+        if (current.pausedByBibleAudio && current.pausedByBibleAudio.activeSounds.length > 0) {
+          engine.resumeAll()
+        }
+        break
     }
 
     dispatch(action)
