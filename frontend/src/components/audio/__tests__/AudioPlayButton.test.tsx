@@ -3,6 +3,7 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
+import { AudioProvider } from '@/components/audio/AudioProvider'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer'
 import type { AudioPlayerActions } from '@/types/bible-audio'
@@ -30,6 +31,23 @@ vi.mock('@/lib/audio/audio-cache', async (importOriginal) => {
 })
 vi.mock('@/lib/audio/dbp-client', () => ({
   getChapterAudio: hoisted.getChapterAudio,
+}))
+// BB-27 — AudioPlayerProvider requires AudioProvider; mock its deps
+vi.mock('@/lib/audio-engine', () => {
+  class MockAudioEngineService {
+    ensureContext = vi.fn(); addSound = vi.fn().mockResolvedValue(undefined)
+    removeSound = vi.fn(); setSoundVolume = vi.fn(); setMasterVolume = vi.fn()
+    playForeground = vi.fn(); seekForeground = vi.fn(); setForegroundBalance = vi.fn()
+    pauseAll = vi.fn(); resumeAll = vi.fn(); stopAll = vi.fn()
+    getSoundCount = vi.fn(() => 0); getForegroundElement = vi.fn(() => null)
+  }
+  return { AudioEngineService: MockAudioEngineService }
+})
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
 }))
 vi.mock('@/lib/audio/engine', () => ({
   createEngineInstance: vi.fn(async (_url: string, events: EngineEvents) => {
@@ -59,7 +77,9 @@ import { AudioPlayButton } from '@/components/audio/AudioPlayButton'
 function wrapper({ children }: { children: ReactNode }) {
   return (
     <MemoryRouter>
-      <AudioPlayerProvider>{children}</AudioPlayerProvider>
+      <AudioProvider>
+        <AudioPlayerProvider>{children}</AudioPlayerProvider>
+      </AudioProvider>
     </MemoryRouter>
   )
 }
@@ -78,10 +98,12 @@ function renderWithActions(children: ReactNode) {
   }
   const rendered = render(
     <MemoryRouter>
-      <AudioPlayerProvider>
-        <Harness />
-        {children}
-      </AudioPlayerProvider>
+      <AudioProvider>
+        <AudioPlayerProvider>
+          <Harness />
+          {children}
+        </AudioPlayerProvider>
+      </AudioProvider>
     </MemoryRouter>,
   )
   return { ...rendered, actionsRef }
@@ -276,10 +298,12 @@ describe('AudioPlayButton (BB-26)', () => {
     }
     rerender(
       <MemoryRouter>
-        <AudioPlayerProvider>
-          <Harness />
-          <AudioPlayButton bookSlug="john" bookDisplayName="John" chapter={4} />
-        </AudioPlayerProvider>
+        <AudioProvider>
+          <AudioPlayerProvider>
+            <Harness />
+            <AudioPlayButton bookSlug="john" bookDisplayName="John" chapter={4} />
+          </AudioPlayerProvider>
+        </AudioProvider>
       </MemoryRouter>,
     )
     // Wait for the new chapter's DBP lookup + re-render.

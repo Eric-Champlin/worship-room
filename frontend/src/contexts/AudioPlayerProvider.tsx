@@ -35,6 +35,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAudioDispatch as useAmbientDispatch } from '@/components/audio/AudioProvider'
 import type {
   AudioPlayerActions,
   AudioPlayerState,
@@ -313,6 +314,27 @@ export function AudioPlayerProvider({
   // capturing a stale value. Updated on every render.
   const latestPlaybackStateRef = useRef(state.playbackState)
   latestPlaybackStateRef.current = state.playbackState
+
+  // BB-27 — ambient audio pause coordination
+  const ambientDispatch = useAmbientDispatch()
+  const prevPlaybackStateRef = useRef(state.playbackState)
+
+  useEffect(() => {
+    const prev = prevPlaybackStateRef.current
+    const curr = state.playbackState
+    prevPlaybackStateRef.current = curr
+
+    const wasIdle = prev === 'idle'
+    const nowActive = curr === 'loading' || curr === 'playing'
+    const wasActive = prev === 'loading' || prev === 'playing' || prev === 'paused' || prev === 'error'
+    const nowIdle = curr === 'idle'
+
+    if (wasIdle && nowActive) {
+      ambientDispatch({ type: 'PAUSE_BY_BIBLE_AUDIO' })
+    } else if (wasActive && nowIdle) {
+      ambientDispatch({ type: 'RESUME_FROM_BIBLE_AUDIO' })
+    }
+  }, [state.playbackState, ambientDispatch])
 
   const toggle = useCallback(() => {
     const eng = engineRef.current

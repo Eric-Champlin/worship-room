@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, cleanup, render, renderHook, waitFor } from '@testing-library/react'
 import { type ReactNode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
+import { AudioProvider } from '@/components/audio/AudioProvider'
 import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import type { PlayerTrack } from '@/types/bible-audio'
@@ -58,6 +59,24 @@ vi.mock('@/lib/audio/media-session', () => ({
   clearMediaSession: vi.fn(),
 }))
 
+// BB-27 — AudioPlayerProvider requires AudioProvider; mock its deps
+vi.mock('@/lib/audio-engine', () => {
+  class MockAudioEngineService {
+    ensureContext = vi.fn(); addSound = vi.fn().mockResolvedValue(undefined)
+    removeSound = vi.fn(); setSoundVolume = vi.fn(); setMasterVolume = vi.fn()
+    playForeground = vi.fn(); seekForeground = vi.fn(); setForegroundBalance = vi.fn()
+    pauseAll = vi.fn(); resumeAll = vi.fn(); stopAll = vi.fn()
+    getSoundCount = vi.fn(() => 0); getForegroundElement = vi.fn(() => null)
+  }
+  return { AudioEngineService: MockAudioEngineService }
+})
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
+
 const TRACK: PlayerTrack = {
   filesetId: 'EN1WEBN2DA',
   book: 'john',
@@ -70,7 +89,9 @@ const TRACK: PlayerTrack = {
 function wrapper({ children }: { children: ReactNode }) {
   return (
     <MemoryRouter>
-      <AudioPlayerProvider>{children}</AudioPlayerProvider>
+      <AudioProvider>
+        <AudioPlayerProvider>{children}</AudioPlayerProvider>
+      </AudioProvider>
     </MemoryRouter>
   )
 }
@@ -226,9 +247,11 @@ describe('useAudioPlayer (BB-26)', () => {
 
     render(
       <MemoryRouter>
-        <AudioPlayerProvider>
-          <Root />
-        </AudioPlayerProvider>
+        <AudioProvider>
+          <AudioPlayerProvider>
+            <Root />
+          </AudioPlayerProvider>
+        </AudioProvider>
       </MemoryRouter>,
     )
 

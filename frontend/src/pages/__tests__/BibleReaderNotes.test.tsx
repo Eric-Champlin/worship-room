@@ -26,6 +26,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { BibleReader } from '../BibleReader'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
+import { AudioProvider } from '@/components/audio/AudioProvider'
+
+// BB-27: mock audio engine so AudioProvider/AudioPlayerProvider mount cleanly
+vi.mock('@/lib/audio-engine', () => {
+  class MockAudioEngineService {
+    ensureContext = vi.fn(); addSound = vi.fn().mockResolvedValue(undefined)
+    removeSound = vi.fn(); setSoundVolume = vi.fn(); setMasterVolume = vi.fn()
+    playForeground = vi.fn(); seekForeground = vi.fn(); setForegroundBalance = vi.fn()
+    pauseAll = vi.fn(); resumeAll = vi.fn(); stopAll = vi.fn()
+    getSoundCount = vi.fn(() => 0); getForegroundElement = vi.fn(() => null)
+  }
+  return { AudioEngineService: MockAudioEngineService }
+})
 
 // BB-26: mock env + audio modules so ReaderChrome's AudioPlayButton renders null
 vi.mock('@/lib/env', async (importOriginal) => {
@@ -158,6 +171,7 @@ vi.mock('@/components/bible/reader/AmbientAudioPicker', () => ({
 }))
 
 vi.mock('@/components/audio/AudioProvider', () => ({
+  AudioProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useAudioState: () => ({
     drawerOpen: false,
     activeSounds: [],
@@ -246,11 +260,13 @@ vi.mock('@/components/daily/CrisisBanner', () => ({
 function renderReader(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <AudioPlayerProvider>
-        <Routes>
-          <Route path="/bible/:book/:chapter" element={<BibleReader />} />
-        </Routes>
-      </AudioPlayerProvider>
+      <AudioProvider>
+        <AudioPlayerProvider>
+          <Routes>
+            <Route path="/bible/:book/:chapter" element={<BibleReader />} />
+          </Routes>
+        </AudioPlayerProvider>
+      </AudioProvider>
     </MemoryRouter>,
   )
 }

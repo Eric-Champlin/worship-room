@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ReaderChrome } from '../ReaderChrome'
 import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
+import { AudioProvider } from '@/components/audio/AudioProvider'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import { createRef } from 'react'
 
@@ -20,12 +21,30 @@ vi.mock('@/lib/audio/media-session', () => ({
   updateMediaSession: vi.fn(),
   clearMediaSession: vi.fn(),
 }))
+// BB-27 — AudioPlayerProvider requires AudioProvider; mock its deps
+vi.mock('@/lib/audio-engine', () => {
+  class MockAudioEngineService {
+    ensureContext = vi.fn(); addSound = vi.fn().mockResolvedValue(undefined)
+    removeSound = vi.fn(); setSoundVolume = vi.fn(); setMasterVolume = vi.fn()
+    playForeground = vi.fn(); seekForeground = vi.fn(); setForegroundBalance = vi.fn()
+    pauseAll = vi.fn(); resumeAll = vi.fn(); stopAll = vi.fn()
+    getSoundCount = vi.fn(() => 0); getForegroundElement = vi.fn(() => null)
+  }
+  return { AudioEngineService: MockAudioEngineService }
+})
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+}))
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}))
 
 function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
   const aaRef = createRef<HTMLButtonElement>()
   const audioButtonRef = createRef<HTMLButtonElement>()
   return render(
     <MemoryRouter>
+      <AudioProvider>
       <AudioPlayerProvider>
       <BibleDrawerProvider>
         <ReaderChrome
@@ -49,6 +68,7 @@ function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
         />
       </BibleDrawerProvider>
       </AudioPlayerProvider>
+      </AudioProvider>
     </MemoryRouter>,
   )
 }
