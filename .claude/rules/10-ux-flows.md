@@ -539,7 +539,8 @@ The BibleReader at `/bible/:book/:chapter` is the primary scripture reading surf
 ### Reader chrome
  
 - **Top toolbar:** theme switcher (`midnight` / `parchment` / `sepia`), type size (s/m/l/xl), line height (compact/normal/relaxed), font family (serif/sans), focus mode toggle, back button, chapter selector, AI Explain button, AI Reflect button.
-- **Bottom toolbar:** audio playback controls (BB-26-29 cluster, deferred), drawer trigger (highlights/notes/bookmarks/journal entries), verse number toggle.
+- **Right-edge icon cluster (top toolbar):** AudioPlayButton (BB-26 — opens the bottom-sheet audio player, last icon in the cluster after Books).
+- **Bottom toolbar:** drawer trigger (highlights/notes/bookmarks/journal entries), verse number toggle.
 - All preference selections persist to localStorage (`wr_bible_reader_theme`, `wr_bible_reader_type_size`, `wr_bible_reader_line_height`, `wr_bible_reader_font_family`).
  
 ### Focus mode
@@ -923,7 +924,7 @@ The Daily Hub has a single, persistent ambient sound entry point: the `DailyAmbi
  
 **Inline ambient pills removed from tab content (Wave 7):** Previous waves placed the AmbientSoundPill inline within the chip rows of PrayerInput, JournalInput, and below the meditation cards in MeditateTabContent. All of those inline placements were REMOVED in Wave 7. The single FAB is the canonical entry point.
  
-**BibleReader audio:** The BibleReader has its own audio entry point in the bottom toolbar of `ReaderChrome` (BB-26-29 cluster, currently deferred). It does NOT use the DailyAmbientPillFAB.
+**BibleReader audio:** The BibleReader has its own audio entry point in the right-edge icon cluster of `ReaderChrome` (BB-26-29 wave shipped on `audio-wave-bb-26-29-44`). The audio button opens a non-modal bottom-sheet player. It does NOT use the DailyAmbientPillFAB. BB-27 coordinates the two: when Bible audio starts playing via the ReaderChrome button, any active ambient sound from the DailyAmbientPillFAB pauses automatically and resumes when Bible audio stops.
  
 ---
  

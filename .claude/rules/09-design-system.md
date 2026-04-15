@@ -835,31 +835,31 @@ The following patterns have been replaced by Round 3 / Daily Hub Round 3 / Bible
 | Mocking the entire reactive store in tests                        | Use real store + mutate from outside the component to verify subscription (BB-45)   |
  
 ---
-
+ 
 ## Error UX Tier System
-
+ 
 When handling errors in UI code, choose the appropriate tier based on user impact:
-
+ 
 **Tier 1 — Inline error state with retry (for primary actions):**
 Use when the error affects a core user action the user is actively trying to complete. The error state should replace the failed UI region with a clear explanation and a "Try again" button. Example: AI Explain/Reflect panels. The retry button should re-attempt the same operation without losing user context.
-
+ 
 **Tier 2 — Fallback UI with alternative (for secondary content):**
 Use when the error affects a secondary feature but the user has a way to continue. The fallback should acknowledge the failure briefly and point at the alternative. Example: Spotify embed falls back to a "Listen on Spotify" link. Map tile failure falls back to the list view.
-
+ 
 **Tier 3 — Toast notification (for background operations):**
 Use when the error affects a background operation that the user initiated but isn't actively watching. The toast should explain briefly and auto-dismiss after a few seconds. Don't use for errors during primary actions — those need Tier 1.
-
+ 
 **Tier 4 — Silent fallback (for non-essential features):**
 Use when the feature is truly non-essential and the error is expected/common. Example: localStorage quota exceeded during analytics write. The code should catch and swallow silently, but add a comment explaining why.
-
+ 
 **When in doubt, escalate tiers rather than downgrade.** A user who sees a clear error message is better served than one who sees silent failure.
-
+ 
 **Avoid:** Logging to console only without user-visible feedback for user-initiated actions. Users don't read the console.
-
+ 
 ---
  
 ## Known Issues
  
 - **Footer touch targets**: Crisis resource links and App Store badges (40px) undersized on mobile (44px minimum). Pre-existing.
 - **Spotify embed loading**: May show fallback in headless/restricted environments.
-- **Audio cluster (BB-27, BB-28, BB-29, BB-44)**: BB-26 shipped the foundation (FCBH DBP v4 client, bottom-sheet player, Media Session). BB-27 (ambient layering / ducking), BB-28 (sleep timer), BB-29 (continuous playback / auto-advance), and BB-44 (read-along verse highlighting) remain as follow-on specs that build on BB-26's `useAudioPlayer` hook. BB-26 introduces a documented BB-27 CORS dependency: `crossOrigin='anonymous'` is pre-emptively set on Howler's internal `<audio>` element in `lib/audio/engine.ts` — if that line is removed, BB-27 ducking will silently break.
+- **Audio cluster (BB-26, BB-27, BB-28, BB-29)**: SHIPPED on `audio-wave-bb-26-29-44` branch. BB-26 ships the foundation (FCBH DBP v4 client, lazy-loaded Howler engine, bottom-sheet player, Media Session, supersession, FCBH attribution). BB-29 ships continuous playback / auto-advance. BB-28 ships the sleep timer with 8 presets and 20-second exponential fade-out. BB-27 ships pause-coordination (Bible audio plays → ambient pauses; Bible stops → ambient resumes). BB-44 (read-along verse highlighting) is the final spec in the wave, in progress. **Critical engineering note:** BB-26's `crossOrigin='anonymous'` assignment on Howler's internal `<audio>` element in `lib/audio/engine.ts` is load-bearing for any future Web Audio work (BB-27's pause coordination doesn't use it, but a future ducking spec would). The line has a DO-NOT-REMOVE comment and a unit test guard. A BB-37c integrity audit covering the full audio wave is recommended after BB-44 ships and the wave merges to main.
