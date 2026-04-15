@@ -94,3 +94,14 @@ SPRING_PROFILES_ACTIVE=dev|prod
 - Environment variables for API keys (never commit keys)
 - Monitor performance with Vercel Analytics (frontend), Spring Boot Actuator (backend)
 - Error tracking with Sentry or Rollbar
+
+### BB-26 → BB-39 PWA service worker follow-up
+
+When BB-39's PWA service worker is next extended to handle audio assets, it MUST exclude FCBH CloudFront audio URLs from runtime caching.
+
+- **URL pattern to exclude:** any URL matching `*.cloudfront.net/audio/*` that originates from a DBP request (the exact host observed in recon is `d1gd73roq7kqw6.cloudfront.net`, but CloudFront distributions may rotate — match by path, not host).
+- **Where to add the rule:** `frontend/vite.config.ts` → `VitePWA` → `injectManifest` → `globIgnores` (for bundled assets) AND a runtime caching strategy that explicitly skips the pattern (for network-fetched URLs).
+- **Reason:** DBP license terms state: "not store content for offline use unless it is explicitly marked as allowed." FCBH audio files are not marked as cacheable; persisting them to a service worker cache violates the license.
+- **Why BB-39's problem, not BB-26's:** BB-26 doesn't touch the service worker config. BB-26's audio cache layer (`bb26-v1:audioBibles`) stores only metadata (the bibles list), not audio binaries. Per-chapter URLs are held in memory only and die with the page. Runtime audio requests go through Howler's `<audio>` element and would only be cached if the service worker runtime caching rule picks them up — which becomes a live concern as soon as BB-39's PWA strategy is extended to cover audio-tier runtime caching.
+- **Created by:** BB-26 (`_specs/bb-26-fcbh-audio-bible-integration.md` + recon at `_plans/recon/bb26-audio-foundation.md`).
+- **Verification:** After implementing the exclusion, load a chapter while online, go offline, reload, and confirm the audio file fails to load (rather than replaying from cache). The player's error state should surface "Connection problem. Check your network and try again."

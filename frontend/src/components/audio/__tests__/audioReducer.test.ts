@@ -635,4 +635,219 @@ describe('audioReducer', () => {
       expect(initialAudioState.readingContext).toBeNull()
     })
   })
+
+  describe('PAUSE_BY_BIBLE_AUDIO (BB-27)', () => {
+    it('captures snapshot when ambient is playing', () => {
+      const state = stateWith({
+        activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+        masterVolume: 0.7,
+        isPlaying: true,
+        pillVisible: true,
+      })
+      const result = audioReducer(state, { type: 'PAUSE_BY_BIBLE_AUDIO' })
+      expect(result.pausedByBibleAudio).toEqual({
+        activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+        masterVolume: 0.7,
+      })
+      expect(result.isPlaying).toBe(false)
+      // activeSounds preserved — sounds are suspended, not removed
+      expect(result.activeSounds).toHaveLength(1)
+    })
+
+    it('is no-op when no ambient playing', () => {
+      const state = stateWith({
+        activeSounds: [],
+        isPlaying: false,
+      })
+      const result = audioReducer(state, { type: 'PAUSE_BY_BIBLE_AUDIO' })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('captures multiple sounds in snapshot', () => {
+      const state = stateWith({
+        activeSounds: [
+          { soundId: 'rain', volume: 0.6, label: 'Rain' },
+          { soundId: 'fire', volume: 0.4, label: 'Fireplace' },
+        ],
+        masterVolume: 0.8,
+        isPlaying: true,
+      })
+      const result = audioReducer(state, { type: 'PAUSE_BY_BIBLE_AUDIO' })
+      expect(result.pausedByBibleAudio?.activeSounds).toHaveLength(2)
+      expect(result.pausedByBibleAudio?.masterVolume).toBe(0.8)
+    })
+  })
+
+  describe('RESUME_FROM_BIBLE_AUDIO (BB-27)', () => {
+    it('restores playback when snapshot exists', () => {
+      const state = stateWith({
+        activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+        isPlaying: false,
+        pausedByBibleAudio: {
+          activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+          masterVolume: 0.7,
+        },
+      })
+      const result = audioReducer(state, { type: 'RESUME_FROM_BIBLE_AUDIO' })
+      expect(result.pausedByBibleAudio).toBeNull()
+      expect(result.isPlaying).toBe(true)
+    })
+
+    it('is no-op when snapshot is null', () => {
+      const state = stateWith({ pausedByBibleAudio: null })
+      const result = audioReducer(state, { type: 'RESUME_FROM_BIBLE_AUDIO' })
+      expect(result.pausedByBibleAudio).toBeNull()
+      expect(result.isPlaying).toBe(false)
+    })
+
+    it('is no-op when snapshot has empty activeSounds', () => {
+      const state = stateWith({
+        pausedByBibleAudio: {
+          activeSounds: [],
+          masterVolume: 0.8,
+        },
+      })
+      const result = audioReducer(state, { type: 'RESUME_FROM_BIBLE_AUDIO' })
+      expect(result.pausedByBibleAudio).toBeNull()
+      expect(result.isPlaying).toBe(false)
+    })
+  })
+
+  describe('BB-27 user-initiated actions clear pausedByBibleAudio', () => {
+    const snapshotState = stateWith({
+      activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+      pausedByBibleAudio: {
+        activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+        masterVolume: 0.8,
+      },
+    })
+
+    it('ADD_SOUND clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, {
+        type: 'ADD_SOUND',
+        payload: { soundId: 'waves', volume: 0.5, label: 'Waves', url: '/audio/waves.mp3' },
+      })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('REMOVE_SOUND clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, {
+        type: 'REMOVE_SOUND',
+        payload: { soundId: 'rain' },
+      })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('PLAY_ALL clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, { type: 'PLAY_ALL' })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('PAUSE_ALL clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, { type: 'PAUSE_ALL' })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('STOP_ALL clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, { type: 'STOP_ALL' })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('SET_MASTER_VOLUME clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, {
+        type: 'SET_MASTER_VOLUME',
+        payload: { volume: 0.5 },
+      })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('SET_SOUND_VOLUME clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, {
+        type: 'SET_SOUND_VOLUME',
+        payload: { soundId: 'rain', volume: 0.3 },
+      })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('SET_SCENE_NAME clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, {
+        type: 'SET_SCENE_NAME',
+        payload: { sceneName: 'Garden', sceneId: 'garden' },
+      })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('START_FOREGROUND clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, {
+        type: 'START_FOREGROUND',
+        payload: { contentId: '1', contentType: 'scripture', title: 'Psalm 23', duration: 120 },
+      })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('PAUSE_FOREGROUND clears pausedByBibleAudio', () => {
+      const stateWithFg = stateWith({
+        ...snapshotState,
+        foregroundContent: {
+          contentId: '1',
+          contentType: 'scripture' as const,
+          title: 'Psalm 23',
+          duration: 120,
+          playbackPosition: 30,
+          isPlaying: true,
+        },
+      })
+      const result = audioReducer(stateWithFg, { type: 'PAUSE_FOREGROUND' })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+
+    it('SET_FOREGROUND_BACKGROUND_BALANCE clears pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, {
+        type: 'SET_FOREGROUND_BACKGROUND_BALANCE',
+        payload: { balance: 0.7 },
+      })
+      expect(result.pausedByBibleAudio).toBeNull()
+    })
+  })
+
+  describe('BB-27 non-user actions do NOT clear pausedByBibleAudio', () => {
+    const snapshotState = stateWith({
+      pausedByBibleAudio: {
+        activeSounds: [{ soundId: 'rain', volume: 0.6, label: 'Rain' }],
+        masterVolume: 0.8,
+      },
+    })
+
+    it('TICK_TIMER does not clear pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, { type: 'TICK_TIMER' })
+      expect(result.pausedByBibleAudio).not.toBeNull()
+    })
+
+    it('OPEN_DRAWER does not clear pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, { type: 'OPEN_DRAWER' })
+      expect(result.pausedByBibleAudio).not.toBeNull()
+    })
+
+    it('CLOSE_DRAWER does not clear pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, { type: 'CLOSE_DRAWER' })
+      expect(result.pausedByBibleAudio).not.toBeNull()
+    })
+
+    it('SET_READING_CONTEXT does not clear pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, {
+        type: 'SET_READING_CONTEXT',
+        payload: { book: 'John', chapter: 3 },
+      })
+      expect(result.pausedByBibleAudio).not.toBeNull()
+    })
+
+    it('CLEAR_READING_CONTEXT does not clear pausedByBibleAudio', () => {
+      const result = audioReducer(snapshotState, { type: 'CLEAR_READING_CONTEXT' })
+      expect(result.pausedByBibleAudio).not.toBeNull()
+    })
+  })
+
+  it('initialAudioState has pausedByBibleAudio: null (BB-27)', () => {
+    expect(initialAudioState.pausedByBibleAudio).toBeNull()
+  })
 })

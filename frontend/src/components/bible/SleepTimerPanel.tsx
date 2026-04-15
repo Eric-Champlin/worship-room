@@ -1,292 +1,153 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+/**
+ * BB-28 — Sleep Timer Panel
+ *
+ * Modal overlay for the Bible audio sleep timer. Renders 8 presets
+ * (6 duration + 2 structural), shows the active timer state, and
+ * provides a cancel affordance. Portals to document.body for correct
+ * z-stacking above the player sheet.
+ *
+ * Replaces the pre-BB-28 scaffolding that was coupled to the music
+ * AudioProvider — this version consumes the Bible audio player context
+ * exclusively.
+ */
+
+import { createPortal } from 'react-dom'
+import { Moon, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import {
-  useSleepTimerControls,
-  useAudioDispatch,
-} from '@/components/audio/AudioProvider'
-import { AUDIO_CONFIG } from '@/constants/audio'
+  formatSleepTimerRemaining,
+  SLEEP_TIMER_PRESETS,
+  type SleepTimerPreset,
+} from '@/lib/audio/sleep-timer'
+import type { SleepTimerInfo } from '@/types/bible-audio'
 
 interface SleepTimerPanelProps {
   isOpen: boolean
   onClose: () => void
 }
 
-function formatMinutes(ms: number): string {
-  const totalSeconds = Math.ceil(ms / 1000)
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  if (minutes === 0) return `${seconds}s`
-  return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`
-}
-
 export function SleepTimerPanel({ isOpen, onClose }: SleepTimerPanelProps) {
-  const { isAuthenticated } = useAuth()
-  const authModal = useAuthModal()
-  const sleepTimer = useSleepTimerControls()
-  const dispatch = useAudioDispatch()
-
-  const [selectedDuration, setSelectedDuration] = useState<number | null>(null)
-  const [isCustom, setIsCustom] = useState(false)
-  const [customMinutes, setCustomMinutes] = useState('')
-  const [selectedFade, setSelectedFade] = useState(10)
-
-  const containerRef = useRef<HTMLDivElement>(null)
-  const customInputRef = useRef<HTMLInputElement>(null)
-
-  // Track if timer was started from this panel
-  const [startedFromHere, setStartedFromHere] = useState(false)
-
-  // Determine which state to show
-  const timerWasActiveOnMount = useRef(sleepTimer.isActive)
-  useEffect(() => {
-    if (isOpen) {
-      timerWasActiveOnMount.current = sleepTimer.isActive
-    }
-  }, [isOpen, sleepTimer.isActive])
-
-  const isConflict = sleepTimer.isActive && !startedFromHere && timerWasActiveOnMount.current
-  const isActiveFromHere = sleepTimer.isActive && startedFromHere
-
-  // Click outside dismissal
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        onClose()
-      }
-    }
-
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
-  }, [isOpen, onClose])
-
-  // Escape key
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
-
-  // Focus custom input when selected
-  useEffect(() => {
-    if (isCustom) {
-      customInputRef.current?.focus()
-    }
-  }, [isCustom])
-
-  const handleStart = useCallback(() => {
-    if (!isAuthenticated) {
-      authModal?.openAuthModal('Sign in to use the sleep timer')
-      return
-    }
-
-    const minutes = isCustom ? parseInt(customMinutes, 10) : selectedDuration
-    if (!minutes || minutes < 1) return
-
-    sleepTimer.start(minutes * 60 * 1000, selectedFade * 60 * 1000)
-    setStartedFromHere(true)
-    onClose()
-  }, [isAuthenticated, authModal, isCustom, customMinutes, selectedDuration, selectedFade, sleepTimer, onClose])
-
-  const handleCancel = useCallback(() => {
-    sleepTimer.cancel()
-    setStartedFromHere(false)
-  }, [sleepTimer])
-
-  const handleAdjust = useCallback(() => {
-    dispatch({ type: 'OPEN_DRAWER' })
-    onClose()
-  }, [dispatch, onClose])
-
-  const handleDurationSelect = (minutes: number) => {
-    setSelectedDuration(minutes)
-    setIsCustom(false)
-  }
-
-  const handleCustomSelect = () => {
-    setIsCustom(true)
-    setSelectedDuration(null)
-  }
+  const { state, actions } = useAudioPlayer()
+  const focusTrapRef = useFocusTrap(isOpen, onClose)
 
   if (!isOpen) return null
 
-  const durationOptions = AUDIO_CONFIG.SLEEP_TIMER_OPTIONS
-  const fadeOptions = [5, 10, 15] as const
+  const isAudioActive = state.playbackState === 'playing' || state.playbackState === 'paused'
+  const hasActiveTimer = state.sleepTimer !== null || state.sleepFade !== null
 
-  const effectiveDuration = isCustom ? parseInt(customMinutes, 10) : selectedDuration
-  const canStart = effectiveDuration != null && effectiveDuration >= 1
+  const handlePresetClick = (preset: SleepTimerPreset) => {
+    if (!isAudioActive) return
+    const timer: SleepTimerInfo = {
+      type: preset.type,
+      remainingMs: preset.durationMs ?? 0,
+      preset: preset.id,
+    }
+    actions.setSleepTimer(timer)
+    onClose()
+  }
 
-  const startLabel = canStart
-    ? `Start ${effectiveDuration} minute sleep timer with ${selectedFade} minute fade`
-    : 'Start sleep timer'
+  const handleCancel = () => {
+    actions.cancelSleepTimer()
+  }
 
-  // Active timer state (started from here)
-  if (isActiveFromHere) {
-    return (
+  // Determine subtitle text
+  let subtitle: string
+  if (!isAudioActive) {
+    subtitle = 'Start audio first, then set a timer'
+  } else if (state.sleepFade) {
+    subtitle = 'Fading...'
+  } else if (state.sleepTimer?.type === 'end-of-chapter') {
+    subtitle = 'Ends with chapter'
+  } else if (state.sleepTimer?.type === 'end-of-book') {
+    subtitle = 'Ends with book'
+  } else if (state.sleepTimer) {
+    subtitle = `Stopping in ${formatSleepTimerRemaining(state.sleepTimer.remainingMs)}`
+  } else {
+    subtitle = 'Choose how long to listen'
+  }
+
+  const activePresetId = state.sleepTimer?.preset ?? null
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      {/* Scrim */}
       <div
-        ref={containerRef}
-        className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
-        role="region"
-        aria-label="Sleep timer active"
+        className="absolute inset-0 bg-black/40"
+        aria-hidden="true"
+        onClick={onClose}
+      />
+      {/* Panel */}
+      <div
+        ref={focusTrapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sleep-timer-title"
+        className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0D0620]/95 px-6 py-6 backdrop-blur-xl sm:px-8 sm:py-8"
       >
-        <p className="text-center text-lg font-semibold text-white">
-          {formatMinutes(sleepTimer.remainingMs)}
-        </p>
-        <div className="mt-2 text-center">
+        {/* Title row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Moon className="h-5 w-5 text-primary/80" aria-hidden="true" />
+            <h2
+              id="sleep-timer-title"
+              className="text-lg font-medium text-white"
+            >
+              Sleep timer
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close sleep timer panel"
+            className="flex h-[44px] w-[44px] items-center justify-center"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50">
+              <X className="h-4 w-4" aria-hidden="true" />
+            </span>
+          </button>
+        </div>
+
+        {/* Subtitle */}
+        <p className="mt-1 text-sm text-white/60">{subtitle}</p>
+
+        {/* Preset grid */}
+        <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {SLEEP_TIMER_PRESETS.map((preset) => {
+            const isSelected = activePresetId === preset.id
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                disabled={!isAudioActive}
+                onClick={() => handlePresetClick(preset)}
+                className={cn(
+                  'min-h-[44px] rounded-full px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+                  !isAudioActive && 'pointer-events-none cursor-not-allowed opacity-50',
+                  isSelected
+                    ? 'border border-primary/30 bg-white/15 text-white'
+                    : 'bg-white/[0.06] text-white/80 hover:bg-white/10',
+                )}
+              >
+                {preset.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Cancel button (when timer active) */}
+        {hasActiveTimer && (
           <button
             type="button"
             onClick={handleCancel}
-            className="text-sm text-white/50 transition-colors hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-            aria-label="Cancel sleep timer"
+            className="mt-6 w-full min-h-[44px] rounded-full bg-white/[0.06] text-sm text-white/70 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
-            Cancel
+            Cancel timer
           </button>
-        </div>
+        )}
       </div>
-    )
-  }
-
-  // Conflict state (timer started elsewhere)
-  if (isConflict) {
-    return (
-      <div
-        ref={containerRef}
-        className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
-        role="region"
-        aria-label="Sleep timer conflict"
-      >
-        <p className="text-center text-lg font-semibold text-white">
-          {formatMinutes(sleepTimer.remainingMs)}
-        </p>
-        <p className="mt-1 text-center text-sm text-white/50" aria-live="polite">
-          Timer already running from Music
-        </p>
-        <div className="mt-2 text-center">
-          <button
-            type="button"
-            onClick={handleAdjust}
-            className="text-sm text-primary underline transition-colors hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          >
-            Adjust
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Setup state (no active timer)
-  return (
-    <div
-      ref={containerRef}
-      className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
-      role="region"
-      aria-label="Sleep timer setup"
-    >
-      {/* Duration selection */}
-      <div
-        role="radiogroup"
-        aria-label="Timer duration"
-        className="flex flex-wrap gap-2"
-      >
-        {durationOptions.map((minutes) => (
-          <button
-            key={minutes}
-            type="button"
-            role="radio"
-            aria-checked={selectedDuration === minutes && !isCustom}
-            onClick={() => handleDurationSelect(minutes)}
-            className={`min-h-[44px] rounded-full px-4 py-2 text-sm transition-colors ${
-              selectedDuration === minutes && !isCustom
-                ? 'bg-primary text-white'
-                : 'border border-white/20 text-white/50 hover:text-white/70'
-            }`}
-          >
-            {minutes}m
-          </button>
-        ))}
-        <button
-          type="button"
-          role="radio"
-          aria-checked={isCustom}
-          onClick={handleCustomSelect}
-          className={`min-h-[44px] rounded-full px-4 py-2 text-sm transition-colors ${
-            isCustom
-              ? 'bg-primary text-white'
-              : 'border border-white/20 text-white/50 hover:text-white/70'
-          }`}
-        >
-          Custom
-        </button>
-      </div>
-
-      {/* Custom input */}
-      {isCustom && (
-        <div className="mt-3">
-          <label htmlFor="custom-timer-input" className="sr-only">
-            Custom timer duration in minutes
-          </label>
-          <input
-            ref={customInputRef}
-            id="custom-timer-input"
-            type="number"
-            min={5}
-            max={480}
-            step={5}
-            value={customMinutes}
-            onChange={(e) => setCustomMinutes(e.target.value)}
-            placeholder="Minutes (5-480)"
-            aria-invalid={customMinutes && (parseInt(customMinutes) < 5 || parseInt(customMinutes) > 480) ? 'true' : undefined}
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/50"
-          />
-        </div>
-      )}
-
-      {/* Fade duration */}
-      <div className="mt-3">
-        <span className="text-xs text-white/60">Fade duration</span>
-        <div
-          role="radiogroup"
-          aria-label="Fade duration"
-          className="mt-1 flex gap-2"
-        >
-          {fadeOptions.map((minutes) => (
-            <button
-              key={minutes}
-              type="button"
-              role="radio"
-              aria-checked={selectedFade === minutes}
-              onClick={() => setSelectedFade(minutes)}
-              className={`min-h-[44px] rounded-full px-3 py-1 text-xs transition-colors ${
-                selectedFade === minutes
-                  ? 'bg-primary/20 text-primary'
-                  : 'text-white/50 hover:text-white/70'
-              }`}
-            >
-              {minutes}m
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Start button */}
-      <button
-        type="button"
-        onClick={handleStart}
-        disabled={!canStart}
-        aria-label={startLabel}
-        className="mt-4 w-full rounded-lg bg-primary py-2.5 font-medium text-white transition-colors hover:bg-primary-lt disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        Start Timer
-      </button>
-    </div>
+    </div>,
+    document.body,
   )
 }

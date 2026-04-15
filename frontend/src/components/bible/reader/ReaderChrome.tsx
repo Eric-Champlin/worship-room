@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, BookOpen, Minimize2, Type, Volume2 } from 'lucide-react'
 import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { cn } from '@/lib/utils'
+import { AudioPlayButton } from '@/components/audio/AudioPlayButton'
 
 const ICON_BTN =
   'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white'
@@ -161,6 +162,13 @@ export function ReaderChrome({
             >
               <BookOpen className="h-5 w-5" />
             </button>
+            {/* BB-26 — FCBH audio play button. Renders null when DBP audio
+                is unavailable or FCBH key is not configured. */}
+            <AudioPlayButton
+              bookSlug={bookSlug}
+              bookDisplayName={bookName}
+              chapter={chapter}
+            />
           </div>
         </div>
       </div>

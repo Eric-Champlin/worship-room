@@ -394,10 +394,10 @@ These drift patterns are documented and intentional. Protocol 04 should still re
 - **BB-45 memorization cards single-verse only.** Cards cover one verse each, not verse ranges. A multi-verse highlight creates one card for the starting verse, not one card per verse in the range. Documented limitation.
 - **BB-33 animation exemptions.** Shimmer (300ms), breathing (`BreathingExercise.tsx`), and garden/SVG ambient animations are exempt from the global reduced-motion safety net because they are functional (breathing) or decorative-without-urgency (shimmer, garden). Documented in `tailwind.config.js` grouping comments.
  
-### Deferred work
+### Audio cluster status
  
-- **Audio cluster (BB-26, BB-27, BB-28, BB-29, BB-44).** All audio-related specs are deferred pending the FCBH (Bible Brains) API key. Any audio UI in the codebase is placeholder or stub implementation. Protocol 04 should NOT flag audio-related code as "missing implementation" or "incomplete feature" — it's intentionally deferred.
-- **Phase 3 backend (Spring Boot + PostgreSQL).** The backend is planned but not built. All current data is localStorage-only. Protocol 04 should NOT flag "no API calls" or "missing backend integration" — the backend is a future phase.
+- **Audio cluster (BB-26, BB-27, BB-28, BB-29).** SHIPPED on `audio-wave-bb-26-29-44` branch. BB-26 added the FCBH DBP v4 audio foundation (Howler.js engine, bottom-sheet player, Media Session, supersession logic, attribution). BB-29 added continuous playback / auto-advance. BB-28 added the sleep timer with 20-second exponential fade-out. BB-27 added pause-coordination so ambient pauses when Bible audio plays. **BB-44 (read-along verse highlighting) is the final spec in the wave, in progress on the same branch.** Protocol 04 should treat audio code as live and audited, not deferred.
+- **Phase 3 backend (Spring Boot + PostgreSQL).** Still planned but not built. All current data is localStorage-only. Protocol 04 should NOT flag "no API calls" or "missing backend integration" — the backend is a future phase.
  
 ---
  
@@ -406,12 +406,17 @@ These drift patterns are documented and intentional. Protocol 04 should still re
 - **Project owner:** Eric Champlin
 - **Repo:** `Eric-Champlin/worship-room`
 - **Main branch:** `main`
-- **Most recent wave:** BB-30 through BB-46 (merged to main 2026-04-13)
-- **Next wave:** Audio Wave (BB-26, BB-27, BB-28, BB-29, BB-44) pending FCBH API key
+- **Most recent wave:** Audio Wave (BB-26, BB-27, BB-28, BB-29) shipped to `audio-wave-bb-26-29-44` branch. BB-44 in progress on the same branch as the final spec.
+- **Next wave:** Round 3 (Prayer Wall and Profile expansions, see `_forums_master_plan/round3-master-plan.md`).
  
 ---
  
 ## Changelog for this overrides file
+ 
+### v1.2 — 2026-04-15
+- Audio cluster (BB-26, BB-27, BB-28, BB-29) shipped to `audio-wave-bb-26-29-44` branch. BB-44 in progress on same branch.
+- Updated "Deferred work" section: removed audio cluster from deferred list, replaced with "Audio cluster status" section reflecting shipped state. Phase 3 backend remains the only deferred item.
+- Updated "Most recent wave" and "Next wave" in Contact and ownership section.
  
 ### v1.1 — 2026-04-13
 - Added every wave-introduced localStorage key (`wr_first_run_completed`, `wr_push_subscription`, `wr_notification_prefs`, `wr_notification_prompt_dismissed`, `wr_chapters_visited`, `wr_memorization_cards`, `wr_echo_dismissals`)

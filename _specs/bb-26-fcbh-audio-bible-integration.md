@@ -1,380 +1,295 @@
 # BB-26: FCBH Audio Bible Integration
 
-**Branch:** `bible-redesign` (no new branch — all work commits directly here)
-**Depends on:** BB-4 (reader view core — audio control mounts in the reader chrome), BB-5 (focus mode — audio persists through focus mode the same way BB-20 ambient audio does), BB-17 (dateUtils — used for media session metadata timestamps), BB-20 (ambient audio — the `AudioProvider` that BB-26 extends with a narration channel). The existing Music page audio infrastructure is also reused for media session, sleep timer, and playback state persistence.
-**Hands off to:** BB-27 (audio + ambient layering — formalizes the rules for mixing narration with ambient audio), BB-28 (sleep timer for Bible audio — reuses BB-26's narration playback state), BB-29 (continuous playback — the "auto-advance to next chapter" behavior), BB-44 (read-along mode — requires BB-26's timing data)
-**Design system recon:** `_plans/recon/design-system.md`
+**Master Plan Reference:** First spec in the audio wave (BB-26 through BB-29, plus BB-44). Foundation for BB-27 (audio + ambient layering), BB-28 (sleep timer), BB-29 (continuous playback), and BB-44 (read-along mode). Depends on BB-33 (animation tokens), BB-38 (deep linking — verse references in Media Session metadata), the existing BibleReader and ReaderChrome from the Bible redesign wave, and the protocol 04 error boundary primitives from the deep review.
+
+**Branch:** `audio-wave-bb-26-29-44` (all work commits directly to this branch)
 
 ---
 
 ## Overview
 
-The Bible reader delivers text, and with BB-20 it delivers atmosphere. BB-26 adds the voice. A user reading John 3 on a sleepless night, or lying in bed too anxious to focus on the words, can tap a single control and hear the chapter read aloud by a professional narrator — layered over whatever ambient sound (rain, fireplace, ocean) they already have playing. For emotionally vulnerable users who struggle to focus, users with vision impairments, users with reading disabilities or ADHD, and users who just want to close their eyes and receive scripture rather than decode it, audio Bible is the feature that turns the reader from a website into a sanctuary.
+Listening to scripture is one of the oldest devotional practices and one of the most underserved by Bible apps. The dominant market approach (YouVersion's audio Bibles, Bible.is, Audible's Bible offerings) treats audio as a parallel mode — separate UI, separate navigation, separate mental model. You're either reading or listening, never both.
 
-This is the first technically complex spec in the wave's back half. Unlike the content-focused plans in BB-22 through BB-25, BB-26 is integration work — connecting a third-party audio source (Faith Comes By Hearing's public API), extending the existing `AudioProvider` with a second audio channel, and handling the edge cases of streaming media over sometimes-unreliable connections. The plan phase must do significant recon before writing any new files.
+BB-26 starts a different approach: audio lives inside the BibleReader as a quiet companion to reading. Tap a button on any chapter, scripture is read aloud, and you can keep the chapter open to follow along, lock your screen and listen with your eyes closed, or minimize the player and keep reading at your own pace. Audio is an option, not a mode.
 
-## User Stories
+This spec delivers the foundation: WEB audio playback via the FCBH Digital Bible Platform v4 API, a player UI that respects the BibleReader's existing chrome and dark theme, and Media Session API integration so the operating system's lock-screen and notification-shade controls work correctly. It does not include ambient layering (BB-27), sleep timer (BB-28), auto-advance (BB-29), or read-along verse highlighting (BB-44). Each of those is a separate spec that builds on this foundation.
 
-- As a **logged-in Bible reader**, I want to tap a control and hear the chapter I'm reading played aloud by a professional narrator so that I can engage with scripture through listening instead of reading.
-- As a **reader who already has ambient rain playing**, I want to start narration without stopping the ambient sound so that I hear the chapter read aloud over the atmosphere I've already set.
-- As a **user lying in bed with eyes closed**, I want to close my phone or background the app without losing playback so that I can listen without looking at a screen.
-- As a **user with a vision impairment**, I want the same feature parity as sighted readers — I tap a clearly labeled control, it plays, I can pause, scrub, adjust speed, stop.
-- As a **reader who glances away from the currently playing chapter**, I want the narration to keep playing the chapter I started listening to so that navigating the reader doesn't cut off my listening.
-- As a **power user**, I want to adjust the playback speed (0.75x, 1x, 1.25x, 1.5x, 2x) so that I can match narration pace to my comprehension or mood.
-- As a **user with a flaky connection**, I want the feature to fail gracefully with a clear error and retry button so that I'm not left staring at a spinning icon.
+**A note on the WEB audio production.** The audio BB-26 ships for the World English Bible is FCBH's **dramatized production** — a recording with multiple voice actors, light background music, and occasional sound effects, rather than a single-voice plain narration. This is not a choice; DBP only publishes WEB in the dramatized format. The dramatized production is FCBH's standard and is what ships in Bible.is, YouVersion's WEB audio, and Dwell. The user-facing label in the player UI remains "World English Bible" with no "drama" qualifier — the production format is not surfaced in the UI because naming it would plant doubt about whether the listener is hearing the right translation, when in fact the text is the same WEB they see on screen. Future readers of this spec should understand: "WEB audio" in BB-26 means the canonical FCBH dramatized WEB recording, not a hypothetical plain-narration alternative that does not exist in DBP.
 
-## What FCBH is (context for the plan phase)
+## User Story
 
-Faith Comes By Hearing (FCBH) is a nonprofit that produces and freely distributes audio Bible recordings. Their public API at `https://4.dbt.io/api/` serves MP3 audio for scripture passages, including the WEB translation (the same translation the wave uses throughout). FCBH is free to use, produces high-quality studio recordings, supports WEB, supports granular passage requests, and is run by a real nonprofit with real documentation.
-
-Tradeoffs the plan phase must accept:
-
-- **Streaming only.** Audio files are large, cannot be bundled, and every playback requires a network request to FCBH's CDN. Offline caching is explicitly BB-39's job, not BB-26's.
-- **Undocumented rate limits.** At our scale unlikely to hit them, but the error handling must treat rate-limit responses gracefully.
-- **Third-party dependency.** If FCBH goes down, the feature degrades — the rest of the app is unaffected.
-- **No word-level timing metadata.** The MP3s have no synchronized transcripts. BB-44 (read-along mode) will solve this separately; BB-26 does not.
-
-FCBH publishes a JavaScript SDK but it is outdated and has peer dependency conflicts with modern React. The plan phase writes a thin direct-fetch client instead. The API surface we need is small (2–3 endpoints total).
-
-## Recon (mandatory before plan execution writes any code)
-
-This spec's plan phase absolutely must complete recon before writing any integration code. The `AudioProvider` infrastructure is complex and getting this wrong produces bugs that are hard to debug. The plan phase's first four tasks, in order:
-
-**Recon task 1 — Locate and document the existing `AudioProvider`.** Find the file. Document its current API surface: what context value it exposes, what methods exist, how playback state is managed, how media session integration works, how the sleep timer interacts with it, how the current playing sound persists across route changes. Write this into the plan's recon notes.
-
-**Recon task 2 — Locate the BB-20 extensions.** BB-20 added a `setReadingContext` method to `AudioProvider` and integrated ambient audio into the Bible reader. Read the BB-20 implementation carefully. BB-26 extends the same `AudioProvider` with a second audio channel (narration) that must coexist with the ambient channel BB-20 established.
-
-**Recon task 3 — Verify FCBH API access from the dev machine.** Before writing any integration code, hit the FCBH API manually to confirm: (a) the API is reachable, (b) the WEB translation is available via the filesets endpoint, (c) a chapter request returns a valid audio file URL, (d) the URL is directly playable in an HTML5 `<audio>` element, (e) CORS headers allow browser playback. If any check fails, the plan phase must account for the failure before implementation begins.
-
-**Recon task 4 — Run `/playwright-recon` against competing apps.** Capture UX reference from YouVersion audio Bible (industry standard), Dwell (audio-first Bible), Bible.is (FCBH's own app, same data source), and Audible (streaming audio reference). For each, document where the play button lives, how the currently-playing chapter is shown while the user scrolls elsewhere, how playback state persists across chapter navigation, how sleep timer integrates, what buffering and error states look like, how speed controls work, and what skip behavior is (±15s vs ±verse vs ±chapter).
+As a **logged-in or logged-out user reading the Bible**, I want to **tap a play button on any chapter and hear it narrated** so that **I can follow along, listen with my eyes closed, or keep the audio playing while my screen is off**.
 
 ## Requirements
 
 ### Functional Requirements
 
-#### FCBH API client
+#### DBP API Client
 
-1. A new module at `frontend/src/lib/audio/fcbh/` exposes a thin direct-fetch FCBH client. The module exports `getAudioUrl(book, chapter)` and `listAvailableFilesets()` as its public surface.
-2. The client looks up the FCBH three-letter book code from a static map covering all 66 books (e.g., `'genesis' → 'GEN'`, `'psalms' → 'PSA'`, `'john' → 'JHN'`, `'revelation' → 'REV'`).
-3. The client fetches the WEB fileset ID once at app startup and caches it in memory for the session. Subsequent `getAudioUrl` calls reuse the cached fileset ID.
-4. `getAudioUrl(book, chapter)` returns the direct audio file URL for the requested chapter. The URL is cached in memory with a 1-hour TTL. Cache is memory-only — never written to localStorage.
-5. The client throws typed errors: `FCBHNetworkError` (network unreachable), `FCBHNotFoundError` (404 / invalid book or chapter), `FCBHRateLimitError` (rate-limited, with `retry-after` if provided), `FCBHApiError` (everything else). Callers handle these and translate to user-facing UI.
-6. The client has unit tests covering: successful fetch, network error, 404 error, rate limit error, and URL caching behavior.
-7. No hardcoded API keys, tokens, or secrets in the source code. If FCBH requires a public API key, it is read from environment variables per `.claude/rules/08-deployment.md`.
+1. A new module at `frontend/src/lib/audio/dbp-client.ts` exports a typed client for the FCBH Digital Bible Platform v4 API at `https://4.dbt.io`
+2. The client reads the API key from `import.meta.env.VITE_FCBH_API_KEY` at build time
+3. The client exposes: `listAudioBibles()`, `getBibleFilesets(bibleId)`, `getChapterAudio(filesetId, bookId, chapter)`
+4. All client methods return typed responses; types live in `frontend/src/types/audio.ts`
+5. The client handles network errors, 4xx/5xx responses, and timeouts gracefully — every method either resolves with valid data or rejects with a typed error
+6. The client does not retry failed requests automatically; retry logic lives in the caching layer
 
-#### Dual-channel `AudioProvider`
+#### Audio Cache Layer
 
-8. The existing `AudioProvider` (from the Music page, extended by BB-20) is extended to expose a second audio channel: `narration`. The ambient channel from BB-20 is unchanged.
-9. The `narration` channel state surface: `currentChapter`, `isPlaying`, `isBuffering`, `isError`, `errorMessage`, `volume`, `playbackSpeed`, `currentTime`, `duration`.
-10. The `narration` channel methods: `play(book, chapter)`, `pause()`, `resume()`, `stop()`, `seekTo(seconds)`, `setPlaybackSpeed(speed)`, `setVolume(volume)`.
-11. The `narration` channel is backed by a single `<audio>` element owned by the `AudioProvider` component. The same element is reused for all chapter playbacks — playing a new chapter changes `src`, it does not create a new element. This is a hard rule because iOS Safari enforces a ~16-element active audio limit.
-12. The narration `<audio>` element is mounted at the `AudioProvider` level (app root), NOT inside the reader. It must survive route changes so that playback continues when the user navigates away from the current chapter.
-13. The ambient and narration channels are independent. Starting narration does NOT stop ambient audio. Starting ambient audio does NOT stop narration. Both channels play simultaneously at their respective volumes.
-14. The narration channel's default volume is `85` (deliberately loud; users want to hear the words). The ambient channel retains its BB-20 default of `35`. BB-27 will formalize auto-duck behavior; BB-26 makes no attempt to duck or mix smartly.
-15. `playbackSpeed` is discrete: `0.75 | 1 | 1.25 | 1.5 | 2`. Not a slider, not continuous.
-16. BB-20's ambient audio behavior must be unchanged by BB-26's extensions. Every BB-20 acceptance criterion still passes after BB-26 ships.
+7. A new module at `frontend/src/lib/audio/audio-cache.ts` provides caching for DBP responses
+8. The "list of audio bibles" response is cached in localStorage under `bb26-v1:audioBibles` with a 7-day TTL
+9. The cache layer handles cache invalidation, stale-while-revalidate, and graceful fallback to a fresh fetch if the cached value is corrupt
+10. Per-chapter audio URLs are cached in memory only (a `Map` keyed by `${filesetId}:${book}:${chapter}`) — they are NOT persisted to localStorage because the URLs may be signed or expiring
+11. Audio file binary data is not cached; streaming is sufficient for v1
+12. The cache layer matches the existing `bb32-v1:` AI cache pattern from BB-32 — same prefix convention, same TTL handling, same error tolerance
 
-#### The `NarrationControl` (reader chrome)
+#### Audio Player Context & Hook
 
-17. A new component `NarrationControl` mounts in the Bible reader's top action bar, next to (not replacing) the BB-20 ambient audio control.
-18. Visual states: (a) not playing — icon at reduced opacity with a play glyph, (b) loading/buffering — spinner or pulse animation, (c) playing — full opacity with pause glyph, (d) error — muted with a small warning indicator.
-19. Tapping the control opens the `NarrationPicker`. Tapping the control in error state also opens the picker (the error card inside the picker explains what went wrong and offers retry).
-20. Reduced motion: the buffering pulse/spinner is replaced with a static color shift per `prefers-reduced-motion`.
+13. A new context at `frontend/src/contexts/AudioPlayerContext.tsx` provides player state to consuming components
+14. The context is mounted at the App level so player state survives BibleReader navigation (necessary foundation for BB-29 continuous playback)
+15. The context exposes: current track metadata (book, chapter, fileset), playback state (idle/loading/playing/paused/error), current time, duration, playback speed, controls (play, pause, toggle, seek, setSpeed, stop)
+16. A new hook at `frontend/src/hooks/audio/useAudioPlayer.ts` is the canonical consumer interface — components use the hook, not the raw context
+17. The hook follows the project's reactive store consumer pattern: components that consume player state must subscribe properly so they re-render on state changes (BB-45 anti-pattern protection applies)
+18. Player state is ephemeral and intentionally NOT persisted to localStorage; closing the tab or refreshing resets the player
 
-#### The `NarrationPicker`
+#### Audio Engine
 
-21. The picker renders as a bottom sheet (mobile) or popover anchored to the control (desktop), matching BB-20's `AmbientAudioPicker` pattern.
-22. Contents, top to bottom: (a) heading "Listen", (b) current chapter label (e.g., "John 3"), (c) large prominent play/pause button, (d) scrubber with `current / total` labels in `M:SS / M:SS` format, (e) `-15s` and `+15s` skip buttons flanking the play/pause button, (f) playback speed button showing current speed and cycling `0.75x → 1x → 1.25x → 1.5x → 2x → 0.75x` on tap, (g) narration volume slider (independent of the BB-20 ambient volume slider), (h) "Set a sleep timer" link, (i) "Stop playback" button.
-23. The "Set a sleep timer" link: BB-26 either shows this disabled with "Coming soon" OR wires it to the existing ambient sleep timer as a temporary shortcut. The plan phase picks whichever is simpler; BB-28 will replace this with a dedicated narration sleep timer.
-24. The picker closes on backdrop tap, X button, or Escape key. It is focus-trapped while open.
-25. The scrubber updates in real time as audio plays (`timeupdate` events) and supports dragging to seek.
-26. The scrubber is keyboard-accessible: Left/Right arrow keys seek by 5 seconds.
-27. The `-15s` and `+15s` buttons adjust `currentTime` by exactly 15 seconds, clamped to `[0, duration]`.
-28. The narration volume slider adjusts the narration channel's volume independently of the ambient channel. The slider value persists as the reader-context default across sessions.
+19. The audio engine uses Howler.js (`howler` ~25KB gzipped, added as a production dependency along with `@types/howler` as a dev dependency)
+20. Howler is lazy-loaded via dynamic import when the user first opens a chapter that has audio — it does NOT enter the main bundle
+21. The engine handles: load, play, pause, seek, speed change, error events, end-of-track event (used by BB-29 in a future spec)
+22. The engine respects iOS Safari's audio context unlock requirements — Howler handles this internally but the spec acknowledges the dependency
+23. Only one audio source is active at a time; starting playback on a new chapter stops the previous one
 
-#### Mutual exclusion with BB-20's `AmbientAudioPicker`
+#### Player UI — Play Button
 
-29. The `NarrationPicker` and BB-20's `AmbientAudioPicker` cannot be open simultaneously. Opening one closes the other. Same z-index layer, same transition pattern.
+24. A new `AudioPlayButton` component at `frontend/src/components/audio/AudioPlayButton.tsx` lives in the BibleReader's `ReaderChrome` top bar, positioned near the right edge alongside the existing chapter navigation and theme picker
+25. The button displays a play icon when audio is available for the current chapter and has not started, a pause icon when audio is playing, and a play icon when audio is paused
+26. If WEB audio is not available for the current chapter, the button is hidden entirely (not disabled with a tooltip — fully removed from the DOM)
+27. If WEB audio is not available for the entire WEB bible (DBP API returns no data, or the API call fails), the button is hidden across all chapters
+28. Tapping the button when the player is idle or stopped opens the `AudioPlayerSheet` and starts loading audio
+29. Tapping the button when the player is playing pauses audio without closing the sheet
+30. Tapping the button when the player is paused resumes audio
+31. The button matches the existing chrome icon style: same size, same opacity, same hover and focus states
+32. The button has appropriate `aria-label` reflecting the current state ("Play audio for John 3", "Pause audio", "Resume audio")
 
-#### Chapter navigation and playback rules
+#### Player UI — Bottom Sheet
 
-30. **Play on a new chapter while one is already playing:** the currently playing audio stops, the new chapter's audio loads, and playback begins automatically. No dialog, no confirmation.
-31. **Navigate to a different chapter while narration is playing:** narration keeps playing the original chapter until it finishes or the user stops it. The `NarrationControl` in the reader chrome shows the currently-playing chapter (not the currently-viewed chapter). See the `NarrationCurrentlyPlayingIndicator` requirement below.
-32. **A `NarrationCurrentlyPlayingIndicator` component** renders a small chip in the reader chrome (e.g., near or under the narration control) whenever the currently-playing narration chapter differs from the currently-viewed chapter. The chip reads "Now playing: {Book} {Chapter}" and, on tap, navigates the reader back to that chapter. This indicator is a P1 requirement, not a nice-to-have — it is the UX touch that makes listening feel continuous instead of brittle.
-33. **Tap play on a new chapter while a different chapter is narrating:** the old chapter stops, the new chapter loads, the new chapter plays. Standard replace behavior.
-34. **End of chapter:** playback stops. No auto-advance. BB-29 will add opt-in continuous playback and attach itself to the end-of-chapter callback BB-26 exposes.
-35. **Rapid chapter navigation with `narrationAutoStart` enabled:** if the user navigates rapidly between chapters (John 3 → John 4 → John 5 within 2 seconds), only the most recent chapter's audio actually plays. The `AudioProvider` cancels in-flight playback requests for superseded chapters by comparing book/chapter against the currently-requested chapter and bailing if the user has moved on.
+33. A new `AudioPlayerSheet` component at `frontend/src/components/audio/AudioPlayerSheet.tsx` is a bottom sheet that slides up from the bottom of the viewport when the user starts audio playback
+34. The sheet has three states: closed (not in DOM), expanded (full player UI visible at the bottom of the screen, ~280px tall on desktop / ~320px on mobile), minimized (thin bar ~64px tall at the bottom of the screen)
+35. The sheet starts in expanded state when first opened
+36. The user can minimize the sheet by tapping a minimize button or swiping it down
+37. The user can re-expand the minimized sheet by tapping it
+38. The user can close the sheet entirely by tapping a close button — closing the sheet stops playback
+39. The sheet's open and close transitions are 300ms slide animations using the existing animation tokens from BB-33
+40. The minimize and expand transitions are 200ms transitions using the existing animation tokens
+41. All sheet animations respect `prefers-reduced-motion: reduce` and become instant state changes when reduced motion is enabled
+42. The sheet uses the dark theme tokens: `bg-background-deep/95 backdrop-blur-xl border-t border-white/10`
+43. The sheet is wrapped in an `ErrorBoundary` using the same pattern established by protocol 04 in the deep review — if the player throws, the user sees a fallback ("Audio unavailable right now") instead of a crashed BibleReader
 
-#### Media session integration
+#### Player UI — Expanded State
 
-36. When narration is playing, the OS media session metadata reflects: Title = `"{Book} {Chapter}"` (e.g., `"John 3"`), Artist = `"Audio Bible · WEB translation"`, Album = `"Worship Room"`, Artwork = the wave's default Bible icon (or a simple book/cross glyph).
-37. When both narration and ambient are playing, the media session shows the narration metadata (narration is the primary content).
-38. When only ambient is playing, the media session shows the ambient metadata (matching BB-20 behavior).
-39. When both channels stop, the media session clears.
-40. Media session action handlers: `play` → resume narration, `pause` → pause narration, `seekforward` → `+15s`, `seekbackward` → `-15s`. `previoustrack` and `nexttrack` are disabled in BB-26 (BB-29 will add `nexttrack`).
+44. A new `AudioPlayerExpanded` component at `frontend/src/components/audio/AudioPlayerExpanded.tsx` renders the full player UI inside the expanded sheet
+45. The component displays: chapter reference (e.g., "John 3"), translation indicator ("World English Bible"), large play/pause button, scrubber with current time and total duration, playback speed picker, minimize button, close button
+46. The scrubber is a draggable range slider showing the current playback position; dragging the thumb seeks to that position; releasing the thumb resumes playback if it was playing before
+47. The current time and total duration are displayed in `mm:ss` format on either side of the scrubber
+48. The playback speed picker exposes 5 discrete options: 0.75x, 1.0x, 1.25x, 1.5x, 2.0x — rendered as a row of buttons or a small popover, with the current speed highlighted
+49. Speed changes apply immediately and persist for the lifetime of the player context (resetting only on page refresh)
+50. All controls have appropriate `aria-label` and keyboard support
+50a. The expanded player sheet displays a text attribution link in its footer area: **"Audio by Faith Comes By Hearing"**. The link uses `text-white/40 text-xs` styling, opens `https://www.faithcomesbyhearing.com/bible-brain/legal` in a new tab with `rel="noopener noreferrer"`, and is NOT shown on the minimized bar. This satisfies the DBP license requirement that consuming applications provide users with a link to DBP terms and conditions. See `_plans/recon/bb26-audio-foundation.md` § 11 item 2 for the license source.
 
-#### Error handling
+#### Player UI — Minimized State
 
-41. **Network unreachable:** `NarrationControl` shows error state. Picker, when opened, shows an error card at the top with a retry button.
-42. **404 (chapter URL not found):** picker shows "This chapter's audio isn't available right now" with a retry button.
-43. **403 / 401 (should not happen for public FCBH):** log the raw error to console, picker shows a generic error message.
-44. **Rate limited:** picker shows "Too many audio requests. Try again in a moment." Retry button waits for the duration in the `Retry-After` header if provided before re-enabling.
-45. **CORS failure:** picker shows a generic error, raw error logged to console. (Should not happen if recon verified CORS works.)
-46. **`MediaError` during playback (e.g., `MEDIA_ERR_NETWORK`, `MEDIA_ERR_DECODE`):** picker shows "Audio playback failed. Check your connection and try again." Different error codes do not need distinct user messages.
-47. **Slow connection:** if buffering exceeds 10 seconds, the error state fires with "Connection is slow. Try again when you have a better connection." The 10-second timeout is a hard design choice — the plan phase must not shorten it.
-48. **Transient stall (e.g., user turns off wifi briefly):** `stalled` and `suspend` events are treated as transient. BB-26 waits 10 seconds before showing the slow-connection error. If the connection comes back within 10 seconds, playback resumes silently.
-49. **Retry behavior:** one tap of the retry button reattempts the original request. No automatic retries, no exponential backoff. Trust the user to decide whether to retry.
+51. A new `AudioPlayerMini` component at `frontend/src/components/audio/AudioPlayerMini.tsx` renders the minimized bar
+52. The minimized bar displays: small chapter reference, play/pause button, expand button (or the entire bar is tappable to expand)
+53. The minimized bar does NOT include the scrubber, speed picker, or close button — those are only available in the expanded state
+54. The minimized bar maintains the same dark theme treatment as the expanded sheet
 
-#### Settings integration
+#### Media Session API Integration
 
-50. The reader settings panel (from BB-4, extended by BB-20's "Background sound" section) gains a new "Audio narration" section with three fields:
-    - **Toggle:** "Show narration control in reader" (controls `narrationControlVisible`, default `true`)
-    - **Toggle:** "Auto-play narration when opening a chapter" (controls `narrationAutoStart`, default `false`)
-    - **Dropdown:** "Default playback speed" (values `0.75x | 1x | 1.25x | 1.5x | 2x`, default `1x`)
-51. Auto-play default is `false`. This is non-negotiable. A user who opens a chapter and hears unexpected narration is going to close the app forever. Every user opts in explicitly.
-52. Settings persist within the existing reader settings object managed by BB-4. No new top-level `wr_*` keys are created by BB-26; the new fields are added to `wr_bible_reader_*` or the structured settings object established by BB-4.
+55. When audio starts playing, the player updates `navigator.mediaSession.metadata` with: `title` (chapter reference, e.g., "John 3"), `artist` (translation, "World English Bible"), `album` ("Worship Room"), and `artwork` (a default artwork image)
+56. The player wires up `navigator.mediaSession.setActionHandler` for: `play`, `pause`, `seekbackward` (10s), `seekforward` (10s), `stop`
+57. Media Session metadata is updated when the user changes chapters (relevant once BB-29 lands; BB-26 still updates correctly within a single chapter)
+58. Media Session is wired up but verified only on desktop browsers (Chrome, Firefox, Safari) for BB-26 — mobile lock-screen verification is deferred to a future session when mobile testing begins
 
-#### Focus mode coexistence
+#### Fallback Handling
 
-53. Entering BB-5 focus mode does NOT stop narration. Playback continues.
-54. The `NarrationControl` remains accessible from focus mode via the same chrome-access pattern focus mode uses for the BB-20 ambient control (e.g., `...` overflow or tap-to-reveal).
-
-#### Tab visibility and background behavior
-
-55. Narration does NOT stop when the browser tab loses visibility. Users expect background audio to continue.
-56. Behavior when the app is backgrounded for an extended period depends on OS: BB-26 does not try to fight OS suspension behavior. Whatever state the `<audio>` element is in when the user returns is the state reflected in the UI. Media session controls continue to work at the OS level regardless.
+59. When DBP returns "no audio available" for a chapter, the audio button is hidden silently — no error UI, no toast
+60. When the DBP API call fails (network error, 5xx, timeout), the audio button is hidden silently and the failure is logged to console — the cache layer handles retry on the next chapter navigation
+61. When the audio file URL is returned but the audio fails to load or play (404, decode error, etc.), the player UI shows an inline error state ("Audio unavailable — try another chapter") with a dismiss button — this is the only fallback case that surfaces user-visible error UI
+62. The error state in the player UI is keyboard-accessible and screen-reader-friendly
 
 ### Non-Functional Requirements
 
-- **Performance:** The narration `<audio>` element is a single long-lived element reused across chapters. No audio engine reinitialization. URL cache is in-memory only (1-hour TTL). No localStorage writes on the hot path.
-- **Accessibility:** WCAG 2.1 AA. All controls have `aria-label` attributes. Play/pause button is keyboard-accessible (Enter / Space toggles). Scrubber is keyboard-accessible (Left/Right arrows seek). Volume slider has proper ARIA labels and keyboard support. Picker is focus-trapped when open. Screen reader announces play/pause state changes via `aria-live`. All tap targets ≥ 44px. Lighthouse accessibility score ≥ 95 with the picker open.
-- **Reduced motion:** All buffering/loading animations respect `prefers-reduced-motion`. The buffering state replaces spinner/pulse with a static color shift.
-- **Bundle size:** No new audio engine dependencies. The FCBH client is a thin direct-fetch module. New UI components are lightweight React wrappers.
-- **iOS Safari:** Test on a real iPhone, not a desktop emulator. iOS has specific behavior around audio elements, autoplay policies, background audio, and media session that differs from every other browser. The plan phase must allocate explicit real-device testing time.
+- **Performance**: BibleReader Lighthouse Performance score stays at 100 (the post-deep-review batch 10 baseline). CLS stays at 0.000. The audio bundle is lazy-loaded so it does not affect initial BibleReader load.
+- **Bundle size**: The main bundle stays at or below 102 KB gzipped (current post-deep-review baseline is 100 KB). Howler.js (~25KB gzipped) and the audio components must be in a separate lazy-loaded chunk.
+- **Accessibility**: All player controls have `aria-label` and full keyboard navigation. Focus is managed correctly when the sheet opens and closes (focus moves to the play button on open, returns to the chrome button on close). Touch targets meet 44px minimum. Reduced motion is respected on all animations.
+- **Storage**: The cache key `bb26-v1:audioBibles` is bounded to a single JSON object; total size should be well under 50KB.
 
 ## Auth Gating
 
+The audio Bible feature is available to all users, logged in or out. The BibleReader is a public route and audio playback does not require an account. BB-26 adds zero new auth gates.
+
 | Action | Logged-Out Behavior | Logged-In Behavior | Auth Modal Message |
 |--------|--------------------|--------------------|-------------------|
-| See `NarrationControl` icon | Matches BB-20's ambient control visibility pattern (plan phase verifies and mirrors it) | Visible in reader chrome when `narrationControlVisible` is `true` | N/A |
-| Tap `NarrationControl` icon | Matches BB-20 auth pattern for the reader action bar | Opens `NarrationPicker` | N/A |
-| Play / pause narration | Matches BB-20 auth pattern | Full access | N/A |
-| Scrub / seek | N/A (gated if logged out) | Full access | N/A |
-| Adjust playback speed | N/A (gated if logged out) | Full access | N/A |
-| Adjust narration volume | N/A (gated if logged out) | Full access, persisted | N/A |
-| Change narration settings in reader settings panel | N/A (settings panel gated per BB-4) | Full access | N/A |
-| See `NarrationCurrentlyPlayingIndicator` | Visible if any narration is active | Visible if any narration is active | N/A |
-
-**Note:** BB-26 mirrors BB-20's auth gating exactly. The reader chrome auth pattern from BB-4 is the source of truth — the plan phase must verify the BB-20 implementation and match it precisely rather than inventing a new auth pattern. If BB-20 shows the ambient control to logged-out users with an auth-modal-on-tap, BB-26 does the same for the narration control. If BB-20 hides the control entirely, BB-26 does the same.
+| See audio play button on BibleReader | Visible if DBP has audio for the chapter | Visible if DBP has audio for the chapter | N/A |
+| Start audio playback | Plays normally | Plays normally | N/A |
+| Use scrubber, speed picker, minimize | Works normally | Works normally | N/A |
+| Use Media Session lock-screen controls | Works normally | Works normally | N/A |
 
 ## Responsive Behavior
 
 | Breakpoint | Layout |
 |-----------|--------|
-| Mobile (< 640px) | `NarrationControl` icon in reader top bar (same size as other action icons, next to the BB-20 ambient control). `NarrationPicker` renders as a full-width bottom sheet, max-height 65vh, swipe-down dismiss. Scrubber full-width, speed/volume controls stacked. Skip `-15s` / play / `+15s` in a horizontal row. `NarrationCurrentlyPlayingIndicator` chip renders under the reader chrome or docked to the top action bar area (plan phase picks the less intrusive location). |
-| Tablet (640–1024px) | Same as mobile layout but bottom sheet is narrower (max-width 520px, centered). `NarrationCurrentlyPlayingIndicator` chip may render inline in the action bar. |
-| Desktop (> 1024px) | `NarrationControl` icon in reader top bar. `NarrationPicker` renders as a popover anchored below the icon (width ~360px). Controls laid out with more horizontal space; scrubber on its own row, skip/play/speed/volume on a second row. `NarrationCurrentlyPlayingIndicator` chip renders inline with the action bar. |
+| Mobile (< 640px) | Bottom sheet is full-width and ~320px tall when expanded; ~64px tall when minimized. Scrubber spans nearly the full width. Play button is large (56px). Speed picker is a popover triggered by tapping the current speed. |
+| Tablet (640-1024px) | Bottom sheet is full-width and ~280px tall when expanded; ~64px tall when minimized. Scrubber and speed picker have more horizontal room. Speed picker may be inline. |
+| Desktop (> 1024px) | Bottom sheet is centered with `max-w-2xl` and ~280px tall when expanded. Background outside the sheet is not dimmed (the sheet is a non-modal companion to the BibleReader, not an overlay). Speed picker is inline as a row of 5 buttons. |
 
-All tap targets ≥ 44px across every breakpoint, including scrubber thumb, skip buttons, speed cycle button, volume slider thumb, and the `NarrationCurrentlyPlayingIndicator` chip.
+- The audio play button in `ReaderChrome` is the same size at all breakpoints, matching the existing chrome icons
+- The bottom sheet's bottom edge is anchored to the viewport bottom on all sizes; the sheet does not respect safe area insets in v1 (BB-26 is desktop-verified only; mobile safe-area handling will be revisited when mobile testing begins)
+- All animations work identically at all sizes via the BB-33 animation tokens
 
 ## AI Safety Considerations
 
-N/A — This feature does not involve AI-generated content or free-text user input. Audio is professionally recorded narration served directly from FCBH; no AI moderation layer is required. No crisis detection is required.
+N/A — This feature does not involve AI-generated content or free-text user input. No crisis detection required. All audio content comes from the FCBH Digital Bible Platform under WEB (World English Bible, public domain).
 
 ## Auth & Persistence
 
-- **Logged-out users:** Matches BB-20's pattern. No narration state persisted for logged-out users (demo-mode zero-persistence rule from `.claude/rules/02-security.md`).
-- **Logged-in users:** Narration volume and playback speed persist in the existing reader settings object. Playback state (currently playing chapter, current time) is session-only in-memory state on the `AudioProvider` — NOT persisted to localStorage, because restoring mid-chapter playback across sessions is out of scope for BB-26.
-- **localStorage usage:**
-  - New fields inside the existing reader settings structure managed by BB-4 (and extended by BB-20):
-    - `narrationControlVisible` (boolean, default `true`)
-    - `narrationAutoStart` (boolean, default `false`)
-    - `narrationDefaultSpeed` (`0.75 | 1 | 1.25 | 1.5 | 2`, default `1`)
-    - `narrationVolume` (0–100, default `85`)
-  - No new top-level `wr_*` keys. These fields live within the existing reader settings object per `.claude/rules/11-local-storage-keys.md`.
-  - The FCBH URL cache is in-memory only — explicitly NOT localStorage — to avoid storing signed URLs that may expire or contain caching headers.
+- **Logged-out users:** Audio playback works normally. Playback state is ephemeral (lost on page refresh). No localStorage writes specific to playback.
+- **Logged-in users:** Same behavior as logged-out users in BB-26. Future specs may add per-user audio preferences (default speed, default voice if multiple voices exist) but BB-26 ships with no per-user persistence.
+- **Route type:** Public (BibleReader is public; audio inherits)
+- **localStorage keys:**
+  - `bb26-v1:audioBibles` — cached DBP `listAudioBibles` response, 7-day TTL, JSON object
 
 ## Completion & Navigation
 
-N/A — The Bible reader is not part of the Daily Hub tabbed experience. BB-26 does NOT integrate with reading plan mark-complete. Listening to John 3 without scrolling or tapping Mark Complete does not auto-complete a plan day. Mark Complete stays a manual action. There is no "listen instead of read" button on plan days — users who want to listen just tap the `NarrationControl`.
+N/A — Audio playback is not part of the Daily Hub tabbed experience. It does not contribute to streaks, faith points, or daily activity signals. BB-26 explicitly does not gamify listening.
 
 ## Design Notes
 
-- **Icons:** Use Lucide glyphs matching existing reader chrome patterns. `Headphones` or `Play` for the `NarrationControl` in its default state; `Pause` when playing; `Loader2` with spin for buffering; `AlertCircle` at reduced opacity for error state.
-- **`NarrationControl` sizing and placement:** Match the existing reader action bar icon sizing and spacing from BB-4 and BB-20. The narration control sits next to the BB-20 ambient control — do not merge them, do not nest them, do not reorder existing controls.
-- **`NarrationPicker` styling:** Dark frosted glass matching the `AmbientAudioPicker` from BB-20 and the existing `AudioDrawer` aesthetic: `rgba(15, 10, 30, 0.95)` background with `backdrop-blur(16px)`, `border border-white/10`, `rounded-2xl`. Consistent with `.claude/rules/09-design-system.md` and the design system recon.
-- **Scrubber styling:** Track `bg-white/20`, fill `bg-primary`, thumb white circle 20px diameter. Match the BB-20 volume slider pattern for keyboard focus ring and reduced-motion behavior.
-- **Play/pause button:** Large prominent circular button. White or primary fill, dark icon. Minimum 56px for the primary control (exceeds the 44px tap target minimum).
-- **Speed cycle button:** Small pill-shaped button showing current speed as text (e.g., `1x`, `1.5x`). Uses `bg-white/[0.08]` with `border border-white/[0.12]` matching FrostedCard micro-variant.
-- **`NarrationCurrentlyPlayingIndicator` chip:** Small pill-shaped chip with a tiny sound-wave or play icon, text reading "Now playing: John 3". `bg-white/[0.08]` background, `border border-primary/40` accent border to signal activity, `text-white/80` text. Tappable with `aria-label="Return to currently playing chapter: John 3"`.
-- **Error state styling:** Error cards inside the picker use the warm-warning pattern from `09-design-system.md` — not alarming red, but clearly distinguishable from normal content. The retry button is a standard primary button.
-- **Bottom sheet animation:** Reuse the existing bottom sheet pattern (`animate-bottom-sheet-slide-in`, swipe-down dismiss) from BB-20 and the `AudioDrawer`.
-- **All text:** `text-white` for headings, `text-white/70` for secondary labels, `text-white/50` for hint/caption text. Zero raw hex values.
-- **Default narration volume 85:** Deliberate. Narration is the primary content when it's playing — users want to hear the words over ambient sound. The 85/100 default is the right number for this context.
+- The audio play button in `ReaderChrome` matches the existing chrome icon treatment: 24px icon, `text-white/70` default, `hover:text-white` on hover, `focus:ring-1 focus:ring-white/20 rounded` for focus
+- The play icon and pause icon are from the existing `lucide-react` icon set (`Play`, `Pause`)
+- The bottom sheet uses `bg-background-deep/95 backdrop-blur-xl` for the surface and `border-t border-white/10` for the top edge separation from the BibleReader content below it
+- The expanded sheet has internal padding of `px-6 py-4` on mobile, `px-8 py-5` on tablet and desktop
+- The chapter reference in the expanded sheet uses `text-white text-lg font-medium`
+- The translation label uses `text-white/60 text-sm`
+- The play/pause button in the expanded sheet is large (56px) with a circular `bg-white/10 hover:bg-white/15 border border-white/20` treatment
+- The scrubber uses a custom-styled range input with a `bg-white/10` track, `bg-white` filled portion, and `bg-white` thumb
+- The current time and duration labels use `text-white/60 text-xs tabular-nums` (tabular numerals prevent jitter as the time updates)
+- The speed picker buttons use `bg-white/[0.06] hover:bg-white/10` for unselected and `bg-white/15 text-white` for the selected speed
+- The minimize and close buttons in the corner of the expanded sheet use `text-white/50 hover:text-white/80` with 32px touch targets
+- The minimized bar's chapter reference uses `text-white/80 text-sm`
+- The minimized bar's play/pause button is 40px and uses the same circular treatment as the expanded version, scaled down
+- The error state in the player UI uses `text-white/70` for the message and a `text-white/50 hover:text-white/80` dismiss button
+- All animations use the existing BB-33 animation tokens (`duration-300 ease-out` for slide transitions)
+- Reduced motion compliance: every animation has a fallback path via `prefers-reduced-motion: reduce` that becomes an instant state change
 
-**Design system recon referenced:** `_plans/recon/design-system.md`. Audio component patterns, frosted glass values, drawer animations, and the BB-20 ambient picker styling are documented there.
+## Anti-Pressure Design Decisions
 
-**New visual patterns (flag for `[UNVERIFIED]` marking during `/plan`):**
-- **Narration scrubber** — not yet in the design system recon. Plan phase must derive exact values from the recon's range-input patterns and mark them `[UNVERIFIED]` until verified.
-- **`NarrationCurrentlyPlayingIndicator` chip** — new component pattern. Plan phase derives styling from existing chip/pill patterns and marks it `[UNVERIFIED]`.
-- **Speed cycle button** — small pill variant. Plan phase derives from existing small button patterns and marks it `[UNVERIFIED]`.
+These reflect Worship Room's core positioning and apply to BB-26 specifically:
 
-All other patterns (`NarrationControl` icon, `NarrationPicker` frosted glass, error card, bottom sheet animation) reuse existing documented patterns.
-
-## Critical Edge Cases
-
-1. **FCBH is down entirely.** Every narration playback attempt fails with a network error. The narration control shows the error state. The rest of the app is unaffected. Correct graceful degradation.
-2. **2G / very slow connection.** The 10-second buffering timeout fires and shows the slow-connection error. User retries when they have better bandwidth.
-3. **User turns off wifi mid-playback.** `stalled` / `suspend` events fire. BB-26 waits 10 seconds before showing the error. If connectivity returns within 10 seconds, playback resumes silently. Otherwise, error state.
-4. **User backgrounds the app during playback, returns 30+ minutes later.** OS behavior determines playback state. BB-26 does not fight OS suspension. The UI reflects whatever state the `<audio>` element is in on return.
-5. **Phone call interrupts playback (iOS / Android).** The `<audio>` element receives a `pause` event. Narration control reflects the paused state. When the call ends, user taps resume.
-6. **User starts narration, then starts ambient audio.** Both play. Narration at 85, ambient at 35. User hears the chapter being read over soft rain. This is the intended experience.
-7. **User starts ambient audio, then starts narration.** Same result. Order does not matter.
-8. **User starts narration while the BB-20 ambient sleep timer is counting down.** The ambient sleep timer continues to count down and stops ambient audio when it fires. Narration keeps playing on its own channel. BB-28 will add a dedicated narration sleep timer; until then, narration has no sleep timer and plays until the chapter ends or the user stops it.
-9. **FCBH recording includes intro audio ("The Gospel of John, chapter 3…").** BB-26 does not skip or strip this. The audio plays in its entirety.
-10. **User has `narrationAutoStart` enabled and navigates rapidly (John 3 → John 4 → John 5 in 2 seconds).** Only the most recent chapter plays. Superseded playback requests are canceled.
-11. **Narration picker is open when a playback error occurs.** The picker shows an inline error card at the top with a retry button. The `NarrationControl` icon in the reader chrome also reflects the error state.
-12. **User opens the narration picker while BB-20's ambient picker is open.** The ambient picker closes, the narration picker opens. Same z-index layer, smooth transition.
-13. **User taps the `NarrationCurrentlyPlayingIndicator` chip while on a different chapter.** The reader navigates back to the currently-playing chapter. Audio continues without interruption.
-14. **Signed URL expires mid-playback.** Should not happen within a single chapter's duration, but if the `<audio>` element receives a `MediaError` during playback, BB-26 shows the generic playback error and the user retries. The retry fetches a fresh URL.
-15. **Multiple browser tabs.** Each tab has an independent `AudioProvider` state. Known limitation, accepted (same as BB-20 and BB-16).
+- **No listening goals or targets.** No "minutes listened today," no "chapters listened" counter, no daily listening goals.
+- **No streaks for listening.** Audio playback does not feed into the BB-17 streak system.
+- **No completion tracking.** A chapter that the user has listened to is not marked "completed" or "heard." The chapter visit store is for reading; audio is separate.
+- **No autoplay between sessions.** When the user opens the BibleReader, audio does not start automatically. The user must tap play.
+- **No scoring or gamification.** No badges for listening, no point values, no leaderboard contribution.
+- **No social features.** No "X friends are listening to this chapter" indicators. No share-the-audio functionality.
+- **No notification reminders to listen.** The BB-41 notification system is not extended to audio in BB-26.
 
 ## Out of Scope
 
-- **No offline caching of audio files.** BB-39 (PWA) territory.
-- **No auto-advance to the next chapter.** BB-29.
-- **No narration-specific sleep timer.** BB-28. (BB-26 may temporarily wire the "Set a sleep timer" link to the existing BB-20 ambient sleep timer or leave it disabled with "Coming soon" — the plan phase picks the simpler path.)
-- **No word-level or verse-level timing metadata.** BB-44 (read-along mode).
-- **No FCBH-specific UI branding.** Users do not need to see "Powered by Faith Comes By Hearing" anywhere. The audio just plays.
-- **No multi-voice narrator selection.** FCBH has multiple English recordings (dramatized, non-dramatized, various narrators). BB-26 picks one fileset and uses it exclusively.
-- **No dramatized vs. non-dramatized toggle.**
-- **No podcast-style chapter bookmarks.** Users cannot mark a timestamp for later.
-- **No synchronized transcription or captions.** The reader shows the text, the audio plays the words, but there is no karaoke-style highlighting.
-- **No continuous speed slider.** Speeds are discrete (`0.75x | 1x | 1.25x | 1.5x | 2x`).
-- **No audio-only mode.** The reader always shows text; audio is an optional layer.
-- **No Bluetooth device routing UI.** Browser/OS handles this automatically via media session.
-- **No equalizer or audio effects.** The MP3 plays raw.
-- **No shared listening** ("listen to this chapter with me"). No sync, no rooms.
-- **No download button for offline.** BB-39.
-- **No queue or playlist.** One chapter at a time.
-- **No analytics on listening behavior.** Not tracking how many minutes users listen or which chapters are most played.
-- **No subscription or paywall.** Audio is free because FCBH is free.
-- **No integration with reading plans' mark-complete flow.** Listening does not auto-complete a plan day.
-- **No "listen instead of read" button on plan days.**
-- **No verse-level playback.** Chapter is the smallest unit.
-- **No audio highlights or clips.** Users cannot save 30-second snippets.
-- **No pitch correction beyond what the browser provides automatically.**
-- **No cross-session playback resume.** Closing the tab clears current playback state; next session starts fresh.
-- **No restoration of FCBH SDK.** Thin direct-fetch client only; no SDK, no middleware layer, no request queue, no offline-first shim. BB-26 is a client, not a framework.
-- **No Music page UI changes.** BB-26 extends `AudioProvider` internally but adds no narration UI to the Music page. Narration is a reader-only feature for this spec.
-- Backend API work is Phase 3+.
+- Ambient audio layering or mixing with the existing Music feature ambient sounds (BB-27)
+- Sleep timer functionality (BB-28)
+- Auto-advance to the next chapter when the current chapter ends (BB-29)
+- Read-along verse highlighting that follows the audio (BB-44)
+- Translation choice — WEB only in BB-26
+- Voice picker UI — supported in the data model but no UI in BB-26 even if WEB has multiple filesets
+- TTS fallback when DBP audio is unavailable
+- Download audio for offline playback
+- Audio bookmarks or playback position memory across sessions
+- Verse-level audio scrubbing (jump to a specific verse) — the scrubber works on the chapter as a continuous track only
+- Equalizer, audio effects, or per-user audio profiles
+- Per-user default playback speed (resets to 1.0x on each page refresh)
+- Per-user default voice selection
+- Mobile-specific UX hints ("install the PWA for best background playback") — deferred until mobile testing begins
+- iOS safe-area inset handling on the bottom sheet — deferred until mobile testing begins
+- Real-device mobile verification — desktop browser verification only for BB-26
+- Backend API for any audio-related data (Phase 3)
+- New SDK packages beyond Howler.js and `@types/howler`
+- Changes to BB-7 highlights, BB-43 chapter visits, BB-17 streaks, or any other reactive store
+- Telemetry or analytics on audio listening behavior
+- Audio file caching to localStorage or service worker
 
 ## Acceptance Criteria
 
-### FCBH client
-- [ ] `frontend/src/lib/audio/fcbh/fcbhClient.ts` exists and exports `getAudioUrl(book, chapter)` and `listAvailableFilesets()`.
-- [ ] A `bookCodes.ts` file contains the complete 66-book mapping from lowercase English slug to FCBH three-letter code.
-- [ ] Typed errors `FCBHNetworkError`, `FCBHNotFoundError`, `FCBHRateLimitError`, `FCBHApiError` exist in `errors.ts`.
-- [ ] `fcbhClient.test.ts` unit tests cover: successful fetch, network error, 404 error, rate limit error with `Retry-After` header, and URL caching (cache hit within 1 hour, cache miss after expiry).
-- [ ] The WEB fileset ID is fetched once per session and cached in memory.
-- [ ] URL cache is in-memory only with a 1-hour TTL. Zero localStorage writes from the FCBH client.
-- [ ] Zero hardcoded API keys, tokens, or secrets in the source code.
-- [ ] Plan phase verified FCBH API access from the dev environment (all 5 checks from Recon task 3) BEFORE any integration code was written.
-- [ ] Plan phase documented the existing `AudioProvider` API surface in recon notes BEFORE any new `AudioProvider` code was written.
+- [ ] A new module at `frontend/src/lib/audio/dbp-client.ts` exports a typed client for the DBP v4 API
+- [ ] The client reads the API key from `import.meta.env.VITE_FCBH_API_KEY`
+- [ ] The client exposes `listAudioBibles()`, `getBibleFilesets()`, `getChapterAudio()` methods with full TypeScript types
+- [ ] All client methods handle network errors and 4xx/5xx responses gracefully
+- [ ] A new module at `frontend/src/lib/audio/audio-cache.ts` provides a 7-day localStorage cache for the audio bibles list under `bb26-v1:audioBibles`
+- [ ] Per-chapter audio URLs are cached in memory only, never persisted
+- [ ] A new context at `frontend/src/contexts/AudioPlayerContext.tsx` is mounted at the App level and provides player state
+- [ ] A new hook at `frontend/src/hooks/audio/useAudioPlayer.ts` is the canonical consumer interface
+- [ ] The hook follows the BB-45 anti-pattern protection: components subscribe properly and re-render on state changes
+- [ ] Howler.js is added as a production dependency with `@types/howler` as a dev dependency
+- [ ] Howler is lazy-loaded via dynamic import and does NOT enter the main bundle
+- [ ] A new `AudioPlayButton` component lives in `ReaderChrome` near the right edge of the top bar
+- [ ] The button is hidden when WEB audio is not available for the current chapter (or for the entire WEB bible)
+- [ ] The button shows the correct play/pause icon based on player state and has appropriate `aria-label`
+- [ ] A new `AudioPlayerSheet` component renders a bottom sheet with three states: expanded, minimized, closed
+- [ ] The sheet's slide animations are 300ms and respect `prefers-reduced-motion: reduce`
+- [ ] The sheet uses the dark theme tokens `bg-background-deep/95 backdrop-blur-xl border-t border-white/10`
+- [ ] The sheet is wrapped in an `ErrorBoundary` with a fallback that says "Audio unavailable right now"
+- [ ] A new `AudioPlayerExpanded` component renders the full player UI: chapter reference, translation, play/pause, scrubber, time labels, speed picker, minimize, close
+- [ ] The scrubber is keyboard-accessible and supports drag-to-seek
+- [ ] The speed picker offers 0.75x, 1.0x, 1.25x, 1.5x, 2.0x as discrete options with the current speed highlighted
+- [ ] A new `AudioPlayerMini` component renders the minimized bar with chapter reference and play/pause
+- [ ] Tapping the minimized bar expands it; tapping the minimize button collapses the expanded view
+- [ ] Tapping the close button stops playback and removes the sheet from the DOM
+- [ ] When audio starts playing, `navigator.mediaSession.metadata` is updated with title (chapter reference), artist (translation), album ("Worship Room"), and artwork
+- [ ] `navigator.mediaSession.setActionHandler` is wired up for `play`, `pause`, `seekbackward`, `seekforward`, and `stop`
+- [ ] When DBP returns no audio for a chapter, the play button is hidden silently with no error UI
+- [ ] When the DBP API call fails, the play button is hidden silently and the failure is logged to console
+- [ ] When the audio file fails to load or play, the player UI shows an inline error state with a dismiss button
+- [ ] FCBH attribution link is present in the expanded player footer, opens the FCBH legal page (`https://www.faithcomesbyhearing.com/bible-brain/legal`) in a new tab with `rel="noopener noreferrer"`, and is absent from the minimized bar
+- [ ] All BB-30 through BB-46 tests continue to pass unchanged
+- [ ] At least 12 unit tests cover the DBP client (mock fetch, error cases, response parsing)
+- [ ] At least 8 unit tests cover the audio cache layer (localStorage stubs, TTL handling, corruption fallback)
+- [ ] At least 10 unit tests cover the `useAudioPlayer` hook (Howler mocked, state transitions, mutation-after-mount re-render verification per BB-45)
+- [ ] At least 6 component tests cover `AudioPlayButton` (rendering, hidden states, click behavior)
+- [ ] At least 8 component tests cover `AudioPlayerSheet` (state transitions, animations, error boundary fallback)
+- [ ] At least 6 component tests cover `AudioPlayerExpanded` (controls, scrubber, speed picker, focus management)
+- [ ] At least 4 component tests cover `AudioPlayerMini` (rendering, expand interaction)
+- [ ] At least 5 integration tests cover the BibleReader + audio button + sheet open/close flow
+- [ ] No TypeScript errors, no new lint warnings, no new accessibility violations
+- [ ] Zero new auth gates
+- [ ] Exactly one new localStorage key: `bb26-v1:audioBibles`
+- [ ] The new key is documented in `.claude/rules/11-local-storage-keys.md`
+- [ ] The audio context (third state pattern alongside reactive stores and CRUD storage) is documented in `.claude/rules/04-frontend-standards.md` or equivalent
+- [ ] The DBP API key is documented in `frontend/.env.example` matching the existing `VITE_GEMINI_API_KEY` and `VITE_GOOGLE_MAPS_API_KEY` pattern
+- [ ] A documentation file at `_plans/recon/bb26-audio-foundation.md` documents the DBP API findings, fileset structure, WEB audio coverage, fallback behavior, and integration points
+- [ ] BibleReader Lighthouse Performance score stays at 100 with CLS at 0.000
+- [ ] Main bundle size stays at or below 102 KB gzipped (audio code is in a separate lazy-loaded chunk)
+- [ ] All player UI animations respect `prefers-reduced-motion: reduce`
+- [ ] All player controls are keyboard-accessible with proper focus management
+- [ ] The Media Session integration is verified on desktop Chrome, Firefox, and Safari
+- [ ] Mobile verification (iOS and Android lock-screen controls) is explicitly deferred to a future session and noted in the recon document
 
-### `AudioProvider` dual-channel extension
-- [ ] `AudioProvider` exposes a `narration` channel with the documented state surface (`currentChapter`, `isPlaying`, `isBuffering`, `isError`, `errorMessage`, `volume`, `playbackSpeed`, `currentTime`, `duration`).
-- [ ] `AudioProvider` exposes narration methods (`play`, `pause`, `resume`, `stop`, `seekTo`, `setPlaybackSpeed`, `setVolume`).
-- [ ] `AudioProvider` owns exactly one `<audio>` element for narration, reused across all chapter playbacks (verified: playing 3 chapters in sequence results in a single `<audio>` element in the DOM, with `src` changing each time).
-- [ ] The narration `<audio>` element is mounted at the `AudioProvider` level, not inside the reader. It survives route changes (verified: starting narration, navigating to the landing page, and navigating back shows playback continuing).
-- [ ] Starting narration does NOT stop the ambient channel.
-- [ ] Starting ambient audio does NOT stop the narration channel.
-- [ ] Both channels play simultaneously with independent volumes (verified: narration at 85, ambient at 35, both audible).
-- [ ] BB-20's ambient audio acceptance criteria all still pass after BB-26 ships.
+## Notes for Plan Phase Recon
 
-### `NarrationControl`
-- [ ] `NarrationControl` mounts in the reader chrome next to the BB-20 ambient control.
-- [ ] Visual states for not-playing, buffering, playing, and error are all implemented.
-- [ ] `prefers-reduced-motion` replaces buffering animation with a static color shift.
-- [ ] Tapping the control opens the `NarrationPicker`.
+**Status: RESOLVED.** The pre-execution recon ran on 2026-04-14 against the live DBP v4 API and documented every item in `_plans/recon/bb26-audio-foundation.md`. Summary of what the recon found, for anyone reading the spec without the plan:
 
-### `NarrationPicker`
-- [ ] Picker heading reads "Listen".
-- [ ] Picker shows the current chapter (e.g., "John 3").
-- [ ] Large prominent play/pause button toggles playback.
-- [ ] Scrubber updates in real time during playback.
-- [ ] Scrubber shows `M:SS / M:SS` format labels.
-- [ ] Scrubber supports drag-to-seek with mouse and touch.
-- [ ] Scrubber is keyboard-accessible (Left/Right seek by 5 seconds).
-- [ ] `-15s` and `+15s` skip buttons adjust `currentTime`, clamped to `[0, duration]`.
-- [ ] Playback speed button cycles `0.75x → 1x → 1.25x → 1.5x → 2x → 0.75x`.
-- [ ] Narration volume slider adjusts narration volume independently of ambient.
-- [ ] "Stop playback" button stops narration and resets the control.
-- [ ] "Set a sleep timer" link is either disabled with "Coming soon" or wires to the existing ambient sleep timer (plan phase choice).
-- [ ] Picker closes on backdrop tap, X button, or Escape key.
-- [ ] Picker is focus-trapped while open.
-- [ ] `NarrationPicker` and BB-20's `AmbientAudioPicker` cannot be open simultaneously (opening one closes the other).
+1. **DBP v4 API shape ✅** — Base URL `https://4.dbt.io/api`. Auth via `?key=<KEY>&v=4` query parameters. Responses are wrapped in `{ data, meta }`. Filesets live under `{ filesets: { 'dbp-prod': [...] } }` on each bible. Per-chapter shortcut endpoint `/bibles/filesets/{id}/{book}/{chapter}` exists and returns a 1-element `data` array. 4xx/5xx failure modes are clean.
+2. **WEB audio coverage ✅** — The canonical full-coverage WEB audio is provided by **`EN1WEBN2DA`** (New Testament, 27 books / 260 chapters) and **`EN1WEBO2DA`** (Old Testament, 39 books / 929 chapters), both under the `ENGWWH` bible abbreviation ("World English Bible - Winfred Henson"). 100% coverage verified across Genesis 1, Genesis 50, Psalm 23, Psalm 119, Isaiah 53, Obadiah, John 3, John 21, Revelation 22, Philemon, 3 John. A smaller alternative, `ENGWEBN2DA` from the `ENGWEB` abbreviation, provides NT-only coverage and is not used for BB-26. There is no plain-narration WEB audio in DBP at all — only dramatized production (see the Overview note). The spec's earlier assumption of a single "ENGWEB" fileset is incorrect; the implementation must hit the two EN1WEB* filesets.
+3. **Audio file format ✅** — MP3 at 64 kbps, CloudFront-delivered, `Content-Type: binary/octet-stream` (not `audio/mpeg`, but browsers sniff by extension). URLs are signed with `Expires` query param, expiring ~15 hours after issue. In-memory-only per-chapter URL cache is correct. Range requests supported.
+4. **BibleReader `ReaderChrome` structure ✅** — Documented in the plan's Architecture Context. `AudioPlayButton` slots in after the existing Books icon at the right edge.
+5. **App-level context mounting ✅** — Documented in the plan's Architecture Context and Step 9. `AudioPlayerProvider` mounts between `<AudioProvider>` and `<WhisperToastProvider>` in `App.tsx`.
+6. **Legacy scaffolding (`useBibleAudio.ts`, `SleepTimerPanel.tsx`) ✅** — Left untouched. Documented in the plan. A later cleanup or BB-28 spec will deal with them.
+7. **Lazy-loading verification ✅** — Vite config supports dynamic imports. Plan Step 1 installs Howler with explicit "no static import" guardrails. Main-bundle ceiling of 102 KB gzipped is enforced in Step 19.
+8. **iOS Safari Media Session ✅** — Support confirmed via public docs. `metadata`, `setActionHandler('play'|'pause'|'seekbackward'|'seekforward')` all work on iOS 15.4+. `playbackState` assignment required to keep lock-screen metadata visible after pause. Real-device verification deferred per BB-26 scope.
+9. **Howler.js iOS unlock ✅** — Howler 2.2.4 in `html5: true` mode handles iOS unlock automatically on the first user gesture. **One gap confirmed:** Howler does NOT auto-set `crossOrigin="anonymous"` on its internal `<audio>` element, so the plan's Step 6 mitigation (direct assignment via `_sounds[0]._node`) is load-bearing for BB-27's future Web Audio ducking path.
+10. **FCBH CORS posture ✅** — CloudFront returns `Access-Control-Allow-Origin: *` when an `Origin` header is present (with `Vary: Origin`). BB-27 ducking is unblocked.
+11. **DBP rate limits ✅** — 1500 requests per key per window (window period not documented in headers; likely hourly). Per-key quota, shared across all Worship Room users. No backend proxy needed at BB-26 scale.
+12. **FCBH key public-safety ⚠️ inferred, not explicit** — The DBP signup flow asks for Application URL, the API serves `ACAO: *` unconditionally, and the license language says "provide DBP content directly to end users." All three signals imply the key is intended for frontend use. No explicit "this key is safe to expose" statement exists in the docs. Treating `VITE_FCBH_API_KEY` as public-safe-but-rate-budgeted is the recon's best-effort conclusion.
+13. **DBP license constraints ⚠️** — License prohibits offline audio caching and requires attribution link. Attribution link is now covered by functional requirement 50a above. BB-39's PWA service worker must exclude `*.cloudfront.net/audio/*` from runtime caching — see plan Step 18 for the follow-up TODO.
+14. **DBP invalid-book-code bug ⚠️** — Requesting an unknown book code returns HTTP 200 with a fallback 1 Chronicles HLS playlist instead of 404. The DBP client must validate `response.data[0].book_id` against the requested book code — see plan Step 4 for the defensive check.
 
-### Chapter navigation and playback
-- [ ] Playing a new chapter while one is already playing stops the old chapter and starts the new one with no dialog.
-- [ ] Navigating to a different chapter while narration is playing keeps narration playing the original chapter.
-- [ ] `NarrationCurrentlyPlayingIndicator` chip appears in the reader chrome whenever the currently-playing narration chapter differs from the currently-viewed chapter.
-- [ ] The chip reads "Now playing: {Book} {Chapter}".
-- [ ] Tapping the chip navigates the reader back to the currently-playing chapter.
-- [ ] Tapping play on a new chapter while a different chapter is narrating stops the old chapter and starts the new one.
-- [ ] When the chapter audio ends, playback stops. No auto-advance.
-- [ ] With `narrationAutoStart` enabled, rapid chapter navigation (3 chapters in < 2 seconds) results in only the most recent chapter actually playing — superseded requests are canceled.
-
-### Media session
-- [ ] When narration is playing, media session metadata shows Title = `"{Book} {Chapter}"`, Artist = `"Audio Bible · WEB translation"`, Album = `"Worship Room"`, artwork present.
-- [ ] When both narration and ambient play, media session shows narration metadata.
-- [ ] When only ambient plays, media session shows ambient metadata (BB-20 behavior unchanged).
-- [ ] Media session `play` handler resumes narration.
-- [ ] Media session `pause` handler pauses narration.
-- [ ] Media session `seekforward` handler moves `+15s`.
-- [ ] Media session `seekbackward` handler moves `-15s`.
-- [ ] Media session `previoustrack` and `nexttrack` are disabled in BB-26.
-
-### Error handling
-- [ ] Network errors show the error state in `NarrationControl` and an error card with retry button in `NarrationPicker`.
-- [ ] 404 errors show "This chapter's audio isn't available right now" with retry button.
-- [ ] Rate-limit errors show "Too many audio requests. Try again in a moment." and respect `Retry-After` header for retry button enablement.
-- [ ] Slow connection (>10 seconds buffering) shows "Connection is slow. Try again when you have a better connection."
-- [ ] Transient stall (<10 seconds) does NOT show an error; playback resumes silently if connectivity returns.
-- [ ] `MediaError` during playback shows "Audio playback failed. Check your connection and try again."
-- [ ] Retry button reattempts the original request without automatic retries.
-
-### Settings
-- [ ] Reader settings panel has an "Audio narration" section.
-- [ ] Section includes "Show narration control in reader" toggle (default `true`).
-- [ ] Section includes "Auto-play narration when opening a chapter" toggle (default `false`, non-negotiable).
-- [ ] Section includes "Default playback speed" dropdown (default `1x`).
-- [ ] Settings persist within the existing reader settings object. No new top-level `wr_*` keys.
-
-### Focus mode
-- [ ] Entering BB-5 focus mode does not stop narration playback.
-- [ ] `NarrationControl` remains accessible from focus mode via the existing BB-5 chrome-access pattern.
-
-### Accessibility
-- [ ] All controls have meaningful `aria-label` attributes.
-- [ ] Play/pause button is keyboard-accessible (Enter / Space).
-- [ ] Scrubber is keyboard-accessible (Left/Right arrows).
-- [ ] Volume slider is keyboard-accessible.
-- [ ] Picker is focus-trapped when open.
-- [ ] Screen reader announces play/pause state changes via `aria-live`.
-- [ ] All tap targets ≥ 44px.
-- [ ] Reduced motion respected on all buffering/loading animations.
-- [ ] Lighthouse accessibility score ≥ 95 with the picker open.
-
-### Design system compliance
-- [ ] Zero raw hex values in any new component or stylesheet.
-- [ ] `NarrationPicker` frosted glass styling matches BB-20's `AmbientAudioPicker` and the `AudioDrawer` pattern from the design system recon.
-- [ ] `NarrationCurrentlyPlayingIndicator` chip uses existing chip/pill patterns (values marked `[UNVERIFIED]` during planning until verified via `/verify-with-playwright`).
-- [ ] Narration scrubber matches documented range-input patterns (values marked `[UNVERIFIED]` during planning until verified).
-
-### Recon gates (blocking)
-- [ ] Plan phase completed Recon task 1 (AudioProvider documentation) before writing any new code.
-- [ ] Plan phase completed Recon task 2 (BB-20 extension review) before writing any new code.
-- [ ] Plan phase completed Recon task 3 (FCBH API verification — all 5 checks) before writing any integration code.
-- [ ] Plan phase completed Recon task 4 (`/playwright-recon` against YouVersion, Dwell, Bible.is, and Audible) before designing the `NarrationPicker` layout.
-- [ ] Real-iOS-device testing was allocated explicitly in the plan phase.
+Full details (response shapes, URL examples, coverage table, rate-limit headers, license quotes) in `_plans/recon/bb26-audio-foundation.md`.
