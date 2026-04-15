@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, cleanup, render, renderHook, waitFor } from '@testing-library/react'
 import { type ReactNode } from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import type { PlayerTrack } from '@/types/bible-audio'
@@ -67,7 +68,11 @@ const TRACK: PlayerTrack = {
 }
 
 function wrapper({ children }: { children: ReactNode }) {
-  return <AudioPlayerProvider>{children}</AudioPlayerProvider>
+  return (
+    <MemoryRouter>
+      <AudioPlayerProvider>{children}</AudioPlayerProvider>
+    </MemoryRouter>
+  )
 }
 
 describe('useAudioPlayer (BB-26)', () => {
@@ -220,9 +225,11 @@ describe('useAudioPlayer (BB-26)', () => {
     }
 
     render(
-      <AudioPlayerProvider>
-        <Root />
-      </AudioPlayerProvider>,
+      <MemoryRouter>
+        <AudioPlayerProvider>
+          <Root />
+        </AudioPlayerProvider>
+      </MemoryRouter>,
     )
 
     await act(async () => {

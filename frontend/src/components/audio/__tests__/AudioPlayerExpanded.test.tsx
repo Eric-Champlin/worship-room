@@ -18,6 +18,8 @@ const mockState: AudioPlayerState = {
   playbackSpeed: 1.0,
   sheetState: 'expanded',
   errorMessage: null,
+  continuousPlayback: true,
+  endOfBible: false,
 }
 
 const mockActions = {
@@ -31,6 +33,8 @@ const mockActions = {
   minimize: vi.fn(),
   close: vi.fn(),
   dismissError: vi.fn(),
+  setContinuousPlayback: vi.fn(),
+  startFromGenesis: vi.fn(),
 }
 
 vi.mock('@/hooks/audio/useAudioPlayer', () => ({
@@ -54,6 +58,8 @@ function resetMockState() {
   mockState.playbackSpeed = 1.0
   mockState.sheetState = 'expanded'
   mockState.errorMessage = null
+  mockState.continuousPlayback = true
+  mockState.endOfBible = false
 }
 
 describe('AudioPlayerExpanded (BB-26)', () => {
@@ -145,5 +151,176 @@ describe('AudioPlayerExpanded (BB-26)', () => {
     expect(
       screen.getByRole('link', { name: /Faith Comes By Hearing/i }),
     ).toBeInTheDocument()
+  })
+})
+
+describe('AudioPlayerExpanded (BB-29) — continuous playback toggle', () => {
+  beforeEach(() => {
+    resetMockState()
+    Object.values(mockActions).forEach((fn) => fn.mockClear())
+  })
+
+  afterEach(() => cleanup())
+
+  it('renders toggle with correct label and description', () => {
+    render(<AudioPlayerExpanded />)
+    expect(
+      screen.getByRole('switch', { name: /continuous playback/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Auto-play next chapter')).toBeInTheDocument()
+  })
+
+  it('toggle reflects continuousPlayback true state', () => {
+    mockState.continuousPlayback = true
+    render(<AudioPlayerExpanded />)
+    const toggle = screen.getByRole('switch', { name: /continuous playback/i })
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('toggle reflects continuousPlayback false state', () => {
+    mockState.continuousPlayback = false
+    render(<AudioPlayerExpanded />)
+    const toggle = screen.getByRole('switch', { name: /continuous playback/i })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('clicking toggle calls setContinuousPlayback with inverted value', async () => {
+    const user = userEvent.setup()
+    mockState.continuousPlayback = true
+    render(<AudioPlayerExpanded />)
+    const toggle = screen.getByRole('switch', { name: /continuous playback/i })
+    await user.click(toggle)
+    expect(mockActions.setContinuousPlayback).toHaveBeenCalledWith(false)
+  })
+
+  it('pressing Enter on toggle fires setContinuousPlayback', async () => {
+    const user = userEvent.setup()
+    mockState.continuousPlayback = true
+    render(<AudioPlayerExpanded />)
+    const toggle = screen.getByRole('switch', { name: /continuous playback/i })
+    toggle.focus()
+    await user.keyboard('{Enter}')
+    expect(mockActions.setContinuousPlayback).toHaveBeenCalledWith(false)
+  })
+
+  it('pressing Space on toggle fires setContinuousPlayback (native button)', async () => {
+    const user = userEvent.setup()
+    mockState.continuousPlayback = true
+    render(<AudioPlayerExpanded />)
+    const toggle = screen.getByRole('switch', { name: /continuous playback/i })
+    toggle.focus()
+    await user.keyboard(' ')
+    expect(mockActions.setContinuousPlayback).toHaveBeenCalledWith(false)
+  })
+
+  it('toggle is hidden during error state', () => {
+    mockState.playbackState = 'error'
+    mockState.errorMessage = 'boom'
+    render(<AudioPlayerExpanded />)
+    expect(screen.queryByRole('switch', { name: /continuous playback/i })).toBeNull()
+  })
+
+  it('toggle has stable id bb29-continuous-playback', () => {
+    render(<AudioPlayerExpanded />)
+    const labelSpan = document.getElementById('bb29-continuous-playback-label')
+    expect(labelSpan).not.toBeNull()
+    expect(labelSpan?.textContent).toBe('Continuous playback')
+  })
+
+  it('toggle is positioned between speed picker and attribution footer', () => {
+    render(<AudioPlayerExpanded />)
+    const speedPicker = screen.getByRole('group', { name: 'Playback speed' })
+    const toggle = screen.getByRole('switch', { name: /continuous playback/i })
+    const attribution = screen.getByRole('link', { name: /Faith Comes By Hearing/i })
+
+    // speedPicker should come before toggle in DOM order, toggle before attribution
+    const order =
+      speedPicker.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING
+    expect(order).toBeTruthy()
+    const order2 =
+      toggle.compareDocumentPosition(attribution) & Node.DOCUMENT_POSITION_FOLLOWING
+    expect(order2).toBeTruthy()
+  })
+})
+
+describe('AudioPlayerExpanded (BB-29) — end-of-Bible state', () => {
+  beforeEach(() => {
+    resetMockState()
+    Object.values(mockActions).forEach((fn) => fn.mockClear())
+    // Enter end-of-Bible state with Revelation 22 as the track
+    mockState.track = {
+      filesetId: 'EN1WEBN2DA',
+      book: 'revelation',
+      bookDisplayName: 'Revelation',
+      chapter: 22,
+      translation: 'World English Bible',
+      url: 'https://cdn.example.com/REV/22.mp3',
+    }
+    mockState.playbackState = 'idle'
+    mockState.currentTime = 0
+    mockState.endOfBible = true
+  })
+
+  afterEach(() => cleanup())
+
+  it('renders gentle end-of-Bible message', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.getByText(/end of the bible/i)).toBeInTheDocument()
+  })
+
+  it('renders Start from Genesis button with correct aria-label', () => {
+    render(<AudioPlayerExpanded />)
+    expect(
+      screen.getByRole('button', { name: 'Start playback from Genesis 1' }),
+    ).toBeInTheDocument()
+  })
+
+  it('preserves chapter reference at top', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.getByText('Revelation 22')).toBeInTheDocument()
+  })
+
+  it('preserves translation label', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.getByText('World English Bible')).toBeInTheDocument()
+  })
+
+  it('preserves attribution footer', () => {
+    render(<AudioPlayerExpanded />)
+    expect(
+      screen.getByRole('link', { name: /Faith Comes By Hearing/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('hides scrubber in end-of-Bible state', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.queryByRole('slider')).toBeNull()
+  })
+
+  it('hides speed picker in end-of-Bible state', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.queryByRole('group', { name: 'Playback speed' })).toBeNull()
+  })
+
+  it('hides continuous playback toggle in end-of-Bible state', () => {
+    render(<AudioPlayerExpanded />)
+    expect(screen.queryByRole('switch')).toBeNull()
+  })
+
+  it('clicking Start from Genesis calls actions.startFromGenesis', async () => {
+    const user = userEvent.setup()
+    render(<AudioPlayerExpanded />)
+    await user.click(
+      screen.getByRole('button', { name: 'Start playback from Genesis 1' }),
+    )
+    expect(mockActions.startFromGenesis).toHaveBeenCalledTimes(1)
+  })
+
+  it('focus moves to Start from Genesis button on mount', () => {
+    render(<AudioPlayerExpanded />)
+    const btn = screen.getByRole('button', {
+      name: 'Start playback from Genesis 1',
+    })
+    expect(document.activeElement).toBe(btn)
   })
 })

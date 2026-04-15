@@ -1,10 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, cleanup, render, renderHook, waitFor } from '@testing-library/react'
 import { useContext, type ReactNode } from 'react'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { AudioPlayerContext, reducer } from '@/contexts/AudioPlayerContext'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
-import type { AudioPlayerState, PlayerTrack } from '@/types/bible-audio'
+import type {
+  AudioPlayerState,
+  DbpChapterAudio,
+  DbpError,
+  PlayerTrack,
+} from '@/types/bible-audio'
+import type { ResolveNextTrackDeps } from '@/lib/audio/next-track'
 import type { EngineEvents } from '@/lib/audio/engine'
+import { clearChapterAudioCache } from '@/lib/audio/audio-cache'
+import { CONTINUOUS_PLAYBACK_KEY } from '@/lib/audio/continuous-playback'
 
 // Module-level mutable state used by the mocked engine module.
 type EngineStub = {
@@ -59,9 +68,26 @@ vi.mock('@/lib/audio/engine', () => ({
   }),
 }))
 
+// BB-29 — capture the latest handlers object passed to updateMediaSession
+// so provider integration tests can invoke the manual nexttrack /
+// previoustrack callbacks the provider wires for Media Session.
+const latestMediaSessionHandlers: {
+  current: { onNextTrack?: () => void; onPrevTrack?: () => void } | null
+} = { current: null }
+
 vi.mock('@/lib/audio/media-session', () => ({
-  updateMediaSession: vi.fn(),
-  clearMediaSession: vi.fn(),
+  updateMediaSession: vi.fn(
+    (
+      _track: unknown,
+      _actions: unknown,
+      handlers?: { onNextTrack?: () => void; onPrevTrack?: () => void },
+    ) => {
+      latestMediaSessionHandlers.current = handlers ?? null
+    },
+  ),
+  clearMediaSession: vi.fn(() => {
+    latestMediaSessionHandlers.current = null
+  }),
 }))
 
 const TRACK_A: PlayerTrack = {
@@ -76,7 +102,11 @@ const TRACK_B: PlayerTrack = { ...TRACK_A, chapter: 4, url: 'https://cdn.example
 const TRACK_C: PlayerTrack = { ...TRACK_A, chapter: 5, url: 'https://cdn.example.com/JHN/5.mp3' }
 
 function wrapper({ children }: { children: ReactNode }) {
-  return <AudioPlayerProvider>{children}</AudioPlayerProvider>
+  return (
+    <MemoryRouter>
+      <AudioPlayerProvider>{children}</AudioPlayerProvider>
+    </MemoryRouter>
+  )
 }
 
 function useCtx() {
@@ -100,6 +130,8 @@ describe('AudioPlayerContext reducer (BB-26)', () => {
     playbackSpeed: 1.0,
     sheetState: 'closed',
     errorMessage: null,
+    continuousPlayback: true,
+    endOfBible: false,
   }
 
   it('LOAD_START transitions to loading with track set and sheet expanded', () => {
@@ -134,6 +166,91 @@ describe('AudioPlayerContext reducer (BB-26)', () => {
     )
     expect(dismissed.playbackState).toBe('idle')
     expect(dismissed.errorMessage).toBeNull()
+  })
+})
+
+describe('AudioPlayerContext reducer (BB-29 — auto-advance)', () => {
+  const init: AudioPlayerState = {
+    track: null,
+    playbackState: 'idle',
+    currentTime: 0,
+    duration: 0,
+    playbackSpeed: 1.0,
+    sheetState: 'closed',
+    errorMessage: null,
+    continuousPlayback: true,
+    endOfBible: false,
+  }
+
+  it('LOAD_NEXT_CHAPTER_START preserves minimized sheetState', () => {
+    const state: AudioPlayerState = {
+      ...init,
+      track: TRACK_A,
+      playbackState: 'playing',
+      sheetState: 'minimized',
+    }
+    const s = reducer(state, { type: 'LOAD_NEXT_CHAPTER_START', track: TRACK_B })
+    expect(s.sheetState).toBe('minimized')
+    expect(s.track).toBe(TRACK_B)
+    expect(s.playbackState).toBe('loading')
+    expect(s.currentTime).toBe(0)
+  })
+
+  it('LOAD_NEXT_CHAPTER_START preserves expanded sheetState', () => {
+    const state: AudioPlayerState = {
+      ...init,
+      track: TRACK_A,
+      playbackState: 'playing',
+      sheetState: 'expanded',
+    }
+    const s = reducer(state, { type: 'LOAD_NEXT_CHAPTER_START', track: TRACK_B })
+    expect(s.sheetState).toBe('expanded')
+  })
+
+  it('LOAD_NEXT_CHAPTER_START clears endOfBible flag', () => {
+    const state: AudioPlayerState = {
+      ...init,
+      track: TRACK_A,
+      sheetState: 'expanded',
+      endOfBible: true,
+    }
+    const s = reducer(state, { type: 'LOAD_NEXT_CHAPTER_START', track: TRACK_B })
+    expect(s.endOfBible).toBe(false)
+  })
+
+  it('SET_CONTINUOUS_PLAYBACK toggles the flag', () => {
+    const off = reducer(init, { type: 'SET_CONTINUOUS_PLAYBACK', enabled: false })
+    expect(off.continuousPlayback).toBe(false)
+    const on = reducer(off, { type: 'SET_CONTINUOUS_PLAYBACK', enabled: true })
+    expect(on.continuousPlayback).toBe(true)
+  })
+
+  it('END_OF_BIBLE sets flag, stops playback, preserves track and sheetState', () => {
+    const state: AudioPlayerState = {
+      ...init,
+      track: TRACK_A,
+      playbackState: 'playing',
+      currentTime: 179.5,
+      sheetState: 'expanded',
+    }
+    const s = reducer(state, { type: 'END_OF_BIBLE' })
+    expect(s.endOfBible).toBe(true)
+    expect(s.playbackState).toBe('idle')
+    expect(s.currentTime).toBe(0)
+    expect(s.track).toBe(TRACK_A)
+    expect(s.sheetState).toBe('expanded')
+  })
+
+  it('LOAD_START clears endOfBible flag', () => {
+    const state: AudioPlayerState = { ...init, endOfBible: true }
+    const s = reducer(state, { type: 'LOAD_START', track: TRACK_A })
+    expect(s.endOfBible).toBe(false)
+  })
+
+  it('CLOSE clears endOfBible flag', () => {
+    const state: AudioPlayerState = { ...init, track: TRACK_A, endOfBible: true }
+    const s = reducer(state, { type: 'CLOSE' })
+    expect(s.endOfBible).toBe(false)
   })
 })
 
@@ -329,9 +446,11 @@ describe('AudioPlayerProvider integration (BB-26)', () => {
     }
 
     render(
-      <AudioPlayerProvider>
-        <Root />
-      </AudioPlayerProvider>,
+      <MemoryRouter>
+        <AudioPlayerProvider>
+          <Root />
+        </AudioPlayerProvider>
+      </MemoryRouter>,
     )
 
     await act(async () => {
@@ -340,5 +459,560 @@ describe('AudioPlayerProvider integration (BB-26)', () => {
     await flush()
     await waitFor(() => expect(aState?.track?.chapter).toBe(3))
     expect(bState?.track?.chapter).toBe(3)
+  })
+})
+
+// ─── BB-29 — Auto-advance integration tests ──────────────────────────────
+
+const REV_22: PlayerTrack = {
+  filesetId: 'EN1WEBN2DA',
+  book: 'revelation',
+  bookDisplayName: 'Revelation',
+  chapter: 22,
+  translation: 'World English Bible',
+  url: 'https://cdn.example.com/REV/22.mp3',
+}
+const GEN_50: PlayerTrack = {
+  filesetId: 'EN1WEBO2DA',
+  book: 'genesis',
+  bookDisplayName: 'Genesis',
+  chapter: 50,
+  translation: 'World English Bible',
+  url: 'https://cdn.example.com/GEN/50.mp3',
+}
+const MAL_4: PlayerTrack = {
+  filesetId: 'EN1WEBO2DA',
+  book: 'malachi',
+  bookDisplayName: 'Malachi',
+  chapter: 4,
+  translation: 'World English Bible',
+  url: 'https://cdn.example.com/MAL/4.mp3',
+}
+
+function makeChapterAudioFake(url: string): DbpChapterAudio {
+  return { book: 'JHN', chapter: 0, url }
+}
+
+// Build a BB-29 test wrapper that also captures the current route via
+// useLocation so tests can assert on navigation without spying.
+function makeBB29Wrapper(
+  deps: ResolveNextTrackDeps,
+  locationRef: { current: string },
+) {
+  function LocationCapture() {
+    const loc = useLocation()
+    locationRef.current = loc.pathname
+    return null
+  }
+  return function BB29Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <MemoryRouter initialEntries={['/']}>
+        <AudioPlayerProvider __resolveNextTrackDeps={deps}>
+          <LocationCapture />
+          {children}
+        </AudioPlayerProvider>
+      </MemoryRouter>
+    )
+  }
+}
+
+describe('AudioPlayerProvider BB-29 — auto-advance + preference lifecycle', () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    createdEngines.length = 0
+    pendingResolvers.length = 0
+    deferMode = false
+    nextOverride = null
+    clearChapterAudioCache()
+    localStorage.removeItem(CONTINUOUS_PLAYBACK_KEY)
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    warnSpy.mockRestore()
+    cleanup()
+    vi.useRealTimers()
+    localStorage.removeItem(CONTINUOUS_PLAYBACK_KEY)
+    clearChapterAudioCache()
+  })
+
+  it('provider reads continuousPlayback from localStorage on mount (false)', async () => {
+    localStorage.setItem(CONTINUOUS_PLAYBACK_KEY, 'false')
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({}, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+    expect(result.current.state.continuousPlayback).toBe(false)
+  })
+
+  it('provider defaults continuousPlayback to true when storage absent', async () => {
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({}, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+    expect(result.current.state.continuousPlayback).toBe(true)
+  })
+
+  it('setContinuousPlayback writes to localStorage and updates state', async () => {
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({}, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      result.current.actions.setContinuousPlayback(false)
+    })
+    expect(result.current.state.continuousPlayback).toBe(false)
+    expect(localStorage.getItem(CONTINUOUS_PLAYBACK_KEY)).toBe('false')
+  })
+
+  it('onEnd triggers auto-advance when continuousPlayback is true', async () => {
+    const fetchChapterAudio = vi
+      .fn()
+      .mockResolvedValue(makeChapterAudioFake('https://cdn.example.com/JHN/4.mp3'))
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    expect(createdEngines).toHaveLength(1)
+    const firstEngine = createdEngines[0]
+
+    await act(async () => {
+      firstEngine.events.onEnd?.()
+    })
+    await flush()
+
+    await waitFor(() => expect(result.current.state.track?.chapter).toBe(4))
+    expect(fetchChapterAudio).toHaveBeenCalledWith('EN1WEBN2DA', 'JHN', 4)
+  })
+
+  it('onEnd dispatches STOP when continuousPlayback is false', async () => {
+    localStorage.setItem(CONTINUOUS_PLAYBACK_KEY, 'false')
+    const fetchChapterAudio = vi.fn()
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    expect(result.current.state.playbackState).toBe('idle')
+    expect(result.current.state.track?.chapter).toBe(3) // preserved
+    expect(fetchChapterAudio).not.toHaveBeenCalled()
+  })
+
+  it('auto-advance navigates to next chapter URL with replace', async () => {
+    const fetchChapterAudio = vi
+      .fn()
+      .mockResolvedValue(makeChapterAudioFake('https://cdn.example.com/JHN/4.mp3'))
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    await waitFor(() => expect(locationRef.current).toBe('/bible/john/4'))
+  })
+
+  it('auto-advance preserves expanded sheet state', async () => {
+    const fetchChapterAudio = vi
+      .fn()
+      .mockResolvedValue(makeChapterAudioFake('https://cdn.example.com/JHN/4.mp3'))
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    // play() forces sheetState to expanded already
+    expect(result.current.state.sheetState).toBe('expanded')
+
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    await waitFor(() => expect(result.current.state.track?.chapter).toBe(4))
+    expect(result.current.state.sheetState).toBe('expanded')
+  })
+
+  it('auto-advance preserves minimized sheet state', async () => {
+    const fetchChapterAudio = vi
+      .fn()
+      .mockResolvedValue(makeChapterAudioFake('https://cdn.example.com/JHN/4.mp3'))
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    await act(async () => {
+      result.current.actions.minimize()
+    })
+    expect(result.current.state.sheetState).toBe('minimized')
+
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    await waitFor(() => expect(result.current.state.track?.chapter).toBe(4))
+    expect(result.current.state.sheetState).toBe('minimized')
+  })
+
+  it('auto-advance at Revelation 22 dispatches END_OF_BIBLE', async () => {
+    const fetchChapterAudio = vi.fn()
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(REV_22)
+    })
+    await flush()
+    const priorLocation = locationRef.current
+
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    expect(result.current.state.endOfBible).toBe(true)
+    expect(result.current.state.playbackState).toBe('idle')
+    expect(result.current.state.track?.book).toBe('revelation')
+    expect(result.current.state.track?.chapter).toBe(22)
+    // No navigate call for end-of-bible
+    expect(locationRef.current).toBe(priorLocation)
+    expect(fetchChapterAudio).not.toHaveBeenCalled()
+  })
+
+  it('auto-advance across book boundary navigates to new book', async () => {
+    const fetchChapterAudio = vi
+      .fn()
+      .mockResolvedValue({ book: 'EXO', chapter: 1, url: 'https://cdn.example.com/EXO/1.mp3' })
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(GEN_50)
+    })
+    await flush()
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    await waitFor(() => expect(locationRef.current).toBe('/bible/exodus/1'))
+    expect(result.current.state.track?.book).toBe('exodus')
+    expect(result.current.state.track?.chapter).toBe(1)
+  })
+
+  it('auto-advance across testament boundary switches fileset', async () => {
+    const fetchChapterAudio = vi
+      .fn()
+      .mockResolvedValue({ book: 'MAT', chapter: 1, url: 'https://cdn.example.com/MAT/1.mp3' })
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(MAL_4)
+    })
+    await flush()
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    await waitFor(() => expect(result.current.state.track?.book).toBe('matthew'))
+    expect(result.current.state.track?.chapter).toBe(1)
+    expect(result.current.state.track?.filesetId).toBe('EN1WEBN2DA')
+    expect(fetchChapterAudio).toHaveBeenCalledWith('EN1WEBN2DA', 'MAT', 1)
+  })
+
+  it('auto-advance error dispatches LOAD_ERROR', async () => {
+    const err: DbpError = { kind: 'network', message: 'offline' }
+    const fetchChapterAudio = vi.fn().mockRejectedValue(err)
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    await waitFor(() => expect(result.current.state.playbackState).toBe('error'))
+    expect(result.current.state.errorMessage).toBeTruthy()
+  })
+
+  it('manual pause does not trigger auto-advance', async () => {
+    const fetchChapterAudio = vi.fn()
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    await act(async () => {
+      result.current.actions.pause()
+    })
+
+    expect(result.current.state.track?.chapter).toBe(3)
+    expect(fetchChapterAudio).not.toHaveBeenCalled()
+  })
+
+  it('endOfBible flag cleared when user manually plays a new chapter', async () => {
+    const fetchChapterAudio = vi.fn()
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    // Force end-of-bible via Revelation 22 + onEnd
+    await act(async () => {
+      await result.current.actions.play(REV_22)
+    })
+    await flush()
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+    expect(result.current.state.endOfBible).toBe(true)
+
+    // Manually play a new chapter
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    expect(result.current.state.endOfBible).toBe(false)
+  })
+
+  it('startFromGenesis action plays Genesis 1 and navigates', async () => {
+    // Pre-seed the in-memory cache for Genesis 1 so startFromGenesis does
+    // NOT hit the real DBP client (which would require mocking).
+    const { setCachedChapterAudio } = await import('@/lib/audio/audio-cache')
+    setCachedChapterAudio('EN1WEBO2DA', 'GEN', 1, {
+      book: 'GEN',
+      chapter: 1,
+      url: 'https://cdn.example.com/GEN/1.mp3',
+    })
+
+    const fetchChapterAudio = vi.fn()
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.startFromGenesis()
+    })
+    await flush()
+
+    await waitFor(() => expect(result.current.state.track?.book).toBe('genesis'))
+    expect(result.current.state.track?.chapter).toBe(1)
+    expect(locationRef.current).toBe('/bible/genesis/1')
+  })
+
+  it('auto-advance supersession: manual play cancels in-flight auto-advance', async () => {
+    // Use deferMode so new engines block until we manually resolve them
+    let resolveFetch: ((v: DbpChapterAudio) => void) | null = null
+    const fetchChapterAudio = vi.fn().mockImplementation(
+      () =>
+        new Promise<DbpChapterAudio>((resolve) => {
+          resolveFetch = resolve
+        }),
+    )
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    // Start John 3
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    expect(createdEngines).toHaveLength(1)
+
+    // Fire onEnd — autoAdvance starts and awaits the pending fetch
+    await act(async () => {
+      createdEngines[0].events.onEnd?.()
+    })
+    await flush()
+
+    // While auto-advance is blocked on the fetch, user manually plays Genesis 1
+    await act(async () => {
+      await result.current.actions.play({
+        filesetId: 'EN1WEBO2DA',
+        book: 'genesis',
+        bookDisplayName: 'Genesis',
+        chapter: 1,
+        translation: 'World English Bible',
+        url: 'https://cdn.example.com/GEN/1.mp3',
+      })
+    })
+    await flush()
+
+    // Now resolve the deferred fetch — autoAdvance should see it's superseded
+    await act(async () => {
+      resolveFetch?.({ book: 'JHN', chapter: 4, url: 'https://cdn.example.com/JHN/4.mp3' })
+    })
+    await flush()
+
+    // Genesis should win — the auto-advance result was discarded
+    expect(result.current.state.track?.book).toBe('genesis')
+    expect(result.current.state.track?.chapter).toBe(1)
+  })
+
+  // ─── BB-29 Step 4 — Media Session nexttrack / previoustrack ────────────
+
+  it('provider manual nexttrack advances to the next chapter', async () => {
+    const fetchChapterAudio = vi
+      .fn()
+      .mockResolvedValue(makeChapterAudioFake('https://cdn.example.com/JHN/4.mp3'))
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    await waitFor(() =>
+      expect(latestMediaSessionHandlers.current?.onNextTrack).toBeDefined(),
+    )
+
+    await act(async () => {
+      latestMediaSessionHandlers.current?.onNextTrack?.()
+    })
+    await flush()
+    await waitFor(() => expect(result.current.state.track?.chapter).toBe(4))
+  })
+
+  it('provider manual nexttrack ignores continuousPlayback preference', async () => {
+    // Turn preference OFF — manual nexttrack should still advance
+    localStorage.setItem(CONTINUOUS_PLAYBACK_KEY, 'false')
+    const fetchChapterAudio = vi
+      .fn()
+      .mockResolvedValue(makeChapterAudioFake('https://cdn.example.com/JHN/4.mp3'))
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+    expect(result.current.state.continuousPlayback).toBe(false)
+
+    await act(async () => {
+      latestMediaSessionHandlers.current?.onNextTrack?.()
+    })
+    await flush()
+    await waitFor(() => expect(result.current.state.track?.chapter).toBe(4))
+  })
+
+  it('provider manual nexttrack at Revelation 22 triggers end-of-bible state', async () => {
+    const fetchChapterAudio = vi.fn()
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(REV_22)
+    })
+    await flush()
+
+    await act(async () => {
+      latestMediaSessionHandlers.current?.onNextTrack?.()
+    })
+    await flush()
+
+    expect(result.current.state.endOfBible).toBe(true)
+    expect(fetchChapterAudio).not.toHaveBeenCalled()
+  })
+
+  it('provider manual previoustrack goes to previous chapter', async () => {
+    // Pre-seed cache for John 2 so prev-track doesn't hit the real DBP
+    const audioCacheModule = await import('@/lib/audio/audio-cache')
+    audioCacheModule.setCachedChapterAudio('EN1WEBN2DA', 'JHN', 2, {
+      book: 'JHN',
+      chapter: 2,
+      url: 'https://cdn.example.com/JHN/2.mp3',
+    })
+
+    const fetchChapterAudio = vi.fn()
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    await act(async () => {
+      await result.current.actions.play(TRACK_A)
+    })
+    await flush()
+
+    await act(async () => {
+      latestMediaSessionHandlers.current?.onPrevTrack?.()
+    })
+    await flush()
+
+    await waitFor(() => expect(result.current.state.track?.chapter).toBe(2))
+    expect(result.current.state.track?.book).toBe('john')
+  })
+
+  it('provider manual previoustrack at Genesis 1 is a no-op', async () => {
+    const fetchChapterAudio = vi.fn()
+    const locationRef = { current: '/' }
+    const wrapperFn = makeBB29Wrapper({ fetchChapterAudio }, locationRef)
+    const { result } = renderHook(() => useCtx(), { wrapper: wrapperFn })
+
+    const GENESIS_1: PlayerTrack = {
+      filesetId: 'EN1WEBO2DA',
+      book: 'genesis',
+      bookDisplayName: 'Genesis',
+      chapter: 1,
+      translation: 'World English Bible',
+      url: 'https://cdn.example.com/GEN/1.mp3',
+    }
+
+    await act(async () => {
+      await result.current.actions.play(GENESIS_1)
+    })
+    await flush()
+
+    await act(async () => {
+      latestMediaSessionHandlers.current?.onPrevTrack?.()
+    })
+    await flush()
+
+    // Track unchanged — no adjacent chapter before Genesis 1
+    expect(result.current.state.track?.book).toBe('genesis')
+    expect(result.current.state.track?.chapter).toBe(1)
   })
 })

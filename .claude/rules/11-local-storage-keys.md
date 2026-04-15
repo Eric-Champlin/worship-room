@@ -154,6 +154,21 @@ Cache entries for BB-26 Bible audio playback. Managed by `frontend/src/lib/audio
 - **Version:** `bb26-v1` prefix allows future invalidation by bumping to `bb26-v2`.
 - **Failure mode:** all localStorage operations are wrapped in `safeLocalStorageGet/Set/Remove` try/catch helpers. Private browsing, quota exceeded, and disabled storage all degrade to no-op behavior. The stale-while-revalidate wrapper `loadAudioBibles()` falls back to stale cache data if the DBP fetch fails, or rethrows if no cache exists.
 
+### Bible Audio Auto-Advance (BB-29)
+
+Preference for continuous playback in the Bible audio player. Managed by `frontend/src/lib/audio/continuous-playback.ts`. Uses the `bb29-v1:` prefix, following the BB-26 / BB-32 `bb*-v1:` convention for spec-namespaced preferences.
+
+| Key                          | Type      | Feature                                                                                     |
+| ---------------------------- | --------- | ------------------------------------------------------------------------------------------- |
+| `bb29-v1:continuousPlayback` | `boolean` | Continuous playback preference (BB-29). Defaults to `true` when absent or corrupt. No TTL. |
+
+- **Default:** `true` — continuous playback is on by default for new users (anti-pressure design: the feature works correctly for most users without configuration).
+- **Read:** Loaded once on `AudioPlayerProvider` mount via lazy reducer init. Not re-read during the session.
+- **Write:** Updated synchronously by the `setContinuousPlayback` action, which mirrors the new value into the reducer state and writes to localStorage.
+- **Corruption:** Non-JSON or non-boolean values fall back to the default `true`. All localStorage operations are wrapped in try/catch — private browsing, quota exceeded, and disabled storage all degrade to a no-op read returning the default and a no-op write.
+- **Cross-tab:** Not synchronized. Two concurrent audio Bible sessions in separate tabs are not a real use case.
+- **Version:** `bb29-v1` prefix allows future invalidation by bumping to `bb29-v2`.
+
 ### Community Challenges
  
 | Key                        | Type                             | Feature                          |

@@ -13,6 +13,18 @@ import type { AudioPlayerActions, PlayerTrack } from '@/types/bible-audio'
 
 const ARTWORK_URL = '/icons/icon-512.png'
 
+/**
+ * BB-29 — optional next/prev track handlers. BB-26 did not wire these;
+ * BB-29 wires them so lock-screen and headphone buttons can advance
+ * chapters manually. `nexttrack` flows through the same `autoAdvance`
+ * cascade the provider uses for natural track ends; `previoustrack`
+ * resolves the prior chapter via `getAdjacentChapter` and calls play().
+ */
+export interface MediaSessionHandlers {
+  onNextTrack?: () => void
+  onPrevTrack?: () => void
+}
+
 function hasMediaSession(): boolean {
   return typeof navigator !== 'undefined' && 'mediaSession' in navigator
 }
@@ -20,6 +32,7 @@ function hasMediaSession(): boolean {
 export function updateMediaSession(
   track: PlayerTrack,
   actions: AudioPlayerActions,
+  handlers: MediaSessionHandlers = {},
 ): void {
   if (!hasMediaSession()) return
   try {
@@ -47,6 +60,14 @@ export function updateMediaSession(
       actions.seek(current)
     })
     navigator.mediaSession.setActionHandler('stop', () => actions.stop())
+    navigator.mediaSession.setActionHandler(
+      'nexttrack',
+      handlers.onNextTrack ?? null,
+    )
+    navigator.mediaSession.setActionHandler(
+      'previoustrack',
+      handlers.onPrevTrack ?? null,
+    )
   } catch (e) {
     console.warn('[BB-26] Media Session update failed:', e)
   }
@@ -61,6 +82,8 @@ export function clearMediaSession(): void {
     navigator.mediaSession.setActionHandler('seekbackward', null)
     navigator.mediaSession.setActionHandler('seekforward', null)
     navigator.mediaSession.setActionHandler('stop', null)
+    navigator.mediaSession.setActionHandler('nexttrack', null)
+    navigator.mediaSession.setActionHandler('previoustrack', null)
   } catch {
     /* noop */
   }

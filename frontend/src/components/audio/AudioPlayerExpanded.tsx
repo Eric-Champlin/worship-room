@@ -19,6 +19,7 @@ import { useEffect, useRef } from 'react'
 import { Play, Pause, Minimize2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer'
+import { ToggleSwitch } from '@/components/settings/ToggleSwitch'
 import type { PlaybackSpeed } from '@/types/bible-audio'
 
 const SPEEDS: PlaybackSpeed[] = [0.75, 1.0, 1.25, 1.5, 2.0]
@@ -69,16 +70,26 @@ function AttributionFooter() {
 export function AudioPlayerExpanded() {
   const { state, actions } = useAudioPlayer()
   const playButtonRef = useRef<HTMLButtonElement>(null)
+  const startFromGenesisButtonRef = useRef<HTMLButtonElement>(null)
 
   // Focus moves to the play button when the sheet first expands
   useEffect(() => {
     playButtonRef.current?.focus()
   }, [])
 
+  // BB-29 — when end-of-Bible engages, move focus to the Start from
+  // Genesis button so the primary action is keyboard-accessible.
+  useEffect(() => {
+    if (state.endOfBible) {
+      startFromGenesisButtonRef.current?.focus()
+    }
+  }, [state.endOfBible])
+
   if (!state.track) return null
 
   const isPlaying = state.playbackState === 'playing'
   const isError = state.playbackState === 'error'
+  const isEndOfBible = state.endOfBible
 
   return (
     <div className="flex h-[340px] flex-col px-6 py-4 sm:h-[300px] sm:px-8 sm:py-5">
@@ -112,6 +123,21 @@ export function AudioPlayerExpanded() {
             className="rounded px-2 py-1 text-sm text-white/50 underline underline-offset-2 transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
             Dismiss
+          </button>
+        </div>
+      ) : isEndOfBible ? (
+        <div className="mt-4 flex flex-1 flex-col items-center justify-center gap-4">
+          <p className="text-center text-base text-white/80">
+            End of the Bible. Press play to start again from Genesis.
+          </p>
+          <button
+            ref={startFromGenesisButtonRef}
+            type="button"
+            onClick={() => void actions.startFromGenesis()}
+            aria-label="Start playback from Genesis 1"
+            className="flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/10 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+          >
+            <Play className="h-6 w-6 text-white" aria-hidden="true" />
           </button>
         </div>
       ) : (
@@ -174,6 +200,17 @@ export function AudioPlayerExpanded() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* BB-29 — Continuous playback toggle */}
+          <div className="mt-2 px-0">
+            <ToggleSwitch
+              id="bb29-continuous-playback"
+              checked={state.continuousPlayback}
+              onChange={actions.setContinuousPlayback}
+              label="Continuous playback"
+              description="Auto-play next chapter"
+            />
           </div>
         </>
       )}

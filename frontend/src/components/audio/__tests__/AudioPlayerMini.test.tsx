@@ -12,6 +12,8 @@ const mockState: AudioPlayerState = {
   playbackSpeed: 1.0,
   sheetState: 'closed',
   errorMessage: null,
+  continuousPlayback: true,
+  endOfBible: false,
 }
 
 const mockActions = {
@@ -25,6 +27,8 @@ const mockActions = {
   minimize: vi.fn(),
   close: vi.fn(),
   dismissError: vi.fn(),
+  setContinuousPlayback: vi.fn(),
+  startFromGenesis: vi.fn(),
 }
 
 vi.mock('@/hooks/audio/useAudioPlayer', () => ({
@@ -77,5 +81,11 @@ describe('AudioPlayerMini (BB-26)', () => {
     mockState.track = null
     const { container } = render(<AudioPlayerMini />)
     expect(container.firstChild).toBeNull()
+  })
+
+  // BB-29 spec requirement 17 — toggle is never rendered on the minimized bar
+  it('does NOT render continuous playback toggle (BB-29)', () => {
+    render(<AudioPlayerMini />)
+    expect(screen.queryByRole('switch')).toBeNull()
   })
 })

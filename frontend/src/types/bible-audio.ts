@@ -77,6 +77,9 @@ export interface AudioPlayerState {
   playbackSpeed: PlaybackSpeed
   sheetState: SheetState
   errorMessage: string | null
+  // BB-29 — continuous playback / auto-advance
+  continuousPlayback: boolean
+  endOfBible: boolean
 }
 
 /**
@@ -94,4 +97,7 @@ export interface AudioPlayerActions {
   minimize: () => void
   close: () => void
   dismissError: () => void
+  // BB-29 — continuous playback / auto-advance
+  setContinuousPlayback: (enabled: boolean) => void
+  startFromGenesis: () => Promise<void>
 }

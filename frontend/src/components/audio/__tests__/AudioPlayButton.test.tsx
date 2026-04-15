@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer'
 import type { AudioPlayerActions } from '@/types/bible-audio'
@@ -56,7 +57,11 @@ vi.mock('@/lib/audio/media-session', () => ({
 import { AudioPlayButton } from '@/components/audio/AudioPlayButton'
 
 function wrapper({ children }: { children: ReactNode }) {
-  return <AudioPlayerProvider>{children}</AudioPlayerProvider>
+  return (
+    <MemoryRouter>
+      <AudioPlayerProvider>{children}</AudioPlayerProvider>
+    </MemoryRouter>
+  )
 }
 
 /**
@@ -72,10 +77,12 @@ function renderWithActions(children: ReactNode) {
     return null
   }
   const rendered = render(
-    <AudioPlayerProvider>
-      <Harness />
-      {children}
-    </AudioPlayerProvider>,
+    <MemoryRouter>
+      <AudioPlayerProvider>
+        <Harness />
+        {children}
+      </AudioPlayerProvider>
+    </MemoryRouter>,
   )
   return { ...rendered, actionsRef }
 }
@@ -268,10 +275,12 @@ describe('AudioPlayButton (BB-26)', () => {
       return null
     }
     rerender(
-      <AudioPlayerProvider>
-        <Harness />
-        <AudioPlayButton bookSlug="john" bookDisplayName="John" chapter={4} />
-      </AudioPlayerProvider>,
+      <MemoryRouter>
+        <AudioPlayerProvider>
+          <Harness />
+          <AudioPlayButton bookSlug="john" bookDisplayName="John" chapter={4} />
+        </AudioPlayerProvider>
+      </MemoryRouter>,
     )
     // Wait for the new chapter's DBP lookup + re-render.
     await waitFor(() => {

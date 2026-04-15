@@ -10,6 +10,8 @@ const mockState: AudioPlayerState = {
   playbackSpeed: 1.0,
   sheetState: 'closed',
   errorMessage: null,
+  continuousPlayback: true,
+  endOfBible: false,
 }
 const mockActions = {
   play: vi.fn(),
@@ -22,6 +24,8 @@ const mockActions = {
   minimize: vi.fn(),
   close: vi.fn(),
   dismissError: vi.fn(),
+  setContinuousPlayback: vi.fn(),
+  startFromGenesis: vi.fn(),
 }
 
 vi.mock('@/hooks/audio/useAudioPlayer', () => ({
