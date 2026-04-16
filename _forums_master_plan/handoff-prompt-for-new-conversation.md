@@ -82,8 +82,12 @@ You have Filesystem and Desktop Commander MCP servers connected. You can read/wr
 
 1. Read the master plan yourself: `Filesystem:read_text_file` at the path above
 2. Extract the spec section verbatim — the `/spec-forums` skill handles formatting
-3. Give me a tracker line I can paste into `spec-tracker.md`
 
 Don't ask clarifying questions — everything you need is in the master plan on disk.
+
+## Output rules
+
+- **Skip tracker lines.** I already have a complete spec tracker with all 138 specs. I update it myself.
+- **Use artifacts for specs and large documents.** Create them as artifacts (the clickable pill) — not inline text. Just the artifact plus a short confirmation (filename, length, any notes). Don't dump content into chat.
 
 Now: new spec please. Spec 0.1.
