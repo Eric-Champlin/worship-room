@@ -58,7 +58,7 @@ Protocols run in order on a single deep-review branch and produce a consolidated
 - **Spotify Integration**: No Spotify API required. Song of the Day embed uses track IDs from the Worship Room playlist (https://open.spotify.com/playlist/5Ux99VLE8cG7W656CjR2si).
 - **Gamification Philosophy**: "Gentle gamification" — celebrate presence, never punish absence. Grace-based streak repair (1 free/week, 50 pts for additional). Mood data always private; only engagement data visible to friends.
 - **Visual Growth Metaphor**: Animated SVG garden on dashboard that grows through 6 stages matching faith levels.
-- **Content Strategy**: All AI content (prayers, devotionals, insights, chat) is mock/hardcoded for frontend-first build. Real AI generation via OpenAI API in Phase 3. **Exception:** BB-30/BB-31 Explain and Reflect features use real Gemini 2.5 Flash Lite calls in production via the BB-32 cache layer.
+- **Content Strategy**: All AI content (prayers, devotionals, insights, chat) is mock/hardcoded for frontend-first build. The Forums Wave (Phase 3) uses curated content only — no LLM integration in MVP. Real AI generation deferred to a future wave. **Exception:** BB-30/BB-31 Explain and Reflect features use real Gemini 2.5 Flash Lite calls in production via the BB-32 cache layer.
 - **Liturgical Calendar**: Algorithmic Easter calculation (Computus) with automatic season detection. Seasons affect dashboard greeting, devotional priority, Verse of the Day, landing page banner, QOTD, and navbar icon.
 - **Dark Theme**: App uses dark theme throughout. Light mode deferred to Phase 4. Bible reader supports three reader-only themes (midnight default, parchment, sepia) scoped to the BibleReader chrome only.
 - **Navigation**: 5 top-level nav items (Daily Hub, Bible, Grow, Prayer Wall, Music) + Local Support dropdown + avatar dropdown for authenticated users. Mobile: grouped section drawer.
@@ -236,11 +236,40 @@ The largest single wave in the project's history. Rebuilt the Bible reader, adde
 - **Search and personal layer (BB-42, BB-43, BB-45, BB-46)** — Full-text scripture search (BB-42), reading heatmap and Bible progress map (BB-43), verse memorization deck (BB-45), verse echoes (BB-46).
 - **The wave introduced the BB-45 store mirror anti-pattern as a documented hazard.** Components consuming reactive stores must use the store's hook, not local `useState`. See `11-local-storage-keys.md` § "Reactive Store Consumption" and `_protocol/04-prompt-architecture-and-pattern-consistency.md` Phase 1E.
 
-**Phase 3 — Auth & Backend Wiring** (NEXT)
+**Phase 3 — Forums Wave** (ACTIVE — current work)
 
-Spring Security + JWT, OpenAI API, backend crisis detection, API wiring for all features, journal encryption, data persistence (localStorage → API), real AI generation for prayers/chat/devotionals/insights/plan generation, photo moderation, rate limiting. BB-41's push notifications get a real push server in Phase 3.
+The largest backend wave in the project's history. 138 specs across 19 phases (Phase 0 → Phase 16), documented in the Forums Wave Master Plan at `_forums_master_plan/round3-master-plan.md` (v2.6, 622 KB). This wave migrates Worship Room from a frontend-only localStorage app to a full-stack Spring Boot + PostgreSQL application with real auth, a community prayer wall, user profiles, moderation, notifications, search, and email.
 
-**Phase 4 — Light Mode & Native Prep**
+**Master plan is the source of truth for all Phase 3 work.** The plan contains 17 Universal Rules, 17 Architectural Decisions, and detailed per-spec acceptance criteria. CC must read the relevant spec section from the master plan before executing any Forums Wave work.
+
+**Key architectural decisions (read the master plan for full detail):**
+- Decision 5: Unified `posts` table (not `prayer_requests` — the old table names in `05-database.md` are superseded)
+- Decision 6: Spring Security + JWT (in-memory token, short-lived, no cookie)
+- Decision 8: Friends + Social Interactions + Milestone Events dual-write in Phase 2.5
+- Decision 9: Feature flags for every migration phase (`VITE_USE_BACKEND_*`)
+- Decision 13: Every migration phase has a cutover spec with smoke test
+- Universal Rule 13: Crisis content supersedes all other feature behavior
+- Universal Rule 17: Per-phase accessibility smoke test at every cutover
+
+**Forums Wave skill pipeline:**
+1. **`/spec-forums <spec-id-or-description>`** — Extracts a spec from the master plan into a standalone `_specs/` file + feature branch
+2. **`/plan-forums _specs/<spec>.md`** — Generates a backend-aware implementation plan (Liquibase, JPA, service layer, API, tests)
+3. **Review** — User approves plan
+4. **`/execute-plan-forums _plans/<plan>.md`** — Implements step-by-step with backend verification (compile, test, API shape)
+5. **`/code-review`** — Pre-commit quality check (backend + frontend aware)
+6. **`/verify-with-playwright`** — Visual verification (for specs with UI; skipped for backend-only specs)
+
+**Backend tech stack:**
+- Spring Boot 3.x + Java 21 + Maven
+- PostgreSQL via Docker Compose (local) / Railway or Supabase (prod)
+- Liquibase for migrations (NOT Flyway — master plan uses Liquibase throughout)
+- Spring Security + JWT for auth
+- Redis for rate limiting + caching (Spec 5.6)
+- Sentry for error tracking with PII scrubber (Spec 1.10d)
+- S3/R2/MinIO adapter for object storage (Spec 1.10e)
+- Testcontainers for integration tests
+
+**Phase 4 — Light Mode & Native Prep** (deferred)
 
 Light mode toggle, real TTS audio files, performance optimization, native app planning.
 
@@ -272,7 +301,7 @@ Run `pnpm test`, `pnpm lint`, and `pnpm build` to get current build health for a
 
 ## Build Approach
 
-### Spec-Driven Workflow
+### Frontend Spec-Driven Workflow (pre-Forums-Wave features, Bible wave, visual polish)
 
 1. **`/spec <feature description>`** — Generates spec file + feature branch
 2. **`/plan _specs/<feature>.md`** — Generates implementation plan
@@ -280,6 +309,15 @@ Run `pnpm test`, `pnpm lint`, and `pnpm build` to get current build health for a
 4. **`/execute-plan _plans/<plan>.md`** — Implements step-by-step
 5. **`/code-review`** — Pre-commit quality check
 6. **`/verify-with-playwright`** — Visual verification
+
+### Forums Wave Workflow (Phase 3 — backend + full-stack features)
+
+1. **`/spec-forums <spec-id-or-description>`** — Extracts spec from master plan (`_forums_master_plan/round3-master-plan.md`) into standalone `_specs/` file + feature branch
+2. **`/plan-forums _specs/<spec>.md`** — Generates backend-aware implementation plan (Liquibase, JPA, services, endpoints, Testcontainers)
+3. **Review** — User approves plan
+4. **`/execute-plan-forums _plans/<plan>.md`** — Implements with backend verification (compile → test → API shape → Liquibase applies)
+5. **`/code-review`** — Pre-commit quality check (Forums Wave safety checks included)
+6. **`/verify-with-playwright`** — Visual verification (only for specs with UI components; skipped for backend-only specs)
 
 ### Deep Review Workflow
 
@@ -314,3 +352,16 @@ The protocols catch issues that the per-spec workflow can't: cross-spec contract
 - **Animation token discipline** — all animation durations and easings come from `frontend/src/constants/animation.ts`. Don't hardcode `200ms` or `cubic-bezier(...)` strings in new components. See `09-design-system.md` § "Animation Tokens".
 - **Visual patterns live in `09-design-system.md`** — glow opacities, text color defaults, heading treatments, FrostedCard tier system, white pill CTAs, textarea glow, sticky FAB pattern, drawer-aware visibility, Daily Hub HorizonGlow architecture, animation tokens, deprecated patterns. Always read it before working on UI.
 - **BibleReader is a documented layout exception** — uses `ReaderChrome` instead of `Navbar`/`SiteFooter`, has its own root-level skip link, no SiteFooter (intentional immersive design). When auditing pages, treat BibleReader's structure as documented intentional drift, not a violation.
+
+### Forums Wave Working Guidelines (Phase 3)
+
+- **Master plan is authoritative** — `_forums_master_plan/round3-master-plan.md` contains all 138 specs, 17 Universal Rules, and 17 Decisions. Read the relevant spec section before executing any work.
+- **Liquibase for all schema changes** — every table creation, column addition, and index must be a Liquibase changeset. No raw SQL migrations. Changeset filenames follow `YYYY-MM-DD-NNN-description.xml` pattern.
+- **Dual-write discipline** — Phases 2, 2.5, and 3 use the dual-write migration pattern: localStorage remains primary for reads, backend receives shadow writes. Feature flags (`VITE_USE_BACKEND_*`) control the read source. Never flip a flag default without a cutover spec's smoke test passing.
+- **Crisis content supersedes everything** — Universal Rule 13. Any feature touching user-generated content must handle crisis detection. When crisis resources are needed, they override all other feature behavior. See Spec 10.5 (three-tier escalation) and the master plan's crisis-related Decisions.
+- **Anti-pressure copy** — extends to Prayer Wall, welcome emails, moderation notifications, and all community features. No "we miss you!", no streak-as-shame, no comparison metrics. See the Anti-Pressure Copy Checklist in each spec's Copy Deck section.
+- **Plain text only for user content** — NO HTML, NO Markdown rendering for user-generated posts, comments, or messages. Store as plain text, render with `white-space: pre-wrap`. Never use `dangerouslySetInnerHTML` on user content. Same policy as frontend (see `02-security.md`).
+- **User handles all git operations** — CC never commits, pushes, or checks out branches. CC creates feature branches via `/spec-forums` but all other git operations are manual.
+- **Testcontainers for integration tests** — all backend integration tests use Testcontainers PostgreSQL. No H2, no mocking the database layer for integration tests.
+- **BCrypt for passwords** — Spring Security default. See Spec 1.4 and `02-security.md`.
+- **WEB translation for all scripture** — same as frontend. No exceptions.

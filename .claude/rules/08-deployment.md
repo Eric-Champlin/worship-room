@@ -1,13 +1,27 @@
 ## Deployment
 
-### Deployment
-- **Frontend**: Vercel (React app with CI/CD)
-- **Backend**: Railway, Render, or Fly.io (Spring Boot API)
-- **Database**: Railway PostgreSQL, Supabase, or Neon
-- **Containerization**: Docker (configured for local dev)
-- **CI/CD**: GitHub Actions (integrated with deployment platforms)
-- **Error Tracking**: Sentry or Rollbar
-- **Monitoring**: Vercel Analytics (frontend), Spring Boot Actuator (backend)
+### Platform Targets (Spec 1.10b)
+- **Frontend:** Vercel (React/Vite with CI/CD)
+- **Backend:** Railway or Render (Spring Boot JAR) — decision finalized in Spec 1.10b
+- **Database:** Railway PostgreSQL, Supabase, or Neon — decision finalized in Spec 1.10b
+- **Redis:** Upstash (serverless Redis) or Railway Redis — for rate limiting and caching (Spec 5.6)
+- **Object Storage:** Cloudflare R2 (S3-compatible) — for backups and user uploads (Spec 1.10e)
+- **Email:** Postmark, SendGrid, or Resend — for transactional and welcome emails (Spec 15.1)
+- **Error Tracking:** Sentry (Spec 1.10d)
+- **Uptime Monitoring:** UptimeRobot or Better Stack (Spec 1.10d)
+- **Containerization:** Docker Compose for local dev (PostgreSQL + Redis + backend)
+
+### Deploy Pipeline
+1. Push to feature branch → CI runs `./mvnw test` + `pnpm test` + `pnpm build`
+2. Merge to main → auto-deploy frontend to Vercel, backend to Railway/Render
+3. **Liquibase migrations run automatically on backend startup** — Spring Boot applies pending changesets before the app accepts traffic
+4. Post-deploy health check: `GET /api/v1/health` returns 200
+
+### Liquibase in Deploy
+- Changesets are applied automatically on Spring Boot startup (`spring.liquibase.enabled=true`)
+- **Zero-downtime requirement:** Changesets must be backward-compatible (no DROP COLUMN on active columns, no NOT NULL on existing columns without defaults)
+- **Rollback:** Each changeset has a rollback block; manual rollback via `liquibase rollback` if needed
+- **Changeset ordering:** Alphabetical by filename — the `YYYY-MM-DD-NNN` prefix ensures correct order
 
 ## Development Commands
 
@@ -26,16 +40,17 @@ pnpm test:watch   # Run tests in watch mode
 ### Backend
 ```bash
 cd backend
-./mvnw spring-boot:run  # Start dev server (http://localhost:8080)
-./mvnw test             # Run tests
-./mvnw clean package    # Build JAR
+./mvnw spring-boot:run   # Start dev server (http://localhost:8080)
+./mvnw test              # Run all tests (includes Testcontainers)
+./mvnw compile           # Compile only (fast check)
+./mvnw clean package     # Build JAR for deployment
 ```
 
-### Docker
+### Docker (local dev)
 ```bash
-docker-compose up --build  # Start both services + PostgreSQL
-docker-compose down        # Stop services
-docker-compose logs -f     # View logs
+docker-compose up -d     # Start PostgreSQL + Redis (detached)
+docker-compose down      # Stop services
+docker-compose logs -f   # View logs
 ```
 
 ### Just (Task Runner)
@@ -44,64 +59,65 @@ just install         # Install frontend dependencies
 just dev-frontend    # Start frontend
 just dev-backend     # Start backend
 just build           # Build both projects
-just test            # Run all tests
+just test            # Run all tests (frontend + backend)
 ```
 
 ## Environment Variables
 
-**Standard Environment Variable Naming**:
+### Required (backend)
 ```bash
-# AI
-OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o
-
 # Database
-DATABASE_URL=postgresql://...
+DATABASE_URL=postgresql://user:pass@localhost:5432/worship_room
 
 # Auth
-JWT_SECRET=...
+JWT_SECRET=your-256-bit-secret-here
 JWT_EXPIRATION=3600
 
-# Email (SMTP)
-SMTP_HOST=smtp.gmail.com
+# Admin
+ADMIN_EMAIL=admin@worshiproom.com
+
+# Encryption (journal entries)
+ENCRYPTION_KEY=your-encryption-key
+```
+
+### Required (frontend)
+```bash
+VITE_API_BASE_URL=http://localhost:8080
+VITE_VAPID_PUBLIC_KEY=your-vapid-public-key
+```
+
+### Optional / Phase-specific
+```bash
+# Redis (Spec 5.6 — omit for in-memory fallback)
+REDIS_URL=redis://localhost:6379
+
+# Sentry (Spec 1.10d — omit to disable)
+SENTRY_DSN=https://...@sentry.io/...
+
+# Object Storage (Spec 1.10e)
+STORAGE_PROVIDER=r2|s3|minio
+STORAGE_ENDPOINT=https://...
+STORAGE_ACCESS_KEY=...
+STORAGE_SECRET_KEY=...
+STORAGE_BUCKET=worship-room-uploads
+
+# Email (Spec 15.1)
+SMTP_HOST=smtp.postmarkapp.com
 SMTP_PORT=587
 SMTP_USER=...
 SMTP_PASS=...
-ADMIN_EMAIL=admin@example.com
 
-# Maps
-GOOGLE_MAPS_API_KEY=...
+# Backup (Spec 1.10c)
+BACKUP_CRON=0 3 * * *
+BACKUP_RETENTION_DAYS=30
 
-# Encryption
-ENCRYPTION_KEY=...
-ENCRYPTION_SALT=...
+# Feature Flags (dual-write migration)
+VITE_USE_BACKEND_AUTH=false
+VITE_USE_BACKEND_ACTIVITY=false
+VITE_USE_BACKEND_FRIENDS=false
+VITE_USE_BACKEND_SOCIAL=false
+VITE_USE_BACKEND_PRAYER_WALL=false
 
-# Rate Limiting
-RATE_LIMIT_AI_REQUESTS_PER_HOUR=20
-RATE_LIMIT_PRAYER_POSTS_PER_DAY=5
-
-# Environment
-NODE_ENV=development|production
-SPRING_PROFILES_ACTIVE=dev|prod
+# Rate Limiting (configurable, not hardcoded)
+RATE_LIMIT_BACKEND=redis|in-memory
 ```
-
-### Deployment Strategy
-- Deploy frontend to Vercel when MVP features are ready
-- Deploy backend to Railway, Render, or Fly.io
-- Deploy database to Railway PostgreSQL, Supabase, or Neon
-- Use preview deployments for feature branches
-- Set up CI/CD with GitHub Actions
-- Environment variables for API keys (never commit keys)
-- Monitor performance with Vercel Analytics (frontend), Spring Boot Actuator (backend)
-- Error tracking with Sentry or Rollbar
-
-### BB-26 → BB-39 PWA service worker follow-up
-
-When BB-39's PWA service worker is next extended to handle audio assets, it MUST exclude FCBH CloudFront audio URLs from runtime caching.
-
-- **URL pattern to exclude:** any URL matching `*.cloudfront.net/audio/*` that originates from a DBP request (the exact host observed in recon is `d1gd73roq7kqw6.cloudfront.net`, but CloudFront distributions may rotate — match by path, not host).
-- **Where to add the rule:** `frontend/vite.config.ts` → `VitePWA` → `injectManifest` → `globIgnores` (for bundled assets) AND a runtime caching strategy that explicitly skips the pattern (for network-fetched URLs).
-- **Reason:** DBP license terms state: "not store content for offline use unless it is explicitly marked as allowed." FCBH audio files are not marked as cacheable; persisting them to a service worker cache violates the license.
-- **Why BB-39's problem, not BB-26's:** BB-26 doesn't touch the service worker config. BB-26's audio cache layer (`bb26-v1:audioBibles`) stores only metadata (the bibles list), not audio binaries. Per-chapter URLs are held in memory only and die with the page. Runtime audio requests go through Howler's `<audio>` element and would only be cached if the service worker runtime caching rule picks them up — which becomes a live concern as soon as BB-39's PWA strategy is extended to cover audio-tier runtime caching.
-- **Created by:** BB-26 (`_specs/bb-26-fcbh-audio-bible-integration.md` + recon at `_plans/recon/bb26-audio-foundation.md`).
-- **Verification:** After implementing the exclusion, load a chapter while online, go offline, reload, and confirm the audio file fails to load (rather than replaying from cache). The player's error state should surface "Connection problem. Check your network and try again."

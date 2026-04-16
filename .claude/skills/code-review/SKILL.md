@@ -735,9 +735,40 @@ The best commit is one you'd be proud to explain to anyone. This review catches 
  
 ---
  
+## Forums Wave Additional Checks
+
+When reviewing Forums Wave code (backend Spring Boot, Liquibase, dual-write), add these checks to Step 10:
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Liquibase changeset filename follows `YYYY-MM-DD-NNN-description.xml` | OK / VIOLATION | {file} |
+| Liquibase changeset has rollback block | OK / MISSING | {file} |
+| No duplicate changeset date+sequence prefix vs existing files | OK / COLLISION | {file} |
+| UUID primary keys on new tables | OK / VIOLATION | {file} |
+| API responses follow standard shape (data + meta wrapper) | OK / VIOLATION | {file}:{line} |
+| DTOs used for API responses (JPA entities never exposed) | OK / VIOLATION | {file}:{line} |
+| Constructor injection only (no @Autowired on fields) | OK / VIOLATION | {file}:{line} |
+| @Valid on controller request body params | OK / MISSING | {file}:{line} |
+| @Transactional on service write methods | OK / MISSING | {file}:{line} |
+| Rate limit headers present on responses | OK / MISSING | {file}:{line} |
+| Plain text only for user content (no HTML, no dangerouslySetInnerHTML) | OK / VIOLATION | {file}:{line} |
+| BCrypt for password hashing (not MD5, SHA, etc.) | OK / VIOLATION / N/A | {file}:{line} |
+| Master plan Universal Rules respected (check relevant rules for this spec) | OK / VIOLATION | {details} |
+| Anti-pressure copy discipline (no FOMO, no shame, no exclamation points near vulnerability) | OK / VIOLATION / N/A | {file}:{line} |
+| Crisis detection supersession respected (Universal Rule 13) | OK / VIOLATION / N/A | {file}:{line} |
+| Dual-write pattern: localStorage primary, backend shadow, fire-and-forget | OK / VIOLATION / N/A | {file}:{line} |
+| Feature flag env var documented in `.env.example` | OK / MISSING / N/A | {file} |
+
+**Forums Wave violations are Blocker severity** — same as Worship Room safety violations.
+
+---
+
 ## See Also
- 
+
 - `/plan` — Create implementation plan from a spec (produces the plan this skill cross-references)
+- `/plan-forums` — Forums Wave implementation plans
 - `/spec` — Write a feature specification (upstream of /plan)
+- `/spec-forums` — Forums Wave spec extraction from master plan
 - `/execute-plan` — Execute all steps from a generated plan (run before this review)
+- `/execute-plan-forums` — Forums Wave execution engine
 - `/verify-with-playwright` — Runtime UI verification with screenshots and computed style comparison

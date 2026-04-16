@@ -160,3 +160,70 @@ The push subscription is stored in `wr_push_subscription` (localStorage) for now
 - **Journal Entries**: Encrypt at rest in Phase 3 (in addition to plain text policy)
 - **AI Prompts**: Check for injection attacks
 - **Mood Check-In Text**: 280-char limit, crisis keyword detection (see `01-ai-safety.md`)
+---
+
+## Forums Wave Security Additions
+
+### JWT Authentication (Phase 1 — Spring Security)
+
+- **Token type:** Short-lived access token (1 hour expiry)
+- **Storage:** In-memory (React state/context) — lost on page refresh (acceptable for MVP)
+- **Algorithm:** HS256 with `JWT_SECRET` from env vars
+- **Claims:** `sub` (user UUID), `iat`, `exp`, `is_admin` (boolean)
+- **Validation:** Spring Security `OncePerRequestFilter` on every `/api/v1/**` request except public endpoints
+- **Public endpoints (no JWT required):** `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/legal/versions`, `GET /api/v1/health`
+- **Password hashing:** BCrypt with salt (Spring Security default) — per master plan, explicitly mentioned in Spec 1.4
+- **Timing-safe auth failures:** Perform BCrypt comparison even for unknown emails (dummy hash) to prevent timing leaks
+- **Registration anti-enumeration:** Same 200 response for new AND existing emails (no "email already taken" leak)
+
+### Terms of Service Consent (Spec 1.10f)
+
+- Registration form includes a consent checkbox (NOT pre-checked per GDPR rules)
+- Submit disabled until checkbox checked
+- Server stores `users.terms_version` and `users.privacy_version` at registration
+- On ToS/privacy update: version-mismatch triggers consent modal on next login
+- Users who decline the update get interaction-locked (can browse, cannot post/react)
+- 30-day advance notice for policy changes
+
+### Trust Levels (Phase 10.4 — Discourse-Inspired)
+
+- Level 0: New user (default on registration)
+- Level 1: Basic (after N posts + N days active)
+- Level 2: Member (can access sensitive features like 3am Watch)
+- Level 3: Regular (can access moderation-adjacent features)
+- Level 4+: Moderator / Admin (elevated queue access)
+- Trust levels gate feature access, NOT content visibility
+
+### Forums Wave Rate Limits (master plan specifics)
+
+| Endpoint category | Limit | Enforcement |
+|---|---|---|
+| Prayer Wall posts | 5 per day per user | Backend (configurable via env) |
+| Comments | 20 per hour per user | Backend |
+| Reactions | 60 per hour per user | Backend |
+| Friend requests | 10 per day per user | Backend |
+| User reports | 3 per week per reporter | Backend (Spec 10.7b) |
+| Encouragements | 3 per friend per day | Client-side primary, backend belt-and-suspenders |
+| Nudges | 1 per friend per week | Client-side primary, backend belt-and-suspenders |
+| Verse-Finds-You endpoint | 10 per hour per user | Backend (Spec 6.8) |
+| Login attempts | 5 per 15 min per email | Backend |
+| Registration | 3 per hour per IP | Backend |
+| AI requests | 20 per hour per user | Backend (when AI features ship) |
+
+### Crisis Detection Supersession (Universal Rule 13)
+
+When a user's content triggers crisis-flag detection (Phase 10.5/10.6):
+- Crisis resources banner takes precedence over ALL feature behavior
+- 3am Watch suppresses for that user for the duration of the crisis flag
+- Verse-Finds-You suppresses for 48 hours
+- Welcome email sequence pauses for 72 hours
+- No algorithmic content surfacing during active crisis state
+- Crisis detection is authoritative — features MUST respect it, not override it
+
+### Moderation Security
+
+- Reports about admins/moderators route to a separate Eric-only queue (Spec 10.7b)
+- Reported users receive NO notification until a moderator takes action
+- Reporter identity never disclosed to reported user via automated channels
+- Mass-reporter detection: 6+ closed-no-action reports in 30 days triggers reporting suspension
+- Zero-interaction-history flag on user reports prevents weaponized cross-community targeting

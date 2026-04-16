@@ -1,112 +1,161 @@
-## Testing
- 
-### Testing
-- **Run tests automatically** after code changes
-- Write tests for new features
-- Ensure tests pass before commits
-- **Frontend**: Vitest + React Testing Library
-  - Unit tests for utilities and hooks
-  - Component tests for UI components
-  - Integration tests for page flows
-  - **Reactive store consumer tests** — see "Reactive Store Consumer Pattern" below
-- **Backend**: JUnit 5 + Spring Boot Test + Testcontainers
-  - Unit tests for services
-  - Integration tests for controllers
-  - Repository tests with Testcontainers PostgreSQL
-  - AI safety tests (self-harm detection, content moderation)
- 
-### Testing Strategy
+## Testing Standards
+
+### Frameworks
+- **Frontend:** Vitest + React Testing Library
+- **Backend:** JUnit 5 + Spring Boot Test + Testcontainers
+- **E2E:** Playwright (visual verification via `/verify-with-playwright`)
+
+### General Rules
+- Run tests automatically after code changes
 - Write tests alongside feature development
-- Aim for 80%+ code coverage
-- Focus on critical paths (auth, data saving, AI integrations, **AI safety**, **reactive store subscription correctness**)
-- Use Testcontainers for realistic database tests
-- Manual testing for UX flows
-- **AI Safety Testing**:
-  - Test self-harm keyword detection
-  - Test crisis resource display
-  - Test AI content moderation
-  - Test inappropriate input handling
- 
+- Ensure ALL tests pass before commits: `./mvnw test && cd frontend && pnpm test`
+- Aim for 80%+ code coverage on new code
+- Focus on critical paths: auth, data persistence, crisis detection, reactive store subscriptions, API contracts, database migrations
+
+---
+
+## Backend Test Patterns (Forums Wave)
+
+### Test Categories
+
+**Unit tests** (`@ExtendWith(MockitoExtension.class)`):
+- Service layer logic with mocked repositories
+- DTO validation logic
+- Utility functions
+- Naming: `{ClassName}Test.java`
+
+**Integration tests** (`@SpringBootTest`):
+- Full Spring context with Testcontainers PostgreSQL + Redis
+- End-to-end flows: HTTP request → controller → service → repository → database
+- Naming: `{ClassName}IntegrationTest.java`
+
+**Repository tests** (`@DataJpaTest` + Testcontainers):
+- JPA repository queries with real PostgreSQL
+- Verify custom queries, constraints, indexes
+- Naming: `{RepositoryName}Test.java`
+
+**Controller tests** (`@WebMvcTest` or `MockMvc` in `@SpringBootTest`):
+- HTTP status codes, response shapes, validation errors
+- Auth gating (401 for unauthenticated, 403 for unauthorized)
+- Rate limiting behavior (429 on excess requests)
+
+**Liquibase migration tests:**
+- Testcontainers integration test that applies all changesets and verifies table structure
+- `LiquibaseSmokeTest.java` — runs on every test suite execution
+- Verify columns, constraints, indexes exist after migration
+
+### Testcontainers Setup Pattern
+
+All backend integration tests extend `AbstractIntegrationTest` (created in Spec 1.7), which manages the Testcontainers PostgreSQL container. **Never create containers per-test-class — use the shared base class.**
+
+```java
+// AbstractIntegrationTest.java (created in Phase 1, Spec 1.7)
+@Testcontainers
+@SpringBootTest
+public abstract class AbstractIntegrationTest {
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
+        .withDatabaseName("worship_room_test");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
+}
+
+// Your integration test extends it:
+class PostControllerIntegrationTest extends AbstractIntegrationTest {
+    // tests here — container is already running
+}
+```
+
+**CRITICAL: Never use H2 for testing.** H2 lies about PostgreSQL behavior (different SQL dialect, different constraint enforcement, different type handling). Testcontainers with real PostgreSQL is the only acceptable approach.
+
+### API Contract Test Pattern
+```java
+@Test
+void createPost_returnsStandardResponseShape() throws Exception {
+    mockMvc.perform(post("/api/v1/posts")
+            .header("Authorization", "Bearer " + validToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id").exists())
+        .andExpect(jsonPath("$.meta.requestId").exists());
+}
+```
+
+### Test Data Patterns
+- Use `@BeforeEach` to seed test data, `@AfterEach` or `@Transactional` to clean up
+- SQL INSERT for repository tests (not JPA save — tests the actual migration schema)
+- Use constants for test data, grouped by context, alphabetized within groups
+- Test both happy paths AND error paths (invalid input, missing auth, rate limits)
+
+### Drift Detection Tests (Decision 12)
+
+Where the same logic exists in both frontend and backend (faith point calculation, badge eligibility, level thresholds, streak rules), a drift-detection test runs both implementations against shared test cases from `_test_fixtures/activity-engine-scenarios.json` and asserts parity. Neither implementation is the "reference" — they are peers that must agree. The test lives in the backend test suite and parses the frontend constants file. Target: under 30 seconds total. Runs in CI on every PR.
+
+### Test Count Expectations (per spec size, from Decision 12)
+
+| Spec Size | Expected Tests |
+|---|---|
+| Small (S) | 5–10 |
+| Medium (M) | 10–20 |
+| Large (L) | 20–40 |
+| Extra-Large (XL) | 40+ |
+
+Reactive store specs always include at least one cross-mount subscription test regardless of size.
+
+---
+
+## Frontend Test Patterns
+
+### Vitest + React Testing Library
+- Unit tests for utilities and hooks
+- Component tests for UI behavior
+- Integration tests for page flows
+- **Reactive store consumer tests** (see below)
+
 ### Reactive Store Consumer Pattern (BB-45 anti-pattern)
- 
-The Bible wave introduced reactive stores for personal-layer features (highlights, bookmarks, notes, journal entries, chapter visits, memorization cards, echo dismissals). Each store exposes a custom hook (`useHighlightStore()`, `useBookmarkStore()`, etc.) that internally subscribes to changes via `useSyncExternalStore`. Components consuming these stores **must use the hook** so they re-render when the store mutates from any surface.
- 
-The BB-45 implementation surfaced the canonical anti-pattern: a component that mirrors the store into local `useState` looks correct on initial render but silently breaks when the store mutates from elsewhere. A memorization card added in BibleReader will not appear in the My Bible feed if the My Bible component uses `useState(getAllMemorizationCards())` instead of `useMemorizationStore()`. **This bug class only manifests in real cross-surface usage and slips past tests that only check initial render.**
- 
-#### Required test pattern for reactive store consumers
- 
-Components that read from a reactive store must have a test that verifies subscription behavior, not just initial render. The pattern:
- 
+
+Bible wave reactive stores (`useHighlightStore()`, `useBookmarkStore()`, etc.) require subscription tests — not just initial-render tests. The BB-45 anti-pattern: a component that mirrors the store into local `useState` looks correct initially but breaks when the store mutates from elsewhere.
+
+**Required pattern:** Mutate the store AFTER the component mounts, then assert re-render:
 ```tsx
-// Bad — only verifies initial render
-test('renders memorization cards', () => {
-  addCard(mockCard);
-  render(<MemorizationDeck />);
-  expect(screen.getByText(mockCard.text)).toBeInTheDocument();
-});
- 
-// Good — verifies subscription
-test('renders new memorization cards added after mount', async () => {
+test('renders new cards added after mount', async () => {
   render(<MemorizationDeck />);
   expect(screen.queryByText(mockCard.text)).not.toBeInTheDocument();
- 
-  // Mutate the store from outside the component
-  act(() => {
-    addCard(mockCard);
-  });
- 
-  // Component should re-render with the new card
+  act(() => { addCard(mockCard); });
   expect(await screen.findByText(mockCard.text)).toBeInTheDocument();
 });
 ```
- 
-The key element is mutating the store **after** the component has mounted, then asserting that the component re-renders. A test that only adds cards before render will pass even if the component uses the broken `useState(getAllX())` pattern.
- 
-#### Forbidden test patterns
- 
-```tsx
-// FORBIDDEN — mocks the entire store and bypasses the subscription mechanism
-vi.mock('@/lib/memorize/store', () => ({
-  getAllMemorizationCards: () => mockCards,
-  useMemorizationStore: () => mockCards,  // also wrong
-}));
-```
- 
-Mocking the store means the test no longer exercises the subscription path. Use the real store and the real hook in tests; populate it via the store's mutation methods, not via mocks.
- 
-#### Stores requiring this test pattern
- 
-| Store hook              | Spec   | Components to test                                    |
-| ----------------------- | ------ | ----------------------------------------------------- |
-| `useHighlightStore()`   | BB-7   | BibleReader, MyBible activity feed, ReadingHeatmap (indirect) |
-| `useBookmarkStore()`    | BB-7   | BibleReader, MyBible activity feed                    |
-| `useNoteStore()`        | BB-8   | BibleReader notes drawer, MyBible activity feed       |
-| `useJournalStore()`     | BB-11b | BibleReader journal drawer, MyBible activity feed     |
-| `useChapterVisitStore()` | BB-43 | ReadingHeatmap, BibleProgressMap                      |
-| `useMemorizationStore()` | BB-45 | MemorizationDeck, BibleReader (verse menu state)      |
-| `useEchoStore()`        | BB-46  | EchoCard, echo selection engine                       |
- 
-Any new component that reads from one of these stores must have at least one subscription test. The deep review protocol at `_protocol/02-prompt-test-suite-audit.md` checks for this in failure category 3f.
- 
-### Definition of Done (For Any Feature)
- 
-Before considering a feature "complete", ensure:
- 
-- UI implemented + responsive (mobile, tablet, desktop)
-- Backend endpoint implemented (if needed)
-- Tests added/updated (frontend + backend)
-- **Reactive store consumer tests added if the feature reads from a reactive store** (see pattern above)
-- Rate limiting + logging on AI endpoints (if applicable)
-- Error states + loading states handled
-- Accessibility basics (labels, keyboard nav, ARIA where needed)
-- **Lighthouse targets met** on any page the feature touches:
-  - **Performance: 90+** (BB-36 baseline)
-  - **Accessibility: 95+** (BB-35 baseline)
-  - **Best Practices: 90+**
-  - **SEO: 90+** (BB-40 baseline)
-- No secrets committed (API keys, passwords, etc.)
-- AI safety checks implemented (if user input involved)
-- Audio playback tested if applicable (TTS, ambient sounds)
-- New localStorage keys documented in `11-local-storage-keys.md`
-- Animation durations and easings imported from `frontend/src/constants/animation.ts` (BB-33), not hardcoded
-- Documentation updated (if public-facing feature or API change)
+
+**Forbidden:** Mocking the entire store (`vi.mock(...)`) bypasses the subscription mechanism.
+
+**Stores requiring this pattern:** `useHighlightStore`, `useBookmarkStore`, `useNoteStore`, `useJournalStore`, `useChapterVisitStore`, `useMemorizationStore`, `useEchoStore`
+
+---
+
+## Definition of Done
+
+Before considering any feature complete:
+
+- [ ] Backend compiles cleanly: `./mvnw compile`
+- [ ] Backend tests pass: `./mvnw test`
+- [ ] Frontend builds cleanly: `pnpm build`
+- [ ] Frontend tests pass: `pnpm test`
+- [ ] Reactive store consumer tests added (if feature reads from a reactive store)
+- [ ] API responses follow standard shape from `03-backend-standards.md`
+- [ ] Liquibase changesets apply cleanly (verified via Testcontainers)
+- [ ] Rate limiting + logging on write endpoints and AI endpoints
+- [ ] Error states and loading states handled
+- [ ] Accessibility basics (labels, keyboard nav, ARIA)
+- [ ] Lighthouse Performance 90+, Accessibility 95+, Best Practices 90+, SEO 90+ on touched pages
+- [ ] No secrets committed
+- [ ] New localStorage keys documented in `11-local-storage-keys.md`
+- [ ] Animation tokens imported from `frontend/src/constants/animation.ts` (not hardcoded)
+- [ ] Master plan acceptance criteria checked off
+- [ ] Documentation updated (if public-facing feature or API change)
+- [ ] OpenAPI spec updated and frontend types regenerated (if API change)

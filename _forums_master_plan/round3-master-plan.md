@@ -1,8 +1,8 @@
 # Worship Room — Phase 3: Forums Wave Master Plan
 
-**Version:** 2.0
-**Date:** April 14, 2026
-**Supersedes:** v1.0 (April 14, 2026)
+**Version:** 2.6
+**Date:** April 16, 2026
+**Supersedes:** v2.5 (April 16, 2026)
 **Scope:** Prayer Wall + User Profiles + Activity Engine backend integration. First wave of CLAUDE.md's official Phase 3 (Auth & Backend Wiring). Other features (Daily Hub, Bible, Music, Grow, Local Support) remain on localStorage and migrate in later waves.
 
 **Author context:** Drafted by Claude in conversation with Eric Champlin, based on three Prayer Wall recons, a Profile/Dashboard recon, two rounds of competitor research, and a comprehensive codebase audit (CLAUDE.md, all 11 rule files in `.claude/rules/`, the actual `usePrayerReactions.ts` / `AuthContext.tsx` / `PrayerCard.tsx` / `InteractionBar.tsx` / `prayer-wall-mock-data.ts` / `types/prayer-wall.ts`, the existing `backend/` skeleton, and the existing `prayer-wall-redesign.md` / `prayer-wall-question-of-day.md` / `prayer-wall-category-filter.md` / `prayer-wall-category-layout.md` / `friends-system.md` / `notification-system.md` / `bb45-verse-memorization-deck.md` specs), and 16 architectural decisions made by Eric.
@@ -33,25 +33,25 @@ The Forums Wave is the first slice of CLAUDE.md's official Phase 3 (Auth & Backe
 | --- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | 0   | Backend Foundation Learning               | Teaching document Eric reads before any backend work                                                                                                                                            | 1             |
 | 0.5 | Reaction Persistence Quick Win            | Convert `usePrayerReactions` to a reactive store (no backend needed). Ships day 1.                                                                                                              | 1             |
-| 1   | Backend Foundation                        | Audit existing skeleton, rename group ID, add Liquibase / Spring Security + JWT / OpenAPI / Testcontainers, end-to-end roundtrip                                                                | 11            |
-| 2   | Activity Engine Migration (Dual-Write)    | Points / streaks / badges / grace / grief pause on backend with dual-write strategy                                                                                                             | 9             |
-| 2.5 | Friends Backend Migration                 | `wr_friends` data and friend request flow to backend                                                                                                                                            | 5             |
+| 1   | Backend Foundation                        | Audit existing skeleton, rename group ID, add Liquibase / Spring Security + JWT / OpenAPI / Testcontainers, end-to-end roundtrip                                                                | 17            |
+| 2   | Activity Engine Migration (Dual-Write)    | Points / streaks / badges / grace / grief pause on backend with dual-write strategy                                                                                                             | 10            |
+| 2.5 | Friends Backend Migration                 | `wr_friends` data and friend request flow to backend                                                                                                                                            | 6             |
 | 3   | Prayer Wall Data Migration                | Posts / comments / reactions / bookmarks / reports / QOTD on backend, frontend service swap, **fixes the reaction bug for cross-device**                                                        | 12            |
-| 4   | Post Type Expansion                       | Prayer Request polish, Testimony, Question, Devotional Discussion, Encouragement, Composer Chooser, Room Selector                                                                               | 8             |
-| 5   | Visual Migration to Round 2 Brand         | FrostedCard, HorizonGlow, 2-line headings, animation tokens, ring colors                                                                                                                        | 5             |
-| 6   | Hero Features                             | Prayer Receipt, Quick Lift, Night Mode, 3am Watch, Intercessor Timeline, Answered Wall, Shareable Testimony Cards, Verse-Finds-You                                                              | 12            |
+| 4   | Post Type Expansion                       | Prayer Request polish, Testimony, Question, Devotional Discussion, Encouragement, Composer Chooser, Room Selector                                                                               | 10            |
+| 5   | Visual Migration to Round 2 Brand         | FrostedCard, HorizonGlow, 2-line headings, animation tokens, ring colors                                                                                                                        | 6             |
+| 6   | Hero Features                             | Prayer Receipt, Quick Lift, Night Mode, 3am Watch, Intercessor Timeline, Answered Wall, Shareable Testimony Cards, Verse-Finds-You                                                              | 14            |
 | 7   | Cross-Feature Integration                 | Bible ↔ Wall, Music ↔ Wall, Daily Hub rituals, Privacy tiers, Local Support bridges                                                                                                             | 8             |
 | 8   | Unified Profile System                    | Username, URL merge to `/u/:username`, Summary/Activity tabs, name canonicalization, customization                                                                                              | 9             |
 | 9   | Ritual & Time Awareness                   | Liturgical theming, Sunday Service Sync, time-of-day copy, Candle Mode                                                                                                                          | 5             |
-| 10  | Community Warmth & Moderation             | First Time badges, Welcomer role, presence cues, Discourse-style trust levels, 7 Cups three-tier escalation, automated flagging, moderation queue, appeal flow, rate limiting, admin foundation | 10            |
+| 10  | Community Warmth & Moderation             | First Time badges, Welcomer role, presence cues, Discourse-style trust levels, 7 Cups three-tier escalation, automated flagging, moderation queue, appeal flow, rate limiting, admin foundation | 12            |
 | 11  | Search & Discovery                        | Full-text post search, find by author, find by verse reference, find by date                                                                                                                    | 4             |
-| 12  | Notification Taxonomy                     | Full notification type catalog (8 new types beyond Prayer Receipt), notification preferences                                                                                                    | 5             |
+| 12  | Notification Taxonomy                     | 14-type notification catalog (7 inherited + 7 prayer-specific/lifecycle types) + notification preferences + 30-day archive / 90-day delete policy                                               | 5             |
 | 13  | Personal Analytics & Insights             | Year-in-review, prayer journey insights, intercession patterns                                                                                                                                  | 4             |
 | 14  | Onboarding & Empty States                 | First-visit walkthrough, suggested first action, find-your-people friend suggestions, warm empty states                                                                                         | 4             |
-| 15  | Email & Push Notifications                | SMTP for comment replies (digest-style), push notification wiring (extends BB-41)                                                                                                               | 4             |
-| 16  | PWA, Offline, Performance & Accessibility | Cached recent feed, queued posts, offline indicator, Lighthouse 90+/95+ for Prayer Wall, BB-35-style accessibility audit                                                                        | 4             |
+| 15  | Email & Push Notifications                | SMTP for comment replies (digest-style), push notification wiring (extends BB-41)                                                                                                               | 5             |
+| 16  | PWA, Offline, Performance & Accessibility | Cached recent feed, queued posts, offline indicator, Lighthouse 90+/95+ for Prayer Wall, BB-35-style accessibility audit                                                                        | 5             |
 
-**Total:** approximately 120 specs.
+**Total:** approximately 138 specs.
 
 ### Architectural Decisions (the TL;DR)
 
@@ -65,9 +65,9 @@ These are the whole-project decisions that every spec assumes. Full rationale li
 
 4. **Canonical user model lives on the backend.** One `users` table is the source of truth, with `first_name`, `last_name`, `display_name_preference` (enum), `custom_display_name`, and the derived `display_name` computed server-side. The frontend's four-way naming inconsistency (auth context, PrayerWallUser, FriendProfile, leaderboard) is fixed by centralizing resolution. The existing `users` schema in `.claude/rules/05-database.md` is the starting point and gets extended in Phase 1.
 
-5. **One `posts` table holds all five post types**, discriminated by a `post_type` enum column. Prayer Request, Testimony, Question, Devotional Discussion, Encouragement. Shared infrastructure for comments, reactions, bookmarks, reports, moderation. Type-specific behavior lives in nullable columns. **This deliberately diverges from the `prayer_requests` / `prayer_replies` / `prayer_bookmarks` / `prayer_reports` table names mentioned in `prayer-wall-redesign.md`** — that older spec was written before post type expansion was on the table. The unified `posts` table is the new contract; the old spec is superseded.
+5. **One `posts` table holds all five post types**, discriminated by a `post_type` enum column. Prayer Request, Testimony, Question, Devotional Discussion, Encouragement. Shared infrastructure for comments, reactions, bookmarks, reports, moderation. Type-specific behavior lives in nullable columns. **This deliberately diverges from the `prayer_requests` / `prayer_replies` / `prayer_bookmarks` / `prayer_reports` table names mentioned in `prayer-wall-redesign.md`** — that older spec was written before post type expansion was on the table. The unified `posts` table is the new contract; the old spec is superseded. **The `post_reactions` table includes a `reaction_type VARCHAR(20) NOT NULL` column with a CHECK constraint allowing values `'praying'` and `'candle'`** — Light a Candle is a distinct reaction type from Praying (warm amber color, ripple animation, separate count) inherited from the existing `prayer-wall-redesign.md` spec. Both reaction types are first-class in the schema. The post_reactions PRIMARY KEY is `(post_id, user_id, reaction_type)` so a single user can both pray AND light a candle for the same post (independent toggles, independent counts). Future reaction types (e.g., "amen") may be added by amending the CHECK constraint; folding into a generic emoji-reaction system is explicitly out of scope for the Forums Wave.
 
-6. **The activity engine migrates in dual-write mode.** `recordActivity()` calls write to BOTH localStorage (existing `wr_daily_activities`, `wr_faith_points`, `wr_streak`, `wr_badges`) AND the backend (`POST /api/v1/activity`). localStorage is the source of truth for reads during this wave. The backend gets populated as a shadow copy that future waves can promote to the source of truth. Blast radius is minimized — if the backend hiccups, every feature still works from localStorage.
+6. **The activity engine migrates in dual-write mode.** `recordActivity()` calls write to BOTH localStorage (existing `wr_daily_activities`, `wr_faith_points`, `wr_streak`, `wr_badges`, `wr_streak_repairs`) AND the backend (`POST /api/v1/activity`). localStorage is the source of truth for reads during this wave. The backend gets populated as a shadow copy that future waves can promote to the source of truth. Blast radius is minimized — if the backend hiccups, every feature still works from localStorage. The `wr_streak_repairs` key (introduced by the existing `streak-repair-grace.md` spec — 1 free repair/week, 50 points after) MUST be included in the dual-write set; backend `streak_state` schema accommodates `grace_days_used`, `grace_week_start`, and `grief_pause_until` per Decision 5's schema.
 
 7. **Friends system migrates to the backend in Phase 2.5** (between activity engine and Prayer Wall). Same dual-write strategy. The `wr_friends` data structure is preserved on the frontend; the backend gets a copy. Friends backend is required so Phase 7's "friends pin to top of Prayer Wall feed" can work cross-device.
 
@@ -79,15 +79,80 @@ These are the whole-project decisions that every spec assumes. Full rationale li
 
 11. **Save-to-prayer-list is a separate feature from Prayer Wall bookmark.** The existing `Save` button on `InteractionBar` adds a Prayer Wall post to the user's personal `/my-prayers` page (a prayer reminder system). The `Bookmark` button adds it to the user's Prayer Wall bookmarks (visible in PrayerWallDashboard's Bookmarks tab). These are two different features and the Forums Wave preserves both. v1 conflated them — v2 documents them as distinct.
 
-12. **The 10 existing categories are preserved.** Health, Mental Health, Family, Work, Grief, Gratitude, Praise, Relationships, Other, Discussion. Categories are NOT user-creatable. The `Discussion` category is reserved for QOTD responses. The `Mental Health` category was added in `prayer-wall-category-layout.md` and v1 missed it entirely.
+12. **The 10 existing categories are preserved.** Health, Mental Health, Family, Work, Grief, Gratitude, Praise, Relationships, Other, Discussion. Categories are NOT user-creatable. The `Discussion` category is reserved for QOTD responses. The `Mental Health` category was added in `prayer-wall-category-layout.md` and v1 missed it entirely. **Discussion category special semantics (preserved from existing `prayer-wall-question-of-day.md` spec):** when the user filters by Discussion, QOTD responses appear; when the user filters by ANY OTHER category (Health, Family, etc.), QOTD responses are EXCLUDED from the feed (they are discussion content, not prayer requests); when "All" filter is active, QOTD responses appear inline with prayer requests. Backend feed queries MUST honor these semantics — `GET /api/v1/posts?category=health` excludes posts with `qotd_id IS NOT NULL`; `GET /api/v1/posts?category=discussion` includes them; `GET /api/v1/posts` (no filter) returns both.
 
-13. **QOTD already exists and gets MIGRATED, not built.** The 60 existing questions across 6 themes (faith_journey, practical, reflective, encouraging, community, seasonal) move to a backend table in Phase 3. The day-of-year modulo rotation logic moves to the backend. Frontend reads "today's question" from the API.
+13. **QOTD already exists and gets MIGRATED, not built.** The 60 existing questions across 6 themes (faith_journey, practical, reflective, encouraging, community, seasonal) move to a backend table in Phase 3. The day-of-year modulo rotation logic moves to the backend. Frontend reads "today's question" from the API. **The following details from the existing `prayer-wall-question-of-day.md` spec MUST be preserved during migration:** (a) each question record includes an optional `hint` field — a 1-sentence conversation-starter prompt rendered in Lora italic below the question; (b) response count UX shows "X responses" / "1 response" / "Be the first to respond" — tapping the count scrolls to the first QOTD response in the feed (or opens the composer if zero); (c) QOTD response cards display a "Re: Question of the Day" badge above the author name (small pill, primary-tinted styling); (d) the QOTD composer is intentionally simpler than the Prayer Wall composer — no anonymous toggle, no category selector (responses are auto-tagged `category='discussion'` with `qotd_id` foreign key); (e) posting a QOTD response triggers `recordActivity('prayerWall')` for faith points (same 15 points as a regular Prayer Wall reaction). The backend `qotd_questions` table schema must include `id`, `text`, `theme`, and nullable `hint` columns.
 
 14. **Reactive store pattern (BB-45) is mandatory for any new state in Prayer Wall.** New stores prefer Pattern A (standalone hook with `useSyncExternalStore`) per `.claude/rules/11-local-storage-keys.md`. Tests for reactive store consumers MUST verify subscription behavior (mutate the store after mount, assert re-render), not just initial render. The BB-45 anti-pattern (snapshot-without-subscribe) is forbidden in all new code.
 
 15. **API contract follows project standards.** Success: `{ data, meta: { requestId } }`. Error: `{ code, message, requestId, timestamp }`. Headers: `X-Request-Id`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After` on 429s. Pagination: `?page=1&limit=20`. Versioned as `/api/v1/` from day one. Generated TypeScript types from OpenAPI spec, never hand-written. Full conventions in `.claude/rules/03-backend-standards.md`.
 
 16. **Existing components are extended, not rebuilt.** `PrayerCard`, `InteractionBar`, `InlineComposer`, `CommentsSection`, `CommentInput`, `CommentItem`, `Avatar`, `CategoryBadge`, `CategoryFilterBar`, `AnsweredBadge`, `MarkAsAnsweredForm`, `ReportDialog`, `DeletePrayerDialog`, `ShareDropdown`, `AuthModal`, `AuthModalProvider`, `PageShell`, `PrayerWallHero`, `QotdBadge`, `QotdComposer`, `QuestionOfTheDay`, `SaveToPrayersForm` — all already exist in `frontend/src/components/prayer-wall/`. Specs that touch these components extend them rather than replacing them. New post types (Phase 4) extend the existing card and composer patterns rather than creating parallel components.
+
+### Inheritance Acknowledgments
+
+The Forums Wave inherits significant prior work from earlier waves. This section is the canonical map of what is inherited, what is superseded, and what is preserved. CC must consult this section before assuming any feature is greenfield.
+
+**Existing specs SUPERSEDED by this Master Plan (the older spec is partially or fully invalidated):**
+
+- `prayer-wall-redesign.md` storage section (table names `prayer_requests` / `prayer_replies` / `prayer_bookmarks` / `prayer_reports`) → SUPERSEDED by Decision 5's unified `posts` family. CC must use the new table names. The visual/UX requirements in the original spec are otherwise PRESERVED.
+- `prayer-wall-redesign.md` AI Safety section ("crisis detection deferred") → SUPERSEDED by Universal Spec Rule #13 which makes crisis detection MANDATORY on all post and comment writes. The existing frontend `containsCrisisKeyword()` function is a courtesy fast-path; the authoritative check is server-side. This is a deliberate policy upgrade, not a contradiction.
+- `prayer-wall-redesign.md` `/prayer-wall/dashboard` private dashboard route → DEPRECATED by Phase 8's unified `/u/:username` profile system. The dashboard route 301-redirects to `/u/:username` for the user's own profile (with edit-mode when viewer === owner). My Comments / Bookmarks / Reactions become subsections of the user's own profile with privacy gates. Settings move to `/settings`. See Phase 8 for the migration spec.
+
+**Existing specs INHERITED and PRESERVED (the Forums Wave builds on them, does not replace them):**
+
+- `prayer-wall-category-filter.md` — original 8 categories, sticky filter bar, URL-based filter state, category badges on cards. PRESERVED.
+- `prayer-wall-category-layout.md` — `mental-health` category (10th), single-row layout, scroll fade gradient. PRESERVED.
+- `prayer-wall-question-of-day.md` — 60 questions, 6 themes, optional `hint` field, response count UX, "Re: Question of the Day" badge, simpler composer, Discussion category integration. PRESERVED IN FULL during Phase 3.9 backend migration (see Patch 4 / Decision 13).
+- `friends-system.md` — `/friends` page, mutual friend model, denormalized FriendProfile shape, search, invite-by-link, invite-by-email, pending requests, blocking, "People You May Know". PRESERVED. Phase 2.5 dual-writes the data to backend; UI is unchanged.
+- `notification-system.md` — bell icon, notification panel, unread badge, 7 existing notification types (encouragement, friend_request, milestone, friend_milestone, nudge, weekly_recap, level_up), Mark all as read, dismiss, mock data seed, push notification stub. PRESERVED. Phase 12 EXTENDS the type catalog (see Decision 17 below).
+- `personal-prayer-list.md` — `/my-prayers` page, `wr_prayer_list` localStorage key, max 200 items, "Pray for this" glow, answered prayer green left border. PRESERVED. NOT migrated to backend in this wave (deferred to a future wave; Save vs Bookmark distinction per Decision 11 is preserved).
+- `liturgical-calendar-awareness.md` — 8 seasons, Computus algorithm, `useLiturgicalSeason` hook, dashboard greeting suffix, devotional/verse seasonal priority, landing page banner, navbar icon. PRESERVED IN FULL (client-side only, no backend involvement). Phase 9.1 EXTENDS this to Prayer Wall surfaces (seasonal QOTD prioritization, seasonal hero accents) — does NOT rebuild the underlying calendar logic.
+- `dark-theme-prayer-wall-local.md` — `#0f0a1e` page background, `bg-white/[0.06]` content cards, `bg-white/[0.08]` structural elements, dark Local Support map tiles, frosted glass treatments across all Prayer Wall and Local Support routes. PRESERVED. Phase 5 EXTENDS this with Round 2 Brand patterns (FrostedCard component, HorizonGlow, 2-line headings, ring colors) — does NOT redo the dark theme conversion.
+- `streak-faith-points-engine.md` — 6 activities (mood:5, pray:10, listen:10, prayerWall:15, meditate:20, journal:25), 4 multiplier tiers (1x/1.25x/1.5x/2x), 6 levels (Seedling/Sprout/Blooming/Flourishing/Oak/Lighthouse) at 0/100/500/1500/4000/10000, 30-second listen timer with reset-on-pause semantics. PRESERVED. Phase 2 ports this exact spec to backend; values must match exactly (see Decision 5 schema and Phase 2 spec descriptions).
+- `streak-repair-grace.md` — 1 free repair/week, 50 points/repair after, `wr_streak_repairs` localStorage key, "Everyone misses a day. Grace is built into your journey." copy. PRESERVED. Phase 2 dual-writes `wr_streak_repairs` and mirrors repair logic on backend (see Patch 2).
+- `social-interactions.md` — encouragements (3/friend/day, 4 presets), nudges (1/friend/week, ≥3 days inactive), milestone feed (10-15 mock events), weekly recap card. PRESERVED. Phase 2.5 dual-writes `wr_social_interactions` and `wr_milestone_feed` (see Patch 7). Phase 12 wires notifications generated by these interactions into the consolidated taxonomy.
+- `leaderboard.md` — Friends board (with avatars, streaks, levels), Global board (display name + weekly points only — privacy-preserving, no avatars), `wr_leaderboard_global`, profile popup on Global board tap (level + badges only). PRESERVED. Phase 8's unified `/u/:username` profile MUST respect Global board privacy: tapping a name on Global board opens the minimal popup, not the full profile page (only Friends-board taps and explicit profile-link taps go to the full profile).
+- `local-support.md` and `local-support-enhancements.md` — three routes (Churches, Counselors, Celebrate Recovery), Google Places integration, search controls available to logged-out users, cross-feature CTAs from listing cards (Pray, Journal, Prayer Wall), "I visited" check-in (logged-in only), counselor disclaimer. PRESERVED. Phase 7.5 (Local Support bridges) ADDS the reverse-direction bridges from Prayer Wall TO Local Support — does NOT rebuild the existing forward bridges.
+
+**The non-existent reference:** Several inherited specs reference `dashboard-growth-spec-plan-v2.md` as their Master Plan reference. This file does NOT exist in the repository — it was a working document name from the Phase 2.75 planning era that was never formalized. This is a documentation hole, not a functional bug. If CC encounters this reference while reading an inherited spec, treat it as equivalent to "Phase 2.75 wave (now superseded by this Forums Wave Master Plan for cross-cutting concerns)."
+
+### Decision 17: Notification Taxonomy is 14 Types (Consolidated)
+
+The existing `notification-system.md` spec ships 7 notification types in production. Phase 12 of the Forums Wave was originally drafted with 8 "new" types, several of which collide with or duplicate the existing types. This decision consolidates to a single canonical 14-type catalog.
+
+**The 14 final notification types:**
+
+1. `encouragement` — INHERITED. "[Name] sent: [preset message]". Tap → `/friends`.
+2. `friend_request_received` — NEW (replaces and renames the existing `friend_request`). "[Name] wants to be your friend". Inline Accept/Decline buttons (no navigation on tap).
+3. `friend_request_accepted` — NEW. "[Name] accepted your friend request". Tap → friend's profile at `/u/:username`.
+4. `friend_milestone` — INHERITED. "[Name] hit a [N]-day streak!" or "[Name] leveled up to [Level]!" or "[Name] earned [Badge]!". Tap → `/friends`.
+5. `milestone` — INHERITED. "You earned [Badge]!" or "You leveled up to [Level]!". Tap → dashboard.
+6. `level_up` — INHERITED. "You leveled up to [Level]!". Tap → dashboard. (Note: `level_up` is a distinct type from `milestone` because it triggers a different celebration tier.)
+7. `nudge` — INHERITED. "[Name] is thinking of you". Tap → dashboard.
+8. `weekly_recap` — INHERITED. "Your weekly recap is ready". Tap → dashboard. (Note: this REPLACES Phase 12 v1's `weekly_digest` — same feature, existing name kept.)
+9. `prayer_received` — NEW. "[Name] is praying for your post". Tap → the post detail page.
+10. `comment_received` — NEW. "[Name] commented on your post". Tap → the post detail page, scrolled to the comment.
+11. `reply_received` — NEW. "[Name] replied to your comment". Tap → the post detail page, scrolled to the reply.
+12. `mention_received` — NEW. "[Name] mentioned you in a post" or "...in a comment". Tap → the post detail page, scrolled to the mention.
+13. `prayer_answered_witness` — NEW. "[Name]'s prayer was answered: [praise text excerpt]". Fires when a post YOU prayed for is marked as answered. Tap → the post detail page.
+14. `friend_posted` — NEW. "[Name] posted a new prayer request" (only fires for users who have opted in to friend-posted notifications via Spec 12.4 preferences). Tap → the post detail page.
+
+**Deprecated from Phase 12 v1 (do NOT implement):**
+
+- `weekly_digest` → use existing `weekly_recap` instead.
+- `intercession_milestone` → covered by existing `milestone` with a `metadata.subtype` field.
+- Original `friend_request` → renamed to `friend_request_received` for clarity.
+
+**Notification lifecycle policy** (new in Decision 17):
+
+- Notifications older than 30 days auto-archive (hidden from default panel view, accessible via "View archived" link).
+- Notifications older than 90 days auto-delete from the database (background job runs nightly).
+- The existing 50-notification cap in `notification-system.md` is REPLACED by this time-based policy — no hard count cap on the backend, only the time-based archival/deletion.
+
+**"Mark all as read" and "Mark category as read"** — Phase 12 spec adds bulk operations: mark all as read (existing), plus a per-category "mark all encouragements as read" action when the panel is filtered by type. Phase 12.4 (notification preferences) adds opt-in/opt-out toggles per type.
+
+**Notification digest batching** (opt-in) — Phase 12 spec adds a user preference: "Batch my notifications — send me a summary every 2 hours" instead of real-time. When enabled, individual notifications are queued and emitted as a single digest notification at the configured interval. Default is real-time. Stored in `wr_settings.notifications.digestInterval` (one of `'realtime' | '2h' | '6h' | 'daily'`).
 
 ### Naming Conventions
 
@@ -125,7 +190,7 @@ Every Forums Wave spec uses this structure. The template matches the existing `_
 **Master Plan Reference:** `_forums_master_plan/round3-master-plan.md` — Phase {N}, Spec {NN}.
 **Branch:** `forums-wave` (or sub-branch as Eric directs)
 
-> **Before executing this spec:** Load `/Users/Eric/worship-room/_forums_master_plan/round3-master-plan.md` and read the Quick Reference section at the top. If this spec touches phase-specific decisions, consult the Phase {N} section as well. Never commit, never push, never `git checkout` — Eric handles all git operations manually.
+> **Before executing this spec:** Load `/Users/eric.champlin/worship-room/_forums_master_plan/round3-master-plan.md` and read the Quick Reference section at the top. If this spec touches phase-specific decisions, consult the Phase {N} section as well. Never commit, never push, never `git checkout` — Eric handles all git operations manually.
 
 ---
 
@@ -262,7 +327,7 @@ These apply to every Forums Wave spec, always, without exception. CC must respec
 
 4. **Use TypeScript types generated from OpenAPI**, not hand-written API response types. The OpenAPI spec at `backend/api/openapi.yaml` is the contract. The TypeScript types are derivatives in `frontend/src/types/api/generated.ts`, regenerated via `npm run types:generate`. Hand-editing the generated file is forbidden.
 
-5. **All user-facing strings go in a Copy Deck section of the spec**, then into a constants file (e.g., `frontend/src/constants/prayer-wall-copy.ts`). No inline hardcoded strings in components. Brand voice governs all copy. Every string in a spec's Copy Deck must pass the pastor's wife test.
+5. **All user-facing strings go in a Copy Deck section of the spec**, then into a constants file (e.g., `frontend/src/constants/prayer-wall-copy.ts`). No inline hardcoded strings in components. Brand voice governs all copy. Every string in a spec's Copy Deck must pass the pastor's wife test. Constants files are structured as flat key-value mappings (e.g., `export const PRAYER_WALL_COPY = { composerPlaceholder: "...", submitButton: "...", ... }`) to enable future internationalization via a single key-substitution layer (no current i18n requirement; this is a structural choice that keeps future translation cheap). **Every Copy Deck section also includes an Anti-Pressure Copy Checklist** — a short list of yes/no questions the copy must pass before the spec is considered done: (a) Does any copy use comparison framing ("more than X% of users")? (b) Does any copy use urgency language ("now", "hurry", "X people need...")? (c) Does any copy use exclamation points near vulnerability content (grief, mental health, crisis)? (d) Does any copy use therapy-app jargon ("manage your anxiety", "cope with depression")? (e) Does any copy use streak-as-shame language ("you missed a day", "don't break your streak")? (f) Does any copy use false-scarcity framing ("only 3 spots left", "limited time")? Any "yes" answer requires copy revision before the spec ships.
 
 6. **Tests are mandatory for new functionality.** Backend: JUnit 5 + Spring Boot Test + Testcontainers for integration tests, unit tests for pure logic. Frontend: Vitest + React Testing Library, plus reactive store subscription tests for any new store consumers (per BB-45 anti-pattern). Playwright for end-to-end verification. Eric can override the test requirement on a per-spec basis only when a spec is purely refactoring with no behavior change, and that override must be explicit in the spec's Out-of-Band Notes section.
 
@@ -278,13 +343,15 @@ These apply to every Forums Wave spec, always, without exception. CC must respec
 
 12. **Anti-pressure design.** Engagement features, gamification additions, and personal data displays must include an Anti-Pressure Design Decisions section in the spec with non-negotiables. The Prayer Wall is a vulnerability space — never punish absence, never gamify intercession in shame-inducing ways, never use comparison-based language ("you have prayed less than 80% of users"), never use false-urgency ("3 people need prayer right now — be one"), never display streaks-as-shame.
 
-13. **Crisis detection runs on the backend.** The existing frontend `containsCrisisKeyword()` is a courtesy fast-path that surfaces the crisis banner immediately for fast feedback. The authoritative crisis check happens server-side on post and comment creation per `.claude/rules/01-ai-safety.md` — backend uses an LLM-based classifier (with keyword fallback) and fail-closed semantics in the UI. New post/comment write endpoints MUST run the backend crisis check and MUST set `posts.crisis_flag = true` when triggered. Admin notification follows fail-open semantics (do not auto-flag content unless classification parsing succeeds or a clear keyword match exists) per the rule file.
+13. **Crisis detection runs on the backend.** The existing frontend `containsCrisisKeyword()` is a courtesy fast-path that surfaces the crisis banner immediately for fast feedback. The authoritative crisis check happens server-side on post and comment creation per `.claude/rules/01-ai-safety.md` — backend uses an LLM-based classifier (with keyword fallback) and fail-closed semantics in the UI. New post/comment write endpoints MUST run the backend crisis check and MUST set `posts.crisis_flag = true` when triggered. Admin notification follows fail-open semantics (do not auto-flag content unless classification parsing succeeds or a clear keyword match exists) per the rule file. **Acknowledged supersession:** the existing `prayer-wall-redesign.md` AI Safety section explicitly DEFERRED crisis detection ("Crisis detection needed?: No"). This Universal Rule #13 deliberately upgrades that policy to MANDATORY for the Forums Wave. The existing frontend `containsCrisisKeyword()` function (already shipped, used by `prayer-wall-question-of-day.md` and `personal-prayer-list.md`) is the partial implementation that this rule promotes to fully enforced. CC must NOT remove the frontend fast-path — it provides immediate UX feedback before the server round-trip completes. Both layers coexist.
 
 14. **Plain text only for user-generated content.** No HTML, no Markdown, no `dangerouslySetInnerHTML`. Backend defensively strips `<...>` tags on input (belt and suspenders). Frontend renders with `white-space: pre-wrap`. React's default escaping handles XSS prevention. This applies to prayer post content, comments, bios, custom display names, and any other user-supplied text. Per `.claude/rules/02-security.md`.
 
-15. **Rate limiting on all write endpoints.** Defaults from `.claude/rules/02-security.md`: 5 prayer posts per day per user, 20 AI requests per hour per user. Configurable via env vars (`RATE_LIMIT_PRAYER_POSTS_PER_DAY`, `RATE_LIMIT_AI_REQUESTS_PER_HOUR`). Spring Security + in-memory cache for dev, Redis for production. Rate limit headers on every response (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`). `Retry-After` header on 429 responses. Anti-enumeration on registration (existing email returns same response as new email).
+15. **Rate limiting on all write AND read endpoints.** Write defaults from `.claude/rules/02-security.md`: 5 prayer posts per day per user, 20 AI requests per hour per user. Configurable via env vars (`RATE_LIMIT_PRAYER_POSTS_PER_DAY`, `RATE_LIMIT_AI_REQUESTS_PER_HOUR`). **Read endpoint defaults: 100 requests per minute per authenticated user, 30 requests per minute per IP for unauthenticated requests, with a 20-request burst allowance.** Read limits prevent feed-scraping attacks that could de-anonymize anonymous posts via correlation across paginated requests. Configurable via env vars (`RATE_LIMIT_READS_PER_MINUTE_AUTHED`, `RATE_LIMIT_READS_PER_MINUTE_ANON`). Spring Security + in-memory cache for dev, Redis for production. Rate limit headers on every response — both writes and reads (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`). `Retry-After` header on 429 responses. Anti-enumeration on registration (existing email returns same response as new email).
 
 16. **Respect existing patterns.** Existing Prayer Wall components (PrayerCard, InteractionBar, InlineComposer, CommentsSection, etc.) are extended, not rebuilt. Existing localStorage keys (`wr_friends`, `wr_faith_points`, `wr_streak`, `wr_badges`, `wr_notifications`) are migrated, not reinvented. Existing UX flows from the prayer-wall-redesign / category-filter / category-layout / question-of-day specs are preserved unless this Master Plan explicitly supersedes them. When in doubt, ask Eric whether a deviation is intentional.
+
+17. **Per-phase accessibility smoke test.** Every phase cutover spec requires a passing accessibility smoke test before cutover is declared complete. This is distinct from Phase 16.4's comprehensive accessibility audit at the end of the wave — the smoke test is a lightweight verification gate that runs per-phase so accessibility debt doesn't pile up across 15 phases and arrive as 50+ violations in the final audit. Minimum requirements for the smoke test: (a) axe-core automated scan passes with zero CRITICAL violations on all routes and components introduced or modified in the phase (run via `@axe-core/playwright` in CI); (b) keyboard-only navigation walkthrough completes for the phase's primary user flows (compose post, react, comment, navigate profile, toggle a setting — whichever apply to the phase in question); (c) VoiceOver (macOS) spot-check on the 2-3 most complex interactions introduced in the phase (e.g., Phase 6's receipt modal, Phase 11's search overlay, Phase 14's walkthrough, Phase 10.7b's report dialog). Medium and minor axe violations are tolerable at the smoke-test gate but MUST be documented in the cutover spec's Out-of-Band Notes with a remediation owner (Eric by default) and a target remediation date (typically the next phase's cutover or the Phase 16.4 audit, whichever is sooner). The smoke test target duration is under 30 minutes per phase; the automated axe-core portion runs in seconds in CI, leaving the manual portion to the keyboard walkthrough and VoiceOver spot-check. CC executing a cutover spec MUST produce evidence of the smoke test passing (axe-core report artifact committed to `_cutover-evidence/{phase}-a11y-smoke.json`, plus a brief markdown note recording the keyboard walkthrough outcome and VoiceOver spot-check observations) as part of the cutover deliverables. A cutover spec that ships without this evidence is incomplete regardless of functional correctness.
 
 ---
 
@@ -354,13 +421,16 @@ What Phase 1 adds:
 - 🆕 PostgreSQL service in `docker-compose.yml`
 - 🆕 PostgreSQL JDBC driver and Spring Data JPA dependencies in `pom.xml`
 - 🆕 Liquibase dependency and master changelog
-- 🆕 Spring Security dependency and a `SecurityConfig` class
+- 🆕 Spring Security dependency and a `SecurityConfig` class — MUST disable CSRF in the SecurityConfig (`http.csrf(csrf -> csrf.disable())`). JWT-based auth using `Authorization: Bearer` headers does not need CSRF protection (CSRF protects cookie-based auth flows). Spring Security enables CSRF by default; without explicit disable, every POST/PUT/DELETE from the frontend returns a confusing 403 with no helpful error message. This is a single line of config but a multi-hour debugging session if missed. Document this explicitly in the Phase 1.4 spec.
 - 🆕 JJWT (JSON Web Token) library for token signing/parsing
 - 🆕 BCrypt password encoder bean
 - 🆕 Springdoc OpenAPI dependency and `openapi.yaml` spec file
 - 🆕 Testcontainers dependency and an `AbstractIntegrationTest` base class
 - 🆕 First Liquibase changeset: `users` table (extending the schema in `.claude/rules/05-database.md`)
 - 🆕 First real auth endpoints: `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/users/me`
+
+**BCrypt-in-Liquibase-XML gotcha (must be handled in Phase 1 seed spec):** BCrypt password hashes contain the `$` character, which Liquibase interprets as `${}` template reference delimiters in XML changeset files. Three options for handling this in the dev-seed changeset: (a) wrap the password values in `<![CDATA[...]]>` blocks within the column tag; (b) escape every `$` as `\${}` Liquibase escape sequence; (c) seed via SQL changeset (`<sqlFile path="..."/>`) instead of XML changeset. The Phase 1.8 dev-seed spec MUST pick one approach and document it. Recommended: option (a), CDATA blocks — least surprise, most readable.
+
 - 🆕 `application-test.properties` profile for Testcontainers tests
 - 🆕 Update root `docker-compose.yml` to depend on PostgreSQL service
 - 🆕 Move existing `/api/health` and `/api/hello` endpoints to `/api/v1/health` and `/api/v1/hello` for versioning consistency
@@ -601,7 +671,7 @@ Response: {
 
 **Known consequence of dual-write:** A badge earned on Device A (which writes to localStorage A and shadow-writes to the backend) is NOT visible on Device B until backend reads become source-of-truth in a future wave. The user's profile view in Phase 8 may surface backend-derived badges as a partial workaround, but the celebration moment fires only on the device where the badge was earned. This is intentional — the dual-write strategy trades cross-device celebration for blast-radius safety.
 
-Both the frontend (existing `services/`) and the backend ports of the calculation logic must produce identical results. A drift-detection test runs both implementations against shared test cases and asserts parity. When they disagree, the test fails loudly.
+Both the frontend (existing `services/`) and the backend ports of the calculation logic must produce identical results. A drift-detection test runs both implementations against shared test cases and asserts parity. When they disagree, the test fails loudly. **CI integration:** the drift test runs on every PR via GitHub Actions (or equivalent), in a job that boots the JVM (Java 21), executes the JS/TS implementation via Node 20, runs both against ~50 shared scenarios from `_test_fixtures/activity-engine-scenarios.json`, and fails the build if any scenario produces non-identical output. The shared scenarios file is the single source of truth and BOTH implementations are tested against it — neither implementation is the "reference"; they are peers that must agree. New scenarios are added when bugs are found (regression-test-first discipline). The test is FAST (target <30 seconds total) so it never gets disabled for being slow.
 
 **Grace periods and grief pause** are built in from Phase 2 day one:
 
@@ -721,6 +791,24 @@ friend_requests
 
 **The mutual friendship rule:** When a request is accepted, two rows are inserted into `friend_relationships` (A→B and B→A). Block is unidirectional (A blocks B inserts one row with `status='blocked'` from A to B). Querying "is X a friend of Y?" checks for an `active` row from Y to X.
 
+**Friends API responses denormalize per-friend profile data.** The existing frontend (per `friends-system.md`) reads `level`, `levelName`, `currentStreak`, `faithPoints`, `weeklyPoints`, `lastActive` directly from the `wr_friends` localStorage `FriendProfile` shape. The backend `friend_relationships` schema does NOT store these fields, but `GET /api/v1/users/me/friends` MUST return them by joining with `users`, `faith_points`, `streak_state`, and `activity_log` (for `weeklyPoints` computation). The response DTO shape:
+
+```
+FriendDto {
+  id: string                  // friend's user ID
+  displayName: string         // computed by DisplayNameResolver
+  avatarUrl: string | null
+  level: number               // 1-6, from faith_points.current_level
+  levelName: string           // computed: Seedling/Sprout/Blooming/Flourishing/Oak/Lighthouse
+  currentStreak: number       // from streak_state.current_streak
+  faithPoints: number         // from faith_points.total_points
+  weeklyPoints: number        // SUM(activity_log.points_earned) WHERE occurred_at >= getCurrentWeekStart()
+  lastActive: string          // ISO timestamp from users.last_active_at
+}
+```
+
+This denormalize-on-read approach matches existing UI assumptions, avoids N+1 fetch storms, and stays performant up to ~500 friends per user (the existing 250-friend cap in `friends-system.md` is preserved). Backend computes `weeklyPoints` with a single aggregating query joined into the friends list query, not per-friend lookups.
+
 **API endpoints** (Phase 2.5):
 
 - `GET /api/v1/users/me/friends` — returns the current user's friends with display names, levels, streaks, last active
@@ -733,6 +821,8 @@ friend_requests
 - `GET /api/v1/users/search?q=name` — search for users by name (for the friend-add UI)
 
 The frontend dual-writes friend actions to both `wr_friends` and the backend. The existing `useFriends` hook gains a fire-and-forget API call alongside its existing localStorage write. Reads continue to come from `wr_friends` during this wave.
+
+**Phase 2.5 also dual-writes `wr_social_interactions` and `wr_milestone_feed`** — these localStorage keys are owned by the existing `social-interactions.md` spec (encouragements, nudges, recap dismissals, milestone feed events). The backend gets shadow tables `social_interactions` and `milestone_events` with the same dual-write strategy. Encouragements (3-per-friend-per-day rate limit), nudges (1-per-friend-per-week rate limit), and milestone events are preserved during migration. Notifications generated by these interactions (encouragement, nudge, friend_milestone, weekly_recap) flow through Phase 12's notification taxonomy — see Patch 8 for the consolidated 14-type catalog.
 
 **Privacy:** User search results respect the existing privacy: blocked users do not appear in search results for either party. The current user does not appear in their own search results. Phase 8's privacy tier system extends this further (private profiles are searchable only by friends, etc.).
 
@@ -1346,6 +1436,96 @@ The hook returns the same shape as before (`{ reactions, togglePraying, toggleBo
 
 **Out-of-band notes for Eric:** This is where your Liquibase work experience pays off. The structure should feel familiar. The only Forums-Wave-specific thing is the `contexts/` directory pattern, which we introduce in Spec 1.8 for seed data.
 
+### Spec 1.3b — Users Table Timezone Column
+
+- **ID:** `round3-phase01-spec03b-users-timezone-column`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** 1.3
+- **Goal:** Add a `timezone VARCHAR(50)` column to the `users` table via a second Liquibase changeset. Every feature that triggers on local time (grace day reset, streak midnight boundary, Night Mode, 3am Watch, Sunday Service Sync, liturgical day-of-year rotations, scheduled notifications) depends on knowing each user's timezone. Capturing it at registration is cheap; retrofitting it later across five features is not. This spec also demonstrates the additive-migration pattern that Spec 1.3 foreshadowed (username column deliberately deferred to a later changeset) — a working reference for every future schema change in the wave.
+
+**Approach:** New Liquibase changeset `2026-04-14-003-add-users-timezone-column.xml` that adds `timezone VARCHAR(50) NOT NULL DEFAULT 'UTC'` to the `users` table. The default matters — existing rows from the dev-seed would fail the NOT NULL constraint without it, and Spring Boot would refuse to start the next time. The column accepts any IANA timezone string (`America/Chicago`, `Europe/London`, `Asia/Tokyo`, etc.); validation uses Java's `ZoneId.of()` at the service layer (throws `DateTimeException` on invalid strings, which the controller translates to `400 INVALID_INPUT`).
+
+**Registration flow update:** `POST /api/v1/auth/register` accepts an optional `timezone` field in the request body. If provided and valid, it's stored. If omitted or invalid, the backend falls back to `UTC` (no error — invalid strings become UTC silently on register to avoid blocking registration over a client-side detection glitch). The frontend AuthModal auto-detects the browser's timezone via `Intl.DateTimeFormat().resolvedOptions().timeZone` and sends it on registration. `GET /api/v1/users/me` returns the timezone in the UserResponse.
+
+**Settings update:** A "Timezone" control appears in `/settings` under account preferences. Implementation uses a searchable autocomplete (the IANA tz database is ~600 zones, a flat `<select>` is unusable). Changing timezone does NOT retroactively recompute streaks or past activity (those are recorded with server-UTC timestamps); it only affects future day-boundary computations — including the next Monday's grace-day reset.
+
+**Anti-pressure consideration:** Timezone changes mid-streak could create an apparent gap (e.g., moving from UTC-8 to UTC+9 pushes "today" forward almost a full day). The streak service treats any same-calendar-date activity in the user's CURRENT timezone as continuing the streak, even if the stored `last_active_date` was recorded in a different timezone. No streak is ever broken by a timezone change alone.
+
+**Files to create:**
+
+- `backend/src/main/resources/db/changelog/2026-04-14-003-add-users-timezone-column.xml`
+
+**Files to modify:**
+
+- `backend/src/main/java/com/worshiproom/user/User.java` (add `timezone` field)
+- `backend/src/main/java/com/worshiproom/auth/dto/RegisterRequest.java` (optional `timezone` field)
+- `backend/src/main/java/com/worshiproom/user/dto/UserResponse.java` (expose `timezone`)
+- `backend/src/main/java/com/worshiproom/auth/AuthService.java` (capture timezone on register with UTC fallback)
+- `backend/src/main/java/com/worshiproom/user/UserService.java` (timezone update endpoint logic)
+- `frontend/src/components/prayer-wall/AuthModal.tsx` (detect browser timezone, send on register)
+- `frontend/src/pages/Settings.tsx` or equivalent (timezone autocomplete)
+- `backend/src/main/resources/db/changelog/master.xml` (include the new changeset)
+
+**Database changes:**
+
+- Liquibase changeset: `db/changelog/2026-04-14-003-add-users-timezone-column.xml`
+- Tables modified: `users`
+- Columns added: `timezone VARCHAR(50) NOT NULL DEFAULT 'UTC'`
+- Rollback block: `DROP COLUMN timezone` (safe because default means no data loss for new users; existing UTC values in a rolled-back world just disappear)
+
+**API changes:**
+
+- `POST /api/v1/auth/register` — adds optional `timezone` field to request body
+- `PATCH /api/v1/users/me` — new endpoint (or extended existing) that accepts `{ timezone: string }` and validates via `ZoneId.of()`
+- `GET /api/v1/users/me` — response now includes `timezone`
+
+**Copy Deck:**
+
+- Settings label: "Timezone"
+- Settings helper text: "We use this to know when your day starts and ends."
+- Invalid timezone error: "That timezone isn't one we recognize. Try picking from the list."
+- Registration: no user-facing copy (silent auto-detection)
+
+**Anti-Pressure Copy Checklist:** (a) no comparison framing ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Acceptance criteria:**
+
+- [ ] `timezone` column exists on users table with `NOT NULL DEFAULT 'UTC'`
+- [ ] Existing users (from dev-seed) default to `'UTC'` after migration
+- [ ] New registration via browser captures the browser's IANA timezone string automatically
+- [ ] Registration with an omitted timezone succeeds and defaults to UTC (not an error)
+- [ ] Registration with an invalid IANA string succeeds and defaults to UTC (silently; logged as a warning)
+- [ ] `GET /api/v1/users/me` response includes `timezone` field
+- [ ] `PATCH /api/v1/users/me` with invalid IANA string returns `400 INVALID_INPUT` (stricter than register — settings-driven changes should fail loudly)
+- [ ] Settings UI renders a searchable timezone autocomplete
+- [ ] Changing timezone in settings persists and is reflected on next `/me` fetch
+- [ ] Streak is NOT broken by a timezone change alone (verified by an integration test that sets last_active_date in UTC, changes timezone to UTC-12, and asserts streak continues)
+- [ ] At least 10 backend tests covering: changeset applies, registration with/without/invalid timezone, settings update valid/invalid, streak preservation across timezone change
+- [ ] At least 1 Playwright test: register in a browser with a non-UTC timezone, verify `GET /me` returns that timezone
+
+**Testing notes:**
+
+- Unit tests: `ZoneId.of()` validation wrapper, timezone-aware streak continuation logic
+- Integration tests (Testcontainers): registration flow, settings update, streak preservation
+- Playwright: browser-detected timezone round-trips end-to-end
+
+**Notes for plan phase recon:**
+
+1. Confirm no existing code assumes UTC everywhere; flag any `LocalDate.now()` (without zone) that should become `LocalDate.now(userZone)` in future specs.
+2. Verify the autocomplete library choice — `react-select` with `Intl.supportedValuesOf('timeZone')` (native in modern browsers) avoids pulling in `moment-timezone`'s 800 KB.
+3. Confirm the dev-seed users should default to UTC or be given realistic timezones (recommend UTC — makes tests deterministic).
+
+**Out of scope:**
+
+- Retroactive streak recomputation when timezone changes (deferred; streak preservation rule above is the MVP)
+- Timezone-aware grace-day reset (foundational column lands here; the actual grace-day timezone logic ships in a Phase 2 follow-up spec)
+- DST transition handling (relies on Java's `ZoneId` which handles this correctly by default)
+
+**Out-of-band notes for Eric:** This is the spec that unblocks five downstream features (Night Mode, 3am Watch, Sunday Service Sync, liturgical theming, timezone-aware grace reset). Worth landing early in Phase 1 even though the features that need it don't land until Phase 6+. The additive-migration pattern — a changeset just to add one column — is also the reference implementation for every column addition the wave will need later.
+
+---
+
 ### Spec 1.4 — Spring Security and JWT Setup
 
 - **ID:** `round3-phase01-spec04-spring-security-jwt`
@@ -1546,6 +1726,101 @@ The hook returns the same shape as before (`{ reactions, togglePraying, toggleBo
 
 **Out-of-band notes for Eric:** This is the highest-risk spec in Phase 1. The rule of thumb: if a file imports `useAuth` and only reads `user.name` or `user.id` or `isAuthenticated`, it does not need to change. If a file calls `login(...)` it needs to be updated. The recon should list all `login(` call sites before execution starts.
 
+### Spec 1.9b — Error & Loading State Design System
+
+- **ID:** `round3-phase01-spec09b-error-loading-design-system`
+- **Size:** M
+- **Risk:** Low (additive; no behavioral change to existing code)
+- **Prerequisites:** 1.9
+- **Goal:** Establish canonical `<LoadingSkeleton>`, `<ErrorBoundary>`, `<EmptyState>`, and `<RetryBanner>` components before Phase 2+ start turning every page into a network-consumer. Without shared primitives, every async page reinvents its own loading spinner and error toast, and the UI drifts into inconsistency within a week. This spec lands the primitives early, wires them into the auth flow as the first consumer, and gives every downstream spec a three-line integration instead of an ad-hoc invention.
+
+**Approach:** Four new components in `frontend/src/components/common/`, each tiny and opinionated:
+
+1. **`<LoadingSkeleton variant="card" | "list" | "inline" | "page">`** — Renders a shimmering FrostedCard-shaped placeholder (for `card`), a list of three shimmering rows (for `list`), a single shimmering inline pill (for `inline`), or a full-page hero-and-content skeleton (for `page`). Uses CSS `@keyframes` for the shimmer, gated behind `prefers-reduced-motion` (static opacity-60 block when motion is reduced). Imports its animation timing from `frontend/src/constants/animation.ts` per BB-33. Never shows a spinner — spinners communicate "something is happening" but shimmer communicates "something is loading specifically here," which matches Worship Room's quiet aesthetic.
+
+2. **`<ErrorBoundary fallback={...}>`** — React error boundary wrapping any subtree. Catches render-time errors, logs them to console (dev) and to the future Sentry integration (flagged as TODO in a comment), and renders a `<RetryBanner>` with a "Try again" button that re-mounts the children. Top-level `<App>` wraps Prayer Wall routes in this. Individual features wrap their own risky subtrees (e.g., the Prayer Wall feed) with feature-specific fallbacks. This is NOT for catching API errors (those are caught at the service layer and surfaced via `<RetryBanner>` directly); it's for catching _render_ crashes that would otherwise white-screen the page.
+
+3. **`<EmptyState icon={LucideIcon} eyebrow="..." headline="..." body="..." action={...}>`** — Canonical empty-state treatment for feeds with zero items, profiles with no posts, search results with no matches, etc. Two-line headings per the Round 2 Brand standard. Brand-voice copy is SPEC-REQUIRED (not inline in the component) — every consumer passes their own copy from their Copy Deck section. Optional `action` prop renders a single primary-button CTA. Follows the anti-pressure pattern from Decision "Anti-Pressure Design" in the Universal Spec Rules: no shame, no comparison, no "you haven't posted yet — everyone else has!" framing.
+
+4. **`<RetryBanner message="..." onRetry={fn} severity="info" | "warning" | "error">`** — A small frosted banner that renders at the top of any async-consuming area when a fetch fails. Shows the message, a retry button, and auto-dismisses after a successful retry. Severity controls the accent color (quiet blue for info, amber for warning, muted red for error — never red-on-red-emergency colors, which are jarring on Prayer Wall vulnerability content). Messages come from the consumer; this spec does not define any inline strings.
+
+**Integration with Spec 1.9 (AuthContext JWT Migration):** The AuthModal becomes the first consumer. The existing "Signing in..." inline text gets replaced with `<LoadingSkeleton variant="inline" />` during the `login()` promise. Auth errors ("Invalid email or password") become a `<RetryBanner severity="error" />` above the form, dismissed on next field edit. If the AuthContext re-renders with an error boundary trip (e.g., malformed JWT from a compromised localStorage), the wrapping `<ErrorBoundary>` catches it and shows a "Something went wrong. Try signing out and back in." fallback with a logout-then-retry action.
+
+**Files to create:**
+
+- `frontend/src/components/common/LoadingSkeleton.tsx`
+- `frontend/src/components/common/ErrorBoundary.tsx`
+- `frontend/src/components/common/EmptyState.tsx`
+- `frontend/src/components/common/RetryBanner.tsx`
+- `frontend/src/components/common/__tests__/LoadingSkeleton.test.tsx`
+- `frontend/src/components/common/__tests__/ErrorBoundary.test.tsx`
+- `frontend/src/components/common/__tests__/EmptyState.test.tsx`
+- `frontend/src/components/common/__tests__/RetryBanner.test.tsx`
+
+**Files to modify:**
+
+- `frontend/src/components/prayer-wall/AuthModal.tsx` (consume LoadingSkeleton + RetryBanner)
+- `frontend/src/App.tsx` (or equivalent root) — wrap Prayer Wall routes in `<ErrorBoundary>`
+- `frontend/src/constants/animation.ts` — export a `SKELETON_SHIMMER` duration/easing token if not already present
+
+**Copy Deck:**
+
+These are component-level fallback copies that Copy-Deck-less consumers inherit. Every spec that uses these components SHOULD override with its own Copy Deck strings.
+
+- ErrorBoundary default fallback headline: "Something went sideways"
+- ErrorBoundary default fallback body: "This page hit an error. Try reloading — we'll keep your other work."
+- ErrorBoundary default retry button: "Reload this page"
+- RetryBanner default generic message: "We couldn't finish that. Try again?"
+- RetryBanner default retry button: "Try again"
+- EmptyState default headline (overridable): "Nothing here yet"
+- EmptyState default body (overridable): "That's all right. Come back when you're ready."
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Acceptance criteria:**
+
+- [ ] All four components created in `frontend/src/components/common/`
+- [ ] `<LoadingSkeleton>` supports four variants, shimmer gated behind `prefers-reduced-motion`
+- [ ] `<ErrorBoundary>` catches render errors and renders fallback without white-screening
+- [ ] `<EmptyState>` requires eyebrow, headline, body props (TypeScript enforces); optional icon and action
+- [ ] `<RetryBanner>` supports three severities with distinct accent colors (no emergency-red)
+- [ ] All components use FrostedCard backing where backgrounded
+- [ ] All animation timing imported from `constants/animation.ts` (no hardcoded `ms` strings)
+- [ ] AuthModal integration: signing-in state uses LoadingSkeleton inline variant
+- [ ] AuthModal integration: login error shows RetryBanner error severity
+- [ ] Root App wraps Prayer Wall routes in ErrorBoundary
+- [ ] Intentionally throwing an error inside a wrapped component is caught and the fallback renders
+- [ ] Tab key navigates into the RetryBanner retry button (focus management)
+- [ ] Screen reader announces EmptyState headline and body as `role="status"` (non-intrusive)
+- [ ] Color contrast on all severity variants meets WCAG AA (4.5:1 for body text)
+- [ ] At least 4 tests per component (16 total) covering happy path, variant props, reduced-motion, accessibility
+- [ ] Storybook stories exist for each component and each variant (if Storybook is in the repo; otherwise skip)
+- [ ] Bundle size impact < 10 KB gzipped across all four components combined
+
+**Testing notes:**
+
+- Unit tests verify variant rendering and prop validation
+- Accessibility tests verify ARIA roles and focus management (React Testing Library + axe-core)
+- Visual regression test via Playwright on each component in isolation (optional; if Storybook is set up)
+- Integration test: AuthModal submits invalid credentials, RetryBanner appears, retry clears the banner
+
+**Notes for plan phase recon:**
+
+1. Confirm whether Storybook is set up in the repo (if not, skip the stories acceptance criterion)
+2. Verify `constants/animation.ts` exists and has the BB-33 token structure; create if missing (note: should already exist from earlier work)
+3. Identify any existing ad-hoc loading spinners in Prayer Wall components that should be migrated to `<LoadingSkeleton>` in a follow-up cleanup spec (not this spec's scope)
+4. Confirm the FrostedCard component is available for use as backing
+
+**Out of scope:**
+
+- Retrofitting existing Prayer Wall components to use these primitives (that's a follow-up cleanup spec, probably in Phase 5)
+- Toast notifications (that's a separate system, lands in Phase 12 or earlier if needed)
+- Form validation error display (that's the consuming form's responsibility; these components only handle async/render errors)
+
+**Out-of-band notes for Eric:** The BIG reason to land this in Phase 1 (before Phase 2's dual-write introduces the first "network might fail" surface) is that without shared primitives, Phase 2-16 will each build one-off loading/error treatments that you'll later pay to unify. One spec now saves a dozen cleanup specs later. The AuthModal integration is also a canary: if it feels right for login, it'll feel right everywhere.
+
+---
+
 ### Spec 1.10 — Phase 1 Cutover and End-to-End Test
 
 - **ID:** `round3-phase01-spec10-phase1-cutover`
@@ -1569,6 +1844,7 @@ The hook returns the same shape as before (`{ reactions, togglePraying, toggleBo
 - [ ] Rollback procedure documented in cutover checklist (set flag to `false`, restart frontend)
 - [ ] CLAUDE.md updated if any commands changed
 - [ ] Phase 1 officially done — backend foundation is ready for feature work
+- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase1-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
 
 **Out-of-band notes for Eric:** When this spec passes, take a break. You just shipped your first backend. The rest of the Forums Wave builds on this foundation but does not require the same level of concept-learning you just did — Phase 2 will feel easier because you already know how the pieces fit.
 
@@ -1588,6 +1864,566 @@ The hook returns the same shape as before (`{ reactions, togglePraying, toggleBo
 - [ ] Each candidate has the same evaluation criteria applied
 - [ ] Recommendation section with reasoning
 - [ ] Eric reviews and picks (not part of the spec — this is a follow-up action)
+
+---
+
+### Spec 1.10d — Production Monitoring Foundation
+
+- **ID:** `round3-phase01-spec10d-production-monitoring-foundation`
+- **Size:** M
+- **Risk:** Low (additive operational tooling)
+- **Prerequisites:** 1.10b
+- **Goal:** Wire Sentry for unhandled exception tracking, uptime monitoring for the `/api/v1/health` endpoint, JSON structured logging activation (configured, not merely defined), and basic alert rules. Without this, a backend failure at 2 AM is a surprise Eric discovers days later when a user emails. This spec establishes the minimum ears-and-eyes layer so production outages are detected within minutes, not weeks. Budget: a few hours of setup in exchange for years of not-flying-blind.
+
+**Approach:** Four thin substacks layered onto the existing Spring Boot + Logback foundation. Each substack is independently testable; each has an explicit off-switch for dev profile so local iteration doesn't pollute the production alert stream.
+
+**Substack 1 — Sentry error tracking.** Spring Boot Sentry starter dependency wired to `SENTRY_DSN` env var. Free tier (5K events/month) is enough for MVP. Production profile enables the integration; dev profile disables entirely so local stack traces don't hit the shared Sentry project. Unhandled exceptions auto-capture. Additionally, specific events explicitly push to Sentry: `QUICK_LIFT_TOO_SHORT` violations (WARN — interesting but not actionable), rate-limit threshold breaches (WARN), crisis detection triggers (WARN, aggregated to weekly digest rather than real-time alerts), 5xx responses (ERROR). Every event is routed through a PII scrubber before leaving the process.
+
+**Substack 2 — PII scrubber.** Before Sentry emits an event, strip: any value matching the email regex (in breadcrumbs, tags, or context), the raw `Authorization: Bearer ...` header from HTTP request breadcrumbs, the `password` field from any captured form submission, the client IP (Sentry's default is to capture this — we override to null), any `wr_*` localStorage keys if they appear in frontend-source events (reserved for a future frontend Sentry integration, not in this spec's scope). The scrubber is strict by default; it's preferable to lose useful debugging context than to leak user PII into a third-party service.
+
+**Substack 3 — JSON structured logging activation.** `logback-spring.xml` has a `prod` profile that uses `logstash-logback-encoder` for JSON output; `dev` profile retains the human-readable pattern. Every log line in prod includes: `timestamp`, `level`, `logger`, `message`, `requestId` (from MDC, populated by a request filter), `userId` (from MDC when authenticated), `thread`. The MDC filter runs early in the filter chain and populates `requestId` from the `X-Request-Id` response header (or generates one if the incoming request didn't supply it). This alone — correlated log lines per request — makes post-incident forensics 10x easier.
+
+**Substack 4 — Uptime monitoring + basic alert rules.** Configure UptimeRobot (free tier, 5-minute intervals, 50 monitors) OR Better Stack (free starter, richer dashboards) against `https://{prod-domain}/api/v1/health`. Alert on 2 consecutive failures (filters transient network blips). Alert on response time > 5s for 3 consecutive intervals (performance degradation signal). Alert email delivery MUST be verified on day one via a deliberate synthetic failure — an alerting system that never alerts is worse than no alerting (false security). Sentry alert rules: error rate > 5 events/hour → email; any explicitly-tagged `CRITICAL` event → email immediately. `Retry-After` and rate-limit events are INFO-level, not alertable.
+
+**Anti-noise discipline:**
+
+- Sentry ignorelist configured for expected 4xx: 404s on `/api/v1/*` (client probing), 401s on expected-auth endpoints (user token expired), 403s on trust-level-gated actions (expected when trust levels enforce). These are user behavior, not errors.
+- Crisis detection events fire to Sentry as WARN, NOT alert-triggering. A prayer community generates genuine crisis signals regularly; alerting on each would train Eric to ignore the alert channel. Aggregate to a weekly digest (future spec).
+- Monitor only `/api/v1/health` publicly. Authenticated endpoints require a bot-user JWT, which is operational complexity not worth the coverage gain at MVP scale.
+- Health endpoint intentionally lightweight: returns 200 with `{ status: "ok", db: "reachable" }` after a `SELECT 1` against PostgreSQL. Does NOT check downstream dependencies (S3, Redis) — those get their own lightweight health sub-endpoints in later phases if needed.
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/observability/SentryConfig.java`
+- `backend/src/main/java/com/worshiproom/observability/PiiScrubber.java`
+- `backend/src/main/java/com/worshiproom/observability/RequestIdMdcFilter.java`
+- `backend/src/main/resources/logback-spring.xml`
+- `backend/src/test/java/com/worshiproom/observability/PiiScrubberTest.java`
+- `backend/src/test/java/com/worshiproom/observability/RequestIdMdcFilterIntegrationTest.java`
+- `backend/docs/runbook-monitoring-alerts.md`
+
+**Files to modify:**
+
+- `backend/pom.xml` — add `io.sentry:sentry-spring-boot-starter-jakarta` + `net.logstash.logback:logstash-logback-encoder`
+- `backend/src/main/resources/application-prod.properties` — Sentry DSN binding, JSON logging on, Sentry `send-default-pii=false`
+- `backend/src/main/resources/application-dev.properties` — Sentry disabled, human-readable logs
+- `.env.example` — document `SENTRY_DSN`, `UPTIMEROBOT_API_KEY` (optional, for programmatic monitor config)
+
+**Database changes:** None
+
+**API changes:** None (monitoring is external; `/api/v1/health` already exists from Phase 1)
+
+**Copy Deck:** None (no user-facing copy)
+
+**Acceptance criteria:**
+
+- [ ] Sentry Spring Boot starter present in `pom.xml`
+- [ ] `SENTRY_DSN` env var wired to Sentry config; empty DSN → Sentry auto-disabled (dev default)
+- [ ] Deliberate `throw new RuntimeException("test")` in a scratch endpoint produces a Sentry event (verified manually OR via mock SentryClient in test)
+- [ ] PII scrubber strips email addresses from breadcrumb strings (unit tested with 5+ email patterns)
+- [ ] PII scrubber strips `Authorization: Bearer` header from captured request breadcrumbs
+- [ ] PII scrubber nulls client IP in event context
+- [ ] `send-default-pii=false` confirmed in production properties
+- [ ] JSON logging active in `prod` profile — verified by log line pattern match (starts with `{`)
+- [ ] Human-readable logging retained in `dev` profile
+- [ ] `requestId` appears in MDC for every request; present in every log line emitted during that request
+- [ ] MDC populated from incoming `X-Request-Id` header when present; generated UUID otherwise
+- [ ] UptimeRobot (or Better Stack) monitor configured on `/api/v1/health` with 5-minute interval
+- [ ] Alert fires on 2 consecutive failures (tested by deliberately stopping backend for 10+ minutes)
+- [ ] Alert fires on sustained response time > 5s (tested by adding a `Thread.sleep(6000)` to health endpoint in dev)
+- [ ] Sentry ignore list drops 404/401/403 responses (verified by triggering each and confirming no Sentry event)
+- [ ] Crisis-detection events reach Sentry with WARN severity and are NOT included in alert rules
+- [ ] Runbook exists at `backend/docs/runbook-monitoring-alerts.md`
+- [ ] Runbook documents: what each alert means, first-response triage steps, how to acknowledge and silence false alarms
+- [ ] Day-1 synthetic alert test completed and the date/outcome recorded in the runbook
+- [ ] At least 10 tests covering PII scrubber (email, JWT, IP cases), MDC filter (present/absent header), Sentry config (enabled/disabled by DSN)
+
+**Testing notes:**
+
+- PII scrubber: unit test with fixture Sentry event payloads containing various PII shapes
+- MDC filter: integration test fires a real HTTP request, asserts the log line emitted during request handling contains the expected `requestId`
+- Sentry dispatch: use Sentry's test mode (`dsn=https://fake@localhost/0`) to assert events would fire without network calls
+- Alert test: deliberately stopping the backend during the day-1 drill is the real acceptance test for the alerting pipeline
+
+**Notes for plan phase recon:**
+
+1. Confirm Sentry (cloud, paid) vs GlitchTip (self-hosted Sentry-compatible, free). Default Sentry for MVP simplicity.
+2. Confirm UptimeRobot vs Better Stack. UptimeRobot has a longer track record; Better Stack has nicer dashboards. Default UptimeRobot.
+3. Set up a dedicated alerts email address (e.g., `ops@worshiproom.com` once domain is active, or a Gmail `+alerts` alias in the interim) so alerts don't drown in personal inbox.
+4. Verify the deployment platform exposes `/api/v1/health` publicly without auth.
+
+**Out of scope:**
+
+- Log aggregation (Loki, Datadog, LogDNA) — deferred; platform stdout capture suffices at MVP
+- Distributed tracing (OpenTelemetry, Jaeger) — not needed at current scale
+- Application performance monitoring (APM) dashboards — Sentry performance monitoring requires Pro tier
+- Custom business metrics dashboards — deferred
+- SMS alert delivery — email only for MVP; revisit when revenue justifies the Twilio line item
+- Frontend Sentry integration — a follow-up spec; this one handles backend only
+- PagerDuty or incident response automation — overkill for a solo-dev MVP
+
+**Out-of-band notes for Eric:** The single most important output of this spec is not the tooling — it is the day-1 synthetic alert test. An alerting pipeline that has never fired a real alert is Schrödinger's alerting pipeline; you have no idea whether it works until you need it, at which point it probably doesn't. Kill the backend container in production for 15 minutes on a planned day, verify the alert email arrives, document the timing in the runbook, THEN consider this spec done. The 5K events/month free tier is plenty — a well-behaved app uses well under 100/month in steady state. If you're burning through 5K, something is firing repeatedly and that's the real signal, not a budget problem.
+
+---
+
+### Spec 1.10e — Object Storage Adapter Foundation
+
+- **ID:** `round3-phase01-spec10e-object-storage-adapter-foundation`
+- **Size:** M
+- **Risk:** Medium (foundational abstraction used by 1.10c backups, 4.6b images, 6.7 testimony cards, 10.11 deletion cleanup)
+- **Prerequisites:** 1.10b
+- **Goal:** Establish a single `ObjectStorageAdapter` interface with three implementations (production S3, test-time MinIO via Testcontainers, dev-time local filesystem). Every downstream consumer (backups, image uploads, shareable testimony cards, async deletion cleanup) depends on this adapter rather than talking to S3 SDK directly. This prevents four ad-hoc S3 integrations from drifting apart and makes dev iteration cheap (no AWS credentials needed for local work). Land this in Phase 1 — before any consumer — so the abstraction is genuinely tested against multiple backends before any feature code depends on it.
+
+**Approach:** Thin interface, three implementations, Spring profile selection.
+
+**The interface** (Java, illustrative):
+
+```java
+public interface ObjectStorageAdapter {
+    StoredObject put(String key, InputStream data, long contentLength, String contentType, Map<String, String> metadata);
+    Optional<StoredObjectStream> get(String key);
+    boolean exists(String key);
+    boolean delete(String key);
+    List<StoredObjectSummary> list(String prefix, int maxResults);
+    String generatePresignedUrl(String key, Duration expiry);
+}
+```
+
+`StoredObject` returns `{ key, sizeBytes, etag, contentType }`. `StoredObjectStream` returns an `InputStream` the caller is responsible for closing (use try-with-resources). `StoredObjectSummary` is `{ key, sizeBytes, lastModified }`.
+
+**The three implementations:**
+
+1. **`S3StorageAdapter`** — AWS SDK v2, for production. Reads `STORAGE_BUCKET`, `STORAGE_REGION`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY` env vars. Works against native AWS S3, Cloudflare R2 (S3-compatible), Backblaze B2 (S3-compatible endpoint), and any other S3-API-compatible provider by overriding `STORAGE_ENDPOINT_URL`. Retry with exponential backoff (3 attempts, 100ms / 300ms / 1000ms) on transient errors; non-retriable on 4xx. Active under `prod` profile.
+
+2. **`MinIOStorageAdapter`** — Same code path as S3StorageAdapter (MinIO is S3-compatible), but initialized against a Testcontainers-managed MinIO container for integration tests. Active under `test` profile. Inside `AbstractIntegrationTest`, a `@Container` MinIO instance starts once per test class and is torn down cleanly.
+
+3. **`LocalFilesystemStorageAdapter`** — Writes files to a configurable local directory (default `$HOME/.worshiproom-dev-storage`). Keys map to hierarchical filesystem paths (forward slashes become actual subdirectories). Metadata stored as sidecar `.meta.json` files alongside the data file. Presigned URLs generated as `http://localhost:8080/dev-storage/{key}?expires=...` served by a dev-only controller that verifies the expiry signature. Active under `dev` profile. Gives Eric a zero-setup local workflow — no AWS credentials, no Docker container, just `./mvnw spring-boot:run`.
+
+**Key conventions:**
+
+- All keys are lowercase, forward-slash-separated, hierarchical: `post-images/{user_id}/{post_id}/{rendition}.jpg` — not `PostImages\{UserId}\...`
+- Top-level key prefixes (load-bearing across consumers): `post-images/`, `testimony-cards/`, `backups/pg_dump/`, `exports/user-data/`
+- Keys never contain user input directly — always sanitize (strip `..`, enforce allowed charset) before composing a key. A consumer that builds `post-images/{filename}` where `filename` is user-supplied is a path traversal vulnerability
+- Max key length: 256 characters (S3 allows 1024, but this buffer prevents surprises across providers)
+
+**Content-Type and Content-Length** are required on every `put` — no inference. Callers MUST know what they're uploading. The adapter validates Content-Length matches the stream's actual byte count; a mismatch throws `ObjectStorageIntegrityException`.
+
+**Retry and failure semantics:**
+
+- Transient failures (timeouts, 5xx, connection resets) retry up to 3 times with exponential backoff
+- Non-retriable failures (403 forbidden, 400 bad request, key-too-long) throw immediately — no retry
+- Every retry logs at WARN; every final failure logs at ERROR and surfaces to Sentry per 1.10d
+- Successful operations log at DEBUG with key + size + duration
+- Adapter operations include `requestId` from MDC per 1.10d's logging foundation
+
+**Security:**
+
+- Never include `STORAGE_SECRET_KEY` in logs or exceptions (PII scrubber from 1.10d catches this as defense-in-depth, but don't rely on the scrubber; log only the error class + key)
+- Presigned URL generation uses the adapter's signing key, NEVER a user-provided parameter
+- Presigned URL expiry maximum: 24 hours (configurable via `STORAGE_MAX_PRESIGN_HOURS`, defaults to 1 hour; caller can request shorter)
+- Bucket ACL defaults to private; individual objects never get public-read ACL from this adapter (consumers that need public objects, like testimony card shares, use presigned URLs instead)
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/storage/ObjectStorageAdapter.java` (interface)
+- `backend/src/main/java/com/worshiproom/storage/StoredObject.java` (record types)
+- `backend/src/main/java/com/worshiproom/storage/S3StorageAdapter.java`
+- `backend/src/main/java/com/worshiproom/storage/LocalFilesystemStorageAdapter.java`
+- `backend/src/main/java/com/worshiproom/storage/StorageConfig.java` (Spring `@Configuration` that picks the adapter by profile)
+- `backend/src/main/java/com/worshiproom/storage/controller/DevStorageController.java` (dev-profile-only presigned URL serving)
+- `backend/src/main/java/com/worshiproom/storage/ObjectStorageIntegrityException.java`
+- `backend/src/test/java/com/worshiproom/storage/S3StorageAdapterIntegrationTest.java`
+- `backend/src/test/java/com/worshiproom/storage/LocalFilesystemStorageAdapterIntegrationTest.java`
+- `backend/src/test/java/com/worshiproom/storage/AbstractObjectStorageContractTest.java` (contract test both impls must pass)
+
+**Files to modify:**
+
+- `backend/pom.xml` — add `software.amazon.awssdk:s3` and `software.amazon.awssdk:s3-transfer-manager`
+- `backend/src/main/resources/application-dev.properties` — local filesystem storage path
+- `backend/src/main/resources/application-test.properties` — MinIO Testcontainer config
+- `backend/src/main/resources/application-prod.properties` — S3 binding
+- `.env.example` — document all storage env vars
+- `backend/docs/runbook-storage.md` — how to rotate access keys, how to switch providers (R2 vs S3 vs B2)
+
+**Database changes:** None
+
+**API changes:** None (this is infrastructure; consumers expose their own endpoints)
+
+**Copy Deck:** None (no user-facing copy — infrastructure only)
+
+**Acceptance criteria:**
+
+- [ ] `ObjectStorageAdapter` interface defined with all 6 operations
+- [ ] `S3StorageAdapter` passes the contract test against MinIO Testcontainer
+- [ ] `LocalFilesystemStorageAdapter` passes the same contract test
+- [ ] Both implementations implement all 6 operations with identical semantics (contract test enforces this)
+- [ ] Spring profile `dev` selects LocalFilesystemStorageAdapter
+- [ ] Spring profile `test` selects MinIOStorageAdapter (via same S3StorageAdapter code)
+- [ ] Spring profile `prod` selects S3StorageAdapter
+- [ ] Content-Length mismatch throws `ObjectStorageIntegrityException`
+- [ ] Retry fires 3 attempts with exponential backoff on transient failures
+- [ ] Non-retriable 4xx failures throw immediately (no retry loop)
+- [ ] Presigned URL expiry capped at `STORAGE_MAX_PRESIGN_HOURS` (integration test verifies cap enforcement)
+- [ ] Key sanitization rejects `..`, leading slashes, and non-allowed characters with `IllegalArgumentException`
+- [ ] Max key length enforced at 256 characters
+- [ ] Dev-profile controller serves presigned URLs with expiry signature verification
+- [ ] Contract test covers: put+get roundtrip, put+exists+delete+exists-false, put+list-by-prefix, put+generatePresignedUrl, metadata preservation, Content-Type preservation, large-file handling (>5MB test fixture)
+- [ ] Secret keys never appear in logs (unit test asserts no `STORAGE_SECRET_KEY` value in emitted log lines after a failure)
+- [ ] Storage operations integrate with 1.10d's requestId MDC + Sentry error capture
+- [ ] Runbook documents provider rotation and key rotation procedures
+- [ ] At least 20 tests (contract + per-impl + config + security)
+
+**Testing notes:**
+
+- The `AbstractObjectStorageContractTest` is the load-bearing artifact: both S3 (against MinIO) and LocalFilesystem implementations extend it and MUST pass identical assertions. This is how we prevent drift between adapters.
+- Use real byte streams in tests (fixture files at `src/test/resources/fixtures/`) — don't mock `InputStream` with string-based stubs that hide encoding/size issues.
+- Contract test parameterized with small (1 KB), medium (500 KB), and large (6 MB, triggering multipart) file sizes.
+- Local filesystem adapter test verifies actual disk writes/reads under a `@TempDir`.
+
+**Notes for plan phase recon:**
+
+1. Confirm Cloudflare R2 is acceptable as production storage (10x cheaper than AWS S3 egress; fully S3-API-compatible via custom endpoint URL). Recommendation: R2 for MVP.
+2. Verify the MinIO Testcontainer image tag (`minio/minio:RELEASE.2024-...`) is current and stable.
+3. Decide bucket naming convention (`worshiproom-prod`, `worshiproom-dev`, or `worshiproom-{env}-{region}`).
+4. Confirm AWS SDK v2 (not v1 — v1 is in maintenance mode).
+
+**Out of scope:**
+
+- Client-side direct-to-S3 uploads (presigned POST). Deferred; all uploads go through the backend for PII/size/malware checks.
+- Image transformation (resize, format conversion). That's Spec 4.6b's responsibility — the adapter only stores bytes.
+- Server-side encryption with customer-managed keys (SSE-C, SSE-KMS). Defer until a real compliance need emerges.
+- Cross-region replication. Deferred; MVP is single-region.
+- Versioning (S3 object versions). Deferred; backup retention covers the accidental-overwrite case.
+- Malware scanning (ClamAV integration). Deferred; PII stripping catches metadata-based risks, and user-uploaded images in a Prayer Wall context are lower-risk than, say, PDF uploads.
+
+**Out-of-band notes for Eric:** The contract test is the single most important thing in this spec. It's what lets you swap providers in the future (R2 → S3 → B2) with confidence that your code still works. When you add new operations to the interface in later specs, add the assertion to the contract test FIRST — if the contract test doesn't cover it, future drift between S3 and Local implementations is guaranteed. Also: the `LocalFilesystemStorageAdapter` is intentionally not production-grade (no concurrency guarantees across processes, no atomic writes). That's fine — it's a dev convenience. If you ever find yourself tempted to use it in production, the answer is always "no, use real S3 or R2."
+
+---
+
+### Spec 1.10c — Database Backup Strategy
+
+- **ID:** `round3-phase01-spec10c-database-backup-strategy`
+- **Size:** S
+- **Risk:** Low (non-functional, but critical operational practice)
+- **Prerequisites:** 1.10b, 1.10e
+- **Goal:** Establish automated database backups with documented restore procedures and scheduled restore drills. Users are about to pour their prayers, confessions, testimonies, and spiritual journeys into this database. Losing that data due to a disk failure or deployment mistake is not a "oh well, it happens" outcome — it is a trauma for users whose testimonies of God's work are gone. A working backup strategy is the minimum operational baseline before user data touches the system.
+
+**Approach:** Rely on platform-native backup where available (Railway PostgreSQL, Supabase, Neon all offer point-in-time recovery out of the box) and layer a weekly `pg_dump` to object storage on top as defense-in-depth. Document the exact restore procedure in a runbook so that when disaster strikes at 2 AM, the recovery path is a checklist, not a research project. Schedule a quarterly restore drill — actually restoring to a scratch database and verifying a known row appears.
+
+**Platform-native backups:**
+
+- Railway PostgreSQL: daily snapshots retained 7 days by default. If Railway is chosen in Spec 1.10b, this is automatic and requires no additional code.
+- Supabase: daily backups retained 7 days on Pro plan; point-in-time recovery on higher tiers.
+- Neon: branch-based time-travel with 7-day history by default.
+- Whichever platform 1.10b selects, verify its backup configuration during the onboarding step.
+
+**Layered `pg_dump` to object storage (weekly):**
+
+- Spring `@Scheduled` task runs every Sunday at 03:00 UTC
+- Shells out to `pg_dump` (backend container image MUST include the postgres-client package matching the DB version)
+- Output written to object storage (reuses the adapter from Spec 1.10e) at `backups/pg_dump/{YYYY}/{MM}/{YYYY-MM-DD}.sql.gz`
+- 90-day retention; files older than 90 days cleaned up by a second scheduled task
+- Notification on success (compressed size) and on failure (error details). Until Phase 15 SMTP lands, notifications are WARN/INFO logs only; after Phase 15, add email channel as a follow-up cleanup.
+
+**Restore runbook:**
+
+- Markdown document at `backend/docs/runbook-database-restore.md`
+- Step-by-step procedure for: (a) restoring a platform-native snapshot, (b) restoring from a `pg_dump` file to a fresh DB, (c) smoke-testing the restore before flipping DNS
+- Exact `psql` and `pg_restore` commands with placeholder substitutions
+- Known-row verification query (e.g., "does user `eric@...` exist?") to confirm the restore took
+
+**Quarterly restore drill:**
+
+- Calendar reminder to Eric (intentionally human-in-the-loop, not automated)
+- Actually spin up a scratch Postgres container, restore latest backup, run the verification query
+- If the drill fails, that is the signal to fix the backup pipeline BEFORE you need it
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/operations/BackupService.java`
+- `backend/src/main/java/com/worshiproom/operations/BackupScheduledJob.java`
+- `backend/src/main/java/com/worshiproom/operations/BackupRetentionJob.java`
+- `backend/src/test/java/com/worshiproom/operations/BackupServiceIntegrationTest.java`
+- `backend/docs/runbook-database-restore.md`
+
+**Files to modify:**
+
+- `backend/Dockerfile` (install `postgresql-client` matching DB version)
+- `backend/src/main/resources/application.properties` (backup cron expression, retention days, storage path prefix)
+- `.env.example` (document `BACKUP_STORAGE_BUCKET`, `BACKUP_NOTIFICATION_EMAIL`)
+
+**Database changes:** None
+
+**API changes:** None (backup is internal; no public endpoint)
+
+**Copy Deck:** None (no user-facing copy)
+
+**Acceptance criteria:**
+
+- [ ] Platform-native backup is enabled and verified at the deployment target chosen in 1.10b
+- [ ] Scheduled `pg_dump` job runs Sunday 03:00 UTC and writes to object storage
+- [ ] Compressed dump size is reasonable (sanity: < 10× live DB size)
+- [ ] Retention job deletes dumps older than 90 days (integration test seeds old-timestamped dumps and asserts deletion)
+- [ ] Restore runbook exists at `backend/docs/runbook-database-restore.md`
+- [ ] Runbook has been read end-to-end by Eric with any ambiguities resolved
+- [ ] At least ONE restore drill has been performed and documented in the runbook (date, outcome, issues found)
+- [ ] Quarterly drill reminder is on Eric's calendar
+- [ ] Backup failure surfaces as a WARN log (email channel added as follow-up after Phase 15)
+- [ ] At least 8 tests cover backup scheduling, retention, storage paths, and error handling
+
+**Testing notes:**
+
+- Integration tests use Testcontainers + MinIO (S3-compatible) and run a real `pg_dump` against the test DB
+- Do NOT mock `pg_dump` — the whole point is catching command-line integration bugs
+- Retention test manually writes old-timestamped objects to MinIO and asserts cleanup
+
+**Notes for plan phase recon:**
+
+1. Confirm the object storage adapter from 3.12b is available (if this spec executes before 3.12b, temporarily use platform-native cloud storage with a TODO to migrate)
+2. Verify the deployment target chosen in 1.10b has automatic snapshots configured
+3. Decide the notification recipient — personal email is fine for now; set up `ops@` when the app grows
+
+**Out of scope:**
+
+- Real-time replication (read replicas, streaming) — not needed at current scale
+- Cross-region backup redundancy — nice-to-have, not MVP-essential
+- Application-level per-user export (that is Spec 10.11)
+- Automated restore (drills are intentionally manual — human judgment during disaster)
+
+**Out-of-band notes for Eric:** The quarterly drill is the most-skipped step in any backup strategy in any organization, ever. Do it. Put it on your calendar right now. A drill that discovers "my pg_dump can't be restored because the version mismatches" is FAR preferable to discovering that at 2 AM after a deploy went sideways. Budget 2 hours for the first drill, 30 minutes for subsequent drills.
+
+---
+
+### Spec 1.10f — Terms of Service and Privacy Policy Surfaces
+
+- **ID:** `round3-phase01-spec10f-terms-privacy-policy-surfaces`
+- **Size:** M
+- **Risk:** Medium-High (legal exposure if absent; drafting risk if wrong; every user who registers implicitly accepts these so the drafts must actually reflect what the app does)
+- **Prerequisites:** 1.10b, 1.10c, 1.10d, 1.10e
+- **Goal:** Ship a Terms of Service page, a Privacy Policy page, and the registration-time consent flow that binds new users to them. Without these, every user registering in the Phase 1 cutover is technically registering without agreeing to anything — which is both a legal exposure for Eric and an ethical gap given the vulnerability-adjacent nature of Prayer Wall content. This spec does NOT attempt to produce legally-perfect final copy (that requires a lawyer); it produces legitimate first-draft copy that accurately describes what the app does, with an explicit follow-up to have a lawyer review before scale-up.
+
+**Approach:** Two static content pages at `/terms` and `/privacy`, linked from the site footer and from the registration form's consent checkbox. Pages are versioned (per-deployment git SHA captured in `terms_version` / `privacy_version` columns on `users` at registration). First-draft content written by Eric (with AI assistance is fine but NOT a replacement for human authorship of the core decisions) covering: what Worship Room is, what data is collected, how it's used, who has access, how users can export/delete it (hooks into Spec 10.11), third-party services (SMTP, storage, monitoring — enumerate each), cookie/tracking posture (minimal — no marketing analytics, basic auth session only), age minimum (13+ for COPPA safety), arbitration and dispute resolution, changes policy. Registration form adds a consent checkbox that cannot be pre-checked (per GDPR dark-pattern rules — users must actively opt in).
+
+**Core content sections (Terms of Service):**
+
+1. **What Worship Room is** — a community app for sharing prayer requests, testimonies, and reflections. Not a crisis service, not therapy, not medical care.
+2. **Eligibility** — 13+ minimum age. Users under 18 should have parental awareness (we don't block signup based on age but the ToS names the expectation).
+3. **Account rules** — one human per account, accurate registration info, no impersonation, no automated access without written permission.
+4. **Content ownership** — users retain ownership of their posts and comments. Users grant Worship Room a non-exclusive license to display, store, and moderate that content within the service. License ends when content is deleted (respecting Spec 10.11's 30-day grace).
+5. **Prohibited content** — harassment, explicit sexual content, content that promotes self-harm, illegal content, spam, impersonation of real people, content posted without consent of pictured persons. Anti-Christian content not prohibited (the app is for the Christian community but doesn't censor respectful disagreement).
+6. **Moderation** — moderators may remove content, restrict accounts, or ban users per published community standards (links to separate Community Guidelines doc as future work). Moderation actions are appealable per Spec 10.8.
+7. **Crisis content** — users in acute distress should contact 988 or Crisis Text Line; Worship Room is NOT a crisis intervention service and explicitly does NOT offer crisis counseling. Crisis-flagged posts may be surfaced to moderators but moderators are not crisis professionals.
+8. **Termination** — Worship Room may terminate accounts for terms violations. Users may delete their own accounts anytime (Spec 10.11 flow).
+9. **Disclaimers** — content is user-generated; Worship Room doesn't warrant accuracy of prayers, theological claims, or personal advice shared by users. Worship Room is provided "as is."
+10. **Liability limits** — standard clause; Eric should have a lawyer draft the actual text.
+11. **Arbitration** — placeholder (lawyer required).
+12. **Changes** — ToS changes require 30-day advance notice via in-app banner and email to opted-in users. Continued use after the effective date = acceptance.
+13. **Contact** — support email, legal inquiries email.
+
+**Core content sections (Privacy Policy):**
+
+1. **What we collect** — email, first name, last name, password (hashed), posts and comments you create, reactions and bookmarks, friendships you establish, timezone, timestamps of activity. Explicitly: we do NOT collect location beyond timezone, we do NOT fingerprint devices for advertising, we do NOT buy data from third parties.
+2. **Why we collect it** — to run the service (authentication, displaying your content, delivering notifications), to moderate content, to debug errors. Explicitly: we do NOT sell data, we do NOT serve ads.
+3. **Third-party services** — enumerate:
+   - Cloudflare R2 (or chosen storage per 1.10e): stores user-uploaded images and database backups
+   - Sentry (per 1.10d): receives error reports with PII scrubbed
+   - UptimeRobot or Better Stack (per 1.10d): monitors the /api/v1/health endpoint; does not receive user data
+   - Postmark / SendGrid / Resend (chosen per 15.1): sends transactional and welcome emails
+   - Railway / Supabase / Upstash (chosen per 1.10b and 5.6): hosts database and Redis
+4. **How long we keep it** — active users: indefinitely while account exists. Deleted users: 30-day grace then anonymized (per Spec 10.11). Logs: 90 days. Email send logs: retained for delivery troubleshooting, purged per the same schedule.
+5. **Who has access** — Eric as the operator. Moderators access moderation-queued content (reported posts, crisis-flagged posts). Third-party services listed above per their limited roles. Law enforcement only with valid legal process.
+6. **Your rights** — you can export your data (Spec 10.11), delete your account (Spec 10.11), correct inaccurate data (edit profile), unsubscribe from emails (Spec 15.1b), restrict certain processing (see below).
+7. **Cookies** — Worship Room uses only functional cookies (auth session). No analytics cookies, no advertising cookies, no third-party trackers. Users can block cookies; auth won't work without the session cookie.
+8. **Children's privacy** — Worship Room is not directed at children under 13. We do not knowingly collect data from users under 13. If we learn we have data from someone under 13, we delete it.
+9. **International users** — app is hosted in the US. Users outside the US consent to data processing in the US. GDPR rights honored regardless of user location.
+10. **Changes** — same 30-day notice as ToS changes.
+11. **Contact** — privacy email for data requests and questions.
+
+**Registration consent flow:**
+
+- Registration form (AuthModal) adds two pieces of copy at the bottom, above the Submit button:
+  - Checkbox (NOT pre-checked): "I'm 13 or older and I agree to the [Terms of Service] and [Privacy Policy]."
+  - Links open in a new tab to `/terms` and `/privacy`
+- Submit button is DISABLED until the checkbox is checked
+- On successful registration, the server stores `users.terms_version` and `users.privacy_version` with the current deployment's document version hash (git SHA of the .md file at deploy time)
+- If ToS or Privacy Policy is updated, a version-mismatch detection on next login shows an inline consent prompt (modal): "We've updated our Terms and Privacy Policy. Here's a summary of what changed: ... [Review terms] [Review privacy] [I agree and continue]" — user cannot use the app until they agree
+- Users who refuse to agree to the update see: "That's OK. Your account will stay as-is for now, but you won't be able to post or interact until you agree or delete your account." — links to Spec 10.11 account deletion.
+- Grace period on update: the 30-day announcement period MUST have elapsed before the forcing modal appears
+
+**Footer links (site-wide):**
+
+- Footer component renders "Terms", "Privacy", "Contact" links on every page including logged-out pages
+- Each link opens to the respective page, not a new tab (users who follow the link in-app should be able to hit Back to return)
+
+**Content authoring and review process:**
+
+- First drafts written by Eric (AI assistance fine for phrasing, NOT for core legal decisions)
+- Documents reviewed for accuracy against actual app behavior by someone technical BEFORE shipping (cross-check: does the privacy policy mention all third-party services actually in use? Does the ToS match Spec 10.11's deletion flow?)
+- BEFORE user count exceeds 500, a real lawyer reviews both documents (schedule this; don't defer indefinitely). Budget $500-2000 for a single-sitting review with a lawyer familiar with SaaS ToS.
+- Documents checked into the repo at `docs/legal/terms.md` and `docs/legal/privacy.md`; frontend renders them from those files at build time (Vite content plugin or equivalent)
+
+**Versioning:**
+
+- Each document has a `version` frontmatter field (YYYY-MM-DD format, plus optional `-rev-N` suffix)
+- Version gets computed from the git SHA at build time for automated version tracking
+- `users.terms_version VARCHAR(40)` and `users.privacy_version VARCHAR(40)` columns added via Liquibase
+- On registration: populated with current version
+- On update: version-mismatch detection triggers the consent prompt
+
+**Anti-dark-pattern design:**
+
+- Consent checkbox NEVER pre-checked
+- Submit button disabled until checkbox is checked (clear cause-and-effect for the user)
+- Consent checkbox label is concise and scannable; the actual agreement requires reading the linked pages (no "by using this site you agree" implicit consent pattern)
+- Withdrawal of consent (deleting account) is as easy as granting it was (Spec 10.11)
+- No "accept all / reject all" cookie banner (we don't use trackable cookies, so no banner is needed — but a note in the footer clarifies this)
+- Policy update consent NEVER uses a pre-checked "I agree" — always requires active click
+- Changes to ToS/privacy always include a plain-language summary ("what changed") AT THE TOP of the update prompt, not buried in legalese
+
+**Files to create:**
+
+- `docs/legal/terms.md`
+- `docs/legal/privacy.md`
+- `frontend/src/pages/Terms.tsx`
+- `frontend/src/pages/Privacy.tsx`
+- `frontend/src/components/Footer.tsx` (or extend existing footer)
+- `frontend/src/components/TermsUpdateModal.tsx`
+- `backend/src/main/java/com/worshiproom/legal/LegalVersionService.java`
+- `backend/src/main/resources/db/changelog/2026-04-22-006-add-users-legal-version-columns.xml`
+- `backend/src/test/java/com/worshiproom/legal/LegalVersionIntegrationTest.java`
+- `__tests__/Terms.test.tsx`, `Privacy.test.tsx`, `TermsUpdateModal.test.tsx`
+
+**Files to modify:**
+
+- `frontend/src/components/prayer-wall/AuthModal.tsx` — add consent checkbox; disable Submit until checked
+- `backend/src/main/java/com/worshiproom/auth/AuthService.java` — capture and store terms/privacy versions on register
+- `backend/src/main/java/com/worshiproom/user/User.java` — add `termsVersion`, `privacyVersion` fields
+- Router — add `/terms` and `/privacy` public routes
+- OpenAPI spec — document the version-check endpoint
+- Layout component — mount Footer on every page
+
+**Database changes:**
+
+- Alter `users`: add `terms_version VARCHAR(40) NOT NULL DEFAULT 'unversioned'`, `privacy_version VARCHAR(40) NOT NULL DEFAULT 'unversioned'` columns
+- Liquibase changeset: `2026-04-22-006-add-users-legal-version-columns.xml`
+- Existing users get `'unversioned'` default, which triggers the update-consent prompt on their next login
+
+**API changes:**
+
+- `GET /api/v1/legal/versions` — public; returns current deployed versions `{ terms_version, privacy_version, effective_date, summary_of_changes? }`
+- `POST /api/v1/users/me/legal/accept` — auth required; accepts the current versions; body `{ terms_version, privacy_version }`; server validates versions match current deployed
+- `POST /api/v1/auth/register` — now requires `{ ..., accepted_terms_version, accepted_privacy_version }` in body; server validates these match current deployed before creating account
+
+**Copy Deck:**
+
+_Registration consent checkbox:_
+
+- Label (cannot be pre-checked): "I'm 13 or older and I agree to the Terms of Service and Privacy Policy."
+- The phrase "Terms of Service" is a link to `/terms`
+- The phrase "Privacy Policy" is a link to `/privacy`
+- Validation error if unchecked: "Please agree to the Terms of Service and Privacy Policy to continue."
+
+_Footer links:_
+
+- "Terms" → `/terms`
+- "Privacy" → `/privacy`
+- "Contact" → mailto: or `/contact`
+- Footer cookie note (small text): "Worship Room uses only the cookies needed to keep you signed in. We don't use tracking or advertising cookies."
+
+_Terms update modal:_
+
+- Heading: "Our Terms have been updated"
+- Body intro: "Here's what changed:"
+- Summary (populated from the update's "summary_of_changes" field)
+- Links: "Read the full Terms" / "Read the full Privacy Policy"
+- Primary button: "I agree and continue"
+- Secondary button: "Not right now"
+- Secondary button consequence text: "Your account will stay as-is, but you won't be able to post or interact until you agree or delete your account."
+
+_Privacy policy opening paragraph:_
+
+"Worship Room exists to help you share prayers, testimonies, and reflections with a trustworthy community. This policy explains what we collect, why, and your rights. We've tried to write it in plain language; if something isn't clear, email us at the address at the bottom."
+
+_Terms of service opening paragraph:_
+
+"These are the terms of using Worship Room. They're an agreement between you and us about what the app is, what we promise, what we expect from you, and what happens if things go wrong. We've tried to write them in plain language; the legal bits are only the ones that matter."
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- Consent checkbox cannot be pre-checked
+- Submit button disabled until checkbox checked
+- No "accept all" cookie dark pattern (none needed; no tracking cookies)
+- Terms and Privacy accessible via footer on every page
+- Policy-update consent prompt requires active click, never auto-accepts
+- Summary-of-changes shown at top of update prompt, not buried in legalese
+- Declining a policy update doesn't silently lock the account — user explicitly informed and given the deletion path
+- 30-day advance notice for policy changes baked into the ToS itself (so users know the commitment)
+- Plain-language openings in both documents (not "WHEREAS the User shall hereby...")
+
+**Acceptance criteria:**
+
+- [ ] `/terms` and `/privacy` routes render the respective markdown docs styled consistently with the rest of the site
+- [ ] Footer renders on every page (logged-in and logged-out) with Terms, Privacy, Contact links
+- [ ] Registration form shows the consent checkbox UNCHECKED by default
+- [ ] Submit button is DISABLED when checkbox is unchecked
+- [ ] Submit button ENABLES when checkbox is checked
+- [ ] Attempting to submit without checking triggers the validation error message
+- [ ] Server rejects registration POST without `accepted_terms_version` and `accepted_privacy_version` fields
+- [ ] Server rejects registration with mismatched versions (returns 400)
+- [ ] On successful registration, `users.terms_version` and `users.privacy_version` match the current deployed versions
+- [ ] Existing users (before this spec shipped) have `'unversioned'` defaults
+- [ ] `'unversioned'` users trigger the update-consent modal on their next login
+- [ ] Update-consent modal shows summary-of-changes at top
+- [ ] "I agree and continue" updates the user's stored versions and dismisses the modal
+- [ ] "Not right now" dismisses the modal but flags the session as interaction-locked; user can still browse/read but cannot post/comment/react
+- [ ] Interaction-lock message visible on attempted interactions: "You'll need to agree to the updated Terms to interact. Review them anytime from Settings."
+- [ ] Version hash derived from git SHA at build time (verified via build-output inspection)
+- [ ] Terms and Privacy pages linked from the registration consent label text open in a NEW tab
+- [ ] Terms and Privacy pages linked from the footer open in the SAME tab (no new tab spam)
+- [ ] Accessibility: both pages have proper semantic heading structure (H1 → H2 → H3)
+- [ ] Accessibility: consent checkbox is keyboard-reachable and has accessible name including the document titles
+- [ ] Accessibility: update-consent modal traps focus and can be Escape-dismissed (same behavior as "Not right now")
+- [ ] Accessibility: page content meets WCAG AA contrast
+- [ ] Mobile viewport renders both pages readably (text ≥14px body, good line-height)
+- [ ] Dark mode rendering of both pages has good contrast
+- [ ] Documents cross-reference accurate app behavior (verified manually: every third-party service in 1.10e/1.10d/5.6/15.1 is listed in Privacy; every moderation action type in Phase 10 matches the Terms description)
+- [ ] Footer includes cookie posture note
+- [ ] At least 18 tests across version tracking, registration validation, update consent flow, interaction-lock behavior, accessibility
+
+**Testing notes:**
+
+- Integration test: register with missing consent fields → 400; register with mismatched versions → 400; register with correct versions → 201 with stored version on user
+- Integration test: update the terms markdown file, rebuild, verify version hash changes; log in as existing user, verify update-consent modal appears
+- Integration test: click "Not right now" → flag set; attempt to post → 403 with interaction-lock message
+- Integration test: click "I agree and continue" → version updated; subsequent post attempt succeeds
+- Unit test: Footer renders all three links on every route
+- Unit test: Consent checkbox disabled → Submit disabled; checked → Submit enabled
+- Accessibility test: axe-core on both pages, VoiceOver walk of consent flow
+- Manual QA: render both documents and visually confirm they actually describe the app
+- Manual QA checklist for content accuracy: every third-party service listed, deletion flow matches 10.11, moderation flow matches Phase 10.7/10.7b/10.8
+
+**Notes for plan phase recon:**
+
+1. Decide content-authoring approach. Recommendation: Eric writes first drafts in a couple of focused sessions, Claude assists with phrasing clarity, a lawyer reviews before scale-up (budget $500-2000)
+2. Confirm the 30-day advance notice for policy changes is workable operationally. Some changes (urgent security corrections) may need shorter notice; the ToS should allow for "emergency changes with shorter notice"
+3. Decide whether to use a third-party legal-docs template as a starting point (Termly, Iubenda). Recommendation: write original drafts in Worship Room's voice; templates sound corporate and off-brand
+4. Verify the Vite/frontend build can render markdown documents at build time with syntax highlighting if ever needed (probably not for legal docs)
+5. Confirm git-SHA-derived version hash is deterministic and survives deploy process (if the build process rewrites files, version might change unexpectedly; use the markdown file's git log, not the built file's hash)
+6. Decide if "Contact" in footer goes to a mailto: or to a `/contact` page. Recommendation: `/contact` page with a simple form (easier to add privacy-protective routing later)
+
+**Out of scope:**
+
+- Full Community Guidelines document (referenced but not built in this spec; follow-up spec)
+- Per-jurisdiction privacy law variants (CCPA California supplements, UK Data Protection Act, etc.) — lawyer-review territory, deferred
+- Cookie consent banner — not needed for Worship Room's cookie posture (functional-only)
+- DPA (Data Processing Agreement) for enterprise/B2B use — out of scope (no B2B for MVP)
+- Legal translation — English only
+- Age verification beyond self-attestation — out of scope; we trust the 13+ self-attestation
+- Automated ToS change announcement emails — possible follow-up; manual announcement via in-app banner + welcome-sequence-style email for MVP
+
+**Out-of-band notes for Eric:** Resist the urge to use a SaaS template for these docs. Every "we value your privacy" cliché page looks the same and sounds corporate; Worship Room's voice is the whole differentiator. The opening paragraph of each document sets the tone — "we've tried to write this in plain language" is already a signal of care that 95% of privacy policies fail. Also: the lawyer review before 500 users is not optional. Even with good drafts, there are clauses (arbitration, liability limits, indemnification) that a lawyer writes differently than you will. Budget for it; it's cheaper than a dispute. Finally: when the time comes to update these docs (which will happen — every app evolves), resist the urge to do minor updates without a summary-of-changes. Users deserve to know what's different, even if it's small. The summary-of-changes pattern is what keeps this from being a dark-pattern update flow.
 
 ---
 
@@ -1849,6 +2685,122 @@ Combines all four results into a single `ActivityResponse` DTO matching the shap
 - [ ] Backend `faith_points` table reflects accumulated points
 - [ ] Backend `streak_state` table reflects current streak
 - [ ] Cutover checklist completed and committed
+- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase2-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
+
+---
+
+### Spec 2.10 — Historical Activity Backfill
+
+- **ID:** `round3-phase02-spec10-historical-activity-backfill`
+- **Size:** M
+- **Risk:** Medium (touches users' existing localStorage history; read-only-from-localStorage is safe, but we must get the write side right on the backend)
+- **Prerequisites:** 2.9 (Phase 2 cutover)
+- **Goal:** On the first dual-write after a user's Phase 2 cutover, backfill their existing localStorage activity history (`wr_daily_activities`, `wr_faith_points`, `wr_streak`, `wr_badges`, `wr_streak_repairs`) into the backend shadow tables (`activity_log`, `faith_points`, `streak_state`, `user_badges`, `activity_counts`). Without this, every user who had points/streaks/badges before Phase 2 landed would appear "fresh" in the backend, and any future wave that promotes backend-as-source-of-truth would silently discard the pre-migration activity. A one-time backfill closes that door cleanly.
+
+**Approach:** New idempotent endpoint `POST /api/v1/activity/backfill` that accepts the full localStorage activity payload from the frontend and writes it to the shadow tables. The frontend sends the backfill exactly once per user (tracked via `wr_activity_backfill_completed` localStorage boolean). If the backfill is interrupted mid-flight, re-running it is safe — the endpoint uses idempotent upserts keyed on (user_id, occurred_at, activity_type) for `activity_log`, (user_id) for the singleton tables, and (user_id, badge_id) for `user_badges`.
+
+**Frontend flow (fires once, automatically):**
+
+1. On first successful dual-write after `VITE_USE_BACKEND_ACTIVITY` cutover, check `localStorage['wr_activity_backfill_completed']`.
+2. If absent or `false`: collect all activity-related localStorage (`wr_daily_activities`, `wr_faith_points`, `wr_streak`, `wr_badges`, `wr_streak_repairs`, `wr_activity_counts`), serialize into a single payload, POST to `/api/v1/activity/backfill`.
+3. On 200 response, set `wr_activity_backfill_completed = 'true'`.
+4. On 4xx/5xx: log to console, leave the flag unset so the next dual-write retries. No user-facing error — this is silent maintenance.
+5. On subsequent dual-writes: flag is set, skip.
+
+**Backend flow:**
+
+1. Validate the payload shape (reject malformed JSON with 400).
+2. In a single transaction, upsert each activity type:
+   - `activity_log`: for each historical activity entry, INSERT ON CONFLICT DO NOTHING on `(user_id, occurred_at, activity_type, source_feature)` composite unique key (added in a small supplementary changeset as part of this spec).
+   - `faith_points`: UPSERT on `user_id`, taking `MAX(existing.total_points, incoming.total_points)` — never decrease a user's total points, even if localStorage somehow has less than the backend already recorded.
+   - `streak_state`: UPSERT on `user_id`, taking `MAX(existing.longest_streak, incoming.longest_streak)`; `current_streak` is taken from incoming (localStorage is source of truth for reads during this wave); `last_active_date` is taken as the MAX of the two.
+   - `user_badges`: INSERT ON CONFLICT DO NOTHING on `(user_id, badge_id)`. Preserves the `earned_at` timestamp from localStorage.
+   - `activity_counts`: UPSERT each count_type, taking `MAX(existing.count_value, incoming.count_value)`.
+3. Return `{ data: { activities_backfilled: N, badges_backfilled: N, final_total_points: N, ...}, meta: { requestId } }`.
+
+**Why MAX-based upserts everywhere:** During dual-write mode, the backend may have received some writes before the backfill runs (e.g., a user taps Pray, dual-write fires, then on the next page load the backfill runs). Taking the MAX ensures the backfill never erases progress. The one asymmetry is `current_streak`, which MUST take the incoming value (localStorage is the source of truth for reads during this wave per Decision 5); if the MAX rule applied to current_streak, a stale backend value could override correct local state.
+
+**Data volume expectations:** A heavy user at Phase 2 cutover has approximately: ~365 activity_log entries (one per day for a year), ~20 user_badges, ~5 activity_counts, singleton faith_points and streak_state rows. Backfill payload: ~50 KB uncompressed JSON. Endpoint handles 10x that (500 KB) without issues; larger payloads return `413 PAYLOAD_TOO_LARGE` with guidance to contact support (expected to never happen in practice).
+
+**Rate limiting:** `/api/v1/activity/backfill` is rate-limited to 3 calls per user per hour (the endpoint should only ever be called once successfully; retries after failure are the only legitimate repeat use).
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/activity/BackfillController.java`
+- `backend/src/main/java/com/worshiproom/activity/BackfillService.java`
+- `backend/src/main/java/com/worshiproom/activity/dto/BackfillRequest.java`
+- `backend/src/main/java/com/worshiproom/activity/dto/BackfillResponse.java`
+- `backend/src/main/resources/db/changelog/2026-04-18-001-add-activity-log-unique-key.xml` (adds the composite unique key enabling idempotent backfill)
+- `backend/src/test/java/com/worshiproom/activity/BackfillIntegrationTest.java`
+- `frontend/src/services/api/activityBackfill.ts`
+- `frontend/src/services/api/__tests__/activityBackfill.test.ts`
+
+**Files to modify:**
+
+- `frontend/src/services/activity-recorder.ts` (or equivalent) — on first successful dual-write, trigger the one-shot backfill
+- `.claude/rules/11-local-storage-keys.md` — document new `wr_activity_backfill_completed` key
+
+**Database changes:**
+
+- Liquibase changeset: `db/changelog/2026-04-18-001-add-activity-log-unique-key.xml`
+- Adds `UNIQUE (user_id, occurred_at, activity_type, source_feature)` to `activity_log` (supports `ON CONFLICT DO NOTHING`)
+- Rollback: DROP CONSTRAINT (safe; no data loss)
+
+**API changes:**
+
+- New endpoint: `POST /api/v1/activity/backfill` (authenticated, rate-limited 3/hour)
+- OpenAPI spec: add `BackfillRequest`, `BackfillResponse` schemas + endpoint
+
+**Copy Deck:**
+
+No user-facing copy — this is silent background maintenance. The UI MUST NOT surface backfill progress or completion to the user. If the backfill fails, the next dual-write retries; the user sees no "syncing" message at any point. Celebrations, points, and streaks continue to render from localStorage exactly as before.
+
+**Anti-Pressure Copy Checklist:** N/A — no user-facing copy
+
+**Anti-Pressure Design Decisions:**
+
+- No "syncing your data" banner or spinner (silent)
+- No "your account is now upgraded" notification (silent)
+- No loss of celebrations or streaks during backfill (localStorage still the source of truth for reads)
+- No forced logout/re-login to trigger backfill (fires automatically in the background)
+
+**Acceptance criteria:**
+
+- [ ] Backfill endpoint accepts full payload and upserts all five activity-related tables in one transaction
+- [ ] MAX-based upsert on faith_points never decreases a user's total (integration test with backend having higher value than incoming)
+- [ ] current_streak takes incoming value; longest_streak takes MAX
+- [ ] activity_log composite unique key prevents duplicate entries on re-run (idempotency verified by running backfill twice and asserting row count unchanged)
+- [ ] user_badges INSERT ON CONFLICT DO NOTHING preserves original earned_at timestamps
+- [ ] Frontend triggers backfill on first post-cutover dual-write; sets `wr_activity_backfill_completed` on success
+- [ ] Frontend skips backfill on subsequent dual-writes when flag is set
+- [ ] Backfill failure does NOT set the flag (next dual-write retries)
+- [ ] Backfill failure is silent to the user (console log only)
+- [ ] Rate limit: 4th backfill call within 1 hour returns 429
+- [ ] Payload > 512 KB returns 413 with structured error
+- [ ] Anonymous / logged-out state: backfill is never called (no user ID)
+- [ ] At least 14 integration tests covering all MAX-upsert edge cases, idempotency, rate limiting, failure modes
+- [ ] At least 4 frontend tests covering the flag logic and retry-on-failure behavior
+
+**Testing notes:**
+
+- Integration tests use Testcontainers, pre-seed backend state, send a backfill payload, verify final state
+- Edge case test: backend has 100 points, incoming has 50 points → final is 100 (MAX preserves progress)
+- Edge case test: backend has badge X earned_at = 2025-01-01, incoming has badge X earned_at = 2024-06-01 → final earned_at is 2024-06-01 (preserve earlier timestamp)
+- Idempotency test: run backfill twice in quick succession, assert activity_log rows = expected count (not 2x)
+
+**Notes for plan phase recon:**
+
+1. Confirm the exact localStorage shapes to serialize — run through each key and verify no schema drift from earlier specs
+2. Identify whether any user has localStorage from before the `wr_daily_activities` format stabilized (if so, add a migration/normalization step in the frontend before sending)
+3. Verify the rate limiter's default scope works for the `/backfill` endpoint or needs a dedicated bucket
+
+**Out of scope:**
+
+- Backfilling data for Prayer Wall, Friends, or other domains (those have their own backfill flows in later phases — Phase 2.5 for friends, Phase 3 for Prayer Wall)
+- Retroactive badge computation (if a user's history would have earned an unearned badge under current rules, we do NOT grant it during backfill — badges are earned in the moment, not recomputed)
+- Cross-device merge semantics (user has localStorage on two devices with different histories — this wave treats each device independently; the first backfill wins, subsequent dual-writes accumulate normally)
+
+**Out-of-band notes for Eric:** The cross-device-merge limitation is worth understanding. If you use Worship Room on a laptop and a phone, and both have independent localStorage histories pre-cutover, only the first device's backfill will fully seed the backend. The second device's subsequent dual-writes will accumulate into the backend alongside the first device's history, but the second device's _pre-cutover_ localStorage activity stays local-only. This is acceptable for Phase 2 because reads remain from localStorage during this wave; when a future wave promotes backend-as-source-of-truth, we'll address multi-device merge then (likely via a "merge my history" prompt in settings). Document this as a known limitation in the cutover checklist.
 
 ---
 
@@ -1868,20 +2820,62 @@ Combines all four results into a single `ActivityResponse` DTO matching the shap
 - **Prerequisites:** Phase 2 complete
 - **Goal:** Create `friend_relationships` and `friend_requests` tables per Decision 8.
 
-**Approach:** Two changesets:
+**Approach:** Four changesets, landing all four Phase 2.5 shadow tables together so the Phase 12 notification taxonomy and Phase 13 analytics don't hit missing-table errors later:
 
 - `2026-04-16-001-create-friend-relationships-table.xml`
 - `2026-04-16-002-create-friend-requests-table.xml`
+- `2026-04-16-003-create-social-interactions-table.xml`
+- `2026-04-16-004-create-milestone-events-table.xml`
 
-Schema matches Decision 8 exactly. Foreign keys to `users.id`. Composite primary key on `friend_relationships`. Unique constraint on `(from_user_id, to_user_id)` in `friend_requests`. Indexes for the most common queries.
+Friends tables match Decision 8 exactly. Foreign keys to `users.id`. Composite primary key on `friend_relationships`. Unique constraint on `(from_user_id, to_user_id)` in `friend_requests`. Indexes for the most common queries.
+
+**Social interactions shadow table schema (per Decision 8):**
+
+```sql
+social_interactions
+  id                    UUID PRIMARY KEY
+  from_user_id          UUID NOT NULL REFERENCES users(id)
+  to_user_id            UUID NOT NULL REFERENCES users(id)
+  interaction_type      VARCHAR(20) NOT NULL
+                        -- 'encouragement', 'nudge', 'recap_dismissal'
+  payload               JSONB NULL
+                        -- encouragement: { preset_message_id, preset_text }
+                        -- nudge: { } (empty; nudges carry no extra payload)
+                        -- recap_dismissal: { week_start_date }
+  created_at            TIMESTAMP NOT NULL DEFAULT NOW()
+```
+
+Indexes on `(from_user_id, created_at DESC)` for rate-limit lookups (3 encouragements/friend/day, 1 nudge/friend/week) and `(to_user_id, created_at DESC)` for the recipient's inbox query.
+
+**Milestone events shadow table schema (per Decision 8):**
+
+```sql
+milestone_events
+  id                    UUID PRIMARY KEY
+  user_id               UUID NOT NULL REFERENCES users(id)
+  event_type            VARCHAR(40) NOT NULL
+                        -- 'streak_milestone', 'level_up', 'badge_earned',
+                        -- 'prayer_count_milestone', 'friend_milestone'
+  event_metadata        JSONB NULL
+                        -- e.g., { streak: 30 } or { badge_id: 'first-prayer' }
+  occurred_at           TIMESTAMP NOT NULL DEFAULT NOW()
+```
+
+Index on `(user_id, occurred_at DESC)` for the user's own feed lookup. Index on `(occurred_at DESC)` for the cross-user weekly-recap aggregator (Phase 13).
+
+**Why these two tables land now (not later):** Decision 8 explicitly specifies them as part of Phase 2.5's dual-write scope. The existing `social-interactions.md` spec owns `wr_social_interactions` and `wr_milestone_feed` localStorage keys; both need backend mirrors. Phase 12's notification generators (Spec 12.3) and Phase 13's personal analytics (Spec 13.1) assume these tables exist. Creating them in 2.5.1 prevents "table does not exist" errors when those later specs query them.
 
 **Acceptance criteria:**
 
-- [ ] Both tables created in dev database
-- [ ] Foreign keys and unique constraints present
-- [ ] `psql \d friend_relationships` and `psql \d friend_requests` show correct schemas
-- [ ] LiquibaseSmokeTest extended to verify both tables
-- [ ] Testcontainers integration test confirms migrations
+- [ ] All four tables created in dev database (`friend_relationships`, `friend_requests`, `social_interactions`, `milestone_events`)
+- [ ] Foreign keys and unique constraints present on all four
+- [ ] `psql \d friend_relationships`, `\d friend_requests`, `\d social_interactions`, `\d milestone_events` all show correct schemas
+- [ ] LiquibaseSmokeTest extended to verify all four tables
+- [ ] Testcontainers integration test confirms all four migrations apply cleanly in order
+- [ ] `social_interactions.interaction_type` CHECK constraint allows only `'encouragement'`, `'nudge'`, `'recap_dismissal'`
+- [ ] `milestone_events.event_type` CHECK constraint allows only the five documented event types
+- [ ] Indexes exist on all documented query paths (rate-limit lookups, recipient inbox, per-user feed, cross-user weekly aggregator)
+- [ ] Rollback blocks defined for all four changesets (simple DROP TABLE, safe because no prod data yet)
 
 ### Spec 2.5.2 — Friends Service and Repository
 
@@ -1968,22 +2962,147 @@ Auth required on all. OpenAPI spec updated. Generated frontend types updated.
 - [ ] Backend errors are logged but do not break the UI
 - [ ] At least 8 tests cover both flag states
 
+### Spec 2.5.4b — Social Interactions and Milestone Events Dual-Write Pipeline
+
+- **ID:** `round3-phase02-5-spec04b-social-milestone-dual-write`
+- **Size:** M
+- **Risk:** Medium (dual-write pipeline with blast-radius-minimization — any backend failure must not affect localStorage-backed UX)
+- **Prerequisites:** 2.5.1, 2.5.4
+- **Goal:** Extend the dual-write pattern established in Spec 2.5.4 (friends) to cover the two remaining Decision 8 shadow tables: `social_interactions` (encouragements, nudges, recap dismissals) and `milestone_events` (streak milestones, level-ups, badge earns, prayer-count milestones, friend milestones). Without this spec, the tables land via 2.5.1 but sit permanently empty because no spec writes to them — which defeats the entire purpose of dual-write as "backend gets populated as a shadow copy future waves can promote to source of truth." Phase 12 notification generators and Phase 13 personal analytics both assume these tables have data.
+
+**Approach:** Thin write-only backend service (no read endpoints needed during this wave — localStorage remains source of truth for reads), POST endpoints for the two write paths, frontend dual-write extension added alongside 2.5.4's friends dual-write. New env flag `VITE_USE_BACKEND_SOCIAL` defaults `false` until 2.5.5 flips it. Same fire-and-forget pattern as friends: localStorage write first (user sees immediate UX), backend shadow-write fires asynchronously, failures log to console but do not propagate to user. Identical blast-radius discipline as Decision 5's activity engine dual-write.
+
+**The two write paths:**
+
+**Social interactions write path:**
+
+Any frontend action that writes to `wr_social_interactions` fires a parallel `POST /api/v1/social-interactions` with the interaction payload. The existing `social-interactions.md` spec defines three interaction types: `encouragement` (sent via preset messages, 3/friend/day rate limit), `nudge` (sent when friend is ≥3 days inactive, 1/friend/week rate limit), `recap_dismissal` (user tapped "dismiss" on the weekly recap card). Each maps to a row in `social_interactions` with the matching `interaction_type`. Rate limits are enforced CLIENT-SIDE (existing behavior from social-interactions.md); backend validation is a belt-and-suspenders redundant check that logs a warning if client-side enforcement missed but does NOT reject the write (avoids dual-write failures on rate-limit edge cases).
+
+**Milestone events write path:**
+
+The existing activity engine (Phase 2) computes milestone events in its completion handlers — when a streak hits 7/30/100 days, when level threshold crosses, when a new badge is earned, when prayer count hits a round number, when a friend hits a milestone. Each existing milestone computation fires a parallel `POST /api/v1/milestone-events` with the event type and metadata. Events are write-once (no mutation, no delete from this wave; garbage collection is a future-wave concern). No rate limits — milestones are legitimately infrequent.
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/social/SocialInteractionsController.java`
+- `backend/src/main/java/com/worshiproom/social/SocialInteractionsService.java`
+- `backend/src/main/java/com/worshiproom/social/SocialInteractionRepository.java`
+- `backend/src/main/java/com/worshiproom/social/dto/SocialInteractionRequest.java`
+- `backend/src/main/java/com/worshiproom/social/MilestoneEventsController.java`
+- `backend/src/main/java/com/worshiproom/social/MilestoneEventsService.java`
+- `backend/src/main/java/com/worshiproom/social/MilestoneEventRepository.java`
+- `backend/src/main/java/com/worshiproom/social/dto/MilestoneEventRequest.java`
+- `backend/src/test/java/com/worshiproom/social/SocialInteractionsIntegrationTest.java`
+- `backend/src/test/java/com/worshiproom/social/MilestoneEventsIntegrationTest.java`
+
+**Files to modify:**
+
+- `frontend/src/hooks/useSocialInteractions.ts` (or wherever existing social-interactions.md logic lives — recon determines) — wrap existing localStorage write mutations with fire-and-forget backend POST
+- `frontend/src/services/activity-engine.ts` (or wherever milestone computation lives) — after each milestone emission, fire parallel POST to backend
+- `frontend/.env.example` — add `VITE_USE_BACKEND_SOCIAL=false` default
+- OpenAPI spec — document both new endpoint pairs
+- Frontend generated types regenerated
+
+**Database changes:** None (tables were created in Spec 2.5.1; this spec only adds write paths)
+
+**API changes:**
+
+- `POST /api/v1/social-interactions` — body `{ to_user_id, interaction_type, payload? }`. Auth required. Rate-limited at the read-limit default (100/minute authed) to prevent abuse, not at the anti-spam limit (that's client-enforced per the inherited spec). Returns 201 with `{ id, created_at }`.
+- `POST /api/v1/milestone-events` — body `{ event_type, event_metadata? }`. Auth required. `user_id` derived from JWT (user can only write their own milestones). Returns 201. Duplicate-prevention: server checks for identical `(user_id, event_type, event_metadata)` in last 60 seconds and returns 200 with existing row (idempotent for retry safety).
+
+**Copy Deck:** None (infrastructure only; no user-facing strings)
+
+**Anti-Pressure Copy Checklist:** N/A (no user-facing copy)
+
+**Anti-Pressure Design Decisions:**
+
+- Fire-and-forget pattern: backend failures NEVER affect user's localStorage-driven UX
+- No server-side rate limit stricter than read defaults (client is the rate-limit authority for these interactions)
+- Duplicate-prevention on milestones is 60-second idempotency window (handles retry-on-flaky-network without rejecting legitimate double milestones)
+- No server-side enrichment of interaction payloads (server stores what client sends; no backend-derived "helpful" fields that could drift)
+
+**Acceptance criteria:**
+
+- [ ] `POST /api/v1/social-interactions` accepts all three interaction_types
+- [ ] Invalid interaction_type returns 400 INVALID_INPUT
+- [ ] Request attempting to write interaction on behalf of another user (from_user_id != JWT subject) returns 403
+- [ ] `POST /api/v1/milestone-events` accepts all five documented event_types
+- [ ] Milestone duplicate-prevention 60-second idempotency window verified (same event twice within 60s returns same row ID)
+- [ ] `VITE_USE_BACKEND_SOCIAL=false` → no backend calls fired from frontend social/milestone paths (verified via MSW network intercept test)
+- [ ] `VITE_USE_BACKEND_SOCIAL=true` → every localStorage write triggers a parallel backend POST
+- [ ] Backend failure (simulated 500 response) is logged to console but does NOT affect localStorage write or user-visible state
+- [ ] Backend timeout (simulated slow response) does NOT block the user's next action
+- [ ] Rate-limit headers present on 200/201 responses (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
+- [ ] `social_interactions` row contains correct `from_user_id`, `to_user_id`, `interaction_type`, `payload`, `created_at`
+- [ ] `milestone_events` row contains correct `user_id`, `event_type`, `event_metadata`, `occurred_at`
+- [ ] Testcontainers integration tests verify round-trip for all three interaction types and all five event types
+- [ ] Existing frontend behavior unchanged when flag is off (regression-tested against 2.5.4 behavior)
+- [ ] No reads from these tables in this spec (reads remain on localStorage)
+- [ ] At least 18 tests covering happy paths, auth gates, rate-limit headers, duplicate prevention, graceful-failure
+
+**Testing notes:**
+
+- Integration test: write an encouragement, verify row in `social_interactions` with correct `from_user_id`
+- Integration test: write a milestone_event, write same again within 60s, verify idempotency (same ID returned)
+- Integration test: write a milestone_event, write same again after 61s, verify new row created
+- Unit test: fire-and-forget discipline — simulate backend 500, verify `console.error` logged but no user-facing error
+- Playwright: with flag on, send an encouragement via UI, verify network tab shows POST to social-interactions endpoint
+- Playwright: with flag off, send an encouragement via UI, verify network tab shows NO call to the new endpoints
+
+**Notes for plan phase recon:**
+
+1. Identify the exact existing function(s) in `social-interactions.md`-owned code that write to `wr_social_interactions` — this spec wraps each of them
+2. Identify the exact existing function(s) that emit milestone events — the activity engine's badge/level/streak completion handlers
+3. Confirm the 60-second idempotency window is reasonable for milestone events (can be tuned to 30s or 120s based on real-world retry patterns observed during Phase 2 activity migration)
+4. Verify the `social_interactions.payload` JSONB shape matches what the frontend already stores in `wr_social_interactions` (if there's drift, this spec must normalize — NOT by changing the localStorage shape, but by adapting in the backend dto mapping)
+5. Confirm milestone events from the existing `streak-faith-points-engine.md` and `streak-repair-grace.md` specs all fire through the same entry point that we're instrumenting (if there are multiple emission paths, all need dual-write)
+
+**Out of scope:**
+
+- Read endpoints for these tables (future-wave concern when migrating source-of-truth away from localStorage)
+- Backfill from existing localStorage data (not needed for shadow-write; future promotion spec will handle)
+- Notifications triggered by these writes (Phase 12.3 handles notification generation from these events)
+- Analytics queries on these tables (Phase 13.1 insights endpoint consumes them)
+- Per-interaction-type CREATE-TABLE audit log (admin audit log handles any future privileged action context)
+- Retroactive milestone generation for pre-existing users (intentional — backend only records milestones earned from cutover forward)
+
+**Out-of-band notes for Eric:** This spec is the plumbing that makes Decision 8's shadow-table promise real. It's small-scope (write-only, no UI changes, no user-facing behavior) but load-bearing for Phase 12 and 13. If anyone later asks "why do we dual-write these tables if we never read from them during the wave?", the answer is: because Phase 12 and 13 query them as source-of-truth from day one, and we're pre-populating during Phase 2.5 so those later queries don't return empty results for users who were active during Phase 2.5 → Phase 12 gap. Also: resist the urge to add read endpoints here. The whole point of dual-write is that reads stay on localStorage. A read endpoint on these tables would be consumed by someone and create a drift risk we explicitly avoided.
+
+---
+
 ### Spec 2.5.5 — Phase 2.5 Cutover
 
 - **ID:** `round3-phase02-5-spec05-phase2-5-cutover`
 - **Size:** S
 - **Risk:** Medium
-- **Prerequisites:** 2.5.4
-- **Goal:** Flip `VITE_USE_BACKEND_FRIENDS` to `true`. Smoke test the friend flow end-to-end with two seed users.
+- **Prerequisites:** 2.5.4, 2.5.4b
+- **Goal:** Flip `VITE_USE_BACKEND_FRIENDS` and `VITE_USE_BACKEND_SOCIAL` to `true`. Smoke test all three dual-write pipelines (friends, social interactions, milestone events) end-to-end with seed users. Verify that each of the four Phase 2.5 shadow tables is receiving writes correctly.
 
-**Approach:** Set the flag default. Local smoke test: log in as seed user A, send a friend request to seed user B, log out, log in as B, accept the request, verify both `wr_friends` and the backend `friend_relationships` table reflect the friendship. Cutover checklist.
+**Approach:** Set both env-var flag defaults to `true`. Local smoke test covers three distinct pipelines:
+
+1. **Friends pipeline (from original 2.5 scope):** Log in as seed user A, send a friend request to seed user B. Log out, log in as B, accept the request. Verify `wr_friends` localStorage AND `friend_relationships` / `friend_requests` backend tables both reflect the friendship.
+
+2. **Social interactions pipeline:** As user A, send an encouragement preset message to user B. Verify `wr_social_interactions` AND `social_interactions` backend table both have the row with `interaction_type='encouragement'`. As user A, wait until user B has been inactive ≥3 days (or force-seed inactivity in the test user's metadata), then send a nudge. Verify similar dual-presence.
+
+3. **Milestone events pipeline:** As user A, perform an activity that crosses a milestone threshold (e.g., complete a prayer action that takes streak to 7 days — pre-seed streak to 6 days). Verify the milestone event appears in BOTH `wr_milestone_feed` (or equivalent localStorage key) AND `milestone_events` backend table.
+
+Cutover checklist at `_plans/forums-wave/phase02-5-cutover-checklist.md` covers all three pipelines plus the per-phase accessibility smoke test.
 
 **Acceptance criteria:**
 
-- [ ] Flag default is `true`
-- [ ] Manual smoke test passes
-- [ ] Backend tables reflect the friendship after the smoke test
-- [ ] Cutover checklist committed
+- [ ] `VITE_USE_BACKEND_FRIENDS` flag default is `true`
+- [ ] `VITE_USE_BACKEND_SOCIAL` flag default is `true`
+- [ ] Manual smoke test of friends pipeline passes
+- [ ] Manual smoke test of social interactions pipeline passes (both encouragement and nudge)
+- [ ] Manual smoke test of milestone events pipeline passes
+- [ ] Backend `friend_relationships` reflects the friendship after friends smoke test
+- [ ] Backend `friend_requests` reflects the request history after friends smoke test
+- [ ] Backend `social_interactions` contains the encouragement and nudge rows after social smoke test
+- [ ] Backend `milestone_events` contains the streak milestone row after milestone smoke test
+- [ ] Cutover checklist committed at `_plans/forums-wave/phase02-5-cutover-checklist.md`
+- [ ] No regressions in existing localStorage-driven UX (friends list, social feed, milestone celebrations all still work identically to before the cutover)
+- [ ] Backend failure simulation (disable backend for 60 seconds during a user action) does NOT break the user-visible UX
+- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on friends pages, settings email preferences, and any new UI surfaces from Phase 2.5 returns zero CRITICAL violations; keyboard-only navigation walkthrough of friend request → accept → remove flow completes without dead-ends; VoiceOver spot-check on the friend request modal and the encouragement preset picker completes without blocking issues; evidence committed to `_cutover-evidence/phase2-5-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
 
 ---
 
@@ -2282,6 +3401,10 @@ qotd_questions
 - [ ] Soft delete
 - [ ] At least 25 integration tests
 
+### Phase 3.6 Addendum — Comment Edit Window and Error Code
+
+Comments inherit the same 5-minute edit window as posts (consistent with the existing `prayer-wall-redesign.md` pattern). After 5 minutes from `created_at`, the comment becomes immutable. `PATCH /api/v1/posts/{post_id}/comments/{comment_id}` returns `400 EDIT_WINDOW_EXPIRED` with response body `{ "code": "EDIT_WINDOW_EXPIRED", "message": "Comments can be edited within 5 minutes of posting.", "edit_window_seconds": 300 }` for late edits. Frontend `CommentItem.tsx` hides the edit button after the window expires (computed client-side from `created_at` + 300 seconds, refreshed every second on a mounted comment). Deletion has no time window — authors can delete their own comments at any time. The 5-minute window is configurable via `COMMENT_EDIT_WINDOW_SECONDS` env var (default 300). After the edit window, the only changes possible are: deletion (by author), moderation actions (by trust level 2+), and admin actions (by admin).
+
 ### Spec 3.7 — Reactions and Bookmarks Write Endpoints
 
 - **ID:** `round3-phase03-spec07-reactions-bookmarks-write`
@@ -2301,6 +3424,10 @@ qotd_questions
 - [ ] Reaction creates an intercession activity (faith points)
 - [ ] Reaction deletion does not subtract points
 - [ ] At least 15 integration tests
+
+### Phase 3.7 Addendum — Reaction Endpoint Signature for Light a Candle
+
+The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: 'praying' | 'candle' }` in the request body. The endpoint toggles the row in `post_reactions` matching `(post_id, user_id, reaction_type)`. Sending the same reaction_type a second time removes the row (toggle-off). Sending a different reaction_type adds an additional row (a single user can both pray AND light a candle). The denormalized `posts.praying_count` and a new `posts.candle_count` (added by the same Liquibase changeset that introduces `reaction_type`) update transactionally. Frontend `usePrayerReactions` hook is extended with `toggleCandle(postId)` mirroring the existing `togglePraying(postId)`. Reactive store key `wr_prayer_reactions` value shape changes from `Record<string, { praying: boolean }>` to `Record<string, { praying: boolean, candle: boolean }>` — this is a localStorage migration that needs a version bump (Pattern A migration logic per `.claude/rules/11-local-storage-keys.md`).
 
 ### Spec 3.8 — Reports Write Endpoint
 
@@ -2431,6 +3558,7 @@ qotd_questions
 - [ ] Bookmarks persist across devices
 - [ ] CLAUDE.md updated
 - [ ] Cutover checklist completed
+- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase3-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
 
 **Out-of-band notes for Eric:** This is the moment Prayer Wall becomes a real social product. Every action you take now lives on a server and syncs across devices. The next phases (post type expansion, hero features, integrations) build on this foundation but the foundation itself is now stable.
 
@@ -2583,7 +3711,7 @@ qotd_questions
 - `frontend/src/components/prayer-wall/InlineComposer.tsx` (discussion variant + scripture field)
 - `frontend/src/types/prayer-wall.ts` (add `scriptureReference` optional field on Discussion posts)
 - `backend/src/main/java/com/worshiproom/post/Post.java` (add nullable `scripture_reference` column)
-- `backend/src/main/resources/db/changelog/2026-04-18-001-add-scripture-reference-to-posts.xml`
+- `backend/src/main/resources/db/changelog/2026-04-18-002-add-scripture-reference-to-posts.xml`
 
 **Acceptance criteria:**
 
@@ -2629,6 +3757,136 @@ qotd_questions
 - [ ] At least 14 tests cover the encouragement variant
 - [ ] Brand voice review passes
 
+### Spec 4.6b — Image Upload for Testimonies & Questions
+
+- **ID:** `round3-phase04-spec06b-image-upload-testimonies-questions`
+- **Size:** L
+- **Risk:** Medium (introduces external storage dependency, image processing pipeline, PII concerns)
+- **Prerequisites:** 4.2 (Testimony), 4.3 (Question) — note: the image PII-stripping infrastructure is introduced in this spec and subsequently reused by the Shareable Testimony Cards spec later in Phase 6
+- **Goal:** Allow users to attach ONE image to Testimony or Question posts at compose time. Images render inline on the PrayerCard with a lightbox on tap. Deliberately NOT available on Prayer Request posts — most prayer content is text, and adding an image upload path increases the "before I can pray for you I need to take a picture" friction that undermines the spontaneity the Prayer Wall depends on. Also not on Encouragement (ephemeral; persistence cost > benefit) or Discussion/QOTD responses (conversational, no image need). Limiting image upload to Testimony and Question creates a cleaner mental model: "these two types may have visual content; others are text-only."
+
+**Approach:** Three-layer change. (1) Backend adds `image_url VARCHAR(500) NULL` and `image_alt_text VARCHAR(500) NULL` columns to `posts`, both nullable, both only populated for Testimony and Question types. (2) New `POST /api/v1/uploads/post-image` endpoint accepts a multipart upload, validates (size, format, PII), strips EXIF and GPS metadata (reusing the stripping function from Spec 6.7), uploads to S3-or-equivalent, returns `{ url, dimensions }`. The frontend then includes the returned URL in the `POST /api/v1/posts` body. (3) Frontend composer gains drag-drop, paste, and click-to-upload affordances; PrayerCard renders the image below content with aspect-ratio preservation; tap opens a lightbox modal with keyboard navigation.
+
+**Size and format constraints:**
+
+- Max file size: 5 MB (configurable via `POST_IMAGE_MAX_SIZE_BYTES` env var, default 5242880)
+- Allowed MIME types: `image/jpeg`, `image/png`, `image/webp`
+- HEIC/HEIF rejected with a copy-deck error guiding the user to export as JPEG from Photos (macOS/iOS share sheet offers this)
+- Max dimensions: 4000 × 4000 px (hard reject); recommended 1920 × 1920 px
+- Server-side resize generates three renditions: `full` (up to 1920 on long edge), `medium` (960 on long edge for feed), `thumb` (240 on long edge for share cards). All stored on S3 with URLs in a JSON column on the post row.
+
+**PII stripping (reuses Spec 6.7 infrastructure):**
+
+- EXIF metadata stripped (camera, lens, software)
+- GPS/location metadata stripped — CRITICAL, a testimony photo taken at home should not leak home coordinates
+- Creation timestamp truncated to date (no time-of-day fingerprinting)
+- Re-encoded server-side as JPEG Q=85 as belt-and-suspenders against any metadata the library missed
+
+**Accessibility:**
+
+- Alt text REQUIRED before the post can submit — a single-line input labeled "Describe this image for people using screen readers" appears directly below the image preview. Empty submission rejected at both client and server with a gentle copy-deck error.
+- Lightbox uses `role="dialog"`, traps focus, Escape to close, arrow keys to pan very large images
+- Images display `loading="lazy"` on the feed; first five posts get `loading="eager"` to avoid layout shift on first paint
+
+**Upload UX states:**
+
+- Idle: "Add a photo" button next to the composer textarea
+- Dragging: dotted outline around composer, "Drop image here"
+- Uploading: shimmering skeleton with progress percentage (consumes `<LoadingSkeleton>` from Spec 1.9b)
+- Uploaded: preview with "Remove" button and alt-text input
+- Failed: `<RetryBanner severity="error">` with specific failure reason
+
+**Rate limiting:** `POST /api/v1/uploads/post-image` limited to 10 uploads per user per hour (aligns with the 5-posts-per-day rate limit — allows retries without enabling abuse).
+
+**Storage retention:** Images stored indefinitely alongside their posts. Soft-deleted post (`is_deleted = true`) → image stays on S3 but served 403 via short-lifetime presigned URLs. Future cleanup job (TODO in spec, not scope) deletes S3 objects after 90 days of post soft-delete.
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/upload/UploadController.java`
+- `backend/src/main/java/com/worshiproom/upload/UploadService.java`
+- `backend/src/main/java/com/worshiproom/upload/S3StorageAdapter.java` (interface + impl; dev profile uses local filesystem adapter writing to `/tmp/worshiproom-uploads`)
+- `backend/src/main/java/com/worshiproom/upload/ImageProcessingService.java` (resize + metadata strip)
+- `backend/src/main/java/com/worshiproom/upload/dto/UploadResponse.java`
+- `backend/src/main/resources/db/changelog/2026-04-20-001-add-posts-image-columns.xml`
+- `frontend/src/components/prayer-wall/ImageUpload.tsx` (composer affordance)
+- `frontend/src/components/prayer-wall/PostImage.tsx` (card display)
+- `frontend/src/components/prayer-wall/ImageLightbox.tsx`
+- `__tests__/*.test.tsx` files for each component
+- `backend/src/test/java/com/worshiproom/upload/UploadIntegrationTest.java`
+
+**Files to modify:**
+
+- Testimony and Question composer components (integrate `ImageUpload`)
+- `PrayerCard.tsx` (renders `PostImage` when `image_url` present)
+- `posts` schema (adds `image_url`, `image_alt_text` columns)
+- OpenAPI spec (adds upload endpoint + post image fields)
+
+**API changes:**
+
+- `POST /api/v1/uploads/post-image` — multipart upload; returns `{ data: { url, dimensions, alt_text_required: true }, meta }`
+- `POST /api/v1/posts` — accepts optional `image_url` and `image_alt_text` in request body (validated: only for testimony/question types)
+
+**Copy Deck:**
+
+- "Add a photo" (button)
+- "Drop image here" (drag state)
+- "Uploading..." (inline with %)
+- "Describe this image for people using screen readers" (alt text input label)
+- "Remove photo" (remove button)
+- "Photo too big. Max 5 MB. Try exporting at a smaller size." (size error)
+- "That format isn't supported. Use JPEG, PNG, or WebP." (format error)
+- "HEIC photos from iPhone need to be exported as JPEG first. In Photos, share → Save Image → JPEG." (HEIC error)
+- "Please describe the image. This helps people who can't see it." (alt text empty error)
+- "Uploads are temporarily unavailable. Try again in a moment." (server error)
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Acceptance criteria:**
+
+- [ ] Columns `image_url` and `image_alt_text` added to `posts` table
+- [ ] Upload endpoint accepts JPEG, PNG, WebP; rejects other formats with 400
+- [ ] Upload endpoint rejects files > 5 MB with 413
+- [ ] Upload endpoint rejects files with dimensions > 4000 × 4000 with 400
+- [ ] EXIF metadata stripped (verified by downloading and inspecting with `exiftool`)
+- [ ] GPS metadata stripped (integration test uses fixture image with GPS data, asserts stripped result has none)
+- [ ] Three renditions (full, medium, thumb) generated and uploaded
+- [ ] Alt text required before submit (client-side AND server-side)
+- [ ] Upload UI works via drag-drop, paste (Ctrl/Cmd+V), and file picker
+- [ ] Upload failure surfaces a RetryBanner
+- [ ] Post creation with `image_url` on a Prayer Request type returns 400 (only testimony/question allowed)
+- [ ] Lightbox opens on tap, closes on Escape, traps focus, arrow keys pan large images
+- [ ] Image lazy-loads on feed after first 5 posts
+- [ ] Rate limit: 11th upload in 1 hour returns 429
+- [ ] At least 20 tests across backend + frontend
+
+**Testing notes:**
+
+- Integration test uses Testcontainers + MinIO (S3-compatible) for end-to-end upload verification
+- Unit tests for metadata stripping using fixture images with known-bad EXIF
+- Playwright test covers full composer → upload → post → render flow
+- Accessibility test with axe-core + manual VoiceOver spot-check
+
+**Notes for plan phase recon:**
+
+1. Decide S3 provider. Recommended: AWS S3 for prod, Cloudflare R2 as cheaper alternative, MinIO for local dev. All three are S3-API compatible.
+2. Confirm image library. Recommended: Java ImageIO for resize + Apache Commons Imaging for metadata strip.
+3. Verify existing CDN strategy (may need CDN in front of S3 for public image URLs)
+4. Confirm Spec 6.7's PII-stripping utility is a reusable service, not inlined
+
+**Out of scope:**
+
+- Multiple images per post (one only)
+- Image galleries
+- Video uploads (explicit no-go for Forums Wave)
+- Direct camera-capture flow on mobile (users upload from Photos; camera is a Phase-15+ enhancement)
+- User-facing image editing (crop, rotate, filters)
+- Animated GIFs (no animation handling, no GIF support)
+- Prayer Request image support (intentional — see Goal)
+
+**Out-of-band notes for Eric:** The S3 adapter abstraction is load-bearing. Build it as an interface from day one so dev uses a local-filesystem adapter (zero AWS cost during development) and production picks a real backend via Spring profile. Test by running dev profile with no S3 credentials and confirming uploads still work.
+
+---
+
 ### Spec 4.7 — Composer Chooser
 
 - **ID:** `round3-phase04-spec07-composer-chooser`
@@ -2662,6 +3920,97 @@ qotd_questions
 - [ ] All cards meet 44px touch target
 - [ ] Brand voice review passes
 - [ ] At least 12 component tests
+
+### Spec 4.7b — Ways to Help MVP
+
+- **ID:** `round3-phase04-spec07b-ways-to-help-mvp`
+- **Size:** M
+- **Risk:** Low (additive content feature; no novel coordination complexity — uses existing comment flow)
+- **Prerequisites:** 4.1 (Prayer Request polish), 4.7 (Composer Chooser)
+- **Goal:** Prayer request authors can OPTIONALLY tag what practical help would be welcome alongside prayer: Meals, Rides, Errands, Visits, or "Just prayer, please." Tags render as small pills on the PrayerCard. Offers of help flow through the existing comment system — no separate "I'm volunteering" modal, no signup list, no coordinator role. The feature exists to make the "practical help is welcome" signal explicit in a community where many members want to help but don't know how to offer without seeming pushy. The MVP deliberately avoids building a coordination system; authors and helpers figure it out in comments, like they would in any church lobby conversation.
+
+**Approach:** New `help_tags VARCHAR(200)` column on `posts`, stored as a comma-separated enum list. Valid values: `meals`, `rides`, `errands`, `visits`, `just_prayer`. Application-layer validation rejects unknown values. The PrayerCard renders the tags as a horizontal row of frost-glass pills below the category badge, only when at least one non-`just_prayer` tag is present. The composer gains a "What would help?" section below the category picker with the five options as selectable chips; by default none are selected (equivalent to the baseline "just prayer is the gift").
+
+**Why `just_prayer` is an explicit tag, not the absence of tags:** Users who want to communicate "ONLY prayer, please — I don't want offers" need a way to say that affirmatively. The `just_prayer` tag means "I've thought about it and prayer is specifically what I want." The absence of any tag means "I haven't thought about it" — which defaults to the same behavior but communicates something different. In practice, the card treats both states identically: no pills shown, just the prayer request as-is. This symmetry is intentional.
+
+**Tag semantics on the card:**
+
+- No tags OR only `just_prayer`: no pills rendered (baseline; doesn't clutter the card)
+- One or more of `meals` / `rides` / `errands` / `visits`: renders those as pills (does NOT render `just_prayer` alongside even if author selected both; if the author picked "meals AND just prayer," they probably mean "meals would be welcome, but prayer is the main thing" — we trust the explicit practical tags)
+
+**Anti-pressure design:**
+
+- Tagging is OPTIONAL at compose time; authors can skip entirely (default)
+- Offering help is via normal comments, NOT a special "I'll help" button — this keeps the barrier to offering low and doesn't create a visible "who stepped up" list that turns community into theater
+- No notifications when a comment offers help (commenting fires the existing `comment_received` notification, same as any other comment)
+- No tracking of fulfillment ("did someone bring the meal?") — that's the author's and helper's business, not the app's
+- Tags can be edited or removed post-publication by the author (same 5-minute edit window as any post edit per Phase 3.6 Addendum)
+
+**Files to create:**
+
+- `frontend/src/components/prayer-wall/WaysToHelpPicker.tsx` (composer chip picker)
+- `frontend/src/components/prayer-wall/WaysToHelpPills.tsx` (card display)
+- `__tests__/*.test.tsx` for each
+- `frontend/src/constants/ways-to-help.ts` (enum values + copy)
+- `backend/src/main/resources/db/changelog/2026-04-20-002-add-posts-help-tags.xml`
+
+**Files to modify:**
+
+- `PrayerRequestComposer.tsx` or equivalent (integrates WaysToHelpPicker)
+- `PrayerCard.tsx` (renders WaysToHelpPills when tags present)
+- `posts` schema (adds `help_tags` column)
+- OpenAPI spec (adds `help_tags` to post request/response)
+
+**Database changes:**
+
+- Liquibase changeset adds `help_tags VARCHAR(200) NOT NULL DEFAULT ''` to `posts`
+- Application-layer validation on valid enum values (Java Set-based validation, not DB CHECK — easier to extend later)
+- Rollback: DROP COLUMN (safe; no data loss beyond feature data)
+
+**Copy Deck:**
+
+- "What would help?" (composer section label)
+- "Optional — leave blank if prayer is what you need right now." (composer helper text)
+- Chips: "Meals", "Rides", "Errands", "Visits", "Just prayer, please"
+- Card pills: same labels, minus "Just prayer, please" which renders nothing
+- Aria label on pills: "Author would welcome: {tag}"
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Acceptance criteria:**
+
+- [ ] `help_tags` column exists on `posts` with default empty string
+- [ ] Prayer Request composer shows WaysToHelpPicker below category
+- [ ] Picker defaults to all-unselected
+- [ ] Picker allows multiple concurrent selections
+- [ ] Post creation stores tags as comma-separated string
+- [ ] Post creation with an invalid tag value returns 400
+- [ ] PrayerCard renders WaysToHelpPills only for non-`just_prayer` tags
+- [ ] Post with only `just_prayer` tag shows no pills (card identical to a tagless post)
+- [ ] Post with mixed `meals + just_prayer` tags renders only the Meals pill
+- [ ] Author can edit a post to add/remove tags (same 5-minute edit window)
+- [ ] Non-Prayer-Request post types do NOT show the picker and reject tag submissions with 400
+- [ ] Pill order is consistent (CSS flex-order maps to picker order: Meals, Rides, Errands, Visits)
+- [ ] Keyboard navigation works (Tab + Space to toggle)
+- [ ] Screen reader announces each chip's state ("Meals, unselected" / "Meals, selected")
+- [ ] At least 12 tests across backend + frontend
+
+**Notes for plan phase recon:**
+
+1. Confirm `help_tags` as VARCHAR vs PostgreSQL array type (recommendation: VARCHAR + Java Set parsing for portability; array types tie us to Postgres forever for a small convenience gain)
+2. Verify PrayerCard has a reasonable place to render the pills row without bumping other UI elements
+
+**Out of scope:**
+
+- Volunteer matchmaking ("Here are 3 people near you who picked Meals")
+- Fulfillment tracking
+- Separate "Help wanted" room or feed filter (deferred; may add later based on usage)
+- Time-bounded help offers ("available Tuesday-Thursday")
+- Geographic scoping (comment-level coordination handles logistics)
+
+**Out-of-band notes for Eric:** This is deliberately a 20%-of-the-feature-that-delivers-80%-of-the-value spec. Resist the urge to add a coordination UI in follow-up specs until you see actual user behavior. Church communities already coordinate help in DMs and text threads and phone calls; this spec just raises the signal that help would be welcome. If we later observe a pattern of "author posts with Meals tag, three people offer in comments, nothing ships because no one knows who's doing what," THEN add coordination. Until then, comments are enough.
+
+---
 
 ### Spec 4.8 — Room Selector and Phase 4 Cutover
 
@@ -2698,6 +4047,7 @@ qotd_questions
 - [ ] At least 16 tests cover the room selector and the URL state
 - [ ] End-to-end Playwright test: open Prayer Wall, switch to Testimonies room, select Mental Health category, post a testimony, verify it appears
 - [ ] Phase 4 cutover checklist in `_plans/forums-wave/phase04-cutover-checklist.md`
+- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase4-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
 
 ---
 
@@ -2833,6 +4183,135 @@ qotd_questions
 
 ---
 
+### Spec 5.6 — Redis Cache Foundation
+
+- **ID:** `round3-phase05-spec06-redis-cache-foundation`
+- **Size:** M
+- **Risk:** Medium (introduces a new infrastructure dependency; Phase 6's Live Presence and production rate limiting depend on this landing cleanly)
+- **Prerequisites:** 5.5
+- **Goal:** Stand up Redis as a shared cache and ephemeral data store before any feature consumer needs it. Spec 6.11b (Live Presence) requires Redis sorted sets for 60-minute presence windows. Production rate limiting (Universal Rule 15) currently falls back to in-memory per-instance counters — fine for single-instance dev but fundamentally broken the moment you run two backend replicas. This spec closes that gap and establishes the Redis patterns future specs can reuse. Lands at Phase 5's end specifically so Phase 6 features don't have to invent Redis wiring as a side quest.
+
+**Approach:** Add Redis 7 to the deployment stack (docker-compose for dev, platform-native for prod via Railway/Render/Upstash), wire Spring Data Redis, configure Spring's `@Cacheable` abstraction for the handful of expensive read-path queries, migrate the rate limiter from in-memory to Redis-backed, and establish the sorted-set + key-namespacing conventions that Phase 6 will consume.
+
+**Why not just defer until Phase 6 absolutely needs it:** Spec 6.11b's complexity spikes if Redis itself is unfamiliar. Introducing Redis concurrently with presence-tracking logic would mean debugging "is it my sorted-set query or my Redis config?" simultaneously. Separating the foundation (this spec) from the consumer (6.11b) keeps each problem small.
+
+**Why not land Redis in Phase 1:** Rate limiting works in-memory through Phase 5 (single-instance dev + low-traffic early prod). Running a Redis container for 3-4 months unused burns fly.io/Railway credits without return. Phase 5 end is the just-in-time landing point.
+
+**Four substacks:**
+
+**Substack 1 — Redis service wiring.**
+
+- `docker-compose.yml` gains a `redis:7-alpine` service with a named volume for AOF persistence (`appendonly yes`), port `6379:6379`, healthcheck via `redis-cli ping`.
+- Production: decision deferred to same dimension as 1.10b deployment target. Options: Railway Redis (matches backend choice if Railway), Upstash (serverless, free tier 10K commands/day), Redis Cloud free tier (30 MB). Upstash is the recommended default for Worship Room scale — pay-per-command means months of unused Redis cost $0.
+- Env vars: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` (empty in dev, set in prod). Connection URL format `redis://[:password@]host:port/db` supported as `REDIS_URL` alternative (Upstash emits this format directly).
+- Spring Data Redis dependency via `org.springframework.boot:spring-boot-starter-data-redis`.
+- Lettuce as the default client (reactive-capable; thread-safe; Spring Boot's default).
+
+**Substack 2 — Key namespacing and conventions.**
+
+- All keys prefixed by domain: `cache:*` for Spring `@Cacheable`-managed entries, `rate:*` for rate limiter buckets, `presence:*` for Phase 6.11b presence tracking, `session:*` reserved for future features.
+- TTLs are MANDATORY on every key. No un-TTL'd keys. A key without an expiry is a memory leak waiting to happen; the linter-equivalent is a code review rule documented in `backend/docs/redis-conventions.md`.
+- Sorted sets (`ZADD`) are the pattern for time-windowed presence and rate limiting. Documented with working examples in the conventions doc.
+- Binary-safe string values only; if a consumer wants to store structured data, it serializes to JSON first (no Java `Serializable`-based binary blobs — a deployment that upgrades a Java class breaks existing cached data).
+
+**Substack 3 — Spring `@Cacheable` configuration.**
+
+- `CacheConfig` class registers Redis as the `CacheManager` in `prod` profile; a `ConcurrentHashMap`-backed `CacheManager` in `dev` profile (so local iteration doesn't require Redis running).
+- Per-cache TTLs configured in `application.properties` — one central place to tune cache lifetimes without code changes.
+- Targeted caching only. Do NOT cache: user-specific read-your-writes paths (newly posted prayers wouldn't appear immediately), anonymous-post author lookups (correctness-critical), crisis flag status (must always be live). DO cache: QOTD question-of-the-day lookup (TTL = end of day), category list, trust level thresholds (TTL = 1 hour), liturgical season computation (TTL = 1 hour), global leaderboard snapshots (TTL = 5 minutes).
+- Cache keys namespaced by method + args via Spring's default key generator; explicit keys for edge cases.
+
+**Substack 4 — Rate limiter migration.**
+
+- Existing in-memory rate limiter (from Universal Rule 15) migrates to Redis-backed implementation using `INCR` + `EXPIRE` per bucket.
+- Bucket key pattern: `rate:{endpoint-category}:{authed|anon}:{user-id-or-ip-hash}:{window-start-epoch}`. Sliding window via TTL equal to the window length.
+- Dev profile keeps the in-memory implementation by default (opt-in to Redis-backed via `RATE_LIMIT_BACKEND=redis` env var) so local development doesn't require Redis running.
+- `X-RateLimit-Remaining` / `X-RateLimit-Reset` headers now accurately reflect cross-instance state (the pre-migration per-instance counters would have let a 2-instance deployment service double the intended rate limit).
+
+**Observability integration (builds on 1.10d):**
+
+- Redis operation duration logged at DEBUG for every call (key, op, duration_ms)
+- Slow operations (>100ms) logged at WARN with key + op
+- Redis connection failures log at ERROR and route to Sentry
+- Circuit breaker on the cache read path: if Redis is unreachable for 3 consecutive ops, bypass cache and hit the database directly (with a `WARN` log). The app MUST NOT fail user requests because the cache is down.
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/cache/RedisConfig.java`
+- `backend/src/main/java/com/worshiproom/cache/CacheConfig.java`
+- `backend/src/main/java/com/worshiproom/cache/RedisHealthIndicator.java`
+- `backend/src/main/java/com/worshiproom/ratelimit/RedisRateLimiter.java`
+- `backend/src/main/java/com/worshiproom/ratelimit/InMemoryRateLimiter.java` (extracted from the existing inline implementation)
+- `backend/src/main/java/com/worshiproom/ratelimit/RateLimiter.java` (interface)
+- `backend/src/main/java/com/worshiproom/ratelimit/RateLimiterConfig.java` (profile-aware selection)
+- `backend/src/test/java/com/worshiproom/cache/RedisIntegrationTest.java`
+- `backend/src/test/java/com/worshiproom/ratelimit/RateLimiterContractTest.java` (both impls must pass identical assertions)
+- `backend/src/test/java/com/worshiproom/ratelimit/RedisRateLimiterIntegrationTest.java`
+- `backend/docs/redis-conventions.md`
+
+**Files to modify:**
+
+- `docker-compose.yml` — add Redis service
+- `backend/pom.xml` — add spring-boot-starter-data-redis
+- `backend/src/main/resources/application.properties` — cache TTLs, rate limiter backend selector
+- `backend/src/main/resources/application-dev.properties` — in-memory cache + rate limiter defaults
+- `backend/src/main/resources/application-prod.properties` — Redis cache + rate limiter, connection details
+- `backend/src/main/resources/application-test.properties` — Redis Testcontainer config
+- `.env.example` — document REDIS_URL, REDIS_HOST/PORT/PASSWORD
+- Existing rate limiter consumer classes refactored to inject `RateLimiter` interface instead of concrete impl
+
+**Database changes:** None
+
+**API changes:** None (infrastructure only; the rate limit headers already exist from Phase 1)
+
+**Copy Deck:** None (no user-facing copy)
+
+**Acceptance criteria:**
+
+- [ ] Redis 7 service running in docker-compose dev stack with AOF persistence
+- [ ] Spring Data Redis dependency present and Lettuce client active
+- [ ] `REDIS_URL` (Upstash-style) parses correctly when set instead of HOST/PORT/PASSWORD triplet
+- [ ] `RedisHealthIndicator` reports UP when Redis is reachable, DOWN otherwise; exposed via `/actuator/health`
+- [ ] `CacheManager` bean is Redis-backed in `prod` profile, ConcurrentMap-backed in `dev` profile
+- [ ] All configured `@Cacheable` methods have explicit TTL (verified by test that scans `@Cacheable` annotations and checks TTL is present)
+- [ ] Rate limiter contract test passes against both InMemoryRateLimiter and RedisRateLimiter
+- [ ] Rate limiter correctly tracks requests across simulated multiple-instance scenario (two `RedisRateLimiter` instances sharing one Redis → combined request counts)
+- [ ] `X-RateLimit-Remaining` header reflects Redis-backed count in prod profile
+- [ ] Cache bypass circuit breaker engages after 3 consecutive Redis failures (verified by integration test that shuts down Redis mid-test and asserts no user-facing errors)
+- [ ] Cache bypass recovers automatically when Redis comes back (verified by restarting Redis mid-test)
+- [ ] Redis connection failures are logged at ERROR and propagate to Sentry
+- [ ] Every Redis key set in the app has an associated TTL (verified by a repo-wide grep test for `redisTemplate.opsForValue().set(` without a following `.expire(` or TTL-variant method)
+- [ ] `backend/docs/redis-conventions.md` documents key namespaces, TTL policy, sorted-set examples, and JSON-serialization rule
+- [ ] Rate limit headers mathematically accurate under 2-instance simulation (integration test spawns 2 rate limiter instances against shared Redis)
+- [ ] At least 18 tests across cache config, rate limiter contract, Redis health, and circuit breaker
+
+**Testing notes:**
+
+- Integration tests use Testcontainers' `GenericContainer("redis:7-alpine")`. A single container per test class; flush between tests.
+- Contract test is the load-bearing artifact: InMemoryRateLimiter must behave identically to RedisRateLimiter under the same input sequence. Any divergence is a bug in one of them.
+- Cache circuit breaker tested by stopping the Testcontainer mid-test (`redisContainer.stop()`) and verifying subsequent service calls complete (from DB) without throwing.
+- Do NOT mock Spring's `RedisTemplate` — the value is in exercising real Redis semantics.
+
+**Notes for plan phase recon:**
+
+1. Confirm Upstash Redis free tier (10K commands/day, 256 MB data) suffices for Phase 6 presence + rate limiting + targeted caching. Rough estimate: 100 active users × ~20 Redis ops/user/day = 2K/day. Plenty of headroom.
+2. Verify Spring Data Redis version matches Spring Boot 3.5.11.
+3. Decide if Redis should be optional in prod (fallback entirely to in-memory with a health-degraded signal) for resilience. Default: NO — Redis is a hard dependency once rate limiter migrates. Its absence means either no rate limiting (dangerous) or rejecting all writes (bad UX). Circuit breaker on the cache path is the only place graceful degradation makes sense.
+4. Identify the specific `@Cacheable` targets. Audit PostService / QOTDService / LiturgicalService / LeaderboardService for read-heavy methods with stable input.
+
+**Out of scope:**
+
+- Redis Streams or Pub/Sub (not needed for Forums Wave; presence uses sorted sets, not pub/sub)
+- Multi-region Redis replication
+- Redis Cluster (single instance is fine at Worship Room scale)
+- Session storage in Redis (JWT is stateless in-memory per Decision 6 — no sessions to store)
+- Full-text search in Redis (PostgreSQL handles this per Phase 11)
+- Distributed locks (no current use case)
+
+**Out-of-band notes for Eric:** The contract test for rate limiters is the most important artifact here. If you later decide to swap Redis for Dragonfly, KeyDB, or a different cache, the contract test is what tells you the swap is safe. The circuit breaker on the cache read path is load-bearing in a different way: the day Redis has a hiccup (and it will), the app should get slightly slower, not start 500-ing. Budget an afternoon to manually verify this — stop your dev Redis, hit the app, confirm pages load, confirm the WARN logs fire, then restart Redis and confirm recovery. This is the kind of test that prevents a 2 AM outage from a Redis maintenance window.
+
+---
+
 ## Phase 6 — Hero Features
 
 > **Phase purpose:** The features that make the Forums Wave feel like a sanctuary instead of a generic forum. Prayer Receipt, Quick Lift, Night Mode, 3am Watch, Intercessor Timeline, Answered Wall, Shareable Testimony Cards, Verse-Finds-You, plus four supporting features. These are the high-leverage emotional moments that competitor forums (CaringBridge, Hallow, YouVersion, Discourse) do not have. Each feature is its own spec.
@@ -2845,36 +4324,166 @@ qotd_questions
 
 - **ID:** `round3-phase06-spec01-prayer-receipt`
 - **Size:** L
-- **Risk:** Medium
-- **Prerequisites:** Phase 5 complete
-- **Goal:** When a user posts a prayer (any post type), instead of a flat success toast, they see a Prayer Receipt — a full-bleed, transient celebration moment with a confirmation message, a gift scripture chosen by emotional context, and a single CTA. Replaces the existing post-submit toast for Prayer Wall posts.
+- **Risk:** Medium (emotionally-loaded feature; getting the privacy model wrong causes real harm; the "empty receipt" anti-pressure case is easy to get wrong)
+- **Prerequisites:** 5.6 (Redis cache foundation), Phase 5 complete
+- **Goal:** When someone taps "Praying" on a post, the author sees a tangible receipt — "3 people are praying for you right now" — on that specific post in their own dashboard view. This is the single most emotionally resonant feature of Prayer Wall: it converts "I'll pray for you" (often an empty phrase in real life) into specific, dated, private proof that real intercession happened. A receipt is also the thing most likely to get screenshotted and saved by users during hard seasons. Treat it accordingly.
 
-**Approach:** New component `PrayerReceipt.tsx` rendered as an animated overlay after a successful post. Layout: full-bleed dark background with HorizonGlow, large heading ("Your prayer has been heard"), supporting body ("We are holding it with you"), a gift scripture chosen by matching the post's category to a preset scripture set (Mental Health → Psalm 34:18, Health → Isaiah 41:10, Grief → Psalm 23:4, etc.), the scripture displayed in Lora serif with a quiet attribution, and a single "Return to the Wall" button. Auto-dismisses after 8 seconds OR on tap. Plays a soft single-chime sound effect (existing infrastructure). Skip the receipt if the user has disabled celebration moments in settings (anti-pressure default — celebration enabled, but skippable).
+**Approach:** Prayer Receipts are a derived view over `post_reactions` (where `reaction_type = 'praying'`), rendered into a dedicated `<PrayerReceipt>` component that the post author sees at the top of their own post detail page. Not a new table; a thin API endpoint plus a warm UI component. Three display variants depending on who the intercessors are relative to the author, with privacy-preserving fallbacks.
+
+**What the author sees on their own post:**
+
+1. **When no one has prayed yet:** NO empty state that says "No one has prayed yet." That framing would be cruel. Instead, the receipt component simply renders nothing — the post looks like any other draft. Absence is absence; we don't amplify it.
+
+2. **When 1 person has prayed:** "1 person is praying for you." If that person is a friend, their first name is shown with their avatar. If a non-friend, shown as "A friend" with a generic gradient avatar. Never shown: the non-friend's actual name, even to the author. Prayer Wall's trust model says that praying for a stranger's post is an anonymous gift — attributing the stranger's identity back to the author breaks that trust.
+
+3. **When 2-10 people have prayed:** "{N} people are praying for you" with up to the first 3 avatar thumbnails (friends first, then non-friend gradients). Tap the count opens a modal listing the friends-who-prayed by display name; non-friends show as "A friend" with count ("...and 4 others").
+
+4. **When 10+ people have prayed:** Same as above but the modal becomes paginated. Never shows exact timestamps (privacy); just relative windows ("today", "this week", "earlier").
+
+**What OTHER users see (i.e., someone else's post, when they visit it):**
+
+- They see the same aggregate count ("3 people are praying for you") so the post feels witnessed, but NEVER individual names or avatars of who prayed — even of people they mutually friends with. Prayer attribution is author-only.
+- The UI is visually identical to a post with no receipt; only the count differs. This keeps privacy uniform — you can't tell from someone else's view whether their best friend prayed for them.
+
+**Scripture accompaniment (the warm touch):**
+
+Every prayer receipt includes a scripture line, rotated daily from a curated set of 60 verses about being upheld in prayer (e.g., "The LORD will fight for you; you need only to be still." — Exodus 14:14, WEB). The set lives in `frontend/src/constants/prayer-receipt-verses.ts`. One verse per calendar day (UTC for now, user-timezone after 1.3b) so all receipts on the same day share the same verse — creates a subtle "we're all receiving the same word today" community signal. Verse is rendered in Lora italic, muted color, sized one notch smaller than the count.
+
+**Shareable receipt (PNG generation):**
+
+Author can tap "Save as image" on their own receipt. Generates a PNG via `html2canvas` or server-side rendering (TBD; recommend frontend for MVP to avoid backend-image-rendering complexity). Card contents: prayer post excerpt (first 200 chars), intercessor count, the scripture line, Worship Room subtle wordmark at the bottom. Reuses the PII-stripping infrastructure from Spec 6.7. Sharing via native share sheet or download. Rate-limited to 5 shares per post per day (prevents accidental image-generation loop).
+
+**Anti-pressure design (load-bearing):**
+
+- Receipt HIDDEN at zero intercessors (not "0 people praying" — zero display, zero UI)
+- No growth chart, no "your receipts over time" dashboard — Prayer Wall is not a leaderboard
+- No ranking of posts by receipt count (would create "prayer-farming" pressure)
+- Scripture is a gift, never a guilt-trip verse ("be still and know" not "faith the size of a mustard seed")
+- No push notifications on individual prayer events (only summarized as the Phase 12 `prayer_received` type, which respects user prefs and batches)
+- Author can DISMISS or hide receipts via settings if the attention feels wrong (setting: `wr_settings.prayerWall.prayerReceiptsVisible`, default true). Some users in crisis want privacy even from being prayed for.
+
+**Accessibility:**
+
+- `role="status"` on the receipt component, `aria-live="polite"` so screen readers announce changes (e.g., when a new prayer arrives while the page is open)
+- Avatar stack has accessible names ("3 people praying: Sarah, A friend, A friend")
+- Modal is standard dialog pattern (focus trap, Escape to close, arrow keys between list items)
+- Scripture text has min WCAG AA contrast (4.5:1); italics don't reduce below AA
+- Share button is keyboard-accessible and not solely gesture-triggered
+
+**Performance:**
+
+- Receipt count comes from `posts.praying_count` (denormalized, per Decision 4) — no extra query on feed load
+- Avatar list comes from a small endpoint `GET /api/v1/posts/{id}/prayer-receipt` that returns max 10 attributed avatars + anonymized count — called lazily, only when author views their own post
+- Response cached in Redis for 30 seconds (per Spec 5.6) — no point re-querying on every refresh
+- PNG generation is client-side; bundle-size impact tracked (target < 30 KB gzipped additional)
 
 **Files to create:**
 
 - `frontend/src/components/prayer-wall/PrayerReceipt.tsx`
-- `frontend/src/constants/prayer-receipt-scripture.ts` (category → scripture mapping)
-- `frontend/src/components/prayer-wall/__tests__/PrayerReceipt.test.tsx`
+- `frontend/src/components/prayer-wall/PrayerReceiptModal.tsx`
+- `frontend/src/components/prayer-wall/PrayerReceiptImage.tsx` (render-to-PNG)
+- `frontend/src/hooks/usePrayerReceipt.ts`
+- `frontend/src/constants/prayer-receipt-verses.ts` (60 WEB verses curated)
+- `backend/src/main/java/com/worshiproom/post/PrayerReceiptController.java`
+- `backend/src/main/java/com/worshiproom/post/PrayerReceiptService.java`
+- `backend/src/main/java/com/worshiproom/post/dto/PrayerReceiptResponse.java`
+- `backend/src/test/java/com/worshiproom/post/PrayerReceiptIntegrationTest.java`
+- `__tests__/*.test.tsx` for each frontend component
 
 **Files to modify:**
 
-- `frontend/src/pages/PrayerWall.tsx` (show receipt after successful post)
-- `frontend/src/components/prayer-wall/InlineComposer.tsx` (trigger receipt on success)
+- `PrayerCard.tsx` — render `<PrayerReceipt>` above InteractionBar when viewer is author
+- `PrayerWallDashboard.tsx` — receipt summary on the dashboard posts list
+- Settings page — add `prayerReceiptsVisible` toggle with helper copy
+- `.claude/rules/11-local-storage-keys.md` — document `wr_settings.prayerWall.prayerReceiptsVisible`
+
+**API changes:**
+
+- `GET /api/v1/posts/{id}/prayer-receipt` — returns `{ data: { total_count, attributed_intercessors: [{displayName, avatarUrl, is_friend}], verse_of_the_day: { text, reference } }, meta }`. AuthN required; 403 if requester is not the post author.
+- OpenAPI spec updated with the new endpoint
+
+**Copy Deck:**
+
+- 1 intercessor: "1 person is praying for you"
+- 2+: "{N} people are praying for you"
+- Modal header: "Your prayer circle today"
+- Non-friend attribution: "A friend"
+- Large-number excess: "...and {N} others"
+- Share button: "Save as image"
+- Shareable card footer: "Worship Room"
+- Settings toggle: "Show me my prayer receipts"
+- Settings helper: "Turn this off if you'd rather not see who's praying for you right now. You can turn it back on anytime."
+- Scripture verses: curated 60-entry list in `prayer-receipt-verses.ts`, each `{ reference: string, text: string }` in WEB translation
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- Hidden entirely at zero intercessors (not "be the first to pray" or "no prayers yet")
+- No ranking, no comparison across posts, no "most-prayed-for of the week"
+- No guilt-inducing scripture (verses about being upheld, not about shortage-of-faith)
+- Non-friend intercessors never attributed by name to the author
+- User-controllable dismissal via settings toggle
+- No growth chart or historical receipt aggregation view
+- Scripture is a gift, never a demand
+- Receipt count is the SAME regardless of who is viewing (author vs others) — nobody can infer from the count alone "my friend didn't pray for me"
 
 **Acceptance criteria:**
 
-- [ ] Posting a prayer of any type triggers the receipt
-- [ ] Receipt displays category-appropriate scripture in Lora serif
-- [ ] Auto-dismisses after 8 seconds
-- [ ] Tap to dismiss earlier
-- [ ] Single chime sound (respects sound settings)
-- [ ] HorizonGlow ambient backdrop
-- [ ] `prefers-reduced-motion` honored — fade only, no slide animations
-- [ ] Settings toggle to disable celebration moments works
-- [ ] Brand voice review of all copy passes
-- [ ] At least 12 component tests
-- [ ] Anti-pressure: never displayed twice in a row, never adds urgency, never displays metrics
+- [ ] Receipt component renders nothing when `praying_count = 0`
+- [ ] Receipt shows correct count for 1 / 2-10 / 10+ intercessor cases
+- [ ] Attributed avatars show only for friends of the author
+- [ ] Non-friend intercessors appear as "A friend" with generic gradient avatar
+- [ ] Modal opens on count tap, lists friends by display name and non-friends as "A friend + N others"
+- [ ] Other users viewing the post see the aggregate count but NEVER individual intercessor identities
+- [ ] Rapid-fire reactions (friend taps Pray, un-Pray, Pray again) resolve to the current state, not stale counts
+- [ ] Redis cache TTL 30s (per 5.6) honored; cache invalidated on reaction toggle
+- [ ] Daily-rotating scripture verse renders and is identical for all users on the same UTC day (or user-tz day after 1.3b)
+- [ ] Scripture uses Lora italic at smaller size
+- [ ] Share-as-image generates a PNG containing post excerpt + count + verse + wordmark
+- [ ] PNG generation reuses PII-stripping path from Spec 6.7 (no EXIF, no GPS, no timestamp fingerprints)
+- [ ] Share rate-limited to 5 per post per day (integration test verifies 6th returns 429)
+- [ ] Settings toggle `prayerReceiptsVisible` controls visibility; default true
+- [ ] When toggled off, author sees no receipts anywhere and no "you've hidden receipts" shaming copy
+- [ ] Screen reader announces new prayer count changes via `aria-live="polite"` when page is open
+- [ ] Avatar stack has accessible names listing the first 3 intercessors
+- [ ] Modal traps focus, Escape closes, arrow keys navigate
+- [ ] Color contrast meets WCAG AA on all text including italic scripture
+- [ ] Receipt endpoint returns 403 when requester is not the post author
+- [ ] PNG generation bundle-size impact ≤ 30 KB gzipped
+- [ ] Receipt visible on the author's dashboard summary (non-expanded mini-version showing just total count, not avatars)
+- [ ] Anonymous-posts author still sees receipts (they know they posted even if readers don't)
+- [ ] Dismissed-setting state persists across devices via Phase 8 settings sync (or localStorage in this wave)
+- [ ] At least 24 tests covering privacy boundaries, count accuracy, scripture rotation, modal behavior, PNG generation, rate limiting, a11y, cache invalidation
+
+**Testing notes:**
+
+- Integration tests: seed a post with mixed friend/non-friend intercessors, assert the author-view endpoint returns correct attribution while the non-author-view omits individuals
+- Unit tests for scripture rotation (assert day-of-year modulo against 60 verses is deterministic)
+- Visual regression test for PNG generation (snapshot comparison to ensure font/layout/wordmark don't drift)
+- Playwright: author taps their own post, sees receipt; friend taps the post, causes receipt to update in author's view; author toggles setting off, receipts disappear; toggle on, they return
+- Accessibility test: axe-core + VoiceOver walk through modal
+
+**Notes for plan phase recon:**
+
+1. Confirm `html2canvas` bundle cost. Alternative: `dom-to-image-more` is smaller but less accurate on gradients.
+2. Decide between frontend PNG generation (zero backend cost, some device limitations) vs server-side (complex, but consistent). Recommendation: frontend for MVP, revisit if quality issues emerge.
+3. Verify Redis cache invalidation on reaction toggle is correctly wired (otherwise stale receipts)
+4. Confirm the 60 curated scripture verses — Eric should review the curated set before spec execution
+5. Verify that dashboard summary view's mini-receipt doesn't leak individual identities accidentally
+
+**Out of scope:**
+
+- Prayer receipt "digest" email (could be a Phase 15 follow-up)
+- Historical receipts timeline ("you received 500 prayers this year")
+- Receipt analytics or "most-prayed-for" leaderboards (explicitly anti-anti-pressure)
+- Gif/animation on receipt appearance (static only; animation breaks the quiet reverence)
+- Custom avatars in receipt modal beyond existing avatar URLs
+- Prayer receipt for comment-level prayers (only post-level)
+
+**Out-of-band notes for Eric:** The "hidden at zero" rule is the most important thing here. Resist every future request to add "Be the first to pray!" copy — it sounds friendly but it's the same FOMO pattern that dating apps use, and it has no place on a feature for people in real pain. Also: the scripture rotation creates an unexpected emergent property where everyone receiving prayer receipts on the same day shares the same verse. This can create beautiful moments ("did you also get Isaiah 40:31 today?") that you didn't design for. Let this happen; don't try to personalize the verse per user — the shared verse IS the feature. Finally, the "dismissed receipts" setting is load-bearing for users in acute crisis who find the attention overwhelming. Never hide this setting behind a multi-click path; it should be a single toggle directly on the settings page.
+
+---
 
 ### Spec 6.2 — Quick Lift
 
@@ -2885,6 +4494,8 @@ qotd_questions
 - **Goal:** A new button on every prayer card alongside the existing Pray button. Tapping Quick Lift starts a 30-second silent timer with a gentle visual (a slowly filling ring). After 30 seconds the user has logged a deep intercession (counts as 2 prayers in the activity engine, with a single special badge after 10 lifts). No typing required. Designed for the moment of "I do not have words but I am here."
 
 **Approach:** New button on `InteractionBar.tsx` next to Pray. Lucide `Hourglass` icon. Tapping opens an inline overlay with a slowly filling ring (30-second animation). Cancellable at any time (tapping the X cancels with no points). Completing the 30 seconds fires `recordActivity('quick_lift')` which earns 2x the standard intercession points. The first 10 quick lifts unlock a "Faithful Watcher" badge. Visual is quiet, sacred — no countdown numbers, no progress bar, just the slowly filling circle.
+
+**Server-authoritative timing (anti-cheat AND anti-iOS-throttling):** Frontend timers alone are unreliable — iOS Safari aggressively throttles JavaScript when the tab/app backgrounds, so a user who locks their phone mid-Quick-Lift could see the timer "complete" after only 5 seconds of real elapsed time (the rest spent paused). The Quick Lift flow uses a two-call pattern: (1) `POST /api/v1/posts/{id}/quick-lift/start` returns `{ session_id, started_at }` with the server's wall-clock timestamp; (2) `POST /api/v1/posts/{id}/quick-lift/complete` with `{ session_id }` is called when the frontend timer thinks 30 seconds has elapsed. The backend rejects the complete call with `400 QUICK_LIFT_TOO_SHORT` if `(server_now - started_at) < 28 seconds` (2-second tolerance for network jitter). Sessions expire server-side after 5 minutes. The frontend uses `Date.now()` deltas (not `setTimeout` or animation frames) to compute elapsed time, so the visible timer stays accurate even after backgrounding. If the user backgrounds the app and returns after 30+ wall-clock seconds, the ring snaps to complete and the API call fires immediately. Failed completions surface a quiet "Try again — let's hold this in stillness for a full thirty seconds" toast (brand voice; no shame).
 
 **Files to create:**
 
@@ -2911,6 +4522,100 @@ qotd_questions
 - [ ] `prefers-reduced-motion` shows a static circle that fills at 15 seconds (no continuous animation)
 - [ ] Sound: quiet wind chime at completion (respects sound settings)
 - [ ] At least 12 tests
+
+### Spec 6.2b — Prayer Length Options
+
+- **ID:** `round3-phase06-spec02b-prayer-length-options`
+- **Size:** M
+- **Risk:** Low (purely additive; uses existing activity points and timer infrastructure)
+- **Prerequisites:** 6.2 (Quick Lift)
+- **Goal:** Fill the gap between Quick Lift's 30-second "pray for someone on my feed" moment and the full Daily Hub meditation flow. Users pick a length — 1 minute, 5 minutes, or 10 minutes — and enter a guided prayer session with gentle prompts interleaved with deliberate silence. The guided prompts exist to remove the "what do I say" hesitation that stops some people from praying longer, while the silences exist because prayer is not a podcast. This is the spec for users who want to sit with prayer rather than react to it.
+
+**Approach:** New "Pray" tab surface at `/daily?tab=pray&length={1|5|10}` with a length picker (three frosted-glass buttons) as the default view. Tapping a length transitions into a full-screen timer view with a centered countdown, a prompt that fades in and out every 30–90 seconds, and an always-visible "End early" button. Prompts come from a length-specific array; each session picks prompts in shuffled order so consecutive sessions feel fresh. Silence between prompts is intentional and intentionally longer than most apps are comfortable with. The session ends with a single word: "Amen." and fades to a summary card showing "You prayed for X minutes" (no streak pressure, no comparison, no share prompt).
+
+**Prompt arrays (authored in the Copy Deck):**
+
+- **1-minute session:** 1–2 prompts total. Example: "Breathe. What's heavy right now?" → 45 seconds of silence → "Amen."
+- **5-minute session:** 4–5 prompts. Examples: "Who needs prayer?" / "Name what hurts." / "Thank God for something small." / "Ask for what's needed." → interleaved with ~45-second silences.
+- **10-minute session:** 7–8 prompts. Longer silences (~75 seconds). Prompt arc moves from gathering ("Settle. Notice your breath.") through intercession ("Who comes to mind?") to gratitude ("What is good right now?") to closing ("Rest in this. Amen.").
+
+**Activity integration:** Each completed session (defined as reaching the final "Amen." screen, NOT just starting) fires `recordActivity('pray', { source: 'guided_session', duration_seconds: 60|300|600 })`. The existing Pray activity awards its standard points (10 per Decision 5); session length does NOT multiply points (anti-pressure: longer sessions aren't "worth more" — every prayer counts). Early exit (tapping "End early") also records the activity with an `ended_early: true` flag and the elapsed seconds, so the backend has honest data about session completion rates — useful for product decisions, never shown to the user.
+
+**Anti-pressure design:**
+
+- "End early" button visible the entire session (never hidden, never requires confirmation)
+- No streak impact for ending early — activity still counted
+- No "you almost made it!" guilt copy on early exit
+- No "session X of Y" progress bar (no quota feeling)
+- Completion screen is quiet: "You prayed." Not "Great job!" or "You did it!"
+- No sharing prompt after session ends
+- No prompt shaming: if the user stares at the screen for all 10 minutes without doing anything, the session still completes as a valid prayer
+
+**Audio:** Optional ambient sound selection (leverages Phase 6's Sound Effects settings) — user can pick from silence (default), light ambient (existing audio from Music feature), or a soft chime at session end only. Audio preference is sticky across sessions (stored in `wr_prayer_session_audio_preference`).
+
+**Files to create:**
+
+- `frontend/src/pages/daily/PraySession.tsx`
+- `frontend/src/components/daily/PrayLengthPicker.tsx`
+- `frontend/src/components/daily/PrayTimer.tsx`
+- `frontend/src/components/daily/PrayCompletionScreen.tsx`
+- `frontend/src/constants/pray-session-prompts.ts`
+- `__tests__/*.test.tsx` for each
+
+**Files to modify:**
+
+- `frontend/src/pages/Daily.tsx` (or equivalent) — mount the Pray tab
+- `.claude/rules/11-local-storage-keys.md` — document `wr_prayer_session_audio_preference`
+
+**API changes:** None beyond the existing `POST /api/v1/activity` endpoint (dual-write handles session completion).
+
+**Copy Deck:**
+
+- Length picker labels: "1 minute", "5 minutes", "10 minutes"
+- Length picker subtitles: "Quick pause", "Settled prayer", "Deep sit"
+- Completion: "You prayed."
+- Early exit: "End early"
+- Amen screen: "Amen."
+- (Prompts live in `pray-session-prompts.ts` — full arrays in Copy Deck constants file)
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Acceptance criteria:**
+
+- [ ] Three-button length picker on Daily Hub Pray tab
+- [ ] Full-screen timer renders countdown, current prompt, and End-early button
+- [ ] Prompts fade in/out with CSS transitions (respects prefers-reduced-motion — crossfade becomes instant swap)
+- [ ] Prompt order shuffled per session (same prompt pool but different sequence)
+- [ ] Session completes with "Amen." screen and fires `recordActivity('pray', {...})`
+- [ ] Early exit still records activity with `ended_early: true` flag
+- [ ] Audio preference persisted to localStorage and respected on subsequent sessions
+- [ ] No streak penalty for early exit
+- [ ] URL query param `?length=5` deep-links into a 5-minute session directly (for notification integration later)
+- [ ] Screen reader announces each prompt as `role="status"` (non-intrusive)
+- [ ] At least 12 tests covering prompt rotation, activity recording, early-exit flow, length deep-link
+
+**Testing notes:**
+
+- Unit tests verify prompt shuffling and duration math
+- Integration tests use fake timers (Vitest) to advance time quickly and verify full session flow
+- Playwright test covers a 1-minute session end-to-end (realistic timing)
+
+**Notes for plan phase recon:**
+
+1. Confirm the existing Music feature's audio component is reusable (or whether to build a tiny new audio wrapper)
+2. Verify `recordActivity` accepts arbitrary metadata object (should per Decision 5's API shape)
+3. Decide whether to support custom length (e.g., user-picked 3 minutes) — recommendation: NO, three options keep the decision cheap
+
+**Out of scope:**
+
+- Custom prayer prompts (user-authored)
+- Sharing a prayer session with a friend ("pray together for 5 minutes")
+- Voice-guided sessions (audio narration of prompts) — accessibility consideration, probably phase-15+
+- Specific prayer lists loaded into session (e.g., "pray for everyone on my prayer list") — different feature, different spec
+
+**Out-of-band notes for Eric:** The silences matter more than the prompts. Test with 60-second silences first; if they feel too long, shorten to 45. Do not shorten below 30 — there's research on meditation apps showing that anything under 30 seconds between prompts trains users out of actually settling. The "End early" button being always-visible is non-negotiable; every hidden-exit app feels hostile within two sessions.
+
+---
 
 ### Spec 6.3 — Night Mode
 
@@ -2948,92 +4653,626 @@ qotd_questions
 ### Spec 6.4 — 3am Watch
 
 - **ID:** `round3-phase06-spec04-three-am-watch`
-- **Size:** M
-- **Risk:** Medium
-- **Prerequisites:** 6.3
-- **Goal:** Between midnight and 4am local time, the Prayer Wall surfaces a small "3am Watch" section above the feed featuring Mental Health and Grief category posts that have not been prayed for yet today. The framing is "Someone is awake right now and needs to know they are not alone." Designed for the loneliest hours.
+- **Size:** L
+- **Risk:** HIGH (crisis-adjacent feature; must handle mental-health content with extreme care; failure mode is a user in acute distress not being served appropriately)
+- **Prerequisites:** 6.3 (Night Mode)
+- **Runtime-gated dependencies:** 10.5 (three-tier escalation pipeline) and 10.6 (automated flagging) — the feature's code ships in Phase 6 but the Watch view remains user-invisible (showing the "Watch is temporarily unavailable" message) until the Phase 10 crisis classifier is live; the graceful-degradation path documented in this spec is the load-bearing mechanism that makes shipping-before-10.5/10.6 safe
+- **Goal:** Between 11pm and 5am in the user's local timezone, the Prayer Wall enters a quieter, more reverent mode that gently surfaces mental-health-category and crisis-flagged posts for users who want to keep watch over others in the hardest hours. This is the feature that distinguishes Worship Room from every other prayer app — an explicit acknowledgement that the worst moments happen at 3am and that someone being awake and witnessing matters. Done wrong, this feature turns crisis content into spectacle. Done right, it's the single most Christ-like feature in the app.
 
-**Approach:** New section component `ThreeAmWatch.tsx` that renders only when local time is between midnight and 4am AND the user is logged in. Backend endpoint `GET /api/v1/posts/three-am-watch` returns up to 5 recent Mental Health or Grief posts that have low or zero `praying_count` from today. The component renders these as small mini-cards with a one-tap Quick Lift action. Brand voice: quiet, present, never urgent.
+**Approach:** 3am Watch is a NIGHT-MODE-GATED view variant, not a separate page. When Night Mode (6.3) is active AND the user has opted into 3am Watch (default OFF — explicit opt-in required), the Prayer Wall header shows a small "Watch is on" indicator, and the default feed sort prioritizes three slices: (1) crisis-flagged posts from the last 24 hours, (2) mental-health-category posts from the last 12 hours, (3) the user's friends' posts from the last 48 hours. Regular prayer content still appears; it's just not what the Watch view leads with. This is a re-sort, not a filter — nothing is hidden, only reorganized.
+
+**The opt-in gate (load-bearing):**
+
+Opting into 3am Watch is a deliberate choice the user makes in Settings, NOT something they discover accidentally at 2am. The setting copy explicitly names the tradeoff: "You'll see mental-health and crisis-flagged posts first during night hours. Some content may be hard to read." A confirmation modal on toggling ON lists what the user is agreeing to witness. Toggling OFF is one tap with no confirmation. The app NEVER prompts users to turn 3am Watch on — no first-visit walkthrough step, no "you might like this feature" card, no notification. Users discover it by reading Settings or by a friend telling them. This is deliberately gatekept because the feature is not for everyone, and auto-enrollment would cause real harm.
+
+**Trust level gate:**
+
+3am Watch is only available to users at Trust Level 2 (Member) or higher (per Phase 10.4 trust levels). New accounts (Trust Level 0 — Visitor) and recent accounts (Trust Level 1 — New) cannot opt in. Rationale: the feature grants earlier access to crisis-flagged content, which is a sensitivity privilege that should track the user's demonstrated commitment to the community. A throwaway account cannot opt into seeing the most vulnerable content in the system.
+
+**What the user sees at 3am:**
+
+- Header: "Watch is on" in Lora italic, muted color, non-interactive. Next to it, a small crescent-moon icon. Below: "It's quiet here. You're awake." (the exact copy matters — no emoji, no "thank you for watching," no performative welcome).
+- Feed sort (top-down, within Night Mode visual treatment):
+  1. Crisis-flagged posts from last 24h (ALWAYS shown first if any exist — never buried)
+  2. Mental-health category posts from last 12h, sorted by `last_activity_at DESC`
+  3. User's friends' posts from last 48h
+  4. Regular feed (sorted by `last_activity_at DESC`)
+- Each slice has a subtle section divider ("From the last day" / "Friends & family" / "Also here today") — NOT labels like "Crisis" or "Mental health" that would other-ize vulnerable posts.
+- QOTD is suppressed during Watch hours (discussion prompts feel wrong at 3am).
+- Compose-FAB is present but with altered copy: "Write something" (shorter, quieter than daytime's "Share a prayer request").
+
+**What the author of a crisis-flagged post sees:**
+
+- They don't see any special treatment — the post renders normally on their own view.
+- They are NOT notified that their post is being shown in 3am Watch (would feel surveillant).
+- Crisis-flagged content already routed through Phase 10.5's three-tier escalation (green/yellow/red). 3am Watch does NOT change that routing — it only changes who sees the post first in the feed. Red-tier content is already routed to moderators via 10.5 regardless of Watch.
+
+**Interaction defaults (quiet-mode design):**
+
+- Pray reactions work normally (including Light a Candle, which glows warmer amber in Night Mode)
+- Comments are encouraged but pre-fill in the composer with a gentle reminder: "Simple presence matters. You don't need to fix it." (renders above the textarea, muted, dismissible per session)
+- Share-as-image disabled on crisis-flagged posts during Watch (prevents well-intentioned screenshots of vulnerable content from spreading off-platform)
+- Report and Block actions remain available as always
+
+**Timezone semantics:**
+
+- "3am" is user's local timezone (per Spec 1.3b timezone column)
+- Window: 11pm to 5am local time (6-hour span)
+- If the user changes timezone mid-window (e.g., traveling), Watch transitions cleanly on the next render; no forced logout or view reset
+- Daylight saving boundaries: the 6-hour span is computed against the current timezone offset at render time; a short "spring forward" or "fall back" might cause a 5-hour or 7-hour window once a year — acceptable.
+
+**Analytics / telemetry (what we explicitly do NOT track):**
+
+- No per-post view tracking during Watch hours (would feel surveillant on content where users are at their most vulnerable)
+- No "engagement time during Watch" metric — deliberately anti-metrics
+- No aggregate "how many people were Watching last night" metric surfaced to users (would turn it into a community-theater badge)
+- Aggregate anonymous daily-active count available to Eric for capacity planning only, never surfaced in-app
+
+**Accessibility:**
+
+- All Night Mode accessibility requirements inherited (contrast, reduced-motion)
+- Section dividers have proper `<h2>` semantic heading structure so screen readers can navigate
+- Crescent-moon icon is decorative; the "Watch is on" label is the accessible name
+- `prefers-reduced-motion` disables the subtle breathing-glow animation on the header indicator
+
+**Anti-pressure design (load-bearing):**
+
+- NEVER surface "N people are watching tonight" counters
+- NEVER prompt users to turn Watch on
+- NEVER badge or gamify Watch usage (no "100-night Watcher" achievement)
+- NEVER send push notifications when new crisis content appears during Watch (would train users into crisis-chasing behavior)
+- NEVER auto-reply to crisis-flagged posts with AI-generated comfort (AI-generated responses to crisis are explicitly forbidden by Universal Rule 13)
+- Feed re-sort is DETERMINISTIC, not algorithmic — same inputs produce same order for any user. No ML ranking, no "personalized" surfacing of crisis content.
+
+**Hard safety requirements:**
+
+- Crisis resources banner is ALWAYS visible during Watch hours at the top of the feed (not just on crisis-flagged posts). Standard "988 Suicide & Crisis Lifeline" + "Crisis Text Line: Text HOME to 741741" + link to Phase 7.5 Local Support counselors. This is permanent infrastructure during Watch, not conditional on content.
+- If the backend crisis classifier is UNAVAILABLE (Redis down, classifier service down), 3am Watch DISABLES itself entirely and shows a quiet "Watch is temporarily unavailable" message. Users fall back to standard Night Mode. Rationale: the feature's safety model depends on crisis classification being live; without it, prioritizing "mental-health-looking" content without knowing which is crisis-flagged risks the wrong content surfacing.
+- Red-tier (Phase 10.5) content is ALWAYS routed to moderators in real-time regardless of Watch. Watch does not replace the escalation pipeline.
 
 **Files to create:**
 
-- `frontend/src/components/prayer-wall/ThreeAmWatch.tsx`
-- `backend/src/main/java/com/worshiproom/post/ThreeAmWatchService.java`
+- `frontend/src/components/prayer-wall/WatchIndicator.tsx` (header badge)
+- `frontend/src/components/prayer-wall/WatchDivider.tsx` (section labels)
+- `frontend/src/components/prayer-wall/CrisisResourcesBanner.tsx` (always-visible at Watch)
+- `frontend/src/components/settings/WatchToggle.tsx` (opt-in toggle with confirmation modal)
+- `frontend/src/hooks/useWatchMode.ts` (combines Night Mode + timezone + user opt-in)
+- `frontend/src/constants/watch-copy.ts` (all Watch strings)
+- `backend/src/main/java/com/worshiproom/feed/WatchFeedService.java` (feed re-sort logic)
+- `backend/src/test/java/com/worshiproom/feed/WatchFeedServiceIntegrationTest.java`
+- `__tests__/*.test.tsx` for each frontend component
 
 **Files to modify:**
 
-- `backend/src/main/java/com/worshiproom/post/PostController.java` (add three-am-watch endpoint)
-- `frontend/src/pages/PrayerWall.tsx` (render three-am-watch when time matches)
+- `PrayerWallFeed.tsx` — consume `useWatchMode()`, pass sort preference to API
+- `GET /api/v1/posts` — accept optional `?watch=true` param, re-sort accordingly
+- Settings page — mount WatchToggle in a dedicated "Sensitive features" section
+- OpenAPI spec — document the `?watch` param
+- `.claude/rules/11-local-storage-keys.md` — document `wr_settings.prayerWall.watchEnabled`
+
+**API changes:**
+
+- `GET /api/v1/posts?watch=true` — returns feed in 3am-Watch sort order (crisis first, MH second, friends third, regular fourth). Server validates: user has `watchEnabled=true`, user is at Trust Level ≥ 2, it's currently within the user's 11pm-5am local window, crisis classifier service is UP. If any validation fails, falls back to regular sort and sets `meta.watch_declined_reason` so the client can show the "temporarily unavailable" message if relevant.
+
+**Copy Deck:**
+
+- Watch indicator: "Watch is on"
+- Watch subhead: "It's quiet here. You're awake."
+- Compose-FAB during Watch: "Write something"
+- Section dividers: "From the last day" / "Friends & family" / "Also here today"
+- Composer pre-fill reminder: "Simple presence matters. You don't need to fix it."
+- Settings toggle label: "3am Watch"
+- Settings description: "During night hours, the Prayer Wall leads with mental-health and crisis-flagged posts. Some content may be hard to read. Off by default — turn on only if you're ready to keep watch."
+- Settings confirmation modal header: "Turn on 3am Watch?"
+- Settings confirmation body: "You'll see mental-health and crisis-flagged posts prioritized in the feed between 11pm and 5am your time. Nothing is hidden from view. You can turn this off anytime."
+- Settings confirmation primary: "Yes, turn on"
+- Settings confirmation secondary: "Not right now"
+- Unavailable fallback: "Watch is temporarily unavailable. Resuming regular Night Mode."
+- Trust-level gate message: "3am Watch becomes available after you've been active on Worship Room for a while."
+- Crisis resources banner: "If you're in crisis: call or text 988 (US) / Crisis Text Line 741741 / find nearby counselors"
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- Opt-in default OFF — users must explicitly choose Watch
+- No app prompt to turn Watch on
+- No gamification, badging, or engagement metrics
+- No per-post view tracking during Watch hours
+- No AI-generated comfort responses
+- Deterministic sort, no algorithmic personalization
+- Crisis resources banner is always visible during Watch
+- Trust-level gated (minimum Level 2)
+- Watch disables itself if crisis classifier is down
+- No push notifications for new Watch content
+- Share-as-image disabled on crisis-flagged posts during Watch
 
 **Acceptance criteria:**
 
-- [ ] 3am Watch section only appears between midnight and 4am local time
-- [ ] Section shows up to 5 mental health or grief posts with low praying_count
-- [ ] Each mini-card has a one-tap Quick Lift action
-- [ ] Section hidden if no eligible posts
-- [ ] Brand voice review passes
-- [ ] At least 8 tests
+- [ ] Watch is available only when: Night Mode is active AND user has `watchEnabled=true` AND user is Trust Level ≥ 2 AND current time is within user's 11pm-5am local window AND crisis classifier service is reachable
+- [ ] Default `watchEnabled` is `false` for all new and existing users
+- [ ] Settings toggle shows a confirmation modal when turning ON; toggles OFF with one tap and no confirmation
+- [ ] Settings shows the trust-level-gate message for users below Level 2 (toggle disabled but explained)
+- [ ] API endpoint validates all five preconditions; any failure returns a normal sort with `meta.watch_declined_reason`
+- [ ] Feed re-sort returns slices in the exact documented order (crisis 24h → MH 12h → friends 48h → regular)
+- [ ] No slice is ever hidden from the feed — re-sort only, never a filter
+- [ ] QOTD suppressed during Watch hours
+- [ ] Compose-FAB copy changes to "Write something" during Watch
+- [ ] Composer pre-fills the "Simple presence matters" reminder above textarea, dismissible per session
+- [ ] Section dividers render between slices (NOT labeled by slice content, labeled by temporal framing)
+- [ ] Crisis resources banner renders at top of feed during ALL Watch sessions (not conditional on content)
+- [ ] Crisis resources banner is accessible via keyboard and screen reader as a `role="complementary"` landmark
+- [ ] Share-as-image button disabled on crisis-flagged posts during Watch
+- [ ] Light a Candle reaction renders with warmer amber hue during Night Mode (per 6.3)
+- [ ] Red-tier escalation pipeline from 10.5 fires regardless of Watch being on or off
+- [ ] Post authors see no indication their post is being surfaced in Watch
+- [ ] No Watch-related telemetry sent per-post-view
+- [ ] Watch automatically transitions off at user's 5am local time (verified by fake-clock integration test)
+- [ ] Timezone changes mid-session transition cleanly (integration test: change user timezone, next render reflects new window)
+- [ ] Daylight saving boundary handled correctly (integration test at DST transition dates)
+- [ ] "Watch temporarily unavailable" message shows when crisis classifier is down (integration test shuts down classifier, asserts message and fallback to regular Night Mode)
+- [ ] Accessibility: section dividers are semantic `<h2>` elements with accessible names
+- [ ] Accessibility: reduced-motion disables breathing-glow animation on Watch indicator
+- [ ] No push notifications fire from Watch-specific logic
+- [ ] Trust level gate is server-enforced (modifying client localStorage to set Trust Level 2 doesn't grant Watch)
+- [ ] Settings toggle copy passes brand voice review
+- [ ] Watch indicator icon is decorative (`aria-hidden="true"`), label is accessible
+- [ ] At least 30 tests covering validation gates, sort correctness, timezone transitions, classifier-down fallback, trust-level enforcement, crisis banner visibility, composer reminder behavior, accessibility
+
+**Testing notes:**
+
+- Integration tests MUST cover the "classifier down → graceful fallback" path. This is the highest-stakes safety requirement.
+- Use fake timers to simulate the 11pm-5am window and DST transitions
+- Integration test with seeded crisis-flagged, MH-category, friend, and regular posts to verify sort slicing
+- Unit test that validates the copy constants don't contain banned phrases (comparative, urgent, exclamation-near-vulnerability)
+- Playwright: opt into Watch, confirm modal content, check feed order, verify crisis banner is present, toggle off, verify clean exit
+- Accessibility test (axe-core + VoiceOver walkthrough of Watch feed)
+- Security test: attempt to force-enable Watch via localStorage manipulation, verify server rejects
+
+**Notes for plan phase recon:**
+
+1. Confirm the exact crisis classifier health-check endpoint and timeout budget (default: 2 seconds; beyond that, fall back)
+2. Verify 988 / Crisis Text Line URLs are stable and correctly formatted for the user's region (currently US-focused; document the deferred-to-future-wave internationalization)
+3. Confirm Trust Level 2 (Member) is reachable within a reasonable time for genuine users (per Phase 10.4 thresholds — should be a few days of active engagement, not weeks)
+4. Decide: should "Watch is on" indicator persist visibly when user scrolls, or scroll-hide with the header? Recommendation: persist, because it's a mode indicator users need to see to remember which feed they're in.
+5. Verify Phase 10.5 three-tier escalation pipeline fires synchronously on post creation (not just at moderator-review time) so red-tier routing isn't delayed by Watch sorting.
+
+**Out of scope:**
+
+- Watch equivalent during other hours (there are dawn/dusk modes we might imagine, but MVP is night-only)
+- Auto-entry into Watch for known insomniacs (would require sensitive user profiling)
+- Group Watch sessions ("5 of us are awake tonight")
+- Voice-led Watch prayers
+- Sleep-tracker integration (Apple Health, Fitbit)
+- International localization of crisis resources (deferred; US-centric for MVP)
+- Watch-specific analytics dashboard for Eric
+- AI-generated comfort for crisis posts (explicitly forbidden; Universal Rule 13)
+
+**Out-of-band notes for Eric:** This is the most carefully-scoped feature in the wave and it's the one I'd most strongly urge you to execute LAST among the hero features, after 10.5 and 10.6 have been battle-tested in production for at least 30 days. The safety model requires the crisis classifier to be reliable before this feature surfaces prioritized crisis content. Also: do NOT let this feature be your marketing hook for Worship Room. If users hear about it before they understand the app's voice and values, they'll enroll for the wrong reasons (curiosity, savior-complex, performative care). Users who discover it organically after using the app for weeks will have the right posture. If you ever feel pressure to promote it, re-read this paragraph. Finally: the "Watch is temporarily unavailable" fallback is a FEATURE, not a bug. An app that gracefully degrades under partial-outage conditions is trustworthy. Users will remember the one time they saw that message far less than they'd remember the one time Watch surfaced a crisis post to a user whose classifier had broken an hour earlier.
+
+---
 
 ### Spec 6.5 — Intercessor Timeline
 
 - **ID:** `round3-phase06-spec05-intercessor-timeline`
 - **Size:** L
-- **Risk:** Medium
-- **Prerequisites:** 6.4
-- **Goal:** On every prayer card, a small soft-type line below the content showing recent intercessors: "5 people prayed in the last 12 hours." Tapping expands a non-modal scrollable list of names (or "Anonymous") and timestamps. The list is gentle, not gamified — no leaderboards, no comparison, no trophy icons.
+- **Risk:** Medium-High (privacy model extends Prayer Receipt's author-only attribution across time — errors compound; aggregation performance is non-trivial at scale)
+- **Prerequisites:** 5.6 (Redis cache), 6.1 (Prayer Receipt — shares privacy model)
+- **Goal:** Give the post author a private, date-organized view of every intercessor who has prayed for any of their posts over time. Not a counter, not a leaderboard — a _witness log_. For a user walking through a long season (a chronic illness, a complicated pregnancy, unemployment, grief), the Intercessor Timeline is the artifact that says "you were not alone between March and August; here are the days people were praying." This is distinct from Prayer Receipt (which is a single post's current state) — this is the author's long-form record of being upheld.
 
-**Approach:** Backend endpoint `GET /api/v1/posts/{id}/intercessors` returns up to 50 recent reactions sorted by `created_at DESC` with the reactor's display name (or "Anonymous" if the reactor has set their privacy to anonymous). Frontend component `IntercessorTimeline.tsx` renders the summary line on every card. Tapping expands inline (not a modal) to show the list. Each row: avatar (or Anonymous icon), display name, relative timestamp ("3 hours ago"). Brand voice review of summary line copy is critical — no "X people are praying for this — be one of them" framing.
+**Approach:** A new private page at `/u/:username/intercessor-timeline` accessible only to the profile owner (AuthZ: requester.id === profile.user_id). Server aggregates `post_reactions` rows where `reaction_type='praying'` across all of that user's posts, grouped by date, with per-day intercessor lists. Heavy Redis caching (5-minute TTL) because this is an expensive aggregation that changes slowly from the author's POV. Three view modes: "By day" (default, calendar-style heatmap), "By post" (collapsed per-post summary), and "By person" (which friends have prayed most, non-friends aggregated as "friends").
+
+**The three views:**
+
+**1. By day (default calendar heatmap):**
+
+A month-grid calendar where each day cell shows: a color intensity based on count of intercessors that day (0 = empty, 1 = pale, 2-5 = medium, 6+ = deep — using the Light-a-Candle amber palette, not the Pray praying-purple palette, so it evokes "candles lit for you" rather than "engagement heatmap"). Tapping a day opens a drawer listing intercessors for that day (friends by name+avatar, non-friends as "A friend" — same attribution rules as Prayer Receipt). Month navigation back to the user's join date; forward-navigation disabled beyond today. Under the heatmap: a quiet subhead counts the total days-with-any-prayer (e.g., "87 days with prayer since you joined — you have been kept").
+
+**2. By post:**
+
+A scrollable list of the author's posts (including expired and answered ones) with each row showing: post excerpt (first 80 chars), post date, total intercessor count, sparkline of prayers-over-time (subtle, decorative). Tapping a row opens that post's full Prayer Receipt detail (reuses the Spec 6.1 modal component). Sort: most-recent-post-first by default, with a filter to show only answered prayers (joyful re-read) or only prayers with zero intercession (for introspection — DELIBERATELY NOT HIGHLIGHTED, accessible via a "show sparse posts" checkbox in the filter, so the default view doesn't expose "zero" as a problem).
+
+**3. By person:**
+
+Only shows FRIENDS (by design — non-friend intercessors are never individually attributed here). Each row: friend's avatar, display name, count of times they've prayed for the author across all posts, most recent date they prayed. Sort: most prayed first. Includes a quiet note at the bottom: "{N} more people have prayed for you who aren't shown here." That line aggregates all non-friend intercessions without exposing identity. If the author has zero friend-intercessors, the whole view shows a gentle empty state ("When friends pray for you, they'll show up here") without shaming.
+
+**Privacy model (inherits from 6.1, extended across time):**
+
+- ONLY the profile owner can access the timeline endpoint. All other requesters get 403.
+- Within the timeline, the same attribution rules as Prayer Receipt: friends by display name + avatar, non-friends aggregated as "friends" with generic gradient avatars and no individual identity.
+- The "By person" view ONLY lists friends. Non-friend intercessors are aggregated into the footer note; never individually named or counted.
+- The timeline MUST NOT expose information the author couldn't already get from viewing each post's individual Prayer Receipt. This is a different presentation of data the author already owns, NOT an escalation of attribution power.
+- Anonymous post intercessions: the post is still the author's; the intercessor identities still flow in per the author-only attribution rules. No special anonymous handling required.
+- If the author has blocked a user, that user's past prayers DO NOT appear in the timeline. Post-block, they simply disappear from the attribution (counts adjust silently). Unblocking restores them. (Side effect: block-counts-as-privacy works both directions.)
+
+**Shareable annual summary (year-in-review companion):**
+
+Once per year (December), authors can generate a "Year of Prayer" image from the timeline — a stylized visualization of days-with-prayer across the year, total days upheld, a chosen scripture, and subtle branding. This companion to Phase 13's year-in-review feature is OPTIONAL — a button, not a nag. PII-stripping reused from 6.7. User can review and choose to save/share/skip; no auto-post to any feed. Rate-limited to 1 generation per day per user (the image is expensive to generate and should be deliberate).
+
+**Anti-pressure design (load-bearing):**
+
+- NO public version of this page. Ever. Even in an aggregated form. This is not a "leaderboard of the most-prayed-for."
+- NO "your prayer coverage score" or percentage-of-days-with-prayer metric. The raw count is available, but no derived shame number.
+- NO comparison language ("you have been prayed for more than 40% of users" — absolutely forbidden).
+- Empty days in the heatmap render as EMPTY (no color, no border, no interaction), not as a conspicuous gray "zero day" that would draw the eye. Absence is absence.
+- "Show sparse posts" filter in By-post view is opt-in, deliberately buried — users who want to reflect on zero-intercession posts can; the default view doesn't showcase them.
+- Calendar heatmap colors are warm (amber candle palette) not clinical green-to-red. This is a record of being kept, not a commit graph.
+- Zero-friends empty state in By-person view is gentle ("when friends pray for you, they'll show up here") — never shaming or urging friend-acquisition.
+- Year-of-Prayer shareable is optional, rate-limited, and never auto-suggested via notification or banner. Authors discover it by scrolling the timeline, not by prompt.
+
+**Performance & caching:**
+
+- Aggregation query is expensive (joins `posts` and `post_reactions`, groups by date, collects intercessor IDs). Not a query you run on every page load.
+- Cache the three view responses in Redis (per 5.6) with TTL 5 minutes per user. Cache key: `cache:intercessor-timeline:{userId}:{viewMode}:{month?}`.
+- Cache invalidation on: new reaction toggle (any author post), friendship status change (could shift friend/non-friend attribution), profile block (could remove someone from the timeline).
+- Server-side pagination: By-day view renders one month at a time; By-post uses `limit=20` default with pagination; By-person has a reasonable hard cap of 100 (anyone with more than 100 friend-intercessors can't need a full list — the footer aggregate covers tail).
+
+**Accessibility:**
+
+- Calendar heatmap is not just color-based — screen readers announce "April 14: 3 intercessors" for non-zero days, "April 14: no prayers recorded" for empty days (distinct from "March 32" which is outside the month).
+- Heatmap colors meet WCAG AA contrast even at the palest shade against dark background (tested against 6.3 Night Mode's darkest background too).
+- Tab order: month navigation → day cells (as a grid) → total summary → view-mode switcher.
+- Day cells respond to Enter/Space to open the intercessor drawer; drawer traps focus.
+- `prefers-reduced-motion` disables the subtle "new prayer arrived" pulse animation on the current day.
 
 **Files to create:**
 
-- `frontend/src/components/prayer-wall/IntercessorTimeline.tsx`
-- `backend/src/main/java/com/worshiproom/post/IntercessorService.java`
-- `backend/src/main/java/com/worshiproom/post/dto/IntercessorResponse.java`
+- `frontend/src/pages/IntercessorTimeline.tsx`
+- `frontend/src/components/prayer-wall/TimelineHeatmap.tsx`
+- `frontend/src/components/prayer-wall/TimelineByPostList.tsx`
+- `frontend/src/components/prayer-wall/TimelineByPersonList.tsx`
+- `frontend/src/components/prayer-wall/TimelineDayDrawer.tsx`
+- `frontend/src/components/prayer-wall/YearOfPrayerImage.tsx`
+- `frontend/src/hooks/useIntercessorTimeline.ts`
+- `frontend/src/constants/timeline-copy.ts`
+- `backend/src/main/java/com/worshiproom/post/IntercessorTimelineController.java`
+- `backend/src/main/java/com/worshiproom/post/IntercessorTimelineService.java`
+- `backend/src/main/java/com/worshiproom/post/dto/TimelineByDayResponse.java`
+- `backend/src/main/java/com/worshiproom/post/dto/TimelineByPostResponse.java`
+- `backend/src/main/java/com/worshiproom/post/dto/TimelineByPersonResponse.java`
+- `backend/src/test/java/com/worshiproom/post/IntercessorTimelineIntegrationTest.java`
+- `__tests__/*.test.tsx` for each frontend component
 
 **Files to modify:**
 
-- `backend/src/main/java/com/worshiproom/post/PostController.java` (add endpoint)
-- `frontend/src/components/prayer-wall/PrayerCard.tsx` (render the timeline)
+- `UserProfilePage.tsx` (or equivalent) — add link to "Your intercessor timeline" in the owner-only actions section
+- OpenAPI spec — document the three endpoints
+- `.claude/rules/11-local-storage-keys.md` — no new keys (timeline is fully server-side)
+
+**API changes:**
+
+- `GET /api/v1/users/me/intercessor-timeline/by-day?month=YYYY-MM` — returns `{ data: { days: [{ date, count, intercessors: [...] }], month_summary: { total_days_with_prayer, total_prayers } }, meta }`. AuthN required; endpoint is always `/users/me` (no ability to request another user's timeline).
+- `GET /api/v1/users/me/intercessor-timeline/by-post?limit=20&offset=0&include_sparse=false` — paginated post list with per-post prayer counts and sparklines.
+- `GET /api/v1/users/me/intercessor-timeline/by-person` — friend-only intercessor leaderboard (ordered most-prayers-first) + aggregated non-friend count footer.
+- `POST /api/v1/users/me/intercessor-timeline/year-of-prayer-image` — generates the annual summary PNG; rate-limited 1/day per user.
+
+**Copy Deck:**
+
+- Page heading: "Your intercessor timeline"
+- Subhead: "A record of being kept."
+- Tab labels: "By day", "By post", "By person"
+- By-day total summary: "{N} days with prayer since you joined — you have been kept."
+- By-post empty: "When people pray for your posts, this is where you'll see it unfold."
+- By-post sparse filter label: "Show posts with no intercession"
+- By-person empty: "When friends pray for you, they'll show up here."
+- By-person footer: "{N} more people have prayed for you who aren't shown here."
+- Day drawer header: "{Date}"
+- Day drawer friend row: "{displayName} · prayed"
+- Day drawer non-friend aggregated: "{N} others prayed"
+- Year-of-Prayer button: "Save this year as an image"
+- Year-of-Prayer modal header: "Your year of prayer"
+- Empty heatmap year: "Your first year is still being written."
+- Block-adjusted counts note (NOT shown to user; internal documentation): server silently excludes blocked-user prayers without informing the author
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- No public-facing version of the timeline
+- No "coverage score" or percentage metric
+- No comparative language or benchmarks
+- Empty days render as empty (no conspicuous zero-markers)
+- Sparse-post filter is opt-in and buried
+- Calendar palette is warm amber (candle), not commit-graph red
+- Zero-friends empty state is gentle, not urging
+- Year-of-Prayer shareable is optional and not auto-prompted
+- Rate-limited image generation
+- Non-friend intercessors aggregated (footer line), never individually named or counted
+- Blocked-user prayers silently disappear (no "X prayers were hidden due to blocks" exposure)
 
 **Acceptance criteria:**
 
-- [ ] Summary line visible on every prayer card
-- [ ] Tap expands the list inline
-- [ ] List shows display names (or "Anonymous")
-- [ ] Timestamps in relative format
-- [ ] Anonymous reactors are not deanonymized
-- [ ] No comparison or leaderboard framing
-- [ ] Brand voice review passes
-- [ ] At least 10 tests
+- [ ] Endpoint returns 403 when requester is not the profile owner (verified by seeding user A's timeline and fetching as user B)
+- [ ] By-day view renders calendar heatmap with correct per-day intensity based on intercessor counts
+- [ ] Heatmap color palette is amber/candle (not green commit-graph)
+- [ ] Empty days render without color, border, or interaction; screen reader says "no prayers recorded"
+- [ ] Heatmap intensity scale: 0=empty, 1=pale, 2-5=medium, 6+=deep; tested with boundary counts
+- [ ] Day drawer opens on day click, lists friends by name, non-friends as "A friend"
+- [ ] By-post view paginates correctly with `limit` / `offset`
+- [ ] By-post view shows sparkline per post (count-over-time since post creation)
+- [ ] "Show sparse posts" filter is unchecked by default
+- [ ] When unchecked, posts with zero intercessions are HIDDEN from the By-post list
+- [ ] When checked, all posts appear including zero-intercession ones
+- [ ] By-person view lists ONLY friend intercessors (verified by seeding both friend and non-friend prayers)
+- [ ] By-person footer aggregates non-friend count correctly
+- [ ] By-person view hard cap of 100 friend-intercessors (beyond that, remainder rolls into footer aggregate)
+- [ ] Year-of-Prayer button rate-limited to 1/day per user (4th attempt returns 429)
+- [ ] Year-of-Prayer PNG generation reuses PII-stripping from Spec 6.7 and Spec 6.1
+- [ ] Blocked-user prayers do NOT appear anywhere in the timeline (integration test: block user, verify past prayers disappear silently)
+- [ ] Unblocking restores the previously-blocked user's past prayers (integration test)
+- [ ] Redis cache with 5-minute TTL is honored for each view mode
+- [ ] Cache invalidated on: new reaction toggle on author's post, friendship status change, block status change (three separate invalidation paths verified)
+- [ ] Anonymous posts' intercessors appear correctly in the author's timeline (anonymity of the POST doesn't hide the intercessor from the AUTHOR)
+- [ ] Private and friends-only posts' intercessors appear correctly in the author's timeline
+- [ ] Heatmap navigates back to user's join date but NOT forward beyond today
+- [ ] Tab order is logical and reaches all interactive elements
+- [ ] Screen reader announces month navigation, day counts, and drawer content correctly
+- [ ] `prefers-reduced-motion` disables the current-day pulse animation
+- [ ] Heatmap colors pass WCAG AA contrast against dark Night Mode background
+- [ ] Day drawer traps focus and closes on Escape
+- [ ] Mobile viewport renders the heatmap with legible day cells (min 32px × 32px touch target)
+- [ ] API response includes blocked-user-adjusted counts, NOT raw counts with notes about hidden prayers
+- [ ] At least 28 tests covering authz, view modes, privacy attribution, cache invalidation, block semantics, accessibility, rate limits, PNG generation
+
+**Testing notes:**
+
+- Integration test: seed 12 months of post+reaction data across mixed friend/non-friend/blocked intercessors; fetch all three views; assert privacy attribution
+- Integration test: block a user, assert timeline refetch shows adjusted counts and no trace of the blocked user; unblock, assert restoration
+- Unit test: color intensity mapping for boundary counts (0, 1, 2, 5, 6, 100)
+- Unit test: accessible name generation for each day cell state (empty, single prayer, multiple prayers)
+- Playwright: navigate to own timeline, verify all three views render, open day drawer, close, toggle sparse-filter, generate year image
+- Security test: user A attempts `GET /api/v1/users/me/intercessor-timeline/by-day` with user B's JWT manipulated — verify 403
+- Performance test: user with 1000 posts and 10,000 total prayers across 2 years — verify By-day month load completes within 500ms with cache cold, 50ms with cache warm
+
+**Notes for plan phase recon:**
+
+1. Confirm the aggregation query performance at scale — worst-case user (10K+ prayers across 2 years) should load By-day view in <500ms uncached
+2. Decide sparkline rendering approach: CSS-only (simple, small bundle) vs SVG (more flexible, slightly larger bundle). Recommendation: SVG via a tiny component.
+3. Confirm timezone handling for day boundaries — uses author's timezone from Spec 1.3b so a 11:55pm prayer doesn't appear on the wrong day
+4. Verify the block-cascading cache invalidation fires on `DELETE /api/v1/users/me/blocks/{userId}` (the unblock path must invalidate too)
+5. Confirm the Year-of-Prayer companion relationship with Phase 13.3 Year-in-Review — are they separate features (my recommendation) or unified?
+
+**Out of scope:**
+
+- Public or aggregated community-level timelines ("most-prayed-for-users of the year")
+- Timeline export in machine-readable format (the Spec 10.11 data export covers this; timeline is a viewing experience)
+- Notifications about timeline milestones ("you've been prayed for 100 days!" — explicitly anti-anti-pressure)
+- Comparing your timeline to a friend's (never)
+- Shared timelines for couples or families (would require consent frameworks not in scope)
+- Timeline-based AI insights or summaries
+
+**Out-of-band notes for Eric:** The single subhead "A record of being kept" is doing a lot of work. It frames the feature as testimony rather than metric. If you ever feel tempted to change it to something like "Your prayer stats" or "Intercession metrics," stop and re-read this paragraph. The language is the feature as much as the data is. Also: I deliberately designed this to have three views because different users will relate to it differently — some will want the calendar (temporal), some will want the post list (contextual), some will want to see who has been faithful (relational). Don't cut any of the three views to reduce scope; each is the right view for someone. Finally: resist the urge to show "coverage %" or "prayer streak" anywhere in this feature. The whole point is that prayer is a gift, not a grind, and any metric that turns it into a grind is a design failure.
+
+---
 
 ### Spec 6.6 — Answered Wall
 
 - **ID:** `round3-phase06-spec06-answered-wall`
 - **Size:** L
-- **Risk:** Medium
-- **Prerequisites:** 6.5
-- **Goal:** A new tab or section called "Answered" that shows every prayer marked answered, sorted by `answered_at DESC`. Becomes a celebration archive of God's faithfulness. Each card is rendered with the existing AnsweredBadge plus an extra warmth treatment.
+- **Risk:** Medium (celebration-space has subtle anti-pressure failure modes — comparative framing, prosperity-gospel adjacency, survivor bias)
+- **Prerequisites:** 5.6 (Redis cache), Phase 3 complete (reads from `posts` with `is_answered=true`)
+- **Goal:** A dedicated, always-on public surface at `/prayer-wall/answered` showing prayer requests that the author has marked as answered, with the praise/update text they chose to share. This exists for two reasons: (1) for users in the middle of a hard prayer to see that prayers DO get answered sometimes, as a quiet source of hope, and (2) for the community to celebrate with authors without the celebration being buried in the main feed. The hard design problem: celebration without comparison, gratitude without "you just need more faith" subtext, joy that doesn't accidentally shame people whose prayers haven't been answered yet.
 
-**Approach:** New page or sub-tab at `/prayer-wall/answered`. Reuses the existing feed query with a filter `?sort=answered`. Each card shows the original prayer, the answer text, the date answered, and a small "Praising with you" reaction button (separate counter from the main praying count). Brand voice celebration copy at the top: "Stories of God's faithfulness from this community."
+**Approach:** `/prayer-wall/answered` renders a reverse-chronological feed of posts where `is_answered=true`, filtered to `visibility='public'` OR `visibility='friends' AND requester ∈ author's friends`. Same card component as the main feed (`PrayerCard.tsx` with `post.is_answered=true` triggering the answered-visual-variant), with the author's `answered_text` (the praise/update they chose to share) prominently rendered in a warmer color. A "Share your update" flow lets authors of answered prayers add or edit the `answered_text` after the fact. Reactions and comments work as normal, though reactions on answered posts use a distinct label ("Praising with you" instead of "Praying") and the Light a Candle reaction is replaced with a "Celebrate" reaction using a warm sunrise palette.
+
+**The page structure:**
+
+- Hero area (quieter than main feed): "Answered" heading in Fraunces, subhead in Lora italic: "Gratitude, not comparison."
+- Short intro paragraph: "These are prayer requests whose authors chose to share an update. Many prayers are never 'finished' in the ways we expect. That doesn't mean they weren't heard. This page is for joy, not for keeping score."
+- Optional filter chips: "All" (default), "Health", "Family", "Work", "Grief", "Gratitude" — no chip for "Mental Health" (reason: see below)
+- Reverse-chrono feed of answered `PrayerCard`s
+
+**Why no Mental Health filter:**
+
+Mental-health prayers being "answered" is a genuinely complicated theological/clinical territory. A post like "prayed for relief from depression, it got better" can land well for one reader and terribly for another (who thinks "why hasn't mine gotten better?"). Rather than surface Mental-Health-category answered posts as a filtered collection, we just include them in "All" without their own filter chip. This prevents the subtle message that mental-health suffering is supposed to resolve on the same timeline as other suffering. Health and Grief are also sensitive, but their inclusion in filterable categories is a deliberate trade-off: Health because physical healing answers are often the most hopeful, Grief because "time healed" is a legitimate answer users celebrate. Mental Health is the only category we intentionally don't filter by.
+
+**The "answered" lifecycle:**
+
+- Author marks a prayer as answered via Spec 3.5's MarkAsAnsweredForm, which already lets them write `answered_text`
+- On submit: post gets `is_answered=true`, `answered_at=NOW()`, appears on Answered Wall
+- `answered_text` is optional. Posts can be answered without a praise/update text (author just wants to mark it done). The Answered Wall still shows them, but with a gentle fallback rendering ("A prayer was answered. No additional update was shared.")
+- Author can later add or edit `answered_text` via "Share an update" action visible on their own answered posts (uses existing 5-minute edit window? NO — different semantics here: the answered_text is editable indefinitely, since hindsight shapes how we tell these stories. Edit history is NOT preserved — latest version wins)
+- Author can UN-MARK as answered (sets `is_answered=false`, `answered_at=NULL`) in case they marked prematurely or changed their understanding of the situation. Removes from Answered Wall cleanly.
+
+**Reactions on answered posts:**
+
+- "Praying" reaction replaced by "Praising with you" (same mechanic, different label and icon — a soft sunrise / raised hands / "hallelujah" visual)
+- "Light a Candle" reaction replaced by "Celebrate" (warm sunrise palette, different animation from the mourning-candle)
+- Backend-wise, these are new `reaction_type` values: `'praising'` and `'celebrate'` alongside the existing `'praying'` and `'candle'`. CHECK constraint extended per Decision 5 pattern. Reaction endpoint from Phase 3.7 Addendum handles all four types transparently.
+- Counts rendered separately: "12 praising with you · 3 celebrating"
+
+**Comments on answered posts:**
+
+- Comments work as usual. Brand voice guidance for commenters is softer: "Share in their joy. A few words is enough."
+- Inline composer placeholder: "Say a word of celebration..."
+- No auto-generated congratulations copy (AI-generated responses explicitly forbidden per Universal Rule 13, and even if allowed, would feel hollow here)
+
+**Feed sort & pagination:**
+
+- Default sort: `answered_at DESC` (most recently answered first)
+- Secondary filter: `?category=health` narrows by post category
+- Pagination: `?page=N&limit=20`, max `limit=50`
+- Feed excludes answered posts whose author has since deleted the post or gone through account deletion (per Spec 10.11 — rendered as "Former member" per deleted-author rules would feel wrong on a celebration page; we just hide them)
+- Feed INCLUDES answered posts that have expired (Testimonies never expire, but Prayer Requests do — expired-and-answered is a valid state and belongs on the Wall)
+
+**Auth gating:**
+
+- Logged-out: can view the Answered Wall (public content). Can read posts. CANNOT react or comment (tap triggers AuthModal).
+- Logged-in: full interaction. Can mark own prayers as answered from this page via an "Add update" button visible on their own unanswered posts (shortcut link back to MarkAsAnsweredForm).
+- Anonymous-posted prayers: author is still "Anonymous" on the Answered Wall, consistent with original post. The `answered_text` they write is their voice, but attribution stays as "Anonymous" per Decision 3.
+
+**Anti-pressure design (load-bearing):**
+
+- Page subhead explicitly states "Gratitude, not comparison" at the top of every view
+- No "most-celebrated" or "most-reactions" sort option
+- No streak or count of "how many answered prayers this week" community-wide
+- No personalized "your answered prayers" mini-feed on this page (that's on the user's own profile Growth tab, where it belongs)
+- No push notifications when a new post hits the Answered Wall (would create "celebration-chasing" patterns)
+- No "Suggested prayers to pray" next to answered posts (the Answered Wall isn't an engagement funnel)
+- Empty state (no answered posts in the viewer's visibility set): "When prayers are answered and shared here, you'll see them." — gentle, not urging
+- NEVER surface aggregate metrics like "1,200 answered prayers shared so far" — would cheapen individual stories into counters
+- Filter chips excluding Mental Health is a deliberate anti-pressure choice (see rationale above)
+
+**Performance & caching:**
+
+- Feed response cached in Redis (per 5.6) keyed by `(category?, page)`, TTL 2 minutes — answered feed changes slowly
+- Cache invalidated on: any post `is_answered` transition (true→false or false→true), post content edit of an answered post
+- Logged-in requests NOT cached per-user (auth gates on reactions already handled by frontend state; the feed response itself doesn't change per user for public/friend visibility because those filters are computed at query time)
+
+**Accessibility:**
+
+- Page has proper `<main>` landmark
+- Hero subhead as `<h2>` within the main landmark
+- Filter chips are keyboard-reachable, announce state ("Health, unselected" / "Health, selected")
+- Answered variant of `PrayerCard` has accessible name including "answered" ("Sarah's prayer request, answered: Got the surgery approval")
+- "Celebrate" reaction animation respects `prefers-reduced-motion` (falls back to a single static state)
+- Color contrast of warmer answered-palette meets WCAG AA on all Night Mode and regular backgrounds
 
 **Files to create:**
 
 - `frontend/src/pages/AnsweredWall.tsx`
-- `frontend/src/components/prayer-wall/AnsweredCard.tsx` (small extension of PrayerCard)
+- `frontend/src/components/prayer-wall/AnsweredWallHero.tsx`
+- `frontend/src/components/prayer-wall/AnsweredCategoryFilter.tsx`
+- `frontend/src/components/prayer-wall/CelebrateReaction.tsx` (distinct from Light a Candle)
+- `frontend/src/components/prayer-wall/AnsweredPostCard.tsx` (wrapper that composes PrayerCard with answered-variant props)
+- `frontend/src/hooks/useAnsweredFeed.ts`
+- `frontend/src/constants/answered-wall-copy.ts`
+- `backend/src/main/java/com/worshiproom/post/AnsweredFeedController.java`
+- `backend/src/main/java/com/worshiproom/post/AnsweredFeedService.java`
+- `backend/src/main/resources/db/changelog/2026-04-22-002-extend-reaction-types-praising-celebrate.xml`
+- `backend/src/test/java/com/worshiproom/post/AnsweredFeedIntegrationTest.java`
+- `__tests__/*.test.tsx` for each frontend component
 
 **Files to modify:**
 
-- Router to add `/prayer-wall/answered` route
-- Prayer Wall navigation to surface the Answered tab
+- `PrayerCard.tsx` — accept `answeredVariant` prop, render warmer palette + `answered_text` prominently
+- `InteractionBar.tsx` — swap "Praying" label to "Praising with you" and Light-a-Candle to Celebrate when rendering an answered post
+- `MarkAsAnsweredForm.tsx` — no behavior change; already writes `answered_text` per Spec 3.5
+- Feed sort logic — already supports `is_answered` filter; answered endpoint just parameterizes
+- Router — add `/prayer-wall/answered` route
+- Navbar — add "Answered" link in Prayer Wall section (visible to both logged-out and logged-in)
+- OpenAPI spec — document the answered-feed endpoint and new reaction types
+
+**Database changes:**
+
+- Liquibase changeset: extend `post_reactions.reaction_type` CHECK constraint to allow `'praying'`, `'candle'`, `'praising'`, `'celebrate'`
+- No schema shape change (still `(post_id, user_id, reaction_type)` composite PK per Decision 5)
+- Rollback: revert CHECK constraint to previous list (data loss acceptable for forward-only migration discipline)
+
+**API changes:**
+
+- `GET /api/v1/posts/answered?category=&page=&limit=` — returns paginated answered posts, respects visibility rules, excludes deleted-author posts
+- `POST /api/v1/posts/{id}/reactions` — already exists; now validates new `reaction_type` enum values
+- OpenAPI spec updated
+
+**Copy Deck:**
+
+- Page title (browser tab): "Answered — Worship Room"
+- Hero heading: "Answered"
+- Hero subhead: "Gratitude, not comparison."
+- Hero intro paragraph: "These are prayer requests whose authors chose to share an update. Many prayers are never 'finished' in the ways we expect. That doesn't mean they weren't heard. This page is for joy, not for keeping score."
+- Filter chip "All": "All"
+- Category chips: "Health", "Family", "Work", "Grief", "Gratitude" (no Mental Health chip)
+- Empty state: "When prayers are answered and shared here, you'll see them."
+- "Answered" badge on card: "Answered"
+- Missing-answered-text fallback: "A prayer was answered. No additional update was shared."
+- "Share an update" button (on author's own answered post without text): "Share an update"
+- Un-mark-answered button (author's own post): "Un-mark as answered"
+- Praising reaction label: "Praising with you"
+- Celebrate reaction label: "Celebrate"
+- Reaction count rendering: "{N} praising with you" / "{N} celebrating"
+- Inline composer placeholder: "Say a word of celebration..."
+- Navbar link: "Answered"
+- Logged-out auth modal trigger (on reaction tap): "Sign in to celebrate with {author}"
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- Page subhead names the tension explicitly ("Gratitude, not comparison")
+- No Mental Health filter chip (rationale in Approach section)
+- No "most-celebrated" sort
+- No community aggregate metrics
+- No push notifications on new answered posts
+- No engagement-funnel suggestions next to cards
+- Empty state is gentle, not urging
+- Celebrate reaction animation is optional (reduced-motion honored)
+- Author can un-mark as answered without shame or friction
+- Answered_text is optional and editable indefinitely (hindsight shapes how we tell these stories)
+- Comment tone guidance ("A few words is enough") prevents over-performance
 
 **Acceptance criteria:**
 
-- [ ] Answered Wall route works
-- [ ] Sorted by `answered_at DESC`
-- [ ] Each card shows the answer text
-- [ ] "Praising with you" reaction works
-- [ ] Brand voice review passes
-- [ ] At least 8 tests
+- [ ] `/prayer-wall/answered` renders for both logged-out and logged-in users
+- [ ] Only posts with `is_answered=true` appear in the feed
+- [ ] Private posts (`visibility='private'`) NEVER appear on the Answered Wall regardless of answer state
+- [ ] Friends-only posts appear only for the author's friends
+- [ ] Public posts appear for everyone
+- [ ] Default sort is `answered_at DESC`
+- [ ] Pagination works with `?page` and `?limit`
+- [ ] Category filter chips filter feed (Health, Family, Work, Grief, Gratitude)
+- [ ] No Mental Health filter chip (intentional omission verified)
+- [ ] Filter "All" shows everything INCLUDING mental-health category answered posts
+- [ ] Answered variant of PrayerCard uses warmer palette distinct from regular feed
+- [ ] `answered_text` renders prominently when present
+- [ ] Missing-answered-text fallback renders gracefully ("A prayer was answered. No additional update was shared.")
+- [ ] "Praising with you" and "Celebrate" reactions render with distinct icons and counts from "Praying" and "Candle"
+- [ ] Liquibase changeset extends CHECK constraint to include `'praising'` and `'celebrate'`
+- [ ] Reaction endpoint accepts all 4 reaction types
+- [ ] Reaction counts displayed separately per type
+- [ ] Author can edit `answered_text` indefinitely via "Share an update" (no 5-minute window)
+- [ ] Author can un-mark as answered, post disappears from Answered Wall
+- [ ] Post re-marked as answered reappears with updated `answered_at`
+- [ ] Expired Prayer Requests still appear on Answered Wall if `is_answered=true`
+- [ ] Posts whose author is soft-deleted (within grace period) still appear with normal attribution
+- [ ] Posts whose author is hard-deleted are excluded entirely from the Answered Wall (not rendered as "Former member")
+- [ ] Anonymous-posted answered prayers retain "Anonymous" attribution
+- [ ] Logged-out users see full feed but get AuthModal when trying to react or comment
+- [ ] Logged-in users can react and comment normally
+- [ ] Empty state renders when visibility rules leave no posts
+- [ ] Navbar link routes to `/prayer-wall/answered`
+- [ ] Page title and heading use Fraunces, subhead uses Lora italic
+- [ ] Redis cache TTL 2 minutes verified
+- [ ] Cache invalidated on any `is_answered` state change
+- [ ] Cache invalidated on post content edit of an answered post
+- [ ] Accessibility: hero is `<h1>`, subhead `<h2>`, filter chips keyboard-navigable
+- [ ] Accessibility: answered card accessible name includes "answered"
+- [ ] Accessibility: Celebrate reaction animation respects `prefers-reduced-motion`
+- [ ] Color contrast of warmer palette passes WCAG AA on Night Mode + regular backgrounds
+- [ ] Brand voice review of all copy strings passes
+- [ ] At least 24 tests covering visibility rules, reaction types, cache invalidation, edit semantics, deleted-author handling, category filtering, a11y
+
+**Testing notes:**
+
+- Integration test: seed posts of each visibility × answered combination; verify correct subset appears for each requester type
+- Integration test: soft-delete author, verify post still appears; hard-delete author, verify post disappears
+- Integration test: un-mark-answered removes post from Answered Wall API response
+- Unit test: Celebrate and Praising reactions save with correct `reaction_type` value
+- Unit test: reaction count rendering when user has both Praising and Celebrate on the same post
+- Playwright: navigate to Answered Wall, filter by category, try to react while logged-out (AuthModal appears), log in, react, un-react
+- Accessibility test: axe-core on Answered Wall, VoiceOver spot-check
+
+**Notes for plan phase recon:**
+
+1. Confirm the reaction CHECK constraint update plays well with existing data (none should be affected since `'praising'` and `'celebrate'` don't yet exist)
+2. Verify the Celebrate animation bundle cost stays under budget (target: under 5 KB gzipped for the animation component)
+3. Confirm MarkAsAnsweredForm (Spec 3.5) already distinguishes the optional-answered_text path — if it REQUIRES answered_text today, this spec introduces the optional path, which is a behavior change to document
+4. Decide color palette for Celebrate reaction specifically — recommend sunrise gradient (gold + coral) distinct from Light-a-Candle's amber
+5. Confirm expired posts still flow through the answered-feed query (query should NOT filter `expires_at > NOW()` for this endpoint)
+
+**Out of scope:**
+
+- Answered-Wall-specific search (Phase 11 full-text covers this)
+- Answered post analytics for the author (lives on the author's profile, Phase 8)
+- "Pray for my next thing" CTA on answered posts (would turn celebration into engagement)
+- Testimony-post equivalent on Answered Wall — Testimonies already function differently (they're NOT prayer requests); this page is for answered-prayer-requests
+- Video / audio answered updates
+- Answered update templates or AI-suggested praise text (explicitly forbidden)
+- Public leaderboard of "most answered prayers this month"
+
+**Out-of-band notes for Eric:** The hero subhead "Gratitude, not comparison" is the single most important piece of copy in this feature. It's there because users will inevitably compare — "my prayer hasn't been answered, why theirs?" — and naming the tension directly is kinder than pretending it doesn't exist. Also: the "Celebrate" reaction icon choice matters a lot. Resist emoji (🎉, 🙌); they read as throwaway. A custom sunrise SVG or a single warm-toned hand-raised mark will feel more like Worship Room. Finally: the Mental Health filter omission is the single design choice I'd most expect someone to second-guess during execution. It's deliberate. If a user feature-requests a Mental Health filter, the answer is "no, and here's why" (prosperity-gospel adjacency risk for the category that most needs protection from it). Document the rationale so future-you doesn't re-open the question without context.
+
+---
 
 ### Spec 6.7 — Shareable Testimony Cards
 
@@ -3063,36 +5302,257 @@ qotd_questions
 - [ ] Fallback download works on desktop
 - [ ] Anonymous testimonies show anonymous attribution
 - [ ] Brand visual review passes
-- [ ] At least 10 tests
+- [ ] Pre-share confirmation modal: before generating the PNG, show a one-time-per-user (sticky-dismissible) modal explaining "Once you share this image, it cannot be unshared. People who receive it can save it forever, even if you later delete the original testimony." User must explicitly confirm. Modal does NOT show for subsequent shares from the same user (preference stored in `wr_settings.dismissedShareWarning`).
+- [ ] Image does NOT include the user's avatar URL when avatar is from an external/uploaded source (only renders initials in a stylized circle) — avatar URLs may contain identifying user IDs that leak in URL inspection of the PNG metadata
+- [ ] PNG metadata stripped of EXIF, generation timestamp truncated to date (no time-of-day fingerprinting)
+- [ ] At least 12 tests (includes 2 new tests for the share warning and metadata stripping)
 
 ### Spec 6.8 — Verse-Finds-You
 
 - **ID:** `round3-phase06-spec08-verse-finds-you`
 - **Size:** L
-- **Risk:** Medium
-- **Prerequisites:** 6.7
-- **Goal:** Every time the user opens the Prayer Wall, a small "A scripture for you today" section near the top displays one verse chosen by emotional context (matching the user's recent activity, time of day, current liturgical season). Updates daily, never repeats within 30 days.
+- **Risk:** HIGH (AI-adjacent feature surfacing scripture in response to user's emotional/spiritual state; misapplied scripture in vulnerability moments causes real harm; fallback behavior when AI is unavailable is safety-critical)
+- **Prerequisites:** 5.6 (Redis cache), 6.1 (Prayer Receipt — shares curated verse set pattern)
+- **Runtime-gated dependencies:** 10.5 (crisis detection routing) and 10.6 (automated flagging) — the curated-set selection engine ships in Phase 6 but the 48-hour crisis-flag suppression gate requires the Phase 10 classifier to be live; before 10.5/10.6 land, the surfacing pipeline falls through its safe-failure path (returns null) for all users since no crisis flag can be read — Verse-Finds-You is functionally dormant until then, which is the intended behavior
+- **Goal:** After a user composes a prayer request, comments on a vulnerable post, or spends time reading the Prayer Wall, occasionally surface a single short scripture passage that speaks to the context. Not a daily-verse, not an AI chatbot — a quiet, rare, carefully-scoped offering where a passage seems to "find" the user at the right moment. The challenge: make scripture feel like a gift from a friend who heard you, not an algorithmic intrusion, not a prosperity-gospel cliché, not a guilt-verse surfaced to someone in grief. Done wrong, this feature turns the Prayer Wall into a "Christian BuzzFeed." Done right, it's the moment a user screenshots and sends to a friend.
 
-**Approach:** Backend endpoint `GET /api/v1/users/me/verse-of-the-day` returns one scripture chosen by a service that considers: user's recent post categories (more grief lately → more Psalm 23-style verses), time of day (morning → encouragement, evening → rest), current liturgical season (Advent, Lent, Easter, Pentecost, Ordinary Time). The verse comes from a curated set of ~200 verses tagged with emotional categories. Daily rotation is per-user (not global). The verse is cached for 24 hours per user. Frontend renders a small `<VerseFindsYou />` component near the top of Prayer Wall.
+**Approach:** A curated set of 180 scripture passages, each tagged with emotional/situational domains (grief, waiting, fear, gratitude, loneliness, doubt, uncertainty, hope, endurance, comfort — deliberately no prosperity/triumph/"just-believe" tags). When the user completes certain surfacing triggers, the backend selects from the candidate set using a deterministic-by-day rotation with context filtering (category tags from the user's recent activity). The selection is NEVER done by a generative LLM — no free-form verse generation, no "pick the verse that matches this post" prompting. The AI layer (if used at all) is only for classifying the user's recent activity into a domain tag; the verse selection itself is a curated-set lookup. The surfacing is OPT-IN, rate-limited, and respects an explicit off-switch in settings.
+
+**The four surfacing triggers:**
+
+1. **Post-compose moment (opt-in):** After a user submits a prayer request, if Verse-Finds-You is enabled, a single verse appears below the success toast for 8 seconds (or until dismissed). "The word found you today:" in Lora italic, then the verse in the card's primary font. Verse chosen based on the post's category (Grief → grief-tagged verses; Gratitude → gratitude-tagged). Appears at most ONCE per user per 24h across all trigger types.
+
+2. **Comment-of-encouragement moment (opt-in):** When a user leaves a supportive comment on someone else's vulnerable post (category Mental Health, Grief, Health), occasionally a verse appears in the user's own view (NOT the post author's view — this is a gift to the commenter). Same 24h cooldown.
+
+3. **Reading-time moment (very rare):** After a user has spent >5 minutes actively reading the Prayer Wall feed in one session, a single verse card may appear mid-scroll (visually distinguished from posts, not dismissible-as-post) saying "A word as you keep watch:" Same 24h cooldown. Requires foreground + scroll activity signal (not idle tab).
+
+4. **Crisis-adjacency (NEVER surfaces; documented here as an explicit anti-pattern):** Users who have triggered crisis-flag detection on their own recent post get ZERO Verse-Finds-You surfacing for 48 hours. This is deliberate: a person in acute distress is the LEAST right moment to algorithmically serve scripture. Universal Rule 13's "crisis takes precedence" applies. Instead, the crisis resources banner (from Phase 10.5) is what they see.
+
+**The curated verse set (180 passages):**
+
+- Stored in `backend/src/main/resources/verses/verse-finds-you.json`
+- Each entry: `{ reference, text, translation: 'WEB', tags: string[], excluded_contexts: string[], approximate_length: 'short'|'medium' }`
+- Tags: `grief`, `waiting`, `fear`, `gratitude`, `loneliness`, `doubt`, `uncertainty`, `hope`, `endurance`, `comfort`, `presence`, `lament`, `rest`
+- Excluded-contexts: allows tagging a verse as "do NOT surface for grief" even if it matches another tag (defensive: some "hope" verses are wrong at a funeral)
+- Curation rules (documented at top of the JSON file):
+  - Short passages only (max ~35 words; longer passages lose their weight in surfacing UI)
+  - No "prosperity" passages (no "God will give you the desires of your heart" surfaced as a promise)
+  - No guilt/shame verses (no "oh ye of little faith" or mustard-seed-as-lecture)
+  - No judgment verses outside explicit lament context
+  - Prefer Psalms, Lamentations, Isaiah, Gospels of John and Matthew, Romans 8, Philippians 4, 2 Corinthians — passages explicitly about God's presence in difficulty
+  - Every entry reviewed against the "pastor's wife test" before inclusion: would this verse at this moment land as grace or as judgment?
+- Translation locked to WEB (World English Bible — per existing project convention and public domain)
+- The 180-passage file is version-controlled; changes go through a spec review, not hotfixed
+
+**The selection algorithm (plain-prose; no LLM in MVP):**
+
+Step 1: If user has triggered crisis-flag in the last 48 hours, return null (no surfacing). Step 2: If the user is within the 24-hour cooldown from the last surfacing, return null. Step 3: If the user has Verse-Finds-You disabled in settings, return null. Step 4: Determine context tags from the trigger — post-compose uses the post's category-mapped tags, comment uses the parent post's category-mapped tags, reading-time uses the last-viewed post's category tags. Step 5: Filter the curated set to entries matching ANY context tag AND NOT matching the excluded_contexts. Step 6: From the filtered set, select deterministically by (user_id hash + day-of-year) modulo the filtered set size. Step 7: Return the selected verse.
+
+The selection is deterministic by day — two users with the same context on the same day get the same verse. This is intentional: shared verses create emergent community moments ("did you also get Psalm 34 today?"). Rotating daily (not per-visit) prevents refresh-gaming where users reload to get a "better" verse.
+
+**Category-to-tag mapping** (documented in `verse-finds-you.json`):
+
+- `health` → `comfort`, `endurance`, `presence`
+- `mental-health` → `comfort`, `lament`, `presence`, `rest` (deliberately NOT `hope` — hope-verses can be cruel in acute depression)
+- `family` → `endurance`, `comfort`, `presence`
+- `work` → `waiting`, `uncertainty`, `endurance`
+- `grief` → `lament`, `presence`, `comfort` (deliberately NOT `hope` — too soon for most grievers)
+- `gratitude` → `gratitude`, `rest`
+- `praise` → `gratitude`
+- `relationships` → `endurance`, `comfort`, `presence`
+- `other` → `presence`, `comfort`
+
+**When NO LLM is used (the default and recommended path):**
+
+The feature above works ENTIRELY with curated sets and deterministic selection. No AI service required. This is the MVP and the recommended production path. It's cheaper, predictable, auditable, and never hallucinated a verse.
+
+**When an LLM classifier IS used (optional enhancement, NOT MVP):**
+
+For users who write free-form bio text, Testimony content, or Question posts, an LLM CLASSIFIER could map the post content into the same tag set for more precise verse selection. This is OPT-IN at the Eric-configuration level (a future enhancement spec). The LLM NEVER generates or selects the verse — only maps content → tags. The curated set remains the verse source. If this enhancement ships in a future spec, the fallback-when-classifier-down behavior is: fall back to category-based tag mapping (which is what MVP uses).
+
+**The explicit AI safety gates:**
+
+- Per Universal Rule 13: backend crisis-classifier is authoritative. Crisis posts suppress Verse-Finds-You entirely for 48h.
+- Plain text rendering only, no HTML, no Markdown. No `dangerouslySetInnerHTML`.
+- If any LLM is ever used (future enhancement), classification output is strictly validated against the known tag enum — a bogus tag like "desperation" coming back from the LLM falls through to the safe default tag set.
+- No user input ever flows into verse selection beyond category tag — user's actual post TEXT is not sent to any AI service unless the optional enhancement is active and the user has opted in.
+- The feature degrades safely: if ANY part of the pipeline fails (Redis down, classifier timeout, JSON parse error, tag mismatch), the surfacing simply doesn't happen. No error message to the user. No fallback random verse. Silent degradation is the right choice here — a bad verse is worse than no verse.
+
+**Opt-in and off-switch:**
+
+- Settings toggle: "Verse Finds You" — default OFF
+- Settings description: "Occasionally, after you share a prayer, comment, or spend time reading, a short scripture may appear. Off by default. You can turn it on anytime."
+- No confirmation modal on enabling (unlike 3am Watch, this feature's risk is quieter — bad verses can sting but rarely cause acute harm). Simple toggle.
+- No confirmation on disabling either — one tap.
+- Per-session transient dismissal: tapping "X" on a verse hides it immediately and suppresses future surfacings for that session.
+- Long-term suppression: after dismissing 3 verses in a row without engagement, a one-time inline prompt offers "Want to turn this off?" with a quick toggle.
+
+**Shareable verse moment (optional):**
+
+When a verse surfaces, a small "Save this" button lets users screenshot-save or save-to-phone. Reuses PII-stripping from Spec 6.7. Rate-limited to 1 save per verse per user. Saves are client-side PNG generation; no server-side image logs.
+
+**Anti-pressure design (load-bearing):**
+
+- Default OFF. User opts in deliberately.
+- 24h cooldown across ALL triggers — a user is NEVER bombarded with verses
+- Crisis-flag suppression for 48h — acute distress is not the moment for algorithmic scripture
+- Curated set with explicit exclusions (no prosperity, no guilt, no judgment-without-lament-context)
+- Deterministic daily rotation — no "slot machine" dopamine loop of refresh-for-new-verse
+- No LLM-generated content in MVP; curated-set selection only
+- Graceful silent failure — no verse is always better than wrong verse
+- Plain text rendering — no HTML injection, no Markdown formatting that could hide injection
+- No "verse of the day" notification (would train users into daily-dose pattern antithetical to the feature)
+- No tracking of which verses "worked" for users (no engagement optimization loop)
+- Mental Health and Grief categories explicitly mapped to `lament` and `comfort` tags, NOT to `hope`
+
+**Accessibility:**
+
+- Verse card has `role="note"` and accessible name including "scripture"
+- Verse reference is a proper `<cite>` element for semantic clarity
+- Dismiss button has clear accessible name ("Dismiss this verse")
+- Reduced-motion: no fade-in animation; verse appears instantly
+- Screen reader announces the verse politely (`aria-live="polite"`), not assertively
+- Color contrast passes WCAG AA
 
 **Files to create:**
 
-- `backend/src/main/java/com/worshiproom/scripture/VerseFindsYouService.java`
-- `backend/src/main/java/com/worshiproom/scripture/VerseRepository.java`
-- `backend/src/main/resources/db/changelog/2026-04-19-001-create-verses-table.xml`
-- `backend/src/main/resources/db/changelog/contexts/2026-04-19-002-seed-verses.xml`
 - `frontend/src/components/prayer-wall/VerseFindsYou.tsx`
+- `frontend/src/hooks/useVerseFindsYou.ts`
+- `backend/src/main/java/com/worshiproom/verse/VerseFindsYouController.java`
+- `backend/src/main/java/com/worshiproom/verse/VerseFindsYouService.java`
+- `backend/src/main/java/com/worshiproom/verse/VerseSelectionEngine.java`
+- `backend/src/main/java/com/worshiproom/verse/dto/VerseFindsYouResponse.java`
+- `backend/src/main/resources/verses/verse-finds-you.json` (180 curated passages)
+- `backend/src/test/java/com/worshiproom/verse/VerseSelectionEngineTest.java`
+- `backend/src/test/java/com/worshiproom/verse/VerseFindsYouIntegrationTest.java`
+- `__tests__/*.test.tsx` for each frontend component
+
+**Files to modify:**
+
+- `InlineComposer.tsx` / `PrayerWallFeed.tsx` / `CommentInput.tsx` — trigger points after submit/scroll
+- Settings page — add VerseFindsYou toggle in a "Gentle extras" section
+- `.claude/rules/11-local-storage-keys.md` — document `wr_settings.verseFindsYou.enabled`, `wr_verse_dismissals` (dismissal count + last dismissed timestamp for the 3-in-a-row prompt)
+- OpenAPI spec — document the endpoint
+
+**Database changes:**
+
+- New table `verse_surfacing_log` (lightweight): `(user_id, verse_id, surfaced_at, trigger_type, dismissed_at)` — used ONLY for 24h cooldown enforcement and the 3-in-a-row dismissal detection. Retained 30 days; older rows purged by scheduled job.
+- Liquibase changeset: `2026-04-22-003-create-verse-surfacing-log.xml`
+- Index on `(user_id, surfaced_at DESC)` for fast cooldown lookup
+
+**API changes:**
+
+- `GET /api/v1/verse-finds-you?trigger=post_compose&context=health` — returns `{ data: { verse: { reference, text } | null, cooldown_until: timestamp | null, reason: 'cooldown' | 'crisis_suppression' | 'disabled' | 'no_match' | null } }`. Returns `verse: null` in all non-surfacing cases with a reason code. Auth required.
+- Rate-limited to 10 requests per hour per user (prevents client-side polling abuse even though the surfacing logic prevents actual verse delivery).
+
+**Copy Deck:**
+
+- Post-compose surfacing prefix: "The word found you today:"
+- Comment surfacing prefix: "A word as you gave comfort:"
+- Reading-time surfacing prefix: "A word as you keep watch:"
+- Dismiss button: "Dismiss"
+- Save-this-verse button: "Save"
+- Settings toggle label: "Verse Finds You"
+- Settings description: "Occasionally, after you share a prayer, comment, or spend time reading, a short scripture may appear. Off by default. You can turn it on anytime."
+- 3-in-a-row dismissal prompt: "Want to turn this off? You can turn it back on anytime in settings."
+- 3-in-a-row dismiss primary: "Turn off"
+- 3-in-a-row dismiss secondary: "Keep it on"
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- Default OFF at account creation
+- 24h cooldown across all trigger types
+- 48h crisis-flag suppression (Universal Rule 13 compliance)
+- Curated verse set with explicit exclusion rules (no prosperity, no guilt)
+- Deterministic daily rotation, not per-visit randomization
+- Silent failure on any pipeline error (no verse > wrong verse)
+- No LLM-generated content in MVP
+- Mental Health and Grief categories mapped to `lament`/`comfort`, NOT `hope`
+- No daily-verse notification
+- No verse engagement tracking / optimization
+- 3-in-a-row dismissal offers a gentle off-ramp
+- Plain text only; no HTML, no Markdown
 
 **Acceptance criteria:**
 
-- [ ] Endpoint returns one verse per user per day
-- [ ] Verse changes day-over-day
-- [ ] Never repeats within 30 days
-- [ ] Verse selection considers recent activity, time of day, liturgical season
-- [ ] Frontend renders the verse with Lora serif
-- [ ] Cache is per-user with 24-hour TTL
-- [ ] Brand voice review passes
-- [ ] At least 12 tests
+- [ ] Settings toggle defaults to OFF for all users (new and existing)
+- [ ] Verse surfacing NEVER fires when toggle is off (integration test verifies zero API calls from UI when disabled)
+- [ ] Post-compose trigger surfaces a verse when: enabled, not in cooldown, no crisis flag, matching verse exists
+- [ ] Comment-encouragement trigger surfaces on supportive comments to Mental Health / Grief / Health posts
+- [ ] Reading-time trigger requires >5min active engagement (foreground tab + scroll activity)
+- [ ] 24h cooldown across all triggers verified (integration test: trigger once, attempt second trigger within 24h, assert no surfacing)
+- [ ] 48h crisis-flag suppression verified (integration test: flag user's post with crisis, attempt all triggers, assert zero surfacing)
+- [ ] Crisis-adjacency suppression is per-user, not per-post (user gets suppressed everywhere, not just on the flagged post)
+- [ ] Curated JSON file exists with 180 passages, all WEB translation, all with at least one tag
+- [ ] JSON schema validation in integration test: every entry has reference, text, translation, tags array
+- [ ] Every entry's `text` is ≤35 words
+- [ ] No entry tagged with forbidden context (no prosperity-adjacent tags)
+- [ ] Category-to-tag mapping matches spec documentation exactly
+- [ ] Mental Health maps to `comfort`, `lament`, `presence`, `rest` — NOT `hope`
+- [ ] Grief maps to `lament`, `presence`, `comfort` — NOT `hope`
+- [ ] Selection algorithm is deterministic: same (user_id_hash, day_of_year, context) returns same verse
+- [ ] Two users with same context on same day get the same verse (integration test)
+- [ ] Refreshing the page within the same day returns the same verse for the same trigger+context
+- [ ] Rate limit: 10 endpoint requests per hour per user (11th returns 429)
+- [ ] Silent failure: if JSON parse fails, verse selection fails, or tag lookup returns nothing, API returns `{ verse: null, reason: 'no_match' }` (no 500)
+- [ ] Silent failure: Redis-down does not 500; cooldown defaults to DENY (safer; prevents cooldown-bypass)
+- [ ] Silent failure on Redis-down tested via Testcontainer stop mid-test
+- [ ] Dismiss button hides the verse card immediately
+- [ ] Session-level suppression after dismissal (no new surfacing in same session)
+- [ ] 3-in-a-row dismissal tracking in localStorage triggers off-ramp prompt
+- [ ] 3-in-a-row prompt offers "Turn off" / "Keep it on" both clearly labeled
+- [ ] Save-this-verse button generates PNG client-side with PII stripping
+- [ ] Save rate-limited to 1 per verse per user
+- [ ] Plain text rendering verified (attempted injection of HTML in a test entry does NOT render as HTML)
+- [ ] Verse card has `role="note"` and correct accessible name
+- [ ] Verse reference rendered in `<cite>` element
+- [ ] Reduced-motion disables any fade-in; verse appears instantly
+- [ ] Screen reader announces verse via `aria-live="polite"`
+- [ ] Color contrast passes WCAG AA in light and Night Mode
+- [ ] Surfacing log table retention job purges rows older than 30 days (integration test)
+- [ ] Logged-out users receive no verses (endpoint requires auth; 401 if attempted)
+- [ ] At least 35 tests across selection determinism, cooldowns, crisis suppression, category mapping, a11y, injection-safety, graceful degradation
+
+**Testing notes:**
+
+- Unit test: selection algorithm is deterministic across identical inputs
+- Unit test: `excluded_contexts` properly filters out blocked verses
+- Integration test: crisis-flag suppression across all trigger types (seed user with crisis-flagged post, attempt all 3 triggers, assert zero surfacing for 48h, assert resumption at 49h)
+- Integration test: cooldown enforcement (seed recent surfacing in log, attempt trigger within 24h, assert suppression)
+- Integration test: Redis-down test (stop Testcontainer, assert endpoint returns safe degradation — fail-closed)
+- Integration test: JSON parse failure graceful degradation (temporarily corrupt the JSON file in test, verify no 500 response, verse null returned)
+- Unit test for every entry in the curated JSON set: passes word-count limit, has valid tag(s), has required fields
+- Security test: attempt to inject HTML in a test verse entry, verify frontend renders as escaped text not DOM
+- Security test: verify user's post TEXT is not sent to any external service (MVP: no LLM; enhancement: opt-in only)
+- Playwright: enable Verse-Finds-You in settings, compose a post, dismiss the verse, verify session-level suppression
+- Playwright: disable Verse-Finds-You, compose a post, verify no verse appears
+
+**Notes for plan phase recon:**
+
+1. Curate the 180-passage set as a prerequisite deliverable. Eric should review every entry before spec execution. Recommend pulling from existing devotional collections that lean Psalmist/Pauline/Johannine.
+2. Confirm the WEB translation being used matches existing Prayer Receipt verse set (same source for consistency).
+3. Verify `excluded_contexts` enforcement — some verses may appear under multiple tags but must be suppressed in specific contexts (e.g., a hope verse that excluded-contexts grief).
+4. Decide whether to include any Old Testament judgment/lament passages (Lamentations 3, Psalm 88) — recommend yes, under `lament` tag, but curated carefully. These are among the most comforting passages for acute grief because they don't deny the darkness.
+5. Confirm the trigger cadence (24h) is not too short — monitor in production and adjust the rate up if surfacing feels intrusive.
+6. Review the cooldown-fail-closed decision: if Redis is down, does the cooldown check default to "allow surfacing" (more verses, potentially bypass cooldown) or "deny surfacing" (no verses, safer)? Spec says DENY; re-confirm.
+
+**Out of scope:**
+
+- LLM-based verse selection or generation (explicitly deferred; MVP is curated-set only)
+- LLM-based user-content classification (future enhancement, out of scope for this spec)
+- Daily verse notification (explicitly anti-pattern per anti-pressure discipline)
+- User-curated verse collections ("save verses I love")
+- Sharing verses to social with Worship Room branding as a growth loop (would turn the feature into marketing)
+- Audio/spoken verses
+- Multiple translations (WEB only in MVP)
+- Personalized verse preferences ("I prefer Psalms") — the deterministic daily rotation is the wrong substrate for personalization
+- Verse scheduling ("send me a verse every morning") — daily-verse pattern is anti-pattern for this feature's design intent
+
+**Out-of-band notes for Eric:** The 180-passage curation is the single highest-leverage piece of work in this spec, and the one most likely to be rushed. Block out 4-6 hours for the curation, ideally in consultation with someone whose pastoral discernment you trust. Every bad entry is a potential wound to a vulnerable user. Remove any verse you're unsure about — "fewer and safer" beats "more and dicey." Also: I deliberately separated the AI-free MVP from the optional LLM-classifier enhancement. The MVP works and is the recommended production path; adding LLM classification later is a known-shape enhancement with clear boundaries. If anyone later asks "why not just use an LLM to pick the perfect verse for each user?", the answer is: because the curated-set approach is predictable, auditable, and never hallucinated a verse that shamed someone. Finally: the "silent failure" discipline throughout this feature is load-bearing. The feature genuinely does not need to fire on every eligible moment. Better to miss surfacings than to land a wrong one. Tune everything toward caution.
+
+---
 
 ### Spec 6.9 — Prayer Wall Composer Drafts
 
@@ -3146,6 +5606,134 @@ qotd_questions
 - [ ] Default: on for new users
 - [ ] At least 4 tests
 
+### Spec 6.11b — Live Presence Component
+
+- **ID:** `round3-phase06-spec11b-live-presence-component`
+- **Size:** M
+- **Risk:** Medium (introduces polling traffic; requires carefully-bounded Redis presence tracking)
+- **Prerequisites:** 3.11 (Prayer Wall feed live), 6.11 (Sound Effects polish)
+- **Goal:** Surface the reality that other people are also reading the Prayer Wall — without creating FOMO, social comparison, or false urgency. A small inline indicator in the feed header shows "N people here now" when and only when N ≥ 1 in the last 60 minutes. Hidden completely when N = 0 so users don't feel alone in an empty room. The count refreshes every 30 seconds while the tab is active. This is the gentlest possible "you're not the only one" signal — warm, not performative.
+
+**Approach:** Backend tracks presence via a Redis sorted set keyed `presence:prayer_wall` with user_id (or anonymous session id) as member and `unix_timestamp_seconds` as score. Every `GET /api/v1/posts` request (authenticated or anonymous) bumps the user's score. `GET /api/v1/prayer-wall/presence` returns `{ count: N }` where N = count of members with score ≥ (now - 3600). The endpoint is cached server-side for 30 seconds (Spring's `@Cacheable` with a short TTL) so a burst of clients polling doesn't hammer Redis. Frontend polls every 30 seconds while the Prayer Wall tab is visible; stops immediately on `visibilitychange` to hidden (no background polling tax).
+
+**Display rules:**
+
+- N = 0: component renders nothing (no placeholder, no "be the first", no gray "—")
+- N = 1: "1 person here" — don't assume the single user is "just you"; the lurker might be on another device, or a friend who just opened the tab
+- N ≥ 2: "N people here now"
+- Count is static (not animated) — counters that tick up/down create urgency
+- Placement: feed header top-right, small font, muted color, non-interactive (no tap target — just a status)
+
+**Anti-pressure design (Decision 7 from Stage C sign-off):**
+
+- Hidden when count is zero — no "be the first" CTA
+- No "X of your friends are here" enrichment (avoids social comparison)
+- No "someone just joined" flash or pulse animation
+- No tooltip or expansion listing who is present (pure count, no identity)
+- No historical chart ("more people here than usual") — we don't measure anything past "right now"
+- Logged-out visitors see the count and contribute to it (public)
+- User can opt out of being counted via `/settings` toggle ("Count me as present when I'm reading") — defaults to ON; users can hide themselves without hiding the count for others
+
+**Privacy:**
+
+- Authenticated users: counted as their user_id (one contribution per user across multiple tabs/devices via SELECT DISTINCT on the sorted set)
+- Anonymous visitors: counted by a 90-day cookie session id (not the JWT; no identity exposure). Cookie is httpOnly and scoped to the presence endpoint path.
+- No user sees any other user's identity via this endpoint — count only
+- Deleted users' session entries age out of the sorted set naturally (60-min TTL via Redis `ZREMRANGEBYSCORE` cleanup job)
+
+**Rate limiting:**
+
+- `GET /api/v1/prayer-wall/presence`: 120 per minute per authenticated user (every 30 seconds, plus margin for re-polls after tab focus). Anonymous: 60 per minute per IP.
+- Cleanup job: Redis `ZREMRANGEBYSCORE presence:prayer_wall 0 (now - 3600)` runs every 5 minutes via scheduled task
+
+**Accessibility:**
+
+- Component has `role="status"` and `aria-live="polite"` so screen readers announce changes (but only when the value actually changes — not on every 30-second poll)
+- Icon is decorative (`aria-hidden="true"`); the numeric count is the accessible name
+- Focus never lands on the count (it's a status, not a control)
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/presence/PresenceController.java`
+- `backend/src/main/java/com/worshiproom/presence/PresenceService.java`
+- `backend/src/main/java/com/worshiproom/presence/PresenceTrackingInterceptor.java` (bumps presence on `/posts` requests)
+- `backend/src/test/java/com/worshiproom/presence/PresenceIntegrationTest.java`
+- `frontend/src/components/prayer-wall/PresenceIndicator.tsx`
+- `frontend/src/hooks/usePresence.ts` (polling hook with visibility-aware pause)
+- `__tests__/*.test.tsx` for each frontend module
+
+**Files to modify:**
+
+- Feed header component (embed PresenceIndicator)
+- OpenAPI spec (adds `/prayer-wall/presence` endpoint)
+- Settings page (adds "Count me as present" toggle → stored as `wr_settings.presence.optedOut` + mirrored to backend preference)
+
+**API changes:**
+
+- `GET /api/v1/prayer-wall/presence` — returns `{ data: { count: N }, meta }`, cache TTL 30 seconds
+- Presence-tracking interceptor bumps scores on existing endpoints; no new write endpoints
+
+**Copy Deck:**
+
+- N = 1: "1 person here"
+- N ≥ 2: "{N} people here now"
+- Settings toggle label: "Count me as present when I'm reading"
+- Settings toggle helper: "Others see how many people are on the Prayer Wall. Turn this off to hide yourself from the count."
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- Hidden at N=0 (the single most important rule — no "empty room" signal)
+- No animated counter, no pulse on change
+- No identity enrichment (count only, no names, no avatars)
+- Opt-out always available and honored
+- Not a social proof CTA ("N people — join them!")
+- Disabled entirely on pages containing crisis-flagged posts (don't surface presence on the most vulnerable content)
+
+**Acceptance criteria:**
+
+- [ ] Component hidden when count is 0
+- [ ] Component renders "1 person here" when count is 1
+- [ ] Component renders "N people here now" when count ≥ 2
+- [ ] Presence bumped on every `/posts` request (authenticated and anonymous)
+- [ ] Anonymous visitors use cookie session id, not JWT or IP
+- [ ] Count excludes users with `preferences.presence.opted_out = true`
+- [ ] Frontend polls every 30 seconds while tab visible
+- [ ] Polling stops on `visibilitychange` to hidden
+- [ ] Polling resumes on `visibilitychange` to visible
+- [ ] Server cache TTL 30 seconds verified
+- [ ] Rate limit: 121st request in 1 minute returns 429
+- [ ] Sorted set cleanup job runs every 5 minutes
+- [ ] Settings toggle persists to both local and backend preference
+- [ ] Component not rendered on pages with crisis-flagged post surfacing
+- [ ] Screen reader announces changes but not every poll
+- [ ] At least 14 tests across backend + frontend covering edge cases
+
+**Testing notes:**
+
+- Integration tests use Testcontainers + Redis container
+- Frontend tests use MSW to mock presence endpoint; verify polling pause/resume via Vitest fake timers
+- Playwright test loads Prayer Wall in two browser contexts, verifies count = 2
+
+**Notes for plan phase recon:**
+
+1. Confirm Redis is already in the deployment target choice (if not, consider whether to wait for Redis infra or use a simpler in-memory presence with obvious multi-instance caveats)
+2. Verify Spring's `@Cacheable` setup is trivial for a 30-second TTL (should be with Spring Cache + Redis)
+3. Confirm anonymous session cookie name doesn't collide with any existing cookie
+
+**Out of scope:**
+
+- Per-post presence ("N people looking at this post right now") — too creepy, too performance-expensive
+- Friends-only presence ("2 friends are here") — adds comparison dynamic that contradicts the whole spec
+- Historical presence graphs
+- Push notifications when presence crosses thresholds
+- Typing indicators anywhere
+
+**Out-of-band notes for Eric:** This is the single most "user-psychology-loaded" spec in Phase 6. The difference between a presence indicator that feels warm and one that feels creepy is one or two copy decisions and the N=0 hiding rule. If you find yourself relaxing any of the Anti-Pressure Design Decisions in implementation, stop and talk to yourself out loud about why — there's usually a hidden pressure-tradeoff that the original rules exist to prevent. The "hidden at zero" rule in particular has been violated in every app I've seen try this feature, always with the justification of "social proof"; that justification is exactly what this spec rejects.
+
+---
+
 ### Spec 6.12 — Phase 6 Cutover
 
 - **ID:** `round3-phase06-spec12-phase6-cutover`
@@ -3159,6 +5747,7 @@ qotd_questions
 - [ ] Every hero feature manually verified
 - [ ] Cutover checklist completed
 - [ ] Phase 6 officially done
+- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase6-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
 
 ---
 
@@ -3311,6 +5900,27 @@ qotd_questions
 
 **Approach:** Add visibility selector to `InlineComposer.tsx` as a small chip row below the category picker. Default is `public`. Tooltip on each option explains the audience. Backend write endpoint accepts and stores the visibility. Backend read endpoints already enforce visibility per Phase 3 Spec 3.3. New Playwright test: post with each visibility setting, verify visibility enforcement from another user's account.
 
+**Visibility predicate (the canonical SQL fragment Phase 3.3 must implement):** every read endpoint that returns posts (feed, search, profile-tab, intercessor-list, friend-prayers-today, three-am-watch, etc.) MUST apply the visibility predicate at query time, NOT in application code (avoids accidental leaks via a missed filter). The predicate, parameterized by `:viewer_id` (nullable for unauthenticated viewers):
+
+```
+-- Pseudo-SQL (translate to JPQL/Criteria for actual implementation)
+WHERE posts.is_deleted = FALSE
+  AND posts.moderation_status IN ('approved', 'flagged')  -- 'hidden' and 'removed' invisible to non-mods
+  AND (
+    posts.visibility = 'public'
+    OR (posts.visibility = 'friends' AND :viewer_id IS NOT NULL AND EXISTS (
+        SELECT 1 FROM friend_relationships fr
+        WHERE fr.user_id = posts.user_id
+          AND fr.friend_user_id = :viewer_id
+          AND fr.status = 'active'
+    ))
+    OR (posts.visibility = 'private' AND posts.user_id = :viewer_id)
+    OR posts.user_id = :viewer_id  -- author always sees own posts regardless of visibility
+  )
+```
+
+This predicate is centralized as a JPA Specification or a `@Query` fragment that every post-returning service composes into its query. A Phase 3.3 acceptance criterion is "predicate exists in exactly one place; every post-fetching query references it." Drift here means privacy bugs.
+
 **Acceptance criteria:**
 
 - [ ] Composer shows visibility selector with 3 options
@@ -3334,6 +5944,7 @@ qotd_questions
 - [ ] All 7 integrations manually verified
 - [ ] No regressions in adjacent features
 - [ ] Cutover checklist completed
+- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase7-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
 
 ---
 
@@ -3353,13 +5964,13 @@ qotd_questions
 - **Prerequisites:** Phase 7 complete
 - **Goal:** Add username generation, validation, and storage. Every existing user gets a username back-filled from their first name + last initial (with collision handling). New registrations require a username.
 
-**Approach:** Username is added in three sequential Liquibase changesets to safely populate existing rows without violating constraints. Phase 1.3 deliberately did NOT create this column, so Phase 8.1 introduces it from scratch. Changeset 1 adds the column as `VARCHAR(30) NULL` (no default, no constraint yet). Changeset 2 is a backfill: for each existing user, generate `firstname-l` (e.g., "sarah-j"), with collision handling that appends a number (sarah-j-2, sarah-j-3). Changeset 3 alters the column to `NOT NULL` and adds the `UNIQUE` constraint. Validation rules: 3-30 chars, lowercase letters / numbers / hyphens only, must start with a letter, no consecutive hyphens. New endpoint `PATCH /api/v1/users/me/username` for changing username (rate limited: once per 30 days). Registration flow updated to ask for or auto-suggest a username.
+**Approach:** Username is added in three sequential Liquibase changesets to safely populate existing rows without violating constraints. Phase 1.3 deliberately did NOT create this column, so Phase 8.1 introduces it from scratch. Changeset 1 adds the column as `VARCHAR(30) NULL` (no default, no constraint yet). Changeset 2 is a backfill: for each existing user, generate `firstname-l` (e.g., "sarah-j"), with collision handling that appends a number (sarah-j-2, sarah-j-3). Changeset 3 alters the column to `NOT NULL` and adds the `UNIQUE` constraint. Validation rules: 3-30 chars, lowercase letters / numbers / hyphens only, must start with a letter, no consecutive hyphens. **Profanity and impersonation filter (mandatory):** the validator MUST reject usernames matching a curated profanity list AND reserved words (admin, mod, moderator, anthropic, worshiproom, support, official, jesus, god, christ, the-lord, holy-spirit, pastor, deacon, bishop, etc.). The reserved word list is shipped as a constants file and reviewed quarterly. Profanity check uses the existing `containsCrisisKeyword`-style backend service extended with a profanity dictionary. Existing-user backfill that produces a profane or reserved username falls through to the next collision number (sarah-j-2 etc.) until a clean candidate is found. New endpoint `PATCH /api/v1/users/me/username` for changing username (rate limited: once per 30 days). Registration flow updated to ask for or auto-suggest a username, with the validator running client-side (fast feedback) AND server-side (authoritative).
 
 **Files to create:**
 
-- `backend/src/main/resources/db/changelog/2026-04-20-001-add-username-column-nullable.xml`
-- `backend/src/main/resources/db/changelog/2026-04-20-002-backfill-usernames.xml`
-- `backend/src/main/resources/db/changelog/2026-04-20-003-username-not-null-unique.xml`
+- `backend/src/main/resources/db/changelog/2026-04-21-001-add-username-column-nullable.xml`
+- `backend/src/main/resources/db/changelog/2026-04-21-002-backfill-usernames.xml`
+- `backend/src/main/resources/db/changelog/2026-04-21-003-username-not-null-unique.xml`
 - `backend/src/main/java/com/worshiproom/user/UsernameGenerator.java`
 - `backend/src/main/java/com/worshiproom/user/UsernameValidator.java`
 
@@ -3430,7 +6041,9 @@ qotd_questions
 - [ ] Filter by post type within the tab works
 - [ ] Anonymous posts NOT shown (anonymous = opaque even to viewers of the user's profile)
 - [ ] Private and friends posts respect viewer permissions
-- [ ] At least 10 tests
+- [ ] Deleted-user handling: posts by users with `is_deleted=TRUE` render as "Former member" with `avatarUrl: null`; backend never returns the deleted user's first_name/last_name/email even via this endpoint; the post itself remains visible (community memory matters; CaringBridge-style)
+- [ ] Banned-user handling: posts by users with `is_banned=TRUE` render as "Banned member"; same anonymization as deleted; visible only to admins via a future admin-flag query param
+- [ ] At least 12 tests (includes 2 new tests for deleted-user and banned-user rendering)
 
 ### Spec 8.5 — Profile Growth Tab
 
@@ -3510,6 +6123,7 @@ qotd_questions
 - [ ] All 4 profile pages tested manually
 - [ ] All redirects verified
 - [ ] Cutover checklist completed
+- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase8-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
 
 ---
 
@@ -3710,6 +6324,196 @@ qotd_questions
 - [ ] Trust level enforcement on actions
 - [ ] At least 14 tests
 
+### Spec 10.7b — Report a User
+
+- **ID:** `round3-phase10-spec07b-report-a-user`
+- **Size:** M
+- **Risk:** Medium (moderation feature with abuse potential — both real abuse of users AND vexatious reports; both failure modes need handling)
+- **Prerequisites:** 10.7 (Peer Moderator Queue — user reports flow through the same queue)
+- **Goal:** Let users report another user for pattern-level harassment, creepy DMs from the future, systemic boundary-violating behavior that spans a user's whole activity, and similar concerns that a single post-level report cannot capture. The existing post-level report (Spec 3.8) handles "this specific post violated community standards." This spec handles "this user has a pattern of behavior that needs attention." Without this, users facing sustained harassment have to file 40 post-reports to describe a single pattern — exhausting and ineffective. Moderators need the user-level aggregate view to see the pattern.
+
+**Approach:** A new `user_reports` table and a "Report this user" action accessible from any user profile page (under a "..." menu, never as a prominent button). Reports require a reason category and a short narrative text. Reports flow into the same Phase 10.7 moderator queue as post reports, tagged as `target_type='user'`. Moderators reviewing a user report see the reported user's recent activity (last 30 days of posts + comments) in a single panel for context. To prevent weaponization, users are rate-limited to 3 user-reports per week, and reports auto-close if the reporter and reported user have no shared content history (no mutual posts/comments) — a protection against users with no interaction history filing reports as harassment.
+
+**The report dialog:**
+
+- Entry point: user profile page "..." menu → "Report this user"
+- NOT available on your own profile (the "..." menu hides the option for self)
+- NOT available on deleted-user profiles (the "Former member" profile from Spec 10.11)
+- Dialog shows the reported user's avatar and display name at the top so the reporter confirms who they're reporting
+- Reason picker (radio): Harassment or bullying / Unwanted romantic or sexual attention / Impersonation / Spam or self-promotion / Crisis-adjacent concerning pattern / Other
+- Narrative text (required, 50-1000 chars): "What pattern of behavior are you reporting? Please include examples if you can."
+- Optional field: "Specific posts or comments to flag" (free-text post IDs or URLs the reporter can paste)
+- Submit button: "Submit report" — once tapped, report is sealed (no edits after submission; can be followed up by a moderator contact)
+- Cancel button: "Never mind"
+- Confirmation after submit: "Thank you. A moderator will review within 48 hours. We'll let you know what we decide."
+
+**Anti-weaponization guards:**
+
+- Rate limit: 3 user-reports per reporter per rolling 7 days (server-enforced)
+- Pattern-match abuse detection: if a single reporter files > 5 user-reports across any 30-day window that are all closed as "no action taken," their reporting is temporarily suspended for 30 days (with notification) — prevents drive-by mass-reporting
+- Zero-interaction-history gate: if reporter and reported user have no mutual posts/comments within the last 90 days, the report is AUTO-FLAGGED for moderator skepticism (a banner in the moderator view says "These users have no interaction history — verify this report reflects genuine interaction, not external targeting")
+- Reports about admins and moderators flow through a separate queue reviewed by Eric directly (prevents coordinated reporting of moderators to silence enforcement)
+- Self-report attempt server-side rejected with a quiet 400
+
+**What the reported user sees:**
+
+- NOTHING until/unless an action is taken. No "someone has reported you" notification. This prevents two failure modes: (a) retaliation against the suspected reporter, and (b) chilling effect on legitimate reporters.
+- If a moderator warns the reported user, they receive the warning per Phase 10.5's three-tier escalation. They do not see who reported them unless the moderator chooses to share that context (they usually will not).
+- If a moderator takes no action, the reported user is never informed the report existed.
+- If the moderator bans or restricts the reported user, the action notification goes through normal ban-notification channels; the report context stays internal.
+
+**What moderators see in the queue:**
+
+- User report row includes: reported user's display name + avatar, reporter's display name + avatar, reason category, full narrative text, submitted timestamp, zero-interaction flag (if applicable)
+- "Expand context" button: loads the reported user's last 30 days of public activity (posts + comments that the reporter or a moderator could have seen), highlighting any referenced by the reporter's narrative
+- "View past reports about this user" button: lists any prior user-reports AND prior post-reports naming this user as the subject/author (per Phase 10.7 queue cross-reference)
+- Moderator actions: Close with no action, Send warning (Phase 10.5 yellow-tier), Restrict account (limit post frequency for 7 days), Suspend 7 days, Suspend 30 days, Ban permanently
+- Every action writes to `admin_audit_log` per Spec 10.10 with: the action taken, the moderator who took it, the reported user, the reporter, the reason, and a mandatory moderator note (50+ chars)
+
+**Moderator feedback to the reporter:**
+
+- The reporter receives a Phase 12 notification when the report is resolved: "Thanks for your report. We reviewed it and {took action / determined no action was needed}."
+- Action-taken notifications do NOT disclose which specific action (preserves the reported user's privacy)
+- No-action notifications include the moderator's anonymized rationale category (e.g., "We found the content was within community standards" or "We weren't able to verify the pattern you described")
+- Reporters can appeal a no-action decision via Phase 10.8 Appeal Flow, which escalates to Eric
+
+**Anti-pressure design:**
+
+- Reporting UI is deliberately friction-ful (confirmation dialog, required narrative, rate limit) to prevent impulsive or trivial reports — but NOT so friction-ful that users facing real harassment give up
+- No public "report count" or "times-reported" badge on user profiles — would create stigma/scarlet-letter dynamics and be easily gamed by coordinated reporting
+- Narrative text is required because "report without context" signals either genuine inability to articulate (maybe AI-generated spam report) or vexatious reporting (maybe personal vendetta). 50-char minimum forces the reporter to name the pattern.
+- Reporter anonymity maintained against the reported user by default; moderators can disclose identity only with reporter consent (separate out-of-band channel)
+
+**Files to create:**
+
+- `frontend/src/components/prayer-wall/ReportUserDialog.tsx`
+- `frontend/src/components/prayer-wall/ReportUserSuccessToast.tsx`
+- `backend/src/main/java/com/worshiproom/moderation/UserReportController.java`
+- `backend/src/main/java/com/worshiproom/moderation/UserReportService.java`
+- `backend/src/main/java/com/worshiproom/moderation/dto/UserReportRequest.java`
+- `backend/src/main/java/com/worshiproom/moderation/dto/UserReportResponse.java`
+- `backend/src/main/resources/db/changelog/2026-04-22-004-create-user-reports-table.xml`
+- `backend/src/test/java/com/worshiproom/moderation/UserReportIntegrationTest.java`
+- `__tests__/ReportUserDialog.test.tsx`
+
+**Files to modify:**
+
+- `UserProfilePage.tsx` (or equivalent) — add "..." menu with "Report this user" option on others' profiles
+- Phase 10.7 moderator queue component — render user-report rows with different styling and "Expand context" action
+- `constants/moderation-copy.ts` — add all new report-reason labels and dialog strings
+- OpenAPI spec — document new endpoints
+- `.claude/rules/11-local-storage-keys.md` — no new keys (all server-side)
+
+**Database changes:**
+
+- New table `user_reports`: `(id UUID PK, reporter_user_id UUID NOT NULL FK → users, reported_user_id UUID NOT NULL FK → users, reason_category VARCHAR(50), narrative TEXT, referenced_post_ids TEXT[], zero_interaction_flag BOOLEAN, status VARCHAR(20) — 'pending', 'reviewing', 'closed_action', 'closed_no_action', moderator_id UUID FK → users, moderator_note TEXT, created_at TIMESTAMP, resolved_at TIMESTAMP)`
+- Index on `(reported_user_id, created_at DESC)` for "view past reports about this user"
+- Index on `(reporter_user_id, created_at DESC)` for rate-limit checks
+- CHECK constraint: `reporter_user_id != reported_user_id`
+- Liquibase changeset: `2026-04-22-004-create-user-reports-table.xml`
+
+**API changes:**
+
+- `POST /api/v1/users/{userId}/reports` — body `{ reason_category, narrative, referenced_post_ids?: string[] }`. Auth required. Returns 201 with receipt ID. Server enforces: not self-report, rate limit, zero-interaction-flag detection, mass-reporter suspension check.
+- `GET /api/v1/moderation/user-reports?status=pending&limit=20` — moderator-only (Trust Level ≥ 4 or is_admin). Paginated queue.
+- `PATCH /api/v1/moderation/user-reports/{id}` — moderator action: `{ action: 'warn'|'restrict'|'suspend_7d'|'suspend_30d'|'ban'|'no_action', moderator_note: string (min 50 chars) }`. Writes to audit log.
+- `GET /api/v1/moderation/user-reports/{id}/context` — moderator-only. Returns reported user's last 30d of public activity.
+
+**Copy Deck:**
+
+- Profile menu label: "Report this user"
+- Dialog heading: "Report {displayName}"
+- Reason radio group label: "Why are you reporting this user?"
+- Reason options: "Harassment or bullying", "Unwanted romantic or sexual attention", "Impersonation", "Spam or self-promotion", "Crisis-adjacent concerning pattern", "Other"
+- Narrative label: "What pattern of behavior are you reporting?"
+- Narrative placeholder: "Please include examples if you can. A moderator will read this carefully."
+- Narrative helper: "At least 50 characters. This is the context a moderator needs to act on your report."
+- Referenced-posts label (optional): "Link to specific posts or comments (optional)"
+- Submit button: "Submit report"
+- Cancel button: "Never mind"
+- Confirmation toast: "Thank you. A moderator will review within 48 hours. We'll let you know what we decide."
+- Rate-limit error: "You've filed 3 user reports this week. You can file again next week. For urgent concerns, contact support directly."
+- Self-report error (should never reach UI, but fallback): "You can't report yourself."
+- Moderator outcome — action taken: "Thanks for your report. We reviewed it and took action."
+- Moderator outcome — no action: "Thanks for your report. We reviewed it and determined no action was needed this time. You can appeal this decision if you believe we missed something."
+- Moderator queue zero-interaction banner: "These users have no interaction history in the last 90 days — verify this report reflects genuine interaction, not external targeting."
+- Moderator mass-reporter suspension notification to reporter: "Your ability to report users has been temporarily paused for 30 days. This happens when many of a user's reports are not substantiated."
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- Friction-ful but not prohibitive entry (confirmation dialog, required narrative, rate limit)
+- No public "times reported" counters on profiles
+- Reporter anonymity preserved against reported user by default
+- No "someone reported you" notification to reported user unless action is taken
+- Zero-interaction flag prevents weaponized reporting from users who never met the target
+- Mass-reporter suspension prevents coordinated harassment campaigns disguised as reports
+- Narrative required to filter low-signal reports
+- 48-hour moderator SLA stated in confirmation copy
+- Appeal path available for no-action decisions
+
+**Acceptance criteria:**
+
+- [ ] "Report this user" appears in profile "..." menu for other users' profiles
+- [ ] Option is hidden on own profile
+- [ ] Option is hidden on soft-deleted and hard-deleted user profiles
+- [ ] Dialog renders all 6 reason categories as radio options
+- [ ] Narrative text field enforces 50-1000 char range
+- [ ] Server validates reporter_user_id != reported_user_id (400 on self-report attempt)
+- [ ] Rate limit: 4th report within 7 days returns 429 with correct retry-after
+- [ ] Zero-interaction flag correctly set when no mutual posts/comments in last 90 days
+- [ ] Zero-interaction flag correctly cleared when any mutual interaction exists
+- [ ] Mass-reporter detection: 6th closed-no-action report in 30 days triggers 30-day reporting suspension
+- [ ] Suspended reporters receive notification and subsequent report attempts return 403
+- [ ] Suspension auto-lifts after 30 days
+- [ ] Report row appears in moderator queue with correct rendering
+- [ ] Moderator queue visible only to users with Trust Level ≥ 4 or is_admin (403 otherwise)
+- [ ] "Expand context" action returns reported user's last 30 days of public activity
+- [ ] "View past reports" shows both prior user-reports and prior post-reports naming this user
+- [ ] Every moderator action writes to admin_audit_log with mandatory 50+ char note
+- [ ] Reports about admins/moderators routed to separate queue (Eric-only)
+- [ ] Reported user receives NO notification when a report is filed
+- [ ] Reported user receives warning/restriction/suspension notifications only when those actions are taken (per Phase 10.5 escalation)
+- [ ] Reporter receives anonymous resolution notification once report is closed
+- [ ] No-action resolution includes appeal path information
+- [ ] Reporter identity never disclosed to reported user via any automated channel
+- [ ] Liquibase changeset creates table with all columns, constraints, and indexes
+- [ ] At least 22 tests covering dialog, rate limit, zero-interaction, mass-reporter detection, moderator queue, notification flow
+
+**Testing notes:**
+
+- Integration test: file report, verify row in `user_reports`, verify rate-limit counter increments
+- Integration test: 4th report in 7 days returns 429
+- Integration test: zero mutual interaction → flag set; one shared post from 80 days ago → flag cleared
+- Integration test: seed 6 closed-no-action reports from the same reporter across 30 days, attempt 7th, verify suspension triggers
+- Integration test: moderator resolves with action → audit log row created, reporter notified, reported user notified per 10.5
+- Integration test: moderator resolves with no action → audit log row, reporter notified with appeal path
+- Security test: non-moderator attempts to access moderator queue endpoint, verify 403
+- Security test: reporter attempts self-report via crafted API call, verify 400
+- Playwright: profile "..." menu → Report dialog → fill out → submit → confirmation toast
+
+**Notes for plan phase recon:**
+
+1. Confirm the shared Phase 10.7 moderator queue UI can render both post-reports and user-reports with different styling (tabs or filter chip). Recommend adding a "Type: Post | User" filter.
+2. Decide trust level threshold for moderator queue access. Default: ≥ 4 OR is_admin. Re-confirm Phase 10.4 trust level thresholds make this achievable by actual members.
+3. Verify the "referenced post IDs" field accepts both full URLs and bare post IDs (helpful for reporters who copy-paste from the address bar).
+4. Confirm moderator-note minimum 50 chars is reasonable — some actions have clear rationale expressible in fewer chars. Consider 30 chars.
+5. Confirm mass-reporter detection window (30 days, 6 reports) — these are starting values; tune based on real signal.
+
+**Out of scope:**
+
+- In-thread reporting of users from within a post/comment (use the profile menu path)
+- AI-assisted report triage (all triage is human moderator review for MVP)
+- Public moderator action log (moderator actions are internal only)
+- Reporter-to-moderator chat during review (one-shot report + one-shot resolution for MVP)
+- Cross-reporting of users across platforms (Worship-Room-internal only)
+- Automated permanent bans triggered by N reports (always requires moderator human action)
+
+**Out-of-band notes for Eric:** The zero-interaction-flag + mass-reporter suspension are the two features that prevent this from becoming a tool of harassment itself. Without them, coordinated bad actors would use user-reporting as a silencing mechanism against legitimate users (especially anyone visibly LGBT+, anyone sharing mental-health content, anyone posting in certain theological traditions). With them, the feature stays trustworthy. Also: resist future pressure to show "users reported X times" counters publicly. That single design decision — report counts as private-to-moderators — is what separates this feature from becoming a Twitter-style pile-on vector. Finally: the 48-hour SLA in the confirmation copy is a promise. If your moderator capacity can't sustain 48 hours, change the copy to 72 or 96. Don't promise what you can't deliver on a vulnerability feature.
+
+---
+
 ### Spec 10.8 — Appeal Flow
 
 - **ID:** `round3-phase10-spec08-appeal-flow`
@@ -3752,6 +6556,182 @@ qotd_questions
 - [ ] AdminAuditService logs all admin actions
 - [ ] No admin UI built (out of scope)
 - [ ] At least 10 tests
+
+---
+
+### Spec 10.11 — Account Deletion and Data Export
+
+- **ID:** `round3-phase10-spec11-account-deletion-data-export`
+- **Size:** L
+- **Risk:** High (destructive on hard delete; requires careful cascade; GDPR-adjacent, so "good enough" is not good enough)
+- **Prerequisites:** 10.9 (admin foundation), 10.10 (moderation queue — so deletion interacts cleanly with flagged content)
+- **Goal:** Give users a respectful, legally-grounded path to either take their data with them (JSON export) or leave entirely (account deletion with 30-day grace period). This is the GDPR baseline: access and erasure. No dark patterns on deletion — no "are you sure you want to leave?" guilt loop, no "tell us why" mandatory field, no artificial friction beyond a typed confirmation. Also not adversarial to mistakes: the 30-day grace period means a user who deletes impulsively and regrets it within a month can log back in and the deletion is paused.
+
+**Approach (two features in one spec, closely coupled by the same Settings surface):**
+
+### Feature 1: Data Export
+
+`GET /api/v1/users/me/export` returns a JSON dump of all the user's data in a single response (streaming for large accounts). Response includes:
+
+- Profile: id, email, first_name, last_name, username, bio, favorite_verse_reference, favorite_verse_text, joined_at, timezone, settings preferences
+- Posts: id, post_type, content, category, is_anonymous, created_at, image_url (if any), help_tags, is_answered, answered_text, answered_at, moderation_status (omitted if 'removed' by admin — user shouldn't see admin moderation state), crisis_flag (for transparency)
+- Comments: id, post_id (only if post is also in this export; other users' posts only include the user's comment, not the full post), content, created_at
+- Reactions: post_id, reaction_type, created_at (only for posts in this export; a list of "you reacted to post IDs you can no longer see" is not useful)
+- Bookmarks: post_id, bookmarked_at (for posts still visible)
+- Activity log: all entries (activity_type, source_feature, occurred_at, points_earned, metadata)
+- Faith points: total_points, current_level, last_updated
+- Streak state: current_streak, longest_streak, last_active_date, grace_days_used, grief_pause_until
+- Badges: all earned badges with earned_at and display_count
+- Friends: friend user IDs + accepted_at timestamps (NOT full friend profiles — respects friends' privacy)
+- Friend requests: outbound only (inbound requests are other users' data)
+- Notifications: the user's inbox entries
+- Settings: all preferences
+
+Excluded from export (explicit):
+
+- Other users' comments on the exporting user's posts (they're authored by someone else; they can export their own)
+- Other users' reactions on the exporting user's posts (same reason — aggregate counts OK, individual user IDs not OK)
+- Admin audit log entries about the user
+- Moderation reports filed BY the user (these are the user's data, include them — but reports filed ABOUT the user are excluded)
+- Any email or server logs
+
+Rate limit: 3 exports per user per 24 hours (the export is expensive; a user-triggered export is rare — 3/day handles edge cases).
+
+### Feature 2: Account Deletion
+
+**Phase 1: Soft delete with 30-day grace period.**
+
+User taps "Delete my account" in Settings → typed-confirmation modal ("Type DELETE to confirm"). On confirm:
+
+- `users.is_deleted = true`, `users.deleted_at = NOW()`
+- User immediately logged out
+- All `/api/v1/users/me/*` endpoints return 404 for this user going forward
+- Backend `authentication` flow recognizes a login attempt on a soft-deleted account and returns a special `202 DELETION_PAUSED` response rather than 401 — the frontend renders a "Welcome back. We paused your deletion. Keep your account?" confirmation screen. If the user confirms "keep", `is_deleted = false` and `deleted_at = NULL`. If they confirm "complete deletion", the hard-delete job fires immediately (skipping the 30-day wait).
+- During the grace period, the user's posts, comments, reactions remain visible (but attributed to an "Account pending deletion" display name to signal the state). Their notifications stop. Friends see them disappear from the friends list.
+
+**Phase 2: Hard delete after 30 days.**
+
+Scheduled job runs nightly. For each user with `is_deleted = true AND deleted_at < (now - INTERVAL '30 days')`:
+
+- Posts: `content = '[deleted]'`, `author_display_name = 'Former member'`, `image_url = NULL`, S3 image objects queued for async deletion. Post ID and timestamps preserved (comment threads and reaction histories from OTHER users remain coherent).
+- Comments: `content = '[deleted]'`, `author_display_name = 'Former member'`. Same rationale.
+- Reactions, bookmarks, reports: hard DELETE (no need to preserve).
+- Activity log: hard DELETE (no cross-user impact).
+- Faith points, streak state, user badges: hard DELETE.
+- Friend relationships, friend requests: hard DELETE (both sides; the other user's friends list simply shrinks by one).
+- Notifications: hard DELETE (both the user's inbox and any notifications about this user sitting in other users' inboxes).
+- Moderation reports filed BY this user: preserved but anonymized (`reporter_id = NULL`, `reporter_note` preserved). Moderation history shouldn't be destroyed by the reporter's deletion.
+- Moderation reports ABOUT this user: preserved as-is (about-subject stays attached for admin record-keeping).
+- User row itself: content-fields nulled (`email = NULL`, `password_hash = NULL`, `first_name = 'Former'`, `last_name = 'member'`, `custom_display_name = NULL`, `bio = NULL`, `favorite_verse_reference = NULL`, `favorite_verse_text = NULL`). Row NOT deleted — foreign keys in other tables (e.g., post author_id) still reference this id. `is_deleted = true` stays for permanent record.
+- S3 image objects: async cleanup job deletes objects 7 days after hard delete (grace window in case the hard delete itself was a mistake).
+
+### Anti-pressure design
+
+- No "we're sad to see you go" dark pattern
+- No "tell us why" mandatory field (optional feedback field allowed, always skippable)
+- No "90% of users who tried to delete found X helpful" suggested alternatives
+- Typed confirmation ("DELETE") is friction, but it's honest friction — prevents accidental-tap deletion, not a guilt gate
+- 30-day grace clearly explained before confirmation
+- Data export offered ABOVE the delete option in Settings ("Before you go, you can download your data")
+- After deletion confirmation, the logout page says "Your account is scheduled for deletion. You can reactivate by logging in before {date}." — factual, not begging
+
+### Files to create
+
+- `backend/src/main/java/com/worshiproom/user/DataExportController.java`
+- `backend/src/main/java/com/worshiproom/user/DataExportService.java`
+- `backend/src/main/java/com/worshiproom/user/AccountDeletionController.java`
+- `backend/src/main/java/com/worshiproom/user/AccountDeletionService.java`
+- `backend/src/main/java/com/worshiproom/user/HardDeleteScheduledJob.java`
+- `backend/src/main/java/com/worshiproom/user/dto/DataExportResponse.java`
+- `backend/src/test/java/com/worshiproom/user/DataExportIntegrationTest.java`
+- `backend/src/test/java/com/worshiproom/user/AccountDeletionIntegrationTest.java`
+- `backend/src/test/java/com/worshiproom/user/HardDeleteCascadeIntegrationTest.java`
+- `backend/src/main/resources/db/changelog/2026-04-22-001-add-moderation-reports-reporter-nullable.xml` (allows reporter_id to become NULL on user delete)
+- `frontend/src/components/settings/DangerZone.tsx`
+- `frontend/src/components/settings/DeleteAccountModal.tsx`
+- `frontend/src/pages/DeletionPaused.tsx` (shown on login during grace period)
+- `__tests__/*.test.tsx` for each frontend module
+
+### Files to modify
+
+- `frontend/src/pages/Settings.tsx` (mount DangerZone at the bottom)
+- `backend/src/main/java/com/worshiproom/auth/AuthService.java` (handle soft-deleted user login specially)
+- OpenAPI spec (adds export + deletion endpoints)
+- Post/comment DTO serialization (renders "Former member" for hard-deleted authors)
+
+### API changes
+
+- `GET /api/v1/users/me/export` — returns full JSON dump, rate limited 3/24h
+- `POST /api/v1/users/me/delete` — body `{ typed_confirmation: "DELETE" }`, sets soft-delete
+- `POST /api/v1/users/me/delete/cancel` — cancels pending deletion (only accessible during grace period, requires auth)
+- `POST /api/v1/users/me/delete/confirm-hard` — skips 30-day wait, fires hard delete immediately (requires re-authentication)
+
+### Copy Deck
+
+- Settings section heading: "Your data"
+- Export button: "Download my data"
+- Export helper: "You'll get a JSON file with everything you've written, reacted to, and earned. It includes posts, comments, reactions, activity, and settings."
+- Export limit hit: "You can download your data 3 times a day. Try again tomorrow."
+- Danger Zone heading: "Delete my account"
+- Delete intro: "Deleting your account removes your profile, posts, comments, and activity. It's permanent after 30 days."
+- Delete confirmation instruction: "Type DELETE to confirm."
+- Delete confirmation button: "Delete account"
+- Optional feedback prompt: "Anything you want to share? (optional)"
+- Post-delete logout message: "Your account is scheduled for deletion. You can reactivate by logging in before {date}."
+- Grace period welcome-back screen: "Welcome back. We paused your deletion. Keep your account?" with "Keep my account" and "Complete deletion now" buttons
+- Hard-deleted author display: "Former member"
+- Hard-deleted post/comment content: "[deleted]"
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+### Acceptance criteria
+
+- [ ] Export endpoint returns complete JSON dump matching the export shape above
+- [ ] Export excludes other users' comments, reactions, admin moderation
+- [ ] Export rate-limited to 3/24h (4th attempt returns 429)
+- [ ] Soft delete sets `is_deleted = true`, `deleted_at = NOW()` on users
+- [ ] Soft-deleted user is immediately logged out
+- [ ] Login during grace period returns `202 DELETION_PAUSED` and triggers welcome-back screen
+- [ ] Welcome-back screen "Keep" button restores account; "Complete deletion" button fires immediate hard delete
+- [ ] Scheduled hard-delete job correctly cascades: posts/comments anonymized, reactions/bookmarks/activity/points/streaks/badges/friends/notifications deleted
+- [ ] Moderation reports filed BY deleted user become `reporter_id = NULL` but are preserved
+- [ ] Moderation reports filed ABOUT deleted user are preserved unchanged
+- [ ] S3 image objects queued for deletion 7 days after hard delete (verified via async job)
+- [ ] Post/comment DTO renders "Former member" for hard-deleted authors
+- [ ] Friend relationship deletion removes BOTH directional rows
+- [ ] Notifications about deleted user are purged from all other users' inboxes
+- [ ] Typed confirmation rejects any input other than exact "DELETE" (case-sensitive)
+- [ ] Optional feedback field is truly optional (submit with empty string succeeds)
+- [ ] No mandatory "tell us why" field
+- [ ] Export endpoint streams response for accounts with >10 MB of data
+- [ ] At least 30 tests covering all cascade paths, grace period flows, rate limits, and edge cases
+
+### Testing notes
+
+- Integration tests build a fully populated user (posts, comments, reactions, friends, badges, notifications, reports filed by and about) then soft-delete and verify state, then simulate the scheduled job and verify hard-delete cascade
+- Edge case: user with moderation reports filed by them → verify reporter_id nulled but report preserved
+- Edge case: user whose post has another user's answered-prayer reference → verify reference still resolves after anonymization
+- Edge case: user deletes during active Phase 6 Quick Lift session → verify session ends gracefully, activity still recorded
+- Playwright test: full delete flow from Settings → typed confirmation → logout → welcome-back on login → cancel
+
+### Notes for plan phase recon
+
+1. Confirm email sending infrastructure (Phase 15) is in place for the deletion confirmation email (optional but recommended — even a "your account has been scheduled for deletion on {date}" transactional email is helpful)
+2. Verify scheduled job infrastructure (Spring `@Scheduled`) is set up
+3. Confirm the 30-day grace period meets legal requirements in user geographies (GDPR says "without undue delay" which courts have generally interpreted as ≤30 days — we're at the boundary)
+4. Check whether admin dashboard needs to surface "pending deletions" list (probably yes — for legal compliance audit)
+
+### Out of scope
+
+- Partial deletion ("delete my posts but keep my account") — different feature
+- Account merging (two accounts merging into one) — rare, complex, out of scope
+- Temporary deactivation (90-day pause) — distinct from deletion, consider for a later spec
+- Export format options (CSV, XML) — JSON only for MVP
+- Scheduled export (email me my data monthly) — out of scope
+
+### Out-of-band notes for Eric
+
+The 30-day grace period is the single most important choice in this spec. It turns "I impulsively deleted my account and lost everything" into "I impulsively deleted my account and got it back when I logged in." Almost every adverse outcome from account deletion is recoverable for 30 days, which means the typed-confirmation pattern doesn't need to be adversarial — the confirmation catches accidental-tap deletion, and the grace period catches impulsive-regret deletion. Together they handle the two distinct failure modes without adding guilt-trip copy. The "Former member" anonymization after hard delete is also important: post and comment threads remain coherent (conversations don't become incomprehensible after a participant leaves), but the identity is fully erased. Some apps delete posts entirely on user deletion, which orphans the conversations of every user who replied; we deliberately don't.
 
 ---
 
@@ -4078,6 +7058,288 @@ qotd_questions
 - [ ] SMTP send works in dev
 - [ ] At least 6 tests
 
+### Spec 15.1b — Welcome Email Sequence
+
+- **ID:** `round3-phase15-spec01b-welcome-email-sequence`
+- **Size:** M
+- **Risk:** Medium (email content sent to users in potentially vulnerable states — tone matters; getting "welcome email" voice wrong is cringe at best, triggering at worst for users who signed up during a crisis moment)
+- **Prerequisites:** 15.1 (SMTP Setup)
+- **Goal:** Send a three-email sequence to new users across their first 7 days — day 0 welcome, day 3 gentle introduction to key features, day 7 quiet check-in. This is the single most effective lever available for 30-day retention, but only if the voice matches Worship Room's core posture: warm, unhurried, never hype. A welcome email that reads like a SaaS onboarding ("🎉 Welcome aboard! Here are 5 ways to get the most out of your account!") would actively damage the user's trust; we'd rather send no welcome email than that kind. This spec defines the exact copy, timing, and opt-out discipline for a sequence that feels like a letter from a thoughtful friend.
+
+**Approach:** A scheduled job runs hourly, queries users whose `joined_at` crosses each sequence trigger (day 0 immediate, day 3 ±1 hour, day 7 ±1 hour in user's timezone), and sends the appropriate email via the SMTP layer from 15.1. Every email is sent as plain text AND HTML (multipart), unsubscribe link in both, one-click unsubscribe honored via a token-based endpoint (no login required to unsubscribe — that's cruel). Users can opt out of the sequence during registration OR at any point via a prominent unsubscribe link in every email OR via settings. The sequence is retention-motivated but NOT retention-desperate — no "we miss you!" language, no "don't lose your streak!" manipulation.
+
+**The three emails:**
+
+**Email 1 — Day 0, sent within 10 minutes of registration.**
+
+- Subject: "Your Worship Room account is ready"
+- Body: Brief, warm, non-hype. Confirms the account works, names one thing the user might want to do first (read the Prayer Wall), and signals that slow engagement is fine. Signed "— Eric" (the founder, by name).
+- Single CTA button: "Open the Prayer Wall" → deep link to `/prayer-wall`
+- Unsubscribe link at footer
+- Target reading time: under 30 seconds
+
+**Email 2 — Day 3 (72 hours after registration, ±1 hour).**
+
+- Subject: "A few things about Worship Room that might help"
+- Body: Introduces three features gently — (1) anonymous posting exists for when attribution feels wrong, (2) moderators are real people who read reports carefully, (3) crisis resources are always one tap away. NOT a feature tour; a values statement that happens to mention features.
+- NO CTA to "post your first prayer!" — that's pressure. Instead: "If you haven't posted anything yet, that's completely fine. Some people spend weeks reading before writing."
+- Unsubscribe link
+
+**Email 3 — Day 7 (168 hours after registration, ±1 hour).**
+
+- Subject: "How are you?"
+- Body: Very short. Three sentences max. Not "we hope you're enjoying Worship Room" (transactional). Actually: "If you've been praying with us, thank you. If you've been reading, that counts too. If life has pulled you elsewhere, that's allowed."
+- No CTA. No feature mention. Just presence.
+- Unsubscribe link
+
+**Anti-pressure discipline (load-bearing):**
+
+- NO emoji in subject lines or body
+- NO exclamation points anywhere in the sequence
+- NO "don't miss out", "last chance", "limited time" framing
+- NO gamification references ("you've earned your first badge!")
+- NO comparison metrics ("you're in the top 20% of users")
+- NO automated "your streak is in danger" emails (this sequence is strictly the 3-email welcome; streak notifications are separate and also follow anti-pressure rules)
+- NO growth-loop CTAs ("invite your friends!")
+- NO testimonial carousel ("Sarah said Worship Room helped her through...")
+- NO feature-of-the-week promotions
+- Sequence pauses automatically if the user has triggered a crisis-flag on their own post in the last 72h (per Phase 10.5 crisis classifier integration); a user in acute distress should NOT receive a day-3 marketing-adjacent email. Email resumes 72h after the crisis flag clears.
+- Sequence pauses if the user has requested account deletion (per Spec 10.11)
+- Sequence NEVER resumes for users who unsubscribed, even if they re-engage
+
+**Opt-in / opt-out:**
+
+- Default: opted IN at registration
+- Registration form shows a single checkbox: "It's OK to send me an occasional welcome email over my first week." Default CHECKED. Below that: "You can unsubscribe anytime."
+- Unsubscribe link in every email footer
+- Unsubscribe endpoint: `POST /api/v1/email/unsubscribe?token={unsubscribe_token}&list=welcome_sequence` — token-signed, no login required
+- Settings page exposes a "Email preferences" section with a toggle for each email category (Welcome sequence, Comment-reply digest, Weekly summary, Push notification emails)
+- Unsubscribe honored within 5 minutes (scheduled job respects the flag on its next hourly run)
+
+**Email infrastructure specifics:**
+
+- Uses SMTP layer from Spec 15.1
+- From: `eric@worshiproom.com` (or equivalent — the FROM name matters; "Eric from Worship Room" feels like a person, "Worship Room" feels like a brand)
+- Reply-To: same (real human email; users sometimes reply with thanks or questions, and that's valuable signal for Eric)
+- List-Unsubscribe header: mandatory per RFC 8058 / Gmail bulk-sender rules
+- List-Unsubscribe-Post: One-click unsubscribe header
+- DKIM + SPF + DMARC configured (deliverability requirement; may need a dedicated subdomain setup — document in runbook)
+- Bounce handling: hard bounces set `email_bounce=true` on users; sequence paused for bounced users
+- Sent-log table: records every email sent per user for debugging and to prevent double-sends on scheduler restart
+
+**Localization / timezone:**
+
+- Subject and body in English for MVP (no localization)
+- Day-3 and Day-7 triggers respect user's timezone (per Spec 1.3b) — target 10am-11am user-local time window; if the hourly scheduler tick doesn't land in the window, defer to the next day rather than sending at an odd hour
+- Day-0 email sends immediately regardless of timezone (account-creation confirmation is expected immediately)
+
+**Template structure:**
+
+- Templates live in `backend/src/main/resources/email-templates/welcome/`
+- One `.txt` and one `.html` per email (so 6 files total)
+- Template variables: `{{firstName}}`, `{{unsubscribeUrl}}`, `{{prayerWallUrl}}`, `{{settingsUrl}}`
+- Rendered via Thymeleaf (already in Spring Boot ecosystem)
+- HTML template is deliberately simple — single-column, system font stack, no images except optional small wordmark, max-width 600px, good in dark-mode email clients
+
+**Files to create:**
+
+- `backend/src/main/java/com/worshiproom/email/welcome/WelcomeSequenceScheduledJob.java`
+- `backend/src/main/java/com/worshiproom/email/welcome/WelcomeSequenceService.java`
+- `backend/src/main/java/com/worshiproom/email/UnsubscribeController.java`
+- `backend/src/main/java/com/worshiproom/email/UnsubscribeService.java`
+- `backend/src/main/java/com/worshiproom/email/EmailSentLog.java` (JPA entity)
+- `backend/src/main/resources/email-templates/welcome/day0.txt`
+- `backend/src/main/resources/email-templates/welcome/day0.html`
+- `backend/src/main/resources/email-templates/welcome/day3.txt`
+- `backend/src/main/resources/email-templates/welcome/day3.html`
+- `backend/src/main/resources/email-templates/welcome/day7.txt`
+- `backend/src/main/resources/email-templates/welcome/day7.html`
+- `backend/src/main/resources/db/changelog/2026-04-22-005-create-email-sent-log-and-preferences.xml`
+- `backend/src/test/java/com/worshiproom/email/welcome/WelcomeSequenceIntegrationTest.java`
+- `backend/src/test/java/com/worshiproom/email/UnsubscribeIntegrationTest.java`
+- `frontend/src/components/settings/EmailPreferences.tsx`
+- `__tests__/EmailPreferences.test.tsx`
+
+**Files to modify:**
+
+- `backend/src/main/java/com/worshiproom/auth/AuthService.java` — capture opt-in checkbox on registration
+- `frontend/src/components/prayer-wall/AuthModal.tsx` — add opt-in checkbox (default checked)
+- `frontend/src/pages/Settings.tsx` — mount EmailPreferences component
+- Users table — add `welcome_sequence_opted_in BOOLEAN DEFAULT TRUE`, `email_bounce BOOLEAN DEFAULT FALSE` columns via Liquibase
+
+**Database changes:**
+
+- Alter `users`: add `welcome_sequence_opted_in`, `email_bounce` columns
+- Create `email_sent_log`: `(id UUID PK, user_id UUID FK, email_category VARCHAR(50), template_key VARCHAR(50), sent_at TIMESTAMP, smtp_message_id VARCHAR(255))`
+- Create `email_preferences`: `(user_id UUID PK FK, welcome_sequence BOOLEAN DEFAULT TRUE, comment_digest BOOLEAN DEFAULT TRUE, weekly_summary BOOLEAN DEFAULT TRUE, push_notification_email BOOLEAN DEFAULT TRUE, updated_at TIMESTAMP)`
+- Liquibase changeset: `2026-04-22-005-create-email-sent-log-and-preferences.xml`
+- Index on `email_sent_log(user_id, email_category, sent_at DESC)` for dedupe and debugging
+
+**API changes:**
+
+- `POST /api/v1/email/unsubscribe?token={token}&list={list_key}` — public endpoint (no auth); token-signed; single-click unsubscribe; returns a simple confirmation HTML page
+- `GET /api/v1/users/me/email-preferences` — returns current opt-in state for all email categories
+- `PATCH /api/v1/users/me/email-preferences` — update preferences
+- OpenAPI spec updated
+
+**Copy Deck:**
+
+_Day 0 email (plain text):_
+
+"Hi {{firstName}},
+
+Your Worship Room account is ready.
+
+Most people start by reading the Prayer Wall — a feed of prayer requests, testimonies, and discussions from other members. You don't have to post anything yet. Reading counts.
+
+{{prayerWallUrl}}
+
+If you ever want to change how Worship Room contacts you, your settings are here: {{settingsUrl}}
+
+— Eric
+Founder, Worship Room
+
+Unsubscribe from welcome emails: {{unsubscribeUrl}}"
+
+_Day 3 email (plain text):_
+
+"Hi {{firstName}},
+
+Checking in — a few things about Worship Room that might help as you settle in.
+
+First: anonymous posting is always available. When something feels too raw to share under your name, the anonymous option is there. Your identity stays hidden from everyone including the moderators.
+
+Second: our moderators are real people who read every report carefully. If you see something that doesn't belong — harassment, spam, or content that feels unsafe — use the report button and we'll take it seriously.
+
+Third: crisis resources are always one tap away, on every page. If you or someone you're praying for is in acute distress, 988 (Suicide & Crisis Lifeline) and Crisis Text Line (text HOME to 741741) are the fastest paths to immediate help.
+
+If you haven't posted anything yet, that's completely fine. Some people spend weeks reading before writing. There's no right pace.
+
+— Eric
+
+Unsubscribe: {{unsubscribeUrl}}"
+
+_Day 7 email (plain text):_
+
+"Hi {{firstName}},
+
+A short note.
+
+If you've been praying with us, thank you. If you've been reading, that counts too. If life has pulled you elsewhere, that's allowed.
+
+— Eric
+
+Unsubscribe: {{unsubscribeUrl}}"
+
+_HTML versions:_ structurally identical, wrapped in simple single-column 600px-max layout with system font stack, 1.6 line-height, muted footer for unsubscribe.
+
+_Registration checkbox copy:_
+
+- Label: "It's OK to send me an occasional welcome email over my first week."
+- Helper: "You can unsubscribe anytime."
+
+_Settings section header:_ "Email preferences"
+
+_Settings toggle labels:_
+
+- "Welcome emails (first week)"
+- "Comment reply digest"
+- "Weekly summary"
+- "Notification emails"
+
+_Settings description (per toggle):_ short factual sentences, e.g. "A daily summary of replies to your comments" — no hype, no feature-selling.
+
+_Unsubscribe confirmation page:_ "You've been unsubscribed from {{list_name}}. You can update your email preferences anytime in Settings."
+
+**Anti-Pressure Copy Checklist:** (a) no comparison ✓ (b) no urgency ✓ (c) no exclamation points near vulnerability ✓ (d) no therapy-app jargon ✓ (e) no streak-as-shame ✓ (f) no false scarcity ✓
+
+**Anti-Pressure Design Decisions:**
+
+- Three emails total, no more
+- No emoji anywhere in the sequence
+- No exclamation points in copy
+- No "don't miss out" or "complete your profile" CTAs
+- Day-3 copy explicitly validates not posting ("some people spend weeks reading before writing")
+- Day-7 copy explicitly validates being away ("if life has pulled you elsewhere, that's allowed")
+- Sequence pauses for users with active crisis flags
+- Sequence pauses for users in account-deletion grace period
+- One-click unsubscribe (no login required)
+- Unsubscribed users never get re-added to the sequence
+- From address is a real human ("Eric") not a brand
+- No image tracking pixels
+- No feature-of-the-week drip campaign
+- No referral/invite CTAs
+
+**Acceptance criteria:**
+
+- [ ] Registration form shows welcome-email opt-in checkbox, default checked
+- [ ] Unchecking the checkbox at registration sets `welcome_sequence_opted_in=false`
+- [ ] Day 0 email sends within 10 minutes of registration
+- [ ] Day 0 email has both plain-text and HTML parts (multipart/alternative)
+- [ ] Day 3 email sends 72h ±1h after registration in the user's local 10-11am window
+- [ ] Day 7 email sends 168h ±1h in the user's local 10-11am window
+- [ ] User in crisis-flagged state in last 72h does NOT receive Day 3 or Day 7 emails
+- [ ] User in account-deletion grace period does NOT receive any sequence emails
+- [ ] Unsubscribed user does NOT receive subsequent emails in the sequence
+- [ ] Unsubscribe endpoint works without authentication (token-signed)
+- [ ] Unsubscribe takes effect within 5 minutes (next scheduler tick)
+- [ ] One-click unsubscribe via List-Unsubscribe header supported
+- [ ] DKIM + SPF + DMARC all pass on sent emails (verified via Mail-Tester or equivalent)
+- [ ] Bounced emails mark user `email_bounce=true` and pause the sequence
+- [ ] `email_sent_log` records every sent email, preventing double-sends on scheduler restart
+- [ ] Settings page "Email preferences" section renders all 4 toggles with correct current state
+- [ ] Toggling a preference off immediately persists and is respected on next scheduler tick
+- [ ] All email copy strings pass the Anti-Pressure Copy Checklist
+- [ ] No emoji or exclamation points in any email subject or body
+- [ ] FROM displays as "Eric from Worship Room <eric@worshiproom.com>" (or configured equivalent)
+- [ ] Day 3 email explicitly includes the "reading counts" validation
+- [ ] Day 7 email is ≤3 sentences in the body
+- [ ] Unsubscribe confirmation page renders cleanly without authentication
+- [ ] HTML email renders correctly in Gmail (web + mobile), Apple Mail, Outlook web
+- [ ] Dark-mode email clients render the HTML email without color contrast failures
+- [ ] No tracking pixels in HTML emails
+- [ ] Sequence does NOT resume if a previously-unsubscribed user re-engages (unsubscribe is permanent unless explicitly re-enabled in settings)
+- [ ] Integration tests cover: crisis suppression, deletion suppression, unsubscribe suppression, bounce handling, timezone windows, re-subscription
+- [ ] At least 20 tests across scheduling, templates, unsubscribe flow, preference persistence, suppression logic
+
+**Testing notes:**
+
+- Integration test with fake clock: advance time to 72h after registration, verify Day 3 email fires at the correct user-local 10-11am window
+- Integration test: user in timezone America/Los_Angeles registered at 11pm UTC → Day 3 email should fire at next user-local 10am (NOT at 72h UTC sharp)
+- Integration test: crisis-flag the user's post, advance time to Day 3 trigger, assert no email fires
+- Integration test: user unsubscribes after Day 0, advance to Day 3 trigger, assert no email fires
+- Integration test: bounce Day 0 delivery (simulated SMTP 550), verify Day 3/7 skipped
+- Unit test: template rendering with all expected variables present
+- Unit test: unsubscribe token signing and verification
+- Playwright: register a user with opt-in unchecked, verify no welcome email is logged in sent_log
+- Mail-Tester (or equivalent) check for DKIM/SPF/DMARC configuration
+- Manual QA: send all 3 emails to real Gmail, Apple Mail, Outlook Web accounts and visually verify rendering
+
+**Notes for plan phase recon:**
+
+1. Confirm SMTP provider choice from 15.1 supports List-Unsubscribe and List-Unsubscribe-Post headers (Postmark, SendGrid, Resend all do)
+2. Decide FROM email address structure. Recommendation: `eric@worshiproom.com` (personal, not `noreply@`). The Reply-To being a real inbox matters.
+3. Verify DKIM/SPF/DMARC setup requirements for the chosen SMTP provider and DNS host; document in runbook
+4. Confirm user timezone from Spec 1.3b is populated by the time Day 3 trigger would fire (should be — set at registration)
+5. Budget for email sending volume: 3 emails per new user × expected signups. At 1000 users/month signing up, that's 3000 emails/month — well within free tier of most providers.
+6. Consider adding a "hide from sequence if user has posted in first 24h" rule? Recommendation: NO — a new user who posts immediately is EXACTLY who benefits from the Day 3 values statement and Day 7 check-in.
+
+**Out of scope:**
+
+- Longer drip sequence beyond Day 7 (deliberately capped; anything longer becomes marketing)
+- Segmented welcome sequences by post category interest
+- A/B testing email copy (MVP is one version, well-written)
+- Email localization into other languages
+- SMS welcome sequence
+- In-app welcome walkthrough (that's Phase 14.1 First-Visit Walkthrough — separate feature)
+- Referral "invite a friend" CTAs in welcome emails
+- Marketing campaign emails (newsletters, product updates) — out of scope entirely for this wave
+- Re-engagement emails to inactive users ("we miss you!") — explicitly anti-pattern
+
+**Out-of-band notes for Eric:** The Day 7 email is the most important one in the sequence and the hardest to get right. Resist every instinct to add a CTA, a feature mention, or a "here's what's new" section. The Day 7 email is LITERALLY three sentences. Its power is in its smallness. When a user on Day 7 opens an inbox full of demanding emails and sees yours — short, signed by a human, making no ask — that's the moment they remember Worship Room feels different. Also: sending from your real email address (`eric@...`) means you'll occasionally get real replies. Read them. Those replies are the single highest-signal data source about whether the voice is working. A user writing back "thanks, this meant a lot" is validation; a user writing back "please stop, this is triggering" is a signal to revise. Finally: the welcome sequence is the ONLY email sequence for Worship Room that should ever exist without an explicit user request. No "here's this month's featured prayers," no "we noticed you haven't been back." The moment we add a second automated sequence is the moment we become a SaaS.
+
+---
+
 ### Spec 15.2 — Comment Reply Digest Email
 
 - **ID:** `round3-phase15-spec02-comment-reply-digest`
@@ -4174,6 +7436,99 @@ qotd_questions
 - [ ] Bundle size regression check passes (no more than 50 KB increase from Phase 0)
 - [ ] At least 6 tests
 
+### Spec 16.3b — Feature Flag Cleanup Pass
+
+- **ID:** `round3-phase16-spec03b-feature-flag-cleanup-pass`
+- **Size:** S
+- **Risk:** Low (code simplification, not behavior change — every flag being removed is already at its "on" state by the time this runs)
+- **Prerequisites:** 16.3 (all prior phases' cutovers must be in stable production state for ≥30 days before their flags can be retired)
+- **Goal:** Audit every feature flag introduced during the Forums Wave, classify each as "retire" or "keep," remove the retired flags' code branches, and document the survivors in a runbook. Decision 9 introduced the feature-flag pattern as a migration-safety lever; without explicit cleanup, dead flags accumulate and become cargo-cult conditionals that confuse future work ("why is this branch behind a flag that's been true for 8 months?"). This spec is the discipline that prevents that accumulation. Run once near the end of the wave when every phase cutover has proven stable.
+
+**Approach:** Produce an audit table listing every flag introduced during the wave (`VITE_USE_BACKEND_*`, `RATE_LIMIT_BACKEND`, feature-specific toggles, etc.). For each flag: classify as RETIRE (flag has served its migration purpose; remove flag check and the dead branch) or KEEP (flag is a legitimate kill switch or ongoing-use toggle). Remove retired flags by deleting the conditional and promoting the "on" branch inline; run the full test suite after each removal to confirm no regressions. Document the kept flags in `backend/docs/runbook-feature-flags.md` with: flag name, purpose, who can toggle, current default, rollback procedure.
+
+**Known flags introduced during the wave (seed audit list — spec execution will verify and extend):**
+
+- `VITE_USE_BACKEND_AUTH` (Phase 1 cutover) — RETIRE after 30 days of stable JWT auth
+- `VITE_USE_BACKEND_ACTIVITY` (Phase 2 cutover) — RETIRE after 30 days; dual-write continues but the flag's read-side branching is dead after Phase 3 promotes backend reads
+- `VITE_USE_BACKEND_FRIENDS` (Phase 2.5 cutover) — RETIRE after 30 days
+- `VITE_USE_BACKEND_PRAYER_WALL` (Phase 3 cutover) — RETIRE after 30 days
+- `RATE_LIMIT_BACKEND` (Spec 5.6) — KEEP as `'redis' | 'in-memory'` toggle; legitimate ongoing choice for dev-vs-prod, documented in runbook
+- `SENTRY_DSN` (Spec 1.10d) — KEEP (env-var-based, not a toggle flag per se; setting empty disables Sentry)
+- Night Mode opt-in (Spec 6.3 settings toggle) — NOT a feature flag; KEEP (user preference)
+- 3am Watch opt-in (Spec 6.4 settings toggle) — NOT a feature flag; KEEP (user preference)
+- Verse-Finds-You opt-in (Spec 6.8 settings toggle) — NOT a feature flag; KEEP (user preference)
+- Welcome email opt-in (Spec 15.1b settings toggle) — NOT a feature flag; KEEP (user preference)
+
+The distinction between **feature flag** (migration-phase conditional, intended to be temporary) and **user preference toggle** (ongoing user choice, intended to persist) is the load-bearing taxonomic line. User preferences NEVER retire; feature flags SHOULD retire once their phase is stable.
+
+**Cleanup procedure (per retired flag):**
+
+1. Grep the codebase for the flag name; enumerate every call site
+2. Confirm the flag's current default is the "target" state (e.g., `VITE_USE_BACKEND_AUTH=true` in prod)
+3. Open a branch named `retire-flag-{flag-name}`
+4. At each call site: remove the conditional, keep only the "on" branch inline
+5. Remove the flag declaration from `.env.example`, `application.properties`, any config classes
+6. Run full test suite; commit only if green
+7. Merge to main; deploy; monitor for 48h before retiring the next flag
+8. Update `backend/docs/runbook-feature-flags.md` to mark the flag as "retired on {date}" in a historical-ledger subsection
+
+**Files to create:**
+
+- `backend/docs/runbook-feature-flags.md` (surviving flags + retired-flags ledger)
+- `_cutover-evidence/phase16-feature-flag-audit.md` (audit artifact: one line per flag with classification, rationale, cleanup PR link)
+
+**Files to modify (illustrative — actual set determined by audit):**
+
+- `frontend/src/services/index.ts` and every `services/api/*` file behind a `VITE_USE_BACKEND_*` flag
+- Every component or hook that checks a retired flag
+- `.env.example` — remove retired flag entries
+- `backend/src/main/resources/application.properties` — remove retired flag entries
+
+**Database changes:** None
+
+**API changes:** None
+
+**Copy Deck:** None (no user-facing copy changes)
+
+**Acceptance criteria:**
+
+- [ ] Audit table `_cutover-evidence/phase16-feature-flag-audit.md` exists and lists every flag introduced during the wave with columns: flag name, phase introduced, classification (RETIRE/KEEP), cleanup PR reference or runbook section reference
+- [ ] `backend/docs/runbook-feature-flags.md` documents every KEPT flag with: purpose, default value, toggle procedure, rollback procedure
+- [ ] Retired flags are removed from `.env.example`
+- [ ] Retired flags are removed from Spring `application*.properties` files
+- [ ] Retired flag conditionals are removed from code (no `if (import.meta.env.VITE_USE_BACKEND_*)` branches remain for retired flags)
+- [ ] Every retired flag's dead branch is also removed (not just the conditional — the code path that was the "off" branch is deleted entirely)
+- [ ] Full test suite passes after each flag retirement (documented in audit PR descriptions)
+- [ ] Runbook includes a "Retired flags" ledger subsection listing each retired flag with its retirement date for future archaeology
+- [ ] No flag retired fewer than 30 days after its phase cutover (verified against cutover dates in Change Log)
+- [ ] User-preference toggles (Night Mode, 3am Watch, Verse-Finds-You, Welcome email opt-in, etc.) are EXPLICITLY listed in the audit as "user preference — not retired" to prevent future confusion
+- [ ] At least 8 tests — per-retired-flag smoke tests confirming the "on" path still works after conditional removal
+
+**Testing notes:**
+
+- Each flag retirement is its own PR with its own test-suite run
+- Smoke test per retired flag: run the feature end-to-end in the "promoted" code path to confirm no behavioral regression
+- Full E2E test run before final merge of the cleanup phase
+
+**Notes for plan phase recon:**
+
+1. Produce the audit table first, review with Eric, THEN execute retirements. Don't batch-retire without review.
+2. Confirm the 30-day stability window per phase by checking deploy dates and incident/rollback history
+3. Some flags may warrant a KEEP classification that wasn't obvious at introduction time — use this audit as an opportunity to reclassify
+4. Watch for flags referenced in test fixtures; retiring a flag in production code but leaving it in tests is a common miss
+
+**Out of scope:**
+
+- Removing user-preference toggles (those are product features, not flags)
+- Renaming kept flags (out of scope; rename is a separate refactor)
+- Introducing new flags during this spec (cleanup only — no new flags)
+- Flag-management tooling (LaunchDarkly, Unleash, etc.) — out of scope; env-var flags are sufficient at current scale
+- Auto-detection of dead flags via static analysis — manual audit for MVP
+
+**Out-of-band notes for Eric:** The audit table is the load-bearing deliverable here, not the code removal. Even if you never got around to the actual retirement PRs, having a written record of which flags exist and why is 80% of the value — because the alternative is 2 years from now asking "what does `VITE_USE_BACKEND_ACTIVITY` do and can I delete it?" and nobody remembering. Write the audit table thoroughly and the cleanup itself becomes mechanical. Also: the 30-day stability window per flag is a floor, not a ceiling — if a phase has been stable for 6 months, don't treat it as "too soon." Retire aggressively; dead code is the enemy of future velocity.
+
+---
+
 ### Spec 16.4 — Accessibility Audit (BB-35 Style)
 
 - **ID:** `round3-phase16-spec04-accessibility-audit`
@@ -4260,6 +7615,12 @@ These are decisions that have been made but should be revisited if circumstances
 
 ## Change Log
 
+- **2026-04-16 — v2.6** — Hygiene pass + Phase 2.5 completeness fix + Rule 17 retrofit correction. **Pre-execution audit uncovered six prereq-graph issues** (1 real architectural: Spec 1.10c depended on 1.10e but preceded it in the file, fixed by physically moving the 1.10c block to after 1.10e and updating Appendix C ordering; 1 spurious forward ref: Spec 4.6b incorrectly listed 6.7 as a prerequisite when the direction was reversed, rephrased to name the feature rather than the spec number; 4 runtime-gated misclassifications: Specs 6.4 and 6.8 listed 10.5 and 10.6 as hard prereqs when both features ship with documented graceful-degradation paths for when the crisis classifier is unavailable — reclassified as "Runtime-gated dependencies" with explicit notes preserving the shipping-before-10-is-safe story). **Four Liquibase changeset filename collisions fixed** (same-date-same-sequence prefixes that would have caused Liquibase checksum conflicts on deploy — renames: scripture-reference-to-posts 2026-04-18-001→002, three username changesets 2026-04-20-001/002/003→2026-04-21-001/002/003, keeping the Phase 8 username trio grouped on one date). **Phase 2.5 completeness fix** (audit surfaced that Decision 8 promises `social_interactions` and `milestone_events` shadow tables in Phase 2.5 but the existing specs only created `friend_relationships` and `friend_requests` — would have caused runtime "table does not exist" errors when Phase 12 notification generators and Phase 13 personal analytics queries ran against the missing tables): Spec 2.5.1 extended to create all four tables with full schemas and CHECK constraints; new Spec 2.5.4b added for the social/milestone dual-write pipeline with fire-and-forget pattern and new `VITE_USE_BACKEND_SOCIAL` env flag; Spec 2.5.5 cutover extended to flip both flags and smoke-test all three pipelines (friends, social interactions, milestone events) plus Universal Rule 17 accessibility smoke test AC. **Two Rule 17 cutover retrofits** (Spec 2.9 Phase 2 Cutover and Spec 2.5.5 Phase 2.5 Cutover were missed in the initial Batch 8 retrofit because they weren't in the retrofit list at the time; added now so all 8 cutovers have explicit Rule 17 ACs with phase-specific evidence paths). **Meta-observation:** the initial audit regex `\d+\.\d+[a-z]?` silently excluded Phase 2.5's 3-part IDs (2.5.1–2.5.5) from prereq and cross-ref checks; re-audited with `\d+\.\d+(?:\.\d+)?[a-z]?` and confirmed Phase 2.5's graph is clean. Metadata synced: QR table (Phase 2.5: 5→6), total spec count (137→138), Appendix C regenerated with Spec 2.5.4b inserted in execution position, Spec 1.10c moved in Appendix C ordering to reflect new post-1.10e execution sequence.
+- **2026-04-16 — v2.5** — Batch 8 polish-tier artifacts. Three new additions addressing the two polish-tier gaps from the v2.0 assessment plus a catalog deliverable that was always implicit but never consolidated: **Universal Rule 17 — Per-phase accessibility smoke test** (new cross-cutting rule requiring axe-core CI scan + keyboard walkthrough + VoiceOver spot-check at every phase cutover, with committed evidence at `_cutover-evidence/{phase}-a11y-smoke.json` — prevents accessibility debt from compounding across 15 phases into a 50+ violation final audit; rule is 17 of 17 total Universal Rules). **Spec 16.3b — Feature Flag Cleanup Pass** (new cleanup spec in Phase 16 that audits every feature flag introduced during the wave, classifies each as RETIRE or KEEP with the feature-flag-vs-user-preference taxonomic line as load-bearing distinction, documents surviving flags in `backend/docs/runbook-feature-flags.md`, removes retired flag code branches with per-flag smoke-test PRs, produces permanent historical ledger of retired flags for future archaeology; 30-day stability floor per flag before retirement). **Appendix D — Deferred to Future Waves** (new consolidated catalog of ~90 explicit deferrals scattered through the wave, grouped by theme: Core features, Profile & identity, Infrastructure, Notifications & engagement, Community & moderation, Search & discovery, Analytics & insights, Legal & compliance, Internationalization & accessibility, Integration, Monetization & sustainability, Process & tooling — plus a final "Explicitly NOT ever shipping" anti-pattern register that catalogs the ~10 ideas explicitly forbidden by the wave's anti-pressure discipline so future-self doesn't accidentally re-open them). Metadata synced: Phase 16 QR count (4→5), total spec count (136→137), Appendix C regenerated to add Spec 16.3b. With this batch, all 9 gaps from the original v2.0 assessment are now addressed. The plan is complete and execution-ready.
+- **2026-04-16 — v2.4** — Batch 6 content specs. Three new specs filling the three most important non-infrastructure gaps from the v2.0 assessment: **Spec 10.7b — Report a User** (user-level pattern-harassment reporting distinct from post-level reports, rate-limited to 3/week, zero-interaction-flag anti-weaponization gate, mass-reporter suspension after 6 closed-no-action reports in 30 days, flows through existing Phase 10.7 moderator queue with separate routing for reports about moderators/admins to Eric-only queue, never notifies the reported user until a moderator takes action — prevents retaliation and chilling effects), **Spec 15.1b — Welcome Email Sequence** (three emails across first 7 days: Day 0 account-ready confirmation signed by Eric personally, Day 3 values-statement-masquerading-as-feature-tour explicitly validating not-posting-yet, Day 7 three-sentence check-in with no CTA, plain-text + HTML, one-click List-Unsubscribe, suppresses for users with active crisis flags and users in account-deletion grace, never resumes for unsubscribed users even if they re-engage — retention lever without retention desperation), **Spec 1.10f — Terms of Service and Privacy Policy Surfaces** (two versioned markdown documents at `/terms` and `/privacy` with first-draft Eric-authored content describing actual app behavior, consent checkbox on registration that cannot be pre-checked with Submit disabled until checked, registration-time version capture in `users.terms_version` and `users.privacy_version`, update-consent modal with summary-of-changes at top and 30-day advance notice, interaction-lock for users who decline an update without silent account suspension, lawyer review scheduled before 500 users). Metadata synced: QR table (Phase 1: 16→17, Phase 10: 11→12, Phase 15: 4→5), total spec count (133→136), Appendix C regenerated with all 136 IDs. These three specs close gaps 4, 5, and 6 from the original v2.0 assessment. Combined with Batch 5's infrastructure foundations and Batch 7's hero spec depth pass, all major structural gaps are now addressed; remaining open items (per-phase accessibility smoke tests, feature flag cleanup catalog, deferred wave 2 catalog) are polish-tier and can be deferred to a post-execution cleanup batch.
+- **2026-04-16 — v2.3** — Batch 7 hero spec depth pass. Five Phase 6 specs replaced with production-depth versions: **Spec 6.1 Prayer Receipt** (grew from 2,267 to 13,646 chars; added three display-variant privacy model, daily-rotating scripture accompaniment, shareable receipt with PII stripping, dismissible via settings, 24 acceptance criteria), **Spec 6.4 3am Watch** (1,563 → 17,772 chars; added explicit opt-in gate with confirmation modal, Trust Level 2 gate, deterministic feed re-sort across crisis/MH/friends/regular slices, mandatory crisis resources banner, classifier-down graceful degradation, 30+ acceptance criteria), **Spec 6.5 Intercessor Timeline** (1,794 → 17,857 chars; added three view modes — By day/By post/By person — with warm amber calendar heatmap, friend-only attribution in person view, block-cascading cache invalidation, optional Year of Prayer image, 28+ acceptance criteria), **Spec 6.6 Answered Wall** (1,289 → 18,629 chars; added deliberate Mental-Health-filter omission with rationale, two new reaction types 'praising' and 'celebrate', indefinitely-editable answered_text, un-mark-as-answered without shame, hero subhead "Gratitude, not comparison", 24+ acceptance criteria), **Spec 6.8 Verse-Finds-You** (1,787 → 22,101 chars; added 180-passage curated set with tags and excluded_contexts, four surfacing triggers with 24h cooldown, 48h crisis-flag suppression per Universal Rule 13, category-to-tag mapping deliberately excluding `hope` from Mental Health and Grief, no LLM in MVP — curated-set lookup only, graceful silent failure on pipeline errors, 35+ acceptance criteria). Total depth added: approximately 90 KB. No specs added or removed; no QR table or Appendix C changes. Every depth-replaced spec now includes full Anti-Pressure Design Decisions block, complete Copy Deck with Anti-Pressure Copy Checklist, detailed Files-to-Create and API Changes sections, Testing Notes with integration and security test specifics, and Out-of-Band Notes for Eric capturing the design intent that would otherwise be lost to future-context drift.
+- **2026-04-16 — v2.2** — Batch 5 infrastructure foundation specs. Four new specs added to close the gap between architectural decisions and the first consumer that needs each piece of infrastructure: **Spec 1.10c — Database Backup Strategy** (platform-native snapshots plus weekly pg_dump to object storage, with quarterly restore drill discipline; depends on 1.10e for storage), **Spec 1.10d — Production Monitoring Foundation** (Sentry error tracking with PII scrubber, JSON structured logging with request-ID MDC, uptime monitoring on /api/v1/health with day-1 synthetic alert test), **Spec 1.10e — Object Storage Adapter Foundation** (single `ObjectStorageAdapter` interface with three implementations — S3/R2/B2 for prod, MinIO for tests, local filesystem for dev — with contract test enforcing identical semantics across implementations), **Spec 5.6 — Redis Cache Foundation** (Redis 7 service wiring, key namespace conventions, Spring `@Cacheable` configuration, rate limiter migration from in-memory to Redis-backed, cache circuit breaker for graceful degradation). Metadata synced: QR table (Phase 1: 13→16, Phase 5: 5→6), total spec count (129→133), Appendix C regenerated with all 133 IDs. One cross-reference fix: Spec 1.10c's reference to the earlier-draft identifier "3.12b" (leftover from an earlier draft) corrected to "Spec 1.10e"; prereq list updated to reflect the adapter dependency. These four specs collectively move Redis + S3 + monitoring + backups from "CC will improvise mid-hero-feature" to "deliberately designed once with contract tests."
+- **2026-04-16 — v2.1** — Post-v2.0 recovery and four-batch amendment pass (all surgery done via direct-to-file Python after multi-segment file corruption was recovered from the personal-laptop copy). **Round 1** (12 path/correction patches). **Batch 1** (12 critical patches): `wr_streak_repairs` dual-write mirror, Decision 5 Light a Candle reaction schema and composite PK, Decision 8 FriendDto denormalization, Phase 2.5 `social_interactions` and `milestone_feed` dual-write, Phase 12 14-type notification catalog consolidation, Inheritance Acknowledgments section, Decision 17, Universal Rule 13 crisis detection supersession, Universal Rule 15 read-endpoint rate limits, Universal Rule 5 i18n-ready constants structure + Anti-Pressure Copy Checklist. **Batch 2** (11 should-fix patches): Appendix B path bulk correction, Spec 6.2 Quick Lift server-authoritative timer, Phase 1 BCrypt-in-Liquibase-XML callout, Spec 8.1 username profanity filter, Spec 1.4 CSRF disable callout, Spec 2.8 drift detection CI integration, Phase 3.6 and 3.7 addenda content, Spec 7.7 visibility predicate canonical SQL, Spec 8.4 deleted/banned user display copy, Spec 6.7 PII stripping for testimony PNGs. **Batch 3** (8 new specs): 1.3b users timezone column, 1.9b error/loading design system, 2.10 historical activity backfill, 4.6b image upload for testimonies and questions, 4.7b Ways to Help MVP, 6.2b prayer length options (1/5/10 min guided sessions), 6.11b live presence component, 10.11 account deletion and data export. **Batch 4** (metadata cleanup): Phase 3.6 and 3.7 addenda relocated from Phase 4/11 into their correct Phase 3 homes (pure move, content unchanged), Quick Reference phase-count table synced to Batch 3 additions (Phase 1: 13, Phase 2: 10, Phase 4: 10, Phase 6: 14, Phase 10: 11), total spec count updated to ~129, Appendix C regenerated to include all 128 spec IDs, version and end-marker bumped to v2.1.
 - **2026-04-14 — v2.0** — Comprehensive rewrite based on full codebase audit. Critical corrections: tech stack (Maven not Gradle, JPA not JDBC, JWT not Firebase, application.properties not yml), backend skeleton already exists (audit and extend, not create), 10 categories not 8 (Mental Health was missing), QOTD already exists (migrate not build), reaction bug fixed in new Phase 0.5 (before backend work), Save vs Bookmark are distinct features, `posts` table replaces `prayer_requests`/etc names from older spec. New phases: 0.5, 2.5, 11, 12, 13, 14, 15, 16. Spec count: 88 → ~120. Spec template rewritten to match BB-45 format. Universal spec rules expanded from 12 to 16 (BB-45 anti-pattern enforcement, plain text only, rate limiting).
 - **2026-04-14 — v1.0** — Initial draft based on three Prayer Wall recons, Profile/Dashboard recon, competitor research, and strategic conversation. Now superseded by v2.0.
 
@@ -4280,17 +7641,17 @@ These are decisions that have been made but should be revisited if circumstances
 
 ## Appendix B — Key File Locations
 
-- **Master Plan (this file)** — `/Users/Eric/worship-room/_forums_master_plan/round3-master-plan.md`
-- **Backend** — `/Users/Eric/worship-room/backend/`
-- **Backend Liquibase changelogs** — `/Users/Eric/worship-room/backend/src/main/resources/db/changelog/`
-- **OpenAPI spec** — `/Users/Eric/worship-room/backend/api/openapi.yaml`
-- **Frontend Prayer Wall components** — `/Users/Eric/worship-room/frontend/src/components/prayer-wall/`
-- **Frontend Prayer Wall pages** — `/Users/Eric/worship-room/frontend/src/pages/PrayerWall*.tsx`
-- **Generated API types** — `/Users/Eric/worship-room/frontend/src/types/api/generated.ts`
-- **Reactive store inventory** — `/Users/Eric/worship-room/.claude/rules/11-local-storage-keys.md`
-- **Brand voice doctrine** — `/Users/Eric/worship-room/CLAUDE.md` (anti-pressure section)
-- **Existing specs** — `/Users/Eric/worship-room/_specs/`
-- **Cutover checklists** — `/Users/Eric/worship-room/_plans/forums-wave/`
+- **Master Plan (this file)** — `/Users/eric.champlin/worship-room/_forums_master_plan/round3-master-plan.md`
+- **Backend** — `/Users/eric.champlin/worship-room/backend/`
+- **Backend Liquibase changelogs** — `/Users/eric.champlin/worship-room/backend/src/main/resources/db/changelog/`
+- **OpenAPI spec** — `/Users/eric.champlin/worship-room/backend/api/openapi.yaml`
+- **Frontend Prayer Wall components** — `/Users/eric.champlin/worship-room/frontend/src/components/prayer-wall/`
+- **Frontend Prayer Wall pages** — `/Users/eric.champlin/worship-room/frontend/src/pages/PrayerWall*.tsx`
+- **Generated API types** — `/Users/eric.champlin/worship-room/frontend/src/types/api/generated.ts`
+- **Reactive store inventory** — `/Users/eric.champlin/worship-room/.claude/rules/11-local-storage-keys.md`
+- **Brand voice doctrine** — `/Users/eric.champlin/worship-room/CLAUDE.md` (anti-pressure section)
+- **Existing specs** — `/Users/eric.champlin/worship-room/_specs/`
+- **Cutover checklists** — `/Users/eric.champlin/worship-room/_plans/forums-wave/`
 
 ## Appendix C — Spec Quick Index
 
@@ -4302,14 +7663,20 @@ round3-phase00-5-spec01-prayer-reactions-reactive-store
 round3-phase01-spec01-backend-skeleton-audit
 round3-phase01-spec02-postgres-docker
 round3-phase01-spec03-liquibase-setup
+round3-phase01-spec03b-users-timezone-column
 round3-phase01-spec04-spring-security-jwt
 round3-phase01-spec05-auth-endpoints
 round3-phase01-spec06-user-me-endpoint
 round3-phase01-spec07-testcontainers-setup
 round3-phase01-spec08-dev-seed-data
 round3-phase01-spec09-frontend-auth-jwt
+round3-phase01-spec09b-error-loading-design-system
 round3-phase01-spec10-phase1-cutover
 round3-phase01-spec10b-deployment-target-decision
+round3-phase01-spec10d-production-monitoring-foundation
+round3-phase01-spec10e-object-storage-adapter-foundation
+round3-phase01-spec10c-database-backup-strategy
+round3-phase01-spec10f-terms-privacy-policy-surfaces
 round3-phase02-spec01-activity-schema
 round3-phase02-spec02-faith-points-service
 round3-phase02-spec03-streak-service
@@ -4319,10 +7686,12 @@ round3-phase02-spec06-activity-endpoint
 round3-phase02-spec07-frontend-activity-dual-write
 round3-phase02-spec08-activity-drift-test
 round3-phase02-spec09-phase2-cutover
+round3-phase02-spec10-historical-activity-backfill
 round3-phase02-5-spec01-friends-schema
 round3-phase02-5-spec02-friends-service
 round3-phase02-5-spec03-friends-endpoints
 round3-phase02-5-spec04-frontend-friends-dual-write
+round3-phase02-5-spec04b-social-milestone-dual-write
 round3-phase02-5-spec05-phase2-5-cutover
 round3-phase03-spec01-prayer-wall-schema
 round3-phase03-spec02-mock-data-seed
@@ -4342,15 +7711,19 @@ round3-phase04-spec03-testimony-post-type
 round3-phase04-spec04-question-post-type
 round3-phase04-spec05-discussion-post-type
 round3-phase04-spec06-encouragement-post-type
+round3-phase04-spec06b-image-upload-testimonies-questions
 round3-phase04-spec07-composer-chooser
+round3-phase04-spec07b-ways-to-help-mvp
 round3-phase04-spec08-room-selector-cutover
 round3-phase05-spec01-frosted-card-migration
 round3-phase05-spec02-horizon-glow
 round3-phase05-spec03-two-line-headings
 round3-phase05-spec04-animation-tokens
 round3-phase05-spec05-deprecated-pattern-purge
+round3-phase05-spec06-redis-cache-foundation
 round3-phase06-spec01-prayer-receipt
 round3-phase06-spec02-quick-lift
+round3-phase06-spec02b-prayer-length-options
 round3-phase06-spec03-night-mode
 round3-phase06-spec04-three-am-watch
 round3-phase06-spec05-intercessor-timeline
@@ -4360,6 +7733,7 @@ round3-phase06-spec08-verse-finds-you
 round3-phase06-spec09-composer-drafts
 round3-phase06-spec10-search-by-author
 round3-phase06-spec11-sound-effects-polish
+round3-phase06-spec11b-live-presence-component
 round3-phase06-spec12-phase6-cutover
 round3-phase07-spec01-bible-to-prayer-wall
 round3-phase07-spec02-prayer-wall-to-bible
@@ -4390,9 +7764,11 @@ round3-phase10-spec04-trust-levels
 round3-phase10-spec05-three-tier-escalation
 round3-phase10-spec06-automated-flagging
 round3-phase10-spec07-peer-moderator-queue
+round3-phase10-spec07b-report-a-user
 round3-phase10-spec08-appeal-flow
 round3-phase10-spec09-rate-limit-tightening
 round3-phase10-spec10-admin-foundation
+round3-phase10-spec11-account-deletion-data-export
 round3-phase11-spec01-fulltext-search-schema
 round3-phase11-spec02-search-endpoint
 round3-phase11-spec03-search-ui
@@ -4411,15 +7787,143 @@ round3-phase14-spec02-suggested-first-action
 round3-phase14-spec03-find-your-people
 round3-phase14-spec04-warm-empty-states
 round3-phase15-spec01-smtp-setup
+round3-phase15-spec01b-welcome-email-sequence
 round3-phase15-spec02-comment-reply-digest
 round3-phase15-spec03-weekly-summary
 round3-phase15-spec04-push-notifications
 round3-phase16-spec01-offline-cache
 round3-phase16-spec02-queued-posts
 round3-phase16-spec03-lighthouse-perf
+round3-phase16-spec03b-feature-flag-cleanup-pass
 round3-phase16-spec04-accessibility-audit
 ```
 
+## Appendix D — Deferred to Future Waves
+
+This appendix consolidates every deliberate deferral scattered through the Forums Wave into a single reference. Each entry was recorded as "out of scope" inside a specific spec's Out-of-Scope section; gathering them here gives next-wave planning a starting scope-of-work rather than requiring a re-grep of the entire Master Plan. Entries are grouped by theme. Each entry notes the spec(s) where the deferral was declared, so context is one ctrl-F away.
+
+### Core features deferred to future waves
+
+- **Personal prayer list (`/my-prayers`) backend migration.** The Save-to-prayer-list feature stays on localStorage during the Forums Wave (Decision 14, Spec 3.10). Future-wave scope: migrate `wr_prayer_list` to a backend table, preserve reminder scheduling and mark-as-answered UX, distinguish from Prayer Wall bookmarks semantically.
+- **Direct messages (DMs).** Not in scope anywhere in this wave. Future-wave scope: 1:1 messaging with encryption-at-rest, report-message flow integrating with Phase 10.7 moderation, block-user cascading to DM permissions.
+- **Voice-guided prayer sessions.** Referenced as out of scope in Spec 6.2 Quick Lift and 6.2b Prayer Length Options. Future-wave scope: audio content delivery, narrator voice curation, offline caching, accessibility (closed captions).
+- **Video prayer requests.** Referenced as out of scope in Spec 4.6b Image Upload. Future-wave scope: video upload + moderation + storage cost model + trust-level gating for video.
+- **Multiple images per post.** Spec 4.6b scopes to single-image MVP. Future-wave scope: gallery UI, ordering, caption-per-image.
+- **Images on "mark as answered" updates.** Spec 6.6 Answered Wall flagged this as a future consideration — emotionally loaded testimonies often deserve images. Future-wave scope: image upload in MarkAsAnsweredForm, reused storage adapter.
+- **Group prayer rooms / private circles.** Not scoped in this wave. Future-wave scope: invitation-only small-group feeds, shared prayer lists, small-group notifications.
+- **Scheduled / recurring prayers.** Referenced as out of scope in Spec 10.11 Account Deletion. Future-wave scope: "pray every weekday at 7am for 30 days" recurring reminders.
+- **Liturgy-of-the-day integrated readings.** Phase 9 touches liturgical seasons but not daily-lectionary integration. Future-wave scope: RCL (Revised Common Lectionary) and Catholic lectionary feeds.
+- **Church community integration.** Phase 7.5 touches local support (counselors, Celebrate Recovery). Future-wave scope: church-specific prayer walls, pastor dashboard, sermon-referenced prayer prompts.
+- **Family / household prayer mode.** Not scoped. Future-wave scope: shared prayer lists for families, child-friendly UI mode, parental controls.
+
+### Profile & identity deferrals
+
+- **Profile photo upload.** Open Question #10 in this plan. Avatars remain URL-only with initials fallback. Future-wave scope: S3-backed photo upload (adapter exists per 1.10e), image moderation, crop UI, removing photos on account deletion.
+- **Account merging.** Referenced in Spec 10.11. Future-wave scope: two Worship Room accounts merging into one, with comment/post reattribution.
+- **OAuth social login (Google, Apple).** Not in scope for JWT auth per Decision 6. Future-wave scope: SSO flows, account-linking UX, existing-email conflict handling.
+- **Username change flow.** Spec 8.1 introduces usernames but doesn't specify mid-life-of-account changes. Future-wave scope: rate-limited username changes, URL redirect retention for old handles.
+- **Custom profile themes / backgrounds.** Profile customization capped at bio, favorite verse, display-name preference. Future-wave scope: theme selection, background image upload.
+- **Verified profiles (pastors, chaplains, counselors).** Not in scope. Future-wave scope: verification badge, in-app disclosure that the person is acting in a professional capacity, referral integration with Phase 7.5 Local Support.
+
+### Infrastructure deferrals
+
+- **Real-time WebSocket feed updates.** Prayer Wall refreshes on navigation; no live-updating feed. Future-wave scope: WebSocket or SSE for real-time feed updates, presence indicators across feature boundaries.
+- **Read replicas / horizontal DB scaling.** Spec 1.10c notes deferral. Future-wave scope: platform-managed read replicas, connection routing, replication-lag monitoring.
+- **Redis Cluster / multi-region Redis.** Spec 5.6 single-instance only. Future-wave scope: cluster mode, failover, multi-region.
+- **Cross-region backup redundancy.** Spec 1.10c single-region. Future-wave scope: replicated backups across regions, restore-from-alt-region runbook.
+- **Distributed tracing (OpenTelemetry).** Spec 1.10d defers. Future-wave scope: trace propagation from frontend through Spring Boot to Redis/Postgres, latency percentile tracking.
+- **APM dashboards.** Spec 1.10d defers (Sentry free tier covers errors, not APM). Future-wave scope: Datadog APM or equivalent with p50/p95/p99 latency per endpoint.
+- **Log aggregation service.** Spec 1.10d defers; stdout capture is MVP. Future-wave scope: Loki, Better Stack Logs, or LogDNA integration.
+- **Malware scanning on uploads.** Spec 1.10e defers (ClamAV integration). Future-wave scope: async virus scan queue, quarantine-before-present flow for uploaded images.
+- **Client-side direct-to-S3 uploads (presigned POST).** Spec 1.10e defers. Future-wave scope: presigned POST endpoints, browser-native progress UI, PII/size validation on the client before upload.
+- **Server-side encryption with customer-managed keys.** Spec 1.10e defers. Future-wave scope: SSE-KMS or SSE-C implementation when a real compliance need emerges.
+
+### Notifications & engagement deferrals
+
+- **Notification digest batching implementation.** Decision 17 specifies the preference; the job itself is deferred. Future-wave scope: scheduled digest-batching job, email/push delivery, digest-formatting templates.
+- **Re-engagement emails to inactive users.** Spec 15.1b explicitly names this anti-pattern. Future-wave scope: IF ever shipped, must pass pastor's-wife test first; current recommendation is never to ship this.
+- **Per-feature newsletter / product-update emails.** Spec 15.1b out of scope. Future-wave scope: opt-in newsletter list, strict separation from transactional emails.
+- **SMS notifications.** Not scoped. Future-wave scope: Twilio integration for critical-only notifications (moderation actions, account security), explicitly opt-in.
+- **Web push rich notifications with images.** Spec 15.4 covers basic web push. Future-wave scope: Notification Actions, rich preview, badge counts.
+- **iOS / Android native apps.** Worship Room is PWA-only for MVP. Future-wave scope: native wrappers (Capacitor / Expo), App Store submission, app-store-specific requirements (App Tracking Transparency, Play Store data-safety).
+
+### Community & moderation deferrals
+
+- **Community Guidelines document.** Spec 1.10f references but doesn't author. Future-wave scope: standalone `/community-guidelines` page, cross-referenced from ToS and from moderation actions.
+- **Automated permanent bans from multiple reports.** Spec 10.7b keeps this manual. Future-wave scope: if/when scale demands automation, explicit human-review gate remains mandatory.
+- **Moderator-to-reporter direct chat during review.** Spec 10.7b one-shot only. Future-wave scope: moderator-initiated clarification requests with PII-safe threading.
+- **Cross-platform user report sharing.** Spec 10.7b internal-only. Future-wave scope: if Worship Room ever integrates with other Christian platforms, mutual-block and mutual-report protocols.
+- **AI-assisted report triage.** Spec 10.7b human-only. Future-wave scope: classifier to prioritize the moderator queue, never to auto-act.
+- **Public moderator action log / transparency report.** Not scoped. Future-wave scope: aggregated quarterly transparency reports (number of actions by category, no per-case detail).
+
+### Search & discovery deferrals
+
+- **Semantic / embedding-based search.** Phase 11 uses PostgreSQL full-text only. Future-wave scope: pgvector integration, semantic-proximity search, opt-in for specific features.
+- **Saved searches.** Phase 11 scopes to recent searches only. Future-wave scope: named saved searches with notifications on new matches.
+- **Cross-user search privacy preferences.** Phase 11 enforces existing privacy tiers. Future-wave scope: "hide me from search entirely" user preference beyond the existing privacy tiers.
+- **Content-aware search autocomplete.** Phase 11 uses recent-searches only. Future-wave scope: trending-terms suggestions (with anti-pressure guardrails — never suggest crisis terms as "trending").
+
+### Analytics & insights deferrals
+
+- **Per-post view tracking.** Explicitly forbidden during 3am Watch (Spec 6.4); out of scope generally. Future-wave scope: if ever shipped, must be opt-in at the author level per-post, with deletion cascading.
+- **Intercessor retention cohort analytics.** Phase 13 personal only. Future-wave scope: community-level cohort analytics (aggregated, anonymized), visible only to Eric.
+- **A/B testing framework.** Not scoped. Future-wave scope: feature-flag-gated experimentation, consent-aware (no A/B on vulnerability content like 3am Watch or Verse-Finds-You).
+- **Retention dashboards for Eric.** Not scoped. Future-wave scope: weekly operational digest showing active users, new signups, deletion rate — strictly aggregate, no individual user tracking.
+
+### Legal & compliance deferrals
+
+- **Lawyer review of Terms and Privacy Policy.** Spec 1.10f flags this as required before 500 users. Next-wave scope: single-sitting legal review ($500-2000 budget), revisions incorporated.
+- **Per-jurisdiction privacy variants.** Spec 1.10f English-only MVP. Future-wave scope: CCPA (California), UK-DPA, Brazilian LGPD supplements as user geography expands.
+- **Data Processing Agreement (DPA) for B2B use.** Spec 1.10f out of scope. Future-wave scope: if church/organization accounts ever ship, DPA template and signing flow.
+- **SOC 2 Type I or Type II.** Not scoped; no current enterprise buyer requires this. Future-wave scope: gap assessment, 12-month audit prep if a qualifying buyer emerges.
+- **HIPAA considerations.** Worship Room is not a medical service and should never attempt HIPAA compliance (would require clinical-grade safeguards incompatible with the current trust model). Future-wave scope: if referral-to-counselor ever grows into clinical integration, explicit separation of a HIPAA-covered product from the core community app.
+
+### Internationalization & accessibility deferrals
+
+- **Multi-language UI.** Universal Rule 5's constants structure is i18n-ready but no translation exists. Future-wave scope: Spanish first (largest Christian non-English community in likely user base), then Portuguese, then Korean.
+- **Scripture translations beyond WEB.** Multiple specs lock to WEB. Future-wave scope: ESV, NIV, NKJV, KJV, CSB as licensed — each requires a rights deal.
+- **International crisis resource localization.** Spec 6.4 3am Watch is US-centric. Future-wave scope: per-country crisis resource mapping (UK: Samaritans 116 123, Canada: 988, Australia: Lifeline 13 11 14, etc.).
+- **Screen reader optimization beyond smoke-test level.** Rule 17 adds smoke tests; Spec 16.4 is the full audit. Future-wave scope: comprehensive NVDA / JAWS / VoiceOver / TalkBack walkthroughs with real users.
+- **Cognitive accessibility features.** Not scoped. Future-wave scope: simplified-language mode, reading-time estimates, distraction-reduction mode.
+
+### Integration deferrals
+
+- **Church management software integration.** Not scoped. Future-wave scope: Planning Center, Pushpay, CCB, Rock RMS integrations for parish-scale deployment.
+- **Calendar integration for prayer reminders.** Not scoped. Future-wave scope: Google Calendar / iCal subscription for prayer-for-someone reminders.
+- **Audio Bible integration.** Not scoped. Future-wave scope: YouVersion or Bible Gateway API audio playback for Phase 7 Bible ↔ Prayer Wall bridge.
+- **Music service integration beyond embeds.** Existing music feature is independent. Future-wave scope: Spotify/Apple Music/YouTube Music linked-account playback within Worship Room.
+
+### Monetization & sustainability deferrals
+
+- **Subscription / paid tier.** Not scoped. Future-wave scope: IF ever shipped, must preserve the "vulnerability content is never paywalled" principle; premium tier can only gate convenience features (e.g., advanced search, longer export retention).
+- **Donations / tip-jar model.** Not scoped. Future-wave scope: one-time donation support for sustaining hosting costs, transparent financial reporting.
+- **Church-sponsored / partner accounts.** Not scoped. Future-wave scope: verified church accounts with their own intra-church Prayer Wall, moderated by church-appointed moderators.
+
+### Process & tooling deferrals
+
+- **Feature-flag-management platform** (LaunchDarkly, Unleash, etc.). Spec 16.3b env-var-based for MVP. Future-wave scope: platform migration IF flag count grows beyond manageable.
+- **Automated dead-flag static analysis.** Spec 16.3b manual audit. Future-wave scope: custom lint rule or AST-grep check for unused flag references.
+- **Incident response automation (PagerDuty, Opsgenie).** Spec 1.10d email-only. Future-wave scope: on-call rotation, escalation policies, incident postmortems discipline.
+- **Automated ToS change announcement emails.** Spec 1.10f manual-for-MVP. Future-wave scope: scheduled announcement + in-app banner flow on version change.
+- **Internationalized timezones in registration UX.** Spec 1.3b captures from browser automatically; manual picker is a fallback. Future-wave scope: better autocomplete, country-pre-filtered timezone list.
+
+### Explicitly NOT ever shipping (anti-pattern register)
+
+These items appear in various "out of scope" sections with explicit guidance that they should NEVER ship. Consolidated here so future-self doesn't accidentally re-open them:
+
+- "Be the first to pray!" FOMO copy — explicitly forbidden (Spec 6.1)
+- AI-generated comfort responses to crisis posts — forbidden by Universal Rule 13 (Spec 6.4)
+- "Most-celebrated prayer of the week" public leaderboard — explicitly anti-pattern (Spec 6.6)
+- "N people are watching tonight" community counters during 3am Watch — explicitly anti-pattern (Spec 6.4)
+- Streak-shame notifications ("your streak is in danger") — explicitly forbidden (Spec 15.1b, Universal Rule 12)
+- Automated "we miss you" re-engagement emails — explicitly anti-pattern (Spec 15.1b)
+- Referral / invite-a-friend CTAs in onboarding emails — explicitly out of scope (Spec 15.1b)
+- Comparative metrics ("you pray more than X% of users") — forbidden across the wave by anti-pressure discipline
+- Public "times reported" badge on user profiles — explicit harassment-vector anti-pattern (Spec 10.7b)
+- Personalized LLM-generated verse selection — explicitly not-MVP; may never ship (Spec 6.8)
+
 ---
 
-_End of Worship Room — Phase 3: Forums Wave Master Plan v2.0_
+---
+
+_End of Worship Room — Phase 3: Forums Wave Master Plan v2.6_
