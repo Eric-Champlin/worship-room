@@ -9,260 +9,260 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 
 ## Phase 0 — Learning (1 spec)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 1 | 0.1 | Backend Foundation Learning Document | L | Low | ⬜ |
+| #   | Spec | Title                                | Size | Risk | Status |
+| --- | ---- | ------------------------------------ | ---- | ---- | ------ |
+| 1   | 0.1  | Backend Foundation Learning Document | L    | Low  | ✅     |
 
 ## Phase 0.5 — Quick Win (1 spec)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 2 | 0.5 | Convert usePrayerReactions to a Reactive Store | S | Low | ⬜ |
+| #   | Spec | Title                                          | Size | Risk | Status |
+| --- | ---- | ---------------------------------------------- | ---- | ---- | ------ |
+| 2   | 0.5  | Convert usePrayerReactions to a Reactive Store | S    | Low  | ⬜     |
 
 ## Phase 1 — Backend Foundation (17 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 3 | 1.1 | Audit and Rename Backend Skeleton | S | Low | ⬜ |
-| 4 | 1.2 | PostgreSQL via Docker Compose | S | Low | ⬜ |
-| 5 | 1.3 | Liquibase Integration and First Changeset | M | Low | ⬜ |
-| 6 | 1.3b | Users Table Timezone Column | S | Low | ⬜ |
-| 7 | 1.4 | Spring Security and JWT Setup | L | Medium | ⬜ |
-| 8 | 1.5 | Auth Endpoints (Register, Login, Logout) | L | High | ⬜ |
-| 9 | 1.6 | User Me Endpoint | S | Low | ⬜ |
-| 10 | 1.7 | Testcontainers Integration Test Infrastructure | M | Low | ⬜ |
-| 11 | 1.8 | Dev Seed Data | S | Low | ⬜ |
-| 12 | 1.9 | Frontend AuthContext JWT Migration | L | High | ⬜ |
-| 13 | 1.9b | Error & Loading State Design System | M | Low | ⬜ |
-| 14 | 1.10 | Phase 1 Cutover and End-to-End Test | M | Medium | ⬜ |
-| 15 | 1.10b | Deployment Target Decision Document | S | Low | ⬜ |
-| 16 | 1.10d | Production Monitoring Foundation | M | Low | ⬜ |
-| 17 | 1.10e | Object Storage Adapter Foundation | M | Medium | ⬜ |
-| 18 | 1.10c | Database Backup Strategy | S | Low | ⬜ |
-| 19 | 1.10f | Terms of Service and Privacy Policy Surfaces | M | Med-High | ⬜ |
+| #   | Spec  | Title                                          | Size | Risk     | Status |
+| --- | ----- | ---------------------------------------------- | ---- | -------- | ------ |
+| 3   | 1.1   | Audit and Rename Backend Skeleton              | S    | Low      | ⬜     |
+| 4   | 1.2   | PostgreSQL via Docker Compose                  | S    | Low      | ⬜     |
+| 5   | 1.3   | Liquibase Integration and First Changeset      | M    | Low      | ⬜     |
+| 6   | 1.3b  | Users Table Timezone Column                    | S    | Low      | ⬜     |
+| 7   | 1.4   | Spring Security and JWT Setup                  | L    | Medium   | ⬜     |
+| 8   | 1.5   | Auth Endpoints (Register, Login, Logout)       | L    | High     | ⬜     |
+| 9   | 1.6   | User Me Endpoint                               | S    | Low      | ⬜     |
+| 10  | 1.7   | Testcontainers Integration Test Infrastructure | M    | Low      | ⬜     |
+| 11  | 1.8   | Dev Seed Data                                  | S    | Low      | ⬜     |
+| 12  | 1.9   | Frontend AuthContext JWT Migration             | L    | High     | ⬜     |
+| 13  | 1.9b  | Error & Loading State Design System            | M    | Low      | ⬜     |
+| 14  | 1.10  | Phase 1 Cutover and End-to-End Test            | M    | Medium   | ⬜     |
+| 15  | 1.10b | Deployment Target Decision Document            | S    | Low      | ⬜     |
+| 16  | 1.10d | Production Monitoring Foundation               | M    | Low      | ⬜     |
+| 17  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ⬜     |
+| 18  | 1.10c | Database Backup Strategy                       | S    | Low      | ⬜     |
+| 19  | 1.10f | Terms of Service and Privacy Policy Surfaces   | M    | Med-High | ⬜     |
 
 ## Phase 2 — Activity Engine Migration (10 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 20 | 2.1 | Activity Engine Schema (Liquibase) | M | Low | ⬜ |
-| 21 | 2.2 | Faith Points Calculation Service (Backend Port) | L | Medium | ⬜ |
-| 22 | 2.3 | Streak State Service (Backend Port) | L | Medium | ⬜ |
-| 23 | 2.4 | Badge Eligibility Service (Backend Port) | L | Medium | ⬜ |
-| 24 | 2.5 | Activity Counts Service | S | Low | ⬜ |
-| 25 | 2.6 | Activity API Endpoint | L | Medium | ⬜ |
-| 26 | 2.7 | Frontend Activity Dual-Write | M | Medium | ⬜ |
-| 27 | 2.8 | Drift Detection Test (Frontend ↔ Backend) | M | Low | ⬜ |
-| 28 | 2.9 | Phase 2 Cutover | S | Medium | ⬜ |
-| 29 | 2.10 | Historical Activity Backfill | M | Medium | ⬜ |
+| #   | Spec | Title                                           | Size | Risk   | Status |
+| --- | ---- | ----------------------------------------------- | ---- | ------ | ------ |
+| 20  | 2.1  | Activity Engine Schema (Liquibase)              | M    | Low    | ⬜     |
+| 21  | 2.2  | Faith Points Calculation Service (Backend Port) | L    | Medium | ⬜     |
+| 22  | 2.3  | Streak State Service (Backend Port)             | L    | Medium | ⬜     |
+| 23  | 2.4  | Badge Eligibility Service (Backend Port)        | L    | Medium | ⬜     |
+| 24  | 2.5  | Activity Counts Service                         | S    | Low    | ⬜     |
+| 25  | 2.6  | Activity API Endpoint                           | L    | Medium | ⬜     |
+| 26  | 2.7  | Frontend Activity Dual-Write                    | M    | Medium | ⬜     |
+| 27  | 2.8  | Drift Detection Test (Frontend ↔ Backend)       | M    | Low    | ⬜     |
+| 28  | 2.9  | Phase 2 Cutover                                 | S    | Medium | ⬜     |
+| 29  | 2.10 | Historical Activity Backfill                    | M    | Medium | ⬜     |
 
 ## Phase 2.5 — Friends Migration (6 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 30 | 2.5.1 | Friends Schema (Liquibase) | S | Low | ⬜ |
-| 31 | 2.5.2 | Friends Service and Repository | L | Medium | ⬜ |
-| 32 | 2.5.3 | Friends API Endpoints | L | Medium | ⬜ |
-| 33 | 2.5.4 | Frontend Friends Dual-Write | L | Medium | ⬜ |
-| 34 | 2.5.4b | Social Interactions & Milestone Events Dual-Write | M | Medium | ⬜ |
-| 35 | 2.5.5 | Phase 2.5 Cutover | S | Medium | ⬜ |
+| #   | Spec   | Title                                             | Size | Risk   | Status |
+| --- | ------ | ------------------------------------------------- | ---- | ------ | ------ |
+| 30  | 2.5.1  | Friends Schema (Liquibase)                        | S    | Low    | ⬜     |
+| 31  | 2.5.2  | Friends Service and Repository                    | L    | Medium | ⬜     |
+| 32  | 2.5.3  | Friends API Endpoints                             | L    | Medium | ⬜     |
+| 33  | 2.5.4  | Frontend Friends Dual-Write                       | L    | Medium | ⬜     |
+| 34  | 2.5.4b | Social Interactions & Milestone Events Dual-Write | M    | Medium | ⬜     |
+| 35  | 2.5.5  | Phase 2.5 Cutover                                 | S    | Medium | ⬜     |
 
 ## Phase 3 — Prayer Wall Backend (12 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 36 | 3.1 | Prayer Wall Schema (Liquibase) | L | Medium | ⬜ |
-| 37 | 3.2 | Mock Data Seed Migration | M | Low | ⬜ |
-| 38 | 3.3 | Posts Read Endpoints | L | Medium | ⬜ |
-| 39 | 3.4 | Comments, Reactions, Bookmarks Read Endpoints | M | Low | ⬜ |
-| 40 | 3.5 | Posts Write Endpoints (Create, Update, Delete) | XL | High | ⬜ |
-| 41 | 3.6 | Comments Write Endpoints | L | High | ⬜ |
-| 42 | 3.7 | Reactions and Bookmarks Write Endpoints | L | Medium | ⬜ |
-| 43 | 3.8 | Reports Write Endpoint | M | Medium | ⬜ |
-| 44 | 3.9 | QOTD Backend Migration | M | Low | ⬜ |
-| 45 | 3.10 | Frontend Service API Implementations | XL | High | ⬜ |
-| 46 | 3.11 | Reactive Store Backend Adapter | L | Medium | ⬜ |
-| 47 | 3.12 | Phase 3 Cutover | M | High | ⬜ |
+| #   | Spec | Title                                          | Size | Risk   | Status |
+| --- | ---- | ---------------------------------------------- | ---- | ------ | ------ |
+| 36  | 3.1  | Prayer Wall Schema (Liquibase)                 | L    | Medium | ⬜     |
+| 37  | 3.2  | Mock Data Seed Migration                       | M    | Low    | ⬜     |
+| 38  | 3.3  | Posts Read Endpoints                           | L    | Medium | ⬜     |
+| 39  | 3.4  | Comments, Reactions, Bookmarks Read Endpoints  | M    | Low    | ⬜     |
+| 40  | 3.5  | Posts Write Endpoints (Create, Update, Delete) | XL   | High   | ⬜     |
+| 41  | 3.6  | Comments Write Endpoints                       | L    | High   | ⬜     |
+| 42  | 3.7  | Reactions and Bookmarks Write Endpoints        | L    | Medium | ⬜     |
+| 43  | 3.8  | Reports Write Endpoint                         | M    | Medium | ⬜     |
+| 44  | 3.9  | QOTD Backend Migration                         | M    | Low    | ⬜     |
+| 45  | 3.10 | Frontend Service API Implementations           | XL   | High   | ⬜     |
+| 46  | 3.11 | Reactive Store Backend Adapter                 | L    | Medium | ⬜     |
+| 47  | 3.12 | Phase 3 Cutover                                | M    | High   | ⬜     |
 
 ## Phase 4 — Post Types (10 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 48 | 4.1 | Post Type Foundation (Frontend Types + Backend Enum Sync) | M | Low | ⬜ |
-| 49 | 4.2 | Prayer Request Polish | M | Low | ⬜ |
-| 50 | 4.3 | Testimony Post Type | L | Medium | ⬜ |
-| 51 | 4.4 | Question Post Type | L | Medium | ⬜ |
-| 52 | 4.5 | Devotional Discussion Post Type | M | Medium | ⬜ |
-| 53 | 4.6 | Encouragement Post Type | M | Medium | ⬜ |
-| 54 | 4.6b | Image Upload for Testimonies & Questions | L | Medium | ⬜ |
-| 55 | 4.7 | Composer Chooser | L | Medium | ⬜ |
-| 56 | 4.7b | Ways to Help MVP | M | Low | ⬜ |
-| 57 | 4.8 | Room Selector and Phase 4 Cutover | L | Medium | ⬜ |
+| #   | Spec | Title                                                     | Size | Risk   | Status |
+| --- | ---- | --------------------------------------------------------- | ---- | ------ | ------ |
+| 48  | 4.1  | Post Type Foundation (Frontend Types + Backend Enum Sync) | M    | Low    | ⬜     |
+| 49  | 4.2  | Prayer Request Polish                                     | M    | Low    | ⬜     |
+| 50  | 4.3  | Testimony Post Type                                       | L    | Medium | ⬜     |
+| 51  | 4.4  | Question Post Type                                        | L    | Medium | ⬜     |
+| 52  | 4.5  | Devotional Discussion Post Type                           | M    | Medium | ⬜     |
+| 53  | 4.6  | Encouragement Post Type                                   | M    | Medium | ⬜     |
+| 54  | 4.6b | Image Upload for Testimonies & Questions                  | L    | Medium | ⬜     |
+| 55  | 4.7  | Composer Chooser                                          | L    | Medium | ⬜     |
+| 56  | 4.7b | Ways to Help MVP                                          | M    | Low    | ⬜     |
+| 57  | 4.8  | Room Selector and Phase 4 Cutover                         | L    | Medium | ⬜     |
 
 ## Phase 5 — Visual Polish (6 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 58 | 5.1 | FrostedCard Migration | L | Medium | ⬜ |
-| 59 | 5.2 | HorizonGlow at Prayer Wall Root | S | Low | ⬜ |
-| 60 | 5.3 | 2-Line Heading Treatment | M | Low | ⬜ |
-| 61 | 5.4 | Animation Token Migration (BB-33 Compliance) | M | Low | ⬜ |
-| 62 | 5.5 | Deprecated Pattern Purge and Visual Audit | M | Low | ⬜ |
-| 63 | 5.6 | Redis Cache Foundation | M | Medium | ⬜ |
+| #   | Spec | Title                                        | Size | Risk   | Status |
+| --- | ---- | -------------------------------------------- | ---- | ------ | ------ |
+| 58  | 5.1  | FrostedCard Migration                        | L    | Medium | ⬜     |
+| 59  | 5.2  | HorizonGlow at Prayer Wall Root              | S    | Low    | ⬜     |
+| 60  | 5.3  | 2-Line Heading Treatment                     | M    | Low    | ⬜     |
+| 61  | 5.4  | Animation Token Migration (BB-33 Compliance) | M    | Low    | ⬜     |
+| 62  | 5.5  | Deprecated Pattern Purge and Visual Audit    | M    | Low    | ⬜     |
+| 63  | 5.6  | Redis Cache Foundation                       | M    | Medium | ⬜     |
 
 ## Phase 6 — Engagement Features (14 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 64 | 6.1 | Prayer Receipt | L | Medium | ⬜ |
-| 65 | 6.2 | Quick Lift | M | Low | ⬜ |
-| 66 | 6.2b | Prayer Length Options | M | Low | ⬜ |
-| 67 | 6.3 | Night Mode | L | Medium | ⬜ |
-| 68 | 6.4 | 3am Watch | L | HIGH | ⬜ |
-| 69 | 6.5 | Intercessor Timeline | L | Med-High | ⬜ |
-| 70 | 6.6 | Answered Wall | L | Medium | ⬜ |
-| 71 | 6.7 | Shareable Testimony Cards | L | Medium | ⬜ |
-| 72 | 6.8 | Verse-Finds-You | L | HIGH | ⬜ |
-| 73 | 6.9 | Prayer Wall Composer Drafts | M | Low | ⬜ |
-| 74 | 6.10 | Prayer Wall Search by Author | S | Low | ⬜ |
-| 75 | 6.11 | Sound Effects Settings Polish | S | Low | ⬜ |
-| 76 | 6.11b | Live Presence Component | M | Medium | ⬜ |
-| 77 | 6.12 | Phase 6 Cutover | S | Low | ⬜ |
+| #   | Spec  | Title                         | Size | Risk     | Status |
+| --- | ----- | ----------------------------- | ---- | -------- | ------ |
+| 64  | 6.1   | Prayer Receipt                | L    | Medium   | ⬜     |
+| 65  | 6.2   | Quick Lift                    | M    | Low      | ⬜     |
+| 66  | 6.2b  | Prayer Length Options         | M    | Low      | ⬜     |
+| 67  | 6.3   | Night Mode                    | L    | Medium   | ⬜     |
+| 68  | 6.4   | 3am Watch                     | L    | HIGH     | ⬜     |
+| 69  | 6.5   | Intercessor Timeline          | L    | Med-High | ⬜     |
+| 70  | 6.6   | Answered Wall                 | L    | Medium   | ⬜     |
+| 71  | 6.7   | Shareable Testimony Cards     | L    | Medium   | ⬜     |
+| 72  | 6.8   | Verse-Finds-You               | L    | HIGH     | ⬜     |
+| 73  | 6.9   | Prayer Wall Composer Drafts   | M    | Low      | ⬜     |
+| 74  | 6.10  | Prayer Wall Search by Author  | S    | Low      | ⬜     |
+| 75  | 6.11  | Sound Effects Settings Polish | S    | Low      | ⬜     |
+| 76  | 6.11b | Live Presence Component       | M    | Medium   | ⬜     |
+| 77  | 6.12  | Phase 6 Cutover               | S    | Low      | ⬜     |
 
 ## Phase 7 — Cross-Feature Integration (8 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 78 | 7.1 | Bible to Prayer Wall Bridge | L | Medium | ⬜ |
-| 79 | 7.2 | Prayer Wall to Bible Bridge | S | Low | ⬜ |
-| 80 | 7.3 | Music During Prayer Wall | S | Low | ⬜ |
-| 81 | 7.4 | Daily Hub Pray Tab Friend Surfacing | M | Medium | ⬜ |
-| 82 | 7.5 | Local Support Bridges on Mental Health Posts | M | Medium | ⬜ |
-| 83 | 7.6 | Friends Pin to Top of Feed | L | Medium | ⬜ |
-| 84 | 7.7 | Privacy Tiers (Public / Friends / Private) | L | High | ⬜ |
-| 85 | 7.8 | Phase 7 Cutover | S | Low | ⬜ |
+| #   | Spec | Title                                        | Size | Risk   | Status |
+| --- | ---- | -------------------------------------------- | ---- | ------ | ------ |
+| 78  | 7.1  | Bible to Prayer Wall Bridge                  | L    | Medium | ⬜     |
+| 79  | 7.2  | Prayer Wall to Bible Bridge                  | S    | Low    | ⬜     |
+| 80  | 7.3  | Music During Prayer Wall                     | S    | Low    | ⬜     |
+| 81  | 7.4  | Daily Hub Pray Tab Friend Surfacing          | M    | Medium | ⬜     |
+| 82  | 7.5  | Local Support Bridges on Mental Health Posts | M    | Medium | ⬜     |
+| 83  | 7.6  | Friends Pin to Top of Feed                   | L    | Medium | ⬜     |
+| 84  | 7.7  | Privacy Tiers (Public / Friends / Private)   | L    | High   | ⬜     |
+| 85  | 7.8  | Phase 7 Cutover                              | S    | Low    | ⬜     |
 
 ## Phase 8 — User Profiles (9 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 86 | 8.1 | Username System | L | Medium | ⬜ |
-| 87 | 8.2 | `/u/:username` Route and Redirects | M | Medium | ⬜ |
-| 88 | 8.3 | Profile Summary Tab | L | Medium | ⬜ |
-| 89 | 8.4 | Profile Prayer Wall Tab | M | Low | ⬜ |
-| 90 | 8.5 | Profile Growth Tab | M | Low | ⬜ |
-| 91 | 8.6 | Profile Bible Tab | M | Low | ⬜ |
-| 92 | 8.7 | Profile Friends Tab | M | Low | ⬜ |
-| 93 | 8.8 | Name Canonicalization Migration | XL | High | ⬜ |
-| 94 | 8.9 | Phase 8 Cutover | S | Low | ⬜ |
+| #   | Spec | Title                              | Size | Risk   | Status |
+| --- | ---- | ---------------------------------- | ---- | ------ | ------ |
+| 86  | 8.1  | Username System                    | L    | Medium | ⬜     |
+| 87  | 8.2  | `/u/:username` Route and Redirects | M    | Medium | ⬜     |
+| 88  | 8.3  | Profile Summary Tab                | L    | Medium | ⬜     |
+| 89  | 8.4  | Profile Prayer Wall Tab            | M    | Low    | ⬜     |
+| 90  | 8.5  | Profile Growth Tab                 | M    | Low    | ⬜     |
+| 91  | 8.6  | Profile Bible Tab                  | M    | Low    | ⬜     |
+| 92  | 8.7  | Profile Friends Tab                | M    | Low    | ⬜     |
+| 93  | 8.8  | Name Canonicalization Migration    | XL   | High   | ⬜     |
+| 94  | 8.9  | Phase 8 Cutover                    | S    | Low    | ⬜     |
 
 ## Phase 9 — Seasonal & Liturgical (5 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 95 | 9.1 | Liturgical Calendar Service | M | Low | ⬜ |
-| 96 | 9.2 | Liturgical Theming on Prayer Wall | M | Low | ⬜ |
-| 97 | 9.3 | Sunday Service Sync | S | Low | ⬜ |
-| 98 | 9.4 | Time-of-Day Copy Variations | M | Low | ⬜ |
-| 99 | 9.5 | Candle Mode | L | Medium | ⬜ |
+| #   | Spec | Title                             | Size | Risk   | Status |
+| --- | ---- | --------------------------------- | ---- | ------ | ------ |
+| 95  | 9.1  | Liturgical Calendar Service       | M    | Low    | ⬜     |
+| 96  | 9.2  | Liturgical Theming on Prayer Wall | M    | Low    | ⬜     |
+| 97  | 9.3  | Sunday Service Sync               | S    | Low    | ⬜     |
+| 98  | 9.4  | Time-of-Day Copy Variations       | M    | Low    | ⬜     |
+| 99  | 9.5  | Candle Mode                       | L    | Medium | ⬜     |
 
 ## Phase 10 — Community Safety (12 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 100 | 10.1 | First Time Badges | S | Low | ⬜ |
-| 101 | 10.2 | Welcomer Role | M | Medium | ⬜ |
-| 102 | 10.3 | Presence Cues | M | Low | ⬜ |
-| 103 | 10.4 | Trust Levels (Discourse-Inspired) | L | High | ⬜ |
-| 104 | 10.5 | Three-Tier Escalation (7 Cups Inspired) | L | High | ⬜ |
-| 105 | 10.6 | Automated Phrase Flagging | M | High | ⬜ |
-| 106 | 10.7 | Peer Moderator Queue | L | Medium | ⬜ |
-| 107 | 10.7b | Report a User | M | Medium | ⬜ |
-| 108 | 10.8 | Appeal Flow | M | Medium | ⬜ |
-| 109 | 10.9 | Rate Limiting Tightening | S | Low | ⬜ |
-| 110 | 10.10 | Admin Foundation | M | Low | ⬜ |
-| 111 | 10.11 | Account Deletion and Data Export | L | High | ⬜ |
+| #   | Spec  | Title                                   | Size | Risk   | Status |
+| --- | ----- | --------------------------------------- | ---- | ------ | ------ |
+| 100 | 10.1  | First Time Badges                       | S    | Low    | ⬜     |
+| 101 | 10.2  | Welcomer Role                           | M    | Medium | ⬜     |
+| 102 | 10.3  | Presence Cues                           | M    | Low    | ⬜     |
+| 103 | 10.4  | Trust Levels (Discourse-Inspired)       | L    | High   | ⬜     |
+| 104 | 10.5  | Three-Tier Escalation (7 Cups Inspired) | L    | High   | ⬜     |
+| 105 | 10.6  | Automated Phrase Flagging               | M    | High   | ⬜     |
+| 106 | 10.7  | Peer Moderator Queue                    | L    | Medium | ⬜     |
+| 107 | 10.7b | Report a User                           | M    | Medium | ⬜     |
+| 108 | 10.8  | Appeal Flow                             | M    | Medium | ⬜     |
+| 109 | 10.9  | Rate Limiting Tightening                | S    | Low    | ⬜     |
+| 110 | 10.10 | Admin Foundation                        | M    | Low    | ⬜     |
+| 111 | 10.11 | Account Deletion and Data Export        | L    | High   | ⬜     |
 
 ## Phase 11 — Search (4 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 112 | 11.1 | Full-Text Search Schema and Indexing | M | Medium | ⬜ |
-| 113 | 11.2 | Search API Endpoint | L | Medium | ⬜ |
-| 114 | 11.3 | Search UI | L | Medium | ⬜ |
-| 115 | 11.4 | Search by Verse Reference | M | Low | ⬜ |
+| #   | Spec | Title                                | Size | Risk   | Status |
+| --- | ---- | ------------------------------------ | ---- | ------ | ------ |
+| 112 | 11.1 | Full-Text Search Schema and Indexing | M    | Medium | ⬜     |
+| 113 | 11.2 | Search API Endpoint                  | L    | Medium | ⬜     |
+| 114 | 11.3 | Search UI                            | L    | Medium | ⬜     |
+| 115 | 11.4 | Search by Verse Reference            | M    | Low    | ⬜     |
 
 ## Phase 12 — Notifications (5 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 116 | 12.1 | Notification Types Catalog | M | Low | ⬜ |
-| 117 | 12.2 | Notification Backend Schema and Endpoints | L | Medium | ⬜ |
-| 118 | 12.3 | Notification Generators | L | Medium | ⬜ |
-| 119 | 12.4 | Notification Preferences | M | Low | ⬜ |
-| 120 | 12.5 | Mention System | L | Medium | ⬜ |
+| #   | Spec | Title                                     | Size | Risk   | Status |
+| --- | ---- | ----------------------------------------- | ---- | ------ | ------ |
+| 116 | 12.1 | Notification Types Catalog                | M    | Low    | ⬜     |
+| 117 | 12.2 | Notification Backend Schema and Endpoints | L    | Medium | ⬜     |
+| 118 | 12.3 | Notification Generators                   | L    | Medium | ⬜     |
+| 119 | 12.4 | Notification Preferences                  | M    | Low    | ⬜     |
+| 120 | 12.5 | Mention System                            | L    | Medium | ⬜     |
 
 ## Phase 13 — Personal Analytics (4 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 121 | 13.1 | Personal Insights Endpoint | M | Low | ⬜ |
-| 122 | 13.2 | Insights UI Card | M | Low | ⬜ |
-| 123 | 13.3 | Year-in-Review Story | L | Medium | ⬜ |
-| 124 | 13.4 | Intercession Patterns | M | Low | ⬜ |
+| #   | Spec | Title                      | Size | Risk   | Status |
+| --- | ---- | -------------------------- | ---- | ------ | ------ |
+| 121 | 13.1 | Personal Insights Endpoint | M    | Low    | ⬜     |
+| 122 | 13.2 | Insights UI Card           | M    | Low    | ⬜     |
+| 123 | 13.3 | Year-in-Review Story       | L    | Medium | ⬜     |
+| 124 | 13.4 | Intercession Patterns      | M    | Low    | ⬜     |
 
 ## Phase 14 — Onboarding (4 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 125 | 14.1 | First-Visit Walkthrough | L | Medium | ⬜ |
-| 126 | 14.2 | Suggested First Action | M | Low | ⬜ |
-| 127 | 14.3 | Find Your People Friend Suggestions | L | Medium | ⬜ |
-| 128 | 14.4 | Warm Empty States | M | Low | ⬜ |
+| #   | Spec | Title                               | Size | Risk   | Status |
+| --- | ---- | ----------------------------------- | ---- | ------ | ------ |
+| 125 | 14.1 | First-Visit Walkthrough             | L    | Medium | ⬜     |
+| 126 | 14.2 | Suggested First Action              | M    | Low    | ⬜     |
+| 127 | 14.3 | Find Your People Friend Suggestions | L    | Medium | ⬜     |
+| 128 | 14.4 | Warm Empty States                   | M    | Low    | ⬜     |
 
 ## Phase 15 — Email & Push (5 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 129 | 15.1 | SMTP Setup | M | Medium | ⬜ |
-| 130 | 15.1b | Welcome Email Sequence | M | Medium | ⬜ |
-| 131 | 15.2 | Comment Reply Digest Email | L | Medium | ⬜ |
-| 132 | 15.3 | Weekly Summary Email | M | Low | ⬜ |
-| 133 | 15.4 | Push Notification Wiring | L | Medium | ⬜ |
+| #   | Spec  | Title                      | Size | Risk   | Status |
+| --- | ----- | -------------------------- | ---- | ------ | ------ |
+| 129 | 15.1  | SMTP Setup                 | M    | Medium | ⬜     |
+| 130 | 15.1b | Welcome Email Sequence     | M    | Medium | ⬜     |
+| 131 | 15.2  | Comment Reply Digest Email | L    | Medium | ⬜     |
+| 132 | 15.3  | Weekly Summary Email       | M    | Low    | ⬜     |
+| 133 | 15.4  | Push Notification Wiring   | L    | Medium | ⬜     |
 
 ## Phase 16 — Polish & Performance (5 specs)
 
-| # | Spec | Title | Size | Risk | Status |
-|---|------|-------|------|------|--------|
-| 134 | 16.1 | Offline Cache for Recent Feed | L | Medium | ⬜ |
-| 135 | 16.2 | Queued Posts (Offline-First Composer) | L | High | ⬜ |
-| 136 | 16.3 | Lighthouse Performance Audit | M | Low | ⬜ |
-| 137 | 16.3b | Feature Flag Cleanup Pass | S | Low | ⬜ |
-| 138 | 16.4 | Accessibility Audit (BB-35 Style) | L | Medium | ⬜ |
+| #   | Spec  | Title                                 | Size | Risk   | Status |
+| --- | ----- | ------------------------------------- | ---- | ------ | ------ |
+| 134 | 16.1  | Offline Cache for Recent Feed         | L    | Medium | ⬜     |
+| 135 | 16.2  | Queued Posts (Offline-First Composer) | L    | High   | ⬜     |
+| 136 | 16.3  | Lighthouse Performance Audit          | M    | Low    | ⬜     |
+| 137 | 16.3b | Feature Flag Cleanup Pass             | S    | Low    | ⬜     |
+| 138 | 16.4  | Accessibility Audit (BB-35 Style)     | L    | Medium | ⬜     |
 
 ---
 
 ## Summary by Phase
 
-| Phase | Name | Specs | High Risk |
-|-------|------|-------|-----------|
-| 0 | Learning | 1 | 0 |
-| 0.5 | Quick Win | 1 | 0 |
-| 1 | Backend Foundation | 17 | 2 |
-| 2 | Activity Engine | 10 | 0 |
-| 2.5 | Friends Migration | 6 | 0 |
-| 3 | Prayer Wall Backend | 12 | 4 |
-| 4 | Post Types | 10 | 0 |
-| 5 | Visual Polish | 6 | 0 |
-| 6 | Engagement Features | 14 | 2 |
-| 7 | Cross-Feature | 8 | 1 |
-| 8 | User Profiles | 9 | 1 |
-| 9 | Seasonal | 5 | 0 |
-| 10 | Community Safety | 12 | 4 |
-| 11 | Search | 4 | 0 |
-| 12 | Notifications | 5 | 0 |
-| 13 | Personal Analytics | 4 | 0 |
-| 14 | Onboarding | 4 | 0 |
-| 15 | Email & Push | 5 | 0 |
-| 16 | Polish & Performance | 5 | 1 |
-| **Total** | | **138** | **15** |
+| Phase     | Name                 | Specs   | High Risk |
+| --------- | -------------------- | ------- | --------- |
+| 0         | Learning             | 1       | 0         |
+| 0.5       | Quick Win            | 1       | 0         |
+| 1         | Backend Foundation   | 17      | 2         |
+| 2         | Activity Engine      | 10      | 0         |
+| 2.5       | Friends Migration    | 6       | 0         |
+| 3         | Prayer Wall Backend  | 12      | 4         |
+| 4         | Post Types           | 10      | 0         |
+| 5         | Visual Polish        | 6       | 0         |
+| 6         | Engagement Features  | 14      | 2         |
+| 7         | Cross-Feature        | 8       | 1         |
+| 8         | User Profiles        | 9       | 1         |
+| 9         | Seasonal             | 5       | 0         |
+| 10        | Community Safety     | 12      | 4         |
+| 11        | Search               | 4       | 0         |
+| 12        | Notifications        | 5       | 0         |
+| 13        | Personal Analytics   | 4       | 0         |
+| 14        | Onboarding           | 4       | 0         |
+| 15        | Email & Push         | 5       | 0         |
+| 16        | Polish & Performance | 5       | 1         |
+| **Total** |                      | **138** | **15**    |
