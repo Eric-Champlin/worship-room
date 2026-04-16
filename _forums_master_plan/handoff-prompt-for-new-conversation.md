@@ -90,4 +90,4 @@ Don't ask clarifying questions — everything you need is in the master plan on 
 - **Skip tracker lines.** I already have a complete spec tracker with all 138 specs. I update it myself.
 - **Use artifacts for specs and large documents.** Create them as artifacts (the clickable pill) — not inline text. Just the artifact plus a short confirmation (filename, length, any notes). Don't dump content into chat.
 
-Now: new spec please. Spec 0.1.
+Skip the /spec-forums flow for Spec 0.1 — it's just a teaching document for me to read. Write it directly as an artifact. All 13 sections from the master plan's Spec 0.1 requirements, conversational voice, 15-25 pages.
