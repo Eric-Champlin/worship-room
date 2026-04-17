@@ -77,17 +77,17 @@ describe('ReaderChrome', () => {
   it('renders all 5 interactive elements with correct aria-labels', () => {
     renderChrome()
 
-    expect(screen.getByLabelText('Back to Bible')).toBeTruthy()
+    expect(screen.getByLabelText('Back to Study Bible')).toBeTruthy()
     expect(screen.getByLabelText('Open chapter picker')).toBeTruthy()
     expect(screen.getByLabelText('Typography settings')).toBeTruthy()
-    expect(screen.getByLabelText('Toggle focus mode')).toBeTruthy()
+    expect(screen.getByLabelText('Toggle auto-hide toolbar')).toBeTruthy()
     expect(screen.getByLabelText('Browse books')).toBeTruthy()
   })
 
   it('back button links to /bible', () => {
     renderChrome()
 
-    const backLink = screen.getByLabelText('Back to Bible')
+    const backLink = screen.getByLabelText('Back to Study Bible')
     expect(backLink.getAttribute('href')).toBe('/bible')
   })
 
@@ -111,7 +111,7 @@ describe('ReaderChrome', () => {
   it('all icon buttons have 44px minimum size', () => {
     renderChrome()
 
-    const backBtn = screen.getByLabelText('Back to Bible')
+    const backBtn = screen.getByLabelText('Back to Study Bible')
     expect(backBtn.className).toContain('min-h-[44px]')
     expect(backBtn.className).toContain('min-w-[44px]')
 
@@ -139,7 +139,7 @@ describe('ReaderChrome', () => {
       (b) => b.getAttribute('aria-label') === 'Typography settings',
     )
     const focusIndex = buttons.findIndex(
-      (b) => b.getAttribute('aria-label') === 'Toggle focus mode',
+      (b) => b.getAttribute('aria-label') === 'Toggle auto-hide toolbar',
     )
     const booksIndex = buttons.findIndex(
       (b) => b.getAttribute('aria-label') === 'Browse books',
@@ -154,7 +154,7 @@ describe('ReaderChrome', () => {
     const onFocusToggle = vi.fn()
     renderChrome({ onFocusToggle })
 
-    await user.click(screen.getByLabelText('Toggle focus mode'))
+    await user.click(screen.getByLabelText('Toggle auto-hide toolbar'))
     expect(onFocusToggle).toHaveBeenCalledOnce()
   })
 
@@ -262,7 +262,7 @@ describe('ReaderChrome', () => {
       (b) => b.getAttribute('aria-label') === 'Open ambient sounds',
     )
     const focusIndex = buttons.findIndex(
-      (b) => b.getAttribute('aria-label') === 'Toggle focus mode',
+      (b) => b.getAttribute('aria-label') === 'Toggle auto-hide toolbar',
     )
 
     expect(audioIndex).toBeGreaterThan(aaIndex)

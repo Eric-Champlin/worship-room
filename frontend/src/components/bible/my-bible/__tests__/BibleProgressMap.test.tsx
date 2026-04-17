@@ -71,21 +71,33 @@ describe('BibleProgressMap', () => {
     })
     renderMap({ coverage })
 
-    // Chapter 1: read (not highlighted)
+    // Chapter 1: read (not highlighted) — high-contrast fill (BB-51)
     const ch1 = screen.getByLabelText('Genesis chapter 1: read')
-    expect(ch1.className).toContain('bg-primary/60')
+    expect(ch1.className).toContain('bg-white/80')
 
-    // Chapter 2: highlighted (overrides read)
+    // Chapter 2: highlighted (overrides read) — solid white, not an opacity variant
     const ch2 = screen.getByLabelText('Genesis chapter 2: highlighted')
-    expect(ch2.className).toContain('bg-primary/80')
+    expect(ch2.className).toMatch(/\bbg-white\b(?!\/)/)
 
     // Chapter 3: highlighted (not read but highlighted)
     const ch3 = screen.getByLabelText('Genesis chapter 3: highlighted')
-    expect(ch3.className).toContain('bg-primary/80')
+    expect(ch3.className).toMatch(/\bbg-white\b(?!\/)/)
 
-    // Chapter 4: unread
+    // Chapter 4: unread — near-invisible (BB-51)
     const ch4 = screen.getByLabelText('Genesis chapter 4: unread')
-    expect(ch4.className).toContain('bg-white/[0.08]')
+    expect(ch4.className).toContain('bg-white/[0.06]')
+  })
+
+  it('does not use purple color classes in progress map', () => {
+    const coverage = makeCoverage({
+      genesis: { read: [1, 2], highlighted: [2, 3] },
+    })
+    renderMap({ coverage })
+
+    const cells = screen.getAllByRole('button')
+    for (const cell of cells) {
+      expect(cell.className).not.toMatch(/bg-primary/)
+    }
   })
 
   it('navigates to chapter on cell click', () => {

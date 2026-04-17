@@ -11,11 +11,8 @@ export function PlanBrowseCard({ plan }: PlanBrowseCardProps) {
     <article aria-label={plan.title}>
       <Link
         to={`/bible/plans/${plan.slug}`}
-        className={`group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${plan.coverGradient} p-5 transition-all motion-reduce:transition-none duration-base motion-safe:hover:-translate-y-1 hover:border-white/20 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark`}
+        className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 transition-all motion-reduce:transition-none duration-base hover:bg-white/[0.08] hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
       >
-        {/* Dark scrim for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-
         {/* Content */}
         <div className="relative z-10 flex flex-col gap-1">
           <h3 className="text-lg font-semibold text-white">{plan.title}</h3>

@@ -110,10 +110,18 @@ describe('PlanBrowserPage', () => {
     expect(screen.getByText('No plans available yet')).toBeInTheDocument()
   })
 
-  it('shows filter bar', () => {
+  it('does not render filter bar (BB-51 removed)', () => {
     renderPage()
-    expect(screen.getByText('All')).toBeInTheDocument()
-    expect(screen.getByText('Any length')).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: /filters/i })).not.toBeInTheDocument()
+    // "Any length" was a filter pill label — should be gone
+    expect(screen.queryByText('Any length')).not.toBeInTheDocument()
+  })
+
+  it('heading uses gradient and includes pb-2 to prevent descender clip', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1, name: /Reading Plans/i })
+    expect(heading.className).toContain('pb-2')
+    expect(heading.style.backgroundClip).toBeTruthy()
   })
 
   it('shows In Progress section when plans are active', () => {
@@ -177,7 +185,7 @@ describe('PlanBrowserPage', () => {
     expect(screen.getByRole('button', { name: /Clear filters/i })).toBeInTheDocument()
   })
 
-  it('URL params control initial filter state', () => {
+  it('hook-provided filteredBrowse still drives card display (even with filter UI removed)', () => {
     mockUsePlanBrowser.mockReturnValue(
       defaultResult({
         theme: 'comfort',
@@ -185,9 +193,8 @@ describe('PlanBrowserPage', () => {
       }),
     )
     renderPage()
-    // Comfort pill should be active (aria-pressed=true) — use getAllByText since card shortTitle also says "Comfort"
-    const comfortButtons = screen.getAllByText('Comfort')
-    const pill = comfortButtons.find((el) => el.tagName === 'BUTTON')
-    expect(pill).toHaveAttribute('aria-pressed', 'true')
+    // Only the comfort plan should be rendered (not prayer)
+    expect(screen.getByText('Finding Comfort')).toBeInTheDocument()
+    expect(screen.queryByText('Prayer Journey')).not.toBeInTheDocument()
   })
 })

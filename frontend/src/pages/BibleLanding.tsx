@@ -20,6 +20,7 @@ import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
 import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
 import { StreakResetWelcome } from '@/components/bible/streak/StreakResetWelcome'
 import { useStreakStore } from '@/hooks/bible/useStreakStore'
+import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
 import { getTodayLocal } from '@/lib/bible/dateUtils'
 import { getActivePlans } from '@/lib/bible/landingState'
@@ -80,6 +81,7 @@ function BibleLandingInner() {
   const { showToast } = useToast()
   const handleMilestoneDismissed = useCallback(() => setPendingMilestone(null), [])
   const { isOpen, close, toggle } = useBibleDrawer()
+  const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     setPlans(getActivePlans())
@@ -137,7 +139,7 @@ function BibleLandingInner() {
   return (
     <Layout>
       <SEO {...seoMetadata} jsonLd={bibleBreadcrumbs} />
-      <div className="relative min-h-screen bg-dashboard-dark">
+      <div className="relative min-h-screen bg-hero-bg">
         <BibleLandingOrbs />
         <BibleHero />
 
@@ -147,7 +149,7 @@ function BibleLandingInner() {
         <div className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 pb-16">
           {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap.
               Visible in both landing and search mode so streak context never disappears. */}
-          {streak.currentStreak > 0 && (
+          {isAuthenticated && streak.currentStreak > 0 && (
             <div className="flex justify-center">
               <StreakChip
                 streak={streak}

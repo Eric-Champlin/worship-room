@@ -210,8 +210,8 @@ export function MobileDrawer({ isOpen, onClose, onBellTap }: MobileDrawerProps) 
             {/* Nav sections — visible to all */}
             {renderSection('Daily', DAILY_LINKS)}
             {renderSection('Study', STUDY_LINKS)}
-            {renderSection('Community', COMMUNITY_LINKS)}
             {renderSection('Listen', LISTEN_LINKS)}
+            {renderSection('Community', COMMUNITY_LINKS)}
             {renderSection('Find Help', LOCAL_SUPPORT_LINKS)}
 
             {/* MY WORSHIP ROOM — logged-in only */}

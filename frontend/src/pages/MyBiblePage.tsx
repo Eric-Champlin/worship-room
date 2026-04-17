@@ -11,7 +11,6 @@ import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
 import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
-import { SectionHeading } from '@/components/homepage/SectionHeading'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { ActivityCard } from '@/components/bible/my-bible/ActivityCard'
@@ -35,6 +34,10 @@ import {
   countBooksVisited,
 } from '@/lib/heatmap'
 import type { ActivityItem, ActivityFilter } from '@/types/my-bible'
+import { useAuth } from '@/hooks/useAuth'
+import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 
 const BibleSettingsModal = lazy(() =>
   import('@/components/bible/my-bible/BibleSettingsModal').then((m) => ({
@@ -59,6 +62,46 @@ const STAT_CARDS = [
 ] as const
 
 function MyBiblePageInner() {
+  const { isAuthenticated } = useAuth()
+  const authModal = useAuthModal()
+
+  if (!isAuthenticated) {
+    return (
+      <Layout>
+        <SEO {...MY_BIBLE_METADATA} jsonLd={myBibleBreadcrumbs} />
+        <div className="relative min-h-screen bg-hero-bg">
+          <BibleLandingOrbs />
+          <section
+            className="relative z-10 mx-auto flex min-h-[calc(100vh-20rem)] max-w-[480px] items-center justify-center px-4"
+          >
+            <FrostedCard as="article" className="w-full text-center">
+              <h1
+                className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
+                style={GRADIENT_TEXT_STYLE}
+              >
+                My Bible
+              </h1>
+              <p className="mt-4 text-base text-white/70 sm:text-lg">
+                Track your reading journey, highlights, notes, and bookmarks across all your devices.
+              </p>
+              <button
+                type="button"
+                onClick={() => authModal?.openAuthModal('Sign in to track your Bible reading journey')}
+                className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
+              >
+                Get Started — It's Free
+              </button>
+            </FrostedCard>
+          </section>
+        </div>
+      </Layout>
+    )
+  }
+
+  return <MyBibleAuthenticatedInner />
+}
+
+function MyBibleAuthenticatedInner() {
   const navigate = useNavigate()
   const { isOpen: drawerOpen, close: closeDrawer } = useBibleDrawer()
   const {
@@ -130,7 +173,7 @@ function MyBiblePageInner() {
 
   // Derive dynamic subhead
   const subhead = useMemo(() => {
-    if (isEmpty) return 'Nothing yet. Tap a verse in the reader to start.'
+    if (isEmpty) return 'Start reading to build your collection.'
     const parts: string[] = []
     if (totalCounts.highlights > 0) parts.push(`${totalCounts.highlights} highlight${totalCounts.highlights === 1 ? '' : 's'}`)
     if (totalCounts.notes > 0) parts.push(`${totalCounts.notes} note${totalCounts.notes === 1 ? '' : 's'}`)
@@ -166,14 +209,18 @@ function MyBiblePageInner() {
   return (
     <Layout>
       <SEO {...MY_BIBLE_METADATA} jsonLd={myBibleBreadcrumbs} />
-      <div className="relative min-h-screen max-w-[100vw] overflow-hidden bg-dashboard-dark">
+      <div className="relative min-h-screen max-w-[100vw] overflow-hidden bg-hero-bg">
         <BibleLandingOrbs />
 
         {/* Hero section */}
         <section className="relative z-10 w-full px-4 pb-8 pt-24 sm:pt-28" style={ATMOSPHERIC_HERO_BG}>
           <div className="mx-auto max-w-2xl text-center">
-            <h1 className="sr-only">My Bible</h1>
-            <SectionHeading topLine="My Bible" bottomLine="everything you've marked" className="[&_span:last-child]:max-w-full [&_span:last-child]:break-words [&_span:last-child]:!text-3xl [&_span:last-child]:sm:!text-4xl" />
+            <h1
+              className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
+              style={GRADIENT_TEXT_STYLE}
+            >
+              My Bible
+            </h1>
             <p className="mt-3 text-base text-white/60 sm:text-lg">{subhead}</p>
           </div>
         </section>

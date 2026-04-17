@@ -5,7 +5,7 @@ export function BibleHero() {
   return (
     <section
       aria-labelledby="bible-hero-heading"
-      className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
+      className="relative flex w-full flex-col items-center px-4 pt-12 pb-8 text-center antialiased sm:pt-16 sm:pb-12 lg:pt-20"
       style={ATMOSPHERIC_HERO_BG}
     >
       <h1 id="bible-hero-heading" className="px-1 sm:px-2">

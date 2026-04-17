@@ -162,13 +162,36 @@ describe('getTodaysDevotional', () => {
     expect(result.season).toBeUndefined()
   })
 
-  it('cycles through seasonal devotionals within a season', () => {
-    // Advent 2026: Nov 29 to Dec 24 — 5 advent devotionals cycle
-    const day1 = getTodaysDevotional(new Date(2026, 10, 29))
-    const day2 = getTodaysDevotional(new Date(2026, 10, 30))
+  it('returns seasonal devotional within pool range', () => {
+    // Advent 2026: Nov 29 to Dec 24 — 5 advent devotionals
+    const day0 = getTodaysDevotional(new Date(2026, 10, 29)) // day 0
+    const day1 = getTodaysDevotional(new Date(2026, 10, 30)) // day 1
+    expect(day0.season).toBe('advent')
     expect(day1.season).toBe('advent')
-    expect(day2.season).toBe('advent')
-    expect(day1.id).not.toBe(day2.id)
+    expect(day0.id).not.toBe(day1.id)
+  })
+
+  it('falls through to general pool when seasonal devotionals exhausted', () => {
+    // Easter 2026 starts Apr 5. Easter pool has 3 devotionals.
+    // Day 10 (Apr 15) should fall through to general pool.
+    const day10 = getTodaysDevotional(new Date(2026, 3, 15))
+    expect(day10.season).toBeUndefined()
+  })
+
+  it('5+ consecutive days during a season produce 5+ different devotionals', () => {
+    // Easter 2026 starts Apr 5. 3 easter devos + general fallthrough.
+    const ids = new Set<string>()
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(2026, 3, 5 + d)
+      ids.add(getTodaysDevotional(date).id)
+    }
+    expect(ids.size).toBeGreaterThanOrEqual(5)
+  })
+
+  it('seasonal devotionals take priority when available', () => {
+    // Easter day 0
+    const result = getTodaysDevotional(new Date(2026, 3, 5))
+    expect(result.season).toBe('easter')
   })
 
   it('past-day navigation with dayOffset respects season of that past date', () => {
@@ -184,6 +207,16 @@ describe('getTodaysDevotional', () => {
     const first = getTodaysDevotional(date)
     const second = getTodaysDevotional(date)
     expect(first.id).toBe(second.id)
+  })
+
+  it('all 30 general devotionals participate in rotation', () => {
+    // 30 consecutive non-seasonal days (July, firmly in Ordinary Time)
+    const ids = new Set<string>()
+    for (let d = 0; d < 30; d++) {
+      const date = new Date(2026, 6, 1 + d)
+      ids.add(getTodaysDevotional(date).id)
+    }
+    expect(ids.size).toBe(30)
   })
 
   it('with dayOffset navigates correctly', () => {

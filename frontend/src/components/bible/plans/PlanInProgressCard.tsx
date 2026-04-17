@@ -13,11 +13,8 @@ export function PlanInProgressCard({ plan, progress }: PlanInProgressCardProps) 
   return (
     <article aria-label={plan.title}>
       <div
-        className={`relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${plan.coverGradient} p-5`}
+        className="relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 transition-all motion-reduce:transition-none duration-base hover:bg-white/[0.08] hover:border-white/20"
       >
-        {/* Dark scrim for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-
         {/* Content */}
         <div className="relative z-10 flex flex-col gap-2">
           <h3 className="text-lg font-semibold text-white">{plan.title}</h3>

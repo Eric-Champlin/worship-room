@@ -6,15 +6,11 @@ import { cn } from '@/lib/utils'
 interface LayoutProps {
   children: ReactNode
   hero?: ReactNode
-  dark?: boolean
 }
 
-export function Layout({ children, hero, dark }: LayoutProps) {
+export function Layout({ children, hero }: LayoutProps) {
   return (
-    <div className={cn(
-      'flex min-h-screen flex-col overflow-x-hidden font-sans',
-      dark ? 'bg-dashboard-dark' : 'bg-neutral-bg',
-    )}>
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-hero-bg font-sans">
       {hero ? <Navbar transparent /> : <Navbar />}
       {hero}
       <main

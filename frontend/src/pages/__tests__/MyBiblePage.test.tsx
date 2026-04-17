@@ -11,6 +11,23 @@ vi.mock('@/hooks/bible/useActivityFeed', () => ({
   useActivityFeed: () => mockUseActivityFeed(),
 }))
 
+// Mock useAuth: default logged-in so existing tests render the full experience.
+// Individual tests can override via mockUseAuth.mockReturnValue.
+const mockUseAuth = vi.fn(() => ({
+  isAuthenticated: true,
+  user: { name: 'Test User', id: 'test-user-id' },
+  login: vi.fn(),
+  logout: vi.fn(),
+}))
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => mockUseAuth(),
+}))
+
+const mockOpenAuthModal = vi.fn()
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: mockOpenAuthModal }),
+}))
+
 vi.mock('@/components/bible/BibleDrawerProvider', () => ({
   BibleDrawerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useBibleDrawer: () => ({
@@ -114,6 +131,13 @@ function renderPage() {
 describe('MyBiblePage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Re-seed logged-in as default (vi.clearAllMocks clears mockReturnValue)
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: { name: 'Test User', id: 'test-user-id' },
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation((query: string) => ({
@@ -127,11 +151,17 @@ describe('MyBiblePage', () => {
     })
   })
 
-  it('renders hero with gradient heading', () => {
+  it('renders hero with single-line gradient heading (BB-51)', () => {
     mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
     renderPage()
-    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('everything you\'ve marked')).toBeInTheDocument()
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading).toBeInTheDocument()
+    expect(heading.textContent).toBe('My Bible')
+    // Gradient applied inline via GRADIENT_TEXT_STYLE
+    expect(heading.style.backgroundClip).toBeTruthy()
+    // Padding-bottom to prevent descender clip
+    expect(heading.className).toContain('pb-2')
+    expect(screen.queryByText(/everything you've marked/)).not.toBeInTheDocument()
   })
 
   it('dynamic subhead shows item counts', () => {
@@ -154,7 +184,8 @@ describe('MyBiblePage', () => {
   it('dynamic subhead shows empty message', () => {
     mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
     renderPage()
-    expect(screen.getByText(/Nothing yet/)).toBeInTheDocument()
+    expect(screen.getByText(/Start reading to build your collection/)).toBeInTheDocument()
+    expect(screen.queryByText(/Nothing yet/)).not.toBeInTheDocument()
   })
 
   it('quick stats show correct counts', () => {
@@ -323,5 +354,47 @@ describe('MyBiblePage', () => {
     // SEO component uses Helmet which may not update document.title in jsdom.
     // Verify the page renders without errors — SEO is tested indirectly.
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('My Bible')
+  })
+
+  describe('logged-out conversion card (BB-51)', () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        login: vi.fn(),
+        logout: vi.fn(),
+      })
+      mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
+    })
+
+    it('renders conversion card heading when logged out', () => {
+      renderPage()
+      expect(screen.getByRole('heading', { level: 1, name: /My Bible/i })).toBeInTheDocument()
+      expect(
+        screen.getByText(/Track your reading journey, highlights, notes, and bookmarks/i),
+      ).toBeInTheDocument()
+    })
+
+    it('renders Get Started CTA when logged out', () => {
+      renderPage()
+      expect(
+        screen.getByRole('button', { name: /Get Started — It's Free/i }),
+      ).toBeInTheDocument()
+    })
+
+    it('does not render the authenticated activity feed when logged out', () => {
+      renderPage()
+      expect(screen.queryByText(/Your Bible highlights will show up here/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Stored on this device/i)).not.toBeInTheDocument()
+    })
+
+    it('CTA opens auth modal with the expected subtitle', async () => {
+      const user = userEvent.setup()
+      renderPage()
+      await user.click(screen.getByRole('button', { name: /Get Started — It's Free/i }))
+      expect(mockOpenAuthModal).toHaveBeenCalledWith(
+        'Sign in to track your Bible reading journey',
+      )
+    })
   })
 })

@@ -110,10 +110,10 @@ describe('VerseOfTheDay', () => {
     expect(screen.getByText(today)).toBeInTheDocument()
   })
 
-  it('"Read in context" links to correct URL with highlight', () => {
+  it('"Read in context" links to top of chapter (no scroll-to param)', () => {
     renderComponent()
     const link = screen.getByText('Read in context').closest('a')
-    expect(link?.getAttribute('href')).toBe('/bible/psalms/23?scroll-to=1')
+    expect(link?.getAttribute('href')).toBe('/bible/psalms/23')
   })
 
   it('"Share" opens share modal', () => {

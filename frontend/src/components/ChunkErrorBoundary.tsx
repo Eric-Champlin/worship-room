@@ -36,7 +36,7 @@ export class ChunkErrorBoundary extends Component<ChunkErrorBoundaryProps, Chunk
   render(): ReactNode {
     if (this.state.hasChunkError) {
       return (
-        <Layout dark>
+        <Layout>
           <div className="flex min-h-[60vh] items-center justify-center px-6">
             <div className="max-w-md text-center">
               <svg

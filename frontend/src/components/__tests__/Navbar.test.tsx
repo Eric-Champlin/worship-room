@@ -63,13 +63,25 @@ describe('Navbar', () => {
   })
 
   describe('Desktop nav links', () => {
-    it('renders exactly 5 nav links: Daily Hub, Study Bible, Grow, Prayer Wall, Music', () => {
+    it('renders exactly 5 nav links: Daily Hub, Study Bible, Grow, Music, Prayer Wall', () => {
       renderNavbar()
       expect(screen.getByRole('link', { name: 'Daily Hub' })).toHaveAttribute('href', '/daily')
       expect(screen.getByRole('link', { name: 'Study Bible' })).toHaveAttribute('href', '/bible')
       expect(screen.getByRole('link', { name: 'Grow' })).toHaveAttribute('href', '/grow')
-      expect(screen.getByRole('link', { name: 'Prayer Wall' })).toHaveAttribute('href', '/prayer-wall')
       expect(screen.getByRole('link', { name: 'Music' })).toHaveAttribute('href', '/music')
+      expect(screen.getByRole('link', { name: 'Prayer Wall' })).toHaveAttribute('href', '/prayer-wall')
+    })
+
+    it('renders Music before Prayer Wall in nav order', () => {
+      renderNavbar()
+      const nav = screen.getByRole('navigation', { name: /main navigation/i })
+      const links = within(nav).getAllByRole('link')
+      const labels = links.map((l) => l.getAttribute('aria-label'))
+      const musicIdx = labels.indexOf('Music')
+      const prayerWallIdx = labels.indexOf('Prayer Wall')
+      expect(musicIdx).toBeGreaterThan(-1)
+      expect(prayerWallIdx).toBeGreaterThan(-1)
+      expect(musicIdx).toBeLessThan(prayerWallIdx)
     })
 
     it('"Ask", "Daily Devotional", "Reading Plans", "Challenges" NOT in desktop nav', () => {
@@ -287,18 +299,33 @@ describe('Navbar', () => {
       // Section headers
       expect(within(menu).getByText('Daily')).toBeInTheDocument()
       expect(within(menu).getByText('Study')).toBeInTheDocument()
-      expect(within(menu).getByText('Community')).toBeInTheDocument()
       expect(within(menu).getByText('Listen')).toBeInTheDocument()
+      expect(within(menu).getByText('Community')).toBeInTheDocument()
       expect(within(menu).getByText('Find Help')).toBeInTheDocument()
       // Nav items
       const allLabels = [
         'Daily Hub', 'Study Bible', 'Grow', "Ask God's Word",
-        'Prayer Wall', 'Music',
+        'Music', 'Prayer Wall',
         'Churches', 'Counselors', 'Celebrate Recovery',
       ]
       for (const label of allLabels) {
         expect(within(menu).getByText(label)).toBeInTheDocument()
       }
+    })
+
+    it('mobile drawer renders Music section before Prayer Wall section', async () => {
+      const user = userEvent.setup()
+      renderNavbar()
+
+      await user.click(screen.getByRole('button', { name: 'Open menu' }))
+      const menu = document.getElementById('mobile-menu')!
+      const headings = within(menu).getAllByRole('heading', { level: 2 })
+      const headingTexts = headings.map((h) => h.textContent)
+      const listenIdx = headingTexts.indexOf('Listen')
+      const communityIdx = headingTexts.indexOf('Community')
+      expect(listenIdx).toBeGreaterThan(-1)
+      expect(communityIdx).toBeGreaterThan(-1)
+      expect(listenIdx).toBeLessThan(communityIdx)
     })
 
     it('section headers have role="heading" aria-level="2"', async () => {

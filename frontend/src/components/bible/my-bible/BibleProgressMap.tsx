@@ -100,9 +100,9 @@ function BookCard({
               onClick={() => onNavigate(`/bible/${book.slug}/${chapter}`)}
               className={cn(
                 'h-1.5 w-1.5 rounded-[1px] transition-opacity motion-reduce:transition-none hover:opacity-80 sm:h-2 sm:w-2 lg:h-2.5 lg:w-2.5',
-                state === 'unread' && 'bg-white/[0.08]',
-                state === 'read' && 'bg-primary/60',
-                state === 'highlighted' && 'bg-primary/80',
+                state === 'unread' && 'bg-white/[0.06]',
+                state === 'read' && 'bg-white/80',
+                state === 'highlighted' && 'bg-white',
               )}
               aria-label={`${book.name} chapter ${chapter}: ${state}`}
               title={`${book.name} ${chapter}`}

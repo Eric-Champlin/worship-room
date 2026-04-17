@@ -21,11 +21,8 @@ export function PlanCompletedCard({ plan, progress }: PlanCompletedCardProps) {
     <article aria-label={plan.title}>
       <Link
         to={`/bible/plans/${plan.slug}`}
-        className={`group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${plan.coverGradient} p-5 opacity-85 transition-all motion-reduce:transition-none duration-base motion-safe:hover:-translate-y-1 hover:border-white/20 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark`}
+        className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 opacity-85 transition-all motion-reduce:transition-none duration-base hover:bg-white/[0.08] hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
       >
-        {/* Dark scrim for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-
         {/* Completed badge */}
         <span className="absolute right-3 top-3 z-10 rounded-full bg-white/15 px-2 py-0.5 text-xs text-white/80">
           Completed

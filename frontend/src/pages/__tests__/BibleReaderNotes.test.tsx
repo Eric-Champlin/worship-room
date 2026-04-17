@@ -466,7 +466,7 @@ describe('BibleReader — Notes Integration', () => {
     renderReader('/bible/genesis/1')
     await waitForChapterLoaded()
 
-    // Should render normally without crashing
+    // Should render normally without crashing — sr-only h1 as of BB-51
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Genesis')
   })
 })

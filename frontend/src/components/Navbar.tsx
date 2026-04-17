@@ -15,8 +15,8 @@ const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> 
   { label: 'Daily Hub', to: '/daily', icon: Calendar },
   { label: 'Study Bible', to: '/bible', icon: Book },
   { label: 'Grow', to: '/grow', icon: TrendingUp },
-  { label: 'Prayer Wall', to: '/prayer-wall', icon: Heart },
   { label: 'Music', to: '/music', icon: Music },
+  { label: 'Prayer Wall', to: '/prayer-wall', icon: Heart },
 ]
 
 // eslint-disable-next-line react-refresh/only-export-components -- Utility co-located with Navbar for route matching

@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BookOpen, Minimize2, Type, Volume2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, ChevronDown, Minimize2, Type, Volume2 } from 'lucide-react'
 import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { cn } from '@/lib/utils'
 import { AudioPlayButton } from '@/components/audio/AudioPlayButton'
@@ -78,7 +78,7 @@ export function ReaderChrome({
       <div className="bg-hero-bg/80 backdrop-blur-md">
         <div className="flex h-14 items-center justify-between px-4">
           {/* Left: Back button */}
-          <Link to="/bible" className={ICON_BTN} aria-label="Back to Bible">
+          <Link to="/bible" className={ICON_BTN} aria-label="Back to Study Bible">
             <ArrowLeft className="h-5 w-5" />
           </Link>
 
@@ -86,13 +86,14 @@ export function ReaderChrome({
           <button
             ref={centerRef}
             type="button"
-            className="flex min-h-[44px] items-center text-base font-medium text-white/90 transition-colors hover:text-white"
+            className="flex min-h-[44px] items-center gap-1 text-base font-medium text-white/90 transition-colors hover:text-white"
             aria-label="Open chapter picker"
             onClick={handleCenterClick}
           >
             <span className="text-sm sm:text-base">
               {bookName} {chapter}
             </span>
+            <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
 
           {/* Right: Aa + Focus + Books icons */}
@@ -142,7 +143,7 @@ export function ReaderChrome({
             <button
               type="button"
               className={cn(ICON_BTN, 'relative')}
-              aria-label="Toggle focus mode"
+              aria-label="Toggle auto-hide toolbar"
               onClick={onFocusToggle}
             >
               <Minimize2 className="h-5 w-5" />

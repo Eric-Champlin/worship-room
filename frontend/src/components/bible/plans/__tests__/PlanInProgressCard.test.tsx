@@ -63,4 +63,18 @@ describe('PlanInProgressCard', () => {
     renderCard(DEFAULT_PLAN, { ...DEFAULT_PROGRESS, pausedAt: '2026-01-05' })
     expect(screen.getByText('Paused')).toBeInTheDocument()
   })
+
+  it('applies frosted glass styling (not colored gradient)', () => {
+    const { container } = renderCard()
+    const card = container.querySelector('article > div') as HTMLElement
+    expect(card.className).toContain('bg-white/5')
+    expect(card.className).toContain('backdrop-blur-sm')
+    expect(card.className).toContain('border-white/10')
+    expect(card.className).not.toContain('bg-gradient-to-br')
+  })
+
+  it('does not render dark scrim', () => {
+    const { container } = renderCard()
+    expect(container.querySelector('.bg-gradient-to-t')).toBeNull()
+  })
 })

@@ -65,4 +65,18 @@ describe('PlanCompletedCard', () => {
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', '/bible/plans/finding-comfort')
   })
+
+  it('applies frosted glass styling (not colored gradient)', () => {
+    renderCard()
+    const link = screen.getByRole('link')
+    expect(link.className).toContain('bg-white/5')
+    expect(link.className).toContain('backdrop-blur-sm')
+    expect(link.className).toContain('border-white/10')
+    expect(link.className).not.toContain('bg-gradient-to-br')
+  })
+
+  it('does not render dark scrim', () => {
+    const { container } = renderCard()
+    expect(container.querySelector('.bg-gradient-to-t')).toBeNull()
+  })
 })

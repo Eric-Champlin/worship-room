@@ -176,7 +176,7 @@ describe('BibleReader (BB-4 Immersive Reader)', () => {
     })
   })
 
-  it('shows chapter heading with book name and number', async () => {
+  it('provides an accessible chapter heading (sr-only — BB-51)', async () => {
     renderReader('/bible/john/3')
 
     await waitFor(() => {
@@ -184,6 +184,9 @@ describe('BibleReader (BB-4 Immersive Reader)', () => {
       expect(heading).toBeTruthy()
       expect(heading.textContent).toContain('John')
       expect(heading.textContent).toContain('3')
+      // BB-51: static ChapterHeading removed from reader body; the h1 is sr-only.
+      // Canonical visible chapter display is the top toolbar button ("John 3 ▾").
+      expect(heading.className).toContain('sr-only')
     })
   })
 

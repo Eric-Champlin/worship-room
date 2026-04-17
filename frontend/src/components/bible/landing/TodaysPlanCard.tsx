@@ -1,4 +1,3 @@
-import { ListChecks } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import type { ActivePlan } from '@/types/bible-landing'
@@ -9,16 +8,7 @@ interface TodaysPlanCardProps {
 
 export function TodaysPlanCard({ plans }: TodaysPlanCardProps) {
   if (plans.length === 0) {
-    return (
-      <FrostedCard as="article">
-        <Link to="/bible/plans" className="flex flex-col items-center gap-3 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark">
-          <ListChecks className="h-8 w-8 text-white/60" aria-hidden="true" />
-          <div>
-            <h3 className="text-lg font-bold text-white">Try a reading plan</h3>
-          </div>
-        </Link>
-      </FrostedCard>
-    )
+    return null
   }
 
   // Show plan with earliest incomplete day (least progress first)

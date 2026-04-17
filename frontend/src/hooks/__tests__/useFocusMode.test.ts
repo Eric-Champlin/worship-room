@@ -37,6 +37,14 @@ describe('useFocusMode', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     localStorage.clear()
+    // Most tests expect focus mode to be enabled; set it explicitly since
+    // the default changed to false (BB-50). Tests verifying disabled behavior
+    // override this via localStorage.setItem('wr_bible_focus_enabled', 'false').
+    // Mark v2 migration as already run so it doesn't wipe the explicit value —
+    // these tests are verifying post-migration behavior. Migration-specific tests
+    // (BB-51) clear this flag and manipulate legacy state explicitly.
+    localStorage.setItem('wr_bible_focus_enabled', 'true')
+    localStorage.setItem('wr_bible_focus_v2_migrated', 'true')
     mockReducedMotion = false
   })
 
@@ -52,6 +60,12 @@ describe('useFocusMode', () => {
     expect(result.current.chromeOpacity).toBe(1)
     expect(result.current.chromePointerEvents).toBe('auto')
     expect(result.current.vignetteVisible).toBe(false)
+  })
+
+  it('defaults to enabled=false when no localStorage value set', () => {
+    localStorage.removeItem('wr_bible_focus_enabled')
+    const { result } = renderHook(() => useFocusMode())
+    expect(result.current.settings.enabled).toBe(false)
   })
 
   // --- Timer-based focus transition ---
@@ -375,5 +389,70 @@ describe('useFocusMode', () => {
     expect(result.current.settings.enabled).toBe(false)
     expect(result.current.settings.delay).toBe(12000)
     expect(result.current.settings.dimOrbs).toBe(false)
+  })
+
+  // --- BB-51 one-time migration (wr_bible_focus_v2_migrated) ---
+
+  describe('BB-51 migration', () => {
+    it('resets legacy true value and sets migration flag for pre-migration user', () => {
+      // Simulate a legacy user pre-BB-51: focus enabled=true, no migration flag
+      localStorage.clear()
+      localStorage.setItem('wr_bible_focus_enabled', 'true')
+
+      const { result } = renderHook(() => useFocusMode())
+
+      expect(result.current.settings.enabled).toBe(false)
+      expect(localStorage.getItem('wr_bible_focus_enabled')).toBeNull()
+      expect(localStorage.getItem('wr_bible_focus_v2_migrated')).toBe('true')
+    })
+
+    it('preserves legacy false value but still sets migration flag', () => {
+      localStorage.clear()
+      localStorage.setItem('wr_bible_focus_enabled', 'false')
+
+      const { result } = renderHook(() => useFocusMode())
+
+      expect(result.current.settings.enabled).toBe(false)
+      expect(localStorage.getItem('wr_bible_focus_enabled')).toBe('false')
+      expect(localStorage.getItem('wr_bible_focus_v2_migrated')).toBe('true')
+    })
+
+    it('does not re-run migration when flag is already set (respects explicit true)', () => {
+      localStorage.clear()
+      localStorage.setItem('wr_bible_focus_enabled', 'true')
+      localStorage.setItem('wr_bible_focus_v2_migrated', 'true')
+
+      const { result } = renderHook(() => useFocusMode())
+
+      expect(result.current.settings.enabled).toBe(true)
+      expect(localStorage.getItem('wr_bible_focus_enabled')).toBe('true')
+    })
+
+    it('new user (clean storage) defaults to enabled=false and sets migration flag', () => {
+      localStorage.clear()
+
+      const { result } = renderHook(() => useFocusMode())
+
+      expect(result.current.settings.enabled).toBe(false)
+      expect(localStorage.getItem('wr_bible_focus_v2_migrated')).toBe('true')
+    })
+
+    it('user can toggle focus mode on after migration', () => {
+      // Start as a pre-migration user with legacy true — migration resets to false
+      localStorage.clear()
+      localStorage.setItem('wr_bible_focus_enabled', 'true')
+
+      const { result: first } = renderHook(() => useFocusMode())
+      expect(first.current.settings.enabled).toBe(false)
+
+      // User toggles focus mode on
+      act(() => {
+        first.current.updateFocusSetting('enabled', true)
+      })
+
+      // New mount reads the explicit preference (migration flag already set)
+      const { result: second } = renderHook(() => useFocusMode())
+      expect(second.current.settings.enabled).toBe(true)
+    })
   })
 })

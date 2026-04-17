@@ -105,8 +105,8 @@ describe('BibleLanding', () => {
     // First-time reader: VOTD shown, no resume card
     expect(screen.getByText('Verse of the Day')).toBeInTheDocument()
     expect(screen.queryByText('Continue reading')).not.toBeInTheDocument()
-    // Plan card still shows empty state
-    expect(screen.getByText('Try a reading plan')).toBeInTheDocument()
+    // Plan card returns null when no active plans (BB-50)
+    expect(screen.queryByText('Try a reading plan')).not.toBeInTheDocument()
     // No streak chip visible
     expect(screen.queryByText(/day streak/)).not.toBeInTheDocument()
   })
@@ -143,7 +143,9 @@ describe('BibleLanding', () => {
     expect(await screen.findByRole('progressbar')).toBeInTheDocument()
   })
 
-  it('streak chip visible when count > 0', () => {
+  it('streak chip visible when count > 0 AND user is logged in', () => {
+    localStorage.setItem('wr_auth_simulated', 'true')
+    localStorage.setItem('wr_user_name', 'Test User')
     localStorage.setItem(
       'bible:streak',
       JSON.stringify({
@@ -166,6 +168,29 @@ describe('BibleLanding', () => {
   it('streak chip hidden when count is 0', () => {
     renderLanding()
     expect(screen.queryByText(/day streak/)).not.toBeInTheDocument()
+  })
+
+  it('streak chip hidden when logged out even if streak > 0', () => {
+    // No wr_auth_simulated set → logged out
+    // Use a streak value with no matching milestones so no milestone toast fires
+    // (the toast "N day streak!" would also match /day streak/ and confuse the query).
+    localStorage.setItem(
+      'bible:streak',
+      JSON.stringify({
+        currentStreak: 5,
+        longestStreak: 5,
+        lastReadDate: '2026-04-07',
+        streakStartDate: '2026-04-03',
+        graceDaysAvailable: 1,
+        graceDaysUsedThisWeek: 0,
+        lastGraceUsedDate: null,
+        weekResetDate: '2026-04-06',
+        milestones: [],
+        totalDaysRead: 5,
+      }),
+    )
+    renderLanding()
+    expect(screen.queryByText('5 day streak')).not.toBeInTheDocument()
   })
 
   it('VOTD always renders', () => {
@@ -238,9 +263,9 @@ describe('BibleLanding', () => {
     expect(screen.getByText('Verse of the Day')).toBeInTheDocument()
   })
 
-  it('TodaysPlanCard still renders', () => {
+  it('TodaysPlanCard returns null when no active plans', () => {
     renderLanding()
-    // Empty plan state shows the CTA
-    expect(screen.getByText('Try a reading plan')).toBeInTheDocument()
+    // BB-50: empty plan state now returns null instead of showing a CTA
+    expect(screen.queryByText('Try a reading plan')).not.toBeInTheDocument()
   })
 })

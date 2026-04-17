@@ -36,11 +36,12 @@ export interface FocusModeReturn {
 const KEY_ENABLED = 'wr_bible_focus_enabled'
 const KEY_DELAY = 'wr_bible_focus_delay'
 const KEY_DIM_ORBS = 'wr_bible_focus_dim_orbs'
+const KEY_MIGRATION_V2 = 'wr_bible_focus_v2_migrated'
 
 // --- Defaults ---
 
 const DEFAULT_SETTINGS: FocusModeSettings = {
-  enabled: true,
+  enabled: false,
   delay: 6000,
   dimOrbs: true,
 }
@@ -48,6 +49,18 @@ const DEFAULT_SETTINGS: FocusModeSettings = {
 // --- Helpers ---
 
 function loadSettings(): FocusModeSettings {
+  // BB-51 one-time migration: legacy users with wr_bible_focus_enabled='true' from
+  // before BB-50 still have focus mode auto-activating. Reset to default (false)
+  // once per browser, then honor the user's explicit toggle going forward.
+  const migrated = localStorage.getItem(KEY_MIGRATION_V2)
+  if (migrated !== 'true') {
+    const legacyValue = localStorage.getItem(KEY_ENABLED)
+    if (legacyValue === 'true') {
+      localStorage.removeItem(KEY_ENABLED)
+    }
+    localStorage.setItem(KEY_MIGRATION_V2, 'true')
+  }
+
   const enabled = localStorage.getItem(KEY_ENABLED)
   const delay = localStorage.getItem(KEY_DELAY)
   const dimOrbs = localStorage.getItem(KEY_DIM_ORBS)

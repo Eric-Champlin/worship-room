@@ -9,7 +9,7 @@ export function BibleBrowse() {
   return (
     <Layout>
       <SEO {...BIBLE_BROWSE_METADATA} />
-      <div className="min-h-screen bg-dashboard-dark">
+      <div className="min-h-screen bg-hero-bg">
         <section
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
           style={ATMOSPHERIC_HERO_BG}

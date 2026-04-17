@@ -48,4 +48,16 @@ describe('BibleHero', () => {
     const { container } = render(<BibleHero />)
     expect(container.querySelector('.font-script')).toBeNull()
   })
+
+  it('uses reduced top padding pt-12 sm:pt-16 lg:pt-20', () => {
+    render(<BibleHero />)
+    const heading = screen.getByRole('heading', { level: 1 })
+    const section = heading.closest('section')
+    expect(section?.className).toContain('pt-12')
+    expect(section?.className).toContain('sm:pt-16')
+    expect(section?.className).toContain('lg:pt-20')
+    expect(section?.className).not.toContain('pt-32')
+    expect(section?.className).not.toContain('sm:pt-36')
+    expect(section?.className).not.toContain('lg:pt-40')
+  })
 })

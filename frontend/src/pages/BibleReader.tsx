@@ -7,7 +7,6 @@ import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
 import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
 import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
-import { ChapterHeading } from '@/components/bible/reader/ChapterHeading'
 import { ReaderBody } from '@/components/bible/reader/ReaderBody'
 import { ReaderChrome } from '@/components/bible/reader/ReaderChrome'
 import { ReaderChapterNav } from '@/components/bible/reader/ReaderChapterNav'
@@ -840,7 +839,7 @@ function BibleReaderInner() {
             </div>
           ) : (
             <>
-              <ChapterHeading bookName={book.name} chapter={chapterNumber} />
+              <h1 className="sr-only">{book.name} {chapterNumber}</h1>
               <ReaderBody
                 verses={verses}
                 bookSlug={bookSlug!}

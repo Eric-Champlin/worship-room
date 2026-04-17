@@ -1791,10 +1791,11 @@ export function getTodaysDevotional(date: Date = new Date(), dayOffset: number =
 
   if (isNamedSeason) {
     const seasonalPool = DEVOTIONAL_POOL.filter((d) => d.season === currentSeason.id)
-    if (seasonalPool.length > 0) {
-      const dayInSeason = getDayWithinSeason(currentSeason.id, adjustedDate)
-      return seasonalPool[dayInSeason % seasonalPool.length]
+    const dayInSeason = getDayWithinSeason(currentSeason.id, adjustedDate)
+    if (seasonalPool.length > 0 && dayInSeason < seasonalPool.length) {
+      return seasonalPool[dayInSeason]
     }
+    // Fall through to general pool when seasonal devotionals are exhausted
   }
 
   // Fallback: general (non-seasonal) pool rotation

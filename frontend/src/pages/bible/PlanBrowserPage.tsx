@@ -3,7 +3,6 @@ import { PlanBrowseCard } from '@/components/bible/plans/PlanBrowseCard'
 import { PlanBrowserEmptyState } from '@/components/bible/plans/PlanBrowserEmptyState'
 import { PlanBrowserSection } from '@/components/bible/plans/PlanBrowserSection'
 import { PlanCompletedCard } from '@/components/bible/plans/PlanCompletedCard'
-import { PlanFilterBar } from '@/components/bible/plans/PlanFilterBar'
 import { PlanInProgressCard } from '@/components/bible/plans/PlanInProgressCard'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
@@ -15,10 +14,6 @@ export function PlanBrowserPage() {
   const {
     sections,
     filteredBrowse,
-    theme,
-    duration,
-    setTheme,
-    setDuration,
     clearFilters,
     isEmpty,
     isFilteredEmpty,
@@ -28,13 +23,13 @@ export function PlanBrowserPage() {
   return (
     <Layout>
       <SEO {...BIBLE_PLANS_BROWSER_METADATA} />
-      <div className="min-h-screen bg-dashboard-dark">
+      <div className="min-h-screen bg-hero-bg">
         {/* Hero */}
         <section
           className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
           style={ATMOSPHERIC_HERO_BG}
         >
-          <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl" style={GRADIENT_TEXT_STYLE}>
+          <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2" style={GRADIENT_TEXT_STYLE}>
             Reading Plans
           </h1>
           <p className="mt-3 text-base text-white/60 sm:text-lg">
@@ -44,13 +39,6 @@ export function PlanBrowserPage() {
 
         {/* Content */}
         <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
-          <PlanFilterBar
-            theme={theme}
-            duration={duration}
-            onThemeChange={setTheme}
-            onDurationChange={setDuration}
-          />
-
           {/* Empty state: no manifest */}
           {isEmpty && <PlanBrowserEmptyState variant="no-manifest" />}
 
