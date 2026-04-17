@@ -1061,6 +1061,9 @@ export const CHALLENGES: Challenge[] = [
     themeColor: '#6B21A8',
     dailyContent: lentenDays,
     communityGoal: '10,000 prayers as a community',
+    remindersCount: 142,
+    activeParticipantsCount: 1847,
+    completedCount: 512,
   },
   {
     id: 'easter-joy-resurrection-hope',
@@ -1074,6 +1077,9 @@ export const CHALLENGES: Challenge[] = [
     themeColor: '#FDE68A',
     dailyContent: easterDays,
     communityGoal: '5,000 moments of gratitude',
+    remindersCount: 38,
+    activeParticipantsCount: 624,
+    completedCount: 1284,
   },
   {
     id: 'fire-of-pentecost',
@@ -1090,6 +1096,9 @@ export const CHALLENGES: Challenge[] = [
     themeColor: '#DC2626',
     dailyContent: pentecostDays,
     communityGoal: '7,000 prayers for boldness',
+    remindersCount: 87,
+    activeParticipantsCount: 0,
+    completedCount: 0,
   },
   {
     id: 'advent-awaits',
@@ -1103,6 +1112,9 @@ export const CHALLENGES: Challenge[] = [
     themeColor: '#7C3AED',
     dailyContent: adventDays,
     communityGoal: '8,000 acts of kindness',
+    remindersCount: 203,
+    activeParticipantsCount: 0,
+    completedCount: 864,
   },
   {
     id: 'new-year-new-heart',
@@ -1116,6 +1128,9 @@ export const CHALLENGES: Challenge[] = [
     themeColor: '#059669',
     dailyContent: newYearDays,
     communityGoal: '6,000 journal entries of hope',
+    remindersCount: 156,
+    activeParticipantsCount: 0,
+    completedCount: 1103,
   },
 ]
 

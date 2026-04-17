@@ -1,35 +1,64 @@
-import { ButtonHTMLAttributes, forwardRef } from 'react'
+import {
+  ButtonHTMLAttributes,
+  Children,
+  cloneElement,
+  forwardRef,
+  isValidElement,
+  type ReactElement,
+  type Ref,
+} from 'react'
 import { cn } from '@/lib/utils'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'light'
   size?: 'sm' | 'md' | 'lg'
+  /** When true, render merged styles onto the single child element instead of a <button>. */
+  asChild?: boolean
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        className={cn(
-          'inline-flex items-center justify-center rounded-md font-medium transition-[colors,transform] duration-fast',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          'disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]',
-          {
-            'bg-primary text-white hover:bg-primary-lt': variant === 'primary',
-            'bg-gray-200 text-gray-900 hover:bg-gray-300': variant === 'secondary',
-            'border border-primary text-primary hover:bg-primary/5': variant === 'outline',
-            'text-primary hover:bg-primary/5': variant === 'ghost',
-            'h-9 px-3 text-sm': size === 'sm',
-            'h-10 px-4': size === 'md',
-            'h-12 px-6 text-lg': size === 'lg',
-          },
-          className
-        )}
-        {...props}
-      />
+  ({ className, variant = 'primary', size = 'md', asChild = false, children, ...props }, ref) => {
+    const merged = cn(
+      'inline-flex items-center justify-center font-medium transition-[colors,transform] duration-fast motion-reduce:transition-none',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
+      'disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]',
+      variant !== 'light' && 'rounded-md',
+      variant === 'light' &&
+        'rounded-full bg-white text-primary hover:bg-gray-100 gap-2 font-semibold min-h-[44px]',
+      {
+        'bg-primary text-white hover:bg-primary-lt': variant === 'primary',
+        'bg-gray-200 text-gray-900 hover:bg-gray-300': variant === 'secondary',
+        'border border-primary text-primary hover:bg-primary/5': variant === 'outline',
+        'text-primary hover:bg-primary/5': variant === 'ghost',
+        'h-9 px-3 text-sm': size === 'sm' && variant !== 'light',
+        'h-10 px-4': size === 'md' && variant !== 'light',
+        'h-12 px-6 text-lg': size === 'lg' && variant !== 'light',
+        'px-4 py-2 text-sm': size === 'sm' && variant === 'light',
+        'px-6 py-2.5 text-sm': size === 'md' && variant === 'light',
+        'px-8 py-3 text-base': size === 'lg' && variant === 'light',
+      },
+      className,
     )
-  }
+
+    if (asChild) {
+      const child = Children.only(children)
+      if (!isValidElement(child)) {
+        throw new Error('Button asChild requires a single valid React element')
+      }
+      const childElement = child as ReactElement<{ className?: string; ref?: Ref<unknown> }>
+      return cloneElement(childElement, {
+        ...props,
+        className: cn(merged, childElement.props.className),
+        ref,
+      } as Partial<{ className?: string; ref?: Ref<unknown> }>)
+    }
+
+    return (
+      <button ref={ref} className={merged} {...props}>
+        {children}
+      </button>
+    )
+  },
 )
 
 Button.displayName = 'Button'

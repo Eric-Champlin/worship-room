@@ -254,4 +254,34 @@ describe('ChallengeDetail', () => {
       expect(hrefs.filter((h) => h === '/grow?tab=challenges').length).toBe(2)
     })
   })
+
+  describe('Facelift — hero, CommunityFeed, countdown', () => {
+    it('hero h1 does NOT use font-script', () => {
+      renderDetail('pray40-lenten-journey')
+      const h1 = screen.getByRole('heading', { level: 1 })
+      expect(h1.querySelector('.font-script')).toBeNull()
+      expect(h1.textContent).toBe('Pray40: A Lenten Journey')
+    })
+
+    it('past challenge renders CommunityFeed in completed state (Award + count)', () => {
+      renderDetail('pray40-lenten-journey')
+      // CommunityFeed renders "Challenge Community" heading, and completed state includes "completed this challenge"
+      expect(
+        screen.getByRole('heading', { name: 'Challenge Community' }),
+      ).toBeInTheDocument()
+      expect(screen.getByText(/completed this challenge/)).toBeInTheDocument()
+    })
+
+    it('no "Pray for the community" link appears', () => {
+      renderDetail('pray40-lenten-journey')
+      expect(screen.queryByText(/pray for the community/i)).toBeNull()
+    })
+
+    it('completed challenge does NOT render avatar-based activity items', () => {
+      const { container } = renderDetail('pray40-lenten-journey')
+      // CommunityFeed avatar items have h-8 w-8 rounded-full with inline backgroundColor style
+      const avatars = container.querySelectorAll('div.h-8.w-8.rounded-full[aria-hidden="true"]')
+      expect(avatars.length).toBe(0)
+    })
+  })
 })

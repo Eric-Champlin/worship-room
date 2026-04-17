@@ -7,6 +7,14 @@ describe('challenges data', () => {
     expect(CHALLENGES).toHaveLength(5)
   })
 
+  it('every challenge has remindersCount, activeParticipantsCount, completedCount as numbers', () => {
+    for (const challenge of CHALLENGES) {
+      expect(typeof challenge.remindersCount).toBe('number')
+      expect(typeof challenge.activeParticipantsCount).toBe('number')
+      expect(typeof challenge.completedCount).toBe('number')
+    }
+  })
+
   it('each challenge has correct duration', () => {
     const expected: Record<string, number> = {
       'pray40-lenten-journey': 40,
