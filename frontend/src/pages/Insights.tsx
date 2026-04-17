@@ -197,7 +197,7 @@ export function Insights() {
         </Link>
         <h1
           id="insights-heading"
-          className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+          className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
           Mood <span className="font-script">Insights</span>

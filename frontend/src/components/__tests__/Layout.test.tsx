@@ -47,10 +47,10 @@ function mockSeason(seasonId: keyof typeof LITURGICAL_SEASONS) {
   })
 }
 
-function renderLayout(props?: { dark?: boolean; hero?: React.ReactNode }) {
+function renderLayout(props?: { hero?: React.ReactNode }) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Layout dark={props?.dark} hero={props?.hero}>
+      <Layout hero={props?.hero}>
         <div>test content</div>
       </Layout>
     </MemoryRouter>,
@@ -58,20 +58,12 @@ function renderLayout(props?: { dark?: boolean; hero?: React.ReactNode }) {
 }
 
 describe('Layout', () => {
-  it('renders with bg-neutral-bg by default', () => {
+  it('renders bg-hero-bg on outer wrapper (no legacy bg tokens)', () => {
     mockSeason('ordinary-time')
     const { container } = renderLayout()
     const outer = container.firstChild as HTMLElement
-    expect(outer.className).toContain('bg-neutral-bg')
+    expect(outer.className).toContain('bg-hero-bg')
+    expect(outer.className).not.toContain('bg-neutral-bg')
     expect(outer.className).not.toContain('bg-dashboard-dark')
   })
-
-  it('renders with bg-dashboard-dark when dark prop is true', () => {
-    mockSeason('ordinary-time')
-    const { container } = renderLayout({ dark: true })
-    const outer = container.firstChild as HTMLElement
-    expect(outer.className).toContain('bg-dashboard-dark')
-    expect(outer.className).not.toContain('bg-neutral-bg')
-  })
-
 })

@@ -91,10 +91,16 @@ describe('TypographySheet', () => {
 
   // --- Focus Mode Section ---
 
-  it('renders Focus mode section when sheet is open', () => {
+  it('renders Auto-hide toolbar section when sheet is open', () => {
     renderSheet()
 
-    expect(screen.getByText('Focus mode')).toBeTruthy()
+    expect(screen.getByText('Auto-hide toolbar')).toBeTruthy()
+  })
+
+  it('renders subtitle text below the toggle', () => {
+    renderSheet()
+
+    expect(screen.getByText('Toolbar fades after a few seconds of reading')).toBeTruthy()
   })
 
   it('enabled toggle calls onFocusSettingUpdate', async () => {
@@ -103,7 +109,7 @@ describe('TypographySheet', () => {
       focusSettings: { enabled: true, delay: 6000, dimOrbs: true },
     })
 
-    await user.click(screen.getByLabelText('Focus mode enabled'))
+    await user.click(screen.getByLabelText('Auto-hide toolbar'))
     expect(onFocusSettingUpdate).toHaveBeenCalledWith('enabled', false)
   })
 
@@ -142,7 +148,7 @@ describe('TypographySheet', () => {
       focusSettings: { enabled: false, delay: 6000, dimOrbs: true },
     })
 
-    expect(screen.queryByLabelText('Dim orbs in focus mode')).toBeNull()
+    expect(screen.queryByLabelText('Dim orbs when toolbar is hidden')).toBeNull()
   })
 
   it('caption text is correct', () => {
@@ -160,7 +166,7 @@ describe('TypographySheet', () => {
       focusSettings: { enabled: true, delay: 6000, dimOrbs: true },
     })
 
-    const toggle = screen.getByLabelText('Focus mode enabled')
+    const toggle = screen.getByLabelText('Auto-hide toolbar')
     expect(toggle.getAttribute('role')).toBe('switch')
     expect(toggle.getAttribute('aria-checked')).toBe('true')
   })

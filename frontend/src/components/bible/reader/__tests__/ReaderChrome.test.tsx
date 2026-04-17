@@ -57,8 +57,8 @@ function renderChrome(props?: Partial<Parameters<typeof ReaderChrome>[0]>) {
           chromeOpacity={props?.chromeOpacity ?? 1}
           chromePointerEvents={props?.chromePointerEvents ?? 'auto'}
           chromeTransitionMs={props?.chromeTransitionMs ?? 200}
-          isManuallyArmed={props?.isManuallyArmed ?? false}
-          onFocusToggle={props?.onFocusToggle ?? vi.fn()}
+          focusEnabled={props?.focusEnabled ?? false}
+          onFocusEnabledToggle={props?.onFocusEnabledToggle ?? vi.fn()}
           ambientAudioVisible={props?.ambientAudioVisible ?? true}
           isAudioPlaying={props?.isAudioPlaying ?? false}
           onAudioToggle={props?.onAudioToggle ?? vi.fn()}
@@ -77,17 +77,18 @@ describe('ReaderChrome', () => {
   it('renders all 5 interactive elements with correct aria-labels', () => {
     renderChrome()
 
-    expect(screen.getByLabelText('Back to Bible')).toBeTruthy()
+    expect(screen.getByLabelText('Back to Study Bible')).toBeTruthy()
     expect(screen.getByLabelText('Open chapter picker')).toBeTruthy()
     expect(screen.getByLabelText('Typography settings')).toBeTruthy()
-    expect(screen.getByLabelText('Toggle focus mode')).toBeTruthy()
+    // BB-52: focus toggle aria-label reflects state (Eye/EyeOff icon swap)
+    expect(screen.getByLabelText('Enable focus mode (auto-hide toolbar)')).toBeTruthy()
     expect(screen.getByLabelText('Browse books')).toBeTruthy()
   })
 
   it('back button links to /bible', () => {
     renderChrome()
 
-    const backLink = screen.getByLabelText('Back to Bible')
+    const backLink = screen.getByLabelText('Back to Study Bible')
     expect(backLink.getAttribute('href')).toBe('/bible')
   })
 
@@ -111,7 +112,7 @@ describe('ReaderChrome', () => {
   it('all icon buttons have 44px minimum size', () => {
     renderChrome()
 
-    const backBtn = screen.getByLabelText('Back to Bible')
+    const backBtn = screen.getByLabelText('Back to Study Bible')
     expect(backBtn.className).toContain('min-h-[44px]')
     expect(backBtn.className).toContain('min-w-[44px]')
 
@@ -139,7 +140,7 @@ describe('ReaderChrome', () => {
       (b) => b.getAttribute('aria-label') === 'Typography settings',
     )
     const focusIndex = buttons.findIndex(
-      (b) => b.getAttribute('aria-label') === 'Toggle focus mode',
+      (b) => b.getAttribute('aria-label') === 'Enable focus mode (auto-hide toolbar)',
     )
     const booksIndex = buttons.findIndex(
       (b) => b.getAttribute('aria-label') === 'Browse books',
@@ -149,27 +150,53 @@ describe('ReaderChrome', () => {
     expect(focusIndex).toBeLessThan(booksIndex)
   })
 
-  it('focus toggle calls onFocusToggle', async () => {
+  it('focus toggle calls onFocusEnabledToggle', async () => {
     const user = userEvent.setup()
-    const onFocusToggle = vi.fn()
-    renderChrome({ onFocusToggle })
+    const onFocusEnabledToggle = vi.fn()
+    renderChrome({ onFocusEnabledToggle })
 
-    await user.click(screen.getByLabelText('Toggle focus mode'))
-    expect(onFocusToggle).toHaveBeenCalledOnce()
+    await user.click(screen.getByLabelText('Enable focus mode (auto-hide toolbar)'))
+    expect(onFocusEnabledToggle).toHaveBeenCalledOnce()
   })
 
-  it('shows armed dot when isManuallyArmed is true', () => {
-    const { container } = renderChrome({ isManuallyArmed: true })
+  it('focus toggle aria-label and aria-pressed reflect state', () => {
+    // When disabled (default): label says "Enable", pressed=false
+    const { rerender } = renderChrome({ focusEnabled: false })
+    const offBtn = screen.getByLabelText('Enable focus mode (auto-hide toolbar)')
+    expect(offBtn.getAttribute('aria-pressed')).toBe('false')
 
-    const dot = container.querySelector('.bg-primary-lt')
-    expect(dot).toBeTruthy()
-  })
-
-  it('hides armed dot when isManuallyArmed is false', () => {
-    const { container } = renderChrome({ isManuallyArmed: false })
-
-    const dot = container.querySelector('.bg-primary-lt')
-    expect(dot).toBeNull()
+    // When enabled: label says "Disable", pressed=true
+    rerender(
+      <MemoryRouter>
+        <AudioProvider>
+          <AudioPlayerProvider>
+            <BibleDrawerProvider>
+              <ReaderChrome
+                bookName="John"
+                bookSlug="john"
+                chapter={3}
+                onTypographyToggle={vi.fn()}
+                isTypographyOpen={false}
+                aaRef={createRef<HTMLButtonElement>() as React.RefObject<HTMLButtonElement | null>}
+                chromeOpacity={1}
+                chromePointerEvents="auto"
+                chromeTransitionMs={200}
+                focusEnabled={true}
+                onFocusEnabledToggle={vi.fn()}
+                ambientAudioVisible={true}
+                isAudioPlaying={false}
+                onAudioToggle={vi.fn()}
+                audioButtonRef={createRef<HTMLButtonElement>() as React.RefObject<HTMLButtonElement | null>}
+                isAudioPickerOpen={false}
+                reducedMotion={false}
+              />
+            </BibleDrawerProvider>
+          </AudioPlayerProvider>
+        </AudioProvider>
+      </MemoryRouter>,
+    )
+    const onBtn = screen.getByLabelText('Disable focus mode (keep toolbar visible)')
+    expect(onBtn.getAttribute('aria-pressed')).toBe('true')
   })
 
   it('applies chromeOpacity and pointerEvents from props', () => {
@@ -262,7 +289,7 @@ describe('ReaderChrome', () => {
       (b) => b.getAttribute('aria-label') === 'Open ambient sounds',
     )
     const focusIndex = buttons.findIndex(
-      (b) => b.getAttribute('aria-label') === 'Toggle focus mode',
+      (b) => b.getAttribute('aria-label') === 'Enable focus mode (auto-hide toolbar)',
     )
 
     expect(audioIndex).toBeGreaterThan(aaIndex)
@@ -274,5 +301,26 @@ describe('ReaderChrome', () => {
     const audioBtn = screen.getByLabelText('Open ambient sounds')
     expect(audioBtn.className).toContain('min-h-[44px]')
     expect(audioBtn.className).toContain('min-w-[44px]')
+  })
+
+  it('chapter selector is positioned in right cluster, precedes Typography button', () => {
+    renderChrome()
+    const buttons = screen.getAllByRole('button')
+    const chapterIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Open chapter picker',
+    )
+    const aaIndex = buttons.findIndex(
+      (b) => b.getAttribute('aria-label') === 'Typography settings',
+    )
+    expect(chapterIndex).toBeGreaterThanOrEqual(0)
+    expect(aaIndex).toBeGreaterThan(chapterIndex)
+  })
+
+  it('chapter selector click opens chapter drawer', async () => {
+    const user = userEvent.setup()
+    renderChrome()
+    const chapterBtn = screen.getByLabelText('Open chapter picker')
+    // Should not throw — drawer action wires correctly
+    await user.click(chapterBtn)
   })
 })

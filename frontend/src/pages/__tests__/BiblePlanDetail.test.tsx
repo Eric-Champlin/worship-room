@@ -6,8 +6,9 @@ import type { UsePlanResult } from '@/hooks/bible/usePlan'
 
 const mockOpenAuthModal = vi.fn()
 
+let mockIsAuthenticated = false
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ isAuthenticated: false, user: null }),
+  useAuth: () => ({ isAuthenticated: mockIsAuthenticated, user: null }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -56,6 +57,7 @@ function renderDetail(slug = 'psalm-comfort') {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockIsAuthenticated = false
 })
 
 describe('BiblePlanDetail', () => {
@@ -214,5 +216,30 @@ describe('BiblePlanDetail', () => {
 
     const startBtn = screen.getByText('Start this plan')
     expect(startBtn.className).toContain('min-h-[44px]')
+  })
+
+  describe('day-row auth gating (BB-53 Req 4)', () => {
+    it('opens auth modal and prevents navigation when logged out', () => {
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: null, isLoading: false, isError: false })
+      renderDetail()
+
+      const dayOneLink = screen.getByText('Day 1: Day 1').closest('a')
+      expect(dayOneLink).not.toBeNull()
+      fireEvent.click(dayOneLink!)
+
+      expect(mockOpenAuthModal).toHaveBeenCalledWith('Sign in to start this reading plan')
+    })
+
+    it('does NOT open auth modal when logged in', () => {
+      mockIsAuthenticated = true
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: null, isLoading: false, isError: false })
+      renderDetail()
+
+      const dayOneLink = screen.getByText('Day 1: Day 1').closest('a')
+      expect(dayOneLink).not.toBeNull()
+      fireEvent.click(dayOneLink!)
+
+      expect(mockOpenAuthModal).not.toHaveBeenCalled()
+    })
   })
 })

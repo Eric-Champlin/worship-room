@@ -87,7 +87,7 @@ export function VerseOfTheDay() {
   // Skeleton
   if (isLoading || !votd) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="w-full">
         <FrostedCard as="article">
           <div className="motion-safe:animate-pulse space-y-4">
             <div className="h-3 w-32 rounded bg-white/10" />
@@ -108,17 +108,11 @@ export function VerseOfTheDay() {
   }
 
   const { entry, verseText } = votd
-  // BB-38: renamed from `highlightParam` to `scrollToParam` to match the
-  // ?scroll-to= URL parameter (renamed from ?highlight=).
-  const scrollToParam =
-    entry.endVerse > entry.startVerse
-      ? `${entry.startVerse}-${entry.endVerse}`
-      : String(entry.startVerse)
 
   const verseFontClass = 'font-serif text-lg sm:text-xl text-white leading-relaxed'
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="w-full">
       <FrostedCard as="article">
         {/* VERSE OF THE DAY label */}
         <span className="text-xs font-medium uppercase tracking-widest text-white/50">
@@ -140,7 +134,7 @@ export function VerseOfTheDay() {
           <div className="flex items-center gap-4">
             {/* Read in context */}
             <Link
-              to={`/bible/${entry.book}/${entry.chapter}?scroll-to=${scrollToParam}`}
+              to={`/bible/${entry.book}/${entry.chapter}`}
               className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-white hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
               aria-label="Read this verse in context"
             >

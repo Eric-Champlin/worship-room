@@ -239,7 +239,7 @@ export function TypographySheet({
           {/* Focus Mode Section */}
           <section>
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
-              Focus mode
+              Auto-hide toolbar
             </h3>
 
             {/* Enabled toggle */}
@@ -248,9 +248,10 @@ export function TypographySheet({
               <ToggleSwitch
                 checked={focusSettings.enabled}
                 onChange={(v) => onFocusSettingUpdate('enabled', v)}
-                label="Focus mode enabled"
+                label="Auto-hide toolbar"
               />
             </div>
+            <p className="mt-1 text-xs text-white/40">Toolbar fades after a few seconds of reading</p>
 
             {/* Timing — only visible when enabled */}
             {focusSettings.enabled && (
@@ -267,11 +268,11 @@ export function TypographySheet({
             {/* Dim orbs toggle — only visible when enabled */}
             {focusSettings.enabled && (
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-sm text-white/70">Dim orbs in focus</span>
+                <span className="text-sm text-white/70">Dim orbs when toolbar is hidden</span>
                 <ToggleSwitch
                   checked={focusSettings.dimOrbs}
                   onChange={(v) => onFocusSettingUpdate('dimOrbs', v)}
-                  label="Dim orbs in focus mode"
+                  label="Dim orbs when toolbar is hidden"
                 />
               </div>
             )}

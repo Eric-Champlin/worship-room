@@ -7,8 +7,14 @@ import type { PlanMetadata, PlanProgress } from '@/types/bible-plans'
 import type { UsePlanBrowserResult } from '@/hooks/bible/usePlanBrowser'
 
 vi.mock('@/hooks/bible/usePlanBrowser')
-vi.mock('@/components/Layout', () => ({
-  Layout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+vi.mock('@/components/Navbar', () => ({
+  Navbar: () => null,
+}))
+vi.mock('@/components/SiteFooter', () => ({
+  SiteFooter: () => null,
+}))
+vi.mock('@/components/daily/HorizonGlow', () => ({
+  HorizonGlow: () => null,
 }))
 vi.mock('@/components/SEO', () => ({
   SEO: ({ title }: { title: string }) => { document.title = title; return null },
@@ -110,10 +116,18 @@ describe('PlanBrowserPage', () => {
     expect(screen.getByText('No plans available yet')).toBeInTheDocument()
   })
 
-  it('shows filter bar', () => {
+  it('does not render filter bar (BB-51 removed)', () => {
     renderPage()
-    expect(screen.getByText('All')).toBeInTheDocument()
-    expect(screen.getByText('Any length')).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: /filters/i })).not.toBeInTheDocument()
+    // "Any length" was a filter pill label — should be gone
+    expect(screen.queryByText('Any length')).not.toBeInTheDocument()
+  })
+
+  it('heading uses gradient and includes pb-2 to prevent descender clip', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1, name: /Reading Plans/i })
+    expect(heading.className).toContain('pb-2')
+    expect(heading.style.backgroundClip).toBeTruthy()
   })
 
   it('shows In Progress section when plans are active', () => {
@@ -177,7 +191,7 @@ describe('PlanBrowserPage', () => {
     expect(screen.getByRole('button', { name: /Clear filters/i })).toBeInTheDocument()
   })
 
-  it('URL params control initial filter state', () => {
+  it('hook-provided filteredBrowse still drives card display (even with filter UI removed)', () => {
     mockUsePlanBrowser.mockReturnValue(
       defaultResult({
         theme: 'comfort',
@@ -185,9 +199,23 @@ describe('PlanBrowserPage', () => {
       }),
     )
     renderPage()
-    // Comfort pill should be active (aria-pressed=true) — use getAllByText since card shortTitle also says "Comfort"
-    const comfortButtons = screen.getAllByText('Comfort')
-    const pill = comfortButtons.find((el) => el.tagName === 'BUTTON')
-    expect(pill).toHaveAttribute('aria-pressed', 'true')
+    // Only the comfort plan should be rendered (not prayer)
+    expect(screen.getByText('Finding Comfort')).toBeInTheDocument()
+    expect(screen.queryByText('Prayer Journey')).not.toBeInTheDocument()
+  })
+
+  it('hero heading uses Daily Hub pt-36/sm:pt-40/lg:pt-44 padding', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1, name: /Reading Plans/i })
+    const section = heading.closest('section')
+    expect(section?.className).toContain('pt-36')
+    expect(section?.className).toContain('sm:pt-40')
+    expect(section?.className).toContain('lg:pt-44')
+  })
+
+  it('no ATMOSPHERIC_HERO_BG inline background (no #0f0a1e)', () => {
+    const { container } = renderPage()
+    const darkBgElements = container.querySelectorAll('[style*="0f0a1e"]')
+    expect(darkBgElements.length).toBe(0)
   })
 })

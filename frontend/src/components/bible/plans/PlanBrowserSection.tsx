@@ -12,7 +12,7 @@ export function PlanBrowserSection({ title, children, className }: PlanBrowserSe
   return (
     <section className={cn(className)}>
       <h2 className="text-xl font-semibold text-white">{title}</h2>
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {children}
       </div>
     </section>

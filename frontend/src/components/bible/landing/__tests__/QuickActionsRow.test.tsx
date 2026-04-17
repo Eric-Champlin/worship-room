@@ -1,8 +1,24 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QuickActionsRow } from '../QuickActionsRow'
 import { BibleDrawerProvider } from '@/components/bible/BibleDrawerProvider'
+
+const mockUseAuth = vi.fn(() => ({
+  isAuthenticated: false,
+  user: null,
+  login: vi.fn(),
+  logout: vi.fn(),
+}))
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => mockUseAuth(),
+}))
+
+const mockOpenAuthModal = vi.fn()
+vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
+  useAuthModal: () => ({ openAuthModal: mockOpenAuthModal }),
+}))
 
 function renderWithProviders() {
   return render(
@@ -10,11 +26,21 @@ function renderWithProviders() {
       <BibleDrawerProvider>
         <QuickActionsRow />
       </BibleDrawerProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 
 describe('QuickActionsRow', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+  })
+
   it('renders three quick action cards', () => {
     renderWithProviders()
     expect(screen.getByText('Browse Books')).toBeInTheDocument()
@@ -53,5 +79,43 @@ describe('QuickActionsRow', () => {
     const { container } = renderWithProviders()
     const cards = container.querySelectorAll('.min-h-\\[44px\\]')
     expect(cards.length).toBe(3)
+  })
+
+  it('logged-out user clicking My Bible opens auth modal with expected message', async () => {
+    const user = userEvent.setup()
+    renderWithProviders()
+    const myBibleLink = screen.getByText('My Bible').closest('a')!
+    await user.click(myBibleLink)
+    expect(mockOpenAuthModal).toHaveBeenCalledWith(
+      'Sign in to access your highlights, notes, and reading history.',
+    )
+  })
+
+  it('logged-in user clicking My Bible does NOT open auth modal', async () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: { name: 'Test', id: 't' },
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+    const user = userEvent.setup()
+    renderWithProviders()
+    const myBibleLink = screen.getByText('My Bible').closest('a')!
+    await user.click(myBibleLink)
+    expect(mockOpenAuthModal).not.toHaveBeenCalled()
+  })
+
+  it('Reading Plans click never opens auth modal regardless of auth state', async () => {
+    const user = userEvent.setup()
+    renderWithProviders()
+    const plansLink = screen.getByText('Reading Plans').closest('a')!
+    await user.click(plansLink)
+    expect(mockOpenAuthModal).not.toHaveBeenCalled()
+  })
+
+  it('My Bible Link keeps its href for logged-out users (right-click/new-tab works)', () => {
+    renderWithProviders()
+    const myBibleLink = screen.getByText('My Bible').closest('a')
+    expect(myBibleLink?.getAttribute('href')).toBe('/bible/my')
   })
 })

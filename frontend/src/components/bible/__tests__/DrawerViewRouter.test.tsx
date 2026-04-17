@@ -1,14 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { BibleDrawerProvider, useBibleDrawer } from '../BibleDrawerProvider'
 import { DrawerViewRouter } from '../DrawerViewRouter'
-
-// Mock useReducedMotion
-const mockReducedMotion = vi.fn(() => false)
-vi.mock('@/hooks/useReducedMotion', () => ({
-  useReducedMotion: () => mockReducedMotion(),
-}))
 
 // Helper to drive the drawer from tests
 function DrawerController({
@@ -39,12 +33,6 @@ function renderRouter() {
 
 beforeEach(() => {
   localStorage.clear()
-  mockReducedMotion.mockReturnValue(false)
-  vi.useFakeTimers()
-})
-
-afterEach(() => {
-  vi.useRealTimers()
 })
 
 describe('DrawerViewRouter', () => {
@@ -57,52 +45,34 @@ describe('DrawerViewRouter', () => {
   it('renders ChapterPickerView when currentView is chapters', () => {
     const { getCtx } = renderRouter()
     act(() => getCtx().open({ type: 'chapters', bookSlug: 'obadiah' }))
-    act(() => vi.advanceTimersByTime(250))
-    // ChapterPickerView shows the book name in a heading
+    // Instant swap — no transition to wait on
     expect(screen.getByRole('heading', { name: 'Obadiah' })).toBeInTheDocument()
   })
 
-  it('both views mounted during transition', () => {
+  it('pushView swaps instantly — only current view rendered', () => {
     const { getCtx } = renderRouter()
     act(() => getCtx().open())
 
     // Start in books view
     expect(screen.getByPlaceholderText('Find a book')).toBeInTheDocument()
 
-    // Push chapters view (use obadiah to avoid name collision with books list)
+    // Push chapters view
     act(() => getCtx().pushView({ type: 'chapters', bookSlug: 'obadiah' }))
 
-    // During the 220ms transition, both views should be in the DOM
-    expect(screen.getByPlaceholderText('Find a book')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Obadiah' })).toBeInTheDocument()
-  })
-
-  it('outgoing view unmounts after animation', () => {
-    const { getCtx } = renderRouter()
-    act(() => getCtx().open())
-    act(() => getCtx().pushView({ type: 'chapters', bookSlug: 'obadiah' }))
-
-    // Both mounted during transition
-    expect(screen.getByPlaceholderText('Find a book')).toBeInTheDocument()
-
-    // Advance past transition
-    act(() => vi.advanceTimersByTime(250))
-
-    // Outgoing (books) search should no longer be in DOM
+    // No dual-mount: outgoing (books) is gone, only chapters visible
     expect(screen.queryByPlaceholderText('Find a book')).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Obadiah' })).toBeInTheDocument()
   })
 
-  it('reduced motion skips animation — instant swap', () => {
-    mockReducedMotion.mockReturnValue(true)
-    const { getCtx } = renderRouter()
+  it('no slide animation classes applied after view change', () => {
+    const { getCtx, container } = renderRouter()
     act(() => getCtx().open())
-
     act(() => getCtx().pushView({ type: 'chapters', bookSlug: 'obadiah' }))
 
-    // With reduced motion, there should be no dual-mount — only the new view
-    expect(screen.queryByPlaceholderText('Find a book')).not.toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Obadiah' })).toBeInTheDocument()
+    // None of the removed slide animation classes should appear anywhere
+    expect(container.querySelector('.animate-view-slide-in')).toBeNull()
+    expect(container.querySelector('.animate-view-slide-out')).toBeNull()
+    expect(container.querySelector('.animate-view-slide-back-in')).toBeNull()
   })
 
   it('VIEW_COMPONENTS maps books and chapters types', () => {
@@ -113,7 +83,6 @@ describe('DrawerViewRouter', () => {
 
     // Chapters view
     act(() => getCtx().open({ type: 'chapters', bookSlug: 'obadiah' }))
-    act(() => vi.advanceTimersByTime(250))
     expect(screen.getByRole('heading', { name: 'Obadiah' })).toBeInTheDocument()
   })
 })

@@ -134,7 +134,7 @@ export function GrowthProfile() {
         </Link>
         <h1
           id="profile-heading"
-          className="mb-2 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+          className="mb-2 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
           {profileData.displayName}&apos;s <span className="font-script">Garden</span>

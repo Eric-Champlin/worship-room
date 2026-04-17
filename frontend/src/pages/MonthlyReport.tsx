@@ -104,7 +104,7 @@ export function MonthlyReport() {
       >
         <h1
           id="monthly-report-heading"
-          className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+          className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
           Monthly <span className="font-script">Report</span>

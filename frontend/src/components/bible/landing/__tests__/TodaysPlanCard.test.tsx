@@ -72,16 +72,14 @@ describe('TodaysPlanCard', () => {
     expect(chip.closest('a')?.getAttribute('href')).toBe('/bible/plans')
   })
 
-  it('renders first-run state when no plans', () => {
-    renderWithRouter(<TodaysPlanCard plans={[]} />)
-    expect(screen.getByText('Try a reading plan')).toBeInTheDocument()
-    expect(screen.queryByText('Choose from 10 guided plans')).not.toBeInTheDocument()
+  it('returns null when plans empty', () => {
+    const { container } = renderWithRouter(<TodaysPlanCard plans={[]} />)
+    expect(container.innerHTML).toBe('')
   })
 
-  it('first-run links to /bible/plans', () => {
-    renderWithRouter(<TodaysPlanCard plans={[]} />)
-    const link = screen.getByRole('link')
-    expect(link.getAttribute('href')).toBe('/bible/plans')
+  it('active plan card still renders when plans exist', () => {
+    renderWithRouter(<TodaysPlanCard plans={[PLAN_A]} />)
+    expect(screen.getByText('Gospel of John')).toBeInTheDocument()
   })
 
   it('links have focus-visible ring', () => {

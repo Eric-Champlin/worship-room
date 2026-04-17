@@ -5,8 +5,8 @@ import userEvent from '@testing-library/user-event'
 import { ChunkErrorBoundary } from '../ChunkErrorBoundary'
 
 vi.mock('@/components/Layout', () => ({
-  Layout: ({ children, dark }: { children: React.ReactNode; dark?: boolean }) => (
-    <div data-testid="layout" data-dark={dark}>{children}</div>
+  Layout: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="layout">{children}</div>
   ),
 }))
 
@@ -121,7 +121,7 @@ describe('ChunkErrorBoundary', () => {
     expect(reloadMock).toHaveBeenCalledOnce()
   })
 
-  it('error fallback uses Layout with dark prop', () => {
+  it('error fallback is wrapped in Layout', () => {
     const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
 
     render(
@@ -130,8 +130,7 @@ describe('ChunkErrorBoundary', () => {
       </ChunkErrorBoundary>
     )
 
-    const layout = screen.getByTestId('layout')
-    expect(layout).toHaveAttribute('data-dark', 'true')
+    expect(screen.getByTestId('layout')).toBeInTheDocument()
   })
 
   it('error fallback shows cross branding icon', () => {

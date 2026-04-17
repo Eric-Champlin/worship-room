@@ -48,4 +48,37 @@ describe('BibleHero', () => {
     const { container } = render(<BibleHero />)
     expect(container.querySelector('.font-script')).toBeNull()
   })
+
+  it('uses BB-53 balanced clearance padding pt-28 pb-12 sm:pt-32 sm:pb-14 lg:pt-32', () => {
+    render(<BibleHero />)
+    const heading = screen.getByRole('heading', { level: 1 })
+    const section = heading.closest('section')
+    expect(section?.className).toContain('pt-28')
+    expect(section?.className).toContain('pb-12')
+    expect(section?.className).toContain('sm:pt-32')
+    expect(section?.className).toContain('sm:pb-14')
+    expect(section?.className).toContain('lg:pt-32')
+    // Pre-BB-53 padding removed (imbalanced 2.47:1 ratio)
+    expect(section?.className).not.toContain('pt-36')
+    expect(section?.className).not.toContain('sm:pt-40')
+    expect(section?.className).not.toContain('lg:pt-44')
+  })
+
+  it('has no inline background style (no ATMOSPHERIC_HERO_BG)', () => {
+    render(<BibleHero />)
+    const heading = screen.getByRole('heading', { level: 1 })
+    const section = heading.closest('section')
+    const styleAttr = section?.getAttribute('style') ?? ''
+    expect(styleAttr.toLowerCase()).not.toContain('background')
+  })
+
+  it('preserves 2-line heading (Your + Study Bible)', () => {
+    render(<BibleHero />)
+    const topLine = screen.getByText('Your')
+    const bottomLine = screen.getByText('Study Bible')
+    expect(topLine.tagName).toBe('SPAN')
+    expect(bottomLine.tagName).toBe('SPAN')
+    expect(topLine.className).toContain('block')
+    expect(bottomLine.className).toContain('block')
+  })
 })

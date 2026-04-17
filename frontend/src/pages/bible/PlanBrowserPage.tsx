@@ -1,40 +1,33 @@
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
+import { HorizonGlow } from '@/components/daily/HorizonGlow'
 import { PlanBrowseCard } from '@/components/bible/plans/PlanBrowseCard'
 import { PlanBrowserEmptyState } from '@/components/bible/plans/PlanBrowserEmptyState'
 import { PlanBrowserSection } from '@/components/bible/plans/PlanBrowserSection'
 import { PlanCompletedCard } from '@/components/bible/plans/PlanCompletedCard'
-import { PlanFilterBar } from '@/components/bible/plans/PlanFilterBar'
 import { PlanInProgressCard } from '@/components/bible/plans/PlanInProgressCard'
-import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
 import { BIBLE_PLANS_BROWSER_METADATA } from '@/lib/seo/routeMetadata'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { usePlanBrowser } from '@/hooks/bible/usePlanBrowser'
 
 export function PlanBrowserPage() {
-  const {
-    sections,
-    filteredBrowse,
-    theme,
-    duration,
-    setTheme,
-    setDuration,
-    clearFilters,
-    isEmpty,
-    isFilteredEmpty,
-    isAllStarted,
-  } = usePlanBrowser()
+  const { sections, filteredBrowse, clearFilters, isEmpty, isFilteredEmpty, isAllStarted } =
+    usePlanBrowser()
 
   return (
-    <Layout>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
+      <HorizonGlow />
+      <Navbar transparent />
       <SEO {...BIBLE_PLANS_BROWSER_METADATA} />
-      <div className="min-h-screen bg-dashboard-dark">
-        {/* Hero */}
-        <section
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
-          style={ATMOSPHERIC_HERO_BG}
-        >
-          <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl" style={GRADIENT_TEXT_STYLE}>
+
+      <main id="main-content" className="relative z-10 flex-1">
+        {/* Hero — matches BibleHero spacing (BB-53 parity) */}
+        <section className="pt-30 sm:pt-34 relative flex w-full flex-col items-center px-4 pb-10 text-center antialiased sm:pb-12 lg:pt-36">
+          <h1
+            className="pb-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+            style={GRADIENT_TEXT_STYLE}
+          >
             Reading Plans
           </h1>
           <p className="mt-3 text-base text-white/60 sm:text-lg">
@@ -42,15 +35,10 @@ export function PlanBrowserPage() {
           </p>
         </section>
 
+        <div className="mx-auto max-w-6xl border-t border-white/[0.08]" />
+
         {/* Content */}
         <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
-          <PlanFilterBar
-            theme={theme}
-            duration={duration}
-            onThemeChange={setTheme}
-            onDurationChange={setDuration}
-          />
-
           {/* Empty state: no manifest */}
           {isEmpty && <PlanBrowserEmptyState variant="no-manifest" />}
 
@@ -85,7 +73,9 @@ export function PlanBrowserPage() {
             </PlanBrowserSection>
           )}
         </div>
-      </div>
-    </Layout>
+      </main>
+
+      <SiteFooter />
+    </div>
   )
 }

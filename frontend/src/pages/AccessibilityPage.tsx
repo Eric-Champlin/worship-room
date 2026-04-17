@@ -3,7 +3,7 @@ import { SEO } from '@/components/SEO'
 
 export function AccessibilityPage() {
   return (
-    <Layout dark>
+    <Layout>
       <SEO
         title="Accessibility | Worship Room"
         description="Worship Room's commitment to accessibility. We aim to meet WCAG 2.2 Level AA across the entire application."

@@ -96,6 +96,13 @@ export function BiblePlanDetail() {
     restartPlan(plan!.slug, plan!.duration, plan!.title, todayReading)
   }
 
+  function handleDayRowClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (!isAuthenticated) {
+      e.preventDefault()
+      authModal?.openAuthModal('Sign in to start this reading plan')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-dashboard-dark">
       {/* BB-40 Step 8: dynamic metadata from builder. Includes BreadcrumbList JSON-LD
@@ -123,7 +130,7 @@ export function BiblePlanDetail() {
             </span>
           )}
 
-          <h1 className="mt-4 text-3xl font-bold sm:text-4xl lg:text-5xl" style={GRADIENT_TEXT_STYLE}>
+          <h1 className="mt-4 text-3xl font-bold sm:text-4xl lg:text-5xl pb-2" style={GRADIENT_TEXT_STYLE}>
             {plan.title}
           </h1>
 
@@ -222,6 +229,7 @@ export function BiblePlanDetail() {
             <Link
               key={day.day}
               to={`/bible/plans/${plan.slug}/day/${day.day}`}
+              onClick={handleDayRowClick}
               className={cn(
                 'flex min-h-[44px] items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-white/[0.04]',
                 isCurrentDay && 'bg-white/[0.04]',

@@ -79,7 +79,7 @@ export function RegisterPage() {
         >
           <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
             <h1
-              className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+              className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
               id="register-hero-heading"
               style={GRADIENT_TEXT_STYLE}
             >

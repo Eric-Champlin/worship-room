@@ -134,7 +134,7 @@ export function BiblePlanDay() {
 
           {/* Day title */}
           <h1
-            className="mt-1 text-2xl font-bold sm:text-3xl"
+            className="mt-1 text-2xl font-bold sm:text-3xl pb-2"
             style={GRADIENT_TEXT_STYLE}
           >
             {day.title}

@@ -133,7 +133,7 @@ function ComingSoon({ title }: { title: string }) {
 
 function NotFound() {
   return (
-    <Layout dark>
+    <Layout>
       <SEO {...NOT_FOUND_METADATA} />
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="max-w-md text-center">

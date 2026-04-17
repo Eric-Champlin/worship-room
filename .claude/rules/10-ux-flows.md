@@ -13,10 +13,10 @@ Detailed user experience flows for every major feature. Read this file before im
 ### Desktop Navbar (Logged Out)
  
 ```
-[Worship Room logo]   Daily Hub   Study Bible   Grow   Prayer Wall   Music   [Local Support ▾]   [Log In]  [Get Started]
+[Worship Room logo]   Daily Hub   Study Bible   Grow   Music   Prayer Wall   [Local Support ▾]   [Log In]  [Get Started]
 ```
  
-**Top-level links:** Daily Hub, Study Bible, Grow, Prayer Wall, and Music — all always visible, no dropdowns. Study Bible links to `/bible` (BibleBrowser). Grow links to `/grow` (Reading Plans + Challenges).
+**Top-level links:** Daily Hub, Study Bible, Grow, Music, and Prayer Wall — all always visible, no dropdowns. Study Bible links to `/bible` (BibleBrowser). Grow links to `/grow` (Reading Plans + Challenges).
  
 **"Local Support" dropdown** (clickable label goes to `/local-support/churches`; dropdown expands on hover/click):
  
@@ -29,7 +29,7 @@ Detailed user experience flows for every major feature. Read this file before im
 ### Desktop Navbar (Logged In)
  
 ```
-[Worship Room logo]   Daily Hub   Study Bible   Grow   Prayer Wall   Music   [Local Support ▾]   [🔔]  [Avatar ▾]
+[Worship Room logo]   Daily Hub   Study Bible   Grow   Music   Prayer Wall   [Local Support ▾]   [🔔]  [Avatar ▾]
 ```
  
 **Notification bell** (🔔): Lucide `Bell` icon. Badge count for unread notifications (red circle, white text, top-right). Only shows when count > 0. Click opens dropdown panel (see Notification Flow below).
@@ -58,9 +58,9 @@ Study Bible
 ──────────────
 Grow
 ──────────────
-Prayer Wall
-──────────────
 Music
+──────────────
+Prayer Wall
 ──────────────
 LOCAL SUPPORT
   Churches
@@ -82,9 +82,9 @@ Study Bible
 ──────────────
 Grow
 ──────────────
-Prayer Wall
-──────────────
 Music
+──────────────
+Prayer Wall
 ──────────────
 LOCAL SUPPORT
   Churches

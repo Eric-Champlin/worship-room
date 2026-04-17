@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BookOpen, Minimize2, Type, Volume2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, ChevronDown, Eye, EyeOff, Type, Volume2 } from 'lucide-react'
 import { useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { cn } from '@/lib/utils'
 import { AudioPlayButton } from '@/components/audio/AudioPlayButton'
@@ -19,8 +19,8 @@ interface ReaderChromeProps {
   chromeOpacity: number
   chromePointerEvents: 'auto' | 'none'
   chromeTransitionMs: number
-  isManuallyArmed: boolean
-  onFocusToggle: () => void
+  focusEnabled: boolean
+  onFocusEnabledToggle: () => void
   // BB-20 ambient audio
   ambientAudioVisible: boolean
   isAudioPlaying: boolean
@@ -40,8 +40,8 @@ export function ReaderChrome({
   chromeOpacity,
   chromePointerEvents,
   chromeTransitionMs,
-  isManuallyArmed,
-  onFocusToggle,
+  focusEnabled,
+  onFocusEnabledToggle,
   ambientAudioVisible,
   isAudioPlaying,
   onAudioToggle,
@@ -77,26 +77,25 @@ export function ReaderChrome({
       {/* Chrome background */}
       <div className="bg-hero-bg/80 backdrop-blur-md">
         <div className="flex h-14 items-center justify-between px-4">
-          {/* Left: Back button */}
-          <Link to="/bible" className={ICON_BTN} aria-label="Back to Bible">
+          {/* Left: Back button only */}
+          <Link to="/bible" className={ICON_BTN} aria-label="Back to Study Bible">
             <ArrowLeft className="h-5 w-5" />
           </Link>
 
-          {/* Center: Book + Chapter label */}
-          <button
-            ref={centerRef}
-            type="button"
-            className="flex min-h-[44px] items-center text-base font-medium text-white/90 transition-colors hover:text-white"
-            aria-label="Open chapter picker"
-            onClick={handleCenterClick}
-          >
-            <span className="text-sm sm:text-base">
-              {bookName} {chapter}
-            </span>
-          </button>
-
-          {/* Right: Aa + Focus + Books icons */}
+          {/* Right: Chapter selector + Aa + Audio + Focus + Books + Audio Play */}
           <div className="flex items-center gap-1">
+            <button
+              ref={centerRef}
+              type="button"
+              className="flex min-h-[44px] items-center gap-1 rounded-full px-3 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white sm:text-base"
+              aria-label="Open chapter picker"
+              onClick={handleCenterClick}
+            >
+              <span>
+                {bookName} {chapter}
+              </span>
+              <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
             <button
               ref={aaRef as React.RefObject<HTMLButtonElement>}
               type="button"
@@ -141,16 +140,23 @@ export function ReaderChrome({
             )}
             <button
               type="button"
-              className={cn(ICON_BTN, 'relative')}
-              aria-label="Toggle focus mode"
-              onClick={onFocusToggle}
+              className={cn(
+                ICON_BTN,
+                'relative transition-colors duration-fast ease-sharp',
+                focusEnabled && 'bg-white/10 text-white',
+              )}
+              aria-label={
+                focusEnabled
+                  ? 'Disable focus mode (keep toolbar visible)'
+                  : 'Enable focus mode (auto-hide toolbar)'
+              }
+              aria-pressed={focusEnabled}
+              onClick={onFocusEnabledToggle}
             >
-              <Minimize2 className="h-5 w-5" />
-              {isManuallyArmed && (
-                <span
-                  className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary-lt"
-                  aria-hidden="true"
-                />
+              {focusEnabled ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
               )}
             </button>
             <button

@@ -59,7 +59,7 @@ export function Settings() {
         </Link>
         <h1
           id="settings-heading"
-          className="px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+          className="px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
           <span className="font-script">Settings</span>

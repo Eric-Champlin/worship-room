@@ -5,7 +5,7 @@ import { Layout } from '@/components/Layout'
 
 function RouteErrorFallback() {
   return (
-    <Layout dark>
+    <Layout>
       <div className="flex min-h-[60vh] items-center justify-center px-6">
         <div className="max-w-md text-center">
           <h1 className="mb-3 text-2xl font-bold text-white">

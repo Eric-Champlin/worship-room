@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
+import { HorizonGlow } from '@/components/daily/HorizonGlow'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BIBLE_LANDING_METADATA, buildBibleSearchMetadata } from '@/lib/seo/routeMetadata'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
-import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
 import { StreakChip } from '@/components/bible/landing/StreakChip'
 import { BibleHeroSlot } from '@/components/bible/landing/BibleHeroSlot'
 import { TodaysPlanCard } from '@/components/bible/landing/TodaysPlanCard'
@@ -20,6 +21,7 @@ import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
 import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
 import { StreakResetWelcome } from '@/components/bible/streak/StreakResetWelcome'
 import { useStreakStore } from '@/hooks/bible/useStreakStore'
+import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
 import { getTodayLocal } from '@/lib/bible/dateUtils'
 import { getActivePlans } from '@/lib/bible/landingState'
@@ -80,6 +82,7 @@ function BibleLandingInner() {
   const { showToast } = useToast()
   const handleMilestoneDismissed = useCallback(() => setPendingMilestone(null), [])
   const { isOpen, close, toggle } = useBibleDrawer()
+  const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     setPlans(getActivePlans())
@@ -135,19 +138,21 @@ function BibleLandingInner() {
     : BIBLE_LANDING_METADATA
 
   return (
-    <Layout>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
+      <HorizonGlow />
+      <Navbar transparent />
       <SEO {...seoMetadata} jsonLd={bibleBreadcrumbs} />
-      <div className="relative min-h-screen bg-dashboard-dark">
-        <BibleLandingOrbs />
+
+      <main id="main-content" className="relative z-10 flex-1">
         <BibleHero />
 
         {/* Section divider: hero → content */}
         <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
 
-        <div className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 pb-16">
+        <div className="mx-auto max-w-6xl space-y-8 px-4 pb-16 pt-8">
           {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap.
               Visible in both landing and search mode so streak context never disappears. */}
-          {streak.currentStreak > 0 && (
+          {isAuthenticated && streak.currentStreak > 0 && (
             <div className="flex justify-center">
               <StreakChip
                 streak={streak}
@@ -179,8 +184,13 @@ function BibleLandingInner() {
             </div>
           ) : (
             <>
-              {/* Hero slot: resume card / VOTD / lapsed link based on reader state */}
-              <BibleHeroSlot />
+              {/* Hero slot: resume card / VOTD / lapsed link based on reader state.
+                  BB-53 Req 2: max-w-4xl wrapper ensures all four branches render at
+                  matching width — otherwise VOTD (672px) and Resume Reading (1120px)
+                  mismatch at desktop. */}
+              <div className="mx-auto w-full max-w-4xl">
+                <BibleHeroSlot />
+              </div>
 
               {/* Today's Plan — standalone below hero slot */}
               <TodaysPlanCard plans={plans} />
@@ -196,7 +206,9 @@ function BibleLandingInner() {
             </>
           )}
         </div>
-      </div>
+      </main>
+
+      <SiteFooter />
 
       {/* Books Drawer */}
       <BibleDrawer isOpen={isOpen} onClose={close} ariaLabel="Books of the Bible">
@@ -224,7 +236,7 @@ function BibleLandingInner() {
           }}
         />
       )}
-    </Layout>
+    </div>
   )
 }
 
