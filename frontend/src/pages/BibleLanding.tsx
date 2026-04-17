@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
+import { HorizonGlow } from '@/components/daily/HorizonGlow'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BIBLE_LANDING_METADATA, buildBibleSearchMetadata } from '@/lib/seo/routeMetadata'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
-import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
 import { StreakChip } from '@/components/bible/landing/StreakChip'
 import { BibleHeroSlot } from '@/components/bible/landing/BibleHeroSlot'
 import { TodaysPlanCard } from '@/components/bible/landing/TodaysPlanCard'
@@ -137,16 +138,18 @@ function BibleLandingInner() {
     : BIBLE_LANDING_METADATA
 
   return (
-    <Layout>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
+      <HorizonGlow />
+      <Navbar transparent />
       <SEO {...seoMetadata} jsonLd={bibleBreadcrumbs} />
-      <div className="relative min-h-screen bg-hero-bg">
-        <BibleLandingOrbs />
+
+      <main id="main-content" className="relative z-10 flex-1">
         <BibleHero />
 
         {/* Section divider: hero → content */}
         <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
 
-        <div className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 pb-16">
+        <div className="mx-auto max-w-6xl space-y-8 px-4 pb-16 pt-8">
           {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap.
               Visible in both landing and search mode so streak context never disappears. */}
           {isAuthenticated && streak.currentStreak > 0 && (
@@ -198,7 +201,9 @@ function BibleLandingInner() {
             </>
           )}
         </div>
-      </div>
+      </main>
+
+      <SiteFooter />
 
       {/* Books Drawer */}
       <BibleDrawer isOpen={isOpen} onClose={close} ariaLabel="Books of the Bible">
@@ -226,7 +231,7 @@ function BibleLandingInner() {
           }}
         />
       )}
-    </Layout>
+    </div>
   )
 }
 

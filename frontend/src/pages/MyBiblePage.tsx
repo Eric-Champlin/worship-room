@@ -4,15 +4,15 @@ import { useMyBibleView, type MyBibleViewId } from '@/hooks/url/useMyBibleView'
 import { BookOpen, Paintbrush, PenLine, Bookmark as BookmarkIcon, Filter, Flame } from 'lucide-react'
 import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
 import { useStreakStore } from '@/hooks/bible/useStreakStore'
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
+import { HorizonGlow } from '@/components/daily/HorizonGlow'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { MY_BIBLE_METADATA } from '@/lib/seo/routeMetadata'
-import { BibleLandingOrbs } from '@/components/bible/landing/BibleLandingOrbs'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
 import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
-import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { ActivityCard } from '@/components/bible/my-bible/ActivityCard'
 import { ActivityActionMenu } from '@/components/bible/my-bible/ActivityActionMenu'
 import { ActivityFilterBar } from '@/components/bible/my-bible/ActivityFilterBar'
@@ -67,13 +67,13 @@ function MyBiblePageInner() {
 
   if (!isAuthenticated) {
     return (
-      <Layout>
+      <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
+        <HorizonGlow />
+        <Navbar transparent />
         <SEO {...MY_BIBLE_METADATA} jsonLd={myBibleBreadcrumbs} />
-        <div className="relative min-h-screen bg-hero-bg">
-          <BibleLandingOrbs />
-          <section
-            className="relative z-10 mx-auto flex min-h-[calc(100vh-20rem)] max-w-[480px] items-center justify-center px-4"
-          >
+
+        <main id="main-content" className="relative z-10 flex-1">
+          <section className="mx-auto flex min-h-[calc(100vh-20rem)] max-w-[480px] items-center justify-center px-4 pt-36 sm:pt-40 lg:pt-44">
             <FrostedCard as="article" className="w-full text-center">
               <h1
                 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
@@ -93,8 +93,10 @@ function MyBiblePageInner() {
               </button>
             </FrostedCard>
           </section>
-        </div>
-      </Layout>
+        </main>
+
+        <SiteFooter />
+      </div>
     )
   }
 
@@ -207,13 +209,14 @@ function MyBibleAuthenticatedInner() {
   )
 
   return (
-    <Layout>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
+      <HorizonGlow />
+      <Navbar transparent />
       <SEO {...MY_BIBLE_METADATA} jsonLd={myBibleBreadcrumbs} />
-      <div className="relative min-h-screen max-w-[100vw] overflow-hidden bg-hero-bg">
-        <BibleLandingOrbs />
 
-        {/* Hero section */}
-        <section className="relative z-10 w-full px-4 pb-8 pt-24 sm:pt-28" style={ATMOSPHERIC_HERO_BG}>
+      <main id="main-content" className="relative z-10 flex-1">
+        {/* Hero section — Daily Hub pt-36 pattern, no ATMOSPHERIC_HERO_BG */}
+        <section className="relative z-10 w-full px-4 pt-36 pb-6 sm:pt-40 sm:pb-8 lg:pt-44">
           <div className="mx-auto max-w-2xl text-center">
             <h1
               className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
@@ -380,7 +383,9 @@ function MyBibleAuthenticatedInner() {
             .
           </p>
         </div>
-      </div>
+      </main>
+
+      <SiteFooter />
 
       {/* Action menu */}
       {actionMenu && (
@@ -415,7 +420,7 @@ function MyBibleAuthenticatedInner() {
           atRisk={atRisk}
         />
       )}
-    </Layout>
+    </div>
   )
 }
 

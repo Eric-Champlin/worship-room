@@ -70,6 +70,20 @@ function BibleReaderInner() {
   const reducedMotion = useReducedMotion()
   const focusMode = useFocusMode()
 
+  // BB-52: Focus-mode toggle hint (2-second auto-dismiss, ON state only)
+  const [showFocusHint, setShowFocusHint] = useState(false)
+  useEffect(() => {
+    if (!showFocusHint) return
+    const t = setTimeout(() => setShowFocusHint(false), 2000)
+    return () => clearTimeout(t)
+  }, [showFocusHint])
+
+  const handleFocusEnabledToggle = useCallback(() => {
+    const next = !focusMode.settings.enabled
+    focusMode.updateFocusSetting('enabled', next)
+    if (next) setShowFocusHint(true)
+  }, [focusMode])
+
   // BB-20 ambient audio
   const audioState = useAudioState()
   const readingContextControl = useReadingContext()
@@ -735,8 +749,8 @@ function BibleReaderInner() {
         chromeOpacity={focusMode.chromeOpacity}
         chromePointerEvents={focusMode.chromePointerEvents}
         chromeTransitionMs={focusMode.chromeTransitionMs}
-        isManuallyArmed={focusMode.isManuallyArmed}
-        onFocusToggle={focusMode.triggerFocused}
+        focusEnabled={focusMode.settings.enabled}
+        onFocusEnabledToggle={handleFocusEnabledToggle}
         ambientAudioVisible={settings.ambientAudioVisible}
         isAudioPlaying={isAudioPlaying}
         onAudioToggle={handleAudioToggle}
@@ -744,6 +758,16 @@ function BibleReaderInner() {
         isAudioPickerOpen={pickerOpen}
         reducedMotion={reducedMotion}
       />
+
+      {showFocusHint && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="pointer-events-none fixed left-1/2 top-20 z-30 -translate-x-1/2 rounded-full border border-white/20 bg-hero-bg/90 px-4 py-2 text-sm text-white/90 shadow-lg backdrop-blur-sm"
+        >
+          Toolbar will auto-hide after inactivity
+        </div>
+      )}
 
       <TypographySheet
         isOpen={typographyOpen}
@@ -839,7 +863,9 @@ function BibleReaderInner() {
             </div>
           ) : (
             <>
-              <h1 className="sr-only">{book.name} {chapterNumber}</h1>
+              <h1 className="mb-6 text-2xl font-semibold text-white/90">
+                {book.name} {chapterNumber}
+              </h1>
               <ReaderBody
                 verses={verses}
                 bookSlug={bookSlug!}

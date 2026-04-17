@@ -356,6 +356,24 @@ describe('MyBiblePage', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('My Bible')
   })
 
+  it('hero heading padding uses Daily Hub clearance pt-36 sm:pt-40 lg:pt-44', () => {
+    mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1 })
+    const section = heading.closest('section')
+    expect(section?.className).toContain('pt-36')
+    expect(section?.className).toContain('sm:pt-40')
+    expect(section?.className).toContain('lg:pt-44')
+  })
+
+  it('no ATMOSPHERIC_HERO_BG inline background color (#0f0a1e)', () => {
+    mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
+    const { container } = renderPage()
+    // Assert no element has the dashboard-dark inline background color
+    const darkBgElements = container.querySelectorAll('[style*="0f0a1e"]')
+    expect(darkBgElements.length).toBe(0)
+  })
+
   describe('logged-out conversion card (BB-51)', () => {
     beforeEach(() => {
       mockUseAuth.mockReturnValue({

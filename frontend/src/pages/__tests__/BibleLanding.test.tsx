@@ -268,4 +268,48 @@ describe('BibleLanding', () => {
     // BB-50: empty plan state now returns null instead of showing a CTA
     expect(screen.queryByText('Try a reading plan')).not.toBeInTheDocument()
   })
+
+  it('renders with transparent Navbar (Daily Hub root pattern)', () => {
+    const { container } = renderLanding()
+    // Navbar in transparent variant applies `bg-transparent` to the <nav> element
+    const navEl = container.querySelector('nav[aria-label="Main navigation"]')
+    expect(navEl?.className).toContain('bg-transparent')
+  })
+
+  it('does NOT wrap in Layout max-w-7xl main', () => {
+    const { container } = renderLanding()
+    const maxW7xlElements = container.querySelectorAll('[class*="max-w-7xl"]')
+    expect(maxW7xlElements.length).toBe(0)
+  })
+
+  it('renders all core content sections (streak, hero slot, quick actions, search)', () => {
+    localStorage.setItem('wr_auth_simulated', 'true')
+    localStorage.setItem('wr_user_name', 'Test User')
+    localStorage.setItem(
+      'bible:streak',
+      JSON.stringify({
+        currentStreak: 3,
+        longestStreak: 3,
+        lastReadDate: '2026-04-07',
+        streakStartDate: '2026-04-05',
+        graceDaysAvailable: 1,
+        graceDaysUsedThisWeek: 0,
+        lastGraceUsedDate: null,
+        weekResetDate: '2026-04-06',
+        milestones: [],
+        totalDaysRead: 3,
+      }),
+    )
+    renderLanding()
+    // Streak chip visible
+    expect(screen.getByText('3 day streak')).toBeInTheDocument()
+    // Hero slot VOTD visible
+    expect(screen.getByText('Verse of the Day')).toBeInTheDocument()
+    // Quick actions row rendering all 3 cards
+    expect(screen.getByText('Browse Books')).toBeInTheDocument()
+    expect(screen.getByText('My Bible')).toBeInTheDocument()
+    expect(screen.getByText('Reading Plans')).toBeInTheDocument()
+    // Search entry
+    expect(screen.getByRole('searchbox')).toBeInTheDocument()
+  })
 })

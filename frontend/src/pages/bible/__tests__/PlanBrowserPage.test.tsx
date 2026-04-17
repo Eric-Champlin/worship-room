@@ -7,8 +7,14 @@ import type { PlanMetadata, PlanProgress } from '@/types/bible-plans'
 import type { UsePlanBrowserResult } from '@/hooks/bible/usePlanBrowser'
 
 vi.mock('@/hooks/bible/usePlanBrowser')
-vi.mock('@/components/Layout', () => ({
-  Layout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+vi.mock('@/components/Navbar', () => ({
+  Navbar: () => null,
+}))
+vi.mock('@/components/SiteFooter', () => ({
+  SiteFooter: () => null,
+}))
+vi.mock('@/components/daily/HorizonGlow', () => ({
+  HorizonGlow: () => null,
 }))
 vi.mock('@/components/SEO', () => ({
   SEO: ({ title }: { title: string }) => { document.title = title; return null },
@@ -196,5 +202,20 @@ describe('PlanBrowserPage', () => {
     // Only the comfort plan should be rendered (not prayer)
     expect(screen.getByText('Finding Comfort')).toBeInTheDocument()
     expect(screen.queryByText('Prayer Journey')).not.toBeInTheDocument()
+  })
+
+  it('hero heading uses Daily Hub pt-36/sm:pt-40/lg:pt-44 padding', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1, name: /Reading Plans/i })
+    const section = heading.closest('section')
+    expect(section?.className).toContain('pt-36')
+    expect(section?.className).toContain('sm:pt-40')
+    expect(section?.className).toContain('lg:pt-44')
+  })
+
+  it('no ATMOSPHERIC_HERO_BG inline background (no #0f0a1e)', () => {
+    const { container } = renderPage()
+    const darkBgElements = container.querySelectorAll('[style*="0f0a1e"]')
+    expect(darkBgElements.length).toBe(0)
   })
 })

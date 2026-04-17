@@ -1,10 +1,11 @@
-import { Layout } from '@/components/Layout'
+import { Navbar } from '@/components/Navbar'
+import { SiteFooter } from '@/components/SiteFooter'
+import { HorizonGlow } from '@/components/daily/HorizonGlow'
 import { PlanBrowseCard } from '@/components/bible/plans/PlanBrowseCard'
 import { PlanBrowserEmptyState } from '@/components/bible/plans/PlanBrowserEmptyState'
 import { PlanBrowserSection } from '@/components/bible/plans/PlanBrowserSection'
 import { PlanCompletedCard } from '@/components/bible/plans/PlanCompletedCard'
 import { PlanInProgressCard } from '@/components/bible/plans/PlanInProgressCard'
-import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { SEO } from '@/components/SEO'
 import { BIBLE_PLANS_BROWSER_METADATA } from '@/lib/seo/routeMetadata'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
@@ -21,14 +22,14 @@ export function PlanBrowserPage() {
   } = usePlanBrowser()
 
   return (
-    <Layout>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
+      <HorizonGlow />
+      <Navbar transparent />
       <SEO {...BIBLE_PLANS_BROWSER_METADATA} />
-      <div className="min-h-screen bg-hero-bg">
-        {/* Hero */}
-        <section
-          className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center antialiased sm:pt-36 sm:pb-12 lg:pt-40"
-          style={ATMOSPHERIC_HERO_BG}
-        >
+
+      <main id="main-content" className="relative z-10 flex-1">
+        {/* Hero — Daily Hub pt-36 pattern, no ATMOSPHERIC_HERO_BG */}
+        <section className="relative flex w-full flex-col items-center px-4 pt-36 pb-6 text-center antialiased sm:pt-40 sm:pb-8 lg:pt-44">
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2" style={GRADIENT_TEXT_STYLE}>
             Reading Plans
           </h1>
@@ -36,6 +37,8 @@ export function PlanBrowserPage() {
             Guided daily reading to deepen your walk
           </p>
         </section>
+
+        <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
 
         {/* Content */}
         <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
@@ -73,7 +76,9 @@ export function PlanBrowserPage() {
             </PlanBrowserSection>
           )}
         </div>
-      </div>
-    </Layout>
+      </main>
+
+      <SiteFooter />
+    </div>
   )
 }
