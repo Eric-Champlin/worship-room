@@ -144,7 +144,7 @@ function BibleLandingInner() {
         {/* Section divider: hero → content */}
         <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
 
-        <div className="relative z-10 mx-auto max-w-4xl space-y-8 px-4 pb-16">
+        <div className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 pb-16">
           {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap.
               Visible in both landing and search mode so streak context never disappears. */}
           {streak.currentStreak > 0 && (

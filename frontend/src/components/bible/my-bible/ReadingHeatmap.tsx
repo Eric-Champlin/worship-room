@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { getIntensity } from '@/lib/heatmap'
 import { BIBLE_BOOKS } from '@/constants/bible'
@@ -11,12 +11,15 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 const DAY_LABELS_FULL = ['', 'Mon', '', 'Wed', '', 'Fri', '']
 const DAY_LABELS_SHORT = ['', 'M', '', 'W', '', 'F', '']
 
+// Tier values match spec AC #9 (empty 0.10, light 0.20, moderate 0.50, heavy 1.0).
+// Tier 2 (3-5 chapters) interpolates between light and moderate; tier 3 (6-10
+// chapters) hits the spec's "moderate" exactly. Five tiers preserved per plan.
 const INTENSITY_CLASSES: Record<HeatmapIntensity, string> = {
-  0: 'bg-white/5',
-  1: 'bg-primary/30',
-  2: 'bg-primary/50',
-  3: 'bg-primary/70',
-  4: 'bg-primary/90',
+  0: 'bg-white/10',
+  1: 'bg-white/20',
+  2: 'bg-white/[0.35]',
+  3: 'bg-white/50',
+  4: 'bg-white',
 }
 
 // --- Types ---
@@ -197,6 +200,19 @@ export function ReadingHeatmap({ dailyActivity, currentStreak, activeDays }: Rea
     tooltipTimeoutRef.current = setTimeout(() => setTooltip(null), 200)
   }, [])
 
+  // Tooltip hover handlers — cancel the auto-dismiss timer so users can travel
+  // from cell to tooltip and click chapter Links without the tooltip vanishing.
+  const handleTooltipEnter = useCallback(() => {
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current)
+      tooltipTimeoutRef.current = null
+    }
+  }, [])
+
+  const handleTooltipLeave = useCallback(() => {
+    tooltipTimeoutRef.current = setTimeout(() => setTooltip(null), 200)
+  }, [])
+
   return (
     <section aria-label="Reading heatmap">
       {/* Summary */}
@@ -321,6 +337,8 @@ export function ReadingHeatmap({ dailyActivity, currentStreak, activeDays }: Rea
           chapterCount={tooltip.chapterCount}
           chapters={tooltip.chapters}
           rect={tooltip.rect}
+          onMouseEnter={handleTooltipEnter}
+          onMouseLeave={handleTooltipLeave}
         />
       )}
     </section>
@@ -334,11 +352,15 @@ function HeatmapTooltip({
   chapterCount,
   chapters,
   rect,
+  onMouseEnter,
+  onMouseLeave,
 }: {
   date: string
   chapterCount: number
   chapters: Array<{ book: string; chapter: number }>
   rect: DOMRect
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
 }) {
   const tooltipRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ top: 0, left: 0 })
@@ -364,13 +386,8 @@ function HeatmapTooltip({
     setPosition({ top, left })
   }, [rect])
 
-  const chapterSummary =
-    chapterCount === 0
-      ? 'No reading'
-      : chapters
-          .slice(0, 5)
-          .map((c) => `${formatBookName(c.book)} ${c.chapter}`)
-          .join(', ') + (chapters.length > 5 ? `, +${chapters.length - 5} more` : '')
+  const firstFive = chapters.slice(0, 5)
+  const remainder = chapters.length > 5 ? chapters.length - 5 : 0
 
   return (
     <div
@@ -379,9 +396,28 @@ function HeatmapTooltip({
       className="fixed z-50 rounded-lg border border-white/[0.12] bg-white/[0.06] px-3 py-2 text-xs text-white shadow-lg backdrop-blur-sm"
       style={{ top: position.top, left: position.left }}
       role="tooltip"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <p className="font-medium">{formatDate(date)}</p>
-      <p className="mt-0.5 text-white/60">{chapterSummary}</p>
+      {chapterCount === 0 ? (
+        <p className="mt-0.5 text-white/60">No reading</p>
+      ) : (
+        <p className="mt-0.5 text-white/60">
+          {firstFive.map((c, i) => (
+            <React.Fragment key={`${c.book}-${c.chapter}`}>
+              <Link
+                to={`/bible/${c.book}/${c.chapter}`}
+                className="text-white underline underline-offset-2 hover:text-white/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
+              >
+                {formatBookName(c.book)} {c.chapter}
+              </Link>
+              {i < firstFive.length - 1 && ', '}
+            </React.Fragment>
+          ))}
+          {remainder > 0 && <>, +{remainder} more</>}
+        </p>
+      )}
     </div>
   )
 }

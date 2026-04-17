@@ -90,6 +90,20 @@ describe('ReadingPlanDetail', () => {
     ).toBeInTheDocument()
   })
 
+  it('renders the standard Navbar (not ReaderChrome)', async () => {
+    renderPage('finding-peace-in-anxiety')
+    // Wait for page to resolve to the valid plan route
+    await screen.findByRole('heading', { level: 1 })
+    // Standard Navbar uses aria-label="Main navigation"
+    expect(
+      screen.getByRole('navigation', { name: /main navigation/i }),
+    ).toBeInTheDocument()
+    // ReaderChrome would expose a "Reader controls" nav — ensure absent
+    expect(
+      screen.queryByRole('navigation', { name: /reader controls/i }),
+    ).not.toBeInTheDocument()
+  })
+
   it('shows Plan Not Found for invalid planId', async () => {
     renderPage('nonexistent-plan')
     expect(await screen.findByText('Plan Not Found')).toBeInTheDocument()
