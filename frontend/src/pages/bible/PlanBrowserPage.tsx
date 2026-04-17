@@ -12,14 +12,8 @@ import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { usePlanBrowser } from '@/hooks/bible/usePlanBrowser'
 
 export function PlanBrowserPage() {
-  const {
-    sections,
-    filteredBrowse,
-    clearFilters,
-    isEmpty,
-    isFilteredEmpty,
-    isAllStarted,
-  } = usePlanBrowser()
+  const { sections, filteredBrowse, clearFilters, isEmpty, isFilteredEmpty, isAllStarted } =
+    usePlanBrowser()
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
@@ -28,9 +22,12 @@ export function PlanBrowserPage() {
       <SEO {...BIBLE_PLANS_BROWSER_METADATA} />
 
       <main id="main-content" className="relative z-10 flex-1">
-        {/* Hero — Daily Hub pt-36 pattern, no ATMOSPHERIC_HERO_BG */}
-        <section className="relative flex w-full flex-col items-center px-4 pt-36 pb-6 text-center antialiased sm:pt-40 sm:pb-8 lg:pt-44">
-          <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2" style={GRADIENT_TEXT_STYLE}>
+        {/* Hero — matches BibleHero spacing (BB-53 parity) */}
+        <section className="pt-30 sm:pt-34 relative flex w-full flex-col items-center px-4 pb-10 text-center antialiased sm:pb-12 lg:pt-36">
+          <h1
+            className="pb-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
+            style={GRADIENT_TEXT_STYLE}
+          >
             Reading Plans
           </h1>
           <p className="mt-3 text-base text-white/60 sm:text-lg">
@@ -38,7 +35,7 @@ export function PlanBrowserPage() {
           </p>
         </section>
 
-        <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
+        <div className="mx-auto max-w-6xl border-t border-white/[0.08]" />
 
         {/* Content */}
         <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
