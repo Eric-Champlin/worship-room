@@ -34,7 +34,7 @@ export function PageHero({ title, subtitle, showDivider, scriptWord, children }:
         ref={showDivider ? headingRef : undefined}
         id="page-hero-heading"
         className={cn(
-          'px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl',
+          'px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2',
           showDivider ? 'inline-block' : 'mb-3'
         )}
         style={GRADIENT_TEXT_STYLE}

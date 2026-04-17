@@ -39,7 +39,7 @@ export function SectionHeading({
       ) : (
         <h2
           id={id}
-          className="text-3xl sm:text-4xl lg:text-5xl font-bold"
+          className="text-3xl sm:text-4xl lg:text-5xl font-bold pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
           {heading}

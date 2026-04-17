@@ -49,17 +49,19 @@ describe('BibleHero', () => {
     expect(container.querySelector('.font-script')).toBeNull()
   })
 
-  it('uses Daily Hub clearance padding pt-36 sm:pt-40 lg:pt-44', () => {
+  it('uses BB-53 balanced clearance padding pt-28 pb-12 sm:pt-32 sm:pb-14 lg:pt-32', () => {
     render(<BibleHero />)
     const heading = screen.getByRole('heading', { level: 1 })
     const section = heading.closest('section')
-    expect(section?.className).toContain('pt-36')
-    expect(section?.className).toContain('sm:pt-40')
-    expect(section?.className).toContain('lg:pt-44')
-    // Old padding values removed
-    expect(section?.className).not.toContain('pt-12')
-    expect(section?.className).not.toContain('sm:pt-16')
-    expect(section?.className).not.toContain('lg:pt-20')
+    expect(section?.className).toContain('pt-28')
+    expect(section?.className).toContain('pb-12')
+    expect(section?.className).toContain('sm:pt-32')
+    expect(section?.className).toContain('sm:pb-14')
+    expect(section?.className).toContain('lg:pt-32')
+    // Pre-BB-53 padding removed (imbalanced 2.47:1 ratio)
+    expect(section?.className).not.toContain('pt-36')
+    expect(section?.className).not.toContain('sm:pt-40')
+    expect(section?.className).not.toContain('lg:pt-44')
   })
 
   it('has no inline background style (no ATMOSPHERIC_HERO_BG)', () => {

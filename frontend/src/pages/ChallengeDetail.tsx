@@ -240,7 +240,7 @@ export function ChallengeDetail() {
           />
 
           <h1
-            className="mt-4 px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl"
+            className="mt-4 px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl pb-2"
             style={GRADIENT_TEXT_STYLE}
           >
             {titlePrefix} <span className="font-script">{titleLastWord}</span>

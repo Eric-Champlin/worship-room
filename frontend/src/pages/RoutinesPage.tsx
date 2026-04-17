@@ -119,7 +119,7 @@ export function RoutinesPage() {
       >
         <h1
           ref={headingRef}
-          className="px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl"
+          className="px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
           Bedtime <span className="font-script">Routines</span>

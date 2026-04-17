@@ -184,8 +184,13 @@ function BibleLandingInner() {
             </div>
           ) : (
             <>
-              {/* Hero slot: resume card / VOTD / lapsed link based on reader state */}
-              <BibleHeroSlot />
+              {/* Hero slot: resume card / VOTD / lapsed link based on reader state.
+                  BB-53 Req 2: max-w-4xl wrapper ensures all four branches render at
+                  matching width — otherwise VOTD (672px) and Resume Reading (1120px)
+                  mismatch at desktop. */}
+              <div className="mx-auto w-full max-w-4xl">
+                <BibleHeroSlot />
+              </div>
 
               {/* Today's Plan — standalone below hero slot */}
               <TodaysPlanCard plans={plans} />

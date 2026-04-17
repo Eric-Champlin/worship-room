@@ -87,7 +87,7 @@ export function VerseOfTheDay() {
   // Skeleton
   if (isLoading || !votd) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="w-full">
         <FrostedCard as="article">
           <div className="motion-safe:animate-pulse space-y-4">
             <div className="h-3 w-32 rounded bg-white/10" />
@@ -112,7 +112,7 @@ export function VerseOfTheDay() {
   const verseFontClass = 'font-serif text-lg sm:text-xl text-white leading-relaxed'
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="w-full">
       <FrostedCard as="article">
         {/* VERSE OF THE DAY label */}
         <span className="text-xs font-medium uppercase tracking-widest text-white/50">
