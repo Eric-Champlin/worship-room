@@ -150,7 +150,7 @@ describe('BB-35: Layout main landmark', () => {
 describe('BB-35: Navbar navigation accessible names', () => {
   it('nav links have accessible names matching their labels', () => {
     renderWithProviders(<Navbar />)
-    const expectedLinks = ['Daily Hub', 'Bible', 'Grow', 'Prayer Wall', 'Music']
+    const expectedLinks = ['Daily Hub', 'Study Bible', 'Grow', 'Prayer Wall', 'Music']
     for (const name of expectedLinks) {
       const link = screen.getByRole('link', { name })
       expect(link).toBeInTheDocument()

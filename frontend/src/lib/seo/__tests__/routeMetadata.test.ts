@@ -163,7 +163,7 @@ describe('buildBibleChapterMetadata', () => {
     const items = jsonLd.itemListElement as Array<Record<string, unknown>>
     expect(items).toHaveLength(4)
     expect(items[0].name).toBe('Worship Room')
-    expect(items[1].name).toBe('Bible')
+    expect(items[1].name).toBe('Study Bible')
     expect(items[2].name).toBe('Genesis')
     expect(items[3].name).toBe('Genesis 1')
     // Positions ascend from 1
@@ -234,7 +234,7 @@ describe('buildBiblePlanMetadata', () => {
     expect(jsonLd['@type']).toBe('BreadcrumbList')
     const items = jsonLd.itemListElement as Array<Record<string, unknown>>
     expect(items).toHaveLength(3)
-    expect(items[0].name).toBe('Bible')
+    expect(items[0].name).toBe('Study Bible')
     expect(items[1].name).toBe('Plans')
     expect(items[2].name).toBe('30 Days in the Psalms')
   })

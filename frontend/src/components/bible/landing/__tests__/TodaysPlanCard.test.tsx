@@ -75,7 +75,7 @@ describe('TodaysPlanCard', () => {
   it('renders first-run state when no plans', () => {
     renderWithRouter(<TodaysPlanCard plans={[]} />)
     expect(screen.getByText('Try a reading plan')).toBeInTheDocument()
-    expect(screen.getByText('Choose from 10 guided plans')).toBeInTheDocument()
+    expect(screen.queryByText('Choose from 10 guided plans')).not.toBeInTheDocument()
   })
 
   it('first-run links to /bible/plans', () => {

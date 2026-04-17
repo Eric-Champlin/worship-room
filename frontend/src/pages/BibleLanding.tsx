@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
@@ -31,7 +31,7 @@ const bibleBreadcrumbs = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-    { '@type': 'ListItem', position: 2, name: 'Bible' },
+    { '@type': 'ListItem', position: 2, name: 'Study Bible' },
   ],
 }
 
@@ -184,14 +184,6 @@ function BibleLandingInner() {
 
               {/* Today's Plan — standalone below hero slot */}
               <TodaysPlanCard plans={plans} />
-              <div className="flex justify-center">
-                <Link
-                  to="/bible/plans"
-                  className="inline-flex min-h-[44px] items-center text-sm font-medium text-white/60 transition-colors hover:text-white"
-                >
-                  Browse all plans →
-                </Link>
-              </div>
 
               {/* Section divider → Quick Actions */}
               <div className="border-t border-white/[0.08]" />
@@ -201,11 +193,6 @@ function BibleLandingInner() {
 
               {/* Search */}
               <BibleSearchEntry />
-
-              {/* Footer note */}
-              <p className="text-center text-sm text-white/50">
-                World English Bible (WEB) — Public Domain — No account, ever.
-              </p>
             </>
           )}
         </div>

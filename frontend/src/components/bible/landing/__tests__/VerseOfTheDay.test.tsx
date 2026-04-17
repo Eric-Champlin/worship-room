@@ -148,12 +148,34 @@ describe('VerseOfTheDay', () => {
     expect(screen.getByText('Saved')).toBeInTheDocument()
   })
 
-  it('long verse uses smaller font', () => {
+  it('verse uses smaller font unconditionally', () => {
+    renderComponent()
+    const blockquote = screen.getByText(mockVotd.verseText).closest('blockquote')
+    expect(blockquote?.className).toContain('text-lg')
+    expect(blockquote?.className).toContain('sm:text-xl')
+    expect(blockquote?.className).not.toContain('text-2xl')
+    expect(blockquote?.className).not.toContain('text-3xl')
+  })
+
+  it('long verse also uses smaller font (word-count branching removed)', () => {
     mockVotdValue = mockLongVotd
     renderComponent()
     const blockquote = screen.getByText(mockLongVotd.verseText).closest('blockquote')
     expect(blockquote?.className).toContain('text-lg')
     expect(blockquote?.className).not.toContain('text-2xl')
+  })
+
+  it('action buttons render with white text and no primary color', () => {
+    renderComponent()
+    const buttons = [
+      screen.getByLabelText('Read this verse in context'),
+      screen.getByLabelText('Share verse of the day'),
+      screen.getByLabelText('Save verse of the day'),
+    ]
+    buttons.forEach((btn) => {
+      expect(btn.className).toContain('text-white')
+      expect(btn.className).not.toContain('text-primary')
+    })
   })
 
   it('skeleton shows during loading', () => {

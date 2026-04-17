@@ -9,7 +9,7 @@ const FOOTER_DAILY_LINKS = [
 ]
 
 const FOOTER_STUDY_LINKS = [
-  { label: 'Bible', to: '/bible' },
+  { label: 'Study Bible', to: '/bible' },
   { label: 'Grow', to: '/grow' },
   { label: 'Ask God\'s Word', to: '/ask' },
 ]

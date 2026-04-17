@@ -41,11 +41,11 @@ describe('Breadcrumb', () => {
 
   it('parent items are links', () => {
     renderBreadcrumb([
-      { label: 'Bible', href: '/bible' },
+      { label: 'Study Bible', href: '/bible' },
       { label: 'Genesis', href: '/bible?book=genesis' },
       { label: 'Chapter 1' },
     ])
-    const bibleLink = screen.getByRole('link', { name: 'Bible' })
+    const bibleLink = screen.getByRole('link', { name: 'Study Bible' })
     expect(bibleLink).toHaveAttribute('href', '/bible')
     const genesisLink = screen.getByRole('link', { name: 'Genesis' })
     expect(genesisLink).toHaveAttribute('href', '/bible?book=genesis')
@@ -53,7 +53,7 @@ describe('Breadcrumb', () => {
 
   it('last item has aria-current and no link', () => {
     renderBreadcrumb([
-      { label: 'Bible', href: '/bible' },
+      { label: 'Study Bible', href: '/bible' },
       { label: 'Chapter 1' },
     ])
     const current = screen.getByText('Chapter 1')
@@ -76,7 +76,7 @@ describe('Breadcrumb', () => {
 
   it('mobile truncation for 3+ items shows ellipsis and hides early items', () => {
     renderBreadcrumb([
-      { label: 'Bible', href: '/bible' },
+      { label: 'Study Bible', href: '/bible' },
       { label: 'Genesis', href: '/bible?book=genesis' },
       { label: 'Chapter 1' },
     ])
@@ -88,7 +88,7 @@ describe('Breadcrumb', () => {
     expect(ellipsisLi!.className).toContain('sm:hidden')
 
     // First item li has hidden sm:flex (hidden on mobile)
-    const bibleLink = screen.getByRole('link', { name: 'Bible' })
+    const bibleLink = screen.getByRole('link', { name: 'Study Bible' })
     const bibleLi = bibleLink.closest('li')
     expect(bibleLi!.className).toContain('hidden')
     expect(bibleLi!.className).toContain('sm:flex')

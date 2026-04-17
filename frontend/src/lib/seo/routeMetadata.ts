@@ -375,7 +375,7 @@ export function buildBibleChapterMetadata(
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Worship Room', item: `${SITE_URL}/` },
-      { '@type': 'ListItem', position: 2, name: 'Bible', item: `${SITE_URL}/bible` },
+      { '@type': 'ListItem', position: 2, name: 'Study Bible', item: `${SITE_URL}/bible` },
       { '@type': 'ListItem', position: 3, name: bookName, item: `${SITE_URL}/bible/browse` },
       {
         '@type': 'ListItem',
@@ -429,7 +429,7 @@ export function buildBiblePlanMetadata(
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Bible', item: `${SITE_URL}/bible` },
+      { '@type': 'ListItem', position: 1, name: 'Study Bible', item: `${SITE_URL}/bible` },
       { '@type': 'ListItem', position: 2, name: 'Plans', item: `${SITE_URL}/bible/plans` },
       {
         '@type': 'ListItem',
@@ -465,7 +465,7 @@ export function buildBiblePlanDayMetadata(
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Bible', item: `${SITE_URL}/bible` },
+      { '@type': 'ListItem', position: 1, name: 'Study Bible', item: `${SITE_URL}/bible` },
       { '@type': 'ListItem', position: 2, name: 'Plans', item: `${SITE_URL}/bible/plans` },
       {
         '@type': 'ListItem',

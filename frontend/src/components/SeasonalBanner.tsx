@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { Sparkles, X } from 'lucide-react'
 import { useLiturgicalSeason } from '@/hooks/useLiturgicalSeason'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import type { LiturgicalSeasonId } from '@/constants/liturgical-calendar'
+import { isWithinEasterOctave, type LiturgicalSeasonId } from '@/constants/liturgical-calendar'
 
 const SEASON_MESSAGES: Partial<Record<LiturgicalSeasonId, string>> = {
   advent: "It's Advent — a season of waiting and hope",
@@ -55,7 +55,11 @@ export function SeasonalBanner() {
     }, 200)
   }, [prefersReduced, seasonId])
 
-  if (!isNamedSeason || dismissed) return null
+  // Easter banner only shows during the Octave of Easter (Easter Sunday + 7 days),
+  // not the full 49-day liturgical Easter season.
+  const withinBannerWindow = seasonId === 'easter' ? isWithinEasterOctave() : true
+
+  if (!isNamedSeason || dismissed || !withinBannerWindow) return null
 
   const message =
     SEASON_MESSAGES[seasonId as LiturgicalSeasonId] ??
@@ -80,12 +84,12 @@ export function SeasonalBanner() {
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pr-10 sm:pr-12">
           <div className="flex items-center gap-2">
             <Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-white/40" aria-hidden="true" />
-            <span className="text-sm text-white/70">{message}</span>
+            <span className="text-sm font-bold text-white">{message}</span>
           </div>
           <span className="hidden text-white/40 sm:inline" aria-hidden="true">&middot;</span>
           <Link
             to="/daily?tab=devotional"
-            className="text-sm font-medium text-primary-lt transition-colors hover:text-primary"
+            className="text-sm font-bold text-white transition-colors hover:text-white/80"
           >
             Read today&apos;s devotional &rarr;
           </Link>

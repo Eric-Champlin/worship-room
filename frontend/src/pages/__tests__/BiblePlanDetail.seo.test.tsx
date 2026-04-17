@@ -60,7 +60,7 @@ describe('BiblePlanDetail SEO — buildBiblePlanMetadata contract (BB-40 Step 8)
       expect(jsonLd['@type']).toBe('BreadcrumbList')
       const items = jsonLd.itemListElement as Array<Record<string, unknown>>
       expect(items).toHaveLength(3)
-      expect(items[0].name).toBe('Bible')
+      expect(items[0].name).toBe('Study Bible')
       expect(items[1].name).toBe('Plans')
       expect(items[2].name).toBe(plan.title)
     })

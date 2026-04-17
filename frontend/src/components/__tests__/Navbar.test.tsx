@@ -63,10 +63,10 @@ describe('Navbar', () => {
   })
 
   describe('Desktop nav links', () => {
-    it('renders exactly 5 nav links: Daily Hub, Bible, Grow, Prayer Wall, Music', () => {
+    it('renders exactly 5 nav links: Daily Hub, Study Bible, Grow, Prayer Wall, Music', () => {
       renderNavbar()
       expect(screen.getByRole('link', { name: 'Daily Hub' })).toHaveAttribute('href', '/daily')
-      expect(screen.getByRole('link', { name: 'Bible' })).toHaveAttribute('href', '/bible')
+      expect(screen.getByRole('link', { name: 'Study Bible' })).toHaveAttribute('href', '/bible')
       expect(screen.getByRole('link', { name: 'Grow' })).toHaveAttribute('href', '/grow')
       expect(screen.getByRole('link', { name: 'Prayer Wall' })).toHaveAttribute('href', '/prayer-wall')
       expect(screen.getByRole('link', { name: 'Music' })).toHaveAttribute('href', '/music')
@@ -99,7 +99,7 @@ describe('Navbar', () => {
 
     it('tablet: nav links have aria-label for icon-only mode', () => {
       renderNavbar()
-      for (const name of ['Daily Hub', 'Bible', 'Grow', 'Prayer Wall', 'Music']) {
+      for (const name of ['Daily Hub', 'Study Bible', 'Grow', 'Prayer Wall', 'Music']) {
         const link = screen.getByRole('link', { name })
         expect(link).toHaveAttribute('aria-label', name)
       }
@@ -292,7 +292,7 @@ describe('Navbar', () => {
       expect(within(menu).getByText('Find Help')).toBeInTheDocument()
       // Nav items
       const allLabels = [
-        'Daily Hub', 'Bible', 'Grow', "Ask God's Word",
+        'Daily Hub', 'Study Bible', 'Grow', "Ask God's Word",
         'Prayer Wall', 'Music',
         'Churches', 'Counselors', 'Celebrate Recovery',
       ]
@@ -374,7 +374,7 @@ describe('Navbar', () => {
 
     it('no active state on /ask', () => {
       renderNavbar('/ask')
-      for (const name of ['Daily Hub', 'Bible', 'Grow', 'Prayer Wall', 'Music']) {
+      for (const name of ['Daily Hub', 'Study Bible', 'Grow', 'Prayer Wall', 'Music']) {
         const link = screen.getByRole('link', { name })
         expect(link.className).toContain('after:scale-x-0')
       }
@@ -386,9 +386,9 @@ describe('Navbar', () => {
       expect(link.className).not.toContain('after:scale-x-0')
     })
 
-    it('"Bible" active on /bible/genesis/1', () => {
+    it('"Study Bible" active on /bible/genesis/1', () => {
       renderNavbar('/bible/genesis/1')
-      const link = screen.getByRole('link', { name: 'Bible' })
+      const link = screen.getByRole('link', { name: 'Study Bible' })
       expect(link.className).not.toContain('after:scale-x-0')
     })
 
@@ -650,7 +650,7 @@ describe('Navbar', () => {
       await user.click(screen.getByRole('button', { name: 'Open menu' }))
       const menu = document.getElementById('mobile-menu')!
       // Check main nav links (exclude seasonal devotional link which is a utility link)
-      const navLabels = ['Daily Hub', 'Bible', 'Grow', "Ask God's Word", 'Prayer Wall', 'Music', 'Churches', 'Counselors', 'Celebrate Recovery']
+      const navLabels = ['Daily Hub', 'Study Bible', 'Grow', "Ask God's Word", 'Prayer Wall', 'Music', 'Churches', 'Counselors', 'Celebrate Recovery']
       for (const label of navLabels) {
         const link = within(menu).getByText(label).closest('a')!
         expect(link.className).toContain('min-h-[44px]')

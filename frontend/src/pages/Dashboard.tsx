@@ -38,8 +38,6 @@ import { getRecentBibleAnnotations } from '@/services/bible-annotations-storage'
 import { READING_PLAN_PROGRESS_KEY } from '@/constants/reading-plans'
 import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard'
 import { WelcomeBack } from '@/components/dashboard/WelcomeBack'
-import { useFirstRun } from '@/hooks/useFirstRun'
-import { FirstRunWelcome } from '@/components/onboarding/FirstRunWelcome'
 import { TooltipCallout } from '@/components/ui/TooltipCallout'
 import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
@@ -67,7 +65,6 @@ const DASHBOARD_ENTER_DURATION_MS = 800
 // Loading state: use DashboardSkeleton
 export function Dashboard() {
   const { user } = useAuth()
-  const { isFirstRun, dismissFirstRun } = useFirstRun()
   const prefersReduced = useReducedMotion()
   useRoutePreload([
     () => import('@/pages/DailyHub'),
@@ -628,7 +625,6 @@ export function Dashboard() {
         />
       )}
       {import.meta.env.DEV && <DevAuthToggle />}
-      {isFirstRun && <FirstRunWelcome onDismiss={dismissFirstRun} />}
     </div>
   )
 }

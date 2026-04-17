@@ -44,7 +44,7 @@ export function ResumeReadingCard({
         {nextChapter && (
           <Link
             to={`/bible/${nextChapter.bookSlug}/${nextChapter.chapter}`}
-            className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+            className="inline-flex min-h-[44px] items-center text-sm text-white transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
           >
             Or read the next chapter
           </Link>
