@@ -15,7 +15,6 @@ export function TodaysPlanCard({ plans }: TodaysPlanCardProps) {
           <ListChecks className="h-8 w-8 text-white/60" aria-hidden="true" />
           <div>
             <h3 className="text-lg font-bold text-white">Try a reading plan</h3>
-            <p className="mt-1 text-sm text-white/60">Choose from 10 guided plans</p>
           </div>
         </Link>
       </FrostedCard>

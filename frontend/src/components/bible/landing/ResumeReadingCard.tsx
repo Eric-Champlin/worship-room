@@ -37,14 +37,13 @@ export function ResumeReadingCard({
         <Link
           to={`/bible/${slug}/${chapter}`}
           className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-hero-bg shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all motion-reduce:transition-none duration-base hover:shadow-[0_0_20px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
-          aria-label={`Continue reading ${book} chapter ${chapter}`}
         >
-          Continue
+          Continue reading {book} {chapter}
         </Link>
         {nextChapter && (
           <Link
             to={`/bible/${nextChapter.bookSlug}/${nextChapter.chapter}`}
-            className="inline-flex min-h-[44px] items-center text-sm text-primary-lt transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+            className="inline-flex min-h-[44px] items-center text-sm text-white transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
           >
             Or read the next chapter
           </Link>

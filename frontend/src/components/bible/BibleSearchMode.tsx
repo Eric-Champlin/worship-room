@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { useBibleSearch } from '@/hooks/useBibleSearch'
+import { parseReference } from '@/lib/search'
 import { stem } from '@/lib/search/tokenizer'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
@@ -76,7 +77,21 @@ export function BibleSearchMode({ query: controlledQuery, onQueryChange }: Bible
     error,
   } = useBibleSearch({ controlledQuery, onQueryChange })
 
+  const navigate = useNavigate()
   const isLoading = isSearching || isLoadingIndex
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== 'Enter') return
+    const trimmed = query.trim()
+    if (!trimmed) return
+
+    const ref = parseReference(trimmed)
+    if (ref) {
+      e.preventDefault()
+      const verseSuffix = ref.verse !== undefined ? `?verse=${ref.verse}` : ''
+      navigate(`/bible/${ref.book}/${ref.chapter}${verseSuffix}`)
+    }
+  }
 
   return (
     <div className="mt-6">
@@ -89,7 +104,8 @@ export function BibleSearchMode({ query: controlledQuery, onQueryChange }: Bible
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search the Bible..."
+          onKeyDown={handleKeyDown}
+          placeholder="Search verses or go to a passage (e.g., John 3:16)"
           aria-label="Search the Bible"
           aria-describedby="bible-search-hint bible-search-status"
           className="min-h-[44px] w-full rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 transition-colors focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/20"

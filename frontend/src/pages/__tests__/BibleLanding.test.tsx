@@ -190,20 +190,22 @@ describe('BibleLanding', () => {
     expect(screen.getByText('Reading Plans')).toBeInTheDocument()
   })
 
-  it('footer note visible', () => {
+  it('footer note is removed', () => {
     renderLanding()
     expect(
-      screen.getByText('World English Bible (WEB) — Public Domain — No account, ever.')
-    ).toBeInTheDocument()
+      screen.queryByText('World English Bible (WEB) — Public Domain — No account, ever.')
+    ).not.toBeInTheDocument()
   })
 
   it('hero uses gradient text, no font-script in hero', () => {
     renderLanding()
-    const heading = screen.getByText('The Word of God')
+    const heading = screen.getByText('Your')
     expect(heading).toBeInTheDocument()
-    expect(screen.getByText('open to you')).toBeInTheDocument()
-    // Verify no font-script within the hero section itself
+    // "Study Bible" also appears in the Navbar; scope the assertion to the hero section
     const heroSection = heading.closest('section')
+    expect(heroSection).not.toBeNull()
+    expect(heroSection!.textContent).toContain('Study Bible')
+    // Verify no font-script within the hero section itself
     expect(heroSection?.querySelector('.font-script')).toBeNull()
   })
 

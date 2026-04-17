@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 import { SEO, SITE_URL } from '@/components/SEO'
@@ -31,7 +31,7 @@ const bibleBreadcrumbs = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-    { '@type': 'ListItem', position: 2, name: 'Bible' },
+    { '@type': 'ListItem', position: 2, name: 'Study Bible' },
   ],
 }
 
@@ -144,7 +144,7 @@ function BibleLandingInner() {
         {/* Section divider: hero → content */}
         <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
 
-        <div className="relative z-10 mx-auto max-w-4xl space-y-8 px-4 pb-16">
+        <div className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 pb-16">
           {/* Streak chip — conditionally rendered to avoid empty space-y-8 gap.
               Visible in both landing and search mode so streak context never disappears. */}
           {streak.currentStreak > 0 && (
@@ -184,14 +184,6 @@ function BibleLandingInner() {
 
               {/* Today's Plan — standalone below hero slot */}
               <TodaysPlanCard plans={plans} />
-              <div className="flex justify-center">
-                <Link
-                  to="/bible/plans"
-                  className="inline-flex min-h-[44px] items-center text-sm font-medium text-white/60 transition-colors hover:text-white"
-                >
-                  Browse all plans →
-                </Link>
-              </div>
 
               {/* Section divider → Quick Actions */}
               <div className="border-t border-white/[0.08]" />
@@ -201,11 +193,6 @@ function BibleLandingInner() {
 
               {/* Search */}
               <BibleSearchEntry />
-
-              {/* Footer note */}
-              <p className="text-center text-sm text-white/50">
-                World English Bible (WEB) — Public Domain — No account, ever.
-              </p>
             </>
           )}
         </div>

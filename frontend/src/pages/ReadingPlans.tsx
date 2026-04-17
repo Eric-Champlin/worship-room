@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Sparkles, Star } from 'lucide-react'
 
 import { CreatePlanFlow } from '@/components/reading-plans/CreatePlanFlow'
-import { FilterBar } from '@/components/reading-plans/FilterBar'
 import { PlanCard } from '@/components/reading-plans/PlanCard'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
@@ -13,7 +12,7 @@ import { useReadingPlanProgress } from '@/hooks/useReadingPlanProgress'
 import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { READING_PLAN_METADATA } from '@/data/reading-plans'
 import { getCustomPlanIds } from '@/utils/custom-plans-storage'
-import type { PlanDifficulty, ReadingPlanMeta } from '@/types/reading-plans'
+import type { ReadingPlanMeta } from '@/types/reading-plans'
 
 interface ReadingPlansContentProps {
   createParam?: boolean
@@ -80,9 +79,6 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
   const { getProgress, getActivePlanId, startPlan, getPlanStatus } =
     useReadingPlanProgress()
 
-  const [selectedDuration, setSelectedDuration] = useState<number | null>(null)
-  const [selectedDifficulty, setSelectedDifficulty] =
-    useState<PlanDifficulty | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<string | null>(null)
 
   const showCreateFlow = createParam ?? searchParams.get('create') === 'true'
@@ -97,27 +93,14 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
     setSearchParams({ create: 'true' })
   }, [isAuthenticated, authModal, setSearchParams])
 
-  const filteredPlans = useMemo(() => {
-    return READING_PLAN_METADATA.filter((plan) => {
-      if (selectedDuration !== null && plan.durationDays !== selectedDuration)
-        return false
-      if (
-        selectedDifficulty !== null &&
-        plan.difficulty !== selectedDifficulty
-      )
-        return false
-      return true
-    })
-  }, [selectedDuration, selectedDifficulty])
-
   const sortedPlans = useMemo(() => {
     const statusOrder = { active: 0, paused: 1, unstarted: 2, completed: 3 }
-    return [...filteredPlans].sort((a, b) => {
+    return [...READING_PLAN_METADATA].sort((a, b) => {
       const statusA = getPlanStatus(a.id)
       const statusB = getPlanStatus(b.id)
       return statusOrder[statusA] - statusOrder[statusB]
     })
-  }, [filteredPlans, getPlanStatus])
+  }, [getPlanStatus])
 
   const { containerRef: planGridRef, getStaggerProps: getPlanStaggerProps } =
     useStaggeredEntrance({ staggerDelay: 80, itemCount: sortedPlans.length })
@@ -157,11 +140,6 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
 
   const handleCancelSwitch = useCallback(() => {
     setConfirmTarget(null)
-  }, [])
-
-  const clearFilters = useCallback(() => {
-    setSelectedDuration(null)
-    setSelectedDifficulty(null)
   }, [])
 
   const activePlan = activePlanId
@@ -204,13 +182,6 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
             </div>
           </div>
 
-          <FilterBar
-            selectedDuration={selectedDuration}
-            selectedDifficulty={selectedDifficulty}
-            onDurationChange={setSelectedDuration}
-            onDifficultyChange={setSelectedDifficulty}
-          />
-
           {allCompleted ? (
             <FeatureEmptyState
               icon={Star}
@@ -219,7 +190,7 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
               ctaLabel="Create a custom plan"
               onCtaClick={handleCreatePlan}
             />
-          ) : sortedPlans.length > 0 ? (
+          ) : (
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2" ref={planGridRef}>
               {sortedPlans.map((plan: ReadingPlanMeta, index: number) => {
                 const stagger = getPlanStaggerProps(index)
@@ -235,19 +206,6 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
                   </div>
                 )
               })}
-            </div>
-          ) : (
-            <div className="mt-12 text-center">
-              <p className="text-lg text-white/60">
-                No reading plans match your filters.
-              </p>
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="mt-4 min-h-[44px] rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-lt"
-              >
-                Clear filters
-              </button>
             </div>
           )}
         </div>

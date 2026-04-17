@@ -107,7 +107,7 @@ export function VerseOfTheDay() {
     )
   }
 
-  const { entry, verseText, wordCount } = votd
+  const { entry, verseText } = votd
   // BB-38: renamed from `highlightParam` to `scrollToParam` to match the
   // ?scroll-to= URL parameter (renamed from ?highlight=).
   const scrollToParam =
@@ -115,11 +115,7 @@ export function VerseOfTheDay() {
       ? `${entry.startVerse}-${entry.endVerse}`
       : String(entry.startVerse)
 
-  // Long verse: >30 words → smaller font
-  const verseFontClass =
-    wordCount > 30
-      ? 'font-serif text-lg sm:text-xl text-white leading-relaxed'
-      : 'font-serif text-2xl sm:text-3xl text-white leading-relaxed'
+  const verseFontClass = 'font-serif text-lg sm:text-xl text-white leading-relaxed'
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -145,7 +141,7 @@ export function VerseOfTheDay() {
             {/* Read in context */}
             <Link
               to={`/bible/${entry.book}/${entry.chapter}?scroll-to=${scrollToParam}`}
-              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-white hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
               aria-label="Read this verse in context"
             >
               <BookOpen className="h-4 w-4" aria-hidden="true" />
@@ -157,7 +153,7 @@ export function VerseOfTheDay() {
               type="button"
               onClick={() => setShareOpen(true)}
               aria-label="Share verse of the day"
-              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-white hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               <Share2 className="h-4 w-4" aria-hidden="true" />
               Share
@@ -168,11 +164,7 @@ export function VerseOfTheDay() {
               type="button"
               onClick={handleSave}
               aria-label={isBookmarked ? 'Remove saved verse' : 'Save verse of the day'}
-              className={`inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark ${
-                isBookmarked
-                  ? 'text-primary-lt'
-                  : 'text-primary hover:text-primary-lt'
-              }`}
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-white hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               <Bookmark
                 className="h-4 w-4"

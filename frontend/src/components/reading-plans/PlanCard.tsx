@@ -55,7 +55,7 @@ export function PlanCard({ plan, status, progress, onStart, isCustom }: PlanCard
   return (
     <Link
       to={`/reading-plans/${plan.id}`}
-      className="block rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+      className="block rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-[background-color,border-color] duration-base motion-reduce:transition-none hover:bg-white/[0.08] hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
     >
       <div className="mb-3 text-4xl" aria-hidden="true">
         {plan.coverEmoji}
@@ -67,20 +67,20 @@ export function PlanCard({ plan, status, progress, onStart, isCustom }: PlanCard
         </span>
       )}
 
-      <h3 className="text-lg font-bold text-white">{plan.title}</h3>
+      <h3 className="text-lg font-semibold text-white">{plan.title}</h3>
 
-      <p className="mt-1 line-clamp-2 text-sm text-white/60">
+      <p className="mt-1 line-clamp-2 text-sm text-white/70">
         {plan.description}
       </p>
 
       <div className="mt-3 flex flex-wrap gap-2">
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/50">
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
           {plan.durationDays} days
         </span>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/50">
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
           {PLAN_DIFFICULTY_LABELS[plan.difficulty]}
         </span>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/50">
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
           {PLAN_THEME_LABELS[plan.theme]}
         </span>
       </div>

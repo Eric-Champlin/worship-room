@@ -5,35 +5,35 @@ import { BibleHero } from '../BibleHero'
 describe('BibleHero', () => {
   it('renders heading text', () => {
     render(<BibleHero />)
-    expect(screen.getByText('The Word of God')).toBeInTheDocument()
-    expect(screen.getByText('open to you')).toBeInTheDocument()
+    expect(screen.getByText('Your')).toBeInTheDocument()
+    expect(screen.getByText('Study Bible')).toBeInTheDocument()
   })
 
   it('top line renders as white text', () => {
     render(<BibleHero />)
-    const topLine = screen.getByText('The Word of God')
+    const topLine = screen.getByText('Your')
     expect(topLine.className).toContain('text-white')
   })
 
   it('bottom line renders with gradient style', () => {
     render(<BibleHero />)
-    const bottomLine = screen.getByText('open to you')
+    const bottomLine = screen.getByText('Study Bible')
     expect(bottomLine.style.backgroundClip).toBeTruthy()
   })
 
   it('heading sizes follow SectionHeading pattern', () => {
     render(<BibleHero />)
-    const topLine = screen.getByText('The Word of God')
-    const bottomLine = screen.getByText('open to you')
+    const topLine = screen.getByText('Your')
+    const bottomLine = screen.getByText('Study Bible')
     expect(topLine.className).toContain('text-2xl')
     expect(bottomLine.className).toContain('text-4xl')
   })
 
-  it('renders subhead text', () => {
+  it('does not render the pre-polish subtitle', () => {
     render(<BibleHero />)
     expect(
-      screen.getByText('No account needed. Free forever. The World English Bible, always here for you.')
-    ).toBeInTheDocument()
+      screen.queryByText(/No account needed/)
+    ).not.toBeInTheDocument()
   })
 
   it('has correct aria-labelledby', () => {

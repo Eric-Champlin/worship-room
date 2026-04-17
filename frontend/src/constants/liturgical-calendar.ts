@@ -342,6 +342,23 @@ export function getDayWithinSeason(seasonId: LiturgicalSeasonId, date: Date): nu
 }
 
 /**
+ * Octave of Easter window — Easter Sunday + 7 days (inclusive).
+ *
+ * Used by SeasonalBanner to cap the "He is risen!" banner so it doesn't linger
+ * for the full 49-day Easter liturgical season. Returns true on Easter Sunday
+ * and the seven days that follow; false outside that window.
+ */
+export function isWithinEasterOctave(date: Date = new Date()): boolean {
+  const year = date.getFullYear()
+  const easter = computeEasterDate(year)
+  const msPerDay = 1000 * 60 * 60 * 24
+  const utcEaster = Date.UTC(easter.getFullYear(), easter.getMonth(), easter.getDate())
+  const utcNow = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  const daysSinceEaster = Math.floor((utcNow - utcEaster) / msPerDay)
+  return daysSinceEaster >= 0 && daysSinceEaster < 8
+}
+
+/**
  * Returns the liturgical season for a given date.
  * Priority order: Holy Week > Epiphany > Pentecost > Christmas > Advent > Lent > Easter > Ordinary Time
  */

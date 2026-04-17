@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { SeasonalBanner } from '../SeasonalBanner'
-import { LITURGICAL_SEASONS } from '@/constants/liturgical-calendar'
+import { LITURGICAL_SEASONS, computeEasterDate, isWithinEasterOctave } from '@/constants/liturgical-calendar'
 
 vi.mock('@/hooks/useLiturgicalSeason', () => ({
   useLiturgicalSeason: vi.fn(),
@@ -42,9 +42,14 @@ function renderBanner() {
 beforeEach(() => {
   localStorage.clear()
   mockUseReducedMotion.mockReturnValue(false)
+  // Default test date: Easter Sunday 2026-04-05 — keeps all existing Easter
+  // banner assertions valid regardless of the real-world date.
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date(2026, 3, 5))
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
 })
 
@@ -110,11 +115,22 @@ describe('SeasonalBanner', () => {
     expect(link).toHaveAttribute('href', '/daily?tab=devotional')
   })
 
-  it('CTA uses text-primary-lt class', () => {
+  it('CTA uses font-bold white text', () => {
     mockSeason('advent')
     renderBanner()
     const link = screen.getByText(/Read today.s devotional/)
-    expect(link.className).toContain('text-primary-lt')
+    expect(link.className).toContain('font-bold')
+    expect(link.className).toContain('text-white')
+    expect(link.className).not.toContain('text-primary')
+  })
+
+  it('message body uses font-bold white text', () => {
+    mockSeason('advent')
+    renderBanner()
+    const msg = screen.getByText(/waiting and hope/)
+    expect(msg.className).toContain('font-bold')
+    expect(msg.className).toContain('text-white')
+    expect(msg.className).not.toContain('text-white/70')
   })
 
   it('decorative sparkle icon has aria-hidden', () => {
@@ -191,5 +207,66 @@ describe('SeasonalBanner', () => {
     expect(inner.className).toContain('backdrop-blur-md')
     expect(inner.className).toContain('rounded-2xl')
     expect(inner.className).toContain('border-white/10')
+  })
+
+  describe('Easter banner Octave cap', () => {
+    it('renders on Easter Sunday', () => {
+      const easter = computeEasterDate(2026)
+      vi.setSystemTime(easter)
+      mockSeason('easter')
+      renderBanner()
+      expect(screen.getByRole('complementary')).toBeInTheDocument()
+    })
+
+    it('renders on Easter + 7 (last day of Octave)', () => {
+      const easter = computeEasterDate(2026)
+      const easterPlus7 = new Date(easter.getFullYear(), easter.getMonth(), easter.getDate() + 7)
+      vi.setSystemTime(easterPlus7)
+      mockSeason('easter')
+      renderBanner()
+      expect(screen.getByRole('complementary')).toBeInTheDocument()
+    })
+
+    it('hidden on Easter + 8 (past Octave) even though liturgical season is still Easter', () => {
+      const easter = computeEasterDate(2026)
+      const easterPlus8 = new Date(easter.getFullYear(), easter.getMonth(), easter.getDate() + 8)
+      vi.setSystemTime(easterPlus8)
+      mockSeason('easter')
+      const { container } = renderBanner()
+      expect(container.innerHTML).toBe('')
+    })
+
+    it('hidden on 2026-04-16 (11 days after Easter 2026)', () => {
+      vi.setSystemTime(new Date(2026, 3, 16))
+      mockSeason('easter')
+      const { container } = renderBanner()
+      expect(container.innerHTML).toBe('')
+    })
+
+    it('non-Easter named seasons are not affected by the cap', () => {
+      // Simulate a Lent date far from Easter — cap should not apply
+      vi.setSystemTime(new Date(2026, 1, 20))
+      mockSeason('lent')
+      renderBanner()
+      expect(screen.getByRole('complementary')).toBeInTheDocument()
+    })
+  })
+
+  describe('isWithinEasterOctave helper', () => {
+    it('returns true on Easter Sunday', () => {
+      expect(isWithinEasterOctave(computeEasterDate(2026))).toBe(true)
+    })
+    it('returns true on Easter + 7', () => {
+      const e = computeEasterDate(2026)
+      expect(isWithinEasterOctave(new Date(e.getFullYear(), e.getMonth(), e.getDate() + 7))).toBe(true)
+    })
+    it('returns false on Easter + 8', () => {
+      const e = computeEasterDate(2026)
+      expect(isWithinEasterOctave(new Date(e.getFullYear(), e.getMonth(), e.getDate() + 8))).toBe(false)
+    })
+    it('returns false the day before Easter', () => {
+      const e = computeEasterDate(2026)
+      expect(isWithinEasterOctave(new Date(e.getFullYear(), e.getMonth(), e.getDate() - 1))).toBe(false)
+    })
   })
 })

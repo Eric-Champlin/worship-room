@@ -1,11 +1,17 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { BibleSearchMode } from '../BibleSearchMode'
 
 const mockSetQuery = vi.fn()
 const mockLoadMore = vi.fn()
+const mockNavigate = vi.fn()
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return { ...actual, useNavigate: () => mockNavigate }
+})
 
 let mockHookReturn = {
   query: '',
@@ -232,5 +238,113 @@ describe('BibleSearchMode — error state', () => {
     }
     renderSearch()
     expect(screen.queryByText(/No verses found/)).not.toBeInTheDocument()
+  })
+})
+
+describe('BibleSearchMode — placeholder', () => {
+  beforeEach(() => {
+    mockHookReturn = {
+      query: '', setQuery: mockSetQuery, results: [],
+      isSearching: false, isLoadingIndex: false,
+      hasMore: false, totalResults: 0, loadMore: mockLoadMore, error: null,
+    }
+  })
+
+  it('placeholder reads the exact spec string', () => {
+    renderSearch()
+    const input = screen.getByLabelText('Search the Bible') as HTMLInputElement
+    expect(input.placeholder).toBe(
+      'Search verses or go to a passage (e.g., John 3:16)',
+    )
+  })
+})
+
+describe('BibleSearchMode — reference detection on Enter', () => {
+  beforeEach(() => {
+    mockNavigate.mockClear()
+  })
+
+  it('Enter on "John 3:16" navigates to /bible/john/3?verse=16', () => {
+    mockHookReturn = {
+      query: 'John 3:16', setQuery: mockSetQuery, results: [],
+      isSearching: false, isLoadingIndex: false,
+      hasMore: false, totalResults: 0, loadMore: mockLoadMore, error: null,
+    }
+    renderSearch()
+    const input = screen.getByLabelText('Search the Bible')
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(mockNavigate).toHaveBeenCalledWith('/bible/john/3?verse=16')
+  })
+
+  it('Enter on "John 3" (no verse) navigates without ?verse=', () => {
+    mockHookReturn = {
+      query: 'John 3', setQuery: mockSetQuery, results: [],
+      isSearching: false, isLoadingIndex: false,
+      hasMore: false, totalResults: 0, loadMore: mockLoadMore, error: null,
+    }
+    renderSearch()
+    const input = screen.getByLabelText('Search the Bible')
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(mockNavigate).toHaveBeenCalledWith('/bible/john/3')
+  })
+
+  it('Enter on "1 John 4:8" navigates to numbered-book route', () => {
+    mockHookReturn = {
+      query: '1 John 4:8', setQuery: mockSetQuery, results: [],
+      isSearching: false, isLoadingIndex: false,
+      hasMore: false, totalResults: 0, loadMore: mockLoadMore, error: null,
+    }
+    renderSearch()
+    const input = screen.getByLabelText('Search the Bible')
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(mockNavigate).toHaveBeenCalledWith('/bible/1-john/4?verse=8')
+  })
+
+  it('Enter on "love" does NOT navigate (falls through to full-text search)', () => {
+    mockHookReturn = {
+      query: 'love', setQuery: mockSetQuery, results: [],
+      isSearching: false, isLoadingIndex: false,
+      hasMore: false, totalResults: 0, loadMore: mockLoadMore, error: null,
+    }
+    renderSearch()
+    const input = screen.getByLabelText('Search the Bible')
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('Enter on empty query does NOT navigate', () => {
+    mockHookReturn = {
+      query: '', setQuery: mockSetQuery, results: [],
+      isSearching: false, isLoadingIndex: false,
+      hasMore: false, totalResults: 0, loadMore: mockLoadMore, error: null,
+    }
+    renderSearch()
+    const input = screen.getByLabelText('Search the Bible')
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('Enter on "John 99" (out-of-bounds chapter) does NOT navigate', () => {
+    mockHookReturn = {
+      query: 'John 99', setQuery: mockSetQuery, results: [],
+      isSearching: false, isLoadingIndex: false,
+      hasMore: false, totalResults: 0, loadMore: mockLoadMore, error: null,
+    }
+    renderSearch()
+    const input = screen.getByLabelText('Search the Bible')
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('non-Enter keys do NOT navigate', () => {
+    mockHookReturn = {
+      query: 'John 3:16', setQuery: mockSetQuery, results: [],
+      isSearching: false, isLoadingIndex: false,
+      hasMore: false, totalResults: 0, loadMore: mockLoadMore, error: null,
+    }
+    renderSearch()
+    const input = screen.getByLabelText('Search the Bible')
+    fireEvent.keyDown(input, { key: 'a' })
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 })

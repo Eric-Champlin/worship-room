@@ -100,93 +100,20 @@ describe('ReadingPlans', () => {
     ).toBeInTheDocument()
   })
 
-  it('filters by 7-day duration', async () => {
+  it('does not render filter UI', () => {
     renderPage()
-    const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: '7 days' }))
-
-    expect(screen.getByText('Finding Peace in Anxiety')).toBeInTheDocument()
-    expect(screen.getByText('The Gratitude Reset')).toBeInTheDocument()
-    expect(screen.getByText('Learning to Trust God')).toBeInTheDocument()
-    expect(screen.getByText("Hope When It's Hard")).toBeInTheDocument()
     expect(
-      screen.getByText('Building Stronger Relationships'),
-    ).toBeInTheDocument()
-
-    // 14 and 21-day plans should not be visible
-    expect(
-      screen.queryByText('Walking Through Grief'),
+      screen.queryByRole('button', { name: '7 days' }),
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByText('Knowing Who You Are in Christ'),
+      screen.queryByRole('button', { name: '14 days' }),
     ).not.toBeInTheDocument()
-  })
-
-  it('filters by 14-day duration', async () => {
-    renderPage()
-    const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: '14 days' }))
-
-    expect(screen.getByText('Walking Through Grief')).toBeInTheDocument()
-    expect(screen.getByText('The Path to Forgiveness')).toBeInTheDocument()
-    expect(screen.getByText('Discovering Your Purpose')).toBeInTheDocument()
     expect(
-      screen.queryByText('Finding Peace in Anxiety'),
+      screen.queryByRole('button', { name: 'Beginner' }),
     ).not.toBeInTheDocument()
-  })
-
-  it('filters by 21-day duration', async () => {
-    renderPage()
-    const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: '21 days' }))
-
     expect(
-      screen.getByText('Knowing Who You Are in Christ'),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText('Healing from the Inside Out'),
-    ).toBeInTheDocument()
-    expect(
-      screen.queryByText('Finding Peace in Anxiety'),
+      screen.queryByText(/No reading plans match your filters/i),
     ).not.toBeInTheDocument()
-  })
-
-  it('filters by difficulty', async () => {
-    renderPage()
-    const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: 'Beginner' }))
-
-    expect(screen.getByText('Finding Peace in Anxiety')).toBeInTheDocument()
-    expect(
-      screen.queryByText('Walking Through Grief'),
-    ).not.toBeInTheDocument()
-  })
-
-  it('applies both filters with AND logic', async () => {
-    renderPage()
-    const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: '7 days' }))
-    await user.click(screen.getByRole('button', { name: 'Intermediate' }))
-
-    // No 7-day intermediate plans exist, so empty state
-    expect(
-      screen.getByText('No reading plans match your filters.'),
-    ).toBeInTheDocument()
-  })
-
-  it('shows empty state and clear filters button', async () => {
-    renderPage()
-    const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: '7 days' }))
-    await user.click(screen.getByRole('button', { name: 'Intermediate' }))
-
-    const clearBtn = screen.getByRole('button', { name: 'Clear filters' })
-    expect(clearBtn).toBeInTheDocument()
-
-    await user.click(clearBtn)
-    // All 10 plans should be visible again
-    expect(screen.getByText('Finding Peace in Anxiety')).toBeInTheDocument()
-    expect(screen.getByText('Walking Through Grief')).toBeInTheDocument()
   })
 
   it('shows auth modal when clicking Start Plan while logged out', async () => {
@@ -249,16 +176,6 @@ describe('ReadingPlans', () => {
     expect(
       screen.queryByText('Switch Reading Plan?'),
     ).not.toBeInTheDocument()
-  })
-
-  it('active filter pills have aria-pressed="true"', async () => {
-    renderPage()
-    const user = userEvent.setup()
-    const sevenDayButton = screen.getByRole('button', { name: '7 days' })
-
-    expect(sevenDayButton).toHaveAttribute('aria-pressed', 'false')
-    await user.click(sevenDayButton)
-    expect(sevenDayButton).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('plan cards link to detail page', () => {

@@ -16,7 +16,7 @@ const DAILY_LINKS = [
 ] as const
 
 const STUDY_LINKS = [
-  { label: 'Bible', to: '/bible' },
+  { label: 'Study Bible', to: '/bible' },
   { label: 'Grow', to: '/grow' },
   { label: "Ask God's Word", to: '/ask' },
 ] as const

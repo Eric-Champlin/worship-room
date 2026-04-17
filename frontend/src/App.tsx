@@ -17,6 +17,7 @@ import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
+import { ScrollToTop } from '@/components/ScrollToTop'
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary'
 import { WhisperToastProvider } from '@/components/ui/WhisperToast'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
@@ -225,6 +226,7 @@ function App() {
         <InstallPrompt />
         <NotificationSchedulerEffect />
         <ChunkErrorBoundary>
+        <ScrollToTop />
         <Suspense fallback={<RouteLoadingFallback />}>
         <RouteTransition>
         <Routes>

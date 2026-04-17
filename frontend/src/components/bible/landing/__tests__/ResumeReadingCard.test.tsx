@@ -38,9 +38,9 @@ describe('ResumeReadingCard', () => {
     expect(screen.getByText('Read 3 hours ago')).toBeInTheDocument()
   })
 
-  it('Continue link navigates to correct URL', () => {
+  it('Continue link visible text includes book and chapter', () => {
     renderCard()
-    const link = screen.getByRole('link', { name: /continue reading john chapter 3/i })
+    const link = screen.getByRole('link', { name: 'Continue reading John 3' })
     expect(link.getAttribute('href')).toBe('/bible/john/3')
   })
 
@@ -68,11 +68,10 @@ describe('ResumeReadingCard', () => {
     expect(link.className).toContain('min-h-[44px]')
   })
 
-  it('has appropriate aria-label', () => {
+  it('does not have a redundant aria-label (visible text carries the name)', () => {
     renderCard()
-    expect(
-      screen.getByLabelText('Continue reading John chapter 3'),
-    ).toBeInTheDocument()
+    const link = screen.getByRole('link', { name: 'Continue reading John 3' })
+    expect(link.getAttribute('aria-label')).toBeNull()
   })
 
   it('focus-visible ring on links', () => {

@@ -57,7 +57,7 @@ describe('BibleReader SEO — BreadcrumbList JSON-LD (BB-40 Step 9)', () => {
     expect(items[0].name).toBe('Worship Room')
     expect(items[0].item).toBe('https://worshiproom.com/')
 
-    expect(items[1].name).toBe('Bible')
+    expect(items[1].name).toBe('Study Bible')
     expect(items[1].item).toBe('https://worshiproom.com/bible')
 
     expect(items[2].name).toBe('Philippians')
