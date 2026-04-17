@@ -1,0 +1,1058 @@
+{
+  "createYourOwnCard": {
+    "heading": "Create Your Own Plan",
+    "chain": [
+      {
+        "depth": 0,
+        "tag": "div",
+        "className": "flex-1",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderStyle": "solid",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "backdropFilter": "none",
+        "padding": "0px 0px 0px 0px",
+        "width": "640.062px",
+        "height": "52px",
+        "display": "block"
+      },
+      {
+        "depth": 1,
+        "tag": "div",
+        "className": "flex flex-col items-start gap-4 sm:flex-row sm:items-center",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderStyle": "solid",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "backdropFilter": "none",
+        "padding": "0px 0px 0px 0px",
+        "width": "846px",
+        "height": "52px",
+        "display": "flex"
+      },
+      {
+        "depth": 2,
+        "tag": "div",
+        "className": "mb-6 rounded-xl border border-primary/20 bg-primary/[0.08] p-6",
+        "bg": "rgba(109, 40, 217, 0.08)",
+        "border": "1px solid rgba(109, 40, 217, 0.2)",
+        "borderStyle": "solid",
+        "borderRadius": "12px",
+        "boxShadow": "none",
+        "backdropFilter": "none",
+        "padding": "24px 24px 24px 24px",
+        "width": "896px",
+        "height": "102px",
+        "display": "block"
+      },
+      {
+        "depth": 3,
+        "tag": "div",
+        "className": "mx-auto max-w-4xl",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderStyle": "solid",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "backdropFilter": "none",
+        "padding": "0px 0px 0px 0px",
+        "width": "896px",
+        "height": "1572px",
+        "display": "block"
+      },
+      {
+        "depth": 4,
+        "tag": "section",
+        "className": "px-4 py-8 sm:px-6 sm:py-10",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderStyle": "solid",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "backdropFilter": "none",
+        "padding": "40px 24px 40px 24px",
+        "width": "1440px",
+        "height": "1652px",
+        "display": "block"
+      }
+    ]
+  },
+  "createYourOwnInteractive": [
+    {
+      "tag": "div",
+      "className": "mb-6 rounded-xl border border-primary/20 bg-primary/[0.08] p-6",
+      "text": "Create Your Own PlanTell us what you're going through and we'll create a personalized Scripture journey just for you.Cre",
+      "href": null,
+      "computed": {
+        "backgroundColor": "rgba(109, 40, 217, 0.08)",
+        "backgroundImage": "none",
+        "border": "1px solid rgba(109, 40, 217, 0.2)",
+        "borderStyle": "solid",
+        "borderRadius": "12px",
+        "boxShadow": "none",
+        "backdropFilter": "none",
+        "padding": "24px 24px 24px 24px",
+        "width": "896px",
+        "height": "102px"
+      }
+    },
+    {
+      "tag": "div",
+      "className": "flex flex-col items-start gap-4 sm:flex-row sm:items-center",
+      "text": "Create Your Own PlanTell us what you're going through and we'll create a personalized Scripture journey just for you.Cre",
+      "href": null,
+      "computed": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "none",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderStyle": "solid",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "backdropFilter": "none",
+        "padding": "0px 0px 0px 0px",
+        "width": "846px",
+        "height": "52px"
+      }
+    },
+    {
+      "tag": "div",
+      "className": "flex-1",
+      "text": "Create Your Own PlanTell us what you're going through and we'll create a personalized Scripture journey just for you.",
+      "href": null,
+      "computed": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "none",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderStyle": "solid",
+        "borderRadius": "0px",
+        "boxShadow": "none",
+        "backdropFilter": "none",
+        "padding": "0px 0px 0px 0px",
+        "width": "640.062px",
+        "height": "52px"
+      }
+    }
+  ],
+  "challengesSectionHeadings": [
+    {
+      "tag": "h1",
+      "text": "Grow in Faith",
+      "className": "mb-1 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2",
+      "fontSize": "48px",
+      "fontWeight": "700",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Create Your Own Plan",
+      "className": "text-lg font-bold text-white",
+      "fontSize": "18px",
+      "fontWeight": "700",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Finding Peace in Anxiety",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Walking Through Grief",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "The Gratitude Reset",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Knowing Who You Are in Christ",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "The Path to Forgiveness",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Learning to Trust God",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Hope When It's Hard",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Healing from the Inside Out",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Discovering Your Purpose",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Building Stronger Relationships",
+      "className": "text-lg font-semibold text-white",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h2",
+      "text": "Fire of Pentecost: 21 Days of the Spirit",
+      "className": "text-xl font-bold text-white sm:text-2xl",
+      "fontSize": "24px",
+      "fontWeight": "700",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h2",
+      "text": "Coming Up",
+      "className": "mb-4 text-lg font-semibold uppercase tracking-wide text-white/50",
+      "fontSize": "18px",
+      "fontWeight": "600",
+      "color": "rgba(255, 255, 255, 0.5)",
+      "textTransform": "uppercase",
+      "letterSpacing": "0.45px"
+    },
+    {
+      "tag": "h3",
+      "text": "Fire of Pentecost: 21 Days of the Spirit",
+      "className": "text-lg font-bold text-white",
+      "fontSize": "18px",
+      "fontWeight": "700",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Advent Awaits: 21 Days to Christmas",
+      "className": "text-lg font-bold text-white",
+      "fontSize": "18px",
+      "fontWeight": "700",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "New Year, New Heart: 21 Days of Renewal",
+      "className": "text-lg font-bold text-white",
+      "fontSize": "18px",
+      "fontWeight": "700",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Pray40: A Lenten Journey",
+      "className": "text-lg font-bold text-white",
+      "fontSize": "18px",
+      "fontWeight": "700",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    },
+    {
+      "tag": "h3",
+      "text": "Easter Joy: 7 Days of Resurrection Hope",
+      "className": "text-lg font-bold text-white",
+      "fontSize": "18px",
+      "fontWeight": "700",
+      "color": "rgb(255, 255, 255)",
+      "textTransform": "none",
+      "letterSpacing": "normal"
+    }
+  ],
+  "challengeCardsDiscovery": [
+    {
+      "i": 0,
+      "tag": "div",
+      "className": "rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm sm:p-8",
+      "firstLine": "Next ChallengeFire of Pentecost: 21 Days of the SpiritStarts in 37 daysBegins Ma",
+      "computed": {
+        "backgroundColor": "rgba(255, 255, 255, 0.06)",
+        "backgroundImage": "none",
+        "backdropFilter": "blur(4px)",
+        "border": "1px solid rgba(255, 255, 255, 0.1)",
+        "borderRadius": "16px",
+        "boxShadow": "none",
+        "padding": "32px 32px 32px 32px",
+        "width": "896px",
+        "height": "334px",
+        "minHeight": "0px",
+        "display": "block",
+        "flexDirection": "row"
+      },
+      "rect": {
+        "x": 272,
+        "y": 402,
+        "width": 896,
+        "height": 334
+      },
+      "tagSpans": [
+        {
+          "text": "Next Challenge",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.6)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "37 days",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(220, 38, 38)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "18px"
+        }
+      ],
+      "hasViewDetails": false,
+      "viewDetailsText": null,
+      "paragraphs": [
+        {
+          "text": "Starts in 37 days",
+          "className": "mb-2 text-lg font-semibold text-white",
+          "webkitLineClamp": "none",
+          "webkitBoxOrient": "horizontal",
+          "overflow": "visible",
+          "display": "block",
+          "fontSize": "18px",
+          "lineHeight": "28px",
+          "color": "rgb(255, 255, 255)",
+          "height": "28px"
+        },
+        {
+          "text": "Begins May 24 - 21 days",
+          "className": "mb-4 text-sm text-white/60",
+          "webkitLineClamp": "none",
+          "webkitBoxOrient": "horizontal",
+          "overflow": "visible",
+          "display": "block",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "color": "rgba(255, 255, 255, 0.6)",
+          "height": "20px"
+        },
+        {
+          "text": "Explore the person and work of the Holy Spirit across 21 days. From the promise of power to being sent on mission, discover how the Spirit transforms your daily",
+          "className": "mb-6 text-white/60",
+          "webkitLineClamp": "none",
+          "webkitBoxOrient": "horizontal",
+          "overflow": "visible",
+          "display": "block",
+          "fontSize": "16px",
+          "lineHeight": "24px",
+          "color": "rgba(255, 255, 255, 0.6)",
+          "height": "48px"
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "tag": "div",
+      "className": "rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20",
+      "firstLine": "Fire of Pentecost: 21 Days of the SpiritPentecostExplore the person and work of ",
+      "computed": {
+        "backgroundColor": "rgba(255, 255, 255, 0.06)",
+        "backgroundImage": "none",
+        "backdropFilter": "blur(4px)",
+        "border": "1px solid rgba(255, 255, 255, 0.1)",
+        "borderRadius": "12px",
+        "boxShadow": "none",
+        "padding": "24px 24px 24px 24px",
+        "width": "440px",
+        "height": "246px",
+        "minHeight": "0px",
+        "display": "block",
+        "flexDirection": "row"
+      },
+      "rect": {
+        "x": 272,
+        "y": 820,
+        "width": 440,
+        "height": 246
+      },
+      "tagSpans": [
+        {
+          "text": "Pentecost",
+          "backgroundColor": "rgba(220, 38, 38, 0.15)",
+          "color": "rgb(220, 38, 38)",
+          "borderRadius": "9999px",
+          "padding": "4px 12px 4px 12px",
+          "fontSize": "12px"
+        },
+        {
+          "text": "21 days",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "-",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "Starts May 24",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        }
+      ],
+      "hasViewDetails": true,
+      "viewDetailsTag": "div",
+      "viewDetailsText": "21 days-Starts May 24Remind meView Details",
+      "paragraphs": [
+        {
+          "text": "Explore the person and work of the Holy Spirit across 21 days. From the promise of power to being sent on mission, discover how the Spirit transforms your daily",
+          "className": "mb-4 line-clamp-2 text-sm text-white/70",
+          "webkitLineClamp": "2",
+          "webkitBoxOrient": "vertical",
+          "overflow": "hidden",
+          "display": "flow-root",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "color": "rgba(255, 255, 255, 0.7)",
+          "height": "40px"
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "tag": "div",
+      "className": "rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20",
+      "firstLine": "Advent Awaits: 21 Days to ChristmasAdventJourney through the Advent season with ",
+      "computed": {
+        "backgroundColor": "rgba(255, 255, 255, 0.06)",
+        "backgroundImage": "none",
+        "backdropFilter": "blur(4px)",
+        "border": "1px solid rgba(255, 255, 255, 0.1)",
+        "borderRadius": "12px",
+        "boxShadow": "none",
+        "padding": "24px 24px 24px 24px",
+        "width": "440px",
+        "height": "246px",
+        "minHeight": "0px",
+        "display": "block",
+        "flexDirection": "row"
+      },
+      "rect": {
+        "x": 728,
+        "y": 820,
+        "width": 440,
+        "height": 246
+      },
+      "tagSpans": [
+        {
+          "text": "Advent",
+          "backgroundColor": "rgba(124, 58, 237, 0.15)",
+          "color": "rgb(124, 58, 237)",
+          "borderRadius": "9999px",
+          "padding": "4px 12px 4px 12px",
+          "fontSize": "12px"
+        },
+        {
+          "text": "21 days",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "-",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "Starts November 29",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        }
+      ],
+      "hasViewDetails": true,
+      "viewDetailsTag": "div",
+      "viewDetailsText": "21 days-Starts November 29Remind meView Details",
+      "paragraphs": [
+        {
+          "text": "Journey through the Advent season with 21 days of hope, peace, joy, and love. Prepare your heart for Christmas through scripture, reflection, and worship as you",
+          "className": "mb-4 line-clamp-2 text-sm text-white/70",
+          "webkitLineClamp": "2",
+          "webkitBoxOrient": "vertical",
+          "overflow": "hidden",
+          "display": "flow-root",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "color": "rgba(255, 255, 255, 0.7)",
+          "height": "40px"
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "tag": "div",
+      "className": "rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20",
+      "firstLine": "New Year, New Heart: 21 Days of RenewalNew YearStart the year with intention and",
+      "computed": {
+        "backgroundColor": "rgba(255, 255, 255, 0.06)",
+        "backgroundImage": "none",
+        "backdropFilter": "blur(4px)",
+        "border": "1px solid rgba(255, 255, 255, 0.1)",
+        "borderRadius": "12px",
+        "boxShadow": "none",
+        "padding": "24px 24px 24px 24px",
+        "width": "440px",
+        "height": "246px",
+        "minHeight": "0px",
+        "display": "block",
+        "flexDirection": "row"
+      },
+      "rect": {
+        "x": 272,
+        "y": 1082,
+        "width": 440,
+        "height": 246
+      },
+      "tagSpans": [
+        {
+          "text": "New Year",
+          "backgroundColor": "rgba(5, 150, 105, 0.15)",
+          "color": "rgb(5, 150, 105)",
+          "borderRadius": "9999px",
+          "padding": "4px 12px 4px 12px",
+          "fontSize": "12px"
+        },
+        {
+          "text": "21 days",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "-",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "Starts January 1",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        }
+      ],
+      "hasViewDetails": true,
+      "viewDetailsTag": "div",
+      "viewDetailsText": "21 days-Starts January 1Remind meView Details",
+      "paragraphs": [
+        {
+          "text": "Start the year with intention and grace. Over 21 days, build a foundation of faith through scripture, prayer, and practical steps that set the tone for the year",
+          "className": "mb-4 line-clamp-2 text-sm text-white/70",
+          "webkitLineClamp": "2",
+          "webkitBoxOrient": "vertical",
+          "overflow": "hidden",
+          "display": "flow-root",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "color": "rgba(255, 255, 255, 0.7)",
+          "height": "40px"
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "tag": "div",
+      "className": "rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20",
+      "firstLine": "Pray40: A Lenten JourneyLentWalk through 40 days of prayer, reflection, and rene",
+      "computed": {
+        "backgroundColor": "rgba(255, 255, 255, 0.06)",
+        "backgroundImage": "none",
+        "backdropFilter": "blur(4px)",
+        "border": "1px solid rgba(255, 255, 255, 0.1)",
+        "borderRadius": "12px",
+        "boxShadow": "none",
+        "padding": "24px 24px 24px 24px",
+        "width": "440px",
+        "height": "218px",
+        "minHeight": "0px",
+        "display": "block",
+        "flexDirection": "row"
+      },
+      "rect": {
+        "x": 728,
+        "y": 1082,
+        "width": 440,
+        "height": 218
+      },
+      "tagSpans": [
+        {
+          "text": "Lent",
+          "backgroundColor": "rgba(107, 33, 168, 0.15)",
+          "color": "rgb(107, 33, 168)",
+          "borderRadius": "9999px",
+          "padding": "4px 12px 4px 12px",
+          "fontSize": "12px"
+        },
+        {
+          "text": "40 days",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "-",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "Starts February 10",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        }
+      ],
+      "hasViewDetails": true,
+      "viewDetailsTag": "div",
+      "viewDetailsText": "40 days-Starts February 10Remind meView Details",
+      "paragraphs": [
+        {
+          "text": "Walk through 40 days of prayer, reflection, and renewal as you prepare your heart for Easter. Each day brings a new scripture, a thoughtful reflection, and a si",
+          "className": "mb-4 line-clamp-2 text-sm text-white/70",
+          "webkitLineClamp": "2",
+          "webkitBoxOrient": "vertical",
+          "overflow": "hidden",
+          "display": "flow-root",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "color": "rgba(255, 255, 255, 0.7)",
+          "height": "40px"
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "tag": "div",
+      "className": "rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm transition-shadow motion-reduce:transition-none lg:hover:shadow-md lg:hover:shadow-black/20",
+      "firstLine": "Easter Joy: 7 Days of Resurrection HopeEasterCelebrate the risen Christ with sev",
+      "computed": {
+        "backgroundColor": "rgba(255, 255, 255, 0.06)",
+        "backgroundImage": "none",
+        "backdropFilter": "blur(4px)",
+        "border": "1px solid rgba(255, 255, 255, 0.1)",
+        "borderRadius": "12px",
+        "boxShadow": "none",
+        "padding": "24px 24px 24px 24px",
+        "width": "440px",
+        "height": "246px",
+        "minHeight": "0px",
+        "display": "block",
+        "flexDirection": "row"
+      },
+      "rect": {
+        "x": 272,
+        "y": 1344,
+        "width": 440,
+        "height": 246
+      },
+      "tagSpans": [
+        {
+          "text": "Easter",
+          "backgroundColor": "rgba(253, 230, 138, 0.15)",
+          "color": "rgb(146, 64, 14)",
+          "borderRadius": "9999px",
+          "padding": "4px 12px 4px 12px",
+          "fontSize": "12px"
+        },
+        {
+          "text": "7 days",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "-",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        },
+        {
+          "text": "Starts March 28",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgba(255, 255, 255, 0.5)",
+          "borderRadius": "0px",
+          "padding": "0px 0px 0px 0px",
+          "fontSize": "14px"
+        }
+      ],
+      "hasViewDetails": true,
+      "viewDetailsTag": "div",
+      "viewDetailsText": "7 days-Starts March 28Remind meView Details",
+      "paragraphs": [
+        {
+          "text": "Celebrate the risen Christ with seven days of joy, gratitude, and hope. From the empty tomb to walking in newness of life, let the power of the resurrection tra",
+          "className": "mb-4 line-clamp-2 text-sm text-white/70",
+          "webkitLineClamp": "2",
+          "webkitBoxOrient": "vertical",
+          "overflow": "hidden",
+          "display": "flow-root",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "color": "rgba(255, 255, 255, 0.7)",
+          "height": "40px"
+        }
+      ]
+    }
+  ],
+  "comingUpSectionCards": {
+    "gridClassName": "grid grid-cols-1 gap-4 sm:grid-cols-2",
+    "gridComputed": {
+      "display": "grid",
+      "gridTemplateColumns": "440px 440px",
+      "gap": "16px"
+    },
+    "items": [
+      {
+        "i": 0,
+        "tag": "div",
+        "className": "motion-safe:animate-stagger-enter",
+        "firstText": "Fire of Pentecost: 21 Days of the SpiritPentecostExplore the person and work of ",
+        "computed": {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px solid rgb(229, 231, 235)",
+          "borderRadius": "0px",
+          "boxShadow": "none",
+          "padding": "0px 0px 0px 0px",
+          "width": "440px",
+          "height": "246px",
+          "minHeight": "auto",
+          "display": "block",
+          "flexDirection": "row",
+          "justifyContent": "normal"
+        },
+        "rect": {
+          "x": 272,
+          "y": 820,
+          "width": 440,
+          "height": 246
+        },
+        "paragraphs": [
+          {
+            "text": "Explore the person and work of the Holy Spirit across 21 days. From the promise of power to being sent on mission, disco",
+            "className": "mb-4 line-clamp-2 text-sm text-white/70",
+            "webkitLineClamp": "2",
+            "height": "40px",
+            "fontSize": "14px"
+          }
+        ]
+      },
+      {
+        "i": 1,
+        "tag": "div",
+        "className": "motion-safe:animate-stagger-enter",
+        "firstText": "Advent Awaits: 21 Days to ChristmasAdventJourney through the Advent season with ",
+        "computed": {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px solid rgb(229, 231, 235)",
+          "borderRadius": "0px",
+          "boxShadow": "none",
+          "padding": "0px 0px 0px 0px",
+          "width": "440px",
+          "height": "246px",
+          "minHeight": "auto",
+          "display": "block",
+          "flexDirection": "row",
+          "justifyContent": "normal"
+        },
+        "rect": {
+          "x": 728,
+          "y": 820,
+          "width": 440,
+          "height": 246
+        },
+        "paragraphs": [
+          {
+            "text": "Journey through the Advent season with 21 days of hope, peace, joy, and love. Prepare your heart for Christmas through s",
+            "className": "mb-4 line-clamp-2 text-sm text-white/70",
+            "webkitLineClamp": "2",
+            "height": "40px",
+            "fontSize": "14px"
+          }
+        ]
+      },
+      {
+        "i": 2,
+        "tag": "div",
+        "className": "motion-safe:animate-stagger-enter",
+        "firstText": "New Year, New Heart: 21 Days of RenewalNew YearStart the year with intention and",
+        "computed": {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px solid rgb(229, 231, 235)",
+          "borderRadius": "0px",
+          "boxShadow": "none",
+          "padding": "0px 0px 0px 0px",
+          "width": "440px",
+          "height": "246px",
+          "minHeight": "auto",
+          "display": "block",
+          "flexDirection": "row",
+          "justifyContent": "normal"
+        },
+        "rect": {
+          "x": 272,
+          "y": 1082,
+          "width": 440,
+          "height": 246
+        },
+        "paragraphs": [
+          {
+            "text": "Start the year with intention and grace. Over 21 days, build a foundation of faith through scripture, prayer, and practi",
+            "className": "mb-4 line-clamp-2 text-sm text-white/70",
+            "webkitLineClamp": "2",
+            "height": "40px",
+            "fontSize": "14px"
+          }
+        ]
+      },
+      {
+        "i": 3,
+        "tag": "div",
+        "className": "motion-safe:animate-stagger-enter",
+        "firstText": "Pray40: A Lenten JourneyLentWalk through 40 days of prayer, reflection, and rene",
+        "computed": {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px solid rgb(229, 231, 235)",
+          "borderRadius": "0px",
+          "boxShadow": "none",
+          "padding": "0px 0px 0px 0px",
+          "width": "440px",
+          "height": "246px",
+          "minHeight": "auto",
+          "display": "block",
+          "flexDirection": "row",
+          "justifyContent": "normal"
+        },
+        "rect": {
+          "x": 728,
+          "y": 1082,
+          "width": 440,
+          "height": 246
+        },
+        "paragraphs": [
+          {
+            "text": "Walk through 40 days of prayer, reflection, and renewal as you prepare your heart for Easter. Each day brings a new scri",
+            "className": "mb-4 line-clamp-2 text-sm text-white/70",
+            "webkitLineClamp": "2",
+            "height": "40px",
+            "fontSize": "14px"
+          }
+        ]
+      },
+      {
+        "i": 4,
+        "tag": "div",
+        "className": "motion-safe:animate-stagger-enter",
+        "firstText": "Easter Joy: 7 Days of Resurrection HopeEasterCelebrate the risen Christ with sev",
+        "computed": {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px solid rgb(229, 231, 235)",
+          "borderRadius": "0px",
+          "boxShadow": "none",
+          "padding": "0px 0px 0px 0px",
+          "width": "440px",
+          "height": "246px",
+          "minHeight": "auto",
+          "display": "block",
+          "flexDirection": "row",
+          "justifyContent": "normal"
+        },
+        "rect": {
+          "x": 272,
+          "y": 1344,
+          "width": 440,
+          "height": 246
+        },
+        "paragraphs": [
+          {
+            "text": "Celebrate the risen Christ with seven days of joy, gratitude, and hope. From the empty tomb to walking in newness of lif",
+            "className": "mb-4 line-clamp-2 text-sm text-white/70",
+            "webkitLineClamp": "2",
+            "height": "40px",
+            "fontSize": "14px"
+          }
+        ]
+      }
+    ]
+  },
+  "categoryTagColors": [
+    {
+      "text": "Pentecost",
+      "className": "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
+      "computed": {
+        "backgroundColor": "rgba(220, 38, 38, 0.15)",
+        "color": "rgb(220, 38, 38)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderRadius": "9999px",
+        "padding": "4px 12px 4px 12px",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "letterSpacing": "normal",
+        "textTransform": "none"
+      }
+    },
+    {
+      "text": "Advent",
+      "className": "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
+      "computed": {
+        "backgroundColor": "rgba(124, 58, 237, 0.15)",
+        "color": "rgb(124, 58, 237)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderRadius": "9999px",
+        "padding": "4px 12px 4px 12px",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "letterSpacing": "normal",
+        "textTransform": "none"
+      }
+    },
+    {
+      "text": "New Year",
+      "className": "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
+      "computed": {
+        "backgroundColor": "rgba(5, 150, 105, 0.15)",
+        "color": "rgb(5, 150, 105)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderRadius": "9999px",
+        "padding": "4px 12px 4px 12px",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "letterSpacing": "normal",
+        "textTransform": "none"
+      }
+    },
+    {
+      "text": "Lent",
+      "className": "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
+      "computed": {
+        "backgroundColor": "rgba(107, 33, 168, 0.15)",
+        "color": "rgb(107, 33, 168)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderRadius": "9999px",
+        "padding": "4px 12px 4px 12px",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "letterSpacing": "normal",
+        "textTransform": "none"
+      }
+    },
+    {
+      "text": "Easter",
+      "className": "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
+      "computed": {
+        "backgroundColor": "rgba(253, 230, 138, 0.15)",
+        "color": "rgb(146, 64, 14)",
+        "border": "0px solid rgb(229, 231, 235)",
+        "borderRadius": "9999px",
+        "padding": "4px 12px 4px 12px",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "letterSpacing": "normal",
+        "textTransform": "none"
+      }
+    }
+  ]
+}
