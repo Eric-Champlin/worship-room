@@ -95,7 +95,7 @@ describe('BibleLanding BB-38 deep-link (search mode)', () => {
 
     // BibleSearchEntry (landing search form) should be present via its placeholder
     expect(
-      screen.getByPlaceholderText(/search the bible.*verses, words, phrases/i),
+      screen.getByPlaceholderText(/search verses or go to a passage/i),
     ).toBeInTheDocument()
 
     // BibleSearchMode's input has id="bible-search-input" — it must NOT be mounted
@@ -120,9 +120,12 @@ describe('BibleLanding BB-38 deep-link (search mode)', () => {
       screen.getByRole('button', { name: /back to bible/i }),
     ).toBeInTheDocument()
 
-    // BibleSearchEntry (landing search form) must NOT be rendered in search mode
+    // BibleSearchEntry (landing search form) must NOT be rendered in search mode.
+    // BibleSearchEntry uses <input type="search"> (role=searchbox);
+    // BibleSearchMode uses <input type="text">. Both share the same placeholder
+    // string post-BB-49, so role is the reliable discriminator.
     expect(
-      screen.queryByPlaceholderText(/search the bible.*verses, words, phrases/i),
+      screen.queryByRole('searchbox', { name: /search the bible/i }),
     ).not.toBeInTheDocument()
   })
 
@@ -147,7 +150,7 @@ describe('BibleLanding BB-38 deep-link (search mode)', () => {
     // Landing content is rendered; BibleSearchMode is NOT mounted
     expect(document.getElementById('bible-search-input')).toBeNull()
     expect(
-      screen.getByPlaceholderText(/search the bible.*verses, words, phrases/i),
+      screen.getByPlaceholderText(/search verses or go to a passage/i),
     ).toBeInTheDocument()
   })
 
@@ -185,7 +188,7 @@ describe('BibleLanding BB-38 deep-link (search mode)', () => {
       expect(document.getElementById('bible-search-input')).toBeNull()
     })
     expect(
-      screen.getByPlaceholderText(/search the bible.*verses, words, phrases/i),
+      screen.getByPlaceholderText(/search verses or go to a passage/i),
     ).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: /back to bible/i }),

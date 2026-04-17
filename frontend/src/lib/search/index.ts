@@ -8,3 +8,5 @@ export {
   _resetIndexCache,
 } from './engine'
 export type { SearchIndex, SearchOptions, SearchResult, VerseRef } from './types'
+export { parseReference } from './reference-parser'
+export type { ParsedReference } from './reference-parser'
