@@ -47,10 +47,10 @@ function mockSeason(seasonId: keyof typeof LITURGICAL_SEASONS) {
   })
 }
 
-function renderLayout(props?: { hero?: React.ReactNode }) {
+function renderLayout(props?: { hero?: React.ReactNode; transparentNav?: boolean }) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Layout hero={props?.hero}>
+      <Layout hero={props?.hero} transparentNav={props?.transparentNav}>
         <div>test content</div>
       </Layout>
     </MemoryRouter>,
@@ -65,5 +65,52 @@ describe('Layout', () => {
     expect(outer.className).toContain('bg-hero-bg')
     expect(outer.className).not.toContain('bg-neutral-bg')
     expect(outer.className).not.toContain('bg-dashboard-dark')
+  })
+
+  describe('main wrapper modes', () => {
+    it('default mode wraps children in <main max-w-7xl py-8>', () => {
+      mockSeason('ordinary-time')
+      const { getByRole } = renderLayout()
+      const main = getByRole('main')
+      expect(main.className).toContain('max-w-7xl')
+      expect(main.className).toContain('py-8')
+      expect(main.className).not.toContain('contents')
+    })
+
+    it('hero mode wraps children in <main max-w-7xl> without py-8', () => {
+      mockSeason('ordinary-time')
+      const { getByRole } = renderLayout({ hero: <div data-testid="hero">hero</div> })
+      const main = getByRole('main')
+      expect(main.className).toContain('max-w-7xl')
+      expect(main.className).not.toContain('py-8')
+      expect(main.className).not.toContain('contents')
+    })
+
+    it('transparentNav without hero uses display:contents main', () => {
+      mockSeason('ordinary-time')
+      const { getByRole } = renderLayout({ transparentNav: true })
+      const main = getByRole('main')
+      expect(main.className).toContain('contents')
+      expect(main.className).not.toContain('max-w-7xl')
+      expect(main.className).not.toContain('py-8')
+    })
+
+    it('transparentNav preserves main#main-content for skip-link', () => {
+      mockSeason('ordinary-time')
+      const { getByRole } = renderLayout({ transparentNav: true })
+      const main = getByRole('main')
+      expect(main.id).toBe('main-content')
+    })
+
+    it('hero mode takes precedence over transparentNav', () => {
+      mockSeason('ordinary-time')
+      const { getByRole } = renderLayout({
+        hero: <div>hero</div>,
+        transparentNav: true,
+      })
+      const main = getByRole('main')
+      expect(main.className).toContain('max-w-7xl')
+      expect(main.className).not.toContain('contents')
+    })
   })
 })

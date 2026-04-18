@@ -27,6 +27,12 @@ export interface Challenge {
   themeColor: string
   dailyContent: DayChallengeContent[]
   communityGoal: string
+  /** Pre-start: how many people have set a reminder. Used by CommunityFeed upcoming state. */
+  remindersCount?: number
+  /** Active: live participant count. If omitted, CommunityFeed hides the count line. */
+  activeParticipantsCount?: number
+  /** Completed: total finishers. If omitted, CommunityFeed defaults to 0. */
+  completedCount?: number
 }
 
 export type ChallengeStatus = 'active' | 'completed' | 'paused' | 'abandoned'

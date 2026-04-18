@@ -1,9 +1,17 @@
 import { Bell, Check, Calendar } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
-import { getContrastSafeColor } from '@/constants/challenges'
+import { Button } from '@/components/ui/Button'
 import type { Challenge } from '@/types/challenges'
 
+import { CategoryTag } from './CategoryTag'
 import { ChallengeIcon } from './ChallengeIcon'
+
+function getCountdownColorClass(daysUntilStart: number): string {
+  if (daysUntilStart <= 1) return 'text-red-400'
+  if (daysUntilStart <= 7) return 'text-amber-300'
+  return 'text-white'
+}
 
 interface NextChallengeCountdownProps {
   challenge: Challenge
@@ -27,9 +35,10 @@ export function NextChallengeCountdown({
     month: 'long',
     day: 'numeric',
   })
+  const countdownColor = getCountdownColorClass(daysUntilStart)
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm sm:p-8">
+    <div className="rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] p-6 sm:p-8">
       <div className="mb-4 flex items-center gap-2 text-white/60">
         <Calendar className="h-5 w-5" aria-hidden="true" />
         <span className="text-sm font-medium uppercase tracking-wide">Next Challenge</span>
@@ -38,48 +47,45 @@ export function NextChallengeCountdown({
       <div className="mb-3 flex items-center gap-3">
         <ChallengeIcon
           name={challenge.icon}
-          className="h-7 w-7 shrink-0"
+          className="h-7 w-7 shrink-0 text-white/90"
           aria-hidden="true"
         />
-        <h2 className="text-xl font-bold text-white sm:text-2xl">{challenge.title}</h2>
+        <h2 className="flex-1 text-xl font-bold text-white sm:text-2xl">{challenge.title}</h2>
+        <CategoryTag category={challenge.season} className="shrink-0" />
       </div>
 
       <p className="mb-2 text-lg font-semibold text-white">
         Starts in{' '}
-        <span style={{ color: getContrastSafeColor(challenge.themeColor) }}>
+        <span className={countdownColor}>
           {daysUntilStart} {daysUntilStart === 1 ? 'day' : 'days'}
         </span>
       </p>
 
       <p className="mb-4 text-sm text-white/60">
-        Begins {formattedStartDate} - {challenge.durationDays} days
+        Begins {formattedStartDate} · {challenge.durationDays} days
       </p>
 
       <p className="mb-6 text-white/60">{challenge.description}</p>
 
-      <button
-        type="button"
-        onClick={onToggleReminder}
-        className={
-          isReminderSet
-            ? 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
-            : 'inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
-        }
-        aria-label={isReminderSet ? 'Remove reminder' : 'Set reminder'}
-        aria-pressed={isReminderSet}
-      >
-        {isReminderSet ? (
-          <>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="light"
+          size="sm"
+          onClick={onToggleReminder}
+          aria-label={isReminderSet ? 'Remove reminder' : 'Set reminder'}
+          aria-pressed={isReminderSet}
+        >
+          {isReminderSet ? (
             <Check className="h-4 w-4" aria-hidden="true" />
-            Reminder set
-          </>
-        ) : (
-          <>
+          ) : (
             <Bell className="h-4 w-4" aria-hidden="true" />
-            Remind me
-          </>
-        )}
-      </button>
+          )}
+          {isReminderSet ? 'Reminder set' : 'Remind me'}
+        </Button>
+        <Button variant="light" size="sm" asChild>
+          <Link to={`/challenges/${challenge.id}`}>View Details</Link>
+        </Button>
+      </div>
     </div>
   )
 }

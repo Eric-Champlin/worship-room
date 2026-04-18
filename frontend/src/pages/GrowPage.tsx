@@ -12,14 +12,10 @@ import { ReadingPlansContent } from '@/pages/ReadingPlans'
 import { ChallengesContent } from '@/pages/Challenges'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 import { CHALLENGES } from '@/data/challenges'
+import { Tabs } from '@/components/ui/Tabs'
 import { cn } from '@/lib/utils'
 
-const TABS = [
-  { id: 'plans', label: 'Reading Plans', icon: BookOpen },
-  { id: 'challenges', label: 'Challenges', icon: Flame },
-] as const
-
-type TabId = (typeof TABS)[number]['id']
+type TabId = 'plans' | 'challenges'
 
 function isValidTab(value: string | null): value is TabId {
   return value === 'plans' || value === 'challenges'
@@ -58,27 +54,6 @@ export function GrowPage() {
     [setSearchParams],
   )
 
-  // Arrow key navigation for tab bar (WAI-ARIA Tabs pattern)
-  const tabButtonRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const handleTabKeyDown = useCallback(
-    (e: React.KeyboardEvent, currentIndex: number) => {
-      let nextIndex: number | null = null
-      if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % TABS.length
-      else if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + TABS.length) % TABS.length
-      else if (e.key === 'Home') nextIndex = 0
-      else if (e.key === 'End') nextIndex = TABS.length - 1
-      if (nextIndex !== null) {
-        e.preventDefault()
-        switchTab(TABS[nextIndex].id)
-        tabButtonRefs.current[nextIndex]?.focus()
-      }
-    },
-    [switchTab],
-  )
-
-  // Tab underline position
-  const activeTabIndex = TABS.findIndex((t) => t.id === activeTab)
-
   const createParam = searchParams.get('create') === 'true'
 
   return (
@@ -98,7 +73,7 @@ export function GrowPage() {
             className="mb-1 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
             style={GRADIENT_TEXT_STYLE}
           >
-            Grow in <span className="font-script">Faith</span>
+            Grow in Faith
           </h1>
           <p className="mt-2 font-serif italic text-base text-white/60 sm:text-lg">
             Structured journeys to deepen your walk with God
@@ -111,60 +86,35 @@ export function GrowPage() {
         {/* Sticky Tab Bar */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-white/[0.08] backdrop-blur-xl transition-shadow motion-reduce:transition-none',
+            'sticky top-0 z-40 backdrop-blur-md transition-shadow motion-reduce:transition-none',
             isSticky && 'shadow-md shadow-black/20',
           )}
         >
-          <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-white/10">
-            <div
-              className="relative flex w-full"
-              role="tablist"
-              aria-label="Grow in Faith sections"
-            >
-              {TABS.map((tab, index) => {
-                const isActive = activeTab === tab.id
-                const Icon = tab.icon
-                return (
-                  <button
-                    key={tab.id}
-                    ref={(el) => { tabButtonRefs.current[index] = el }}
-                    type="button"
-                    role="tab"
-                    id={`tab-${tab.id}`}
-                    aria-selected={isActive}
-                    aria-controls={`tabpanel-${tab.id}`}
-                    tabIndex={isActive ? 0 : -1}
-                    onClick={() => switchTab(tab.id)}
-                    onKeyDown={(e) => handleTabKeyDown(e, index)}
-                    className={cn(
-                      'flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark sm:py-4 sm:text-base active:scale-[0.98]',
-                      isActive
-                        ? 'text-white'
-                        : 'text-white/60 hover:text-white/80',
-                    )}
-                  >
-                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                    {tab.label}
-                    {tab.id === 'challenges' && activeChallengeInfo && (
-                      <span
-                        className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
-                        style={{ backgroundColor: activeChallengeThemeColor }}
-                        aria-hidden="true"
-                      />
-                    )}
-                  </button>
-                )
-              })}
-              {/* Animated underline */}
-              <div
-                className="absolute bottom-0 h-0.5 bg-primary transition-transform motion-reduce:transition-none duration-base ease-standard"
-                style={{
-                  width: `${100 / TABS.length}%`,
-                  transform: `translateX(${activeTabIndex * 100}%)`,
-                }}
-                aria-hidden="true"
-              />
-            </div>
+          <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">
+            <Tabs
+              ariaLabel="Grow in Faith sections"
+              activeId={activeTab}
+              onChange={(id) => switchTab(id as TabId)}
+              items={[
+                {
+                  id: 'plans',
+                  label: 'Reading Plans',
+                  icon: <BookOpen className="h-4 w-4" aria-hidden="true" />,
+                },
+                {
+                  id: 'challenges',
+                  label: 'Challenges',
+                  icon: <Flame className="h-4 w-4" aria-hidden="true" />,
+                  badge: activeChallengeInfo ? (
+                    <span
+                      className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
+                      style={{ backgroundColor: activeChallengeThemeColor }}
+                      aria-hidden="true"
+                    />
+                  ) : undefined,
+                },
+              ]}
+            />
           </div>
         </div>
 

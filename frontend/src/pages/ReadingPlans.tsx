@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Sparkles, Star } from 'lucide-react'
 
+import { Button } from '@/components/ui/Button'
 import { CreatePlanFlow } from '@/components/reading-plans/CreatePlanFlow'
 import { PlanCard } from '@/components/reading-plans/PlanCard'
 import { useAuth } from '@/hooks/useAuth'
@@ -160,11 +161,11 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
     <>
       <section id="reading-plans-content" className="px-4 py-8 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
-          {/* Create Your Own Plan card */}
-          <div className="mb-6 rounded-xl border border-primary/20 bg-primary/[0.08] p-6">
+          {/* Create Your Own Plan card — canonical FrostedCard treatment */}
+          <div className="mb-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <Sparkles className="h-6 w-6 text-primary" />
+                <Sparkles className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-white">Create Your Own Plan</h3>
@@ -172,13 +173,9 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
                   Tell us what you&apos;re going through and we&apos;ll create a personalized Scripture journey just for you.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleCreatePlan}
-                className="min-h-[44px] w-full rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-lt sm:w-auto"
-              >
+              <Button variant="light" onClick={handleCreatePlan}>
                 Create Plan
-              </button>
+              </Button>
             </div>
           </div>
 

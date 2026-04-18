@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { PlanCard } from '../PlanCard'
 import type { ReadingPlanMeta } from '@/types/reading-plans'
@@ -16,10 +16,11 @@ const TEST_PLAN: ReadingPlanMeta = {
 
 function renderCard(
   status: 'unstarted' | 'active' | 'paused' | 'completed' = 'unstarted',
+  onStart: (id: string) => void = vi.fn(),
 ) {
   return render(
     <MemoryRouter>
-      <PlanCard plan={TEST_PLAN} status={status} onStart={vi.fn()} />
+      <PlanCard plan={TEST_PLAN} status={status} onStart={onStart} />
     </MemoryRouter>,
   )
 }
@@ -28,18 +29,15 @@ describe('PlanCard', () => {
   it('renders as a Link to the plan detail page', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link).toHaveAttribute(
-      'href',
-      '/reading-plans/finding-peace-in-anxiety',
-    )
+    expect(link).toHaveAttribute('href', '/reading-plans/finding-peace-in-anxiety')
   })
 
-  it('applies FrostedCard-pattern classes to the link container', () => {
+  it('applies canonical FrostedCard class string', () => {
     renderCard()
     const link = screen.getByRole('link')
     expect(link.className).toContain('rounded-2xl')
-    expect(link.className).toContain('bg-white/5')
-    expect(link.className).toContain('border-white/10')
+    expect(link.className).toContain('bg-white/[0.06]')
+    expect(link.className).toContain('border-white/[0.12]')
     expect(link.className).toContain('backdrop-blur-sm')
   })
 
@@ -50,15 +48,13 @@ describe('PlanCard', () => {
     expect(link.className).toContain('hover:border-white/20')
   })
 
-  it('applies focus-visible ring classes', () => {
+  it('applies focus-visible ring classes with hero-bg offset', () => {
     renderCard()
     const link = screen.getByRole('link')
     expect(link.className).toContain('focus-visible:ring-2')
     expect(link.className).toContain('focus-visible:ring-white/50')
     expect(link.className).toContain('focus-visible:ring-offset-2')
-    expect(link.className).toContain(
-      'focus-visible:ring-offset-dashboard-dark',
-    )
+    expect(link.className).toContain('focus-visible:ring-offset-hero-bg')
   })
 
   it('uses animation token duration-base (not hardcoded ms)', () => {
@@ -68,13 +64,34 @@ describe('PlanCard', () => {
     expect(link.className).toContain('motion-reduce:transition-none')
   })
 
-  it('renders title with font-semibold (not font-bold)', () => {
+  it('uses flex h-full flex-col for equal heights', () => {
     renderCard()
-    const title = screen.getByRole('heading', {
-      name: 'Finding Peace in Anxiety',
-    })
+    const link = screen.getByRole('link')
+    expect(link.className).toContain('flex')
+    expect(link.className).toContain('h-full')
+    expect(link.className).toContain('flex-col')
+  })
+
+  it('renders emoji inline with title (text-lg, not text-4xl)', () => {
+    renderCard()
+    const title = screen.getByRole('heading', { name: 'Finding Peace in Anxiety' })
+    const emoji = title.previousElementSibling as HTMLElement
+    expect(emoji.textContent).toBe('🕊️')
+    expect(emoji.className).toContain('text-lg')
+    expect(emoji.className).not.toContain('text-4xl')
+  })
+
+  it('emoji span has aria-hidden', () => {
+    renderCard()
+    const title = screen.getByRole('heading')
+    const emoji = title.previousElementSibling as HTMLElement
+    expect(emoji.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('title uses font-semibold', () => {
+    renderCard()
+    const title = screen.getByRole('heading', { name: 'Finding Peace in Anxiety' })
     expect(title.className).toContain('font-semibold')
-    expect(title.className).not.toContain('font-bold')
   })
 
   it('renders description with text-white/70', () => {
@@ -83,10 +100,49 @@ describe('PlanCard', () => {
     expect(description.className).toContain('text-white/70')
   })
 
-  it('renders metadata pills with text-white/70 (not text-white/50)', () => {
+  it('renders metadata pills with text-white/70', () => {
     renderCard()
     const durationPill = screen.getByText('7 days')
     expect(durationPill.className).toContain('text-white/70')
-    expect(durationPill.className).not.toContain('text-white/50')
+  })
+
+  it('renders Start Plan as white pill (variant="light")', () => {
+    renderCard('unstarted')
+    const btn = screen.getByRole('button', { name: 'Start Plan' })
+    expect(btn.className).toContain('bg-white')
+    expect(btn.className).toContain('text-primary')
+    expect(btn.className).toContain('rounded-full')
+  })
+
+  it('renders Continue label when status=active', () => {
+    renderCard('active')
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
+  })
+
+  it('renders Resume label when status=paused', () => {
+    renderCard('paused')
+    expect(screen.getByRole('button', { name: 'Resume' })).toBeInTheDocument()
+  })
+
+  it('completed status renders a "Completed" badge (no button)', () => {
+    renderCard('completed')
+    expect(screen.queryByRole('button')).toBeNull()
+    expect(screen.getByText('Completed')).toBeInTheDocument()
+  })
+
+  it('clicking Start Plan calls onStart with planId and stops propagation', () => {
+    const onStart = vi.fn()
+    renderCard('unstarted', onStart)
+    const btn = screen.getByRole('button', { name: 'Start Plan' })
+    fireEvent.click(btn)
+    expect(onStart).toHaveBeenCalledTimes(1)
+    expect(onStart).toHaveBeenCalledWith('finding-peace-in-anxiety')
+  })
+
+  it('action row uses mt-auto for bottom pin', () => {
+    renderCard()
+    const btn = screen.getByRole('button')
+    const actionRow = btn.parentElement
+    expect(actionRow?.className).toContain('mt-auto')
   })
 })

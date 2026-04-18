@@ -93,6 +93,13 @@ describe('GrowPage', () => {
     ).toBeInTheDocument()
   })
 
+  it('hero h1 does not contain font-script class', () => {
+    renderPage()
+    const h1 = screen.getByRole('heading', { name: 'Grow in Faith', level: 1 })
+    expect(h1.querySelector('.font-script')).toBeNull()
+    expect(h1.textContent).toBe('Grow in Faith')
+  })
+
   it('renders hero subtitle', () => {
     renderPage()
     expect(
