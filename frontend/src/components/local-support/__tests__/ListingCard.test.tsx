@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ListingCard } from '../ListingCard'
 import type { LocalSupportPlace } from '@/types/local-support'
@@ -139,5 +139,91 @@ describe('ListingCard', () => {
     const article = container.querySelector('article')
     expect(article?.className).toContain('ring-2')
     expect(article?.className).toContain('ring-primary')
+  })
+
+  describe('facelift styling', () => {
+    it('address paragraph uses solid text-white (not text-white/60)', () => {
+      render(<ListingCard {...defaultProps} />)
+      const address = screen.getByText('115 W 7th St, Columbia, TN 38401')
+      expect(address.className).toContain('text-white')
+      expect(address.className).not.toContain('text-white/60')
+    })
+
+    it('MapPin icon before address is text-white/70', () => {
+      render(<ListingCard {...defaultProps} />)
+      const address = screen.getByText('115 W 7th St, Columbia, TN 38401')
+      const icon = address.querySelector('svg')
+      expect(icon?.getAttribute('class')).toContain('text-white/70')
+    })
+
+    it('phone anchor renders in text-white with hover underline and primary-lt focus ring', () => {
+      render(<ListingCard {...defaultProps} />)
+      const phoneLink = screen.getByRole('link', { name: '(931) 555-0101' })
+      expect(phoneLink.className).toContain('text-white')
+      expect(phoneLink.className).toContain('hover:underline')
+      expect(phoneLink.className).toContain('focus:ring-primary-lt')
+      expect(phoneLink.className).not.toContain('text-primary')
+    })
+
+    it('photo wrapper is visible at all breakpoints (no hidden sm:block)', () => {
+      const { container } = render(<ListingCard {...defaultProps} />)
+      // Photo wrapper is the first flex child inside the main card row
+      const photoWrapper = container.querySelector('article > div.flex > div.shrink-0')
+      expect(photoWrapper).not.toBeNull()
+      expect(photoWrapper!.className).not.toContain('hidden')
+      expect(photoWrapper!.className).not.toContain('sm:block')
+    })
+
+    it('photo placeholder uses responsive sizing (64px mobile, 80px sm+)', () => {
+      const { container } = render(<ListingCard {...defaultProps} />)
+      const placeholder = container.querySelector('div.h-16.w-16')
+      expect(placeholder).not.toBeNull()
+      expect(placeholder!.className).toContain('h-16')
+      expect(placeholder!.className).toContain('w-16')
+      expect(placeholder!.className).toContain('sm:h-20')
+      expect(placeholder!.className).toContain('sm:w-20')
+    })
+
+    it('photo image uses responsive sizing and has onError handler when photoUrl present', () => {
+      const placeWithPhoto = { ...mockPlace, photoUrl: 'https://example.com/photo.jpg' }
+      const { container } = render(<ListingCard {...defaultProps} place={placeWithPhoto} />)
+      const img = container.querySelector('img')
+      expect(img).not.toBeNull()
+      expect(img!.className).toContain('h-16')
+      expect(img!.className).toContain('w-16')
+      expect(img!.className).toContain('sm:h-20')
+      expect(img!.className).toContain('sm:w-20')
+    })
+
+    it('photo onError replaces the broken image with the placeholder (stable layout)', () => {
+      const placeWithPhoto = { ...mockPlace, photoUrl: 'https://example.com/broken.jpg' }
+      const { container } = render(<ListingCard {...defaultProps} place={placeWithPhoto} />)
+      const img = container.querySelector('img') as HTMLImageElement
+      expect(img).not.toBeNull()
+      fireEvent.error(img)
+      expect(container.querySelector('img')).toBeNull()
+      const placeholder = container.querySelector('div.h-16.w-16')
+      expect(placeholder).not.toBeNull()
+      expect(placeholder!.className).toContain('sm:h-20')
+      expect(placeholder!.className).toContain('sm:w-20')
+    })
+
+    it('Get Directions renders as white pill with text-primary and glow shadow', () => {
+      render(<ListingCard {...defaultProps} isExpanded={true} />)
+      const link = screen.getByRole('link', { name: /Get Directions/ })
+      expect(link.className).toContain('rounded-full')
+      expect(link.className).toContain('bg-white')
+      expect(link.className).toContain('text-primary')
+      expect(link.className).toContain('font-semibold')
+      expect(link.className).toContain('shadow-[0_0_20px_rgba(255,255,255,0.15)]')
+      expect(link.className).toContain('focus-visible:ring-primary-lt')
+    })
+
+    it('Visit Website anchor uses text-white for readability on dark cards', () => {
+      render(<ListingCard {...defaultProps} isExpanded={true} />)
+      const link = screen.getByRole('link', { name: /Visit Website/ })
+      expect(link.className).toContain('text-white')
+      expect(link.className).not.toContain('text-primary ')
+    })
   })
 })

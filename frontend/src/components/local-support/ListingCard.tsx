@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Bookmark, ChevronDown, ExternalLink, ImageOff, MapPin, Phone, Share2, Star } from 'lucide-react'
 import type { LocalSupportPlace, LocalSupportCategory } from '@/types/local-support'
 import { VisitButton, VisitNote, useVisitState } from './VisitButton'
@@ -61,6 +62,7 @@ export function ListingCard({
   listId,
 }: ListingCardProps) {
   const detailsId = listId ? `${listId}-${place.id}-details` : `${place.id}-details`
+  const [photoLoadFailed, setPhotoLoadFailed] = useState(false)
 
   // Always call hook (React rules); renders are conditional
   const visitState = useVisitState({
@@ -81,17 +83,19 @@ export function ListingCard({
       {/* Main card content */}
       <div className="flex gap-4">
         {/* Photo or placeholder */}
-        <div className="hidden shrink-0 sm:block">
-          {place.photoUrl ? (
+        <div className="shrink-0">
+          {place.photoUrl && !photoLoadFailed ? (
             <img
               src={place.photoUrl}
               alt={`Photo of ${place.name}`}
-              className="h-20 w-20 rounded-lg object-cover"
+              className="h-16 w-16 rounded-lg object-cover sm:h-20 sm:w-20"
               loading="lazy"
+              onError={() => setPhotoLoadFailed(true)}
             />
           ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-white/[0.06]">
-              <ImageOff size={24} className="text-white/30" aria-hidden="true" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-white/[0.06] sm:h-20 sm:w-20">
+              <ImageOff size={20} className="text-white/30 sm:hidden" aria-hidden="true" />
+              <ImageOff size={24} className="hidden text-white/30 sm:inline" aria-hidden="true" />
             </div>
           )}
         </div>
@@ -107,17 +111,17 @@ export function ListingCard({
             )}
           </div>
 
-          <p className="mt-1 flex items-center gap-1 text-sm text-white/60">
-            <MapPin size={14} className="shrink-0" aria-hidden="true" />
+          <p className="mt-1 flex items-center gap-1 text-sm text-white">
+            <MapPin size={14} className="shrink-0 text-white/70" aria-hidden="true" />
             {place.address}
           </p>
 
           {place.phone && (
             <p className="mt-1 flex items-center gap-1 text-sm">
-              <Phone size={14} className="shrink-0 text-white/60" aria-hidden="true" />
+              <Phone size={14} className="shrink-0 text-white/70" aria-hidden="true" />
               <a
                 href={`tel:${place.phone}`}
-                className="rounded text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary"
+                className="rounded text-white hover:underline focus:outline-none focus:ring-2 focus:ring-primary-lt"
               >
                 {place.phone}
               </a>
@@ -204,7 +208,7 @@ export function ListingCard({
                 href={place.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary"
+                className="rounded text-white hover:underline focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 Visit Website
               </a>
@@ -244,7 +248,7 @@ export function ListingCard({
             href={`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+            className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
           >
             <MapPin size={14} aria-hidden="true" />
             Get Directions

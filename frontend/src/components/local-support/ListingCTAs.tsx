@@ -69,13 +69,13 @@ export function ListingCTAs({ placeName, category, onShareClick }: ListingCTAsPr
 
   return (
     <div className="border-t border-white/10 pt-3">
-      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 sm:gap-3 lg:flex lg:flex-row lg:gap-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         {ctas.map((cta) =>
           cta.to ? (
             <Link
               key={cta.label}
               to={cta.to}
-              className="inline-flex min-h-[44px] items-center gap-1 text-sm text-primary-lt transition-colors hover:text-primary"
+              className="inline-flex min-h-[44px] items-center gap-1 whitespace-nowrap text-sm text-white transition-colors hover:text-white/80"
             >
               {cta.label}
               <ArrowRight size={14} aria-hidden="true" />
@@ -85,7 +85,7 @@ export function ListingCTAs({ placeName, category, onShareClick }: ListingCTAsPr
               key={cta.label}
               type="button"
               onClick={cta.onClick}
-              className="inline-flex min-h-[44px] items-center gap-1 text-left text-sm text-primary-lt transition-colors hover:text-primary"
+              className="inline-flex min-h-[44px] items-center gap-1 whitespace-nowrap text-left text-sm text-white transition-colors hover:text-white/80"
             >
               {cta.label}
               <ArrowRight size={14} aria-hidden="true" />

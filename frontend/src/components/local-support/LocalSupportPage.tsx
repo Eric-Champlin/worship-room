@@ -8,7 +8,6 @@ import { createLocalSupportService } from '@/services/local-support-service'
 import { categoryToPlaceType } from '@/services/local-visit-storage'
 import { calculateDistanceMiles } from '@/lib/geo'
 import type { LocalSupportPlace, LocalSupportCategory, SortOption } from '@/types/local-support'
-import { getMockPlacesByCategory } from '@/mocks/local-support-mock-data'
 import { SiteFooter } from '@/components/SiteFooter'
 import { LocalSupportHero } from './LocalSupportHero'
 import { SearchControls } from './SearchControls'
@@ -24,7 +23,6 @@ export interface LocalSupportPageConfig {
   headingId: string
   title: string
   subtitle: string
-  scriptWord?: string
   extraHeroContent?: ReactNode
   searchKeyword: string
   filterOptions: readonly string[] | null
@@ -54,21 +52,15 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   }, [recordActivity, showToast])
 
   // Search state
-  const [searchResults, setSearchResults] = useState<LocalSupportPlace[]>(() =>
-    isAuthenticated ? [] : getMockPlacesByCategory(config.category),
-  )
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() =>
-    isAuthenticated ? null : MOCK_DATA_CENTER,
-  )
+  const [searchResults, setSearchResults] = useState<LocalSupportPlace[]>([])
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [radius, setRadius] = useState(25)
   const [sortOption, setSortOption] = useState<SortOption>('distance')
   const [filterValue, setFilterValue] = useState<string | null>(null)
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'search' | 'saved'>('search')
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
-  const [searchState, setSearchState] = useState<'idle' | 'loading' | 'error' | 'success'>(() =>
-    isAuthenticated ? 'idle' : 'success',
-  )
+  const [searchState, setSearchState] = useState<'idle' | 'loading' | 'error' | 'success'>('idle')
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
@@ -242,7 +234,6 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
         headingId={config.headingId}
         title={config.title}
         subtitle={config.subtitle}
-        scriptWord={config.scriptWord}
         extraContent={config.extraHeroContent}
       />
 
@@ -295,9 +286,9 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                   tabRefs.current[nextIndex]?.focus()
                 }}
                 className={cn(
-                  'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                  'min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
                   activeTab === tab
-                    ? 'bg-primary/20 text-white'
+                    ? 'bg-white text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-[0.98]'
                     : 'bg-white/10 text-white/60 hover:bg-white/15',
                 )}
               >
@@ -374,9 +365,9 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     aria-pressed={mobileView === 'list'}
                     onClick={() => setMobileView('list')}
                     className={cn(
-                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
                       mobileView === 'list'
-                        ? 'bg-primary/20 text-white'
+                        ? 'bg-white text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-[0.98]'
                         : 'bg-white/10 text-white/60 hover:bg-white/15',
                     )}
                   >
@@ -388,9 +379,9 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     aria-pressed={mobileView === 'map'}
                     onClick={() => setMobileView('map')}
                     className={cn(
-                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
                       mobileView === 'map'
-                        ? 'bg-primary/20 text-white'
+                        ? 'bg-white text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-[0.98]'
                         : 'bg-white/10 text-white/60 hover:bg-white/15',
                     )}
                   >

@@ -3,35 +3,9 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
-import type { LocalSupportPlace } from '@/types/local-support'
 
-const MOCK_CHURCH: LocalSupportPlace = {
-  id: 'church-1',
-  name: 'First Baptist Church',
-  address: '123 Main St, Columbia, TN 38401',
-  phone: '(931) 555-0100',
-  lat: 35.615,
-  lng: -87.035,
-  category: 'churches',
-  website: null,
-  photoUrl: null,
-  description: null,
-  hoursOfOperation: null,
-  rating: 4.5,
-  denomination: null,
-  specialties: null,
-}
-
-// Return mock data for logged-out users (isAuthenticated: false)
-vi.mock('@/mocks/local-support-mock-data', () => ({
-  getMockPlacesByCategory: () => [MOCK_CHURCH],
-  getMockPlaces: () => [MOCK_CHURCH],
-}))
-
-// Use isAuthenticated: false so mock data loads AND we can verify
-// the showToast import doesn't break the component.
-// Visit buttons are hidden when !isAuthenticated, so we verify the
-// toast integration at the code/compilation level.
+// Logged-out user: no auth gate, no mock data. The page should render
+// the SearchPrompt empty state until the user runs a search.
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
     user: null,
@@ -97,11 +71,12 @@ function renderPage() {
 }
 
 describe('LocalSupportPage — visit toast integration', () => {
-  it('renders page with toast provider without errors', () => {
+  it('renders the SearchPrompt empty state for logged-out users with no mock data', () => {
     renderPage()
-    // Page renders successfully with useToast() hook imported
-    // Verify the listing renders from mock data
-    expect(screen.getAllByText('First Baptist Church').length).toBeGreaterThan(0)
+    // No initial search has been run, so no listings should appear.
+    // The page should show the SearchPrompt empty state instead.
+    expect(screen.getByText(/find support near you/i)).toBeInTheDocument()
+    expect(screen.getByText(/enter your location/i)).toBeInTheDocument()
   })
 
   it('page uses useToast hook without crashing', () => {

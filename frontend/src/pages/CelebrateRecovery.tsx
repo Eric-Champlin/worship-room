@@ -20,7 +20,6 @@ export function CelebrateRecovery() {
         category: 'celebrate-recovery',
         headingId: 'celebrate-recovery-heading',
         title: 'Find Celebrate Recovery',
-        scriptWord: 'Recovery',
         subtitle:
           "Freedom from hurts, habits, and hang-ups starts with showing up. Celebrate Recovery is a Christ-centered 12-step recovery program where you'll find people who understand — because they've been there too.",
         extraHeroContent: (

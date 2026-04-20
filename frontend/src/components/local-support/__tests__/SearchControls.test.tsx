@@ -120,4 +120,34 @@ describe('SearchControls', () => {
       expect(blocked).toHaveBeenCalled()
     })
   })
+
+  describe('white-pill CTA styling', () => {
+    it('Use My Location button renders as white pill with text-primary', () => {
+      render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
+      const button = screen.getByLabelText('Use my current location')
+      expect(button.className).toContain('bg-white')
+      expect(button.className).toContain('text-primary')
+      expect(button.className).toContain('rounded-full')
+      expect(button.className).toContain('font-semibold')
+      expect(button.className).toContain('shadow-[0_0_20px_rgba(255,255,255,0.15)]')
+      expect(button.className).toContain('focus-visible:ring-primary-lt')
+      expect(button.className).toContain('focus-visible:ring-offset-hero-bg')
+    })
+
+    it('Search submit button renders as white pill with text-primary', () => {
+      render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
+      const button = screen.getByRole('button', { name: /search/i })
+      expect(button.className).toContain('bg-white')
+      expect(button.className).toContain('text-primary')
+      expect(button.className).toContain('rounded-full')
+      expect(button.className).toContain('font-semibold')
+      expect(button.className).toContain('shadow-[0_0_20px_rgba(255,255,255,0.15)]')
+    })
+
+    it('Use My Location button preserves disabled:opacity-50 for loading state', () => {
+      render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
+      const button = screen.getByLabelText('Use my current location')
+      expect(button.className).toContain('disabled:opacity-50')
+    })
+  })
 })
