@@ -242,15 +242,31 @@ describe('AmbientBrowser', () => {
     }
   })
 
-  it('renders SectionHeader headings for all sections (uppercase text-white/50)', () => {
+  it('Featured and All Scenes headings use default SectionHeader variant with text-white', () => {
     render(<AmbientBrowser />)
     const featured = screen.getByRole('heading', { level: 2, name: /featured/i })
     const allScenes = screen.getByRole('heading', { level: 2, name: /all scenes/i })
-    const byom = screen.getByRole('heading', { level: 2, name: /build your own mix/i })
-    for (const heading of [featured, allScenes, byom]) {
+    for (const heading of [featured, allScenes]) {
       expect(heading.className).toContain('uppercase')
-      expect(heading.className).toContain('text-white/50')
+      expect(heading.className).toContain('tracking-wide')
+      expect(heading.className).toContain('text-white')
+      expect(heading.className).not.toContain('text-white/50')
+      expect(heading.className).not.toContain('text-center')
     }
+  })
+
+  it('"Build Your Own Mix" renders as gradient-variant heading', () => {
+    render(<AmbientBrowser />)
+    const byom = screen.getByRole('heading', {
+      level: 2,
+      name: /build your own mix/i,
+    })
+    expect(byom.className).toContain('text-center')
+    expect(byom.className).toContain('text-3xl')
+    expect(byom.className).toContain('sm:text-4xl')
+    expect(byom.className).toContain('lg:text-5xl')
+    expect(byom.style.backgroundImage).not.toBe('')
+    expect(byom.className).not.toContain('uppercase')
   })
 
   it('scene grid has responsive classes', () => {

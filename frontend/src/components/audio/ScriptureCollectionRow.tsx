@@ -15,7 +15,7 @@ export function ScriptureCollectionRow({
   return (
     <section className="space-y-3">
       <SectionHeader>{collection.name}</SectionHeader>
-      <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scrollbar-none">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {collection.readings.map((reading) => (
           <ScriptureSessionCard
             key={reading.id}

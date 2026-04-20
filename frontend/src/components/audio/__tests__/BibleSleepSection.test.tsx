@@ -82,11 +82,13 @@ describe('BibleSleepSection', () => {
     expect(mockLoadScene.mock.calls[0][0]).toHaveProperty('id', 'peaceful-study')
   })
 
-  it('renders Scripture Reading heading as SectionHeader (uppercase text-white/50)', () => {
+  it('renders Scripture Reading heading as SectionHeader default variant (uppercase text-white)', () => {
     renderSection()
     const heading = screen.getByRole('heading', { level: 2, name: /scripture reading/i })
     expect(heading.className).toContain('uppercase')
-    expect(heading.className).toContain('text-white/50')
+    expect(heading.className).toContain('tracking-wide')
+    expect(heading.className).toContain('text-white')
+    expect(heading.className).not.toContain('text-white/50')
   })
 
   it('quick-start play icons use text-primary-lt (WCAG AA)', () => {

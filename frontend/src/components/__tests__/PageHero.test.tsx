@@ -32,10 +32,13 @@ describe('PageHero', () => {
     expect(scriptSpan).toBeNull()
   })
 
-  it('uses lg:text-5xl sizing', () => {
+  it('uses text-4xl sm:text-5xl lg:text-6xl sizing (Round 2 bump)', () => {
     render(<PageHero title="Test" />)
     const heading = screen.getByRole('heading', { name: 'Test' })
-    expect(heading.className).toContain('lg:text-5xl')
+    expect(heading.className).toContain('text-4xl')
+    expect(heading.className).toContain('sm:text-5xl')
+    expect(heading.className).toContain('lg:text-6xl')
+    expect(heading.className).not.toContain('lg:text-5xl')
   })
 
   it('does not use font-script on h1', () => {

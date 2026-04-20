@@ -28,12 +28,14 @@ describe('SoundGrid', () => {
     expect(screen.getByRole('heading', { level: 3, name: /instruments/i })).toBeInTheDocument()
   })
 
-  it('each category heading uses the canonical uppercase muted style', () => {
+  it('each category heading uses the canonical uppercase white style (Round 2: full white)', () => {
     renderGrid()
     for (const name of ['Nature', 'Environments', 'Spiritual', 'Instruments']) {
       const heading = screen.getByRole('heading', { level: 3, name })
       expect(heading.className).toContain('uppercase')
-      expect(heading.className).toContain('text-white/50')
+      expect(heading.className).toContain('tracking-wide')
+      expect(heading.className).toContain('text-white')
+      expect(heading.className).not.toContain('text-white/50')
     }
   })
 

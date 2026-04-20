@@ -56,17 +56,29 @@ describe('scene-backgrounds', () => {
     }
   })
 
-  it('overlay alphas stay within the desaturated range (≤ 0.30 for whites)', () => {
+  it('overlay alphas stay within the Round 2 desaturated range (≤ 0.20 for whites)', () => {
+    // Round 2: all overlay alphas reduced by × 0.70 on top of Round 1's × 0.67.
+    // Starfield (historical outlier) maxes at 0.19 post-Round-2; cap set at 0.20
+    // to catch regressions without false positives on starfield's star-dot alphas.
     for (const id of SCENE_IDS) {
       const bg = SCENE_BACKGROUNDS[id]
       const image = bg.backgroundImage as string
-      // Find all rgba(255,255,255, X) overlay alphas and ensure none exceeds 0.30
       const whiteMatches = [
         ...image.matchAll(/rgba\(255,255,255,([\d.]+)\)/g),
       ]
       for (const m of whiteMatches) {
-        expect(parseFloat(m[1])).toBeLessThanOrEqual(0.3)
+        expect(parseFloat(m[1])).toBeLessThanOrEqual(0.2)
       }
+    }
+  })
+
+  it('every scene linear-gradient stop is expressed as a 6-digit hex color', () => {
+    for (const id of SCENE_IDS) {
+      const bg = SCENE_BACKGROUNDS[id]
+      const image = bg.backgroundImage as string
+      // Every linear-gradient must include at least one 6-digit hex stop
+      expect(image).toMatch(/linear-gradient\(/)
+      expect(image).toMatch(/#[0-9a-fA-F]{6}/)
     }
   })
 })

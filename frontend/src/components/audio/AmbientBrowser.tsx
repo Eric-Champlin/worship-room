@@ -196,7 +196,7 @@ export function AmbientBrowser() {
           {search.filteredSounds.length > 0 && (
             <section aria-label="Build your own mix">
               <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
-                <SectionHeader>Build Your Own Mix</SectionHeader>
+                <SectionHeader variant="gradient">Build Your Own Mix</SectionHeader>
                 <SoundGrid
                   activeSoundIds={activeSoundIds}
                   loadingSoundIds={soundToggle.loadingSoundIds}
