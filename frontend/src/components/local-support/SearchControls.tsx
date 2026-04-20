@@ -128,7 +128,7 @@ export function SearchControls({
           onClick={onInteractionBlocked ?? handleUseMyLocation}
           disabled={isGeolocating}
           aria-label="Use my current location"
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] disabled:opacity-50"
         >
           {isGeolocating ? (
             <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden="true" />
@@ -162,7 +162,7 @@ export function SearchControls({
             type="submit"
             disabled={isLoading || !locationInput.trim()}
             aria-label="Search"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-medium text-white transition-colors hover:bg-primary-lt disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] disabled:opacity-50"
           >
             <Search size={18} aria-hidden="true" />
             <span className="hidden sm:inline">Search</span>

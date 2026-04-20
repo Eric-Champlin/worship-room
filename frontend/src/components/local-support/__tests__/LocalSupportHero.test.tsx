@@ -16,7 +16,7 @@ describe('LocalSupportHero', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders subtitle', () => {
+  it('renders subtitle in Inter sans, non-italic, solid white', () => {
     render(
       <LocalSupportHero
         headingId="test-heading"
@@ -24,7 +24,12 @@ describe('LocalSupportHero', () => {
         subtitle="Your healing journey"
       />,
     )
-    expect(screen.getByText('Your healing journey')).toBeInTheDocument()
+    const subtitle = screen.getByText('Your healing journey')
+    expect(subtitle).toBeInTheDocument()
+    expect(subtitle.className).toContain('text-white')
+    expect(subtitle.className).not.toContain('font-serif')
+    expect(subtitle.className).not.toContain('italic')
+    expect(subtitle.className).not.toContain('text-white/60')
   })
 
   it('renders action when provided', () => {
@@ -50,9 +55,7 @@ describe('LocalSupportHero', () => {
         extraContent={<p>What is Celebrate Recovery?</p>}
       />,
     )
-    expect(
-      screen.getByText('What is Celebrate Recovery?'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('What is Celebrate Recovery?')).toBeInTheDocument()
   })
 
   it('does not render action wrapper when omitted', () => {
@@ -68,7 +71,7 @@ describe('LocalSupportHero', () => {
     expect(section.children).toHaveLength(2)
   })
 
-  it('renders title with padding for Caveat flourish fix', () => {
+  it('renders title with centered spacing for gradient text rendering', () => {
     render(
       <LocalSupportHero
         headingId="test-heading"
@@ -81,19 +84,41 @@ describe('LocalSupportHero', () => {
     expect(heading.className).toContain('sm:px-2')
   })
 
-  it('heading uses gradient text style, accent word gets font-script', () => {
+  it('heading has no font-script descendants (Caveat accent retired)', () => {
+    render(
+      <LocalSupportHero
+        headingId="test-heading"
+        title="Find a Church Near You"
+        subtitle="Sub"
+      />,
+    )
+    const heading = screen.getByRole('heading', { name: 'Find a Church Near You' })
+    expect(heading.querySelector('.font-script')).toBeNull()
+  })
+
+  it('renders inside GlowBackground with two glow orbs', () => {
+    const { container } = render(
+      <LocalSupportHero
+        headingId="test-heading"
+        title="Test Title"
+        subtitle="Sub"
+      />,
+    )
+    const orbs = container.querySelectorAll('[data-testid="glow-orb"]')
+    expect(orbs.length).toBe(2)
+  })
+
+  it('heading has gradient text styling applied', () => {
     render(
       <LocalSupportHero
         headingId="test-heading"
         title="Test Title"
         subtitle="Sub"
-        scriptWord="Title"
       />,
     )
     const heading = screen.getByRole('heading', { name: 'Test Title' })
-    expect(heading.className).not.toContain('font-script')
-    const scriptSpan = heading.querySelector('.font-script')
-    expect(scriptSpan).toBeInTheDocument()
-    expect(scriptSpan?.textContent).toBe('Title')
+    // GRADIENT_TEXT_STYLE sets an inline style with backgroundClip: 'text'
+    const styleAttr = heading.getAttribute('style') ?? ''
+    expect(styleAttr).toMatch(/background-clip|-webkit-background-clip/)
   })
 })
