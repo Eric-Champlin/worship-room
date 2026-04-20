@@ -35,4 +35,33 @@ describe('TonightScripture', () => {
 
     expect(onPlay).toHaveBeenCalledOnce()
   })
+
+  it('Tonight\'s Scripture label is solid white (WCAG AAA)', () => {
+    render(<TonightScripture onPlay={vi.fn()} />)
+    const label = screen.getByText("Tonight's Scripture")
+    expect(label.className).toContain('text-white')
+    expect(label.className).not.toContain('text-primary')
+  })
+
+  it('play button is inverted (white bg, purple icon)', () => {
+    render(<TonightScripture onPlay={vi.fn()} />)
+    const button = screen.getAllByRole('button')[0]
+    expect(button.className).toContain('bg-white')
+    expect(button.className).toContain('text-primary')
+    expect(button.className).not.toContain('bg-primary')
+  })
+
+  it('play button has white glow halo', () => {
+    render(<TonightScripture onPlay={vi.fn()} />)
+    const button = screen.getAllByRole('button')[0]
+    expect(button.className).toContain(
+      'shadow-[0_0_20px_rgba(255,255,255,0.15)]',
+    )
+  })
+
+  it('play button has press feedback (active:scale-[0.96])', () => {
+    render(<TonightScripture onPlay={vi.fn()} />)
+    const button = screen.getAllByRole('button')[0]
+    expect(button.className).toContain('active:scale-[0.96]')
+  })
 })

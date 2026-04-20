@@ -143,4 +143,17 @@ describe('SleepBrowse Integration', () => {
     const link = screen.getByRole('link', { name: 'Create a Routine' })
     expect(link).toHaveAttribute('href', '/music/routines')
   })
+
+  it('routine CTA is a white pill with purple text', () => {
+    renderSleepBrowse()
+    const link = screen.getByRole('link', { name: 'Create a Routine' })
+    expect(link.className).toContain('bg-white')
+    expect(link.className).toContain('text-primary')
+  })
+
+  it('routine CTA has a 44px minimum touch target', () => {
+    renderSleepBrowse()
+    const link = screen.getByRole('link', { name: 'Create a Routine' })
+    expect(link.className).toContain('min-h-[44px]')
+  })
 })

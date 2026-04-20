@@ -1,6 +1,7 @@
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getSoundIcon } from './sound-icon-map'
+import type { SoundCategoryTokens } from '@/constants/soundCategoryColors'
 import type { Sound } from '@/types/music'
 
 interface SoundCardProps {
@@ -9,7 +10,7 @@ interface SoundCardProps {
   isLoading: boolean
   hasError: boolean
   onToggle: (sound: Sound) => void
-  tabIndex?: number
+  categoryTokens: SoundCategoryTokens
 }
 
 function getAriaLabel(sound: Sound, isActive: boolean, isLoading: boolean, hasError: boolean): string {
@@ -19,7 +20,14 @@ function getAriaLabel(sound: Sound, isActive: boolean, isLoading: boolean, hasEr
   return `${sound.name} — tap to add to mix`
 }
 
-export function SoundCard({ sound, isActive, isLoading, hasError, onToggle, tabIndex }: SoundCardProps) {
+export function SoundCard({
+  sound,
+  isActive,
+  isLoading,
+  hasError,
+  onToggle,
+  categoryTokens,
+}: SoundCardProps) {
   const Icon = getSoundIcon(sound.lucideIcon)
 
   return (
@@ -28,13 +36,16 @@ export function SoundCard({ sound, isActive, isLoading, hasError, onToggle, tabI
       aria-pressed={isActive}
       aria-busy={isLoading}
       aria-label={getAriaLabel(sound, isActive, isLoading, hasError)}
-      tabIndex={tabIndex}
       data-sound-id={sound.id}
       onClick={() => onToggle(sound)}
       className={cn(
-        'relative flex w-20 h-20 sm:w-[90px] sm:h-[90px] flex-col items-center justify-center gap-1 rounded-xl bg-white/[0.06] transition-shadow motion-reduce:transition-none',
+        'relative flex w-20 h-20 sm:w-[90px] sm:h-[90px] shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl',
+        'border backdrop-blur-sm transition-shadow duration-base motion-reduce:transition-none',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e]',
-        isActive && 'shadow-[0_0_12px_rgba(147,51,234,0.4)] motion-safe:animate-sound-pulse',
+        'active:scale-[0.98]',
+        categoryTokens.bgClass,
+        categoryTokens.borderClass,
+        isActive && cn(categoryTokens.activeGlow, 'motion-safe:animate-sound-pulse'),
       )}
     >
       {/* Error dot */}
@@ -48,8 +59,8 @@ export function SoundCard({ sound, isActive, isLoading, hasError, onToggle, tabI
           size={24}
           aria-hidden="true"
           className={cn(
-            'transition-colors',
-            isActive ? 'text-primary' : 'text-white/50',
+            'transition-colors duration-base',
+            isActive ? categoryTokens.iconActiveClass : categoryTokens.iconInactiveClass,
           )}
         />
         {isLoading && (

@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { BookOpen, Play } from 'lucide-react'
 import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { SCENE_BY_ID } from '@/data/scenes'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 
 const QUICK_START_OPTIONS = [
   {
@@ -40,9 +41,7 @@ export function BibleSleepSection() {
 
   return (
     <section>
-      <h2 className="mb-4 text-lg font-semibold text-white">
-        Scripture Reading
-      </h2>
+      <SectionHeader>Scripture Reading</SectionHeader>
 
       {/* "Read the Bible" hero card */}
       <a
@@ -83,7 +82,7 @@ export function BibleSleepSection() {
               className="flex min-h-[44px] items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] p-4 transition-shadow motion-reduce:transition-none hover:shadow-md hover:shadow-black/20"
               aria-label={`Start ${scene.name} and read ${option.bookLabel}`}
             >
-              <Play className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+              <Play className="h-4 w-4 flex-shrink-0 text-primary-lt" aria-hidden="true" />
               <div className="text-left">
                 <span className="block text-sm font-medium text-white">
                   {scene.name}

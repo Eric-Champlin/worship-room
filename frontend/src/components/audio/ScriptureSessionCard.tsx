@@ -30,12 +30,12 @@ export function ScriptureSessionCard({ reading, onPlay }: ScriptureSessionCardPr
           <span className="text-xs text-white/50">
             {reading.voiceId === 'male' ? 'Male voice' : 'Female voice'}
           </span>
-          <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+          <span className="flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-300">
             <BookOpen size={10} aria-hidden="true" />
             Scripture
           </span>
           <span
-            className="ml-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white"
+            className="ml-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white text-primary shadow-[0_0_12px_rgba(255,255,255,0.12)]"
             aria-hidden="true"
           >
             <Play size={14} fill="currentColor" />

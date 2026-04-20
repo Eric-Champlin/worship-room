@@ -20,6 +20,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['trust'],
     },
     animationCategory: 'pulse',
+    themeColor: '#3c4531',
   },
   {
     id: 'still-waters',
@@ -40,6 +41,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['comfort'],
     },
     animationCategory: 'drift',
+    themeColor: '#356060',
   },
   {
     id: 'midnight-rain',
@@ -59,6 +61,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['rest'],
     },
     animationCategory: 'drift',
+    themeColor: '#202a34',
   },
   {
     id: 'ember-and-stone',
@@ -79,6 +82,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['comfort'],
     },
     animationCategory: 'pulse',
+    themeColor: '#764d2e',
   },
   {
     id: 'morning-mist',
@@ -99,6 +103,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['praise'],
     },
     animationCategory: 'drift',
+    themeColor: '#778262',
   },
   {
     id: 'the-upper-room',
@@ -119,6 +124,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['trust'],
     },
     animationCategory: 'glow',
+    themeColor: '#5f4a35',
   },
   {
     id: 'starfield',
@@ -139,6 +145,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['trust'],
     },
     animationCategory: 'glow',
+    themeColor: '#1f1838',
   },
   {
     id: 'mountain-refuge',
@@ -159,6 +166,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['praise'],
     },
     animationCategory: 'drift',
+    themeColor: '#625742',
   },
   {
     id: 'peaceful-study',
@@ -178,6 +186,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['comfort'],
     },
     animationCategory: 'drift',
+    themeColor: '#35545f',
   },
   {
     id: 'evening-scripture',
@@ -197,6 +206,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['rest'],
     },
     animationCategory: 'pulse',
+    themeColor: '#694a2b',
   },
   {
     id: 'sacred-space',
@@ -216,6 +226,7 @@ export const SCENE_PRESETS: ScenePreset[] = [
       scriptureTheme: ['trust'],
     },
     animationCategory: 'glow',
+    themeColor: '#2d2242',
   },
 ]
 

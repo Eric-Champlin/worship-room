@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AmbientBrowser } from '../AmbientBrowser'
-import { SCENE_PRESETS } from '@/data/scenes'
+import { FEATURED_SCENE_IDS, SCENE_PRESETS } from '@/data/scenes'
 import { SOUND_CATALOG } from '@/data/sound-catalog'
 import type { FilterState } from '@/hooks/useAmbientSearch'
 import type { AudioState } from '@/types/audio'
@@ -217,9 +217,12 @@ describe('AmbientBrowser Integration', () => {
     expect(screen.getByText('Sounds')).toBeInTheDocument()
   })
 
-  it('filter chips reduce visible scenes', () => {
+  it('filter chips reduce visible scenes (All Scenes grid excludes featured)', () => {
     const sleepScenes = SCENE_PRESETS.filter((s) =>
       s.tags.activity.includes('sleep'),
+    )
+    const sleepNonFeatured = sleepScenes.filter(
+      (s) => !FEATURED_SCENE_IDS.includes(s.id as (typeof FEATURED_SCENE_IDS)[number]),
     )
     mockSearchState = {
       ...mockSearchState,
@@ -237,8 +240,8 @@ describe('AmbientBrowser Integration', () => {
     const allScenesSection = screen.getByLabelText('All scenes')
     // Each scene has 2 buttons (play + favorite), so multiply by 2
     const sceneButtons = allScenesSection.querySelectorAll('button')
-    expect(sceneButtons.length).toBe(sleepScenes.length * 2)
-    expect(sleepScenes.length).toBeLessThan(8)
+    expect(sceneButtons.length).toBe(sleepNonFeatured.length * 2)
+    expect(sleepScenes.length).toBeLessThan(SCENE_PRESETS.length)
   })
 
   it('no results message when search matches nothing', () => {

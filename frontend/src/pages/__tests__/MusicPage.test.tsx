@@ -116,30 +116,30 @@ describe('MusicPage', () => {
     expect(tabs).toHaveLength(3)
   })
 
-  it('defaults to ambient tab', () => {
-    renderPage()
-    const ambientTab = screen.getByRole('tab', { name: /ambient/i })
-    expect(ambientTab).toHaveAttribute('aria-selected', 'true')
-  })
-
-  it('switches to playlists tab on click', async () => {
-    const user = userEvent.setup()
+  it('defaults to playlists tab', () => {
     renderPage()
     const playlistsTab = screen.getByRole('tab', { name: /playlists/i })
-    await user.click(playlistsTab)
     expect(playlistsTab).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('switches to ambient tab on click', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const ambientTab = screen.getByRole('tab', { name: /ambient/i })
+    await user.click(ambientTab)
+    expect(ambientTab).toHaveAttribute('aria-selected', 'true')
   })
 
   it('shows correct content per tab', async () => {
     const user = userEvent.setup()
     renderPage()
 
-    // Default: ambient visible
-    expect(screen.getByTestId('ambient-browser')).toBeVisible()
-
-    // Switch to playlists
-    await user.click(screen.getByRole('tab', { name: /playlists/i }))
+    // Default: playlists visible
     expect(screen.getByTestId('worship-playlists-tab')).toBeVisible()
+
+    // Switch to ambient
+    await user.click(screen.getByRole('tab', { name: /ambient/i }))
+    expect(screen.getByTestId('ambient-browser')).toBeVisible()
 
     // Switch to sleep
     await user.click(screen.getByRole('tab', { name: /sleep/i }))
@@ -163,18 +163,39 @@ describe('MusicPage', () => {
   it('keyboard navigation (ArrowRight)', async () => {
     const user = userEvent.setup()
     renderPage()
-    // Focus the active tab (ambient, index 1)
+    // Focus the active tab (playlists, index 0)
     const tabs = screen.getAllByRole('tab')
-    tabs[1].focus()
+    tabs[0].focus()
     await user.keyboard('{ArrowRight}')
-    // Should move to sleep tab (index 2)
-    expect(tabs[2]).toHaveAttribute('aria-selected', 'true')
+    // Should move to ambient tab (index 1)
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true')
   })
 
-  it('initial URL has no tab param (defaults to ambient)', () => {
+  it('ArrowRight wraps from last tab to first', async () => {
+    const user = userEvent.setup()
+    renderPage('/music?tab=sleep')
+    const tabs = screen.getAllByRole('tab')
+    tabs[2].focus()
+    await user.keyboard('{ArrowRight}')
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('Home/End keys preserved', async () => {
+    const user = userEvent.setup()
+    renderPage('/music?tab=ambient')
+    const tabs = screen.getAllByRole('tab')
+    tabs[1].focus()
+    await user.keyboard('{End}')
+    expect(tabs[2]).toHaveAttribute('aria-selected', 'true')
+    tabs[2].focus()
+    await user.keyboard('{Home}')
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('initial URL has no tab param (defaults to playlists)', () => {
     renderPage('/music')
-    const ambientTab = screen.getByRole('tab', { name: /ambient/i })
-    expect(ambientTab).toHaveAttribute('aria-selected', 'true')
+    const playlistsTab = screen.getByRole('tab', { name: /playlists/i })
+    expect(playlistsTab).toHaveAttribute('aria-selected', 'true')
   })
 
   it('URL param selects correct tab', () => {
@@ -183,10 +204,10 @@ describe('MusicPage', () => {
     expect(sleepTab).toHaveAttribute('aria-selected', 'true')
   })
 
-  it('invalid tab param defaults to ambient', () => {
+  it('invalid tab param defaults to playlists', () => {
     renderPage('/music?tab=invalid')
-    const ambientTab = screen.getByRole('tab', { name: /ambient/i })
-    expect(ambientTab).toHaveAttribute('aria-selected', 'true')
+    const playlistsTab = screen.getByRole('tab', { name: /playlists/i })
+    expect(playlistsTab).toHaveAttribute('aria-selected', 'true')
   })
 
   it('has skip-to-content link (via Navbar)', () => {
@@ -216,11 +237,47 @@ describe('MusicPage', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('default tab is always ambient regardless of time', () => {
-    // No time-of-day override — always defaults to ambient
+  it('default tab is always playlists regardless of time', () => {
     renderPage('/music')
-    const ambientTab = screen.getByRole('tab', { name: /ambient/i })
-    expect(ambientTab).toHaveAttribute('aria-selected', 'true')
+    const playlistsTab = screen.getByRole('tab', { name: /playlists/i })
+    expect(playlistsTab).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('h1 renders "Music" without Caveat accent', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { level: 1, name: 'Music' })
+    expect(heading.querySelector('.font-script')).toBeNull()
+  })
+
+  it('tab bar uses pill+halo structure', () => {
+    renderPage()
+    const tablist = screen.getByRole('tablist')
+    expect(tablist.className).toContain('rounded-full')
+    expect(tablist.className).toContain('bg-white/[0.06]')
+  })
+
+  it('active tab has halo glow and pill background', () => {
+    renderPage()
+    const playlistsTab = screen.getByRole('tab', { name: /playlists/i })
+    expect(playlistsTab.className).toContain('bg-white/[0.12]')
+    expect(playlistsTab.className).toContain('shadow-[0_0_12px_rgba(139,92,246,0.15)]')
+  })
+
+  it('each tab contains an icon SVG', () => {
+    renderPage()
+    const tabs = screen.getAllByRole('tab')
+    for (const tab of tabs) {
+      expect(tab.querySelector('svg')).toBeInTheDocument()
+    }
+  })
+
+  it('no animated underline element', () => {
+    renderPage()
+    const tablist = screen.getByRole('tablist')
+    const underline = tablist.querySelector(
+      '[class*="bg-primary"][class*="transition-transform"]',
+    )
+    expect(underline).toBeNull()
   })
 
   it('does not render time-of-day section', () => {

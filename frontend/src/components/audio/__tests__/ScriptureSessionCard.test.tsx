@@ -78,4 +78,27 @@ describe('ScriptureSessionCard', () => {
     const heartButton = screen.getByRole('button', { name: /favorites/ })
     expect(heartButton).toBeInTheDocument()
   })
+
+  it('Scripture badge uses the new violet treatment (WCAG AA)', () => {
+    render(<ScriptureSessionCard reading={MOCK_READING} onPlay={vi.fn()} />)
+    const badge = screen.getByText('Scripture').closest('span') as HTMLElement
+    expect(badge.className).toContain('bg-violet-500/15')
+    expect(badge.className).toContain('text-violet-300')
+    expect(badge.className).not.toContain('bg-primary/10')
+  })
+
+  it('inline play button is inverted (white bg, purple icon) with subtle glow', () => {
+    const { container } = render(
+      <ScriptureSessionCard reading={MOCK_READING} onPlay={vi.fn()} />,
+    )
+    // The inline decorative play "button" is a span[aria-hidden=true] — not a real button
+    const playIcon = container.querySelector('span[aria-hidden="true"]') as HTMLElement
+    expect(playIcon).toBeTruthy()
+    expect(playIcon.className).toContain('bg-white')
+    expect(playIcon.className).toContain('text-primary')
+    expect(playIcon.className).toContain(
+      'shadow-[0_0_12px_rgba(255,255,255,0.12)]',
+    )
+    expect(playIcon.className).not.toContain('bg-primary text-white')
+  })
 })

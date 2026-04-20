@@ -45,4 +45,28 @@ describe('scene-backgrounds', () => {
   it('has exactly 11 scene backgrounds', () => {
     expect(Object.keys(SCENE_BACKGROUNDS)).toHaveLength(11)
   })
+
+  it('each background contains multiple distinct hex stops (not uniform gray)', () => {
+    for (const id of SCENE_IDS) {
+      const bg = SCENE_BACKGROUNDS[id]
+      const image = bg.backgroundImage as string
+      const hexMatches = image.match(/#[0-9a-fA-F]{6}/g) ?? []
+      const unique = new Set(hexMatches.map((h) => h.toLowerCase()))
+      expect(unique.size).toBeGreaterThanOrEqual(2)
+    }
+  })
+
+  it('overlay alphas stay within the desaturated range (≤ 0.30 for whites)', () => {
+    for (const id of SCENE_IDS) {
+      const bg = SCENE_BACKGROUNDS[id]
+      const image = bg.backgroundImage as string
+      // Find all rgba(255,255,255, X) overlay alphas and ensure none exceeds 0.30
+      const whiteMatches = [
+        ...image.matchAll(/rgba\(255,255,255,([\d.]+)\)/g),
+      ]
+      for (const m of whiteMatches) {
+        expect(parseFloat(m[1])).toBeLessThanOrEqual(0.3)
+      }
+    }
+  })
 })

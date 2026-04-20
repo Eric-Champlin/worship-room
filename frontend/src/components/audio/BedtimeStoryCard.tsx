@@ -37,7 +37,7 @@ export function BedtimeStoryCard({ story, onPlay }: BedtimeStoryCardProps) {
           <span className="text-xs text-white/50">
             {story.voiceId === 'male' ? 'Male voice' : 'Female voice'}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary-lt">
+          <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-300">
             <Moon size={10} aria-hidden="true" />
             Story
           </span>

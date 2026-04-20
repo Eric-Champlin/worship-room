@@ -47,7 +47,7 @@ export function PageHero({ title, subtitle, showDivider, scriptWord, children }:
         </div>
       )}
       {subtitle && (
-        <p className="mx-auto max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
+        <p className="mx-auto max-w-xl text-base text-white sm:text-lg">
           {subtitle}
         </p>
       )}

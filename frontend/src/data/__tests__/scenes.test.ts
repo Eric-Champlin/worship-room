@@ -85,6 +85,20 @@ describe('SCENE_PRESETS', () => {
     const ids = SCENE_PRESETS.map((s) => s.id)
     expect(new Set(ids).size).toBe(ids.length)
   })
+
+  it('every scene has a valid themeColor hex string (forward-looking field)', () => {
+    const hexPattern = /^#[0-9a-fA-F]{6}$/
+    for (const scene of SCENE_PRESETS) {
+      expect(
+        typeof scene.themeColor,
+        `Scene "${scene.id}" themeColor must be a string`,
+      ).toBe('string')
+      expect(
+        scene.themeColor,
+        `Scene "${scene.id}" themeColor must be a 6-char hex`,
+      ).toMatch(hexPattern)
+    }
+  })
 })
 
 describe('FEATURED_SCENE_IDS', () => {

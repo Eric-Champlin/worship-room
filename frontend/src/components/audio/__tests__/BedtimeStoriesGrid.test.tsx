@@ -30,4 +30,11 @@ describe('BedtimeStoriesGrid', () => {
     const storyBadges = screen.getAllByText('Story')
     expect(storyBadges).toHaveLength(12)
   })
+
+  it('heading uses SectionHeader (uppercase text-white/50)', () => {
+    render(<BedtimeStoriesGrid onPlay={vi.fn()} />)
+    const heading = screen.getByRole('heading', { level: 2, name: 'Bedtime Stories' })
+    expect(heading.className).toContain('uppercase')
+    expect(heading.className).toContain('text-white/50')
+  })
 })

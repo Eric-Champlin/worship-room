@@ -70,4 +70,9 @@ export interface ScenePreset {
     scriptureTheme?: string[]
   }
   animationCategory: SceneAnimationCategory
+  /**
+   * Primary accent color for the scene, derived from its desaturated gradient.
+   * Forward-looking — no consumer reads this yet.
+   */
+  themeColor?: string
 }

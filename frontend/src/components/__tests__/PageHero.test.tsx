@@ -43,4 +43,26 @@ describe('PageHero', () => {
     const heading = screen.getByRole('heading', { name: 'My Prayers' })
     expect(heading.className).not.toContain('font-script')
   })
+
+  it('subtitle renders solid white, not muted', () => {
+    render(<PageHero title="Test" subtitle="A warm subtitle line" />)
+    const subtitle = screen.getByText('A warm subtitle line')
+    expect(subtitle.className).toContain('text-white')
+    expect(subtitle.className).not.toContain('text-white/60')
+  })
+
+  it('subtitle is not italic and not font-serif', () => {
+    render(<PageHero title="Test" subtitle="A warm subtitle line" />)
+    const subtitle = screen.getByText('A warm subtitle line')
+    expect(subtitle.className).not.toContain('italic')
+    expect(subtitle.className).not.toContain('font-serif')
+  })
+
+  it('subtitle preserves responsive sizing and max-width', () => {
+    render(<PageHero title="Test" subtitle="A warm subtitle line" />)
+    const subtitle = screen.getByText('A warm subtitle line')
+    expect(subtitle.className).toContain('max-w-xl')
+    expect(subtitle.className).toContain('text-base')
+    expect(subtitle.className).toContain('sm:text-lg')
+  })
 })

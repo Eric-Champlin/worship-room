@@ -81,4 +81,27 @@ describe('BedtimeStoryCard', () => {
     const desc = container.querySelector('.line-clamp-2')
     expect(desc).toBeInTheDocument()
   })
+
+  it('Story badge uses the new violet treatment (matching Scripture)', () => {
+    render(<BedtimeStoryCard story={MOCK_STORY} onPlay={vi.fn()} />)
+    const badge = screen.getByText('Story').closest('span') as HTMLElement
+    expect(badge.className).toContain('bg-violet-500/15')
+    expect(badge.className).toContain('text-violet-300')
+    expect(badge.className).not.toContain('bg-primary/10')
+  })
+
+  it('Story badge has Moon icon', () => {
+    render(<BedtimeStoryCard story={MOCK_STORY} onPlay={vi.fn()} />)
+    const badge = screen.getByText('Story').closest('span') as HTMLElement
+    expect(badge.querySelector('svg')).toBeInTheDocument()
+  })
+
+  it('play button remains out of scope (purple bg, white icon)', () => {
+    const { container } = render(
+      <BedtimeStoryCard story={MOCK_STORY} onPlay={vi.fn()} />,
+    )
+    const playIcon = container.querySelector('span[aria-hidden="true"]') as HTMLElement
+    expect(playIcon.className).toContain('bg-primary')
+    expect(playIcon.className).toContain('text-white')
+  })
 })

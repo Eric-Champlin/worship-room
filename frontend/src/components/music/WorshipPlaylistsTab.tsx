@@ -1,15 +1,24 @@
+import { Info } from 'lucide-react'
 import { EXPLORE_PLAYLISTS, WORSHIP_PLAYLISTS } from '@/data/music/playlists'
-import { HeadingDivider } from '@/components/HeadingDivider'
-import { useElementWidth } from '@/hooks/useElementWidth'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import { SpotifyEmbed } from './SpotifyEmbed'
 
 // Removed in visual polish — keeping for potential re-enable
 // import { useSpotifyAutoPause } from '@/hooks/useSpotifyAutoPause'
 
-export function WorshipPlaylistsTab() {
-  const { ref: featuredRef, width: featuredWidth } = useElementWidth<HTMLDivElement>()
-  const { ref: exploreRef, width: exploreWidth } = useElementWidth<HTMLDivElement>()
+const PREVIEW_DISCLAIMER =
+  '30-second previews play here. Tap any track or playlist to open in Spotify for full listening.'
 
+function PreviewDisclaimer() {
+  return (
+    <p className="mx-auto mb-3 flex max-w-2xl items-center justify-center gap-2 text-xs text-white/50">
+      <Info className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+      <span>{PREVIEW_DISCLAIMER}</span>
+    </p>
+  )
+}
+
+export function WorshipPlaylistsTab() {
   const hero = WORSHIP_PLAYLISTS.find((p) => p.displaySize === 'hero')
 
   // Explore = all non-hero worship playlists + all explore playlists except lofi
@@ -28,12 +37,8 @@ export function WorshipPlaylistsTab() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       {/* Featured */}
-      <div className="mb-8 text-center" ref={featuredRef}>
-        <h2 className="font-script text-3xl font-bold text-white sm:text-4xl">
-          Featured
-        </h2>
-        <HeadingDivider width={featuredWidth} />
-      </div>
+      <SectionHeader>Featured</SectionHeader>
+      <PreviewDisclaimer />
 
       {/* Hero embed */}
       <div className="mx-auto w-full lg:w-[70%]">
@@ -41,19 +46,17 @@ export function WorshipPlaylistsTab() {
       </div>
 
       {/* Explore */}
-      <div className="mb-8 mt-12 text-center" ref={exploreRef}>
-        <h2 className="font-script text-3xl font-bold text-white sm:text-4xl">
-          Explore
-        </h2>
-        <HeadingDivider width={exploreWidth} />
-      </div>
+      <div className="mt-12">
+        <SectionHeader>Explore</SectionHeader>
+        <PreviewDisclaimer />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {explorePlaylists.map((playlist) => (
-          <div key={playlist.id}>
-            <SpotifyEmbed playlist={playlist} />
-          </div>
-        ))}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {explorePlaylists.map((playlist) => (
+            <div key={playlist.id}>
+              <SpotifyEmbed playlist={playlist} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

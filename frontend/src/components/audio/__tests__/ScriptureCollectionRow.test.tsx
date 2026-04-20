@@ -59,4 +59,11 @@ describe('ScriptureCollectionRow', () => {
     expect(screen.getByText('The Lord is My Shepherd')).toBeInTheDocument()
     expect(screen.getByText('God is Our Refuge')).toBeInTheDocument()
   })
+
+  it('collection heading uses SectionHeader (uppercase text-white/50)', () => {
+    render(<ScriptureCollectionRow collection={MOCK_COLLECTION} onPlay={vi.fn()} />)
+    const heading = screen.getByRole('heading', { level: 2, name: 'Psalms of Peace' })
+    expect(heading.className).toContain('uppercase')
+    expect(heading.className).toContain('text-white/50')
+  })
 })
