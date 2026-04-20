@@ -32,15 +32,40 @@ describe('PageHero', () => {
     expect(scriptSpan).toBeNull()
   })
 
-  it('uses lg:text-5xl sizing', () => {
+  it('uses text-4xl sm:text-5xl lg:text-6xl sizing (Round 2 bump)', () => {
     render(<PageHero title="Test" />)
     const heading = screen.getByRole('heading', { name: 'Test' })
-    expect(heading.className).toContain('lg:text-5xl')
+    expect(heading.className).toContain('text-4xl')
+    expect(heading.className).toContain('sm:text-5xl')
+    expect(heading.className).toContain('lg:text-6xl')
+    expect(heading.className).not.toContain('lg:text-5xl')
   })
 
   it('does not use font-script on h1', () => {
     render(<PageHero title="My Prayers" scriptWord="Prayers" />)
     const heading = screen.getByRole('heading', { name: 'My Prayers' })
     expect(heading.className).not.toContain('font-script')
+  })
+
+  it('subtitle renders solid white, not muted', () => {
+    render(<PageHero title="Test" subtitle="A warm subtitle line" />)
+    const subtitle = screen.getByText('A warm subtitle line')
+    expect(subtitle.className).toContain('text-white')
+    expect(subtitle.className).not.toContain('text-white/60')
+  })
+
+  it('subtitle is not italic and not font-serif', () => {
+    render(<PageHero title="Test" subtitle="A warm subtitle line" />)
+    const subtitle = screen.getByText('A warm subtitle line')
+    expect(subtitle.className).not.toContain('italic')
+    expect(subtitle.className).not.toContain('font-serif')
+  })
+
+  it('subtitle preserves responsive sizing and max-width', () => {
+    render(<PageHero title="Test" subtitle="A warm subtitle line" />)
+    const subtitle = screen.getByText('A warm subtitle line')
+    expect(subtitle.className).toContain('max-w-xl')
+    expect(subtitle.className).toContain('text-base')
+    expect(subtitle.className).toContain('sm:text-lg')
   })
 })

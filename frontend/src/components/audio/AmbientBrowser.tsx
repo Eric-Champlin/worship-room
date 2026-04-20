@@ -13,7 +13,11 @@ import { SoundCard } from './SoundCard'
 import { SceneUndoToast } from './SceneUndoToast'
 import { SavedMixCard } from '@/components/music/SavedMixCard'
 import { RoutineInterruptDialog } from './RoutineInterruptDialog'
+import { SectionHeader } from '@/components/ui/SectionHeader'
+import { SOUND_CATEGORY_COLORS } from '@/constants/soundCategoryColors'
 import type { ScenePreset, Sound } from '@/types/music'
+
+const FEATURED_SCENE_ID_SET: ReadonlySet<string> = new Set(FEATURED_SCENE_IDS)
 
 function SearchResults({
   scenes,
@@ -45,7 +49,7 @@ function SearchResults({
       )}
       {scenes.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-white/50">Scenes</h3>
+          <SectionHeader as="h3">Scenes</SectionHeader>
           {scenes.map((scene) => (
             <button
               key={scene.id}
@@ -70,18 +74,22 @@ function SearchResults({
       )}
       {sounds.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-white/50">Sounds</h3>
+          <SectionHeader as="h3">Sounds</SectionHeader>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-            {sounds.map((sound) => (
-              <SoundCard
-                key={sound.id}
-                sound={sound}
-                isActive={activeSoundIds.has(sound.id)}
-                isLoading={loadingSoundIds.has(sound.id)}
-                hasError={errorSoundIds.has(sound.id)}
-                onToggle={onToggleSound}
-              />
-            ))}
+            {sounds.map((sound) => {
+              const tokens = SOUND_CATEGORY_COLORS[sound.category] ?? SOUND_CATEGORY_COLORS.nature
+              return (
+                <SoundCard
+                  key={sound.id}
+                  sound={sound}
+                  categoryTokens={tokens}
+                  isActive={activeSoundIds.has(sound.id)}
+                  isLoading={loadingSoundIds.has(sound.id)}
+                  hasError={errorSoundIds.has(sound.id)}
+                  onToggle={onToggleSound}
+                />
+              )
+            })}
           </div>
         </div>
       )}
@@ -111,6 +119,12 @@ export function AmbientBrowser() {
     .map((id) => SCENE_BY_ID.get(id))
     .filter((s): s is ScenePreset => s !== undefined)
 
+  // All Scenes grid excludes scenes already shown in the Featured row (dedupe)
+  const allOtherScenes = useMemo(
+    () => search.filteredScenes.filter((scene) => !FEATURED_SCENE_ID_SET.has(scene.id)),
+    [search.filteredScenes],
+  )
+
   const activeSceneName = scenePlayer.activeSceneId
     ? (SCENE_BY_ID.get(scenePlayer.activeSceneId)?.name ?? '')
     : ''
@@ -135,9 +149,7 @@ export function AmbientBrowser() {
           {/* Your Saved Mixes (logged-in users with mixes only) */}
           {isAuthenticated && mixes.length > 0 && (
             <section aria-label="Your saved mixes">
-              <h2 className="mb-3 text-sm font-semibold text-white">
-                Your Saved Mixes
-              </h2>
+              <SectionHeader>Your Saved Mixes</SectionHeader>
               <div className="scrollbar-none flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
                 {mixes.map((mix) => (
                   <div key={mix.id} className="min-w-[200px] flex-shrink-0 sm:min-w-0">
@@ -150,6 +162,7 @@ export function AmbientBrowser() {
 
           {/* Featured Scenes */}
           <section aria-label="Featured scenes">
+            <SectionHeader>Featured</SectionHeader>
             <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
               {featuredScenes.map((scene) => (
                 <FeaturedSceneCard
@@ -162,12 +175,12 @@ export function AmbientBrowser() {
             </div>
           </section>
 
-          {/* All Scenes Grid */}
-          {search.filteredScenes.length > 0 && (
+          {/* All Scenes Grid — excludes featured scenes (dedupe) */}
+          {allOtherScenes.length > 0 && (
             <section aria-label="All scenes">
-              <h2 className="mb-4 text-base font-medium text-white">All Scenes</h2>
+              <SectionHeader>All Scenes</SectionHeader>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {search.filteredScenes.map((scene) => (
+                {allOtherScenes.map((scene) => (
                   <SceneCard
                     key={scene.id}
                     scene={scene}
@@ -183,7 +196,7 @@ export function AmbientBrowser() {
           {search.filteredSounds.length > 0 && (
             <section aria-label="Build your own mix">
               <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
-                <h2 className="mb-4 text-base font-medium text-white">Build Your Own Mix</h2>
+                <SectionHeader variant="gradient">Build Your Own Mix</SectionHeader>
                 <SoundGrid
                   activeSoundIds={activeSoundIds}
                   loadingSoundIds={soundToggle.loadingSoundIds}

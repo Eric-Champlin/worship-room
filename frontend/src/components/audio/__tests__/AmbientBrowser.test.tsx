@@ -208,9 +208,12 @@ describe('AmbientBrowser', () => {
     expect(screen.getByText(/Search all music/)).toBeInTheDocument()
   })
 
-  it('filters reduce visible scenes', () => {
+  it('filters reduce visible scenes (All Scenes grid excludes featured)', () => {
     const peacefulScenes = SCENE_PRESETS.filter((s) =>
       s.tags.mood.includes('peaceful'),
+    )
+    const peacefulNonFeatured = peacefulScenes.filter(
+      (s) => !FEATURED_SCENE_IDS.includes(s.id as (typeof FEATURED_SCENE_IDS)[number]),
     )
     mockSearchReturn = {
       ...mockSearchReturn,
@@ -223,8 +226,47 @@ describe('AmbientBrowser', () => {
     const allScenesSection = screen.getByLabelText('All scenes')
     // Each scene has 2 buttons (play + favorite), so multiply by 2
     const buttons = allScenesSection.querySelectorAll('button')
-    expect(buttons.length).toBe(peacefulScenes.length * 2)
-    expect(peacefulScenes.length).toBeLessThan(8)
+    expect(buttons.length).toBe(peacefulNonFeatured.length * 2)
+    expect(peacefulScenes.length).toBeLessThan(SCENE_PRESETS.length)
+  })
+
+  it('All Scenes grid excludes FEATURED_SCENE_IDS (dedupe)', () => {
+    render(<AmbientBrowser />)
+    const allScenesSection = screen.getByLabelText('All scenes')
+    const featuredSection = screen.getByLabelText('Featured scenes')
+    // Each featured scene name appears in featured, NOT in the all-scenes grid
+    for (const id of FEATURED_SCENE_IDS) {
+      const scene = SCENE_PRESETS.find((s) => s.id === id)!
+      expect(featuredSection.textContent).toContain(scene.name)
+      expect(allScenesSection.textContent ?? '').not.toContain(scene.name)
+    }
+  })
+
+  it('Featured and All Scenes headings use default SectionHeader variant with text-white', () => {
+    render(<AmbientBrowser />)
+    const featured = screen.getByRole('heading', { level: 2, name: /featured/i })
+    const allScenes = screen.getByRole('heading', { level: 2, name: /all scenes/i })
+    for (const heading of [featured, allScenes]) {
+      expect(heading.className).toContain('uppercase')
+      expect(heading.className).toContain('tracking-wide')
+      expect(heading.className).toContain('text-white')
+      expect(heading.className).not.toContain('text-white/50')
+      expect(heading.className).not.toContain('text-center')
+    }
+  })
+
+  it('"Build Your Own Mix" renders as gradient-variant heading', () => {
+    render(<AmbientBrowser />)
+    const byom = screen.getByRole('heading', {
+      level: 2,
+      name: /build your own mix/i,
+    })
+    expect(byom.className).toContain('text-center')
+    expect(byom.className).toContain('text-3xl')
+    expect(byom.className).toContain('sm:text-4xl')
+    expect(byom.className).toContain('lg:text-5xl')
+    expect(byom.style.backgroundImage).not.toBe('')
+    expect(byom.className).not.toContain('uppercase')
   })
 
   it('scene grid has responsive classes', () => {

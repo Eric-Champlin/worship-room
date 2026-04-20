@@ -59,4 +59,38 @@ describe('ScriptureCollectionRow', () => {
     expect(screen.getByText('The Lord is My Shepherd')).toBeInTheDocument()
     expect(screen.getByText('God is Our Refuge')).toBeInTheDocument()
   })
+
+  it('collection heading uses SectionHeader default variant (uppercase text-white)', () => {
+    render(<ScriptureCollectionRow collection={MOCK_COLLECTION} onPlay={vi.fn()} />)
+    const heading = screen.getByRole('heading', { level: 2, name: 'Psalms of Peace' })
+    expect(heading.className).toContain('uppercase')
+    expect(heading.className).toContain('tracking-wide')
+    expect(heading.className).toContain('text-white')
+    expect(heading.className).not.toContain('text-white/50')
+  })
+
+  it('wraps readings in a responsive grid (1/2/3 columns)', () => {
+    const { container } = render(
+      <ScriptureCollectionRow collection={MOCK_COLLECTION} onPlay={vi.fn()} />,
+    )
+    // The grid wrapper is the second child of the <section> (after SectionHeader)
+    const gridWrapper = container.querySelector('.grid') as HTMLElement
+    expect(gridWrapper).toBeTruthy()
+    expect(gridWrapper.className).toContain('grid')
+    expect(gridWrapper.className).toContain('grid-cols-1')
+    expect(gridWrapper.className).toContain('sm:grid-cols-2')
+    expect(gridWrapper.className).toContain('lg:grid-cols-3')
+    expect(gridWrapper.className).toContain('gap-3')
+  })
+
+  it('does NOT use horizontal-scroll classes', () => {
+    const { container } = render(
+      <ScriptureCollectionRow collection={MOCK_COLLECTION} onPlay={vi.fn()} />,
+    )
+    const gridWrapper = container.querySelector('.grid') as HTMLElement
+    expect(gridWrapper.className).not.toContain('overflow-x-auto')
+    expect(gridWrapper.className).not.toContain('snap-x')
+    expect(gridWrapper.className).not.toContain('snap-mandatory')
+    expect(gridWrapper.className).not.toContain('scrollbar-none')
+  })
 })

@@ -1,5 +1,6 @@
 import type { ScriptureCollection } from '@/types/music'
 import type { ScriptureReading } from '@/types/music'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import { ScriptureSessionCard } from './ScriptureSessionCard'
 
 interface ScriptureCollectionRowProps {
@@ -13,8 +14,8 @@ export function ScriptureCollectionRow({
 }: ScriptureCollectionRowProps) {
   return (
     <section className="space-y-3">
-      <h3 className="text-xl font-semibold text-white">{collection.name}</h3>
-      <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scrollbar-none">
+      <SectionHeader>{collection.name}</SectionHeader>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {collection.readings.map((reading) => (
           <ScriptureSessionCard
             key={reading.id}

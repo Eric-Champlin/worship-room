@@ -45,7 +45,7 @@ export function SleepBrowse() {
           </p>
           <Link
             to="/music/routines"
-            className="inline-block rounded-full border border-primary px-6 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e] active:scale-[0.98] transition-colors motion-reduce:transition-none"
           >
             Create a Routine
           </Link>

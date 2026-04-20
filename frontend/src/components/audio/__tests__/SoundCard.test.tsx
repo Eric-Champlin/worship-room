@@ -2,7 +2,11 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SoundCard } from '../SoundCard'
+import { SOUND_CATEGORY_COLORS } from '@/constants/soundCategoryColors'
 import type { Sound } from '@/types/music'
+
+const NATURE_TOKENS = SOUND_CATEGORY_COLORS.nature
+const SPIRITUAL_TOKENS = SOUND_CATEGORY_COLORS.spiritual
 
 const TEST_SOUND: Sound = {
   id: 'gentle-rain',
@@ -23,6 +27,7 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     expect(screen.getByText('Gentle Rain')).toBeInTheDocument()
@@ -37,6 +42,7 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false')
@@ -48,6 +54,7 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
@@ -61,9 +68,9 @@ describe('SoundCard', () => {
         isLoading={true}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
-    // Loader2 renders with motion-safe:animate-spin class
     const btn = screen.getByRole('button')
     expect(btn.querySelector('.motion-safe\\:animate-spin')).toBeInTheDocument()
   })
@@ -76,6 +83,7 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={true}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     const dot = screen.getByRole('button').querySelector('.bg-warning')
@@ -92,6 +100,7 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={false}
         onToggle={onToggle}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     await user.click(screen.getByRole('button'))
@@ -106,6 +115,7 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     expect(screen.getByRole('button')).toHaveAttribute(
@@ -120,6 +130,7 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     expect(screen.getByRole('button')).toHaveAttribute(
@@ -134,6 +145,7 @@ describe('SoundCard', () => {
         isLoading={true}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     expect(screen.getByRole('button')).toHaveAttribute(
@@ -148,6 +160,7 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={true}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     expect(screen.getByRole('button')).toHaveAttribute(
@@ -164,6 +177,7 @@ describe('SoundCard', () => {
         isLoading={true}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true')
@@ -177,9 +191,57 @@ describe('SoundCard', () => {
         isLoading={false}
         hasError={false}
         onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
       />,
     )
     const btn = screen.getByRole('button')
     expect(btn.className).toContain('motion-safe:animate-sound-pulse')
+  })
+
+  it('applies category-themed inactive tile styles (Nature = emerald)', () => {
+    render(
+      <SoundCard
+        sound={TEST_SOUND}
+        isActive={false}
+        isLoading={false}
+        hasError={false}
+        onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
+      />,
+    )
+    const btn = screen.getByRole('button')
+    expect(btn.className).toContain('bg-emerald-500/[0.08]')
+    expect(btn.className).toContain('border-emerald-400/20')
+  })
+
+  it('applies category-themed active glow (Nature = emerald shadow)', () => {
+    render(
+      <SoundCard
+        sound={TEST_SOUND}
+        isActive={true}
+        isLoading={false}
+        hasError={false}
+        onToggle={() => {}}
+        categoryTokens={NATURE_TOKENS}
+      />,
+    )
+    const btn = screen.getByRole('button')
+    expect(btn.className).toContain('shadow-[0_0_16px_rgba(52,211,153,0.45)]')
+  })
+
+  it('different category produces different active glow (Spiritual = violet)', () => {
+    render(
+      <SoundCard
+        sound={{ ...TEST_SOUND, id: 'choir-hum', category: 'spiritual' }}
+        isActive={true}
+        isLoading={false}
+        hasError={false}
+        onToggle={() => {}}
+        categoryTokens={SPIRITUAL_TOKENS}
+      />,
+    )
+    const btn = screen.getByRole('button')
+    expect(btn.className).toContain('shadow-[0_0_16px_rgba(167,139,250,0.45)]')
+    expect(btn.className).not.toContain('rgba(52,211,153')
   })
 })

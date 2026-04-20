@@ -39,7 +39,11 @@ export function SpotifyEmbed({
   if (!isOnline) {
     return (
       <div
-        className={cn('rounded-xl border border-white/10 bg-[rgba(15,10,30,0.3)] p-6 text-center', className)}
+        className={cn(
+          'rounded-xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 text-center',
+          'shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]',
+          className,
+        )}
       >
         <WifiOff className="mx-auto h-6 w-6 text-white/40" aria-hidden="true" />
         <p className="mt-2 text-sm text-white/60">
@@ -52,19 +56,23 @@ export function SpotifyEmbed({
   if (status === 'error') {
     return (
       <div
-        className={cn('rounded-xl border border-white/10 bg-[rgba(15,10,30,0.3)] p-6 text-center', className)}
+        className={cn(
+          'rounded-xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 text-center',
+          'shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]',
+          className,
+        )}
       >
         <p className="font-medium text-white">{playlist.name}</p>
         <p className="mt-1 text-sm text-white/60">
-          Player couldn&apos;t load — tap to open in Spotify
+          Player couldn&apos;t load. Tap below for full listening in the Spotify app.
         </p>
         <a
           href={playlist.spotifyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-block rounded-full border border-primary px-5 py-2 text-sm font-medium text-primary"
+          className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] transition-colors motion-reduce:transition-none"
         >
-          Open in Spotify
+          Open in Spotify →
         </a>
       </div>
     )

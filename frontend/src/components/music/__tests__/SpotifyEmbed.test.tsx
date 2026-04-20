@@ -58,9 +58,32 @@ describe('SpotifyEmbed', () => {
 
     expect(screen.getByText('Test Worship Playlist')).toBeInTheDocument()
     expect(
-      screen.getByText(/Player couldn't load — tap to open in Spotify/)
+      screen.getByText(/Player couldn't load\. Tap below for full listening in the Spotify app\./)
     ).toBeInTheDocument()
-    expect(screen.getByText('Open in Spotify')).toBeInTheDocument()
+    expect(screen.getByText(/Open in Spotify/)).toBeInTheDocument()
+  })
+
+  it('error state renders FrostedCard treatment', () => {
+    const { container } = render(<SpotifyEmbed playlist={TEST_PLAYLIST} />)
+    act(() => {
+      vi.advanceTimersByTime(10_000)
+    })
+    const root = container.firstElementChild as HTMLElement
+    expect(root.className).toContain('rounded-xl')
+    expect(root.className).toContain('border-white/[0.12]')
+    expect(root.className).toContain('bg-white/[0.06]')
+    expect(root.className).toContain('backdrop-blur-sm')
+  })
+
+  it('error CTA is a white pill with purple text and trailing arrow', () => {
+    render(<SpotifyEmbed playlist={TEST_PLAYLIST} />)
+    act(() => {
+      vi.advanceTimersByTime(10_000)
+    })
+    const link = screen.getByRole('link', { name: /open in spotify/i })
+    expect(link.className).toContain('bg-white')
+    expect(link.className).toContain('text-primary')
+    expect(link.textContent?.trim().endsWith('→')).toBe(true)
   })
 
   it('fallback link points to correct URL', () => {
@@ -70,7 +93,7 @@ describe('SpotifyEmbed', () => {
       vi.advanceTimersByTime(10_000)
     })
 
-    const link = screen.getByText('Open in Spotify')
+    const link = screen.getByRole('link', { name: /open in spotify/i })
     expect(link).toHaveAttribute(
       'href',
       'https://open.spotify.com/playlist/abc123'

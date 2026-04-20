@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Moon, Music, Wind } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { PageHero } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -33,9 +34,9 @@ const musicBreadcrumbs = {
 import type { SharedMixData } from '@/types/storage'
 
 const TABS = [
-  { id: 'playlists', label: 'Worship Playlists', shortLabel: 'Playlists' },
-  { id: 'ambient', label: 'Ambient Sounds', shortLabel: 'Ambient' },
-  { id: 'sleep', label: 'Sleep & Rest', shortLabel: 'Sleep' },
+  { id: 'playlists', label: 'Worship Playlists', icon: Music },
+  { id: 'ambient', label: 'Ambient Sounds', icon: Wind },
+  { id: 'sleep', label: 'Sleep & Rest', icon: Moon },
 ] as const
 
 type MusicTabId = (typeof TABS)[number]['id']
@@ -48,7 +49,7 @@ function isValidTab(value: string | null): value is MusicTabId {
 export function MusicPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const rawTab = searchParams.get('tab')
-  const defaultTab: MusicTabId = 'ambient'
+  const defaultTab: MusicTabId = 'playlists'
   const activeTab: MusicTabId = isValidTab(rawTab) ? rawTab : defaultTab
 
   // Getting Started checklist: flag ambient visit
@@ -146,9 +147,6 @@ export function MusicPage() {
   // Scene player for routine interrupt dialog
   const scenePlayer = useScenePlayer()
 
-  // Tab underline position
-  const activeTabIndex = TABS.findIndex((t) => t.id === activeTab)
-
   // Arrow key navigation for tab bar (WAI-ARIA Tabs pattern)
   const tabButtonRefs = useRef<(HTMLButtonElement | null)[]>([])
   const handleTabKeyDown = useCallback(
@@ -178,29 +176,29 @@ export function MusicPage() {
         <PageHero
           title="Music"
           subtitle="Worship, rest, and find peace in God's presence."
-          scriptWord="Music"
         />
 
         {/* Sentinel for sticky tab bar shadow */}
         <div ref={sentinelRef} aria-hidden="true" />
 
-        {/* Sticky Tab Bar */}
+        {/* Sticky Tab Bar — pill+halo pattern matching Daily Hub */}
         <div
           className={cn(
-            'sticky top-0 z-40 bg-dashboard-dark transition-shadow motion-reduce:transition-none',
-            isSticky && 'shadow-md',
+            'relative sticky top-0 z-40 backdrop-blur-md transition-shadow motion-reduce:transition-none',
+            isSticky && 'shadow-md shadow-black/20',
           )}
         >
-          <div className="mx-auto flex max-w-3xl items-center justify-center border-b border-white/10">
+          <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">
             <div
               ref={tabBarRef}
-              className="relative flex w-full"
+              className="flex w-full rounded-full border border-white/[0.12] bg-white/[0.06] p-1"
               role="tablist"
               aria-label="Music sections"
               {...(tabBarTooltip.shouldShow ? { 'aria-describedby': 'music-ambient-tab' } : {})}
             >
               {TABS.map((tab, index) => {
                 const isActive = activeTab === tab.id
+                const Icon = tab.icon
                 return (
                   <button
                     key={tab.id}
@@ -216,26 +214,18 @@ export function MusicPage() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e] sm:py-4 sm:text-base',
+                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e] sm:text-base active:scale-[0.98]',
                       isActive
-                        ? 'text-white'
-                        : 'text-white/60 hover:text-white/80',
+                        ? 'bg-white/[0.12] border border-white/[0.15] text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
+                        : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
                     )}
                   >
-                    <span className="sm:hidden">{tab.shortLabel}</span>
-                    <span className="hidden sm:inline">{tab.label}</span>
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                    <span className="hidden min-[400px]:inline">{tab.label}</span>
+                    <span className="sr-only min-[400px]:hidden">{tab.label}</span>
                   </button>
                 )
               })}
-              {/* Animated underline */}
-              <div
-                className="absolute bottom-0 h-0.5 bg-primary transition-transform motion-reduce:transition-none duration-base ease-standard"
-                style={{
-                  width: `${100 / TABS.length}%`,
-                  transform: `translateX(${activeTabIndex * 100}%)`,
-                }}
-                aria-hidden="true"
-              />
             </div>
           </div>
         </div>
