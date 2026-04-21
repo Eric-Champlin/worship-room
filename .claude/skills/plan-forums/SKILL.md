@@ -6,17 +6,24 @@ user-invokable: true
 
 # plan-forums
 
-Generate a technical implementation plan for a **Forums Wave** spec — covering backend (Spring Boot, JPA, Liquibase, Testcontainers), frontend (React, TypeScript, Tailwind), or both. Plans are the source of truth for `/execute-plan-forums`.
+Generate a technical implementation plan for any **backend-heavy or full-stack spec** that follows Worship Room's backend conventions — covering backend (Spring Boot, JPA, Liquibase, Testcontainers), frontend (React, TypeScript, Tailwind), or both. Plans are the source of truth for `/execute-plan-forums`.
+
+**Use this skill for:**
+- Forums Wave specs (the original use case — specs from `_forums_master_plan/round3-master-plan.md`)
+- Standalone backend specs that follow project conventions but aren't in the Forums Wave master plan (e.g., AI proxy specs, infrastructure specs, any Spring Boot work that uses `03-backend-standards.md`)
+- Full-stack specs that mix backend and frontend changes
+
+Forums-Wave-specific behavior (master plan reading, Universal Rules extraction, spec ID format) activates only when the spec references the master plan. Standalone specs skip that step and rely on `.claude/rules/` files as the source of project conventions.
 
 User input: $ARGUMENTS
 
 ## High-Level Behavior
 
 1. Read and internalize the spec file
-2. Read the master plan's Universal Rules and relevant Decisions
+2. **If the spec references the Forums Wave master plan:** read the master plan's Universal Rules and relevant Decisions. Otherwise, skip this step.
 3. Explore the codebase to understand existing patterns
 4. Generate a detailed, step-by-step implementation plan
-5. Save the plan to `_plans/forums/`
+5. Save the plan to `_plans/forums/` (Forums Wave specs) or `_plans/` (standalone specs)
 
 ---
 
@@ -28,9 +35,15 @@ If not found, display an error and **stop immediately.**
 
 ---
 
-## Step 2: Read the Master Plan Context
+## Step 2: Read the Master Plan Context (conditional)
 
-Read `_forums_master_plan/round3-master-plan.md` and extract:
+**Check whether this spec references the Forums Wave master plan:**
+
+- Look at the spec file for a `Master Plan Reference:` header or any reference to `_forums_master_plan/round3-master-plan.md`.
+- If the spec has NO master plan reference (standalone backend spec like an AI proxy spec, infrastructure spec, etc.): **skip this entire step** and proceed to Step 3. Rely on `.claude/rules/` files for project conventions.
+- If the spec DOES reference the master plan: continue with the master-plan reads below.
+
+**Forums Wave specs only — read `_forums_master_plan/round3-master-plan.md` and extract:**
 
 1. **Universal Spec Rules** — all 17 rules. These are non-negotiable constraints on every plan.
 2. **Architectural Decisions** referenced by this spec (check the spec's prereqs and body for "Decision N" references)
@@ -38,7 +51,7 @@ Read `_forums_master_plan/round3-master-plan.md` and extract:
 4. **Phase context** — read the phase header to understand the phase's overall goal and migration pattern
 5. **Cross-spec dependencies** — check if other specs in the same phase reference this one
 
-**Key master plan rules that affect every plan:**
+**Key master plan rules that affect every Forums Wave plan:**
 - Rule 1: No git operations (CC never commits, pushes, or runs destructive git commands)
 - Rule 3: All schema changes via Liquibase changesets (never raw SQL, never JPA ddl-auto)
 - Rule 4: TypeScript types generated from OpenAPI spec (never hand-written API types)
@@ -88,24 +101,28 @@ Document what you find — this becomes the **Architecture Context** section.
 
 ## Step 4: Generate the Plan
 
-Create the plan file at `_plans/forums/YYYY-MM-DD-<spec-id>.md`.
+**Create the plan file at:**
+- Forums Wave specs (master-plan-referenced): `_plans/forums/YYYY-MM-DD-<spec-id>.md`
+- Standalone backend specs: `_plans/YYYY-MM-DD-<spec-slug>.md`
 
 Use this structure:
 
 ````markdown
-# Forums Wave Plan: Spec {number} — {title}
+# {Plan Title — "Forums Wave Plan: Spec {number} — {title}" for Forums specs, "Plan: {title}" for standalone}
 
 **Spec:** `{spec file path}`
-**Master Plan:** `_forums_master_plan/round3-master-plan.md` → Spec {number}
+**Master Plan:** `_forums_master_plan/round3-master-plan.md` → Spec {number}   *(omit for standalone specs)*
 **Date:** YYYY-MM-DD
 **Branch:** {branch name}
-**Phase:** {phase number}
+**Phase:** {phase number}   *(omit for standalone specs)*
 **Size:** {S/M/L}
 **Risk:** {level}
 
 ---
 
-## Universal Rules Checklist
+## Universal Rules Checklist (Forums Wave specs only)
+
+**If this is a standalone backend spec (no master plan reference), write "N/A — standalone spec, see `.claude/rules/` files for applicable conventions" and skip the checklist below. Per-step verification commands are unchanged.**
 
 Before implementing, confirm this plan respects:
 - [ ] Rule 1: No git operations by CC

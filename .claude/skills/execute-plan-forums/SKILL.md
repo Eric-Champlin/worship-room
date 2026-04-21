@@ -6,7 +6,7 @@ user-invokable: true
 
 # execute-plan-forums
 
-Execute all steps from a Forums Wave implementation plan created by `/plan-forums`. Handles backend (Spring Boot, JPA, Liquibase, Testcontainers), frontend (React, TypeScript, Tailwind), and mixed specs.
+Execute all steps from an implementation plan created by `/plan-forums`. Handles backend (Spring Boot, JPA, Liquibase, Testcontainers), frontend (React, TypeScript, Tailwind), and mixed specs — Forums Wave or standalone backend specs that follow project conventions.
 
 User input: $ARGUMENTS
 
@@ -31,12 +31,12 @@ Read the plan file at `$ARGUMENTS`. If not found, display error and **stop.**
 Before doing anything, read and internalize:
 
 1. **Architecture Context** — existing codebase patterns, package conventions, related files
-2. **Master plan context** — read `_forums_master_plan/round3-master-plan.md` Universal Spec Rules section. These rules apply to every line of code you write.
+2. **Master plan context (conditional)** — if the plan references `_forums_master_plan/round3-master-plan.md`, read its Universal Spec Rules section (these apply to every line of Forums Wave code). If the plan is a standalone backend spec with no master plan reference, skip this step and rely on `.claude/rules/` files for project conventions.
 3. **`.claude/rules/03-backend-standards.md`** — API contract, Spring Boot conventions
 4. **`.claude/rules/05-database.md`** — schema conventions, naming
 5. **`.claude/rules/02-security.md`** — auth patterns, input validation
 6. **`.claude/rules/06-testing.md`** — test patterns
-7. **Universal Rules Checklist** — verify every checked rule is understood
+7. **Universal Rules Checklist (if present)** — verify every checked rule is understood; for standalone specs this section will be marked N/A and can be skipped
 8. **Edge Cases & Decisions** — know explicit decisions so you don't re-decide during implementation
 9. **Assumptions & Pre-Execution Checklist** — if first run (no steps [COMPLETE]), display to user and **wait for confirmation before proceeding**
 
@@ -109,7 +109,7 @@ Before implementing, re-read the relevant rules fresh — do NOT rely on memoriz
 - **Backend steps:** `03-backend-standards.md` (API contract, patterns), `05-database.md` (schema conventions)
 - **Frontend steps:** `09-design-system.md` (visual patterns), `04-frontend-standards.md`
 - **All steps:** `02-security.md` (auth, validation), `06-testing.md` (test patterns)
-- **Always:** The master plan's Universal Spec Rules section
+- **Forums Wave specs only:** the master plan's Universal Spec Rules section
 
 ### 4e: Implement
 
@@ -117,7 +117,7 @@ Execute the step following the plan's exact specifications.
 
 **Hierarchy of authority:**
 1. **The plan's explicit instructions** — file paths, method signatures, guardrails
-2. **Master plan Universal Rules** — non-negotiable constraints
+2. **Master plan Universal Rules** — non-negotiable constraints (Forums Wave specs only; standalone specs skip to #3)
 3. **`.claude/rules/` files** — project standards
 4. **Architecture Context** — patterns from reconnaissance
 5. **General best practices** — only when all above are silent
@@ -249,7 +249,8 @@ All {N} steps executed successfully.
 
 **Plan Authority:**
 - The plan is the source of truth — follow it precisely
-- The master plan's Universal Rules are non-negotiable — check them before every step
+- The master plan's Universal Rules are non-negotiable (Forums Wave specs only) — check them before every step
+- For standalone backend specs, `.claude/rules/` files are the primary authority after the plan
 - If the plan conflicts with reality (files don't exist, interfaces don't match), STOP and flag it
 - If you need to deviate, get user approval first and document in the Execution Log
 

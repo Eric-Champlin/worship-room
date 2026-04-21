@@ -735,9 +735,9 @@ The best commit is one you'd be proud to explain to anyone. This review catches 
  
 ---
  
-## Forums Wave Additional Checks
+## Backend Additional Checks
 
-When reviewing Forums Wave code (backend Spring Boot, Liquibase, dual-write), add these checks to Step 10:
+When reviewing code that touches the backend (Spring Boot, Liquibase, dual-write) — whether Forums Wave, AI proxy, infrastructure, or any other backend work — add these checks to Step 10:
 
 | Check | Status | Evidence |
 |-------|--------|----------|
@@ -759,7 +759,55 @@ When reviewing Forums Wave code (backend Spring Boot, Liquibase, dual-write), ad
 | Dual-write pattern: localStorage primary, backend shadow, fire-and-forget | OK / VIOLATION / N/A | {file}:{line} |
 | Feature flag env var documented in `.env.example` | OK / MISSING / N/A | {file} |
 
-**Forums Wave violations are Blocker severity** — same as Worship Room safety violations.
+**Backend violations are Blocker severity** — same as Worship Room safety violations.
+
+**Note:** Some checks in this table only apply to Forums Wave specs (dual-write, master-plan Universal Rules). For non-Forums backend work (e.g., AI proxy specs), mark those rows N/A.
+
+---
+
+## Proxy Additional Checks
+
+**Run this subsection when the diff touches `backend/src/main/java/com/example/worshiproom/proxy/` or any frontend file that calls `/api/v1/proxy/*`.**
+
+The proxy package wraps upstream third-party APIs (Gemini, Google Places, FCBH). The entire reason the proxy exists is to keep API keys off the frontend and to prevent key/secret leakage. Every review of proxy code MUST verify these invariants:
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| API keys never appear in log statements (never logged as fields, never logged as part of request/response bodies) | OK / VIOLATION | {file}:{line} |
+| API keys never appear in response bodies (not in success responses, not in error responses, not in health endpoints) | OK / VIOLATION | {file}:{line} |
+| API keys never appear in error messages that reach the client (even in 500 responses — messages must be user-safe) | OK / VIOLATION | {file}:{line} |
+| Upstream exception details (stack traces, third-party error text, internal URLs) don't leak to the client — `ProxyExceptionHandler` produces generic `UPSTREAM_ERROR` messages with request IDs | OK / VIOLATION | {file}:{line} |
+| Secrets loaded from env vars via `@ConfigurationProperties` or `@Value("${...}")` — never hardcoded, never parsed from `.env.local` in Java code | OK / VIOLATION | {file}:{line} |
+| `RequestIdFilter` runs before all other filters (`@Order(Ordered.HIGHEST_PRECEDENCE)`) so every log line includes a request ID | OK / WRONG ORDER | {file}:{line} |
+| `RateLimitFilter` runs after `RequestIdFilter` and only enforces on `/api/v1/proxy/**` paths (not global) | OK / OVER-BROAD | {file}:{line} |
+| Proxy endpoints return the standard `{ data, meta: { requestId } }` success shape from `ProxyResponse` | OK / VIOLATION | {file}:{line} |
+| Proxy endpoints return the standard `{ code, message, requestId, timestamp }` error shape from `ProxyError` | OK / VIOLATION | {file}:{line} |
+| `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` headers present on every `/api/v1/proxy/*` response | OK / MISSING | {file}:{line} |
+| 429 responses include `Retry-After` header (seconds, not date) | OK / MISSING | {file}:{line} |
+| `@RestControllerAdvice` is scoped with `basePackages = "com.example.worshiproom.proxy"` so it doesn't swallow exceptions from non-proxy controllers | OK / OVER-BROAD | {file}:{line} |
+| Health endpoint reports provider readiness as booleans only (never the key values themselves) | OK / VIOLATION | {file}:{line} |
+| Frontend no longer references `VITE_GEMINI_API_KEY` / `VITE_GOOGLE_MAPS_API_KEY` / `VITE_FCBH_API_KEY` after migration specs (Specs 2-4) — grep the frontend diff to confirm | OK / STILL PRESENT / N/A | {file}:{line} |
+| Frontend calls the proxy at `/api/v1/proxy/*` using `VITE_API_BASE_URL`, not direct upstream URLs | OK / VIOLATION / N/A | {file}:{line} |
+| `WebClient` has a request timeout configured (not unlimited) | OK / MISSING | {file}:{line} |
+| `RateLimitFilter` bucket map doesn't grow unboundedly in a way that could cause OOM (acceptable for current traffic, but flag if new eviction-free code is added) | OK / MEMORY RISK | {file}:{line} |
+
+**Proxy violations are Blocker severity.** Leaking a key or an upstream stack trace is the entire failure mode these specs exist to prevent; catching it in review is non-negotiable.
+
+**Recommended grep commands during review:**
+
+```bash
+# Verify no API key in logs
+grep -rn 'log\.\(info\|debug\|warn\|error\).*apiKey\|log\.\(info\|debug\|warn\|error\).*getApiKey' backend/src/main/java
+
+# Verify no API key in error messages
+grep -rn 'throw new.*Exception.*apiKey\|throw new.*Exception.*getApiKey' backend/src/main/java
+
+# Verify no hardcoded keys (should find nothing; actual keys are in env vars)
+grep -rnE 'apiKey\s*=\s*"[A-Za-z0-9_-]{10,}"' backend/src/main/java
+
+# Confirm frontend migration removed the VITE_*_API_KEY references (run for each migrated key)
+grep -rn 'VITE_GEMINI_API_KEY\|VITE_GOOGLE_MAPS_API_KEY\|VITE_FCBH_API_KEY' frontend/src
+```
 
 ---
 
