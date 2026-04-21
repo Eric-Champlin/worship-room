@@ -12,7 +12,7 @@
 - **Containerization:** Docker Compose for local dev (PostgreSQL + Redis + backend)
 
 ### Deploy Pipeline
-1. Push to feature branch → CI runs `./mvnw test` + `pnpm test` + `pnpm build`
+1. Push to feature branch → CI runs `./mvnw test` + `npm test` + `npm run build`
 2. Merge to main → auto-deploy frontend to Vercel, backend to Railway/Render
 3. **Liquibase migrations run automatically on backend startup** — Spring Boot applies pending changesets before the app accepts traffic
 4. Post-deploy health check: `GET /api/v1/health` returns 200
@@ -28,13 +28,13 @@
 ### Frontend
 ```bash
 cd frontend
-pnpm install      # Install dependencies
-pnpm dev          # Start dev server (http://localhost:5173)
-pnpm build        # Build for production
-pnpm lint         # Lint code
-pnpm format       # Format with Prettier
-pnpm test         # Run Vitest tests
-pnpm test:watch   # Run tests in watch mode
+npm install      # Install dependencies
+npm run dev      # Start dev server (http://localhost:5173)
+npm run build    # Build for production
+npm run lint     # Lint code
+npm run format   # Format with Prettier
+npm test         # Run Vitest tests
+npm run test:watch   # Run tests in watch mode
 ```
 
 ### Backend
@@ -88,7 +88,23 @@ VITE_VAPID_PUBLIC_KEY=your-vapid-public-key
 
 ### Optional / Phase-specific
 ```bash
-# Redis (Spec 5.6 — omit for in-memory fallback)
+# Key Protection wave (Spec 1 `ai-proxy-foundation` onwards)
+# These are loaded from backend/.env.local via docker-compose env_file directive
+# (with required: false, so the backend boots without them and /api/v1/health
+# reports providers.* as false). In production, your hosting platform
+# (Railway/Render) injects them directly.
+# After Spec 2 merges, VITE_GEMINI_API_KEY is REMOVED from the frontend —
+# GEMINI_API_KEY on the backend is the sole source of truth.
+GEMINI_API_KEY=your-gemini-api-key-here
+GOOGLE_MAPS_API_KEY=your-google-maps-api-key-here
+FCBH_API_KEY=your-fcbh-api-key-here
+
+# Rate-limit + XFF tuning (Spec 1 defaults; override per deploy if needed)
+# proxy.rate-limit.requests-per-minute=60
+# proxy.rate-limit.burst-capacity=10
+# proxy.trust-forwarded-headers=true   # REQUIRED in prod (Railway/Vercel sanitize XFF)
+
+# Redis (Spec 5.6 — omit for in-memory Caffeine fallback; required for multi-instance deploys)
 REDIS_URL=redis://localhost:6379
 
 # Sentry (Spec 1.10d — omit to disable)

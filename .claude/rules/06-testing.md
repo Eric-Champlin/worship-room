@@ -8,7 +8,7 @@
 ### General Rules
 - Run tests automatically after code changes
 - Write tests alongside feature development
-- Ensure ALL tests pass before commits: `./mvnw test && cd frontend && pnpm test`
+- Ensure ALL tests pass before commits: `./mvnw test && cd frontend && npm test`
 - Aim for 80%+ code coverage on new code
 - Focus on critical paths: auth, data persistence, crisis detection, reactive store subscriptions, API contracts, database migrations
 
@@ -24,9 +24,18 @@
 - Utility functions
 - Naming: `{ClassName}Test.java`
 
+**Controller slice tests** (`@WebMvcTest` — no DB, no Testcontainers):
+- For controllers whose services don't touch the database (proxy controllers that call external APIs — Gemini, Maps, FCBH — and have nothing to persist)
+- Loads ONLY the web layer: `@WebMvcTest(FooController.class)` + `@Import(ProxyExceptionHandler.class)` if the shared advice is needed for error-shape assertions
+- Service dependencies stubbed via `@MockBean`
+- Fast (~500ms per class) — prefer over `@SpringBootTest` when no DB involvement is needed
+- Naming: `{ControllerName}Test.java`
+- Example: `GeminiControllerTest` (Spec 2) uses `@WebMvcTest(GeminiController.class)` + `@Import(ProxyExceptionHandler.class)` + `@MockBean private GeminiService geminiService`
+
 **Integration tests** (`@SpringBootTest`):
-- Full Spring context with Testcontainers PostgreSQL + Redis
-- End-to-end flows: HTTP request → controller → service → repository → database
+- Full Spring context. For database-touching flows, add Testcontainers PostgreSQL + Redis per the Testcontainers Setup Pattern below.
+- For proxy/external-API flows that don't touch the database, `@SpringBootTest` + `@AutoConfigureMockMvc` + `@MockBean` on the service is sufficient — no Testcontainers needed. Locks in the full filter chain (RequestIdFilter, RateLimitFilter, exception advices) end-to-end.
+- End-to-end flows: HTTP request → filter chain → controller → service → repository → database (when relevant)
 - Naming: `{ClassName}IntegrationTest.java`
 
 **Repository tests** (`@DataJpaTest` + Testcontainers):
@@ -44,9 +53,11 @@
 - `LiquibaseSmokeTest.java` — runs on every test suite execution
 - Verify columns, constraints, indexes exist after migration
 
-### Testcontainers Setup Pattern
+### Testcontainers Setup Pattern (database-touching tests only)
 
-All backend integration tests extend `AbstractIntegrationTest` (created in Spec 1.7), which manages the Testcontainers PostgreSQL container. **Never create containers per-test-class — use the shared base class.**
+**When to use:** Any test that exercises JPA repositories, Liquibase migrations, or SQL behavior. Not required for proxy controller/service tests that don't touch the database — those use `@WebMvcTest` or `@SpringBootTest` + `@MockBean` instead.
+
+All backend integration tests that need a database extend `AbstractIntegrationTest` (created in Spec 1.7), which manages the Testcontainers PostgreSQL container. **Never create containers per-test-class — use the shared base class.**
 
 ```java
 // AbstractIntegrationTest.java (created in Phase 1, Spec 1.7)
@@ -144,8 +155,8 @@ Before considering any feature complete:
 
 - [ ] Backend compiles cleanly: `./mvnw compile`
 - [ ] Backend tests pass: `./mvnw test`
-- [ ] Frontend builds cleanly: `pnpm build`
-- [ ] Frontend tests pass: `pnpm test`
+- [ ] Frontend builds cleanly: `npm run build`
+- [ ] Frontend tests pass: `npm test`
 - [ ] Reactive store consumer tests added (if feature reads from a reactive store)
 - [ ] API responses follow standard shape from `03-backend-standards.md`
 - [ ] Liquibase changesets apply cleanly (verified via Testcontainers)

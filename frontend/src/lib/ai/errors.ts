@@ -103,23 +103,6 @@ export class GeminiTimeoutError extends Error {
 }
 
 /**
- * Thrown when `requireGeminiApiKey()` threw because `VITE_GEMINI_API_KEY` is
- * not set. The hook maps this to the generic "temporarily unavailable" message
- * for users — the specific error is logged to the console for developers by
- * `geminiClient.getClient()`.
- */
-export class GeminiKeyMissingError extends Error {
-  constructor(
-    message = 'Gemini API key is not configured (check frontend/.env.local)',
-    options?: ErrorOptions,
-  ) {
-    super(message)
-    this.name = 'GeminiKeyMissingError'
-    assignCause(this, options)
-  }
-}
-
-/**
  * Thrown when a request was denied by the client-side rate limiter (BB-32).
  *
  * Carries `retryAfterSeconds` so the UI can render a live countdown. The

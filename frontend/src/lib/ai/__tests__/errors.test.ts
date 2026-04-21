@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import * as errorsModule from '../errors'
 import {
   GeminiApiError,
-  GeminiKeyMissingError,
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
@@ -14,7 +13,6 @@ const ERROR_CLASSES = [
   { name: 'GeminiApiError', Ctor: GeminiApiError },
   { name: 'GeminiSafetyBlockError', Ctor: GeminiSafetyBlockError },
   { name: 'GeminiTimeoutError', Ctor: GeminiTimeoutError },
-  { name: 'GeminiKeyMissingError', Ctor: GeminiKeyMissingError },
 ] as const
 
 describe('Gemini typed error classes', () => {
@@ -73,18 +71,17 @@ describe('RateLimitError (BB-32)', () => {
   })
 
   /**
-   * Regression guard for acceptance criterion 14: the 5 pre-existing error
-   * classes must not be modified. If a future edit removes or renames one
-   * of them, this export-shape assertion fails.
+   * Regression guard: the error module exports exactly 5 classes post-Spec-2
+   * (4 pre-existing Gemini* + RateLimitError). The key-missing error class
+   * was deleted in Spec 2 — the frontend no longer owns the API key.
    */
-  it('errors module exports exactly 6 error classes (5 pre-existing + RateLimitError)', () => {
+  it('errors module exports exactly 5 error classes', () => {
     const errorExports = Object.keys(errorsModule).filter((k) =>
       k.endsWith('Error'),
     )
     expect(errorExports.sort()).toEqual(
       [
         'GeminiApiError',
-        'GeminiKeyMissingError',
         'GeminiNetworkError',
         'GeminiSafetyBlockError',
         'GeminiTimeoutError',

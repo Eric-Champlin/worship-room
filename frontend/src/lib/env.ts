@@ -18,7 +18,6 @@
 // `SEO.tsx`, `constants/audio.ts`, `components/SEO.tsx`) predate this module
 // and should migrate to env.ts when those files are next touched.
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as
   | string
   | undefined
@@ -27,26 +26,6 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undef
 // "absent" check regardless of whether the var is missing or set to "".
 const FCBH_API_KEY_RAW = import.meta.env.VITE_FCBH_API_KEY as string | undefined
 const FCBH_API_KEY: string | undefined = FCBH_API_KEY_RAW || undefined
-
-/**
- * Returns the Google Gemini API key, or throws if it is not configured.
- *
- * Call this from the feature code that actually sends a Gemini request. Do
- * NOT call it at module load or from feature code that may run for users who
- * have not opted into the Gemini-backed feature.
- *
- * Used by: BB-30 (Explain This Passage), BB-31 (What does this mean for me),
- * future Ask AI migration.
- */
-export function requireGeminiApiKey(): string {
-  if (!GEMINI_API_KEY) {
-    throw new Error(
-      'Gemini API key is not configured. Add VITE_GEMINI_API_KEY to frontend/.env.local. ' +
-        'See frontend/.env.example for the expected format.',
-    )
-  }
-  return GEMINI_API_KEY
-}
 
 /**
  * Returns the Google Maps Platform API key, or throws if it is not
@@ -68,16 +47,7 @@ export function requireGoogleMapsApiKey(): string {
 
 /**
  * Non-throwing check — use in UI that wants to conditionally render a feature
- * based on whether its key is configured (e.g., hide an "Explain this passage"
- * affordance in environments where Gemini is not wired up).
- */
-export function isGeminiApiKeyConfigured(): boolean {
-  return !!GEMINI_API_KEY
-}
-
-/**
- * Non-throwing check — symmetric with `isGeminiApiKeyConfigured` for the Maps
- * key.
+ * based on whether the Maps key is configured.
  */
 export function isGoogleMapsApiKeyConfigured(): boolean {
   return !!GOOGLE_MAPS_API_KEY

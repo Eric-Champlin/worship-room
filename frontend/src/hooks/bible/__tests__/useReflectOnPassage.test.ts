@@ -13,7 +13,6 @@ vi.mock('@/lib/ai/geminiClient', () => ({
 import { useReflectOnPassage, ERROR_COPY } from '../useReflectOnPassage'
 import {
   GeminiApiError,
-  GeminiKeyMissingError,
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
@@ -106,19 +105,6 @@ describe('useReflectOnPassage', () => {
     })
     expect(result.current.errorKind).toBe('timeout')
     expect(result.current.errorMessage).toContain('took too long')
-  })
-
-  it('maps GeminiKeyMissingError to "unavailable" kind', async () => {
-    mockGenerateReflection.mockRejectedValue(new GeminiKeyMissingError())
-    const { result } = renderHook(() =>
-      useReflectOnPassage(REFERENCE, VERSE_TEXT),
-    )
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('error')
-    })
-    expect(result.current.errorKind).toBe('unavailable')
-    expect(result.current.errorMessage).toContain('temporarily unavailable')
   })
 
   it('maps unknown errors to "unavailable" kind', async () => {

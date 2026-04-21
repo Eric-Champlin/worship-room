@@ -78,17 +78,29 @@ The push subscription is stored in `wr_push_subscription` (localStorage) for now
 - Privacy settings control visibility of engagement data (everyone / friends / only me)
  
 ### Rate Limiting
- 
-- **Backend**: Per-user rate limiting on AI endpoints to prevent abuse and control costs
-  - **AI Requests**: 20 requests per hour per user (scripture matching, prayers, reflections, prompts) - configurable via environment variables (dev vs prod)
-  - **Prayer Wall Posts**: 5 posts per day per user - configurable via environment variables
-  - **Implementation**: Spring Security + Redis (production) or in-memory cache (local dev only)
-  - **Important**: Local dev can use in-memory; production must use Redis (multi-instance safe)
-  - **Configuration**: Rate limits are environment-specific (`.env` or platform env vars), not hardcoded
-- **Frontend AI cache (BB-32)**: BB-30 Explain and BB-31 Reflect use the local `bb32-v1:*` cache layer to avoid duplicate Gemini calls for the same verse range. This is a courtesy reduction in upstream calls, NOT a security boundary — the backend rate limiter must still enforce per-user limits when Phase 3 wires real auth.
-- **Global**: IP-based rate limiting to prevent DDoS
-  - **API Endpoints**: 100 requests per minute per IP
-  - **Implementation**: Nginx or Spring Security
+
+**Current implementation (Key Protection wave, Spec 1 `ai-proxy-foundation`):**
+- **Mechanism**: bucket4j token bucket with a Caffeine-backed bounded bucket map keyed by client IP. NOT Spring Security, NOT Redis. Single-instance, in-process.
+- **Scope**: Applied to `/api/v1/proxy/**` only (health endpoints and other routes excluded via `RateLimitFilter.shouldNotFilter`). Forums Wave endpoints will add their own per-endpoint limits when they ship.
+- **Profile defaults**: Dev profile 120/min with 30-request burst; prod profile 60/min with 10-request burst. Configured via `proxy.rate-limit.requests-per-minute` and `proxy.rate-limit.burst-capacity` in `application-{profile}.properties` — NEVER hardcoded.
+- **Enforcement granularity**: Per-IP (not per-user) until JWT auth lands in Forums Wave Phase 1. Once auth is wired, per-user limits take precedence for authenticated endpoints, with per-IP as the fallback for unauthenticated ones.
+- **Response**: 429 `RATE_LIMITED` with `Retry-After` header (integer seconds). Every successful response carries `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers.
+- **Bucket-map bounding** (MANDATORY — see "Bounded External-Input Caches" rule below).
+
+**BOUNDED EXTERNAL-INPUT CACHES (MANDATORY RULE):**
+
+Any map, cache, or lookup structure keyed by untrusted external input — client IP, `User-Agent`, arbitrary request header values, opaque client-supplied tokens, etc. — MUST be bounded. Use Caffeine (`Caffeine.newBuilder().maximumSize(N).expireAfterAccess(Duration).build()`) or an equivalent bounded cache. An unbounded `ConcurrentHashMap` keyed on external input is a denial-of-service vector: an attacker cycling input values grows the map indefinitely until the JVM runs out of heap.
+
+Spec 1 Round 2 caught this on the rate-limit bucket map (`maximumSize(10_000)` + `expireAfterAccess(15m)`, ~1 MB worst case). The same rule applies to every future cache of this shape — session stores, idempotency keys, request-ID dedupe caches, per-IP circuit breakers, and so on. `/code-review` MUST flag any new unbounded map keyed on external input.
+
+**Frontend AI cache (BB-32)**: BB-30 Explain and BB-31 Reflect use the client-side `bb32-v1:*` localStorage cache to avoid duplicate Gemini calls for the same verse range. This is a courtesy reduction in upstream calls, NOT a security boundary — the backend rate limiter is the actual enforcement (per-IP today, per-user once auth wires up).
+
+**Forums Wave targets (deferred to Phase 1):**
+- **AI Requests**: 20/hour per authenticated user (per master plan)
+- **Prayer Wall Posts**: 5/day per user (per master plan)
+- **Deploy-time Redis**: Redis-backed bucket4j for multi-instance deploys is the documented upgrade path. Single-instance Caffeine is acceptable until then.
+
+**Global DDoS protection**: Deferred to the deployment layer (Nginx/edge). Not a Spring Boot concern in this architecture.
  
 ### API Key Security & Environment Variables
  
@@ -130,15 +142,38 @@ The push subscription is stored in `wr_push_subscription` (localStorage) for now
 - **Future Enhancement**: Password strength meter, common password blacklist, 2FA
  
 ### CORS Policy
- 
-- **Allowed Origins**:
-  - **Local Development**: `http://localhost:5173` (Vite dev server)
-  - **Production**: `https://worshiproom.com` (or actual production domain)
-- **Allowed Methods**: `GET, POST, PUT, DELETE, OPTIONS`
+
+- **Allowed Origins** (comma-separated, loaded from `proxy.cors.allowed-origins` in `application-{profile}.properties` — NEVER hardcoded in Java):
+  - **Local dev**: `http://localhost:5173,http://localhost:5174,http://localhost:4173` (Vite dev + preview ports)
+  - **Production**: `https://worshiproom.com,https://www.worshiproom.com` (apex + www, both required)
+- **Allowed Methods**: `GET, POST, PUT, PATCH, DELETE, OPTIONS` — PATCH is REQUIRED (Forums Wave endpoints use PATCH for partial updates)
 - **Allowed Headers**: `Content-Type, Authorization, X-Request-Id`
+- **Exposed Headers** (MANDATORY — without these, browsers hide them from frontend JavaScript even though they arrive on the wire): `X-Request-Id, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After`
 - **Credentials**: `false` for MVP (in-memory JWT, no cookies). Set to `true` only if migrating to cookie-based JWT in the future.
-- **Implementation**: Spring Boot `@CrossOrigin` or global CORS configuration
+- **Implementation**: Global `CorsConfig` with `WebMvcConfigurer.addCorsMappings`, `@Value("${proxy.cors.allowed-origins}")`-bound `String[]`. No inline `@Value` defaults (they duplicate `application.properties` and create drift).
  
+### X-Forwarded-For Trust Policy
+
+`X-Forwarded-For` and `X-Real-IP` headers are trivially forgeable by any client. The `IpResolver` (used by `RateLimitFilter`, and any future per-IP feature) MUST trust them ONLY when the app sits behind a reverse proxy that sanitizes incoming values.
+
+- **Implementation**: `proxy.trust-forwarded-headers` boolean in `application-{profile}.properties`.
+  - **Dev profile**: `false` (local dev has no reverse proxy — client IP is `remoteAddr`)
+  - **Prod profile**: `true` (Railway/Vercel sanitize XFF — strip the client's value, overwrite with the real observed IP)
+- **When `false`**: `IpResolver` ignores XFF and X-Real-IP entirely; returns `request.getRemoteAddr()`.
+- **When `true`**: `IpResolver` reads the leftmost XFF entry first, then X-Real-IP, then `remoteAddr` as fallback.
+
+**Why flag-based, not IP-format validation**: An attacker can set `X-Forwarded-For: 203.0.113.99` (a valid-looking IP) per request. Format validation filters garbage but doesn't stop the attack — each request still generates a fresh rate-limit bucket. The only way to actually prevent XFF spoofing is "do not trust XFF unless a trusted proxy set it." Flag-based matches the threat model precisely.
+
+This rule is mandatory for any proxy filter or feature that reads client IP. Spec 1 Round 2 caught this on `IpResolver`; the same rule applies to future per-IP features (geo-lookup, audit logs, etc.).
+
+### Never Leak Upstream Error Text (MANDATORY)
+
+When a proxy endpoint (`/api/v1/proxy/ai/*`, `/api/v1/proxy/places/*`, `/api/v1/proxy/audio/*`) catches an upstream API failure, the HTTP response body sent to the client MUST contain ONLY a user-safe generic message. The upstream exception's message, stack trace, response body, and headers are server-side debugging information and MUST NOT reach the client.
+
+- **Pattern**: Services catch SDK/HTTP exceptions, log the full detail server-side with the request ID, and throw `UpstreamException("AI service is temporarily unavailable. Please try again.", cause)`. The shared `ProxyExceptionHandler` emits the user-safe message in the `ProxyError` body; the `cause` chain is never serialized.
+- **Rationale**: Upstream errors often contain API keys, internal URLs, quota details, or cryptic vendor-specific codes that are useless or dangerous to expose.
+- **Verification**: Every proxy service test MUST include a "generic SDK exception throws UpstreamException (no internal leak)" test that asserts the caught exception's message does NOT appear in the thrown `ProxyException`'s message. Spec 2's `GeminiServiceTest.genericSdkErrorThrowsUpstream` is the canonical example.
+
 ### Input Validation & Sanitization
  
 - **All User Inputs**: Validate length, format, content
