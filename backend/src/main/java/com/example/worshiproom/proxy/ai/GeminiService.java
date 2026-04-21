@@ -182,9 +182,17 @@ public class GeminiService {
         Optional<FinishReason> finishReason = firstCandidate
                 .flatMap(Candidate::finishReason);
 
+        // Compare against the FinishReason.Known enum directly rather than
+        // matching on FinishReason.toString(). google-genai 1.51.0's toString
+        // happens to produce "SAFETY" / "PROHIBITED_CONTENT" today (see D2a),
+        // but that is incidental — a future SDK version could change the
+        // wrapper's toString format (e.g. "Known[SAFETY]") and silently break
+        // output-level safety detection. The Known enum constants are a
+        // stable API surface. Mirrors the input-side pattern from D2a.
         if (finishReason.isPresent()) {
-            String reason = finishReason.get().toString();
-            if ("SAFETY".equals(reason) || "PROHIBITED_CONTENT".equals(reason)) {
+            FinishReason.Known reason = finishReason.get().knownEnum();
+            if (reason == FinishReason.Known.SAFETY
+                    || reason == FinishReason.Known.PROHIBITED_CONTENT) {
                 throw new SafetyBlockException(
                         "Gemini blocked the response: finishReason=" + reason
                 );

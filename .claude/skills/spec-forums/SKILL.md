@@ -113,6 +113,15 @@ Save the spec to `_specs/forums/<spec_id>.md`
 
 ---
 
+## Affected Frontend Routes
+
+{Derive this from the spec content. List the user-facing routes this spec touches — one per line as backtick-wrapped markdown bullets. The `/verify-with-playwright` skill reads this section when invoked plan-only (e.g., `/verify-with-playwright _plans/forums/...md`) and uses these routes to drive UI verification. If the spec is purely backend with no frontend changes, write "N/A — backend-only spec" and omit the bullets. The plan generated from this spec should inherit this section unchanged.}
+
+- `/route-1`
+- `/route-2?tab=variant`
+
+---
+
 {Full spec content from master plan}
 ```
 
@@ -146,6 +155,7 @@ Before saving:
 - [ ] API changes include endpoint paths and HTTP methods
 - [ ] Acceptance criteria are present and testable
 - [ ] Out of scope section exists
+- [ ] **Affected Frontend Routes** section populated — either with the actual user-facing routes touched by this spec (one per line, backtick-wrapped, including query params), or with "N/A — backend-only spec" if no UI is involved. Required for `/verify-with-playwright` plan-only invocation downstream.
 
 ---
 

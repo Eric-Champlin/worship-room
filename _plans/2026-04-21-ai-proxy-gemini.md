@@ -7,6 +7,10 @@
 **Size:** L (24 files touched, ~60 tests, backend + frontend)
 **Risk:** Medium — backend net-new + frontend swap of a widely-used client (`geminiClient.ts`). Public function signatures preserved to minimize hook/component churn.
 
+## Affected Frontend Routes
+
+- `/bible`
+
 ---
 
 ## Universal Rules Checklist
@@ -1361,6 +1365,8 @@ Expected: zero output. (The model string `gemini-2.5-flash-lite` is gone from th
 | 23 | Frontend test + lint + build | [COMPLETE] | 2026-04-21 | `pnpm test`: 8738/8748 pass. The 10 failures are all pre-existing on the baseline (Local Support, Bible Audio, PlanBrowserPage) — verified via `git stash` + baseline re-run. Spec 2 added ~32 new geminiClient tests, all pass. `pnpm lint`: 9 errors in `frontend/scripts/verify-local-support-facelift.mjs` — all pre-existing (unrelated script file), verified same on baseline. `pnpm build`: PASS in 7.4s + PWA service worker built. Bundle scan: Spec 2's goal achieved (zero Gemini key in bundle, zero GoogleGenAI, zero VITE_GEMINI_API_KEY). See Deviation D5 for the two pre-existing non-Spec-2 artifacts the scan regex also matched. |
 | 24 | End-to-end smoke with real key | [DONE-CLI] | 2026-04-21 | Eric delegated the 7 CLI sub-steps (1-7) to CC; browser spot-check (original sub-step 7 / plan sub-step 7 UX) remains for Eric. All 7 CLI sub-steps PASS after deviations D6 + D7 applied. Sub-step 1: `/explain` 200, real Gemini content (2269 chars), `data.model == "gemini-2.5-flash-lite"`, 22-char `requestId`. Sub-step 2: `X-Request-Id` + all three `X-RateLimit-*` headers present. Sub-step 3: `/reflect` 200, 854 chars, interrogative voice ("A reader might wonder...") — distinct from explain's scholarly voice, confirms REFLECT prompt routing. Sub-step 4: blank reference → 400 `INVALID_INPUT` user-safe. Sub-step 5: 15/15 rapid POSTs = 200 (rate limit not misconfigured). Sub-step 6: After D7 fix, zero `verseText` hits in logs; controller INFO log `reference=1 Corinthians 13:4-7 verseTextLength=48` emits correctly. Sub-step 7: Empty `.env.local` → 502 `UPSTREAM_ERROR` message `"AI service is not configured on the server."` (Branch A per D3) + warn log; restore → 200 with real content. |
 
+**Post-review addendum (2026-04-21, after `/code-review`):** Verified existing D1 and D2b cover Minor #2 (`Optional.ofNullable` removal) and Minor #1 (`callModels()` seam) from `/code-review` — no doc edits needed for those. Added D8 (documents the `@Import(ProxyConfig.class)` slice-test addition that was already implicit in the Step 9 row) and D9 (documents the Medium #1 safety-detection hardening applied post-review). Ran `./mvnw test -Dtest=GeminiServiceTest` → 8/8 green, and the full `./mvnw test` suite → 45/45 green, confirming no regressions from the D9 code change.
+
 ---
 
 ## Deviations from spec
@@ -1563,3 +1569,37 @@ src/hooks/bible/__tests__/useExplainPassage.test.ts:99:    mockGenerateExplanati
 Step 6's verification line quoted the Branch B message (`"AI service is temporarily unavailable. Please try again."`) for the null-client path. The spec's actual Branch A message — and what `GeminiService` produces when the key is absent — is `"AI service is not configured on the server."` This matches `GeminiServiceTest.nullClientThrowsUpstream`'s `.hasMessageContaining("not configured")` assertion (Step 8). No code change needed; plan verification line was wrong.
 
 The two-branch design is deliberate: "not configured" signals a deployment issue (operator action), "temporarily unavailable" signals a transient runtime problem (user retry) — they shouldn't be collapsed. Step 6's historical verification text is left intact for the audit trail; D3 documents the correction.
+
+### D8 — Step 9 (`GeminiControllerTest.java`): test plumbing, not in plan
+
+`GeminiControllerTest` uses `@Import({ProxyExceptionHandler.class, ProxyConfig.class})`. The `ProxyConfig.class` was not in the plan's import list (plan specified `@Import(ProxyExceptionHandler.class)` only) but is required for `@WebMvcTest` to bootstrap the `proxyConfig` bean that `GeminiController` reads from in its constructor chain (via `RateLimitFilter` / `CorsConfig` wiring that the slice pulls in). Standard slice-test plumbing pattern; no behavior impact — tests still exercise only the controller and shared advice, with `GeminiService` mocked via `@MockBean`.
+
+**Pattern note for Specs 3 and 4:** Any controller slice test for a proxy controller will need `@Import(ProxyConfig.class)` (in addition to `ProxyExceptionHandler.class`) since all proxy controllers read upstream credentials from `ProxyConfig`'s nested properties classes (`ProxyConfig.GeminiProperties`, `ProxyConfig.GoogleMapsProperties`, `ProxyConfig.FcbhProperties`). Propagate the `@Import({ProxyExceptionHandler.class, ProxyConfig.class})` pair into the slice-test template without re-surfacing.
+
+Originally called out as an implicit note on the Step 9 Execution Log row; promoted to a proper D-entry here so `/code-review` runs on future specs can cite it directly.
+
+### D9 — Medium #1 from `/code-review` applied: output-level safety match uses `FinishReason.Known` enum instead of `toString()`
+
+**Source:** `/code-review` on Eric's laptop flagged this as Medium #1 on 2026-04-21 after the wave merged locally but before push.
+
+**What changed:** In `GeminiService.generate()` the output-level safety check previously compared `finishReason.get().toString()` against the string literals `"SAFETY"` and `"PROHIBITED_CONTENT"`. That pattern relies on google-genai 1.51.0's wrapper `toString()` incidentally producing the bare enum name (verified per D2a: `new FinishReason(Known.SAFETY)` sets the internal value so `toString()` returns `"SAFETY"`). A future SDK version could change the wrapper's `toString` format (e.g. `"Known[SAFETY]"`, `"FinishReason{SAFETY}"`) and silently break output-level safety detection — no test would fail because the unit test currently constructs the wrapper with the same 1.51.0 behavior, and real-world unsafe responses would start flowing through untriggered.
+
+Replaced with a direct enum comparison:
+
+```java
+FinishReason.Known reason = finishReason.get().knownEnum();
+if (reason == FinishReason.Known.SAFETY
+        || reason == FinishReason.Known.PROHIBITED_CONTENT) {
+    throw new SafetyBlockException(
+            "Gemini blocked the response: finishReason=" + reason
+    );
+}
+```
+
+The `Known` enum constants are a stable API surface of the SDK. This mirrors the input-side pattern already set by D2a (`new BlockedReason(BlockedReason.Known.SAFETY)` on the test construction side) — the production code is now internally consistent with that approach end-to-end.
+
+**Behavioral impact:** Zero today. `GeminiServiceTest.outputSafetyThrowsSafety` constructs `new FinishReason(FinishReason.Known.SAFETY)` so `knownEnum()` returns `Known.SAFETY`, which equals the constant being compared — the assertion `hasMessageContaining("finishReason=SAFETY")` still holds because Java's default enum `toString()` returns the name `"SAFETY"`. Verified by running `./mvnw test -Dtest=GeminiServiceTest` (8/8 pass) and the full backend suite `./mvnw test` (45/45 pass).
+
+**Edge case considered:** If a future Gemini response contains a finish reason not yet represented in the `Known` enum, `knownEnum()` returns `null`. The `==` comparison against `Known.SAFETY`/`Known.PROHIBITED_CONTENT` is false for `null`, so no `SafetyBlockException` is thrown — identical behavior to the prior `toString()` version, which also would not match an unknown finish-reason string. Neither version protects against a future unsafe-but-unknown finish reason; that would require an SDK upgrade to pick up the new `Known` constant. Acceptable per spec's scope (we own the SDK version).
+
+**Cross-spec takeaway for Specs 3 and 4:** When wrapping a Google SDK that exposes the `Wrapper + Known enum` pattern (per D2a's audit), always compare against `.knownEnum() == Wrapper.Known.CONSTANT` in production code. Treat `toString()`-based matches on SDK wrapper types as an anti-pattern — even when they work today, they're a silent-failure vector under SDK upgrades.

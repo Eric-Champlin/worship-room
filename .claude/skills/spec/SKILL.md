@@ -121,6 +121,15 @@ Use the exact structure from `_specs/template.md` if it exists. If `_specs/templ
  
 ---
  
+## Affected Frontend Routes
+ 
+{List the user-facing routes this spec touches, one per line as backtick-wrapped markdown bullets, including any query parameters that affect rendering. The `/verify-with-playwright` skill reads this section (via the plan that inherits it) when invoked plan-only and uses these routes to drive UI verification. If this is a backend-only or non-UI feature, write "N/A — backend-only spec" and omit the bullets. The plan generated from this spec should inherit this section unchanged.}
+ 
+- `/route-1`
+- `/route-2?tab=variant`
+ 
+---
+ 
 ## Overview
  
 {Frame the feature in terms of emotional healing and spiritual support — the app's mission. 2-4 sentences.}
@@ -298,6 +307,7 @@ For features that are part of the Daily Hub tabbed experience:
 - [ ] Visual acceptance criteria reference specific properties, not subjective assessments
 - [ ] The spec is detailed enough that someone unfamiliar with the project could understand the feature
 - [ ] Master plan reference included if this is part of a multi-spec feature
+- [ ] **Affected Frontend Routes** section populated — either with the actual user-facing routes touched by this spec (one per line, backtick-wrapped, including query params), or with "N/A — backend-only spec" if no UI is involved. Required for `/verify-with-playwright` plan-only invocation downstream.
 - [ ] Depth is proportional to complexity — simple features have concise specs, complex features have thorough specs
  
 If any check fails, fix the spec before saving.
