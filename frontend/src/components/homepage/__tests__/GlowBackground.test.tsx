@@ -125,6 +125,54 @@ describe('GlowBackground', () => {
     expect(orbs[2].style.background).toContain('0.14')
   })
 
+  it('variant="fullPage" renders 5 glow orbs', () => {
+    render(
+      <GlowBackground variant="fullPage">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs).toHaveLength(5)
+  })
+
+  it('fullPage variant first orb has 0.25 opacity and 139, 92, 246 color', () => {
+    render(
+      <GlowBackground variant="fullPage">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs[0].style.background).toContain('rgba(139, 92, 246, 0.25)')
+  })
+
+  it('fullPage variant orbs have the documented opacities in order', () => {
+    render(
+      <GlowBackground variant="fullPage">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs[0].style.background).toContain('rgba(139, 92, 246, 0.25)')
+    expect(orbs[1].style.background).toContain('rgba(168, 130, 255, 0.18)')
+    expect(orbs[2].style.background).toContain('rgba(139, 92, 246, 0.2)')
+    expect(orbs[3].style.background).toContain('rgba(186, 156, 255, 0.16)')
+    expect(orbs[4].style.background).toContain('rgba(139, 92, 246, 0.22)')
+  })
+
+  it('fullPage variant orbs are positioned at expected top percentages', () => {
+    render(
+      <GlowBackground variant="fullPage">
+        <p>Content</p>
+      </GlowBackground>
+    )
+    const orbs = screen.getAllByTestId('glow-orb')
+    expect(orbs[0].className).toContain('top-[5%]')
+    expect(orbs[1].className).toContain('top-[30%]')
+    expect(orbs[2].className).toContain('top-[55%]')
+    expect(orbs[3].className).toContain('top-[75%]')
+    expect(orbs[4].className).toContain('top-[92%]')
+  })
+
   it('orbs have pointer-events-none', () => {
     render(
       <GlowBackground variant="center">

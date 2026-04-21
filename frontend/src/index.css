@@ -285,3 +285,49 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-challenge-pulse { animation: none; }
 }
+
+/* Register page Round 2 — hero H1 gradient shimmer (12s cycle) */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 12s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-gradient-shift {
+    animation: none;
+  }
+}
+
+/* Register page Round 2 — primary CTA shine sweep (6s loop, 2s delay) */
+@keyframes shine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shine {
+  position: relative;
+  overflow: hidden;
+}
+.animate-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: shine 6s ease-in-out infinite;
+  animation-delay: 2s;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-shine::after {
+    animation: none;
+    opacity: 0;
+  }
+}
