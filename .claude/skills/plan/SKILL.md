@@ -115,6 +115,15 @@ Use this exact structure:
  
 ---
  
+## Affected Frontend Routes
+ 
+{List the user-facing routes this spec touches, one per line as markdown bullets. The `/verify-with-playwright` skill reads this section when invoked plan-only (e.g., `/verify-with-playwright _plans/...md`) and uses these routes to drive UI verification. Format: backtick-wrapped, including any query parameters that affect rendering. If this is a backend-only spec with NO frontend changes, write "N/A — backend-only spec" and omit the bullets.}
+ 
+- `/route-1`
+- `/route-2?tab=variant`
+ 
+---
+ 
 ## Architecture Context
  
  
@@ -342,22 +351,23 @@ Before executing this plan, confirm:
 2. [ ] **No tentative language anywhere** — no "should probably", "might want to", "consider doing". Every decision is explicit.
 3. [ ] Patterns referenced in the plan actually match what was found in reconnaissance (not assumed from general knowledge)
 4. [ ] The plan is self-contained: someone reading it without the spec can understand what to build
-5. [ ] Every auth-gated action from the spec appears in the Auth Gating Checklist AND in the relevant implementation step
-6. [ ] Every [UNVERIFIED] value includes: best guess, how to verify, what to do if wrong
-7. [ ] Test count is calibrated to complexity — simple utility: 2-4 tests; complex interactive component with auth gating, error states, responsive: 10-15
-8. [ ] UI steps include responsive behavior at 3 breakpoints (mobile, tablet, desktop); non-UI steps say "N/A: no UI impact"
-9. [ ] If Design System Reference exists: exact computed values used in Details section (not "use the primary color" but "use `#6D28D9`")
-10. [ ] If Design System Reference NOT found: values from codebase inspection are cited with file:line, and guessed values are marked [UNVERIFIED]
-11. [ ] Steps are small — each touches ≤3 files and is independently verifiable
-12. [ ] Steps are ordered for safety — data models/API before UI, shared utilities before consumers
-13. [ ] AI Safety guardrails included in every step that touches AI-generated content
-14. [ ] Auth gate tests included for every step that implements a gated action (verify auth modal appears for logged-out users)
-15. [ ] Design System Reminder populated from: design system recon + rules files (especially `09-design-system.md` Round 3 Visual Patterns, Daily Hub Visual Architecture, and Deprecated Patterns) + deviations from recent Execution Logs
-16. [ ] Vertical Rhythm values included (from design system recon, if available)
-17. [ ] Inline Element Position Expectations table populated for any UI step with inline-row layouts (or marked N/A)
-18. [ ] If master spec plan exists: shared data models, localStorage keys, and cross-spec integration points are in Architecture Context
-19. [ ] Edge Cases & Decisions table is populated — at least the obvious edge cases are covered
-20. [ ] No deprecated patterns are introduced (Caveat headings, BackgroundSquiggle on Daily Hub, GlowBackground on Daily Hub, animate-glow-pulse, cyan textarea borders, italic Lora prompts, soft-shadow 8px-radius cards on dark backgrounds, PageTransition component)
+5. [ ] **Affected Frontend Routes** section populated — either with the actual user-facing routes touched by this spec (one per line, backtick-wrapped, including query params), or with "N/A — backend-only spec" if no UI is involved. Required for `/verify-with-playwright` plan-only invocation.
+6. [ ] Every auth-gated action from the spec appears in the Auth Gating Checklist AND in the relevant implementation step
+7. [ ] Every [UNVERIFIED] value includes: best guess, how to verify, what to do if wrong
+8. [ ] Test count is calibrated to complexity — simple utility: 2-4 tests; complex interactive component with auth gating, error states, responsive: 10-15
+9. [ ] UI steps include responsive behavior at 3 breakpoints (mobile, tablet, desktop); non-UI steps say "N/A: no UI impact"
+10. [ ] If Design System Reference exists: exact computed values used in Details section (not "use the primary color" but "use `#6D28D9`")
+11. [ ] If Design System Reference NOT found: values from codebase inspection are cited with file:line, and guessed values are marked [UNVERIFIED]
+12. [ ] Steps are small — each touches ≤3 files and is independently verifiable
+13. [ ] Steps are ordered for safety — data models/API before UI, shared utilities before consumers
+14. [ ] AI Safety guardrails included in every step that touches AI-generated content
+15. [ ] Auth gate tests included for every step that implements a gated action (verify auth modal appears for logged-out users)
+16. [ ] Design System Reminder populated from: design system recon + rules files (especially `09-design-system.md` Round 3 Visual Patterns, Daily Hub Visual Architecture, and Deprecated Patterns) + deviations from recent Execution Logs
+17. [ ] Vertical Rhythm values included (from design system recon, if available)
+18. [ ] Inline Element Position Expectations table populated for any UI step with inline-row layouts (or marked N/A)
+19. [ ] If master spec plan exists: shared data models, localStorage keys, and cross-spec integration points are in Architecture Context
+20. [ ] Edge Cases & Decisions table is populated — at least the obvious edge cases are covered
+21. [ ] No deprecated patterns are introduced (Caveat headings, BackgroundSquiggle on Daily Hub, GlowBackground on Daily Hub, animate-glow-pulse, cyan textarea borders, italic Lora prompts, soft-shadow 8px-radius cards on dark backgrounds, PageTransition component)
  
 **Additional quality rules:**
  

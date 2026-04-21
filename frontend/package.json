@@ -19,7 +19,6 @@
     "build-search-index": "npx tsx scripts/build-search-index.mjs"
   },
   "dependencies": {
-    "@google/genai": "^1.49.0",
     "clsx": "^2.1.0",
     "howler": "^2.2.4",
     "leaflet": "^1.9.4",

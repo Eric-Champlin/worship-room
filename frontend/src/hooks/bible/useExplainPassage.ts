@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { generateExplanation, type ExplainResult } from '@/lib/ai/geminiClient'
 import {
   GeminiApiError,
-  GeminiKeyMissingError,
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
@@ -58,9 +57,6 @@ function classifyError(err: unknown): ExplainErrorKind {
   if (err instanceof GeminiSafetyBlockError) return 'safety'
   if (err instanceof GeminiTimeoutError) return 'timeout'
   if (err instanceof GeminiNetworkError) return 'network'
-  // Key-missing is mapped to the generic 'unavailable' message for users —
-  // the specific error is logged to the console for developers in the client.
-  if (err instanceof GeminiKeyMissingError) return 'unavailable'
   if (err instanceof GeminiApiError) return 'api'
   return 'unavailable'
 }

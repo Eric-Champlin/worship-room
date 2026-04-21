@@ -1,6 +1,6 @@
 ---
 description: Runtime UI verification using Playwright — visual rendering, interactive flows, responsive breakpoints (6 sizes), accessibility, console/network diagnostics, and optional prod comparison
-argument-hint: Route to verify, optionally followed by plan file path and/or --compare-prod URL (e.g. /daily, /daily _plans/2026-03-03-daily-experience.md, /daily --compare-prod https://worshiproom.app/daily)
+argument-hint: Route to verify (or plan path alone — auto-derives route from plan), optionally followed by plan file path and/or --compare-prod URL (e.g. /daily, /daily _plans/2026-03-03-daily-experience.md, _plans/2026-04-21-ai-proxy-gemini.md, /daily --compare-prod https://worshiproom.app/daily)
 user-invokable: true
 name: verify-with-playwright
 ---
@@ -19,6 +19,9 @@ User input: $ARGUMENTS
  
 # Plan-aware verification
 /verify-with-playwright /daily _plans/2026-03-03-daily-experience.md
+ 
+# Plan-only (route auto-derived from plan's "Affected Frontend Routes" section)
+/verify-with-playwright _plans/2026-04-21-ai-proxy-gemini.md
  
 # Side-by-side comparison against production
 /verify-with-playwright /daily --compare-prod https://worshiproom.app/daily
@@ -41,7 +44,7 @@ User input: $ARGUMENTS
 8. **Prod comparison** — side-by-side style comparison against production (if --compare-prod)
  
 **What this does NOT do:**
-- Run unit tests (use `pnpm test`)
+- Run unit tests (use `npm test`)
 - Perform full accessibility audits (use `/code-review`)
 - Test backend API logic (use `./mvnw test`)
 - Modify any code
@@ -88,6 +91,16 @@ Only report console errors/warnings that originate from application code. The `I
  
 ## Step 1: Parse Arguments & Load Context
  
+### Plan-only invocation (NEW)
+ 
+First, inspect `$ARGUMENTS`. **If the only positional argument ends in `.md` or starts with `_plans/`**, treat it as plan-only invocation:
+ 
+- Set `plan_path` to that argument.
+- Defer `target` (route) resolution to the "Auto-derive route from plan" step below.
+- Skip the standard target/plan parsing path.
+ 
+Otherwise, parse arguments per the existing rules below.
+ 
 From `$ARGUMENTS`, determine:
  
 **`target`** — Route, page, or component to verify (e.g., `/daily`, `/prayer-wall`, `"the auth modal"`, `/` for dashboard). If the route includes query parameters (e.g., `/daily?tab=pray`), preserve them — they affect which content is displayed and must be included when navigating.
@@ -113,6 +126,30 @@ Read the plan file and extract:
 - **Execution Log** — what was actually built (including deviations)
 - **[UNVERIFIED] values** — any values flagged as unverified that need extra scrutiny during comparison
 - **Master Spec Plan reference** — if present, read for shared data models and localStorage keys (useful for seeding test data)
+ 
+### Auto-derive route from plan (only if plan-only invocation)
+ 
+If invoked with only a plan path (no explicit route), look for an `## Affected Frontend Routes` section in the plan file. The expected format is one route per line as a markdown bullet:
+ 
+```markdown
+## Affected Frontend Routes
+ 
+- `/bible`
+- `/daily?tab=pray`
+```
+ 
+Resolution rules:
+ 
+- **Exactly 1 route found** — use it as `target`. Note: "Auto-derived route from plan: {route}".
+- **2+ routes found** — list them and ask the user to pick one (number or full route). Wait for input. Note: "Plan affects multiple routes; verifying user-selected: {chosen}. To verify others, re-run with explicit route per usage examples."
+- **Section not found OR section is empty** — surface to user:
+   ```text
+   I loaded plan {plan_path} but couldn't find an '## Affected Frontend Routes' section.
+   What route should I verify? (e.g., /bible, /daily, /prayer-wall)
+   ```
+   Wait for user input before proceeding.
+ 
+When this auto-derive path runs, the plan is already known to be loaded — `plan_path` is set, plan-aware mode is active by default. The user does not need to repeat the plan path.
  
 ### Auto-detect plan (if no plan path provided)
  
@@ -186,7 +223,7 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:5173
  
 ```bash
 cd frontend
-nohup pnpm dev > /tmp/worship-room-frontend.log 2>&1 &
+nohup npm run dev > /tmp/worship-room-frontend.log 2>&1 &
 # Wait up to 30 seconds for ready
 ```
  

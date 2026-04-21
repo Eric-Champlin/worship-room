@@ -1,5 +1,10 @@
 # Feature: {feature_title}
 
+## Affected Frontend Routes
+<!-- List the user-facing routes this spec touches, one per line as backtick-wrapped markdown bullets, including any query parameters that affect rendering. The /verify-with-playwright skill reads this section (via the plan that inherits it) when invoked plan-only and uses these routes to drive UI verification. If this is a backend-only or non-UI feature, write "N/A — backend-only spec" and omit the bullets. -->
+- `/route-1`
+- `/route-2?tab=variant`
+
 ## Overview
 <!-- What is this feature and why does it exist? How does it serve the mission of emotional healing and spiritual support? -->
 

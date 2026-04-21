@@ -37,6 +37,7 @@ paths:
       tags: [Health]
       summary: Health check with provider readiness
       operationId: getHealth
+      security: []
       responses:
         '200':
           description: Service is healthy
@@ -56,6 +57,87 @@ paths:
                       gemini: { type: boolean }
                       googleMaps: { type: boolean }
                       fcbh: { type: boolean }
+
+  /api/v1/proxy/ai/explain:
+    post:
+      tags: [Proxy / AI]
+      summary: Generate a scholarly explanation for a scripture passage
+      description: |
+        Proxied call to Gemini. Frontend (BB-30) sends a reference and verse
+        text; the server adds the system prompt, calls Gemini with the
+        backend-owned API key, and returns the generated explanation.
+
+        The system prompt is not configurable by the client — it lives in
+        `GeminiPrompts.java` on the server.
+      operationId: explainPassage
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExplainRequest' }
+      responses:
+        '200':
+          description: Explanation generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/GeminiResponseDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/SafetyBlocked' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
+
+  /api/v1/proxy/ai/reflect:
+    post:
+      tags: [Proxy / AI]
+      summary: Generate a contemplative reflection for a scripture passage
+      description: |
+        Proxied call to Gemini. Frontend (BB-31) sends a reference and verse
+        text; the server adds the system prompt, calls Gemini with the
+        backend-owned API key, and returns the generated reflection.
+
+        Request/response shape identical to `/explain`. The only difference
+        is the system prompt used internally — the reflect prompt emphasizes
+        interrogative/conditional voice and multiple possibilities.
+      operationId: reflectOnPassage
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReflectRequest' }
+      responses:
+        '200':
+          description: Reflection generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/GeminiResponseDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/SafetyBlocked' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
 
 components:
   schemas:
@@ -92,6 +174,51 @@ components:
           type: string
           format: date-time
 
+    ExplainRequest:
+      description: Body for `POST /api/v1/proxy/ai/explain`.
+      type: object
+      required: [reference, verseText]
+      properties:
+        reference:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: '1 Corinthians 13:4-7'
+          description: Formatted Bible reference (book, chapter, verse range).
+        verseText:
+          type: string
+          minLength: 1
+          maxLength: 8000
+          description: The scripture text the user is reading (WEB translation).
+
+    ReflectRequest:
+      description: Body for `POST /api/v1/proxy/ai/reflect`. Same shape as ExplainRequest.
+      type: object
+      required: [reference, verseText]
+      properties:
+        reference:
+          type: string
+          minLength: 1
+          maxLength: 200
+        verseText:
+          type: string
+          minLength: 1
+          maxLength: 8000
+
+    GeminiResponseDto:
+      description: LLM-generated content plus the model identifier that produced it.
+      type: object
+      required: [content, model]
+      properties:
+        content:
+          type: string
+          description: The generated explanation or reflection text.
+          example: 'Paul is writing to a factional Corinthian church, not a wedding audience...'
+        model:
+          type: string
+          description: The Gemini model that produced this response. Frontend stores this as-is for cache-key invalidation.
+          example: 'gemini-2.5-flash-lite'
+
   responses:
     BadRequest:
       description: Invalid input
@@ -120,6 +247,14 @@ components:
           schema: { $ref: '#/components/schemas/ProxyError' }
     UpstreamTimeout:
       description: Upstream API timed out
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+    SafetyBlocked:
+      description: |
+        The upstream AI model refused to generate a response due to its safety
+        filters. HTTP 422 because the request was well-formed and valid — the
+        upstream deliberately chose not to answer.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ProxyError' }

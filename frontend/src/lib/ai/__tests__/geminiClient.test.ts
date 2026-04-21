@@ -1,25 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 
-// Use vi.hoisted so the mocks are available in the vi.mock factory (which is
-// hoisted above imports). Plain `const` declarations are not hoisted.
-const { mockGenerateContent, mockRequireGeminiApiKey } = vi.hoisted(() => ({
-  mockGenerateContent: vi.fn(),
-  mockRequireGeminiApiKey: vi.fn(),
-}))
+// The fetch mock is the single mocking surface after the proxy migration.
+// No SDK to stub, no env to mock — the client just POSTs to the backend.
+const mockFetch = vi.fn()
 
-vi.mock('@google/genai', () => ({
-  // Use a function declaration (not arrow) so vitest allows it as a constructor
-  GoogleGenAI: vi.fn(function GoogleGenAI(this: { models: unknown }) {
-    this.models = { generateContent: mockGenerateContent }
-  }),
-}))
-
-vi.mock('@/lib/env', () => ({
-  requireGeminiApiKey: () => mockRequireGeminiApiKey(),
-}))
-
-// NOTE: These imports must come AFTER the vi.mock calls above.
-import { GoogleGenAI } from '@google/genai'
 import {
   generateExplanation,
   generateReflection,
@@ -27,669 +11,444 @@ import {
 } from '../geminiClient'
 import {
   GeminiApiError,
-  GeminiKeyMissingError,
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
   RateLimitError,
 } from '../errors'
-import { EXPLAIN_PASSAGE_SYSTEM_PROMPT } from '../prompts/explainPassagePrompt'
-import {
-  REFLECT_PASSAGE_SYSTEM_PROMPT,
-  buildReflectPassageUserPrompt,
-} from '../prompts/reflectPassagePrompt'
-// BB-32: reset the cache and rate-limit state between tests so each `it()`
-// block runs in isolation. This is the only addition to this test file
-// required by BB-32 — every pre-existing test body remains byte-unchanged.
 import { clearAllAICache } from '../cache'
 import { getRateLimitState, resetRateLimitForTests } from '../rateLimit'
 
 const REFERENCE = '1 Corinthians 13:4-7'
-const VERSE_TEXT = 'Love is patient and is kind; love doesn\'t envy.'
-const HAPPY_RESPONSE = {
-  text: 'Paul is writing to a factional Corinthian church, not a wedding audience.',
-  candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'ok' }] } }],
-  promptFeedback: undefined,
+const VERSE_TEXT = "Love is patient and is kind; love doesn't envy."
+
+// Helper: build a mock Response for a success case.
+function okResponse(content: string, model = 'gemini-2.5-flash-lite'): Response {
+  return new Response(
+    JSON.stringify({
+      data: { content, model },
+      meta: { requestId: 'test-req-id-22chars0000' },
+    }),
+    { status: 200, headers: { 'Content-Type': 'application/json' } },
+  )
+}
+
+// Helper: build a mock Response for a backend error case.
+function errorResponse(
+  status: number,
+  code: string,
+  message = 'err',
+  extraHeaders: Record<string, string> = {},
+): Response {
+  return new Response(
+    JSON.stringify({
+      code,
+      message,
+      requestId: 'test-req-id-22chars0000',
+      timestamp: '2026-04-21T10:30:00Z',
+    }),
+    {
+      status,
+      headers: { 'Content-Type': 'application/json', ...extraHeaders },
+    },
+  )
 }
 
 beforeEach(() => {
   __resetGeminiClientForTests()
-  vi.clearAllMocks()
-  mockRequireGeminiApiKey.mockReturnValue('fake-test-key')
-  // BB-32 infrastructure reset — pre-existing tests were written before
-  // the cache and rate-limit layers existed and share fixture values
-  // (REFERENCE / VERSE_TEXT), so without this reset, a cache hit from an
-  // earlier test would short-circuit a later test's SDK mock, or the
-  // 10-token bucket would drain partway through the 43-test file.
+  mockFetch.mockReset()
+  // Vitest's stubGlobal sets global fetch for this test only.
+  vi.stubGlobal('fetch', mockFetch)
   clearAllAICache()
   resetRateLimitForTests()
 })
 
-describe('generateExplanation — key missing', () => {
-  it('throws GeminiKeyMissingError when requireGeminiApiKey throws', async () => {
-    mockRequireGeminiApiKey.mockImplementation(() => {
-      throw new Error('VITE_GEMINI_API_KEY not set')
-    })
-    // Silence the expected console.error for this test
-    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    await expect(
-      generateExplanation(REFERENCE, VERSE_TEXT),
-    ).rejects.toBeInstanceOf(GeminiKeyMissingError)
-
-    errSpy.mockRestore()
-  })
-
-  it('preserves the original error as `cause` on GeminiKeyMissingError', async () => {
-    const original = new Error('VITE_GEMINI_API_KEY not set')
-    mockRequireGeminiApiKey.mockImplementation(() => {
-      throw original
-    })
-    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    try {
-      await generateExplanation(REFERENCE, VERSE_TEXT)
-      expect.fail('should have thrown')
-    } catch (err) {
-      expect(err).toBeInstanceOf(GeminiKeyMissingError)
-      expect((err as Error).cause).toBe(original)
-    }
-
-    errSpy.mockRestore()
-  })
+afterEach(() => {
+  vi.unstubAllGlobals()
 })
 
-describe('generateExplanation — lazy init', () => {
-  it('does not instantiate GoogleGenAI at module load', () => {
-    // Module was already imported above. The constructor should not have been
-    // called yet if no generateExplanation call has been made.
-    __resetGeminiClientForTests()
-    vi.clearAllMocks()
-    expect(GoogleGenAI).not.toHaveBeenCalled()
-  })
-
-  it('instantiates GoogleGenAI on the first call', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(GoogleGenAI).toHaveBeenCalledTimes(1)
-    expect(GoogleGenAI).toHaveBeenCalledWith({ apiKey: 'fake-test-key' })
-  })
-
-  it('reuses the client on subsequent calls (memoized)', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(GoogleGenAI).toHaveBeenCalledTimes(1)
-  })
-
-  it('__resetGeminiClientForTests clears the memoized client', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(GoogleGenAI).toHaveBeenCalledTimes(1)
-
-    __resetGeminiClientForTests()
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(GoogleGenAI).toHaveBeenCalledTimes(2)
-  })
-})
-
-describe('generateExplanation — request payload shape', () => {
-  beforeEach(() => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-  })
-
-  it('passes the model string gemini-2.5-flash-lite', async () => {
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(mockGenerateContent).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'gemini-2.5-flash-lite' }),
+describe('generateExplanation — happy path', () => {
+  it('posts to /api/v1/proxy/ai/explain with correct body', async () => {
+    mockFetch.mockResolvedValueOnce(
+      okResponse('Paul is writing to a factional church.'),
     )
-  })
 
-  it('routes the system prompt through config.systemInstruction', async () => {
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [
-      { config: { systemInstruction: string } },
-    ]
-    expect(payload.config.systemInstruction).toBe(EXPLAIN_PASSAGE_SYSTEM_PROMPT)
-  })
-
-  it('does NOT prepend the system prompt to contents', async () => {
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [{ contents: string }]
-    expect(payload.contents.startsWith('Explain this passage from the World English Bible:')).toBe(
-      true,
-    )
-    expect(payload.contents).not.toContain('You are a thoughtful biblical scholar')
-  })
-
-  it('passes temperature 0.7 and maxOutputTokens 600', async () => {
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [
-      { config: { temperature: number; maxOutputTokens: number } },
-    ]
-    expect(payload.config.temperature).toBe(0.7)
-    expect(payload.config.maxOutputTokens).toBe(600)
-  })
-
-  it('passes an AbortSignal via config.abortSignal', async () => {
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [
-      { config: { abortSignal: unknown } },
-    ]
-    expect(payload.config.abortSignal).toBeInstanceOf(AbortSignal)
-  })
-})
-
-describe('generateExplanation — success response', () => {
-  it('returns { content, model } on success', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
     const result = await generateExplanation(REFERENCE, VERSE_TEXT)
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    const [url, init] = mockFetch.mock.calls[0]
+    expect(url).toMatch(/\/api\/v1\/proxy\/ai\/explain$/)
+    expect(init.method).toBe('POST')
+    expect(init.headers).toEqual({ 'Content-Type': 'application/json' })
+    expect(JSON.parse(init.body as string)).toEqual({
+      reference: REFERENCE,
+      verseText: VERSE_TEXT,
+    })
     expect(result).toEqual({
-      content: HAPPY_RESPONSE.text,
+      content: 'Paul is writing to a factional church.',
       model: 'gemini-2.5-flash-lite',
     })
   })
 
-  it('trims leading/trailing whitespace from content', async () => {
-    mockGenerateContent.mockResolvedValue({
-      ...HAPPY_RESPONSE,
-      text: '  hello world  \n\n',
-    })
+  it('returns ExplainResult shape {content, model}', async () => {
+    mockFetch.mockResolvedValueOnce(okResponse('Some explanation.'))
     const result = await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(result.content).toBe('hello world')
-  })
-})
-
-describe('generateExplanation — safety block detection', () => {
-  it('throws GeminiSafetyBlockError when promptFeedback.blockReason is set', async () => {
-    mockGenerateContent.mockResolvedValue({
-      text: '',
-      candidates: [],
-      promptFeedback: { blockReason: 'SAFETY' },
-    })
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiSafetyBlockError,
-    )
+    expect(result).toHaveProperty('content')
+    expect(result).toHaveProperty('model')
   })
 
-  it('throws GeminiSafetyBlockError when finishReason === SAFETY', async () => {
-    mockGenerateContent.mockResolvedValue({
-      text: '',
-      candidates: [{ finishReason: 'SAFETY' }],
-      promptFeedback: undefined,
-    })
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiSafetyBlockError,
-    )
-  })
-
-  it('throws GeminiSafetyBlockError when finishReason === PROHIBITED_CONTENT', async () => {
-    mockGenerateContent.mockResolvedValue({
-      text: '',
-      candidates: [{ finishReason: 'PROHIBITED_CONTENT' }],
-      promptFeedback: undefined,
-    })
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiSafetyBlockError,
-    )
-  })
-
-  it('throws GeminiSafetyBlockError when response text is empty/whitespace', async () => {
-    mockGenerateContent.mockResolvedValue({
-      text: '   ',
-      candidates: [{ finishReason: 'STOP' }],
-      promptFeedback: undefined,
-    })
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiSafetyBlockError,
-    )
-  })
-})
-
-describe('generateExplanation — error classification', () => {
-  it('throws GeminiTimeoutError on DOMException(name=TimeoutError)', async () => {
-    mockGenerateContent.mockRejectedValue(new DOMException('timeout', 'TimeoutError'))
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiTimeoutError,
-    )
-  })
-
-  it('throws GeminiTimeoutError on AbortError', async () => {
-    const abortErr = new Error('aborted')
-    abortErr.name = 'AbortError'
-    mockGenerateContent.mockRejectedValue(abortErr)
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiTimeoutError,
-    )
-  })
-
-  it('throws GeminiNetworkError on TypeError from fetch', async () => {
-    mockGenerateContent.mockRejectedValue(new TypeError('Failed to fetch'))
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiNetworkError,
-    )
-  })
-
-  it('throws GeminiNetworkError on Error with network-ish message', async () => {
-    mockGenerateContent.mockRejectedValue(new Error('network disconnected'))
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiNetworkError,
-    )
-  })
-
-  it('throws GeminiApiError on generic Error (invalid key, quota, etc.)', async () => {
-    mockGenerateContent.mockRejectedValue(new Error('Invalid API key'))
-    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiApiError,
-    )
-  })
-
-  it('preserves the original error as `cause`', async () => {
-    const original = new Error('Invalid API key')
-    mockGenerateContent.mockRejectedValue(original)
-    try {
-      await generateExplanation(REFERENCE, VERSE_TEXT)
-      expect.fail('should have thrown')
-    } catch (err) {
-      expect(err).toBeInstanceOf(GeminiApiError)
-      expect((err as Error).cause).toBe(original)
-    }
-  })
-})
-
-// ─── BB-31 generateReflection tests ────────────────────────────────────────
-// These tests are ADDITIVE to the BB-30 tests above. They do NOT modify any
-// existing test. The mock surface (GoogleGenAI, requireGeminiApiKey) is
-// shared, so any state (client singleton, call counters) must be reset via
-// the global beforeEach at the top of the file.
-
-const REFLECT_HAPPY_RESPONSE = {
-  text: 'A reader might ask what it would mean to hold this passage gently.',
-  candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'ok' }] } }],
-  promptFeedback: undefined,
-}
-
-describe('generateReflection — key missing', () => {
-  it('throws GeminiKeyMissingError when requireGeminiApiKey throws', async () => {
-    mockRequireGeminiApiKey.mockImplementation(() => {
-      throw new Error('VITE_GEMINI_API_KEY not set')
-    })
-    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    await expect(
-      generateReflection(REFERENCE, VERSE_TEXT),
-    ).rejects.toBeInstanceOf(GeminiKeyMissingError)
-
-    errSpy.mockRestore()
-  })
-})
-
-describe('generateReflection — request payload shape', () => {
-  beforeEach(() => {
-    mockGenerateContent.mockResolvedValue(REFLECT_HAPPY_RESPONSE)
-  })
-
-  it('passes the model string gemini-2.5-flash-lite', async () => {
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    expect(mockGenerateContent).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'gemini-2.5-flash-lite' }),
-    )
-  })
-
-  it('routes REFLECT_PASSAGE_SYSTEM_PROMPT through config.systemInstruction', async () => {
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [
-      { config: { systemInstruction: string } },
-    ]
-    expect(payload.config.systemInstruction).toBe(REFLECT_PASSAGE_SYSTEM_PROMPT)
-  })
-
-  it('passes the built reflect user prompt as contents', async () => {
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [{ contents: string }]
-    expect(payload.contents).toBe(
-      buildReflectPassageUserPrompt(REFERENCE, VERSE_TEXT),
-    )
-  })
-
-  it('does NOT prepend the system prompt to contents', async () => {
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [{ contents: string }]
-    expect(payload.contents).not.toContain(
-      'You are helping a reader think about how a scripture passage',
-    )
-  })
-
-  it('passes temperature 0.7 and maxOutputTokens 600', async () => {
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [
-      { config: { temperature: number; maxOutputTokens: number } },
-    ]
-    expect(payload.config.temperature).toBe(0.7)
-    expect(payload.config.maxOutputTokens).toBe(600)
-  })
-
-  it('passes an AbortSignal via config.abortSignal', async () => {
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    const [payload] = mockGenerateContent.mock.calls[0] as [
-      { config: { abortSignal: unknown } },
-    ]
-    expect(payload.config.abortSignal).toBeInstanceOf(AbortSignal)
-  })
-})
-
-describe('generateReflection — shared client singleton', () => {
-  it('reuses the same GoogleGenAI instance as generateExplanation', async () => {
-    mockGenerateContent.mockResolvedValue(REFLECT_HAPPY_RESPONSE)
-    // Call generateExplanation first to initialize the singleton
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(GoogleGenAI).toHaveBeenCalledTimes(1)
-    // Now call generateReflection — should reuse the same client instance
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    expect(GoogleGenAI).toHaveBeenCalledTimes(1)
-  })
-
-  it('reuses client across multiple generateReflection calls', async () => {
-    mockGenerateContent.mockResolvedValue(REFLECT_HAPPY_RESPONSE)
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    await generateReflection(REFERENCE, VERSE_TEXT)
-    expect(GoogleGenAI).toHaveBeenCalledTimes(1)
-  })
-})
-
-describe('generateReflection — success response', () => {
-  it('returns { content, model } on success', async () => {
-    mockGenerateContent.mockResolvedValue(REFLECT_HAPPY_RESPONSE)
-    const result = await generateReflection(REFERENCE, VERSE_TEXT)
-    expect(result).toEqual({
-      content: REFLECT_HAPPY_RESPONSE.text,
-      model: 'gemini-2.5-flash-lite',
-    })
-  })
-
-  it('trims leading/trailing whitespace from content', async () => {
-    mockGenerateContent.mockResolvedValue({
-      ...REFLECT_HAPPY_RESPONSE,
-      text: '  a reader might ask  \n\n',
-    })
-    const result = await generateReflection(REFERENCE, VERSE_TEXT)
-    expect(result.content).toBe('a reader might ask')
-  })
-})
-
-describe('generateReflection — safety block detection', () => {
-  it('throws GeminiSafetyBlockError when promptFeedback.blockReason is set', async () => {
-    mockGenerateContent.mockResolvedValue({
-      text: '',
-      candidates: [],
-      promptFeedback: { blockReason: 'SAFETY' },
-    })
-    await expect(generateReflection(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiSafetyBlockError,
-    )
-  })
-
-  it('throws GeminiSafetyBlockError when finishReason === SAFETY', async () => {
-    mockGenerateContent.mockResolvedValue({
-      text: '',
-      candidates: [{ finishReason: 'SAFETY' }],
-      promptFeedback: undefined,
-    })
-    await expect(generateReflection(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiSafetyBlockError,
-    )
-  })
-
-  it('throws GeminiSafetyBlockError when finishReason === PROHIBITED_CONTENT', async () => {
-    mockGenerateContent.mockResolvedValue({
-      text: '',
-      candidates: [{ finishReason: 'PROHIBITED_CONTENT' }],
-      promptFeedback: undefined,
-    })
-    await expect(generateReflection(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiSafetyBlockError,
-    )
-  })
-
-  it('throws GeminiSafetyBlockError when response text is empty/whitespace', async () => {
-    mockGenerateContent.mockResolvedValue({
-      text: '   ',
-      candidates: [{ finishReason: 'STOP' }],
-      promptFeedback: undefined,
-    })
-    await expect(generateReflection(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiSafetyBlockError,
-    )
-  })
-})
-
-describe('generateReflection — error classification', () => {
-  it('throws GeminiTimeoutError on DOMException(name=TimeoutError)', async () => {
-    mockGenerateContent.mockRejectedValue(
-      new DOMException('timeout', 'TimeoutError'),
-    )
-    await expect(generateReflection(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiTimeoutError,
-    )
-  })
-
-  it('throws GeminiTimeoutError on AbortError', async () => {
-    const abortErr = new Error('aborted')
-    abortErr.name = 'AbortError'
-    mockGenerateContent.mockRejectedValue(abortErr)
-    await expect(generateReflection(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiTimeoutError,
-    )
-  })
-
-  it('throws GeminiNetworkError on TypeError from fetch', async () => {
-    mockGenerateContent.mockRejectedValue(new TypeError('Failed to fetch'))
-    await expect(generateReflection(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiNetworkError,
-    )
-  })
-
-  it('throws GeminiApiError on generic Error (invalid key, quota, etc.)', async () => {
-    mockGenerateContent.mockRejectedValue(new Error('Invalid API key'))
-    await expect(generateReflection(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
-      GeminiApiError,
-    )
-  })
-
-  it('re-throws caller AbortError unchanged (silent discard path)', async () => {
-    // Pre-abort the caller's signal
+  it('passes the caller-provided AbortSignal into fetch', async () => {
+    mockFetch.mockResolvedValueOnce(okResponse('ok'))
     const controller = new AbortController()
-    controller.abort()
-    const abortErr = new Error('aborted')
-    abortErr.name = 'AbortError'
-    mockGenerateContent.mockRejectedValue(abortErr)
 
-    try {
-      await generateReflection(REFERENCE, VERSE_TEXT, controller.signal)
-      expect.fail('should have thrown')
-    } catch (err) {
-      // Must be the raw AbortError, NOT wrapped as GeminiTimeoutError
-      expect(err).toBe(abortErr)
-      expect((err as Error).name).toBe('AbortError')
-      expect(err).not.toBeInstanceOf(GeminiTimeoutError)
-    }
+    await generateExplanation(REFERENCE, VERSE_TEXT, controller.signal)
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.signal).toBeInstanceOf(AbortSignal)
   })
 })
 
-// ──────────────────────────────────────────────────────────────────────────
-// BB-32: helper-integration tests — appended only, existing 43 untouched.
-// ──────────────────────────────────────────────────────────────────────────
+describe('generateReflection — happy path', () => {
+  it('posts to /api/v1/proxy/ai/reflect with correct body', async () => {
+    mockFetch.mockResolvedValueOnce(okResponse('A reader might ask...'))
 
-describe('BB-32 — cache layer integration', () => {
-  it('generateExplanation returns cached result on second call without firing the SDK', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+    const result = await generateReflection(REFERENCE, VERSE_TEXT)
 
-    const first = await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(mockGenerateContent).toHaveBeenCalledTimes(1)
-
-    // Clear the spy so we can assert NO further SDK calls
-    mockGenerateContent.mockClear()
-
-    const second = await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(mockGenerateContent).not.toHaveBeenCalled()
-    expect(second).toEqual(first)
-  })
-
-  it('generateReflection returns cached result on second call without firing the SDK', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-
-    const first = await generateReflection(REFERENCE, VERSE_TEXT)
-    expect(mockGenerateContent).toHaveBeenCalledTimes(1)
-    mockGenerateContent.mockClear()
-
-    const second = await generateReflection(REFERENCE, VERSE_TEXT)
-    expect(mockGenerateContent).not.toHaveBeenCalled()
-    expect(second).toEqual(first)
-  })
-
-  it('cache hit does NOT consume a rate-limit token', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-
-    // Cache miss — one token consumed
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    const afterFirst = getRateLimitState('explain').tokensRemaining
-
-    // Cache hit — zero tokens consumed
-    await generateExplanation(REFERENCE, VERSE_TEXT)
-    const afterSecond = getRateLimitState('explain').tokensRemaining
-
-    expect(afterFirst).toBe(9) // 10 - 1
-    expect(afterSecond).toBe(9) // unchanged — the cache hit was free
-  })
-
-  it('cache hit returns the same {content, model} shape as the SDK call', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-
-    const first = await generateExplanation(REFERENCE, VERSE_TEXT)
-    const second = await generateExplanation(REFERENCE, VERSE_TEXT)
-
-    expect(Object.keys(second).sort()).toEqual(['content', 'model'])
-    expect(second.content).toBe(first.content)
-    expect(second.model).toBe(first.model)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    const [url, init] = mockFetch.mock.calls[0]
+    expect(url).toMatch(/\/api\/v1\/proxy\/ai\/reflect$/)
+    expect(init.method).toBe('POST')
+    expect(JSON.parse(init.body as string)).toEqual({
+      reference: REFERENCE,
+      verseText: VERSE_TEXT,
+    })
+    expect(result).toEqual({
+      content: 'A reader might ask...',
+      model: 'gemini-2.5-flash-lite',
+    })
   })
 })
 
-describe('BB-32 — rate-limit denial integration', () => {
-  it('generateExplanation throws RateLimitError after the 11th rapid call', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-
-    // Fire 10 distinct calls — each consumes one token, each misses the cache
-    for (let i = 0; i < 10; i++) {
-      await generateExplanation(`Ref${i}`, `VerseText${i}`)
-    }
-    expect(mockGenerateContent).toHaveBeenCalledTimes(10)
-    mockGenerateContent.mockClear()
-
-    // 11th call — bucket empty → denial BEFORE the SDK is called
-    await expect(
-      generateExplanation('Ref11', 'VerseText11'),
-    ).rejects.toBeInstanceOf(RateLimitError)
-
-    // And the SDK was NOT called for the rejected request
-    expect(mockGenerateContent).not.toHaveBeenCalled()
-  })
-
-  it('the thrown RateLimitError carries retryAfterSeconds > 0', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-    for (let i = 0; i < 10; i++) {
-      await generateExplanation(`Ref${i}`, `VerseText${i}`)
-    }
-
-    try {
-      await generateExplanation('Ref11', 'VerseText11')
-      expect.fail('should have thrown')
-    } catch (err) {
-      expect(err).toBeInstanceOf(RateLimitError)
-      expect((err as RateLimitError).retryAfterSeconds).toBeGreaterThan(0)
-    }
-  })
-
-  it('Explain rate limit and Reflect rate limit are independent', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
-
-    // Drain the explain bucket
-    for (let i = 0; i < 10; i++) {
-      await generateExplanation(`ExRef${i}`, `ExText${i}`)
-    }
-    // Explain now denies
-    await expect(
-      generateExplanation('ExRef11', 'ExText11'),
-    ).rejects.toBeInstanceOf(RateLimitError)
-
-    // But Reflect still has a full bucket
-    const reflectResult = await generateReflection('RfRef0', 'RfText0')
-    expect(reflectResult.content).toBeTruthy()
-    expect(getRateLimitState('reflect').tokensRemaining).toBe(9)
-  })
-})
-
-describe('BB-32 — errors are NOT cached', () => {
-  it('network errors are not cached — retry fires the SDK again', async () => {
-    const networkErr = new TypeError('NetworkError: fetch failed')
-    mockGenerateContent.mockRejectedValueOnce(networkErr)
-
-    await expect(
-      generateExplanation(REFERENCE, VERSE_TEXT),
-    ).rejects.toBeInstanceOf(GeminiNetworkError)
-
-    // Second call — same args, but the error was NOT cached, so the SDK
-    // fires again. This time it succeeds.
-    mockGenerateContent.mockResolvedValueOnce(HAPPY_RESPONSE)
-    const result = await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(result.content).toBeTruthy()
-    expect(mockGenerateContent).toHaveBeenCalledTimes(2)
-  })
-
-  it('safety errors are not cached — retry fires the SDK again', async () => {
-    mockGenerateContent.mockResolvedValueOnce({
-      text: '',
-      candidates: [{ finishReason: 'STOP', content: { parts: [] } }],
-      promptFeedback: { blockReason: 'HARM_CATEGORY_HARASSMENT' },
+describe('Abort semantics', () => {
+  it('re-throws caller-driven AbortError unchanged', async () => {
+    const controller = new AbortController()
+    mockFetch.mockImplementationOnce(() => {
+      controller.abort()
+      const err = new Error('aborted')
+      err.name = 'AbortError'
+      return Promise.reject(err)
     })
 
     await expect(
-      generateExplanation(REFERENCE, VERSE_TEXT),
-    ).rejects.toBeInstanceOf(GeminiSafetyBlockError)
-
-    // Retry with a fresh successful response — SDK fires, result returned
-    mockGenerateContent.mockResolvedValueOnce(HAPPY_RESPONSE)
-    const result = await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(result.content).toBeTruthy()
-    expect(mockGenerateContent).toHaveBeenCalledTimes(2)
+      generateExplanation(REFERENCE, VERSE_TEXT, controller.signal),
+    ).rejects.toMatchObject({ name: 'AbortError' })
   })
 
-  it('api errors are not cached — retry fires the SDK again', async () => {
-    const apiErr = new Error('503 Service Unavailable')
-    mockGenerateContent.mockRejectedValueOnce(apiErr)
+  it('internal AbortSignal.timeout (TimeoutError) maps to GeminiTimeoutError', async () => {
+    mockFetch.mockRejectedValueOnce(
+      new DOMException('timed out', 'TimeoutError'),
+    )
 
-    await expect(
-      generateExplanation(REFERENCE, VERSE_TEXT),
-    ).rejects.toBeInstanceOf(GeminiApiError)
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiTimeoutError,
+    )
+  })
 
-    mockGenerateContent.mockResolvedValueOnce(HAPPY_RESPONSE)
-    const result = await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(result.content).toBeTruthy()
-    expect(mockGenerateContent).toHaveBeenCalledTimes(2)
+  it('AbortError from a non-caller source is surfaced as GeminiTimeoutError', async () => {
+    mockFetch.mockImplementationOnce(() => {
+      const err = new Error('aborted')
+      err.name = 'AbortError'
+      return Promise.reject(err)
+    })
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiTimeoutError,
+    )
   })
 })
 
-describe('BB-32 — cache + client reset interaction', () => {
-  it('__resetGeminiClientForTests also clears cache (so next call hits the SDK)', async () => {
-    mockGenerateContent.mockResolvedValue(HAPPY_RESPONSE)
+describe('Network failures', () => {
+  it('TypeError from fetch maps to GeminiNetworkError', async () => {
+    mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
 
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiNetworkError,
+    )
+  })
+
+  it('network-ish error message also maps to GeminiNetworkError', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('network unreachable'))
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiNetworkError,
+    )
+  })
+
+  it('unknown Error type maps to GeminiApiError', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('something odd happened'))
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+})
+
+describe('Backend error code mapping', () => {
+  it('502 UPSTREAM_ERROR maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(errorResponse(502, 'UPSTREAM_ERROR', 'upstream down'))
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+
+  it('504 UPSTREAM_TIMEOUT maps to GeminiTimeoutError', async () => {
+    mockFetch.mockResolvedValueOnce(errorResponse(504, 'UPSTREAM_TIMEOUT', 'slow'))
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiTimeoutError,
+    )
+  })
+
+  it('422 SAFETY_BLOCK maps to GeminiSafetyBlockError', async () => {
+    mockFetch.mockResolvedValueOnce(errorResponse(422, 'SAFETY_BLOCK', 'blocked'))
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiSafetyBlockError,
+    )
+  })
+
+  it('429 RATE_LIMITED maps to RateLimitError with Retry-After seconds', async () => {
+    mockFetch.mockResolvedValueOnce(
+      errorResponse(429, 'RATE_LIMITED', 'slow down', { 'Retry-After': '17' }),
+    )
+
+    const err = await generateExplanation(REFERENCE, VERSE_TEXT).catch((e) => e)
+    expect(err).toBeInstanceOf(RateLimitError)
+    expect((err as RateLimitError).retryAfterSeconds).toBe(17)
+  })
+
+  it('429 RATE_LIMITED with missing Retry-After defaults to 60 seconds', async () => {
+    mockFetch.mockResolvedValueOnce(errorResponse(429, 'RATE_LIMITED', 'slow down'))
+
+    const err = await generateExplanation(REFERENCE, VERSE_TEXT).catch((e) => e)
+    expect(err).toBeInstanceOf(RateLimitError)
+    expect((err as RateLimitError).retryAfterSeconds).toBe(60)
+  })
+
+  it('429 RATE_LIMITED with unparseable Retry-After falls back to 1 second minimum', async () => {
+    mockFetch.mockResolvedValueOnce(
+      errorResponse(429, 'RATE_LIMITED', 'slow down', { 'Retry-After': 'abc' }),
+    )
+
+    const err = await generateExplanation(REFERENCE, VERSE_TEXT).catch((e) => e)
+    expect(err).toBeInstanceOf(RateLimitError)
+    expect((err as RateLimitError).retryAfterSeconds).toBeGreaterThanOrEqual(1)
+  })
+
+  it('400 INVALID_INPUT maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(errorResponse(400, 'INVALID_INPUT', 'bad input'))
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+
+  it('500 INTERNAL_ERROR maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(errorResponse(500, 'INTERNAL_ERROR', 'server error'))
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+
+  it('unknown error code maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(errorResponse(418, 'TEAPOT', 'short and stout'))
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+})
+
+describe('Malformed backend responses', () => {
+  it('malformed JSON body maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response('not json', {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+
+  it('missing data.content maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ data: { model: 'gemini-2.5-flash-lite' }, meta: {} }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    )
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+
+  it('missing data.model maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ data: { content: 'some text' }, meta: {} }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    )
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+
+  it('empty data object maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ data: {}, meta: {} }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+
+  it('error response with unparseable body still maps to GeminiApiError', async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response('not json', {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+  })
+})
+
+describe('BB-32 cache composition', () => {
+  it('cache hit short-circuits the network call', async () => {
+    // First call populates the cache.
+    mockFetch.mockResolvedValueOnce(okResponse('cached explanation'))
+    const first = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(first.content).toBe('cached explanation')
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+
+    // Second call for the same reference+verse should hit the cache —
+    // NO fetch should be issued.
+    const second = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(second.content).toBe('cached explanation')
+    expect(mockFetch).toHaveBeenCalledTimes(1) // still 1, no new call
+  })
+
+  it('different references miss the cache (fetch called again)', async () => {
+    mockFetch.mockResolvedValueOnce(okResponse('first'))
+    await generateExplanation('John 3:16', VERSE_TEXT)
+
+    mockFetch.mockResolvedValueOnce(okResponse('second'))
+    await generateExplanation('John 3:17', VERSE_TEXT)
+
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('explain and reflect use separate cache partitions', async () => {
+    mockFetch.mockResolvedValueOnce(okResponse('explain result'))
     await generateExplanation(REFERENCE, VERSE_TEXT)
-    expect(mockGenerateContent).toHaveBeenCalledTimes(1)
 
-    __resetGeminiClientForTests() // BB-32 extension: also nukes cache + rate limit
-    mockGenerateContent.mockClear()
+    mockFetch.mockResolvedValueOnce(okResponse('reflect result'))
+    const reflectResult = await generateReflection(REFERENCE, VERSE_TEXT)
 
+    expect(reflectResult.content).toBe('reflect result')
+    expect(mockFetch).toHaveBeenCalledTimes(2) // not cache hit
+  })
+
+  it('errors are NOT cached — second call after error fires fresh fetch', async () => {
+    mockFetch.mockResolvedValueOnce(errorResponse(502, 'UPSTREAM_ERROR'))
+    await expect(generateExplanation(REFERENCE, VERSE_TEXT)).rejects.toBeInstanceOf(
+      GeminiApiError,
+    )
+
+    mockFetch.mockResolvedValueOnce(okResponse('recovered'))
+    const result = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(result.content).toBe('recovered')
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('BB-32 rate-limit composition', () => {
+  it('rate-limit denial throws BEFORE the fetch', async () => {
+    // Exhaust the client-side rate limit bucket synchronously.
+    // (getRateLimitState gives visibility; we drive by repeated calls.)
+    // Easier: fill the bucket with a loop of mocked successes, then
+    // observe that the next call hits the limiter.
+    const stateBefore = getRateLimitState('explain')
+    const capacity = stateBefore.tokensRemaining
+
+    // Burn all tokens with successful calls, each using a distinct ref to
+    // avoid the cache. `okResponse` is cheap; we mock `capacity` of them.
+    for (let i = 0; i < capacity; i++) {
+      mockFetch.mockResolvedValueOnce(okResponse(`burn ${i}`))
+      await generateExplanation(`Ref ${i}`, VERSE_TEXT)
+    }
+
+    // Bucket is now empty. Next call should throw RateLimitError without
+    // issuing a fetch.
+    mockFetch.mockResolvedValueOnce(okResponse('should not reach'))
+    await expect(
+      generateExplanation('Ref after burn', VERSE_TEXT),
+    ).rejects.toBeInstanceOf(RateLimitError)
+
+    // Verify fetch was NOT called for the denied attempt.
+    expect(mockFetch).toHaveBeenCalledTimes(capacity) // only the burn calls
+  })
+})
+
+describe('__resetGeminiClientForTests', () => {
+  it('clears the cache and rate-limit state', async () => {
+    // Populate cache
+    mockFetch.mockResolvedValueOnce(okResponse('cached'))
     await generateExplanation(REFERENCE, VERSE_TEXT)
-    // SDK was called again because the cache was cleared
-    expect(mockGenerateContent).toHaveBeenCalledTimes(1)
+
+    // Reset
+    __resetGeminiClientForTests()
+
+    // Next call should hit the network again (cache was cleared)
+    mockFetch.mockResolvedValueOnce(okResponse('fresh'))
+    const result = await generateExplanation(REFERENCE, VERSE_TEXT)
+    expect(result.content).toBe('fresh')
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('Request body shape', () => {
+  it('body contains reference and verseText exactly, no extra fields', async () => {
+    mockFetch.mockResolvedValueOnce(okResponse('ok'))
+    await generateExplanation(REFERENCE, VERSE_TEXT)
+
+    const [, init] = mockFetch.mock.calls[0]
+    const body = JSON.parse(init.body as string)
+    expect(Object.keys(body).sort()).toEqual(['reference', 'verseText'])
+  })
+
+  it('body does not include system prompt (backend owns prompts)', async () => {
+    mockFetch.mockResolvedValueOnce(okResponse('ok'))
+    await generateExplanation(REFERENCE, VERSE_TEXT)
+
+    const [, init] = mockFetch.mock.calls[0]
+    const bodyStr = init.body as string
+    expect(bodyStr).not.toMatch(/systemInstruction/i)
+    expect(bodyStr).not.toMatch(/thoughtful biblical scholar/i)
   })
 })

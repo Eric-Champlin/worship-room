@@ -1,16 +1,5 @@
-import { GoogleGenAI } from '@google/genai'
-import { requireGeminiApiKey } from '@/lib/env'
-import {
-  EXPLAIN_PASSAGE_SYSTEM_PROMPT,
-  buildExplainPassageUserPrompt,
-} from '@/lib/ai/prompts/explainPassagePrompt'
-import {
-  REFLECT_PASSAGE_SYSTEM_PROMPT,
-  buildReflectPassageUserPrompt,
-} from '@/lib/ai/prompts/reflectPassagePrompt'
 import {
   GeminiApiError,
-  GeminiKeyMissingError,
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
@@ -28,29 +17,30 @@ import {
 } from '@/lib/ai/rateLimit'
 
 /**
- * The Gemini model used for BB-30 "Explain this passage".
- *
- * `gemini-2.5-flash-lite` is hardcoded here (not passed by callers) because
- * every request in this feature uses the same model. Rationale:
- *
- * - Flash-Lite is the cheapest 2.5-family model (~$0.10/M input, ~$0.40/M
- *   output). Per-request cost is ~$0.0002, a thousand requests ~$0.20.
- * - gemini-2.0-flash-lite is deprecated (scheduled removal June 2026).
- * - gemini-2.5-flash and 2.5-pro are 3-6x more expensive; Flash-Lite is
- *   adequate for this scholarly-explanation task.
- *
- * Model string verified against live Gemini docs on 2026-04-10.
- * See https://ai.google.dev/gemini-api/docs/models for the canonical list.
+ * Base URL for the backend proxy. Matches the convention established in
+ * `src/api/client.ts` — VITE_API_BASE_URL or localhost:8080 as fallback.
+ * The URL is resolved once at module load; changing it requires a page
+ * reload, which is fine for an env-var-driven config.
  */
-const MODEL = 'gemini-2.5-flash-lite'
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+  'http://localhost:8080'
 
-const REQUEST_TIMEOUT_MS = 30_000
-const MAX_OUTPUT_TOKENS = 600
-const TEMPERATURE = 0.7
+const EXPLAIN_URL = `${API_BASE_URL}/api/v1/proxy/ai/explain`
+const REFLECT_URL = `${API_BASE_URL}/api/v1/proxy/ai/reflect`
 
 /**
- * The single return shape for `generateExplanation`. No discriminated union,
- * no `source` field — acceptance criterion 29.
+ * Internal 30-second request timeout. Mirrors the backend's Gemini
+ * timeout exactly so caller UX is consistent: if a request takes more
+ * than 30 seconds, the frontend times out even when the backend would
+ * have.
+ */
+const REQUEST_TIMEOUT_MS = 30_000
+
+/**
+ * The single return shape for `generateExplanation`. Matches the backend
+ * `GeminiResponseDto`. Do NOT add a `source` field or discriminated
+ * union — acceptance criterion 29 from the BB-30 spec.
  */
 export interface ExplainResult {
   content: string
@@ -59,9 +49,9 @@ export interface ExplainResult {
 
 /**
  * The return shape for `generateReflection` (BB-31). Same shape as
- * `ExplainResult` but a distinct exported type so callers are explicit about
- * which feature they're calling, and future features may extend one type and
- * not the other.
+ * `ExplainResult` but a distinct exported type so callers are explicit
+ * about which feature they're calling, and future features may extend
+ * one type and not the other.
  */
 export interface ReflectResult {
   content: string
@@ -69,265 +59,196 @@ export interface ReflectResult {
 }
 
 /**
- * Lazily initialized SDK client. Initializing at module load would throw for
- * users without a configured key, defeating the require-on-use pattern in
- * `env.ts`. First call to `generateExplanation` constructs the client;
- * subsequent calls reuse the memoized instance.
- */
-let client: GoogleGenAI | null = null
-
-function getClient(): GoogleGenAI {
-  if (client) return client
-
-  let apiKey: string
-  try {
-    apiKey = requireGeminiApiKey()
-  } catch (err) {
-    console.error(
-      '[BB-30] Gemini key missing. Add VITE_GEMINI_API_KEY to frontend/.env.local. ' +
-        'See frontend/.env.example for the expected format.',
-      err,
-    )
-    throw new GeminiKeyMissingError(undefined, { cause: err })
-  }
-
-  client = new GoogleGenAI({ apiKey })
-  return client
-}
-
-/**
- * Test-only hook to reset the memoized client between tests. Never called
- * from production code — exported solely for the unit test suite.
- *
- * BB-32 extension: also clears the BB-32 cache and rate-limit state. This
- * keeps the "full module reset" contract intact — callers that reset the
- * client expect a clean slate, and BB-32 added transitive module-level
- * state (cache writes in localStorage, in-memory rate-limit buckets) that
- * would otherwise leak across tests. The existing `geminiClient.test.ts`
- * beforeEach ALSO calls `clearAllAICache()` + `resetRateLimitForTests()`
- * directly as belt-and-suspenders — but a mid-test call to
- * `__resetGeminiClientForTests` (e.g., in the "reuses the client
- * (memoized)" regression test) needs this extension to keep the existing
- * assertion `GoogleGenAI.toHaveBeenCalledTimes(2)` passing after the
- * cache layer was introduced.
+ * Test-only hook to reset all module-level state. Preserves the contract
+ * of the original SDK-based implementation: callers that reset expect a
+ * clean slate. After the proxy migration there's no SDK client to null
+ * out, but the cache + rate-limit helpers still hold state, so we
+ * continue to clear them here.
  */
 export function __resetGeminiClientForTests(): void {
-  client = null
   clearAllAICache()
   resetRateLimitForTests()
 }
 
 /**
- * BB-32 — Shared helper that wraps a Gemini call with cache and rate-limit
- * layers. Both `generateExplanation` and `generateReflection` route through
- * this helper so the cache + rate-limit logic lives in exactly one place.
- *
- * The composition order is load-bearing:
- *   1. Cache lookup — synchronous, returns a hit WITHOUT consuming a
- *      rate-limit token and WITHOUT calling the SDK. This is the most
- *      important property of BB-32: repeated requests for the same passage
- *      are completely free.
- *   2. Rate-limit check — consumes one token if allowed, throws
- *      `RateLimitError` BEFORE the SDK is called if denied.
- *   3. SDK call with the existing abort-signal composition and error
- *      mapping preserved verbatim from BB-30/BB-31.
- *   4. Safety-block detection (three-path check preserved verbatim).
- *   5. On success: cache the result and return it. On any error: do NOT
- *      cache — retrying after a transient failure should fire a fresh
- *      request, not return the old failure for 7 days.
- *
- * The function signature keeps `feature`, `systemPrompt`, and
- * `buildUserPrompt` injected by the caller so Explain and Reflect can
- * share this helper without cross-contaminating their prompts.
+ * Shape of the backend's success response body (minus the `meta` wrapper
+ * which we don't need to consume here — we grab the request ID from the
+ * header instead).
  */
-async function generateWithPromptAndCacheAndRateLimit(
+interface ProxySuccessBody {
+  data: { content: string; model: string }
+  meta?: { requestId?: string }
+}
+
+/**
+ * Shape of the backend's error response body (ProxyError).
+ */
+interface ProxyErrorBody {
+  code: string
+  message: string
+  requestId?: string
+  timestamp?: string
+}
+
+/**
+ * Shared helper wrapping cache + rate-limit + backend fetch. Composition
+ * order preserved from the pre-migration implementation:
+ *
+ *   1. Cache lookup — synchronous, returns WITHOUT consuming a
+ *      rate-limit token and WITHOUT calling the backend.
+ *   2. Rate-limit check — consumes one token if allowed, throws
+ *      RateLimitError BEFORE the fetch if denied.
+ *   3. Fetch to backend /api/v1/proxy/ai/{endpoint}.
+ *   4. Response mapping — success → cache + return, error → typed throw.
+ *
+ * The backend already handles safety detection and timeout — the client
+ * simply maps backend error codes to the existing frontend error
+ * classes.
+ */
+async function callProxy(
   feature: AIFeature,
-  systemPrompt: string,
+  url: string,
   reference: string,
   verseText: string,
-  buildUserPrompt: (ref: string, text: string) => string,
   signal?: AbortSignal,
 ): Promise<{ content: string; model: string }> {
-  // 1. Cache lookup — no rate-limit consumption, no API call
+  // 1. Cache lookup — no rate-limit consumption, no network call
   const cached = getCachedAIResult(feature, reference, verseText)
   if (cached) return cached
 
-  // 2. Rate-limit check — denial throws BEFORE any SDK work
+  // 2. Rate-limit check — denial throws BEFORE any network work
   const decision = consumeRateLimitToken(feature)
   if (!decision.allowed) {
     throw new RateLimitError(decision.retryAfterSeconds)
   }
 
-  // 3. Lazy SDK client — preserves all existing key-missing semantics
-  const ai = getClient()
-
-  // 4. Build the user prompt via the caller-provided builder
-  const userPrompt = buildUserPrompt(reference, verseText)
-
-  // 5. Compose abort signals — caller's optional signal + internal timeout
+  // 3. Compose abort signals — caller's optional signal + internal timeout
   const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
   const combinedSignal = signal
     ? AbortSignal.any([signal, timeoutSignal])
     : timeoutSignal
 
-  // 6. SDK call + error mapping — preserved verbatim from BB-30/BB-31
-  let response
+  // 4. Fetch to backend
+  let response: Response
   try {
-    response = await ai.models.generateContent({
-      model: MODEL,
-      contents: userPrompt,
-      config: {
-        systemInstruction: systemPrompt,
-        temperature: TEMPERATURE,
-        maxOutputTokens: MAX_OUTPUT_TOKENS,
-        abortSignal: combinedSignal,
-      },
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference, verseText }),
+      signal: combinedSignal,
     })
   } catch (err) {
-    // Caller-driven abort: re-throw the original AbortError unchanged so the
-    // hook can detect it and silently discard (the component is unmounting or
-    // a replacement request is already in flight — there is no one to show
-    // an error to). Do NOT wrap as GeminiTimeoutError.
+    // Caller-driven abort: re-throw AbortError unchanged so the hook can
+    // silently discard. The caller is gone — no one to show an error to.
     if (signal?.aborted && err instanceof Error && err.name === 'AbortError') {
       throw err
     }
-    // Internal timeout signal: AbortSignal.timeout fires a DOMException with
-    // name 'TimeoutError' (distinct from 'AbortError').
+    // Internal timeout (AbortSignal.timeout fires with name 'TimeoutError')
     if (err instanceof DOMException && err.name === 'TimeoutError') {
       throw new GeminiTimeoutError(undefined, { cause: err })
     }
-    // Any other AbortError source is also surfaced as a timeout from the
-    // user's POV.
+    // Any other AbortError source = also a timeout from the user's POV
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new GeminiTimeoutError('Gemini request was aborted', { cause: err })
+      throw new GeminiTimeoutError('AI request was aborted', { cause: err })
     }
-    // Network failures — TypeError from fetch, or errors with network-ish messages
+    // Network failures — fetch throws TypeError for DNS, connection,
+    // CORS, or offline. Also catch any network-ish error messages as a
+    // defensive catch-all.
     if (
       err instanceof TypeError ||
       (err instanceof Error && /network|fetch|offline/i.test(err.message))
     ) {
       throw new GeminiNetworkError(undefined, { cause: err })
     }
-    // Everything else — invalid key, quota, 5xx, malformed response, unknown
+    // Anything else surfaces as a generic API error.
     throw new GeminiApiError(
-      err instanceof Error ? err.message : 'Unknown Gemini API error',
+      err instanceof Error ? err.message : 'Unknown AI proxy error',
       { cause: err },
     )
   }
 
-  // 7. Safety block detection — belt-and-suspenders, check three places:
-  //   1. Prompt-level block:    response.promptFeedback?.blockReason
-  //   2. Output-level block:    candidates[0]?.finishReason === 'SAFETY'
-  //   3. Silent block (empty):  response.text is empty/whitespace
-  const promptBlockReason = response.promptFeedback?.blockReason
-  if (promptBlockReason) {
-    throw new GeminiSafetyBlockError(
-      `Gemini blocked the prompt: ${promptBlockReason}`,
-    )
+  // 5. Success path (HTTP 2xx)
+  if (response.ok) {
+    let body: ProxySuccessBody
+    try {
+      body = (await response.json()) as ProxySuccessBody
+    } catch (err) {
+      throw new GeminiApiError('AI proxy returned a malformed response', {
+        cause: err,
+      })
+    }
+    if (!body?.data?.content || !body?.data?.model) {
+      throw new GeminiApiError('AI proxy returned an incomplete response')
+    }
+    const result = { content: body.data.content, model: body.data.model }
+    // Cache writes are fire-and-forget — storage failure degrades silently.
+    setCachedAIResult(feature, reference, verseText, result)
+    return result
   }
 
-  const firstCandidate = response.candidates?.[0]
-  const finishReason = firstCandidate?.finishReason
-  if (finishReason === 'SAFETY' || finishReason === 'PROHIBITED_CONTENT') {
-    throw new GeminiSafetyBlockError(
-      `Gemini blocked the response: finishReason=${finishReason}`,
-    )
+  // 6. Error path (HTTP 4xx/5xx) — parse ProxyError body and map to
+  //    the appropriate typed error class.
+  let errorBody: ProxyErrorBody | null = null
+  try {
+    errorBody = (await response.json()) as ProxyErrorBody
+  } catch {
+    // Ignore — errorBody stays null
   }
 
-  const content = response.text?.trim()
-  if (!content) {
-    throw new GeminiSafetyBlockError(
-      'Gemini returned an empty response (likely a silent safety block)',
-    )
-  }
+  const code = errorBody?.code ?? ''
+  const message = errorBody?.message ?? `AI proxy returned HTTP ${response.status}`
 
-  // 8. Build the result and cache it. Cache writes are fire-and-forget —
-  //    any storage failure (quota, private browsing, disabled) degrades
-  //    silently to no-cache behavior inside the cache module.
-  const result = { content, model: MODEL }
-  setCachedAIResult(feature, reference, verseText, result)
-  return result
+  switch (code) {
+    case 'RATE_LIMITED': {
+      // Backend rate limit. Read Retry-After header (integer seconds).
+      const retryAfterHeader = response.headers.get('Retry-After')
+      const retryAfterSeconds = retryAfterHeader
+        ? Math.max(1, parseInt(retryAfterHeader, 10) || 1)
+        : 60
+      throw new RateLimitError(retryAfterSeconds)
+    }
+    case 'SAFETY_BLOCK':
+      throw new GeminiSafetyBlockError(message)
+    case 'UPSTREAM_TIMEOUT':
+      throw new GeminiTimeoutError(message)
+    case 'UPSTREAM_ERROR':
+    case 'INVALID_INPUT':
+    case 'INTERNAL_ERROR':
+      throw new GeminiApiError(message)
+    default:
+      throw new GeminiApiError(message)
+  }
 }
 
 /**
- * Generate a scholarly explanation for a scripture passage using Gemini.
- *
- * The system prompt is routed through `config.systemInstruction` (the
- * Gemini-specific pattern) — it is NOT prepended to `contents`. The user
- * prompt (reference + verse text) is the only value passed as `contents`.
+ * Generate a scholarly explanation for a scripture passage via the
+ * backend AI proxy. Public signature unchanged from the pre-migration
+ * SDK-based implementation — callers (`useExplainPassage`) do not need
+ * to change.
  *
  * @param reference Formatted reference, e.g. "1 Corinthians 13:4-7"
  * @param verseText The WEB translation text for the referenced range
- * @param signal Optional caller-provided AbortSignal. When fired (e.g., from
- *   a React effect cleanup on unmount or re-fire), the in-flight request is
- *   cancelled and the original AbortError is re-thrown unchanged so the
- *   caller can detect it via `err.name === 'AbortError'` and silently
- *   discard. This composes with the internal 30-second timeout signal via
- *   `AbortSignal.any`, so whichever fires first wins.
- * @returns ExplainResult with the LLM-generated content and model identifier
- * @throws GeminiKeyMissingError when VITE_GEMINI_API_KEY is not set
- * @throws GeminiNetworkError for offline/DNS/fetch-level failures
- * @throws GeminiApiError for non-success API responses (invalid key, quota, 5xx)
- * @throws GeminiSafetyBlockError when Gemini's safety filter blocked the output
- * @throws GeminiTimeoutError when the request exceeded 30 seconds
- * @throws DOMException/AbortError (unwrapped) when the caller's `signal` aborted
+ * @param signal Optional caller-provided AbortSignal. When fired, the
+ *   in-flight fetch is cancelled and the original AbortError is re-thrown
+ *   unchanged so the caller can detect it via `err.name === 'AbortError'`
+ *   and silently discard.
  */
 export async function generateExplanation(
   reference: string,
   verseText: string,
   signal?: AbortSignal,
 ): Promise<ExplainResult> {
-  return generateWithPromptAndCacheAndRateLimit(
-    'explain',
-    EXPLAIN_PASSAGE_SYSTEM_PROMPT,
-    reference,
-    verseText,
-    buildExplainPassageUserPrompt,
-    signal,
-  )
+  return callProxy('explain', EXPLAIN_URL, reference, verseText, signal)
 }
 
 /**
- * Generate a contemplative reflection for a scripture passage using Gemini.
- *
- * Where `generateExplanation` offers scholarly context, `generateReflection`
- * offers the reader a small set of genuine questions and possibilities about
- * how the passage might land today. It shares the same SDK client singleton,
- * model, timeout behavior, and error classification as `generateExplanation`
- * — the only difference is that it passes BB-31's system prompt (not BB-30's)
- * via `config.systemInstruction`.
- *
- * The system prompt is routed through `config.systemInstruction` (the
- * Gemini-specific pattern) — it is NOT prepended to `contents`. The user
- * prompt (reference + verse text) is the only value passed as `contents`.
- *
- * @param reference Formatted reference, e.g. "Philippians 4:6-7"
- * @param verseText The WEB translation text for the referenced range
- * @param signal Optional caller-provided AbortSignal. When fired (e.g., from
- *   a React effect cleanup on unmount or re-fire), the in-flight request is
- *   cancelled and the original AbortError is re-thrown unchanged so the
- *   caller can detect it via `err.name === 'AbortError'` and silently
- *   discard. This composes with the internal 30-second timeout signal via
- *   `AbortSignal.any`, so whichever fires first wins.
- * @returns ReflectResult with the LLM-generated content and model identifier
- * @throws GeminiKeyMissingError when VITE_GEMINI_API_KEY is not set
- * @throws GeminiNetworkError for offline/DNS/fetch-level failures
- * @throws GeminiApiError for non-success API responses (invalid key, quota, 5xx)
- * @throws GeminiSafetyBlockError when Gemini's safety filter blocked the output
- * @throws GeminiTimeoutError when the request exceeded 30 seconds
- * @throws DOMException/AbortError (unwrapped) when the caller's `signal` aborted
+ * Generate a contemplative reflection for a scripture passage via the
+ * backend AI proxy. Public signature unchanged.
  */
 export async function generateReflection(
   reference: string,
   verseText: string,
   signal?: AbortSignal,
 ): Promise<ReflectResult> {
-  return generateWithPromptAndCacheAndRateLimit(
-    'reflect',
-    REFLECT_PASSAGE_SYSTEM_PROMPT,
-    reference,
-    verseText,
-    buildReflectPassageUserPrompt,
-    signal,
-  )
+  return callProxy('reflect', REFLECT_URL, reference, verseText, signal)
 }

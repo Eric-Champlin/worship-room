@@ -80,8 +80,11 @@ paths: ["backend/**"]
 - `403 Forbidden` — Insufficient permissions (code: `FORBIDDEN`)
 - `404 Not Found` — Resource not found (code: `NOT_FOUND`)
 - `409 Conflict` — Duplicate resource (code: `CONFLICT`)
+- `422 Unprocessable Content` — Request valid but upstream content cannot be processed (code: `SAFETY_BLOCK` for AI safety-filter refusals per Spec 2; other 422 codes may be added per endpoint)
 - `429 Too Many Requests` — Rate limit exceeded (code: `RATE_LIMITED`)
 - `500 Internal Server Error` — Server error (code: `INTERNAL_ERROR`)
+- `502 Bad Gateway` — Upstream API returned an error or unreachable (code: `UPSTREAM_ERROR`) — used by proxy endpoints (`/api/v1/proxy/**`) when Gemini, Google Maps, FCBH, or future upstreams fail
+- `504 Gateway Timeout` — Upstream API exceeded its per-request timeout (code: `UPSTREAM_TIMEOUT`) — used by proxy endpoints for timeouts exceeding the configured `proxy.upstream.default-timeout-ms` or a service-specific override
 
 **Special response (not an error):**
 - `200 OK` with `crisis_flag: true` in body — content flagged by crisis detection (code: `CRISIS_DETECTED`). Post is still created with `crisis_flag=true` and crisis resources surfaced in UI. This is NOT a rejection.
@@ -153,25 +156,37 @@ backend/src/main/resources/db/changelog/
 
 ### Package Structure
 
-**Current state:** The existing skeleton uses `com.example.worshiproom`. Spec 1.1 (Backend Skeleton Audit) will decide whether to rename to `com.worshiproom` or keep the existing package. Until that decision is made, use whichever package the skeleton currently uses.
+**Base package** (decided in Spec 1 `ai-proxy-foundation` and confirmed shipped): **`com.example.worshiproom`**. Do NOT rename. A future Forums Wave spec may migrate to `com.worshiproom` but that is a global rename requiring coordination across imports, package-info files, `pom.xml` `groupId`, Docker image tags, and CI — not in scope for any current spec.
 
-**Target structure (within the base package):**
+**Current structure (as of Spec 1 merged):**
 ```
-{base-package}
-├── auth/           — AuthController, AuthService, JWT utils
-├── user/           — UserController, UserService, User entity
-├── prayer/         — PostController, PostService, Post/Comment entities
-├── moderation/     — ReportController, UserReportService
-├── friends/        — FriendsController, FriendsService
-├── social/         — SocialInteractionsService, MilestoneEventsService
-├── verse/          — VerseFindsYouService
-├── email/          — WelcomeSequenceService, UnsubscribeController
-├── legal/          — LegalVersionService
-├── notification/   — NotificationService
-├── config/         — SecurityConfig, CorsConfig, RedisConfig
-├── common/         — shared DTOs, exceptions, base classes
-└── infrastructure/ — S3 adapter, Sentry config, rate limiter
+com.example.worshiproom/
+├── WorshipRoomApplication.java
+├── config/
+│   ├── CorsConfig.java
+│   └── ProxyConfig.java           (binds proxy.* properties, exposes WebClient + IpResolver beans)
+├── controller/
+│   └── ApiController.java         (/api/health, /api/v1/health, /api/hello)
+└── proxy/
+    ├── common/                    (shared across all proxy subpackages)
+    │   ├── ProxyResponse.java
+    │   ├── ProxyError.java
+    │   ├── ProxyException.java        (base class)
+    │   ├── UpstreamException.java     (502 UPSTREAM_ERROR)
+    │   ├── UpstreamTimeoutException.java  (504 UPSTREAM_TIMEOUT)
+    │   ├── RateLimitExceededException.java  (429 RATE_LIMITED)
+    │   ├── SafetyBlockException.java  (422 SAFETY_BLOCK, added in Spec 2)
+    │   ├── ProxyExceptionHandler.java (@RestControllerAdvice(basePackages="...proxy"))
+    │   ├── RateLimitExceptionHandler.java (global @RestControllerAdvice — filter-raised, see Error Handling)
+    │   ├── RequestIdFilter.java       (@Order(HIGHEST_PRECEDENCE))
+    │   ├── RateLimitFilter.java       (@Order(HIGHEST_PRECEDENCE + 10), scoped to /api/v1/proxy/**)
+    │   └── IpResolver.java
+    └── ai/                        (Spec 2 — GeminiController, GeminiService, GeminiPrompts, request/response DTOs)
 ```
+
+**Proxy subpackage convention (MANDATORY):** Every proxy feature lives under `com.example.worshiproom.proxy.{feature}/` — `proxy.ai` for Gemini (Spec 2), `proxy.places` for Google Maps (Spec 3), `proxy.audio` for FCBH (Spec 4). Feature packages contain their controller + service + prompts/DTOs/helpers specific to that upstream. They NEVER redefine what already exists in `proxy.common` — shared types, exceptions, filters, and handlers always stay in common.
+
+**Forums Wave target structure (Phase 1+, not current):** When Forums Wave Phase 1 adds authentication and domain logic, new top-level packages (auth/, user/, prayer/, moderation/, friends/, social/, verse/, email/, legal/, notification/, infrastructure/) will sit alongside `proxy/`. Do not create those packages preemptively — Forums Wave specs own them.
 
 ### Controller Conventions
 - Annotate with `@RestController` and `@RequestMapping("/api/v1/...")`
@@ -215,6 +230,19 @@ backend/src/main/resources/db/changelog/
 - Never expose stack traces to the client
 - Never expose internal error details — use generic messages with request IDs for debugging
 - Log the full exception server-side with the request ID for correlation
+- **Upstream error text never reaches the client.** See `02-security.md` § "Never Leak Upstream Error Text" — proxy services catch upstream failures, log the full cause server-side, and throw `UpstreamException` / `UpstreamTimeoutException` with user-safe generic messages. Every proxy service test asserts the caught exception's message does NOT appear in the thrown `ProxyException`'s message.
+
+### `@RestControllerAdvice` Scoping (MANDATORY pattern)
+
+Proxy advices are **package-scoped** via `@RestControllerAdvice(basePackages = "com.example.worshiproom.proxy")`. This prevents a proxy exception handler from accidentally catching and reshaping exceptions thrown by unrelated Forums Wave controllers in sibling packages.
+
+**Filter-raised exception gotcha (non-obvious):** Package-scoped advices DO NOT catch exceptions thrown from servlet filters. When a filter throws, the Spring `HandlerExceptionResolver` chain runs with `handler == null` (there is no controller associated with a filter-raised exception), which causes the advice's `isApplicableToBeanType(null)` check to fail. Package-scoped advices are silently skipped for filter-raised exceptions.
+
+**Pattern:** Filter-raised exceptions require one of two solutions:
+1. **Unscoped companion advice** — a separate `@RestControllerAdvice` (no `basePackages`) that handles ONLY the filter-raised exception type. Safe because it only matches one exception class that's only ever thrown by the filter. Spec 1's `RateLimitExceptionHandler` is the canonical example: a global advice handling only `RateLimitExceededException`, documented with a class-level JavaDoc explaining why it's intentionally unscoped.
+2. **HandlerExceptionResolver delegation from inside the filter** — the filter injects `@Qualifier("handlerExceptionResolver") HandlerExceptionResolver` and calls `resolver.resolveException(request, response, null, ex)` instead of throwing. The resolver chain finds the appropriate advice because the resolver explicitly iterates advices. Spec 1's `RateLimitFilter` uses this pattern so the rate-limit response body + `Retry-After` header are emitted correctly.
+
+Either pattern is acceptable. The unscoped-companion-advice pattern is simpler for single-exception cases; the resolver-delegation pattern is better when the filter needs fine control over the response. DO NOT add `basePackages` to an advice that must catch filter-raised exceptions — it will silently fail in production.
 
 ### Input Validation
 - All user inputs validated for length, format, content
@@ -230,32 +258,39 @@ backend/src/main/resources/db/changelog/
 - Moderation queue at `/admin/prayer-wall` (future phase)
 
 ### Rate Limiting
-- **Implementation:** Redis-backed in production (via Spec 5.6), in-memory fallback for local dev
-- **Per-user limits:** Configurable via env vars, not hardcoded
-- **Standard tiers:**
-  - Read endpoints (authenticated): 100 requests/minute per user
-  - Read endpoints (unauthenticated): 30 requests/minute per IP, with 20-request burst allowance
-  - Write endpoints: 20 requests/minute per authenticated user
-  - Auth endpoints: 5 login attempts per 15 minutes per email
-  - AI endpoints: 20 requests/hour per user (when AI features ship)
-- **Global:** IP-based 100 requests/minute at edge level
-- **Rate limit response:** 429 with `Retry-After` header and standard error shape
-- **When Redis is down:** Fail-closed (deny requests) not fail-open (allow unlimited)
+
+**Current implementation** (shipped in Spec 1 `ai-proxy-foundation`; see `02-security.md` § Rate Limiting for the full policy):
+- **Mechanism:** bucket4j token bucket + Caffeine-backed bounded bucket map. NOT Spring Security, NOT Redis.
+- **Scope:** `/api/v1/proxy/**` only. Other routes (health, future Forums Wave endpoints) are excluded via `RateLimitFilter.shouldNotFilter`.
+- **Profile defaults:** Dev 120/min with 30-burst; prod 60/min with 10-burst. All configurable via `proxy.rate-limit.*` in `application-{profile}.properties` — never hardcoded.
+- **Enforcement:** Per-IP until JWT auth lands. Once auth is wired, per-user takes precedence for authenticated endpoints.
+- **Response headers on every response:** `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`. On 429: `Retry-After` (integer seconds).
+- **Bucket-map bounding is mandatory** — see `02-security.md` § "BOUNDED EXTERNAL-INPUT CACHES".
+
+**Forums Wave targets (not yet implemented):**
+- Read (authenticated): 100/min per user
+- Read (unauthenticated): 30/min per IP with 20-request burst
+- Write (authenticated): 20/min per user
+- Auth: 5 login attempts per 15 min per email
+- AI (when per-user replaces per-IP): 20/hour per user
+- **When Redis is down (once deployed):** Fail-closed (deny), not fail-open (allow unlimited).
 
 ### CORS Policy
-- **Local dev:** `http://localhost:5173`
-- **Production:** `https://worshiproom.com` (or actual domain)
+- **Local dev:** `http://localhost:5173,http://localhost:5174,http://localhost:4173` (Vite dev + preview)
+- **Production:** `https://worshiproom.com,https://www.worshiproom.com` (apex + www)
 - **Methods:** GET, POST, PUT, PATCH, DELETE, OPTIONS
 - **Headers:** Content-Type, Authorization, X-Request-Id
+- **Exposed Headers** (MANDATORY): `X-Request-Id, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After` — without `exposedHeaders`, browsers hide these from frontend JavaScript even though they arrive on the wire.
 - **Credentials:** `false` for MVP (in-memory JWT, no cookies)
+- **Configuration:** `proxy.cors.allowed-origins` (comma-separated) in `application-{profile}.properties`, bound via `@Value("${proxy.cors.allowed-origins}")` into `CorsConfig`. No inline `@Value` defaults (they duplicate `application.properties` and create drift).
 
 ### OpenAPI Spec and Type Generation (Universal Rule 4)
-- **Single source of truth:** `backend/api/openapi.yaml`
-- **Frontend types:** Generated to `frontend/src/types/api/generated.ts` via `openapi-typescript`
-- **Regeneration:** Run `npm run types:generate` after any API change
-- **Hand-editing generated types is forbidden** — edit the OpenAPI spec, then regenerate
-- **Swagger UI:** Available at `/api/docs` in dev profile only (never in production)
-- **Linting:** Spectral (or similar) in CI to validate the spec
+- **Single source of truth:** `backend/src/main/resources/openapi.yaml` (hand-authored, NOT generated from controllers — matches Spec 1 § Decision 10). The `src/main/resources/` location ships the spec inside the JAR, so it is available at runtime if ever needed.
+- **Frontend types:** Generated to `frontend/src/types/api/generated.ts` via `openapi-typescript` (pipeline wired up by Forums Wave Phase 1; hand-typed in the interim).
+- **Regeneration:** Run `npm run types:generate` after any API change (once the pipeline is wired).
+- **Hand-editing generated types is forbidden** — edit the OpenAPI spec, then regenerate.
+- **Swagger UI:** Available at `/api/docs` in dev profile only (never in production).
+- **Linting:** Validate with Swagger Editor (editor.swagger.io) or `npx @redocly/cli lint` before shipping any spec that adds paths. Spec 1's openapi.yaml has the shared schemas (`ProxyResponse`, `ProxyError`) and shared responses (`BadRequest`, `RateLimited`, `UpstreamError`, `UpstreamTimeout`, `InternalError`, `SafetyBlocked`) — proxy specs add paths that `$ref` these shared components; they do NOT redefine them.
 
 ### Content Policy
 - All scripture uses WEB (World English Bible) translation — public domain, no licensing

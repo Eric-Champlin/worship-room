@@ -120,6 +120,15 @@ Use this structure:
 
 ---
 
+## Affected Frontend Routes
+
+{List the user-facing routes this spec touches, one per line as markdown bullets. The `/verify-with-playwright` skill reads this section when invoked plan-only (e.g., `/verify-with-playwright _plans/...md`) and uses these routes to drive UI verification. Format: backtick-wrapped, including any query parameters that affect rendering. If this is a backend-only spec with NO frontend changes, write "N/A — backend-only spec" and omit the bullets.}
+
+- `/route-1`
+- `/route-2?tab=variant`
+
+---
+
 ## Universal Rules Checklist (Forums Wave specs only)
 
 **If this is a standalone backend spec (no master plan reference), write "N/A — standalone spec, see `.claude/rules/` files for applicable conventions" and skip the checklist below. Per-step verification commands are unchanged.**
@@ -263,15 +272,16 @@ Before implementing, confirm this plan respects:
 2. [ ] **No tentative language** — no "should probably", "might want to", "consider doing"
 3. [ ] Patterns match what was found in reconnaissance, not assumed from general knowledge
 4. [ ] Universal Rules checklist populated with rules relevant to this spec
-5. [ ] Every Liquibase changeset filename is unique (checked against existing changesets in `db/changelog/`)
-6. [ ] Every API endpoint follows the standard response shape from `03-backend-standards.md`
-7. [ ] Backend verification includes compile + test commands for every backend step
-8. [ ] Frontend verification includes build + test + visual check for every frontend step
-9. [ ] Steps are small — each touches ≤3 files and is independently verifiable
-10. [ ] Steps are ordered for safety — database migrations before services, services before controllers, backend before frontend
-11. [ ] Test count calibrated to complexity (simple utility: 2-4; complex service with edge cases: 10-15)
-12. [ ] Edge Cases & Decisions table populated
-13. [ ] No deprecated patterns introduced (check `09-design-system.md` § "Deprecated Patterns" for frontend steps)
+5. [ ] **Affected Frontend Routes** section populated — either with the actual user-facing routes touched by this spec (one per line, backtick-wrapped, including query params), or with "N/A — backend-only spec" if no UI is involved. Required for `/verify-with-playwright` plan-only invocation.
+6. [ ] Every Liquibase changeset filename is unique (checked against existing changesets in `db/changelog/`)
+7. [ ] Every API endpoint follows the standard response shape from `03-backend-standards.md`
+8. [ ] Backend verification includes compile + test commands for every backend step
+9. [ ] Frontend verification includes build + test + visual check for every frontend step
+10. [ ] Steps are small — each touches ≤3 files and is independently verifiable
+11. [ ] Steps are ordered for safety — database migrations before services, services before controllers, backend before frontend
+12. [ ] Test count calibrated to complexity (simple utility: 2-4; complex service with edge cases: 10-15)
+13. [ ] Edge Cases & Decisions table populated
+14. [ ] No deprecated patterns introduced (check `09-design-system.md` § "Deprecated Patterns" for frontend steps)
 
 ---
 

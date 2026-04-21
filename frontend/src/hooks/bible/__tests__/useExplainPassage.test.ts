@@ -13,7 +13,6 @@ vi.mock('@/lib/ai/geminiClient', () => ({
 import { useExplainPassage, ERROR_COPY } from '../useExplainPassage'
 import {
   GeminiApiError,
-  GeminiKeyMissingError,
   GeminiNetworkError,
   GeminiSafetyBlockError,
   GeminiTimeoutError,
@@ -93,17 +92,6 @@ describe('useExplainPassage', () => {
     })
     expect(result.current.errorKind).toBe('timeout')
     expect(result.current.errorMessage).toContain('took too long')
-  })
-
-  it('maps GeminiKeyMissingError to "unavailable" kind with generic copy', async () => {
-    mockGenerateExplanation.mockRejectedValue(new GeminiKeyMissingError())
-    const { result } = renderHook(() => useExplainPassage(REFERENCE, VERSE_TEXT))
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('error')
-    })
-    expect(result.current.errorKind).toBe('unavailable')
-    expect(result.current.errorMessage).toContain('temporarily unavailable')
   })
 
   it('maps unknown errors to "unavailable" kind', async () => {
