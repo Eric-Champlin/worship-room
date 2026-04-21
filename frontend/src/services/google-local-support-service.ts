@@ -1,33 +1,22 @@
 import type { LocalSupportCategory, SearchParams, SearchResult } from '@/types/local-support'
 import type { LocalSupportService } from './local-support-service'
-import { requireGoogleMapsApiKey } from '@/lib/env'
 import { calculateDistanceMiles } from '@/lib/geo'
 import { mapGooglePlaceToLocalSupport, type GooglePlace } from './google-places-mapper'
 import { geocodeCache } from './geocode-cache'
 
-const PLACES_TEXT_SEARCH_URL = 'https://places.googleapis.com/v1/places:searchText'
-const GEOCODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json'
+const PROXY_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/v1/proxy/maps`
+const PROXY_PLACES_SEARCH_URL = `${PROXY_BASE}/places-search`
+const PROXY_GEOCODE_URL = `${PROXY_BASE}/geocode`
 
-const REQUESTED_FIELDS = [
-  'places.id',
-  'places.displayName',
-  'places.formattedAddress',
-  'places.nationalPhoneNumber',
-  'places.internationalPhoneNumber',
-  'places.websiteUri',
-  'places.location',
-  'places.rating',
-  'places.photos',
-  'places.editorialSummary',
-  'places.regularOpeningHours',
-  'places.types',
-  'places.businessStatus',
-].join(',')
+// Backend upstream timeout is 10s; client gives an extra 5s of slack so the
+// user-facing error is an actual upstream failure, not a preemptive abort.
+const REQUEST_TIMEOUT_MS = 15000
 
-// Module-level token cache keyed by (lat, lng, radius, keyword). Persists
-// across calls within a page load so pagination doesn't re-issue the whole
-// search.
-const paginationTokens = new Map<string, string | null>()
+// Module-level map of (searchParamsKey → nextPageToken). The backend is
+// stateless; it returns nextPageToken per response and we pass it back in
+// the subsequent "load more" request. Mirrors the pre-migration behavior so
+// the UI contract is unchanged.
+const pageTokens = new Map<string, string | null>()
 
 function paramKey(params: SearchParams): string {
   const normalizedKeyword = params.keyword.trim().toLowerCase()
@@ -41,14 +30,10 @@ function categoryFromKeyword(keyword: string): LocalSupportCategory {
   return 'churches'
 }
 
-function milesToMeters(miles: number): number {
-  return miles * 1609.344
-}
-
 async function fetchWithTimeout(
   url: string,
   options: RequestInit,
-  timeoutMs = 10000,
+  timeoutMs = REQUEST_TIMEOUT_MS,
 ): Promise<Response> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
@@ -59,100 +44,101 @@ async function fetchWithTimeout(
   }
 }
 
+async function readBackendError(response: Response): Promise<string> {
+  // Backend errors follow the ProxyError shape: {code, message, requestId, timestamp}.
+  // Read defensively — a misconfigured proxy or disconnected network might strip
+  // the body or serve non-JSON content.
+  try {
+    const data = await response.json()
+    return typeof data?.message === 'string'
+      ? data.message
+      : `Maps service error ${response.status}`
+  } catch {
+    return `Maps service error ${response.status}`
+  }
+}
+
 class GoogleLocalSupportService implements LocalSupportService {
   async search(params: SearchParams, page: number): Promise<SearchResult> {
-    const apiKey = requireGoogleMapsApiKey()
     const category = categoryFromKeyword(params.keyword)
     const cacheKey = paramKey(params)
 
     let pageToken: string | null | undefined
     if (page > 0) {
-      pageToken = paginationTokens.get(cacheKey)
+      pageToken = pageTokens.get(cacheKey)
       if (!pageToken) return { places: [], hasMore: false }
     }
 
-    const body: Record<string, unknown> = {
-      textQuery: params.keyword,
-      locationBias: {
-        circle: {
-          center: { latitude: params.lat, longitude: params.lng },
-          radius: milesToMeters(params.radius),
-        },
-      },
-      maxResultCount: 20,
+    const body = {
+      lat: params.lat,
+      lng: params.lng,
+      radiusMiles: params.radius,
+      keyword: params.keyword,
+      pageToken: pageToken ?? null,
     }
-    if (pageToken) body.pageToken = pageToken
 
-    const response = await fetchWithTimeout(PLACES_TEXT_SEARCH_URL, {
+    const response = await fetchWithTimeout(PROXY_PLACES_SEARCH_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': `${REQUESTED_FIELDS},nextPageToken`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
 
     if (!response.ok) {
-      if (import.meta.env.DEV) {
-        const errorText = await response.text().catch(() => '(no body)')
-        throw new Error(`Places API error ${response.status}: ${errorText}`)
-      }
-      throw new Error(`Places API error ${response.status}`)
+      throw new Error(await readBackendError(response))
     }
 
-    const data = (await response.json()) as {
-      places?: GooglePlace[]
-      nextPageToken?: string
+    const envelope = (await response.json()) as {
+      data: { places?: GooglePlace[]; nextPageToken?: string | null }
+      meta?: { requestId?: string }
     }
 
-    const places = (data.places ?? [])
-      .map((gp) => mapGooglePlaceToLocalSupport(gp, category, apiKey))
+    const places = (envelope.data.places ?? [])
+      .map((gp) => mapGooglePlaceToLocalSupport(gp, category))
       .filter((p): p is NonNullable<typeof p> => p !== null)
 
-    // Google Places API's searchText endpoint only accepts locationBias
-    // (soft preference) with a circle — not locationRestriction.circle.
-    // To enforce the user's chosen radius as a hard cap, we filter results
-    // here. See:
-    // https://developers.google.com/maps/documentation/places/web-service/text-search
+    // Google's locationBias is a soft preference, so we enforce the user's
+    // chosen radius as a hard client-side cap. Backend passes the circle as
+    // locationBias; this filter is unchanged from the pre-migration behavior.
     const filtered = places.filter((p) => {
       const dist = calculateDistanceMiles(params.lat, params.lng, p.lat, p.lng)
       return dist <= params.radius
     })
 
-    paginationTokens.set(cacheKey, data.nextPageToken ?? null)
-
-    return { places: filtered, hasMore: Boolean(data.nextPageToken) }
+    pageTokens.set(cacheKey, envelope.data.nextPageToken ?? null)
+    return { places: filtered, hasMore: Boolean(envelope.data.nextPageToken) }
   }
 
   async geocode(query: string): Promise<{ lat: number; lng: number } | null> {
     const cached = geocodeCache.get(query)
     if (cached !== undefined) return cached
 
-    const apiKey = requireGoogleMapsApiKey()
-    const url = `${GEOCODE_URL}?address=${encodeURIComponent(query)}&key=${encodeURIComponent(apiKey)}`
+    const url = `${PROXY_GEOCODE_URL}?query=${encodeURIComponent(query)}`
     const response = await fetchWithTimeout(url, { method: 'GET' })
 
     if (!response.ok) {
-      throw new Error(`Geocoding API error ${response.status}`)
+      throw new Error(await readBackendError(response))
     }
 
-    const data = (await response.json()) as {
-      status: string
-      results?: Array<{ geometry: { location: { lat: number; lng: number } } }>
+    const envelope = (await response.json()) as {
+      data: { lat: number | null; lng: number | null }
+      meta?: { requestId?: string }
     }
 
-    if (data.status !== 'OK' || !data.results || data.results.length === 0) {
-      geocodeCache.set(query, null)
-      return null
-    }
+    const result =
+      envelope.data.lat == null || envelope.data.lng == null
+        ? null
+        : { lat: envelope.data.lat, lng: envelope.data.lng }
 
-    const coords = data.results[0].geometry.location
-    geocodeCache.set(query, coords)
-    return coords
+    geocodeCache.set(query, result)
+    return result
   }
 }
 
 export function createGoogleService(): LocalSupportService {
   return new GoogleLocalSupportService()
+}
+
+/** Test-only: clear the page-token map between tests. */
+export function __resetPageTokensForTests(): void {
+  pageTokens.clear()
 }

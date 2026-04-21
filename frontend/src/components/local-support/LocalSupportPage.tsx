@@ -4,7 +4,7 @@ import { Navbar } from '@/components/Navbar'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
-import { createLocalSupportService } from '@/services/local-support-service'
+import { createLocalSupportService, type LocalSupportService } from '@/services/local-support-service'
 import { categoryToPlaceType } from '@/services/local-visit-storage'
 import { calculateDistanceMiles } from '@/lib/geo'
 import type { LocalSupportPlace, LocalSupportCategory, SortOption } from '@/types/local-support'
@@ -34,10 +34,23 @@ interface LocalSupportPageProps {
   config: LocalSupportPageConfig
 }
 
-const service = createLocalSupportService()
 const MOCK_DATA_CENTER = { lat: 35.6151, lng: -87.0353 }
 
 function LocalSupportPageContent({ config }: LocalSupportPageProps) {
+  // Factory became async in Spec 3 (ai-proxy-maps): it probes /api/v1/health
+  // once to decide between the real Google-backed service and the mock
+  // service. We resolve it once per mount and hold the result in state.
+  const [service, setService] = useState<LocalSupportService | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    createLocalSupportService().then((s) => {
+      if (!cancelled) setService(s)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const { recordActivity } = useFaithPoints()
@@ -126,6 +139,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
 
   const handleSearch = useCallback(
     async (lat: number, lng: number, r: number) => {
+      if (!service) return
       setUserCoords({ lat, lng })
       setRadius(r)
       setSearchState('loading')
@@ -150,18 +164,19 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
         setSearchState('error')
       }
     },
-    [config.searchKeyword, setSearchParams],
+    [service, config.searchKeyword, setSearchParams],
   )
 
   const handleGeocode = useCallback(
     async (query: string) => {
+      if (!service) return null
       return service.geocode(query)
     },
-    [],
+    [service],
   )
 
   const handleLoadMore = useCallback(async () => {
-    if (!userCoords) return
+    if (!service || !userCoords) return
     setIsLoadingMore(true)
     setLoadMoreError('')
     try {
@@ -178,7 +193,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
     } finally {
       setIsLoadingMore(false)
     }
-  }, [userCoords, page, radius, config.searchKeyword])
+  }, [service, userCoords, page, radius, config.searchKeyword])
 
   const handleToggleBookmark = useCallback((placeId: string) => {
     if (!isAuthenticated) {
