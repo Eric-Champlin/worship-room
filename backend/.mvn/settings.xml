@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Project-local Maven settings for Worship Room backend.
+
+  WHY THIS FILE EXISTS
+  ====================
+  This file deliberately bypasses the machine-wide ~/.m2/settings.xml so that
+  builds of this project have zero dependency on any external organization's
+  Maven infrastructure (corporate Artifactory, CodeArtifact mirrors, proxy
+  auth tokens, etc.).
+
+  All artifacts resolve directly from Maven Central, which is defined as the
+  default repository by the Spring Boot parent POM. No authentication is
+  required, no credentials are used, and no request ever touches a non-public
+  server.
+
+  HOW IT'S ACTIVATED
+  ==================
+  The sibling file `.mvn/maven.config` passes `-s .mvn/settings.xml` to the
+  Maven wrapper automatically. To build this project, just run `./mvnw` from
+  the `backend/` directory as usual — no manual flag needed.
+
+  BACKGROUND
+  ==========
+  Some development machines have a global ~/.m2/settings.xml configured with:
+    <mirror>
+      <mirrorOf>central</mirrorOf>
+      <url>https://some-corporate-proxy/...</url>
+    </mirror>
+  which intercepts every Maven Central request and routes it through the
+  corporate proxy. That's appropriate for projects that belong to that
+  organization, but NOT for this project. Without this file, Worship Room
+  builds would fail on such machines when the proxy's auth token expires.
+
+  DO NOT EDIT
+  ===========
+  Do not add <mirror>, <server>, <proxy>, or <profile> entries referencing
+  any corporate or private infrastructure. This file must remain a clean
+  "talk to Maven Central directly" configuration.
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <!--
+      Deliberately minimal. No <servers>, no <mirrors>, no active <profiles>.
+      Maven Central is the default repository, declared by the Spring Boot
+      parent POM. Nothing here needs to override that default.
+    -->
+</settings>

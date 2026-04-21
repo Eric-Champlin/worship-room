@@ -7,8 +7,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    env_file:
+      - path: ./backend/.env.local
+        required: false
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      # SPRING_PROFILES_ACTIVE from .env.local takes precedence; this is a fallback.
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
