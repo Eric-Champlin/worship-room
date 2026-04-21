@@ -25,10 +25,7 @@ export function DigDeeperSection({
             onClick={() => onChipClick(question)}
             disabled={disabled}
             className={cn(
-              'inline-flex items-center gap-2 min-h-[44px] rounded-full bg-white/10 px-4 py-2',
-              'text-sm text-white/70 hover:bg-white/15 hover:text-white',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-              'transition-[colors,transform] duration-fast active:scale-[0.98]',
+              'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-2 text-sm text-white transition-[colors,transform] duration-base motion-reduce:transition-none hover:bg-white/15 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]',
               disabled && 'opacity-50 cursor-not-allowed',
             )}
           >

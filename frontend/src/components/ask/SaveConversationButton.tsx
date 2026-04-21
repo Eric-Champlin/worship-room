@@ -1,5 +1,4 @@
 import { ClipboardCopy } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
 import type { AskResponse } from '@/types/ask'
 
@@ -40,12 +39,7 @@ export function SaveConversationButton({ conversation }: SaveConversationButtonP
       <button
         type="button"
         onClick={handleCopy}
-        className={cn(
-          'inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/10 px-3 py-2 sm:w-auto',
-          'text-sm text-white/70 hover:bg-white/15',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          'transition-colors',
-        )}
+        className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] sm:w-auto"
       >
         <ClipboardCopy className="h-4 w-4" aria-hidden="true" />
         Save this conversation

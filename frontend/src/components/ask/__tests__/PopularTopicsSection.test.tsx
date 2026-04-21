@@ -32,11 +32,18 @@ describe('PopularTopicsSection', () => {
     expect(screen.getByText('Popular Topics')).toBeInTheDocument()
   })
 
-  it('cards have correct styling', () => {
+  it('cards are FrostedCard buttons with upgraded opacity tiers', () => {
     render(<PopularTopicsSection onTopicClick={vi.fn()} />)
     const card = screen.getByText('Understanding Suffering').closest('button')
-    expect(card?.className).toContain('rounded-xl')
-    expect(card?.className).toContain('border')
+    expect(card?.tagName).toBe('BUTTON')
+    expect(card?.className).toContain('rounded-2xl')
     expect(card?.className).toContain('bg-white/[0.06]')
+    expect(card?.className).toContain('border-white/[0.12]')
+    const title = screen.getByText('Understanding Suffering')
+    expect(title.className).toContain('text-white')
+    expect(title.className).not.toContain('text-white/80')
+    const description = screen.getByText(/Why pain exists and how to endure it/i)
+    expect(description.className).toContain('text-white/80')
+    expect(description.className).not.toContain('text-white/50')
   })
 })
