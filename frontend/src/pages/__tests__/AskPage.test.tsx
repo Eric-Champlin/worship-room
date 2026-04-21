@@ -55,27 +55,43 @@ beforeEach(() => {
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
 })
 
+describe('AskPage — Shell Structure', () => {
+  it('does not render bg-dashboard-dark anywhere', () => {
+    const { container } = renderAskPage()
+    const offenders = container.querySelectorAll('[class*="bg-dashboard-dark"]')
+    expect(offenders.length).toBe(0)
+  })
+
+  it('renders GlowBackground orbs (≥3)', () => {
+    const { container } = renderAskPage()
+    // GlowBackground variant="fullPage" renders 5 orbs; assert ≥3 for safety margin.
+    const orbs = container.querySelectorAll('[data-testid="glow-orb"]')
+    expect(orbs.length).toBeGreaterThanOrEqual(3)
+  })
+})
+
 describe('AskPage — Page Structure', () => {
-  it('renders PageHero with "Ask God\'s Word" title', () => {
+  it('renders the hero heading "Ask God\'s Word"', () => {
     renderAskPage()
     const heading = screen.getByRole('heading', { name: "Ask God's Word" })
     expect(heading).toBeInTheDocument()
   })
 
-  it('renders subtitle in Lora italic', () => {
+  it('renders subtitle in plain white sans-serif (no italic, no serif)', () => {
     renderAskPage()
     const subtitle = screen.getByText('Bring your questions. Find wisdom in Scripture.')
     expect(subtitle).toBeInTheDocument()
-    expect(subtitle.className).toContain('font-serif')
-    expect(subtitle.className).toContain('italic')
+    expect(subtitle.className).not.toContain('font-serif')
+    expect(subtitle.className).not.toContain('italic')
+    expect(subtitle.className).toContain('text-white')
+    expect(subtitle.className).not.toContain('text-white/60')
   })
 
-  it('renders HeadingDivider', () => {
+  it('hero H1 uses animate-gradient-shift (no HeadingDivider)', () => {
     renderAskPage()
-    // HeadingDivider renders as an SVG element within the hero
     const heading = screen.getByRole('heading', { name: "Ask God's Word" })
-    // showDivider causes the heading to have inline-block class
-    expect(heading.className).toContain('inline-block')
+    expect(heading.className).toContain('animate-gradient-shift')
+    expect(heading.className).not.toContain('font-script')
   })
 })
 
@@ -296,30 +312,35 @@ describe('AskPage — Response Display', () => {
     expect(screen.getAllByText('2 Corinthians 1:3-4').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('verse cards use correct styles', () => {
+  it('verse cards are FrostedCard (rounded-2xl, border-white/[0.12], bg-white/[0.06])', () => {
     submitAndWait()
-    // Get the verse card container (the one with rounded-xl class)
     const verseCards = screen.getAllByText('Romans 8:28')
-    const verseCard = verseCards.find((el) => el.closest('.rounded-xl'))?.closest('.rounded-xl')
-    expect(verseCard?.className).toContain('rounded-xl')
-    expect(verseCard?.className).toContain('border')
+    const verseCard = verseCards
+      .find((el) => el.closest('.rounded-2xl'))
+      ?.closest('.rounded-2xl') as HTMLElement | null
+    expect(verseCard?.className).toContain('rounded-2xl')
+    expect(verseCard?.className).toContain('border-white/[0.12]')
+    expect(verseCard?.className).toContain('bg-white/[0.06]')
     expect(verseCard?.className).toContain('backdrop-blur-sm')
   })
 
-  it('encouragement callout has purple background + left border', () => {
+  it('encouragement callout is Tier 2 (border-l-4, rounded-xl, bg-white/[0.04])', () => {
     submitAndWait()
     const encouragement = screen.getByText(/Your pain matters to God/i).closest('div')
-    expect(encouragement?.className).toContain('bg-white/[0.06]')
-    expect(encouragement?.className).toContain('border-l-2')
-    expect(encouragement?.className).toContain('border-primary')
+    expect(encouragement?.className).toContain('rounded-xl')
+    expect(encouragement?.className).toContain('border-l-4')
+    expect(encouragement?.className).toContain('border-l-primary/60')
+    expect(encouragement?.className).toContain('bg-white/[0.04]')
+    expect(encouragement?.className).not.toContain('border-l-2')
   })
 
-  it('prayer section has "Pray About This" label + Lora italic text', () => {
+  it('prayer section has "Pray About This" label + non-italic sans text', () => {
     submitAndWait()
     expect(screen.getByText('Pray About This')).toBeInTheDocument()
     const prayer = screen.getByText(/Lord, I am hurting/i)
-    expect(prayer.className).toContain('font-serif')
-    expect(prayer.className).toContain('italic')
+    expect(prayer.className).not.toContain('font-serif')
+    expect(prayer.className).not.toContain('italic')
+    expect(prayer.className).toContain('text-white/80')
   })
 
   it('AI disclaimer appears below response', () => {
@@ -329,9 +350,11 @@ describe('AskPage — Response Display', () => {
     ).toBeInTheDocument()
   })
 
-  it('response section uses animate-fade-in-up', () => {
+  it('response section uses motion-safe:animate-fade-in-up', () => {
     submitAndWait()
-    const responseSection = screen.getByText('What Scripture Says').closest('.animate-fade-in-up')
+    const responseSection = screen
+      .getByText('What Scripture Says')
+      .closest('.motion-safe\\:animate-fade-in-up')
     expect(responseSection).toBeInTheDocument()
   })
 })

@@ -28,7 +28,7 @@ export function LinkedAnswerText({ text }: LinkedAnswerTextProps) {
       <Link
         key={`ref-${ref.startIndex}`}
         to={`/bible/${ref.bookSlug}/${ref.chapter}#verse-${ref.verseStart}`}
-        className="text-primary-lt transition-colors hover:underline"
+        className="font-semibold text-white underline decoration-primary/60 underline-offset-2 transition-[text-decoration-color,text-decoration-thickness] duration-base motion-reduce:transition-none hover:decoration-primary hover:decoration-2"
       >
         {ref.raw}
       </Link>,

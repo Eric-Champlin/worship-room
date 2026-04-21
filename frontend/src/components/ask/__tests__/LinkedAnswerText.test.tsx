@@ -23,10 +23,13 @@ describe('LinkedAnswerText', () => {
     expect(link).toBeInTheDocument()
   })
 
-  it('link has text-primary-lt class', () => {
+  it('link uses WCAG-fixed text-white + underline (not text-primary-lt)', () => {
     renderLinkedText('See Romans 8:28 for details.')
     const link = screen.getByRole('link', { name: 'Romans 8:28' })
-    expect(link.className).toContain('text-primary-lt')
+    expect(link.className).toContain('text-white')
+    expect(link.className).toContain('underline')
+    expect(link.className).toContain('decoration-primary/60')
+    expect(link.className).not.toContain('text-primary-lt')
   })
 
   it('link navigates to correct Bible reader URL', () => {

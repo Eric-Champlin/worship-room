@@ -45,7 +45,6 @@ function renderDisplay(props: Partial<Parameters<typeof AskResponseDisplay>[0]> 
             response={SUFFERING_RESPONSE}
             isFirstResponse={false}
             onFollowUpClick={vi.fn()}
-            prefersReducedMotion={false}
             {...props}
           />
         </AuthModalProvider>
@@ -71,15 +70,18 @@ describe('AskResponseDisplay', () => {
   it('verse card references are links to Bible reader', () => {
     renderDisplay()
     const links = screen.getAllByRole('link', { name: 'Romans 8:28' })
-    const verseCardLink = links.find((l) => l.className.includes('font-bold'))
+    const verseCardLink = links.find((l) => l.className.includes('decoration-primary/60'))
     expect(verseCardLink).toHaveAttribute('href', '/bible/romans/8#verse-28')
   })
 
-  it('verse card reference links have text-primary-lt style', () => {
+  it('verse card reference links use WCAG-fixed text-white + underline (not text-primary-lt)', () => {
     renderDisplay()
     const links = screen.getAllByRole('link', { name: 'Romans 8:28' })
-    const verseCardLink = links.find((l) => l.className.includes('font-bold'))
-    expect(verseCardLink?.className).toContain('text-primary-lt')
+    const verseCardLink = links.find((l) => l.className.includes('decoration-primary/60'))
+    expect(verseCardLink?.className).toContain('text-white')
+    expect(verseCardLink?.className).toContain('underline')
+    expect(verseCardLink?.className).toContain('decoration-primary/60')
+    expect(verseCardLink?.className).not.toContain('text-primary-lt')
   })
 
   it('renders encouragement callout', () => {
