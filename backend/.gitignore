@@ -1,0 +1,23 @@
+# Maven
+target/
+
+# Env vars (NEVER commit)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+*.log
+HELP.md

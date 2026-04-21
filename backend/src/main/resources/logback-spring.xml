@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Plain-text encoder for dev: timestamp + level + logger + requestId + message -->
+    <appender name="CONSOLE_PLAIN" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} [%X{requestId:-no-req}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- JSON encoder for prod: machine-parseable, includes MDC -->
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <pattern>yyyy-MM-dd'T'HH:mm:ss.SSSXXX</pattern>
+                </timestamp>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+                <mdc>
+                    <!-- Includes requestId and any other MDC fields automatically -->
+                </mdc>
+                <stackTrace>
+                    <fieldName>stackTrace</fieldName>
+                </stackTrace>
+                <pattern>
+                    <pattern>
+                        {
+                          "service": "worship-room-backend"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- Profile-based encoder selection (primary path, NOT the <if> conditional from spec §5) -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </root>
+    </springProfile>
+    <springProfile name="!prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_PLAIN"/>
+        </root>
+    </springProfile>
+
+    <!-- Per-package log levels are set in application-{profile}.properties via logging.level.* -->
+</configuration>

@@ -1,0 +1,130 @@
+openapi: 3.1.0
+info:
+  title: Worship Room API
+  description: |
+    Backend API for Worship Room.
+
+    Phase 1: Proxy endpoints for upstream APIs (Gemini, Google Places, FCBH)
+    that previously had keys exposed in the frontend bundle. Subsequent
+    Forums Wave specs add application endpoints (auth, posts, comments, etc.).
+
+    See `_specs/ai-proxy-foundation.md` for proxy architecture details.
+  version: 1.0.0
+  license:
+    name: Proprietary
+    identifier: proprietary
+  contact:
+    name: Eric Champlin
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.worshiproom.com
+    description: Production
+
+tags:
+  - name: Health
+    description: Liveness and readiness checks
+  - name: Proxy / AI
+    description: Proxied AI endpoints (Gemini)
+  - name: Proxy / Places
+    description: Proxied Google Maps Places endpoints
+  - name: Proxy / Audio
+    description: Proxied FCBH Digital Bible Platform endpoints
+
+paths:
+  /api/v1/health:
+    get:
+      tags: [Health]
+      summary: Health check with provider readiness
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, providers]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+                  providers:
+                    type: object
+                    required: [gemini, googleMaps, fcbh]
+                    properties:
+                      gemini: { type: boolean }
+                      googleMaps: { type: boolean }
+                      fcbh: { type: boolean }
+
+components:
+  schemas:
+    ProxyResponse:
+      description: |
+        Standard success-response envelope. The `data` field's shape varies
+        per endpoint and is documented inline on each operation.
+      type: object
+      required: [data, meta]
+      properties:
+        data: {}
+        meta:
+          type: object
+          required: [requestId]
+          properties:
+            requestId: { type: string, minLength: 22, maxLength: 22 }
+
+    ProxyError:
+      description: Standard error-response shape.
+      type: object
+      required: [code, message, requestId, timestamp]
+      properties:
+        code:
+          type: string
+          example: RATE_LIMITED
+          description: Stable error code that the frontend branches on.
+        message:
+          type: string
+          description: User-safe error message (no stack traces, no upstream details).
+        requestId:
+          type: string
+          description: Same request ID that's set on the X-Request-Id response header.
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+    RateLimited:
+      description: Too many requests
+      headers:
+        Retry-After:
+          schema: { type: integer }
+          description: Seconds until the rate limit window resets.
+        X-RateLimit-Limit:
+          schema: { type: integer }
+        X-RateLimit-Remaining:
+          schema: { type: integer }
+        X-RateLimit-Reset:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+    UpstreamError:
+      description: Upstream API failed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+    UpstreamTimeout:
+      description: Upstream API timed out
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }

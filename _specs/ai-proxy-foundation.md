@@ -157,7 +157,7 @@ A few decisions worth surfacing because they're load-bearing:
 
 ### 1. `backend/pom.xml`
 
-Add three dependencies and one plugin to the existing `<dependencies>` and `<plugins>` blocks. Do NOT remove or modify any existing entries.
+Add four dependencies (updated to five in post-review Round 2 — see "Post-shipment updates" at the end of this spec) to the existing `<dependencies>` block. Do NOT remove or modify any existing entries.
 
 **Add to `<dependencies>` (place after the existing `spring-boot-starter-validation` block):**
 
@@ -179,7 +179,7 @@ Add three dependencies and one plugin to the existing `<dependencies>` and `<plu
 <dependency>
     <groupId>com.bucket4j</groupId>
     <artifactId>bucket4j_jdk17-core</artifactId>
-    <version>8.10.1</version>
+    <version>8.18.0</version>
 </dependency>
 
 <!-- Structured JSON logging encoder — used by logback-spring.xml -->
@@ -188,16 +188,26 @@ Add three dependencies and one plugin to the existing `<dependencies>` and `<plu
     <artifactId>logstash-logback-encoder</artifactId>
     <version>8.0</version>
 </dependency>
+
+<!-- Caffeine — bounded LRU cache for the per-IP rate-limit bucket map.
+     Added in post-review Round 2 to cap memory and prevent XFF-cycling DoS. -->
+<dependency>
+    <groupId>com.github.ben-manes.caffeine</groupId>
+    <artifactId>caffeine</artifactId>
+    <version>3.1.8</version>
+</dependency>
 ```
 
 **Background for the reviewer:**
 
 - `google-genai` is the official Google GenAI SDK for Java, versioned 1.51.0 at time of writing (verified via Maven Central). API mirrors the JS SDK the frontend already uses: `Client.builder().apiKey(...).build()`, `client.models.generateContent(...)`. CC should pin this exact version, not `LATEST`.
 - `spring-boot-starter-webflux` brings in `WebClient`, the non-blocking HTTP client. Adds reactor + netty as transitive dependencies. Does NOT change the existing servlet-based controller stack — WebClient is just a client library that happens to live in the webflux starter. The controllers stay servlet-based via `spring-boot-starter-web`.
-- `bucket4j` is the most popular Java token-bucket library. The `_jdk17-core` artifact is the modern variant (older `bucket4j-core` is for Java 8). 8.10.1 is the current stable.
+- `bucket4j` is the most popular Java token-bucket library. The `_jdk17-core` artifact is the modern variant (older `bucket4j-core` is for Java 8, and note that the artifact was renamed at 8.11.0 — versions before 8.11.0 only exist under the old `bucket4j-core` name). 8.18.0 is the current stable version the official README recommends; API surface for `Bandwidth.classic`, `Refill.intervally`, `Bucket.builder`, `tryConsumeAndReturnRemaining`, `getNanosToWaitForRefill` is stable across the entire 8.x line.
 - `logstash-logback-encoder` provides the JSON encoder for Logback. We use it directly from `logback-spring.xml`.
 
-CC must NOT add additional dependencies beyond these four. If CC discovers a "convenience library" mid-execution, surface it to Eric for review rather than adding it.
+CC must NOT add additional dependencies beyond these five. If CC discovers a "convenience library" mid-execution, surface it to Eric for review rather than adding it.
+
+> **Post-review Round 2 note:** Caffeine (`com.github.ben-manes.caffeine:caffeine:3.1.8`) was added as a 5th dependency after initial shipping, to replace the `ConcurrentHashMap` bucket store in `RateLimitFilter` with a bounded cache. See "Post-shipment updates" at the end of this spec for the full rationale.
 
 ### 2. `backend/src/main/resources/application.properties`
 
@@ -1798,7 +1808,7 @@ class ApiControllerTest {
 After this spec ships, verify each of the following:
 
 1. ✅ `cd backend && ./mvnw clean package` compiles without errors and produces `target/worship-room-backend-0.0.1-SNAPSHOT.jar`
-2. ✅ `./mvnw test` passes — all 5 new test files run (rate limit, request ID, exception handler, IP resolver, API controller). At least 25 individual test cases.
+2. ✅ `./mvnw test` passes — all 5 new test files run (rate limit, request ID, exception handler, IP resolver, API controller). At least 20 individual test cases. (Original draft said 25; the actual planned count is 20, which is the correct shipping number — each test covers something meaningful, and filler tests purely to hit a count are explicitly discouraged.)
 3. ✅ With `backend/.env.local` populated and `docker-compose up -d backend`, the backend starts and `curl http://localhost:8080/api/v1/health` returns `{"status":"ok","providers":{...}}` with each `provider` showing `true` if its env var is set
 4. ✅ `curl -i http://localhost:8080/api/v1/health` includes an `X-Request-Id` header
 5. ✅ `curl -i -H "X-Request-Id: my-test-id" http://localhost:8080/api/v1/health` returns the same `X-Request-Id` value back (client ID honored)
@@ -1887,3 +1897,49 @@ docker-compose logs -f backend
 ```
 
 Eric should see `"providers":{"gemini":true,"googleMaps":false,"fcbh":false}` in the health response (gemini true because he set the var; the other two false until Specs 3 and 4 ship).
+
+
+---
+
+## Post-shipment updates
+
+After initial implementation shipped, two rounds of `/code-review` surfaced fixes. They are documented here rather than by rewriting the middle sections of this spec, which would risk subtle drift between the spec and the actual code.
+
+### Round 1 (immediately after first implementation)
+
+- **`RateLimitFilter` filter/advice integration fix.** Servlet filters run above `DispatcherServlet`, so `@RestControllerAdvice` never sees exceptions thrown from filters. The initial code threw `RateLimitExceededException` from the filter, which produced a generic Spring Boot error JSON instead of the `ProxyError` shape. Fixed by injecting `@Qualifier("handlerExceptionResolver") HandlerExceptionResolver` and calling `resolveException(request, response, null, ex)` instead of throwing. A new `RateLimitIntegrationTest` (`@SpringBootTest` + `@AutoConfigureMockMvc`) locks in the end-to-end 429 response shape as a regression guard.
+- **`application-dev.properties` / `application-prod.properties`: `proxy.logging.json-format` removed.** The property was defined but unreferenced — `logback-spring.xml` uses `<springProfile>` blocks directly. Leaving dead config in place misleads future readers.
+- **Test count reconciliation.** Spec acceptance criterion #2 was updated from "≥25" to "≥20" to match the actual shipping count; filler tests purely to hit a count are discouraged. The new `RateLimitIntegrationTest` from the filter/advice fix brought the count to 21.
+- **`ApiControllerTest` test infrastructure swap.** The original spec's `@TestConfiguration` pattern providing a `ProxyConfig` bean collided with the auto-scanned `@Configuration`-annotated `ProxyConfig`. Switched to `@EnableConfigurationProperties(ProxyConfig.class)` + `@TestPropertySource`, which is the idiomatic Spring Boot pattern for `@ConfigurationProperties` classes in slice tests.
+
+### Round 2 (security hardening)
+
+Three Medium findings and three Minor findings were addressed in Round 2. All six were applied in a single follow-up commit.
+
+**Medium 1 + Medium 2 (combined — XFF trust + bounded bucket map).** The original `IpResolver` unconditionally trusted `X-Forwarded-For` and `X-Real-IP`. Combined with the unbounded `ConcurrentHashMap<String, Bucket>` in `RateLimitFilter`, this allowed an attacker cycling XFF values to (a) bypass rate limiting entirely by generating a fresh bucket per request, and (b) exhaust memory over time. Production is safe because Railway and Vercel sanitize XFF before forwarding, but dev (no reverse proxy) and integration tests (`Specs 2/3/4 + any future end-to-end test`) are exposed.
+
+Fix:
+- New config property `proxy.trust-forwarded-headers` (default `false` in dev; `true` in prod). `IpResolver` takes this as a constructor flag and, when `false`, ignores XFF/`X-Real-IP` entirely, falling through to `request.getRemoteAddr()`. The flag-based approach was chosen over IP-format validation because format validation only filters garbage, not valid-looking spoofed values.
+- `RateLimitFilter`'s `buckets` field was changed from `ConcurrentHashMap<String, Bucket>` to a Caffeine `Cache<String, Bucket>` with `maximumSize(10_000)` + `expireAfterAccess(Duration.ofMinutes(15))`. Memory ceiling drops from a theoretical ~15 MB (100k IPs, no eviction) to ~1 MB worst case, and idle IPs are reclaimed automatically. Caffeine was added as a 5th project dependency (see Section 1).
+
+**Medium 3 (docker-compose fails when `.env.local` missing).** The original `env_file: - ./backend/.env.local` entry made the file mandatory, which broke first-time `docker-compose up` on a fresh clone. Switched to docker-compose v2.24+ syntax `- path: ./backend/.env.local, required: false`. The backend now starts even without `.env.local`; `/api/v1/health` correctly reports all providers as `false`, which is the signal that keys need to be configured. `backend/.env.example`'s header comment was updated to emphasize the copy step.
+
+**Minor 1 (`ProxyResponse.of` extraMeta could overwrite `requestId`).** The three-argument factory now does `combined.putAll(extraMeta)` before `combined.put("requestId", ...)`, so the canonical `requestId` always wins even if a caller accidentally includes it in `extraMeta`.
+
+**Minor 2 (redundant `@Value` default in `CorsConfig`).** The `:http://localhost:5173` fallback duplicated `application.properties`'s default and created a drift risk. Removed — `CorsConfig` now reads `@Value("${proxy.cors.allowed-origins}")` with no inline default.
+
+**Minor 3 (dead `<logger>` entries in `logback-spring.xml`).** The two `<logger>` elements setting `com.example.worshiproom` and `org.springframework.web` to INFO were overridden by `application-{profile}.properties`'s `logging.level.*` entries, so they had no practical effect. Removed.
+
+### Net effect on Section-level content
+
+If you are reading the mid-spec code blocks (§16 `IpResolver.java`, §17 `RateLimitFilter.java`) for historical context, note that the shipped code differs from what those blocks show. The differences are:
+
+| Section | Spec shows | Shipped code |
+|---------|------------|--------------|
+| §16 `IpResolver.java` | No-arg constructor; always reads XFF/X-Real-IP | Constructor takes `boolean trustForwardedHeaders`; XFF/X-Real-IP read only when `true` |
+| §17 `RateLimitFilter.java` | `private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();` | `private final com.github.benmanes.caffeine.cache.Cache<String, Bucket> buckets = Caffeine.newBuilder().maximumSize(10_000).expireAfterAccess(Duration.ofMinutes(15)).build();` and the `computeIfAbsent` call becomes `buckets.get(ip, this::createBucket)` |
+| §17 `RateLimitFilter.java` | Throws `RateLimitExceededException` on depletion | Calls `handlerExceptionResolver.resolveException(...)` on depletion (Round 1 filter/advice fix) |
+| §23 `RateLimitFilterTest.java` | `new IpResolver()` | `new IpResolver(true)` (test relies on XFF behavior) + a 3rd constructor arg (mock `HandlerExceptionResolver`) for the Round 1 fix |
+| §26 `IpResolverTest.java` | 6 tests all assume XFF is trusted | Same 6 tests (each now constructs `new IpResolver(true)`) + 2 new tests for `trust=false` behavior — 8 tests total |
+
+The plan's Edge Cases & Decisions table and its `Post-review round 2 hardening` notes in the Rate limiter design section are the authoritative description of the final shipped code.
