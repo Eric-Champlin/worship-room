@@ -1,13 +1,16 @@
 package com.example.worshiproom.proxy.common;
 
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @RestControllerAdvice(basePackages = "com.example.worshiproom.proxy")
 public class ProxyExceptionHandler {
@@ -39,6 +42,64 @@ public class ProxyExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(ProxyError.of("INVALID_INPUT", firstError, requestId));
+    }
+
+    // Handles Bean Validation failures on @Validated controllers' @RequestParam
+    // and @PathVariable parameters. MethodArgumentNotValidException (above) fires
+    // only for @Valid @RequestBody — without this handler, @RequestParam validation
+    // would fall through to the Throwable advice and return 500 INTERNAL_ERROR
+    // instead of 400 INVALID_INPUT. MapsController's GET /geocode and /place-photo
+    // are the first consumers; future proxy GET endpoints inherit this.
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ProxyError> handleConstraintViolation(ConstraintViolationException ex) {
+        var requestId = MDC.get("requestId");
+        var firstViolation = ex.getConstraintViolations().stream()
+            .findFirst()
+            .map(v -> {
+                String path = v.getPropertyPath().toString();
+                String leaf = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
+                return leaf + ": " + v.getMessage();
+            })
+            .orElse("Invalid input");
+        log.info("Constraint violation: {}", firstViolation);
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ProxyError.of("INVALID_INPUT", firstViolation, requestId));
+    }
+
+    // Spring Boot 3.2+ / Spring 6.1+ routes @RequestParam / @PathVariable
+    // validation through HandlerMethodValidationException instead of the
+    // legacy ConstraintViolationException. Without this handler, validation
+    // failures on @Validated controllers' GET endpoints fall through to
+    // the Throwable advice and return 500. Keep both handlers: legacy code
+    // paths still throw ConstraintViolationException directly.
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ProxyError> handleHandlerMethodValidation(HandlerMethodValidationException ex) {
+        var requestId = MDC.get("requestId");
+        var firstError = ex.getParameterValidationResults().stream()
+            .flatMap(r -> r.getResolvableErrors().stream().map(err -> {
+                String paramName = r.getMethodParameter().getParameterName();
+                String code = err.getDefaultMessage();
+                return (paramName != null ? paramName : "param") + ": " + code;
+            }))
+            .findFirst()
+            .orElse("Invalid input");
+        log.info("Handler-method validation failed: {}", firstError);
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ProxyError.of("INVALID_INPUT", firstError, requestId));
+    }
+
+    // Missing required @RequestParam produces MissingServletRequestParameterException
+    // before validation runs. Map to 400 INVALID_INPUT with the param name.
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ProxyError> handleMissingParam(MissingServletRequestParameterException ex) {
+        var requestId = MDC.get("requestId");
+        String message = ex.getParameterName() + ": must be provided";
+        log.info("Missing request parameter: {}", message);
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ProxyError.of("INVALID_INPUT", message, requestId));
     }
 
     @ExceptionHandler(Throwable.class)

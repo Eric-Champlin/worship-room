@@ -32,10 +32,10 @@ public class ApiController {
     }
 
     private Map<String, Object> buildHealth() {
-        var providers = new LinkedHashMap<String, Boolean>();
-        providers.put("gemini", config.getGemini().isConfigured());
-        providers.put("googleMaps", config.getGoogleMaps().isConfigured());
-        providers.put("fcbh", config.getFcbh().isConfigured());
+        var providers = new LinkedHashMap<String, Object>();
+        providers.put("gemini", Map.of("configured", config.getGemini().isConfigured()));
+        providers.put("googleMaps", Map.of("configured", config.getGoogleMaps().isConfigured()));
+        providers.put("fcbh", Map.of("configured", config.getFcbh().isConfigured()));
 
         var result = new LinkedHashMap<String, Object>();
         result.put("status", "ok");

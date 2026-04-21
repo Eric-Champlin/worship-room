@@ -39,14 +39,14 @@ class ApiControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/health returns 200 and provider statuses")
+    @DisplayName("GET /api/v1/health returns 200 and nested provider statuses")
     void healthReturnsProviderStatuses() throws Exception {
         mockMvc.perform(get("/api/v1/health"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("ok"))
-            .andExpect(jsonPath("$.providers.gemini").value(true))
-            .andExpect(jsonPath("$.providers.googleMaps").value(false))
-            .andExpect(jsonPath("$.providers.fcbh").value(false));
+            .andExpect(jsonPath("$.providers.gemini.configured").value(true))
+            .andExpect(jsonPath("$.providers.googleMaps.configured").value(false))
+            .andExpect(jsonPath("$.providers.fcbh.configured").value(false));
     }
 
     @Test

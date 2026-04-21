@@ -7,8 +7,6 @@ import {
   type GooglePlace,
 } from '../google-places-mapper'
 
-const API_KEY = 'test-key'
-
 function buildPlace(overrides: Partial<GooglePlace> = {}): GooglePlace {
   return {
     id: 'ChIJ_test_id',
@@ -20,21 +18,22 @@ function buildPlace(overrides: Partial<GooglePlace> = {}): GooglePlace {
 }
 
 describe('buildPhotoUrl', () => {
-  it('constructs the Places Photo media URL with the API key', () => {
-    const url = buildPhotoUrl('places/abc/photos/xyz', API_KEY)
-    expect(url).toBe(
-      'https://places.googleapis.com/v1/places/abc/photos/xyz/media?maxWidthPx=400&key=test-key',
+  it('returns a backend-proxy URL with URL-encoded photo name (no API key)', () => {
+    const url = buildPhotoUrl('places/abc/photos/xyz')
+    expect(url).toMatch(
+      /\/api\/v1\/proxy\/maps\/place-photo\?name=places%2Fabc%2Fphotos%2Fxyz$/,
     )
   })
 
-  it('encodes the API key as a query param', () => {
-    const url = buildPhotoUrl('places/abc/photos/xyz', 'key with/special&chars')
-    expect(url).toContain('key=key%20with%2Fspecial%26chars')
+  it('does not include any googleapis.com host', () => {
+    const url = buildPhotoUrl('places/abc/photos/xyz')
+    expect(url).not.toContain('googleapis.com')
   })
 
-  it('uses maxWidthPx=400 by default and accepts a custom override', () => {
-    expect(buildPhotoUrl('places/a/photos/b', API_KEY)).toContain('maxWidthPx=400')
-    expect(buildPhotoUrl('places/a/photos/b', API_KEY, 800)).toContain('maxWidthPx=800')
+  it('does not include an API key query param', () => {
+    const url = buildPhotoUrl('places/abc/photos/xyz')
+    expect(url).not.toContain('key=')
+    expect(url).not.toContain('AIza')
   })
 })
 
@@ -135,24 +134,23 @@ describe('inferSpecialties', () => {
 describe('mapGooglePlaceToLocalSupport', () => {
   it('returns null for CLOSED_PERMANENTLY places', () => {
     const gp = buildPlace({ businessStatus: 'CLOSED_PERMANENTLY' })
-    expect(mapGooglePlaceToLocalSupport(gp, 'churches', API_KEY)).toBeNull()
+    expect(mapGooglePlaceToLocalSupport(gp, 'churches')).toBeNull()
   })
 
   it('returns null when displayName is missing', () => {
     const gp = buildPlace({ displayName: undefined })
-    expect(mapGooglePlaceToLocalSupport(gp, 'churches', API_KEY)).toBeNull()
+    expect(mapGooglePlaceToLocalSupport(gp, 'churches')).toBeNull()
   })
 
   it('returns null when displayName.text is empty', () => {
     const gp = buildPlace({ displayName: { text: '' } })
-    expect(mapGooglePlaceToLocalSupport(gp, 'churches', API_KEY)).toBeNull()
+    expect(mapGooglePlaceToLocalSupport(gp, 'churches')).toBeNull()
   })
 
   it('returns null when location is missing', () => {
     const gp = buildPlace()
-    // Force location to be undefined via a cast — runtime guard is what we're checking
     const withoutLocation = { ...gp, location: undefined } as unknown as GooglePlace
-    expect(mapGooglePlaceToLocalSupport(withoutLocation, 'churches', API_KEY)).toBeNull()
+    expect(mapGooglePlaceToLocalSupport(withoutLocation, 'churches')).toBeNull()
   })
 
   it('maps a happy-path church with photo + denomination inference', () => {
@@ -161,12 +159,14 @@ describe('mapGooglePlaceToLocalSupport', () => {
       photos: [{ name: 'places/abc/photos/xyz' }],
       editorialSummary: { text: 'Baptist congregation downtown' },
     })
-    const result = mapGooglePlaceToLocalSupport(gp, 'churches', API_KEY)
+    const result = mapGooglePlaceToLocalSupport(gp, 'churches')
     expect(result).not.toBeNull()
     expect(result!.name).toBe('First Baptist Church')
     expect(result!.denomination).toBe('Baptist')
     expect(result!.specialties).toBeNull()
-    expect(result!.photoUrl).toContain('places/abc/photos/xyz/media?maxWidthPx=400&key=test-key')
+    expect(result!.photoUrl).toContain('/api/v1/proxy/maps/place-photo?name=places%2Fabc%2Fphotos%2Fxyz')
+    expect(result!.photoUrl).not.toContain('googleapis.com')
+    expect(result!.photoUrl).not.toContain('key=')
   })
 
   it('maps a happy-path counselor with specialty inference', () => {
@@ -174,7 +174,7 @@ describe('mapGooglePlaceToLocalSupport', () => {
       displayName: { text: 'Grief & Loss Counseling' },
       editorialSummary: { text: 'Trauma-informed therapy' },
     })
-    const result = mapGooglePlaceToLocalSupport(gp, 'counselors', API_KEY)
+    const result = mapGooglePlaceToLocalSupport(gp, 'counselors')
     expect(result).not.toBeNull()
     expect(result!.denomination).toBeNull()
     expect(result!.specialties).toEqual(['Grief', 'Trauma'])
@@ -182,7 +182,7 @@ describe('mapGooglePlaceToLocalSupport', () => {
 
   it('maps a celebrate-recovery place without inference (both null)', () => {
     const gp = buildPlace({ displayName: { text: 'Celebrate Recovery Tuesday Nights' } })
-    const result = mapGooglePlaceToLocalSupport(gp, 'celebrate-recovery', API_KEY)
+    const result = mapGooglePlaceToLocalSupport(gp, 'celebrate-recovery')
     expect(result).not.toBeNull()
     expect(result!.denomination).toBeNull()
     expect(result!.specialties).toBeNull()
@@ -190,7 +190,7 @@ describe('mapGooglePlaceToLocalSupport', () => {
 
   it('falls back to "Address unavailable" when formattedAddress is missing', () => {
     const gp = buildPlace({ formattedAddress: undefined })
-    const result = mapGooglePlaceToLocalSupport(gp, 'churches', API_KEY)
+    const result = mapGooglePlaceToLocalSupport(gp, 'churches')
     expect(result!.address).toBe('Address unavailable')
   })
 
@@ -199,19 +199,19 @@ describe('mapGooglePlaceToLocalSupport', () => {
       nationalPhoneNumber: '(615) 555-0100',
       internationalPhoneNumber: '+1 615-555-0100',
     })
-    const result = mapGooglePlaceToLocalSupport(gp, 'churches', API_KEY)
+    const result = mapGooglePlaceToLocalSupport(gp, 'churches')
     expect(result!.phone).toBe('(615) 555-0100')
   })
 
   it('falls back to internationalPhoneNumber when national is missing', () => {
     const gp = buildPlace({ internationalPhoneNumber: '+1 615-555-0100' })
-    const result = mapGooglePlaceToLocalSupport(gp, 'churches', API_KEY)
+    const result = mapGooglePlaceToLocalSupport(gp, 'churches')
     expect(result!.phone).toBe('+1 615-555-0100')
   })
 
   it('sets phone to null when both phone fields are missing', () => {
     const gp = buildPlace()
-    const result = mapGooglePlaceToLocalSupport(gp, 'churches', API_KEY)
+    const result = mapGooglePlaceToLocalSupport(gp, 'churches')
     expect(result!.phone).toBeNull()
   })
 
@@ -219,11 +219,10 @@ describe('mapGooglePlaceToLocalSupport', () => {
     const emptyPhotos = mapGooglePlaceToLocalSupport(
       buildPlace({ photos: [] }),
       'churches',
-      API_KEY,
     )
     expect(emptyPhotos!.photoUrl).toBeNull()
 
-    const missingPhotos = mapGooglePlaceToLocalSupport(buildPlace(), 'churches', API_KEY)
+    const missingPhotos = mapGooglePlaceToLocalSupport(buildPlace(), 'churches')
     expect(missingPhotos!.photoUrl).toBeNull()
   })
 
@@ -234,12 +233,11 @@ describe('mapGooglePlaceToLocalSupport', () => {
         regularOpeningHours: { weekdayDescriptions: ['Sunday: 9:00 AM – 12:00 PM'] },
       }),
       'churches',
-      API_KEY,
     )
     expect(withExtras!.rating).toBe(4.6)
     expect(withExtras!.hoursOfOperation).toEqual(['Sunday: 9:00 AM – 12:00 PM'])
 
-    const withoutExtras = mapGooglePlaceToLocalSupport(buildPlace(), 'churches', API_KEY)
+    const withoutExtras = mapGooglePlaceToLocalSupport(buildPlace(), 'churches')
     expect(withoutExtras!.rating).toBeNull()
     expect(withoutExtras!.hoursOfOperation).toBeNull()
   })

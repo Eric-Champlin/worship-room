@@ -18,40 +18,16 @@
 // `SEO.tsx`, `constants/audio.ts`, `components/SEO.tsx`) predate this module
 // and should migrate to env.ts when those files are next touched.
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as
-  | string
-  | undefined
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
 // Normalize empty-string env to undefined so `!FCBH_API_KEY` is a clean
 // "absent" check regardless of whether the var is missing or set to "".
 const FCBH_API_KEY_RAW = import.meta.env.VITE_FCBH_API_KEY as string | undefined
 const FCBH_API_KEY: string | undefined = FCBH_API_KEY_RAW || undefined
 
-/**
- * Returns the Google Maps Platform API key, or throws if it is not
- * configured. Call this from the feature code that actually loads the Maps
- * SDK or sends a Places/Geocoding request.
- *
- * Used by: future Local Support feature (churches, counselors, Celebrate
- * Recovery locators).
- */
-export function requireGoogleMapsApiKey(): string {
-  if (!GOOGLE_MAPS_API_KEY) {
-    throw new Error(
-      'Google Maps API key is not configured. Add VITE_GOOGLE_MAPS_API_KEY to frontend/.env.local. ' +
-        'See frontend/.env.example for the expected format.',
-    )
-  }
-  return GOOGLE_MAPS_API_KEY
-}
-
-/**
- * Non-throwing check — use in UI that wants to conditionally render a feature
- * based on whether the Maps key is configured.
- */
-export function isGoogleMapsApiKeyConfigured(): boolean {
-  return !!GOOGLE_MAPS_API_KEY
-}
+// Note: the Google Maps API key was decommissioned from the frontend in
+// Spec 3 (ai-proxy-maps). All Maps calls route through the backend proxy at
+// /api/v1/proxy/maps/*; the backend holds the key. No frontend code should
+// reintroduce VITE_GOOGLE_MAPS_API_KEY.
 
 /**
  * Returns the VAPID public key for Web Push subscriptions, or undefined if

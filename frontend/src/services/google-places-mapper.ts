@@ -21,8 +21,15 @@ export interface GooglePlace {
     | 'CLOSED_PERMANENTLY'
 }
 
-export function buildPhotoUrl(photoName: string, apiKey: string, maxWidthPx = 400): string {
-  return `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=${maxWidthPx}&key=${encodeURIComponent(apiKey)}`
+const PROXY_PHOTO_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1/proxy/maps/place-photo`
+
+/**
+ * Returns a backend-proxied photo URL. The backend holds the Maps API key;
+ * this client-side URL is key-free. Backend controls image width (400px max)
+ * via its own {@code PHOTO_URL_TEMPLATE}.
+ */
+export function buildPhotoUrl(photoName: string): string {
+  return `${PROXY_PHOTO_URL}?name=${encodeURIComponent(photoName)}`
 }
 
 export function inferDenomination(name: string, description: string | null): string | null {
@@ -75,14 +82,13 @@ export function inferSpecialties(name: string, description: string | null): stri
 export function mapGooglePlaceToLocalSupport(
   gp: GooglePlace,
   category: LocalSupportCategory,
-  apiKey: string,
 ): LocalSupportPlace | null {
   if (!gp.displayName?.text || !gp.location) return null
   if (gp.businessStatus === 'CLOSED_PERMANENTLY') return null
 
   const name = gp.displayName.text
   const description = gp.editorialSummary?.text ?? null
-  const photoUrl = gp.photos?.[0]?.name ? buildPhotoUrl(gp.photos[0].name, apiKey) : null
+  const photoUrl = gp.photos?.[0]?.name ? buildPhotoUrl(gp.photos[0].name) : null
   const denomination = category === 'churches' ? inferDenomination(name, description) : null
   const specialties = category === 'counselors' ? inferSpecialties(name, description) : null
 
