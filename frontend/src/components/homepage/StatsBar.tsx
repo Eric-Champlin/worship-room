@@ -5,12 +5,14 @@ import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { cn } from '@/lib/utils'
 
 const STATS = [
+  { value: 66, label: 'Bible Books' },
   { value: 50, label: 'Devotionals' },
   { value: 10, label: 'Reading Plans' },
   { value: 24, label: 'Ambient Sounds' },
   { value: 6, label: 'Meditation Types' },
   { value: 5, label: 'Seasonal Challenges' },
   { value: 8, label: 'Worship Playlists' },
+  { value: 12, label: 'Bedtime Stories' },
 ] as const
 
 function StatItem({
@@ -69,7 +71,7 @@ export function StatsBar() {
         className=""
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
             {STATS.map((stat, i) => (
               <StatItem
                 key={stat.label}

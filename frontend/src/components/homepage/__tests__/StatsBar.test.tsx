@@ -14,14 +14,16 @@ vi.mock('@/hooks/useAnimatedCounter', () => ({
 }))
 
 describe('StatsBar', () => {
-  it('renders all 6 stat labels', () => {
+  it('renders all 8 stat labels', () => {
     render(<StatsBar />)
+    expect(screen.getByText('Bible Books')).toBeInTheDocument()
     expect(screen.getByText('Devotionals')).toBeInTheDocument()
     expect(screen.getByText('Reading Plans')).toBeInTheDocument()
     expect(screen.getByText('Ambient Sounds')).toBeInTheDocument()
     expect(screen.getByText('Meditation Types')).toBeInTheDocument()
     expect(screen.getByText('Seasonal Challenges')).toBeInTheDocument()
     expect(screen.getByText('Worship Playlists')).toBeInTheDocument()
+    expect(screen.getByText('Bedtime Stories')).toBeInTheDocument()
   })
 
   it('renders in GlowBackground with bg-hero-bg', () => {
@@ -43,18 +45,20 @@ describe('StatsBar', () => {
 
   it('stat numbers have aria-label with final values', () => {
     render(<StatsBar />)
+    expect(screen.getByLabelText('66 Bible Books')).toBeInTheDocument()
     expect(screen.getByLabelText('50 Devotionals')).toBeInTheDocument()
     expect(screen.getByLabelText('10 Reading Plans')).toBeInTheDocument()
     expect(screen.getByLabelText('24 Ambient Sounds')).toBeInTheDocument()
     expect(screen.getByLabelText('6 Meditation Types')).toBeInTheDocument()
     expect(screen.getByLabelText('5 Seasonal Challenges')).toBeInTheDocument()
     expect(screen.getByLabelText('8 Worship Playlists')).toBeInTheDocument()
+    expect(screen.getByLabelText('12 Bedtime Stories')).toBeInTheDocument()
   })
 
   it('applies scroll-reveal classes', () => {
     const { container } = render(<StatsBar />)
     const statItems = container.querySelectorAll('.scroll-reveal')
-    expect(statItems).toHaveLength(6)
+    expect(statItems).toHaveLength(8)
   })
 
   it('applies stagger delay styles', () => {
