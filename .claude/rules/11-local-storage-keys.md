@@ -191,7 +191,13 @@ Preference for verse highlighting during Bible audio playback. Managed by `front
 | `wr_challenge_progress`    | {challengeId: ChallengeProgress} | Challenge participation tracking |
 | `wr_challenge_reminders`   | string[] (challenge IDs)         | Challenge reminder preferences   |
 | `wr_challenge_nudge_shown` | string (today's date)            | Challenge nudge daily tracking   |
- 
+
+### Prayer Wall
+
+| Key                   | Type                              | Feature                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wr_prayer_reactions` | `Record<string, PrayerReaction>`  | Prayer Wall reactions — `isPraying` and `isBookmarked` per prayer. **Reactive store (Phase 0.5).** Module: `lib/prayer-wall/reactionsStore.ts`. Hook: `usePrayerReactions()` (Pattern A via `useSyncExternalStore`). Seeded from `getMockReactions()` on first load when storage is empty. In Phase 3 the localStorage adapter swaps for an API adapter without changing the hook surface. |
+
 ### AI Bible Chat
  
 | Key                | Type           | Feature                               |
@@ -314,6 +320,7 @@ Extracting standalone hooks for the Pattern B stores is a future refactoring opp
 | `wr_memorization_cards` | `lib/memorize/store.ts`                 | `useMemorizationStore()` hook (Pattern A)     | BB-45  |
 | `bible:streak`          | `lib/bible/streakStore.ts`              | `useStreakStore()` hook (Pattern A)            | BB-17  |
 | `bible:plans`           | `lib/bible/plansStore.ts`               | Inline `subscribe()` (Pattern B)              | BB-21  |
+| `wr_prayer_reactions`   | `lib/prayer-wall/reactionsStore.ts`     | `usePrayerReactions()` hook (Pattern A)       | Phase 0.5 |
  
 **Note on BB-46 echoes:** Echo dismissal persistence (`wr_echo_dismissals`) was considered but deferred. The current echo system uses a session-scoped `Set<string>` inside the `useEcho()` hook (`hooks/useEcho.ts`) — dismissed echoes reset on page reload. If persistent dismissals are needed, implement as a new feature spec with a proper reactive store.
  

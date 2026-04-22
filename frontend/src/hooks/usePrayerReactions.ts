@@ -1,52 +1,21 @@
-import { useState, useCallback } from 'react'
-import { getMockReactions } from '@/mocks/prayer-wall-mock-data'
+import { useSyncExternalStore } from 'react'
+import {
+  subscribe,
+  getSnapshot,
+  togglePraying,
+  toggleBookmark,
+} from '@/lib/prayer-wall/reactionsStore'
 import type { PrayerReaction } from '@/types/prayer-wall'
+
+function getServerSnapshot(): Record<string, PrayerReaction> {
+  return {}
+}
 
 export function usePrayerReactions(): {
   reactions: Record<string, PrayerReaction>
   togglePraying: (prayerId: string) => boolean
   toggleBookmark: (prayerId: string) => void
 } {
-  const [reactions, setReactions] = useState<Record<string, PrayerReaction>>(
-    () => getMockReactions(),
-  )
-
-  const togglePraying = useCallback(
-    (prayerId: string): boolean => {
-      let wasPraying = false
-      setReactions((prev) => {
-        const current = prev[prayerId]
-        wasPraying = current?.isPraying ?? false
-        return {
-          ...prev,
-          [prayerId]: {
-            prayerId,
-            isPraying: !wasPraying,
-            isBookmarked: current?.isBookmarked ?? false,
-          },
-        }
-      })
-      return wasPraying
-    },
-    [],
-  )
-
-  const toggleBookmark = useCallback(
-    (prayerId: string) => {
-      setReactions((prev) => {
-        const current = prev[prayerId]
-        return {
-          ...prev,
-          [prayerId]: {
-            prayerId,
-            isPraying: current?.isPraying ?? false,
-            isBookmarked: !(current?.isBookmarked ?? false),
-          },
-        }
-      })
-    },
-    [],
-  )
-
+  const reactions = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   return { reactions, togglePraying, toggleBookmark }
 }
