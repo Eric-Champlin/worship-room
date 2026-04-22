@@ -7653,6 +7653,7 @@ These are decisions that have been made but should be revisited if circumstances
 
 ## Change Log
 
+- **2026-04-22 — v2.8** — Pre-execution completeness pass. Added **18 new specs** (138 → 156) closing real functional gaps surfaced during a deliberate line-by-line master plan audit before Forums Wave begins. Gaps fell into four categories — (a) **auth lifecycle incompleteness**: no password reset, no email verification, no change-password, no change-email, no account lockout/brute-force protection, no session invalidation; (b) **production hardening gaps**: no security headers middleware, no consolidated error code catalog, no env-var runbook, no liveness/readiness split (Actuator health is sufficient for uptime but not for Kubernetes-style orchestration), no connection-pool tuning spec, no Playwright E2E infrastructure spec (referenced by the pipeline but never authored); (c) **referenced-but-never-built features**: `block user` and `mute user` are referenced across the master plan (Intercessor Timeline cache invalidation, Privacy Tiers acceptance criteria, 3am Watch filter cascading) but no spec created the schema or endpoints; admin audit log viewer referenced as part of admin foundation but the UI spec was never written; (d) **polish that was implicitly expected but never scoped**: offline banner UI (Phase 16 has offline cache but no user-visible indicator), React error boundaries (no spec owning the global error boundary + Sentry integration + fallback UI strategy). **Phase-by-phase additions:** Phase 1 (17 → 30): six auth lifecycle specs 1.5b through 1.5g, six production hardening specs 1.10g through 1.10l, one community-legal spec 1.10m (moved from Appendix D in-wave because it is referenced by Spec 1.10f Terms of Service); Phase 2.5 (6 → 8): Spec 2.5.6 Block User and 2.5.7 Mute User; Phase 10 (12 → 13): Spec 10.10b Admin Audit Log Viewer; Phase 16 (5 → 7): Spec 16.1b Offline Banner UI and 16.2b React Error Boundary Strategy. **Metadata synced:** QR intro updated from "120 specs across 17 phases" to "156 specs across 19 phases"; heading "The Seventeen Phases" → "The Nineteen Phases"; QR table phase totals updated (Phase 1: 17→30, Phase 2.5: 6→8, Phase 10: 12→13, Phase 16: 5→7); **Total: 138 → 156 specs**; Appendix C regenerated with all 156 spec IDs in correct execution position; **new Appendix E** added containing full specification stubs for all 18 new specs (ID, Size, Risk, Prerequisites, Goal, Approach sketch, and Files-to-Create/Modify — expanded by `/spec-forums` during execution to full spec format); footer bumped from v2.6 end-marker to v2.8. **No existing specs modified; no Universal Rules modified; no Architectural Decisions modified.** This is purely additive — gaps that should have been specs are now specs. Tracker file also rewritten to 156 rows with correct cascading numbering across all 19 phases.
 - **2026-04-22 — v2.7** — Post-Key-Protection-Wave reality-drift reconciliation. The AI Integration Wave (AI-1/AI-2/AI-3) and Key Protection Wave (Specs 1–4 of `ai-proxy-*`) both shipped between v2.6 (April 16) and today, adding ~60+ files under `com.example.worshiproom.proxy.{common,ai,maps,bible}` and ~280 green backend tests that v2.6 assumed didn't exist. **Decision 2 rewritten** to describe the current backend state (proxy layer fully shipped with filters / exception handlers / WebClient / dev-profile log suppressions / `/api/v1/health` provider reporting). **Spec 1.1 rewritten** — Size bumped from S to L, Risk from Low to Medium; file list expanded from ~5 files to ~60+ files across four proxy subpackages plus tests; approach rewritten with explicit guidance on filter ordering, log-suppression preservation, `@RestControllerAdvice` basePackages update, and the guardrail that `ApiController.java`'s `@RequestMapping("/api")` should NOT be changed to `"/api/v1"` (that endpoint already exists as a separate route from the Key Protection Wave). **Spec 1.4 extended** with a "Filter coexistence" note (JwtAuthenticationFilter must order after existing `RequestIdFilter` + `RateLimitFilter`, suggested `HIGHEST_PRECEDENCE + 100`) and a "Proxy endpoints and JWT" note (proxy routes stay anonymous-accessible in Phase 1; per-user rate-limit precedence deferred to a post-Phase-1 operational spec). Risk bumped from Medium to Medium-High. **Phase 1 definition of done extended** with five new bullets verifying proxy-layer survival post-rename (all ~280 tests green, three proxy endpoints still round-trip, log suppressions still work, filter ordering preserved). **Backend packages section in Quick Reference updated** to include the inherited `proxy.{common,ai,maps,bible}` packages alongside the new Forums Wave packages, with a note that v2.6's provisional names (`proxy.places`, `proxy.audio`) were superseded by `proxy.maps` and `proxy.bible` during execution. **Path correction:** OpenAPI spec location corrected from `backend/api/openapi.yaml` (v2.6) to `backend/src/main/resources/openapi.yaml` (actual shipped location). No spec count changes; no Appendix C changes; no Universal Rule changes. This is a Phase-1-targeted correction; Phases 2–16 are not affected by the drift.
 - **2026-04-16 — v2.6** — Hygiene pass + Phase 2.5 completeness fix + Rule 17 retrofit correction. **Pre-execution audit uncovered six prereq-graph issues** (1 real architectural: Spec 1.10c depended on 1.10e but preceded it in the file, fixed by physically moving the 1.10c block to after 1.10e and updating Appendix C ordering; 1 spurious forward ref: Spec 4.6b incorrectly listed 6.7 as a prerequisite when the direction was reversed, rephrased to name the feature rather than the spec number; 4 runtime-gated misclassifications: Specs 6.4 and 6.8 listed 10.5 and 10.6 as hard prereqs when both features ship with documented graceful-degradation paths for when the crisis classifier is unavailable — reclassified as "Runtime-gated dependencies" with explicit notes preserving the shipping-before-10-is-safe story). **Four Liquibase changeset filename collisions fixed** (same-date-same-sequence prefixes that would have caused Liquibase checksum conflicts on deploy — renames: scripture-reference-to-posts 2026-04-18-001→002, three username changesets 2026-04-20-001/002/003→2026-04-21-001/002/003, keeping the Phase 8 username trio grouped on one date). **Phase 2.5 completeness fix** (audit surfaced that Decision 8 promises `social_interactions` and `milestone_events` shadow tables in Phase 2.5 but the existing specs only created `friend_relationships` and `friend_requests` — would have caused runtime "table does not exist" errors when Phase 12 notification generators and Phase 13 personal analytics queries ran against the missing tables): Spec 2.5.1 extended to create all four tables with full schemas and CHECK constraints; new Spec 2.5.4b added for the social/milestone dual-write pipeline with fire-and-forget pattern and new `VITE_USE_BACKEND_SOCIAL` env flag; Spec 2.5.5 cutover extended to flip both flags and smoke-test all three pipelines (friends, social interactions, milestone events) plus Universal Rule 17 accessibility smoke test AC. **Two Rule 17 cutover retrofits** (Spec 2.9 Phase 2 Cutover and Spec 2.5.5 Phase 2.5 Cutover were missed in the initial Batch 8 retrofit because they weren't in the retrofit list at the time; added now so all 8 cutovers have explicit Rule 17 ACs with phase-specific evidence paths). **Meta-observation:** the initial audit regex `\d+\.\d+[a-z]?` silently excluded Phase 2.5's 3-part IDs (2.5.1–2.5.5) from prereq and cross-ref checks; re-audited with `\d+\.\d+(?:\.\d+)?[a-z]?` and confirmed Phase 2.5's graph is clean. Metadata synced: QR table (Phase 2.5: 5→6), total spec count (137→138), Appendix C regenerated with Spec 2.5.4b inserted in execution position, Spec 1.10c moved in Appendix C ordering to reflect new post-1.10e execution sequence.
 - **2026-04-16 — v2.5** — Batch 8 polish-tier artifacts. Three new additions addressing the two polish-tier gaps from the v2.0 assessment plus a catalog deliverable that was always implicit but never consolidated: **Universal Rule 17 — Per-phase accessibility smoke test** (new cross-cutting rule requiring axe-core CI scan + keyboard walkthrough + VoiceOver spot-check at every phase cutover, with committed evidence at `_cutover-evidence/{phase}-a11y-smoke.json` — prevents accessibility debt from compounding across 15 phases into a 50+ violation final audit; rule is 17 of 17 total Universal Rules). **Spec 16.3b — Feature Flag Cleanup Pass** (new cleanup spec in Phase 16 that audits every feature flag introduced during the wave, classifies each as RETIRE or KEEP with the feature-flag-vs-user-preference taxonomic line as load-bearing distinction, documents surviving flags in `backend/docs/runbook-feature-flags.md`, removes retired flag code branches with per-flag smoke-test PRs, produces permanent historical ledger of retired flags for future archaeology; 30-day stability floor per flag before retirement). **Appendix D — Deferred to Future Waves** (new consolidated catalog of ~90 explicit deferrals scattered through the wave, grouped by theme: Core features, Profile & identity, Infrastructure, Notifications & engagement, Community & moderation, Search & discovery, Analytics & insights, Legal & compliance, Internationalization & accessibility, Integration, Monetization & sustainability, Process & tooling — plus a final "Explicitly NOT ever shipping" anti-pattern register that catalogs the ~10 ideas explicitly forbidden by the wave's anti-pressure discipline so future-self doesn't accidentally re-open them). Metadata synced: Phase 16 QR count (4→5), total spec count (136→137), Appendix C regenerated to add Spec 16.3b. With this batch, all 9 gaps from the original v2.0 assessment are now addressed. The plan is complete and execution-ready.
@@ -7981,6 +7982,285 @@ These items appear in various "out of scope" sections with explicit guidance tha
 
 ---
 
+## Appendix E — v2.8 Spec Stubs (18 new specs added for completeness)
+
+These 18 stubs were added in v2.8 to close gaps found during pre-execution review. Each stub contains enough detail for `/spec-forums` to expand into a full spec with copy decks, acceptance criteria, and test specs. Use these as the seed content when creating each spec file in `_specs/forums/`.
+
+**Reading order:** Phase 1 stubs first (they're on the critical path), then Phase 2.5 (needed before Phase 6 references), then Phase 10 and Phase 16 (can slot in whenever).
+
+### Spec 1.5b — Password Reset Flow
+
+- **ID:** `round3-phase01-spec05b-password-reset-flow`
+- **Size:** L
+- **Risk:** High (auth lifecycle; correct token handling is security-critical)
+- **Prerequisites:** 1.5 (Auth Endpoints), 15.1 (SMTP Setup — or provide a stub mailer for dev)
+- **Goal:** Enable users to reset a forgotten password via email-triggered token. Single-use token, 1-hour expiry, rate-limited, anti-enumeration.
+- **Approach:** New `POST /api/v1/auth/password-reset/request` accepts `{ email }`, always returns 200 regardless of email existence (anti-enumeration), silently queues an email if the account exists. Store token in `password_reset_tokens` table (`token_hash`, `user_id`, `expires_at`, `consumed_at`). Email contains `https://worshiproom.app/reset-password?token=<raw_token>`. New `POST /api/v1/auth/password-reset/confirm` accepts `{ token, new_password }`, validates token (not expired, not consumed), updates password hash, invalidates all existing sessions for that user (per Spec 1.5g). Rate limit: 5 reset requests per hour per email + 10 per hour per IP. 12-char minimum enforced on new_password.
+- **Files to create:**
+  - `backend/src/main/resources/db/changelog/2026-XX-XX-NNN-password-reset-tokens-table.xml`
+  - `backend/src/main/java/com/worshiproom/auth/PasswordResetController.java`
+  - `backend/src/main/java/com/worshiproom/auth/PasswordResetService.java`
+  - `backend/src/main/java/com/worshiproom/auth/PasswordResetToken.java` (JPA entity)
+  - `backend/src/main/java/com/worshiproom/auth/PasswordResetTokenRepository.java`
+  - `backend/src/main/java/com/worshiproom/email/PasswordResetEmailTemplate.java`
+  - `frontend/src/pages/ForgotPasswordPage.tsx`
+  - `frontend/src/pages/ResetPasswordPage.tsx`
+  - Integration tests + unit tests
+- **Files to modify:**
+  - `backend/src/main/resources/openapi.yaml` (add two endpoints)
+  - `frontend/src/App.tsx` (add routes `/forgot-password`, `/reset-password`)
+  - `frontend/src/components/auth/AuthModal.tsx` (add "Forgot password?" link)
+- **Copy Deck:** Forgot password copy passes pastor's-wife test ("Enter your email and we'll send you a link to reset your password" — not "Forgot your password? No problem!"); success state is gentle ("If an account exists for this email, you'll receive a reset link shortly"); token-expired error is blameless ("This reset link has expired. Request a new one to continue."). **Anti-Pressure Copy Checklist** applies.
+
+### Spec 1.5c — Change Password Endpoint
+
+- **ID:** `round3-phase01-spec05c-change-password`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** 1.5 (Auth Endpoints)
+- **Goal:** Logged-in user can change their password by providing current + new.
+- **Approach:** `POST /api/v1/auth/change-password` accepts `{ current_password, new_password }`. Validates current_password against stored hash. If match, updates to new hash. Invalidates all other sessions (keeps current session alive per Spec 1.5g semantics). Rate-limited 10/hour per user. 12-char minimum on new_password.
+- **Files to create:**
+  - `backend/src/main/java/com/worshiproom/auth/ChangePasswordController.java` (or extend existing AuthController)
+  - `frontend/src/pages/settings/ChangePasswordSection.tsx`
+  - Tests
+- **Files to modify:**
+  - `backend/src/main/resources/openapi.yaml`
+  - `frontend/src/pages/settings/SettingsPage.tsx` (add section)
+
+### Spec 1.5d — Email Verification Flow
+
+- **ID:** `round3-phase01-spec05d-email-verification`
+- **Size:** L
+- **Risk:** Medium (affects registration UX — must be graceful)
+- **Prerequisites:** 1.5 (Auth Endpoints), 1.5b (Password Reset — similar token infrastructure), 15.1 (SMTP)
+- **Goal:** Verify email ownership at registration. Unverified users can log in and browse but cannot post, comment, or react on Prayer Wall until verified (seven-day grace period).
+- **Approach:** Add `email_verified_at TIMESTAMP NULL` to `users`. On registration, create `email_verification_tokens` row, send email with verification link. `POST /api/v1/auth/email-verify/confirm` consumes token and sets `email_verified_at`. Gate write endpoints behind `@RequireVerifiedEmail` annotation; return 403 `EMAIL_NOT_VERIFIED` with helpful message. Resend endpoint: `POST /api/v1/auth/email-verify/resend` (rate-limited 5/hour). Frontend shows persistent banner on all pages while unverified, with "Resend verification email" button. Grace period: reads allowed for 7 days, writes blocked from day 1. Reads blocked after 7 days.
+- **Files to create:** Similar shape to 1.5b — controller, service, entity, repo, email template, frontend components, integration tests.
+- **Files to modify:**
+  - `backend/src/main/resources/db/changelog/` (users table ALTER + new token table)
+  - `backend/src/main/resources/openapi.yaml`
+  - All Prayer Wall write controllers (apply `@RequireVerifiedEmail`)
+  - `frontend/src/components/shell/AppShell.tsx` (banner)
+
+### Spec 1.5e — Change Email with Re-Verification
+
+- **ID:** `round3-phase01-spec05e-change-email`
+- **Size:** M
+- **Risk:** Medium (security-sensitive — email is auth factor)
+- **Prerequisites:** 1.5d (Email Verification)
+- **Goal:** Logged-in user can change their email. New email must be verified before the change takes effect.
+- **Approach:** `POST /api/v1/auth/change-email` accepts `{ current_password, new_email }`. Validates password. Creates a `pending_email_change` row (`user_id`, `new_email`, `token_hash`, `expires_at`), sends verification to NEW email. Old email receives an alert notification ("A change to your email was requested; if this wasn't you, reset your password"). On confirm, moves the user's email and invalidates all sessions. Anti-enumeration: if new_email already belongs to another account, still return 200 to the user but send a "someone tried to use your email" notification to that account.
+- **Files to create:** Similar shape to 1.5b + alert email template.
+- **Files to modify:** openapi.yaml, settings page.
+
+### Spec 1.5f — Account Lockout & Brute Force Protection
+
+- **ID:** `round3-phase01-spec05f-account-lockout`
+- **Size:** M
+- **Risk:** Medium (UX impact if tuned wrong — users locked out of real accounts)
+- **Prerequisites:** 1.5 (Auth Endpoints)
+- **Goal:** Prevent credential stuffing and password brute force while minimizing real-user lockouts.
+- **Approach:** Add `failed_login_count INT DEFAULT 0`, `locked_until TIMESTAMP NULL` to `users`. On failed login, increment count. After 5 failures within 15 minutes, set `locked_until = now() + 15 minutes`, return 423 `ACCOUNT_LOCKED` with message "Too many failed attempts. Try again in 15 minutes, or reset your password." On successful login, reset count to 0. Also maintain per-IP rate limit (20 login attempts/hour/IP) at the filter layer — catches distributed attacks against many accounts. Admin endpoint to manually unlock an account.
+- **Files to create:**
+  - Liquibase changeset (users ALTER)
+  - `LoginAttemptService.java`
+  - Integration tests
+- **Files to modify:**
+  - `backend/src/main/java/com/worshiproom/auth/AuthController.java` (or service)
+  - `backend/src/main/java/com/worshiproom/proxy/common/RateLimitFilter.java` (add `/api/v1/auth/login` to filter scope if not already)
+  - openapi.yaml (error response shape)
+
+### Spec 1.5g — Session Invalidation & Logout-All-Devices
+
+- **ID:** `round3-phase01-spec05g-session-invalidation`
+- **Size:** M
+- **Risk:** Medium (JWT stateless model requires careful invalidation design)
+- **Prerequisites:** 1.5 (Auth Endpoints), 5.6 (Redis Cache Foundation — for blocklist)
+- **Goal:** Support explicit logout, logout-all-devices, and automatic session invalidation on password change / email change / account compromise.
+- **Approach:** Since JWTs are stateless, introduce a `jwt_blocklist` table (Redis-backed, falls back to Postgres) keyed by `jti` (JWT ID claim). `JwtAuthenticationFilter` checks the blocklist on every request; blocked tokens return 401. Logout adds current token's `jti` to blocklist. Logout-all-devices adds ALL active tokens for the user (tracked in a separate `active_sessions` table keyed by user_id + jti + issued_at). Password change / email change trigger logout-all-devices automatically. Tokens auto-expire from blocklist at their natural JWT expiry (1 hour) so the blocklist stays bounded. New endpoints: `POST /api/v1/auth/logout` (current session), `POST /api/v1/auth/logout-all` (all sessions), `GET /api/v1/auth/sessions` (list active sessions).
+- **Files to create:**
+  - Liquibase changesets for `active_sessions` + `jwt_blocklist`
+  - `SessionService.java`, `JwtBlocklistService.java`
+  - `SessionsController.java`
+  - Frontend: `/settings/sessions` page showing active devices with "Revoke" buttons
+- **Files to modify:**
+  - `backend/src/main/java/com/worshiproom/auth/JwtService.java` (include `jti` claim)
+  - `backend/src/main/java/com/worshiproom/auth/JwtAuthenticationFilter.java` (blocklist check)
+  - openapi.yaml
+
+### Spec 1.10g — Security Headers Middleware (CSP/HSTS/X-Frame-Options)
+
+- **ID:** `round3-phase01-spec10g-security-headers`
+- **Size:** S
+- **Risk:** Low (but easy to misconfigure — CSP too strict breaks the app)
+- **Prerequisites:** 1.4 (Spring Security)
+- **Goal:** Add security response headers on all responses to meet baseline web security expectations.
+- **Approach:** Spring Security's `HttpSecurity.headers()` configuration. Headers: `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, and a `Content-Security-Policy` that permits self + fonts.googleapis.com + the known image CDNs + `data:` for small inline images. Tune CSP on a staging deploy before rolling to prod. Profile-specific: dev profile uses `Content-Security-Policy-Report-Only` to avoid blocking HMR.
+- **Files to modify:**
+  - `backend/src/main/java/com/worshiproom/auth/SecurityConfig.java` (or extract to `SecurityHeadersConfig.java`)
+  - `backend/docs/runbook-security-headers.md` (new doc explaining what to tune when a new CDN or font source is added)
+
+### Spec 1.10h — API Error Code Catalog
+
+- **ID:** `round3-phase01-spec10h-error-code-catalog`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** 1.4 (Spring Security — so all error types exist)
+- **Goal:** Single source of truth for every `code` string the API returns. Prevents drift between controllers and frontend error handlers.
+- **Approach:** Create `backend/docs/error-codes.md` cataloging every error code: `RATE_LIMITED`, `UPSTREAM_ERROR`, `SAFETY_BLOCK`, `VALIDATION_ERROR`, `UNAUTHORIZED`, `EMAIL_NOT_VERIFIED`, `ACCOUNT_LOCKED`, `NOT_FOUND`, `CONFLICT`, etc. Each entry: code constant, HTTP status, user-facing message template, when it's thrown, which controller. Also add `ErrorCodes.java` Java constants class so controllers reference `ErrorCodes.ACCOUNT_LOCKED` not the raw string. Frontend mirror: `frontend/src/lib/error-codes.ts` with type definitions and user-facing copy.
+- **Files to create:**
+  - `backend/docs/error-codes.md`
+  - `backend/src/main/java/com/worshiproom/proxy/common/ErrorCodes.java`
+  - `frontend/src/lib/error-codes.ts`
+- **Files to modify:** all exception handlers to use the constants.
+
+### Spec 1.10i — Backend Environment Variables Runbook
+
+- **ID:** `round3-phase01-spec10i-env-var-runbook`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** None
+- **Goal:** Consolidate every env var the backend reads into a single runbook. Prevents the "what does this env var do?" question during deploy.
+- **Approach:** Audit every `@Value("${...}")` and `@ConfigurationProperties` class in `backend/src/main/java/`, every `application-*.properties` file, every `docker-compose.yml` env reference. Produce `backend/docs/runbook-environment-variables.md` with: variable name, purpose, default value, required-or-optional, which profile uses it, example value (not real secret). Group by concern: database, auth, rate limiting, proxy APIs, SMTP, monitoring, feature flags.
+- **Files to create:** `backend/docs/runbook-environment-variables.md`
+- **Files to modify:** `.env.example` at backend root (regenerate from the runbook).
+
+### Spec 1.10j — Liveness/Readiness Health Checks
+
+- **ID:** `round3-phase01-spec10j-liveness-readiness`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** 1.10 (Phase 1 cutover — so the existing `/api/v1/health` is in place)
+- **Goal:** Split health endpoints into liveness (is the process alive?) and readiness (can it serve traffic?). Existing `/api/v1/health` stays as a combined status endpoint for uptime monitoring.
+- **Approach:** Add `/api/v1/health/live` (always returns 200 if JVM is responding — no DB check, no upstream check) and `/api/v1/health/ready` (returns 200 only if DB connection pool is healthy AND Redis connection is healthy AND migration is complete — returns 503 otherwise). Platforms like Kubernetes, Railway, and Render use these distinctly: liveness restarts the container on failure, readiness removes from load balancer. Spring Boot Actuator provides `/actuator/health/liveness` and `/actuator/health/readiness` out of the box — this spec exposes them at the `/api/v1/` path + adds custom readiness indicators for our specific concerns.
+- **Files to modify:**
+  - `backend/src/main/java/com/worshiproom/health/HealthController.java` (extend)
+  - `application-prod.properties` (expose actuator liveness/readiness)
+  - `backend/docs/runbook-deployment.md` (document which endpoint to use for which purpose)
+
+### Spec 1.10k — HikariCP Connection Pool Tuning
+
+- **ID:** `round3-phase01-spec10k-hikaricp-tuning`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** 1.2 (PostgreSQL), 1.10 (Phase 1 cutover)
+- **Goal:** Set sensible HikariCP defaults so the backend doesn't exhaust connections under load or starve queries by being too conservative.
+- **Approach:** Configure in `application-prod.properties`: `spring.datasource.hikari.maximum-pool-size=10` (tunable via env var `DB_POOL_MAX`), `spring.datasource.hikari.minimum-idle=2`, `spring.datasource.hikari.connection-timeout=30000`, `spring.datasource.hikari.idle-timeout=600000`, `spring.datasource.hikari.max-lifetime=1800000`, `spring.datasource.hikari.leak-detection-threshold=60000`. Dev profile uses lower limits to catch pool leaks earlier. Add integration test that spawns 15 concurrent requests against a pool of 5 and verifies queueing works (no 500s, no leaks).
+- **Files to modify:** `application-prod.properties`, `application-dev.properties`, add integration test.
+
+### Spec 1.10l — Playwright E2E Test Infrastructure & CI Wiring
+
+- **ID:** `round3-phase01-spec10l-playwright-e2e`
+- **Size:** M
+- **Risk:** Low (but referenced throughout — finally authoring it)
+- **Prerequisites:** 1.10 (Phase 1 cutover)
+- **Goal:** Stand up the Playwright E2E infrastructure the `/verify-with-playwright` skill and Rule 17 cutover specs already assume exists. Wire into CI.
+- **Approach:** Install `@playwright/test` in frontend. Create `frontend/playwright.config.ts` with three projects: desktop (1440x900), tablet (768x1024), mobile (375x667). Test base URL pulls from env (`PLAYWRIGHT_BASE_URL`, defaults to `http://localhost:5173`). Global setup spins up backend + frontend + PostgreSQL via docker-compose before tests. Global teardown stops services. Add `@axe-core/playwright` for accessibility smoke tests used by Rule 17. First smoke test: `frontend/tests/e2e/smoke.spec.ts` verifies the homepage loads at each viewport without console errors. CI: add `.github/workflows/playwright.yml` running on every PR, uploading HTML report + axe JSON artifacts.
+- **Files to create:**
+  - `frontend/playwright.config.ts`
+  - `frontend/tests/e2e/smoke.spec.ts`
+  - `frontend/tests/e2e/fixtures/setup.ts` (dev auth cookies, seed data helpers)
+  - `.github/workflows/playwright.yml`
+  - `frontend/docs/playwright-cookbook.md`
+- **Files to modify:**
+  - `frontend/package.json` (scripts, deps)
+  - `.env.example` (document PLAYWRIGHT_* env vars)
+
+### Spec 1.10m — Community Guidelines Document
+
+- **ID:** `round3-phase01-spec10m-community-guidelines`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** 1.10f (Terms of Service)
+- **Goal:** Author a user-facing Community Guidelines document at `/community-guidelines`, referenced from Terms of Service, moderation action copy, and onboarding.
+- **Approach:** Eric-authored prose at `frontend/src/content/community-guidelines.md` describing the community's norms: (1) What belongs on the Prayer Wall (real requests, real testimonies, real questions — no spam, no proselytizing other users' faith journeys, no doctrinal arguments). (2) What doesn't (harassment, doxxing, impersonation, medical-advice-posing-as-support, content that endangers minors). (3) How moderation works (report flow, trust levels, appeal process). (4) Values: dignity before efficiency, vulnerability is protected, grief gets stillness. (5) Plain-English version-controlled (`community_guidelines_version`). Page renders via `CommunityGuidelinesPage.tsx` with a version banner. ToS links to it in the "Your responsibilities" section.
+- **Files to create:**
+  - `frontend/src/content/community-guidelines.md`
+  - `frontend/src/pages/CommunityGuidelinesPage.tsx`
+- **Files to modify:**
+  - `frontend/src/App.tsx` (add route)
+  - Terms of Service page (add link)
+  - Registration flow (link near "agree to ToS")
+
+### Spec 2.5.6 — Block User Feature
+
+- **ID:** `round3-phase02-5-spec06-block-user`
+- **Risk:** Medium (multiple features reference blocking; must cascade correctly)
+- **Size:** M
+- **Prerequisites:** 2.5.5 (Phase 2.5 Cutover — friends backend live)
+- **Goal:** User can block another user. Blocked user's posts, comments, reactions, and presence disappear for the blocker. Blocker is invisible to the blocked user in lists and search. Blocking also removes any friend relationship.
+- **Approach:** New `user_blocks` table (`blocker_id`, `blocked_id`, `created_at`, `reason_text` nullable). Blocking cascades: delete any `friend_relationships` rows between the two users; queue a cache-invalidation for Intercessor Timeline (Spec 6.5), Privacy Tiers (Spec 7.7), and the feed. Endpoints: `POST /api/v1/blocks`, `DELETE /api/v1/blocks/{blocked_user_id}`, `GET /api/v1/blocks` (list my blocks). Frontend adds Block/Unblock to PrayerCard overflow menu, to profile page header, to comment overflow menu. Blocks are never notified to the blocked user (zero-feedback design). Rate limit: 10 blocks/hour/user.
+- **Files to create:**
+  - Liquibase changeset for `user_blocks` table (indexes on both columns)
+  - `BlockController.java`, `BlockService.java`, `Block.java` entity, `BlockRepository.java`
+  - Frontend `useBlockUser` hook, Block menu items
+  - Integration tests including cascade behavior
+- **Files to modify:**
+  - openapi.yaml
+  - `FeedService.java` (filter blocked users from reads — both directions)
+  - `FriendsService.java` (on block, remove friendship)
+  - `IntercessorTimelineService.java` (Spec 6.5 — invalidate cache)
+  - `PrayerCard.tsx` (overflow menu)
+  - `ProfilePageHeader.tsx` (once Phase 8 lands, add Block button)
+
+### Spec 2.5.7 — Mute User Feature
+
+- **ID:** `round3-phase02-5-spec07-mute-user`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** 2.5.5
+- **Goal:** User can mute another user. Muted user's posts don't appear in the blocker's feed, but the blocker is still visible to the muted user (asymmetric — softer than block). Mute is reversible.
+- **Approach:** Similar table `user_mutes` (`muter_id`, `muted_id`, `created_at`). Only filters feed reads; does NOT cascade to friendship, privacy, notifications about the muted user's activity on the muter's content. Endpoints: POST/DELETE/GET `/api/v1/mutes`.
+- **Files to create:** similar to Block but simpler (no cascade).
+- **Files to modify:** `FeedService.java` to apply mute filter on reads.
+
+### Spec 10.10b — Admin Audit Log Viewer
+
+- **ID:** `round3-phase10-spec10b-admin-audit-log-viewer`
+- **Size:** M
+- **Risk:** Low
+- **Prerequisites:** 10.10 (Admin Foundation — `admin_audit_log` table already exists)
+- **Goal:** Admin UI to view the audit log created by Spec 10.10. Backend endpoint + admin-only frontend page.
+- **Approach:** `GET /api/v1/admin/audit-log` returns paginated entries with filters (admin_user_id, action, target_type, date range). Spring Security `@PreAuthorize("hasRole('ADMIN')")`. Frontend `/admin/audit-log` page (admin-only route) with a table, filter sidebar, date-range picker, CSV export. Every action displays the moderator_note (50+ char requirement from Spec 10.7b). Page itself is auditable — viewing the audit log creates a `viewed_audit_log` entry (meta-audit).
+- **Files to create:**
+  - `AdminAuditController.java`, `AdminAuditService.java`, DTOs
+  - `frontend/src/pages/admin/AuditLogPage.tsx`
+  - Admin route guard if not already in place
+- **Files to modify:** openapi.yaml, App.tsx routes.
+
+### Spec 16.1b — Offline Banner UI
+
+- **ID:** `round3-phase16-spec01b-offline-banner`
+- **Size:** S
+- **Risk:** Low
+- **Prerequisites:** 16.1 (Offline Cache for Recent Feed)
+- **Goal:** User-visible indicator when the app is operating offline. Gentle, anti-pressure copy.
+- **Approach:** Hook `useOnlineStatus` listening to `online`/`offline` events + periodic `/api/v1/health/live` ping (every 30s, only when `navigator.onLine` is true — catches captive-portal cases). Banner component slides in at top of viewport when offline, with message "You're offline. Viewing cached content." When back online, banner transitions to success state ("Reconnected") for 3 seconds then disappears. Queued posts from Spec 16.2 surface here as "3 posts waiting to send." Respects `prefers-reduced-motion`.
+- **Files to create:**
+  - `frontend/src/hooks/useOnlineStatus.ts`
+  - `frontend/src/components/shell/OfflineBanner.tsx`
+  - Tests (mock `navigator.onLine`)
+- **Files to modify:** `frontend/src/components/shell/AppShell.tsx` (mount banner), `11-local-storage-keys.md` (if any keys are added).
+
+### Spec 16.2b — React Error Boundary Strategy
+
+- **ID:** `round3-phase16-spec02b-error-boundaries`
+- **Size:** M
+- **Risk:** Low
+- **Prerequisites:** 1.10d (Sentry) — boundaries report to Sentry
+- **Goal:** Structured approach to React error boundaries so a crashed component doesn't break the whole app. Every major feature has its own boundary with an appropriate fallback.
+- **Approach:** Create `frontend/src/components/errors/FeatureErrorBoundary.tsx` as the canonical boundary. Takes `featureName` prop (for Sentry tagging) and optional `fallback` render prop. Wraps each feature mount point in `App.tsx` and each lazy-loaded page. Fallback copy is anti-pressure: "This part of the app hit a snag. We've logged it. Try refreshing, or head to the Daily Hub." — never "Something went wrong!" with an exclamation point. Integration with Sentry: `Sentry.ErrorBoundary` wrapper under the hood, tagged by featureName, with `beforeSend` PII scrubber active. For Prayer Wall specifically (highest-stakes feature), boundary fallback offers a "Refresh this section" button that re-mounts the subtree without reloading the whole page. Tests verify the boundary catches a deliberate throw and renders the fallback without crashing siblings.
+- **Files to create:**
+  - `frontend/src/components/errors/FeatureErrorBoundary.tsx`
+  - `frontend/src/components/errors/__tests__/FeatureErrorBoundary.test.tsx`
+- **Files to modify:**
+  - `frontend/src/App.tsx` (wrap each route's element)
+  - Any page with lazy-loaded subtrees (Bible reader, Prayer Wall, Music)
+  - Tie-in with `09-design-system.md` (§ Error States)
+
 ---
 
-_End of Worship Room — Phase 3: Forums Wave Master Plan v2.6_
+---
+
+_End of Worship Room — Phase 3: Forums Wave Master Plan v2.8_
