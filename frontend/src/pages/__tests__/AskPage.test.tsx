@@ -6,7 +6,35 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { AskPage } from '../AskPage'
 import { ASK_TOPIC_CHIPS } from '@/constants/ask'
+import { ASK_RESPONSES } from '@/mocks/ask-mock-data'
+import { fetchAskResponse } from '@/services/ask-service'
 import type { AuthContextValue } from '@/contexts/AuthContext'
+
+// Mock the backend proxy service. Return the same mock data that the old code used,
+// so the keyword-matching assertions in the existing tests continue to work.
+// vi.mock factories are hoisted — keep the implementation self-contained.
+vi.mock('@/services/ask-service', async () => {
+  const mockData = await vi.importActual<typeof import('@/mocks/ask-mock-data')>(
+    '@/mocks/ask-mock-data',
+  )
+  return {
+    fetchAskResponse: vi.fn((question: string) =>
+      Promise.resolve(mockData.getAskResponse(question)),
+    ),
+  }
+})
+
+/**
+ * Flush the resolved-Promise microtask queue so the `.then(...)` callback in
+ * AskPage's handleSubmit/handleFollowUpClick runs and setState commits.
+ * After this, the response DOM is stable for assertions.
+ */
+async function flushAskPromise() {
+  await act(async () => {
+    await Promise.resolve()
+    await Promise.resolve()
+  })
+}
 
 // --- Auth mock setup ---
 const { mockAuthFn } = vi.hoisted(() => {
@@ -195,7 +223,7 @@ describe('AskPage — Auth Gating (first submit)', () => {
     vi.useRealTimers()
   })
 
-  it('logged-out user clicking submit gets response, not auth modal', () => {
+  it('logged-out user clicking submit gets response, not auth modal', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: false,
       user: null,
@@ -210,9 +238,7 @@ describe('AskPage — Auth Gating (first submit)', () => {
     // Should show loading, NOT auth modal
     expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
     expect(screen.queryByText(/sign in/i)).not.toBeInTheDocument()
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
   })
 })
@@ -278,42 +304,40 @@ describe('AskPage — Response Display', () => {
     vi.useRealTimers()
   })
 
-  function submitAndWait(questionText = 'Why does God allow suffering?') {
+  async function submitAndWait(questionText = 'Why does God allow suffering?') {
     renderAskPage()
     const textarea = screen.getByLabelText('Your question')
     fireEvent.change(textarea, { target: { value: questionText } })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
   }
 
-  it('response fades in after loading', () => {
-    submitAndWait()
+  it('response fades in after loading', async () => {
+    await submitAndWait()
     expect(screen.queryByText('Searching Scripture for wisdom...')).not.toBeInTheDocument()
     expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
   })
 
-  it('direct answer paragraphs render', () => {
-    submitAndWait()
+  it('direct answer paragraphs render', async () => {
+    await submitAndWait()
     expect(screen.getByText(/one of the hardest questions/i)).toBeInTheDocument()
   })
 
-  it('"What Scripture Says" heading appears', () => {
-    submitAndWait()
+  it('"What Scripture Says" heading appears', async () => {
+    await submitAndWait()
     expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
   })
 
-  it('3 verse cards render with reference, text, and explanation', () => {
-    submitAndWait()
+  it('3 verse cards render with reference, text, and explanation', async () => {
+    await submitAndWait()
     // References may appear in both inline text links and verse cards
     expect(screen.getAllByText('Romans 8:28').length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByText('Psalm 34:18').length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByText('2 Corinthians 1:3-4').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('verse cards are FrostedCard (rounded-2xl, border-white/[0.12], bg-white/[0.06])', () => {
-    submitAndWait()
+  it('verse cards are FrostedCard (rounded-2xl, border-white/[0.12], bg-white/[0.06])', async () => {
+    await submitAndWait()
     const verseCards = screen.getAllByText('Romans 8:28')
     const verseCard = verseCards
       .find((el) => el.closest('.rounded-2xl'))
@@ -324,8 +348,8 @@ describe('AskPage — Response Display', () => {
     expect(verseCard?.className).toContain('backdrop-blur-sm')
   })
 
-  it('encouragement callout is Tier 2 (border-l-4, rounded-xl, bg-white/[0.04])', () => {
-    submitAndWait()
+  it('encouragement callout is Tier 2 (border-l-4, rounded-xl, bg-white/[0.04])', async () => {
+    await submitAndWait()
     const encouragement = screen.getByText(/Your pain matters to God/i).closest('div')
     expect(encouragement?.className).toContain('rounded-xl')
     expect(encouragement?.className).toContain('border-l-4')
@@ -334,8 +358,8 @@ describe('AskPage — Response Display', () => {
     expect(encouragement?.className).not.toContain('border-l-2')
   })
 
-  it('prayer section has "Pray About This" label + non-italic sans text', () => {
-    submitAndWait()
+  it('prayer section has "Pray About This" label + non-italic sans text', async () => {
+    await submitAndWait()
     expect(screen.getByText('Pray About This')).toBeInTheDocument()
     const prayer = screen.getByText(/Lord, I am hurting/i)
     expect(prayer.className).not.toContain('font-serif')
@@ -343,15 +367,15 @@ describe('AskPage — Response Display', () => {
     expect(prayer.className).toContain('text-white/80')
   })
 
-  it('AI disclaimer appears below response', () => {
-    submitAndWait()
+  it('AI disclaimer appears below response', async () => {
+    await submitAndWait()
     expect(
       screen.getByText('AI-generated content for encouragement. Not professional advice.')
     ).toBeInTheDocument()
   })
 
-  it('response section uses motion-safe:animate-fade-in-up', () => {
-    submitAndWait()
+  it('response section uses motion-safe:animate-fade-in-up', async () => {
+    await submitAndWait()
     const responseSection = screen
       .getByText('What Scripture Says')
       .closest('.motion-safe\\:animate-fade-in-up')
@@ -374,19 +398,17 @@ describe('AskPage — Action Buttons', () => {
     vi.useRealTimers()
   })
 
-  function submitAndWait(questionText = 'Why does God allow suffering?') {
+  async function submitAndWait(questionText = 'Why does God allow suffering?') {
     renderAskPage()
     fireEvent.change(screen.getByLabelText('Your question'), {
       target: { value: questionText },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
   }
 
-  it('"Ask another question" clears textarea and response', () => {
-    submitAndWait()
+  it('"Ask another question" clears textarea and response', async () => {
+    await submitAndWait()
     fireEvent.click(screen.getByRole('button', { name: /Ask another question/i }))
     // Should show input section again
     expect(screen.getByLabelText('Your question')).toBeInTheDocument()
@@ -394,16 +416,16 @@ describe('AskPage — Action Buttons', () => {
     expect(screen.queryByText('What Scripture Says')).not.toBeInTheDocument()
   })
 
-  it('"Ask another question" scrolls to top', () => {
+  it('"Ask another question" scrolls to top', async () => {
     const scrollSpy = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
-    submitAndWait()
+    await submitAndWait()
     fireEvent.click(screen.getByRole('button', { name: /Ask another question/i }))
     expect(scrollSpy).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
     scrollSpy.mockRestore()
   })
 
-  it('4 action buttons render below response', () => {
-    submitAndWait()
+  it('4 action buttons render below response', async () => {
+    await submitAndWait()
     expect(screen.getByRole('button', { name: /Ask another question/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Journal about this/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Pray about this/i })).toBeInTheDocument()
@@ -419,7 +441,7 @@ describe('AskPage — Action Buttons', () => {
       writable: true,
       configurable: true,
     })
-    submitAndWait()
+    await submitAndWait()
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /^Share$/i }))
     })
@@ -428,8 +450,8 @@ describe('AskPage — Action Buttons', () => {
     )
   })
 
-  it('action buttons are 2x2 grid on mobile (grid-cols-2 class)', () => {
-    submitAndWait()
+  it('action buttons are 2x2 grid on mobile (grid-cols-2 class)', async () => {
+    await submitAndWait()
     const container = screen.getByRole('button', { name: /Ask another question/i }).parentElement
     expect(container?.className).toContain('grid-cols-2')
   })
@@ -438,6 +460,9 @@ describe('AskPage — Action Buttons', () => {
 describe('AskPage — Feedback', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    // Stub scrollIntoView — jsdom doesn't implement it, and the 100ms scroll
+    // timer in handleSubmit fires inside these tests' advanceTimersByTime windows.
+    Element.prototype.scrollIntoView = vi.fn()
     localStorage.clear()
     mockAuthFn.mockReturnValue({
       isAuthenticated: true,
@@ -452,49 +477,48 @@ describe('AskPage — Feedback', () => {
     localStorage.clear()
   })
 
-  function submitAndWait() {
+  async function submitAndWait() {
     renderAskPage()
     fireEvent.change(screen.getByLabelText('Your question'), {
       target: { value: 'Why does God allow suffering?' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
   }
 
-  it('thumbs up button highlights in primary color', () => {
-    submitAndWait()
+  it('thumbs up button highlights in primary color', async () => {
+    await submitAndWait()
     fireEvent.click(screen.getByRole('button', { name: 'Yes, helpful' }))
     const icon = screen.getByRole('button', { name: 'Yes, helpful' }).querySelector('svg')
     expect(icon?.classList.contains('fill-primary')).toBe(true)
   })
 
-  it('thumbs down button highlights in danger color', () => {
-    submitAndWait()
+  it('thumbs down button highlights in danger color', async () => {
+    await submitAndWait()
     fireEvent.click(screen.getByRole('button', { name: 'No, not helpful' }))
     const icon = screen.getByRole('button', { name: 'No, not helpful' }).querySelector('svg')
     expect(icon?.classList.contains('fill-danger')).toBe(true)
   })
 
-  it('thank-you message appears on feedback selection', () => {
-    submitAndWait()
+  it('thank-you message appears on feedback selection', async () => {
+    await submitAndWait()
     fireEvent.click(screen.getByRole('button', { name: 'Yes, helpful' }))
     expect(screen.getByText('Thank you for your feedback!')).toBeInTheDocument()
   })
 
-  it('thank-you message auto-dismisses after 2s', () => {
-    submitAndWait()
+  it('thank-you message auto-dismisses after 2s', async () => {
+    await submitAndWait()
     fireEvent.click(screen.getByRole('button', { name: 'Yes, helpful' }))
     expect(screen.getByText('Thank you for your feedback!')).toBeInTheDocument()
+    // This timer advance is for the real 2s feedback-dismiss timer in AskPage code.
     act(() => {
       vi.advanceTimersByTime(2100)
     })
     expect(screen.queryByText('Thank you for your feedback!')).not.toBeInTheDocument()
   })
 
-  it('feedback stored in localStorage for logged-in user', () => {
-    submitAndWait()
+  it('feedback stored in localStorage for logged-in user', async () => {
+    await submitAndWait()
     fireEvent.click(screen.getByRole('button', { name: 'Yes, helpful' }))
     const stored = JSON.parse(localStorage.getItem('wr_chat_feedback') || '[]')
     expect(stored).toHaveLength(1)
@@ -502,7 +526,7 @@ describe('AskPage — Feedback', () => {
     expect(stored[0].helpful).toBe(true)
   })
 
-  it('feedback NOT stored for logged-out user (auth modal shown instead)', () => {
+  it('feedback NOT stored for logged-out user (auth modal shown instead)', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: false,
       user: null,
@@ -514,17 +538,15 @@ describe('AskPage — Feedback', () => {
       target: { value: 'Why does God allow suffering?' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     // Clicking feedback as logged-out user should show auth modal, not store feedback
     fireEvent.click(screen.getByRole('button', { name: 'Yes, helpful' }))
     expect(screen.getByText('Sign in to give feedback')).toBeInTheDocument()
     expect(localStorage.getItem('wr_chat_feedback')).toBeNull()
   })
 
-  it('feedback buttons have aria-pressed', () => {
-    submitAndWait()
+  it('feedback buttons have aria-pressed', async () => {
+    await submitAndWait()
     expect(screen.getByRole('button', { name: 'Yes, helpful' })).toHaveAttribute(
       'aria-pressed',
       'false'
@@ -565,11 +587,11 @@ describe('AskPage — URL Params', () => {
       logout: vi.fn(),
     })
     renderAskPage('/ask?q=anxiety')
-    // The auto-submit uses setTimeout(0) then the loading delay
+    // The auto-submit uses setTimeout(0). Advance past it so handleSubmit fires.
     act(() => {
       vi.advanceTimersByTime(1)
     })
-    // Should be in loading state
+    // Should be in loading state — the fetchAskResponse promise has not yet resolved.
     expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
   })
 
@@ -604,7 +626,7 @@ describe('AskPage — Full Flow Integration', () => {
     vi.useRealTimers()
   })
 
-  it('full flow: type question → submit → loading → response', () => {
+  it('full flow: type question → submit → loading → response', async () => {
     renderAskPage()
     const textarea = screen.getByLabelText('Your question')
     fireEvent.change(textarea, { target: { value: 'I feel so anxious' } })
@@ -614,10 +636,8 @@ describe('AskPage — Full Flow Integration', () => {
     expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
     expect(screen.queryByText('What Scripture Says')).not.toBeInTheDocument()
 
-    // Advance past delay
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    // Flush the fetchAskResponse promise
+    await flushAskPromise()
 
     // Response
     expect(screen.queryByText('Searching Scripture for wisdom...')).not.toBeInTheDocument()
@@ -626,22 +646,20 @@ describe('AskPage — Full Flow Integration', () => {
     expect(screen.getAllByText('Philippians 4:6-7').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('full flow: click chip → submit → response matches chip topic', () => {
+  it('full flow: click chip → submit → response matches chip topic', async () => {
     renderAskPage()
 
     // Use fireEvent for speed in fake timer context
     fireEvent.click(screen.getByRole('button', { name: 'How do I forgive someone?' }))
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
 
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
 
     // Forgiveness response — may appear in inline text + verse card
     expect(screen.getAllByText('Ephesians 4:32').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('?q= param: pre-fills and auto-submits for logged-in', () => {
+  it('?q= param: pre-fills and auto-submits for logged-in', async () => {
     renderAskPage('/ask?q=suffering')
     act(() => {
       vi.advanceTimersByTime(1) // setTimeout(0) for auto-submit
@@ -649,9 +667,7 @@ describe('AskPage — Full Flow Integration', () => {
     // Should be loading
     expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
 
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
 
     // Should have suffering response — may appear in inline text + verse card
     expect(screen.getAllByText('Romans 8:28').length).toBeGreaterThanOrEqual(1)
@@ -681,7 +697,7 @@ describe('AskPage — Accessibility', () => {
     expect(liveRegion).toBeInTheDocument()
   })
 
-  it('response has proper heading hierarchy (h2)', () => {
+  it('response has proper heading hierarchy (h2)', async () => {
     vi.useFakeTimers()
     mockAuthFn.mockReturnValue({
       isAuthenticated: true,
@@ -694,9 +710,7 @@ describe('AskPage — Accessibility', () => {
       target: { value: 'suffering' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     const h2 = screen.getByRole('heading', { level: 2 })
     expect(h2).toHaveTextContent('What Scripture Says')
     vi.useRealTimers()
@@ -743,30 +757,26 @@ describe('AskPage — Conversation Thread Integration', () => {
     vi.useRealTimers()
   })
 
-  function submitQuestion(questionText = 'Why does God allow suffering?') {
+  async function submitQuestion(questionText = 'Why does God allow suffering?') {
     renderAskPage()
     fireEvent.change(screen.getByLabelText('Your question'), {
       target: { value: questionText },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2200)
-    })
+    await flushAskPromise()
   }
 
-  it('question bubble appears in thread after submission', () => {
-    submitQuestion()
+  it('question bubble appears in thread after submission', async () => {
+    await submitQuestion()
     expect(screen.getByText('Why does God allow suffering?')).toBeInTheDocument()
   })
 
-  it('follow-up chip click adds second Q&A pair', () => {
-    submitQuestion()
+  it('follow-up chip click adds second Q&A pair', async () => {
+    await submitQuestion()
     // Use the first matching chip (from the first response's Dig Deeper section)
     const chips = screen.getAllByRole('button', { name: /What if my suffering doesn't end/i })
     fireEvent.click(chips[0])
-    act(() => {
-      vi.advanceTimersByTime(2200)
-    })
+    await flushAskPromise()
     // Both question bubbles should be visible
     expect(screen.getByText('Why does God allow suffering?')).toBeInTheDocument()
     // The follow-up question appears as both a bubble and in dig deeper chips
@@ -774,24 +784,20 @@ describe('AskPage — Conversation Thread Integration', () => {
     expect(followUpTexts.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('divider appears between Q&A pairs', () => {
-    submitQuestion()
+  it('divider appears between Q&A pairs', async () => {
+    await submitQuestion()
     const chip = screen.getByRole('button', { name: /How did Jesus handle pain/i })
     fireEvent.click(chip)
-    act(() => {
-      vi.advanceTimersByTime(2200)
-    })
+    await flushAskPromise()
     // Multiple border-t elements exist in the response (thread divider + dig deeper border)
     const allBorderElements = document.querySelectorAll('[class*="border-t"]')
     expect(allBorderElements.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('"Ask another question" clears thread during multi-pair conversation', () => {
-    submitQuestion()
+  it('"Ask another question" clears thread during multi-pair conversation', async () => {
+    await submitQuestion()
     fireEvent.click(screen.getByRole('button', { name: /What if my suffering doesn't end/i }))
-    act(() => {
-      vi.advanceTimersByTime(2200)
-    })
+    await flushAskPromise()
     fireEvent.click(screen.getByRole('button', { name: /Ask another question/i }))
     expect(screen.getByLabelText('Your question')).toBeInTheDocument()
     expect(screen.queryByText('What Scripture Says')).not.toBeInTheDocument()
@@ -802,24 +808,24 @@ describe('AskPage — Conversation Thread Integration', () => {
     expect(screen.getByText('Popular Topics')).toBeInTheDocument()
   })
 
-  it('Popular Topics hidden after question submitted', () => {
-    submitQuestion()
+  it('Popular Topics hidden after question submitted', async () => {
+    await submitQuestion()
     expect(screen.queryByText('Popular Topics')).not.toBeInTheDocument()
   })
 
-  it('Popular Topics re-shown after "Ask another question"', () => {
-    submitQuestion()
+  it('Popular Topics re-shown after "Ask another question"', async () => {
+    await submitQuestion()
     fireEvent.click(screen.getByRole('button', { name: /Ask another question/i }))
     expect(screen.getByText('Popular Topics')).toBeInTheDocument()
   })
 
-  it('Dig Deeper section renders after response', () => {
-    submitQuestion()
+  it('Dig Deeper section renders after response', async () => {
+    await submitQuestion()
     expect(screen.getByText('Dig Deeper')).toBeInTheDocument()
   })
 
-  it('inline verse links navigate to Bible reader', () => {
-    submitQuestion()
+  it('inline verse links navigate to Bible reader', async () => {
+    await submitQuestion()
     const links = screen.getAllByRole('link', { name: 'Romans 8:28' })
     expect(links.length).toBeGreaterThanOrEqual(1)
     expect(links[0]).toHaveAttribute('href', '/bible/romans/8#verse-28')
@@ -836,7 +842,7 @@ describe('AskPage — Auth Gating (follow-up actions)', () => {
     vi.useRealTimers()
   })
 
-  it('verse reference links in response are public (no auth gate)', () => {
+  it('verse reference links in response are public (no auth gate)', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: true,
       user: { name: 'Test', id: 'test' },
@@ -848,9 +854,7 @@ describe('AskPage — Auth Gating (follow-up actions)', () => {
       target: { value: 'suffering' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2200)
-    })
+    await flushAskPromise()
     const links = screen.getAllByRole('link', { name: 'Romans 8:28' })
     expect(links.length).toBeGreaterThanOrEqual(1)
     expect(links[0]).toHaveAttribute('href', '/bible/romans/8#verse-28')
@@ -873,32 +877,28 @@ describe('AskPage — Logged-Out First Response', () => {
     vi.useRealTimers()
   })
 
-  it('logged-out: Find Answers submits and shows response', () => {
+  it('logged-out: Find Answers submits and shows response', async () => {
     renderAskPage()
     fireEvent.change(screen.getByLabelText('Your question'), {
       target: { value: 'Why does God allow suffering?' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
     expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
   })
 
-  it('logged-out: ?q= param auto-submits and shows response', () => {
+  it('logged-out: ?q= param auto-submits and shows response', async () => {
     renderAskPage('/ask?q=suffering')
     act(() => {
       vi.advanceTimersByTime(1)
     })
     expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
   })
 
-  it('logged-out: Popular Topics auto-submits first response', () => {
+  it('logged-out: Popular Topics auto-submits first response', async () => {
     renderAskPage()
     // Click a Popular Topic card — button text is the topic name + description
     const popularButton = screen.getByRole('button', { name: /Overcoming Anxiety/i })
@@ -908,9 +908,7 @@ describe('AskPage — Logged-Out First Response', () => {
       vi.advanceTimersByTime(1)
     })
     expect(screen.getByText('Searching Scripture for wisdom...')).toBeInTheDocument()
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     expect(screen.getByText('What Scripture Says')).toBeInTheDocument()
   })
 
@@ -937,44 +935,42 @@ describe('AskPage — Logged-Out Action Gating', () => {
     vi.useRealTimers()
   })
 
-  function submitAndWaitLoggedOut(questionText = 'Why does God allow suffering?') {
+  async function submitAndWaitLoggedOut(questionText = 'Why does God allow suffering?') {
     renderAskPage()
     fireEvent.change(screen.getByLabelText('Your question'), {
       target: { value: questionText },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
   }
 
-  it('logged-out: follow-up chip click shows auth modal', () => {
-    submitAndWaitLoggedOut()
+  it('logged-out: follow-up chip click shows auth modal', async () => {
+    await submitAndWaitLoggedOut()
     const chips = screen.getAllByRole('button', { name: /What if my suffering doesn't end/i })
     fireEvent.click(chips[0])
     expect(screen.getByText('Sign in to continue the conversation')).toBeInTheDocument()
   })
 
-  it('logged-out: "Journal about this" shows auth modal', () => {
-    submitAndWaitLoggedOut()
+  it('logged-out: "Journal about this" shows auth modal', async () => {
+    await submitAndWaitLoggedOut()
     fireEvent.click(screen.getByRole('button', { name: /Journal about this/i }))
     expect(screen.getByText('Sign in to save journal entries')).toBeInTheDocument()
   })
 
-  it('logged-out: "Pray about this" shows auth modal', () => {
-    submitAndWaitLoggedOut()
+  it('logged-out: "Pray about this" shows auth modal', async () => {
+    await submitAndWaitLoggedOut()
     fireEvent.click(screen.getByRole('button', { name: /Pray about this/i }))
     expect(screen.getByText('Sign in to generate prayers')).toBeInTheDocument()
   })
 
-  it('logged-out: feedback thumbs up shows auth modal', () => {
-    submitAndWaitLoggedOut()
+  it('logged-out: feedback thumbs up shows auth modal', async () => {
+    await submitAndWaitLoggedOut()
     fireEvent.click(screen.getByRole('button', { name: 'Yes, helpful' }))
     expect(screen.getByText('Sign in to give feedback')).toBeInTheDocument()
   })
 
-  it('logged-out: feedback thumbs down shows auth modal', () => {
-    submitAndWaitLoggedOut()
+  it('logged-out: feedback thumbs down shows auth modal', async () => {
+    await submitAndWaitLoggedOut()
     fireEvent.click(screen.getByRole('button', { name: 'No, not helpful' }))
     expect(screen.getByText('Sign in to give feedback')).toBeInTheDocument()
   })
@@ -986,7 +982,7 @@ describe('AskPage — Logged-Out Action Gating', () => {
       writable: true,
       configurable: true,
     })
-    submitAndWaitLoggedOut()
+    await submitAndWaitLoggedOut()
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /^Share$/i }))
     })
@@ -994,15 +990,15 @@ describe('AskPage — Logged-Out Action Gating', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('logged-out: "Ask another question" works without auth', () => {
-    submitAndWaitLoggedOut()
+  it('logged-out: "Ask another question" works without auth', async () => {
+    await submitAndWaitLoggedOut()
     fireEvent.click(screen.getByRole('button', { name: /Ask another question/i }))
     expect(screen.getByLabelText('Your question')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('logged-out: SaveConversationButton not rendered', () => {
-    submitAndWaitLoggedOut()
+  it('logged-out: SaveConversationButton not rendered', async () => {
+    await submitAndWaitLoggedOut()
     expect(screen.queryByRole('button', { name: /Save conversation/i })).not.toBeInTheDocument()
   })
 })
@@ -1017,7 +1013,7 @@ describe('AskPage — Conversion Prompt Integration', () => {
     vi.useRealTimers()
   })
 
-  it('conversion prompt appears for logged-out user after response', () => {
+  it('conversion prompt appears for logged-out user after response', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: false,
       user: null,
@@ -1029,13 +1025,11 @@ describe('AskPage — Conversion Prompt Integration', () => {
       target: { value: 'suffering' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     expect(screen.getByText('This is just the beginning.')).toBeInTheDocument()
   })
 
-  it('conversion prompt does NOT appear for logged-in user', () => {
+  it('conversion prompt does NOT appear for logged-in user', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: true,
       user: { name: 'Test', id: 'test' },
@@ -1047,13 +1041,11 @@ describe('AskPage — Conversion Prompt Integration', () => {
       target: { value: 'suffering' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     expect(screen.queryByText('This is just the beginning.')).not.toBeInTheDocument()
   })
 
-  it('conversion prompt dismisses on "Keep exploring"', () => {
+  it('conversion prompt dismisses on "Keep exploring"', async () => {
     mockAuthFn.mockReturnValue({
       isAuthenticated: false,
       user: null,
@@ -1065,12 +1057,64 @@ describe('AskPage — Conversion Prompt Integration', () => {
       target: { value: 'suffering' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
-    act(() => {
-      vi.advanceTimersByTime(2100)
-    })
+    await flushAskPromise()
     expect(screen.getByText('This is just the beginning.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Keep exploring' }))
     expect(screen.queryByText('This is just the beginning.')).not.toBeInTheDocument()
+  })
+})
+
+describe('AskPage — Conversation History on Follow-Up', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    Element.prototype.scrollIntoView = vi.fn()
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: true,
+      user: { name: 'Test User', id: 'test-user-id' },
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+    ;(fetchAskResponse as ReturnType<typeof vi.fn>).mockClear()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('passes conversation history on follow-up submission', async () => {
+    // First call returns the suffering response; second returns a different response
+    // so the follow-up actually renders new content and doesn't collide with the first.
+    const firstResponse = ASK_RESPONSES.suffering
+    const secondResponse = ASK_RESPONSES.prayer
+    const mock = fetchAskResponse as ReturnType<typeof vi.fn>
+    mock.mockReset()
+    mock.mockResolvedValueOnce(firstResponse).mockResolvedValueOnce(secondResponse)
+
+    renderAskPage()
+
+    // Submit first question
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'Why does God allow suffering?' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    await flushAskPromise()
+
+    // Click a follow-up chip from the first response's "Dig Deeper" section.
+    // Use the first matching chip for safety across response shape drift.
+    const followUpText = firstResponse.followUpQuestions[0]
+    const chips = screen.getAllByRole('button', { name: new RegExp(followUpText.slice(0, 20), 'i') })
+    fireEvent.click(chips[0])
+    await flushAskPromise()
+
+    // Verify fetchAskResponse was called twice, and the second call's second arg
+    // (conversationHistory) has exactly 2 entries: the user's original question + the assistant's first answer.
+    expect(mock).toHaveBeenCalledTimes(2)
+    const secondCallArgs = mock.mock.calls[1]
+    const historyArg = secondCallArgs[1] as Array<{ role: string; content: string }>
+    expect(historyArg).toHaveLength(2)
+    expect(historyArg[0]).toEqual({ role: 'user', content: 'Why does God allow suffering?' })
+    expect(historyArg[1].role).toBe('assistant')
+    expect(historyArg[1].content).toBe(firstResponse.answer)
   })
 })
 
