@@ -227,6 +227,44 @@ paths:
         '502': { $ref: '#/components/responses/UpstreamError' }
         '504': { $ref: '#/components/responses/UpstreamTimeout' }
 
+  /api/v1/proxy/ai/reflect-journal:
+    post:
+      tags: [Proxy / AI]
+      summary: Generate a reflection on a journal entry
+      description: |
+        Takes a user's saved journal entry (up to 5000 chars) and returns a
+        brief 2-4 sentence pastoral reflection that references specific details
+        from what they wrote. Crisis keywords trigger a canned response with
+        988/Crisis Text resources, without calling the upstream AI model.
+      operationId: reflectOnJournalEntry
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/JournalReflectionRequest' }
+      responses:
+        '200':
+          description: Generated reflection or crisis reflection
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/JournalReflectionResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/SafetyBlocked' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
+
   /api/v1/proxy/maps/places-search:
     post:
       tags: [Proxy / Places]
@@ -551,6 +589,36 @@ components:
           type: string
           pattern: "^Dear (God|Lord|Father)[,.].*Amen\\.\\s*$"
           example: "Dear God, I come to You with the weight of tomorrow pressing on me... Amen."
+
+    JournalReflectionRequest:
+      description: Body for `POST /api/v1/proxy/ai/reflect-journal`.
+      type: object
+      required: [entry]
+      properties:
+        entry:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          example: "Today was rough. I keep thinking about the conversation with my mom last week..."
+          description: The user's saved journal entry text to reflect on.
+
+    JournalReflectionResponse:
+      description: |
+        Structured reflection response. The `id` field is `"crisis"` when the
+        server-side crisis-keyword short-circuit emitted a canned response
+        (bypassing the upstream model), `"fallback"` when the backend returned
+        its server-side fallback after retries, or a generated ID otherwise.
+      type: object
+      required: [id, text]
+      properties:
+        id:
+          type: string
+          example: "reflect-gen-a8f3"
+        text:
+          type: string
+          minLength: 50
+          maxLength: 800
+          example: "There's so much honesty in what you wrote... The fact that you're naming it is a form of prayer."
 
     PlacesSearchRequest:
       description: Body for `POST /api/v1/proxy/maps/places-search`.

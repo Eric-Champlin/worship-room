@@ -7,6 +7,8 @@ import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { cn } from '@/lib/utils'
 import type { JournalMode, SavedJournalEntry } from '@/types/daily-experience'
 
+const EMPTY_REFLECTING_IDS: ReadonlySet<string> = new Set()
+
 function formatDateTime(date: Date) {
   const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
   const month = date.toLocaleDateString('en-US', { month: 'long' })
@@ -25,6 +27,7 @@ export interface SavedEntriesListProps {
   onWriteAnother: () => void
   onReflect: (entryId: string) => void
   onSwitchTab?: (tab: 'pray' | 'journal' | 'meditate') => void
+  reflectingIds?: ReadonlySet<string>
 }
 
 export function SavedEntriesList({
@@ -32,6 +35,7 @@ export function SavedEntriesList({
   onWriteAnother,
   onReflect,
   onSwitchTab,
+  reflectingIds = EMPTY_REFLECTING_IDS,
 }: SavedEntriesListProps) {
   const [isDoneJournaling, setIsDoneJournaling] = useState(false)
 
@@ -198,6 +202,18 @@ export function SavedEntriesList({
               <p className="text-sm leading-relaxed text-white/80">
                 {entry.reflection}
               </p>
+            </div>
+          ) : reflectingIds.has(entry.id) ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1.5 text-sm text-white/70"
+            >
+              <span
+                aria-hidden="true"
+                className="h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-primary motion-reduce:animate-none"
+              />
+              Reflecting on your words&hellip;
             </div>
           ) : (
             <button

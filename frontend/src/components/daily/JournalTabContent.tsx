@@ -12,10 +12,8 @@ import {
   JOURNAL_DRAFT_KEY,
   VERSE_FRAMINGS,
 } from '@/constants/daily-experience'
-import {
-  getJournalPrompts,
-  getJournalReflection,
-} from '@/mocks/daily-experience-mock-data'
+import { getJournalPrompts } from '@/mocks/daily-experience-mock-data'
+import { fetchJournalReflection } from '@/services/journal-reflection-service'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { JournalInput } from '@/components/daily/JournalInput'
 import { SavedEntriesList } from '@/components/daily/SavedEntriesList'
@@ -71,6 +69,10 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
   const [promptIndex, setPromptIndex] = useState(() =>
     Math.floor(Math.random() * allPrompts.length),
   )
+
+  // Per-entry reflection loading state. Set<string> of entry IDs currently
+  // fetching a reflection — supports multiple concurrent reflects (one per entry).
+  const [reflectingIds, setReflectingIds] = useState<Set<string>>(new Set())
 
   // Saved entries — load from persistent store on mount
   const [savedEntries, setSavedEntries] = useState<SavedJournalEntry[]>(() => {
@@ -265,12 +267,29 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
       authModal?.openAuthModal('Sign in to reflect on your entry')
       return
     }
-    const reflection = getJournalReflection()
-    setSavedEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId ? { ...e, reflection: reflection.text } : e,
-      ),
-    )
+    const entry = savedEntries.find((e) => e.id === entryId)
+    if (!entry) return
+
+    setReflectingIds((prev) => {
+      const next = new Set(prev)
+      next.add(entryId)
+      return next
+    })
+
+    // fetchJournalReflection never rejects — it always resolves with a
+    // JournalReflection, falling through to the mock on any error. No .catch needed.
+    fetchJournalReflection(entry.content).then((reflection) => {
+      setSavedEntries((prev) =>
+        prev.map((e) =>
+          e.id === entryId ? { ...e, reflection: reflection.text } : e,
+        ),
+      )
+      setReflectingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(entryId)
+        return next
+      })
+    })
   }
 
   const handleWriteAnother = () => {
@@ -353,6 +372,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
             onWriteAnother={handleWriteAnother}
             onReflect={handleReflect}
             onSwitchTab={onSwitchTab}
+            reflectingIds={reflectingIds}
           />
         )}
 
