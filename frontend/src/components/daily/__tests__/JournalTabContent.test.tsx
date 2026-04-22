@@ -87,7 +87,15 @@ vi.mock('@/data/bible/index', () => ({
   loadChapterWeb: vi.fn(),
 }))
 
+// Mock journal-reflection-service so handleReflect's fetch goes through a vi.fn()
+// that each test can configure independently (resolved / pending / rejected).
+vi.mock('@/services/journal-reflection-service', () => ({
+  fetchJournalReflection: vi.fn(),
+}))
+
 import { loadChapterWeb } from '@/data/bible/index'
+import { fetchJournalReflection } from '@/services/journal-reflection-service'
+const mockFetchJournalReflection = fetchJournalReflection as unknown as ReturnType<typeof vi.fn>
 
 const mockChapterData = {
   bookSlug: 'john',
@@ -107,6 +115,11 @@ beforeEach(() => {
   localStorage.setItem('wr_auth_simulated', 'true')
   localStorage.setItem('wr_user_name', 'Eric')
   mockRecordActivity.mockClear()
+  mockFetchJournalReflection.mockReset()
+  mockFetchJournalReflection.mockResolvedValue({
+    id: 'reflect-test',
+    text: 'Thank you for bringing these words here. Test reflection.',
+  })
   // jsdom doesn't implement scrollIntoView
   Element.prototype.scrollIntoView = vi.fn()
 })
@@ -137,6 +150,71 @@ describe('JournalTabContent activity integration', () => {
     await user.click(saveBtn)
 
     expect(mockRecordActivity).toHaveBeenCalledWith('journal')
+  })
+})
+
+describe('JournalTabContent reflection loading UX', () => {
+  async function saveEntry(text: string) {
+    const user = userEvent.setup()
+    const textarea = screen.getByLabelText('Journal entry')
+    await user.type(textarea, text)
+    const saveBtn = screen.getByRole('button', { name: /save entry/i })
+    await user.click(saveBtn)
+    return user
+  }
+
+  it('shows loading pill while reflection is pending and hides the reflect button', async () => {
+    // Never-resolving promise simulates an in-flight reflection.
+    mockFetchJournalReflection.mockReturnValue(new Promise(() => {}))
+
+    renderJournalTab()
+    const user = await saveEntry('Today I felt seen in a way I haven’t in a while.')
+
+    const reflectBtn = await screen.findByRole('button', { name: /reflect on entry from/i })
+    await user.click(reflectBtn)
+
+    expect(screen.getByText(/Reflecting on your words/i)).toBeInTheDocument()
+    // Button is replaced by the loading pill
+    expect(
+      screen.queryByRole('button', { name: /reflect on entry from/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('hides loading pill once reflection resolves and renders the reflection text', async () => {
+    // Default resolved mock from beforeEach returns { text: 'Thank you... Test reflection.' }
+    renderJournalTab()
+    const user = await saveEntry('Today I felt seen in a way I haven’t in a while.')
+
+    const reflectBtn = await screen.findByRole('button', { name: /reflect on entry from/i })
+    await user.click(reflectBtn)
+
+    expect(await screen.findByText(/Test reflection/)).toBeInTheDocument()
+    expect(screen.queryByText(/Reflecting on your words/i)).not.toBeInTheDocument()
+  })
+
+  it('supports multiple entries loading concurrently (reflectingIds is a Set)', async () => {
+    mockFetchJournalReflection.mockReturnValue(new Promise(() => {}))
+
+    renderJournalTab()
+    // Entry A
+    const user = await saveEntry('First entry about trust.')
+    // Entry B — click "Write another" to reset, then add a second entry.
+    await user.click(screen.getByRole('button', { name: /write another/i }))
+    const textarea = screen.getByLabelText('Journal entry')
+    await user.type(textarea, 'Second entry about hope.')
+    await user.click(screen.getByRole('button', { name: /save entry/i }))
+
+    const reflectButtons = await screen.findAllByRole('button', {
+      name: /reflect on entry from/i,
+    })
+    expect(reflectButtons.length).toBeGreaterThanOrEqual(2)
+
+    // Click reflect on entry A and entry B (order doesn't matter)
+    await user.click(reflectButtons[0])
+    await user.click(reflectButtons[1])
+
+    const pills = screen.getAllByText(/Reflecting on your words/i)
+    expect(pills.length).toBe(2)
   })
 })
 
