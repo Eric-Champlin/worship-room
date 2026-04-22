@@ -8,6 +8,32 @@ import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayTabContent } from '../PrayTabContent'
 import type { PrayContext, DevotionalSnapshot } from '@/types/daily-experience'
 
+// Mock the backend proxy service. Forward to the existing mock data so keyword-match
+// assertions in existing tests (e.g., 'anxious' → anxiety prayer) continue to work.
+// vi.mock factories are hoisted — keep the implementation self-contained.
+vi.mock('@/services/prayer-service', async () => {
+  const mockData = await vi.importActual<typeof import('@/mocks/daily-experience-mock-data')>(
+    '@/mocks/daily-experience-mock-data',
+  )
+  return {
+    fetchPrayer: vi.fn((request: string) =>
+      Promise.resolve(mockData.getMockPrayer(request)),
+    ),
+  }
+})
+
+/**
+ * Flush the resolved-Promise microtask queue so the `.then(...)` callback in
+ * PrayTabContent's handleGenerate runs and setState commits. After this, the
+ * response DOM is stable for assertions.
+ */
+async function flushPrayerPromise() {
+  await act(async () => {
+    await Promise.resolve()
+    await Promise.resolve()
+  })
+}
+
 // --- Granular mocks for audio system ---
 const mockLoadScene = vi.fn()
 const mockAudioDispatch = vi.fn()
@@ -171,7 +197,7 @@ describe('PrayTabContent activity integration', () => {
     await generatePrayer(user)
 
     // Advance past the 1500ms prayer generation timeout
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     expect(mockRecordActivity).toHaveBeenCalledWith('pray')
   })
@@ -258,7 +284,7 @@ describe('ambient sound auto-play', () => {
     await generatePrayer(user)
 
     // Advance past prayer generation
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     expect(mockLoadScene).toHaveBeenCalledTimes(1)
     expect(screen.getByText('Sound: The Upper Room')).toBeInTheDocument()
@@ -273,7 +299,7 @@ describe('ambient sound auto-play', () => {
 
     await generatePrayer(user)
 
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Sound indicator should not appear because auto-play was skipped
     expect(screen.queryByText('Sound: The Upper Room')).not.toBeInTheDocument()
@@ -289,7 +315,7 @@ describe('ambient sound auto-play', () => {
 
     await generatePrayer(user)
 
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     const stopBtn = screen.getByRole('button', { name: /stop/i })
     expect(stopBtn).toBeInTheDocument()
@@ -306,7 +332,7 @@ describe('karaoke prayer reveal', () => {
 
     await generatePrayer(user)
 
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Prayer should be displayed
     expect(screen.getByText('Your prayer:')).toBeInTheDocument()
@@ -318,7 +344,7 @@ describe('karaoke prayer reveal', () => {
 
     await generatePrayer(user)
 
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
   })
@@ -329,7 +355,7 @@ describe('karaoke prayer reveal', () => {
 
     await generatePrayer(user)
 
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     const skipBtn = screen.getByRole('button', { name: /skip/i })
     await user.click(skipBtn)
@@ -345,7 +371,7 @@ describe('karaoke prayer reveal', () => {
 
     await generatePrayer(user)
 
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip should be visible initially
     expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
@@ -361,7 +387,7 @@ describe('karaoke prayer reveal', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip to complete the reveal
     const skipBtn = screen.getByRole('button', { name: /skip/i })
@@ -384,7 +410,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip the reveal
     const skipBtn = screen.getByRole('button', { name: /skip/i })
@@ -402,7 +428,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Don't skip — still in reveal
     expect(screen.queryByText('How did that prayer land?')).not.toBeInTheDocument()
@@ -413,7 +439,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip reveal + wait for reflection
     await user.click(screen.getByRole('button', { name: /skip/i }))
@@ -435,7 +461,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip reveal + wait for reflection
     await user.click(screen.getByRole('button', { name: /skip/i }))
@@ -457,7 +483,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab({ onSwitchToJournal: mockOnSwitchToJournal })
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip reveal + wait for reflection
     await user.click(screen.getByRole('button', { name: /skip/i }))
@@ -475,7 +501,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip reveal + wait for reflection
     await user.click(screen.getByRole('button', { name: /skip/i }))
@@ -499,7 +525,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip to see all CTAs
     await user.click(screen.getByRole('button', { name: /skip/i }))
@@ -516,7 +542,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     await user.click(screen.getByRole('button', { name: /skip/i }))
     act(() => { vi.advanceTimersByTime(610) })
@@ -532,7 +558,7 @@ describe('post-prayer reflection prompt', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     await user.click(screen.getByRole('button', { name: /skip/i }))
     act(() => { vi.advanceTimersByTime(610) })
@@ -559,7 +585,7 @@ describe('full prayer experience flow', () => {
     })
 
     // Step 2: Wait for prayer display
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
     expect(screen.getByText('Your prayer:')).toBeInTheDocument()
 
     // Step 3: Skip reveal
@@ -586,7 +612,7 @@ describe('full prayer experience flow', () => {
 
     // Generate first prayer
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Skip reveal
     await user.click(screen.getByRole('button', { name: /skip/i }))
@@ -604,7 +630,7 @@ describe('full prayer experience flow', () => {
     mockLoadScene.mockClear()
     mockAudioDispatch.mockClear()
     await generatePrayer(user, 'Help me with gratitude')
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Verify new prayer appears with fresh reveal
     expect(screen.getByText('Your prayer:')).toBeInTheDocument()
@@ -633,7 +659,7 @@ describe('full prayer experience flow', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     expect(screen.getByRole('button', { name: /copy prayer/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /save prayer/i })).toBeInTheDocument()
@@ -644,7 +670,7 @@ describe('full prayer experience flow', () => {
     renderPrayTab()
 
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     expect(screen.getByText(/journal about this →/i)).toBeInTheDocument()
     expect(screen.getByText(/pray about something else/i)).toBeInTheDocument()
@@ -660,7 +686,7 @@ describe('full prayer experience flow', () => {
     // No auto-play
     expect(mockLoadScene).not.toHaveBeenCalled()
 
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
 
     // Prayer should appear
     expect(screen.getByText('Your prayer:')).toBeInTheDocument()
@@ -988,7 +1014,7 @@ describe('prayer draft persistence', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderPrayTab()
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
     expect(localStorage.getItem('wr_prayer_draft')).toBeNull()
   })
 
@@ -1022,7 +1048,7 @@ describe('prayer draft persistence', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderPrayTab()
     await generatePrayer(user)
-    act(() => { vi.advanceTimersByTime(1600) })
+    await flushPrayerPromise()
     // Prayer draft cleared, journal draft untouched
     expect(localStorage.getItem('wr_prayer_draft')).toBeNull()
     expect(localStorage.getItem('wr_journal_draft')).toBe('My journal entry')

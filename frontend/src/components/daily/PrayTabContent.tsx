@@ -19,7 +19,7 @@ import { DevotionalPreviewPanel } from '@/components/daily/DevotionalPreviewPane
 import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
 import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
 import { getPrayerPrefill } from '@/data/challenge-prefills'
-import { getMockPrayer } from '@/mocks/daily-experience-mock-data'
+import { fetchPrayer } from '@/services/prayer-service'
 import type { MockPrayer, PrayContext, PrayerVerseContext } from '@/types/daily-experience'
 import type { GuidedPrayerSession } from '@/types/guided-prayer'
 
@@ -144,8 +144,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
     }
 
     setIsLoading(true)
-    setTimeout(() => {
-      const result = getMockPrayer(inputText)
+    fetchPrayer(inputText).then((result) => {
       setPrayer(result)
       setIsLoading(false)
       markPrayComplete()
@@ -155,7 +154,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
       } catch {
         // localStorage failure is non-critical
       }
-    }, 1500)
+    })
   }
 
   const handleReset = () => {

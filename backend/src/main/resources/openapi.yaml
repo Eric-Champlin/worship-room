@@ -189,6 +189,44 @@ paths:
         '502': { $ref: '#/components/responses/UpstreamError' }
         '504': { $ref: '#/components/responses/UpstreamTimeout' }
 
+  /api/v1/proxy/ai/pray:
+    post:
+      tags: [Proxy / AI]
+      summary: Generate a personalized prayer
+      description: |
+        Takes a user's prayer request (free text, up to 500 chars) and returns
+        a first-person prayer ("Dear God...Amen.") that addresses the specific
+        content of the request. Crisis keywords trigger a canned crisis prayer
+        with 988/Crisis Text resources, without calling the upstream AI model.
+      operationId: generatePrayer
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PrayerRequest' }
+      responses:
+        '200':
+          description: Generated prayer or crisis prayer
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PrayerResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/SafetyBlocked' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
+
   /api/v1/proxy/maps/places-search:
     post:
       tags: [Proxy / Places]
@@ -470,6 +508,49 @@ components:
         reference: { type: string, example: 'Romans 8:28' }
         text: { type: string }
         explanation: { type: string }
+
+    PrayerRequest:
+      description: Body for `POST /api/v1/proxy/ai/pray`.
+      type: object
+      required: [request]
+      properties:
+        request:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: "I'm anxious about my custody hearing tomorrow"
+          description: The user's free-form prayer request.
+
+    PrayerResponse:
+      description: |
+        Structured prayer response. The `topic` enum includes `crisis` because the
+        server-side crisis-keyword short-circuit can emit a canned crisis prayer
+        that bypasses the upstream model. Gemini-produced responses are always one
+        of the 10 non-crisis values.
+      type: object
+      required: [id, topic, text]
+      properties:
+        id:
+          type: string
+          example: "prayer-anxiety-gen-a8f3"
+        topic:
+          type: string
+          enum:
+            - anxiety
+            - gratitude
+            - healing
+            - guidance
+            - grief
+            - forgiveness
+            - relationships
+            - strength
+            - general
+            - devotional
+            - crisis
+        text:
+          type: string
+          pattern: "^Dear (God|Lord|Father)[,.].*Amen\\.\\s*$"
+          example: "Dear God, I come to You with the weight of tomorrow pressing on me... Amen."
 
     PlacesSearchRequest:
       description: Body for `POST /api/v1/proxy/maps/places-search`.
