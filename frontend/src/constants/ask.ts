@@ -16,5 +16,9 @@ export const POPULAR_TOPICS = [
 ] as const
 
 export const ASK_MAX_LENGTH = 500
-export const ASK_LOADING_DELAY_MS = 2000
+// REMOVED: export const ASK_LOADING_DELAY_MS = 2000
+//
+// Previously used to enforce a cosmetic 2-second "Searching Scripture..." delay
+// before returning mock responses. After AI-1 (ai-integration-ask spec), the
+// loading duration is driven by actual Gemini latency via fetchAskResponse().
 export const ASK_FEEDBACK_KEY = 'wr_chat_feedback'

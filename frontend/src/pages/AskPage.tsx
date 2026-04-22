@@ -16,8 +16,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useToast } from '@/components/ui/Toast'
 import { useScrollReveal, staggerDelay } from '@/hooks/useScrollReveal'
-import { ASK_TOPIC_CHIPS, ASK_MAX_LENGTH, ASK_LOADING_DELAY_MS, ASK_FEEDBACK_KEY } from '@/constants/ask'
-import { getAskResponse } from '@/mocks/ask-mock-data'
+import { ASK_TOPIC_CHIPS, ASK_MAX_LENGTH, ASK_FEEDBACK_KEY } from '@/constants/ask'
+import { fetchAskResponse, type ConversationTurn } from '@/services/ask-service'
 import type { AskResponse, AskFeedback } from '@/types/ask'
 import { SEO } from '@/components/SEO'
 import { ASK_METADATA } from '@/lib/seo/routeMetadata'
@@ -72,8 +72,13 @@ export function AskPage() {
     setFeedback(null)
     setFeedbackThanks(false)
 
-    loadingTimerRef.current = setTimeout(() => {
-      const result = getAskResponse(submittedText)
+    // Build conversation history from prior turns, flattened to role/content pairs.
+    const history: ConversationTurn[] = conversation.flatMap((pair) => [
+      { role: 'user' as const, content: pair.question },
+      { role: 'assistant' as const, content: pair.response.answer },
+    ])
+
+    fetchAskResponse(submittedText, history).then((result) => {
       setConversation((prev) => [...prev, { question: submittedText, response: result }])
       setText('')
       setPendingQuestion(null)
@@ -89,7 +94,7 @@ export function AskPage() {
           block: 'start',
         })
       }, 100)
-    }, ASK_LOADING_DELAY_MS)
+    })
   }
 
   handleSubmitRef.current = handleSubmit
@@ -141,8 +146,13 @@ export function AskPage() {
     }
     setPendingQuestion(question)
     setIsLoading(true)
-    loadingTimerRef.current = setTimeout(() => {
-      const result = getAskResponse(question)
+
+    const history: ConversationTurn[] = conversation.flatMap((pair) => [
+      { role: 'user' as const, content: pair.question },
+      { role: 'assistant' as const, content: pair.response.answer },
+    ])
+
+    fetchAskResponse(question, history).then((result) => {
       setConversation((prev) => [...prev, { question, response: result }])
       setPendingQuestion(null)
       setIsLoading(false)
@@ -156,7 +166,7 @@ export function AskPage() {
           block: 'start',
         })
       }, 100)
-    }, ASK_LOADING_DELAY_MS)
+    })
   }
 
   const handleJournal = () => {

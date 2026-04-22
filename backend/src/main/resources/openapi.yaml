@@ -151,6 +151,44 @@ paths:
         '502': { $ref: '#/components/responses/UpstreamError' }
         '504': { $ref: '#/components/responses/UpstreamTimeout' }
 
+  /api/v1/proxy/ai/ask:
+    post:
+      tags: [Proxy / AI]
+      summary: Ask a Scripture-grounded question
+      description: |
+        Returns an AI-generated answer with 3 supporting Bible verses (WEB translation),
+        a prayer, encouragement, and 3 follow-up questions. Conversation history may be
+        included for multi-turn context. Crisis keywords in the question trigger a canned
+        crisis response without calling the upstream AI model (id="crisis").
+      operationId: askQuestion
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AskRequest' }
+      responses:
+        '200':
+          description: Structured answer or crisis response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AskResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '422': { $ref: '#/components/responses/SafetyBlocked' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
+
   /api/v1/proxy/maps/places-search:
     post:
       tags: [Proxy / Places]
@@ -345,6 +383,93 @@ components:
           type: string
           description: The Gemini model that produced this response. Frontend stores this as-is for cache-key invalidation.
           example: 'gemini-2.5-flash-lite'
+
+    AskRequest:
+      description: Body for `POST /api/v1/proxy/ai/ask`.
+      type: object
+      required: [question]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: 'Why does God allow suffering?'
+          description: The user's free-form life question.
+        conversationHistory:
+          type: array
+          maxItems: 6
+          nullable: true
+          description: |
+            Optional alternating user/assistant turns that precede `question`. Capped at
+            6 items (3 round trips). Each entry has `role` ("user" or "assistant") and
+            `content` (1–2000 chars).
+          items: { $ref: '#/components/schemas/ConversationMessage' }
+
+    ConversationMessage:
+      description: A single turn in the prior conversation context.
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    AskResponse:
+      description: |
+        Structured Scripture-grounded response. The `id` enum includes `crisis` because
+        the server-side crisis-keyword short-circuit can emit a canned crisis response
+        that bypasses the upstream model. Gemini-produced responses are always one of
+        the 16 non-crisis values.
+      type: object
+      required: [id, topic, answer, verses, encouragement, prayer, followUpQuestions]
+      properties:
+        id:
+          type: string
+          enum:
+            - suffering
+            - forgiveness
+            - anxiety
+            - purpose
+            - doubt
+            - prayer
+            - grief
+            - loneliness
+            - anger
+            - marriage
+            - parenting
+            - money
+            - identity
+            - temptation
+            - afterlife
+            - fallback
+            - crisis
+        topic: { type: string }
+        answer: { type: string }
+        verses:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items: { $ref: '#/components/schemas/AskVerse' }
+        encouragement: { type: string }
+        prayer: { type: string }
+        followUpQuestions:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items: { type: string }
+
+    AskVerse:
+      description: A single supporting scripture reference.
+      type: object
+      required: [reference, text, explanation]
+      properties:
+        reference: { type: string, example: 'Romans 8:28' }
+        text: { type: string }
+        explanation: { type: string }
 
     PlacesSearchRequest:
       description: Body for `POST /api/v1/proxy/maps/places-search`.
