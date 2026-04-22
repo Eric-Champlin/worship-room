@@ -139,7 +139,16 @@ If invoked with only a plan path (no explicit route), look for an `## Affected F
 ```
  
 Resolution rules:
- 
+
+- **"N/A — backend-only spec" detected** (section body is exactly or contains this text, with no route bullets) — exit cleanly. Display:
+   ```text
+   Backend-only spec detected in {plan_path} (Affected Frontend Routes: N/A).
+   Skipping visual verification — this spec has no frontend changes to verify.
+
+   If this is unexpected and you believe the spec DOES touch the UI, re-run with an explicit route:
+     /verify-with-playwright <route> {plan_path}
+   ```
+   Stop. Do not proceed with any further steps.
 - **Exactly 1 route found** — use it as `target`. Note: "Auto-derived route from plan: {route}".
 - **2+ routes found** — list them and ask the user to pick one (number or full route). Wait for input. Note: "Plan affects multiple routes; verifying user-selected: {chosen}. To verify others, re-run with explicit route per usage examples."
 - **Section not found OR section is empty** — surface to user:

@@ -758,6 +758,10 @@ When reviewing code that touches the backend (Spring Boot, Liquibase, dual-write
 | Crisis detection supersession respected (Universal Rule 13) | OK / VIOLATION / N/A | {file}:{line} |
 | Dual-write pattern: localStorage primary, backend shadow, fire-and-forget | OK / VIOLATION / N/A | {file}:{line} |
 | Feature flag env var documented in `.env.example` | OK / MISSING / N/A | {file} |
+| Testcontainers used for DB integration tests (never H2) | OK / VIOLATION | {file}:{line} |
+| OpenAPI spec EXTENDED at `backend/src/main/resources/openapi.yaml` (never created at `backend/api/openapi.yaml`) | OK / WRONG PATH | {file} |
+| Cutover specs produce `_cutover-evidence/{phase}-a11y-smoke.json` axe-core evidence (Universal Rule 17) | OK / MISSING / N/A | {file} |
+| Drift detection test present for Phase 2 dual-write specs (Decision 12) | OK / MISSING / N/A | {file}:{line} |
 
 **Backend violations are Blocker severity** — same as Worship Room safety violations.
 
@@ -767,7 +771,11 @@ When reviewing code that touches the backend (Spring Boot, Liquibase, dual-write
 
 ## Proxy Additional Checks
 
-**Run this subsection when the diff touches `backend/src/main/java/com/example/worshiproom/proxy/` or any frontend file that calls `/api/v1/proxy/*`.**
+**Run this subsection when the diff touches the proxy package or any frontend file that calls `/api/v1/proxy/*`.**
+
+**PACKAGE PATH NOTE (critical at Forums Wave Phase 1):** The proxy package is currently `com.example.worshiproom.proxy` and becomes `com.worshiproom.proxy` after Phase 1 Spec 1.1 merges. The checks below reference the OLD path (`com.example.worshiproom.proxy`) — this is correct for the current state of `main`. **Post-Spec-1.1**, update every reference in this section: run condition, `@RestControllerAdvice` check, grep commands in this section, and the Run Condition header. Before running this review, check the actual current package with `ls backend/src/main/java/com/` and use that path in all checks below. If you see BOTH packages simultaneously during the Spec 1.1 review itself (the rename is in progress), the checks must pass for whichever package the advice lives in.
+
+**Run Condition:** `backend/src/main/java/com/example/worshiproom/proxy/` (current) OR `backend/src/main/java/com/worshiproom/proxy/` (post-Spec-1.1).
 
 The proxy package wraps upstream third-party APIs (Gemini, Google Places, FCBH). The entire reason the proxy exists is to keep API keys off the frontend and to prevent key/secret leakage. Every review of proxy code MUST verify these invariants:
 
@@ -784,7 +792,7 @@ The proxy package wraps upstream third-party APIs (Gemini, Google Places, FCBH).
 | Proxy endpoints return the standard `{ code, message, requestId, timestamp }` error shape from `ProxyError` | OK / VIOLATION | {file}:{line} |
 | `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` headers present on every `/api/v1/proxy/*` response | OK / MISSING | {file}:{line} |
 | 429 responses include `Retry-After` header (seconds, not date) | OK / MISSING | {file}:{line} |
-| `@RestControllerAdvice` is scoped with `basePackages = "com.example.worshiproom.proxy"` so it doesn't swallow exceptions from non-proxy controllers | OK / OVER-BROAD | {file}:{line} |
+| `@RestControllerAdvice` is scoped with `basePackages = "com.example.worshiproom.proxy"` (or `com.worshiproom.proxy` post-Spec-1.1) so it doesn't swallow exceptions from non-proxy controllers | OK / OVER-BROAD | {file}:{line} |
 | Health endpoint reports provider readiness as booleans only (never the key values themselves) | OK / VIOLATION | {file}:{line} |
 | Frontend no longer references `VITE_GEMINI_API_KEY` / `VITE_GOOGLE_MAPS_API_KEY` / `VITE_FCBH_API_KEY` after migration specs (Specs 2-4) — grep the frontend diff to confirm | OK / STILL PRESENT / N/A | {file}:{line} |
 | Frontend calls the proxy at `/api/v1/proxy/*` using `VITE_API_BASE_URL`, not direct upstream URLs | OK / VIOLATION / N/A | {file}:{line} |
@@ -796,6 +804,11 @@ The proxy package wraps upstream third-party APIs (Gemini, Google Places, FCBH).
 **Recommended grep commands during review:**
 
 ```bash
+# Adjust the package path below based on whether Phase 1 Spec 1.1 has merged:
+#   BEFORE Spec 1.1: backend/src/main/java/com/example/worshiproom/
+#   AFTER  Spec 1.1: backend/src/main/java/com/worshiproom/
+# Run `ls backend/src/main/java/com/` on the current branch to see which applies.
+
 # Verify no API key in logs
 grep -rn 'log\.\(info\|debug\|warn\|error\).*apiKey\|log\.\(info\|debug\|warn\|error\).*getApiKey' backend/src/main/java
 
@@ -807,6 +820,9 @@ grep -rnE 'apiKey\s*=\s*"[A-Za-z0-9_-]{10,}"' backend/src/main/java
 
 # Confirm frontend migration removed the VITE_*_API_KEY references (run for each migrated key)
 grep -rn 'VITE_GEMINI_API_KEY\|VITE_GOOGLE_MAPS_API_KEY\|VITE_FCBH_API_KEY' frontend/src
+
+# Verify no dev-profile DEBUG-level log leak for upstream URL or request body
+grep -iE 'aiza|key=|signature=' /tmp/backend.log 2>/dev/null
 ```
 
 ---

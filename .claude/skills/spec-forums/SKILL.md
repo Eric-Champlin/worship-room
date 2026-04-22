@@ -77,22 +77,23 @@ New branch: {branch_name}
    - **Architectural Decisions** that are referenced in this spec's prerequisites or body
    - **The spec's own section** (if looking up by identifier)
    - **The spec's prerequisites** — read each prereq spec to understand what already exists
-3. **`.claude/rules/03-backend-standards.md`** — Spring Boot conventions, API contract, Liquibase standards
-4. **`.claude/rules/05-database.md`** — schema, table definitions, index patterns
-5. **`.claude/rules/02-security.md`** — auth gating, JWT, rate limiting, input validation
+3. **`_forums_master_plan/spec-tracker.md`** — verify prerequisite specs are marked ✅ (complete) before creating this spec. If any listed prereq is still ⬜ (not started) or ⏳ (in progress), warn the user but don't block — Eric may be intentionally working out of order.
+4. **`.claude/rules/03-backend-standards.md`** — Spring Boot conventions, API contract, Liquibase standards
+5. **`.claude/rules/05-database.md`** — schema, table definitions, index patterns
+6. **`.claude/rules/02-security.md`** — auth gating, JWT, rate limiting, input validation
 
 **Conditionally mandatory (read if the spec touches the area):**
 
-6. **`.claude/rules/06-testing.md`** — when the spec includes test specifications
-7. **`.claude/rules/07-logging-monitoring.md`** — when the spec involves error tracking or structured logging
-8. **`.claude/rules/08-deployment.md`** — when the spec involves env vars or deployment config
-9. **`.claude/rules/09-design-system.md`** — when the spec touches frontend UI
-10. **`.claude/rules/11-local-storage-keys.md`** — when the spec involves localStorage or dual-write
+7. **`.claude/rules/06-testing.md`** — when the spec includes test specifications
+8. **`.claude/rules/07-logging-monitoring.md`** — when the spec involves error tracking or structured logging
+9. **`.claude/rules/08-deployment.md`** — when the spec involves env vars or deployment config
+10. **`.claude/rules/09-design-system.md`** — when the spec touches frontend UI
+11. **`.claude/rules/11-local-storage-keys.md`** — when the spec involves localStorage or dual-write
 
 **Codebase reconnaissance (always do):**
 
-11. **Existing code in `backend/` and `frontend/`** — understand what's already built so the spec references real files and patterns
-12. **Previous Forums Wave specs in `_specs/forums/`** — match depth, tone, and format of specs already written
+12. **Existing code in `backend/` and `frontend/`** — understand what's already built so the spec references real files and patterns
+13. **Previous Forums Wave specs in `_specs/forums/`** — match depth, tone, and format of specs already written
 
 ---
 

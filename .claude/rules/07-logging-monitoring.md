@@ -16,25 +16,39 @@
 
 ### Framework Log Suppression (MANDATORY for proxy endpoints)
 
-The PII rules above govern what **our own code** logs. Spring's built-in request-processing loggers at DEBUG level emit their own messages that include deserialized request bodies via each record's default `toString()`, which defeats controller-level discipline. For proxy endpoints whose DTOs contain user-submitted content (verse text, journal entries, place queries, Bible ids with query params, etc.), this is a back-door PII leak even when the controller only logs `reference` + `verseTextLength`.
+The PII rules above govern what **our own code** logs. Spring's built-in request-processing loggers at DEBUG level emit their own messages that include deserialized request bodies via each record's default `toString()`, AND Spring's `WebClient` at DEBUG level emits outbound HTTP URLs including query strings — both of which defeat controller-level discipline. For proxy endpoints whose DTOs contain user-submitted content (verse text, journal entries, place queries, Bible ids with query params, etc.) OR whose outbound calls pass API keys via `?key=...` query string (FCBH DBP, Google Maps), this is a back-door PII / secret leak even when the controller only logs safe fields.
 
-**Prod profile is already safe** — `logging.level.org.springframework.web=WARN` suppresses DEBUG body-processor chatter entirely. **Dev profile must suppress it explicitly**, because dev sets `logging.level.org.springframework.web=DEBUG` for useful framework diagnostics (mapping lookups, handler discovery) which collaterally re-enables body logging.
+**Prod profile is already safe** — `logging.level.org.springframework.web=WARN` suppresses DEBUG body-processor and ExchangeFunctions chatter entirely. **Dev profile must suppress it explicitly**, because dev sets `logging.level.org.springframework.web=DEBUG` for useful framework diagnostics (mapping lookups, handler discovery, response status) which collaterally re-enables body logging AND outbound URL logging.
 
-**Required addition to `backend/src/main/resources/application-dev.properties`:**
+**Required additions to `backend/src/main/resources/application-dev.properties`:**
 
 ```properties
-# Suppress Spring's body-processor DEBUG output so request-body records' toString()
+# (1) Suppress Spring's body-processor DEBUG output so request-body records' toString()
 # representations (which contain user content like verseText) don't leak into application logs.
 # Required by 07-logging-monitoring.md § Framework Log Suppression — the PII rule is absolute,
 # not prod-only. Keeping other org.springframework.web DEBUG output useful.
 logging.level.org.springframework.web.servlet.mvc.method.annotation=INFO
+
+# (2) Suppress Spring WebClient's ExchangeFunctions DEBUG output so outbound HTTP URLs
+# (which contain API keys for upstreams that accept keys via query string — FCBH, Google Maps)
+# don't leak into application logs. Added during Spec 4 (ai-proxy-fcbh) Deviation #1 after a
+# `grep -iE 'aiza|key='` check of dev-profile stdout surfaced the keys in plain text. Applies
+# retroactively to Spec 3 Maps as well. Narrow class-level target keeps response-status,
+# timing, and retry diagnostics on reactive.function.client at DEBUG.
+logging.level.org.springframework.web.reactive.function.client.ExchangeFunctions=INFO
 ```
 
-**Why the narrow package** (`...mvc.method.annotation`) **rather than the broader** `...mvc` **or** `...web`: the body-processor (`RequestResponseBodyMethodProcessor`) lives in this specific subpackage. Suppressing only this package keeps mapping / handler / view-resolution DEBUG intact, which is useful during local dev.
+**Why narrow package targeting matters:** The body-processor (`RequestResponseBodyMethodProcessor`) lives at `...mvc.method.annotation`; the outbound URL logger lives at `...reactive.function.client.ExchangeFunctions`. Suppressing only these two specific classes keeps mapping / handler / view-resolution / response-status / WebClient-retry DEBUG intact, which is useful during local dev.
 
-**Rule for new proxy DTOs:** Any time a new proxy spec adds a DTO record containing user-submitted content, this dev-profile suppression applies automatically (the config line above catches all `@RequestBody` deserialization for all proxy endpoints). No per-endpoint action needed. What IS required: do not override `logging.level.org.springframework.web.servlet.mvc.method.annotation` back to DEBUG in any profile-specific or local-override properties file — that re-opens the leak.
+**Rule for new proxy specs:** Any time a new proxy spec adds a DTO record containing user-submitted content OR adds outbound WebClient calls that pass secrets via URL (query string or path), the two dev-profile suppressions above apply automatically — no per-endpoint action needed. What IS required: do not override either `logging.level` key back to DEBUG in any profile-specific or local-override properties file — that re-opens the leak. For specs that introduce new upstream loggers (e.g., `reactor.netty.http.client` if reactive logging changes upstream versions), extend this section with a new suppression line keyed to the same PII / secret-leak principle.
 
-**Verification during Step 24 (end-to-end smoke for any proxy spec):** After a happy-path request, grep `docker compose logs backend` for the user-content fields of your DTO. If any match, the suppression isn't working. Also verify the controller-level INFO log (with the safe-to-log fields like `reference` and `verseTextLength`) still appears.
+**Verification during end-to-end smoke for any proxy spec:** After a happy-path request, run:
+
+```bash
+grep -iE 'aiza|key=|signature=' /path/to/backend.log | wc -l
+```
+
+Expect `0`. If any match, the suppression isn't working. Also grep the backend log for the user-content fields of your DTO; if any match, the body-processor suppression (line 1 above) isn't working either. Also verify the controller-level INFO log (with the safe-to-log fields like `reference` and `verseTextLength`) still appears — if it's gone, you've suppressed too broadly.
 
 ### Error Tracking — Sentry (Spec 1.10d)
 - **Platform:** Sentry (not Rollbar — decision made in Spec 1.10d)

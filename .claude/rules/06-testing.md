@@ -8,7 +8,7 @@
 ### General Rules
 - Run tests automatically after code changes
 - Write tests alongside feature development
-- Ensure ALL tests pass before commits: `./mvnw test && cd frontend && npm test`
+- Ensure ALL tests pass before commits: `./mvnw test && cd frontend && pnpm test`
 - Aim for 80%+ code coverage on new code
 - Focus on critical paths: auth, data persistence, crisis detection, reactive store subscriptions, API contracts, database migrations
 
@@ -155,8 +155,8 @@ Before considering any feature complete:
 
 - [ ] Backend compiles cleanly: `./mvnw compile`
 - [ ] Backend tests pass: `./mvnw test`
-- [ ] Frontend builds cleanly: `npm run build`
-- [ ] Frontend tests pass: `npm test`
+- [ ] Frontend builds cleanly: `pnpm build`
+- [ ] Frontend tests pass: `pnpm test`
 - [ ] Reactive store consumer tests added (if feature reads from a reactive store)
 - [ ] API responses follow standard shape from `03-backend-standards.md`
 - [ ] Liquibase changesets apply cleanly (verified via Testcontainers)

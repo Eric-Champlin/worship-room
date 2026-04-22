@@ -4,7 +4,7 @@ paths: ["backend/**"]
 
 ## Forums Wave Backend Standards
 
-**Status: Active — Phase 3 (Forums Wave) is in progress.** The backend is being built using Spring Boot 3.x with the spec-driven pipeline defined in the Forums Wave Master Plan at `_forums_master_plan/round3-master-plan.md`.
+**Status: AI proxy layer shipped (Gemini, Maps, FCBH via `com.example.worshiproom.proxy.*`); Forums Wave master plan v2.6 ready to execute.** The backend is built using Spring Boot 3.x. The Key Protection Wave closed the proxy layer (Specs 1–4: foundation, Gemini, Maps, FCBH); Forums Wave will extend this backend with auth, Liquibase schemas, and domain services per `_forums_master_plan/round3-master-plan.md`.
 
 **Authority hierarchy:** If this file conflicts with the master plan's Universal Rules or Architectural Decisions, the master plan wins.
 
@@ -184,7 +184,7 @@ com.example.worshiproom/
     └── ai/                        (Spec 2 — GeminiController, GeminiService, GeminiPrompts, request/response DTOs)
 ```
 
-**Proxy subpackage convention (MANDATORY):** Every proxy feature lives under `com.example.worshiproom.proxy.{feature}/` — `proxy.ai` for Gemini (Spec 2), `proxy.places` for Google Maps (Spec 3), `proxy.audio` for FCBH (Spec 4). Feature packages contain their controller + service + prompts/DTOs/helpers specific to that upstream. They NEVER redefine what already exists in `proxy.common` — shared types, exceptions, filters, and handlers always stay in common.
+**Proxy subpackage convention (MANDATORY):** Every proxy feature lives under `com.example.worshiproom.proxy.{feature}/` — `proxy.ai` for Gemini (Spec 2), `proxy.maps` for Google Maps (Spec 3), `proxy.bible` for FCBH (Spec 4). Feature packages contain their controller + service + prompts/DTOs/helpers specific to that upstream. They NEVER redefine what already exists in `proxy.common` — shared types, exceptions, filters, and handlers always stay in common. Note: the master plan v2.6 listed provisional names (`proxy.places`, `proxy.audio`) that were superseded during execution — specs chose domain names (`proxy.maps`, `proxy.bible`) per "spec is feature authority." The current on-disk structure is authoritative.
 
 **Forums Wave target structure (Phase 1+, not current):** When Forums Wave Phase 1 adds authentication and domain logic, new top-level packages (auth/, user/, prayer/, moderation/, friends/, social/, verse/, email/, legal/, notification/, infrastructure/) will sit alongside `proxy/`. Do not create those packages preemptively — Forums Wave specs own them.
 

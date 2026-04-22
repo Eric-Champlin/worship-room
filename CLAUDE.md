@@ -58,7 +58,7 @@ Protocols run in order on a single deep-review branch and produce a consolidated
 - **Spotify Integration**: No Spotify API required. Song of the Day embed uses track IDs from the Worship Room playlist (https://open.spotify.com/playlist/5Ux99VLE8cG7W656CjR2si).
 - **Gamification Philosophy**: "Gentle gamification" — celebrate presence, never punish absence. Grace-based streak repair (1 free/week, 50 pts for additional). Mood data always private; only engagement data visible to friends.
 - **Visual Growth Metaphor**: Animated SVG garden on dashboard that grows through 6 stages matching faith levels.
-- **Content Strategy**: All AI content (prayers, devotionals, insights, chat) is mock/hardcoded for frontend-first build. The Forums Wave (Phase 3) uses curated content only — no LLM integration in MVP. Real AI generation deferred to a future wave. **Exception:** BB-30/BB-31 Explain and Reflect features use real Gemini 2.5 Flash Lite calls in production via the BB-32 cache layer.
+- **Content Strategy**: Most AI content now uses real Gemini 2.5 Flash Lite via the backend proxy at `/api/v1/proxy/ai/*` (shipped in the AI Integration + Key Protection Waves). Real AI integrations: Ask (`/ask`), Pray (AI prayer generation), Journal Reflection, BB-30 Explain Passage, BB-31 Reflect on Passage — all cached via the BB-32 `bb32-v1:` localStorage layer. AI Plan Generation remains mock (deferred). **Forums Wave** (Phase 3) keeps Prayer Wall content as user-generated plain text — no LLM generation in MVP.
 - **Liturgical Calendar**: Algorithmic Easter calculation (Computus) with automatic season detection. Seasons affect dashboard greeting, devotional priority, Verse of the Day, landing page banner, QOTD, and navbar icon.
 - **Dark Theme**: App uses dark theme throughout. Light mode deferred to Phase 4. Bible reader supports three reader-only themes (midnight default, parchment, sepia) scoped to the BibleReader chrome only.
 - **Navigation**: 5 top-level nav items (Daily Hub, Bible, Grow, Prayer Wall, Music) + Local Support dropdown + avatar dropdown for authenticated users. Mobile: grouped section drawer.
@@ -79,7 +79,7 @@ Authentication (mock/simulated, real JWT in Phase 3), React Router, Landing Page
 
 ### Daily Experience
 
-Mood Check-In (5 moods, crisis detection, mood-to-content recommendations), Prayer (AI generation, KaraokeText reveal, draft auto-save with auth-wall persistence), Journal (Guided/Free Write, voice input, draft auto-save), Meditation (6 types, verse-aware navigation from devotional via Spec Z), Audio-Guided Prayer (8 sessions, TTS narration), Persistent Ambient Pill (Wave 7 sticky FAB).
+Mood Check-In (5 moods, crisis detection, mood-to-content recommendations), Prayer (real Gemini AI generation via backend proxy, KaraokeText reveal, draft auto-save with auth-wall persistence), Journal (Guided/Free Write, voice input, draft auto-save, real Gemini Reflection via backend proxy), Meditation (6 types, verse-aware navigation from devotional via Spec Z), Audio-Guided Prayer (8 sessions, TTS narration), Persistent Ambient Pill (Wave 7 sticky FAB).
 
 ### Bible & Scripture (post-wave)
 
@@ -114,7 +114,14 @@ Friends (mutual model, encouragements 3/day, nudges 1/week), Leaderboard (friend
 
 ### AI Features
 
-AI Bible Chat (`/ask` with follow-ups), AI Prayer Generation (devotional-context aware), AI Plan Generation, BB-30 Explain Passage (real Gemini), BB-31 Reflect on Passage (real Gemini).
+**All five real AI features route through the backend proxy at `/api/v1/proxy/ai/*`** (no more frontend Gemini key):
+- AI Bible Chat (`/ask` with follow-ups) — real Gemini via backend (AI-1)
+- AI Prayer Generation (devotional-context aware) — real Gemini via backend (AI-2)
+- AI Journal Reflection — real Gemini via backend (AI-3)
+- BB-30 Explain Passage — real Gemini via backend (migrated in Spec 2 of Key Protection Wave)
+- BB-31 Reflect on Passage — real Gemini via backend (migrated in Spec 2 of Key Protection Wave)
+
+All five are cached via the BB-32 `bb32-v1:` localStorage layer (7-day TTL, 2 MB cap, oldest-first eviction). AI Plan Generation remains mock.
 
 ### Music & Audio
 
@@ -236,9 +243,28 @@ The largest single wave in the project's history. Rebuilt the Bible reader, adde
 - **Search and personal layer (BB-42, BB-43, BB-45, BB-46)** — Full-text scripture search (BB-42), reading heatmap and Bible progress map (BB-43), verse memorization deck (BB-45), verse echoes (BB-46).
 - **The wave introduced the BB-45 store mirror anti-pattern as a documented hazard.** Components consuming reactive stores must use the store's hook, not local `useState`. See `11-local-storage-keys.md` § "Reactive Store Consumption" and `_protocol/04-prompt-architecture-and-pattern-consistency.md` Phase 1E.
 
-**Phase 3 — Forums Wave** (ACTIVE — current work)
+**AI Integration Wave** ✅ COMPLETE
 
-The largest backend wave in the project's history. 138 specs across 19 phases (Phase 0 → Phase 16), documented in the Forums Wave Master Plan at `_forums_master_plan/round3-master-plan.md` (v2.6, 622 KB). This wave migrates Worship Room from a frontend-only localStorage app to a full-stack Spring Boot + PostgreSQL application with real auth, a community prayer wall, user profiles, moderation, notifications, search, and email.
+Shipped three frontend AI features as real Gemini integrations, converting them from mock/hardcoded content. All three call Gemini directly from the frontend during this wave (migrated to the backend proxy in the subsequent Key Protection Wave, so this footprint is transitional).
+
+- **AI-1 Ask** (`/ask`) — Real Gemini with follow-up conversation threading and response caching via BB-32.
+- **AI-2 Pray** — Real Gemini prayer generation in the Daily Hub Pray tab. Devotional-context aware, KaraokeText reveal preserved, draft auto-save preserved.
+- **AI-3 Journal Reflection** — Real Gemini reflection on journal entries via the Bible reader and Daily Hub Journal tab. Response cached via BB-32.
+
+**Key Protection Wave** ✅ COMPLETE
+
+The first backend-heavy wave in the project. Migrated all three external API integrations from frontend direct-calls to a Spring Boot proxy layer, eliminating every `VITE_*_API_KEY` secret from the frontend bundle. Closed in four specs:
+
+- **Spec 1 — `ai-proxy-foundation`** — Backend proxy skeleton at `com.example.worshiproom.proxy.*`: `ProxyConfig`, `ProxyResponse`, `ProxyError`, `ProxyException` hierarchy, `RequestIdFilter` (HIGHEST_PRECEDENCE) for MDC-backed request ID threading, `RateLimitFilter` (HIGHEST_PRECEDENCE + 10) scoped to `/api/v1/proxy/**` with bucket4j + Caffeine-backed bounded buckets, package-scoped `ProxyExceptionHandler` with global `RateLimitExceptionHandler` companion, CORS policy with exposed rate-limit headers, `WebClient` bean with request timeouts, and the `/api/v1/health` endpoint reporting per-provider configured state. Dev profile `application-dev.properties` with proxy rate-limit tuning; prod profile with WARN-level org.springframework.web suppression.
+- **Spec 2 — `ai-proxy-gemini`** — Migrated Gemini from frontend direct-calls to `/api/v1/proxy/ai/*` via `proxy.ai.GeminiController` + `GeminiService`. All five real AI features (Ask, Pray, Journal Reflection, BB-30 Explain, BB-31 Reflect) now route through the backend. `VITE_GEMINI_API_KEY` removed from the frontend bundle. Added `SafetyBlockException` → 422 `SAFETY_BLOCK`.
+- **Spec 3 — `ai-proxy-maps`** — Migrated Google Maps Places API from frontend direct-calls to `/api/v1/proxy/maps/*` via `proxy.maps.MapsController` + `GoogleMapsService`. Local Support feature fully migrated. `VITE_GOOGLE_MAPS_API_KEY` removed from the frontend bundle. Per-IP rate limiting inherited from Spec 1. Surfaced the log-leak defense-in-depth pattern (frontend-side cache-on-success behavior in `maps-readiness.ts`).
+- **Spec 4 — `ai-proxy-fcbh`** — Migrated FCBH DBP v4 audio metadata from frontend direct-calls to `/api/v1/proxy/bible/*` via `proxy.bible.FcbhController` + `FcbhService` + `FcbhCacheKeys`. Four endpoints (`/bibles`, `/filesets/{id}`, `/filesets/{id}/{book}/{chapter}`, `/timestamps/{id}/{book}/{chapter}`), three bounded Caffeine caches (bibles 10×7d, filesets 20×7d, chapters 2000×6h), `FcbhNotFoundException` → 404 to preserve AudioPlayButton silent-fallback UX, new `fcbh-readiness.ts` async probe replacing synchronous `isFcbhApiKeyConfigured()`, 9 test-mock swaps, `VITE_FCBH_API_KEY` removed from the frontend bundle. Introduced **Deviation #1**: `logging.level.org.springframework.web.reactive.function.client.ExchangeFunctions=INFO` in dev profile after grep surfaced the FCBH key in dev-profile stdout DEBUG logs; retroactively fixes the same leak class for Spec 3 Maps call paths.
+
+Post-merge operational closure: Maps key rotated in GCP Console (billing verified clean); Gemini and FCBH keys pending rotation per user-driven schedule. GitHub secret-scanning alert for the leaked Maps key closed as Revoked. **Zero secret API keys in the frontend bundle.**
+
+**Phase 3 — Forums Wave** (READY TO START — Key Protection Wave cleared the backend runway)
+
+The largest backend wave in the project's history. 138 specs across 19 phases (Phase 0 → Phase 16), documented in the Forums Wave Master Plan at `_forums_master_plan/round3-master-plan.md` (v2.6, 622 KB). This wave extends the Spring Boot backend with real JWT auth, a community prayer wall, user profiles, moderation, notifications, search, and email. The AI Integration + Key Protection Waves have already shipped the proxy layer (`com.example.worshiproom.proxy.*`); Forums Wave Phase 1 will rename the group ID and add auth / Liquibase / JPA on top of that foundation.
 
 **Master plan is the source of truth for all Phase 3 work.** The plan contains 17 Universal Rules, 17 Architectural Decisions, and detailed per-spec acceptance criteria. CC must read the relevant spec section from the master plan before executing any Forums Wave work.
 
@@ -279,18 +305,26 @@ Light mode toggle, real TTS audio files, performance optimization, native app pl
 
 Run `pnpm test`, `pnpm lint`, and `pnpm build` to get current build health for any specific commit. The historical snapshot below is from the most recent recon and may be outdated — always verify before relying on these numbers.
 
-**Note: the BB-30 through BB-46 Bible redesign + polish wave shipped after the test count below was last measured.** The wave added approximately 600+ new tests across the AI features, personal layer stores, accessibility audit, performance baselines, BB-37 cleanup, and BB-37b audit. The current passing count is meaningfully higher than the table shows. Re-verify with `pnpm test` before relying on any specific number.
+**Note: the BB-30 through BB-46 Bible redesign + polish wave, the AI Integration Wave (AI-1/AI-2/AI-3), and the Key Protection Wave (Specs 1–4 of ai-proxy-*) all shipped after the test count below was last measured.** The cumulative additions are substantial:
+- Bible redesign + polish added ~600+ tests across AI features, personal layer stores, accessibility audit, performance baselines, and final certification.
+- AI Integration Wave added frontend tests for Ask/Pray/Journal Reflection with real Gemini wiring.
+- Key Protection Wave added ~280 backend tests (ProxyConfig + filters + exception handling + 3 service test classes + 3 controller test classes + 3 integration test classes + cache key tests) plus frontend mock swaps across 9 test files.
+
+The current passing count is meaningfully higher than the table shows. Re-verify with `./mvnw test` + `pnpm test` before relying on any specific number.
+
+**Frontend baseline (post-Key-Protection):** 8,811 pass / 11 fail across 7 files. The 11 failures are pre-existing and unrelated to any AI / Maps / FCBH proxy work (orphan test importing a deleted hook, CSS class drift in one plan browser test, logged-out mock listing cards in Local Support / Counselors / Celebrate Recovery / Churches, and a Pray loading-text timing flake). Documented during Spec 4 execution; scoped as deferred tech debt rather than in-scope cleanup. Any NEW failing file or count > 11 after a Forums Wave spec lands is a regression.
 
 | Metric                   | Status                                                                      |
 | ------------------------ | --------------------------------------------------------------------------- |
 | Build                    | PASSES (verify with `pnpm build`)                                           |
-| Tests                    | 4,862+ pass / 0 fail (Round 2 wrap-up baseline; BB-30-46 wave added more)   |
+| Backend tests            | ~280 pass / 0 fail (post-Spec-4 Key Protection Wave baseline)               |
+| Frontend tests           | ~8,811 pass / 11 pre-existing fail (documented above; verify with `pnpm test`) |
 | Lint                     | Verify with `pnpm lint` before relying on a count                           |
 | TypeScript strict        | Enforced                                                                    |
 | PWA                      | Healthy (BB-39 formalized: manifest, SW, runtime caching, install prompt)   |
 | Content sets             | All meet spec targets                                                       |
 | Translation consistency  | Clean (zero non-WEB references)                                             |
-| Security                 | Clean (no secrets in source)                                                |
+| Security                 | Clean (Key Protection Wave closed: zero secret API keys in frontend bundle) |
 | SEO                      | Comprehensive (BB-40: every route has `<SEO>`, JSON-LD on 7+ pages)         |
 | Main bundle              | Verify with `frontend/scripts/measure-bundle.mjs` (BB-36 added measurement) |
 | Largest chunk            | Recharts isolated via manualChunks                                          |

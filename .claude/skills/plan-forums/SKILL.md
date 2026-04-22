@@ -76,10 +76,11 @@ Explore the codebase to ground the plan in reality. **Prioritize in this order:*
 4. **`.claude/rules/05-database.md`** — schema, table definitions, naming conventions
 5. **`.claude/rules/02-security.md`** — JWT, rate limiting, auth patterns
 6. **`.claude/rules/06-testing.md`** — test patterns, Testcontainers setup
-7. **Existing backend code** — `backend/src/main/java/com/worshiproom/` for established patterns
+7. **Existing backend code** — current package is `backend/src/main/java/com/example/worshiproom/` until Phase 1 Spec 1.1 renames it to `backend/src/main/java/com/worshiproom/`. Use the old path for specs that execute BEFORE Spec 1.1 (Phase 0, Phase 0.5, and Spec 1.1 itself); use the new path for specs that execute AFTER Spec 1.1 (every Phase 1.2+ spec through Phase 16). If unsure, grep the current repo: `ls backend/src/main/java/com/` will show which package actually exists on the current branch.
 8. **Existing frontend code** — `frontend/src/` for dual-write patterns, hooks, components
-9. **Existing Liquibase changesets** — `backend/src/main/resources/db/changelog/` for naming and ordering
-10. **Existing tests** — `backend/src/test/` and `frontend/__tests__/` for test structure patterns
+9. **Existing Liquibase changesets** — `backend/src/main/resources/db/changelog/` for naming and ordering. Before assigning a new changeset filename, run `ls backend/src/main/resources/db/changelog/` and confirm no existing file has the same `YYYY-MM-DD-NNN` prefix as yours. A collision will cause Liquibase checksum failure on deploy.
+10. **Existing tests** — `backend/src/test/` for backend test patterns, `frontend/src/**/*.test.tsx` (colocated with source, NOT `frontend/__tests__/`) for frontend test patterns
+11. **Existing OpenAPI spec** — `backend/src/main/resources/openapi.yaml` ALREADY EXISTS (shipped by Key Protection Wave with shared schemas `ProxyResponse` + `ProxyError` and 10+ proxy endpoints). Forums Wave specs EXTEND this file — add new paths that `$ref` the shared components; do NOT create a new file at `backend/api/openapi.yaml` (that path was provisional in master plan v2.6 and is superseded by v2.7).
 
 **For backend-heavy specs, discover:**
 - Project structure and package conventions
@@ -133,18 +134,25 @@ Use this structure:
 
 **If this is a standalone backend spec (no master plan reference), write "N/A — standalone spec, see `.claude/rules/` files for applicable conventions" and skip the checklist below. Per-step verification commands are unchanged.**
 
-Before implementing, confirm this plan respects:
-- [ ] Rule 1: No git operations by CC
-- [ ] Rule 3: Liquibase filenames follow `YYYY-MM-DD-NNN-description.xml`
-- [ ] Rule 4: OpenAPI spec updated and frontend types regenerated (if API changes)
-- [ ] Rule 5: Constants use i18n-ready structure (if user-facing text)
-- [ ] Rule 6: Tests written for all new functionality
-- [ ] Rule 12: Anti-pressure copy discipline (if spec has user-facing text)
-- [ ] Rule 13: Crisis detection supersession (if spec touches vulnerable content)
-- [ ] Rule 14: Plain text only for user-generated content
-- [ ] Rule 15: Rate limiting on all endpoints with standard headers
-- [ ] Rule 17: Accessibility smoke test (if this is a cutover spec)
-- [ ] {Other relevant rules for this specific spec}
+All 17 Universal Rules from `_forums_master_plan/round3-master-plan.md`. Check EVERY rule — mark as applicable (✅), not applicable for this spec (N/A), or needs-attention (⚠️):
+
+- [ ] Rule 1: No git operations by CC (CC never commits, pushes, or runs git checkout/reset/stash)
+- [ ] Rule 2: Master Plan Quick Reference read before planning begins
+- [ ] Rule 3: Liquibase filenames follow `YYYY-MM-DD-NNN-description.xml` with rollback block; no raw SQL, no `ddl-auto`
+- [ ] Rule 4: OpenAPI spec EXTENDED at `backend/src/main/resources/openapi.yaml` (NOT created at `backend/api/openapi.yaml`); frontend types regenerated via `openapi-typescript`
+- [ ] Rule 5: User-facing strings in Copy Deck with i18n-ready constants structure; Anti-Pressure Copy Checklist applied
+- [ ] Rule 6: Tests written for all new functionality (JUnit + Testcontainers backend; Vitest + RTL frontend; Playwright E2E where relevant)
+- [ ] Rule 7: New `wr_*` localStorage keys documented in `11-local-storage-keys.md` with store module path + subscription pattern
+- [ ] Rule 8: BB-45 anti-pattern forbidden (reactive store consumers use the hook, not mirrored `useState`; tests mutate store after mount)
+- [ ] Rule 9: Accessibility not optional (keyboard nav, ARIA, focus management, `prefers-reduced-motion`, WCAG AA contrast, 44×44px touch targets, Lighthouse A11y 95+)
+- [ ] Rule 10: Performance not optional (Lighthouse Perf/Best/SEO 90+, animation tokens from `animation.ts` not hardcoded, bundle regression ≤50 KB without justification)
+- [ ] Rule 11: Brand voice mandatory (pastor's-wife test on every copy string, no exclamation points near vulnerability, scripture as gift not decoration)
+- [ ] Rule 12: Anti-pressure design (no streaks-as-shame, no FOMO, no comparison framing, no false urgency on Prayer Wall)
+- [ ] Rule 13: Crisis detection supersession (backend crisis classifier on post/comment writes; fail-closed in UI; `posts.crisis_flag=true` when triggered)
+- [ ] Rule 14: Plain text only for user-generated content (no HTML, no Markdown, no `dangerouslySetInnerHTML`; `white-space: pre-wrap` rendering)
+- [ ] Rule 15: Rate limiting on ALL write AND read endpoints with standard headers + `Retry-After` on 429
+- [ ] Rule 16: Respect existing patterns (extend existing components, migrate existing localStorage keys, preserve existing UX flows unless explicitly superseded)
+- [ ] Rule 17: Per-phase cutover specs produce `_cutover-evidence/{phase}-a11y-smoke.json` axe-core evidence + keyboard walkthrough + VoiceOver spot-check notes
 
 ---
 
@@ -188,8 +196,47 @@ Before implementing, confirm this plan respects:
 - [ ] Docker is running (PostgreSQL + Redis if needed)
 - [ ] Backend compiles cleanly: `./mvnw compile`
 - [ ] Frontend builds cleanly: `pnpm build` (if frontend changes)
-- [ ] No Liquibase changeset filename collisions with existing changesets
+- [ ] No Liquibase changeset filename collisions with existing changesets. Concrete check: `ls backend/src/main/resources/db/changelog/ | grep '^YYYY-MM-DD-'` (substitute the date of your new changeset). If any existing file has your exact date+sequence prefix, bump the sequence number to avoid a checksum conflict on deploy.
 - [ ] {Spec-specific assumptions}
+
+---
+
+## Spec-Category-Specific Guidance
+
+**Before writing Implementation Steps, identify which category this spec falls into and apply the relevant pattern:**
+
+### If this is a DUAL-WRITE spec (Phases 2, 2.5, 3 migration pattern)
+
+Dual-write specs migrate an existing localStorage-backed feature to the backend while keeping localStorage as the read source-of-truth. Required step structure:
+
+1. **Localstorage writer preservation** — the existing write path continues to write to the `wr_*` key unchanged. Do NOT remove or modify the existing writer.
+2. **Backend shadow writer** — add a fire-and-forget POST to the new backend endpoint alongside the localStorage write. Failure must NOT block the localStorage write or surface an error to the user. Log backend failures at WARN level for observability.
+3. **Feature flag wiring** — introduce a `VITE_USE_BACKEND_{FEATURE}` env var (default `false` during dual-write, flipped to `true` at cutover). The read path branches on this flag.
+4. **Drift detection test** — a test comparing localStorage and backend state after a write sequence, asserting parity. Mandatory for Phase 2 activity-engine specs per Decision 12; recommended for other dual-write specs.
+5. **Step order** — backend endpoint first, then frontend shadow writer, then feature flag read branch, then drift test.
+
+### If this is a CUTOVER spec (Phase N.last or explicit cutover spec)
+
+Cutover specs flip the feature flag from `false` to `true` and declare a phase complete. Required steps:
+
+1. **Flag flip step** — set `VITE_USE_BACKEND_{FEATURE}=true` in `.env` + `.env.example`; regenerate any cached env references.
+2. **Smoke test step** — exercise the happy path for every flow touched in the phase, verifying reads come from the backend and localStorage is now shadow.
+3. **Universal Rule 17 accessibility smoke test** — MANDATORY. Produce `_cutover-evidence/{phase}-a11y-smoke.json` from an axe-core run (`@axe-core/playwright` in CI). Add a keyboard-only navigation walkthrough note + VoiceOver spot-check note on 2–3 complex interactions. A cutover spec without this evidence is incomplete per Rule 17.
+4. **Rollback readiness step** — document how to revert (flag back to `false`) if a post-cutover issue emerges. Keep the localStorage writer for one phase after cutover as insurance.
+
+### If this is a BACKEND-ONLY spec (schema, service, endpoint, migration with no UI)
+
+The "Affected Frontend Routes" section is `N/A — backend-only spec`. `/verify-with-playwright` will skip visual verification. Focus on:
+
+1. Liquibase changeset with rollback block (Rule 3)
+2. Testcontainers integration test (06-testing.md — never H2)
+3. OpenAPI spec EXTENSION, not creation (Rule 4 — `backend/src/main/resources/openapi.yaml` already exists)
+4. JPA entity + repository + service + controller with standard response shape
+5. Rate limiting on all endpoints (Rule 15)
+
+### If this is a FRONTEND-ONLY spec inside Forums Wave (rare — most Forums Wave frontend work is dual-write)
+
+Consider whether the non-forums `/plan` skill is the better fit. If the spec clearly references the master plan and Universal Rules, continue with `/plan-forums` but skip all backend-specific rule checks.
 
 ---
 

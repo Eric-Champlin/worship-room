@@ -1,8 +1,8 @@
 # Worship Room — Phase 3: Forums Wave Master Plan
 
-**Version:** 2.6
-**Date:** April 16, 2026
-**Supersedes:** v2.5 (April 16, 2026)
+**Version:** 2.8
+**Date:** April 22, 2026
+**Supersedes:** v2.7 (April 22, 2026)
 **Scope:** Prayer Wall + User Profiles + Activity Engine backend integration. First wave of CLAUDE.md's official Phase 3 (Auth & Backend Wiring). Other features (Daily Hub, Bible, Music, Grow, Local Support) remain on localStorage and migrate in later waves.
 
 **Author context:** Drafted by Claude in conversation with Eric Champlin, based on three Prayer Wall recons, a Profile/Dashboard recon, two rounds of competitor research, and a comprehensive codebase audit (CLAUDE.md, all 11 rule files in `.claude/rules/`, the actual `usePrayerReactions.ts` / `AuthContext.tsx` / `PrayerCard.tsx` / `InteractionBar.tsx` / `prayer-wall-mock-data.ts` / `types/prayer-wall.ts`, the existing `backend/` skeleton, and the existing `prayer-wall-redesign.md` / `prayer-wall-question-of-day.md` / `prayer-wall-category-filter.md` / `prayer-wall-category-layout.md` / `friends-system.md` / `notification-system.md` / `bb45-verse-memorization-deck.md` specs), and 16 architectural decisions made by Eric.
@@ -25,17 +25,17 @@
 
 ### What the Forums Wave Is
 
-The Forums Wave is the first slice of CLAUDE.md's official Phase 3 (Auth & Backend Wiring). It revamps the Prayer Wall and unified user Profiles, ships the first real backend integration (Spring Boot + PostgreSQL + Liquibase + JWT auth), migrates the activity engine and friends system to the backend in dual-write mode, expands Prayer Wall to five post types, layers in twelve hero features, weaves Prayer Wall into Bible / Music / Daily Hub / Local Support, and adds moderation / community-warmth / search / notifications / personal analytics / onboarding / email-push / PWA / accessibility / performance from the start. Approximately 120 specs across 17 phases, executed in dependency order. Other features (Daily Hub data, Bible data, Music data) remain on localStorage during this wave and migrate in later waves of Phase 3.
+The Forums Wave is the first slice of CLAUDE.md's official Phase 3 (Auth & Backend Wiring). It revamps the Prayer Wall and unified user Profiles, ships the first real backend integration (Spring Boot + PostgreSQL + Liquibase + JWT auth), migrates the activity engine and friends system to the backend in dual-write mode, expands Prayer Wall to five post types, layers in twelve hero features, weaves Prayer Wall into Bible / Music / Daily Hub / Local Support, and adds moderation / community-warmth / search / notifications / personal analytics / onboarding / email-push / PWA / accessibility / performance from the start. **156 specs across 19 phases**, executed in dependency order. Other features (Daily Hub data, Bible data, Music data) remain on localStorage during this wave and migrate in later waves of Phase 3.
 
-### The Seventeen Phases
+### The Nineteen Phases
 
 | #   | Phase                                     | Purpose                                                                                                                                                                                         | Approx. specs |
 | --- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | 0   | Backend Foundation Learning               | Teaching document Eric reads before any backend work                                                                                                                                            | 1             |
 | 0.5 | Reaction Persistence Quick Win            | Convert `usePrayerReactions` to a reactive store (no backend needed). Ships day 1.                                                                                                              | 1             |
-| 1   | Backend Foundation                        | Audit existing skeleton, rename group ID, add Liquibase / Spring Security + JWT / OpenAPI / Testcontainers, end-to-end roundtrip                                                                | 17            |
+| 1   | Backend Foundation                        | Audit existing skeleton, rename group ID, add Liquibase / Spring Security + JWT / OpenAPI / Testcontainers, full auth lifecycle (password reset, change password, email verification, change email, account lockout, session invalidation), production hardening (security headers, error code catalog, env var runbook, liveness/readiness, HikariCP tuning, Playwright E2E, community guidelines), end-to-end roundtrip                                                                | 30            |
 | 2   | Activity Engine Migration (Dual-Write)    | Points / streaks / badges / grace / grief pause on backend with dual-write strategy                                                                                                             | 10            |
-| 2.5 | Friends Backend Migration                 | `wr_friends` data and friend request flow to backend                                                                                                                                            | 6             |
+| 2.5 | Friends Backend Migration                 | `wr_friends` data and friend request flow to backend, block + mute user features                                                                                                                                                    | 8             |
 | 3   | Prayer Wall Data Migration                | Posts / comments / reactions / bookmarks / reports / QOTD on backend, frontend service swap, **fixes the reaction bug for cross-device**                                                        | 12            |
 | 4   | Post Type Expansion                       | Prayer Request polish, Testimony, Question, Devotional Discussion, Encouragement, Composer Chooser, Room Selector                                                                               | 10            |
 | 5   | Visual Migration to Round 2 Brand         | FrostedCard, HorizonGlow, 2-line headings, animation tokens, ring colors                                                                                                                        | 6             |
@@ -43,15 +43,15 @@ The Forums Wave is the first slice of CLAUDE.md's official Phase 3 (Auth & Backe
 | 7   | Cross-Feature Integration                 | Bible ↔ Wall, Music ↔ Wall, Daily Hub rituals, Privacy tiers, Local Support bridges                                                                                                             | 8             |
 | 8   | Unified Profile System                    | Username, URL merge to `/u/:username`, Summary/Activity tabs, name canonicalization, customization                                                                                              | 9             |
 | 9   | Ritual & Time Awareness                   | Liturgical theming, Sunday Service Sync, time-of-day copy, Candle Mode                                                                                                                          | 5             |
-| 10  | Community Warmth & Moderation             | First Time badges, Welcomer role, presence cues, Discourse-style trust levels, 7 Cups three-tier escalation, automated flagging, moderation queue, appeal flow, rate limiting, admin foundation | 12            |
+| 10  | Community Warmth & Moderation             | First Time badges, Welcomer role, presence cues, Discourse-style trust levels, 7 Cups three-tier escalation, automated flagging, moderation queue, appeal flow, rate limiting, admin foundation + audit log viewer | 13            |
 | 11  | Search & Discovery                        | Full-text post search, find by author, find by verse reference, find by date                                                                                                                    | 4             |
 | 12  | Notification Taxonomy                     | 14-type notification catalog (7 inherited + 7 prayer-specific/lifecycle types) + notification preferences + 30-day archive / 90-day delete policy                                               | 5             |
 | 13  | Personal Analytics & Insights             | Year-in-review, prayer journey insights, intercession patterns                                                                                                                                  | 4             |
 | 14  | Onboarding & Empty States                 | First-visit walkthrough, suggested first action, find-your-people friend suggestions, warm empty states                                                                                         | 4             |
 | 15  | Email & Push Notifications                | SMTP for comment replies (digest-style), push notification wiring (extends BB-41)                                                                                                               | 5             |
-| 16  | PWA, Offline, Performance & Accessibility | Cached recent feed, queued posts, offline indicator, Lighthouse 90+/95+ for Prayer Wall, BB-35-style accessibility audit                                                                        | 5             |
+| 16  | PWA, Offline, Performance & Accessibility | Cached recent feed + offline banner, queued posts, error boundaries, Lighthouse 90+/95+ for Prayer Wall, BB-35-style accessibility audit                                                                                                           | 7             |
 
-**Total:** approximately 138 specs.
+**Total:** 156 specs.
 
 ### Architectural Decisions (the TL;DR)
 
@@ -59,7 +59,7 @@ These are the whole-project decisions that every spec assumes. Full rationale li
 
 1. **Tech stack matches CLAUDE.md exactly.** Maven + Spring Boot 3.5.11 + Java 21 + Spring Data JPA + Spring Security + JWT + Liquibase + PostgreSQL + Testcontainers + JUnit 5. NOT Gradle, NOT Spring Data JDBC, NOT Firebase Auth, NOT `application.yml` (use `application.properties` to match what is already in the repo).
 
-2. **The backend skeleton already exists.** Phase 1 audits and extends `backend/` rather than creating it from scratch. Existing files: `WorshipRoomApplication.java`, `CorsConfig.java`, `ApiController.java` (with `/api/health` and `/api/hello`), `Dockerfile`, `pom.xml` (Spring Boot 3.5.11). Group ID is currently `com.example.worshiproom` — Phase 1 renames it to `com.worshiproom` for production identity.
+2. **The backend skeleton has EXPANDED significantly since v2.6.** Phase 1 audits and extends `backend/` rather than creating it from scratch — and the "existing" surface is now much larger than v2.6 described. **Current state (post-Key-Protection-Wave, April 22 2026):** the backend contains the proxy layer at `com.example.worshiproom.proxy.*` with ~60+ files across four subpackages (`proxy.common`, `proxy.ai`, `proxy.maps`, `proxy.bible`), ~280 backend tests green, `RateLimitFilter` + `RequestIdFilter` ordered at `HIGHEST_PRECEDENCE`, `ProxyExceptionHandler` + `RateLimitExceptionHandler`, `WebClient` bean with request timeouts, `application-dev.properties` (with rate-limit tuning and two narrow log suppressions per `07-logging-monitoring.md` § Framework Log Suppression), `application-prod.properties`, `openapi.yaml` with shared schemas and 10+ proxy endpoints, and the `/api/v1/health` endpoint already exists reporting `providers.gemini.configured`, `providers.googleMaps.configured`, `providers.fcbh.configured`. **What still holds from v2.6:** group ID is `com.example.worshiproom`; Phase 1 renames it to `com.worshiproom` for production identity. **What changed from v2.6:** Phase 1 Spec 1.1's rename scope went from ~3 files to ~60+ files; its Size is now L (not S) and Risk is Medium (not Low) because filter ordering + WebClient config + the three proxy services must survive the refactor without regression. See the v2.7 rewrite of Spec 1.1 below.
 
 3. **Auth is JWT, not Firebase.** Spring Security + JWT + BCrypt + 1-hour tokens + 12-char password minimum + anti-enumeration on registration + rate-limited login. The existing `AuthContext.tsx` keeps its `useAuth()` interface unchanged for the 121 consumers — only the internal implementation swaps. The `login(name)` signature changes to `login(email, password)` and ~5-10 call sites (the AuthModal, dev login button, welcome wizard) need updates. The 121 consumers that only read `user.name` and `user.id` do NOT change.
 
@@ -160,7 +160,7 @@ The existing `notification-system.md` spec ships 7 notification types in product
 
 **Backend tables:** `snake_case`, plural. `users`, `posts`, `post_comments`, `post_reactions`, `post_bookmarks`, `post_reports`, `activity_log`, `user_badges`, `faith_points`, `streak_state`, `friend_relationships`, `friend_requests`, `notifications_inbox`. Boolean columns prefixed `is_` (`is_anonymous`, `is_answered`, `is_admin`, `is_deleted`). Timestamp columns suffixed `_at` (`created_at`, `last_activity_at`, `answered_at`). Foreign keys suffixed `_id`.
 
-**Backend packages:** `com.worshiproom.{feature}`. Examples: `com.worshiproom.auth`, `com.worshiproom.user`, `com.worshiproom.post`, `com.worshiproom.activity`, `com.worshiproom.moderation`. Phase 1 includes a rename from existing `com.example.worshiproom` — done with the IntelliJ refactor tool to keep tests/imports correct.
+**Backend packages:** `com.worshiproom.{feature}`. Examples: `com.worshiproom.auth`, `com.worshiproom.user`, `com.worshiproom.post`, `com.worshiproom.activity`, `com.worshiproom.moderation`, plus the existing `com.worshiproom.proxy.{common,ai,maps,bible}` packages inherited from the Key Protection Wave. Phase 1 includes a rename from existing `com.example.worshiproom` — done with the IntelliJ refactor tool to keep tests/imports correct. **Note:** v2.6 suggested provisional names `proxy.places` for Maps and `proxy.audio` for FCBH; the shipped implementation uses domain names `proxy.maps` and `proxy.bible` (spec is feature authority). The on-disk structure is authoritative; rules/03-backend-standards.md reflects this.
 
 **API endpoints:** REST-ish, resource-oriented. `/api/v1/posts`, `/api/v1/posts/{id}`, `/api/v1/posts/{id}/reactions`, `/api/v1/users/{username}`, `/api/v1/activity`, `/api/v1/notifications`. Versioned as `/api/v1/` from day one.
 
@@ -333,7 +333,7 @@ These apply to every Forums Wave spec, always, without exception. CC must respec
 
 3. **Use Liquibase for all schema changes.** Never raw SQL against the database. Never JPA `ddl-auto: update` or `ddl-auto: create`. Liquibase changesets only, in `backend/src/main/resources/db/changelog/`. One changeset per logical change. Never edit committed changesets — Liquibase tracks checksums and will fail if a checksum changes. Add a new changeset instead.
 
-4. **Use TypeScript types generated from OpenAPI**, not hand-written API response types. The OpenAPI spec at `backend/api/openapi.yaml` is the contract. The TypeScript types are derivatives in `frontend/src/types/api/generated.ts`, regenerated via `npm run types:generate`. Hand-editing the generated file is forbidden.
+4. **Use TypeScript types generated from OpenAPI**, not hand-written API response types. The OpenAPI spec at `backend/src/main/resources/openapi.yaml` is the contract. The TypeScript types are derivatives in `frontend/src/types/api/generated.ts`, regenerated via `npm run types:generate`. Hand-editing the generated file is forbidden.
 
 5. **All user-facing strings go in a Copy Deck section of the spec**, then into a constants file (e.g., `frontend/src/constants/prayer-wall-copy.ts`). No inline hardcoded strings in components. Brand voice governs all copy. Every string in a spec's Copy Deck must pass the pastor's wife test. Constants files are structured as flat key-value mappings (e.g., `export const PRAYER_WALL_COPY = { composerPlaceholder: "...", submitButton: "...", ... }`) to enable future internationalization via a single key-substitution layer (no current i18n requirement; this is a structural choice that keeps future translation cheap). **Every Copy Deck section also includes an Anti-Pressure Copy Checklist** — a short list of yes/no questions the copy must pass before the spec is considered done: (a) Does any copy use comparison framing ("more than X% of users")? (b) Does any copy use urgency language ("now", "hurry", "X people need...")? (c) Does any copy use exclamation points near vulnerability content (grief, mental health, crisis)? (d) Does any copy use therapy-app jargon ("manage your anxiety", "cope with depression")? (e) Does any copy use streak-as-shame language ("you missed a day", "don't break your streak")? (f) Does any copy use false-scarcity framing ("only 3 spots left", "limited time")? Any "yes" answer requires copy revision before the spec ships.
 
@@ -1331,14 +1331,18 @@ The hook returns the same shape as before (`{ reactions, togglePraying, toggleBo
 
 **Phase-level definition of done:**
 
-- Backend group ID renamed from `com.example.worshiproom` to `com.worshiproom`
+- Backend group ID renamed from `com.example.worshiproom` to `com.worshiproom` across all ~60+ files of the inherited proxy layer (main + tests)
+- All ~280 backend tests from the Key Protection Wave still pass post-rename
+- Three proxy endpoints (`/api/v1/proxy/ai/*`, `/api/v1/proxy/maps/*`, `/api/v1/proxy/bible/*`) still round-trip correctly and report `configured: true` at `/api/v1/health`
+- The two `application-dev.properties` log suppressions (`...mvc.method.annotation=INFO` and `...ExchangeFunctions=INFO`) still work; `grep -iE 'aiza|key=|signature='` on dev-profile stdout returns 0 matches
+- `RequestIdFilter` + `RateLimitFilter` still ordered at `HIGHEST_PRECEDENCE` / `HIGHEST_PRECEDENCE + 10`; `JwtAuthenticationFilter` (Spec 1.4) slots in cleanly after them without breaking proxy rate-limit enforcement
 - `docker compose up -d` starts a local PostgreSQL container alongside the existing backend/frontend services
 - `./mvnw spring-boot:run` starts the backend on `localhost:8080`
 - The frontend at `localhost:5173` can register a real user via the AuthModal
 - The frontend can log in with that user via the AuthModal
 - The frontend makes an authenticated `GET /api/v1/users/me` request and the response confirms both the backend is alive and the JWT validated correctly
 - A Testcontainers integration test runs the full register → login → /me flow in CI
-- OpenAPI spec is committed at `backend/api/openapi.yaml`, types are generated to `frontend/src/types/api/generated.ts`, and the frontend imports the generated types for the auth endpoints
+- OpenAPI spec is committed at `backend/src/main/resources/openapi.yaml` (extended; do NOT recreate — the file already contains shared schemas and 10+ proxy endpoints), types are generated to `frontend/src/types/api/generated.ts`, and the frontend imports the generated types for the auth endpoints
 - Liquibase has changesets for: users table creation, username column addition (placeholder for Phase 8)
 - The `wr_auth_simulated` flag is gone; the AuthContext uses real JWT auth
 - The 121 consumers of `useAuth()` are unchanged; the ~5-10 callers of `login(name)` are updated to `login(email, password)`
@@ -1347,36 +1351,58 @@ The hook returns the same shape as before (`{ reactions, togglePraying, toggleBo
 ### Spec 1.1 — Audit and Rename Backend Skeleton
 
 - **ID:** `round3-phase01-spec01-backend-skeleton-audit`
-- **Size:** S
-- **Risk:** Low
-- **Prerequisites:** Phase 0 read
-- **Goal:** Audit the existing `backend/` folder, rename the group ID from `com.example.worshiproom` to `com.worshiproom`, move existing endpoints under `/api/v1/`, and document the current state in `backend/README.md`.
+- **Size:** **L** (v2.7: increased from S — the Key Protection Wave expanded the backend from ~3 files to ~60+ files across four proxy subpackages; the rename now touches all of them plus their test files)
+- **Risk:** **Medium** (v2.7: increased from Low — filter ordering, WebClient config, and three shipped proxy services must survive the refactor without regression)
+- **Prerequisites:** Phase 0 read; Key Protection Wave merged (Specs 1–4 of `ai-proxy-*`); `./mvnw test` green on `main` before starting
+- **Goal:** Rename the group ID from `com.example.worshiproom` to `com.worshiproom`, preserving the entire shipped proxy layer (`proxy.common`, `proxy.ai`, `proxy.maps`, `proxy.bible`) and all its tests, filters, exception handlers, and configuration. Reconcile the existing `/api/v1/*` endpoints with the plan's original intent. Document the current state in `backend/README.md`.
 
-**Approach:** Open the project in IntelliJ. Use the Refactor → Rename Package operation to rename `com.example.worshiproom` to `com.worshiproom` (this updates all imports automatically). Update `pom.xml` `groupId`. Update `Dockerfile` if any path references include the old package. Move `/api/health` and `/api/hello` to `/api/v1/health` and `/api/v1/hello` by updating `ApiController.java`'s `@RequestMapping("/api")` to `@RequestMapping("/api/v1")`. Update `docker-compose.yml` healthcheck URL accordingly. Run `./mvnw clean test` to confirm everything still compiles and the existing trivial test passes. Update `backend/README.md` with a brief tour of the project structure as it currently stands.
+**Approach (v2.7 rewrite):** Open the project in IntelliJ. Use **Refactor → Rename Package** on the root `com.example.worshiproom` → `com.worshiproom`. IntelliJ will recursively rename every subpackage (`proxy.common`, `proxy.ai`, `proxy.maps`, `proxy.bible`, `proxy.common.*`, `config`, `controller`) and update every `import` statement in both `src/main/java/` and `src/test/java/`. **Never sed-replace package names** — with 60+ files the refactor tool is the only safe path.
 
-**Files to modify:**
+After the rename, update:
+- `backend/pom.xml` — `groupId` from `com.example` to `com.worshiproom` (or keep `com.worshiproom` top-level; both are acceptable)
+- `backend/.mvn/` and any `@PackageMapping` / `@ComponentScan(basePackages=...)` annotations — scan for string literals that reference the old package path
+- `application.properties`, `application-dev.properties`, `application-prod.properties` — grep for `com.example.worshiproom` in any property keys (Liquibase contexts, Spring scanning, logging package paths, etc.). **Critical:** the two `logging.level.org.springframework.web.*.annotation=INFO` / `ExchangeFunctions=INFO` suppressions in `application-dev.properties` do NOT need changes (they're framework classes, not our packages) — but verify they still resolve correctly after the refactor.
+- `backend/src/main/resources/openapi.yaml` — grep for `com.example.worshiproom` in any schema definitions or server URLs (unlikely but possible)
+- `backend/Dockerfile` — grep for the old package path (unlikely but possible)
+- `docker-compose.yml` — healthcheck URL: verify the existing `/api/v1/health` endpoint is used (it should be — that endpoint already exists via the Key Protection Wave and reports `providers.*.configured` booleans). **Important:** do NOT change `ApiController.java`'s `@RequestMapping` — the v2.6 spec instructed to move `/api/health` → `/api/v1/health`, but `/api/v1/health` ALREADY EXISTS and carries provider status. The pre-existing `/api/health` and `/api/hello` endpoints can either (a) be kept as legacy aliases, or (b) be retired via a dedicated follow-up spec. Preserve them for now to avoid breaking any external health probes.
+- `backend/README.md` — replace the v2.6 project-tour template with a tour of the actual current structure: `proxy.common` filters / handlers / types, `proxy.ai` Gemini, `proxy.maps` Google Maps, `proxy.bible` FCBH, the three Caffeine cache layers, the `WebClient` bean, the `/api/v1/health` provider-configured reporting.
+
+Run `./mvnw clean test` to confirm EVERYTHING still compiles and all ~280 existing tests still pass. Run `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev` and smoke-test the three proxy endpoints (`curl /api/v1/proxy/ai/explain`, `curl /api/v1/proxy/maps/geocode?query=Nashville+TN`, `curl /api/v1/proxy/bible/filesets/EN1WEBN2DA/JHN/3`) — all three must return `ProxyResponse`-shaped bodies with valid `data` fields. Grep `/tmp/backend.log` for `com.example.worshiproom` — expect zero matches (anywhere other than in bytecode artifacts, which should have been regenerated).
+
+**Files to modify (v2.7 — non-exhaustive; the IntelliJ refactor will discover more):**
 
 - `backend/pom.xml` (groupId)
-- `backend/src/main/java/com/example/worshiproom/WorshipRoomApplication.java` → `backend/src/main/java/com/worshiproom/WorshipRoomApplication.java` (renamed via IntelliJ refactor)
-- `backend/src/main/java/com/example/worshiproom/config/CorsConfig.java` → `backend/src/main/java/com/worshiproom/config/CorsConfig.java`
-- `backend/src/main/java/com/example/worshiproom/controller/ApiController.java` → `backend/src/main/java/com/worshiproom/controller/ApiController.java` (also: change `@RequestMapping("/api")` to `@RequestMapping("/api/v1")`)
-- `backend/Dockerfile` (no changes expected, but verify)
-- `docker-compose.yml` (healthcheck URL: `/api/v1/health` instead of `/actuator/health`)
-- `backend/README.md` (project tour)
+- Every file under `backend/src/main/java/com/example/worshiproom/` → moved to `com/worshiproom/` (expect 30+ files across: root `WorshipRoomApplication.java`, `config/`, `controller/`, `proxy/common/`, `proxy/ai/`, `proxy/maps/`, `proxy/bible/`)
+- Every file under `backend/src/test/java/com/example/worshiproom/` → moved to `com/worshiproom/` (expect 30+ files mirroring the main structure)
+- `backend/src/main/resources/application.properties`, `application-dev.properties`, `application-prod.properties` (grep for package-path strings)
+- `backend/src/main/resources/openapi.yaml` (grep for package-path strings)
+- `backend/Dockerfile` (grep for package-path strings)
+- `docker-compose.yml` (healthcheck URL verification, not modification)
+- `backend/README.md` (project tour, substantially rewritten)
 
-**Acceptance criteria:**
+**Acceptance criteria (v2.7):**
 
-- [ ] Group ID is `com.worshiproom`
-- [ ] Package structure is `com.worshiproom.*` throughout
-- [ ] `./mvnw clean test` passes
-- [ ] `./mvnw spring-boot:run` starts the backend
-- [ ] `curl http://localhost:8080/api/v1/health` returns `{"status":"ok"}`
-- [ ] `curl http://localhost:8080/api/v1/hello` returns `{"message":"Hello"}`
+- [ ] Group ID is `com.worshiproom` in `pom.xml`
+- [ ] Package structure is `com.worshiproom.*` throughout main + test trees
+- [ ] `./mvnw clean compile` succeeds with zero warnings about unresolved imports
+- [ ] `./mvnw test` passes — ALL ~280 pre-existing tests green; no new failures introduced by the rename
+- [ ] `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev` starts the backend cleanly; all three providers report `configured: true` at `/api/v1/health` (assuming env vars are populated)
+- [ ] Three proxy endpoints round-trip correctly post-rename (curl smoke tests above)
+- [ ] `grep -rn 'com.example.worshiproom' backend/src/` returns zero hits
+- [ ] `grep -iE 'aiza|key=|signature=' /tmp/backend.log` returns zero matches (verifying the two log suppressions in `application-dev.properties` still work post-rename)
 - [ ] `docker compose up --build backend` builds and runs successfully
-- [ ] Healthcheck in docker-compose passes (uses new URL)
-- [ ] README documents the project structure
+- [ ] Healthcheck in docker-compose passes (existing `/api/v1/health` URL)
+- [ ] README documents the current (post-Key-Protection-Wave) project structure including proxy subpackages
 
-**Out-of-band notes for Eric:** Use IntelliJ's refactor tool for the rename — never sed-replace package names. The refactor tool updates imports and references automatically; a sed-replace will miss things in unexpected places.
+**Guardrails (v2.7 — DO NOT):**
+
+- Do NOT change `ApiController.java`'s `@RequestMapping("/api")` annotation to `"/api/v1"` (the v2.6 instruction) — `/api/v1/health` and `/api/v1/hello` already exist as separate endpoints, and the legacy `/api/health` may be referenced by external probes. Preserve both; retire the legacy ones in a follow-up spec if desired.
+- Do NOT modify any `application-*.properties` log-suppression lines (the two narrow `logging.level` entries for `org.springframework.web.*.annotation=INFO` and `ExchangeFunctions=INFO`) — they target framework classes and survive the rename unchanged.
+- Do NOT alter filter ordering (`RequestIdFilter` at `HIGHEST_PRECEDENCE`, `RateLimitFilter` at `HIGHEST_PRECEDENCE + 10`, `RateLimitFilter.shouldNotFilter` scoping to `/api/v1/proxy/**`).
+- Do NOT modify `ProxyExceptionHandler`'s `basePackages` attribute — update it to the new path (`com.worshiproom.proxy`) as part of the rename, but DO NOT broaden it to catch non-proxy exceptions.
+- Do NOT delete `backend/.env.local` or any of its `GEMINI_API_KEY`/`GOOGLE_MAPS_API_KEY`/`FCBH_API_KEY` entries.
+
+**Out-of-band notes for Eric:** Use IntelliJ's refactor tool. Sed-replacing 60+ files is how you break things silently. After the refactor, spot-check: `grep -rn '@RestControllerAdvice' backend/src/main/java/com/worshiproom/proxy/common/` should show `basePackages = "com.worshiproom.proxy"` (updated) — if IntelliJ missed it and it still reads `com.example.worshiproom.proxy`, advice scoping will silently stop working and filter-raised exceptions will fall through to default Spring error handlers.
 
 ### Spec 1.2 — PostgreSQL via Docker Compose
 
@@ -1538,9 +1564,13 @@ The hook returns the same shape as before (`{ reactions, togglePraying, toggleBo
 
 - **ID:** `round3-phase01-spec04-spring-security-jwt`
 - **Size:** L
-- **Risk:** Medium (new concept territory but well-documented patterns)
+- **Risk:** **Medium-High** (v2.7: increased from Medium — must coexist with the shipped proxy filter chain without breaking rate-limit enforcement or request-ID threading)
 - **Prerequisites:** 1.3
-- **Goal:** Add Spring Security and JJWT to the backend. Configure a `JwtAuthenticationFilter` that validates the bearer token and extracts the user ID. Configure `SecurityConfig` to require auth on all `/api/v1/**` routes except `/api/v1/health`, `/api/v1/auth/register`, `/api/v1/auth/login`. Add a BCrypt password encoder bean.
+- **Goal:** Add Spring Security and JJWT to the backend. Configure a `JwtAuthenticationFilter` that validates the bearer token and extracts the user ID. Configure `SecurityConfig` to require auth on all `/api/v1/**` routes except `/api/v1/health`, `/api/v1/auth/register`, `/api/v1/auth/login`, **and the `/api/v1/proxy/**` routes** (which continue to be publicly accessible with per-IP rate limiting until a dedicated follow-up spec decides whether proxy endpoints should require auth; that decision is out of scope for 1.4 and deferred to a post-Phase-1 operational spec). Add a BCrypt password encoder bean.
+
+**Filter coexistence (v2.7 addition — critical):** The backend already has two filters ordered at `HIGHEST_PRECEDENCE` (`RequestIdFilter`) and `HIGHEST_PRECEDENCE + 10` (`RateLimitFilter`). `JwtAuthenticationFilter` must be ordered AFTER both — suggested `HIGHEST_PRECEDENCE + 100` — so that (1) every authenticated request still gets a request ID threaded through MDC, and (2) rate limiting on `/api/v1/proxy/**` still runs before auth (anonymous proxy traffic must still be rate-limited). `SecurityConfig` must use `addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)` or equivalent explicit ordering. Do NOT register the filter inside the default filter chain without explicit ordering — Spring Security's default insertion may invert the order.
+
+**Proxy endpoints and JWT (v2.7 addition):** `/api/v1/proxy/**` endpoints remain anonymous-accessible in Spec 1.4. The AI proxy specs (Specs 2–4 of Key Protection Wave) shipped with per-IP rate limiting and explicitly documented: "Per-IP until JWT auth lands. Once auth is wired, per-user takes precedence for authenticated endpoints." Spec 1.4 does NOT implement the per-user precedence — that's a post-Phase-1 enhancement (likely Phase 6 or a dedicated operational spec). Spec 1.4 only needs to ensure proxy endpoints continue working when an authenticated user hits them (the JWT should be ignored for proxy routes, not rejected).
 
 **Approach:** Add `spring-boot-starter-security` and `io.jsonwebtoken:jjwt-api` (with runtime impl and jackson) to `pom.xml`. Create `JwtService` for signing and parsing tokens. Create `JwtAuthenticationFilter` that extends `OncePerRequestFilter`, reads the `Authorization: Bearer <token>` header, validates via `JwtService`, sets the Spring Security `Authentication` principal to the user ID. Create `SecurityConfig` with the filter chain configuration. Add BCrypt password encoder bean. Read JWT secret from `JWT_SECRET` env var with a development default (clearly marked as dev-only in code comments).
 
@@ -7623,6 +7653,7 @@ These are decisions that have been made but should be revisited if circumstances
 
 ## Change Log
 
+- **2026-04-22 — v2.7** — Post-Key-Protection-Wave reality-drift reconciliation. The AI Integration Wave (AI-1/AI-2/AI-3) and Key Protection Wave (Specs 1–4 of `ai-proxy-*`) both shipped between v2.6 (April 16) and today, adding ~60+ files under `com.example.worshiproom.proxy.{common,ai,maps,bible}` and ~280 green backend tests that v2.6 assumed didn't exist. **Decision 2 rewritten** to describe the current backend state (proxy layer fully shipped with filters / exception handlers / WebClient / dev-profile log suppressions / `/api/v1/health` provider reporting). **Spec 1.1 rewritten** — Size bumped from S to L, Risk from Low to Medium; file list expanded from ~5 files to ~60+ files across four proxy subpackages plus tests; approach rewritten with explicit guidance on filter ordering, log-suppression preservation, `@RestControllerAdvice` basePackages update, and the guardrail that `ApiController.java`'s `@RequestMapping("/api")` should NOT be changed to `"/api/v1"` (that endpoint already exists as a separate route from the Key Protection Wave). **Spec 1.4 extended** with a "Filter coexistence" note (JwtAuthenticationFilter must order after existing `RequestIdFilter` + `RateLimitFilter`, suggested `HIGHEST_PRECEDENCE + 100`) and a "Proxy endpoints and JWT" note (proxy routes stay anonymous-accessible in Phase 1; per-user rate-limit precedence deferred to a post-Phase-1 operational spec). Risk bumped from Medium to Medium-High. **Phase 1 definition of done extended** with five new bullets verifying proxy-layer survival post-rename (all ~280 tests green, three proxy endpoints still round-trip, log suppressions still work, filter ordering preserved). **Backend packages section in Quick Reference updated** to include the inherited `proxy.{common,ai,maps,bible}` packages alongside the new Forums Wave packages, with a note that v2.6's provisional names (`proxy.places`, `proxy.audio`) were superseded by `proxy.maps` and `proxy.bible` during execution. **Path correction:** OpenAPI spec location corrected from `backend/api/openapi.yaml` (v2.6) to `backend/src/main/resources/openapi.yaml` (actual shipped location). No spec count changes; no Appendix C changes; no Universal Rule changes. This is a Phase-1-targeted correction; Phases 2–16 are not affected by the drift.
 - **2026-04-16 — v2.6** — Hygiene pass + Phase 2.5 completeness fix + Rule 17 retrofit correction. **Pre-execution audit uncovered six prereq-graph issues** (1 real architectural: Spec 1.10c depended on 1.10e but preceded it in the file, fixed by physically moving the 1.10c block to after 1.10e and updating Appendix C ordering; 1 spurious forward ref: Spec 4.6b incorrectly listed 6.7 as a prerequisite when the direction was reversed, rephrased to name the feature rather than the spec number; 4 runtime-gated misclassifications: Specs 6.4 and 6.8 listed 10.5 and 10.6 as hard prereqs when both features ship with documented graceful-degradation paths for when the crisis classifier is unavailable — reclassified as "Runtime-gated dependencies" with explicit notes preserving the shipping-before-10-is-safe story). **Four Liquibase changeset filename collisions fixed** (same-date-same-sequence prefixes that would have caused Liquibase checksum conflicts on deploy — renames: scripture-reference-to-posts 2026-04-18-001→002, three username changesets 2026-04-20-001/002/003→2026-04-21-001/002/003, keeping the Phase 8 username trio grouped on one date). **Phase 2.5 completeness fix** (audit surfaced that Decision 8 promises `social_interactions` and `milestone_events` shadow tables in Phase 2.5 but the existing specs only created `friend_relationships` and `friend_requests` — would have caused runtime "table does not exist" errors when Phase 12 notification generators and Phase 13 personal analytics queries ran against the missing tables): Spec 2.5.1 extended to create all four tables with full schemas and CHECK constraints; new Spec 2.5.4b added for the social/milestone dual-write pipeline with fire-and-forget pattern and new `VITE_USE_BACKEND_SOCIAL` env flag; Spec 2.5.5 cutover extended to flip both flags and smoke-test all three pipelines (friends, social interactions, milestone events) plus Universal Rule 17 accessibility smoke test AC. **Two Rule 17 cutover retrofits** (Spec 2.9 Phase 2 Cutover and Spec 2.5.5 Phase 2.5 Cutover were missed in the initial Batch 8 retrofit because they weren't in the retrofit list at the time; added now so all 8 cutovers have explicit Rule 17 ACs with phase-specific evidence paths). **Meta-observation:** the initial audit regex `\d+\.\d+[a-z]?` silently excluded Phase 2.5's 3-part IDs (2.5.1–2.5.5) from prereq and cross-ref checks; re-audited with `\d+\.\d+(?:\.\d+)?[a-z]?` and confirmed Phase 2.5's graph is clean. Metadata synced: QR table (Phase 2.5: 5→6), total spec count (137→138), Appendix C regenerated with Spec 2.5.4b inserted in execution position, Spec 1.10c moved in Appendix C ordering to reflect new post-1.10e execution sequence.
 - **2026-04-16 — v2.5** — Batch 8 polish-tier artifacts. Three new additions addressing the two polish-tier gaps from the v2.0 assessment plus a catalog deliverable that was always implicit but never consolidated: **Universal Rule 17 — Per-phase accessibility smoke test** (new cross-cutting rule requiring axe-core CI scan + keyboard walkthrough + VoiceOver spot-check at every phase cutover, with committed evidence at `_cutover-evidence/{phase}-a11y-smoke.json` — prevents accessibility debt from compounding across 15 phases into a 50+ violation final audit; rule is 17 of 17 total Universal Rules). **Spec 16.3b — Feature Flag Cleanup Pass** (new cleanup spec in Phase 16 that audits every feature flag introduced during the wave, classifies each as RETIRE or KEEP with the feature-flag-vs-user-preference taxonomic line as load-bearing distinction, documents surviving flags in `backend/docs/runbook-feature-flags.md`, removes retired flag code branches with per-flag smoke-test PRs, produces permanent historical ledger of retired flags for future archaeology; 30-day stability floor per flag before retirement). **Appendix D — Deferred to Future Waves** (new consolidated catalog of ~90 explicit deferrals scattered through the wave, grouped by theme: Core features, Profile & identity, Infrastructure, Notifications & engagement, Community & moderation, Search & discovery, Analytics & insights, Legal & compliance, Internationalization & accessibility, Integration, Monetization & sustainability, Process & tooling — plus a final "Explicitly NOT ever shipping" anti-pattern register that catalogs the ~10 ideas explicitly forbidden by the wave's anti-pressure discipline so future-self doesn't accidentally re-open them). Metadata synced: Phase 16 QR count (4→5), total spec count (136→137), Appendix C regenerated to add Spec 16.3b. With this batch, all 9 gaps from the original v2.0 assessment are now addressed. The plan is complete and execution-ready.
 - **2026-04-16 — v2.4** — Batch 6 content specs. Three new specs filling the three most important non-infrastructure gaps from the v2.0 assessment: **Spec 10.7b — Report a User** (user-level pattern-harassment reporting distinct from post-level reports, rate-limited to 3/week, zero-interaction-flag anti-weaponization gate, mass-reporter suspension after 6 closed-no-action reports in 30 days, flows through existing Phase 10.7 moderator queue with separate routing for reports about moderators/admins to Eric-only queue, never notifies the reported user until a moderator takes action — prevents retaliation and chilling effects), **Spec 15.1b — Welcome Email Sequence** (three emails across first 7 days: Day 0 account-ready confirmation signed by Eric personally, Day 3 values-statement-masquerading-as-feature-tour explicitly validating not-posting-yet, Day 7 three-sentence check-in with no CTA, plain-text + HTML, one-click List-Unsubscribe, suppresses for users with active crisis flags and users in account-deletion grace, never resumes for unsubscribed users even if they re-engage — retention lever without retention desperation), **Spec 1.10f — Terms of Service and Privacy Policy Surfaces** (two versioned markdown documents at `/terms` and `/privacy` with first-draft Eric-authored content describing actual app behavior, consent checkbox on registration that cannot be pre-checked with Submit disabled until checked, registration-time version capture in `users.terms_version` and `users.privacy_version`, update-consent modal with summary-of-changes at top and 30-day advance notice, interaction-lock for users who decline an update without silent account suspension, lawyer review scheduled before 500 users). Metadata synced: QR table (Phase 1: 16→17, Phase 10: 11→12, Phase 15: 4→5), total spec count (133→136), Appendix C regenerated with all 136 IDs. These three specs close gaps 4, 5, and 6 from the original v2.0 assessment. Combined with Batch 5's infrastructure foundations and Batch 7's hero spec depth pass, all major structural gaps are now addressed; remaining open items (per-phase accessibility smoke tests, feature flag cleanup catalog, deferred wave 2 catalog) are polish-tier and can be deferred to a post-execution cleanup batch.
@@ -7652,7 +7683,7 @@ These are decisions that have been made but should be revisited if circumstances
 - **Master Plan (this file)** — `/Users/eric.champlin/worship-room/_forums_master_plan/round3-master-plan.md`
 - **Backend** — `/Users/eric.champlin/worship-room/backend/`
 - **Backend Liquibase changelogs** — `/Users/eric.champlin/worship-room/backend/src/main/resources/db/changelog/`
-- **OpenAPI spec** — `/Users/eric.champlin/worship-room/backend/api/openapi.yaml`
+- **OpenAPI spec** — `/Users/eric.champlin/worship-room/backend/src/main/resources/openapi.yaml` (shipped location — Appendix corrected in v2.7 from v2.6's `backend/api/openapi.yaml` path)
 - **Frontend Prayer Wall components** — `/Users/eric.champlin/worship-room/frontend/src/components/prayer-wall/`
 - **Frontend Prayer Wall pages** — `/Users/eric.champlin/worship-room/frontend/src/pages/PrayerWall*.tsx`
 - **Generated API types** — `/Users/eric.champlin/worship-room/frontend/src/types/api/generated.ts`
@@ -7674,6 +7705,12 @@ round3-phase01-spec03-liquibase-setup
 round3-phase01-spec03b-users-timezone-column
 round3-phase01-spec04-spring-security-jwt
 round3-phase01-spec05-auth-endpoints
+round3-phase01-spec05b-password-reset-flow
+round3-phase01-spec05c-change-password
+round3-phase01-spec05d-email-verification
+round3-phase01-spec05e-change-email
+round3-phase01-spec05f-account-lockout
+round3-phase01-spec05g-session-invalidation
 round3-phase01-spec06-user-me-endpoint
 round3-phase01-spec07-testcontainers-setup
 round3-phase01-spec08-dev-seed-data
@@ -7685,6 +7722,13 @@ round3-phase01-spec10d-production-monitoring-foundation
 round3-phase01-spec10e-object-storage-adapter-foundation
 round3-phase01-spec10c-database-backup-strategy
 round3-phase01-spec10f-terms-privacy-policy-surfaces
+round3-phase01-spec10g-security-headers
+round3-phase01-spec10h-error-code-catalog
+round3-phase01-spec10i-env-var-runbook
+round3-phase01-spec10j-liveness-readiness
+round3-phase01-spec10k-hikaricp-tuning
+round3-phase01-spec10l-playwright-e2e
+round3-phase01-spec10m-community-guidelines
 round3-phase02-spec01-activity-schema
 round3-phase02-spec02-faith-points-service
 round3-phase02-spec03-streak-service
@@ -7701,6 +7745,8 @@ round3-phase02-5-spec03-friends-endpoints
 round3-phase02-5-spec04-frontend-friends-dual-write
 round3-phase02-5-spec04b-social-milestone-dual-write
 round3-phase02-5-spec05-phase2-5-cutover
+round3-phase02-5-spec06-block-user
+round3-phase02-5-spec07-mute-user
 round3-phase03-spec01-prayer-wall-schema
 round3-phase03-spec02-mock-data-seed
 round3-phase03-spec03-posts-read-endpoints
@@ -7776,6 +7822,7 @@ round3-phase10-spec07b-report-a-user
 round3-phase10-spec08-appeal-flow
 round3-phase10-spec09-rate-limit-tightening
 round3-phase10-spec10-admin-foundation
+round3-phase10-spec10b-admin-audit-log-viewer
 round3-phase10-spec11-account-deletion-data-export
 round3-phase11-spec01-fulltext-search-schema
 round3-phase11-spec02-search-endpoint
@@ -7800,7 +7847,9 @@ round3-phase15-spec02-comment-reply-digest
 round3-phase15-spec03-weekly-summary
 round3-phase15-spec04-push-notifications
 round3-phase16-spec01-offline-cache
+round3-phase16-spec01b-offline-banner
 round3-phase16-spec02-queued-posts
+round3-phase16-spec02b-error-boundaries
 round3-phase16-spec03-lighthouse-perf
 round3-phase16-spec03b-feature-flag-cleanup-pass
 round3-phase16-spec04-accessibility-audit

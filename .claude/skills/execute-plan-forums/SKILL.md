@@ -122,6 +122,14 @@ Execute the step following the plan's exact specifications.
 4. **Architecture Context** — patterns from reconnaissance
 5. **General best practices** — only when all above are silent
 
+**Critical invariants for backend work (verify before committing each step):**
+
+- **OpenAPI spec location** — `backend/src/main/resources/openapi.yaml`. This file ALREADY EXISTS from the Key Protection Wave with shared schemas (`ProxyResponse`, `ProxyError`) and 10+ proxy endpoints. When the plan says to update the OpenAPI spec, EXTEND this file. Do NOT create a new file at `backend/api/openapi.yaml` (stale provisional path from master plan v2.6). If the plan's file path says `backend/api/openapi.yaml`, flag it as a plan error and STOP before creating the wrong file.
+- **Filter ordering** — `RequestIdFilter` is at `@Order(Ordered.HIGHEST_PRECEDENCE)`, `RateLimitFilter` is at `@Order(Ordered.HIGHEST_PRECEDENCE + 10)` with `shouldNotFilter` scoping to `/api/v1/proxy/**`. Any new filter (JWT auth in Spec 1.4, future middleware) MUST be ordered AFTER both — suggested `HIGHEST_PRECEDENCE + 100` so request IDs and proxy rate limits run first. Verify ordering explicitly; don't rely on Spring's default filter-chain insertion.
+- **Package path** — current package is `com.example.worshiproom` until Phase 1 Spec 1.1 merges. Specs executing before Spec 1.1 use the old path; specs after use `com.worshiproom`. When in doubt, check the actual current package with `ls backend/src/main/java/com/` before writing new Java files.
+- **`@RestControllerAdvice` scoping** — proxy advice is package-scoped (`basePackages = "com.example.worshiproom.proxy"`). Do NOT create a globally-scoped advice for proxy concerns; do NOT broaden the existing advice to catch non-proxy exceptions. Update the `basePackages` value as part of the Spec 1.1 rename (it becomes `com.worshiproom.proxy`).
+- **Testcontainers mandatory for DB tests** — never H2. Extend `AbstractIntegrationTest` from Spec 1.7; do not spin up per-test-class containers.
+
 **Requirements:**
 - Use exact file paths from the plan
 - Follow referenced patterns — when the plan says "follow the pattern in `ExistingService.java`", read that file and match it
@@ -223,13 +231,13 @@ All {N} steps executed successfully.
 |------|-------|---------------|
 (from Execution Log)
 
-## Next Actions
+## Next Actions (user-performed — CC does NOT execute these)
 1. Review all changes
 2. Run full test suite: ./mvnw test && cd frontend && pnpm test
 3. Run /code-review for final quality check
 4. For UI work: /verify-with-playwright {route} for visual check
-5. Commit and push when satisfied
-6. Delete safety backup: git branch -D {BACKUP_BRANCH}
+5. Commit and push when satisfied (git operations are the user's job per Rule 1)
+6. Delete safety backup when confident no rollback is needed: `git branch -D {BACKUP_BRANCH}` (user-executed; CC never runs this)
 ```
 
 **Stop.**

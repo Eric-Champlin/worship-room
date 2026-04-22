@@ -4,15 +4,15 @@
 
 ### Crisis Intervention Protocol
 - **Self-Harm Detection**: Use a lightweight classifier step (LLM or rules+LLM) for crisis detection; keywords are a fallback, not the sole method
-  - **Primary**: Send user input to OpenAI with system prompt: "Is this text indicating self-harm, suicide ideation, or immediate danger? Return JSON only: { \"isCrisis\": boolean, \"confidence\": 0-1, \"category\": \"self-harm|abuse|other|none\" }"
+  - **Primary**: Send user input through the backend AI proxy (`/api/v1/proxy/ai/*`) with system prompt: "Is this text indicating self-harm, suicide ideation, or immediate danger? Return JSON only: { \"isCrisis\": boolean, \"confidence\": 0-1, \"category\": \"self-harm|abuse|other|none\" }". The proxy currently routes to Gemini 2.5 Flash Lite; the provider is an implementation detail behind the proxy and can swap without frontend changes.
   - **Fallback Keywords**: "suicide", "kill myself", "end it all", "not worth living", "hurt myself", etc.
-  - **Important**: Run crisis detection on the backend (not the client) to prevent bypassing
+  - **Important**: Run crisis detection on the backend (not the client) to prevent bypassing. The client-side `containsCrisisKeyword()` function is a courtesy fast-path; the authoritative check is server-side.
   - **Response Parsing**:
     - Parse JSON response deterministically
     - Show crisis resources if: `isCrisis: true` AND `confidence > 0.7`
     - **OR** if `category == "self-harm"` regardless of confidence (fail safe for self-harm)
     - **Fail Closed (UI only)**: If parsing fails OR model returns invalid JSON → treat as `isCrisis=true` and show crisis resources in the UI (better to show resources unnecessarily than miss a real crisis)
-    - **Important**: Fail-closed applies to showing crisis resources in the UI. Do NOT auto-flag content or notify admin unless classification parsing succeeds (or clear keyword match). This prevents false admin alerts when OpenAI returns malformed JSON.
+    - **Important**: Fail-closed applies to showing crisis resources in the UI. Do NOT auto-flag content or notify admin unless classification parsing succeeds (or clear keyword match). This prevents false admin alerts when the upstream LLM returns malformed JSON.
   - Action: Immediately display crisis resources if detected
 - **Crisis Resources Display**:
   - 988 Suicide & Crisis Lifeline: 988
@@ -54,7 +54,7 @@
 
 ### Data Privacy & Safety
 - **User Data**: Never share user's personal information, mood data, or journal entries with third parties
-- **AI Training**: Do not use user data to train AI models (per OpenAI API terms)
+- **AI Training**: Do not use user data to train AI models (per the upstream LLM provider's API terms — Gemini policy currently applies; the proxy isolates this so the provider can change)
 - **Encryption**: See [05-database.md](05-database.md) for encryption policies (journal entries encrypted, prayer wall posts not, encrypt/decrypt on backend only)
 - **Anonymization**: Mood tracking analytics should be anonymized
 
