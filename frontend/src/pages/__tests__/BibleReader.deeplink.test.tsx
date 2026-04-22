@@ -17,11 +17,11 @@ vi.mock('@/lib/audio-engine', () => {
   return { AudioEngineService: MockAudioEngineService }
 })
 
-// BB-26: mock env + audio modules so ReaderChrome's AudioPlayButton renders null
-vi.mock('@/lib/env', async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>
-  return { ...actual, isFcbhApiKeyConfigured: () => false }
-})
+// BB-26 / Spec 4: mock readiness probe so ReaderChrome's AudioPlayButton renders null
+vi.mock('@/services/fcbh-readiness', () => ({
+  getFcbhReadiness: () => Promise.resolve(false),
+  resetFcbhReadinessCache: () => {},
+}))
 vi.mock('@/lib/audio/engine', () => ({ createEngineInstance: vi.fn() }))
 vi.mock('@/lib/audio/media-session', () => ({
   updateMediaSession: vi.fn(),

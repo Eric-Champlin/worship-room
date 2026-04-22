@@ -29,7 +29,7 @@ import {
   resolveFcbhBookCode,
   resolveFcbhFilesetForBook,
 } from '@/lib/audio/book-codes'
-import { isFcbhApiKeyConfigured } from '@/lib/env'
+import { getFcbhReadiness } from '@/services/fcbh-readiness'
 import type { AudioPlayerState } from '@/types/bible-audio'
 
 // Near-copy of ReaderChrome's ICON_BTN with added focus-visible ring. Keep in sync if the base style changes.
@@ -86,9 +86,27 @@ export function AudioPlayButton({
     }
   }, [state.sheetState, state.track, bookSlug, chapter])
 
+  // Spec 4 (ai-proxy-fcbh): async backend readiness probe replaces the
+  // synchronous isFcbhApiKeyConfigured() env check. One probe per session,
+  // cached in fcbh-readiness.ts. While probing (fcbhReady === null), the
+  // audio-URL-loading effect below short-circuits on `fcbhReady !== true`
+  // so the button stays hidden — same UX as when the key is unconfigured.
+  const [fcbhReady, setFcbhReady] = useState<boolean | null>(null)
   useEffect(() => {
     let cancelled = false
-    if (!isFcbhApiKeyConfigured()) {
+    getFcbhReadiness().then((ready) => {
+      if (!cancelled) setFcbhReady(ready)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    // `!== true` handles both null (still probing) and false (not configured)
+    // identically — both render no button, matching existing UX.
+    if (fcbhReady !== true) {
       setAudioUrl(null)
       setFilesetId(null)
       return
@@ -132,7 +150,7 @@ export function AudioPlayButton({
     return () => {
       cancelled = true
     }
-  }, [bookSlug, chapter])
+  }, [bookSlug, chapter, fcbhReady])
 
   // Hidden when audio unavailable (spec #26: fully removed from DOM)
   if (!audioUrl || !filesetId) return null

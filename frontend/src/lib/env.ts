@@ -19,15 +19,17 @@
 // and should migrate to env.ts when those files are next touched.
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
-// Normalize empty-string env to undefined so `!FCBH_API_KEY` is a clean
-// "absent" check regardless of whether the var is missing or set to "".
-const FCBH_API_KEY_RAW = import.meta.env.VITE_FCBH_API_KEY as string | undefined
-const FCBH_API_KEY: string | undefined = FCBH_API_KEY_RAW || undefined
 
 // Note: the Google Maps API key was decommissioned from the frontend in
 // Spec 3 (ai-proxy-maps). All Maps calls route through the backend proxy at
 // /api/v1/proxy/maps/*; the backend holds the key. No frontend code should
 // reintroduce VITE_GOOGLE_MAPS_API_KEY.
+
+// Note: the FCBH API key was decommissioned from the frontend in Spec 4
+// (ai-proxy-fcbh). All DBP calls route through the backend proxy at
+// /api/v1/proxy/bible/*; the backend holds the key. No frontend code should
+// reintroduce VITE_FCBH_API_KEY. Use @/services/fcbh-readiness for the
+// "is FCBH available" check in UI gating.
 
 /**
  * Returns the VAPID public key for Web Push subscriptions, or undefined if
@@ -65,38 +67,3 @@ export function isVapidKeyConfigured(): boolean {
   return !!VAPID_PUBLIC_KEY
 }
 
-/**
- * Returns the FCBH Digital Bible Platform v4 API key, or throws if it is
- * not configured. Call this from the DBP client right before making a
- * network request — never at module load or from feature code that runs
- * for users who haven't hit the audio feature yet.
- *
- * Used by: BB-26 (FCBH Audio Bible Integration), BB-27 through BB-29 and
- * BB-44 which build on BB-26's DBP client.
- */
-export function requireFcbhApiKey(): string {
-  if (!FCBH_API_KEY) {
-    throw new Error(
-      'FCBH API key is not configured. Add VITE_FCBH_API_KEY to frontend/.env.local. ' +
-        'See frontend/.env.example for the expected format.',
-    )
-  }
-  return FCBH_API_KEY
-}
-
-/**
- * No-throw variant — returns the FCBH API key or undefined. Used by the
- * audio cache layer so it can short-circuit without throwing when the key
- * is absent (e.g., in tests).
- */
-export function getFcbhApiKey(): string | undefined {
-  return FCBH_API_KEY
-}
-
-/**
- * Non-throwing check for FCBH key availability — use to conditionally
- * show the audio play button in BibleReader chrome.
- */
-export function isFcbhApiKeyConfigured(): boolean {
-  return !!FCBH_API_KEY
-}

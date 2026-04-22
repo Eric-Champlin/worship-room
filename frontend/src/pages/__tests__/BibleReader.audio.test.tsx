@@ -27,11 +27,12 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
 }))
 
-// Mock env + DBP so the button resolves
-vi.mock('@/lib/env', async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>
-  return { ...actual, isFcbhApiKeyConfigured: () => true }
-})
+// Spec 4: stub readiness to TRUE so the AudioPlayButton proceeds past the gate
+// and the subsequent DBP-client mocks drive the actual assertions.
+vi.mock('@/services/fcbh-readiness', () => ({
+  getFcbhReadiness: () => Promise.resolve(true),
+  resetFcbhReadinessCache: () => {},
+}))
 
 vi.mock('@/lib/audio/audio-cache', async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>

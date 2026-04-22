@@ -9,17 +9,18 @@ import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer'
 import type { AudioPlayerActions } from '@/types/bible-audio'
 import type { EngineEvents } from '@/lib/audio/engine'
 
-// Mock env + audio-cache + dbp-client
+// Spec 4: mock backend readiness probe + audio-cache + dbp-client.
+// The readiness probe replaces the synchronous env-key check.
 const hoisted = vi.hoisted(() => ({
-  isFcbhApiKeyConfigured: vi.fn(),
+  getFcbhReadiness: vi.fn(),
   loadAudioBibles: vi.fn(),
   getChapterAudio: vi.fn(),
 }))
 
-vi.mock('@/lib/env', async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>
-  return { ...actual, isFcbhApiKeyConfigured: hoisted.isFcbhApiKeyConfigured }
-})
+vi.mock('@/services/fcbh-readiness', () => ({
+  getFcbhReadiness: hoisted.getFcbhReadiness,
+  resetFcbhReadinessCache: vi.fn(),
+}))
 vi.mock('@/lib/audio/audio-cache', async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>
   return {
@@ -123,7 +124,7 @@ describe('AudioPlayButton (BB-26)', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
-    hoisted.isFcbhApiKeyConfigured.mockReset()
+    hoisted.getFcbhReadiness.mockReset()
     hoisted.loadAudioBibles.mockReset()
     hoisted.getChapterAudio.mockReset()
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
@@ -135,7 +136,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('renders nothing when FCBH key is not configured', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(false)
+    hoisted.getFcbhReadiness.mockResolvedValue(false)
     render(
       <AudioPlayButton bookSlug="john" bookDisplayName="John" chapter={3} />,
       { wrapper },
@@ -145,7 +146,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('renders nothing when DBP fetch fails', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(true)
+    hoisted.getFcbhReadiness.mockResolvedValue(true)
     hoisted.loadAudioBibles.mockRejectedValue(
       Object.assign(new Error('boom'), { kind: 'network' }),
     )
@@ -161,7 +162,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('renders nothing for an unknown book slug', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(true)
+    hoisted.getFcbhReadiness.mockResolvedValue(true)
     render(
       <AudioPlayButton bookSlug="not-a-book" bookDisplayName="Nope" chapter={1} />,
       { wrapper },
@@ -170,7 +171,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('renders play icon with book-specific aria-label when audio is available', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(true)
+    hoisted.getFcbhReadiness.mockResolvedValue(true)
     hoisted.loadAudioBibles.mockResolvedValue([])
     hoisted.getChapterAudio.mockResolvedValue({
       book: 'JHN',
@@ -186,7 +187,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('calls getChapterAudio with the correct DBP book code and fileset', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(true)
+    hoisted.getFcbhReadiness.mockResolvedValue(true)
     hoisted.loadAudioBibles.mockResolvedValue([])
     hoisted.getChapterAudio.mockResolvedValue({
       book: 'JHN',
@@ -203,7 +204,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('calls EN1WEBO2DA for OT books', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(true)
+    hoisted.getFcbhReadiness.mockResolvedValue(true)
     hoisted.loadAudioBibles.mockResolvedValue([])
     hoisted.getChapterAudio.mockResolvedValue({
       book: 'GEN',
@@ -220,7 +221,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('focus returns to AudioPlayButton after sheet closes', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(true)
+    hoisted.getFcbhReadiness.mockResolvedValue(true)
     hoisted.loadAudioBibles.mockResolvedValue([])
     hoisted.getChapterAudio.mockResolvedValue({
       book: 'JHN',
@@ -264,7 +265,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('focus does not return to AudioPlayButton if the user navigated to a different chapter before close', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(true)
+    hoisted.getFcbhReadiness.mockResolvedValue(true)
     hoisted.loadAudioBibles.mockResolvedValue([])
     hoisted.getChapterAudio.mockImplementation(async (_fileset, book, ch) => ({
       book,
@@ -335,7 +336,7 @@ describe('AudioPlayButton (BB-26)', () => {
   })
 
   it('click when idle triggers actions.play with correct track', async () => {
-    hoisted.isFcbhApiKeyConfigured.mockReturnValue(true)
+    hoisted.getFcbhReadiness.mockResolvedValue(true)
     hoisted.loadAudioBibles.mockResolvedValue([])
     hoisted.getChapterAudio.mockResolvedValue({
       book: 'JHN',
