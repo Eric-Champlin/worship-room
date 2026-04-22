@@ -4,7 +4,7 @@ paths: ["backend/**"]
 
 ## Forums Wave Backend Standards
 
-**Status: AI proxy layer shipped (Gemini, Maps, FCBH via `com.example.worshiproom.proxy.*`); Forums Wave master plan v2.6 ready to execute.** The backend is built using Spring Boot 3.x. The Key Protection Wave closed the proxy layer (Specs 1–4: foundation, Gemini, Maps, FCBH); Forums Wave will extend this backend with auth, Liquibase schemas, and domain services per `_forums_master_plan/round3-master-plan.md`.
+**Status: AI proxy layer shipped (Gemini, Maps, FCBH via `com.example.worshiproom.proxy.*`); Forums Wave master plan v2.8 ready to execute.** The backend is built using Spring Boot 3.x. The Key Protection Wave closed the proxy layer (Specs 1–4: foundation, Gemini, Maps, FCBH); Forums Wave will extend this backend with auth, Liquibase schemas, and domain services per `_forums_master_plan/round3-master-plan.md`.
 
 **Authority hierarchy:** If this file conflicts with the master plan's Universal Rules or Architectural Decisions, the master plan wins.
 
@@ -156,7 +156,7 @@ backend/src/main/resources/db/changelog/
 
 ### Package Structure
 
-**Base package** (decided in Spec 1 `ai-proxy-foundation` and confirmed shipped): **`com.example.worshiproom`**. Do NOT rename. A future Forums Wave spec may migrate to `com.worshiproom` but that is a global rename requiring coordination across imports, package-info files, `pom.xml` `groupId`, Docker image tags, and CI — not in scope for any current spec.
+**Base package:** **`com.example.worshiproom`** until Forums Wave Phase 1 Spec 1.1 merges, then **`com.worshiproom`** globally. The rename is a deliberate step in Spec 1.1 (now sized L, risk Medium in v2.7+ of the master plan) covering ~60+ proxy files + tests + `pom.xml` `groupId` + Docker image tags. **Before writing any backend code, check the actual current package:** `ls backend/src/main/java/com/`. If `example/worshiproom/` still exists on `main`, use the old path. If only `worshiproom/` exists, Spec 1.1 has merged and the new path is canonical. During the Spec 1.1 review itself, both packages may coexist transiently; treat the spec's own instructions as authoritative during that window.
 
 **Current structure (as of Spec 1 merged):**
 ```
@@ -301,7 +301,7 @@ Either pattern is acceptable. The unscoped-companion-advice pattern is simpler f
 ## Forums Wave Master Plan Integration
 
 The Forums Wave Master Plan at `_forums_master_plan/round3-master-plan.md` is the source of truth for:
-- All 138 spec definitions (ID, acceptance criteria, file lists, database changes, API changes)
+- All 156 spec definitions (ID, acceptance criteria, file lists, database changes, API changes)
 - 17 Universal Rules that apply to every spec
 - 17 Architectural Decisions that define the technical foundation
 - Cross-spec dependencies and prerequisite ordering

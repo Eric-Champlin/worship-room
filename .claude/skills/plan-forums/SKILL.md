@@ -80,7 +80,7 @@ Explore the codebase to ground the plan in reality. **Prioritize in this order:*
 8. **Existing frontend code** — `frontend/src/` for dual-write patterns, hooks, components
 9. **Existing Liquibase changesets** — `backend/src/main/resources/db/changelog/` for naming and ordering. Before assigning a new changeset filename, run `ls backend/src/main/resources/db/changelog/` and confirm no existing file has the same `YYYY-MM-DD-NNN` prefix as yours. A collision will cause Liquibase checksum failure on deploy.
 10. **Existing tests** — `backend/src/test/` for backend test patterns, `frontend/src/**/*.test.tsx` (colocated with source, NOT `frontend/__tests__/`) for frontend test patterns
-11. **Existing OpenAPI spec** — `backend/src/main/resources/openapi.yaml` ALREADY EXISTS (shipped by Key Protection Wave with shared schemas `ProxyResponse` + `ProxyError` and 10+ proxy endpoints). Forums Wave specs EXTEND this file — add new paths that `$ref` the shared components; do NOT create a new file at `backend/api/openapi.yaml` (that path was provisional in master plan v2.6 and is superseded by v2.7).
+11. **Existing OpenAPI spec** — `backend/src/main/resources/openapi.yaml` ALREADY EXISTS (shipped by Key Protection Wave with shared schemas `ProxyResponse` + `ProxyError` and 10+ proxy endpoints). Forums Wave specs EXTEND this file — add new paths that `$ref` the shared components; do NOT create a new file at `backend/api/openapi.yaml` (that path was provisional in master plan v2.6, superseded by v2.7; current as of v2.8).
 
 **For backend-heavy specs, discover:**
 - Project structure and package conventions

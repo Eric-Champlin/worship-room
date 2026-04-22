@@ -136,7 +136,7 @@ Spec 1 Round 2 caught this on the rate-limit bucket map (`maximumSize(10_000)` +
   - **Existing email**: No-op (do not create duplicate), return same `200 OK` with same message (prevents enumeration)
   - **Rationale**: Generic message works for both cases without lying (more honest than "Account created" for existing emails)
   - **Email sending**: Do not send different emails (or any email) based solely on account existence (prevents inbox-based enumeration)
-  - **Future Enhancement**: Add email verification flow (send confirmation link before account activation)
+  - **Email verification flow** — Implemented in Forums Wave Spec 1.5d (`email_verified_at` on users, `@RequireVerifiedEmail` gate on write endpoints, 7-day grace period for reads). See Auth Lifecycle section below.
 - **Validation**: Frontend validation (Zod schemas with controlled inputs) + backend validation (Spring Validation)
 - **Storage**: BCrypt hashing with salt (Spring Security default)
 - **Future Enhancement**: Password strength meter, common password blacklist, 2FA
@@ -198,6 +198,19 @@ When a proxy endpoint (`/api/v1/proxy/ai/*`, `/api/v1/proxy/places/*`, `/api/v1/
 ---
 
 ## Forums Wave Security Additions
+
+### Auth Lifecycle (Phase 1 — v2.8 Spec stubs 1.5b through 1.5g)
+
+Specs 1.5b–1.5g close auth lifecycle gaps identified during v2.8 pre-execution review:
+
+- **1.5b Password Reset** — Email-triggered single-use token, 1-hour expiry, anti-enumeration (always 200), rate limited (5/hour per email + 10/hour per IP). Invalidates all sessions on success.
+- **1.5c Change Password** — Current-password gated; invalidates all OTHER sessions (current stays alive).
+- **1.5d Email Verification** — `email_verified_at` on users; `@RequireVerifiedEmail` annotation gates write endpoints (returns 403 `EMAIL_NOT_VERIFIED`). 7-day read grace period. Resend rate-limited 5/hour.
+- **1.5e Change Email** — Password-gated + new-email verification. Old email gets alert notification. Anti-enumeration on new-email uniqueness.
+- **1.5f Account Lockout** — 5 failures in 15 min → 15-min lockout (423 `ACCOUNT_LOCKED`). Per-IP rate limit (20/hour) at filter layer catches distributed attacks. Admin manual-unlock endpoint.
+- **1.5g Session Invalidation** — Redis-backed `jwt_blocklist` keyed by `jti`; `active_sessions` table for per-user tracking. Password/email change → automatic logout-all. `/settings/sessions` lists active devices with Revoke buttons.
+
+See `_forums_master_plan/round3-master-plan.md` Appendix E for full spec stubs.
 
 ### JWT Authentication (Phase 1 — Spring Security)
 

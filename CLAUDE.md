@@ -29,6 +29,7 @@ Worship Room is free, ad-free, and privacy-respecting in a market where competit
 - 🎨 **[Design System & Components](.claude/rules/09-design-system.md)** - Color palette, typography, component inventory, hooks, utilities, Music architecture, Round 3 visual patterns, Daily Hub Visual Architecture, BB-33 animation tokens, Bible reader component inventory
 - 🔄 **[UX Flows](.claude/rules/10-ux-flows.md)** - Navigation structure, all user flows including Bible wave additions
 - 💾 **[localStorage Keys](.claude/rules/11-local-storage-keys.md)** - Complete inventory of all storage keys with types, descriptions, and reactive store hook references
+- 🗺️ **[Project Reference](.claude/rules/12-project-reference.md)** - Full route inventory (public + protected) and verified content inventory
 
 **Source of truth**: If CLAUDE.md conflicts with a rule file, rule file wins.
 
@@ -83,18 +84,7 @@ Mood Check-In (5 moods, crisis detection, mood-to-content recommendations), Pray
 
 ### Bible & Scripture (post-wave)
 
-- **Bible Reader** — 66-book WEB Bible. Reader chrome with three theme variants, four type sizes, three line heights, serif/sans choice, focus mode with configurable idle delay
-- **Personal layer (BB-7, BB-8, BB-11b)** — 4-color highlights, range-based notes (10K char limit), bookmarks, verse-linked and freeform journal entries. All backed by reactive stores; surfaced in unified My Bible feed
-- **AI Explain (BB-30) and Reflect (BB-31)** — Real Gemini 2.5 Flash Lite calls with anti-pressure voice
-- **AI Cache (BB-32)** — Self-managed `bb32-v1:` namespace with 7-day TTL, 2 MB cap, oldest-first eviction
-- **Full-Text Search (BB-42)** — Client-side inverted index, sub-100ms queries, works offline
-- **PWA + Offline (BB-39)** — Real PWA with installable manifest, runtime caching, offline indicator
-- **Reading Heatmap and Progress Map (BB-43)** — GitHub-style daily activity grid plus 66-book chapter completion map on My Bible
-- **Verse Memorization Deck (BB-45)** — Quiet flip-card memorization. No quiz, no scoring, no spaced repetition
-- **Verse Echoes (BB-46)** — Contextual callbacks to past engagement, surfaced on home and Daily Hub
-- **Web Push Notifications (BB-41)** — Daily verse and gentle streak reminders. iOS Safari 16.4+ via PWA install
-- **Bible Audio (BB-26, BB-27, BB-28, BB-29)** — Full audio Bible experience shipped on `audio-wave-bb-26-29-44` branch. BB-26 ships FCBH DBP v4 audio playback via Howler.js with a non-modal bottom-sheet player (expanded + minimized states), lazy-loaded engine, rapid-navigation supersession, Media Session integration, scrubber, 5-speed picker, and FCBH attribution footer. Ships the dramatized WEB (ENGWWH variant, `EN1WEBN2DA`/`EN1WEBO2DA` filesets) with full 66-book coverage. BB-29 adds continuous playback / auto-advance with React Router navigation following the audio. BB-28 adds the sleep timer with 8 presets (15m through 2h plus structural End-of-Chapter and End-of-Book), 20-second exponential fade-out, and pause-cancel. BB-27 coordinates with the BB-20 ambient subsystem so ambient pauses when Bible audio plays and resumes on full stop. **BB-44 (read-along verse highlighting) is the final spec in the wave, completed on the same branch.**
-- **Verse of the Day** — 60 verses with daily rotation, shareable Canvas image
+Full 66-book WEB Bible, lazy-loaded per book. BibleReader chrome (three themes, four type sizes, three line heights, serif/sans, focus mode). Personal layer (BB-7/BB-8/BB-11b): 4-color highlights, range-based notes, bookmarks, verse-linked and freeform journal entries — all reactive-store backed, surfaced in `/bible/my`. AI Explain (BB-30) and Reflect (BB-31) via real Gemini through the backend proxy. AI cache (BB-32) with `bb32-v1:` namespace, 7-day TTL, 2 MB cap. Full-text search (BB-42, client-side inverted index, sub-100ms, offline). PWA with runtime caching and offline indicator (BB-39). Reading heatmap + 66-book progress map (BB-43). Verse memorization deck (BB-45, no quiz, no scoring). Verse echoes (BB-46). Web push for daily verse and streak reminders (BB-41, iOS Safari 16.4+ via PWA install). Bible audio (BB-26 playback + BB-27 ambient coordination + BB-28 sleep timer + BB-29 auto-advance + BB-44 read-along highlighting) on the dramatized WEB (ENGWWH variant) via FCBH DBP v4 with Howler.js. Verse of the Day: 60 verses, daily rotation, shareable Canvas image.
 
 ### Devotional & Reading
 
@@ -114,14 +104,7 @@ Friends (mutual model, encouragements 3/day, nudges 1/week), Leaderboard (friend
 
 ### AI Features
 
-**All five real AI features route through the backend proxy at `/api/v1/proxy/ai/*`** (no more frontend Gemini key):
-- AI Bible Chat (`/ask` with follow-ups) — real Gemini via backend (AI-1)
-- AI Prayer Generation (devotional-context aware) — real Gemini via backend (AI-2)
-- AI Journal Reflection — real Gemini via backend (AI-3)
-- BB-30 Explain Passage — real Gemini via backend (migrated in Spec 2 of Key Protection Wave)
-- BB-31 Reflect on Passage — real Gemini via backend (migrated in Spec 2 of Key Protection Wave)
-
-All five are cached via the BB-32 `bb32-v1:` localStorage layer (7-day TTL, 2 MB cap, oldest-first eviction). AI Plan Generation remains mock.
+All five real AI features route through the backend proxy at `/api/v1/proxy/ai/*` (no frontend Gemini key): AI Bible Chat (`/ask`, AI-1), AI Prayer Generation (AI-2, devotional-context aware), AI Journal Reflection (AI-3), BB-30 Explain Passage, BB-31 Reflect on Passage. All cached via the BB-32 `bb32-v1:` localStorage layer. AI Plan Generation remains mock (deferred).
 
 ### Music & Audio
 
@@ -141,195 +124,49 @@ PWA (BB-39), SEO (BB-40 — every route has `<SEO>`, JSON-LD on 7+ pages), Deep 
 
 ---
 
-## Content Inventory (Verified)
+## Content Inventory
 
-All counts programmatically verified via `_recon/agent-6-count-scripts.ts`.
-
-| Content Type           | Count                           | Notes                                                             |
-| ---------------------- | ------------------------------- | ----------------------------------------------------------------- |
-| Bible Books (JSON)     | 66                              | Full WEB Bible, lazy-loaded per book                              |
-| Devotionals            | 50 (30 general + 20 seasonal)   | 5 Advent, 5 Lent, 3 Easter, 3 Christmas, 2 Holy Week, 2 Pentecost |
-| Reading Plans          | 10 (119 total days)             | 7/14/21-day plans                                                 |
-| Ambient Sounds         | 24                              | Plus 3 Bible reading scenes                                       |
-| Scene Presets          | 11                              |                                                                   |
-| Scripture Readings     | 24 (4 collections × 6)          |                                                                   |
-| Bedtime Stories        | 12                              |                                                                   |
-| Verse of the Day       | 60 (40 general + 20 seasonal)   |                                                                   |
-| QOTD                   | 72 (60 general + 12 liturgical) |                                                                   |
-| Community Challenges   | 5 (110 total days)              | Lent 40d, Easter 7d, Pentecost 21d, Advent 21d, New Year 21d      |
-| Guided Prayer Sessions | 8                               | 5/10/15 min options                                               |
-| Spotify Playlists      | 8 (4 worship + 4 explore)       |                                                                   |
-| Routine Templates      | 4                               |                                                                   |
-| Song of the Day        | 30 entries, 14 unique tracks    |                                                                   |
-| Badges                 | ~45                             | Across 6 categories                                               |
-
-**Translation consistency**: All scripture uses WEB. Zero non-WEB references found.
+See `.claude/rules/12-project-reference.md` for verified content counts (devotionals, reading plans, ambient sounds, verses, QOTD, challenges, badges, etc.). All scripture uses WEB translation.
 
 ---
 
 ## Routes
 
-### Public Routes (No Authentication Required)
-
-| Route                                                         | Component                  | Description                                                                                                                       |
-| ------------------------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                                           | `Home` / `Dashboard`       | Landing (logged-out) / Dashboard (logged-in)                                                                                      |
-| `/daily`                                                      | `DailyHub`                 | Tabbed: Devotional \| Pray \| Journal \| Meditate                                                                                 |
-| `/pray`, `/journal`, `/meditate`, `/scripture`, `/devotional` | Redirects → `/daily?tab=*` | Legacy redirects                                                                                                                  |
-| `/meditate/breathing`                                         | `BreathingExercise`        | 4-7-8 breathing (consumes verse params from Spec Z)                                                                               |
-| `/meditate/soaking`                                           | `ScriptureSoaking`         | Verse contemplation (consumes verse params from Spec Z)                                                                           |
-| `/meditate/gratitude`                                         | `GratitudeReflection`      | Gratitude journaling                                                                                                              |
-| `/meditate/acts`                                              | `ActsPrayerWalk`           | ACTS framework                                                                                                                    |
-| `/meditate/psalms`                                            | `PsalmReading`             | Psalm reading                                                                                                                     |
-| `/meditate/examen`                                            | `ExamenReflection`         | Ignatian Examen                                                                                                                   |
-| `/verse/:id`                                                  | `SharedVerse`              | Shareable verse card                                                                                                              |
-| `/prayer/:id`                                                 | `SharedPrayer`             | Shareable prayer card                                                                                                             |
-| `/prayer-wall`                                                | `PrayerWall`               | Community prayer feed with QOTD                                                                                                   |
-| `/prayer-wall/:id`                                            | `PrayerDetail`             | Prayer detail page                                                                                                                |
-| `/prayer-wall/user/:id`                                       | `PrayerWallProfile`        | Public prayer profile                                                                                                             |
-| `/prayer-wall/dashboard`                                      | `PrayerWallDashboard`      | Private prayer dashboard                                                                                                          |
-| `/local-support/churches`                                     | `Churches`                 | Church locator (no auth for search)                                                                                               |
-| `/local-support/counselors`                                   | `Counselors`               | Counselor locator                                                                                                                 |
-| `/local-support/celebrate-recovery`                           | `CelebrateRecovery`        | CR locator                                                                                                                        |
-| `/music`                                                      | `MusicPage`                | 3-tab music hub                                                                                                                   |
-| `/music/routines`                                             | `RoutinesPage`             | Bedtime routines (4 templates)                                                                                                    |
-| `/bible`                                                      | `BibleBrowser`             | 66-book Bible browser with BB-42 full-text search                                                                                 |
-| `/bible/:book/:chapter`                                       | `BibleReader`              | Chapter reading with audio, highlights, notes, AI Explain/Reflect, focus mode, theme switching                                    |
-| `/bible/my`                                                   | `MyBible`                  | Personal layer feed: BB-43 heatmap and progress map, BB-45 memorization deck, highlights/notes/bookmarks/journal entries activity |
-| `/ask`                                                        | `AskPage`                  | AI Bible chat with follow-ups                                                                                                     |
-| `/grow`                                                       | `GrowPage`                 | Tabbed: Reading Plans \| Challenges                                                                                               |
-| `/reading-plans`, `/challenges`                               | Redirects → `/grow?tab=*`  | Legacy redirects                                                                                                                  |
-| `/reading-plans/:planId`                                      | `ReadingPlanDetail`        | Plan detail with daily progress                                                                                                   |
-| `/challenges/:challengeId`                                    | `ChallengeDetail`          | Challenge daily content + progress                                                                                                |
-| `/accessibility`                                              | `AccessibilityPage`        | BB-35 accessibility statement                                                                                                     |
-| `/login`                                                      | `ComingSoon`               | Login placeholder (stub)                                                                                                          |
-| `/register`                                                   | `RegisterPage`             | Registration page (UI shell, backend in Phase 3)                                                                                  |
-| `/health`                                                     | `Health`                   | Backend health check                                                                                                              |
-| `/dev/mood-checkin`                                           | `MoodCheckInPreview`       | Dev-only mood check-in preview                                                                                                    |
-| `*`                                                           | `NotFound`                 | 404 page                                                                                                                          |
-
-### Protected Routes (Requires Authentication)
-
-| Route               | Component       | Description                                                          |
-| ------------------- | --------------- | -------------------------------------------------------------------- |
-| `/`                 | `Dashboard`     | Dashboard with garden, widgets, onboarding                           |
-| `/insights`         | `Insights`      | Mood analytics + meditation history + correlations                   |
-| `/insights/monthly` | `MonthlyReport` | Monthly mood report                                                  |
-| `/friends`          | `Friends`       | Friends + Leaderboard tabs                                           |
-| `/profile/:userId`  | `GrowthProfile` | Growth profile with garden                                           |
-| `/settings`         | `Settings`      | User settings (4 sections, including BB-41 notification preferences) |
-| `/my-prayers`       | `MyPrayers`     | Personal prayer list                                                 |
+See `.claude/rules/12-project-reference.md` for the complete route inventory (public + protected).
 
 ---
 
 ## Implementation Phases
 
-**Phases 1 through 2.95** ✅ COMPLETE — Pre-wave foundation across multiple phases delivered: landing page, Daily Experience (Pray/Journal/Meditate, 6 meditation sub-pages), Music feature (24 sounds, 11 scenes, sleep content), Dashboard & Growth (mood check-in, streaks, badges, friends, leaderboard, notifications, insights), UX polish (streak repair, onboarding, mood recommendations, KaraokeText, journal voice input, prayer enhancement), Content & Feature Expansion (Verse of the Day, daily devotional, personal prayer list, reading plans, Bible reader v1 with highlights/notes/audio, audio-guided prayer, gratitude journal, QOTD, evening reflection, liturgical calendar, PWA v1), and Vision Expansion (community challenges, AI Bible chat, visual garden, local support, Bible audio integration, SEO). Total ~4,862 tests at the Round 2 wrap-up baseline.
+**Phases 1 through 2.95** ✅ Pre-wave foundation (Daily Experience, Music, Dashboard & Growth, content expansion, community, visual garden, local support, PWA v1). ~4,862 tests at Round 2 wrap-up baseline.
 
-**Bible Content Migration** ✅ COMPLETE — Full 66-book WEB Bible via lazy-loaded JSON (scrollmapper/bible_databases).
+**Bible Content Migration** ✅ Full 66-book WEB Bible via lazy-loaded JSON (scrollmapper/bible_databases).
 
-**Round 2 — Full-Site Polish** ✅ COMPLETE — 23 specs covering dark theme foundation, navigation consolidation, inner page hero redesigns, cross-feature integration, sound effects, page transitions, warm empty states, breadcrumbs, dashboard widget prioritization, badge definitions, form accessibility, verse image sharing, route code splitting, large component splitting, skeleton loading.
+**Round 2 — Full-Site Polish** ✅ 23 specs: dark theme foundation, nav consolidation, hero redesigns, cross-feature integration, sound effects, skeletons, code splitting, verse image sharing.
 
-**Round 3 — Enhancement & Engagement** ✅ COMPLETE — Homepage redesign (HP-1 through HP-15) and Daily Hub Round 3 (Specs 1-Z + Waves 1-7). Established site-wide visual patterns: dark cinematic theme, visible glow orbs, 2-line section headings, FrostedCard component, locked preview cards, white-default text, HorizonGlow on Daily Hub, FrostedCard tier system, embedded journal CTA, authentic Pray flow, DevotionalPreviewPanel, verse-aware meditation, draft persistence, unified AudioDrawer entry. See `09-design-system.md` § "Round 3 Visual Patterns".
+**Round 3 — Enhancement & Engagement** ✅ Homepage redesign (HP-1→HP-15) + Daily Hub Round 3 (Specs 1-Z + Waves 1-7). Established dark cinematic theme, visible glow orbs, FrostedCard, HorizonGlow, DevotionalPreviewPanel, AudioDrawer unified entry. See `09-design-system.md` § "Round 3 Visual Patterns".
 
-**Bible Redesign + Polish Wave (BB-0 through BB-46)** ✅ COMPLETE
+**Bible Redesign + Polish Wave (BB-0 through BB-46)** ✅ Merged 2026-04-13. The largest single wave. Rebuilt Bible reader, AI features (BB-30/31/32), PWA (BB-39), SEO (BB-40), web push (BB-41), full-text search (BB-42), heatmap + progress map (BB-43), memorization deck (BB-45), verse echoes (BB-46), audio Bible (BB-26/27/28/29/44). Introduced BB-45 store-consumer anti-pattern (see `11-local-storage-keys.md` § "Reactive Store Consumption"). Final certification at `_plans/recon/bb37b-final-audit.md`.
 
-The largest single wave in the project's history. Rebuilt the Bible reader, added AI features, formalized the personal layer, and shipped a full polish cluster. Merged to main 2026-04-13. Final certification at `_plans/recon/bb37b-final-audit.md`.
+**AI Integration Wave** ✅ Three frontend features converted from mock to real Gemini: Ask (AI-1), Pray (AI-2), Journal Reflection (AI-3). Transitional frontend-direct-call footprint migrated to backend proxy in the next wave.
 
-- **Foundation (BB-0 through BB-21)** — Bible browser, BibleReader chrome (theme/typography/focus mode/drawer stack), reactive store pattern (`useHighlightStore`, `useBookmarkStore`, `useNoteStore`, `useJournalStore`, `useChapterVisitStore`), reading plans store, reading streak system, audio integration, deep link contract.
-- **AI features (BB-30, BB-31, BB-32)** — Explain This Passage, Reflect On This Passage, the AI cache layer with the `bb32-v1:` namespace.
-- **Infrastructure (BB-33 through BB-37b)** — Animation tokens and reduced-motion safety net (BB-33), empty states and FirstRunWelcome (BB-34), accessibility audit and `/accessibility` page (BB-35), performance baselines and Lighthouse 90+/95+ targets (BB-36), code health audit and full Playwright sweep (BB-37), Bible wave integrity audit and final certification (BB-37b).
-- **Distribution layer (BB-38, BB-39, BB-40, BB-41)** — Deep linking architecture (BB-38), PWA + offline reading (BB-39), SEO + Open Graph (BB-40), web push notifications (BB-41).
-- **Search and personal layer (BB-42, BB-43, BB-45, BB-46)** — Full-text scripture search (BB-42), reading heatmap and Bible progress map (BB-43), verse memorization deck (BB-45), verse echoes (BB-46).
-- **The wave introduced the BB-45 store mirror anti-pattern as a documented hazard.** Components consuming reactive stores must use the store's hook, not local `useState`. See `11-local-storage-keys.md` § "Reactive Store Consumption" and `_protocol/04-prompt-architecture-and-pattern-consistency.md` Phase 1E.
+**Key Protection Wave** ✅ First backend-heavy wave. Spring Boot proxy at `com.example.worshiproom.proxy.*` (to be renamed `com.worshiproom.proxy` in Forums Wave Phase 1 Spec 1.1). Four specs: `ai-proxy-foundation` (filters, exception handlers, WebClient, `/api/v1/health`), `ai-proxy-gemini`, `ai-proxy-maps`, `ai-proxy-fcbh`. All three external APIs migrated — zero `VITE_*_API_KEY` in frontend bundle. ~280 backend tests. Deviation #1: narrow `ExchangeFunctions=INFO` log suppression in dev profile to prevent query-string key leaks.
 
-**AI Integration Wave** ✅ COMPLETE
+**Phase 3 — Forums Wave** READY TO START. 156 specs across 19 phases (v2.8 completeness pass added 18 specs for auth lifecycle, production hardening, block/mute, admin audit viewer, offline banner, error boundaries). Master plan: `_forums_master_plan/round3-master-plan.md`. Extends backend with JWT auth, PostgreSQL + Liquibase, community Prayer Wall, user profiles, moderation, notifications, search, email. Forums Wave Phase 1 renames the group ID and layers auth / Liquibase / JPA on top of the proxy foundation. The master plan is authoritative for all Phase 3 work — 17 Universal Rules, 17 Architectural Decisions, per-spec acceptance criteria. Pipeline: `/spec-forums` → `/plan-forums` → `/execute-plan-forums` → `/code-review` → `/verify-with-playwright` (skipped for backend-only specs).
 
-Shipped three frontend AI features as real Gemini integrations, converting them from mock/hardcoded content. All three call Gemini directly from the frontend during this wave (migrated to the backend proxy in the subsequent Key Protection Wave, so this footprint is transitional).
-
-- **AI-1 Ask** (`/ask`) — Real Gemini with follow-up conversation threading and response caching via BB-32.
-- **AI-2 Pray** — Real Gemini prayer generation in the Daily Hub Pray tab. Devotional-context aware, KaraokeText reveal preserved, draft auto-save preserved.
-- **AI-3 Journal Reflection** — Real Gemini reflection on journal entries via the Bible reader and Daily Hub Journal tab. Response cached via BB-32.
-
-**Key Protection Wave** ✅ COMPLETE
-
-The first backend-heavy wave in the project. Migrated all three external API integrations from frontend direct-calls to a Spring Boot proxy layer, eliminating every `VITE_*_API_KEY` secret from the frontend bundle. Closed in four specs:
-
-- **Spec 1 — `ai-proxy-foundation`** — Backend proxy skeleton at `com.example.worshiproom.proxy.*`: `ProxyConfig`, `ProxyResponse`, `ProxyError`, `ProxyException` hierarchy, `RequestIdFilter` (HIGHEST_PRECEDENCE) for MDC-backed request ID threading, `RateLimitFilter` (HIGHEST_PRECEDENCE + 10) scoped to `/api/v1/proxy/**` with bucket4j + Caffeine-backed bounded buckets, package-scoped `ProxyExceptionHandler` with global `RateLimitExceptionHandler` companion, CORS policy with exposed rate-limit headers, `WebClient` bean with request timeouts, and the `/api/v1/health` endpoint reporting per-provider configured state. Dev profile `application-dev.properties` with proxy rate-limit tuning; prod profile with WARN-level org.springframework.web suppression.
-- **Spec 2 — `ai-proxy-gemini`** — Migrated Gemini from frontend direct-calls to `/api/v1/proxy/ai/*` via `proxy.ai.GeminiController` + `GeminiService`. All five real AI features (Ask, Pray, Journal Reflection, BB-30 Explain, BB-31 Reflect) now route through the backend. `VITE_GEMINI_API_KEY` removed from the frontend bundle. Added `SafetyBlockException` → 422 `SAFETY_BLOCK`.
-- **Spec 3 — `ai-proxy-maps`** — Migrated Google Maps Places API from frontend direct-calls to `/api/v1/proxy/maps/*` via `proxy.maps.MapsController` + `GoogleMapsService`. Local Support feature fully migrated. `VITE_GOOGLE_MAPS_API_KEY` removed from the frontend bundle. Per-IP rate limiting inherited from Spec 1. Surfaced the log-leak defense-in-depth pattern (frontend-side cache-on-success behavior in `maps-readiness.ts`).
-- **Spec 4 — `ai-proxy-fcbh`** — Migrated FCBH DBP v4 audio metadata from frontend direct-calls to `/api/v1/proxy/bible/*` via `proxy.bible.FcbhController` + `FcbhService` + `FcbhCacheKeys`. Four endpoints (`/bibles`, `/filesets/{id}`, `/filesets/{id}/{book}/{chapter}`, `/timestamps/{id}/{book}/{chapter}`), three bounded Caffeine caches (bibles 10×7d, filesets 20×7d, chapters 2000×6h), `FcbhNotFoundException` → 404 to preserve AudioPlayButton silent-fallback UX, new `fcbh-readiness.ts` async probe replacing synchronous `isFcbhApiKeyConfigured()`, 9 test-mock swaps, `VITE_FCBH_API_KEY` removed from the frontend bundle. Introduced **Deviation #1**: `logging.level.org.springframework.web.reactive.function.client.ExchangeFunctions=INFO` in dev profile after grep surfaced the FCBH key in dev-profile stdout DEBUG logs; retroactively fixes the same leak class for Spec 3 Maps call paths.
-
-Post-merge operational closure: Maps key rotated in GCP Console (billing verified clean); Gemini and FCBH keys pending rotation per user-driven schedule. GitHub secret-scanning alert for the leaked Maps key closed as Revoked. **Zero secret API keys in the frontend bundle.**
-
-**Phase 3 — Forums Wave** (READY TO START — Key Protection Wave cleared the backend runway)
-
-The largest backend wave in the project's history. 138 specs across 19 phases (Phase 0 → Phase 16), documented in the Forums Wave Master Plan at `_forums_master_plan/round3-master-plan.md` (v2.6, 622 KB). This wave extends the Spring Boot backend with real JWT auth, a community prayer wall, user profiles, moderation, notifications, search, and email. The AI Integration + Key Protection Waves have already shipped the proxy layer (`com.example.worshiproom.proxy.*`); Forums Wave Phase 1 will rename the group ID and add auth / Liquibase / JPA on top of that foundation.
-
-**Master plan is the source of truth for all Phase 3 work.** The plan contains 17 Universal Rules, 17 Architectural Decisions, and detailed per-spec acceptance criteria. CC must read the relevant spec section from the master plan before executing any Forums Wave work.
-
-**Key architectural decisions (read the master plan for full detail):**
-- Decision 5: Unified `posts` table (not `prayer_requests` — the old table names in `05-database.md` are superseded)
-- Decision 6: Spring Security + JWT (in-memory token, short-lived, no cookie)
-- Decision 8: Friends + Social Interactions + Milestone Events dual-write in Phase 2.5
-- Decision 9: Feature flags for every migration phase (`VITE_USE_BACKEND_*`)
-- Decision 13: Every migration phase has a cutover spec with smoke test
-- Universal Rule 13: Crisis content supersedes all other feature behavior
-- Universal Rule 17: Per-phase accessibility smoke test at every cutover
-
-**Forums Wave skill pipeline:**
-1. **`/spec-forums <spec-id-or-description>`** — Extracts a spec from the master plan into a standalone `_specs/` file + feature branch
-2. **`/plan-forums _specs/<spec>.md`** — Generates a backend-aware implementation plan (Liquibase, JPA, service layer, API, tests)
-3. **Review** — User approves plan
-4. **`/execute-plan-forums _plans/<plan>.md`** — Implements step-by-step with backend verification (compile, test, API shape)
-5. **`/code-review`** — Pre-commit quality check (backend + frontend aware)
-6. **`/verify-with-playwright`** — Visual verification (for specs with UI; skipped for backend-only specs)
-
-**Backend tech stack:**
-- Spring Boot 3.x + Java 21 + Maven
-- PostgreSQL via Docker Compose (local) / Railway or Supabase (prod)
-- Liquibase for migrations (NOT Flyway — master plan uses Liquibase throughout)
-- Spring Security + JWT for auth
-- Redis for rate limiting + caching (Spec 5.6)
-- Sentry for error tracking with PII scrubber (Spec 1.10d)
-- S3/R2/MinIO adapter for object storage (Spec 1.10e)
-- Testcontainers for integration tests
-
-**Phase 4 — Light Mode & Native Prep** (deferred)
-
-Light mode toggle, real TTS audio files, performance optimization, native app planning.
+**Phase 4 — Light Mode & Native Prep** (deferred) — Light mode toggle, real TTS audio files, performance optimization, native app planning.
 
 ---
 
 ## Build Health
 
-Run `pnpm test`, `pnpm lint`, and `pnpm build` to get current build health for any specific commit. The historical snapshot below is from the most recent recon and may be outdated — always verify before relying on these numbers.
+Verify current state with `./mvnw test` (backend), `pnpm test` (frontend), `pnpm build`, `pnpm lint`, and `frontend/scripts/measure-bundle.mjs` (bundle size). Numbers drift; always run before relying.
 
-**Note: the BB-30 through BB-46 Bible redesign + polish wave, the AI Integration Wave (AI-1/AI-2/AI-3), and the Key Protection Wave (Specs 1–4 of ai-proxy-*) all shipped after the test count below was last measured.** The cumulative additions are substantial:
-- Bible redesign + polish added ~600+ tests across AI features, personal layer stores, accessibility audit, performance baselines, and final certification.
-- AI Integration Wave added frontend tests for Ask/Pray/Journal Reflection with real Gemini wiring.
-- Key Protection Wave added ~280 backend tests (ProxyConfig + filters + exception handling + 3 service test classes + 3 controller test classes + 3 integration test classes + cache key tests) plus frontend mock swaps across 9 test files.
+**Frontend regression baseline (post-Key-Protection):** 8,811 pass / 11 pre-existing fail across 7 files. The 11 failures are documented tech debt (orphan test for a deleted hook, CSS class drift in one plan browser test, logged-out mock listing cards in Local Support / Counselors / Celebrate Recovery / Churches, Pray loading-text timing flake). **Any NEW failing file or fail count > 11 after a Forums Wave spec lands is a regression.**
 
-The current passing count is meaningfully higher than the table shows. Re-verify with `./mvnw test` + `pnpm test` before relying on any specific number.
+**Backend baseline:** ~280 pass / 0 fail (post-Spec-4 Key Protection Wave). Growth expected as Forums Wave lands.
 
-**Frontend baseline (post-Key-Protection):** 8,811 pass / 11 fail across 7 files. The 11 failures are pre-existing and unrelated to any AI / Maps / FCBH proxy work (orphan test importing a deleted hook, CSS class drift in one plan browser test, logged-out mock listing cards in Local Support / Counselors / Celebrate Recovery / Churches, and a Pray loading-text timing flake). Documented during Spec 4 execution; scoped as deferred tech debt rather than in-scope cleanup. Any NEW failing file or count > 11 after a Forums Wave spec lands is a regression.
-
-| Metric                   | Status                                                                      |
-| ------------------------ | --------------------------------------------------------------------------- |
-| Build                    | PASSES (verify with `pnpm build`)                                           |
-| Backend tests            | ~280 pass / 0 fail (post-Spec-4 Key Protection Wave baseline)               |
-| Frontend tests           | ~8,811 pass / 11 pre-existing fail (documented above; verify with `pnpm test`) |
-| Lint                     | Verify with `pnpm lint` before relying on a count                           |
-| TypeScript strict        | Enforced                                                                    |
-| PWA                      | Healthy (BB-39 formalized: manifest, SW, runtime caching, install prompt)   |
-| Content sets             | All meet spec targets                                                       |
-| Translation consistency  | Clean (zero non-WEB references)                                             |
-| Security                 | Clean (Key Protection Wave closed: zero secret API keys in frontend bundle) |
-| SEO                      | Comprehensive (BB-40: every route has `<SEO>`, JSON-LD on 7+ pages)         |
-| Main bundle              | Verify with `frontend/scripts/measure-bundle.mjs` (BB-36 added measurement) |
-| Largest chunk            | Recharts isolated via manualChunks                                          |
-| Lighthouse Performance   | Target 90+ on every major page (BB-36 baseline)                             |
-| Lighthouse Accessibility | Target 95+ on every major page (BB-35 audit)                                |
+**Enforced standards:** TypeScript strict, WCAG 2.2 AA (Lighthouse Accessibility 95+), Lighthouse Performance 90+, zero `VITE_*_API_KEY` in frontend bundle, WEB translation throughout, Recharts isolated via `manualChunks`.
 
 ---
 
@@ -389,7 +226,7 @@ The protocols catch issues that the per-spec workflow can't: cross-spec contract
 
 ### Forums Wave Working Guidelines (Phase 3)
 
-- **Master plan is authoritative** — `_forums_master_plan/round3-master-plan.md` contains all 138 specs, 17 Universal Rules, and 17 Decisions. Read the relevant spec section before executing any work.
+- **Master plan is authoritative** — `_forums_master_plan/round3-master-plan.md` (v2.8) contains all 156 specs, 17 Universal Rules, and 17 Decisions. Read the relevant spec section before executing any work.
 - **Liquibase for all schema changes** — every table creation, column addition, and index must be a Liquibase changeset. No raw SQL migrations. Changeset filenames follow `YYYY-MM-DD-NNN-description.xml` pattern.
 - **Dual-write discipline** — Phases 2, 2.5, and 3 use the dual-write migration pattern: localStorage remains primary for reads, backend receives shadow writes. Feature flags (`VITE_USE_BACKEND_*`) control the read source. Never flip a flag default without a cutover spec's smoke test passing.
 - **Crisis content supersedes everything** — Universal Rule 13. Any feature touching user-generated content must handle crisis detection. When crisis resources are needed, they override all other feature behavior. See Spec 10.5 (three-tier escalation) and the master plan's crisis-related Decisions.

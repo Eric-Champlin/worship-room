@@ -6,8 +6,9 @@ Free, ad-free, and privacy-respecting in a market where competitors charge $40�
  
 ## Documentation
  
-- **[CLAUDE.md](./CLAUDE.md)** — canonical project guide (feature summary, routes, implementation phases, build health, working guidelines)
-- **[.claude/rules/](./.claude/rules/)** — modular conventions (AI safety, security, design system, UX flows, backend/frontend/database standards, logging, deployment, testing, localStorage keys)
+- **[CLAUDE.md](./CLAUDE.md)** — canonical project guide (feature summary, implementation phases, build health, working guidelines)
+- **[.claude/rules/](./.claude/rules/)** — modular conventions (AI safety, security, design system, UX flows, backend/frontend/database standards, logging, deployment, testing, localStorage keys, project reference)
+- **[_forums_master_plan/round3-master-plan.md](./_forums_master_plan/round3-master-plan.md)** — Forums Wave master plan (v2.8, 156 specs across 19 phases)
 - **[_protocol/](./_protocol/)** — deep code health review protocols (run between major waves; produces consolidated reports in `_reports/`)
  
 If anything in this README disagrees with CLAUDE.md or the rule files, the rule files win.
@@ -17,7 +18,7 @@ If anything in this README disagrees with CLAUDE.md or the rule files, the rule 
 ```
 worship-room/
 ├── frontend/       # React 18 + TypeScript + Vite + TailwindCSS
-├── backend/        # Spring Boot 3 + Maven + Java 21 (Phase 3 — scaffold only)
+├── backend/        # Spring Boot 3 + Maven + Java 21 (proxy layer shipped; Forums Wave extends)
 ├── _specs/         # Feature spec files
 ├── _plans/         # Implementation plan files (recon artifacts in _plans/recon/)
 ├── _protocol/      # Deep code health review protocols (00-99)
@@ -31,7 +32,7 @@ worship-room/
  
 **Frontend:** React 18, TypeScript (strict), Vite, TailwindCSS, React Router, Lucide React, Recharts, Leaflet, react-helmet-async, vite-plugin-pwa. Tested with Vitest + React Testing Library + Playwright.
  
-**Backend (Phase 3):** Spring Boot 3, Java 21, Maven, Spring Security + JWT, PostgreSQL.
+**Backend:** Spring Boot 3, Java 21, Maven, Spring Security + JWT (Forums Wave Phase 1), PostgreSQL + Liquibase (Forums Wave Phase 1). Proxy layer (`com.example.worshiproom.proxy.*`) already ships: three services (Gemini, Google Maps, FCBH) wrap external APIs behind `/api/v1/proxy/*` with bucket4j rate limiting, request-ID propagation, and a PII-scrubbing exception handler. ~280 backend tests.
  
 ## Prerequisites
  
@@ -92,7 +93,7 @@ Between major feature waves or quarterly, run the deep review protocols in `_pro
 VITE_API_BASE_URL=http://localhost:8080
 ```
  
-See [.claude/rules/08-deployment.md](./.claude/rules/08-deployment.md) for the full environment variable list (OpenAI, SMTP, encryption, rate limiting, etc. — all Phase 3).
+See [.claude/rules/08-deployment.md](./.claude/rules/08-deployment.md) for the full environment variable list (Gemini/Maps/FCBH API keys for the proxy layer, SMTP for Forums Wave email, JWT secret for auth, encryption keys, Redis URL, feature flags, and rate-limit tuning).
  
 ## Troubleshooting
  
