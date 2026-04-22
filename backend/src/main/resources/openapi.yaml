@@ -380,6 +380,176 @@ paths:
         '502': { $ref: '#/components/responses/UpstreamError' }
         '504': { $ref: '#/components/responses/UpstreamTimeout' }
 
+  /api/v1/proxy/bible/bibles:
+    get:
+      tags: [Proxy / Bible]
+      summary: List audio bibles
+      description: |
+        Proxied call to FCBH Digital Bible Platform v4 `/bibles` endpoint.
+        Backend forwards to DBP with the server-owned FCBH API key. Response
+        passes through the DBP envelope unchanged so the frontend's existing
+        `DbpBible[]` types remain valid.
+      operationId: listAudioBibles
+      security: []
+      parameters:
+        - name: language
+          in: query
+          required: false
+          schema: { type: string, pattern: '^[a-z]{2,3}$', default: 'eng' }
+          description: ISO 639-1/639-2 language code.
+      responses:
+        '200':
+          description: DBP bibles envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BibleEnvelope' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
+
+  /api/v1/proxy/bible/filesets/{filesetId}:
+    get:
+      tags: [Proxy / Bible]
+      summary: Get fileset catalog
+      description: |
+        Proxied call to FCBH DBP `/bibles/filesets/{filesetId}` endpoint.
+        Returns the fileset catalog unchanged.
+      operationId: getFileset
+      security: []
+      parameters:
+        - name: filesetId
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[A-Z0-9-]{3,30}$' }
+          description: DBP fileset ID (e.g., `EN1WEBN2DA`).
+      responses:
+        '200':
+          description: DBP fileset envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BibleEnvelope' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
+
+  /api/v1/proxy/bible/filesets/{filesetId}/{bookCode}/{chapter}:
+    get:
+      tags: [Proxy / Bible]
+      summary: Get chapter audio URL
+      description: |
+        Proxied call to FCBH DBP chapter lookup. Returns a DBP envelope whose
+        inner `data[0].path` is a short-lived signed CloudFront URL that the
+        browser uses AS-IS to stream the mp3 bytes directly. Audio bytes are
+        NEVER proxied through the backend (see spec AD #2). On upstream 404,
+        returns our own 404 with code `NOT_FOUND` — deliberately distinct from
+        502 so the frontend's AudioPlayButton visibility logic preserves the
+        "hide on no-audio" silent-fallback UX.
+      operationId: getChapterAudio
+      security: []
+      parameters:
+        - name: filesetId
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[A-Z0-9-]{3,30}$' }
+        - name: bookCode
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[A-Z0-9]{3}$' }
+          description: DBP 3-letter book code (e.g., `GEN`, `1CO`, `REV`).
+        - name: chapter
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1, maximum: 200 }
+      responses:
+        '200':
+          description: DBP chapter envelope with signed CloudFront audio URL
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BibleEnvelope' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
+
+  /api/v1/proxy/bible/timestamps/{filesetId}/{bookCode}/{chapter}:
+    get:
+      tags: [Proxy / Bible]
+      summary: Get verse-level audio timestamps
+      description: |
+        Proxied call to FCBH DBP verse timestamps endpoint (BB-44 read-along).
+        Empty `data` array is valid and means "no timing data for this chapter"
+        (OT filesets typically return empty). Not cached on the backend.
+      operationId: getChapterTimestamps
+      security: []
+      parameters:
+        - name: filesetId
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[A-Z0-9-]{3,30}$' }
+        - name: bookCode
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[A-Z0-9]{3}$' }
+        - name: chapter
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1, maximum: 200 }
+      responses:
+        '200':
+          description: DBP timestamps envelope (empty data array if no timings)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BibleEnvelope' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502': { $ref: '#/components/responses/UpstreamError' }
+        '504': { $ref: '#/components/responses/UpstreamTimeout' }
+
 components:
   schemas:
     ProxyResponse:
@@ -654,6 +824,24 @@ components:
         lat: { type: number, format: double, nullable: true }
         lng: { type: number, format: double, nullable: true }
 
+    BibleEnvelope:
+      description: |
+        DBP v4 envelope passed through unchanged. Structure documented at
+        https://4.dbt.io/openapi.json — keys and shape vary by endpoint but
+        always carry `data` (array or object) and optional `meta` (object).
+        Frontend continues to consume this via the hand-typed `DbpBible`,
+        `DbpFileset`, `DbpChapterAudio`, and `VerseTimestamp` types in
+        `frontend/src/types/bible-audio.ts`.
+      type: object
+      required: [data]
+      properties:
+        data:
+          oneOf:
+            - type: object
+            - type: array
+        meta:
+          type: object
+
   responses:
     BadRequest:
       description: Invalid input
@@ -682,6 +870,11 @@ components:
           schema: { $ref: '#/components/schemas/ProxyError' }
     UpstreamTimeout:
       description: Upstream API timed out
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+    NotFound:
+      description: Resource not found (upstream 404, e.g., chapter with no audio)
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ProxyError' }

@@ -63,29 +63,29 @@ Spec 4 (`ai-proxy-fcbh`) does the same thing for FCBH (audio Bible). Spec 5 (`ai
 
 ## Files touched
 
-| File | Change | Purpose |
-|---|---|---|
-| `backend/src/main/java/com/example/worshiproom/proxy/maps/MapsController.java` | Create | Three endpoints — POST `/places-search`, GET `/geocode`, GET `/place-photo` |
-| `backend/src/main/java/com/example/worshiproom/proxy/maps/GoogleMapsService.java` | Create | Wraps `WebClient` calls to Places API, Geocoding API, and the Places photo media endpoint. Maps WebClient errors to typed `ProxyException` subclasses. Hosts the three Caffeine caches. |
-| `backend/src/main/java/com/example/worshiproom/proxy/maps/PlacesSearchRequest.java` | Create | Request DTO record `{lat, lng, radiusMiles, keyword, pageToken?}` with Bean Validation |
-| `backend/src/main/java/com/example/worshiproom/proxy/maps/PlacesSearchResponse.java` | Create | Response DTO record `{places, nextPageToken}` where `places` is the raw Google `places` array represented as `List<Map<String, Object>>` (preserves the existing frontend mapper without coupling backend to frontend types) |
-| `backend/src/main/java/com/example/worshiproom/proxy/maps/GeocodeResponse.java` | Create | Response DTO record `{lat, lng}` — both fields `Double` (nullable) so a no-result lookup returns `{lat: null, lng: null}` rather than throwing |
-| `backend/src/main/java/com/example/worshiproom/proxy/maps/MapsCacheKeys.java` | Create | Static helpers for cache-key construction (`searchKey(lat, lng, radius, keyword, pageToken)`, `geocodeKey(query)`, `photoKey(name)`). Centralizes normalization logic so cache keys are consistent across reads and writes. |
-| `backend/src/main/java/com/example/worshiproom/controller/ApiController.java` | Modify | Update `/api/v1/health` to report `googleMaps: { configured: boolean }` in the providers section so the frontend factory can pick Google vs. mock without exposing the key |
-| `backend/src/main/resources/openapi.yaml` | Modify | Add three new paths (`/api/v1/proxy/maps/places-search`, `/api/v1/proxy/maps/geocode`, `/api/v1/proxy/maps/place-photo`) plus request/response schemas. Update health endpoint schema to include `googleMaps` provider readiness. |
-| `backend/src/test/java/com/example/worshiproom/proxy/maps/MapsControllerTest.java` | Create | `@WebMvcTest` slice — validates request bodies, response shapes, error mapping for all three endpoints |
-| `backend/src/test/java/com/example/worshiproom/proxy/maps/GoogleMapsServiceTest.java` | Create | Unit tests with a mocked `WebClient` — covers each error branch (4xx, 5xx, timeout, network), cache hit/miss, photo SSRF guard |
-| `backend/src/test/java/com/example/worshiproom/proxy/maps/MapsIntegrationTest.java` | Create | `@SpringBootTest` end-to-end — mocks `WebClient` at the bean level, asserts full HTTP response including headers and error shape. Includes a photo-streaming round trip. |
-| `backend/src/test/java/com/example/worshiproom/proxy/maps/MapsCacheKeysTest.java` | Create | Unit tests for cache-key normalization — same query in different cases/whitespace should hit the same key |
-| `frontend/src/services/google-local-support-service.ts` | Modify | Replace direct Google API calls with `fetch` to `/api/v1/proxy/maps/*`. Preserve `search` and `geocode` method signatures. Remove `requireGoogleMapsApiKey` import. Remove module-level `paginationTokens` Map (server returns `nextPageToken` in response; we pass it back on next request, no module state needed). |
-| `frontend/src/services/google-places-mapper.ts` | Modify | `buildPhotoUrl` no longer takes `apiKey`. New signature: `buildPhotoUrl(photoName: string): string` returning `${VITE_API_BASE_URL}/api/v1/proxy/maps/place-photo?name=${encodeURIComponent(photoName)}`. Update `mapGooglePlaceToLocalSupport` callers accordingly (one site in `google-local-support-service.ts`). |
-| `frontend/src/services/local-support-service.ts` | Modify | Replace `isGoogleMapsApiKeyConfigured()` with a backend readiness probe. New module: import a one-time async helper that calls `/api/v1/health`, reads `providers.googleMaps.configured`, and caches the result. Factory becomes async (or the readiness check happens once at module load). See Architecture Decision #5 for the chosen approach. |
-| `frontend/src/lib/env.ts` | Modify | Remove `requireGoogleMapsApiKey`, `isGoogleMapsApiKeyConfigured`, and the `GOOGLE_MAPS_API_KEY` module-level constant |
-| `frontend/src/services/__tests__/google-local-support-service.test.ts` | Modify | Swap direct Google API mocks for `fetch` mocks targeting `/api/v1/proxy/maps/*`. Update test fixtures for the new error paths (backend `ProxyError` shape instead of raw Google JSON) |
-| `frontend/src/services/__tests__/google-places-mapper.test.ts` | Modify (if present) | Update `buildPhotoUrl` expectations — backend-proxy URL instead of Google URL with key |
-| `frontend/src/services/__tests__/local-support-service.test.ts` | Modify (if present) | Update factory tests to mock the readiness probe instead of `isGoogleMapsApiKeyConfigured` |
-| `frontend/src/vite-env.d.ts` | Modify | Remove `readonly VITE_GOOGLE_MAPS_API_KEY?: string` from the `ImportMetaEnv` interface |
-| `frontend/.env.example` | Modify | Remove `VITE_GOOGLE_MAPS_API_KEY` block (Spec 4 will remove `VITE_FCBH_API_KEY`; Spec 5 wraps up the wave) |
+| File                                                                                  | Change              | Purpose                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `backend/src/main/java/com/example/worshiproom/proxy/maps/MapsController.java`        | Create              | Three endpoints — POST `/places-search`, GET `/geocode`, GET `/place-photo`                                                                                                                                                                                                                                                                        |
+| `backend/src/main/java/com/example/worshiproom/proxy/maps/GoogleMapsService.java`     | Create              | Wraps `WebClient` calls to Places API, Geocoding API, and the Places photo media endpoint. Maps WebClient errors to typed `ProxyException` subclasses. Hosts the three Caffeine caches.                                                                                                                                                            |
+| `backend/src/main/java/com/example/worshiproom/proxy/maps/PlacesSearchRequest.java`   | Create              | Request DTO record `{lat, lng, radiusMiles, keyword, pageToken?}` with Bean Validation                                                                                                                                                                                                                                                             |
+| `backend/src/main/java/com/example/worshiproom/proxy/maps/PlacesSearchResponse.java`  | Create              | Response DTO record `{places, nextPageToken}` where `places` is the raw Google `places` array represented as `List<Map<String, Object>>` (preserves the existing frontend mapper without coupling backend to frontend types)                                                                                                                       |
+| `backend/src/main/java/com/example/worshiproom/proxy/maps/GeocodeResponse.java`       | Create              | Response DTO record `{lat, lng}` — both fields `Double` (nullable) so a no-result lookup returns `{lat: null, lng: null}` rather than throwing                                                                                                                                                                                                     |
+| `backend/src/main/java/com/example/worshiproom/proxy/maps/MapsCacheKeys.java`         | Create              | Static helpers for cache-key construction (`searchKey(lat, lng, radius, keyword, pageToken)`, `geocodeKey(query)`, `photoKey(name)`). Centralizes normalization logic so cache keys are consistent across reads and writes.                                                                                                                        |
+| `backend/src/main/java/com/example/worshiproom/controller/ApiController.java`         | Modify              | Update `/api/v1/health` to report `googleMaps: { configured: boolean }` in the providers section so the frontend factory can pick Google vs. mock without exposing the key                                                                                                                                                                         |
+| `backend/src/main/resources/openapi.yaml`                                             | Modify              | Add three new paths (`/api/v1/proxy/maps/places-search`, `/api/v1/proxy/maps/geocode`, `/api/v1/proxy/maps/place-photo`) plus request/response schemas. Update health endpoint schema to include `googleMaps` provider readiness.                                                                                                                  |
+| `backend/src/test/java/com/example/worshiproom/proxy/maps/MapsControllerTest.java`    | Create              | `@WebMvcTest` slice — validates request bodies, response shapes, error mapping for all three endpoints                                                                                                                                                                                                                                             |
+| `backend/src/test/java/com/example/worshiproom/proxy/maps/GoogleMapsServiceTest.java` | Create              | Unit tests with a mocked `WebClient` — covers each error branch (4xx, 5xx, timeout, network), cache hit/miss, photo SSRF guard                                                                                                                                                                                                                     |
+| `backend/src/test/java/com/example/worshiproom/proxy/maps/MapsIntegrationTest.java`   | Create              | `@SpringBootTest` end-to-end — mocks `WebClient` at the bean level, asserts full HTTP response including headers and error shape. Includes a photo-streaming round trip.                                                                                                                                                                           |
+| `backend/src/test/java/com/example/worshiproom/proxy/maps/MapsCacheKeysTest.java`     | Create              | Unit tests for cache-key normalization — same query in different cases/whitespace should hit the same key                                                                                                                                                                                                                                          |
+| `frontend/src/services/google-local-support-service.ts`                               | Modify              | Replace direct Google API calls with `fetch` to `/api/v1/proxy/maps/*`. Preserve `search` and `geocode` method signatures. Remove `requireGoogleMapsApiKey` import. Remove module-level `paginationTokens` Map (server returns `nextPageToken` in response; we pass it back on next request, no module state needed).                              |
+| `frontend/src/services/google-places-mapper.ts`                                       | Modify              | `buildPhotoUrl` no longer takes `apiKey`. New signature: `buildPhotoUrl(photoName: string): string` returning `${VITE_API_BASE_URL}/api/v1/proxy/maps/place-photo?name=${encodeURIComponent(photoName)}`. Update `mapGooglePlaceToLocalSupport` callers accordingly (one site in `google-local-support-service.ts`).                               |
+| `frontend/src/services/local-support-service.ts`                                      | Modify              | Replace `isGoogleMapsApiKeyConfigured()` with a backend readiness probe. New module: import a one-time async helper that calls `/api/v1/health`, reads `providers.googleMaps.configured`, and caches the result. Factory becomes async (or the readiness check happens once at module load). See Architecture Decision #5 for the chosen approach. |
+| `frontend/src/lib/env.ts`                                                             | Modify              | Remove `requireGoogleMapsApiKey`, `isGoogleMapsApiKeyConfigured`, and the `GOOGLE_MAPS_API_KEY` module-level constant                                                                                                                                                                                                                              |
+| `frontend/src/services/__tests__/google-local-support-service.test.ts`                | Modify              | Swap direct Google API mocks for `fetch` mocks targeting `/api/v1/proxy/maps/*`. Update test fixtures for the new error paths (backend `ProxyError` shape instead of raw Google JSON)                                                                                                                                                              |
+| `frontend/src/services/__tests__/google-places-mapper.test.ts`                        | Modify (if present) | Update `buildPhotoUrl` expectations — backend-proxy URL instead of Google URL with key                                                                                                                                                                                                                                                             |
+| `frontend/src/services/__tests__/local-support-service.test.ts`                       | Modify (if present) | Update factory tests to mock the readiness probe instead of `isGoogleMapsApiKeyConfigured`                                                                                                                                                                                                                                                         |
+| `frontend/src/vite-env.d.ts`                                                          | Modify              | Remove `readonly VITE_GOOGLE_MAPS_API_KEY?: string` from the `ImportMetaEnv` interface                                                                                                                                                                                                                                                             |
+| `frontend/.env.example`                                                               | Modify              | Remove `VITE_GOOGLE_MAPS_API_KEY` block (Spec 4 will remove `VITE_FCBH_API_KEY`; Spec 5 wraps up the wave)                                                                                                                                                                                                                                         |
 
 **Net changes:** backend gains ~600 lines of Java (slightly more than Spec 2 due to three endpoints + caches + photo streaming) + ~80 lines of YAML (OpenAPI additions) + ~500 lines of tests. Frontend loses ~120 lines (env helpers, direct-API call code, module-level pagination state) and gains ~100 lines (fetch-based service + readiness probe + updated tests). Total ≈ +1100 / -250. About 20 files touched.
 
@@ -120,11 +120,11 @@ The `/api/v1/health` endpoint already exists from Spec 1 with a `providers` bloc
 
 **6. Backend caches use Caffeine, three distinct caches with their own bounds.** Per `02-security.md` § "BOUNDED EXTERNAL-INPUT CACHES":
 
-| Cache | Key | Value | maximumSize | expireAfterWrite | Reason for bounds |
-|---|---|---|---|---|---|
-| `placesSearchCache` | `searchKey(lat, lng, radius, keyword, pageToken)` | Raw Google response (JSON) | 1000 | 6h | Search results are slow-changing (places open/close monthly, not hourly). 6h TTL balances freshness with cost savings. 1000 entries covers most metro-area+category permutations for a small user base. |
-| `geocodeCache` | `geocodeKey(query)` | `{lat, lng}` or null | 500 | 30d | Geocoded coordinates for an address are extremely stable (years). 30d TTL is conservative. 500 entries covers a personal-scale user base; Caffeine evicts oldest on overflow. |
-| `photoCache` | `photoKey(name)` | `byte[]` | 500 | 7d | Place photos are immutable (Places API photo names are stable IDs). 500 entries × ~100 KB avg = ~50 MB heap. Bound is for memory pressure, not freshness. |
+| Cache               | Key                                               | Value                      | maximumSize | expireAfterWrite | Reason for bounds                                                                                                                                                                                       |
+| ------------------- | ------------------------------------------------- | -------------------------- | ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `placesSearchCache` | `searchKey(lat, lng, radius, keyword, pageToken)` | Raw Google response (JSON) | 1000        | 6h               | Search results are slow-changing (places open/close monthly, not hourly). 6h TTL balances freshness with cost savings. 1000 entries covers most metro-area+category permutations for a small user base. |
+| `geocodeCache`      | `geocodeKey(query)`                               | `{lat, lng}` or null       | 500         | 30d              | Geocoded coordinates for an address are extremely stable (years). 30d TTL is conservative. 500 entries covers a personal-scale user base; Caffeine evicts oldest on overflow.                           |
+| `photoCache`        | `photoKey(name)`                                  | `byte[]`                   | 500         | 7d               | Place photos are immutable (Places API photo names are stable IDs). 500 entries × ~100 KB avg = ~50 MB heap. Bound is for memory pressure, not freshness.                                               |
 
 All three caches are documented inline in `GoogleMapsService.java` with the rationale for each bound. The bounds are chosen for personal-scale use; if the app grows, all three need re-tuning (likely upward) — but the architecture is unchanged.
 
@@ -161,6 +161,7 @@ All three caches are documented inline in `GoogleMapsService.java` with the rati
 ```
 
 **Validation:**
+
 - `lat` — required, `-90.0 ≤ lat ≤ 90.0`
 - `lng` — required, `-180.0 ≤ lng ≤ 180.0`
 - `radiusMiles` — required, `1 ≤ radiusMiles ≤ 50` (matches frontend slider range)
@@ -197,6 +198,7 @@ All three caches are documented inline in `GoogleMapsService.java` with the rati
 #### `GET /api/v1/proxy/maps/geocode?query=Spring+Hill+TN`
 
 **Query params:**
+
 - `query` — required, 1–200 chars
 
 **Success response** (HTTP 200, `ProxyResponse<GeocodeResponse>`):
@@ -215,9 +217,11 @@ For no-result queries (Google returns `status: ZERO_RESULTS`), the response is s
 #### `GET /api/v1/proxy/maps/place-photo?name=places/ChIJ.../photos/AbC123`
 
 **Query params:**
+
 - `name` — required, must match `^places/[A-Za-z0-9_-]+/photos/[A-Za-z0-9_-]+$` (SSRF guard)
 
 **Success response** (HTTP 200, raw image bytes):
+
 - `Content-Type`: whatever Google returned (typically `image/jpeg`)
 - `Cache-Control`: `public, max-age=86400, immutable`
 - `X-Request-Id`: standard request ID header
@@ -726,10 +730,10 @@ Four new test classes under `backend/src/test/java/com/example/worshiproom/proxy
 Plain JUnit unit tests. Six tests minimum:
 
 1. `searchKey_normalizesKeywordCase()` — "CHURCH" and "church" produce the same key.
-2. `searchKey_normalizesKeywordWhitespace()` — "  church  " and "church" produce the same key.
+2. `searchKey_normalizesKeywordWhitespace()` — " church " and "church" produce the same key.
 3. `searchKey_includesPageTokenWhenPresent()` — distinct page tokens produce distinct keys.
 4. `searchKey_omitsPageTokenWhenNullOrEmpty()` — null and "" pageToken produce the same key (first page).
-5. `geocodeKey_normalizesQueryCaseAndWhitespace()` — "Spring Hill, TN" and "  spring hill, tn  " produce the same key.
+5. `geocodeKey_normalizesQueryCaseAndWhitespace()` — "Spring Hill, TN" and " spring hill, tn " produce the same key.
 6. `photoKey_returnsNameUnchanged()` — photo names are stable opaque IDs; no normalization needed.
 
 These ensure cache hits behave as expected and prevent subtle bugs where a UI variation in keyword casing causes cache misses and unnecessary upstream calls.
@@ -823,7 +827,7 @@ Three new path entries plus three new schemas plus an updated `Health` response 
 tags:
   - name: Health
   - name: Proxy / AI
-  - name: Proxy / Places   # already declared in Spec 1; this spec uses it
+  - name: Proxy / Places # already declared in Spec 1; this spec uses it
   - name: Proxy / Audio
 ```
 
@@ -839,9 +843,9 @@ tags:
       required: true
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/PlacesSearchRequest' }
+          schema: { $ref: "#/components/schemas/PlacesSearchRequest" }
     responses:
-      '200':
+      "200":
         description: Search results
         content:
           application/json:
@@ -849,13 +853,13 @@ tags:
               type: object
               required: [data, meta]
               properties:
-                data: { $ref: '#/components/schemas/PlacesSearchResponse' }
-                meta: { $ref: '#/components/schemas/ResponseMeta' }
-      '400': { $ref: '#/components/responses/BadRequest' }
-      '429': { $ref: '#/components/responses/RateLimited' }
-      '502': { $ref: '#/components/responses/UpstreamError' }
-      '504': { $ref: '#/components/responses/UpstreamTimeout' }
-      '500': { $ref: '#/components/responses/InternalError' }
+                data: { $ref: "#/components/schemas/PlacesSearchResponse" }
+                meta: { $ref: "#/components/schemas/ResponseMeta" }
+      "400": { $ref: "#/components/responses/BadRequest" }
+      "429": { $ref: "#/components/responses/RateLimited" }
+      "502": { $ref: "#/components/responses/UpstreamError" }
+      "504": { $ref: "#/components/responses/UpstreamTimeout" }
+      "500": { $ref: "#/components/responses/InternalError" }
 
 /api/v1/proxy/maps/geocode:
   get:
@@ -869,7 +873,7 @@ tags:
         schema: { type: string, minLength: 1, maxLength: 200 }
         example: "Spring Hill, TN"
     responses:
-      '200':
+      "200":
         description: Geocode result (coords or null pair for no-result)
         content:
           application/json:
@@ -877,13 +881,13 @@ tags:
               type: object
               required: [data, meta]
               properties:
-                data: { $ref: '#/components/schemas/GeocodeResponse' }
-                meta: { $ref: '#/components/schemas/ResponseMeta' }
-      '400': { $ref: '#/components/responses/BadRequest' }
-      '429': { $ref: '#/components/responses/RateLimited' }
-      '502': { $ref: '#/components/responses/UpstreamError' }
-      '504': { $ref: '#/components/responses/UpstreamTimeout' }
-      '500': { $ref: '#/components/responses/InternalError' }
+                data: { $ref: "#/components/schemas/GeocodeResponse" }
+                meta: { $ref: "#/components/schemas/ResponseMeta" }
+      "400": { $ref: "#/components/responses/BadRequest" }
+      "429": { $ref: "#/components/responses/RateLimited" }
+      "502": { $ref: "#/components/responses/UpstreamError" }
+      "504": { $ref: "#/components/responses/UpstreamTimeout" }
+      "500": { $ref: "#/components/responses/InternalError" }
 
 /api/v1/proxy/maps/place-photo:
   get:
@@ -899,11 +903,12 @@ tags:
           pattern: "^places/[A-Za-z0-9_-]+/photos/[A-Za-z0-9_-]+$"
         example: "places/ChIJ.../photos/AbC123"
     responses:
-      '200':
+      "200":
         description: Photo image bytes
         headers:
           Cache-Control:
-            schema: { type: string, example: "public, max-age=86400, immutable" }
+            schema:
+              { type: string, example: "public, max-age=86400, immutable" }
         content:
           image/jpeg:
             schema: { type: string, format: binary }
@@ -911,11 +916,11 @@ tags:
             schema: { type: string, format: binary }
           image/webp:
             schema: { type: string, format: binary }
-      '400': { $ref: '#/components/responses/BadRequest' }
-      '429': { $ref: '#/components/responses/RateLimited' }
-      '502': { $ref: '#/components/responses/UpstreamError' }
-      '504': { $ref: '#/components/responses/UpstreamTimeout' }
-      '500': { $ref: '#/components/responses/InternalError' }
+      "400": { $ref: "#/components/responses/BadRequest" }
+      "429": { $ref: "#/components/responses/RateLimited" }
+      "502": { $ref: "#/components/responses/UpstreamError" }
+      "504": { $ref: "#/components/responses/UpstreamTimeout" }
+      "500": { $ref: "#/components/responses/InternalError" }
 ```
 
 **Schema additions (insert under `components.schemas`):**
@@ -962,7 +967,7 @@ Health:
         gemini:
           type: object
           properties: { configured: { type: boolean } }
-        googleMaps:    # NEW (or verify present from Spec 1 stub)
+        googleMaps: # NEW (or verify present from Spec 1 stub)
           type: object
           properties: { configured: { type: boolean } }
         fcbh:
@@ -986,37 +991,37 @@ CC verifies these schemas exist via the Spec 1 OpenAPI structure (read first, th
 // retries indefinitely on probe failure (network down at app load shouldn't
 // permanently fall back to mock).
 
-let cachedReadiness: boolean | undefined
-let inflightProbe: Promise<boolean> | undefined
+let cachedReadiness: boolean | undefined;
+let inflightProbe: Promise<boolean> | undefined;
 
-const HEALTH_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1/health`
+const HEALTH_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1/health`;
 
 async function probe(): Promise<boolean> {
   try {
-    const response = await fetch(HEALTH_URL, { method: 'GET' })
-    if (!response.ok) return false
-    const data = await response.json()
-    return Boolean(data?.providers?.googleMaps?.configured)
+    const response = await fetch(HEALTH_URL, { method: "GET" });
+    if (!response.ok) return false;
+    const data = await response.json();
+    return Boolean(data?.providers?.googleMaps?.configured);
   } catch {
-    return false
+    return false;
   }
 }
 
 export async function getMapsReadiness(): Promise<boolean> {
-  if (cachedReadiness !== undefined) return cachedReadiness
-  if (inflightProbe) return inflightProbe
+  if (cachedReadiness !== undefined) return cachedReadiness;
+  if (inflightProbe) return inflightProbe;
   inflightProbe = probe().then((ready) => {
-    cachedReadiness = ready
-    inflightProbe = undefined
-    return ready
-  })
-  return inflightProbe
+    cachedReadiness = ready;
+    inflightProbe = undefined;
+    return ready;
+  });
+  return inflightProbe;
 }
 
 /** Test-only reset. Used by Vitest to clear cached state between tests. */
 export function __resetMapsReadinessForTests(): void {
-  cachedReadiness = undefined
-  inflightProbe = undefined
+  cachedReadiness = undefined;
+  inflightProbe = undefined;
 }
 ```
 
@@ -1027,22 +1032,22 @@ The inflight-promise pattern prevents thundering-herd if multiple components cal
 The factory becomes async. Existing callers update to `await createLocalSupportService()`.
 
 ```typescript
-import type { SearchParams, SearchResult } from '@/types/local-support'
-import { getMapsReadiness } from './maps-readiness'
-import { createMockService } from './mock-local-support-service'
-import { createGoogleService } from './google-local-support-service'
+import type { SearchParams, SearchResult } from "@/types/local-support";
+import { getMapsReadiness } from "./maps-readiness";
+import { createMockService } from "./mock-local-support-service";
+import { createGoogleService } from "./google-local-support-service";
 
 export interface LocalSupportService {
-  search(params: SearchParams, page: number): Promise<SearchResult>
-  geocode(query: string): Promise<{ lat: number; lng: number } | null>
+  search(params: SearchParams, page: number): Promise<SearchResult>;
+  geocode(query: string): Promise<{ lat: number; lng: number } | null>;
 }
 
 export async function createLocalSupportService(): Promise<LocalSupportService> {
-  const ready = await getMapsReadiness()
+  const ready = await getMapsReadiness();
   if (ready) {
-    return createGoogleService()
+    return createGoogleService();
   }
-  return createMockService()
+  return createMockService();
 }
 ```
 
@@ -1050,7 +1055,7 @@ export async function createLocalSupportService(): Promise<LocalSupportService> 
 
 ### `services/google-local-support-service.ts` (rewritten)
 
-```typescript
+````typescript
 import type { LocalSupportCategory, SearchParams, SearchResult } from '@/types/local-support'
 import type { LocalSupportService } from './local-support-service'
 import { calculateDistanceMiles } from '@/lib/geo'
@@ -1191,7 +1196,7 @@ export function createGoogleService(): LocalSupportService {
 export function __resetPageTokensForTests(): void {
   pageTokens.clear()
 }
-```
+````
 
 **Notes on the rewrite:**
 
@@ -1209,29 +1214,33 @@ Two changes:
 2. `mapGooglePlaceToLocalSupport` signature drops the `apiKey` parameter (it was only used to construct photo URLs).
 
 ```typescript
-const PROXY_PHOTO_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1/proxy/maps/place-photo`
+const PROXY_PHOTO_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1/proxy/maps/place-photo`;
 
 export function buildPhotoUrl(photoName: string): string {
-  return `${PROXY_PHOTO_URL}?name=${encodeURIComponent(photoName)}`
+  return `${PROXY_PHOTO_URL}?name=${encodeURIComponent(photoName)}`;
 }
 
 export function mapGooglePlaceToLocalSupport(
   gp: GooglePlace,
   category: LocalSupportCategory,
 ): LocalSupportPlace | null {
-  if (!gp.displayName?.text || !gp.location) return null
-  if (gp.businessStatus === 'CLOSED_PERMANENTLY') return null
+  if (!gp.displayName?.text || !gp.location) return null;
+  if (gp.businessStatus === "CLOSED_PERMANENTLY") return null;
 
-  const name = gp.displayName.text
-  const description = gp.editorialSummary?.text ?? null
-  const photoUrl = gp.photos?.[0]?.name ? buildPhotoUrl(gp.photos[0].name) : null
-  const denomination = category === 'churches' ? inferDenomination(name, description) : null
-  const specialties = category === 'counselors' ? inferSpecialties(name, description) : null
+  const name = gp.displayName.text;
+  const description = gp.editorialSummary?.text ?? null;
+  const photoUrl = gp.photos?.[0]?.name
+    ? buildPhotoUrl(gp.photos[0].name)
+    : null;
+  const denomination =
+    category === "churches" ? inferDenomination(name, description) : null;
+  const specialties =
+    category === "counselors" ? inferSpecialties(name, description) : null;
 
   return {
     id: gp.id,
     name,
-    address: gp.formattedAddress ?? 'Address unavailable',
+    address: gp.formattedAddress ?? "Address unavailable",
     phone: gp.nationalPhoneNumber ?? gp.internationalPhoneNumber ?? null,
     website: gp.websiteUri ?? null,
     lat: gp.location.latitude,
@@ -1243,7 +1252,7 @@ export function mapGooglePlaceToLocalSupport(
     category,
     denomination,
     specialties,
-  }
+  };
 }
 ```
 
@@ -1361,6 +1370,7 @@ Per Spec 2's D6 lessons, the frontend Maps key (`VITE_GOOGLE_MAPS_API_KEY`) is H
 - [ ] Key value pasted into `backend/.env.local` as `GOOGLE_MAPS_API_KEY=AIza...` (NOT prefixed with `VITE_`)
 
 **Org-policy gotcha (per Spec 2 D6):** if you hit "must bind to service account" when creating the key, your Google account is governed by a Google Workspace org policy. There's no AI Studio escape hatch for Maps (unlike Gemini). Workarounds:
+
 1. Switch to an incognito window with a non-Workspace personal Google account
 2. Or accept the service-account dance (additional 10-15 minutes of GCP UI navigation)
 
@@ -1371,7 +1381,7 @@ CC should surface this if the curl smoke at Step N (TBD by /plan-forums) returns
 - [ ] `cd frontend && npm install` (in case of any dep drift since last session)
 - [ ] `cd frontend && npm test -- --run` — full suite passes against Spec 2 baseline
 - [ ] `cd frontend && npm run build` — production build succeeds
-- [ ] Bundle scan baseline: `grep -r 'AIzaSyB32xNSMGT7NJiITWAyTsUF89IQEsyWNOg' frontend/dist/assets/*.js | wc -l` should report `1` (the current Maps key is still in the bundle pre-migration; this number drops to `0` after Spec 3 ships)
+- [ ] Bundle scan baseline: `grep -r '<GOOGLE_MAPS_API_KEY_REDACTED>' frontend/dist/assets/*.js | wc -l` should report `1` (the current Maps key is still in the bundle pre-migration; this number drops to `0` after Spec 3 ships)
 
 ### CI / Docker readiness
 
@@ -1406,7 +1416,7 @@ Reusing Spec 2's lessons, anticipate these likely deviations during Spec 3 execu
 
 ### Security (the Spec 3 reason-for-existing)
 
-- [ ] `frontend/dist/assets/*.js` contains ZERO matches for the production Maps API key value (`AIzaSyB32xNSMGT7NJiITWAyTsUF89IQEsyWNOg` or whatever the current frontend key is). Verified via `grep -r '<key-value>' frontend/dist/assets/ | wc -l` returning `0`.
+- [ ] `frontend/dist/assets/*.js` contains ZERO matches for the production Maps API key value (`<GOOGLE_MAPS_API_KEY_REDACTED>` or whatever the current frontend key is). Verified via `grep -r '<key-value>' frontend/dist/assets/ | wc -l` returning `0`.
 - [ ] `frontend/dist/assets/*.js` contains ZERO matches for `places.googleapis.com` and ZERO matches for `maps.googleapis.com/maps/api/geocode`. The frontend never calls Google directly after this spec.
 - [ ] `frontend/dist/assets/*.js` contains ZERO matches for `VITE_GOOGLE_MAPS_API_KEY`. The env var is fully decommissioned from frontend code.
 - [ ] Network tab on `/local-support` shows ALL Maps-related requests going to `localhost:8080/api/v1/proxy/maps/*` (or the prod backend equivalent). ZERO requests to `*.googleapis.com`.
@@ -1452,7 +1462,7 @@ Reusing Spec 2's lessons, anticipate these likely deviations during Spec 3 execu
 
 ### Operational
 
-- [ ] After merge, the OLD frontend Maps key (`AIzaSyB32xNSMGT7NJiITWAyTsUF89IQEsyWNOg` or whatever it is) can be safely deactivated in GCP Console — nothing reads it anymore. (Eric to-do post-merge, not blocking.)
+- [ ] After merge, the OLD frontend Maps key (`<GOOGLE_MAPS_API_KEY_REDACTED>` or whatever it is) can be safely deactivated in GCP Console — nothing reads it anymore. (Eric to-do post-merge, not blocking.)
 - [ ] After merge, the dead `VITE_GOOGLE_MAPS_API_KEY=` line in personal `frontend/.env.local` files can be deleted (cosmetic only, zero functional effect).
 
 ---

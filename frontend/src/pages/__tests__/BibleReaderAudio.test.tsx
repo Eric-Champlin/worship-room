@@ -46,12 +46,12 @@ vi.mock('@/hooks/useAuth', () => ({
 }))
 
 // BB-26: the AudioPlayButton in ReaderChrome consumes AudioPlayerContext.
-// Stub the FCBH key so the button renders null and doesn't disrupt existing
-// ambient-audio integration assertions.
-vi.mock('@/lib/env', async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>
-  return { ...actual, isFcbhApiKeyConfigured: () => false }
-})
+// Spec 4: stub backend readiness probe so AudioPlayButton renders null and
+// doesn't disrupt existing ambient-audio integration assertions.
+vi.mock('@/services/fcbh-readiness', () => ({
+  getFcbhReadiness: () => Promise.resolve(false),
+  resetFcbhReadinessCache: () => {},
+}))
 vi.mock('@/lib/audio/engine', () => ({
   createEngineInstance: vi.fn(),
 }))

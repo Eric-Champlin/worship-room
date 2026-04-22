@@ -26,10 +26,10 @@ vi.mock('@/lib/audio-engine', () => {
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
 }))
-vi.mock('@/lib/env', async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>
-  return { ...actual, isFcbhApiKeyConfigured: () => false }
-})
+vi.mock('@/services/fcbh-readiness', () => ({
+  getFcbhReadiness: () => Promise.resolve(false),
+  resetFcbhReadinessCache: () => {},
+}))
 vi.mock('@/lib/audio/engine', () => ({
   createEngineInstance: vi.fn(),
 }))

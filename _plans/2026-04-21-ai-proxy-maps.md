@@ -103,12 +103,12 @@ None. This spec does not touch the database.
 
 Three new endpoints under `/api/v1/proxy/maps/`, one shape change on `/api/v1/health`.
 
-| Method | Endpoint | Auth | Rate Limit | Request Body | Response |
-|--------|----------|------|-----------|-------------|----------|
-| POST | `/api/v1/proxy/maps/places-search` | None (inherits proxy filter) | Inherited: 120/min dev, 60/min prod per IP | `PlacesSearchRequest { lat, lng, radiusMiles, keyword, pageToken? }` | `ProxyResponse<PlacesSearchResponse { places: List<Map>, nextPageToken: string? }>` |
-| GET | `/api/v1/proxy/maps/geocode?query=...` | None | Same | — | `ProxyResponse<GeocodeResponse { lat: Double?, lng: Double? }>` |
-| GET | `/api/v1/proxy/maps/place-photo?name=...` | None | Same | — | `image/*` bytes with `Cache-Control: public, max-age=86400, immutable` |
-| GET | `/api/v1/health` (modified) | None | Not rate-limited (outside `/api/v1/proxy/**`) | — | `{ status, providers: { gemini: { configured }, googleMaps: { configured }, fcbh: { configured } } }` (nested, shape change) |
+| Method | Endpoint                                  | Auth                         | Rate Limit                                    | Request Body                                                         | Response                                                                                                                     |
+| ------ | ----------------------------------------- | ---------------------------- | --------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/v1/proxy/maps/places-search`        | None (inherits proxy filter) | Inherited: 120/min dev, 60/min prod per IP    | `PlacesSearchRequest { lat, lng, radiusMiles, keyword, pageToken? }` | `ProxyResponse<PlacesSearchResponse { places: List<Map>, nextPageToken: string? }>`                                          |
+| GET    | `/api/v1/proxy/maps/geocode?query=...`    | None                         | Same                                          | —                                                                    | `ProxyResponse<GeocodeResponse { lat: Double?, lng: Double? }>`                                                              |
+| GET    | `/api/v1/proxy/maps/place-photo?name=...` | None                         | Same                                          | —                                                                    | `image/*` bytes with `Cache-Control: public, max-age=86400, immutable`                                                       |
+| GET    | `/api/v1/health` (modified)               | None                         | Not rate-limited (outside `/api/v1/proxy/**`) | —                                                                    | `{ status, providers: { gemini: { configured }, googleMaps: { configured }, fcbh: { configured } } }` (nested, shape change) |
 
 Error responses for all three proxy endpoints follow the standard `ProxyError` shape. Binary success for `place-photo` distinguished from JSON error by `Content-Type`.
 
@@ -124,7 +124,7 @@ Error responses for all three proxy endpoints follow the standard `ProxyError` s
 - [ ] `cd backend && ./mvnw test` passes cleanly on the current branch baseline (no pre-existing failures).
 - [ ] `cd frontend && npm test -- --run` passes cleanly.
 - [ ] `cd frontend && npm run build` succeeds.
-- [ ] Baseline bundle key leak count: `grep -r 'AIzaSyB32xNSMGT7NJiITWAyTsUF89IQEsyWNOg' frontend/dist/assets/*.js 2>/dev/null | wc -l` reports `1` pre-migration (the current Maps key). Post-migration this must report `0`.
+- [ ] Baseline bundle key leak count: `grep -r '<GOOGLE_MAPS_API_KEY_REDACTED>' frontend/dist/assets/*.js 2>/dev/null | wc -l` reports `1` pre-migration (the current Maps key). Post-migration this must report `0`.
 - [ ] Assumption — package naming: plan uses `com.example.worshiproom.proxy.maps` per the spec's explicit file paths. This deviates from `03-backend-standards.md`'s recommendation of `proxy.places` but matches the spec verbatim. Spec is the feature authority. If Eric prefers `proxy.places`, flag at review time and CC will adjust all file paths and imports consistently.
 - [ ] Assumption — shape change on `/api/v1/health`: plan migrates all three providers (gemini, googleMaps, fcbh) to the nested `{ configured: boolean }` shape simultaneously. No frontend reads from `providers.gemini` or `providers.fcbh` today, so the migration is a breaking change without a consumer — safe to do all at once rather than leaving two providers flat and one nested.
 
@@ -132,16 +132,16 @@ Error responses for all three proxy endpoints follow the standard `ProxyError` s
 
 ## Edge Cases & Decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| `ConstraintViolationException` handler | Add to existing `ProxyExceptionHandler` (not a new class) | The handler class is already the correct home for validation exceptions; adding a second handler class would split the concern. Mapping stays identical to `MethodArgumentNotValidException`: first violation → 400 INVALID_INPUT with human-readable message. |
-| Health-endpoint shape migration scope | Migrate all three providers (gemini, googleMaps, fcbh) to nested shape in one step | Frontend today reads from `providers.googleMaps.configured` (this spec) but never from `providers.gemini` or `providers.fcbh`. No consumer to break. Leaving two providers flat and one nested is inconsistent. |
-| `MapsIntegrationTest` upstream mocking strategy | `@MockBean GoogleMapsService` in the integration test | Spec text suggests "mock WebClient at the bean level" but the existing `GeminiIntegrationTest` precedent uses `@MockBean GeminiService` and that pattern is the documented Spec 2 convention. WebClient-bean mocking is strictly more brittle (fluent-builder mocking tax) without buying additional coverage — the RequestIdFilter, RateLimitFilter, CORS, and advice chain all still run end-to-end with the service mocked. Matches Spec 2 pattern verbatim. |
-| Frontend package manager | `npm` | Spec's pre-execution checklist and acceptance criteria use `npm` commands. The frontend tooling is npm-compatible. CC follows the spec's exact commands rather than substituting `pnpm`. |
-| Photo response `Content-Type` on cache hit | Always `image/jpeg` (the `fetchPhoto` return type the service declares on cache hit) | Spec acknowledges the cache layer stores only bytes, not the original `Content-Type`. Places API photos are overwhelmingly JPEG; returning JPEG on cache hit is acceptable given the cache is a performance optimization and the browser will tolerate mislabelled JPEG content. An alternative (caching `{bytes, contentType}` as a struct) adds complexity for negligible benefit. |
-| Photo URL `maxWidthPx` | Hardcoded `400` in `PHOTO_URL_TEMPLATE` (matching current frontend) | Spec's example code uses `maxWidthPx=400`; current frontend mapper uses `buildPhotoUrl(photoName, apiKey, maxWidthPx = 400)`. Keep the default. Configurable per-request width is out of scope. |
-| LocalSupportPage async factory migration | Initialize the service once in a `useEffect` on mount, store in a `useState` ref | The factory is async after this spec. Components should call it inside an effect, hold the resolved service in state, and render a brief loading state until the service is ready. Spec's guidance: "If any caller is in a synchronous render path, refactor to a `useState`-cached service ref initialized inside an effect." |
-| `googleMaps.api-key` null safety in service | Check `proxyConfig.getGoogleMaps().isConfigured()` at the top of each public method | Mirrors `GeminiService.generate()`'s null-client guard pattern. Throws `UpstreamException("Maps service is not configured on the server.")` before any WebClient call attempt. Matches acceptance criterion `fullLifecycle_unconfiguredKeyReturns502`. |
+| Decision                                        | Choice                                                                               | Rationale                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ConstraintViolationException` handler          | Add to existing `ProxyExceptionHandler` (not a new class)                            | The handler class is already the correct home for validation exceptions; adding a second handler class would split the concern. Mapping stays identical to `MethodArgumentNotValidException`: first violation → 400 INVALID_INPUT with human-readable message.                                                                                                                                                                                                  |
+| Health-endpoint shape migration scope           | Migrate all three providers (gemini, googleMaps, fcbh) to nested shape in one step   | Frontend today reads from `providers.googleMaps.configured` (this spec) but never from `providers.gemini` or `providers.fcbh`. No consumer to break. Leaving two providers flat and one nested is inconsistent.                                                                                                                                                                                                                                                 |
+| `MapsIntegrationTest` upstream mocking strategy | `@MockBean GoogleMapsService` in the integration test                                | Spec text suggests "mock WebClient at the bean level" but the existing `GeminiIntegrationTest` precedent uses `@MockBean GeminiService` and that pattern is the documented Spec 2 convention. WebClient-bean mocking is strictly more brittle (fluent-builder mocking tax) without buying additional coverage — the RequestIdFilter, RateLimitFilter, CORS, and advice chain all still run end-to-end with the service mocked. Matches Spec 2 pattern verbatim. |
+| Frontend package manager                        | `npm`                                                                                | Spec's pre-execution checklist and acceptance criteria use `npm` commands. The frontend tooling is npm-compatible. CC follows the spec's exact commands rather than substituting `pnpm`.                                                                                                                                                                                                                                                                        |
+| Photo response `Content-Type` on cache hit      | Always `image/jpeg` (the `fetchPhoto` return type the service declares on cache hit) | Spec acknowledges the cache layer stores only bytes, not the original `Content-Type`. Places API photos are overwhelmingly JPEG; returning JPEG on cache hit is acceptable given the cache is a performance optimization and the browser will tolerate mislabelled JPEG content. An alternative (caching `{bytes, contentType}` as a struct) adds complexity for negligible benefit.                                                                            |
+| Photo URL `maxWidthPx`                          | Hardcoded `400` in `PHOTO_URL_TEMPLATE` (matching current frontend)                  | Spec's example code uses `maxWidthPx=400`; current frontend mapper uses `buildPhotoUrl(photoName, apiKey, maxWidthPx = 400)`. Keep the default. Configurable per-request width is out of scope.                                                                                                                                                                                                                                                                 |
+| LocalSupportPage async factory migration        | Initialize the service once in a `useEffect` on mount, store in a `useState` ref     | The factory is async after this spec. Components should call it inside an effect, hold the resolved service in state, and render a brief loading state until the service is ready. Spec's guidance: "If any caller is in a synchronous render path, refactor to a `useState`-cached service ref initialized inside an effect."                                                                                                                                  |
+| `googleMaps.api-key` null safety in service     | Check `proxyConfig.getGoogleMaps().isConfigured()` at the top of each public method  | Mirrors `GeminiService.generate()`'s null-client guard pattern. Throws `UpstreamException("Maps service is not configured on the server.")` before any WebClient call attempt. Matches acceptance criterion `fullLifecycle_unconfiguredKeyReturns502`.                                                                                                                                                                                                          |
 
 ---
 
@@ -199,8 +199,8 @@ Test addition: extend `ProxyExceptionHandlerTest` with a minimal test controller
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
+| Test                                             | Type         | Description                                                                                                             |
+| ------------------------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | `constraintViolation_returns400WithInvalidInput` | Unit / slice | Test that a missing `@RequestParam @NotBlank` yields HTTP 400 + `{code: "INVALID_INPUT", message: contains param name}` |
 
 **Expected state after completion:**
@@ -282,9 +282,9 @@ providers:
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| `healthReturnsProviderStatuses` (updated) | Slice | Asserts `$.providers.{gemini,googleMaps,fcbh}.configured` are boolean |
+| Test                                       | Type  | Description                                                                       |
+| ------------------------------------------ | ----- | --------------------------------------------------------------------------------- |
+| `healthReturnsProviderStatuses` (updated)  | Slice | Asserts `$.providers.{gemini,googleMaps,fcbh}.configured` are boolean             |
 | `legacyHealthReturnsSameShape` (unchanged) | Slice | Asserts `$.status` is `"ok"` — nested shape propagates via shared `buildHealth()` |
 
 **Expected state after completion:**
@@ -339,14 +339,14 @@ Copy the DTO code verbatim from the spec's `Backend file specifications` section
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| `searchKey_normalizesKeywordCase` | Unit | "CHURCH"/"church" → same key |
-| `searchKey_normalizesKeywordWhitespace` | Unit | Whitespace trimmed |
-| `searchKey_includesPageTokenWhenPresent` | Unit | Distinct pageTokens → distinct keys |
-| `searchKey_omitsPageTokenWhenNullOrEmpty` | Unit | null/"" equivalent |
-| `geocodeKey_normalizesQueryCaseAndWhitespace` | Unit | Case + whitespace normalized |
-| `photoKey_returnsNameUnchanged` | Unit | Opaque ID passes through |
+| Test                                          | Type | Description                         |
+| --------------------------------------------- | ---- | ----------------------------------- |
+| `searchKey_normalizesKeywordCase`             | Unit | "CHURCH"/"church" → same key        |
+| `searchKey_normalizesKeywordWhitespace`       | Unit | Whitespace trimmed                  |
+| `searchKey_includesPageTokenWhenPresent`      | Unit | Distinct pageTokens → distinct keys |
+| `searchKey_omitsPageTokenWhenNullOrEmpty`     | Unit | null/"" equivalent                  |
+| `geocodeKey_normalizesQueryCaseAndWhitespace` | Unit | Case + whitespace normalized        |
+| `photoKey_returnsNameUnchanged`               | Unit | Opaque ID passes through            |
 
 **Expected state after completion:**
 
@@ -419,12 +419,12 @@ Test list (22 total, verbatim from spec):
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| Search × 8 | Unit | Happy path + empty + cache hit/miss + page token + 4xx/5xx/timeout |
-| Geocode × 6 | Unit | Happy + zero_results + empty + over_query_limit + cache hit + negative cache |
-| Photo × 6 | Unit | Happy + 3× SSRF rejects + cache hit + empty body |
-| Configuration × 2 | Unit | Null client throws + no-leak invariant across all error paths |
+| Test              | Type | Description                                                                  |
+| ----------------- | ---- | ---------------------------------------------------------------------------- |
+| Search × 8        | Unit | Happy path + empty + cache hit/miss + page token + 4xx/5xx/timeout           |
+| Geocode × 6       | Unit | Happy + zero_results + empty + over_query_limit + cache hit + negative cache |
+| Photo × 6         | Unit | Happy + 3× SSRF rejects + cache hit + empty body                             |
+| Configuration × 2 | Unit | Null client throws + no-leak invariant across all error paths                |
 
 **Expected state after completion:**
 
@@ -482,21 +482,21 @@ Test list (13, verbatim from spec):
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| `placesSearch_happyPath_returns200WithBody` | Slice | Response shape `{data:{places,nextPageToken},meta:{requestId}}` |
-| `placesSearch_missingLat_returns400` | Slice | INVALID_INPUT |
-| `placesSearch_invalidLatRange_returns400` | Slice | INVALID_INPUT for lat=100 |
-| `placesSearch_invalidRadius_returns400` | Slice | INVALID_INPUT for radiusMiles=51 |
-| `placesSearch_serviceThrowsUpstream_returns502` | Slice | Upstream surfaces as 502 via handler |
-| `geocode_happyPath_returns200WithCoords` | Slice | Coords in response |
-| `geocode_missingQuery_returns400` | Slice | INVALID_INPUT (relies on Step 1's handler) |
-| `geocode_emptyResult_returns200WithNulls` | Slice | `{data:{lat:null,lng:null}}` |
-| `placePhoto_happyPath_returns200WithImageBytes` | Slice | Content-Type, Cache-Control, body length correct |
-| `placePhoto_invalidNameFormat_returns400` | Slice | INVALID_INPUT JSON body, NOT bytes |
-| `placePhoto_missingName_returns400` | Slice | INVALID_INPUT |
-| `placePhoto_serviceThrowsUpstream_returns502JsonError` | Slice | JSON ProxyError, NOT bytes |
-| `placePhoto_xRequestIdHeaderPresent` | Slice | Request ID header present |
+| Test                                                   | Type  | Description                                                     |
+| ------------------------------------------------------ | ----- | --------------------------------------------------------------- |
+| `placesSearch_happyPath_returns200WithBody`            | Slice | Response shape `{data:{places,nextPageToken},meta:{requestId}}` |
+| `placesSearch_missingLat_returns400`                   | Slice | INVALID_INPUT                                                   |
+| `placesSearch_invalidLatRange_returns400`              | Slice | INVALID_INPUT for lat=100                                       |
+| `placesSearch_invalidRadius_returns400`                | Slice | INVALID_INPUT for radiusMiles=51                                |
+| `placesSearch_serviceThrowsUpstream_returns502`        | Slice | Upstream surfaces as 502 via handler                            |
+| `geocode_happyPath_returns200WithCoords`               | Slice | Coords in response                                              |
+| `geocode_missingQuery_returns400`                      | Slice | INVALID_INPUT (relies on Step 1's handler)                      |
+| `geocode_emptyResult_returns200WithNulls`              | Slice | `{data:{lat:null,lng:null}}`                                    |
+| `placePhoto_happyPath_returns200WithImageBytes`        | Slice | Content-Type, Cache-Control, body length correct                |
+| `placePhoto_invalidNameFormat_returns400`              | Slice | INVALID_INPUT JSON body, NOT bytes                              |
+| `placePhoto_missingName_returns400`                    | Slice | INVALID_INPUT                                                   |
+| `placePhoto_serviceThrowsUpstream_returns502JsonError` | Slice | JSON ProxyError, NOT bytes                                      |
+| `placePhoto_xRequestIdHeaderPresent`                   | Slice | Request ID header present                                       |
 
 **Expected state after completion:**
 
@@ -550,14 +550,14 @@ OpenAPI additions (copy verbatim from spec):
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| `fullLifecycle_placesSearch_returnsExpectedHeaders` | Integration | Full headers + ProxyResponse body |
-| `fullLifecycle_geocode_propagatesRequestId` | Integration | Client X-Request-Id round-trip |
-| `fullLifecycle_placePhoto_streamsBytesWithCorrectHeaders` | Integration | Content-Type + Cache-Control + bytes |
-| `fullLifecycle_invalidInput_returnsProxyErrorShape` | Integration | 400 with ProxyError shape |
-| `fullLifecycle_placesSearchUnconfiguredReturns502` | Integration | UPSTREAM_ERROR when key empty |
-| `fullLifecycle_noUpstreamErrorTextLeaks` | Integration | Cause exception text never in response |
+| Test                                                      | Type        | Description                            |
+| --------------------------------------------------------- | ----------- | -------------------------------------- |
+| `fullLifecycle_placesSearch_returnsExpectedHeaders`       | Integration | Full headers + ProxyResponse body      |
+| `fullLifecycle_geocode_propagatesRequestId`               | Integration | Client X-Request-Id round-trip         |
+| `fullLifecycle_placePhoto_streamsBytesWithCorrectHeaders` | Integration | Content-Type + Cache-Control + bytes   |
+| `fullLifecycle_invalidInput_returnsProxyErrorShape`       | Integration | 400 with ProxyError shape              |
+| `fullLifecycle_placesSearchUnconfiguredReturns502`        | Integration | UPSTREAM_ERROR when key empty          |
+| `fullLifecycle_noUpstreamErrorTextLeaks`                  | Integration | Cause exception text never in response |
 
 **Expected state after completion:**
 
@@ -670,13 +670,13 @@ Use `vi.mock('whatever')`, `vi.stubGlobal('fetch', ...)`, or `vi.spyOn(globalThi
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| `getMapsReadiness_returnsTrueWhenHealthReportsConfigured` | Unit | Nested `configured: true` → true |
+| Test                                                          | Type | Description                        |
+| ------------------------------------------------------------- | ---- | ---------------------------------- |
+| `getMapsReadiness_returnsTrueWhenHealthReportsConfigured`     | Unit | Nested `configured: true` → true   |
 | `getMapsReadiness_returnsFalseWhenHealthReportsNotConfigured` | Unit | Nested `configured: false` → false |
-| `getMapsReadiness_returnsFalseOnFetchError` | Unit | Rejected fetch → false |
-| `getMapsReadiness_cachesAfterFirstSuccess` | Unit | Second call → no fetch |
-| `getMapsReadiness_concurrentCallsShareInflightProbe` | Unit | `Promise.all` → one fetch |
+| `getMapsReadiness_returnsFalseOnFetchError`                   | Unit | Rejected fetch → false             |
+| `getMapsReadiness_cachesAfterFirstSuccess`                    | Unit | Second call → no fetch             |
+| `getMapsReadiness_concurrentCallsShareInflightProbe`          | Unit | `Promise.all` → one fetch          |
 
 **Expected state after completion:**
 
@@ -699,10 +699,10 @@ Use `vi.mock('whatever')`, `vi.stubGlobal('fetch', ...)`, or `vi.spyOn(globalThi
 New `buildPhotoUrl`:
 
 ```typescript
-const PROXY_PHOTO_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1/proxy/maps/place-photo`
+const PROXY_PHOTO_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1/proxy/maps/place-photo`;
 
 export function buildPhotoUrl(photoName: string): string {
-  return `${PROXY_PHOTO_URL}?name=${encodeURIComponent(photoName)}`
+  return `${PROXY_PHOTO_URL}?name=${encodeURIComponent(photoName)}`;
 }
 ```
 
@@ -742,11 +742,11 @@ Update `google-places-mapper.test.ts` (check if present with Glob first; if miss
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| `buildPhotoUrl_returnsBackendProxyUrl` | Unit | Asserts backend-proxy URL with URL-encoded name |
+| Test                                                       | Type | Description                                           |
+| ---------------------------------------------------------- | ---- | ----------------------------------------------------- |
+| `buildPhotoUrl_returnsBackendProxyUrl`                     | Unit | Asserts backend-proxy URL with URL-encoded name       |
 | `mapGooglePlaceToLocalSupport_skipsClosedPlaces` (updated) | Unit | Call site drops apiKey arg; CLOSED_PERMANENTLY → null |
-| (Existing denomination/specialty tests updated) | Unit | Call sites drop apiKey arg |
+| (Existing denomination/specialty tests updated)            | Unit | Call sites drop apiKey arg                            |
 
 **Expected state after completion:**
 
@@ -816,19 +816,19 @@ Use `vi.fn()` or `vi.stubGlobal('fetch', ...)` for fetch mocks. Each test verifi
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| `search_callsBackendProxyWithCorrectBody` | Unit | URL + method + body shape |
-| `search_returnsMappedAndDistanceFilteredResults` | Unit | Radius filter applied |
-| `search_paginatesViaPageToken` | Unit | Token round-trip |
-| `geocode_callsBackendProxyWithEncodedQuery` | Unit | URL encoding |
-| `search_400/429/502/504FromBackend` × 4 | Unit | Error message propagation |
-| `geocode_502FromBackend` | Unit | Same shape as search |
-| `geocode_clientCacheShortCircuits` | Unit | Second call → no fetch |
-| `geocode_negativeResultIsCached` | Unit | null cached |
-| `geocode_differentQueryHitsBackend` | Unit | Cache key correctness |
-| `search_networkError` × 3 | Unit | Propagates, aborts, timeout |
-| `search_pagination` × 3 | Unit | Page 1 without page 0 empty, reset helper, distinct tokens |
+| Test                                             | Type | Description                                                |
+| ------------------------------------------------ | ---- | ---------------------------------------------------------- |
+| `search_callsBackendProxyWithCorrectBody`        | Unit | URL + method + body shape                                  |
+| `search_returnsMappedAndDistanceFilteredResults` | Unit | Radius filter applied                                      |
+| `search_paginatesViaPageToken`                   | Unit | Token round-trip                                           |
+| `geocode_callsBackendProxyWithEncodedQuery`      | Unit | URL encoding                                               |
+| `search_400/429/502/504FromBackend` × 4          | Unit | Error message propagation                                  |
+| `geocode_502FromBackend`                         | Unit | Same shape as search                                       |
+| `geocode_clientCacheShortCircuits`               | Unit | Second call → no fetch                                     |
+| `geocode_negativeResultIsCached`                 | Unit | null cached                                                |
+| `geocode_differentQueryHitsBackend`              | Unit | Cache key correctness                                      |
+| `search_networkError` × 3                        | Unit | Propagates, aborts, timeout                                |
+| `search_pagination` × 3                          | Unit | Page 1 without page 0 empty, reset helper, distinct tokens |
 
 **Expected state after completion:**
 
@@ -853,22 +853,22 @@ Use `vi.fn()` or `vi.stubGlobal('fetch', ...)` for fetch mocks. Each test verifi
 New `local-support-service.ts` (spec verbatim):
 
 ```typescript
-import type { SearchParams, SearchResult } from '@/types/local-support'
-import { getMapsReadiness } from './maps-readiness'
-import { createMockService } from './mock-local-support-service'
-import { createGoogleService } from './google-local-support-service'
+import type { SearchParams, SearchResult } from "@/types/local-support";
+import { getMapsReadiness } from "./maps-readiness";
+import { createMockService } from "./mock-local-support-service";
+import { createGoogleService } from "./google-local-support-service";
 
 export interface LocalSupportService {
-  search(params: SearchParams, page: number): Promise<SearchResult>
-  geocode(query: string): Promise<{ lat: number; lng: number } | null>
+  search(params: SearchParams, page: number): Promise<SearchResult>;
+  geocode(query: string): Promise<{ lat: number; lng: number } | null>;
 }
 
 export async function createLocalSupportService(): Promise<LocalSupportService> {
-  const ready = await getMapsReadiness()
+  const ready = await getMapsReadiness();
   if (ready) {
-    return createGoogleService()
+    return createGoogleService();
   }
-  return createMockService()
+  return createMockService();
 }
 ```
 
@@ -916,12 +916,12 @@ Use `vi.mock('./maps-readiness')` with a factory that returns the stubbed `getMa
 
 **Test specifications:**
 
-| Test | Type | Description |
-|------|------|-------------|
-| `factory_returnsGoogleServiceWhenBackendReady` | Unit | Mocked readiness true → Google |
-| `factory_returnsMockServiceWhenBackendNotReady` | Unit | Mocked false → Mock |
-| `factory_returnsMockServiceOnReadinessProbeFailure` | Unit | Rejected probe → Mock |
-| `factory_isAsync` | Type-check | Return type is `Promise<LocalSupportService>` |
+| Test                                                | Type       | Description                                   |
+| --------------------------------------------------- | ---------- | --------------------------------------------- |
+| `factory_returnsGoogleServiceWhenBackendReady`      | Unit       | Mocked readiness true → Google                |
+| `factory_returnsMockServiceWhenBackendNotReady`     | Unit       | Mocked false → Mock                           |
+| `factory_returnsMockServiceOnReadinessProbeFailure` | Unit       | Rejected probe → Mock                         |
+| `factory_isAsync`                                   | Type-check | Return type is `Promise<LocalSupportService>` |
 
 **Expected state after completion:**
 
@@ -1042,21 +1042,21 @@ None. Verification by grep + manual network-tab observation.
 
 ## Step Dependency Map
 
-| Step | Depends On | Description |
-|------|------------|-------------|
-| 1 | — | Add `ConstraintViolationException` handler to `ProxyExceptionHandler` |
-| 2 | — | Migrate `/api/v1/health` to nested provider shape + test + OpenAPI |
-| 3 | — | DTOs (PlacesSearchRequest, PlacesSearchResponse, GeocodeResponse) + MapsCacheKeys + test |
-| 4 | 3 | `GoogleMapsService` + unit tests |
-| 5 | 1, 3, 4 | `MapsController` + slice tests (Step 1 for `@RequestParam` validation to produce 400) |
-| 6 | 2, 4, 5 | Integration tests + remaining OpenAPI path additions |
-| 7 | 1–6 | Backend Docker Compose end-to-end smoke |
-| 8 | 2 | Frontend maps-readiness probe + test (reads nested health shape from Step 2) |
-| 9 | — | `google-places-mapper.ts` `buildPhotoUrl` signature change + test |
-| 10 | 9 | `google-local-support-service.ts` rewrite + test |
-| 11 | 8, 10 | `local-support-service.ts` async factory + `LocalSupportPage.tsx` caller + test |
-| 12 | 11 | Remove `VITE_GOOGLE_MAPS_API_KEY` + three helpers from `lib/env.ts`, `vite-env.d.ts`, `.env.example` |
-| 13 | 1–12 | Bundle scan + manual network smoke + full test suites |
+| Step | Depends On | Description                                                                                          |
+| ---- | ---------- | ---------------------------------------------------------------------------------------------------- |
+| 1    | —          | Add `ConstraintViolationException` handler to `ProxyExceptionHandler`                                |
+| 2    | —          | Migrate `/api/v1/health` to nested provider shape + test + OpenAPI                                   |
+| 3    | —          | DTOs (PlacesSearchRequest, PlacesSearchResponse, GeocodeResponse) + MapsCacheKeys + test             |
+| 4    | 3          | `GoogleMapsService` + unit tests                                                                     |
+| 5    | 1, 3, 4    | `MapsController` + slice tests (Step 1 for `@RequestParam` validation to produce 400)                |
+| 6    | 2, 4, 5    | Integration tests + remaining OpenAPI path additions                                                 |
+| 7    | 1–6        | Backend Docker Compose end-to-end smoke                                                              |
+| 8    | 2          | Frontend maps-readiness probe + test (reads nested health shape from Step 2)                         |
+| 9    | —          | `google-places-mapper.ts` `buildPhotoUrl` signature change + test                                    |
+| 10   | 9          | `google-local-support-service.ts` rewrite + test                                                     |
+| 11   | 8, 10      | `local-support-service.ts` async factory + `LocalSupportPage.tsx` caller + test                      |
+| 12   | 11         | Remove `VITE_GOOGLE_MAPS_API_KEY` + three helpers from `lib/env.ts`, `vite-env.d.ts`, `.env.example` |
+| 13   | 1–12       | Bundle scan + manual network smoke + full test suites                                                |
 
 Backend steps (1–7) are independently verifiable before frontend begins. Frontend steps (8–13) require the backend to be deployed (or at least locally running) for Step 13's smoke.
 
@@ -1064,22 +1064,22 @@ Backend steps (1–7) are independently verifiable before frontend begins. Front
 
 ## Execution Log
 
-| Step | Title | Status | Completion Date | Notes / Actual Files |
-|------|-------|--------|-----------------|----------------------|
-| 1 | Add ConstraintViolationException handler | [COMPLETE] | 2026-04-21 | `ProxyExceptionHandler.java`, `ProxyExceptionHandlerTest.java`. Also added `HandlerMethodValidationException` and `MissingServletRequestParameterException` handlers during Step 5 — see Deviation 1. |
-| 2 | Migrate /api/v1/health to nested shape | [COMPLETE] | 2026-04-21 | `ApiController.java`, `ApiControllerTest.java`, `openapi.yaml` Health schema. |
-| 3 | Create maps-package DTOs and cache-key helper | [COMPLETE] | 2026-04-21 | `PlacesSearchRequest.java`, `PlacesSearchResponse.java`, `GeocodeResponse.java`, `MapsCacheKeys.java`, `MapsCacheKeysTest.java`. All 6 cache-key tests pass. |
-| 4 | Create GoogleMapsService + unit tests | [COMPLETE] | 2026-04-21 | `GoogleMapsService.java`, `GoogleMapsServiceTest.java`. 22 tests pass. Added `catch (UpstreamException \| UpstreamTimeoutException)` in each method to preserve explicit exception types — see Deviation 2. |
-| 5 | Create MapsController + slice tests | [COMPLETE] | 2026-04-21 | `MapsController.java`, `MapsControllerTest.java`. 13 slice tests pass. Discovered Spring 6.1+ uses `HandlerMethodValidationException` not `ConstraintViolationException` for `@RequestParam` validation — extended Step 1's handler class accordingly (Deviation 1). |
-| 6 | Integration test + OpenAPI updates | [COMPLETE] | 2026-04-21 | `MapsIntegrationTest.java` (6 tests), three new paths + three new schemas in `openapi.yaml`. Full backend suite: 94 tests green. |
-| 7 | Non-Docker backend smoke | [COMPLETE] | 2026-04-21 | Ran via `./mvnw spring-boot:run`. Caught and fixed Spec 1 WebClient buffer sizing (Deviation 3) and two-step Places photo fetch (Deviation 4) and Spring `DispatcherServlet`/`HttpLogging` GET-URL PII leak (Deviation 5). All smoke curls pass: health nested, places-search 20 results, geocode coords, photo streams JPEG 55KB, SSRF guard 400, PII scan 0 leaks, rate-limit + request-id headers present. |
-| 8 | maps-readiness probe + test | [COMPLETE] | 2026-04-21 | `services/maps-readiness.ts` + `__tests__/maps-readiness.test.ts`. 5 tests pass. |
-| 9 | google-places-mapper.ts signature change | [COMPLETE] | 2026-04-21 | Dropped `apiKey` from `buildPhotoUrl` + `mapGooglePlaceToLocalSupport`. Returns backend-proxy URL. 36 mapper tests pass (no googleapis.com, no AIza, no key= in URLs). |
-| 10 | google-local-support-service.ts rewrite | [COMPLETE] | 2026-04-21 | Fetches from `/api/v1/proxy/maps/*`. 19 tests rewritten against fetch mocks. |
-| 11 | Async factory + LocalSupportPage caller | [COMPLETE] | 2026-04-21 | `local-support-service.ts` now async; `LocalSupportPage.tsx` holds service in state via effect. New `__tests__/local-support-service.test.ts` with 3 tests. |
-| 12 | Frontend env cleanup | [COMPLETE] | 2026-04-21 | Removed `requireGoogleMapsApiKey`, `isGoogleMapsApiKeyConfigured`, `GOOGLE_MAPS_API_KEY` constant from `lib/env.ts`; removed `VITE_GOOGLE_MAPS_API_KEY` from `vite-env.d.ts` and `.env.example`. Replaced with decommission comments. `pnpm build` succeeds. |
-| 13 | Final bundle scan + smoke | [COMPLETE] | 2026-04-21 | Bundle scans all pass: 0 key matches, 0 `places.googleapis.com`, 0 `maps.googleapis.com/maps/api/geocode`, 0 `VITE_GOOGLE_MAPS_API_KEY`, backend-proxy URL present. Backend: 94 tests green. Frontend: 8762 pass / 11 fail (same 11 pre-existing baseline failures across 7 files — unchanged from pre-spec baseline of 8742/11). |
-| — | Code-review fixes (D6–D9) | [COMPLETE] | 2026-04-21 | Applied 4 surgical fixes from `/code-review` findings: maps-readiness no longer caches probe failures (D6), `isTimeout` drops substring fallback (D7), added `fetchPhoto_emptyBodyMapsToUpstream` test (D8), added two frontend abort/signal tests (D9). Backend: 95 tests green (was 94, +1 from D8). Frontend: 8766 pass / 10 fail (baseline was 8762/11 — net +4 passes, −1 fail; no regressions). Files touched: `frontend/src/services/maps-readiness.ts`, `frontend/src/services/__tests__/maps-readiness.test.ts`, `frontend/src/services/__tests__/google-local-support-service.test.ts`, `backend/.../GoogleMapsService.java`, `backend/.../GoogleMapsServiceTest.java`. |
+| Step | Title                                         | Status     | Completion Date | Notes / Actual Files                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---- | --------------------------------------------- | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | Add ConstraintViolationException handler      | [COMPLETE] | 2026-04-21      | `ProxyExceptionHandler.java`, `ProxyExceptionHandlerTest.java`. Also added `HandlerMethodValidationException` and `MissingServletRequestParameterException` handlers during Step 5 — see Deviation 1.                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 2    | Migrate /api/v1/health to nested shape        | [COMPLETE] | 2026-04-21      | `ApiController.java`, `ApiControllerTest.java`, `openapi.yaml` Health schema.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 3    | Create maps-package DTOs and cache-key helper | [COMPLETE] | 2026-04-21      | `PlacesSearchRequest.java`, `PlacesSearchResponse.java`, `GeocodeResponse.java`, `MapsCacheKeys.java`, `MapsCacheKeysTest.java`. All 6 cache-key tests pass.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 4    | Create GoogleMapsService + unit tests         | [COMPLETE] | 2026-04-21      | `GoogleMapsService.java`, `GoogleMapsServiceTest.java`. 22 tests pass. Added `catch (UpstreamException \| UpstreamTimeoutException)` in each method to preserve explicit exception types — see Deviation 2.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 5    | Create MapsController + slice tests           | [COMPLETE] | 2026-04-21      | `MapsController.java`, `MapsControllerTest.java`. 13 slice tests pass. Discovered Spring 6.1+ uses `HandlerMethodValidationException` not `ConstraintViolationException` for `@RequestParam` validation — extended Step 1's handler class accordingly (Deviation 1).                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 6    | Integration test + OpenAPI updates            | [COMPLETE] | 2026-04-21      | `MapsIntegrationTest.java` (6 tests), three new paths + three new schemas in `openapi.yaml`. Full backend suite: 94 tests green.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 7    | Non-Docker backend smoke                      | [COMPLETE] | 2026-04-21      | Ran via `./mvnw spring-boot:run`. Caught and fixed Spec 1 WebClient buffer sizing (Deviation 3) and two-step Places photo fetch (Deviation 4) and Spring `DispatcherServlet`/`HttpLogging` GET-URL PII leak (Deviation 5). All smoke curls pass: health nested, places-search 20 results, geocode coords, photo streams JPEG 55KB, SSRF guard 400, PII scan 0 leaks, rate-limit + request-id headers present.                                                                                                                                                                                                                                                                     |
+| 8    | maps-readiness probe + test                   | [COMPLETE] | 2026-04-21      | `services/maps-readiness.ts` + `__tests__/maps-readiness.test.ts`. 5 tests pass.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 9    | google-places-mapper.ts signature change      | [COMPLETE] | 2026-04-21      | Dropped `apiKey` from `buildPhotoUrl` + `mapGooglePlaceToLocalSupport`. Returns backend-proxy URL. 36 mapper tests pass (no googleapis.com, no AIza, no key= in URLs).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 10   | google-local-support-service.ts rewrite       | [COMPLETE] | 2026-04-21      | Fetches from `/api/v1/proxy/maps/*`. 19 tests rewritten against fetch mocks.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 11   | Async factory + LocalSupportPage caller       | [COMPLETE] | 2026-04-21      | `local-support-service.ts` now async; `LocalSupportPage.tsx` holds service in state via effect. New `__tests__/local-support-service.test.ts` with 3 tests.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 12   | Frontend env cleanup                          | [COMPLETE] | 2026-04-21      | Removed `requireGoogleMapsApiKey`, `isGoogleMapsApiKeyConfigured`, `GOOGLE_MAPS_API_KEY` constant from `lib/env.ts`; removed `VITE_GOOGLE_MAPS_API_KEY` from `vite-env.d.ts` and `.env.example`. Replaced with decommission comments. `pnpm build` succeeds.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 13   | Final bundle scan + smoke                     | [COMPLETE] | 2026-04-21      | Bundle scans all pass: 0 key matches, 0 `places.googleapis.com`, 0 `maps.googleapis.com/maps/api/geocode`, 0 `VITE_GOOGLE_MAPS_API_KEY`, backend-proxy URL present. Backend: 94 tests green. Frontend: 8762 pass / 11 fail (same 11 pre-existing baseline failures across 7 files — unchanged from pre-spec baseline of 8742/11).                                                                                                                                                                                                                                                                                                                                                 |
+| —    | Code-review fixes (D6–D9)                     | [COMPLETE] | 2026-04-21      | Applied 4 surgical fixes from `/code-review` findings: maps-readiness no longer caches probe failures (D6), `isTimeout` drops substring fallback (D7), added `fetchPhoto_emptyBodyMapsToUpstream` test (D8), added two frontend abort/signal tests (D9). Backend: 95 tests green (was 94, +1 from D8). Frontend: 8766 pass / 10 fail (baseline was 8762/11 — net +4 passes, −1 fail; no regressions). Files touched: `frontend/src/services/maps-readiness.ts`, `frontend/src/services/__tests__/maps-readiness.test.ts`, `frontend/src/services/__tests__/google-local-support-service.test.ts`, `backend/.../GoogleMapsService.java`, `backend/.../GoogleMapsServiceTest.java`. |
 
 ---
 
@@ -1118,6 +1118,7 @@ All deviations were taken under the Spec 2 charter's 7-condition gate (no public
 ### Deviation 5 — Extended D7 framework-log-suppression to GET-URL PII loggers
 
 **What changed:** `backend/src/main/resources/application-dev.properties` — added two new `logging.level` overrides:
+
 - `logging.level.org.springframework.web.servlet.DispatcherServlet=INFO`
 - `logging.level.org.springframework.web.HttpLogging=INFO`
 
@@ -1152,6 +1153,7 @@ All deviations were taken under the Spec 2 charter's 7-condition gate (no public
 ### Deviation 9 — Add frontend abort/signal coverage to `google-local-support-service.test.ts`
 
 **What changed:** Added two tests covering the spec-listed abort-signal paths:
+
 - `propagates AbortError when fetch is cancelled` — fetch rejects with an `AbortError`, assert the error propagates through `search()` (no catch/translate).
 - `passes an AbortSignal to fetch so REQUEST_TIMEOUT_MS can cancel it` — verifies `fetchWithTimeout` actually wires the signal into `fetch(init)`, which is the production wiring that makes the 15s timeout effective.
 

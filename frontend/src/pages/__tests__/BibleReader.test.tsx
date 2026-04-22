@@ -20,12 +20,12 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
 }))
 
-// BB-26: ReaderChrome now mounts AudioPlayButton which reads AudioPlayerContext.
-// Stub the FCBH key to false so the button renders null in these tests.
-vi.mock('@/lib/env', async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>
-  return { ...actual, isFcbhApiKeyConfigured: () => false }
-})
+// BB-26 / Spec 4: ReaderChrome now mounts AudioPlayButton which probes backend
+// readiness. Stub readiness to false so the button renders null in these tests.
+vi.mock('@/services/fcbh-readiness', () => ({
+  getFcbhReadiness: () => Promise.resolve(false),
+  resetFcbhReadinessCache: () => {},
+}))
 vi.mock('@/lib/audio/engine', () => ({
   createEngineInstance: vi.fn(),
 }))

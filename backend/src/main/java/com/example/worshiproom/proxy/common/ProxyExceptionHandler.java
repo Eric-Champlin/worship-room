@@ -1,5 +1,6 @@
 package com.example.worshiproom.proxy.common;
 
+import com.example.worshiproom.proxy.bible.FcbhNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,21 @@ public class ProxyExceptionHandler {
     // (global advice, no basePackages filter). It's raised from a servlet filter,
     // which means the resolver sees handler=null — and package-scoped advices
     // are skipped when handler=null. See RateLimitExceptionHandler class doc.
+
+    // Explicit branch for FCBH 404s — ordered before the generic ProxyException
+    // handler so Spring's dispatcher picks the more specific type. The generic
+    // branch would also produce the correct 404 + NOT_FOUND body (FcbhNotFoundException
+    // extends ProxyException with status=404, code="NOT_FOUND"), but we want a
+    // dedicated INFO-level log line: "audio not available for this chapter" is
+    // expected UX behavior, not a warning. See ai-proxy-fcbh.md § AD #5.
+    @ExceptionHandler(FcbhNotFoundException.class)
+    public ResponseEntity<ProxyError> handleFcbhNotFound(FcbhNotFoundException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("FCBH not found: {}", ex.getMessage());
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(ProxyError.of("NOT_FOUND", ex.getMessage(), requestId));
+    }
 
     @ExceptionHandler(ProxyException.class)
     public ResponseEntity<ProxyError> handleProxyException(ProxyException ex) {

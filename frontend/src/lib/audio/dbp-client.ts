@@ -1,21 +1,25 @@
 /**
- * BB-26 — FCBH Digital Bible Platform v4 API client.
+ * BB-26 — FCBH Digital Bible Platform v4 client.
  *
- * Pure transport layer. Caching lives in `audio-cache.ts`. Error conversion
- * to user-facing strings lives in `error-messages.ts`. This module throws
- * typed `DbpError` objects on failure and does not retry.
+ * Spec 4 (ai-proxy-fcbh) migrated this module from direct DBP calls to
+ * the backend proxy at /api/v1/proxy/bible/*. All four functions keep
+ * identical signatures. `DbpError` shape unchanged. The book_id validation
+ * for `getChapterAudio` stays verbatim — it guards against DBP's silent
+ * invalid-book-code fallback to 1 Chronicles.
  *
- * Endpoints (confirmed by _plans/recon/bb26-audio-foundation.md):
- *   GET /bibles?language_code=eng
- *     → { data: DbpBible[], meta }
- *   GET /bibles/filesets/{filesetId}
- *     → { data: DbpFileset[] | any, meta }  — 260-929 entries; used sparingly
- *   GET /bibles/filesets/{filesetId}/{bookCode}/{chapter}
- *     → { data: [{ book_id, chapter_start, path, ... }], meta }  (1-element
- *       array, the per-chapter shortcut)
+ * Endpoints:
+ *   GET /api/v1/proxy/bible/bibles?language=eng
+ *   GET /api/v1/proxy/bible/filesets/{filesetId}
+ *   GET /api/v1/proxy/bible/filesets/{filesetId}/{bookCode}/{chapter}
+ *   GET /api/v1/proxy/bible/timestamps/{filesetId}/{bookCode}/{chapter}
+ *
+ * The backend response envelope wraps the DBP envelope:
+ *   { data: { data: [...], meta: {...} }, meta: { requestId } }
+ * `proxyFetch` unwraps the outer ProxyResponse layer and returns the inner
+ * DBP envelope; each public function unwraps DBP's `{data: [...]}` to its
+ * final typed shape.
  */
 
-import { requireFcbhApiKey } from '@/lib/env'
 import type {
   DbpBible,
   DbpChapterAudio,
@@ -24,53 +28,52 @@ import type {
   VerseTimestamp,
 } from '@/types/bible-audio'
 
-const DBP_BASE_URL = 'https://4.dbt.io/api'
-const DBP_TIMEOUT_MS = 10_000
+const PROXY_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/v1/proxy/bible`
+const REQUEST_TIMEOUT_MS = 10_000
 
-/** Pure helper — appends `?v=4&key=...` to a path, preserving any existing query. */
-function buildUrl(path: string, key: string): string {
-  const separator = path.includes('?') ? '&' : '?'
-  return `${DBP_BASE_URL}${path}${separator}v=4&key=${encodeURIComponent(key)}`
+interface ProxyEnvelope<T> {
+  data: T
+  meta?: { requestId?: string }
+}
+
+interface DbpDataEnvelope<T> {
+  data: T
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
 
 function isDbpError(e: unknown): e is DbpError {
   return typeof e === 'object' && e !== null && 'kind' in (e as Record<string, unknown>)
 }
 
-async function dbpFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  let key: string
-  try {
-    key = requireFcbhApiKey()
-  } catch {
-    throw { kind: 'missing-key', message: 'FCBH API key is not configured' } satisfies DbpError
-  }
-
-  const url = buildUrl(path, key)
+async function proxyFetch<TDbpBody>(path: string): Promise<TDbpBody> {
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), DBP_TIMEOUT_MS)
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
   try {
-    const response = await fetch(url, { ...init, signal: controller.signal })
+    const response = await fetch(`${PROXY_BASE}${path}`, { signal: controller.signal })
     if (!response.ok) {
       throw {
         kind: 'http',
         status: response.status,
-        message: `DBP ${response.status}`,
+        message: `Proxy ${response.status}`,
       } satisfies DbpError
     }
+    let envelope: ProxyEnvelope<TDbpBody>
     try {
-      return (await response.json()) as T
+      envelope = (await response.json()) as ProxyEnvelope<TDbpBody>
     } catch {
-      throw { kind: 'parse', message: 'DBP returned invalid JSON' } satisfies DbpError
+      throw { kind: 'parse', message: 'Proxy returned invalid JSON' } satisfies DbpError
     }
+    if (!isObject(envelope) || envelope.data === undefined) {
+      throw { kind: 'parse', message: 'Proxy envelope missing data field' } satisfies DbpError
+    }
+    return envelope.data
   } catch (e) {
-    // AbortController → AbortError
-    if (
-      typeof e === 'object' &&
-      e !== null &&
-      (e as { name?: string }).name === 'AbortError'
-    ) {
-      throw { kind: 'timeout', message: 'DBP request timed out' } satisfies DbpError
+    if (isObject(e) && (e as { name?: string }).name === 'AbortError') {
+      throw { kind: 'timeout', message: 'Proxy request timed out' } satisfies DbpError
     }
     if (isDbpError(e)) throw e
     const message = e instanceof Error ? e.message : 'Network error'
@@ -80,35 +83,26 @@ async function dbpFetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
 }
 
-/** Assert that `value` is an object, useful for defensive response shape checks. */
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
-interface DbpEnvelope<T> {
-  data: T
-}
-
-/** Lists audio bibles for a given language. */
+/** Lists audio bibles. Returns DBP bibles array unwrapped from the double envelope. */
 export async function listAudioBibles(languageCode = 'eng'): Promise<DbpBible[]> {
-  const raw = await dbpFetch<DbpEnvelope<unknown>>(
-    `/bibles?language_code=${encodeURIComponent(languageCode)}`,
+  const dbp = await proxyFetch<DbpDataEnvelope<unknown>>(
+    `/bibles?language=${encodeURIComponent(languageCode)}`,
   )
-  if (!isObject(raw) || !Array.isArray(raw.data)) {
+  if (!isObject(dbp) || !Array.isArray(dbp.data)) {
     throw { kind: 'parse', message: 'DBP bibles list missing data array' } satisfies DbpError
   }
-  return raw.data as DbpBible[]
+  return dbp.data as DbpBible[]
 }
 
 /** Returns the filesets catalog for a single bible id. */
 export async function getBibleFilesets(bibleId: string): Promise<DbpFileset[]> {
-  const raw = await dbpFetch<DbpEnvelope<unknown>>(
-    `/bibles/filesets/${encodeURIComponent(bibleId)}`,
+  const dbp = await proxyFetch<DbpDataEnvelope<unknown>>(
+    `/filesets/${encodeURIComponent(bibleId)}`,
   )
-  if (!isObject(raw) || !Array.isArray(raw.data)) {
+  if (!isObject(dbp) || !Array.isArray(dbp.data)) {
     throw { kind: 'parse', message: 'DBP filesets response missing data array' } satisfies DbpError
   }
-  return raw.data as DbpFileset[]
+  return dbp.data as DbpFileset[]
 }
 
 /**
@@ -126,15 +120,13 @@ export async function getChapterAudio(
   bookCode: string,
   chapter: number,
 ): Promise<DbpChapterAudio> {
-  const raw = await dbpFetch<DbpEnvelope<unknown>>(
-    `/bibles/filesets/${encodeURIComponent(filesetId)}/${encodeURIComponent(
-      bookCode,
-    )}/${chapter}`,
+  const dbp = await proxyFetch<DbpDataEnvelope<unknown>>(
+    `/filesets/${encodeURIComponent(filesetId)}/${encodeURIComponent(bookCode)}/${chapter}`,
   )
-  if (!isObject(raw) || !Array.isArray(raw.data) || raw.data.length === 0) {
+  if (!isObject(dbp) || !Array.isArray(dbp.data) || dbp.data.length === 0) {
     throw { kind: 'parse', message: 'DBP chapter audio response missing data' } satisfies DbpError
   }
-  const entry = raw.data[0]
+  const entry = dbp.data[0]
   if (!isObject(entry)) {
     throw { kind: 'parse', message: 'DBP chapter audio entry is not an object' } satisfies DbpError
   }
@@ -181,12 +173,12 @@ export async function getChapterTimestamps(
   bookCode: string,
   chapter: number,
 ): Promise<VerseTimestamp[]> {
-  const raw = await dbpFetch<DbpEnvelope<unknown>>(
+  const dbp = await proxyFetch<DbpDataEnvelope<unknown>>(
     `/timestamps/${encodeURIComponent(filesetId)}/${encodeURIComponent(bookCode)}/${chapter}`,
   )
-  if (!isObject(raw) || !Array.isArray(raw.data)) return []
+  if (!isObject(dbp) || !Array.isArray(dbp.data)) return []
 
-  const entries = raw.data as DbpTimestampRaw[]
+  const entries = dbp.data as DbpTimestampRaw[]
   return entries
     .filter((e) => {
       const v = parseInt(e.verse_start, 10)

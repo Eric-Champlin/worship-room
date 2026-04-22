@@ -8,12 +8,12 @@ import { AudioProvider } from '@/components/audio/AudioProvider'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import { createRef } from 'react'
 
-// BB-26: AudioPlayButton mounts inside ReaderChrome. Stub the env so the
-// button stays null and doesn't disturb existing ReaderChrome tests.
-vi.mock('@/lib/env', async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>
-  return { ...actual, isFcbhApiKeyConfigured: () => false }
-})
+// BB-26 / Spec 4: AudioPlayButton mounts inside ReaderChrome. Stub readiness
+// to false so the button stays null and doesn't disturb existing ReaderChrome tests.
+vi.mock('@/services/fcbh-readiness', () => ({
+  getFcbhReadiness: () => Promise.resolve(false),
+  resetFcbhReadinessCache: () => {},
+}))
 vi.mock('@/lib/audio/engine', () => ({
   createEngineInstance: vi.fn(),
 }))
