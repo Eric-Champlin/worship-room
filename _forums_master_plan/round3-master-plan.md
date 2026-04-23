@@ -1472,6 +1472,8 @@ Run `./mvnw clean test` to confirm EVERYTHING still compiles and all ~280 existi
 
 ### Spec 1.3b — Users Table Timezone Column
 
+> **Execution note added 2026-04-23 (post-Spec-1.3 completion):** The master plan text below conflates two concerns — the schema column addition (belongs here in Phase 1) and the full-stack wiring that consumes it (User entity, DTOs, AuthService, UserService, AuthModal, Settings page, Playwright). The wiring touches code that doesn't yet exist on the branch when 1.3b executes — those files are created by Specs 1.4 / 1.5 / 1.6 / a dedicated Settings spec. As executed, Spec 1.3b is SCHEMA-ONLY (the column + Liquibase changeset + LiquibaseSmokeTest updates). The consumption wiring is re-homed: Spec 1.4 or 1.5 adds `timezone` to the User JPA entity at creation time; Spec 1.5 adds the optional `timezone` field to RegisterRequest and the browser-detection logic to AuthModal; Spec 1.6 adds `timezone` to UserResponse and the `PATCH /api/v1/users/me` validation-strict update endpoint; a dedicated Settings spec (likely Phase 1.10+ or Phase 8) adds the autocomplete UI + Playwright E2E. **Each of those downstream specs must include a "timezone" bullet in its Files-to-modify list.** The anti-pressure streak-preservation rule ("timezone change alone never breaks a streak") must be honored by the Phase 2 streak service spec when it lands. This note exists so future plan writers don't re-accidentally the scope conflation.
+
 - **ID:** `round3-phase01-spec03b-users-timezone-column`
 - **Size:** S
 - **Risk:** Low

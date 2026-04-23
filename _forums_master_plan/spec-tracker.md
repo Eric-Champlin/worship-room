@@ -25,9 +25,9 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 
 | #   | Spec  | Title                                          | Size | Risk     | Status |
 | --- | ----- | ---------------------------------------------- | ---- | -------- | ------ |
-| 3   | 1.1   | Audit and Rename Backend Skeleton              | L    | Medium   | ⬜     |
-| 4   | 1.2   | PostgreSQL via Docker Compose                  | S    | Low      | ⬜     |
-| 5   | 1.3   | Liquibase Integration and First Changeset      | M    | Low      | ⬜     |
+| 3   | 1.1   | Audit and Rename Backend Skeleton              | L    | Medium   | ✅     |
+| 4   | 1.2   | PostgreSQL via Docker Compose                  | S    | Low      | ✅     |
+| 5   | 1.3   | Liquibase Integration and First Changeset      | M    | Low      | ✅     |
 | 6   | 1.3b  | Users Table Timezone Column                    | S    | Low      | ⬜     |
 | 7   | 1.4   | Spring Security and JWT Setup                  | L    | Med-High | ⬜     |
 | 8   | 1.5   | Auth Endpoints (Register, Login, Logout)       | L    | High     | ⬜     |
