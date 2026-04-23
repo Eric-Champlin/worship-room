@@ -30,6 +30,8 @@ tags:
     description: Proxied Google Maps Places endpoints
   - name: Proxy / Audio
     description: Proxied FCBH Digital Bible Platform endpoints
+  - name: Auth
+    description: Registration, login, logout
 
 paths:
   /api/v1/health:
@@ -550,6 +552,92 @@ paths:
         '502': { $ref: '#/components/responses/UpstreamError' }
         '504': { $ref: '#/components/responses/UpstreamTimeout' }
 
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      description: |
+        Creates a new user account. Returns the same 200 response shape whether
+        the email is new or already registered (anti-enumeration). No JWT is
+        issued at registration — users log in separately.
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '200':
+          description: Registration accepted (new or existing email)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/RegisterResponseData' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in and obtain a JWT
+      description: |
+        Timing-equalized login. Rate-limited: 5 attempts per 15 min per email,
+        20 attempts per 15 min per IP. Both limits enforced. On 429 includes
+        Retry-After header.
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Login successful; JWT + user summary returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthResponseData' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401':
+          description: Invalid email or password (timing-equalized; same response for unknown email or wrong password)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out (stateless no-op)
+      description: |
+        Stateless logout — the backend has no session to destroy. Returns 204
+        regardless of token presence or validity. Spec 1.5g will add session
+        invalidation.
+      operationId: logoutUser
+      security: []
+      responses:
+        '204':
+          description: No content
+
 components:
   schemas:
     ProxyResponse:
@@ -841,6 +929,74 @@ components:
             - type: array
         meta:
           type: object
+
+    RegisterRequest:
+      type: object
+      required: [email, password, firstName, lastName]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          minLength: 12
+          maxLength: 255
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        timezone:
+          type: string
+          maxLength: 50
+          description: IANA timezone. Defaults to UTC when omitted or invalid.
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          minLength: 1
+          maxLength: 255
+
+    RegisterResponseData:
+      type: object
+      required: [registered]
+      properties:
+        registered:
+          type: boolean
+          description: Always true. Returned identically whether the email was new or already registered (anti-enumeration).
+
+    UserSummary:
+      type: object
+      required: [id, email, displayName, firstName, lastName, isAdmin, timezone]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        isAdmin: { type: boolean }
+        timezone: { type: string }
+
+    AuthResponseData:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+          description: HS256-signed JWT. Short-lived (1 hour).
+        user:
+          $ref: '#/components/schemas/UserSummary'
 
   responses:
     BadRequest:

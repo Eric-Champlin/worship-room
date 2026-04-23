@@ -3,12 +3,13 @@ package com.worshiproom.auth;
 import org.springframework.http.HttpStatus;
 
 /**
- * Auth-domain exceptions thrown from JwtAuthenticationFilter. Deliberately
- * not extending ProxyException — auth is its own domain, not part of the
- * proxy layer. AuthExceptionHandler (unscoped @RestControllerAdvice) maps
- * instances back to the shared ProxyError API response shape.
+ * Auth-domain exceptions thrown from JwtAuthenticationFilter and AuthService.
+ * Deliberately not extending ProxyException — auth is its own domain, not part
+ * of the proxy layer. AuthExceptionHandler (unscoped @RestControllerAdvice)
+ * maps instances back to the shared ProxyError API response shape.
  *
- * Error codes: UNAUTHORIZED, TOKEN_INVALID, TOKEN_EXPIRED, TOKEN_MALFORMED.
+ * Error codes: UNAUTHORIZED, TOKEN_INVALID, TOKEN_EXPIRED, TOKEN_MALFORMED,
+ * INVALID_CREDENTIALS.
  */
 public class AuthException extends RuntimeException {
     private final HttpStatus status;
@@ -39,5 +40,9 @@ public class AuthException extends RuntimeException {
     public static AuthException tokenExpired() {
         return new AuthException(HttpStatus.UNAUTHORIZED, "TOKEN_EXPIRED",
             "Authentication token has expired.");
+    }
+    public static AuthException invalidCredentials() {
+        return new AuthException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS",
+            "Invalid email or password.");
     }
 }
