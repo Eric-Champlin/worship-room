@@ -42,8 +42,9 @@ From `$ARGUMENTS`, extract:
 **Derive from the spec:**
 - `spec_number` — e.g., `1.1`, `2.5.4b`, `10.7b`
 - `spec_title` — e.g., "Backend Skeleton Audit"
-- `spec_id` — from the `**ID:**` field (e.g., `round3-phase01-spec01-backend-skeleton-audit`)
-- `feature_slug` — derived from spec_id (e.g., `forums-phase01-spec01-backend-skeleton`)
+- `spec_id` — from the `**ID:**` field (e.g., `round3-phase01-spec01-backend-skeleton-audit`). This is the CANONICAL identifier used inside the spec file for cross-referencing between specs and the master plan. Preserve it verbatim.
+- `spec_filename` — short form derived from `spec_number` by replacing dots with hyphens and prefixing with `spec-` (e.g., `1.1` → `spec-1-1`, `2.5.4b` → `spec-2-5-4b`, `10.7b` → `spec-10-7b`). This is the FILENAME stem used for the on-disk file; it keeps paths short and greppable. The canonical `spec_id` is preserved inside the file body for traceability.
+- `feature_slug` — derived from `spec_filename` (e.g., `forums-spec-1-1`)
 - `branch_name` — `claude/forums/<feature_slug>`
 
 **`--from-branch` flag** (optional): If present, branch from the current branch instead of `main`.
@@ -101,7 +102,7 @@ New branch: {branch_name}
 
 Create the directory if needed: `_specs/forums/`
 
-Save the spec to `_specs/forums/<spec_id>.md`
+Save the spec to `_specs/forums/<spec_filename>.md` (e.g., `_specs/forums/spec-1-1.md`). The full canonical `spec_id` lives inside the file body in the `**ID:**` field — the filename is the short form for path brevity, the body retains the master plan's canonical ID for cross-referencing.
 
 **Spec file structure** — the master plan already defines the template. The spec file should contain the full spec as extracted from the master plan, with these additions at the top:
 
@@ -164,7 +165,7 @@ Before saving:
 
 ```text
 Branch:     {branch_name}
-Spec file:  _specs/forums/{spec_id}.md
+Spec file:  _specs/forums/{spec_filename}.md
 Title:      Spec {number} — {title}
 Phase:      {phase number}
 Size:       {S/M/L from spec}
@@ -172,7 +173,7 @@ Risk:       {risk level from spec}
 Prerequisites: {list}
 Branched from: {main / current branch}
 
-Next step: Run /plan-forums _specs/forums/{spec_id}.md
+Next step: Run /plan-forums _specs/forums/{spec_filename}.md
 ```
 
 ---

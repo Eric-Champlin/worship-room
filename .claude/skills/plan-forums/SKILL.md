@@ -1,6 +1,6 @@
 ---
 description: Generate a Forums Wave implementation plan from a spec file
-argument-hint: Path to spec file (e.g. _specs/forums/round3-phase01-spec01-backend-skeleton-audit.md)
+argument-hint: Path to spec file (e.g. _specs/forums/spec-1-1.md)
 user-invokable: true
 ---
 
@@ -103,8 +103,9 @@ Document what you find — this becomes the **Architecture Context** section.
 ## Step 4: Generate the Plan
 
 **Create the plan file at:**
-- Forums Wave specs (master-plan-referenced): `_plans/forums/YYYY-MM-DD-<spec-id>.md`
+- Forums Wave specs (master-plan-referenced): `_plans/forums/YYYY-MM-DD-<spec-filename>.md` where `<spec-filename>` is the filename stem of the input spec (e.g., `spec-1-1` — derived by stripping the `.md` extension from the spec filename, NOT from the canonical `spec_id` inside the file body). Example: a spec at `_specs/forums/spec-1-1.md` produces a plan at `_plans/forums/2026-04-23-spec-1-1.md`.
 - Standalone backend specs: `_plans/YYYY-MM-DD-<spec-slug>.md`
+
 
 Use this structure:
 
@@ -335,7 +336,7 @@ Consider whether the non-forums `/plan` skill is the better fit. If the spec cle
 ## Step 5: Final Output
 
 ```text
-Plan saved:   _plans/forums/YYYY-MM-DD-{spec-id}.md
+Plan saved:   _plans/forums/YYYY-MM-DD-{spec-filename}.md
 Steps:        {N} steps
 Spec:         {spec file path}
 Phase:        {phase number}
@@ -347,7 +348,7 @@ Tests planned: {N}
 
 Pipeline:
   1. Review the plan
-  2. /execute-plan-forums _plans/forums/YYYY-MM-DD-{spec-id}.md
+  2. /execute-plan-forums _plans/forums/YYYY-MM-DD-{spec-filename}.md
   3. /code-review (when all steps complete)
   4. /verify-with-playwright {route} (if spec has frontend UI)
   5. Commit when satisfied
