@@ -2,6 +2,7 @@ package com.worshiproom.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.worshiproom.support.AbstractIntegrationTest;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.DisplayName;
@@ -9,17 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,31 +38,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * gets inserted BEFORE RateLimitFilter (which would change the error-body
  * shape for unauthenticated proxy requests).
  *
- * Uses standalone Testcontainers pattern (Spec 1.7 will refactor to
- * AbstractIntegrationTest). Requires Docker running locally.
+ * Requires Docker running locally.
  */
-@SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers
-class SecurityConfigIntegrationTest {
+class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
 
     // Must be ≥ 32 bytes for HS256. Distinct from the dev-profile fallback so
     // tests are self-contained and do not inadvertently depend on dev-profile config.
     private static final String TEST_JWT_SECRET =
         "integration-test-jwt-secret-at-least-32-bytes-long-xxxxxxxxxxxxxx";
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
-        .withDatabaseName("worshiproom_test")
-        .withUsername("test")
-        .withPassword("test")
-        .waitingFor(Wait.forListeningPort());
-
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("jwt.secret", () -> TEST_JWT_SECRET);
     }
 

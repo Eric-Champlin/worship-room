@@ -1,16 +1,10 @@
 package com.worshiproom.db;
 
+import com.worshiproom.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.Map;
@@ -22,33 +16,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Smoke test verifying Liquibase applies cleanly against a fresh PostgreSQL 16 container
  * and the canonical users table (Spec 1.3) materializes with the expected shape.
  *
- * <p>This test stands alone. When Spec 1.7 introduces {@code AbstractIntegrationTest}, a
- * follow-up refactor in that spec will migrate this class to extend the new base.
- *
  * <p>Requires Docker to be running locally. Matches the pattern documented in
  * {@code .claude/rules/06-testing.md} § Testcontainers Setup Pattern.
  */
-@SpringBootTest
-@Testcontainers
-class LiquibaseSmokeTest {
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
-        .withDatabaseName("worshiproom_test")
-        .withUsername("test")
-        .withPassword("test")
-        // Wait for TCP port to actually accept host connections. The default
-        // log-message strategy can signal ready before Docker Desktop on Mac
-        // finishes publishing the mapped port — caused ~2s connection-refused
-        // races during Spec 1.3 bring-up. Belt-and-suspenders for container probe.
-        .waitingFor(Wait.forListeningPort());
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
+class LiquibaseSmokeTest extends AbstractIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

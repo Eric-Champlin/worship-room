@@ -1,6 +1,7 @@
 package com.worshiproom.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.worshiproom.support.AbstractIntegrationTest;
 import com.worshiproom.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,16 +12,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Migration note (Spec 1.7): class-level {@code @SpringBootTest(properties=...)} is kept
+ * inline because the rate-limit overrides are static configuration, not container-dependent
+ * values. Datasource properties are inherited from {@link AbstractIntegrationTest}. Dynamic/
+ * conditional values ({@code jwt.secret}, {@code proxy.trust-forwarded-headers}) stay in a
+ * subclass {@link DynamicPropertySource} method. Spring merges the inline properties with the
+ * inherited {@code @SpringBootTest} when the annotation is redeclared on the subclass.
+ */
 @SpringBootTest(properties = {
     "auth.rate-limit.per-email.capacity=5",
     "auth.rate-limit.per-email.window-minutes=15",
@@ -28,21 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "auth.rate-limit.per-ip.window-minutes=15"
 })
 @AutoConfigureMockMvc
-@Testcontainers
-class LoginRateLimitFilterTest {
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
-        .withDatabaseName("worshiproom_test")
-        .withUsername("test")
-        .withPassword("test")
-        .waitingFor(Wait.forListeningPort());
+class LoginRateLimitFilterTest extends AbstractIntegrationTest {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("jwt.secret", () -> "test-jwt-secret-at-least-32-bytes-long-xxxxxxxxxxxxxx");
         // Trust XFF so each test can isolate its per-IP bucket (all MockMvc
         // requests otherwise share one IP and cross-contaminate buckets).
