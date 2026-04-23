@@ -64,6 +64,36 @@ set -a && source .env.local && set +a && ./mvnw spring-boot:run -Dspring-boot.ru
 
 Tests: `./mvnw test` (uses the `test` profile; does not need real keys). Integration tests that exercise upstream behavior use mocked SDK/WebClient responses.
 
+## Local database
+
+Spec 1.2 adds a PostgreSQL 16 service to `docker-compose.yml` for local development. Schema and migrations arrive in Spec 1.3 (Liquibase).
+
+### Start / stop
+
+```sh
+docker compose up -d postgres          # start in background; ~5-10s to healthy
+docker compose ps postgres             # STATUS column should read "healthy"
+docker compose stop postgres           # graceful stop; data persists in named volume
+```
+
+### Manual inspection
+
+```sh
+psql -h localhost -U worshiproom -d worshiproom_dev
+# password: worshiproom
+```
+
+### Wipe the database (⚠️ irreversible)
+
+```sh
+docker compose down -v                 # stops ALL services AND deletes the named volume
+# Next `docker compose up -d postgres` starts from an empty database.
+```
+
+### Development credentials
+
+The dev database credentials are hard-coded in `src/main/resources/application-dev.properties` because the container binds only to `localhost:5432` and never accepts external connections. Production credentials come from a platform-managed `DATABASE_URL` env var (Spec 1.10b). Never copy the dev credentials into any production configuration.
+
 ## Key files referenced by project rules
 
 - `.claude/rules/03-backend-standards.md` — Spring Boot conventions, API contract, `@RestControllerAdvice` scoping patterns

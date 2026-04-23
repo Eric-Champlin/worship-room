@@ -72,6 +72,20 @@
             <version>3.1.8</version>
         </dependency>
 
+        <!-- Spring Boot JDBC starter — brings spring-jdbc (EmbeddedDatabaseType, enables
+             DataSourceAutoConfiguration) + HikariCP connection pool. NO JPA/Hibernate; those
+             come with spring-boot-starter-data-jpa in Spec 1.3. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL JDBC driver — Spring Boot auto-resolves the driver class from the JDBC URL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
