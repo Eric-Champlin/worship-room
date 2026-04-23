@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave schema changesets, ordered chronologically by filename prefix.
+       Future specs APPEND <include> entries — they NEVER edit or reorder existing entries.
+       Editing a committed changeset causes Liquibase checksum failure on deploy. -->
+
+  <include file="db/changelog/2026-04-23-001-create-users-table.xml"/>
+
+</databaseChangeLog>
