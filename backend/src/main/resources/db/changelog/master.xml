@@ -9,5 +9,6 @@
        Editing a committed changeset causes Liquibase checksum failure on deploy. -->
 
   <include file="db/changelog/2026-04-23-001-create-users-table.xml"/>
+  <include file="db/changelog/2026-04-23-002-add-users-timezone-column.xml"/>
 
 </databaseChangeLog>

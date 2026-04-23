@@ -61,7 +61,7 @@ class LiquibaseSmokeTest {
             "ORDER BY ordinal_position"
         );
 
-        assertThat(columns).hasSize(20);
+        assertThat(columns).hasSize(21);
         assertThat(columns).extracting("column_name")
             .containsExactly(
                 "id", "email", "password_hash", "first_name", "last_name",
@@ -69,7 +69,8 @@ class LiquibaseSmokeTest {
                 "favorite_verse_reference", "favorite_verse_text",
                 "is_admin", "is_banned", "is_email_verified",
                 "joined_at", "last_active_at", "created_at", "updated_at",
-                "is_deleted", "deleted_at"
+                "is_deleted", "deleted_at",
+                "timezone"
             );
 
         Map<String, Object> idColumn = columns.stream()
@@ -92,16 +93,38 @@ class LiquibaseSmokeTest {
     }
 
     @Test
-    void liquibaseChangelogRecordsExactlyOneChangeset() {
+    void liquibaseChangelogRecordsAllChangesets() {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
-        assertThat(rows).hasSize(1);
-        Map<String, Object> row = rows.get(0);
-        assertThat(row.get("id")).isEqualTo("2026-04-23-001-create-users-table");
-        assertThat(row.get("author")).isEqualTo("worship-room");
-        assertThat((String) row.get("filename"))
+        assertThat(rows).hasSize(2);
+
+        Map<String, Object> first = rows.get(0);
+        assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");
+        assertThat(first.get("author")).isEqualTo("worship-room");
+        assertThat((String) first.get("filename"))
             .endsWith("2026-04-23-001-create-users-table.xml");
+
+        Map<String, Object> second = rows.get(1);
+        assertThat(second.get("id")).isEqualTo("2026-04-23-002-add-users-timezone-column");
+        assertThat(second.get("author")).isEqualTo("worship-room");
+        assertThat((String) second.get("filename"))
+            .endsWith("2026-04-23-002-add-users-timezone-column.xml");
+    }
+
+    @Test
+    void timezoneColumnHasCorrectDefaultAndConstraints() {
+        Map<String, Object> col = jdbcTemplate.queryForMap(
+            "SELECT data_type, character_maximum_length, is_nullable, column_default " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'users' " +
+            "AND column_name = 'timezone'"
+        );
+
+        assertThat(col.get("data_type")).isEqualTo("character varying");
+        assertThat(col.get("character_maximum_length")).isEqualTo(50);
+        assertThat(col.get("is_nullable")).isEqualTo("NO");
+        assertThat(col.get("column_default").toString()).contains("UTC");
     }
 
     @Test
