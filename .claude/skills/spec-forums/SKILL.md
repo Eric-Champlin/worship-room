@@ -102,7 +102,25 @@ New branch: {branch_name}
 
 Create the directory if needed: `_specs/forums/`
 
-Save the spec to `_specs/forums/<spec_filename>.md` (e.g., `_specs/forums/spec-1-1.md`). The full canonical `spec_id` lives inside the file body in the `**ID:**` field — the filename is the short form for path brevity, the body retains the master plan's canonical ID for cross-referencing.
+**⚠️ FILENAME RULE — READ CAREFULLY. This is the #1 place this skill goes wrong.**
+
+Save the spec to `_specs/forums/<spec_filename>.md` where `<spec_filename>` is the SHORT form derived in Step 2 (e.g., `spec-1-1`, `spec-1-2`, `spec-2-5-4b`).
+
+**DO NOT use `<spec_id>` as the filename.** The `spec_id` (e.g., `round3-phase01-spec02-postgres-docker`) is the CANONICAL identifier and lives INSIDE the file body in the `**ID:**` field — it is NEVER the filename.
+
+**Concrete mapping examples:**
+
+| Spec `**ID:**` field (inside file body) | On-disk filename (what this step saves) |
+|---|---|
+| `round3-phase00-spec01-backend-foundation-learning` | `_specs/forums/spec-0-1.md` |
+| `round3-phase00-5-spec01-prayer-reactions-reactive-store` | `_specs/forums/spec-0-5.md` |
+| `round3-phase01-spec01-backend-skeleton-audit` | `_specs/forums/spec-1-1.md` |
+| `round3-phase01-spec02-postgres-docker` | `_specs/forums/spec-1-2.md` |
+| `round3-phase10-spec07b-user-reports` | `_specs/forums/spec-10-7b.md` |
+
+**The rule:** take `spec_number` from the spec heading (e.g., `1.2`), replace dots with hyphens (`1-2`), prefix with `spec-` (`spec-1-2`), add `.md`. That is the filename. Always.
+
+The canonical `spec_id` is preserved inside the file body in the `**ID:**` field for traceability — never in the filename.
 
 **Spec file structure** — the master plan already defines the template. The spec file should contain the full spec as extracted from the master plan, with these additions at the top:
 

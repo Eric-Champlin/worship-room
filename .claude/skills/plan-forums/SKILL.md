@@ -102,10 +102,24 @@ Document what you find — this becomes the **Architecture Context** section.
 
 ## Step 4: Generate the Plan
 
+**⚠️ FILENAME RULE — READ CAREFULLY. This is the #1 place this skill goes wrong.**
+
 **Create the plan file at:**
-- Forums Wave specs (master-plan-referenced): `_plans/forums/YYYY-MM-DD-<spec-filename>.md` where `<spec-filename>` is the filename stem of the input spec (e.g., `spec-1-1` — derived by stripping the `.md` extension from the spec filename, NOT from the canonical `spec_id` inside the file body). Example: a spec at `_specs/forums/spec-1-1.md` produces a plan at `_plans/forums/2026-04-23-spec-1-1.md`.
+- Forums Wave specs (master-plan-referenced): `_plans/forums/YYYY-MM-DD-<spec-filename>.md` where `<spec-filename>` is the FILENAME STEM of the input spec — i.e., strip the `.md` extension from the actual input file path. Do NOT use the canonical `spec_id` from the `**ID:**` field inside the spec body.
 - Standalone backend specs: `_plans/YYYY-MM-DD-<spec-slug>.md`
 
+**Concrete mapping examples:**
+
+| Input spec path (argument passed to this skill) | Plan filename to create |
+|---|---|
+| `_specs/forums/spec-0-1.md` | `_plans/forums/YYYY-MM-DD-spec-0-1.md` |
+| `_specs/forums/spec-1-1.md` | `_plans/forums/YYYY-MM-DD-spec-1-1.md` |
+| `_specs/forums/spec-1-2.md` | `_plans/forums/YYYY-MM-DD-spec-1-2.md` |
+| `_specs/forums/spec-10-7b.md` | `_plans/forums/YYYY-MM-DD-spec-10-7b.md` |
+
+**The rule:** take the input file's basename (e.g., `spec-1-2.md`), strip `.md` (gives `spec-1-2`), prepend today's date in `YYYY-MM-DD-` format, append `.md`. That is the plan filename. Always.
+
+**DO NOT derive the filename from the spec's `**ID:**` field (e.g., `round3-phase01-spec02-postgres-docker`).** That canonical ID lives inside the plan body for traceability, but it is NEVER the filename. If the input spec file is named `spec-1-2.md`, the plan is named `YYYY-MM-DD-spec-1-2.md` — regardless of what the spec's internal `**ID:**` field says.
 
 Use this structure:
 
