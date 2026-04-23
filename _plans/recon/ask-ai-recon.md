@@ -156,7 +156,7 @@ The Forums Wave master plan (`_forums_master_plan/round3-master-plan.md`, v2.6, 
 - `.claude/rules/03-backend-standards.md` § External APIs: **"AI: Not used in Forums Wave MVP (curated content only; LLM integration deferred per master plan)."**
 - Grep of the master plan for `ai-proxy|gemini-proxy|AI endpoint|gemini|openai|anthropic|llm` returned 14 hits. **Every hit is in Spec 6.8 (Verse-Finds-You)** and explicitly says the feature ships with a curated 180-passage set, **no LLM in MVP**. Sample language (line 5347): *"The selection algorithm (plain-prose; no LLM in MVP)"*. Line 5543: *"LLM-based verse selection or generation (explicitly deferred; MVP is curated-set only)"*. Line 7923: *"Personalized LLM-generated verse selection — explicitly not-MVP; may never ship (Spec 6.8)"*.
 - No spec in the master plan is titled or dedicated to an AI proxy, a Gemini proxy, an Ask AI migration, or server-side AI.
-- `_specs/forums/` contains only one file: `backend-foundation-learning.md` (Spec 0.1 — a teaching doc for Eric, not a CC execution spec).
+- `_specs/forums/` contains only one file: `spec-0-1.md` (Spec 0.1 — a teaching doc for Eric, not a CC execution spec).
 
 ### BB-32 explicitly blocks the Ask AI migration on Phase 3
 

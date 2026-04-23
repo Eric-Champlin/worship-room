@@ -1199,7 +1199,7 @@ _End of Architectural Foundation. Phase breakdowns follow._
 
 13. **What you are allowed to forget.** The document ends with a page listing every Spring Boot / JPA / Hibernate / Maven concept Eric is explicitly allowed to ignore for the Forums Wave: XML-based bean configuration, Spring MVC view templates (we are API-only, no Thymeleaf), JPA entity inheritance strategies, Maven multi-module projects, Spring AOP, Spring Cloud. The list exists so Eric knows what to skip when reading Spring Boot tutorials online.
 
-**Delivery:** This document is delivered as a standalone markdown file (`spec-00-backend-foundation-learning.md` in `_specs/`) that Eric reads once. It is not a CC execution spec. Eric reads, digests, asks questions in chat if anything is unclear, and then we move into Phase 1. CC is told (in the spec header) that this is a reading document and not to attempt execution.
+**Delivery:** This document is delivered as a standalone markdown file (`_specs/forums/spec-0-1.md`) that Eric reads once. It is not a CC execution spec. Eric reads, digests, asks questions in chat if anything is unclear, and then we move into Phase 1. CC is told (in the spec header) that this is a reading document and not to attempt execution.
 
 **Why this is a full spec instead of skipped:** The single biggest failure mode for the Forums Wave is Eric feeling lost when CC generates Java files and losing trust in the process. This document prevents that failure mode by giving Eric enough mental model to stay grounded. It is the highest-leverage artifact in the entire Forums Wave.
 
