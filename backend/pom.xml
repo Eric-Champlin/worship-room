@@ -58,6 +58,31 @@
             <version>8.18.0</version>
         </dependency>
 
+        <!-- Spring Security (Spec 1.4) — auth filter chain, BCrypt encoder -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- JJWT 0.12.x (Spec 1.4) — JWT sign + parse -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Structured JSON logging encoder — used by logback-spring.xml -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
