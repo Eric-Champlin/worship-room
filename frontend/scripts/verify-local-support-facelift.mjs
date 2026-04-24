@@ -33,10 +33,6 @@ const failures = []
 const pass = (msg) => console.log('✓', msg)
 const fail = (msg) => { failures.push(msg); console.log('✗', msg) }
 
-function roughlyEq(a, b, tol = 2) {
-  return Math.abs(a - b) <= tol
-}
-
 const browser = await chromium.launch({ headless: true })
 try {
   for (const route of ROUTES) {

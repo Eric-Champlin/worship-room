@@ -46,6 +46,7 @@ export default tseslint.config(
       sourceType: 'module',
       globals: {
         ...globals.node,
+        ...globals.browser,
       },
     },
   },

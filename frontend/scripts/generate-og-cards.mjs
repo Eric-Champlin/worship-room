@@ -264,7 +264,6 @@ try {
     const html = buildHtml(card)
     await page.setContent(html, { waitUntil: 'networkidle' })
     // Wait for web fonts to finish loading so the screenshot has final glyphs
-    // eslint-disable-next-line no-undef -- runs in Playwright browser context
     await page.evaluate(() => document.fonts.ready)
     // A small settle tick for any final layout reflow
     await page.waitForTimeout(100)

@@ -53,6 +53,8 @@ export function AskPage() {
 
   useEffect(() => {
     return () => {
+      // Cleanup must read the LATEST timer IDs, not a stale snapshot from mount.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current)
       if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current)
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
