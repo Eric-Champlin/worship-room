@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             />
 
             {/* Frosted glass card */}
-            <div className="relative rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-8 shadow-[0_0_40px_rgba(139,92,246,0.15),0_8px_30px_rgba(0,0,0,0.4)] text-center">
+            <div role="alert" className="relative rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-8 shadow-[0_0_40px_rgba(139,92,246,0.15),0_8px_30px_rgba(0,0,0,0.4)] text-center">
               <h1
                 className="text-3xl font-bold sm:text-4xl pb-1"
                 style={{
@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 Something went wrong
               </h1>
               <p className="mt-4 text-base text-white/70 leading-relaxed">
-                We&apos;re sorry for the inconvenience. Please try refreshing the page.
+                Something broke on our end. Reload to try again — your other work is safe.
               </p>
               <button
                 type="button"

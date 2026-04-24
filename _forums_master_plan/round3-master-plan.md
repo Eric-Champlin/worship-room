@@ -1,8 +1,8 @@
 # Worship Room — Phase 3: Forums Wave Master Plan
 
-**Version:** 2.8
-**Date:** April 22, 2026
-**Supersedes:** v2.7 (April 22, 2026)
+**Version:** 2.9
+**Date:** April 23, 2026
+**Supersedes:** v2.8 (April 22, 2026)
 **Scope:** Prayer Wall + User Profiles + Activity Engine backend integration. First wave of CLAUDE.md's official Phase 3 (Auth & Backend Wiring). Other features (Daily Hub, Bible, Music, Grow, Local Support) remain on localStorage and migrate in later waves.
 
 **Author context:** Drafted by Claude in conversation with Eric Champlin, based on three Prayer Wall recons, a Profile/Dashboard recon, two rounds of competitor research, and a comprehensive codebase audit (CLAUDE.md, all 11 rule files in `.claude/rules/`, the actual `usePrayerReactions.ts` / `AuthContext.tsx` / `PrayerCard.tsx` / `InteractionBar.tsx` / `prayer-wall-mock-data.ts` / `types/prayer-wall.ts`, the existing `backend/` skeleton, and the existing `prayer-wall-redesign.md` / `prayer-wall-question-of-day.md` / `prayer-wall-category-filter.md` / `prayer-wall-category-layout.md` / `friends-system.md` / `notification-system.md` / `bb45-verse-memorization-deck.md` specs), and 16 architectural decisions made by Eric.
@@ -18,6 +18,115 @@
 **For both:** This is a living document. If any decision in here changes mid-wave, the plan gets updated and the file in the repo gets replaced with the new version. Major changes are recorded in the Change Log at the bottom.
 
 ---
+
+## Phase 1 Execution Reality Addendum (v2.9, added 2026-04-23)
+
+> **Why this section exists:** Specs 1.1 through 1.8 have shipped. Several of them surfaced real divergences from the original spec text in this document — not "mistakes" but discoveries that only the actual execution could reveal. This addendum consolidates those divergences so future spec authors and CC don't have to re-discover them. Individual spec bodies below may still show the pre-execution text; trust THIS section over the older spec text where they disagree.
+>
+> **Scope:** Phase 1 only (Specs 1.1–1.8). Phase 2+ specs are unaffected by these findings except where called out explicitly.
+
+### 1. Testcontainers pattern — two base classes, not one (Spec 1.7 execution)
+
+**Pre-execution assumption:** A single `AbstractIntegrationTest` base class annotated `@SpringBootTest` would serve all integration tests.
+
+**Execution reality:** `@DataJpaTest` (slice test) and `@SpringBootTest` (full context) are mutually exclusive annotations. `UserRepositoryTest` required slice-test semantics, so a sibling `AbstractDataJpaTest` was added. Both base classes share a singleton PostgreSQL container via a `TestContainers` utility class (started once per JVM run).
+
+**Canonical pattern (post-Spec-1.7):**
+- `backend/src/test/java/com/worshiproom/support/TestContainers.java` — singleton `public static final PostgreSQLContainer<?> POSTGRES`, started in a `static {}` block
+- `backend/src/test/java/com/worshiproom/support/AbstractIntegrationTest.java` — `@SpringBootTest`, registers JDBC properties via `@DynamicPropertySource`
+- `backend/src/test/java/com/worshiproom/support/AbstractDataJpaTest.java` — `@DataJpaTest + @AutoConfigureTestDatabase(replace = Replace.NONE)`, same pattern
+
+`.claude/rules/06-testing.md` was updated during Spec 1.7 execution to document the two-base-class pattern. Authoritative.
+
+**Test suite runtime baseline:** ~97 seconds (not ≤40 seconds as Spec 1.7's body originally claimed). The ≤40s target was written before empirical measurement; container startup reduction from 5→1 only saves ~5s of the ~90s baseline. Remaining runtime is dominated by Spring context boot across ~19 distinct contexts. Hitting <40s would require Surefire parallelism, explicitly out of scope for Phase 1. **Future specs must anchor runtime targets off ~97s, not 40s.**
+
+### 2. `application-test.properties` does NOT exist (Spec 1.8 execution)
+
+**Pre-execution assumption** (Decision 10, Spec 1.8 brief): Tests run with `application-test.properties` active, which would carry `spring.liquibase.contexts=test`.
+
+**Execution reality:** No `application-test.properties` file exists in the repo. Tests inherit the dev profile by default via `spring.profiles.default=dev` in `application.properties`. Without intervention, adding `spring.liquibase.contexts=dev` to `application-dev.properties` (as Spec 1.8 did) would leak the 5 dev-seed users into every test run — breaking `userRepository.deleteAll()` assumptions silently.
+
+**Canonical mitigation (post-Spec-1.8):** Both `AbstractIntegrationTest` and `AbstractDataJpaTest` register a second `@DynamicPropertySource` method that pins `spring.liquibase.contexts=test` for test runs. Spring aggregates `@DynamicPropertySource` methods across the inheritance hierarchy, so subclass-specific property registrations (like `jwt.secret`) still layer on top without conflict.
+
+**Decision 10 correction:** The "`application-test.properties`: `spring.liquibase.contexts=test`" line in Decision 10 below should be read as "enforced via `@DynamicPropertySource` in the Testcontainers base classes" — the file itself does not exist. If a future spec creates `application-test.properties`, the override in the base classes can be removed; until then, the base-class override is the canonical mechanism.
+
+### 3. Liquibase timestamp gotcha — use `valueComputed`, not `valueDate` (Spec 1.8 execution)
+
+**Pre-execution assumption:** `valueDate="2026-01-15T10:00:00Z"` would populate a `TIMESTAMP WITH TIME ZONE` column correctly.
+
+**Execution reality:** Liquibase's `ISODateFormat` does NOT parse the `Z` suffix; it passes the value through as a raw SQL literal, producing `ERROR: trailing junk after numeric literal`. Dropping the `Z` "works" but makes the stored UTC timestamp depend on the developer's JVM default timezone (observed +6h drift on the execution machine).
+
+**Canonical pattern (post-Spec-1.8):** Use `valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"` for any seed timestamp that must be reproducible across JVM timezones. **Never use `valueDate` with a `Z` suffix.** Future seed specs must apply this pattern.
+
+### 4. BCrypt hash generation pattern for seed data (Spec 1.8 execution)
+
+**Canonical pattern:** BCrypt salts are random, so no stable hash can be embedded at planning time. The working pattern:
+
+1. During planning, generate the real hash via a throwaway test method (e.g., a `BCryptHashGenerator` class with `@Test` and `System.out.println(encoder.encode("password"))`)
+2. Run the generator once, copy the hash into the Liquibase changeset wrapped in `<![CDATA[...]]>`
+3. Delete the generator in the next planning step (it has served its purpose)
+4. Post-execution, verify with `grep -c '$2a$10$<prefix>' <changeset>` — expected count matches the seed user count
+
+**Never ship placeholder hashes in seed data.** Unlike the `DUMMY_HASH` pattern in Spec 1.5 (which equalizes login timing for non-existent emails), seed-data hashes must be real and verifiable against the plaintext.
+
+### 5. AuthModal timezone capture re-homed (Spec 1.5, Spec 1.6, Spec 1.3b ripple)
+
+**Pre-execution intent (Spec 1.3b):** AuthModal captures browser timezone via `Intl.DateTimeFormat().resolvedOptions().timeZone` and sends it on registration.
+
+**Execution reality:** Spec 1.5 shipped as backend-only (no frontend AuthModal changes). The timezone-capture wiring was re-homed to Spec 1.9 (Frontend AuthContext JWT Migration) because that's the first spec that actually touches AuthModal. Spec 1.6 added the `PATCH /api/v1/users/me` timezone-update endpoint that Settings will eventually consume.
+
+**Action required:** Spec 1.9's plan MUST include a step to add `Intl.DateTimeFormat().resolvedOptions().timeZone` to the register POST body. Spec 1.9b (Error & Loading Design System) explicitly excludes AuthModal integration from its scope — that belongs to 1.9.
+
+### 6. Spec 1.9b scope is audit-first, not greenfield (Spec 1.9b brief)
+
+**Pre-execution assumption (master plan Phase 1 body):** Spec 1.9b creates a new error/loading/empty-state design system from scratch in `components/common/`, and lands AFTER Spec 1.9.
+
+**Post-recon reality:**
+- Existing `frontend/src/components/ui/` already contains `Button`, `FormField`, `Toast`, `WhisperToast`, `FeatureEmptyState`, `ChartFallback`, `CharacterCount`
+- Existing `frontend/src/components/skeletons/` contains 13 page-specific skeletons + 4 atomic primitives
+- Existing `frontend/src/components/` contains `ErrorBoundary`, `ChunkErrorBoundary`, `RouteErrorBoundary`
+- `components/common/` does NOT exist — the master plan guessed wrong about the directory
+
+**Canonical scope for Spec 1.9b:**
+1. **Audit** existing error/loading/empty components — produce a component-state matrix (feature area × state) that names which existing component serves which state OR marks GAP
+2. **Fill** only the gaps the audit proves exist (may be zero new components — a valid outcome)
+3. **Document** the entire system in `.claude/rules/09-design-system.md` as a new "Error, Loading, and Empty States" section
+4. **Copy-audit** every user-facing string in existing and new components against the 6-point Anti-Pressure Copy Checklist
+5. **Verify** via `/verify-with-playwright` at 3 viewports (375/768/1440) — first spec in the wave where this workflow is exercised
+
+**Component location:** New components go in `frontend/src/components/ui/` (NOT `components/common/` which does not exist).
+
+**Prereq order:** Spec 1.9b lands BEFORE Spec 1.9 so 1.9 can consume the documented patterns rather than inventing its own ad-hoc. The tracker shows 1.9 before 1.9b; the execution order is 1.9b → 1.9.
+
+**AuthModal integration is NOT in 1.9b scope.** That's Spec 1.9's territory (see #5 above).
+
+### 7. "Effort" terminology — `xhigh`, not "Max effort"
+
+Eric's Claude Max subscription gives him access to Claude Opus 4.7. The effort slider for that model has values including `xhigh`. When specs or notes reference "high-stakes specs run at xhigh effort," that refers to the effort slider, NOT the subscription tier. Do not conflate.
+
+### 8. CC execution discipline (observed across Phase 1)
+
+- **CC never commits, pushes, or checks out.** Eric handles all git operations manually. Pre-existing per-rule, reinforced by every Phase 1 spec.
+- **CC proactively flags argument mismatches.** Spec 1.8's `/code-review` invocation with the wrong spec argument was caught by CC before wasting a review pass. This is the desired behavior — don't suppress it.
+- **Stale processes from pre-Spec-1.1 builds** (`com.example.worshiproom.WorshipRoomApplication`) occasionally occupy port 8080 from earlier dev sessions. Safe to kill by PID. Not a regression.
+
+### 9. Spec tracker discipline
+
+Eric updates `_forums_master_plan/spec-tracker.md` MANUALLY after each spec ships. CC does not edit the tracker. The tracker is the canonical source of "what's ✅ vs ⬜" — trust it over memory, trust it over this addendum, trust it over spec bodies.
+
+### 10. "Master Plan Divergence" section required in all future briefs (Spec 1.9b authoring observation)
+
+**Observation:** Spec 1.9b's brief deviated from this document's Phase 1 body text in four ways: scope framing (audit-first vs greenfield), component location (`components/ui/` vs this document's guessed `components/common/`), prereq order (1.9b BEFORE 1.9, not after), and scope exclusion (AuthModal integration deferred to Spec 1.9, not bundled into 1.9b). CC's `/spec-forums` skill correctly flagged the divergence during recon and asked how to reconcile. That's the desired behavior — but it could have been prevented upstream by the brief itself.
+
+**Convention going forward:** Every brief that deviates from this document's current text for its spec MUST include a **"Master Plan Divergence"** section near the top (after Goals, before Scope) that enumerates each deviation as (a) what the master plan currently says, (b) what the brief says instead, (c) why. CC's `/spec-forums` skill then has authoritative reconciliation guidance baked into the brief; no mid-recon reconciliation conversation needed.
+
+**Why drift is expected:** This document is a planning artifact, not a live source of truth. It was authored at versioned points in time (v2.0 → v2.9) based on the state of the codebase at those moments. Between then and when a spec executes, the codebase changes — Round 2 polish shipped skeletons / Toast / WhisperToast / FeatureEmptyState; earlier Phase 1 specs reshaped the backend package structure; and so on. Drift is not a bug — it's evidence the plan was reasonably optimistic about what would still be valid by execution time.
+
+**Batch-update cadence:** This document gets a **v3.0 reconciliation pass post-Phase-1-cutover (after Spec 1.10 ships)** that absorbs all Phase 1 execution learnings into the spec bodies themselves. Until then, this v2.9 addendum + the individual committed spec files under `_specs/forums/` + the per-brief "Master Plan Divergence" section together cover the gap. Do not attempt per-spec inline updates to this document during Phase 1 — the addendum exists precisely to avoid that churn.
+
+---
+
+
 
 ## Quick Reference
 
@@ -1667,6 +1776,8 @@ Run `./mvnw clean test` to confirm EVERYTHING still compiles and all ~280 existi
 
 ### Spec 1.7 — Testcontainers Integration Test Infrastructure
 
+> **Execution note added 2026-04-23 (post-Spec-1.7 completion):** Shipped with two deviations from the brief. (1) Two base classes instead of one — `AbstractIntegrationTest` (`@SpringBootTest`) + `AbstractDataJpaTest` (`@DataJpaTest`) sharing a singleton container via `TestContainers.POSTGRES` — because slice tests and full-context tests have mutually exclusive annotations. (2) Runtime target ≤40s was wrong; real baseline is ~97s dominated by Spring context boot across ~19 distinct contexts, not container startup. Future runtime targets anchor off ~97s. `.claude/rules/06-testing.md` was updated during execution and is authoritative. See "Phase 1 Execution Reality Addendum" #1 for full details.
+
 - **ID:** `round3-phase01-spec07-testcontainers-setup`
 - **Size:** M
 - **Risk:** Low
@@ -1700,6 +1811,8 @@ Run `./mvnw clean test` to confirm EVERYTHING still compiles and all ~280 existi
 
 ### Spec 1.8 — Dev Seed Data
 
+> **Execution note added 2026-04-23 (post-Spec-1.8 completion):** Shipped with three gotchas worth knowing. (1) `application-test.properties` does NOT exist — tests inherit the dev profile, so the test-context override was re-homed into `AbstractIntegrationTest`/`AbstractDataJpaTest` via `@DynamicPropertySource` (see Addendum #2). (2) Liquibase `valueDate="...Z"` does not parse the `Z` suffix and emits raw SQL that Postgres rejects — use `valueComputed="TIMESTAMP WITH TIME ZONE '...+00'"` instead for reproducible UTC seed timestamps (see Addendum #3). (3) BCrypt hashes have random salts, so seed hashes were generated via a throwaway test method, wrapped in `<![CDATA[...]]>`, embedded in the changeset, and the generator deleted (see Addendum #4). All 417 tests green post-execution.
+
 - **ID:** `round3-phase01-spec08-dev-seed-data`
 - **Size:** S
 - **Risk:** Low
@@ -1727,6 +1840,8 @@ Run `./mvnw clean test` to confirm EVERYTHING still compiles and all ~280 existi
 - [ ] `docker compose down -v && docker compose up -d postgres && ./mvnw spring-boot:run` gives a clean dev database with seed data re-applied
 
 ### Spec 1.9 — Frontend AuthContext JWT Migration
+
+> **Execution note added 2026-04-23 (pre-execution planning):** This spec inherits responsibility for AuthModal timezone capture (re-homed from Spec 1.3b — see Addendum #5). The plan MUST include adding `Intl.DateTimeFormat().resolvedOptions().timeZone` to the register POST body. Spec 1.9b lands BEFORE this spec (see Addendum #6), so the error/loading/empty-state primitives 1.9b documents are available for 1.9 to consume — do not re-invent ad-hoc patterns here.
 
 - **ID:** `round3-phase01-spec09-frontend-auth-jwt`
 - **Size:** L
@@ -1767,6 +1882,8 @@ Run `./mvnw clean test` to confirm EVERYTHING still compiles and all ~280 existi
 **Out-of-band notes for Eric:** This is the highest-risk spec in Phase 1. The rule of thumb: if a file imports `useAuth` and only reads `user.name` or `user.id` or `isAuthenticated`, it does not need to change. If a file calls `login(...)` it needs to be updated. The recon should list all `login(` call sites before execution starts.
 
 ### Spec 1.9b — Error & Loading State Design System
+
+> **Execution note added 2026-04-23 (pre-execution; brief authored for /spec-forums):** The master plan text below was drafted before frontend Round 2 shipped `components/ui/` primitives (`Toast`, `WhisperToast`, `FeatureEmptyState`, `ChartFallback`, `FormField`, `Button`, `CharacterCount`) and the 13 skeletons in `components/skeletons/`. The authored brief for this spec is AUDIT-FIRST, not greenfield: inventory existing components → fill only proven gaps → document in `.claude/rules/09-design-system.md`. Components go in `components/ui/` (NOT `components/common/` which doesn't exist). This spec lands BEFORE Spec 1.9 so 1.9's AuthModal work can consume documented patterns. AuthModal integration itself is Spec 1.9's scope, not this one's. See "Phase 1 Execution Reality Addendum" #6 at the top of this document for the full scope reconciliation.
 
 - **ID:** `round3-phase01-spec09b-error-loading-design-system`
 - **Size:** M
@@ -7655,6 +7772,7 @@ These are decisions that have been made but should be revisited if circumstances
 
 ## Change Log
 
+- **2026-04-23 — v2.9** — Phase 1 Execution Reality Addendum. New section inserted after "How to Use This Document" consolidating 10 divergences surfaced during execution of Specs 1.1–1.8 and authoring of Spec 1.9b's brief: (1) Testcontainers two-base-class pattern (`AbstractIntegrationTest` + `AbstractDataJpaTest` sharing a singleton container via a `TestContainers` utility class, post-Spec-1.7 canonical — `@DataJpaTest` and `@SpringBootTest` are mutually exclusive so slice tests need a sibling base); test suite runtime baseline anchored at ~97s, not the ≤40s target the spec body originally claimed (container startup reduction only saves ~5s of ~90s; remaining runtime is dominated by Spring context boot across ~19 distinct contexts; Surefire parallelism is the only path to <40s and is explicitly Phase-1-out-of-scope). (2) `application-test.properties` does NOT exist in the repo — tests inherit the dev profile by default; the canonical test-profile override is `@DynamicPropertySource` in both base classes pinning `spring.liquibase.contexts=test`, post-Spec-1.8 canonical; without this, dev-seed users leak into every test run and break `deleteAll()` assumptions. (3) Liquibase timestamp gotcha: use `valueComputed="TIMESTAMP WITH TIME ZONE '...'"` NOT `valueDate` with a `Z` suffix — Liquibase's `ISODateFormat` does not parse `Z`, and dropping `Z` makes stored UTC depend on developer JVM timezone (observed +6h drift). (4) BCrypt hash generation pattern for seed data: throwaway test method, CDATA-wrapped real hash in changeset, generator deleted in next planning step — never ship placeholder hashes; distinct from the `DUMMY_HASH` timing-equalization constant in `AuthService`. (5) AuthModal timezone capture re-homed from Spec 1.5 (which shipped backend-only) to Spec 1.9 (first spec that actually touches AuthModal) — Spec 1.9's plan MUST include `Intl.DateTimeFormat().resolvedOptions().timeZone` on the register POST body; Spec 1.6 added the `PATCH /api/v1/users/me` timezone-update endpoint that Settings will eventually consume. (6) Spec 1.9b scope corrected from greenfield to audit-first (Round 2 polish already shipped 13 skeletons + Toast + WhisperToast + FeatureEmptyState + ChartFallback + 3 error boundaries), component location corrected from `components/common/` (which does not exist) to `components/ui/`, order reversed to 1.9b before 1.9 so 1.9 can consume 1.9b's documented patterns, AuthModal integration explicitly deferred to 1.9. (7) Effort terminology: `xhigh` refers to the Opus 4.7 effort slider, NOT the Claude Max subscription tier — do not conflate. (8) CC execution discipline: CC never commits/pushes/checks out (Eric handles git manually), CC proactively flags argument mismatches (Spec 1.8's `/code-review` invocation with wrong spec argument was caught before wasting a review pass — desired behavior, don't suppress), stale `com.example.worshiproom.*` processes from pre-Spec-1.1 builds occasionally occupy port 8080. (9) Spec tracker discipline: Eric updates `spec-tracker.md` MANUALLY after each spec ships; CC does not edit the tracker; the tracker beats memory, beats this addendum, beats spec bodies for what's ✅ vs ⬜. (10) "Master Plan Divergence" section required in all future briefs — brief authors enumerate deviations (what the master plan says / what the brief says / why) near the top so CC's `/spec-forums` skill has authoritative reconciliation guidance baked in, preventing mid-recon reconciliation conversations like the one Spec 1.9b surfaced. **Ancillary rule-file updates:** `.claude/rules/05-database.md` gained a new "Liquibase Seed Data & Value Patterns" section documenting #3 and #4 canonically with copy-paste-ready snippets. `.claude/rules/06-testing.md` had already absorbed #1 during Spec 1.7 execution (no v2.9 change). `.claude/rules/03-backend-standards.md` was not modified (its Liquibase section covers naming and template structure only, which remain correct). **Tracker metadata:** `spec-tracker.md` header gained a v2.9 execution-reality pointer to this addendum. **What v2.9 does NOT change:** no spec count changes (still 156), no Quick Reference changes, no Appendix C changes, no Universal Rule changes, no Architectural Decision changes, no existing spec bodies modified. This pass is deliberately narrow — consolidates post-execution learnings into one easy-to-find section so a new conversation can load Phase 1 reality in ~5 minutes of reading. A broader **v3.0 reconciliation pass** will absorb Phase 1 drift into the spec bodies themselves after Spec 1.10 (Phase 1 cutover) ships; until then the v2.9 addendum is the authoritative layer over any stale spec text for Specs 1.1–1.9b. End marker bumped from v2.8 to v2.9.
 - **2026-04-22 — v2.8** — Pre-execution completeness pass. Added **18 new specs** (138 → 156) closing real functional gaps surfaced during a deliberate line-by-line master plan audit before Forums Wave begins. Gaps fell into four categories — (a) **auth lifecycle incompleteness**: no password reset, no email verification, no change-password, no change-email, no account lockout/brute-force protection, no session invalidation; (b) **production hardening gaps**: no security headers middleware, no consolidated error code catalog, no env-var runbook, no liveness/readiness split (Actuator health is sufficient for uptime but not for Kubernetes-style orchestration), no connection-pool tuning spec, no Playwright E2E infrastructure spec (referenced by the pipeline but never authored); (c) **referenced-but-never-built features**: `block user` and `mute user` are referenced across the master plan (Intercessor Timeline cache invalidation, Privacy Tiers acceptance criteria, 3am Watch filter cascading) but no spec created the schema or endpoints; admin audit log viewer referenced as part of admin foundation but the UI spec was never written; (d) **polish that was implicitly expected but never scoped**: offline banner UI (Phase 16 has offline cache but no user-visible indicator), React error boundaries (no spec owning the global error boundary + Sentry integration + fallback UI strategy). **Phase-by-phase additions:** Phase 1 (17 → 30): six auth lifecycle specs 1.5b through 1.5g, six production hardening specs 1.10g through 1.10l, one community-legal spec 1.10m (moved from Appendix D in-wave because it is referenced by Spec 1.10f Terms of Service); Phase 2.5 (6 → 8): Spec 2.5.6 Block User and 2.5.7 Mute User; Phase 10 (12 → 13): Spec 10.10b Admin Audit Log Viewer; Phase 16 (5 → 7): Spec 16.1b Offline Banner UI and 16.2b React Error Boundary Strategy. **Metadata synced:** QR intro updated from "120 specs across 17 phases" to "156 specs across 19 phases"; heading "The Seventeen Phases" → "The Nineteen Phases"; QR table phase totals updated (Phase 1: 17→30, Phase 2.5: 6→8, Phase 10: 12→13, Phase 16: 5→7); **Total: 138 → 156 specs**; Appendix C regenerated with all 156 spec IDs in correct execution position; **new Appendix E** added containing full specification stubs for all 18 new specs (ID, Size, Risk, Prerequisites, Goal, Approach sketch, and Files-to-Create/Modify — expanded by `/spec-forums` during execution to full spec format); footer bumped from v2.6 end-marker to v2.8. **No existing specs modified; no Universal Rules modified; no Architectural Decisions modified.** This is purely additive — gaps that should have been specs are now specs. Tracker file also rewritten to 156 rows with correct cascading numbering across all 19 phases.
 - **2026-04-22 — v2.7** — Post-Key-Protection-Wave reality-drift reconciliation. The AI Integration Wave (AI-1/AI-2/AI-3) and Key Protection Wave (Specs 1–4 of `ai-proxy-*`) both shipped between v2.6 (April 16) and today, adding ~60+ files under `com.example.worshiproom.proxy.{common,ai,maps,bible}` and ~280 green backend tests that v2.6 assumed didn't exist. **Decision 2 rewritten** to describe the current backend state (proxy layer fully shipped with filters / exception handlers / WebClient / dev-profile log suppressions / `/api/v1/health` provider reporting). **Spec 1.1 rewritten** — Size bumped from S to L, Risk from Low to Medium; file list expanded from ~5 files to ~60+ files across four proxy subpackages plus tests; approach rewritten with explicit guidance on filter ordering, log-suppression preservation, `@RestControllerAdvice` basePackages update, and the guardrail that `ApiController.java`'s `@RequestMapping("/api")` should NOT be changed to `"/api/v1"` (that endpoint already exists as a separate route from the Key Protection Wave). **Spec 1.4 extended** with a "Filter coexistence" note (JwtAuthenticationFilter must order after existing `RequestIdFilter` + `RateLimitFilter`, suggested `HIGHEST_PRECEDENCE + 100`) and a "Proxy endpoints and JWT" note (proxy routes stay anonymous-accessible in Phase 1; per-user rate-limit precedence deferred to a post-Phase-1 operational spec). Risk bumped from Medium to Medium-High. **Phase 1 definition of done extended** with five new bullets verifying proxy-layer survival post-rename (all ~280 tests green, three proxy endpoints still round-trip, log suppressions still work, filter ordering preserved). **Backend packages section in Quick Reference updated** to include the inherited `proxy.{common,ai,maps,bible}` packages alongside the new Forums Wave packages, with a note that v2.6's provisional names (`proxy.places`, `proxy.audio`) were superseded by `proxy.maps` and `proxy.bible` during execution. **Path correction:** OpenAPI spec location corrected from `backend/api/openapi.yaml` (v2.6) to `backend/src/main/resources/openapi.yaml` (actual shipped location). No spec count changes; no Appendix C changes; no Universal Rule changes. This is a Phase-1-targeted correction; Phases 2–16 are not affected by the drift.
 - **2026-04-16 — v2.6** — Hygiene pass + Phase 2.5 completeness fix + Rule 17 retrofit correction. **Pre-execution audit uncovered six prereq-graph issues** (1 real architectural: Spec 1.10c depended on 1.10e but preceded it in the file, fixed by physically moving the 1.10c block to after 1.10e and updating Appendix C ordering; 1 spurious forward ref: Spec 4.6b incorrectly listed 6.7 as a prerequisite when the direction was reversed, rephrased to name the feature rather than the spec number; 4 runtime-gated misclassifications: Specs 6.4 and 6.8 listed 10.5 and 10.6 as hard prereqs when both features ship with documented graceful-degradation paths for when the crisis classifier is unavailable — reclassified as "Runtime-gated dependencies" with explicit notes preserving the shipping-before-10-is-safe story). **Four Liquibase changeset filename collisions fixed** (same-date-same-sequence prefixes that would have caused Liquibase checksum conflicts on deploy — renames: scripture-reference-to-posts 2026-04-18-001→002, three username changesets 2026-04-20-001/002/003→2026-04-21-001/002/003, keeping the Phase 8 username trio grouped on one date). **Phase 2.5 completeness fix** (audit surfaced that Decision 8 promises `social_interactions` and `milestone_events` shadow tables in Phase 2.5 but the existing specs only created `friend_relationships` and `friend_requests` — would have caused runtime "table does not exist" errors when Phase 12 notification generators and Phase 13 personal analytics queries ran against the missing tables): Spec 2.5.1 extended to create all four tables with full schemas and CHECK constraints; new Spec 2.5.4b added for the social/milestone dual-write pipeline with fire-and-forget pattern and new `VITE_USE_BACKEND_SOCIAL` env flag; Spec 2.5.5 cutover extended to flip both flags and smoke-test all three pipelines (friends, social interactions, milestone events) plus Universal Rule 17 accessibility smoke test AC. **Two Rule 17 cutover retrofits** (Spec 2.9 Phase 2 Cutover and Spec 2.5.5 Phase 2.5 Cutover were missed in the initial Batch 8 retrofit because they weren't in the retrofit list at the time; added now so all 8 cutovers have explicit Rule 17 ACs with phase-specific evidence paths). **Meta-observation:** the initial audit regex `\d+\.\d+[a-z]?` silently excluded Phase 2.5's 3-part IDs (2.5.1–2.5.5) from prereq and cross-ref checks; re-audited with `\d+\.\d+(?:\.\d+)?[a-z]?` and confirmed Phase 2.5's graph is clean. Metadata synced: QR table (Phase 2.5: 5→6), total spec count (137→138), Appendix C regenerated with Spec 2.5.4b inserted in execution position, Spec 1.10c moved in Appendix C ordering to reflect new post-1.10e execution sequence.
@@ -8265,4 +8383,4 @@ These 18 stubs were added in v2.8 to close gaps found during pre-execution revie
 
 ---
 
-_End of Worship Room — Phase 3: Forums Wave Master Plan v2.8_
+_End of Worship Room — Phase 3: Forums Wave Master Plan v2.9_

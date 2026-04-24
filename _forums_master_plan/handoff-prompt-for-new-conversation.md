@@ -1,6 +1,28 @@
 # Worship Room Forums Wave — Handoff for New Conversation
 
-## Who I am
+> **⚠️ SUPERSEDED 2026-04-23 — READ THIS FIRST**
+>
+> This document was written for **v2.6 of the master plan (138 specs)**. It is stale in the following ways:
+>
+> - Master plan is now **v2.9** with **156 specs** (18 added in v2.8, execution-reality addendum in v2.9).
+> - Specs 1.1 through 1.8 have shipped. Spec 1.9b is currently in execution.
+> - Backend package is `com.worshiproom.*` (not `com.example.worshiproom.*` — renamed in Spec 1.1).
+> - The `spec-forums` / `plan-forums` / `execute-plan-forums` / `code-review` / `verify-with-playwright` / `address-mr-comments` skills have been significantly rewritten since v2.6; do not assume this document's descriptions of them are current.
+>
+> **Canonical sources of truth (read these, not this file):**
+>
+> 1. `_forums_master_plan/round3-master-plan.md` — v2.9, especially the **"Phase 1 Execution Reality Addendum"** section right after "How to Use This Document"
+> 2. `_forums_master_plan/spec-tracker.md` — live status of all 156 specs (Eric updates manually)
+> 3. `.claude/rules/` — 12 files, `06-testing.md` was updated by Spec 1.7 execution
+> 4. Committed specs at `_specs/forums/spec-1-*.md` and plans at `_plans/forums/2026-04-23-spec-1-*.md` — the reality of what actually shipped
+>
+> **For new conversations:** Ask Eric for his current kickoff prompt — the one he's been maintaining in Claude Desktop. It's more current than this file.
+>
+> The content below is preserved for historical reference only. Do not treat it as authoritative.
+
+---
+
+## Who I am (as of April 2026 — still current)
 
 Eric Champlin, solo frontend dev at Ramsey Solutions. Building Worship Room (Christian emotional healing web app).
 

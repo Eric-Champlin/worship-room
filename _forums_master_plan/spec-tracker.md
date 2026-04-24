@@ -4,6 +4,8 @@
 
 **v2.8 additions (2026-04-22):** 18 new specs closed functional gaps surfaced during pre-execution completeness review — 13 in Phase 1 (auth lifecycle + production hardening), 2 in Phase 2.5 (block/mute), 1 in Phase 10 (admin audit viewer), 2 in Phase 16 (offline banner + error boundaries). See master plan v2.8 changelog + new Appendix E for spec details.
 
+**v2.9 execution reality (2026-04-23):** Specs 1.1–1.8 have shipped, and authoring Spec 1.9b's brief surfaced divergences from the original spec bodies (test infrastructure shape, Liquibase timestamp handling, BCrypt seeding pattern, components/ui/ vs components/common/, 1.9b-before-1.9 ordering, AuthModal timezone re-home from 1.5 to 1.9). **Trust the master plan's "Phase 1 Execution Reality Addendum" (right after "How to Use This Document") over any older spec body text for Specs 1.1–1.9b.** The tracker below is the canonical ✅/⬜ status; Eric updates it manually after each spec ships.
+
 Specs execute in phase order (0 → 0.5 → 1 → 2 → 2.5 → 3 → ... → 16).
 Within each phase, specs are sequential — each spec's prerequisites are the specs before it.
 
