@@ -45,7 +45,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 18  | 1.9   | Frontend AuthContext JWT Migration             | L    | High     | ✅     |
 | 19  | 1.9b  | Error & Loading State Design System            | M    | Low      | ✅     |
 | 20  | 1.10  | Phase 1 Cutover and End-to-End Test            | M    | Medium   | ✅     |
-| 21  | 1.10b | Deployment Target Decision Document            | S    | Low      | ✅     |
+| 21  | 1.10b | Deployment Target Decision Document            | S    | Low      | ⬜     |
 | 22  | 1.10d | Production Monitoring Foundation               | M    | Low      | ⬜     |
 | 23  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ⬜     |
 | 24  | 1.10c | Database Backup Strategy                       | S    | Low      | ⬜     |
