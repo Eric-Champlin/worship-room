@@ -29,7 +29,24 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
   return (
     <AuthModalContext.Provider value={{ openAuthModal }}>
       {children}
-      <AuthModal isOpen={isOpen} onClose={closeAuthModal} onShowToast={showToast} subtitle={subtitle} initialView={initialView} />
+      {/*
+        Mount AuthModal only while open. Spec 1.9 made AuthModal call useAuth()
+        unconditionally (it hydrates login/register handlers at mount), so
+        rendering it eagerly would require every AuthModalProvider-wrapped
+        test tree to also wrap in AuthProvider. Conditional mount keeps the
+        pre-1.9 test harnesses green while preserving the real flow — when a
+        caller invokes openAuthModal(), isOpen flips true and AuthModal
+        mounts into a tree that DOES have AuthProvider (App.tsx wraps it).
+      */}
+      {isOpen && (
+        <AuthModal
+          isOpen={isOpen}
+          onClose={closeAuthModal}
+          onShowToast={showToast}
+          subtitle={subtitle}
+          initialView={initialView}
+        />
+      )}
     </AuthModalContext.Provider>
   )
 }

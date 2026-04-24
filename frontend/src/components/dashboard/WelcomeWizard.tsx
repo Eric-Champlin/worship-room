@@ -45,7 +45,7 @@ const HEADING_IDS: Record<WizardScreen, string> = {
 
 export function WelcomeWizard({ userName, onComplete }: WelcomeWizardProps) {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { simulateLegacyAuth } = useAuth()
 
   // ---- Wizard navigation state ----
   const [currentScreen, setCurrentScreen] = useState<WizardScreen>(0)
@@ -165,8 +165,10 @@ export function WelcomeWizard({ userName, onComplete }: WelcomeWizardProps) {
   }
 
   const handleComplete = (destinationRoute?: string) => {
-    // 1. Save display name
-    login(trimmedName)
+    // 1. Save display name via the legacy-mock helper.
+    //    TODO(Phase 3): replace with real registration flow once onboarding
+    //    collects email/password.
+    simulateLegacyAuth(trimmedName)
 
     // 2. Save avatar selection
     updateSettings({ profile: { avatarId: selectedAvatarId } })
