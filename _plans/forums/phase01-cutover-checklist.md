@@ -100,9 +100,9 @@ Every env var in this section is set via the Railway Variables UI (or `railway v
 
 ---
 
-## 5. Frontend deploy (Railway-hosted path — default)
+## 5. Frontend deploy (Railway-hosted)
 
-Skip this section if Eric keeps the frontend on Vercel / Cloudflare Pages / Netlify — jump to 5-alt below.
+Eric chose bundled Railway hosting (backend + Postgres + frontend all on Railway). One vendor, one dashboard, one bill. No external frontend host in the picture.
 
 - [ ] In the Railway project: "Add New" → "GitHub Repo" → same repo, root directory `/frontend`
 - [ ] Build command: `pnpm install && pnpm build` (Railway usually detects Vite and auto-sets this — verify in the service's Settings → Build)
@@ -112,17 +112,6 @@ Skip this section if Eric keeps the frontend on Vercel / Cloudflare Pages / Netl
 - [ ] Deploy succeeds; the frontend URL is reachable
 - [ ] Open the frontend URL in a real browser (Chrome DevTools open) — root URL loads with NO console errors
 - [ ] Submit the login form once manually against the deployed backend before running the automated Playwright smoke (catches the "backend URL typo" class of bug before 8 tests fail identically)
-
----
-
-## 5-alt. Frontend deploy (separate host — only if Eric keeps Vercel / Cloudflare Pages / etc.)
-
-Use this section ONLY if Eric is keeping the frontend on a non-Railway host. Confirm before proceeding.
-
-- [ ] Confirm with Eric which host currently serves `worshiproom.com` preview builds (Vercel? Cloudflare Pages? Netlify?)
-- [ ] On that host, update `VITE_API_BASE_URL` to point at the Railway backend URL (same form as section 5)
-- [ ] Update Railway backend's CORS config to allow the frontend's origin. The prod profile already allows `https://worshiproom.com` and `https://www.worshiproom.com` (application-prod.properties line 14) — if the temporary deploy URL is different (e.g., `*.vercel.app`), add it explicitly. Do NOT use a wildcard; prefer locking to the final `worshiproom.com` origin once DNS flips
-- [ ] Smoke test the login form on the deployed frontend against the Railway backend
 
 ---
 
