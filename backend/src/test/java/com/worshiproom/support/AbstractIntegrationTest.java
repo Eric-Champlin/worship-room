@@ -36,4 +36,25 @@ public abstract class AbstractIntegrationTest {
     static void registerBaseDatasourceProperties(DynamicPropertyRegistry registry) {
         TestContainers.registerJdbcProperties(registry);
     }
+
+    // Prevents dev-seed from leaking into test runs when dev profile is active — see Spec 1.8.
+    /**
+     * Override {@code spring.liquibase.contexts} to {@code "test"} so the dev-only seed
+     * changeset (Spec 1.8, {@code contexts/dev-seed.xml}, {@code context="dev"}) is SKIPPED
+     * during test runs.
+     *
+     * <p>Tests inherit the dev profile by default via {@code spring.profiles.default=dev} in
+     * {@code application.properties}, which would otherwise apply the dev-seed to the shared
+     * singleton container and leak 5 user rows across every integration test class.
+     *
+     * <p>Liquibase context semantics: when the filter is set to {@code "test"} (a value no
+     * changeset currently uses), only no-context changesets run; every changeset with an
+     * explicit context — dev-seed included — is skipped. A future {@code contexts/test-seed.xml}
+     * would use {@code context="test"} if ever added; this override would then include it
+     * automatically without any base-class change.
+     */
+    @DynamicPropertySource
+    static void registerLiquibaseTestContext(DynamicPropertyRegistry registry) {
+        registry.add("spring.liquibase.contexts", () -> "test");
+    }
 }

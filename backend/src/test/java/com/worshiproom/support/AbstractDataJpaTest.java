@@ -34,4 +34,15 @@ public abstract class AbstractDataJpaTest {
     static void registerBaseDatasourceProperties(DynamicPropertyRegistry registry) {
         TestContainers.registerJdbcProperties(registry);
     }
+
+    // Prevents dev-seed from leaking into test runs when dev profile is active — see Spec 1.8.
+    /**
+     * See {@link AbstractIntegrationTest#registerLiquibaseTestContext} — same rationale;
+     * {@code @DataJpaTest} boots a Liquibase-integrated Spring context and must also skip
+     * the dev-seed to keep the singleton container clean across test classes.
+     */
+    @DynamicPropertySource
+    static void registerLiquibaseTestContextForJpaSlice(DynamicPropertyRegistry registry) {
+        registry.add("spring.liquibase.contexts", () -> "test");
+    }
 }

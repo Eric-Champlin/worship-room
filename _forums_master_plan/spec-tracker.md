@@ -39,7 +39,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 14  | 1.5g  | Session Invalidation & Logout-All-Devices      | M    | Medium   | ⬜     |
 | 15  | 1.6   | User Me Endpoint                               | S    | Low      | ✅     |
 | 16  | 1.7   | Testcontainers Integration Test Infrastructure | M    | Low      | ✅     |
-| 17  | 1.8   | Dev Seed Data                                  | S    | Low      | ⬜     |
+| 17  | 1.8   | Dev Seed Data                                  | S    | Low      | ✅     |
 | 18  | 1.9   | Frontend AuthContext JWT Migration             | L    | High     | ⬜     |
 | 19  | 1.9b  | Error & Loading State Design System            | M    | Low      | ⬜     |
 | 20  | 1.10  | Phase 1 Cutover and End-to-End Test            | M    | Medium   | ⬜     |

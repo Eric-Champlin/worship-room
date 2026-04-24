@@ -94,6 +94,59 @@ docker compose down -v                 # stops ALL services AND deletes the name
 
 The dev database credentials are hard-coded in `src/main/resources/application-dev.properties` because the container binds only to `localhost:5432` and never accepts external connections. Production credentials come from a platform-managed `DATABASE_URL` env var (Spec 1.10b). Never copy the dev credentials into any production configuration.
 
+### Dev seed users
+
+When the backend boots with `spring.profiles.active=dev` (the default — see `application.properties`), Liquibase applies `contexts/dev-seed.xml`, which inserts 5 test users so you can exercise `POST /api/v1/auth/login`, `GET /api/v1/users/me`, and `PATCH /api/v1/users/me` without manually registering.
+
+**Shared password for every seed user:** `WorshipRoomDev2026!`
+
+| Email | First / Last | Display name | `is_admin` | Timezone | Verified |
+|-------|--------------|--------------|-----------|----------|----------|
+| `admin@worshiproom.dev` | Admin / User | `Admin User` (first_last) | ✅ | America/Chicago | ✅ |
+| `sarah@worshiproom.dev` | Sarah / Johnson | `Sarah` (first_only) | | America/New_York | ✅ |
+| `bob@worshiproom.dev` | Bob / Smith | `Bob S.` (first_last_initial) | | America/Los_Angeles | ✅ |
+| `mikey@worshiproom.dev` | Michael / Martinez | `Mikey M.` (custom) | | Europe/London | ✅ |
+| `sakura@worshiproom.dev` | Sakura / Tanaka | `Sakura` (first_only) | | Asia/Tokyo | ❌ (unverified) |
+
+Seed UUIDs are deterministic: `00000000-0000-0000-0000-00000000000N` where N is the row number in the table above (1 = admin, 2 = sarah, etc.).
+
+#### Starting a fresh dev database
+
+```sh
+docker compose down -v                                                    # wipe volume
+docker compose up -d postgres                                             # fresh container
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev                     # boot — Liquibase applies seed
+```
+
+#### Logging in as a seed user
+
+```sh
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"sarah@worshiproom.dev","password":"WorshipRoomDev2026!"}'
+```
+
+The response includes a JWT — use it as `Authorization: Bearer <token>` on subsequent requests.
+
+#### Regenerating the BCrypt hash
+
+If you ever need to change the shared dev password, regenerate the hash with a throwaway JUnit test (mirrors the approach used when this spec shipped):
+
+```java
+// src/test/java/com/worshiproom/auth/DevSeedBcryptHashGenerator.java
+@Test
+void generateAndPrintHash() {
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    String hash = encoder.encode("your-new-password");
+    System.out.println("HASH: " + hash);
+    assertThat(encoder.matches("your-new-password", hash)).isTrue();
+}
+```
+
+Run via `./mvnw test -Dtest=DevSeedBcryptHashGenerator`, copy the printed hash, then delete the throwaway file. Create a NEW Liquibase changeset (do NOT edit `contexts/dev-seed.xml` in place — Liquibase checksum mismatch will crash startup) that either `UPDATE`s the 5 `users.password_hash` rows or `DELETE`s + re-`INSERT`s them.
+
+The dev password is plaintext in this README because dev data is scoped to local machines only — the dev context is blocked in prod by `application-prod.properties` (`spring.liquibase.contexts=production`) and in tests by `AbstractIntegrationTest` / `AbstractDataJpaTest` (`spring.liquibase.contexts=test`).
+
 ## Key files referenced by project rules
 
 - `.claude/rules/03-backend-standards.md` — Spring Boot conventions, API contract, `@RestControllerAdvice` scoping patterns
