@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { FormError } from '@/components/ui/FormError'
 import { AuthError, AUTH_ERROR_COPY, type AuthErrorCode } from '@/types/auth'
 
-const PASSWORD_MIN_LENGTH = 12
+const PASSWORD_MIN_LENGTH = 8
 
 type AuthView = 'login' | 'register' | 'forgot-password'
 

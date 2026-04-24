@@ -122,7 +122,7 @@ Spec 1 Round 2 caught this on the rate-limit bucket map (`maximumSize(10_000)` +
  
 ### Password Policy (MVP)
  
-- **Minimum Length**: 12 characters (strong length requirement for sensitive content)
+- **Minimum Length**: 8 characters (matches NIST modern minimum and common industry practice)
 - **Requirements**: No complexity rules (length is more important than uppercase/number requirements)
 - **Rate Limiting**: Login attempts rate-limited to prevent brute force
   - **Per email**: 5 attempts per 15 minutes

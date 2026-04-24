@@ -170,7 +170,7 @@ describe('AuthModal — validation', () => {
     await user.type(passwordInput, 'short')
     await user.click(screen.getByRole('button', { name: 'Log In' }))
     expect(
-      screen.getByText('Password must be at least 12 characters'),
+      screen.getByText('Password must be at least 8 characters'),
     ).toBeInTheDocument()
   })
 
