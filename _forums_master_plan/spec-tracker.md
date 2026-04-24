@@ -29,16 +29,16 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 4   | 1.2   | PostgreSQL via Docker Compose                  | S    | Low      | ✅     |
 | 5   | 1.3   | Liquibase Integration and First Changeset      | M    | Low      | ✅     |
 | 6   | 1.3b  | Users Table Timezone Column                    | S    | Low      | ✅     |
-| 7   | 1.4   | Spring Security and JWT Setup                  | L    | Med-High | ⬜     |
-| 8   | 1.5   | Auth Endpoints (Register, Login, Logout)       | L    | High     | ⬜     |
+| 7   | 1.4   | Spring Security and JWT Setup                  | L    | Med-High | ✅     |
+| 8   | 1.5   | Auth Endpoints (Register, Login, Logout)       | L    | High     | ✅     |
 | 9   | 1.5b  | Password Reset Flow                            | L    | High     | ⬜     |
 | 10  | 1.5c  | Change Password Endpoint                       | S    | Low      | ⬜     |
 | 11  | 1.5d  | Email Verification Flow                        | L    | Medium   | ⬜     |
 | 12  | 1.5e  | Change Email with Re-Verification              | M    | Medium   | ⬜     |
 | 13  | 1.5f  | Account Lockout & Brute Force Protection       | M    | Medium   | ⬜     |
 | 14  | 1.5g  | Session Invalidation & Logout-All-Devices      | M    | Medium   | ⬜     |
-| 15  | 1.6   | User Me Endpoint                               | S    | Low      | ⬜     |
-| 16  | 1.7   | Testcontainers Integration Test Infrastructure | M    | Low      | ⬜     |
+| 15  | 1.6   | User Me Endpoint                               | S    | Low      | ✅     |
+| 16  | 1.7   | Testcontainers Integration Test Infrastructure | M    | Low      | ✅     |
 | 17  | 1.8   | Dev Seed Data                                  | S    | Low      | ⬜     |
 | 18  | 1.9   | Frontend AuthContext JWT Migration             | L    | High     | ⬜     |
 | 19  | 1.9b  | Error & Loading State Design System            | M    | Low      | ⬜     |

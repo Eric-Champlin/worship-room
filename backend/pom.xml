@@ -124,6 +124,15 @@
             <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
 
+        <!-- jackson-databind-nullable — PATCH partial-update support for Spec 1.6 UpdateUserRequest.
+             Distinguishes JSON "absent" (don't touch DB column) from "explicit null" (clear the column)
+             from "value present" (update the column). Without this, PATCH degenerates into PUT semantics. -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+
         <!-- PostgreSQL JDBC driver — Spring Boot auto-resolves the driver class from the JDBC URL -->
         <dependency>
             <groupId>org.postgresql</groupId>
