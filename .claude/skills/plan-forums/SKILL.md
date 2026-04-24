@@ -1,6 +1,6 @@
 ---
 description: Generate a Forums Wave implementation plan from a spec file
-argument-hint: Path to spec file (e.g. _specs/forums/round3-phase01-spec01-backend-skeleton-audit.md)
+argument-hint: Path to spec file (e.g. _specs/forums/spec-1-1.md)
 user-invokable: true
 ---
 
@@ -102,9 +102,24 @@ Document what you find — this becomes the **Architecture Context** section.
 
 ## Step 4: Generate the Plan
 
+**⚠️ FILENAME RULE — READ CAREFULLY. This is the #1 place this skill goes wrong.**
+
 **Create the plan file at:**
-- Forums Wave specs (master-plan-referenced): `_plans/forums/YYYY-MM-DD-<spec-id>.md`
+- Forums Wave specs (master-plan-referenced): `_plans/forums/YYYY-MM-DD-<spec-filename>.md` where `<spec-filename>` is the FILENAME STEM of the input spec — i.e., strip the `.md` extension from the actual input file path. Do NOT use the canonical `spec_id` from the `**ID:**` field inside the spec body.
 - Standalone backend specs: `_plans/YYYY-MM-DD-<spec-slug>.md`
+
+**Concrete mapping examples:**
+
+| Input spec path (argument passed to this skill) | Plan filename to create |
+|---|---|
+| `_specs/forums/spec-0-1.md` | `_plans/forums/YYYY-MM-DD-spec-0-1.md` |
+| `_specs/forums/spec-1-1.md` | `_plans/forums/YYYY-MM-DD-spec-1-1.md` |
+| `_specs/forums/spec-1-2.md` | `_plans/forums/YYYY-MM-DD-spec-1-2.md` |
+| `_specs/forums/spec-10-7b.md` | `_plans/forums/YYYY-MM-DD-spec-10-7b.md` |
+
+**The rule:** take the input file's basename (e.g., `spec-1-2.md`), strip `.md` (gives `spec-1-2`), prepend today's date in `YYYY-MM-DD-` format, append `.md`. That is the plan filename. Always.
+
+**DO NOT derive the filename from the spec's `**ID:**` field (e.g., `round3-phase01-spec02-postgres-docker`).** That canonical ID lives inside the plan body for traceability, but it is NEVER the filename. If the input spec file is named `spec-1-2.md`, the plan is named `YYYY-MM-DD-spec-1-2.md` — regardless of what the spec's internal `**ID:**` field says.
 
 Use this structure:
 
@@ -335,7 +350,7 @@ Consider whether the non-forums `/plan` skill is the better fit. If the spec cle
 ## Step 5: Final Output
 
 ```text
-Plan saved:   _plans/forums/YYYY-MM-DD-{spec-id}.md
+Plan saved:   _plans/forums/YYYY-MM-DD-{spec-filename}.md
 Steps:        {N} steps
 Spec:         {spec file path}
 Phase:        {phase number}
@@ -347,7 +362,7 @@ Tests planned: {N}
 
 Pipeline:
   1. Review the plan
-  2. /execute-plan-forums _plans/forums/YYYY-MM-DD-{spec-id}.md
+  2. /execute-plan-forums _plans/forums/YYYY-MM-DD-{spec-filename}.md
   3. /code-review (when all steps complete)
   4. /verify-with-playwright {route} (if spec has frontend UI)
   5. Commit when satisfied

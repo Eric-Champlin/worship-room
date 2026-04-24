@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 1.3 — canonical users table per Architectural Decision 3.
+       Excludes `username` (Phase 8.1), `terms_version`/`privacy_version` (Spec 1.10f),
+       and `email_verified_at` (Spec 1.5d). See plan Edge Cases for Option-A rationale.
+       All timestamps are TIMESTAMP WITH TIME ZONE per 03-backend-standards.md template.
+       Once this changeset runs, its MD5 is stored in DATABASECHANGELOG. Any in-place
+       edit causes Liquibase checksum failure on next boot. Future schema changes go in
+       new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-23-001-create-users-table" author="worship-room">
+
+    <createTable tableName="users">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="email" type="VARCHAR(255)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="password_hash" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="first_name" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_name" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="display_name_preference" type="VARCHAR(20)" defaultValue="first_only">
+        <constraints nullable="false"/>
+      </column>
+      <column name="custom_display_name" type="VARCHAR(100)"/>
+      <column name="avatar_url" type="VARCHAR(500)"/>
+      <column name="bio" type="TEXT"/>
+      <column name="favorite_verse_reference" type="VARCHAR(50)"/>
+      <column name="favorite_verse_text" type="TEXT"/>
+      <column name="is_admin" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_banned" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_email_verified" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="joined_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_active_at" type="TIMESTAMP WITH TIME ZONE"/>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+
+    <!-- CHECK constraint for enum-like display_name_preference per 03-backend-standards.md.
+         Named explicitly so future ALTER/DROP can target it without introspection.
+         Constraint is dropped transitively by the rollback's <dropTable>. -->
+    <sql>
+      ALTER TABLE users ADD CONSTRAINT users_display_name_preference_check
+      CHECK (display_name_preference IN ('first_only', 'first_last_initial', 'first_last', 'custom'));
+    </sql>
+
+    <rollback>
+      <dropTable tableName="users"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

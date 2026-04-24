@@ -128,7 +128,7 @@ Execute the step following the plan's exact specifications.
 - **Filter ordering** — `RequestIdFilter` is at `@Order(Ordered.HIGHEST_PRECEDENCE)`, `RateLimitFilter` is at `@Order(Ordered.HIGHEST_PRECEDENCE + 10)` with `shouldNotFilter` scoping to `/api/v1/proxy/**`. Any new filter (JWT auth in Spec 1.4, future middleware) MUST be ordered AFTER both — suggested `HIGHEST_PRECEDENCE + 100` so request IDs and proxy rate limits run first. Verify ordering explicitly; don't rely on Spring's default filter-chain insertion.
 - **Package path** — current package is `com.example.worshiproom` until Phase 1 Spec 1.1 merges. Specs executing before Spec 1.1 use the old path; specs after use `com.worshiproom`. When in doubt, check the actual current package with `ls backend/src/main/java/com/` before writing new Java files.
 - **`@RestControllerAdvice` scoping** — proxy advice is package-scoped (`basePackages = "com.example.worshiproom.proxy"`). Do NOT create a globally-scoped advice for proxy concerns; do NOT broaden the existing advice to catch non-proxy exceptions. Update the `basePackages` value as part of the Spec 1.1 rename (it becomes `com.worshiproom.proxy`).
-- **Testcontainers mandatory for DB tests** — never H2. Extend `AbstractIntegrationTest` from Spec 1.7; do not spin up per-test-class containers.
+- **Testcontainers mandatory for DB tests** — never H2. Extend `AbstractIntegrationTest` (or `AbstractDataJpaTest` for repository slice tests) from Spec 1.7; do not spin up per-test-class containers.
 
 **Requirements:**
 - Use exact file paths from the plan

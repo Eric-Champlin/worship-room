@@ -4,6 +4,8 @@
 
 **v2.8 additions (2026-04-22):** 18 new specs closed functional gaps surfaced during pre-execution completeness review — 13 in Phase 1 (auth lifecycle + production hardening), 2 in Phase 2.5 (block/mute), 1 in Phase 10 (admin audit viewer), 2 in Phase 16 (offline banner + error boundaries). See master plan v2.8 changelog + new Appendix E for spec details.
 
+**v2.9 execution reality (2026-04-23):** Specs 1.1–1.8 have shipped, and authoring Spec 1.9b's brief surfaced divergences from the original spec bodies (test infrastructure shape, Liquibase timestamp handling, BCrypt seeding pattern, components/ui/ vs components/common/, 1.9b-before-1.9 ordering, AuthModal timezone re-home from 1.5 to 1.9). **Trust the master plan's "Phase 1 Execution Reality Addendum" (right after "How to Use This Document") over any older spec body text for Specs 1.1–1.9b.** The tracker below is the canonical ✅/⬜ status; Eric updates it manually after each spec ships.
+
 Specs execute in phase order (0 → 0.5 → 1 → 2 → 2.5 → 3 → ... → 16).
 Within each phase, specs are sequential — each spec's prerequisites are the specs before it.
 
@@ -19,30 +21,30 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 
 | #   | Spec | Title                                          | Size | Risk | Status |
 | --- | ---- | ---------------------------------------------- | ---- | ---- | ------ |
-| 2   | 0.5  | Convert usePrayerReactions to a Reactive Store | S    | Low  | ⬜     |
+| 2   | 0.5  | Convert usePrayerReactions to a Reactive Store | S    | Low  | ✅     |
 
 ## Phase 1 — Backend Foundation (30 specs)
 
 | #   | Spec  | Title                                          | Size | Risk     | Status |
 | --- | ----- | ---------------------------------------------- | ---- | -------- | ------ |
-| 3   | 1.1   | Audit and Rename Backend Skeleton              | L    | Medium   | ⬜     |
-| 4   | 1.2   | PostgreSQL via Docker Compose                  | S    | Low      | ⬜     |
-| 5   | 1.3   | Liquibase Integration and First Changeset      | M    | Low      | ⬜     |
-| 6   | 1.3b  | Users Table Timezone Column                    | S    | Low      | ⬜     |
-| 7   | 1.4   | Spring Security and JWT Setup                  | L    | Med-High | ⬜     |
-| 8   | 1.5   | Auth Endpoints (Register, Login, Logout)       | L    | High     | ⬜     |
+| 3   | 1.1   | Audit and Rename Backend Skeleton              | L    | Medium   | ✅     |
+| 4   | 1.2   | PostgreSQL via Docker Compose                  | S    | Low      | ✅     |
+| 5   | 1.3   | Liquibase Integration and First Changeset      | M    | Low      | ✅     |
+| 6   | 1.3b  | Users Table Timezone Column                    | S    | Low      | ✅     |
+| 7   | 1.4   | Spring Security and JWT Setup                  | L    | Med-High | ✅     |
+| 8   | 1.5   | Auth Endpoints (Register, Login, Logout)       | L    | High     | ✅     |
 | 9   | 1.5b  | Password Reset Flow                            | L    | High     | ⬜     |
 | 10  | 1.5c  | Change Password Endpoint                       | S    | Low      | ⬜     |
 | 11  | 1.5d  | Email Verification Flow                        | L    | Medium   | ⬜     |
 | 12  | 1.5e  | Change Email with Re-Verification              | M    | Medium   | ⬜     |
 | 13  | 1.5f  | Account Lockout & Brute Force Protection       | M    | Medium   | ⬜     |
 | 14  | 1.5g  | Session Invalidation & Logout-All-Devices      | M    | Medium   | ⬜     |
-| 15  | 1.6   | User Me Endpoint                               | S    | Low      | ⬜     |
-| 16  | 1.7   | Testcontainers Integration Test Infrastructure | M    | Low      | ⬜     |
-| 17  | 1.8   | Dev Seed Data                                  | S    | Low      | ⬜     |
-| 18  | 1.9   | Frontend AuthContext JWT Migration             | L    | High     | ⬜     |
-| 19  | 1.9b  | Error & Loading State Design System            | M    | Low      | ⬜     |
-| 20  | 1.10  | Phase 1 Cutover and End-to-End Test            | M    | Medium   | ⬜     |
+| 15  | 1.6   | User Me Endpoint                               | S    | Low      | ✅     |
+| 16  | 1.7   | Testcontainers Integration Test Infrastructure | M    | Low      | ✅     |
+| 17  | 1.8   | Dev Seed Data                                  | S    | Low      | ✅     |
+| 18  | 1.9   | Frontend AuthContext JWT Migration             | L    | High     | ✅     |
+| 19  | 1.9b  | Error & Loading State Design System            | M    | Low      | ✅     |
+| 20  | 1.10  | Phase 1 Cutover and End-to-End Test            | M    | Medium   | ✅     |
 | 21  | 1.10b | Deployment Target Decision Document            | S    | Low      | ⬜     |
 | 22  | 1.10d | Production Monitoring Foundation               | M    | Low      | ⬜     |
 | 23  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ⬜     |

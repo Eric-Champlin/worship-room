@@ -126,4 +126,104 @@ describe('Button', () => {
     expect(btn.className).toContain('focus-visible:ring-2')
     expect(btn.className).toContain('focus-visible:ring-primary')
   })
+
+  describe('isLoading prop', () => {
+    it('sets aria-busy and aria-disabled when loading', () => {
+      render(<Button isLoading>Submit</Button>)
+      const btn = screen.getByRole('button')
+      expect(btn).toHaveAttribute('aria-busy', 'true')
+      expect(btn).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    it('does not set aria-busy when not loading', () => {
+      render(<Button>Submit</Button>)
+      const btn = screen.getByRole('button')
+      expect(btn).not.toHaveAttribute('aria-busy')
+      expect(btn).not.toHaveAttribute('aria-disabled')
+    })
+
+    it('disables the button so clicks do not fire', () => {
+      const onClick = vi.fn()
+      render(
+        <Button isLoading onClick={onClick}>
+          Submit
+        </Button>,
+      )
+      const btn = screen.getByRole('button')
+      expect(btn).toBeDisabled()
+      fireEvent.click(btn)
+      expect(onClick).not.toHaveBeenCalled()
+    })
+
+    it('renders an embedded LoadingSpinner with the "Loading" sr-only label', () => {
+      render(<Button isLoading>Submit</Button>)
+      expect(screen.getByText('Loading')).toBeInTheDocument()
+    })
+
+    it('hides the children visually while keeping them in the DOM for width stability', () => {
+      render(<Button isLoading>Save Entry</Button>)
+      const text = screen.getByText('Save Entry')
+      expect(text).toBeInTheDocument()
+      const wrapper = text.closest('span')
+      expect(wrapper?.className).toContain('opacity-0')
+    })
+
+    it('does not hide children when not loading', () => {
+      render(<Button>Save Entry</Button>)
+      const btn = screen.getByRole('button')
+      expect(btn).toHaveTextContent('Save Entry')
+      expect(btn.className).not.toContain('opacity-0')
+      // When isLoading is absent, the button does not wrap its children in a positioning span.
+      expect(btn.querySelector('span[aria-hidden="true"]')).toBeNull()
+    })
+
+    it('sizes the spinner by the button size prop', () => {
+      const { container, rerender } = render(
+        <Button isLoading size="sm">
+          A
+        </Button>,
+      )
+      expect(container.querySelector('svg')).toHaveAttribute('width', '16')
+
+      rerender(
+        <Button isLoading size="md">
+          A
+        </Button>,
+      )
+      expect(container.querySelector('svg')).toHaveAttribute('width', '18')
+
+      rerender(
+        <Button isLoading size="lg">
+          A
+        </Button>,
+      )
+      expect(container.querySelector('svg')).toHaveAttribute('width', '20')
+    })
+
+    it('does not warn in dev when isLoading is used on a <button>', () => {
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      render(<Button isLoading>Submit</Button>)
+      expect(spy).not.toHaveBeenCalled()
+      spy.mockRestore()
+    })
+
+    it('warns in dev when asChild + isLoading are combined and falls back to asChild rendering', () => {
+      const spy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      render(
+        <Button asChild isLoading>
+          <a href="/x">Go</a>
+        </Button>,
+      )
+      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledWith(
+        expect.stringContaining('isLoading is ignored when asChild is true'),
+      )
+      // Fall-back behavior: child renders as a normal anchor — no spinner, no aria-busy,
+      // no opacity wrapper. The warning is the only signal; isLoading is a no-op.
+      const link = screen.getByRole('link', { name: 'Go' })
+      expect(link).not.toHaveAttribute('aria-busy')
+      expect(screen.queryByText('Loading')).not.toBeInTheDocument()
+      spy.mockRestore()
+    })
+  })
 })

@@ -8,16 +8,37 @@ import {
   type Ref,
 } from 'react'
 import { cn } from '@/lib/utils'
+import { LoadingSpinner } from './LoadingSpinner'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'light'
   size?: 'sm' | 'md' | 'lg'
   /** When true, render merged styles onto the single child element instead of a <button>. */
   asChild?: boolean
+  /** When true, show an inline spinner, disable interaction, and announce busy state. Ignored when `asChild` is true. */
+  isLoading?: boolean
+}
+
+const SPINNER_SIZE_BY_BUTTON_SIZE: Record<NonNullable<ButtonProps['size']>, number> = {
+  sm: 16,
+  md: 18,
+  lg: 20,
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', asChild = false, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = 'primary',
+      size = 'md',
+      asChild = false,
+      isLoading = false,
+      disabled,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const merged = cn(
       'inline-flex items-center justify-center font-medium transition-[colors,transform] duration-fast motion-reduce:transition-none',
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
@@ -41,6 +62,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     )
 
     if (asChild) {
+      if (isLoading && typeof console !== 'undefined' && import.meta.env?.DEV) {
+        console.warn(
+          '[Button] isLoading is ignored when asChild is true — loading-state layout assumptions require a <button> host element.',
+        )
+      }
       const child = Children.only(children)
       if (!isValidElement(child)) {
         throw new Error('Button asChild requires a single valid React element')
@@ -53,8 +79,31 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       } as Partial<{ className?: string; ref?: Ref<unknown> }>)
     }
 
+    if (isLoading) {
+      return (
+        <button
+          ref={ref}
+          className={cn(merged, 'relative')}
+          disabled
+          aria-busy
+          aria-disabled
+          {...props}
+        >
+          <span
+            className="inline-flex items-center justify-center gap-2 opacity-0"
+            aria-hidden="true"
+          >
+            {children}
+          </span>
+          <span className="absolute inset-0 flex items-center justify-center">
+            <LoadingSpinner size={SPINNER_SIZE_BY_BUTTON_SIZE[size]} />
+          </span>
+        </button>
+      )
+    }
+
     return (
-      <button ref={ref} className={merged} {...props}>
+      <button ref={ref} className={merged} disabled={disabled} {...props}>
         {children}
       </button>
     )

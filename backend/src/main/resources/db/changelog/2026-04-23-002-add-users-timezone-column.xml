@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 1.3b — timezone column for Phase 6+ consumers
+       (Night Mode, 3am Watch, Sunday Service Sync, liturgical theming,
+       timezone-aware grace reset). DEFAULT 'UTC' is load-bearing: any
+       existing rows must satisfy NOT NULL at migration time. PostgreSQL 11+
+       handles ADD COLUMN NOT NULL DEFAULT <constant> as metadata-only —
+       no row rewrite, no lock escalation. See `.claude/rules/05-database.md`
+       § Canonical Table Registry — Phase 1 entry. -->
+  <changeSet id="2026-04-23-002-add-users-timezone-column" author="worship-room">
+
+    <addColumn tableName="users">
+      <column name="timezone" type="VARCHAR(50)" defaultValue="UTC">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+
+    <rollback>
+      <dropColumn tableName="users" columnName="timezone"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

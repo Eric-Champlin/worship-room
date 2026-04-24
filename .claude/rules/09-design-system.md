@@ -839,25 +839,129 @@ The following patterns have been replaced by Round 3 / Daily Hub Round 3 / Bible
 
 ---
 
-## Error UX Tier System
+## Error, Loading, and Empty States
 
-When handling errors in UI code, choose the appropriate tier based on user impact:
+This section is the single authoritative reference for every error, loading, and empty state across the app. Future spec authors should open this section and be able to pick the right component for any UI state without reading source files. Introduced by Spec 1.9b (Forums Wave, 2026-04-23) — replaced and expanded the prior "Error UX Tier System" section.
 
-**Tier 1 — Inline error state with retry (for primary actions):**
-Use when the error affects a core user action the user is actively trying to complete. The error state should replace the failed UI region with a clear explanation and a "Try again" button. Example: AI Explain/Reflect panels. The retry button should re-attempt the same operation without losing user context.
+**Core principle:** A user who sees a clear error message is better served than one who sees silent failure. Four states, each with its own component and its own copy treatment. Empty ≠ zero ≠ loading.
 
-**Tier 2 — Fallback UI with alternative (for secondary content):**
-Use when the error affects a secondary feature but the user has a way to continue. The fallback should acknowledge the failure briefly and point at the alternative. Example: Spotify embed falls back to a "Listen on Spotify" link. Map tile failure falls back to the list view.
+### Component-State Matrix
 
-**Tier 3 — Toast notification (for background operations):**
-Use when the error affects a background operation that the user initiated but isn't actively watching. The toast should explain briefly and auto-dismiss after a few seconds. Don't use for errors during primary actions — those need Tier 1.
+Canonical primitive per feature area × UI state. "GAP" means no standardized primitive exists today — the first consuming spec that needs it fills the gap following the conventions in this section.
 
-**Tier 4 — Silent fallback (for non-essential features):**
-Use when the feature is truly non-essential and the error is expected/common. Example: localStorage quota exceeded during analytics write. The code should catch and swallow silently, but add a comment explaining why.
+| Feature area | Loading | Error | Empty | Success |
+|---|---|---|---|---|
+| **Auth forms** (`/register`, AuthModal) | `RouteLoadingFallback` + `FormField` + `<Button isLoading>` | `FormField` (field) + `<FormError>` (form-level) | N/A | `<Toast type="success">` |
+| **Navbar / App shell** | `<Suspense fallback>` | `ErrorBoundary` + `ChunkErrorBoundary` | N/A | N/A |
+| **Dashboard** (`/`) | `DashboardSkeleton` | `RouteErrorBoundary` | `FeatureEmptyState` (new user widgets) | Widgets render in place |
+| **Daily Hub** (`/daily`) | `DailyHubSkeleton` | `RouteErrorBoundary` | `FeatureEmptyState` in sub-states | `<Toast type="success">` |
+| **Profile** (`/profile/:userId`) | `ProfileSkeleton` | `RouteErrorBoundary` | `FeatureEmptyState` | In-page data |
+| **Prayer Wall** (`/prayer-wall`) | `PrayerWallSkeleton` | `RouteErrorBoundary` (Phase 3 async GAP — see "Deferred primitives") | `FeatureEmptyState` | `<Toast type="success">` on submit |
+| **Bible Reader** (`/bible/:book/:chapter`) | `BibleReaderSkeleton` | `ChunkErrorBoundary` + inline AI-panel error states | N/A (Bible always has content) | Verse content renders |
+| **Composer** (journal/prayer) | `<Button isLoading>` | `FormField` (field) + `<FormError>` (form-level) + `CrisisBanner` (inline crisis) | N/A | `<Toast type="success">` + draft clear |
+| **Friends** (`/friends`) | `FriendsSkeleton` | `RouteErrorBoundary` | `FeatureEmptyState` | In-page |
+| **Insights** (`/insights`) | `InsightsSkeleton` | `<ChartFallback>` (chart-level, wrapped by `ErrorBoundary fallback`) + `RouteErrorBoundary` (page-level) | `FeatureEmptyState` (sparse data) | Chart renders |
+| **Settings** (`/settings`) | `SettingsSkeleton` | `RouteErrorBoundary` | N/A | `<Toast type="success">` |
+| **Admin** (Phase 10 future) | GAP | GAP | GAP | GAP — deferred to Phase 10 |
 
-**When in doubt, escalate tiers rather than downgrade.** A user who sees a clear error message is better served than one who sees silent failure.
+### Decision Tree: Which component for which state?
 
-**Avoid:** Logging to console only without user-visible feedback for user-initiated actions. Users don't read the console.
+The prior 4-tier framing (inline-retry / fallback-alternative / toast / silent) from the pre-1.9b rule is preserved as the *intent* behind this decision tree — when in doubt, escalate the tier.
+
+**Loading?**
+1. **First choice — skeleton.** Content-shaped skeleton is the canonical Worship Room loading treatment. Use the matching page skeleton (`DashboardSkeleton`, `DailyHubSkeleton`, `PrayerWallSkeleton`, `BibleReaderSkeleton`, etc.) on the route-level `<Suspense fallback>`. For in-page sub-sections, compose the atomic primitives (`SkeletonBlock`, `SkeletonCard`, `SkeletonCircle`, `SkeletonText`) within an `aria-busy="true"` + sr-only "Loading" wrapper.
+2. **Button-internal — `<Button isLoading>`.** Submit buttons and other primary CTAs use the `isLoading` prop, which shows an inline spinner, sets `aria-busy`/`aria-disabled`, and preserves button width so layout does not jump on state change.
+3. **Standalone spinner — `<LoadingSpinner>`.** Use only where a skeleton is infeasible (tiny inline indicator, modal content while fetching, button interior). Has `role="status"` and a sr-only label ("Loading" default, override for specific contexts like "Saving your prayer"). Never use a standalone spinner when a skeleton would work.
+
+**Error?**
+1. **Render crash in a subtree** → wrap in an error boundary. `ErrorBoundary` for generic subtrees, `RouteErrorBoundary` for top-level routes (wraps a `Layout`), `ChunkErrorBoundary` for dynamic-import failures only (propagates non-chunk errors to the outer boundary). Error-boundary *functional enhancements* (Sentry integration, retry logic) are Spec 16.2b's territory; this section governs copy + a11y only.
+2. **Form submission failed (form-level)** → `<FormError>` above the form. Defaults to `severity="error"` with `role="alert"` + `aria-live="assertive"`. Use `severity="warning"` (`role="alert"` + `aria-live="polite"`) for non-critical warnings, `severity="info"` (`role="status"` + `aria-live="polite"`) for passive notices. Caller supplies the message via children — the component is structure + a11y, not copy.
+3. **Per-field validation** → `<FormField error="…">`. The field-level `error` prop wires `aria-invalid="true"`, links the message via `aria-describedby`, and renders `role="alert"` on the error paragraph. Focus-move-to-invalid-field on submission failure is the consuming form's responsibility (see Accessibility Checklist below).
+4. **Chart failed to render** → `<ChartFallback>` inside `<ErrorBoundary fallback={…}>`. Used by the 4 Insights charts today. Component has `role="status"` + `aria-live="polite"` (not `assertive` — a fallback is a lost-content state, not an interrupt).
+5. **Background operation failed** (not the user's foreground action) → `<Toast type="error">`. Auto-dismisses; don't use for primary-action failures — those need `<FormError>` or inline error.
+6. **Page-level async-data fetch failed** (first new in Phase 3) → `PageError.tsx` does not exist yet. The first Phase 3 migration spec that needs it creates the component in `ui/` following the conventions here: `role="alert"`, blameless copy (defaults: headline "We couldn't load this page", body "Try reloading. Your other work is safe.", button "Reload"), action button plus optional secondary "Go Home". See `_specs/forums/spec-1-9b.md` § "Copy Deck" for the default strings.
+7. **Non-essential side effect failed** (localStorage quota, analytics write, etc.) → silent catch with an inline comment documenting *why* the failure is safe to swallow. Never log to console without user-visible feedback for user-initiated actions.
+
+**Empty?**
+1. **Canonical primitive — `<FeatureEmptyState>`.** Icon + heading + description + optional CTA. Used on Prayer Wall, My Bible, Insights, Friends. Any new empty state uses this component.
+2. **Empty ≠ zero ≠ loading.**
+   - *Empty* = "legitimately nothing here, and that's fine" ("You haven't bookmarked any prayers yet.")
+   - *Zero* = "should be something but filter/search turned up nothing" ("No results for 'grace'.")
+   - *Loading* = "fetching, answer unknown" — use a skeleton.
+   Each gets its own copy treatment; do not reuse empty copy for zero state or vice versa.
+
+**Success?**
+1. **Action feedback** → `<Toast type="success">` (top-right, 6s auto-dismiss). Use for saves, submissions, copied-to-clipboard, and other post-action confirmations.
+2. **Atmospheric / reflective notice** → `<WhisperToast>` (bottom-center, italic serif, quiet tone). Used by MidnightVerse and useGratitudeCallback. Not a replacement for Toast — they coexist by design. Toast = action feedback, Whisper = atmospheric.
+3. **Passive state change** — reflect it directly in the UI without a toast.
+
+### Copy Guidelines
+
+Paired good/bad examples drawn from common Forums Wave surfaces. Every user-facing string passes the [Anti-Pressure Copy Checklist](#anti-pressure-checklist-references) below.
+
+| Surface | ✅ Good | ❌ Bad |
+|---|---|---|
+| Form submission failed | "We couldn't save that. Please check the fields below." | "Oops! Something went wrong!" |
+| Page-level load failure | "We couldn't load this page. Your other work is safe." | "Error loading page. Please try again NOW." |
+| Feed empty (new user) | "You haven't bookmarked any prayers yet." | "You haven't saved a single prayer yet!" |
+| Search zero results | "No results for 'grace'. Try a broader term." | "Nothing found!!!" |
+| Post failed (crisis-adjacent) | "We couldn't post that. Would you like to keep a draft?" | "Failed to send. Your message was lost." |
+| Profile load failed | "We couldn't load this profile right now." | "This user could not be found. Connection error." |
+| Friends-empty | "Faith grows stronger together." | "You have no friends yet!" |
+| Loading | Skeleton shape, no copy | "Loading…" spinner by default on content regions |
+
+**Rules:**
+- **Sentence case, complete sentences, period terminators.** "We couldn't finish that." not "WE COULDN'T FINISH THAT" or "we couldn't finish that" or "We couldn't finish that!"
+- **Blameless framing.** "We couldn't reach our server" not "Your connection failed". Even when user input IS the cause, phrase it as the field being invalid, not the user being wrong.
+- **No exclamation points near vulnerability.** Error, empty, and loading states never use exclamation points. Celebration toasts may.
+- **Feature-specific copy lives in the consuming spec's Copy Deck, not here.** This section teaches patterns and shows anchor examples. Consuming specs own their strings.
+- **Crisis-adjacent features (Prayer Wall, Journal, Meditate) need extra copy review.** See Universal Rule 13 and `01-ai-safety.md`. The general pattern lives here; crisis-specific strings live in per-feature specs.
+
+### Accessibility Checklist
+
+Every new-or-modified error/loading/empty state must pass:
+
+- [ ] **Error state** — `role="alert"` + `aria-live="assertive"` for user-action-required (form-submission failure, session expired). `role="alert"` + `aria-live="polite"` for warnings. `role="status"` + `aria-live="polite"` for lost-content fallbacks (ChartFallback) and non-critical notices.
+- [ ] **Loading state** — `aria-busy="true"` on the region; sr-only "Loading" announcer. Skeletons already do this; new loading regions must match.
+- [ ] **Empty state** — semantic `<h3>` for heading; `FeatureEmptyState` is the canonical primitive; decorative icons carry `aria-hidden="true"`.
+- [ ] **Form field error** — `<FormField error="…">` handles the wiring automatically (`aria-invalid`, `aria-describedby`, `role="alert"`).
+- [ ] **Form-level error** — `<FormError>` handles role/aria-live automatically by severity. Do not wrap `FormError` in another alert.
+- [ ] **Focus management on form-submit error** — consuming form moves focus to either (a) the `<FormError>` banner or (b) the first invalid field. Both are correct; choose the one that best fits the form's flow. `FormField` itself does NOT move focus — it's a leaf component, and form-level focus is the container's job. AuthModal (Spec 1.9) is the canonical first consumer.
+- [ ] **`prefers-reduced-motion`** — global safety net in `frontend/src/styles/animations.css` disables animations when the OS flag is on. Shimmer and spinner fall back to static opacity-60 via `motion-safe:animate-spin` / `motion-safe:animate-shimmer` + `motion-reduce:opacity-60`. See "Reduced-Motion Safety Net" section above.
+- [ ] **WCAG AA contrast** — all severity accent colors meet 4.5:1 for normal text (`text-red-100` on `bg-red-950/30` passes on `bg-hero-bg`). Severity palette uses muted tonal colors — NEVER pure `bg-red-500` or `#FF0000`.
+- [ ] **Touch targets** — 44×44 px minimum for dismiss buttons and action buttons.
+
+### Anti-Pressure Checklist references
+
+Every new and modified string in this subsystem must pass the 6-point Anti-Pressure Copy Checklist (master plan Universal Rule 12 + Spec 1.9b):
+
+- [ ] **No comparison** — no "unlike other users", "you're behind", "X people already did this".
+- [ ] **No urgency** — no "NOW", "today only", "hurry", "before it's too late".
+- [ ] **No exclamation points near vulnerability** — "Something went wrong." (period), not "Something went wrong!".
+- [ ] **No therapy-app jargon** — no "take a breath", "center yourself", "be kind to yourself" in error/loading copy.
+- [ ] **No streak-as-shame or missed-X framing** — any copy about absence of activity is warm or neutral, never shaming.
+- [ ] **No false scarcity** — no "limited time", "only N left".
+
+Plus: **blameless framing**, **empty ≠ zero ≠ loading**, **sentence case + complete sentences + period terminators**.
+
+### Severity color system
+
+FormError and similar error-display components use a muted tonal palette — never emergency-red. Worship Room vulnerability content would feel assaulted by a pure `#FF0000`.
+
+| Severity | Border | Background | Text | Icon |
+|---|---|---|---|---|
+| `error` | `border-red-400/30` | `bg-red-950/30` | `text-red-100` | `AlertCircle` (lucide-react) |
+| `warning` | `border-amber-400/30` | `bg-amber-950/30` | `text-amber-100` | `AlertTriangle` |
+| `info` | `border-sky-400/30` | `bg-sky-950/30` | `text-sky-100` | `Info` |
+
+### Cross-spec guidance and deferred primitives
+
+- **Feature-specific empty/error/loading copy** (e.g., "No prayers yet" on Prayer Wall) lives in the consuming spec's Copy Deck, not in this rule file. This section teaches patterns and provides anchor examples.
+- **Crisis-adjacent features** (Prayer Wall, Journal, Meditate) need extra copy review per Universal Rule 13. The general pattern is here; crisis-specific strings live in per-feature specs and `01-ai-safety.md`.
+- **`PageError.tsx` is deferred.** The first Phase 3 migration spec that needs a page-level async-data-fetch error (likely the Prayer Wall feed backend migration) creates it in `ui/` following the conventions above.
+- **`InlineError.tsx` is intentionally NOT created.** 28 ad-hoc inline-error call sites exist in the app, but most fit `<FormField>` or a simple `<p role="alert">` already. Creating a redundant primitive would add a layer without clarity. When migrating those sites in future specs, default to `FormField` for form contexts or inline `<p role="alert">` for non-form text.
+- **Hardcoded ms values** in `ScrollRow` (300), `TooltipCallout` (300/200/8000), `UnsavedChangesModal` (150), `WhisperToast` (300/100) are Rule 10 technical debt. Not migrated in this spec per "Design tokens only — no new tokens." Follow-up spec tracks.
+- **`Card.tsx` is deprecated** (light-theme `bg-white`, pre-Round-3). Zero documented call sites. Do not use in new components. Removed in a future dedicated cleanup spec.
 
 ---
 

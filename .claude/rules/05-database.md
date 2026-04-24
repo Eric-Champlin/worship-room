@@ -102,6 +102,50 @@ CHECK (post_type IN ('prayer_request','testimony','question','discussion','encou
 CHECK (status IN ('pending','reviewing','closed_action','closed_no_action'))
 ```
 
+## Liquibase Seed Data & Value Patterns
+
+**Source of these patterns:** Phase 1 execution (Spec 1.8). Also canonicalized in master plan v2.9 addendum, items 3 and 4. Trust this rule file over any older changeset that predates these patterns.
+
+### Timezoned timestamps — use `valueComputed`, not `valueDate`
+
+Liquibase's `ISODateFormat` does NOT parse the ISO-8601 Z suffix. `valueDate="2026-01-15T10:00:00Z"` produces `ERROR: trailing junk after numeric literal` at migration time. Dropping the Z "works" but silently shifts the stored value by the developer's JVM default timezone (observed +6h drift during Spec 1.8 execution).
+
+**Canonical pattern for `TIMESTAMP WITH TIME ZONE` columns:**
+
+```xml
+<column name="created_at"
+        valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'" />
+```
+
+- Space between date and time, not T.
+- Explicit `+00` UTC offset, not Z.
+- `TIMESTAMP WITH TIME ZONE` quoted-literal syntax passes straight through to Postgres as a typed literal, independent of JVM timezone.
+
+**Never use `valueDate` with a Z suffix.** Applies to every seed-data changeset that populates a `TIMESTAMP WITH TIME ZONE` column.
+
+### BCrypt hashes for seed users
+
+BCrypt salts are random — no stable hash exists at planning time. Never embed placeholder hashes in seed-data changesets (the resulting rows would fail login because the hash doesn't match the plaintext). This is DISTINCT from the `DUMMY_HASH` constant in `AuthService` — that constant exists solely to equalize the login endpoint's response time for non-existent emails (anti-enumeration). Seed-data hashes must be real.
+
+**Canonical workflow (post-Spec-1.8):**
+
+1. During planning, add a throwaway `BCryptHashGenerator` test class annotated `@SpringBootTest`, with a `@Test` method that autowires `BCryptPasswordEncoder` and prints `encoder.encode("WorshipRoomDev2026!")` once per seed user.
+2. Run the generator once. Copy each printed hash into the Liquibase changeset wrapped in a CDATA section. The CDATA wrapper protects the dollar-sign delimiters in the BCrypt hash from Liquibase's variable substitution:
+   ```xml
+   <column name="password_hash"><![CDATA[PASTE_BCRYPT_HASH_HERE]]></column>
+   ```
+   A real BCrypt hash looks like: 60 characters starting with the algorithm prefix (2a, 2b, or 2y), the cost factor (e.g., 10), a 22-character salt, and a 31-character hash, all delimited by dollar signs.
+3. **Delete the generator** in the next planning step. It has served its purpose and otherwise pollutes the test suite.
+4. After execution, verify with a grep for the algorithm+cost prefix pattern (e.g., count lines matching the BCrypt prefix `2a` at cost `10`) — count must match the seed user count.
+
+### Test-profile context override (no `application-test.properties`)
+
+There is NO `application-test.properties` file in the repo. Tests inherit the dev profile by default via `spring.profiles.default=dev` in `application.properties`. If you tag a dev-seed changeset `context="dev"` and don't override the contexts for tests, dev seed users leak into every test run — breaking `userRepository.deleteAll()` and other assumptions silently.
+
+**Canonical mitigation (post-Spec-1.8):** `AbstractIntegrationTest` and `AbstractDataJpaTest` (both in `backend/src/test/java/com/worshiproom/support/`) each register a `@DynamicPropertySource` method that pins `spring.liquibase.contexts=test` for test runs. Seed-data changesets are tagged `context="dev"`; test-only fixture changesets are tagged `context="test"`. Production runs with no context filter and therefore picks up neither.
+
+If a future spec creates `application-test.properties`, the `@DynamicPropertySource` override in the base classes can be removed; until that happens, the base-class override is the canonical mechanism. See `06-testing.md` § "Testcontainers Setup Pattern" for the full base-class shape.
+
 ## Data Retention & Deletion (Spec 10.11)
 
 - **Account deletion flow:** 30-day grace period, then anonymization

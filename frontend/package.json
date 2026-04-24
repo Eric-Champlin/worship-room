@@ -13,6 +13,7 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "test:watch": "vitest",
     "og-generate": "node scripts/generate-og-cards.mjs",
     "og-check": "node scripts/check-og-sizes.mjs",

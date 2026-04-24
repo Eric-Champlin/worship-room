@@ -160,7 +160,7 @@ export function SiteFooter() {
         </div>
 
         {/* Disclaimer */}
-        <p className="mx-auto mt-4 max-w-2xl text-center text-[11px] text-subtle-gray">
+        <p className="mx-auto mt-4 max-w-2xl text-center text-[11px] text-white/60">
           Worship Room provides spiritual encouragement and support. It is not a
           substitute for professional medical, psychological, or psychiatric
           care. If you are in crisis, please call 988 (Suicide &amp; Crisis
@@ -168,7 +168,7 @@ export function SiteFooter() {
         </p>
 
         {/* Copyright */}
-        <p className="mt-4 text-center text-xs text-subtle-gray">
+        <p className="mt-4 text-center text-xs text-white/60">
           &copy; {new Date().getFullYear()} Worship Room. All rights reserved.
         </p>
       </div>

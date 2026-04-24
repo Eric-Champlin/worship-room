@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
+import { AuthProvider } from '@/contexts/AuthContext'
 import { DashboardPreview } from '../DashboardPreview'
 import { PREVIEW_CARDS, getHeatmapColor, PRACTICES, FRIENDS } from '../dashboard-preview-data'
 
@@ -17,11 +18,13 @@ vi.mock('@/hooks/useScrollReveal', () => ({
 function renderDashboardPreview() {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <ToastProvider>
-        <AuthModalProvider>
-          <DashboardPreview />
-        </AuthModalProvider>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <AuthModalProvider>
+            <DashboardPreview />
+          </AuthModalProvider>
+        </ToastProvider>
+      </AuthProvider>
     </MemoryRouter>
   )
 }

@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerWall } from '@/pages/PrayerWall'
+import { _resetForTesting as resetReactionsStore } from '@/lib/prayer-wall/reactionsStore'
 
 const mockUser = { id: 'user-sim', name: 'Eric' }
 
@@ -95,6 +96,8 @@ function renderPage() {
 
 describe('Pray Ceremony', { timeout: 15000 }, () => {
   beforeEach(() => {
+    localStorage.clear()
+    resetReactionsStore()
     vi.useFakeTimers()
   })
 

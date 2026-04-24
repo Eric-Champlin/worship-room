@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 1.8 — dev-only seed users.
+       context="dev" ensures this changeset runs ONLY when spring.liquibase.contexts=dev
+       (local development). Tests override contexts to "test" in AbstractIntegrationTest /
+       AbstractDataJpaTest; prod sets contexts="production". In both non-dev paths, this
+       changeset is skipped.
+
+       Password hash is BCrypt strength 10 of plaintext "WorshipRoomDev2026!" (documented
+       in backend/README.md § Dev seed users). Wrapped in CDATA per master plan Decision 2
+       to prevent Liquibase from interpreting '$' as a template delimiter.
+
+       UUIDs are deterministic (00000000-0000-0000-0000-00000000000N) — visually distinct
+       from random UUIDs so seed rows are unambiguous in psql output and logs.
+
+       No rollback block. Reset path is `docker compose down -v`. -->
+
+  <changeSet id="2026-04-23-003-dev-seed-users" author="worship-room" context="dev">
+
+    <preConditions onFail="HALT">
+      <not>
+        <sqlCheck expectedResult="0">
+          SELECT COUNT(*) FROM information_schema.tables
+          WHERE table_schema='public' AND table_name='users'
+        </sqlCheck>
+      </not>
+    </preConditions>
+
+    <!-- User 1: Admin User — is_admin=true, first_last preference, America/Chicago -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000001"/>
+      <column name="email" value="admin@worshiproom.dev"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Admin"/>
+      <column name="last_name" value="User"/>
+      <column name="display_name_preference" value="first_last"/>
+      <column name="is_admin" valueBoolean="true"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- User 2: Sarah Johnson — first_only preference, with bio + favorite verse -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000002"/>
+      <column name="email" value="sarah@worshiproom.dev"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Sarah"/>
+      <column name="last_name" value="Johnson"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="Walking with the Lord one day at a time."/>
+      <column name="favorite_verse_reference" value="Philippians 4:13"/>
+      <column name="favorite_verse_text" value="I can do all things through him who strengthens me."/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/New_York"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- User 3: Bob Smith — first_last_initial preference, with avatar -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000003"/>
+      <column name="email" value="bob@worshiproom.dev"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Bob"/>
+      <column name="last_name" value="Smith"/>
+      <column name="display_name_preference" value="first_last_initial"/>
+      <column name="avatar_url" value="https://worshiproom.dev/avatars/bob.png"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Los_Angeles"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- User 4: Michael Martinez — custom preference "Mikey M." -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000004"/>
+      <column name="email" value="mikey@worshiproom.dev"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Michael"/>
+      <column name="last_name" value="Martinez"/>
+      <column name="display_name_preference" value="custom"/>
+      <column name="custom_display_name" value="Mikey M."/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="Europe/London"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- User 5: Sakura Tanaka — first_only, unverified email, Asia/Tokyo -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000005"/>
+      <column name="email" value="sakura@worshiproom.dev"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Sakura"/>
+      <column name="last_name" value="Tanaka"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="is_email_verified" valueBoolean="false"/>
+      <column name="timezone" value="Asia/Tokyo"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

@@ -12,7 +12,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.example</groupId>
+    <groupId>com.worshiproom</groupId>
     <artifactId>worship-room-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>worship-room-backend</name>
@@ -58,6 +58,31 @@
             <version>8.18.0</version>
         </dependency>
 
+        <!-- Spring Security (Spec 1.4) — auth filter chain, BCrypt encoder -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- JJWT 0.12.x (Spec 1.4) — JWT sign + parse -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Structured JSON logging encoder — used by logback-spring.xml -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -72,9 +97,76 @@
             <version>3.1.8</version>
         </dependency>
 
+        <!-- Spring Boot JDBC starter — brings spring-jdbc (EmbeddedDatabaseType, enables
+             DataSourceAutoConfiguration) + HikariCP connection pool. NO JPA/Hibernate; those
+             come with spring-boot-starter-data-jpa in Spec 1.3. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+        <!-- Spring Data JPA — Spec 1.5 (Forums Wave Phase 1) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- jackson-module-kotlin — required because google-genai 1.51.0 ships
+             META-INF/services/com.fasterxml.jackson.databind.Module referencing
+             com.fasterxml.jackson.module.kotlin.KotlinModule, but the class isn't
+             exposed (Kotlin is shaded into com.google.genai.shaded.kotlin.*).
+             Jackson's ServiceLoader throws ServiceConfigurationError when JPA
+             triggers module discovery during entityManagerFactory creation.
+             Adding the real module satisfies the service reference; the module
+             auto-registers but has no effect on our non-Kotlin POJOs. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
+
+        <!-- jackson-databind-nullable — PATCH partial-update support for Spec 1.6 UpdateUserRequest.
+             Distinguishes JSON "absent" (don't touch DB column) from "explicit null" (clear the column)
+             from "value present" (update the column). Without this, PATCH degenerates into PUT semantics. -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+
+        <!-- PostgreSQL JDBC driver — Spring Boot auto-resolves the driver class from the JDBC URL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <!-- Liquibase — schema migration via versioned XML changesets (Spec 1.3).
+             Spring Boot auto-configures via spring.liquibase.* properties in application.properties. -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers (Spec 1.3) — real PostgreSQL in integration tests per 06-testing.md
+             "never use H2" rule. Versions managed by Spring Boot BOM. -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

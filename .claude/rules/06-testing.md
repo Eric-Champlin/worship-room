@@ -82,6 +82,8 @@ class PostControllerIntegrationTest extends AbstractIntegrationTest {
 }
 ```
 
+Repository slice tests extend a sibling base class, `AbstractDataJpaTest`, which carries `@DataJpaTest` + `@AutoConfigureTestDatabase(replace = Replace.NONE)`. Both base classes share the same singleton PostgreSQL container via `TestContainers.POSTGRES` (started once per JVM run), so mixing integration tests and `@DataJpaTest` slice tests in the same suite incurs exactly one container start. Subclasses of either base may declare their own `@DynamicPropertySource` method (with a distinct name from the base's `registerBaseDatasourceProperties`) to register test-specific properties such as `jwt.secret` or `auth.rate-limit.*` — Spring aggregates across the inheritance hierarchy and both methods run, subclass values layered on top. The existing example above stays valid.
+
 **CRITICAL: Never use H2 for testing.** H2 lies about PostgreSQL behavior (different SQL dialect, different constraint enforcement, different type handling). Testcontainers with real PostgreSQL is the only acceptable approach.
 
 ### API Contract Test Pattern

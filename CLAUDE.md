@@ -170,6 +170,41 @@ Verify current state with `./mvnw test` (backend), `pnpm test` (frontend), `pnpm
 
 ---
 
+## Production Deployment (Railway)
+
+**Platform:** Railway Hobby plan, US-East region.
+**Projects:** Single Railway project named `worship-room` with three services — backend, postgres, frontend.
+**Dashboard:** https://railway.com/project/<project-id>
+**Runbook:** `_plans/forums/phase01-cutover-checklist.md`
+
+### URLs
+- Backend: https://<backend-service>.up.railway.app
+- Frontend: https://worshiproom.com (Railway-hosted or external — confirm at deploy time)
+- Health: https://<backend-service>.up.railway.app/actuator/health
+
+### CLI commands
+- `railway login` — one-time auth
+- `railway link` — link local checkout to the project
+- `railway logs --service backend --tail 200` — view recent backend logs
+- `railway variables --service backend` — inspect env vars
+- `railway connect postgres` — open a psql session to the prod DB (use sparingly)
+
+### Env vars (set in Railway Variables UI, never committed)
+- Backend: `SPRING_PROFILES_ACTIVE=prod`, `JWT_SECRET`, `JWT_EXPIRATION=3600`, `SERVER_PORT=$PORT`, optional `GEMINI_API_KEY`, `GOOGLE_MAPS_API_KEY`, `FCBH_API_KEY`
+- Frontend (if Railway-hosted): `VITE_API_BASE_URL=<backend-service-url>`
+- Auto-injected by Railway: `DATABASE_URL`, `PORT`
+
+### Redeploy / rollback
+- Redeploy latest: push to `main`, or `railway up` from a clean checkout
+- Rollback: Railway dashboard → service → Deployments → pick previous → Redeploy
+- See `_plans/forums/phase01-cutover-checklist.md` § 8 for full rollback scenarios
+
+### Playwright prod smoke
+- Run: `PLAYWRIGHT_BASE_URL=https://<frontend-url> pnpm test:e2e phase01-auth-roundtrip`
+- Cleanup: `railway connect postgres` → `DELETE FROM users WHERE email LIKE 'playwright-test+%';`
+
+---
+
 ## Build Approach
 
 ### Frontend Spec-Driven Workflow (pre-Forums-Wave features, Bible wave, visual polish)

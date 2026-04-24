@@ -16,13 +16,16 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => mockNavigate }
 })
 
-const mockLogin = vi.fn()
+const mockSimulateLegacyAuth = vi.fn()
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
     isAuthenticated: true,
+    isAuthResolving: false,
     user: { name: 'Eric', id: 'test-id' },
-    login: mockLogin,
+    login: vi.fn(),
+    register: vi.fn(),
     logout: vi.fn(),
+    simulateLegacyAuth: mockSimulateLegacyAuth,
   }),
 }))
 
@@ -132,7 +135,7 @@ describe('Screen 1 — Welcome', () => {
     await user.type(input, 'NewName')
     // Skip
     await user.click(screen.getByRole('button', { name: 'Skip for now' }))
-    expect(mockLogin).not.toHaveBeenCalled()
+    expect(mockSimulateLegacyAuth).not.toHaveBeenCalled()
     expect(localStorage.getItem('wr_settings')).toBeNull()
   })
 
@@ -460,7 +463,7 @@ describe('Screen 4 — Results & Launch', () => {
   it('"Start Your Journey" saves name to wr_user_name via login()', async () => {
     const user = await goToScreen4()
     await user.click(screen.getByRole('button', { name: 'Start Your Journey' }))
-    expect(mockLogin).toHaveBeenCalledWith('Eric')
+    expect(mockSimulateLegacyAuth).toHaveBeenCalledWith('Eric')
   })
 
   it('"Start Your Journey" saves avatar to wr_settings', async () => {
@@ -487,7 +490,7 @@ describe('Screen 4 — Results & Launch', () => {
   it('"Explore on your own" saves data and calls onComplete', async () => {
     const user = await goToScreen4()
     await user.click(screen.getByRole('button', { name: 'Explore on your own' }))
-    expect(mockLogin).toHaveBeenCalledWith('Eric')
+    expect(mockSimulateLegacyAuth).toHaveBeenCalledWith('Eric')
     expect(localStorage.getItem('wr_onboarding_complete')).toBe('true')
     expect(mockOnComplete).toHaveBeenCalledTimes(1)
   })
@@ -515,7 +518,7 @@ describe('Screen 4 — Results & Launch', () => {
   it('Skip on Screen 4 does NOT save name or avatar', async () => {
     const user = await goToScreen4()
     await user.click(screen.getByRole('button', { name: 'Skip for now' }))
-    expect(mockLogin).not.toHaveBeenCalled()
+    expect(mockSimulateLegacyAuth).not.toHaveBeenCalled()
     // Only wr_onboarding_complete should be set
     expect(localStorage.getItem('wr_onboarding_complete')).toBe('true')
     expect(mockOnComplete).toHaveBeenCalledTimes(1)
@@ -559,7 +562,7 @@ describe('Full Wizard Flow', () => {
     await user.click(screen.getByRole('button', { name: 'Start Your Journey' }))
 
     // Verify all data saved
-    expect(mockLogin).toHaveBeenCalledWith('Eric')
+    expect(mockSimulateLegacyAuth).toHaveBeenCalledWith('Eric')
     expect(localStorage.getItem('wr_onboarding_complete')).toBe('true')
     const settings = JSON.parse(localStorage.getItem('wr_settings')!)
     expect(settings.profile.avatarId).toBe('faith-cross')
@@ -572,7 +575,7 @@ describe('Full Wizard Flow', () => {
     await user.click(screen.getByRole('button', { name: 'Skip for now' }))
     expect(localStorage.getItem('wr_onboarding_complete')).toBe('true')
     expect(mockOnComplete).toHaveBeenCalledTimes(1)
-    expect(mockLogin).not.toHaveBeenCalled()
+    expect(mockSimulateLegacyAuth).not.toHaveBeenCalled()
   })
 
   it('skip mid-quiz does not save partial data', async () => {
@@ -596,7 +599,7 @@ describe('Full Wizard Flow', () => {
 
     // Skip
     await user.click(screen.getByRole('button', { name: 'Skip for now' }))
-    expect(mockLogin).not.toHaveBeenCalled()
+    expect(mockSimulateLegacyAuth).not.toHaveBeenCalled()
     expect(localStorage.getItem('wr_settings')).toBeNull()
     expect(localStorage.getItem('wr_onboarding_complete')).toBe('true')
   })
@@ -609,7 +612,7 @@ describe('Full Wizard Flow', () => {
     await user.type(input, 'NewName')
     await user.click(screen.getByRole('button', { name: 'Skip for now' }))
     // login() should NOT have been called (name not saved)
-    expect(mockLogin).not.toHaveBeenCalled()
+    expect(mockSimulateLegacyAuth).not.toHaveBeenCalled()
   })
 
   it('changing avatar on Screen 2, skipping, original avatar preserved', async () => {

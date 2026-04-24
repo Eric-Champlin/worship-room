@@ -12,11 +12,16 @@ When adding a new storage key, default to `wr_*` unless there is a specific reas
  
 ### Auth Keys (cleared on logout)
  
-| Key                 | Type        | Feature                                   |
-| ------------------- | ----------- | ----------------------------------------- |
-| `wr_auth_simulated` | "true"/null | Simulated auth toggle                     |
-| `wr_user_name`      | string      | Display name                              |
-| `wr_user_id`        | UUID        | User identifier (preserved across logout) |
+| Key                 | Type        | Feature                                                                                                                                                                                                                                                                                                                                             |
+| ------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wr_auth_simulated` | "true"/null | Legacy simulated-auth toggle (pre-JWT). Still read by `ListenTracker`, `useFaithPoints`, activity engine, and AuthContext's `readInitialState` fallback. Post-Spec-1.9, AuthContext writes it in two places: (a) `simulateLegacyAuth(name)` for WelcomeWizard mock onboarding, (b) `mirrorToLegacyKeys(user)` on real JWT login (transitional mirror).                                          |
+| `wr_user_name`      | string      | Display name. Post-Spec-1.9, mirrored to `user.displayName` for JWT-authed users until Phase 2 cutover removes the mirror.                                                                                                                                                                                                                         |
+| `wr_user_id`        | UUID        | User identifier (preserved across logout). Pre-1.9: client-generated via `crypto.randomUUID()`. Post-1.9: mirrored to the backend UUID on real login via `mirrorToLegacyKeys`. Data keyed on this value (e.g., `useFriends.getOrInitFriendsData(user.id)`) will appear orphaned when a user transitions from mock-mode to real auth — see Spec 1.9 Decision 19. |
+| `wr_jwt_token`      | string      | Bearer token for authenticated API calls (Spec 1.9). 1-hour expiry per backend Spec 1.4. Cleared on explicit logout and on any authenticated 401 response via the `wr:auth-invalidated` window event. **Single source of truth for the key name:** `frontend/src/lib/auth-storage.ts` — do not reference this string anywhere else.                   |
+
+**Legacy fallback ordering (Spec 1.9, Phase 1):** `readInitialState` in `AuthContext.tsx` checks keys in this order: (1) `wr_jwt_token` present → real JWT-backed mode (boot hydration fetches `/api/v1/users/me`); (2) `wr_auth_simulated === 'true'` → legacy mock mode (reads `wr_user_name`, `wr_user_id`); (3) unauthenticated. The legacy path is preserved for ~32 existing test files that seed auth via `localStorage.setItem('wr_auth_simulated', 'true')`. A future test-suite-migration spec will remove the legacy path.
+
+**Transitional mirror (Spec 1.9, removed in Phase 2 cutover):** AuthContext's `mirrorToLegacyKeys(user)` helper writes `wr_auth_simulated='true'`, `wr_user_name=user.displayName`, and `wr_user_id=user.id` on successful login, register auto-login, and boot hydration. Every call site is tagged with a `// Transitional — removed in Phase 2 cutover` comment so the Phase 2 activity-engine / friends / badges / ListenTracker migration can find and remove them via grep.
  
 ### Mood & Activity Tracking
  
@@ -191,7 +196,13 @@ Preference for verse highlighting during Bible audio playback. Managed by `front
 | `wr_challenge_progress`    | {challengeId: ChallengeProgress} | Challenge participation tracking |
 | `wr_challenge_reminders`   | string[] (challenge IDs)         | Challenge reminder preferences   |
 | `wr_challenge_nudge_shown` | string (today's date)            | Challenge nudge daily tracking   |
- 
+
+### Prayer Wall
+
+| Key                   | Type                              | Feature                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wr_prayer_reactions` | `Record<string, PrayerReaction>`  | Prayer Wall reactions — `isPraying` and `isBookmarked` per prayer. **Reactive store (Phase 0.5).** Module: `lib/prayer-wall/reactionsStore.ts`. Hook: `usePrayerReactions()` (Pattern A via `useSyncExternalStore`). Seeded from `getMockReactions()` on first load when storage is empty. In Phase 3 the localStorage adapter swaps for an API adapter without changing the hook surface. |
+
 ### AI Bible Chat
  
 | Key                | Type           | Feature                               |
@@ -314,6 +325,7 @@ Extracting standalone hooks for the Pattern B stores is a future refactoring opp
 | `wr_memorization_cards` | `lib/memorize/store.ts`                 | `useMemorizationStore()` hook (Pattern A)     | BB-45  |
 | `bible:streak`          | `lib/bible/streakStore.ts`              | `useStreakStore()` hook (Pattern A)            | BB-17  |
 | `bible:plans`           | `lib/bible/plansStore.ts`               | Inline `subscribe()` (Pattern B)              | BB-21  |
+| `wr_prayer_reactions`   | `lib/prayer-wall/reactionsStore.ts`     | `usePrayerReactions()` hook (Pattern A)       | Phase 0.5 |
  
 **Note on BB-46 echoes:** Echo dismissal persistence (`wr_echo_dismissals`) was considered but deferred. The current echo system uses a session-scoped `Set<string>` inside the `useEcho()` hook (`hooks/useEcho.ts`) — dismissed echoes reset on page reload. If persistent dismissals are needed, implement as a new feature spec with a proper reactive store.
  

@@ -2,7 +2,11 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { X, AlertCircle } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useAuth } from '@/hooks/useAuth'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
+import { Button } from '@/components/ui/Button'
+import { FormError } from '@/components/ui/FormError'
+import { AuthError, AUTH_ERROR_COPY, type AuthErrorCode } from '@/types/auth'
 
 const PASSWORD_MIN_LENGTH = 12
 
@@ -22,6 +26,16 @@ interface AuthModalProps {
   initialView?: 'login' | 'register'
 }
 
+/** Safe browser timezone capture — some privacy-aggressive environments throw or return empty. */
+function safeResolveTimezone(): string | undefined {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    return tz && tz.length > 0 ? tz : undefined
+  } catch {
+    return undefined
+  }
+}
+
 export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView = 'login' }: AuthModalProps) {
   const [view, setView] = useState<AuthView>(initialView)
   const [resetEmail, setResetEmail] = useState('')
@@ -39,8 +53,18 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitted, setSubmitted] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState<{ code: AuthErrorCode | 'UNKNOWN'; message: string } | null>(null)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const reducedMotion = useReducedMotion()
+  const { login, register } = useAuth()
+
+  const firstNameRef = useRef<HTMLInputElement>(null)
+  const lastNameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
+  const confirmPasswordRef = useRef<HTMLInputElement>(null)
+  const formErrorRef = useRef<HTMLDivElement>(null)
 
   const markTouched = useCallback((field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }))
@@ -90,27 +114,55 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
       setResetEmailError(null)
       setTouched({})
       setSubmitted(false)
+      setFormError(null)
+      setIsSubmitting(false)
     }
   }, [isOpen, initialView])
 
+  // Reset form-level error when switching between login / register views
+  useEffect(() => {
+    setFormError(null)
+  }, [view])
+
+  type InvalidField = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword'
+
+  const focusField = useCallback((field: InvalidField) => {
+    const refMap: Record<InvalidField, React.RefObject<HTMLInputElement>> = {
+      firstName: firstNameRef,
+      lastName: lastNameRef,
+      email: emailRef,
+      password: passwordRef,
+      confirmPassword: confirmPasswordRef,
+    }
+    refMap[field].current?.focus()
+  }, [])
+
+  const applyServerFieldErrors = useCallback((fieldErrors: Record<string, string>) => {
+    if (fieldErrors.email) setEmailError(fieldErrors.email)
+    if (fieldErrors.password) setPasswordError(fieldErrors.password)
+    if (fieldErrors.firstName) setFirstNameError(fieldErrors.firstName)
+    if (fieldErrors.lastName) setLastNameError(fieldErrors.lastName)
+  }, [])
+
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault()
       setSubmitted(true)
+      setFormError(null)
 
-      let hasError = false
+      const invalidFields: InvalidField[] = []
 
       if (view === 'register') {
         if (!firstNameValue.trim()) {
           setFirstNameError('First name is required')
-          hasError = true
+          invalidFields.push('firstName')
         } else {
           setFirstNameError(null)
         }
 
         if (!lastNameValue.trim()) {
           setLastNameError('Last name is required')
-          hasError = true
+          invalidFields.push('lastName')
         } else {
           setLastNameError(null)
         }
@@ -118,20 +170,20 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
 
       if (!emailValue.trim()) {
         setEmailError('Email is required')
-        hasError = true
+        invalidFields.push('email')
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
         setEmailError('Please enter a valid email')
-        hasError = true
+        invalidFields.push('email')
       } else {
         setEmailError(null)
       }
 
       if (!passwordValue) {
         setPasswordError('Password is required')
-        hasError = true
+        invalidFields.push('password')
       } else if (passwordValue.length < PASSWORD_MIN_LENGTH) {
         setPasswordError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
-        hasError = true
+        invalidFields.push('password')
       } else {
         setPasswordError(null)
       }
@@ -139,21 +191,57 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
       if (view === 'register') {
         if (!confirmPasswordValue) {
           setConfirmPasswordError('Confirm password is required')
-          hasError = true
+          invalidFields.push('confirmPassword')
         } else if (confirmPasswordValue !== passwordValue) {
           setConfirmPasswordError('Passwords do not match')
-          hasError = true
+          invalidFields.push('confirmPassword')
         } else {
           setConfirmPasswordError(null)
         }
       }
 
-      if (hasError) return
+      if (invalidFields.length > 0) {
+        // Visual-order focus: firstName → lastName → email → password → confirmPassword
+        const order: InvalidField[] = ['firstName', 'lastName', 'email', 'password', 'confirmPassword']
+        const first = order.find((f) => invalidFields.includes(f))
+        if (first) {
+          requestAnimationFrame(() => focusField(first))
+        }
+        return
+      }
 
-      onShowToast('Account creation is on the way. For now, explore freely.')
-      handleClose()
+      setIsSubmitting(true)
+
+      try {
+        if (view === 'login') {
+          await login({ email: emailValue, password: passwordValue })
+        } else {
+          const timezone = safeResolveTimezone()
+          await register({
+            email: emailValue,
+            password: passwordValue,
+            firstName: firstNameValue,
+            lastName: lastNameValue,
+            timezone,
+          })
+        }
+        handleClose()
+      } catch (err) {
+        if (err instanceof AuthError) {
+          if (err.code === 'VALIDATION_FAILED' && err.fieldErrors) {
+            applyServerFieldErrors(err.fieldErrors)
+          }
+          const copy = AUTH_ERROR_COPY[err.code] ?? AUTH_ERROR_COPY.UNKNOWN
+          setFormError({ code: err.code, message: copy })
+        } else {
+          setFormError({ code: 'UNKNOWN', message: AUTH_ERROR_COPY.UNKNOWN })
+        }
+        requestAnimationFrame(() => formErrorRef.current?.focus())
+      } finally {
+        setIsSubmitting(false)
+      }
     },
-    [emailValue, passwordValue, firstNameValue, lastNameValue, confirmPasswordValue, view, handleClose, onShowToast],
+    [emailValue, passwordValue, firstNameValue, lastNameValue, confirmPasswordValue, view, handleClose, login, register, focusField, applyServerFieldErrors],
   )
 
   const handleForgotSubmit = useCallback(
@@ -184,6 +272,9 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
   const panelClass = isClosing
     ? 'motion-safe:animate-fade-out'
     : 'motion-safe:animate-scale-in'
+
+  const whitePillClass =
+    'w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all motion-reduce:transition-none hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]'
 
   return (
     <div
@@ -251,9 +342,9 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 )}
               </div>
 
-              <button type="submit" className="w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all motion-reduce:transition-none hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]">
+              <Button type="submit" className={whitePillClass}>
                 Send Reset Link
-              </button>
+              </Button>
             </form>
 
             <p className="mt-4 text-center text-sm text-white/90">
@@ -277,6 +368,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                       First name<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                     </label>
                     <input
+                      ref={firstNameRef}
                       id="auth-first-name"
                       type="text"
                       required
@@ -303,6 +395,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                       Last name<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                     </label>
                     <input
+                      ref={lastNameRef}
                       id="auth-last-name"
                       type="text"
                       required
@@ -332,6 +425,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   Email<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
                 <input
+                  ref={emailRef}
                   id="auth-email"
                   name="auth-email"
                   type="email"
@@ -357,6 +451,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   Password<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
                 <input
+                  ref={passwordRef}
                   id="auth-password"
                   name="auth-password"
                   type="password"
@@ -383,6 +478,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                     Confirm password<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                   </label>
                   <input
+                    ref={confirmPasswordRef}
                     id="auth-confirm-password"
                     type="password"
                     required
@@ -427,9 +523,17 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 </button>
               )}
 
-              <button type="submit" className="w-full rounded-full bg-white py-3 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all motion-reduce:transition-none hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]">
+              {formError && (
+                <div ref={formErrorRef} tabIndex={-1} className="mb-3 focus:outline-none">
+                  <FormError severity="error" onDismiss={() => setFormError(null)}>
+                    {formError.message}
+                  </FormError>
+                </div>
+              )}
+
+              <Button type="submit" isLoading={isSubmitting} className={whitePillClass}>
                 {view === 'login' ? 'Log In' : 'Create Account'}
-              </button>
+              </Button>
             </form>
 
             {/* Divider */}

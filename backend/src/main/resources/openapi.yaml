@@ -30,6 +30,10 @@ tags:
     description: Proxied Google Maps Places endpoints
   - name: Proxy / Audio
     description: Proxied FCBH Digital Bible Platform endpoints
+  - name: Auth
+    description: Registration, login, logout
+  - name: Users
+    description: Authenticated user profile (self) — Spec 1.6
 
 paths:
   /api/v1/health:
@@ -550,6 +554,174 @@ paths:
         '502': { $ref: '#/components/responses/UpstreamError' }
         '504': { $ref: '#/components/responses/UpstreamTimeout' }
 
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      description: |
+        Creates a new user account. Returns the same 200 response shape whether
+        the email is new or already registered (anti-enumeration). No JWT is
+        issued at registration — users log in separately.
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '200':
+          description: Registration accepted (new or existing email)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/RegisterResponseData' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in and obtain a JWT
+      description: |
+        Timing-equalized login. Rate-limited: 5 attempts per 15 min per email,
+        20 attempts per 15 min per IP. Both limits enforced. On 429 includes
+        Retry-After header.
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Login successful; JWT + user summary returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthResponseData' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401':
+          description: Invalid email or password (timing-equalized; same response for unknown email or wrong password)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out (stateless no-op)
+      description: |
+        Stateless logout — the backend has no session to destroy. Returns 204
+        regardless of token presence or validity. Spec 1.5g will add session
+        invalidation.
+      operationId: logoutUser
+      security: []
+      responses:
+        '204':
+          description: No content
+
+  /api/v1/users/me:
+    get:
+      tags: [Users]
+      summary: Get the authenticated user's full profile
+      description: |
+        Returns the full profile shape (15 fields including server-computed
+        displayName) for the user identified by the Bearer token. Distinct
+        from /auth/login's UserSummary (which is the minimal projection
+        embedded in auth responses).
+
+        Returns 401 USER_NOT_FOUND if the JWT subject references a user that
+        no longer exists (e.g., 1-hour token outlives account deletion).
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/UserResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+    patch:
+      tags: [Users]
+      summary: Update the authenticated user's profile
+      description: |
+        Partial update — fields absent from the request body are left
+        unchanged. Fields present with explicit null clear the column (for
+        nullable columns only). Returns the FULL updated profile so the
+        frontend can hydrate React state in one call.
+
+        Updatable fields: firstName, lastName, displayNamePreference,
+        customDisplayName, avatarUrl, bio, favoriteVerseReference,
+        favoriteVerseText, timezone.
+
+        NOT updatable here (silently dropped by the request DTO):
+        email (Spec 1.5e), password (Spec 1.5c), isAdmin (admin-only),
+        isBanned (Phase 10 moderation), isEmailVerified (Spec 1.5d),
+        username (Phase 8.1).
+
+        400 INVALID_INPUT for: invalid timezone, custom preference without
+        custom name, invalid display name preference value, explicit null on
+        non-nullable field. 400 VALIDATION_FAILED with fieldErrors map for:
+        @Size violations, @Pattern (URL) violations.
+      operationId: updateCurrentUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/UserResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
 components:
   schemas:
     ProxyResponse:
@@ -842,6 +1014,155 @@ components:
         meta:
           type: object
 
+    RegisterRequest:
+      type: object
+      required: [email, password, firstName, lastName]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          minLength: 12
+          maxLength: 255
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        timezone:
+          type: string
+          maxLength: 50
+          description: IANA timezone. Defaults to UTC when omitted or invalid.
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          minLength: 1
+          maxLength: 255
+
+    RegisterResponseData:
+      type: object
+      required: [registered]
+      properties:
+        registered:
+          type: boolean
+          description: Always true. Returned identically whether the email was new or already registered (anti-enumeration).
+
+    UserSummary:
+      type: object
+      required: [id, email, displayName, firstName, lastName, isAdmin, timezone]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        isAdmin: { type: boolean }
+        timezone: { type: string }
+
+    AuthResponseData:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+          description: HS256-signed JWT. Short-lived (1 hour).
+        user:
+          $ref: '#/components/schemas/UserSummary'
+
+    UserResponse:
+      type: object
+      required: [id, email, displayName, firstName, lastName, displayNamePreference, timezone, isAdmin, isEmailVerified, joinedAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName:
+          type: string
+          description: Server-computed via DisplayNameResolver from preference + name fields. Frontend should display this as-authoritative.
+        firstName: { type: string, minLength: 1, maxLength: 100 }
+        lastName: { type: string, minLength: 1, maxLength: 100 }
+        displayNamePreference:
+          type: string
+          enum: [first_only, first_last_initial, first_last, custom]
+          description: Lowercase snake_case wire format. Matches DB CHECK constraint.
+        customDisplayName:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: Used as displayName when preference is 'custom'. Required when preference is set to 'custom'.
+        avatarUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+          pattern: "^https?://.+"
+        bio:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Plain text only — no HTML, no Markdown rendering. Frontend renders with white-space pre-wrap.
+        favoriteVerseReference:
+          type: string
+          maxLength: 50
+          nullable: true
+          example: "Romans 8:28"
+        favoriteVerseText:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: WEB translation, plain text.
+        timezone:
+          type: string
+          maxLength: 50
+          description: IANA zone (e.g., America/Chicago).
+        isAdmin: { type: boolean }
+        isEmailVerified: { type: boolean }
+        joinedAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp (ISO-8601 with offset).
+
+    UpdateUserRequest:
+      description: |
+        PATCH body for /api/v1/users/me. Every field is optional. Three
+        states per field:
+          - field absent from JSON     → don't touch DB column
+          - field present with null    → clear DB column (nullable fields only)
+          - field present with a value → update DB column
+
+        Non-nullable fields (firstName, lastName, displayNamePreference,
+        timezone) reject explicit null with 400 INVALID_INPUT. Backend uses
+        org.openapitools.jackson.databind-nullable JsonNullable<String> for
+        the three-state semantics.
+
+        Fields explicitly excluded (privilege escalation guards): email,
+        password, isAdmin, isBanned, isEmailVerified, username. Unknown
+        fields in the JSON are silently dropped by Jackson.
+      type: object
+      properties:
+        firstName: { type: string, minLength: 1, maxLength: 100 }
+        lastName: { type: string, minLength: 1, maxLength: 100 }
+        displayNamePreference:
+          type: string
+          enum: [first_only, first_last_initial, first_last, custom]
+        customDisplayName: { type: string, minLength: 1, maxLength: 100, nullable: true }
+        avatarUrl: { type: string, maxLength: 500, nullable: true, pattern: "^https?://.+" }
+        bio: { type: string, maxLength: 2000, nullable: true }
+        favoriteVerseReference: { type: string, maxLength: 50, nullable: true }
+        favoriteVerseText: { type: string, maxLength: 500, nullable: true }
+        timezone: { type: string, maxLength: 50 }
+
   responses:
     BadRequest:
       description: Invalid input
@@ -891,3 +1212,21 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ProxyError' }
+    Unauthorized:
+      description: |
+        Missing, malformed, or expired Bearer token; or token references a
+        user that no longer exists. Frontend should clear the in-memory JWT
+        and route to login.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        HS256-signed JWT issued by POST /api/v1/auth/login. Send as
+        Authorization: Bearer <token>. Token is short-lived (1 hour);
+        on 401 TOKEN_EXPIRED, the frontend re-logs in via /auth/login.
