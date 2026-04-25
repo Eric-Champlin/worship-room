@@ -38,6 +38,8 @@ Every env var the backend currently reads, grouped by category, alphabetical wit
 | JWT | `JWT_EXPIRATION` | optional | optional | optional | config | Token lifetime in seconds. Default 3600. |
 | JWT | `JWT_SECRET` | auto (dev fallback) | auto (inherits dev) | **required** | secret | HS256 signing key, ≥32 bytes. |
 | CORS | `PROXY_CORS_ALLOWED_ORIGINS` | auto | auto | **required** | config | Comma-separated allow-list of frontend origins. |
+| Monitoring | `SENTRY_DSN` | optional | optional | optional | secret | Sentry DSN; empty = no-op (graceful disable). Spec 1.10d. |
+| Monitoring | `SENTRY_ENVIRONMENT` | optional | optional | optional | config | Environment tag for Sentry events (`development` / `production`). Spec 1.10d. |
 | Upstream API key | `FCBH_API_KEY` | optional | optional | optional | secret | Faith Comes By Hearing audio Bible (Spec 4). |
 | Upstream API key | `GEMINI_API_KEY` | optional | optional | optional | secret | Google Gemini AI proxy (Spec 2). |
 | Upstream API key | `GOOGLE_MAPS_API_KEY` | optional | optional | optional | secret | Google Maps Places + Geocoding (Spec 3). |
@@ -220,6 +222,36 @@ All three upstream API keys share the same shape: empty default in base `applica
 - **Rotation procedure:** see § 5.2.
 - **Cross-references:** introduced by Key Protection Wave Spec 4 (`ai-proxy-fcbh`).
 
+### 3.6 Monitoring
+
+Established by Forums Wave Spec 1.10d. See `backend/docs/runbook-monitoring.md` for the operator runbook (account setup, alert triage, UptimeRobot procedure).
+
+#### `SENTRY_DSN`
+
+- **Type:** string (Sentry project DSN, e.g., `https://<key>@oXXXX.ingest.sentry.io/<project>`)
+- **Default:** empty string `""` (`application.properties` via `${SENTRY_DSN:}` placeholder).
+- **Required in:** never required — the Sentry SDK becomes a no-op when DSN is empty.
+- **Sensitivity:** **secret** (the DSN contains the public ingest key; do not expose in client bundles, logs, or screenshots).
+- **Consumed by:** `sentry-spring-boot-starter-jakarta` auto-configuration → `io.sentry.Sentry` SDK → `SentryConfig.@Bean BeforeSendCallback` (filters expected exceptions) and `SentryConfig.@Bean SentryUserContextFilter` (attaches `user.id`).
+- **Behavior if absent:** SDK initializes in no-op mode. Zero outbound HTTP, zero log noise, zero startup warnings. `SentryConfig` beans still register but their effect is invisible because the SDK won't emit events.
+- **Rotation procedure:** Generate a new DSN in Sentry project Settings → Client Keys → "Generate new key", paste into Railway Variables, save. Railway auto-redeploys. Old DSN can stay valid for a grace period (Sentry honors both until you revoke the old key in the Sentry UI).
+- **Cross-references:**
+  - Introduced by Forums Wave Spec 1.10d.
+  - `backend/docs/runbook-monitoring.md` § 3 — DSN extraction procedure.
+  - `backend/docs/runbook-monitoring.md` § 4 — Railway wiring procedure.
+  - `02-security.md` privacy rule — frontend Sentry (when 1.10d-bis ships) gets its own DSN, also routed through Railway env vars; the backend DSN is NOT shared with the frontend.
+
+#### `SENTRY_ENVIRONMENT`
+
+- **Type:** string (typically `development`, `staging`, or `production`)
+- **Default:** empty string `""` (`application.properties` via `${SENTRY_ENVIRONMENT:}` placeholder). Sentry treats absent environment as "no environment tag" — events appear in the default bucket.
+- **Required in:** never required — but strongly recommended in prod so Eric can filter Sentry's UI by environment.
+- **Sensitivity:** config (no secret value).
+- **Consumed by:** Sentry SDK environment tagging. Every event emitted carries this tag.
+- **Behavior if absent:** events ship without an environment tag. Functional, but Sentry UI lumps every environment into one stream — harder to filter.
+- **Rotation procedure:** N/A. Edit the Railway Variables tab → Railway redeploys → new tag applied to subsequent events.
+- **Cross-references:** introduced by Forums Wave Spec 1.10d. Set to `production` on the Railway backend service post-deploy.
+
 ---
 
 ## 4. Provisioning procedures
@@ -337,8 +369,6 @@ When the introducing spec ships, the var migrates from this section into the mai
 | `ADMIN_EMAIL` | Forums Wave (Phase 1 admin seeding) | Email of the seeded admin user (`is_admin=true`). |
 | `ENCRYPTION_KEY` | Phase 3 journal encryption | App-layer encryption key for journal entries at rest. |
 | `REDIS_URL` | Spec 5.6 | Redis connection URL for distributed rate limiting and caching. |
-| `SENTRY_DSN` | Spec 1.10d | Sentry error-tracking DSN; empty disables Sentry. |
-| `SENTRY_ENVIRONMENT` | Spec 1.10d | Environment tag (`development` / `staging` / `production`) for Sentry events. |
 | `STORAGE_PROVIDER` | Spec 1.10e | Object storage provider selector (`r2` / `s3` / `minio`). |
 | `STORAGE_ENDPOINT` | Spec 1.10e | S3-compatible endpoint URL. |
 | `STORAGE_ACCESS_KEY` | Spec 1.10e | Object storage access key. |

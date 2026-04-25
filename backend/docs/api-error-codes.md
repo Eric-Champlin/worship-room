@@ -1,0 +1,281 @@
+# API Error Code Catalog
+
+**Last updated:** 2026-04-25 (Spec 1.10h initial catalog)
+**Owner:** backend
+**Sibling docs:** `backend/docs/runbook-security-headers.md`
+
+## 1. Purpose and scope
+
+This document is the canonical, machine-readable list of every error `code`
+string the Worship Room API returns in an error response body's `code` field.
+It exists so future endpoints (Phase 2 activity engine and beyond) reuse
+existing codes instead of inventing parallel ones — `INVALID_INPUT`,
+`VALIDATION_FAILED`, `BAD_REQUEST`, `VALIDATION_ERROR` would otherwise all
+appear over time meaning the same thing.
+
+**This document IS:**
+
+- A catalog of every `code` string emitted in production today.
+- The naming-convention reference for new codes added by Phase 2+.
+- The procedure for adding a new code.
+- A registry of known naming drift and structural gaps for future cleanup specs.
+
+**This document is NOT:**
+
+- A list of HTTP status codes — those live in
+  `.claude/rules/03-backend-standards.md` § HTTP Status Codes.
+- A list of response envelope fields — that lives in the same rule file.
+- A list of per-endpoint error responses — those live in
+  `backend/src/main/resources/openapi.yaml` per-operation `responses` blocks.
+- Authoritative for HTTP status semantics. Each `code` carries a fixed
+  associated HTTP status, but the same status (e.g., 400) can be emitted with
+  multiple distinct codes (`INVALID_INPUT`, `VALIDATION_FAILED`).
+
+## 2. Error response envelope
+
+Standard error body shape (defined in `ProxyError.java`, referenced from
+`.claude/rules/03-backend-standards.md`):
+
+```json
+{
+  "code": "RATE_LIMITED",
+  "message": "Too many requests. Try again in 60 seconds.",
+  "requestId": "Mw7n2K8x3qY9jL4vP1tRsA",
+  "timestamp": "2026-04-25T10:30:00Z"
+}
+```
+
+`VALIDATION_FAILED` extends this envelope with an additional `fieldErrors`
+map. See section 6.1 for the drift this creates and section 3 for the field
+list.
+
+## 3. The catalog
+
+Sorted by category, alphabetical within category. The "Emitted in" column lists
+the throw site closest to the user (factory or handler); for upstream-error
+codes with many throw sites, see the source files for the full list. The
+"Notes" column flags non-obvious behavior worth knowing before reusing a code.
+
+### Auth
+
+| Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
+|---|---|---|---|---|---|
+| `INVALID_CREDENTIALS` | 401 | Login attempt with unknown email or wrong password | `"Invalid email or password."` (static; same for both branches per anti-enumeration) | `AuthException.invalidCredentials()` ← `AuthService.login` | Timing-equalized — backend performs BCrypt verify on a dummy hash for unknown emails. Frontend should NOT differentiate "no such email" from "wrong password". |
+| `TOKEN_EXPIRED` | 401 | JWT `exp` claim is in the past | `"Authentication token has expired."` (static) | `AuthException.tokenExpired()` ← `JwtAuthenticationFilter` on `ExpiredJwtException` | Frontend should clear in-memory JWT and redirect to login. |
+| `TOKEN_INVALID` | 401 | JWT signature verification failed, or any other unexpected JWT parsing error | `"Authentication token is invalid."` (static) | `AuthException.tokenInvalid()` ← `JwtAuthenticationFilter` on `SignatureException` and the catch-all branch | Catch-all also covers any non-`Expired`/`Malformed` JJWT exception. |
+| `TOKEN_MALFORMED` | 401 | Bearer token is structurally invalid (not three dot-separated segments) or `sub` is not a UUID | `"Authentication token is malformed."` (static) | `AuthException.tokenMalformed()` ← `JwtAuthenticationFilter` on `MalformedJwtException` and `IllegalArgumentException` | `IllegalArgumentException` covers `UUID.fromString` failure on the subject claim. |
+| `UNAUTHORIZED` | 401 | Request reaches a protected route without any auth context | `"Authentication is required to access this resource."` (static) | `AuthException.unauthorized()` (factory; currently no callers); `RestAuthenticationEntryPoint.commence()` (Spring Security path when SecurityContextHolder has no auth) | Two emit paths with identical wire output — the factory is reserved for future Spec 1.5 work; the entry point is the live path today. |
+| `USER_NOT_FOUND` | **401** (not 404) | Authenticated request whose JWT `sub` references a user that no longer exists in the database | `"Authenticated user not found."` (static) | `UserException.userNotFound()` ← `UserService.getCurrentUser`/`updateCurrentUser` | **Status-code deviation by design** — see § 6.2. Frontend treats this as a force-logout, not a 404 surface. |
+
+### Validation
+
+| Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
+|---|---|---|---|---|---|
+| `INVALID_INPUT` | 400 | (a) `@Valid @RequestBody` failure on a proxy controller; (b) `@RequestParam`/`@PathVariable` Bean Validation failure (handled by both `ConstraintViolationException` and `HandlerMethodValidationException` paths); (c) missing required `@RequestParam`; (d) user-domain rule violations from `UserException` (invalid timezone, custom-display-name preference without value, blank required field, explicit null on non-nullable field, invalid display-name preference enum value) | Dynamic per field. Format: `"<field>: <validation message>"` for body validation, `"<field> cannot be blank"` / `"Unknown timezone identifier: '<value>'"` etc. for user-domain rules | `ProxyExceptionHandler.handleValidation`, `handleConstraintViolation`, `handleHandlerMethodValidation`, `handleMissingParam`; `UserException` factories (`invalidTimezone`, `invalidDisplayNamePreference`, `customDisplayNameRequired`, `fieldBlank`, `nonNullableFieldNull`) | Body shape: flat `ProxyError`, no `fieldErrors` map. Wins for proxy controllers because `ProxyExceptionHandler` is package-scoped to `com.worshiproom.proxy`. See § 6.1 for the drift between this code and `VALIDATION_FAILED`. |
+| `VALIDATION_FAILED` | 400 | `@Valid @RequestBody` failure on an auth or user controller (`MethodArgumentNotValidException`) | Static message: `"Request validation failed."`; per-field detail in the `fieldErrors` map | `AuthValidationExceptionHandler.handleValidation`; `UserValidationExceptionHandler.handleValidation` | **Body shape extends the standard envelope** with `fieldErrors: { <fieldName>: <message> }`. Wins for auth and user controllers because those advices are package-scoped to `com.worshiproom.auth` / `com.worshiproom.user`. Same exception type as one branch of `INVALID_INPUT` — see § 6.1. |
+
+### Rate limit
+
+| Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
+|---|---|---|---|---|---|
+| `RATE_LIMITED` | 429 | Token bucket exhausted on (a) per-IP proxy bucket, (b) per-IP login bucket, or (c) per-email login bucket | Dynamic: `"Too many requests. Try again in <N> seconds."` | `RateLimitExceededException` ← `RateLimitFilter` (proxy, per-IP) and `LoginRateLimitFilter` (login, per-email + per-IP) | Always carries `Retry-After` header (integer seconds). Successful and rate-limited responses both carry `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`. `LoginRateLimitFilter` reports the tighter of the two dimensions in those headers (see filter source for the rationale). |
+
+### Proxy / upstream
+
+| Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
+|---|---|---|---|---|---|
+| `NOT_FOUND` | 404 | FCBH DBP returns 404 for a fileset, chapter, or timestamps lookup (e.g., chapter has no audio) | `"Audio not available for this chapter."` (FCBH-specific today) | `FcbhNotFoundException` ← `FcbhService` | Sole emitter today is FCBH. Has a dedicated `@ExceptionHandler` branch in `ProxyExceptionHandler` (ahead of the generic `ProxyException` handler) so the log line is INFO-level — "audio not available" is expected UX, not a warning. |
+| `SAFETY_BLOCK` | 422 | Upstream AI model refused to generate a response due to its safety filters (prompt-level block, output-level block via `FinishReason.SAFETY` or `PROHIBITED_CONTENT`, or empty-text silent block) | Variants: `"This prayer request was blocked by safety filters. Please rephrase."`, `"This question was blocked by safety filters. Please rephrase."`, `"This journal entry was blocked by safety filters. Please rephrase."`, `"Gemini blocked the prompt: <reason>"`, `"Gemini blocked the response: finishReason=<reason>"`, `"Gemini returned an empty response (likely a silent safety block)."` | `SafetyBlockException` ← `GeminiService` (3 paths), `PrayerService`, `JournalReflectionService`, `AskService` | 422 (Unprocessable Content) per RFC 9110 §15.5.21 — request was valid, upstream chose not to answer. Frontend `GeminiSafetyBlockError` maps this to a user-friendly explanation. The variant messages that name "Gemini" or "finishReason" are server-side debug aids that bypass the user-safe wrapper messages on the per-feature services — review whether they should be sanitized when consolidating naming drift. |
+| `UPSTREAM_ERROR` | 502 | Upstream API (Gemini, Google Maps Places, FCBH DBP) returned an error status, threw an SDK exception, returned an empty body, or was misconfigured (missing API key) | Generic per-service: `"AI service is temporarily unavailable. Please try again."`, `"Maps service is temporarily unavailable. Please try again."`, `"FCBH service returned no response."`, `"…is not configured on the server."`, `"Maps service rejected the geocode request."`, `"Maps service returned empty photo body."` | `UpstreamException` ← `GeminiService`, `GoogleMapsService`, `FcbhService`, `PrayerService`, `JournalReflectionService`, `AskService` (~22 throw sites total) | **Never leaks upstream error text to the client** (per `02-security.md` § Never Leak Upstream Error Text). Server-side log captures the full cause chain with the request ID; the wire message is one of the canned strings above. Every proxy service test asserts the caught exception's message does NOT appear in the thrown `ProxyException`'s message. |
+| `UPSTREAM_TIMEOUT` | 504 | Upstream API exceeded the configured per-request timeout (`proxy.upstream.default-timeout-ms` or service-specific override) | `"AI service timed out. Please try again."` / `"Maps service timed out. Please try again."` | `UpstreamTimeoutException` ← `GeminiService`, `GoogleMapsService` | Distinct from `UPSTREAM_ERROR` (502) so the frontend can branch on retry strategy. FCBH does not currently emit this — its WebClient timeout falls through to `UPSTREAM_ERROR`. |
+
+### Generic
+
+| Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
+|---|---|---|---|---|---|
+| `INTERNAL_ERROR` | 500 | Any `Throwable` that escapes a proxy controller without being mapped by a more specific handler | Static: `"An unexpected error occurred. Please try again."` | `ProxyExceptionHandler.handleUnexpected(Throwable)` | **Coverage gap**: this catch-all is package-scoped to `com.worshiproom.proxy`, so unexpected exceptions from `com.worshiproom.auth` or `com.worshiproom.user` controllers fall through to Spring Boot's `BasicErrorController` instead — see § 6.3. |
+
+## 4. Naming conventions
+
+### Existing pool — descriptive, factual
+
+The 14 codes in this catalog use three different shapes:
+
+- **Adjective-noun:** `INVALID_INPUT`, `INVALID_CREDENTIALS`
+- **Verb-past-tense:** `RATE_LIMITED`, `VALIDATION_FAILED`
+- **Noun-only:** `UNAUTHORIZED`, `NOT_FOUND`, `INTERNAL_ERROR`, `UPSTREAM_ERROR`, `UPSTREAM_TIMEOUT`, `SAFETY_BLOCK`, `TOKEN_EXPIRED`, `TOKEN_INVALID`, `TOKEN_MALFORMED`, `USER_NOT_FOUND`
+
+All 14 are SCREAMING_SNAKE_CASE. That part is consistent.
+
+### Convention for new codes (Phase 2+)
+
+New codes follow `<NOUN>_<ADJECTIVE>` pattern:
+`USER_BLOCKED`, `POST_LOCKED`, `ACTIVITY_DUPLICATED`,
+`COMMENT_DELETED`, `BADGE_ALREADY_EARNED`.
+
+Existing verb-past-tense codes (`RATE_LIMITED`, `VALIDATION_FAILED`) stay
+as-is — retroactively renaming them would force frontend code changes that
+aren't worth it. **Established codes are grandfathered; future codes follow
+the noun-adjective convention.**
+
+### When to add a new code vs reuse an existing one
+
+Reuse an existing code when:
+
+- The new failure mode is semantically the same as an existing one (e.g., a
+  new validated `@RequestBody` failure on a proxy controller is still
+  `INVALID_INPUT` — don't invent `BODY_INVALID`).
+- The HTTP status is the same and the frontend would branch identically.
+
+Add a new code when:
+
+- The frontend needs to branch on the difference (e.g., distinct copy or
+  distinct retry behavior).
+- The HTTP status differs (different status with the same code is confusing
+  and should be avoided — `USER_NOT_FOUND` at 401 is the one grandfathered
+  exception, see § 6.2).
+- The trigger is a new domain concept (a new business rule, a new upstream
+  service, a new lifecycle event) that no existing code covers.
+
+## 5. Adding a new error code
+
+When introducing a new error code in any spec:
+
+1. **Pick a name** that fits the conventions in § 4. Reuse an existing code
+   if the failure is semantically equivalent (see "When to add a new code vs
+   reuse an existing one").
+2. **Add it to the relevant exception class or handler.** Domain exceptions
+   live in `<feature>/<Feature>Exception.java` with static factory methods
+   (`AuthException` and `UserException` are the canonical examples); the
+   handler in `<Feature>ExceptionHandler.java` translates them to
+   `ProxyError` responses.
+3. **Verify the new code follows § 4's noun-adjective convention.** If it
+   doesn't, justify why in the catalog row's Notes column. Grandfathered
+   verb-past-tense codes are not a precedent for new ones.
+4. **Add a row to this catalog** in the same commit as the code change.
+   Choose the correct category (auth, validation, rate-limit, proxy,
+   generic), insert alphabetically within the category. Fill out every
+   column. Use the Notes column for non-obvious behavior (different body
+   shape, status-code deviation, special handler ordering, etc.).
+5. **Reference the code in the OpenAPI spec** for every endpoint that
+   surfaces it. Update `backend/src/main/resources/openapi.yaml` per-operation
+   `responses` blocks. Today the OpenAPI `ProxyError.code` field is plain
+   `type: string` — see § 6.4 for the future cleanup.
+6. **If the code maps to a user-facing copy line**, add the copy to the
+   relevant per-feature constants file with anti-pressure voice (per
+   `01-ai-safety.md` § AI Content Boundaries and the master plan's
+   Universal Rule 12). Avoid blame, judgement, or pressure language.
+
+## 6. Known gaps and follow-ups
+
+Each subsection here is a future spec. The catalog documents the situation;
+it does not repair it. **Do not consolidate or rename anything here without a
+dedicated spec** — frontend code branches on these strings.
+
+### 6.1 Naming drift: `INVALID_INPUT` vs `VALIDATION_FAILED`
+
+- Same HTTP status (400). Same trigger in the most common case
+  (`MethodArgumentNotValidException` on `@Valid @RequestBody`). Two codes,
+  two body shapes.
+- The advice that wins is decided by package scope:
+  `ProxyExceptionHandler` (basePackages=`com.worshiproom.proxy`) emits
+  `INVALID_INPUT` with a flat `ProxyError` body; `AuthValidationExceptionHandler`
+  (basePackages=`com.worshiproom.auth`) and `UserValidationExceptionHandler`
+  (basePackages=`com.worshiproom.user`) emit `VALIDATION_FAILED` with an
+  extended body that adds a `fieldErrors` map.
+- Frontend currently handles both shapes.
+- **Future cleanup spec:** consolidate to one code (likely `VALIDATION_FAILED`
+  for the broader semantics) with the `fieldErrors` map as an optional field.
+  Migrate `INVALID_INPUT` callers (or vice versa) and update the OpenAPI
+  schema to model the consolidated shape.
+
+### 6.2 `USER_NOT_FOUND` returns 401, not 404
+
+- Intentional per `UserException.userNotFound()` JavaDoc: the JWT subject is
+  semantically invalid if the user no longer exists, so the server forces
+  re-login rather than surface a confusing 404 on a self-route like
+  `/api/v1/users/me`.
+- The code name suggests a 4xx-NotFound, which conflicts with `NOT_FOUND`
+  (which is a real 404 from FCBH). A reader scanning the catalog could
+  reasonably expect `USER_NOT_FOUND` to also be 404.
+- **Future cleanup spec:** rename to `USER_DELETED`, `SESSION_INVALIDATED`,
+  or similar to match the actual 401 semantics. Coordinate with frontend
+  to update the string match.
+
+### 6.3 Missing `Throwable.class` catch-all in `AuthExceptionHandler` and `UserExceptionHandler`
+
+- `ProxyExceptionHandler.handleUnexpected(Throwable)` is the only catch-all
+  in the codebase, and it is package-scoped to `com.worshiproom.proxy`.
+- Unexpected `RuntimeException` (or any uncaught exception) thrown from
+  `AuthService`, `UserService`, or any future `com.worshiproom.auth.*` /
+  `com.worshiproom.user.*` controller falls through to Spring Boot's
+  default `BasicErrorController`.
+- Result: response body has no `code` field, no `requestId` field, and uses
+  Spring's default error JSON shape — non-canonical. Frontend error handling
+  that branches on `code` will break.
+- **Future cleanup spec:** add a `Throwable.class` catch-all to
+  `AuthExceptionHandler` and `UserExceptionHandler` that emits
+  `INTERNAL_ERROR` with the canonical envelope (matching
+  `ProxyExceptionHandler.handleUnexpected`). Or, alternatively, lift the
+  catch-all into a top-level unscoped advice covering all packages.
+
+### 6.4 OpenAPI `ProxyError.code` is `type: string`, not an enum
+
+- `backend/src/main/resources/openapi.yaml` defines `ProxyError.code` as
+  plain `type: string` with one example value. The 14 codes in this catalog
+  are not enumerated in the spec.
+- This catalog is the canonical list; OpenAPI lags.
+- **Future cleanup spec:** extend `ProxyError.code` with an `enum` of all
+  14 codes, ideally auto-generated from this document so the two cannot
+  drift. Per-operation `responses` blocks could narrow the enum to the
+  subset each endpoint actually emits.
+
+### 6.5 `VALIDATION_FAILED` body extension not modeled in OpenAPI
+
+- The `BadRequest` response component in `openapi.yaml` references the flat
+  `ProxyError` schema. The `fieldErrors: { <fieldName>: <message> }` map
+  that `AuthValidationExceptionHandler` and `UserValidationExceptionHandler`
+  add to the body is not modeled.
+- Generated frontend types therefore lack the `fieldErrors` field; callers
+  read it via untyped property access.
+- **Future cleanup spec:** define a `ValidationError` schema that extends
+  `ProxyError` with an optional `fieldErrors` map, and add a `BadRequestWithFields`
+  response component that auth and user endpoints reference. Likely sequenced
+  with § 6.1's consolidation.
+
+### 6.6 `SAFETY_BLOCK` message variants leak upstream details
+
+- Several `SAFETY_BLOCK` throw sites in `GeminiService` emit messages that
+  name the upstream model and internal API fields:
+  - `"Gemini blocked the prompt: <reason>"`
+  - `"Gemini blocked the response: finishReason=<reason>"`
+  - `"Gemini returned an empty response (likely a silent safety block)."`
+- The per-feature services (`PrayerService`, `JournalReflectionService`,
+  `AskService`) wrap these with clean copy (`"This question was blocked by
+  safety filters. Please rephrase."`, `"This journal entry was blocked by
+  safety filters. Please rephrase."`, `"This prayer request was blocked by
+  safety filters. Please rephrase."`) — but the raw `GeminiService` variants
+  can surface to clients on paths that throw before the wrapper applies
+  (e.g., the `BB-30 explain` and `BB-31 reflect` endpoints, which call
+  `GeminiService` directly without an intermediate wrapper).
+- This violates the never-leak-upstream-details rule documented in
+  `.claude/rules/02-security.md` § Never Leak Upstream Error Text.
+- **Future cleanup spec:** audit every `SAFETY_BLOCK` throw site, ensure all
+  messages are user-safe and free of upstream identifiers (no `"Gemini"`, no
+  `"finishReason="`, no internal API field names). Wrap `GeminiService`
+  messages at the throw site, not the catch site, so the explain/reflect
+  endpoints get the same user-safe copy as the wrapped feature services.
+
+## 7. Related documents
+
+- `.claude/rules/03-backend-standards.md` § HTTP Status Codes and § Standard
+  Response Shapes — the authoritative reference for the response envelope and
+  the HTTP status / code mapping table.
+- `backend/src/main/resources/openapi.yaml` — per-endpoint error responses
+  (which codes each operation can return).
+- `.claude/rules/02-security.md` § Never Leak Upstream Error Text — why
+  `UPSTREAM_ERROR` and `SAFETY_BLOCK` use canned messages.
+- `.claude/rules/07-logging-monitoring.md` § Request ID Propagation — how the
+  `requestId` field is generated and threaded through every error response.
+- `backend/docs/runbook-security-headers.md` — sibling runbook (security
+  headers policy and tuning).

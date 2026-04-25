@@ -83,6 +83,16 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Sentry Spring Boot starter (Jakarta EE 9+) — Spec 1.10d operational monitoring.
+             Auto-wires SDK init, request hooks, @ExceptionHandler integration, and MDC propagation.
+             DSN-absent behavior is graceful no-op — see SentryConfig.java doc and
+             backend/docs/runbook-monitoring.md for the runbook. -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
+            <version>8.40.0</version>
+        </dependency>
+
         <!-- Structured JSON logging encoder — used by logback-spring.xml -->
         <dependency>
             <groupId>net.logstash.logback</groupId>

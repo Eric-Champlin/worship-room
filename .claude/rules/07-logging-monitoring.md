@@ -50,12 +50,18 @@ grep -iE 'aiza|key=|signature=' /path/to/backend.log | wc -l
 
 Expect `0`. If any match, the suppression isn't working. Also grep the backend log for the user-content fields of your DTO; if any match, the body-processor suppression (line 1 above) isn't working either. Also verify the controller-level INFO log (with the safe-to-log fields like `reference` and `verseTextLength`) still appears — if it's gone, you've suppressed too broadly.
 
-### Error Tracking — Sentry (Spec 1.10d)
-- **Platform:** Sentry (not Rollbar — decision made in Spec 1.10d)
-- **PII scrubber:** Mandatory Sentry `beforeSend` hook that strips: email addresses, user names, IP addresses (including any that might appear in log-message strings captured from rate-limit diagnostics), request body content, verse text sent to the AI proxy, LLM response bodies, and journal/prayer text from error payloads.
-- **Track:** 500 errors, unhandled exceptions, AI API failures, database errors, auth failures, rate limit violations
-- **DSN:** Via `SENTRY_DSN` env var (empty = disabled, for local dev)
-- **Environment tagging:** `SENTRY_ENVIRONMENT=development|staging|production`
+### Error Tracking — Sentry (Spec 1.10d, BACKEND ONLY)
+- **Platform:** Sentry. Backend wired in Spec 1.10d via `sentry-spring-boot-starter-jakarta`. Frontend Sentry deferred to a follow-up spec (1.10d-bis when scoped).
+- **DSN-absent posture:** SDK is a graceful no-op when `SENTRY_DSN` is unset. Dev runs and test runs ship zero events. Prod ships only when explicitly wired through Railway Variables.
+- **Configuration:** `backend/src/main/java/com/worshiproom/config/SentryConfig.java` is the single config class. Two beans: `BeforeSendCallback` (drops expected exceptions; see below) and `SentryUserContextFilter` (attaches `user.id` to scope; see below). Sample rates pinned: `sample-rate=1.0`, `traces-sample-rate=0.0`. APM / tracing is its own future spec.
+- **PII boundary (HARD RULE):** the only field attached to any Sentry event is `user.id` (UUID). Email, displayName, IP, and any request-body content are NEVER attached. `sentry.send-default-pii=false` in `application.properties` disables Sentry's default PII auto-attachment (which would include request bodies and headers). The user-context filter reads `AuthenticatedUser` from `SecurityContextHolder` and copies ONLY the UUID — it deliberately ignores the `isAdmin` flag also exposed by the principal.
+- **Expected-vs-unexpected boundary:** the canonical list is `SentryConfig.EXPECTED_EXCEPTIONS`. Auth failures, validation errors, rate limits, upstream errors, safety blocks, and FCBH not-founds are dropped before reaching Sentry — every one of them maps to a row in `backend/docs/api-error-codes.md` and is "expected behavior" rather than a system fault. Everything else (the catch-all `ProxyExceptionHandler.handleUnexpected` path, anything that escapes a handler entirely, anything thrown from a filter not already in the expected set) reaches Sentry. The filter walks the cause chain: a `RuntimeException` whose `getCause()` is one of the expected types is also dropped. Updating the set requires code review per spec § 4.4 — NOT env-var-tunable.
+- **Logback ingestion DELIBERATELY DISABLED.** Sentry's Logback appender is NOT registered. The Spring starter's `@ExceptionHandler` integration already captures every exception; adding the Logback path would double-count. Do NOT enable without first removing the starter's auto-capture.
+- **CSP impact:** none. Backend SDK fires server-side from the JVM; the browser CSP `connect-src` directive does not need a Sentry origin. Frontend Sentry (when 1.10d-bis ships) WILL need a CSP loosening — that's a follow-up concern.
+- **Operator runbook:** `backend/docs/runbook-monitoring.md` covers account setup, DSN extraction, Railway wiring, alert triage, and the UptimeRobot procedure (documented but not yet configured).
+- **Env vars:** `SENTRY_DSN` (secret, optional everywhere — empty = graceful no-op) and `SENTRY_ENVIRONMENT` (config, optional — recommended in prod for Sentry UI filtering). See `backend/docs/env-vars-runbook.md` § 3.6.
+- **DSN:** Via `SENTRY_DSN` env var (empty = disabled).
+- **Environment tagging:** `SENTRY_ENVIRONMENT=development|staging|production`.
 
 ### Uptime Monitoring (Spec 1.10d)
 - **Platform:** UptimeRobot (or Better Stack)

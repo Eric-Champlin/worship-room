@@ -89,6 +89,10 @@ paths: ["backend/**"]
 **Special response (not an error):**
 - `200 OK` with `crisis_flag: true` in body — content flagged by crisis detection (code: `CRISIS_DETECTED`). Post is still created with `crisis_flag=true` and crisis resources surfaced in UI. This is NOT a rejection.
 
+### Error Code Catalog
+
+The codes above are a sampling. The canonical list of every machine-readable `code` value the API emits (the `code` field in error response bodies, NOT HTTP status codes — those are documented above) lives at `backend/docs/api-error-codes.md`. It covers naming conventions, the procedure for adding a new code, and known drift / gaps. **Consult it before introducing a new error code in any new spec** so we don't end up with `INVALID_INPUT` / `VALIDATION_ERROR` / `BAD_REQUEST` parallel codes meaning the same thing.
+
 ### Pagination
 - Query params: `?page=1&limit=20` (1-indexed pages, max limit 50)
 - Default limit: 20

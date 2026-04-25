@@ -42,6 +42,9 @@ frontend/public/audio/**/*.wav
 frontend/public/audio/**/*.ogg
 frontend/public/audio/**/*.webm
 
+# Claude Code runtime artifacts
+.claude/*.lock
+
 # Playwright MCP artifacts
 .playwright-mcp/
 
