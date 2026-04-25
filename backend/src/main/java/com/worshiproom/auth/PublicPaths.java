@@ -24,6 +24,8 @@ public final class PublicPaths {
         "/api/v1/auth/logout",
         "/api/v1/proxy/**",
         "/actuator/health",
+        "/actuator/health/liveness",
+        "/actuator/health/readiness",
         "/actuator/info"
     );
 }

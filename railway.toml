@@ -1,0 +1,24 @@
+# Worship Room Railway service config (Spec 1.10j).
+#
+# Replaces Railway's default TCP-port-listening healthcheck (which routes
+# user traffic to a backend whose port is bound but whose Spring context
+# is still refreshing — Liquibase migrations not yet complete). Railway
+# now polls /actuator/health/readiness, which flips UP only after the
+# ApplicationContext has fully refreshed.
+#
+# Liveness probe (/actuator/health/liveness) is defined by Spring Boot
+# but is NOT used by Railway in this minimal config — Railway treats any
+# unhealthy readiness response as restart-eligible via restartPolicyType.
+# A future spec can add per-probe routing if needed.
+#
+# Reference: https://docs.railway.com/reference/config-as-code
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+
+[deploy]
+healthcheckPath = "/actuator/health/readiness"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

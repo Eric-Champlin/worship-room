@@ -17,6 +17,13 @@
 3. **Liquibase migrations run automatically on backend startup** — Spring Boot applies pending changesets before the app accepts traffic
 4. Post-deploy health check: `GET /api/v1/health` returns 200
 
+### Railway Health Checks (Spec 1.10j)
+- Railway uses `/actuator/health/readiness` as its platform-level healthcheck (configured in `railway.toml` at repo root, key `[deploy].healthcheckPath`).
+- Readiness flips UP only after the Spring `ApplicationContext` finishes refreshing — which happens AFTER Liquibase completes. This prevents Railway from routing user traffic to a process whose port is bound but whose JPA layer isn't ready yet.
+- Liveness (`/actuator/health/liveness`) is the sibling probe Spring Boot exposes. Worship Room never marks itself liveness=DOWN today (no scenarios where the JVM is alive but the app is permanently wedged), so Railway's restart trigger relies on readiness flapping past `restartPolicyMaxRetries`.
+- Both probes are public (no JWT required — `PublicPaths.PATTERNS` lists them explicitly) and carry the six security headers from Spec 1.10g.
+- Probes are NOT rate-limited. `RateLimitFilter` only scopes to `/api/v1/proxy/**`; Railway can poll the probes at platform cadence without bucket exhaustion.
+
 ### Liquibase in Deploy
 - Changesets are applied automatically on Spring Boot startup (`spring.liquibase.enabled=true`)
 - **Zero-downtime requirement:** Changesets must be backward-compatible (no DROP COLUMN on active columns, no NOT NULL on existing columns without defaults)
