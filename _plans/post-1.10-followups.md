@@ -112,3 +112,15 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Priority:** LOW. CC currently shows perf warnings but nothing breaks. Worth tackling as its own small "rules-hygiene" maintenance spec when there's a fresh-eyes window.
 
 **Caught during:** Spec 1.10c Phase 1 kickoff, 2026-04-24.
+
+## 9. RateLimitIntegrationTest requires local Postgres on :5432 (low priority)
+
+**Discovered:** Spec 1.10g execution, 2026-04-25.
+
+**Behavior:** RateLimitIntegrationTest uses @SpringBootTest @ActiveProfiles("dev") and connects to a dev-profile Postgres at localhost:5432. If docker-compose isn't running, the test produces 30 cascading failures across the full suite — masking real test results.
+
+**Workaround:** `docker-compose up -d postgres` before running `./mvnw test`.
+
+**Real fix (future):** convert to Testcontainers using AbstractIntegrationTest, like the other integration tests. Not urgent — the dev-Postgres dependency is documented now and the workaround is one command.
+
+**Priority:** LOW.

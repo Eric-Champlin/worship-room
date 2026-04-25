@@ -174,6 +174,23 @@ When a proxy endpoint (`/api/v1/proxy/ai/*`, `/api/v1/proxy/places/*`, `/api/v1/
 - **Rationale**: Upstream errors often contain API keys, internal URLs, quota details, or cryptic vendor-specific codes that are useless or dangerous to expose.
 - **Verification**: Every proxy service test MUST include a "generic SDK exception throws UpstreamException (no internal leak)" test that asserts the caught exception's message does NOT appear in the thrown `ProxyException`'s message. Spec 2's `GeminiServiceTest.genericSdkErrorThrowsUpstream` is the canonical example.
 
+### Security Response Headers
+
+Every HTTP response Worship Room emits — including filter-raised 401s and 429s — carries a fixed set of six security response headers, set by `SecurityHeadersFilter` in `backend/src/main/java/com/worshiproom/config/SecurityHeadersConfig.java`. The filter runs at `Ordered.HIGHEST_PRECEDENCE + 6` so headers land on responses written from inside `JwtAuthenticationFilter` and `LoginRateLimitFilter` before those filters short-circuit the chain. Same architectural shape as `CorsConfig`, same reason: Spring Security's declarative `http.headers(...)` API does NOT decorate filter-raised responses.
+
+The six headers (canonical values pinned by `SecurityHeadersConfigTest.csp_directiveStringMatchesCanonical`):
+
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains` — 1-year HSTS; NO `preload` (one-way door).
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY` — Worship Room is never legitimately embedded.
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://worship-room-production.up.railway.app https://api.spotify.com; frame-src 'self' https://open.spotify.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests` — `unsafe-inline` in `style-src` deliberate (Tailwind/Vite); removal tracked as future spec 1.10g-bis.
+- `Permissions-Policy: accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()` — geolocation allowed for Local Support; everything else denied.
+
+**Header values are code constants, not config.** Security headers are policy. Tuning lives at `backend/docs/runbook-security-headers.md`. Adding a new image CDN, frame-ancestors loosening, and the long-term unsafe-inline removal are documented there with concrete worked examples.
+
+**Frontend nginx coverage gap:** `frontend/nginx.conf` does not mirror these headers — static-asset responses served directly by nginx have no security headers today. Documented as deferred; future spec can mirror if static-asset coverage becomes a priority.
+
 ### Input Validation & Sanitization
  
 - **All User Inputs**: Validate length, format, content
