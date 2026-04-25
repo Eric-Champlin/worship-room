@@ -71,6 +71,8 @@ just test            # Run all tests (frontend + backend)
 
 ## Environment Variables
 
+The canonical reference for every env var the backend actually reads — with required-in (dev / test / prod), sensitivity (secret / config), where in code each is consumed, and behavior-if-absent per environment — lives at `backend/docs/env-vars-runbook.md` (Spec 1.10i). It also covers secret rotation procedures, the production Railway provisioning matrix, and known drift between the lists below and current reality (notably: `DATABASE_URL` is shown below but the backend actually reads `SPRING_DATASOURCE_URL`; several "Optional / Phase-specific" vars below are aspirational placeholders for specs that have not shipped). **Consult the runbook when provisioning a new environment, debugging a startup failure, rotating a secret, or before introducing a new env var in any new spec.** Treat the quick-reference lists below as illustrative — the runbook is the source of truth.
+
 ### Required (backend)
 ```bash
 # Database
