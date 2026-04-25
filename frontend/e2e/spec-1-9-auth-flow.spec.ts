@@ -12,109 +12,16 @@
  * axe-core runs on every captured viewport state with WCAG 2.1 AA tags.
  */
 import { test, expect, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import {
+  VIEWPORTS,
+  screenshotDir,
+  mockAllAuth,
+  runAxeScan,
+} from './fixtures'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-const SCREENSHOT_DIR = path.resolve(
-  __dirname,
-  '../playwright-screenshots/1-9',
-)
-
-const VIEWPORTS = [
-  { name: 'mobile', width: 375, height: 667 },
-  { name: 'tablet', width: 768, height: 1024 },
-  { name: 'desktop', width: 1440, height: 900 },
-] as const
-
-const SAMPLE_USER_SUMMARY = {
-  id: 'uuid-e2e-sarah',
-  email: 'sarah@example.com',
-  displayName: 'Sarah',
-  firstName: 'Sarah',
-  lastName: 'Smith',
-  isAdmin: false,
-  timezone: 'America/Chicago',
-}
-
-const SAMPLE_USER_RESPONSE = {
-  ...SAMPLE_USER_SUMMARY,
-  displayNamePreference: 'first_only',
-  customDisplayName: null,
-  avatarUrl: null,
-  bio: null,
-  favoriteVerseReference: null,
-  favoriteVerseText: null,
-  isEmailVerified: true,
-  joinedAt: '2026-04-01T00:00:00Z',
-}
-
-/** JWT-shaped dummy token (3 base64 segments) — not a real signed token. */
-const DUMMY_JWT =
-  'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1dWlkLWUyZS1zYXJhaCJ9.dummy'
-
-interface AuthMocks {
-  loginStatus?: number
-  loginBody?: unknown
-  registerStatus?: number
-  registerBody?: unknown
-  meStatus?: number
-  meBody?: unknown
-  loginDelayMs?: number
-}
-
-async function mockAuthEndpoints(page: Page, mocks: AuthMocks = {}) {
-  const loginStatus = mocks.loginStatus ?? 200
-  const loginBody = mocks.loginBody ?? {
-    data: { token: DUMMY_JWT, user: SAMPLE_USER_SUMMARY },
-    meta: { requestId: 'e2e-r-login' },
-  }
-  const registerStatus = mocks.registerStatus ?? 200
-  const registerBody = mocks.registerBody ?? {
-    data: { registered: true },
-    meta: { requestId: 'e2e-r-reg' },
-  }
-  const meStatus = mocks.meStatus ?? 200
-  const meBody = mocks.meBody ?? {
-    data: SAMPLE_USER_RESPONSE,
-    meta: { requestId: 'e2e-r-me' },
-  }
-
-  await page.route('**/api/v1/auth/login', async (route) => {
-    if (mocks.loginDelayMs) {
-      await new Promise((r) => setTimeout(r, mocks.loginDelayMs))
-    }
-    await route.fulfill({
-      status: loginStatus,
-      contentType: 'application/json',
-      body: JSON.stringify(loginBody),
-    })
-  })
-
-  await page.route('**/api/v1/auth/register', async (route) => {
-    await route.fulfill({
-      status: registerStatus,
-      contentType: 'application/json',
-      body: JSON.stringify(registerBody),
-    })
-  })
-
-  await page.route('**/api/v1/auth/logout', async (route) => {
-    await route.fulfill({ status: 204, body: '' })
-  })
-
-  await page.route('**/api/v1/users/me', async (route) => {
-    await route.fulfill({
-      status: meStatus,
-      contentType: 'application/json',
-      body: JSON.stringify(meBody),
-    })
-  })
-}
+const SCREENSHOT_DIR = screenshotDir('1-9')
 
 async function screenshotAndScan(
   page: Page,
@@ -125,11 +32,7 @@ async function screenshotAndScan(
   fs.mkdirSync(path.dirname(file), { recursive: true })
   await page.screenshot({ path: file, fullPage: false })
 
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze()
-
-  return results.violations
+  return runAxeScan(page)
 }
 
 async function openAuthModalFromLanding(page: Page, view: 'login' | 'register') {
@@ -174,7 +77,7 @@ test.describe('Spec 1.9 — AuthModal visual + a11y captures', () => {
         width: viewport.width,
         height: viewport.height,
       })
-      await mockAuthEndpoints(page)
+      await mockAllAuth(page)
       await openAuthModalFromLanding(page, 'login')
 
       const violations = await screenshotAndScan(
@@ -196,7 +99,7 @@ test.describe('Spec 1.9 — AuthModal visual + a11y captures', () => {
         width: viewport.width,
         height: viewport.height,
       })
-      await mockAuthEndpoints(page)
+      await mockAllAuth(page)
       await openAuthModalFromLanding(page, 'register')
 
       const violations = await screenshotAndScan(
@@ -218,12 +121,14 @@ test.describe('Spec 1.9 — AuthModal visual + a11y captures', () => {
         width: viewport.width,
         height: viewport.height,
       })
-      await mockAuthEndpoints(page, {
-        loginStatus: 401,
-        loginBody: {
-          code: 'INVALID_CREDENTIALS',
-          message: 'Invalid email or password.',
-          requestId: 'r-e2e-401',
+      await mockAllAuth(page, {
+        login: {
+          status: 401,
+          body: {
+            code: 'INVALID_CREDENTIALS',
+            message: 'Invalid email or password.',
+            requestId: 'r-e2e-401',
+          },
         },
       })
       await openAuthModalFromLanding(page, 'login')

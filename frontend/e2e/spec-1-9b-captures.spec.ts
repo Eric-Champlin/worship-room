@@ -13,24 +13,11 @@
  * axe-core runs on every captured viewport state.
  */
 import { test, expect, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { VIEWPORTS, screenshotDir, runAxeScan } from './fixtures'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-const SCREENSHOT_DIR = path.resolve(
-  __dirname,
-  '../playwright-screenshots/1-9b',
-)
-
-const VIEWPORTS = [
-  { name: 'mobile', width: 375, height: 667 },
-  { name: 'tablet', width: 768, height: 1024 },
-  { name: 'desktop', width: 1440, height: 900 },
-]
+const SCREENSHOT_DIR = screenshotDir('1-9b')
 
 async function prepareCaptureRegion(page: Page) {
   // Navigate to an accessible public route that loads the full app CSS + dark theme.
@@ -60,11 +47,7 @@ async function captureAndScan(
   fs.mkdirSync(path.dirname(file), { recursive: true })
   await page.screenshot({ path: file, fullPage: false })
   // Run axe-core scoped to the capture region.
-  const results = await new AxeBuilder({ page })
-    .include('#capture-root')
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze()
-  return results.violations
+  return runAxeScan(page, { include: '#capture-root' })
 }
 
 // Component markup snippets. These match the production components' rendered output

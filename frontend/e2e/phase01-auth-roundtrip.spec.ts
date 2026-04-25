@@ -20,66 +20,18 @@
  * stack. It becomes the template for Phase 2's end-of-phase test.
  */
 import { test, expect, type Page, request as pwRequest } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import {
+  DEV_SEED_EMAIL,
+  DEV_SEED_PASSWORD,
+  freshTestEmail,
+  runAxeScan,
+  seedSkipDashboardGates,
+} from './fixtures'
 
 const IS_PROD_MODE = Boolean(process.env.PLAYWRIGHT_BASE_URL)
 const LOCAL_BACKEND_HEALTH_URL = 'http://localhost:8080/actuator/health'
-const DEV_SEED_EMAIL = 'sarah@worshiproom.dev'
-const DEV_SEED_PASSWORD = 'WorshipRoomDev2026!' // Public — see file header.
 const TEST_PASSWORD = 'PlaywrightSmoke2026!'
 const LOGIN_TIMEOUT_MS = 10_000
-
-function freshRegisterEmail(): string {
-  return `playwright-test+${Date.now()}@worshiproom.dev`
-}
-
-/**
- * Skip the pre-Dashboard gates (onboarding WelcomeWizard + daily MoodCheckIn).
- * This test verifies Phase 1 JWT auth roundtrip — authenticated state
- * propagating to Dashboard, Navbar, and /users/me hydration. Onboarding and
- * the daily mood check-in each have their own separate specs and are not what
- * this test claims to cover. Without these seeds, Dashboard renders
- * `phase === 'onboarding'` or `phase === 'check_in'` for every
- * freshly-authenticated test user (empty localStorage in Playwright's fresh
- * browser context), which replaces Navbar with a full-screen modal and makes
- * the 'User menu' assertion impossible.
- *
- * Dashboard's phase ladder (frontend/src/pages/Dashboard.tsx): onboarding →
- * welcome_back → check_in → dashboard. welcome_back requires 3+ days of
- * inactivity (inactive for fresh-context test users), so seeding past
- * onboarding and check_in is sufficient to land in the dashboard phase.
- *
- * Called right after the first page.goto() on the test origin. localStorage
- * is per-origin and persists across subsequent page.goto() calls within the
- * same origin (e.g., registerFreshUser's trailing page.goto('/')), so a
- * single seed covers the whole flow — no re-seed needed after later navs.
- */
-async function seedSkipDashboardGates(page: Page) {
-  await page.evaluate(() => {
-    localStorage.setItem('wr_onboarding_complete', 'true')
-    const d = new Date()
-    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    // Seed a defensively-complete MoodEntry so the Dashboard's check_in
-    // gate (hasCheckedInToday) is satisfied. Populates every required field
-    // of the MoodEntry interface in frontend/src/types/dashboard.ts so that
-    // downstream consumers (mood chart widget, insights) don't crash when
-    // they render a test entry. Date is today's local date (matches
-    // getLocalDateString's format in frontend/src/utils/date.ts).
-    localStorage.setItem(
-      'wr_mood_entries',
-      JSON.stringify([
-        {
-          id: 'playwright-seed-mood-entry',
-          date: today,
-          mood: 3,
-          moodLabel: 'Okay',
-          timestamp: Date.now(),
-          verseSeen: 'Psalm 46:10',
-        },
-      ]),
-    )
-  })
-}
 
 async function openAuthModalInLoginView(page: Page) {
   await page.goto('/')
@@ -126,7 +78,7 @@ async function loginViaModal(page: Page, email: string, password: string) {
 /** Establish an authenticated session for scenarios 3, 4, 5. */
 async function signInFresh(page: Page) {
   if (IS_PROD_MODE) {
-    await registerFreshUser(page, freshRegisterEmail())
+    await registerFreshUser(page, freshTestEmail())
   } else {
     await loginViaModal(page, DEV_SEED_EMAIL, DEV_SEED_PASSWORD)
   }
@@ -164,7 +116,7 @@ test.describe('Spec 1.10 — Phase 1 auth roundtrip', () => {
   })
 
   test('1. fresh register flows into authenticated dashboard', async ({ page }) => {
-    const email = freshRegisterEmail()
+    const email = freshTestEmail()
     await registerFreshUser(page, email)
 
     // Auto-login lands on the Dashboard, which greets the user by name.
@@ -257,7 +209,7 @@ test.describe('Spec 1.10 — Phase 1 auth roundtrip', () => {
   })
 
   test('6. six failed logins in succession surface RATE_LIMITED copy', async ({ page }) => {
-    const victimEmail = IS_PROD_MODE ? freshRegisterEmail() : DEV_SEED_EMAIL
+    const victimEmail = IS_PROD_MODE ? freshTestEmail() : DEV_SEED_EMAIL
     await openAuthModalInLoginView(page)
 
     const emailField = page.getByLabel('Email address')
@@ -297,16 +249,14 @@ test.describe('Spec 1.10 — Phase 1 accessibility smoke (Rule 17)', () => {
   // TODO: add wcag22aa tag when @axe-core/playwright supports it (project target per CLAUDE.md is WCAG 2.2 AA)
   test('/ logged-out has zero WCAG 2.1 AA violations', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' })
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-      .analyze()
-    if (results.violations.length > 0) {
+    const violations = await runAxeScan(page)
+    if (violations.length > 0) {
       console.log(
         '[1-10] / violations:',
-        results.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help })),
+        violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help })),
       )
     }
-    expect(results.violations).toEqual([])
+    expect(violations).toEqual([])
   })
 
   // TODO(spec-TBD): Test.fixme until design-system primary
@@ -318,15 +268,13 @@ test.describe('Spec 1.10 — Phase 1 accessibility smoke (Rule 17)', () => {
   // fixed. This broader audit belongs in a follow-up spec.
   test.fixme('/prayer-wall logged-out has zero WCAG 2.1 AA violations', async ({ page }) => {
     await page.goto('/prayer-wall', { waitUntil: 'networkidle' })
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-      .analyze()
-    if (results.violations.length > 0) {
+    const violations = await runAxeScan(page)
+    if (violations.length > 0) {
       console.log(
         '[1-10] /prayer-wall violations:',
-        results.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help })),
+        violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help })),
       )
     }
-    expect(results.violations).toEqual([])
+    expect(violations).toEqual([])
   })
 })

@@ -124,3 +124,14 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Real fix (future):** convert to Testcontainers using AbstractIntegrationTest, like the other integration tests. Not urgent — the dev-Postgres dependency is documented now and the workaround is one command.
 
 **Priority:** LOW.
+
+---
+
+## spec-1-9-auth-flow tablet/desktop click intercept
+
+**Discovered:** 2026-04-25 during spec 1.10l verification.
+**Symptom:** `login view`, `login form-error` tests fail at tablet+desktop with 30s click timeout. Backdrop intercepts pointer events. Mobile passes consistently. Non-deterministic on `register` variants.
+**Root cause:** `openAuthModalFromLanding` locator `getByRole('button', { name: 'Log in' })` matches navbar's "Log In" button (visible at tablet+) before modal toggle.
+**Pre-existing:** Yes — confirmed via byte-level diff against pre-refactor code; locator unchanged. Spec 1.10l's plan "9/9 baseline" was an unverified planning-time assumption.
+**Fix sketch:** Scope locator inside the modal: `page.getByRole('dialog').getByRole('button', { name: 'Log in' })` or use a `data-testid` on the toggle.
+**Out of scope for:** spec-1-10l (refactor-only). Owner: TBD.
