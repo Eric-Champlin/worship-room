@@ -1,27 +1,27 @@
 ## localStorage Key Inventory
- 
-Most keys use the `wr_` prefix. Bible redesign keys use the `bible:` prefix instead. AI cache entries use the `bb32-v1:` prefix. Data persists across page refreshes and survives logout (except auth keys).
- 
+
+Most keys use the `wr_` prefix. Bible redesign keys use `bible:`. AI cache uses `bb32-v1:`. Data persists across page refreshes and survives logout (except auth keys).
+
 **Prefix conventions:**
- 
-- `wr_*` — the canonical Worship Room prefix for almost all storage. Used by every feature that predates the Bible redesign and most features added during it.
-- `bible:*` — used by the Bible redesign personal-layer stores (bookmarks, notes, journal entries, reading plans). Documented intentional drift — the personal-layer stores were built as a self-contained subsystem and the prefix differentiates them from the older `wr_bible_*` keys.
-- `bb32-v1:*` — used exclusively by the AI cache module (BB-32). The `v1` suffix supports future cache invalidation by version bump.
- 
-When adding a new storage key, default to `wr_*` unless there is a specific reason to use one of the other prefixes. Document any new key in this file before merging.
+
+- `wr_*` — canonical Worship Room prefix for almost all storage. Used by every feature predating the Bible redesign and most features added during it.
+- `bible:*` — Bible redesign personal-layer stores (bookmarks, notes, journals, plans). Documented intentional drift from the older `wr_bible_*` keys.
+- `bb32-v1:*` — AI cache module (BB-32) only. The `v1` suffix supports future cache invalidation by version bump.
+
+When adding a new key, default to `wr_*` unless there is a specific reason to use one of the other prefixes. Document any new key in this file before merging.
  
 ### Auth Keys (cleared on logout)
  
 | Key                 | Type        | Feature                                                                                                                                                                                                                                                                                                                                             |
 | ------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `wr_auth_simulated` | "true"/null | Legacy simulated-auth toggle (pre-JWT). Still read by `ListenTracker`, `useFaithPoints`, activity engine, and AuthContext's `readInitialState` fallback. Post-Spec-1.9, AuthContext writes it in two places: (a) `simulateLegacyAuth(name)` for WelcomeWizard mock onboarding, (b) `mirrorToLegacyKeys(user)` on real JWT login (transitional mirror).                                          |
-| `wr_user_name`      | string      | Display name. Post-Spec-1.9, mirrored to `user.displayName` for JWT-authed users until Phase 2 cutover removes the mirror.                                                                                                                                                                                                                         |
-| `wr_user_id`        | UUID        | User identifier (preserved across logout). Pre-1.9: client-generated via `crypto.randomUUID()`. Post-1.9: mirrored to the backend UUID on real login via `mirrorToLegacyKeys`. Data keyed on this value (e.g., `useFriends.getOrInitFriendsData(user.id)`) will appear orphaned when a user transitions from mock-mode to real auth — see Spec 1.9 Decision 19. |
-| `wr_jwt_token`      | string      | Bearer token for authenticated API calls (Spec 1.9). 1-hour expiry per backend Spec 1.4. Cleared on explicit logout and on any authenticated 401 response via the `wr:auth-invalidated` window event. **Single source of truth for the key name:** `frontend/src/lib/auth-storage.ts` — do not reference this string anywhere else.                   |
+| `wr_auth_simulated` | "true"/null | Legacy simulated-auth toggle (pre-JWT). Read by `ListenTracker`, `useFaithPoints`, activity engine, and AuthContext's `readInitialState` fallback. Post-1.9, AuthContext writes it via `simulateLegacyAuth(name)` (mock onboarding) and `mirrorToLegacyKeys(user)` (real JWT login — transitional).                                          |
+| `wr_user_name`      | string      | Display name. Post-1.9, mirrored to `user.displayName` for JWT-authed users until Phase 2 cutover removes the mirror.                                                                                                                                                                                                                         |
+| `wr_user_id`        | UUID        | User identifier (preserved across logout). Pre-1.9: client-generated via `crypto.randomUUID()`. Post-1.9: mirrored to backend UUID via `mirrorToLegacyKeys`. Data keyed on this value (e.g., `useFriends.getOrInitFriendsData(user.id)`) appears orphaned when transitioning from mock to real auth — see Spec 1.9 Decision 19. |
+| `wr_jwt_token`      | string      | Bearer token for authenticated API calls (1.9). 1-hour expiry per backend Spec 1.4. Cleared on explicit logout and on any 401 via `wr:auth-invalidated` window event. **Single source of truth:** `frontend/src/lib/auth-storage.ts` — do not reference this string anywhere else.                   |
 
-**Legacy fallback ordering (Spec 1.9, Phase 1):** `readInitialState` in `AuthContext.tsx` checks keys in this order: (1) `wr_jwt_token` present → real JWT-backed mode (boot hydration fetches `/api/v1/users/me`); (2) `wr_auth_simulated === 'true'` → legacy mock mode (reads `wr_user_name`, `wr_user_id`); (3) unauthenticated. The legacy path is preserved for ~32 existing test files that seed auth via `localStorage.setItem('wr_auth_simulated', 'true')`. A future test-suite-migration spec will remove the legacy path.
+**Legacy fallback ordering (1.9):** `readInitialState` checks: (1) `wr_jwt_token` → real JWT mode (boot fetches `/users/me`); (2) `wr_auth_simulated === 'true'` → legacy mock mode (reads `wr_user_name`, `wr_user_id`); (3) unauthenticated. Legacy path preserved for ~32 test files seeding via `wr_auth_simulated`. Future test-migration spec removes it.
 
-**Transitional mirror (Spec 1.9, removed in Phase 2 cutover):** AuthContext's `mirrorToLegacyKeys(user)` helper writes `wr_auth_simulated='true'`, `wr_user_name=user.displayName`, and `wr_user_id=user.id` on successful login, register auto-login, and boot hydration. Every call site is tagged with a `// Transitional — removed in Phase 2 cutover` comment so the Phase 2 activity-engine / friends / badges / ListenTracker migration can find and remove them via grep.
+**Transitional mirror (1.9, removed in Phase 2):** `mirrorToLegacyKeys(user)` writes `wr_auth_simulated`, `wr_user_name`, `wr_user_id` on login, register auto-login, and boot hydration. Each call site is tagged with `// Transitional — removed in Phase 2 cutover` for grep-and-remove during the Phase 2 migration.
  
 ### Mood & Activity Tracking
  
@@ -103,7 +103,7 @@ When adding a new storage key, default to `wr_*` unless there is a specific reas
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `wr_bible_progress`                       | {book: number[]}                                                                                                              | Chapters read per book                                                                                                                                                                                                        |
 | `wr_bible_highlights`                     | BibleHighlight[] (max 500)                                                                                                    | Verse highlights (4 colors). **Reactive store (BB-7).** Module: `lib/bible/highlightStore.ts`. Consumers subscribe inline — see "Reactive store consumption" below.                                                            |
-| `wr_bible_notes` *(deprecated)*           | BibleNote[] (max 200)                                                                                                         | **DEPRECATED.** Pre-redesign verse notes. Replaced by `bible:notes` in BB-8. Key is no longer written to and is ignored on read. Will be removed in a future cleanup spec. Do not use in new code.                            |
+| `wr_bible_notes` *(deprecated)*           | BibleNote[] (max 200)                                                                                                         | **DEPRECATED.** Pre-redesign verse notes; replaced by `bible:notes` in BB-8. No longer written; ignored on read. Constant `BIBLE_NOTES_KEY` still exported from `constants/bible.ts` for backward-compat. Will be removed in a future cleanup spec.                            |
 | `bible:bookmarks`                         | `Bookmark[]`                                                                                                                  | Verse bookmarks (flat array). **Reactive store (BB-7).** Module: `lib/bible/bookmarkStore.ts`. Consumers subscribe inline — see "Reactive store consumption" below.                                                            |
 | `bible:notes`                             | `Note[]`                                                                                                                      | Verse notes — range-based, 10K char limit (BB-8). **Reactive store.** Module: `lib/bible/notes/store.ts`. Consumers subscribe inline — see "Reactive store consumption" below.                                                 |
 | `bible:journalEntries`                    | `JournalEntry[]`                                                                                                              | Journal entries — verse-linked and freeform (BB-11b). **Reactive store.** Module: `lib/bible/journalStore.ts`. Consumers subscribe inline — see "Reactive store consumption" below.                                             |
@@ -130,64 +130,64 @@ When adding a new storage key, default to `wr_*` unless there is a specific reas
 | `wr_memorization_cards`                   | `MemorizationCard[]`                                                                                                          | Verse memorization deck — flip cards with captured verse text (BB-45). **Reactive store via `useMemorizationStore()` hook.** Module: `hooks/bible/useMemorizationStore.ts`.                                                    |
  
 ### AI Cache (BB-32)
- 
+
 Cache entries for AI features (Explain this passage, Reflect on this passage). Managed by `frontend/src/lib/ai/cache.ts`. Uses the `bb32-v1:` prefix instead of `wr_` because BB-32 entries are namespaced as a self-contained pool managed by the cache module's eviction and version logic — same exception precedent as the `bible:` prefix used by other Bible-redesign storage.
- 
+
 | Key                                                                 | Type                                                                                                  | Feature                                       |
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------- |
 | `bb32-v1:explain:gemini-2.5-flash-lite:<reference>:<verseTextHash>` | `{ v: 1, feature: 'explain', model: string, reference: string, content: string, createdAt: number }` | Explain this passage cache (BB-30 + BB-32)    |
 | `bb32-v1:reflect:gemini-2.5-flash-lite:<reference>:<verseTextHash>` | `{ v: 1, feature: 'reflect', model: string, reference: string, content: string, createdAt: number }` | Reflect on this passage cache (BB-31 + BB-32) |
- 
+
+**bb*-v1: cache conventions** (canonical for BB-32; BB-26, BB-29, BB-44 follow the same pattern with deltas noted below):
 - **TTL:** 7 days from `createdAt`. Expired entries return `null` on lookup and are removed as a side effect.
-- **Total cap:** 2 MB (soft limit) across all `bb32-v1:*` entries. When adding a new entry would exceed the cap, oldest entries (by `createdAt`) are evicted one at a time until the cap is satisfied. A single entry larger than 2 MB silently fails to write.
-- **Cleanup:** `clearExpiredAICache()` sweeps expired and version-mismatched entries in one pass. `clearAllAICache()` nukes every `bb32-v1:*` key (used by tests and reserved for a future admin button — no UI trigger exists).
-- **Hash:** verse text is hashed via DJB2 (32-bit, base-36 encoded, non-cryptographic) — compact enough to keep the key short, collision-free across the 16 BB-30/BB-31 prompt-test passages.
-- **Version:** the `bb32-v1` key prefix allows future invalidation. Bumping to `bb32-v2` in a later spec will orphan all existing entries, and the version mismatch on `entry.v` will catch any survivors.
-- **Failure mode:** all cache operations are wrapped in try/catch. Private browsing, quota exceeded, and disabled localStorage all degrade to no-op behavior — the cache is a courtesy layer, never a guarantee. Cache failures never propagate to the UI.
-- **Not cached:** error results. Network errors, API errors, safety blocks, timeouts, key-missing — retrying after a transient failure should fire a fresh request, not return the old failure for 7 days.
+- **Total cap:** 2 MB soft limit across all `bb32-v1:*` entries. Exceeding the cap evicts oldest by `createdAt` one at a time. A single entry larger than 2 MB silently fails to write.
+- **Cleanup:** `clearExpiredAICache()` sweeps expired and version-mismatched entries in one pass. `clearAllAICache()` nukes every `bb32-v1:*` key (used by tests; reserved for a future admin button).
+- **Hash:** verse text is hashed via DJB2 (32-bit, base-36 encoded, non-cryptographic) — compact key, collision-free across the 16 BB-30/BB-31 prompt-test passages.
+- **Version:** the `bb32-v1` prefix allows future invalidation. Bumping to `bb32-v2` orphans existing entries; the version mismatch on `entry.v` catches survivors.
+- **Failure mode:** all cache operations are wrapped in try/catch. Private browsing, quota exceeded, and disabled localStorage degrade to no-op behavior — the cache is a courtesy layer, never a guarantee.
+- **Not cached:** error results. Network errors, API errors, safety blocks, timeouts, and key-missing all retry fresh on next call rather than returning stale failures for 7 days.
 
 ### Audio Cache (BB-26)
 
-Cache entries for BB-26 Bible audio playback. Managed by `frontend/src/lib/audio/audio-cache.ts`. Uses the `bb26-v1:` prefix, mirroring the BB-32 AI cache convention — namespaced as a self-contained pool managed by the cache module's version logic.
+Cache entries for BB-26 Bible audio playback. Managed by `frontend/src/lib/audio/audio-cache.ts`. Uses the `bb26-v1:` prefix.
 
 | Key                   | Type                    | Feature                                                    |
 | --------------------- | ----------------------- | ---------------------------------------------------------- |
 | `bb26-v1:audioBibles` | `AudioBiblesCacheEntry` | Cached DBP `listAudioBibles()` response (BB-26), 7-day TTL |
 
-- **TTL:** 7 days from `createdAt`. Expired entries return null on read.
-- **Cleanup:** Cache corruption or version mismatch returns null and removes the key as a side effect. `clearCachedAudioBibles()` provides explicit cleanup.
-- **Scope:** The only BB-26 localStorage key. Per-chapter audio URLs are held in an in-memory `Map<string, DbpChapterAudio>` keyed by `${filesetId}:${book}:${chapter}` and are NOT persisted — DBP URLs are signed and expire ~15 hours after issue, so persisting them would serve stale URLs on next visit.
-- **Version:** `bb26-v1` prefix allows future invalidation by bumping to `bb26-v2`.
-- **Failure mode:** all localStorage operations are wrapped in `safeLocalStorageGet/Set/Remove` try/catch helpers. Private browsing, quota exceeded, and disabled storage all degrade to no-op behavior. The stale-while-revalidate wrapper `loadAudioBibles()` falls back to stale cache data if the DBP fetch fails, or rethrows if no cache exists.
+Follows `bb*-v1:` cache conventions (see BB-32 above). Deltas:
+- **Single key only.** Per-chapter audio URLs live in an in-memory `Map<string, DbpChapterAudio>` keyed by `${filesetId}:${book}:${chapter}` and are NOT persisted — DBP URLs are signed and expire ~15 hours after issue.
+- **Cleanup helper:** `clearCachedAudioBibles()` provides explicit cleanup.
+- **Stale-while-revalidate:** the `loadAudioBibles()` wrapper falls back to stale cache data if the DBP fetch fails, or rethrows if no cache exists.
+- localStorage operations wrapped in `safeLocalStorageGet/Set/Remove` helpers (same try/catch shape as BB-32).
 
 ### Bible Audio Auto-Advance (BB-29)
 
-Preference for continuous playback in the Bible audio player. Managed by `frontend/src/lib/audio/continuous-playback.ts`. Uses the `bb29-v1:` prefix, following the BB-26 / BB-32 `bb*-v1:` convention for spec-namespaced preferences.
+Preference for continuous playback in the Bible audio player. Managed by `frontend/src/lib/audio/continuous-playback.ts`.
 
 | Key                          | Type      | Feature                                                                                     |
 | ---------------------------- | --------- | ------------------------------------------------------------------------------------------- |
 | `bb29-v1:continuousPlayback` | `boolean` | Continuous playback preference (BB-29). Defaults to `true` when absent or corrupt. No TTL. |
 
-- **Default:** `true` — continuous playback is on by default for new users (anti-pressure design: the feature works correctly for most users without configuration).
-- **Read:** Loaded once on `AudioPlayerProvider` mount via lazy reducer init. Not re-read during the session.
-- **Write:** Updated synchronously by the `setContinuousPlayback` action, which mirrors the new value into the reducer state and writes to localStorage.
-- **Corruption:** Non-JSON or non-boolean values fall back to the default `true`. All localStorage operations are wrapped in try/catch — private browsing, quota exceeded, and disabled storage all degrade to a no-op read returning the default and a no-op write.
-- **Cross-tab:** Not synchronized. Two concurrent audio Bible sessions in separate tabs are not a real use case.
-- **Version:** `bb29-v1` prefix allows future invalidation by bumping to `bb29-v2`.
+Follows `bb*-v1:` versioning convention (see BB-32 above). This is a preference flag, not a cache, so TTL/cap/eviction don't apply. Deltas:
+- **Default:** `true` — anti-pressure design; the feature works for most users without configuration.
+- **Read:** loaded once on `AudioPlayerProvider` mount via lazy reducer init; not re-read during the session.
+- **Write:** `setContinuousPlayback` action mirrors the new value into reducer state and writes to localStorage synchronously.
+- **Corruption fallback:** non-JSON or non-boolean values fall back to `true`.
+- **Cross-tab:** not synchronized. Concurrent audio Bible sessions across tabs aren't a real use case.
 
 ### Read-Along Preference (BB-44)
 
-Preference for verse highlighting during Bible audio playback. Managed by `frontend/src/lib/audio/read-along.ts`. Uses the `bb44-v1:` prefix, following the BB-26/BB-29/BB-32 `bb*-v1:` convention.
+Preference for verse highlighting during Bible audio playback. Managed by `frontend/src/lib/audio/read-along.ts`.
 
 | Key                  | Type      | Feature                                                                                 |
 | -------------------- | --------- | --------------------------------------------------------------------------------------- |
 | `bb44-v1:readAlong`  | `boolean` | Read-along verse highlighting preference (BB-44). Defaults to `true` when absent. No TTL. |
 
-- **Default:** `true` — read-along is on by default (spec req 19).
-- **Read:** Loaded once on `AudioPlayerProvider` mount via lazy reducer init.
-- **Write:** Updated synchronously by the `setReadAlong` action, which mirrors the new value into the reducer state and writes to localStorage.
-- **Corruption:** Non-JSON or non-boolean values fall back to `true`. All localStorage operations are wrapped in try/catch.
-- **Version:** `bb44-v1` prefix allows future invalidation by bumping to `bb44-v2`.
+Follows `bb*-v1:` versioning convention (see BB-32 above). Same shape as BB-29. Deltas:
+- **Default:** `true` (spec req 19).
+- **Read/write:** same lazy-init + sync-write pattern as BB-29.
+- **Corruption fallback:** non-JSON or non-boolean values fall back to `true`.
 
 ### Community Challenges
  
@@ -302,16 +302,14 @@ vi.mock('@/lib/memorize/store', () => ({
 ```
  
 ### Why this matters
- 
-A memorization card added in BibleReader will not appear in the My Bible feed if the My Bible component uses the snapshot-without-subscription pattern. The component looks correct on initial render and silently breaks when the store mutates from elsewhere. This bug class only manifests in real cross-surface usage, so it slips past tests that only check initial render.
- 
-The rule: **every component that reads from a reactive store must subscribe to changes — either via a standalone hook (Pattern A) or via inline `subscribe()` (Pattern B).** Tests for these components must verify subscription behavior, not just initial render — call the store's mutation method from outside the component and verify the component re-renders with the new data.
- 
+
+A memorization card added in BibleReader will not appear in the My Bible feed if the My Bible component uses the snapshot-without-subscription pattern. The component looks correct on initial render and silently breaks when the store mutates from elsewhere. Tests that only check initial render miss this bug class.
+
+The rule: **every component that reads from a reactive store must subscribe to changes** — via standalone hook (Pattern A) or inline `subscribe()` (Pattern B). Tests must verify subscription behavior, not just initial render.
+
 ### Why two patterns coexist
- 
-The standalone-hook pattern (Pattern A) was introduced with `useMemorizationStore` (BB-45) and `useStreakStore` (BB-17). It uses `useSyncExternalStore` and is the cleanest approach. The inline pattern (Pattern B) predates it and is used by the majority of stores (highlights, bookmarks, notes, journals, chapter visits, plans). Both patterns correctly subscribe to the store — the difference is ergonomic, not correctness-related.
- 
-Extracting standalone hooks for the Pattern B stores is a future refactoring opportunity, not a current requirement. New reactive stores should prefer Pattern A (standalone hook with `useSyncExternalStore`), but Pattern B is equally valid when it better fits the component's needs (e.g., when the query depends on component props like `book` and `chapter`).
+
+Pattern A (`useSyncExternalStore`-based standalone hook) was introduced with `useMemorizationStore` (BB-45) and `useStreakStore` (BB-17) and is the cleanest approach. Pattern B (inline) predates it and is used by the majority of stores. Both correctly subscribe — the difference is ergonomic. New reactive stores should prefer Pattern A; Pattern B is fine when the query depends on component props (e.g., `book`, `chapter`). Extracting standalone hooks for existing Pattern B stores is a future refactor, not a current requirement.
  
 ### Reactive stores in this file
  
