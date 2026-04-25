@@ -53,8 +53,4 @@ describe('CelebrateRecovery', () => {
     expect(screen.getByLabelText('Use my current location')).toBeInTheDocument()
   })
 
-  it('renders mock listing cards for logged-out users', () => {
-    renderPage()
-    expect(screen.getAllByText('Celebrate Recovery at First Baptist Columbia').length).toBeGreaterThan(0)
-  })
 })

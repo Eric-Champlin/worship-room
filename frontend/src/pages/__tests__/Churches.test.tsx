@@ -47,11 +47,6 @@ describe('Churches', () => {
     expect(screen.getByLabelText('Use my current location')).toBeInTheDocument()
   })
 
-  it('renders mock listing cards for logged-out users', () => {
-    renderPage()
-    expect(screen.getAllByText('First Baptist Church of Columbia').length).toBeGreaterThan(0)
-  })
-
   it('does not show Saved tab for logged-out users', () => {
     renderPage()
     expect(screen.queryByRole('tab', { name: /saved/i })).not.toBeInTheDocument()

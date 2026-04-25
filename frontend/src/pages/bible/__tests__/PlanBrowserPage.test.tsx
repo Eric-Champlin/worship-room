@@ -204,13 +204,13 @@ describe('PlanBrowserPage', () => {
     expect(screen.queryByText('Prayer Journey')).not.toBeInTheDocument()
   })
 
-  it('hero heading uses Daily Hub pt-36/sm:pt-40/lg:pt-44 padding', () => {
+  it('hero heading uses pt-30/sm:pt-34/lg:pt-36 padding (Bible browser scale)', () => {
     renderPage()
     const heading = screen.getByRole('heading', { level: 1, name: /Reading Plans/i })
     const section = heading.closest('section')
-    expect(section?.className).toContain('pt-36')
-    expect(section?.className).toContain('sm:pt-40')
-    expect(section?.className).toContain('lg:pt-44')
+    expect(section?.className).toContain('pt-30')
+    expect(section?.className).toContain('sm:pt-34')
+    expect(section?.className).toContain('lg:pt-36')
   })
 
   it('no ATMOSPHERIC_HERO_BG inline background (no #0f0a1e)', () => {

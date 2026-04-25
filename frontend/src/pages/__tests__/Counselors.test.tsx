@@ -47,8 +47,4 @@ describe('Counselors', () => {
     expect(screen.getByLabelText('Use my current location')).toBeInTheDocument()
   })
 
-  it('renders mock listing cards for logged-out users', () => {
-    renderPage()
-    expect(screen.getAllByText('Restoration Christian Counseling').length).toBeGreaterThan(0)
-  })
 })

@@ -126,9 +126,12 @@ describe('Pray Ceremony', { timeout: 15000 }, () => {
       vi.advanceTimersByTime(600)
     })
 
-    // Toggle OFF
-    const stopButtons = screen.getAllByLabelText(/stop praying for this request/i)
-    act(() => { fireEvent.click(stopButtons[0]) })
+    // Toggle OFF — re-query inside act() to settle the label transition
+    act(() => {
+      const stopButtons = screen.getAllByLabelText(/stop praying for this request/i)
+      fireEvent.click(stopButtons[0])
+    })
+    act(() => { vi.advanceTimersByTime(0) })
     expect(screen.queryByText('+1 prayer')).not.toBeInTheDocument()
   })
 

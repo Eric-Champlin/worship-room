@@ -50,8 +50,8 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 23  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ⬜     |
 | 24  | 1.10c | Database Backup Strategy                       | S    | Low      | ‼️     |
 | 25  | 1.10f | Terms of Service and Privacy Policy Surfaces   | M    | Med-High | ⬜     |
-| 26  | 1.10g | Security Headers Middleware (CSP/HSTS/etc.)    | S    | Low      | ⬜     |
-| 27  | 1.10h | API Error Code Catalog                         | S    | Low      | ⬜     |
+| 26  | 1.10g | Security Headers Middleware (CSP/HSTS/etc.)    | S    | Low      | ✅     |
+| 27  | 1.10h | API Error Code Catalog                         | S    | Low      | ✅     |
 | 28  | 1.10i | Backend Environment Variables Runbook          | S    | Low      | ⬜     |
 | 29  | 1.10j | Liveness/Readiness Health Checks               | S    | Low      | ⬜     |
 | 30  | 1.10k | HikariCP Connection Pool Tuning                | S    | Low      | ⬜     |

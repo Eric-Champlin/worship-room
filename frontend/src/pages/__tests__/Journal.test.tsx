@@ -175,7 +175,11 @@ describe('JournalTabContent', () => {
     await user.click(screen.getByText('Save Entry'))
     await user.click(screen.getByText('Reflect on my entry'))
 
-    expect(screen.getByText('Reflection')).toBeInTheDocument()
+    // fetchJournalReflection is async — falls through to mock on any error.
+    // Wait for the reflection panel to render.
+    await waitFor(() => {
+      expect(screen.getByText('Reflection')).toBeInTheDocument()
+    })
   })
 
   it('"Done journaling" shows handoff CTAs', async () => {
