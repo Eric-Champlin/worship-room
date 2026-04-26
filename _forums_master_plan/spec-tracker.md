@@ -46,17 +46,17 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 19  | 1.9b  | Error & Loading State Design System            | M    | Low      | ✅     |
 | 20  | 1.10  | Phase 1 Cutover and End-to-End Test            | M    | Medium   | ✅     |
 | 21  | 1.10b | Deployment Target Decision Document            | S    | Low      | ✅     |
-| 22  | 1.10d | Production Monitoring Foundation               | M    | Low      | ⬜     |
+| 22  | 1.10d | Production Monitoring Foundation               | M    | Low      | ✅     |
 | 23  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ⬜     |
 | 24  | 1.10c | Database Backup Strategy                       | S    | Low      | ‼️     |
 | 25  | 1.10f | Terms of Service and Privacy Policy Surfaces   | M    | Med-High | ⬜     |
 | 26  | 1.10g | Security Headers Middleware (CSP/HSTS/etc.)    | S    | Low      | ✅     |
 | 27  | 1.10h | API Error Code Catalog                         | S    | Low      | ✅     |
-| 28  | 1.10i | Backend Environment Variables Runbook          | S    | Low      | ⬜     |
-| 29  | 1.10j | Liveness/Readiness Health Checks               | S    | Low      | ⬜     |
+| 28  | 1.10i | Backend Environment Variables Runbook          | S    | Low      | ✅     |
+| 29  | 1.10j | Liveness/Readiness Health Checks               | S    | Low      | ✅     |
 | 30  | 1.10k | HikariCP Connection Pool Tuning                | S    | Low      | ⬜     |
-| 31  | 1.10l | Playwright E2E Test Infrastructure             | M    | Low      | ⬜     |
-| 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ⬜     |
+| 31  | 1.10l | Playwright E2E Test Infrastructure             | M    | Low      | ✅     |
+| 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ✅     |
 
 ## Phase 2 — Activity Engine Migration (10 specs)
 

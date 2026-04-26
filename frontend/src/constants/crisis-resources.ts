@@ -1,3 +1,8 @@
+// User-facing crisis copy and the resources named here are governed by the
+// Community Guidelines at content/community-guidelines.md (Crisis content section).
+// If you change the resources listed below, update the Guidelines in the same spec
+// so the two stay in sync. See .claude/rules/01-ai-safety.md for the engineering
+// contract (classifier, fail-closed semantics, supersession behavior).
 export const CRISIS_RESOURCES = {
   suicide_prevention: {
     name: '988 Suicide & Crisis Lifeline',

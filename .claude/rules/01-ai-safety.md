@@ -2,6 +2,10 @@
 
 **CRITICAL**: This application deals with emotional and spiritual well-being. AI safety guardrails are mandatory.
 
+### Community Guidelines (canonical user-facing copy)
+
+The Community Guidelines for Worship Room live at `content/community-guidelines.md` (repo root). That document is the canonical source of truth for what users may share, what they may not share, and how the app handles crisis content from a user-facing perspective. Any user-facing copy that touches conduct, content boundaries, or crisis protocol — including Prayer Wall composer hints, crisis banners, moderation action notifications, registration consent, and welcome emails — must align with the Guidelines in voice, claims, and the resources it names. The technical crisis-detection rules in this file (the rest of the section below) and the user-facing voice in the Guidelines are two halves of the same policy: this file owns the engineering contract; the Guidelines own the way we describe it to people. Updates to the Guidelines themselves go through their own spec, not as a side-effect of feature work.
+
 ### Crisis Intervention Protocol
 - **Self-Harm Detection**: Use a lightweight classifier step (LLM or rules+LLM) for crisis detection; keywords are a fallback, not the sole method
   - **Primary**: Send user input through the backend AI proxy (`/api/v1/proxy/ai/*`) with system prompt: "Is this text indicating self-harm, suicide ideation, or immediate danger? Return JSON only: { \"isCrisis\": boolean, \"confidence\": 0-1, \"category\": \"self-harm|abuse|other|none\" }". The proxy currently routes to Gemini 2.5 Flash Lite; the provider is an implementation detail behind the proxy and can swap without frontend changes.
