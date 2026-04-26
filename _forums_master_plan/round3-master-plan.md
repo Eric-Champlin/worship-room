@@ -697,8 +697,7 @@ Expired posts are not deleted — they are hidden from default feed views but re
 
 **Type-specific validation lives in the application layer.** The backend rejects attempts to set `answered_text` on a non-prayer post. The frontend renders different composers and cards based on `post_type`. The database CHECK constraint validates the enum value but not cross-column rules — those live in `PostService`.
 
-### Decision 5: Activity Engine Migrates in Dual-Write Mode
-**The problem.** Every Prayer Wall action calls `recordActivity('prayerWall')`, which writes to `wr_daily_activities`, `wr_faith_points`, `wr_streak`, and potentially `wr_badges`. These four localStorage keys are shared infrastructure that every feature in the app (Daily Hub, Bible, Meditate, etc.) writes to. If Prayer Wall data lives on the backend but the activity engine stays on localStorage, every Prayer Wall write triggers a half-backend / half-local state that is impossible to keep consistent.
+### Decision 5: Activity Engine Migrates in Dual-Write Mode**The problem.** Every Prayer Wall action calls `recordActivity('prayerWall')`, which writes to `wr_daily_activities`, `wr_faith_points`, `wr_streak`, and potentially `wr_badges`. These four localStorage keys are shared infrastructure that every feature in the app (Daily Hub, Bible, Meditate, etc.) writes to. If Prayer Wall data lives on the backend but the activity engine stays on localStorage, every Prayer Wall write triggers a half-backend / half-local state that is impossible to keep consistent.
 
 **The decision (corrected from v1):** Dual-write strategy. The frontend `recordActivity()` function continues to write to localStorage as the source of truth for reads during the Forums Wave. It also fires-and-forgets a `POST /api/v1/activity` call to the backend, which writes to a shadow copy. If the backend is unavailable, localStorage still works and the user sees nothing wrong. Reads NEVER hit the backend during the wave — only writes.
 
@@ -897,6 +896,7 @@ friend_relationships
 friend_requests
   id               UUID PRIMARY KEY
   from_user_id     UUID NOT NULL REFERENCES users(id)
+```
 ```
   to_user_id       UUID NOT NULL REFERENCES users(id)
   status           VARCHAR(20) NOT NULL  -- 'pending', 'accepted', 'declined', 'cancelled'
@@ -2637,9 +2637,7 @@ Schema definitions match Decision 5 in the Architectural Foundation exactly. For
 - **Risk:** Medium (must match frontend logic exactly)
 - **Prerequisites:** 2.1
 - **Goal:** Port the existing frontend faith point calculation logic from `services/faith-points-storage.ts` to a backend `FaithPointsService`. Same point values, same multiplier logic, same level thresholds.
-
 **Approach:** Read the existing frontend logic carefully during recon. Document every point value, every multiplier rule, every level threshold. Port to a backend `FaithPointsService` with the same shape. Unit tests compare backend output against a hardcoded set of (input, expected output) pairs that the frontend implementation also passes. The drift-detection test in Spec 2.8 will assert parity automatically; this spec just ensures the values are right at the moment of porting.
-
 **Files to create:**
 
 - `backend/src/main/java/com/worshiproom/activity/FaithPointsService.java`
@@ -2696,9 +2694,7 @@ Schema definitions match Decision 5 in the Architectural Foundation exactly. For
 - **Size:** L
 - **Risk:** Medium
 - **Prerequisites:** 2.3
-- **Goal:** Port badge eligibility logic to a backend `BadgeService`. Same badge IDs, same trigger conditions, same celebration tiers, same display counts.
-**Approach:** Read the existing frontend badge catalog from `services/badge-storage.ts` and `constants/badges.ts` (or equivalent). Port the catalog and the eligibility logic. The `checkBadges(userId, context)` method takes a user and a context object (current activity, total points, current streak, intercession count, etc.) and returns the list of newly-earned badges plus any badge whose display count should increment. Idempotent — calling it twice in a row returns no new badges the second time.
-
+- **Goal:** Port badge eligibility logic to a backend `BadgeService`. Same badge IDs, same trigger conditions, same celebration tiers, same display counts. **Approach:** Read the existing frontend badge catalog from `services/badge-storage.ts` and `constants/badges.ts` (or equivalent). Port the catalog and the eligibility logic. The `checkBadges(userId, context)` method takes a user and a context object (current activity, total points, current streak, intercession count, etc.) and returns the list of newly-earned badges plus any badge whose display count should increment. Idempotent — calling it twice in a row returns no new badges the second time.
 **Files to create:**
 
 - `backend/src/main/java/com/worshiproom/activity/BadgeService.java`
