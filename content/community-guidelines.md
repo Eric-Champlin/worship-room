@@ -111,7 +111,7 @@ For the legal-precise version of who-sees-what and how data flows, see our Priva
 
 If you see content that breaks these guidelines, or if someone is treating you in a way you'd like us to know about, we want to hear from you.
 
-We're building a reporting flow into the app — you'll be able to flag a post or a user without leaving the page, and the report will go to our moderation queue. Until that ships, please reach out by email at {{SUPPORT_EMAIL}}.
+We're building a reporting flow into the app — you'll be able to flag a post or a user without leaving the page, and the report will go to our moderation queue. Until that ships, please reach out by email at support@worshiproom.com.
 
 A few things to set expectations:
 
@@ -120,7 +120,7 @@ A few things to set expectations:
 - We won't share your identity with the person you reported. Reports are confidential.
 - We make decisions one at a time, with care. A single report doesn't auto-delete a post; a human reviews.
 
-For account-level concerns — deleting your account, exporting your data, questions about a moderation action that affected you — same email: {{SUPPORT_EMAIL}}. We'll add self-serve flows for these as we build out the tools, and we'll point to them from this section when they ship.
+For account-level concerns — deleting your account, exporting your data, questions about a moderation action that affected you — same email: support@worshiproom.com. We'll add self-serve flows for these as we build out the tools, and we'll point to them from this section when they ship.
 
 ## How these guidelines change
 
@@ -128,6 +128,6 @@ We may revise these guidelines as Worship Room grows, especially as new features
 
 ## Last updated and version
 
-- **Last updated:** {{EFFECTIVE_DATE}}
+- **Last updated:** April 25, 2026
 - **Version:** 1.0
 - **Related documents:** Privacy Policy (in progress, Spec 1.10f), Terms of Service (in progress, Spec 1.10f)
