@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.1 — `activity_log` per master plan Decision 5.
+       First of five Phase 2 Activity Engine schema changesets. Every action a
+       user takes that earns points or affects a streak is logged here. The two
+       indexes match expected query patterns for Spec 2.x; add more in a future
+       tuning spec when production query plans reveal need.
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG.
+       Future schema changes go in new YYYY-MM-DD-NNN-*.xml changesets, never
+       in-place edits. -->
+  <changeSet id="2026-04-25-003-create-activity-log-table" author="worship-room">
+
+    <createTable tableName="activity_log">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="activity_type" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="source_feature" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="occurred_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="points_earned" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="metadata" type="JSONB"/>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="activity_log"
+      baseColumnNames="user_id"
+      constraintName="fk_activity_log_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Supports per-user recent-activity queries (Spec 2.6 POST /api/v1/activity). -->
+    <createIndex tableName="activity_log" indexName="idx_activity_log_user_occurred">
+      <column name="user_id"/>
+      <column name="occurred_at" descending="true"/>
+    </createIndex>
+
+    <!-- Supports count-by-type queries for badge eligibility (Spec 2.4). -->
+    <createIndex tableName="activity_log" indexName="idx_activity_log_user_type">
+      <column name="user_id"/>
+      <column name="activity_type"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="activity_log"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

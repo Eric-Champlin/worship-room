@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.1 — `user_badges` per master plan Decision 5.
+       Earned badges with timestamps and optional display count for stackable
+       badges. Composite primary key (user_id, badge_id) — declared via a
+       separate <addPrimaryKey> element so neither column is tagged as a
+       single-column PK inline. badge_id is a VARCHAR string identifier
+       defined by the badge catalog (Spec 2.4).
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new changesets. -->
+  <changeSet id="2026-04-25-006-create-user-badges-table" author="worship-room">
+
+    <createTable tableName="user_badges">
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="badge_id" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="earned_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="display_count" type="INTEGER" defaultValueNumeric="1">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addPrimaryKey
+      tableName="user_badges"
+      constraintName="pk_user_badges"
+      columnNames="user_id, badge_id"/>
+
+    <addForeignKeyConstraint
+      baseTableName="user_badges"
+      baseColumnNames="user_id"
+      constraintName="fk_user_badges_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Named CHECK: display_count must be at least 1 (Decision 5 default). -->
+    <sql>
+      ALTER TABLE user_badges ADD CONSTRAINT user_badges_display_count_positive_check
+      CHECK (display_count &gt;= 1);
+    </sql>
+
+    <rollback>
+      <dropTable tableName="user_badges"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

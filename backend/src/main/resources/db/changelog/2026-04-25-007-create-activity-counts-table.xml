@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.1 — `activity_counts` per master plan Decision 5.
+       Pre-aggregated counts by (user_id, count_type) for fast dashboard reads
+       so we don't COUNT() activity_log rows on every page load. Composite
+       primary key (user_id, count_type) — declared via a separate
+       <addPrimaryKey> element so neither column is tagged as a single-column
+       PK inline. count_type is a VARCHAR identifier (e.g., "prayers",
+       "journals", "weekly_prayers"); the catalog lives in Spec 2.5.
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new changesets. -->
+  <changeSet id="2026-04-25-007-create-activity-counts-table" author="worship-room">
+
+    <createTable tableName="activity_counts">
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="count_type" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="count_value" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_updated" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addPrimaryKey
+      tableName="activity_counts"
+      constraintName="pk_activity_counts"
+      columnNames="user_id, count_type"/>
+
+    <addForeignKeyConstraint
+      baseTableName="activity_counts"
+      baseColumnNames="user_id"
+      constraintName="fk_activity_counts_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Named CHECK: count_value must be non-negative. -->
+    <sql>
+      ALTER TABLE activity_counts ADD CONSTRAINT activity_counts_count_value_nonneg_check
+      CHECK (count_value &gt;= 0);
+    </sql>
+
+    <rollback>
+      <dropTable tableName="activity_counts"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

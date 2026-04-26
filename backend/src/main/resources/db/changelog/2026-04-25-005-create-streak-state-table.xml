@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.1 — `streak_state` per master plan Decision 5.
+       Current streak, longest streak, last active date, plus grace and grief
+       pause columns. Grace and grief pause semantics live in Spec 2.3's
+       StreakService — this spec only provides the columns those services
+       will write to. Date-typed columns (last_active_date, grace_week_start,
+       grief_pause_until) are SQL DATE; grief_pause_used_at is the timestamp
+       of when the user activated the grief pause.
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new changesets. -->
+  <changeSet id="2026-04-25-005-create-streak-state-table" author="worship-room">
+
+    <createTable tableName="streak_state">
+      <column name="user_id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="current_streak" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="longest_streak" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_active_date" type="DATE"/>
+      <column name="grace_days_used" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="grace_week_start" type="DATE"/>
+      <column name="grief_pause_until" type="DATE"/>
+      <column name="grief_pause_used_at" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="streak_state"
+      baseColumnNames="user_id"
+      constraintName="fk_streak_state_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Named CHECK: current_streak must be non-negative. -->
+    <sql>
+      ALTER TABLE streak_state ADD CONSTRAINT streak_state_current_streak_nonneg_check
+      CHECK (current_streak &gt;= 0);
+    </sql>
+
+    <!-- Named CHECK: longest_streak must be non-negative. -->
+    <sql>
+      ALTER TABLE streak_state ADD CONSTRAINT streak_state_longest_streak_nonneg_check
+      CHECK (longest_streak &gt;= 0);
+    </sql>
+
+    <!-- Named CHECK: grace_days_used must be non-negative. -->
+    <sql>
+      ALTER TABLE streak_state ADD CONSTRAINT streak_state_grace_days_used_nonneg_check
+      CHECK (grace_days_used &gt;= 0);
+    </sql>
+
+    <rollback>
+      <dropTable tableName="streak_state"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

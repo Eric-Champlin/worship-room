@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.1 — `faith_points` per master plan Decision 5.
+       Cumulative points + current level per user. PK is also FK to users.id
+       (one row per user). Two named CHECK constraints catch obviously-wrong
+       values at the database level (negative points, sub-1 level).
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new changesets. -->
+  <changeSet id="2026-04-25-004-create-faith-points-table" author="worship-room">
+
+    <createTable tableName="faith_points">
+      <column name="user_id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="total_points" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="current_level" type="INTEGER" defaultValueNumeric="1">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_updated" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="faith_points"
+      baseColumnNames="user_id"
+      constraintName="fk_faith_points_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Named CHECK: total_points must be non-negative. -->
+    <sql>
+      ALTER TABLE faith_points ADD CONSTRAINT faith_points_total_points_nonneg_check
+      CHECK (total_points &gt;= 0);
+    </sql>
+
+    <!-- Named CHECK: current_level must be at least 1 (Decision 5 default). -->
+    <sql>
+      ALTER TABLE faith_points ADD CONSTRAINT faith_points_current_level_positive_check
+      CHECK (current_level &gt;= 1);
+    </sql>
+
+    <rollback>
+      <dropTable tableName="faith_points"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

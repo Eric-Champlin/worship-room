@@ -2652,13 +2652,13 @@ Schema definitions match Decision 5 in the Architectural Foundation exactly. For
 
 **Acceptance criteria:**
 
-- [ ] Every `ActivityType` enum value matches a frontend activity type string-for-string
-- [ ] Point values match the frontend constants file value-for-value
-- [ ] Level thresholds match the frontend constants file
-- [ ] Multiplier logic produces the same tier labels and multipliers as frontend
-- [ ] Recording an activity returns `FaithPointsResult` with: points_earned, total_points, current_level, level_up boolean, multiplier_tier
-- [ ] At least 20 unit tests cover happy paths, level-up cases, multiplier edge cases, and the activity types most commonly used by Prayer Wall
-- [ ] No database calls in unit tests — pure logic only
+- \[ \] Every `ActivityType` enum value matches a frontend activity type string-for-string
+- \[ \] Point values match the frontend constants file value-for-value
+- \[ \] Level thresholds match the frontend constants file
+- \[ \] Multiplier logic produces the same tier labels and multipliers as frontend
+- \[ \] Recording an activity returns `FaithPointsResult` with: points_earned, total_points, current_level, level_up boolean, multiplier_tier
+- \[ \] At least 20 unit tests cover happy paths, level-up cases, multiplier edge cases, and the activity types most commonly used by Prayer Wall
+- \[ \] No database calls in unit tests — pure logic only
 
 ### Spec 2.3 — Streak State Service (Backend Port)
 
@@ -2679,16 +2679,16 @@ Schema definitions match Decision 5 in the Architectural Foundation exactly. For
 
 **Acceptance criteria:**
 
-- [ ] Same-day repeat activity does not increment streak
-- [ ] Day-over-day activity increments streak
-- [ ] One-day gap with grace days remaining consumes a grace day and continues the streak
-- [ ] One-day gap with no grace days remaining and no grief pause breaks the streak
-- [ ] Active grief pause prevents any streak break
-- [ ] Multi-day gap (without grief pause) resets streak to 1
-- [ ] Grace days reset on Monday midnight (server time)
-- [ ] Longest streak updates whenever current streak exceeds it
-- [ ] At least 25 unit tests cover all combinations
-- [ ] Repair eligibility flag returned when a single broken day could be repaired
+- \[ \] Same-day repeat activity does not increment streak
+- \[ \] Day-over-day activity increments streak
+- \[ \] One-day gap with grace days remaining consumes a grace day and continues the streak
+- \[ \] One-day gap with no grace days remaining and no grief pause breaks the streak
+- \[ \] Active grief pause prevents any streak break
+- \[ \] Multi-day gap (without grief pause) resets streak to 1
+- \[ \] Grace days reset on Monday midnight (server time)
+- \[ \] Longest streak updates whenever current streak exceeds it
+- \[ \] At least 25 unit tests cover all combinations
+- \[ \] Repair eligibility flag returned when a single broken day could be repaired
 
 ### Spec 2.4 — Badge Eligibility Service (Backend Port)
 
@@ -2697,7 +2697,6 @@ Schema definitions match Decision 5 in the Architectural Foundation exactly. For
 - **Risk:** Medium
 - **Prerequisites:** 2.3
 - **Goal:** Port badge eligibility logic to a backend `BadgeService`. Same badge IDs, same trigger conditions, same celebration tiers, same display counts.
-
 **Approach:** Read the existing frontend badge catalog from `services/badge-storage.ts` and `constants/badges.ts` (or equivalent). Port the catalog and the eligibility logic. The `checkBadges(userId, context)` method takes a user and a context object (current activity, total points, current streak, intercession count, etc.) and returns the list of newly-earned badges plus any badge whose display count should increment. Idempotent — calling it twice in a row returns no new badges the second time.
 
 **Files to create:**
