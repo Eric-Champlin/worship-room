@@ -107,7 +107,7 @@ export function DevotionalTabContent({
             }
           }
           setIsCompleted(true)
-          recordActivity('devotional')
+          recordActivity('devotional', 'devotional')
           playSoundEffect('chime')
           onComplete?.()
           observer.disconnect()

@@ -154,3 +154,26 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Smoke test:** TBD when domain available
 
 ---
+
+## 10. Activity dual-write gap: `wr:activity-recorded` event paths bypass Spec 2.7 (medium priority)
+
+**Captured:** During Spec 2.7 execution, 2026-04-26.
+
+**The gap:** Spec 2.7 wires fire-and-forget `POST /api/v1/activity` into `useFaithPoints.recordActivity` only. External code paths that update faith-points localStorage directly without going through `useFaithPoints.recordActivity` continue to bypass the backend dual-write entirely.
+
+**Identified emitter (verified by `grep wr:activity-recorded` on 2026-04-26):**
+
+- `frontend/src/hooks/useListenTracker.ts:114` — fires `wr:activity-recorded` with `{ type: 'listen' }` after the music player's 30-second listen timer completes. Writes localStorage directly via `faith-points-storage` services. **Backend will be missing every `'listen'` activity until this is wired.**
+
+**Identified listeners (refresh-only, no shadow write):**
+
+- `frontend/src/hooks/useFaithPoints.ts:356` — refreshes React state via `setState(loadState())`.
+- `frontend/src/hooks/useChallengeAutoDetect.ts:94` — forwards to challenge auto-completion.
+
+**Why deferred:** Spec 2.7 declared this out of scope to keep the spec M-sized. Wiring requires (a) finding/touching `useListenTracker` and any future external emitter, (b) deciding whether the emitter or the listener does the dual-write (emitter wins because the listener has no access to the activity payload), (c) supplying a `sourceFeature` per emitter.
+
+**Suggested fix shape:** Add a `postActivityToBackend` invocation directly in `useListenTracker` after the localStorage write, gated by the same `isBackendActivityEnabled()` flag, with `sourceFeature: 'music'`. Spec 2.10 (Historical Activity Backfill) will eventually backfill the missed `'listen'` rows from localStorage anyway, so the gap is tolerable until then.
+
+**Priority:** MEDIUM. Skews the backend `activity_log` toward non-music activities until wired. Backfill closes the gap eventually.
+
+---

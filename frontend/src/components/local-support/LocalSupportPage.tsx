@@ -60,7 +60,7 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
   const placeType = categoryToPlaceType(config.category)
 
   const handleVisit = useCallback((_placeId: string, _placeName: string) => {
-    recordActivity('localVisit')
+    recordActivity('localVisit', 'local_support')
     showToast('Visit recorded. That took courage. +10 faith points.', 'success')
   }, [recordActivity, showToast])
 

@@ -199,7 +199,7 @@ describe('PrayTabContent activity integration', () => {
     // Advance past the 1500ms prayer generation timeout
     await flushPrayerPromise()
 
-    expect(mockRecordActivity).toHaveBeenCalledWith('pray')
+    expect(mockRecordActivity).toHaveBeenCalledWith('pray', 'daily_hub')
   })
 
   it('recordActivity not called on generate failure (empty text)', async () => {

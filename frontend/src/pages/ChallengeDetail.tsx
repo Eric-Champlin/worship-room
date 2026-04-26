@@ -23,6 +23,7 @@ import type { CompletionResult } from '@/hooks/useChallengeProgress'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { useChallengeAutoDetect } from '@/hooks/useChallengeAutoDetect'
+import type { ActivityType } from '@/types/dashboard'
 import { getChallenge, CHALLENGES } from '@/data/challenges'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
 import {
@@ -57,15 +58,21 @@ export function ChallengeDetail() {
   const [activeMilestone, setActiveMilestone] = useState<{ day: number; title: string } | null>(null)
 
   const faithPoints = useFaithPoints()
+  const { recordActivity: rawRecordActivity } = faithPoints
   const { showToast } = useToastSafe()
   const { playSoundEffect } = useSoundEffects()
+
+  const recordActivityForChallenge = useCallback(
+    (type: ActivityType) => rawRecordActivity(type, 'challenge'),
+    [rawRecordActivity],
+  )
 
   // Auto-detection: auto-complete challenge day if action already done
   useChallengeAutoDetect({
     isAuthenticated,
     getActiveChallenge,
     completeDay,
-    recordActivity: faithPoints.recordActivity,
+    recordActivity: recordActivityForChallenge,
     showToast,
   })
 
@@ -133,7 +140,7 @@ export function ChallengeDetail() {
     if (selectedDay !== progress.currentDay) return
     if (progress.completedDays.includes(selectedDay)) return
 
-    const result: CompletionResult = completeDay(challengeId, selectedDay, faithPoints.recordActivity)
+    const result: CompletionResult = completeDay(challengeId, selectedDay, recordActivityForChallenge)
     playSoundEffect('ascending')
 
     if (result.isCompletion) {
@@ -161,7 +168,7 @@ export function ChallengeDetail() {
         }
       }
     }
-  }, [challengeId, challenge, progress, selectedDay, completeDay, faithPoints.recordActivity, hasMilestoneBeenShown, playSoundEffect])
+  }, [challengeId, challenge, progress, selectedDay, completeDay, recordActivityForChallenge, hasMilestoneBeenShown, playSoundEffect])
 
   const handleJoin = useCallback(() => {
     if (!challengeId) return

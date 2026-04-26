@@ -269,7 +269,7 @@ describe('useFaithPoints — full repair flow (integration)', () => {
     expect(result.current.currentStreak).toBe(7);
 
     // Record activity — triggers streak reset (missed March 17)
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
 
     // Streak resets to 1, previousStreak captured as 7
     expect(result.current.currentStreak).toBe(1);

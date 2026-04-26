@@ -71,7 +71,7 @@ function DashboardContent() {
     (prayerId: string) => {
       const wasPraying = togglePraying(prayerId)
       if (!wasPraying) {
-        recordActivity('prayerWall')
+        recordActivity('prayerWall', 'prayer_wall')
         // Only count as intercession if not praying for own prayer
         const prayer = prayers.find((p) => p.id === prayerId)
         if (prayer?.userId !== user?.id) {
@@ -129,7 +129,7 @@ function DashboardContent() {
             : p,
         ),
       )
-      recordActivity('prayerWall')
+      recordActivity('prayerWall', 'prayer_wall')
       showToast('Comment shared.')
     },
     [showToast, recordActivity],

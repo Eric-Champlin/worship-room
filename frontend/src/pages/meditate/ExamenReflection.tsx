@@ -38,7 +38,7 @@ function ExamenReflectionContent() {
     const elapsedMs = Date.now() - startTimeRef.current
     const minutes = Math.max(1, Math.round(elapsedMs / 60000))
     markMeditationComplete('examen')
-    recordActivity('meditate')
+    recordActivity('meditate', 'meditate')
     setSessionDuration(minutes)
     saveMeditationSession({
       id: crypto.randomUUID(),

@@ -227,7 +227,7 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
     }
     setSavedEntries((prev) => [savedEntry, ...prev])
     markJournalComplete()
-    recordActivity('journal')
+    recordActivity('journal', 'journal')
     showToast('Your words are safe. Well done today.')
 
     // Milestone celebration check

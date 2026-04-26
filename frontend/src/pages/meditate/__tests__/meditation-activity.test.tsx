@@ -90,6 +90,6 @@ describe('Meditation activity integration', () => {
     const finishBtn = screen.getByRole('button', { name: /finish/i })
     await user.click(finishBtn)
 
-    expect(mockRecordActivity).toHaveBeenCalledWith('meditate')
+    expect(mockRecordActivity).toHaveBeenCalledWith('meditate', 'meditate')
   })
 })

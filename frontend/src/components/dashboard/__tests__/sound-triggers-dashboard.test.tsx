@@ -165,7 +165,7 @@ describe('Sound Triggers — Dashboard & Gamification', () => {
       const { result } = renderHook(() => useFaithPoints(), { wrapper: faithPointsWrapper })
 
       act(() => {
-        result.current.recordActivity('mood')
+        result.current.recordActivity('mood', 'test')
       })
 
       window.removeEventListener('wr:points-earned', handler)
@@ -194,7 +194,7 @@ describe('Sound Triggers — Dashboard & Gamification', () => {
 
       // mood gives 5 points → 96 + 5 = 101 → level 2
       act(() => {
-        result.current.recordActivity('mood')
+        result.current.recordActivity('mood', 'test')
       })
 
       window.removeEventListener('wr:level-up', handler)

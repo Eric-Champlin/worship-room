@@ -75,7 +75,7 @@ function GratitudeReflectionContent() {
     const elapsedMs = Date.now() - startTimeRef.current
     const minutes = Math.max(1, Math.round(elapsedMs / 60000))
     markMeditationComplete('gratitude')
-    recordActivity('meditate')
+    recordActivity('meditate', 'meditate')
     setSessionDuration(minutes)
     saveMeditationSession({
       id: crypto.randomUUID(),

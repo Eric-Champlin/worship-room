@@ -149,7 +149,7 @@ describe('JournalTabContent activity integration', () => {
     const saveBtn = screen.getByRole('button', { name: /save entry/i })
     await user.click(saveBtn)
 
-    expect(mockRecordActivity).toHaveBeenCalledWith('journal')
+    expect(mockRecordActivity).toHaveBeenCalledWith('journal', 'journal')
   })
 })
 

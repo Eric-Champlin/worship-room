@@ -55,21 +55,21 @@ describe('Faith Points Integration — Multi-Day Streak', () => {
     const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
 
     // Day 1 — March 16
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
     expect(result.current.currentStreak).toBe(1);
     unmount();
 
     // Day 2 — March 17
     vi.setSystemTime(new Date(2026, 2, 17, 12, 0, 0));
     const { result: r2, unmount: u2 } = renderHook(() => useFaithPoints(), { wrapper });
-    act(() => { r2.current.recordActivity('pray'); });
+    act(() => { r2.current.recordActivity('pray', 'test'); });
     expect(r2.current.currentStreak).toBe(2);
     u2();
 
     // Day 3 — March 18
     vi.setSystemTime(new Date(2026, 2, 18, 12, 0, 0));
     const { result: r3, unmount: u3 } = renderHook(() => useFaithPoints(), { wrapper });
-    act(() => { r3.current.recordActivity('pray'); });
+    act(() => { r3.current.recordActivity('pray', 'test'); });
     expect(r3.current.currentStreak).toBe(3);
     expect(r3.current.longestStreak).toBe(3);
     u3();
@@ -77,7 +77,7 @@ describe('Faith Points Integration — Multi-Day Streak', () => {
     // Day 5 — March 20 (skipped Day 4)
     vi.setSystemTime(new Date(2026, 2, 20, 12, 0, 0));
     const { result: r5 } = renderHook(() => useFaithPoints(), { wrapper });
-    act(() => { r5.current.recordActivity('pray'); });
+    act(() => { r5.current.recordActivity('pray', 'test'); });
     expect(r5.current.currentStreak).toBe(1); // Reset
     expect(r5.current.longestStreak).toBe(3); // Preserved
   });
@@ -94,7 +94,7 @@ describe('Faith Points Integration — Level-Up Progression', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     expect(result.current.currentLevel).toBe(1);
 
-    act(() => { result.current.recordActivity('pray'); }); // +10 → 105
+    act(() => { result.current.recordActivity('pray', 'test'); }); // +10 → 105
     expect(result.current.currentLevel).toBe(2);
     expect(result.current.levelName).toBe('Sprout');
   });
@@ -107,7 +107,7 @@ describe('Faith Points Integration — Level-Up Progression', () => {
 
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
-    act(() => { result.current.recordActivity('pray'); }); // +10 → 505
+    act(() => { result.current.recordActivity('pray', 'test'); }); // +10 → 505
     expect(result.current.currentLevel).toBe(3);
     expect(result.current.levelName).toBe('Blooming');
   });
@@ -118,12 +118,12 @@ describe('Faith Points Integration — Point Recalculation', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     // Activity 1: mood(5) × 1x = 5
-    act(() => { result.current.recordActivity('mood'); });
+    act(() => { result.current.recordActivity('mood', 'test'); });
     expect(result.current.totalPoints).toBe(5);
     expect(result.current.todayPoints).toBe(5);
 
     // Activity 2: mood(5) + pray(10) = 15 × 1.25 = 19; diff = 14
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
     expect(result.current.totalPoints).toBe(19);
     expect(result.current.todayPoints).toBe(19);
     expect(result.current.todayMultiplier).toBe(1.25);
@@ -135,8 +135,8 @@ describe('Faith Points Integration — Idempotency', () => {
     const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('pray');
-      result.current.recordActivity('journal');
+      result.current.recordActivity('pray', 'test');
+      result.current.recordActivity('journal', 'test');
     });
 
     const totalAfter = result.current.totalPoints;
@@ -154,7 +154,7 @@ describe('Faith Points Integration — Idempotency', () => {
 
     // Recording again should be idempotent
     act(() => {
-      r2.current.recordActivity('pray');
+      r2.current.recordActivity('pray', 'test');
     });
     expect(r2.current.totalPoints).toBe(totalAfter);
   });
@@ -173,7 +173,7 @@ describe('Faith Points Integration — Error Recovery', () => {
     expect(result.current.currentLevel).toBe(1);
 
     // Should still be able to record activities
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
     expect(result.current.totalPoints).toBe(10);
   });
 
@@ -185,7 +185,7 @@ describe('Faith Points Integration — Error Recovery', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     // recordActivity should not crash
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
 
     // State should not change (persist failed)
     expect(result.current.totalPoints).toBe(0);
@@ -207,7 +207,7 @@ describe('Faith Points Integration — Max Level', () => {
     expect(result.current.levelName).toBe('Lighthouse');
     expect(result.current.pointsToNextLevel).toBe(0);
 
-    act(() => { result.current.recordActivity('pray'); }); // +10
+    act(() => { result.current.recordActivity('pray', 'test'); }); // +10
     expect(result.current.totalPoints).toBe(10060);
     expect(result.current.currentLevel).toBe(6); // Still Lighthouse
     expect(result.current.pointsToNextLevel).toBe(0);
@@ -220,7 +220,7 @@ describe('Faith Points Integration — Midnight Rollover', () => {
     vi.setSystemTime(new Date(2026, 2, 16, 23, 59, 0));
     const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
 
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
     expect(result.current.currentStreak).toBe(1);
     const day1Points = result.current.todayPoints;
     unmount();
@@ -233,7 +233,7 @@ describe('Faith Points Integration — Midnight Rollover', () => {
     expect(r2.current.todayActivities.pray).toBe(false);
     expect(r2.current.todayPoints).toBe(0);
 
-    act(() => { r2.current.recordActivity('journal'); });
+    act(() => { r2.current.recordActivity('journal', 'test'); });
     expect(r2.current.currentStreak).toBe(2); // Consecutive
     expect(r2.current.todayActivities.journal).toBe(true);
 

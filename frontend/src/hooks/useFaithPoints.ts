@@ -27,6 +27,9 @@ import {
   clearNewlyEarned as clearNewlyEarnedData,
 } from '@/services/badge-storage';
 import { checkForNewBadges } from '@/services/badge-engine';
+import { apiFetch } from '@/lib/api-client';
+import { isBackendActivityEnabled } from '@/lib/env';
+import type { ActivityRequest } from '@/types/api/activity';
 import type { ActivityType, DailyActivities, FaithPointsData, StreakData, StreakRepairData } from '@/types/dashboard';
 
 interface FaithPointsState {
@@ -119,12 +122,36 @@ function loadState(): FaithPointsState {
   };
 }
 
-const noopRecordActivity = () => {};
+const noopRecordActivity = (_type: ActivityType, _sourceFeature: string) => {};
 const noopClearNewlyEarned = () => {};
 const noopRepairStreak = (_useFreeRepair: boolean) => {};
 
+/**
+ * Fire-and-forget POST to /api/v1/activity. Spec 2.7 dual-write.
+ *
+ * NEVER awaited by callers — failures are logged and swallowed.
+ * The backend is a shadow copy; localStorage stays canonical for reads.
+ * Authorization header is attached automatically by apiFetch via auth-storage.
+ *
+ * `apiFetch<void>` matches the existing pattern at auth-service.ts:131 for
+ * endpoints whose response is intentionally discarded.
+ */
+async function postActivityToBackend(
+  type: ActivityType,
+  sourceFeature: string,
+): Promise<void> {
+  const body: ActivityRequest = {
+    activityType: type,
+    sourceFeature,
+  };
+  await apiFetch<void>('/api/v1/activity', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
 export function useFaithPoints(): FaithPointsState & {
-  recordActivity: (type: ActivityType) => void
+  recordActivity: (type: ActivityType, sourceFeature: string) => void
   clearNewlyEarnedBadges: () => void
   repairStreak: (useFreeRepair: boolean) => void
 } {
@@ -135,7 +162,7 @@ export function useFaithPoints(): FaithPointsState & {
     return loadState();
   });
 
-  const recordActivity = useCallback((type: ActivityType) => {
+  const recordActivity = useCallback((type: ActivityType, sourceFeature: string) => {
     if (!isAuthenticated) return;
 
     const today = getLocalDateString();
@@ -250,6 +277,15 @@ export function useFaithPoints(): FaithPointsState & {
     window.dispatchEvent(new CustomEvent('wr:points-earned', { detail: { type, pointDifference } }));
     if (levelInfo.level > currentFaithPoints.currentLevel) {
       window.dispatchEvent(new CustomEvent('wr:level-up', { detail: { newLevel: levelInfo.level } }));
+    }
+
+    // Spec 2.7 dual-write — fire-and-forget POST to /api/v1/activity.
+    // localStorage above is the contract; backend is a shadow copy.
+    // Failures are logged and swallowed — never block UX.
+    if (isBackendActivityEnabled()) {
+      postActivityToBackend(type, sourceFeature).catch((err) => {
+        console.warn('[useFaithPoints] backend dual-write failed:', err);
+      });
     }
   }, [isAuthenticated]);
 

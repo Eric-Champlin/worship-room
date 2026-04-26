@@ -43,6 +43,7 @@ import { useTooltipCallout } from '@/hooks/useTooltipCallout'
 import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { CHALLENGES } from '@/data/challenges'
 import { BADGE_MAP } from '@/constants/dashboard/badges'
+import type { ActivityType } from '@/types/dashboard'
 import { EchoCard } from '@/components/echoes/EchoCard'
 import { cn } from '@/lib/utils'
 import { useEcho, markEchoSeen } from '@/hooks/useEcho'
@@ -125,11 +126,23 @@ export function Dashboard() {
     })
   }, [])
 
+  const { recordActivity: rawRecordActivity } = faithPoints
+
+  const recordActivityForChallenge = useCallback(
+    (type: ActivityType) => rawRecordActivity(type, 'challenge'),
+    [rawRecordActivity],
+  )
+
+  const recordActivityForReflection = useCallback(
+    (type: ActivityType) => rawRecordActivity(type, 'evening_reflection'),
+    [rawRecordActivity],
+  )
+
   const { checkAndAutoComplete } = useChallengeAutoDetect({
     isAuthenticated: !!user,
     getActiveChallenge,
     completeDay: challengeCompleteDay,
-    recordActivity: faithPoints.recordActivity,
+    recordActivity: recordActivityForChallenge,
     showToast: challengeShowToast,
   })
 
@@ -621,7 +634,7 @@ export function Dashboard() {
           todayActivities={faithPoints.todayActivities}
           todayPoints={faithPoints.todayPoints}
           currentStreak={faithPoints.currentStreak}
-          recordActivity={faithPoints.recordActivity}
+          recordActivity={recordActivityForReflection}
         />
       )}
       {import.meta.env.DEV && <DevAuthToggle />}

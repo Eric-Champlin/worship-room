@@ -105,7 +105,7 @@ function ScriptureSoakingContent() {
           cleanup()
           playChime()
           markMeditationComplete('soaking')
-          recordActivity('meditate')
+          recordActivity('meditate', 'meditate')
           setSessionDuration(duration!)
           saveMeditationSession({
             id: crypto.randomUUID(),

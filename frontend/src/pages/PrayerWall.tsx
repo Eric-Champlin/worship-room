@@ -190,7 +190,7 @@ function PrayerWallContent() {
       }
       setPrayers((prev) => [newPrayer, ...prev])
       setComposerOpen(false)
-      recordActivity('prayerWall')
+      recordActivity('prayerWall', 'prayer_wall')
       const badgeData = getBadgeData()
       saveBadgeData({
         ...badgeData,
@@ -242,7 +242,7 @@ function PrayerWallContent() {
     }
     setPrayers(prev => [newResponse, ...prev])
     setQotdComposerOpen(false)
-    recordActivity('prayerWall')
+    recordActivity('prayerWall', 'prayer_wall')
     showToast('Your response has been shared.')
   }, [isAuthenticated, user, todaysQuestion.id, recordActivity, showToast])
 
@@ -263,7 +263,7 @@ function PrayerWallContent() {
 
       const wasPraying = togglePraying(prayerId)
       if (!wasPraying) {
-        recordActivity('prayerWall')
+        recordActivity('prayerWall', 'prayer_wall')
 
         // Only count as intercession if not praying for own prayer
         const prayer = prayers.find((p) => p.id === prayerId)
@@ -339,7 +339,7 @@ function PrayerWallContent() {
             : p,
         ),
       )
-      recordActivity('prayerWall')
+      recordActivity('prayerWall', 'prayer_wall')
       showToast('Comment shared.')
     },
     [isAuthenticated, showToast, user, recordActivity],

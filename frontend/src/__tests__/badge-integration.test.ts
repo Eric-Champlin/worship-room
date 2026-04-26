@@ -56,7 +56,7 @@ describe('Badge Integration — First Activity Badges', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => { result.current.clearNewlyEarnedBadges(); });
 
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
 
     const badges = getBadges();
     expect(badges.earned.first_prayer).toBeDefined();
@@ -115,7 +115,7 @@ describe('Badge Integration — Streak Milestones', () => {
     for (let day = 10; day <= 15; day++) {
       vi.setSystemTime(new Date(2026, 2, day, 12, 0, 0));
       const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
-      act(() => { result.current.recordActivity('pray'); });
+      act(() => { result.current.recordActivity('pray', 'test'); });
       unmount();
     }
 
@@ -126,7 +126,7 @@ describe('Badge Integration — Streak Milestones', () => {
     // Day 7
     vi.setSystemTime(new Date(2026, 2, 16, 12, 0, 0));
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
 
     badges = getBadges();
     expect(badges.earned.streak_7).toBeDefined();
@@ -143,7 +143,7 @@ describe('Badge Integration — Level-Up', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => { result.current.clearNewlyEarnedBadges(); });
 
-    act(() => { result.current.recordActivity('pray'); }); // +10 → 105
+    act(() => { result.current.recordActivity('pray', 'test'); }); // +10 → 105
 
     expect(result.current.currentLevel).toBe(2);
     const badges = getBadges();
@@ -171,7 +171,7 @@ describe('Badge Integration — Activity Count Precision', () => {
     localStorage.setItem('wr_badges', JSON.stringify(seedBadges));
 
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
-    act(() => { result.current.recordActivity('pray'); }); // 100th prayer
+    act(() => { result.current.recordActivity('pray', 'test'); }); // 100th prayer
 
     const badges = getBadges();
     expect(badges.activityCounts.pray).toBe(100);
@@ -211,7 +211,7 @@ describe('Badge Integration — Multiple Badges Single Call', () => {
     }));
 
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
-    act(() => { result.current.recordActivity('journal'); }); // 100th journal + full worship day
+    act(() => { result.current.recordActivity('journal', 'test'); }); // 100th journal + full worship day
 
     const badges = getBadges();
     expect(badges.earned.journal_100).toBeDefined();
@@ -230,7 +230,7 @@ describe('Badge Integration — Error Recovery', () => {
     expect(badges.earned.level_1).toBeDefined();
 
     // Should be able to record activities normally
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
     expect(getBadges().earned.first_prayer).toBeDefined();
   });
 
@@ -252,8 +252,8 @@ describe('Badge Integration — Persistence', () => {
     const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('pray');
-      result.current.recordActivity('journal');
+      result.current.recordActivity('pray', 'test');
+      result.current.recordActivity('journal', 'test');
     });
 
     const earnedBefore = getBadges().earned;
@@ -274,7 +274,7 @@ describe('Badge Integration — Community Badges', () => {
   it('community badges return empty with 0 friends', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
 
     const badges = getBadges();
     expect(badges.earned.first_friend).toBeUndefined();
@@ -288,11 +288,11 @@ describe('Badge Integration — Idempotency', () => {
   it('activityCounts not incremented on idempotent call', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
     expect(getBadges().activityCounts.pray).toBe(1);
 
     // Second call — idempotent
-    act(() => { result.current.recordActivity('pray'); });
+    act(() => { result.current.recordActivity('pray', 'test'); });
     expect(getBadges().activityCounts.pray).toBe(1);
   });
 });

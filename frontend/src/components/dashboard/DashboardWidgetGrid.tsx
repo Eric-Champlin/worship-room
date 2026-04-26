@@ -212,7 +212,7 @@ export function DashboardWidgetGrid({
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
-            <GratitudeWidget onGratitudeSaved={() => faithPoints.recordActivity('gratitude')} />
+            <GratitudeWidget onGratitudeSaved={() => faithPoints.recordActivity('gratitude', 'gratitude')} />
           </DashboardCard>
         )
 

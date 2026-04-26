@@ -75,7 +75,7 @@ export function ReadingPlanDetail() {
           // Capture whether points were already awarded today before recording
           pointsAlreadyAwardedRef.current = todayActivities.readingPlan
           completeDay(planId, selectedDay)
-          recordActivity('readingPlan' as ActivityType)
+          recordActivity('readingPlan' as ActivityType, 'reading_plan')
           setJustCompletedDay(selectedDay)
           observer.disconnect()
         }

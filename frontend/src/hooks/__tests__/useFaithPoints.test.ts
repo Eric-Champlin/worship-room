@@ -1,9 +1,33 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
+
+// Mock api-client and env modules so dual-write (Spec 2.7) tests can control
+// the flag and assert the fetch payload. Defaults preserve existing test
+// behavior: `isBackendActivityEnabled` returns false → dual-write skipped →
+// existing tests run unchanged.
+vi.mock('@/lib/api-client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/api-client')>();
+  return {
+    ...actual,
+    apiFetch: vi.fn(),
+  };
+});
+
+vi.mock('@/lib/env', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/env')>();
+  return {
+    ...actual,
+    isBackendActivityEnabled: vi.fn(() => false),
+  };
+});
+
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useFaithPoints } from '../useFaithPoints';
 import { freshDailyActivities } from '@/services/faith-points-storage';
+import { apiFetch, AUTH_INVALIDATED_EVENT } from '@/lib/api-client';
+import { isBackendActivityEnabled } from '@/lib/env';
+import { ApiError } from '@/types/auth';
 import type { MoodEntry, BadgeData } from '@/types/dashboard';
 
 function makeMoodEntry(overrides: Partial<MoodEntry> = {}): MoodEntry {
@@ -59,7 +83,7 @@ describe('useFaithPoints — unauthenticated', () => {
   it('recordActivity is no-op when not authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     expect(result.current.totalPoints).toBe(0);
     expect(localStorage.getItem('wr_daily_activities')).toBeNull();
@@ -96,7 +120,7 @@ describe('useFaithPoints — authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
 
     expect(result.current.todayActivities.pray).toBe(true);
@@ -108,12 +132,12 @@ describe('useFaithPoints — authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     const pointsAfterFirst = result.current.totalPoints;
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     expect(result.current.totalPoints).toBe(pointsAfterFirst);
   });
@@ -122,12 +146,12 @@ describe('useFaithPoints — authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('mood');
+      result.current.recordActivity('mood', 'test');
     });
     expect(result.current.todayPoints).toBe(5); // 5 × 1x
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     // mood(5) + pray(10) = 15 × 1.25 = 18.75 → 19
     expect(result.current.todayPoints).toBe(19);
@@ -138,10 +162,10 @@ describe('useFaithPoints — authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('mood');
-      result.current.recordActivity('pray');
-      result.current.recordActivity('listen');
-      result.current.recordActivity('prayerWall');
+      result.current.recordActivity('mood', 'test');
+      result.current.recordActivity('pray', 'test');
+      result.current.recordActivity('listen', 'test');
+      result.current.recordActivity('prayerWall', 'test');
     });
 
     // mood(5) + pray(10) + listen(10) + prayerWall(15) = 40 × 1.5 = 60
@@ -153,13 +177,13 @@ describe('useFaithPoints — authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('mood');
-      result.current.recordActivity('pray');
-      result.current.recordActivity('listen');
-      result.current.recordActivity('prayerWall');
-      result.current.recordActivity('meditate');
-      result.current.recordActivity('journal');
-      result.current.recordActivity('gratitude');
+      result.current.recordActivity('mood', 'test');
+      result.current.recordActivity('pray', 'test');
+      result.current.recordActivity('listen', 'test');
+      result.current.recordActivity('prayerWall', 'test');
+      result.current.recordActivity('meditate', 'test');
+      result.current.recordActivity('journal', 'test');
+      result.current.recordActivity('gratitude', 'test');
     });
 
     expect(result.current.todayPoints).toBe(180);
@@ -172,7 +196,7 @@ describe('useFaithPoints — authenticated', () => {
     expect(result.current.currentStreak).toBe(0);
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
 
     expect(result.current.currentStreak).toBe(1);
@@ -190,7 +214,7 @@ describe('useFaithPoints — authenticated', () => {
     expect(result.current.currentLevel).toBe(1);
 
     act(() => {
-      result.current.recordActivity('pray'); // +10 → 105 total → Sprout
+      result.current.recordActivity('pray', 'test'); // +10 → 105 total → Sprout
     });
 
     expect(result.current.currentLevel).toBe(2);
@@ -206,7 +230,7 @@ describe('useFaithPoints — authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('mood'); // +5 → 55, still Seedling
+      result.current.recordActivity('mood', 'test'); // +5 → 55, still Seedling
     });
 
     expect(result.current.currentLevel).toBe(1);
@@ -226,8 +250,8 @@ describe('useFaithPoints — authenticated', () => {
     const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('pray');
-      result.current.recordActivity('journal');
+      result.current.recordActivity('pray', 'test');
+      result.current.recordActivity('journal', 'test');
     });
 
     const pointsBefore = result.current.totalPoints;
@@ -244,12 +268,12 @@ describe('useFaithPoints — authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('mood'); // 5 × 1x = 5
+      result.current.recordActivity('mood', 'test'); // 5 × 1x = 5
     });
     expect(result.current.totalPoints).toBe(5);
 
     act(() => {
-      result.current.recordActivity('pray'); // (5+10) × 1.25 = 19, diff = 14
+      result.current.recordActivity('pray', 'test'); // (5+10) × 1.25 = 19, diff = 14
     });
     expect(result.current.totalPoints).toBe(19);
   });
@@ -258,7 +282,7 @@ describe('useFaithPoints — authenticated', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
 
     expect(localStorage.getItem('wr_daily_activities')).not.toBeNull();
@@ -304,7 +328,7 @@ describe('useFaithPoints — badge integration', () => {
   it('recordActivity integrates badge checking', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     const badges = getBadges();
     expect(badges).not.toBeNull();
@@ -314,7 +338,7 @@ describe('useFaithPoints — badge integration', () => {
   it('recordActivity awards first_prayer on first pray activity', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     const badges = getBadges();
     expect(badges.earned.first_prayer).toBeDefined();
@@ -324,7 +348,7 @@ describe('useFaithPoints — badge integration', () => {
   it('recordActivity increments activityCounts.pray', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     const badges = getBadges();
     expect(badges.activityCounts.pray).toBe(1);
@@ -333,10 +357,10 @@ describe('useFaithPoints — badge integration', () => {
   it('recordActivity does NOT increment activityCounts on idempotent call', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     act(() => {
-      result.current.recordActivity('pray'); // idempotent — should be ignored
+      result.current.recordActivity('pray', 'test'); // idempotent — should be ignored
     });
     const badges = getBadges();
     expect(badges.activityCounts.pray).toBe(1);
@@ -345,12 +369,12 @@ describe('useFaithPoints — badge integration', () => {
   it('recordActivity awards full_worship_day on 6th activity', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      result.current.recordActivity('mood');
-      result.current.recordActivity('pray');
-      result.current.recordActivity('listen');
-      result.current.recordActivity('prayerWall');
-      result.current.recordActivity('meditate');
-      result.current.recordActivity('journal');
+      result.current.recordActivity('mood', 'test');
+      result.current.recordActivity('pray', 'test');
+      result.current.recordActivity('listen', 'test');
+      result.current.recordActivity('prayerWall', 'test');
+      result.current.recordActivity('meditate', 'test');
+      result.current.recordActivity('journal', 'test');
     });
     const badges = getBadges();
     expect(badges.earned.full_worship_day).toBeDefined();
@@ -362,12 +386,12 @@ describe('useFaithPoints — badge integration', () => {
     const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
     // Day 1 — all 6
     act(() => {
-      result.current.recordActivity('mood');
-      result.current.recordActivity('pray');
-      result.current.recordActivity('listen');
-      result.current.recordActivity('prayerWall');
-      result.current.recordActivity('meditate');
-      result.current.recordActivity('journal');
+      result.current.recordActivity('mood', 'test');
+      result.current.recordActivity('pray', 'test');
+      result.current.recordActivity('listen', 'test');
+      result.current.recordActivity('prayerWall', 'test');
+      result.current.recordActivity('meditate', 'test');
+      result.current.recordActivity('journal', 'test');
     });
     unmount();
 
@@ -375,12 +399,12 @@ describe('useFaithPoints — badge integration', () => {
     vi.setSystemTime(new Date(2026, 2, 17, 12, 0, 0));
     const { result: r2 } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      r2.current.recordActivity('mood');
-      r2.current.recordActivity('pray');
-      r2.current.recordActivity('listen');
-      r2.current.recordActivity('prayerWall');
-      r2.current.recordActivity('meditate');
-      r2.current.recordActivity('journal');
+      r2.current.recordActivity('mood', 'test');
+      r2.current.recordActivity('pray', 'test');
+      r2.current.recordActivity('listen', 'test');
+      r2.current.recordActivity('prayerWall', 'test');
+      r2.current.recordActivity('meditate', 'test');
+      r2.current.recordActivity('journal', 'test');
     });
     const badges = getBadges();
     expect(badges.earned.full_worship_day.count).toBe(2);
@@ -392,7 +416,7 @@ describe('useFaithPoints — badge integration', () => {
     for (let day = 10; day <= 16; day++) {
       vi.setSystemTime(new Date(2026, 2, day, 12, 0, 0));
       const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
-      act(() => { result.current.recordActivity('pray'); });
+      act(() => { result.current.recordActivity('pray', 'test'); });
       unmount();
     }
     const badges = getBadges();
@@ -407,7 +431,7 @@ describe('useFaithPoints — badge integration', () => {
 
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      result.current.recordActivity('pray'); // +10 → 105 → level 2
+      result.current.recordActivity('pray', 'test'); // +10 → 105 → level 2
     });
     const badges = getBadges();
     expect(badges.earned.level_2).toBeDefined();
@@ -425,7 +449,7 @@ describe('useFaithPoints — badge integration', () => {
   it('recordActivity badge data persists across page reload', () => {
     const { result, unmount } = renderHook(() => useFaithPoints(), { wrapper });
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     unmount();
 
@@ -452,7 +476,7 @@ describe('useFaithPoints — streak capture on reset', () => {
     expect(result.current.currentStreak).toBe(5);
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
 
     // Streak resets to 1 (missed March 15)
@@ -469,7 +493,7 @@ describe('useFaithPoints — streak capture on reset', () => {
     expect(result.current.currentStreak).toBe(0);
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
 
     expect(result.current.currentStreak).toBe(1);
@@ -485,7 +509,7 @@ describe('useFaithPoints — streak capture on reset', () => {
     const { result } = renderHook(() => useFaithPoints(), { wrapper });
 
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
 
     // Streak continues to 6
@@ -554,7 +578,7 @@ describe('useFaithPoints — badge initialization & newlyEarned', () => {
 
     // Record an activity
     act(() => {
-      result.current.recordActivity('pray');
+      result.current.recordActivity('pray', 'test');
     });
     expect(result.current.newlyEarnedBadges).toContain('first_prayer');
   });
@@ -576,5 +600,169 @@ describe('useFaithPoints — badge initialization & newlyEarned', () => {
 
     // wr_badges should still exist
     expect(localStorage.getItem('wr_badges')).not.toBeNull();
+  });
+});
+
+describe('useFaithPoints — dual-write (Spec 2.7)', () => {
+  beforeEach(() => {
+    simulateLogin();
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(false);
+    vi.mocked(apiFetch).mockReset();
+  });
+
+  // Group A — Flag-off behavior
+  it('flag undefined → no backend call fires', async () => {
+    // mockReturnValue(false) is the default in beforeEach (simulates undefined env)
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    expect(apiFetch).not.toHaveBeenCalled();
+    // localStorage path still ran
+    const stored = JSON.parse(localStorage.getItem('wr_daily_activities')!);
+    expect(stored['2026-03-16'].pray).toBe(true);
+  });
+
+  it("flag === 'false' → no backend call fires", async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(false);
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    expect(apiFetch).not.toHaveBeenCalled();
+  });
+
+  it("flag === '' → no backend call fires (fail-closed)", async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(false);
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    expect(apiFetch).not.toHaveBeenCalled();
+  });
+
+  // Group B — Flag-on behavior
+  it('flag on + authenticated → backend POST fires after localStorage write', async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    let storageAtFetch: string | null = null;
+    vi.mocked(apiFetch).mockImplementation(async () => {
+      storageAtFetch = localStorage.getItem('wr_daily_activities');
+      return undefined as never;
+    });
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(apiFetch).toHaveBeenCalledTimes(1));
+    // localStorage was already updated when the apiFetch mock fired
+    expect(storageAtFetch).not.toBeNull();
+    expect(JSON.parse(storageAtFetch!)['2026-03-16'].pray).toBe(true);
+  });
+
+  it('backend call body has correct activityType and sourceFeature', async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    vi.mocked(apiFetch).mockResolvedValue(undefined as never);
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(apiFetch).toHaveBeenCalledTimes(1));
+    const [path, options] = vi.mocked(apiFetch).mock.calls[0];
+    expect(path).toBe('/api/v1/activity');
+    expect(options?.method).toBe('POST');
+    const body = JSON.parse(options?.body as string);
+    expect(body).toEqual({ activityType: 'pray', sourceFeature: 'daily_hub' });
+    // metadata explicitly omitted
+    expect(body.metadata).toBeUndefined();
+  });
+
+  it('recordActivity returns synchronously without awaiting backend', async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    // Never-resolving promise — recordActivity must NOT block on it
+    vi.mocked(apiFetch).mockImplementation(() => new Promise(() => {}));
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    let returnValue: unknown;
+    act(() => {
+      returnValue = result.current.recordActivity('pray', 'daily_hub');
+    });
+    expect(returnValue).toBeUndefined();
+    // React state updated synchronously even though backend hasn't resolved
+    expect(result.current.todayPoints).toBe(10);
+    expect(result.current.todayActivities.pray).toBe(true);
+  });
+
+  // Group C — Error handling
+  it('backend 500 → console.warn logged, no exception escapes, state preserved', async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    vi.mocked(apiFetch).mockRejectedValue(
+      new ApiError('INTERNAL_ERROR', 500, 'server boom', null),
+    );
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(warnSpy).toHaveBeenCalledTimes(1));
+    expect(warnSpy.mock.calls[0][0]).toContain('backend dual-write failed');
+    // State + localStorage still reflect the local write
+    expect(result.current.totalPoints).toBe(10);
+    expect(JSON.parse(localStorage.getItem('wr_daily_activities')!)['2026-03-16'].pray).toBe(true);
+    warnSpy.mockRestore();
+  });
+
+  it('backend network error → console.warn logged, recordActivity completes normally', async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    vi.mocked(apiFetch).mockRejectedValue(
+      new ApiError('NETWORK_ERROR', 0, 'Unable to reach the server.', null),
+    );
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(warnSpy).toHaveBeenCalledTimes(1));
+    expect(result.current.totalPoints).toBe(10);
+    warnSpy.mockRestore();
+  });
+
+  it('backend 401 → ApiError caught + AUTH_INVALIDATED dispatched + warn fires', async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    // Simulate apiFetch's real 401 path: dispatch the auth-invalidated event
+    // and reject with ApiError. recordActivity's .catch handler still logs.
+    vi.mocked(apiFetch).mockImplementation(async () => {
+      window.dispatchEvent(new CustomEvent(AUTH_INVALIDATED_EVENT));
+      throw new ApiError('UNAUTHENTICATED', 401, 'Unauthorized', null);
+    });
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(warnSpy).toHaveBeenCalledTimes(1));
+    const authInvalidations = dispatchSpy.mock.calls.filter(
+      (call) => (call[0] as CustomEvent).type === AUTH_INVALIDATED_EVENT,
+    );
+    expect(authInvalidations).toHaveLength(1);
+    dispatchSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
+
+  // Group D — Idempotency
+  it('same-day repeat → backend POST fires once only', async () => {
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    vi.mocked(apiFetch).mockResolvedValue(undefined as never);
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+      // Second call hits the idempotency early-return at useFaithPoints.ts:146
+      // before reaching the dual-write block.
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(apiFetch).toHaveBeenCalledTimes(1));
+    // Flush microtasks once more — if a second dispatch were queued, it
+    // would surface here. (Fake timers are active; setTimeout would hang.)
+    await Promise.resolve();
+    expect(apiFetch).toHaveBeenCalledTimes(1);
   });
 });

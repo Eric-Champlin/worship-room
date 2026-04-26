@@ -148,7 +148,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
       setPrayer(result)
       setIsLoading(false)
       markPrayComplete()
-      recordActivity('pray')
+      recordActivity('pray', 'daily_hub')
       try {
         localStorage.removeItem(PRAYER_DRAFT_KEY)
       } catch {
@@ -173,7 +173,7 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
 
   const handleGuidedSessionComplete = () => {
     if (!activeGuidedSession) return
-    recordActivity('pray')
+    recordActivity('pray', 'daily_hub')
     markGuidedPrayerComplete(activeGuidedSession.id)
     saveMeditationSession({
       id: `guided-prayer-${activeGuidedSession.id}-${Date.now()}`,

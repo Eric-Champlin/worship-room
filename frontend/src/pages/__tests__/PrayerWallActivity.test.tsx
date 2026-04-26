@@ -58,7 +58,7 @@ describe('PrayerWall activity integration', () => {
     )
     expect(firstPrayButton).toBeDefined()
     await user.click(firstPrayButton!)
-    expect(mockRecordActivity).toHaveBeenCalledWith('prayerWall')
+    expect(mockRecordActivity).toHaveBeenCalledWith('prayerWall', 'prayer_wall')
   })
 
   it('recordActivity not called when un-praying', async () => {
@@ -112,6 +112,6 @@ describe('PrayerWall activity integration', () => {
     )
     expect(visibleSubmit).toBeDefined()
     await user.click(visibleSubmit!)
-    expect(mockRecordActivity).toHaveBeenCalledWith('prayerWall')
+    expect(mockRecordActivity).toHaveBeenCalledWith('prayerWall', 'prayer_wall')
   })
 })

@@ -67,3 +67,20 @@ export function isVapidKeyConfigured(): boolean {
   return !!VAPID_PUBLIC_KEY
 }
 
+const USE_BACKEND_ACTIVITY = import.meta.env.VITE_USE_BACKEND_ACTIVITY as string | undefined
+
+/**
+ * Returns true when activity events should be dual-written to the backend
+ * (POST /api/v1/activity) alongside the existing localStorage write.
+ *
+ * Strict equality to the string `'true'` — `'false'`, `''`, `undefined`,
+ * and any other value all return false (fail-closed).
+ *
+ * Default: false. Cutover (flag default flip) is owned by Spec 2.9.
+ *
+ * Used by: useFaithPoints (Spec 2.7 — Frontend Activity Dual-Write).
+ */
+export function isBackendActivityEnabled(): boolean {
+  return USE_BACKEND_ACTIVITY === 'true'
+}
+
