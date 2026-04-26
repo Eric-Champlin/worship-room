@@ -62,10 +62,10 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 
 | #   | Spec | Title                                           | Size | Risk   | Status |
 | --- | ---- | ----------------------------------------------- | ---- | ------ | ------ |
-| 33  | 2.1  | Activity Engine Schema (Liquibase)              | M    | Low    | ⬜     |
-| 34  | 2.2  | Faith Points Calculation Service (Backend Port) | L    | Medium | ⬜     |
-| 35  | 2.3  | Streak State Service (Backend Port)             | L    | Medium | ⬜     |
-| 36  | 2.4  | Badge Eligibility Service (Backend Port)        | L    | Medium | ⬜     |
+| 33  | 2.1  | Activity Engine Schema (Liquibase)              | M    | Low    | ✅     |
+| 34  | 2.2  | Faith Points Calculation Service (Backend Port) | L    | Medium | ✅     |
+| 35  | 2.3  | Streak State Service (Backend Port)             | L    | Medium | ✅     |
+| 36  | 2.4  | Badge Eligibility Service (Backend Port)        | L    | Medium | ✅     |
 | 37  | 2.5  | Activity Counts Service                         | S    | Low    | ⬜     |
 | 38  | 2.6  | Activity API Endpoint                           | L    | Medium | ⬜     |
 | 39  | 2.7  | Frontend Activity Dual-Write                    | M    | Medium | ⬜     |
