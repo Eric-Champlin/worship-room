@@ -698,7 +698,6 @@ Expired posts are not deleted — they are hidden from default feed views but re
 **Type-specific validation lives in the application layer.** The backend rejects attempts to set `answered_text` on a non-prayer post. The frontend renders different composers and cards based on `post_type`. The database CHECK constraint validates the enum value but not cross-column rules — those live in `PostService`.
 
 ### Decision 5: Activity Engine Migrates in Dual-Write Mode
-
 **The problem.** Every Prayer Wall action calls `recordActivity('prayerWall')`, which writes to `wr_daily_activities`, `wr_faith_points`, `wr_streak`, and potentially `wr_badges`. These four localStorage keys are shared infrastructure that every feature in the app (Daily Hub, Bible, Meditate, etc.) writes to. If Prayer Wall data lives on the backend but the activity engine stays on localStorage, every Prayer Wall write triggers a half-backend / half-local state that is impossible to keep consistent.
 
 **The decision (corrected from v1):** Dual-write strategy. The frontend `recordActivity()` function continues to write to localStorage as the source of truth for reads during the Forums Wave. It also fires-and-forgets a `POST /api/v1/activity` call to the backend, which writes to a shadow copy. If the backend is unavailable, localStorage still works and the user sees nothing wrong. Reads NEVER hit the backend during the wave — only writes.
@@ -788,7 +787,7 @@ Response: {
 
 **Known consequence of dual-write:** A badge earned on Device A (which writes to localStorage A and shadow-writes to the backend) is NOT visible on Device B until backend reads become source-of-truth in a future wave. The user's profile view in Phase 8 may surface backend-derived badges as a partial workaround, but the celebration moment fires only on the device where the badge was earned. This is intentional — the dual-write strategy trades cross-device celebration for blast-radius safety.
 
-Both the frontend (existing `services/`) and the backend ports of the calculation logic must produce identical results. A drift-detection test runs both implementations against shared test cases and asserts parity. When they disagree, the test fails loudly. **CI integration:** the drift test runs on every PR via GitHub Actions (or equivalent), in a job that boots the JVM (Java 21), executes the JS/TS implementation via Node 20, runs both against ~50 shared scenarios from `_test_fixtures/activity-engine-scenarios.json`, and fails the build if any scenario produces non-identical output. The shared scenarios file is the single source of truth and BOTH implementations are tested against it — neither implementation is the "reference"; they are peers that must agree. New scenarios are added when bugs are found (regression-test-first discipline). The test is FAST (target <30 seconds total) so it never gets disabled for being slow.
+Both the frontend (existing `services/`) and the backend ports of the calculation logic must produce identical results. A drift-detection test runs both implementations against shared test cases and asserts parity. When they disagree, the test fails loudly. **CI integration:** the drift test runs on every PR via GitHub Actions (or equivalent), in a job that boots the JVM (Java 21), executes the JS/TS implementation via Node 20, runs both against \~50 shared scenarios from `_test_fixtures/activity-engine-scenarios.json`, and fails the build if any scenario produces non-identical output. The shared scenarios file is the single source of truth and BOTH implementations are tested against it — neither implementation is the "reference"; they are peers that must agree. New scenarios are added when bugs are found (regression-test-first discipline). The test is FAST (target &lt;30 seconds total) so it never gets disabled for being slow.
 
 **Grace periods and grief pause** are built in from Phase 2 day one:
 
@@ -818,7 +817,7 @@ Both the frontend (existing `services/`) and the backend ports of the calculatio
 - `login(name)` signature changes to `login(email, password)` — async, calls `POST /api/v1/auth/login`, stores the token in React state (in-memory only, lost on refresh), populates `user`.
 - `logout()` clears React state and calls `POST /api/v1/auth/logout` (which is a no-op on the backend for in-memory tokens but the endpoint exists for future cookie-based migration).
 - `wr_user_id` in localStorage is preserved for reactive store keys that depend on it (no logout-clear). `wr_auth_simulated` and `wr_user_name` are deprecated but tolerated until a follow-up cleanup spec.
-- The 121 consumers of `useAuth()` that only read `user.name` and `user.id` do NOT change. The ~5-10 callers of `login(name)` are updated to `login(email, password)` — exact list in Phase 1 Spec 1.9.
+- The 121 consumers of `useAuth()` that only read `user.name` and `user.id` do NOT change. The \~5-10 callers of `login(name)` are updated to `login(email, password)` — exact list in Phase 1 Spec 1.9.
 
 **Token storage & lifecycle:**
 
@@ -840,7 +839,7 @@ Both the frontend (existing `services/`) and the backend ports of the calculatio
 
 ### Decision 7: The Reaction Bug Quick Win (Phase 0.5)
 
-**The bug.** The Prayer Wall reaction state currently lives in `usePrayerReactions.ts` as `useState(getMockReactions())`. Each component that calls the hook gets its own copy. The four pages (PrayerWall, PrayerWallDashboard, PrayerDetail, PrayerWallProfile) each instantiate the hook independently. Tapping "praying" on the feed mutates only the feed page's state. Navigating to the detail page creates a new state. The reaction is lost. **This is exactly the BB-45 anti-pattern documented in `.claude/rules/06-testing.md` and `.claude/rules/11-local-storage-keys.md`.**
+**The bug.** The Prayer Wall reaction state currently lives in `usePrayerReactions.ts` as `useState(getMockReactions())`. Each component that calls the hook gets its own copy. The four pages (PrayerWall, PrayerWallDashboard, PrayerDetail, PrayerWallProfile) each instantiate the hook independently. Tapping "praying" on the feed mutates only the feed page's state. Navigating to the detail page creates a new state. The reaction is lost. **This is exactly the BB-45 anti-pattern documented in** `.claude/rules/06-testing.md` **and** `.claude/rules/11-local-storage-keys.md`**.**
 
 **The decision.** Phase 0.5 ships a single spec that converts `usePrayerReactions` from snapshot-without-subscription to a reactive store using `useSyncExternalStore` (Pattern A). The store persists to a new `wr_prayer_reactions` localStorage key. Cross-page consistency works immediately. **This ships before any backend work starts** (after the Phase 0 learning doc is read).
 
@@ -898,6 +897,7 @@ friend_relationships
 friend_requests
   id               UUID PRIMARY KEY
   from_user_id     UUID NOT NULL REFERENCES users(id)
+```
   to_user_id       UUID NOT NULL REFERENCES users(id)
   status           VARCHAR(20) NOT NULL  -- 'pending', 'accepted', 'declined', 'cancelled'
   message          TEXT NULL
@@ -2603,7 +2603,6 @@ _Terms of service opening paragraph:_
 - Streak repair logic on backend (50 points per day, free 1x/week)
 - `VITE_USE_BACKEND_ACTIVITY` flag controls whether dual-write is active (defaults `false` until cutover spec)
 - Phase 2 cutover spec flips the flag to `true` and verifies dual-write in production-like local environment
-
 ### Spec 2.1 — Activity Engine Schema (Liquibase)
 
 - **ID:** `round3-phase02-spec01-activity-schema`
@@ -2624,12 +2623,12 @@ Schema definitions match Decision 5 in the Architectural Foundation exactly. For
 
 **Acceptance criteria:**
 
-- [ ] All five tables created in dev database via `./mvnw spring-boot:run`
-- [ ] Each table has correct columns, types, primary keys, foreign keys, indexes
-- [ ] `psql \d activity_log` shows the schema correctly
-- [ ] Each changeset has a valid rollback block
-- [ ] LiquibaseSmokeTest extended to verify all five tables exist
-- [ ] Testcontainers integration test confirms migrations apply in test environment
+- \[ \] All five tables created in dev database via `./mvnw spring-boot:run`
+- \[ \] Each table has correct columns, types, primary keys, foreign keys, indexes
+- \[ \] `psql \d activity_log` shows the schema correctly
+- \[ \] Each changeset has a valid rollback block
+- \[ \] LiquibaseSmokeTest extended to verify all five tables exist
+- \[ \] Testcontainers integration test confirms migrations apply in test environment
 
 ### Spec 2.2 — Faith Points Calculation Service (Backend Port)
 

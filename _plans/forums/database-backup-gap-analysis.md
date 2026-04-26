@@ -12,7 +12,7 @@
 Phase 1 dashboard inspection of the production Railway project confirmed:
 
 - The project runs on the **Railway Hobby plan** ($5/mo).
-- The Postgres service's **Backups tab is locked** and displays the message: *"Backups are only available for customers on the Pro plan."*
+- The Postgres service's **Backups tab is locked** and displays the message: _"Backups are only available for customers on the Pro plan."_
 - **Zero backups exist** for the Postgres service.
 - **No manual backup trigger** is available — the "Create Backup" / "Backup Now" button is gated behind the Pro plan upsell.
 - **No restore capability** is exposed in the dashboard. There is no list of backup snapshots to click through, and no restore modal to inspect.
@@ -23,13 +23,13 @@ Implication: today, if the Railway Postgres volume were lost, corrupted, or acci
 
 ## 2. Risk Assessment Given Current Scale
 
-| Dimension | Today | After first real user registers |
-|---|---|---|
-| Real (non-tester) user count | 0 | 1+ |
-| Data loss exposure | Low — test users only, trivially recreatable | **High** — real user content is unrecoverable |
-| Recovery Time Objective (RTO) | ~5 minutes (recreate test users by hand) | Infinite (no recovery possible) |
-| Recovery Point Objective (RPO) | N/A (nothing worth recovering) | Total loss of all data since launch |
-| Acceptable in current state? | Yes (with caveats) | **No** |
+| Dimension                      | Today                                        | After first real user registers               |
+| ------------------------------ | -------------------------------------------- | --------------------------------------------- |
+| Real (non-tester) user count   | 0                                            | 1+                                            |
+| Data loss exposure             | Low — test users only, trivially recreatable | **High** — real user content is unrecoverable |
+| Recovery Time Objective (RTO)  | ~5 minutes (recreate test users by hand)     | Infinite (no recovery possible)               |
+| Recovery Point Objective (RPO) | N/A (nothing worth recovering)               | Total loss of all data since launch           |
+| Acceptable in current state?   | Yes (with caveats)                           | **No**                                        |
 
 The risk profile inverts the moment the first stranger registers. Today the database holds Playwright smoke test users and friends-of-Eric test data — losing it costs an afternoon of recreation. Once a real user trusts the app with their journal entries, prayer wall posts, or community profile, "no backup" stops being an acceptable posture.
 
@@ -99,7 +99,7 @@ This deferral is deliberate, not lazy. Today's risk exposure is low enough that 
 **Before the first non-friend user registers, one of paths A, B, or C must be in place and verified by a successful restore drill.**
 
 - This is a **hard prerequisite for public beta**. The app cannot accept registrations from strangers without a working backup-and-restore story.
-- It is **acceptable** to defer through a friends-and-family beta phase, provided every invitee receives an explicit, written disclosure stating: *"This is an early-access build. The database is not currently backed up. Your data may be lost without warning. Treat any content you post here as ephemeral."* No surprises, no implicit trust.
+- It is **acceptable** to defer through a friends-and-family beta phase, provided every invitee receives an explicit, written disclosure stating: _"This is an early-access build. The database is not currently backed up. Your data may be lost without warning. Treat any content you post here as ephemeral."_ No surprises, no implicit trust.
 - It is **not acceptable** the moment a registration form is exposed to anyone the team does not know personally.
 
 The trigger is binary, not gradual. The day before public-beta launch is too late — the verification drill alone takes time, and a failed first drill (almost always the case) needs days of buffer to diagnose and re-test.

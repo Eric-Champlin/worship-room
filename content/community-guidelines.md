@@ -105,7 +105,7 @@ Most of what you do on Worship Room is private to you and stays in your browser.
 
 Mood data is private by design. Friends never see your mood; we don't aggregate it for leaderboards; we don't surface it in any social feature.
 
-For the legal-precise version of who-sees-what and how data flows, see our Privacy Policy. (The Privacy Policy ships in a separate document. Until it's published, this section is the best summary we have.)
+For the legal-precise version of who-sees-what and how data flows, see the Privacy Policy at content/privacy-policy.md.
 
 ## If something goes wrong
 
@@ -130,4 +130,6 @@ We may revise these guidelines as Worship Room grows, especially as new features
 
 - **Last updated:** April 25, 2026
 - **Version:** 1.0
-- **Related documents:** Privacy Policy (in progress, Spec 1.10f), Terms of Service (in progress, Spec 1.10f)
+- **Related documents:**
+  - Privacy Policy: content/privacy-policy.md
+  - Terms of Service: content/terms-of-service.md

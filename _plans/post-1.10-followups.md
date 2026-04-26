@@ -135,3 +135,22 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Pre-existing:** Yes — confirmed via byte-level diff against pre-refactor code; locator unchanged. Spec 1.10l's plan "9/9 baseline" was an unverified planning-time assumption.
 **Fix sketch:** Scope locator inside the modal: `page.getByRole('dialog').getByRole('button', { name: 'Log in' })` or use a `data-testid` on the toggle.
 **Out of scope for:** spec-1-10l (refactor-only). Owner: TBD.
+
+---
+
+## SMTP setup deferred pending domain purchase
+
+**Date:** April 25, 2026
+**Status:** Deferred
+**Reason:** worshiproom.com is a premium domain currently listed at ~$1,500. Eric is not planning to purchase until closer to public launch.
+**Blocks:** Specs 1.5b–g (password reset, email verification, change-password notification, welcome emails, account lockout notification, additional auth-flow emails).
+**Decision criteria for revisit:**
+- Domain purchased (worshiproom.com OR alternative TLD/name)
+- Worship Room within ~30 days of public launch
+- Real users about to register, making email flows user-facing-required
+
+**Vendor preference (when revisited):** Resend (3000/mo free tier, modern API, US-East region)
+**Pre-decided env vars (when revisited):** RESEND_API_KEY, SMTP_FROM_EMAIL=noreply@<domain>, SMTP_FROM_NAME=Worship Room
+**Smoke test:** TBD when domain available
+
+---
