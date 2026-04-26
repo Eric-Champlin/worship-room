@@ -66,9 +66,9 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 34  | 2.2  | Faith Points Calculation Service (Backend Port) | L    | Medium | ✅     |
 | 35  | 2.3  | Streak State Service (Backend Port)             | L    | Medium | ✅     |
 | 36  | 2.4  | Badge Eligibility Service (Backend Port)        | L    | Medium | ✅     |
-| 37  | 2.5  | Activity Counts Service                         | S    | Low    | ⬜     |
-| 38  | 2.6  | Activity API Endpoint                           | L    | Medium | ⬜     |
-| 39  | 2.7  | Frontend Activity Dual-Write                    | M    | Medium | ⬜     |
+| 37  | 2.5  | Activity Counts Service                         | S    | Low    | ✅     |
+| 38  | 2.6  | Activity API Endpoint                           | L    | Medium | ✅     |
+| 39  | 2.7  | Frontend Activity Dual-Write                    | M    | Medium | ✅     |
 | 40  | 2.8  | Drift Detection Test (Frontend ↔ Backend)       | M    | Low    | ⬜     |
 | 41  | 2.9  | Phase 2 Cutover                                 | S    | Medium | ⬜     |
 | 42  | 2.10 | Historical Activity Backfill                    | M    | Medium | ⬜     |
