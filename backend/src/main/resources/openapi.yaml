@@ -34,6 +34,8 @@ tags:
     description: Registration, login, logout
   - name: Users
     description: Authenticated user profile (self) — Spec 1.6
+  - name: Activity
+    description: Activity recording for points, streak, and badge tracking — Spec 2.6
 
 paths:
   /api/v1/health:
@@ -722,6 +724,53 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/activity:
+    post:
+      tags: [Activity]
+      summary: Record an activity event for points, streak, and badge tracking
+      description: |
+        Authenticated endpoint that records a single user activity. On every
+        call an activity_log row is created and (if a count_type mapping
+        exists) the corresponding activity_counts counter is incremented. The
+        first occurrence of a given activityType per day (in the user's local
+        timezone) ALSO updates faith_points, streak_state, and user_badges
+        and returns the points delta, level info, streak state, and any
+        newly-earned badges. Subsequent same-day occurrences of the same
+        activityType return zero points and an empty newBadges array — but
+        the activity_log row is still created and the lifetime count is still
+        incremented.
+
+        Single transaction; rollback on any failure.
+
+        graceUsed and graceRemaining in the streak response are always 0 for
+        now — grace days will be populated by a future spec.
+      operationId: recordActivity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivityRequest' }
+      responses:
+        '200':
+          description: Activity recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ActivityResponseData' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
 components:
   schemas:
     ProxyResponse:
@@ -1162,6 +1211,131 @@ components:
         favoriteVerseReference: { type: string, maxLength: 50, nullable: true }
         favoriteVerseText: { type: string, maxLength: 500, nullable: true }
         timezone: { type: string, maxLength: 50 }
+
+    ActivityRequest:
+      description: |
+        Body for POST /api/v1/activity. Records a single activity event.
+      type: object
+      required: [activityType, sourceFeature]
+      properties:
+        activityType:
+          type: string
+          enum: [mood, pray, listen, prayerWall, readingPlan, meditate, journal, gratitude, reflection, challenge, localVisit, devotional]
+          description: The 12 wire-format ActivityType values (camelCase, matching the frontend enum).
+          example: pray
+        sourceFeature:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: |
+            Identifier of the feature that triggered the activity (e.g.,
+            "daily-pray", "devotional-pray-cta", "meditate-breathing").
+            Free-form short string.
+          example: daily-pray
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: |
+            Optional structured event data (JSONB). Backend treats this as
+            opaque — does NOT inspect, validate, or log its contents.
+
+    ActivityResponseData:
+      description: Inner data payload for the activity response envelope.
+      type: object
+      required: [pointsEarned, totalPoints, currentLevel, levelUp, streak, newBadges, multiplierTier]
+      properties:
+        pointsEarned:
+          type: integer
+          description: |
+            Points credited to the user from THIS call. 0 on the record-only
+            (same-activity-same-day) path. On the first-time-today path, this
+            is the multiplier-aware delta (today's new total minus today's
+            old total).
+          example: 10
+        totalPoints:
+          type: integer
+          description: User's lifetime cumulative points after this call.
+          example: 150
+        currentLevel:
+          type: integer
+          description: User's level after this call (1–6).
+          example: 2
+        levelUp:
+          type: boolean
+          description: True iff this call moved the user to a higher level.
+          example: false
+        streak:
+          $ref: '#/components/schemas/StreakSnapshot'
+        newBadges:
+          type: array
+          description: Badges newly earned by this call. Empty array if none.
+          items: { $ref: '#/components/schemas/NewBadge' }
+        multiplierTier:
+          $ref: '#/components/schemas/MultiplierTierSnapshot'
+
+    StreakSnapshot:
+      description: User's streak state after this call.
+      type: object
+      required: [current, longest, newToday, graceUsed, graceRemaining]
+      properties:
+        current: { type: integer, example: 7 }
+        longest: { type: integer, example: 14 }
+        newToday:
+          type: boolean
+          description: |
+            True iff the streak transition was anything other than SAME_DAY
+            (i.e., FIRST_EVER, INCREMENT, or RESET).
+        graceUsed:
+          type: integer
+          description: |
+            Always 0 in the current API. Reserved for a future grace-days spec.
+          example: 0
+        graceRemaining:
+          type: integer
+          description: |
+            Always 0 in the current API. Reserved for a future grace-days spec.
+          example: 0
+
+    NewBadge:
+      description: A badge newly earned by this call.
+      type: object
+      required: [id, name, celebrationTier, earnedAt]
+      properties:
+        id:
+          type: string
+          example: first_prayer
+          description: Stable badge identifier.
+        name:
+          type: string
+          example: First Prayer
+        celebrationTier:
+          type: string
+          enum: [toast, toast-confetti, special-toast, full-screen]
+          description: UI celebration treatment tier (kebab-case wire format).
+        earnedAt:
+          type: string
+          format: date-time
+
+    MultiplierTierSnapshot:
+      description: |
+        The multiplier tier currently applied to the user's daily activity
+        set. Reflects today's set AFTER this call (first-time-today path) or
+        the pre-existing today's set (record-only path).
+      type: object
+      required: [label, multiplier]
+      properties:
+        label:
+          type: string
+          example: Growing
+          description: |
+            Tier display label. Empty string for the base tier (1.0×). Other
+            values: "Growing" (1.25×), "Devoted" (1.5×), "Full Worship Day"
+            (2.0×).
+        multiplier:
+          type: number
+          format: double
+          example: 1.25
 
   responses:
     BadRequest:
