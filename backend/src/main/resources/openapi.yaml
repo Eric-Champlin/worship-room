@@ -36,6 +36,8 @@ tags:
     description: Authenticated user profile (self) — Spec 1.6
   - name: Activity
     description: Activity recording for points, streak, and badge tracking — Spec 2.6
+  - name: Friends
+    description: Mutual friendships, friend requests, blocks, and user search — Spec 2.5.3
 
 paths:
   /api/v1/health:
@@ -822,6 +824,279 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  # ----------------------------------------------------------------
+  # Phase 2.5 — Friends (Spec 2.5.3)
+  # ----------------------------------------------------------------
+
+  /api/v1/users/me/friends:
+    get:
+      tags: [Friends]
+      summary: List the authenticated user's friends with denormalized profile data
+      operationId: listFriends
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List retrieved (empty array when no friends)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/FriendDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/me/friend-requests:
+    get:
+      tags: [Friends]
+      summary: List pending friend requests in a given direction
+      operationId: listFriendRequests
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: direction
+          in: query
+          required: true
+          description: 'Filter direction: ''incoming'' = pending requests to me; ''outgoing'' = pending requests I sent.'
+          schema:
+            type: string
+            enum: [incoming, outgoing]
+      responses:
+        '200':
+          description: List retrieved (empty array when none)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/FriendRequestDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [Friends]
+      summary: Send a friend request to another user
+      operationId: sendFriendRequest
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SendFriendRequestRequest' }
+      responses:
+        '201':
+          description: Friend request created
+          headers:
+            Location:
+              schema: { type: string }
+              description: URL of the created friend-request resource (/api/v1/friend-requests/{id})
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/FriendRequestDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/friend-requests/{id}:
+    patch:
+      tags: [Friends]
+      summary: Accept, decline, or cancel a pending friend request
+      operationId: respondToFriendRequest
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RespondToFriendRequestRequest' }
+      responses:
+        '200':
+          description: Request state updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [status]
+                    properties:
+                      status:
+                        type: string
+                        enum: [accepted, declined, cancelled]
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/me/friends/{friendId}:
+    delete:
+      tags: [Friends]
+      summary: Remove a friend (deletes both direction rows)
+      operationId: removeFriend
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: friendId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Friendship removed (no body)
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/me/blocks:
+    post:
+      tags: [Friends]
+      summary: Block a user
+      operationId: blockUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BlockUserRequest' }
+      responses:
+        '201':
+          description: User blocked (idempotent on re-block)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [blockedUserId, blockedAt]
+                    properties:
+                      blockedUserId: { type: string, format: uuid }
+                      blockedAt: { type: string, format: date-time }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/me/blocks/{userId}:
+    delete:
+      tags: [Friends]
+      summary: Unblock a previously blocked user
+      operationId: unblockUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Block removed (no body)
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/search:
+    get:
+      tags: [Friends]
+      summary: Search for users by name prefix (for friend-add UI)
+      description: |
+        Lives on the user namespace per spec 2.5.3 Divergence 2 — same
+        URL prefix as /api/v1/users/me/*. Excludes the caller, blocked
+        users in either direction, deleted users, and banned users.
+
+        q must be at least 2 characters; service-layer validation
+        rejects shorter queries with 400 INVALID_INPUT (no Bean
+        Validation involved — friends domain throws InvalidInputException
+        which is caught by the unscoped FriendsExceptionHandler).
+      operationId: searchUsers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query (>= 2 chars, name prefix LIKE-matched)
+          schema: { type: string, minLength: 2 }
+        - name: limit
+          in: query
+          required: false
+          description: Max results (default 20, max 50)
+          schema: { type: integer, default: 20, minimum: 1, maximum: 50 }
+      responses:
+        '200':
+          description: Matching users (empty array if none)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/UserSearchResultDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
 components:
   schemas:
     ProxyResponse:
@@ -1535,6 +1810,109 @@ components:
           description: Always 14 (one row per CountType, all upserted).
           example: 14
 
+    SendFriendRequestRequest:
+      description: Body for POST /api/v1/users/me/friend-requests.
+      type: object
+      required: [toUserId]
+      properties:
+        toUserId:
+          type: string
+          format: uuid
+          description: Target user.
+        message:
+          type: string
+          maxLength: 280
+          nullable: true
+          description: Optional plain-text message (no HTML, no Markdown).
+
+    RespondToFriendRequestRequest:
+      description: |
+        Body for PATCH /api/v1/friend-requests/{id}. Single-endpoint dispatch
+        per Spec 2.5.3 Divergence 3.
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [accept, decline, cancel]
+          description: |
+            'accept' — recipient accepts (creates two friend_relationships rows).
+            'decline' — recipient declines (status='declined', no relationship rows).
+            'cancel' — sender cancels (status='cancelled', no relationship rows).
+
+    BlockUserRequest:
+      description: Body for POST /api/v1/users/me/blocks.
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: User to block.
+
+    FriendDto:
+      description: |
+        Denormalized friend profile shape. Computed by FriendsService.listFriends
+        via a single native query joining users + faith_points + streak_state +
+        activity_log (weekly points subquery). weeklyPoints uses a Monday-00:00
+        week-start in the caller's timezone — see WeekStartCalculator.
+      type: object
+      required: [id, displayName, level, levelName, currentStreak, faithPoints, weeklyPoints]
+      properties:
+        id: { type: string, format: uuid, description: 'Friend''s user ID.' }
+        displayName:
+          type: string
+          description: Server-computed via DisplayNameResolver from the friend's preference.
+        avatarUrl: { type: string, maxLength: 500, nullable: true }
+        level: { type: integer, minimum: 1, maximum: 6 }
+        levelName:
+          type: string
+          enum: [Seedling, Sprout, Blooming, Flourishing, Oak, Lighthouse]
+        currentStreak: { type: integer, minimum: 0 }
+        faithPoints: { type: integer, minimum: 0 }
+        weeklyPoints: { type: integer, minimum: 0 }
+        lastActive:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO-8601 timestamp from users.last_active_at; null if never active.
+
+    FriendRequestDto:
+      description: |
+        Pending or resolved friend request with optional denormalized counterparty info.
+        For listIncomingPendingRequests: fromUserId is set; toUserId is null in DTO
+        (caller is the recipient). For listOutgoingPendingRequests: toUserId is set;
+        fromUserId is null in DTO (caller is the sender). For sendFriendRequest's
+        201 response: both fromUserId and toUserId are set; counterparty display fields
+        are null (frontend re-fetches if needed).
+      type: object
+      required: [id, status, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        fromUserId: { type: string, format: uuid, nullable: true }
+        toUserId: { type: string, format: uuid, nullable: true }
+        otherPartyDisplayName: { type: string, nullable: true }
+        otherPartyAvatarUrl: { type: string, nullable: true }
+        message: { type: string, nullable: true, maxLength: 280 }
+        status:
+          type: string
+          enum: [pending, accepted, declined, cancelled]
+        createdAt: { type: string, format: date-time }
+        respondedAt: { type: string, format: date-time, nullable: true }
+
+    UserSearchResultDto:
+      description: |
+        Minimal user shape for the friend-add UI. Excludes the caller, blocked
+        users in either direction, deleted users, and banned users.
+      type: object
+      required: [id, displayName]
+      properties:
+        id: { type: string, format: uuid }
+        displayName:
+          type: string
+          description: Server-computed via DisplayNameResolver.
+        avatarUrl: { type: string, maxLength: 500, nullable: true }
+
   responses:
     BadRequest:
       description: Invalid input
@@ -1589,6 +1967,21 @@ components:
         Missing, malformed, or expired Bearer token; or token references a
         user that no longer exists. Frontend should clear the in-memory JWT
         and route to login.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+    Forbidden:
+      description: |
+        Authenticated, but caller is not authorized for this action.
+        Used when a user tries to act on a friend request they didn't
+        send/receive, or attempts an action against a blocked user.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProxyError' }
+    Conflict:
+      description: |
+        State conflict: duplicate friend request, already friends, or
+        request not in the expected state for the action requested.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ProxyError' }

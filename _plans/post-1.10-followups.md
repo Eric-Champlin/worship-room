@@ -200,3 +200,25 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Deferred until:** A future cleanup spec; not urgent.
 
 ---
+
+## 11. Per-user rate limiting on friends write endpoints (medium priority)
+
+**Status:** Deferred from Spec 2.5.3 per its Divergence 1.
+
+**What's missing:** Spec 2.5.3 ships 8 friends endpoints with JWT auth as the only gate. The master plan's Forums Wave Rate Limits (`02-security.md`) specify:
+
+- Friend requests: 10 per day per user
+- Encouragements: 3 per friend per day (client-side primary, backend belt-and-suspenders)
+- Nudges: 1 per friend per week (client-side primary, backend belt-and-suspenders)
+
+These limits are not enforced by 2.5.3.
+
+**Why deferred:** The current `RateLimitFilter` (Phase 1 Spec 1) is per-IP, scoped only to `/api/v1/proxy/**`. Building per-user rate limiting just for friends endpoints would either (a) duplicate filter infrastructure that Phase 10.9 (`round3-phase10-spec09-rate-limit-tightening`) will rebuild correctly across all Forums Wave endpoints, or (b) require a substantive RateLimitFilter refactor that warrants its own spec. JWT auth is the meaningful gate for the Phase 2.5 wave; abuse mitigation arrives with Phase 10.
+
+**Revisit criterion:** Before Phase 10.9 ships, OR before backend friends becomes source-of-truth for reads (Phase 2.5 cutover is shadow-only — no public read path). Whichever comes first.
+
+**Caught during:** Spec 2.5.3 planning, 2026-04-27.
+
+**Priority:** MEDIUM. No abuse vector today (friends writes are dual-write shadow-only; localStorage is primary), but goes hot when Phase 7 reads friends from backend.
+
+---

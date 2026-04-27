@@ -57,4 +57,41 @@ public abstract class AbstractIntegrationTest {
     static void registerLiquibaseTestContext(DynamicPropertyRegistry registry) {
         registry.add("spring.liquibase.contexts", () -> "test");
     }
+
+    /**
+     * Cap HikariCP per-context connection pool to 3 in tests so the suite can run more
+     * concurrent Spring application contexts without exhausting the Testcontainers
+     * Postgres' default {@code max_connections=100}.
+     *
+     * <p>Each {@code @SpringBootTest} class typically creates its own cached context
+     * (cache key includes property values). With Spring Boot's HikariCP default pool of
+     * 10 connections per context, ~10 contexts saturate Postgres before any test runs.
+     * Spec 2.5.3 added two new context-loading test classes that pushed the suite over
+     * that ceiling and triggered {@code FATAL: sorry, too many clients already} during
+     * Liquibase migration.
+     *
+     * <p>3 connections per context is sufficient for tests because they execute
+     * synchronously and rarely hold more than one connection at a time. Production uses
+     * its own profile-specific Hikari sizing — this override scopes only to tests.
+     *
+     * <p><b>Overriding for tests that need more connections:</b> If a future test class
+     * legitimately needs concurrent DB ops (multi-threaded transaction-isolation tests,
+     * async job tests, etc.), declare a sibling {@code @DynamicPropertySource} method on
+     * the subclass with a method name distinct from this base method's. Spring aggregates
+     * {@code @DynamicPropertySource} methods across the inheritance hierarchy and the
+     * subclass's {@code add()} calls overwrite the base values for the same property key:
+     * <pre>
+     * &#64;DynamicPropertySource
+     * static void overrideHikariPool(DynamicPropertyRegistry registry) {
+     *     registry.add("spring.datasource.hikari.maximum-pool-size", () -&gt; "10");
+     * }
+     * </pre>
+     * Watch for {@code FATAL: sorry, too many clients already} in test logs as the
+     * canonical symptom of a new context exceeding Postgres' {@code max_connections=100}.
+     */
+    @DynamicPropertySource
+    static void registerHikariTestPoolCap(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "3");
+        registry.add("spring.datasource.hikari.minimum-idle", () -> "1");
+    }
 }
