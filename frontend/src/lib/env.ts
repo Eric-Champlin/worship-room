@@ -84,3 +84,21 @@ export function isBackendActivityEnabled(): boolean {
   return USE_BACKEND_ACTIVITY === 'true'
 }
 
+const USE_BACKEND_FRIENDS = import.meta.env.VITE_USE_BACKEND_FRIENDS as string | undefined
+
+/**
+ * Returns true when friend-mutation events should be dual-written to the
+ * backend (POST/PATCH/DELETE on /api/v1/users/me/friends and friend-requests)
+ * alongside the existing localStorage write.
+ *
+ * Strict equality to the string `'true'` — `'false'`, `''`, `undefined`,
+ * and any other value all return false (fail-closed).
+ *
+ * Default: false. Cutover (flag default flip) is owned by Spec 2.5.5.
+ *
+ * Used by: useFriends (Spec 2.5.4 — Frontend Friends Dual-Write).
+ */
+export function isBackendFriendsEnabled(): boolean {
+  return USE_BACKEND_FRIENDS === 'true'
+}
+

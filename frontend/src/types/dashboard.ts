@@ -119,6 +119,8 @@ export interface FriendRequest {
   to: FriendProfile;
   sentAt: string;
   message?: string;
+  /** Backend's UUID for this request, populated after the dual-write POST succeeds. Spec 2.5.4. */
+  backendId?: string;
 }
 
 export interface FriendsData {

@@ -134,6 +134,25 @@ export function blockUser(data: FriendsData, userId: string): FriendsData {
   }
 }
 
+/**
+ * Attaches the backend's UUID to the outgoing friend request matching `toUserId`,
+ * if and only if that request does not already have a `backendId`. Idempotent
+ * against double-callback firing — a second call with the same `toUserId` is
+ * a no-op once `backendId` is set. Spec 2.5.4 (Frontend Friends Dual-Write).
+ */
+export function attachBackendId(
+  data: FriendsData,
+  toUserId: string,
+  backendId: string,
+): FriendsData {
+  return {
+    ...data,
+    pendingOutgoing: data.pendingOutgoing.map((req) =>
+      req.to.id === toUserId && !req.backendId ? { ...req, backendId } : req,
+    ),
+  }
+}
+
 export function isBlocked(data: FriendsData, userId: string): boolean {
   return data.blocked.includes(userId)
 }

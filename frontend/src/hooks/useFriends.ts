@@ -10,8 +10,31 @@ import {
   cancelOutgoingRequest as storageCancelRequest,
   removeFriend as storageRemoveFriend,
   blockUser as storageBlockUser,
+  attachBackendId as storageAttachBackendId,
 } from '@/services/friends-storage'
 import { ALL_MOCK_USERS, MOCK_SUGGESTIONS } from '@/mocks/friends-mock-data'
+import { isBackendFriendsEnabled } from '@/lib/env'
+import { getStoredToken } from '@/lib/auth-storage'
+import {
+  sendFriendRequestApi,
+  respondToFriendRequestApi,
+  removeFriendApi,
+  blockUserApi,
+} from '@/services/api/friends-api'
+
+/**
+ * Spec 2.5.4 dual-write guard. Returns true when:
+ * - VITE_USE_BACKEND_FRIENDS === 'true' (env flag), AND
+ * - getStoredToken() returns a non-null JWT.
+ *
+ * The token check is load-bearing: AuthContext's AUTH_INVALIDATED_EVENT handler
+ * clears legacy simulated-auth state on any 401, which means firing apiFetch
+ * for a simulated-auth user without a JWT would silently log them out. Both
+ * conditions must hold to proceed with the backend dispatch.
+ */
+function shouldDualWrite(): boolean {
+  return isBackendFriendsEnabled() && getStoredToken() !== null
+}
 
 export interface FriendSearchResult extends FriendProfile {
   status: 'friend' | 'pending-incoming' | 'pending-outgoing' | 'none'
@@ -107,6 +130,16 @@ export function useFriends(): {
         lastActive: new Date().toISOString(),
       }
       persist(storageSendRequest(data, currentUserProfile, toProfile))
+
+      if (shouldDualWrite()) {
+        sendFriendRequestApi(toProfile.id, null)
+          .then((response) => {
+            persist(storageAttachBackendId(getOrInitFriendsData(user.id), toProfile.id, response.id))
+          })
+          .catch((err) => {
+            console.warn('[useFriends] backend sendRequest dual-write failed:', err)
+          })
+      }
     },
     [isAuthenticated, user, data, persist],
   )
@@ -114,7 +147,21 @@ export function useFriends(): {
   const acceptRequest = useCallback(
     (requestId: string) => {
       if (!isAuthenticated) return
+      const request = data.pendingIncoming.find((r) => r.id === requestId)
+      const backendId = request?.backendId
+
       persist(storageAcceptRequest(data, requestId))
+
+      if (shouldDualWrite() && backendId) {
+        respondToFriendRequestApi(backendId, 'accept').catch((err) => {
+          console.warn('[useFriends] backend acceptRequest dual-write failed:', err)
+        })
+      } else if (shouldDualWrite() && !backendId) {
+        console.warn(
+          '[useFriends] skipping backend acceptRequest — no backendId on local request',
+          { localRequestId: requestId },
+        )
+      }
     },
     [isAuthenticated, data, persist],
   )
@@ -122,7 +169,21 @@ export function useFriends(): {
   const declineRequest = useCallback(
     (requestId: string) => {
       if (!isAuthenticated) return
+      const request = data.pendingIncoming.find((r) => r.id === requestId)
+      const backendId = request?.backendId
+
       persist(storageDeclineRequest(data, requestId))
+
+      if (shouldDualWrite() && backendId) {
+        respondToFriendRequestApi(backendId, 'decline').catch((err) => {
+          console.warn('[useFriends] backend declineRequest dual-write failed:', err)
+        })
+      } else if (shouldDualWrite() && !backendId) {
+        console.warn(
+          '[useFriends] skipping backend declineRequest — no backendId on local request',
+          { localRequestId: requestId },
+        )
+      }
     },
     [isAuthenticated, data, persist],
   )
@@ -130,7 +191,21 @@ export function useFriends(): {
   const cancelRequest = useCallback(
     (requestId: string) => {
       if (!isAuthenticated) return
+      const request = data.pendingOutgoing.find((r) => r.id === requestId)
+      const backendId = request?.backendId
+
       persist(storageCancelRequest(data, requestId))
+
+      if (shouldDualWrite() && backendId) {
+        respondToFriendRequestApi(backendId, 'cancel').catch((err) => {
+          console.warn('[useFriends] backend cancelRequest dual-write failed:', err)
+        })
+      } else if (shouldDualWrite() && !backendId) {
+        console.warn(
+          '[useFriends] skipping backend cancelRequest — no backendId on local request',
+          { localRequestId: requestId },
+        )
+      }
     },
     [isAuthenticated, data, persist],
   )
@@ -139,6 +214,12 @@ export function useFriends(): {
     (friendId: string) => {
       if (!isAuthenticated) return
       persist(storageRemoveFriend(data, friendId))
+
+      if (shouldDualWrite()) {
+        removeFriendApi(friendId).catch((err) => {
+          console.warn('[useFriends] backend removeFriend dual-write failed:', err)
+        })
+      }
     },
     [isAuthenticated, data, persist],
   )
@@ -147,6 +228,12 @@ export function useFriends(): {
     (userId: string) => {
       if (!isAuthenticated) return
       persist(storageBlockUser(data, userId))
+
+      if (shouldDualWrite()) {
+        blockUserApi(userId).catch((err) => {
+          console.warn('[useFriends] backend blockUser dual-write failed:', err)
+        })
+      }
     },
     [isAuthenticated, data, persist],
   )

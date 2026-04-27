@@ -75,3 +75,50 @@ describe('isBackendActivityEnabled (Spec 2.7 — Frontend Activity Dual-Write)',
     expect(isBackendActivityEnabled()).toBe(false)
   })
 })
+
+describe('isBackendFriendsEnabled (Spec 2.5.4 — Frontend Friends Dual-Write)', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  })
+
+  it("returns true for the exact string 'true'", async () => {
+    vi.stubEnv('VITE_USE_BACKEND_FRIENDS', 'true')
+    const { isBackendFriendsEnabled } = await loadEnv()
+    expect(isBackendFriendsEnabled()).toBe(true)
+  })
+
+  it("returns false for the exact string 'false'", async () => {
+    vi.stubEnv('VITE_USE_BACKEND_FRIENDS', 'false')
+    const { isBackendFriendsEnabled } = await loadEnv()
+    expect(isBackendFriendsEnabled()).toBe(false)
+  })
+
+  it('returns false for the empty string (fail-closed)', async () => {
+    vi.stubEnv('VITE_USE_BACKEND_FRIENDS', '')
+    const { isBackendFriendsEnabled } = await loadEnv()
+    expect(isBackendFriendsEnabled()).toBe(false)
+  })
+
+  it('returns false when the env variable is unset (fail-closed)', async () => {
+    vi.stubEnv('VITE_USE_BACKEND_FRIENDS', undefined)
+    const { isBackendFriendsEnabled } = await loadEnv()
+    expect(isBackendFriendsEnabled()).toBe(false)
+  })
+
+  it("returns false for 'TRUE' (case-sensitive comparison)", async () => {
+    vi.stubEnv('VITE_USE_BACKEND_FRIENDS', 'TRUE')
+    const { isBackendFriendsEnabled } = await loadEnv()
+    expect(isBackendFriendsEnabled()).toBe(false)
+  })
+
+  it("returns false for '1' (no implicit truthy-string coercion)", async () => {
+    vi.stubEnv('VITE_USE_BACKEND_FRIENDS', '1')
+    const { isBackendFriendsEnabled } = await loadEnv()
+    expect(isBackendFriendsEnabled()).toBe(false)
+  })
+})

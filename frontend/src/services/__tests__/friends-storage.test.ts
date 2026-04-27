@@ -12,6 +12,7 @@ import {
   cancelOutgoingRequest,
   removeFriend,
   blockUser,
+  attachBackendId,
   isBlocked,
   isFriend,
   hasPendingRequest,
@@ -315,6 +316,28 @@ describe('friends-storage', () => {
     it('returns false when no pending requests', () => {
       const data = makeData()
       expect(hasPendingRequest(data, 'alice')).toBe(false)
+    })
+  })
+
+  describe('attachBackendId', () => {
+    it('updates the matching outgoing request with backendId', () => {
+      const initial = sendFriendRequest(makeData(), CURRENT_USER, ALICE)
+      const result = attachBackendId(initial, ALICE.id, 'backend-uuid-1')
+      expect(result.pendingOutgoing[0].backendId).toBe('backend-uuid-1')
+      expect(result.pendingOutgoing[0].to.id).toBe(ALICE.id)
+    })
+
+    it('is a no-op when no matching outgoing request exists', () => {
+      const data = makeData()
+      const result = attachBackendId(data, 'no-such-user', 'backend-uuid-1')
+      expect(result.pendingOutgoing).toEqual([])
+    })
+
+    it('is idempotent — second call does not overwrite an existing backendId', () => {
+      const initial = sendFriendRequest(makeData(), CURRENT_USER, ALICE)
+      const first = attachBackendId(initial, ALICE.id, 'backend-uuid-first')
+      const second = attachBackendId(first, ALICE.id, 'backend-uuid-second')
+      expect(second.pendingOutgoing[0].backendId).toBe('backend-uuid-first')
     })
   })
 })
