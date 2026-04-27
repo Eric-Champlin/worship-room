@@ -69,16 +69,16 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 37  | 2.5  | Activity Counts Service                         | S    | Low    | ✅     |
 | 38  | 2.6  | Activity API Endpoint                           | L    | Medium | ✅     |
 | 39  | 2.7  | Frontend Activity Dual-Write                    | M    | Medium | ✅     |
-| 40  | 2.8  | Drift Detection Test (Frontend ↔ Backend)       | M    | Low    | ⬜     |
-| 41  | 2.9  | Phase 2 Cutover                                 | S    | Medium | ⬜     |
-| 42  | 2.10 | Historical Activity Backfill                    | M    | Medium | ⬜     |
+| 40  | 2.8  | Drift Detection Test (Frontend ↔ Backend)       | M    | Low    | ✅     |
+| 41  | 2.9  | Phase 2 Cutover                                 | S    | Medium | ✅     |
+| 42  | 2.10 | Historical Activity Backfill                    | M    | Medium | ✅     |
 
 ## Phase 2.5 — Friends Migration (8 specs)
 
 | #   | Spec   | Title                                             | Size | Risk   | Status |
 | --- | ------ | ------------------------------------------------- | ---- | ------ | ------ |
-| 43  | 2.5.1  | Friends Schema (Liquibase)                        | S    | Low    | ⬜     |
-| 44  | 2.5.2  | Friends Service and Repository                    | L    | Medium | ⬜     |
+| 43  | 2.5.1  | Friends Schema (Liquibase)                        | S    | Low    | ✅     |
+| 44  | 2.5.2  | Friends Service and Repository                    | L    | Medium | ✅     |
 | 45  | 2.5.3  | Friends API Endpoints                             | L    | Medium | ⬜     |
 | 46  | 2.5.4  | Frontend Friends Dual-Write                       | L    | Medium | ⬜     |
 | 47  | 2.5.4b | Social Interactions & Milestone Events Dual-Write | M    | Medium | ⬜     |
