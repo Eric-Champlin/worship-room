@@ -22,11 +22,31 @@ vi.mock('@/lib/env', async (importOriginal) => {
   };
 });
 
+// Spec 2.10: mock the backfill service so it doesn't fire its own apiFetch
+// alongside the Spec 2.7 dual-write call. Default `isBackfillCompleted=true`
+// keeps the existing dual-write tests' single-call assertions valid; the new
+// backfill-trigger tests below override it to false to exercise the trigger.
+vi.mock('@/services/activity-backfill', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/services/activity-backfill')>();
+  return {
+    ...actual,
+    triggerBackfill: vi.fn(),
+    markBackfillCompleted: vi.fn(),
+    isBackfillCompleted: vi.fn(() => true),
+  };
+});
+
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useFaithPoints } from '../useFaithPoints';
 import { freshDailyActivities } from '@/services/faith-points-storage';
 import { apiFetch, AUTH_INVALIDATED_EVENT } from '@/lib/api-client';
 import { isBackendActivityEnabled } from '@/lib/env';
+import {
+  triggerBackfill,
+  markBackfillCompleted,
+  isBackfillCompleted,
+} from '@/services/activity-backfill';
 import { ApiError } from '@/types/auth';
 import type { MoodEntry, BadgeData } from '@/types/dashboard';
 
@@ -764,5 +784,60 @@ describe('useFaithPoints — dual-write (Spec 2.7)', () => {
     // would surface here. (Fake timers are active; setTimeout would hang.)
     await Promise.resolve();
     expect(apiFetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useFaithPoints — backfill trigger (Spec 2.10)', () => {
+  beforeEach(() => {
+    simulateLogin();
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    vi.mocked(apiFetch).mockResolvedValue(undefined as never);
+    vi.mocked(triggerBackfill).mockReset();
+    vi.mocked(markBackfillCompleted).mockReset();
+    vi.mocked(isBackfillCompleted).mockReset();
+    vi.mocked(triggerBackfill).mockResolvedValue({
+      activityLogRowsInserted: 0,
+      faithPointsUpdated: true,
+      streakStateUpdated: true,
+      badgesInserted: 0,
+      activityCountsUpserted: 14,
+    });
+  });
+
+  it('flag-off: triggers backfill once on first recordActivity, then marks completed', async () => {
+    vi.mocked(isBackfillCompleted).mockReturnValue(false);
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(triggerBackfill).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(markBackfillCompleted).toHaveBeenCalledTimes(1));
+  });
+
+  it('flag-on: skips backfill on subsequent recordActivity calls', async () => {
+    vi.mocked(isBackfillCompleted).mockReturnValue(true);
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    expect(triggerBackfill).not.toHaveBeenCalled();
+    expect(markBackfillCompleted).not.toHaveBeenCalled();
+  });
+
+  it('backfill failure: warn logged, flag NOT set, dual-write still proceeds', async () => {
+    vi.mocked(isBackfillCompleted).mockReturnValue(false);
+    vi.mocked(triggerBackfill).mockRejectedValue(new Error('boom'));
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => {
+      expect(warnSpy.mock.calls.some((c) => String(c[0]).includes('backfill failed'))).toBe(true);
+    });
+    expect(markBackfillCompleted).not.toHaveBeenCalled();
+    // Dual-write still fired alongside the failed backfill
+    expect(apiFetch).toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 });

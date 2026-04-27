@@ -35,6 +35,7 @@ When adding a new key, default to `wr_*` unless there is a specific reason to us
 | `wr_badges`             | BadgeData                     | Earned badges with timestamps, activity counters    |
 | `wr_meditation_history` | MeditationSession[] (max 365) | Meditation/guided prayer session logs               |
 | `wr_evening_reflection` | string (today's date)         | Evening reflection dismissal tracking               |
+| `wr_activity_backfill_completed` | "true"/null          | Spec 2.10 one-time idempotent flag — set by `useFaithPoints.recordActivity` after `POST /api/v1/activity/backfill` returns 200. When `'true'`, the dual-write block skips the backfill trigger. Preserved across logout (per-browser, not per-user) so re-login does not re-fire backfill. |
  
 ### Social & Friends
  

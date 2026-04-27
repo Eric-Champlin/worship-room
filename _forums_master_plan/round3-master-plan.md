@@ -126,6 +126,257 @@ Eric updates `_forums_master_plan/spec-tracker.md` MANUALLY after each spec ship
 
 ---
 
+## Phase 2 Execution Reality Addendum (added 2026-04-27)
+
+> **Why this section exists:** Phase 2 (Activity Engine Migration) is complete — all 10 specs (2.1–2.10) have shipped. Several of them surfaced real divergences from the original spec text in this document and from each other's pre-execution assumptions. This addendum consolidates those divergences so future spec authors and CC don't have to re-discover them. Individual spec bodies below may still show the pre-execution text; trust THIS section over the older spec text where they disagree.
+>
+> **Scope:** Phase 2 only (Specs 2.1–2.10). Phase 1 findings live in the Phase 1 Addendum above. Phase 2.5 (Friends Backend Migration) and Phase 3+ specs are unaffected by these findings except where called out explicitly.
+>
+> **Headline takeaway:** Several features the master plan v2.9 assumed existed in the frontend (grace days, grief pause, streak repair persistence, the `wr_activity_counts` localStorage key) do NOT exist. Phase 2 ports what the frontend actually does, not what the master plan imagined it does. The deferred features are tracked at the bottom of this addendum.
+
+### 1. Grace days do not exist in the frontend (Spec 2.3 execution)
+
+**Pre-execution assumption (master plan Decision 5 + Spec 2.3 body):** The frontend implements a grace-day system that allows users to miss a day per week without breaking their streak. The `streak_state` schema includes `grace_days_used INTEGER NOT NULL DEFAULT 0` and `grace_week_start DATE NULL` columns to mirror this logic on the backend.
+
+**Execution reality:** Greps for `grace_days_used`, `graceDays`, `graceDaysUsed`, and `grace_week_start` across `frontend/src/` returned **zero matches**. The frontend's `updateStreak` function in `services/faith-points-storage.ts` implements a strict four-state machine (FIRST_EVER / SAME_DAY / INCREMENT / RESET) with no grace logic. The master plan was written assuming a feature that was never built.
+
+**Canonical resolution (post-Spec-2.3):**
+- `streak_state.grace_days_used` and `grace_week_start` columns exist in the schema (created by Spec 2.1) but are **dormant** — always at default values, never read or written by `StreakService`.
+- `StreakService.updateStreak` is a faithful port of the frontend's four-state machine. No grace handling.
+- A future spec (whenever grace days are designed and implemented frontend-first) will activate these columns.
+
+**Implication for future specs:** Do not introduce grace-day handling in any Phase 2.5+ spec without first shipping a frontend grace-day feature. The schema accommodates the future feature; the service layer does not.
+
+### 2. Grief pause does not exist in the frontend (Spec 2.3 execution)
+
+**Pre-execution assumption (master plan Decision 5 + Spec 2.3 body):** The frontend implements a grief-pause feature — users can pause their streak temporarily during a bereavement window. The `streak_state` schema includes `grief_pause_until DATE NULL` and `grief_pause_used_at TIMESTAMP WITH TIME ZONE NULL` columns.
+
+**Execution reality:** Same shape as #1. Greps for `griefPause`, `grief_pause`, `grief_pause_until` returned zero matches in the frontend.
+
+**Canonical resolution (post-Spec-2.3):**
+- `streak_state.grief_pause_until` and `grief_pause_used_at` columns exist (Spec 2.1) but are dormant.
+- `StreakService` does not reference them.
+- Future grief-pause spec will activate them.
+
+### 3. Streak repair APPLICATION is not ported — only ELIGIBILITY check (Spec 2.3 execution)
+
+**Pre-execution assumption (master plan Spec 2.3 body):** The full streak-repair feature ports to the backend, including both "is the user eligible for a free repair?" and "apply the repair to restore the previous streak."
+
+**Execution reality:** The frontend has TWO distinct concerns here:
+- **Eligibility check** (`isFreeRepairAvailable` in `services/streak-repair-storage.ts`) is a pure function over `(lastFreeRepairDate, currentWeekStart)`. Easy to port.
+- **Repair application** uses a separate `wr_streak_repairs` localStorage key with its own data shape (`previousStreak`, `lastFreeRepairDate`, `repairsUsedThisWeek`, `weekStartDate`) plus a 50-points-cost-for-paid-repair flow. Spec 2.1's `streak_state` table has NO repair-related columns. Porting application would have required schema changes + a separate backend repair-state table + a payment-equivalent points-deduction flow.
+
+**Canonical resolution (post-Spec-2.3):**
+- `StreakService.isFreeRepairAvailable(LocalDate?, LocalDate)` is implemented as a pure function. The CALLER provides both dates explicitly.
+- `StreakResult.shouldCaptureForRepair` is a forward-compatibility flag set to `true` when transition == RESET && previousStreak > 1, but **THIS spec doesn't act on the flag**. Future caller will use it.
+- Repair STATE persistence (the `wr_streak_repairs` data) is OUT OF SCOPE for the entire Forums Wave through Phase 2.
+- Per Spec 2.10 Divergence 2: backfill explicitly excludes `wr_streak_repairs` because there's no backend table to write it into.
+
+**Implication for future specs:** When repair persistence ships (likely a small standalone spec in a later wave), it'll need: (a) a new table or columns for repair state, (b) a backfill spec for existing localStorage repair history, and (c) wiring `StreakResult.shouldCaptureForRepair` into the persistence path. This is documented in `_plans/post-1.10-followups.md`.
+
+### 4. The backend lacks data sources for ~half the badge categories (Spec 2.4 execution)
+
+**Pre-execution assumption (master plan Spec 2.4 body):** `BadgeService.checkBadges` runs against a context object the backend can fully populate from its own data.
+
+**Execution reality:** The frontend's `checkForNewBadges` reads from at least seven data sources:
+- `wr_reading_plan_progress` — reading plan completions
+- `wr_bible_progress` — bible chapters/books read
+- `wr_meditation_history` — meditation session list
+- `wr_gratitude_entries` — gratitude entry dates
+- `wr_local_visits` — visited local-support places
+- `wr_listening_history` — listening session durations
+- `wr_friends` — friend count (Phase 2.5 will migrate this)
+
+NONE of these have backend persistence after Phase 2. Six of the seven won't migrate until much later phases (`wr_friends` migrates in Phase 2.5). Categories like "first reading-plan completion," "7-day consecutive gratitude streak," "first bible-book completion," and "listen-10-hours" cannot fire from real production data on the backend during Phase 2.
+
+**Canonical resolution (post-Spec-2.4):**
+- `BadgeService` is implemented as a **pure function over BadgeCheckContext**. The service does NOT query the database.
+- `BadgeCheckContext` includes ALL seven data sources as inputs. The CALLER assembles the context from whatever data sources are available.
+- Spec 2.6's `ActivityService` passes empty collections / zeros for the data sources the backend can't see, which means those badge categories naturally return zero badges from production calls.
+- Spec 2.8's drift detection feeds BOTH implementations identical context (same fake bible progress, same fake meditation history, etc.) and asserts identical output. The drift test verifies CALCULATION parity, not production-data parity.
+
+**Decision 5 correction:** The shadow tables created in Spec 2.1 do NOT include reading-plan, bible-progress, meditation-history, gratitude-entries, local-visits, or listening-history schemas. Future migration specs (one per data source) will add those tables and re-wire the corresponding badge categories to fire from backend data. Until then, the backend under-counts those badge categories vs the frontend during dual-write — expected and tolerated by the dual-write strategy.
+
+### 5. Welcome and challenge badges are out of scope for `checkForNewBadges` (Spec 2.4 execution)
+
+**Pre-execution assumption:** The badge eligibility service handles all ~58 catalog badges.
+
+**Execution reality:** The frontend's `checkForNewBadges` does NOT evaluate eligibility for:
+- The 1 `welcome` badge — granted by `initializeBadgesForNewUser` at registration, not by the eligibility flow
+- The 7 challenge badges (`challenge_lent`, `challenge_easter`, `challenge_pentecost`, `challenge_advent`, `challenge_newyear`, `challenge_first`, `challenge_master`) — granted by challenge-completion code paths, not by the eligibility flow
+
+These 8 badges have no eligibility logic in `checkForNewBadges`. They're manually granted by other code paths.
+
+**Canonical resolution (post-Spec-2.4):**
+- `BadgeCatalog` (the metadata lookup) DOES include all 58 badges including the 8 manually-granted ones. The catalog is for metadata lookup at API response time.
+- `BadgeService.checkBadges` does NOT include welcome or challenge badges in eligibility evaluation.
+- Spec 2.6's POST `/api/v1/activity` endpoint correctly does not grant welcome or challenge badges.
+- Spec 2.8's drift fixture excludes welcome and challenge scenarios.
+
+**Future specs needed:**
+- A registration-flow spec that ports `initializeBadgesForNewUser` (welcome badge granting). Likely lands when registration gets reworked or when admin/onboarding flows get attention.
+- A challenges-migration spec that ports challenge-completion logic. Likely a Phase 6+ effort tied to liturgical/seasonal content migrations.
+
+### 6. Points-delta semantics, not independent-earn (Spec 2.6 execution)
+
+**Pre-execution assumption (master plan Spec 2.6 body):** The activity endpoint computes `pointsEarned` for a single new activity by calling `FaithPointsService.recordActivity(activityType)` (a method that doesn't exist) and treating the result as that activity's standalone contribution.
+
+**Execution reality:** Faith points accumulate based on TODAY's daily activity SET, with a multiplier that depends on activity count. Adding a 4th activity today might bump the multiplier from 1.25 to 1.5, retroactively increasing the contribution of the previous 3 activities. The correct points delta requires comparing two states:
+
+```
+newDailyTotal = calculate(todaysActivitiesAfterNew, 0).pointsEarned
+oldDailyTotal = calculate(todaysActivitiesBeforeNew, 0).pointsEarned
+pointsDelta   = newDailyTotal - oldDailyTotal
+newLifetime   = currentLifetimePoints + pointsDelta
+```
+
+This is the only correct algorithm. Single-activity standalone calculation gives wrong results when multiplier tier crosses a boundary.
+
+**Canonical resolution (post-Spec-2.6):**
+- `ActivityService` reads `activity_log` for today's existing activity types (in user's timezone), constructs the old set, adds the new activity, calls `FaithPointsService.calculate` twice (old set, new set), takes the delta.
+- `FaithPointsService.calculate(Set<ActivityType>, int currentTotalPoints)` is the only public method. There is no `recordActivity` method.
+
+### 7. First-time-today gating differs across tables (Spec 2.6 execution)
+
+**Canonical pattern (post-Spec-2.6):** Within a single POST `/api/v1/activity` request:
+- `activity_log` row written **on every call** (event stream; same activity_type twice in one day = 2 rows)
+- `activity_counts` incremented **on every call** (when count_type mapping exists; lifetime counter, not boolean)
+- `faith_points`, `streak_state`, `user_badges` updated **only on first occurrence** of that activity_type today (in user's timezone)
+
+The gating is implemented by querying `activity_log` for "any row with this user, this activity_type, today (in user's timezone)" BEFORE the insert. Found = skip points/streak/badge; not found = full path.
+
+Second `pray` same day = activity_log row + count++, no points delta, no streak change, no new badges. Different activity_type same day = treated as full path (each type has its own first-time-today gate).
+
+### 8. `grace_used` and `grace_remaining` always zero in API response (Spec 2.6 execution)
+
+Decision 5's `POST /api/v1/activity` response shape includes:
+```
+streak: { current, longest, new_today, grace_used, grace_remaining }
+```
+
+Per #1 above, grace days don't exist. The fields stay in the response shape (for API stability — Spec 2.7 frontend dual-write reads this shape) but always return `grace_used: 0` and `grace_remaining: 0`. Future grace-days spec will populate them honestly.
+
+### 9. recordActivity lives in a hook, not a service (Spec 2.7 execution)
+
+**Pre-execution assumption (master plan Spec 2.7 body):** The frontend's `recordActivity` function lives at `services/activity-recorder.ts` or similar.
+
+**Execution reality:** No `services/activity-recorder.ts` file exists. `recordActivity` is a `useCallback` inside the `useFaithPoints` hook at `frontend/src/hooks/useFaithPoints.ts`. Spec 2.7 wires the dual-write inside that useCallback after `persistAll`, `setState`, and `window.dispatchEvent` calls.
+
+### 10. recordActivity signature change required (Spec 2.7 execution)
+
+**Pre-execution assumption:** Wire dual-write transparently — no signature changes to `recordActivity`.
+
+**Execution reality:** The backend's POST `/api/v1/activity` requires a `@NotBlank source_feature` field per Spec 2.6's validation. Without it, every dual-write call would fail with 400.
+
+**Canonical resolution (post-Spec-2.7):**
+- `recordActivity` signature changed from `(type: ActivityType) => void` to `(type: ActivityType, sourceFeature: string) => void`.
+- `sourceFeature` is REQUIRED (not optional). TypeScript enforces caller updates.
+- All ~12 call sites updated to pass an explicit string per the vocabulary: `'daily_hub'`, `'prayer_wall'`, `'bible'`, `'music'`, `'meditate'`, `'journal'`, `'gratitude'`, `'mood'`, `'reading_plan'`, `'challenge'`, `'local_support'`, `'devotional'`. CC enumerated additional sites during recon.
+
+**Side-effect:** the `wr:activity-recorded` external event paths (e.g., the music player's listen tracker) bypass `useFaithPoints.recordActivity` entirely and dispatch directly. They do NOT participate in the dual-write yet. Documented as a followup in `_plans/post-1.10-followups.md`.
+
+### 11. wr_activity_counts does NOT exist as a separate localStorage key (Spec 2.10 execution)
+
+**Pre-execution assumption (master plan Spec 2.10 body):** The localStorage backfill payload includes a `wr_activity_counts` key.
+
+**Execution reality:** This key does not exist. The 14 activity counts live INSIDE `wr_badges` as the `activityCounts` field of the BadgeData object. Reading from a non-existent key would return null and write zero counts to the backend.
+
+**Canonical resolution (post-Spec-2.10):**
+- The backfill payload reads counts from `wr_badges.activityCounts`, not from a phantom `wr_activity_counts` key.
+- Backfill payload covers four in-scope localStorage keys: `wr_daily_activities`, `wr_faith_points`, `wr_streak`, `wr_badges`.
+- `wr_streak_repairs` excluded per #3 above.
+
+### 12. activity_log backfill uses synthetic timestamps with source_feature='backfill' marker (Spec 2.10 execution)
+
+**Problem:** localStorage stores `wr_daily_activities` as a date-keyed map of boolean activity flags, NOT a timestamped event log. Backfilling activity_log requires synthesizing an `occurred_at` for each historical row.
+
+**Canonical pattern (post-Spec-2.10):**
+- Synthetic `occurred_at` is `<localStorage_date> 12:00:00` in the user's timezone, converted to a UTC `Instant`.
+- Noon avoids midnight DST/day-boundary edge cases.
+- All backfill rows are marked `source_feature = 'backfill'` (distinguishable from real-time recording's `'daily_hub'`, `'prayer_wall'`, etc.).
+- A partial unique index on `activity_log (user_id, activity_type, occurred_at) WHERE source_feature = 'backfill'` provides idempotency (Liquibase changeset 008). Real-time rows (with `NOW()` timestamps + nanosecond precision) are unaffected by the constraint.
+
+**Why this matters:** any future code that distinguishes "real moments" from "backfilled approximations" — e.g., a future analytics dashboard showing "prayer streak by hour-of-day" — must filter on `source_feature != 'backfill'` to avoid noon-spike artifacts.
+
+### 13. Backfill UPSERT semantics differ per table (Spec 2.10 execution)
+
+No single UPSERT pattern fits all five backfill targets:
+- **activity_log** — INSERT ... ON CONFLICT DO NOTHING (per the partial unique index from #12)
+- **faith_points** — INSERT ... ON CONFLICT (user_id) DO UPDATE (overwrite; localStorage is source of truth at cutover)
+- **streak_state** — same as faith_points (overwrite by user_id)
+- **user_badges** — INSERT ... ON CONFLICT (user_id, badge_id) DO NOTHING (preserve real-time badge state if a badge was earned between cutover and backfill firing)
+- **activity_counts** — INSERT ... ON CONFLICT (user_id, count_type) DO UPDATE (overwrite; localStorage is source of truth at cutover)
+
+This matters because backfill races with real-time recording: both are fire-and-forget; either ordering must produce correct final state. The per-table UPSERT discipline above is what makes the race benign.
+
+### 14. Frontend backfill trigger is gated by a localStorage flag (Spec 2.10 execution)
+
+**Canonical pattern (post-Spec-2.10):**
+- `wr_activity_backfill_completed` localStorage key tracks completion (string `'true'` or absent; fail-closed string-equality check).
+- The flag is set via `markBackfillCompleted()` ONLY on a successful 200 response from POST `/api/v1/activity/backfill`.
+- Failure (network error, 500, validation failure, payload >1MB) does NOT set the flag — next dual-write call retries automatically.
+- Frontend trigger lives inside `useFaithPoints.recordActivity`, immediately before the existing dual-write call:
+  ```
+  if (isBackendActivityEnabled() && isAuthenticated) {
+    if (!isBackfillCompleted()) {
+      triggerBackfill().then(markBackfillCompleted).catch(console.warn);
+    }
+    postActivityToBackend(type, sourceFeature).catch(console.warn);
+  }
+  ```
+- Both calls are fire-and-forget. UPSERT semantics handle the race.
+
+### 15. Phase 2 cutover process (Spec 2.9 execution)
+
+**Canonical pattern for future-phase cutovers:** Phase 2's cutover (flipping `VITE_USE_BACKEND_ACTIVITY` from false to true) established a repeatable shape:
+1. Single env-flag flip in `frontend/.env.example` + comment update
+2. Manual smoke test against dev environment (5+ activity types, with psql verification queries)
+3. Universal Rule 17 a11y smoke (axe-core scan + keyboard walkthrough + VoiceOver spot-check)
+4. Production deploy plan documented in `_plans/forums/phaseNN-cutover-checklist.md`
+5. Railway env var flip (separate from the .env.example change — .env.example is documentation, Railway env vars are the live default)
+6. Rollback plan: flip Railway env var back, redeploy, fail-closed env check stops dual-write on next page load
+7. Evidence committed to `_cutover-evidence/phaseNN-a11y-smoke.json` and `_cutover-evidence/phaseNN-a11y-notes.md`
+
+Future phase cutovers should mirror this checklist structure. Phase 2's checklist at `_plans/forums/phase02-cutover-checklist.md` is the template.
+
+### 16. Pre-existing GrowthGarden time-of-day flake (discovered during Spec 2.9 verification)
+
+**Discovered during:** Spec 2.9's Step 6 verification at 7:40am local time.
+
+**Symptom:** 14 tests in `frontend/src/components/dashboard/__tests__/GrowthGarden.test.tsx` fail when the test suite runs during the "dawn" or "night" time-of-day windows. Fail count is 0 outside those windows.
+
+**Root cause:** `GrowthGarden.tsx`'s `getGardenAriaLabel` function appends `" at dawn"` or `" at night"` to the aria-label based on real wall-clock time-of-day. The test assertions were written expecting the no-suffix branch only and were never taught to mock the time-of-day reading. Origin commit: `5afccf0` (growth-garden-enhancement, 2026-04-01).
+
+**Status:** Pre-existing, unrelated to Phase 2. Documented in `_plans/post-1.10-followups.md` as a future cleanup spec. Phase 2 specs that ran verification during the dawn or night windows captured this as a deviation note in their execution logs; future-phase verification baselines should be captured at non-dawn, non-night hours OR the underlying test should be fixed to mock the time-of-day reading.
+
+### Deferred-feature cluster surfaced by Phase 2
+
+The Phase 2 execution surfaced several real product gaps that future phases need to address. Consolidated here so they're not lost across individual followup entries:
+
+- **Grace days** — design + frontend implementation + backend service + drift fixture scenarios. Schema columns already exist (Spec 2.1).
+- **Grief pause** — same shape as grace days. Schema columns already exist.
+- **Streak repair persistence** — backend table or columns + repair-application logic + backfill spec for `wr_streak_repairs`.
+- **Welcome badge granting** — backend port of `initializeBadgesForNewUser`, likely tied to a registration-flow rework spec.
+- **Challenge badge granting** — backend port of challenge-completion logic, likely Phase 6+ tied to liturgical content migration.
+- **Six missing data-source migrations** — reading plans, bible progress, meditation history, gratitude entries, local visits, listening history. Each is its own future spec; Phase 2 leaves them frontend-only. Until they migrate, the corresponding badge categories won't fire from production backend data (drift detection still verifies parity in test).
+- **wr:activity-recorded external event paths** — the music player's listen tracker and other external paths bypass `useFaithPoints.recordActivity` and don't participate in dual-write. Future audit spec needed to enumerate the paths and either route them through `recordActivity` or wire dual-write directly into each.
+- **Chunked/streaming backfill** — Spec 2.10's 1MB payload limit will reject backfills for users with years of localStorage history. Acceptable failure mode for now (rare); future spec when it surfaces.
+- **GrowthGarden time-of-day test flake** — small standalone test-fix spec, no production impact.
+
+Full entries with revisit criteria live in `_plans/post-1.10-followups.md`.
+
+### Test count baselines (post-Phase-2)
+
+For future-phase verification baselines:
+
+- **Backend:** ~552 tests pass / 0 fail (post-2.10). Baseline grew from ~434 (post-1.10d) by ~118 tests across Specs 2.1–2.10.
+- **Frontend (Vitest):** ~9,000 tests pass / 14 pre-existing GrowthGarden flakes fail (when run during dawn/night windows; 0 fail otherwise).
+- **Wall-clock baselines:** backend `./mvnw test` ~110 seconds (up from ~97s baseline by ~13 seconds for Phase 2 additions); frontend `pnpm test` ~25 seconds.
+
+Future specs should anchor regression baselines off these post-Phase-2 numbers, NOT off the post-Phase-1 numbers in the Phase 1 Addendum.
+
+---
+
 
 
 ## Quick Reference

@@ -72,7 +72,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
-        assertThat(rows).hasSize(7);
+        assertThat(rows).hasSize(8);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");
@@ -115,6 +115,35 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         assertThat(seventh.get("author")).isEqualTo("worship-room");
         assertThat((String) seventh.get("filename"))
             .endsWith("2026-04-25-007-create-activity-counts-table.xml");
+
+        Map<String, Object> eighth = rows.get(7);
+        assertThat(eighth.get("id")).isEqualTo("2026-04-27-008-add-activity-log-backfill-idempotency-index");
+        assertThat(eighth.get("author")).isEqualTo("worship-room");
+        assertThat((String) eighth.get("filename"))
+            .endsWith("2026-04-27-008-add-activity-log-backfill-idempotency-index.xml");
+    }
+
+    @Test
+    void activityLogBackfillIdempotencyIndexExists() {
+        // pg_indexes is the PostgreSQL system view that exposes index DDL including
+        // partial-index WHERE clauses; information_schema.statistics omits them.
+        // PostgreSQL re-renders the predicate with explicit type casts (e.g.
+        // ((source_feature)::text = 'backfill'::text)); we assert the structural
+        // pieces rather than the exact rendering to stay robust across versions.
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+            "SELECT indexname, indexdef FROM pg_indexes " +
+            "WHERE schemaname = 'public' AND tablename = 'activity_log' " +
+            "AND indexname = 'activity_log_backfill_idempotency_idx'"
+        );
+        assertThat(rows).hasSize(1);
+        String indexDef = (String) rows.get(0).get("indexdef");
+        assertThat(indexDef).contains("UNIQUE INDEX");
+        assertThat(indexDef).contains("user_id");
+        assertThat(indexDef).contains("activity_type");
+        assertThat(indexDef).contains("occurred_at");
+        assertThat(indexDef).contains("WHERE");
+        assertThat(indexDef).contains("source_feature");
+        assertThat(indexDef).contains("'backfill'");
     }
 
     @Test

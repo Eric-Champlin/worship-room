@@ -29,6 +29,11 @@ import {
 import { checkForNewBadges } from '@/services/badge-engine';
 import { apiFetch } from '@/lib/api-client';
 import { isBackendActivityEnabled } from '@/lib/env';
+import {
+  isBackfillCompleted,
+  markBackfillCompleted,
+  triggerBackfill,
+} from '@/services/activity-backfill';
 import type { ActivityRequest } from '@/types/api/activity';
 import type { ActivityType, DailyActivities, FaithPointsData, StreakData, StreakRepairData } from '@/types/dashboard';
 
@@ -279,10 +284,21 @@ export function useFaithPoints(): FaithPointsState & {
       window.dispatchEvent(new CustomEvent('wr:level-up', { detail: { newLevel: levelInfo.level } }));
     }
 
-    // Spec 2.7 dual-write — fire-and-forget POST to /api/v1/activity.
+    // Spec 2.7 dual-write + Spec 2.10 one-time backfill — both fire-and-forget.
     // localStorage above is the contract; backend is a shadow copy.
     // Failures are logged and swallowed — never block UX.
     if (isBackendActivityEnabled()) {
+      // Spec 2.10: one-time backfill of pre-cutover localStorage history.
+      // Gated by wr_activity_backfill_completed; .then() is the ONLY place
+      // the flag is set (per Architectural Decision #10).
+      if (!isBackfillCompleted()) {
+        triggerBackfill()
+          .then(() => markBackfillCompleted())
+          .catch((err) => {
+            console.warn('[useFaithPoints] backfill failed:', err);
+          });
+      }
+
       postActivityToBackend(type, sourceFeature).catch((err) => {
         console.warn('[useFaithPoints] backend dual-write failed:', err);
       });

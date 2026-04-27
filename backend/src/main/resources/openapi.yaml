@@ -771,6 +771,57 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/activity/backfill:
+    post:
+      tags: [Activity]
+      summary: One-time idempotent backfill of pre-cutover activity history
+      description: |
+        Authenticated endpoint that imports the user's full pre-cutover
+        localStorage activity history into the five Phase 2 shadow tables in
+        a single transaction. Per Spec 2.10:
+
+        - `activity_log`: INSERT ON CONFLICT (user_id, activity_type, occurred_at)
+          WHERE source_feature='backfill' DO NOTHING. Synthetic noon-in-
+          user-timezone occurred_at.
+        - `faith_points` / `streak_state` / `activity_counts`: UPSERT, OVERWRITE.
+        - `user_badges`: INSERT ON CONFLICT DO NOTHING (preserves real-time state).
+
+        Rate-limiting: gated client-side via the once-per-user
+        `wr_activity_backfill_completed` localStorage flag. Per-endpoint server
+        rate limit deferred to a future spec.
+
+        No JSON request-body size cap is enforced today — typical payloads are
+        well under 100KB and the once-per-user client-side gate keeps pressure
+        low. (`spring.servlet.multipart.max-request-size` only governs
+        multipart/form-data, not application/json.) A server-side cap is
+        tracked as a future spec.
+      operationId: backfillActivity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivityBackfillRequest' }
+      responses:
+        '200':
+          description: Backfill applied
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ActivityBackfillResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
 components:
   schemas:
     ProxyResponse:
@@ -1336,6 +1387,153 @@ components:
           type: number
           format: double
           example: 1.25
+
+    ActivityBackfillRequest:
+      description: Body for POST /api/v1/activity/backfill (Spec 2.10).
+      type: object
+      required: [schemaVersion, userTimezone, activityLog, faithPoints, streak, badges]
+      properties:
+        schemaVersion:
+          type: integer
+          example: 1
+          description: Payload schema version. Reserved for future migrations.
+        userTimezone:
+          type: string
+          example: America/Chicago
+          description: |
+            IANA timezone reported by the client. Sanity-check only — the
+            authoritative timezone is users.timezone from the database; if
+            they disagree the server logs WARN and uses the DB value.
+        activityLog:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/BackfillActivityFlags'
+          description: Date-keyed (YYYY-MM-DD) map of per-day activity flags.
+        faithPoints:
+          $ref: '#/components/schemas/BackfillFaithPoints'
+        streak:
+          $ref: '#/components/schemas/BackfillStreak'
+        badges:
+          $ref: '#/components/schemas/BackfillBadges'
+
+    BackfillActivityFlags:
+      description: Per-day boolean flags for the 12 activity types.
+      type: object
+      properties:
+        mood: { type: boolean }
+        pray: { type: boolean }
+        listen: { type: boolean }
+        prayerWall: { type: boolean }
+        readingPlan: { type: boolean }
+        meditate: { type: boolean }
+        journal: { type: boolean }
+        gratitude: { type: boolean }
+        reflection: { type: boolean }
+        challenge: { type: boolean }
+        localVisit: { type: boolean }
+        devotional: { type: boolean }
+        pointsEarned:
+          type: integer
+          nullable: true
+          description: Optional; ride-on-wire from frontend; ignored server-side.
+        multiplier:
+          type: number
+          nullable: true
+          description: Optional; ride-on-wire from frontend; ignored server-side.
+
+    BackfillFaithPoints:
+      type: object
+      required: [totalPoints, currentLevel]
+      properties:
+        totalPoints: { type: integer, example: 1245 }
+        currentLevel: { type: integer, example: 3 }
+
+    BackfillStreak:
+      type: object
+      required: [currentStreak, longestStreak]
+      properties:
+        currentStreak: { type: integer, example: 5 }
+        longestStreak: { type: integer, example: 12 }
+        lastActiveDate:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-04-26'
+
+    BackfillBadges:
+      type: object
+      required: [earned, activityCounts]
+      properties:
+        earned:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/BackfillBadgeEntry'
+          description: Map keyed by badgeId → per-badge metadata.
+        activityCounts:
+          $ref: '#/components/schemas/BackfillActivityCounts'
+
+    BackfillBadgeEntry:
+      type: object
+      properties:
+        earnedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Falls back to NOW() server-side when absent or unparseable.
+        count:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: |
+            Optional displayCount for stackable badges. Defaults to 1 when
+            absent or 0.
+
+    BackfillActivityCounts:
+      description: |
+        The 14 cumulative counter values. Each field maps 1:1 to a CountType
+        wire value. Missing or null fields default to 0.
+      type: object
+      properties:
+        pray: { type: integer }
+        journal: { type: integer }
+        meditate: { type: integer }
+        listen: { type: integer }
+        prayerWall: { type: integer }
+        readingPlan: { type: integer }
+        gratitude: { type: integer }
+        reflection: { type: integer }
+        encouragementsSent: { type: integer }
+        fullWorshipDays: { type: integer }
+        challengesCompleted: { type: integer }
+        intercessionCount: { type: integer }
+        bibleChaptersRead: { type: integer }
+        prayerWallPosts: { type: integer }
+
+    ActivityBackfillResponse:
+      description: Inner data payload for the backfill response envelope.
+      type: object
+      required: [activityLogRowsInserted, faithPointsUpdated, streakStateUpdated, badgesInserted, activityCountsUpserted]
+      properties:
+        activityLogRowsInserted:
+          type: integer
+          description: Rows actually inserted (excludes ON CONFLICT DO NOTHING).
+          example: 31
+        faithPointsUpdated:
+          type: boolean
+          description: Always true (UPSERT always writes).
+          example: true
+        streakStateUpdated:
+          type: boolean
+          description: Always true (UPSERT always writes).
+          example: true
+        badgesInserted:
+          type: integer
+          description: Rows actually inserted (excludes ON CONFLICT DO NOTHING).
+          example: 5
+        activityCountsUpserted:
+          type: integer
+          description: Always 14 (one row per CountType, all upserted).
+          example: 14
 
   responses:
     BadRequest:

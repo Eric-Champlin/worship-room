@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.10 — Partial unique index on activity_log for backfill
+       idempotency per AD #2. Constrains only rows where source_feature = 'backfill';
+       real-time recordActivity rows (source_feature='daily_hub' etc.) are unaffected.
+       Enables `INSERT ... ON CONFLICT (user_id, activity_type, occurred_at) DO NOTHING`
+       in the backfill service. Once this changeset runs, its MD5 is permanent in
+       DATABASECHANGELOG; future schema changes go in new changesets. -->
+  <changeSet id="2026-04-27-008-add-activity-log-backfill-idempotency-index" author="worship-room">
+
+    <sql>
+      CREATE UNIQUE INDEX activity_log_backfill_idempotency_idx
+        ON activity_log (user_id, activity_type, occurred_at)
+        WHERE source_feature = 'backfill';
+    </sql>
+
+    <rollback>
+      <sql>DROP INDEX IF EXISTS activity_log_backfill_idempotency_idx;</sql>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

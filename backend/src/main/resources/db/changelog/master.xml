@@ -15,6 +15,7 @@
   <include file="db/changelog/2026-04-25-005-create-streak-state-table.xml"/>
   <include file="db/changelog/2026-04-25-006-create-user-badges-table.xml"/>
   <include file="db/changelog/2026-04-25-007-create-activity-counts-table.xml"/>
+  <include file="db/changelog/2026-04-27-008-add-activity-log-backfill-idempotency-index.xml"/>
   <include file="db/changelog/contexts/dev-seed.xml"/>
 
 </databaseChangeLog>
