@@ -38,6 +38,8 @@ tags:
     description: Activity recording for points, streak, and badge tracking — Spec 2.6
   - name: Friends
     description: Mutual friendships, friend requests, blocks, and user search — Spec 2.5.3
+  - name: Social
+    description: Encouragements, nudges, and recap dismissals — Spec 2.5.4b
 
 paths:
   /api/v1/health:
@@ -1097,6 +1099,106 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/social/encouragements:
+    post:
+      tags: [Social]
+      summary: Send an encouragement to a friend
+      operationId: sendEncouragement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SendEncouragementRequest' }
+      responses:
+        '201':
+          description: Encouragement created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SocialInteractionWriteResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/social/nudges:
+    post:
+      tags: [Social]
+      summary: Send a nudge to an inactive friend
+      operationId: sendNudge
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SendNudgeRequest' }
+      responses:
+        '201':
+          description: Nudge created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SocialInteractionWriteResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/social/recap-dismissal:
+    post:
+      tags: [Social]
+      summary: Dismiss the weekly recap card for a given week
+      operationId: dismissRecap
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecapDismissalRequest' }
+      responses:
+        '201':
+          description: Dismissal recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/SocialInteractionWriteResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
 components:
   schemas:
     ProxyResponse:
@@ -1912,6 +2014,44 @@ components:
           type: string
           description: Server-computed via DisplayNameResolver.
         avatarUrl: { type: string, maxLength: 500, nullable: true }
+
+    SendEncouragementRequest:
+      description: Body for POST /api/v1/social/encouragements.
+      type: object
+      required: [toUserId, message]
+      properties:
+        toUserId: { type: string, format: uuid }
+        message:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Plain text only — no HTML, no Markdown.
+
+    SendNudgeRequest:
+      description: Body for POST /api/v1/social/nudges.
+      type: object
+      required: [toUserId]
+      properties:
+        toUserId: { type: string, format: uuid }
+
+    RecapDismissalRequest:
+      description: Body for POST /api/v1/social/recap-dismissal.
+      type: object
+      required: [weekStart]
+      properties:
+        weekStart:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: ISO date (Monday) of the recap week being dismissed.
+          example: '2026-04-21'
+
+    SocialInteractionWriteResponse:
+      description: Standard response shape for the three social write endpoints.
+      type: object
+      required: [id, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
 
   responses:
     BadRequest:

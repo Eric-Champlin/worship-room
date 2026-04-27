@@ -1,5 +1,6 @@
 package com.worshiproom.activity;
 
+import com.worshiproom.activity.constants.BadgeThresholds;
 import com.worshiproom.activity.constants.LevelThresholds;
 import com.worshiproom.activity.constants.LevelThresholds.LevelInfo;
 import com.worshiproom.activity.constants.MultiplierTiers;
@@ -16,6 +17,8 @@ import com.worshiproom.activity.dto.MultiplierTierSnapshot;
 import com.worshiproom.activity.dto.NewBadge;
 import com.worshiproom.activity.dto.StreakResult;
 import com.worshiproom.activity.dto.StreakSnapshot;
+import com.worshiproom.social.MilestoneEventType;
+import com.worshiproom.social.MilestoneEventsService;
 import com.worshiproom.user.User;
 import com.worshiproom.user.UserException;
 import com.worshiproom.user.UserRepository;
@@ -103,6 +106,7 @@ public class ActivityService {
     private final StreakService streakService;
     private final BadgeService badgeService;
     private final ActivityCountsService activityCountsService;
+    private final MilestoneEventsService milestoneEventsService;
 
     public ActivityService(UserRepository userRepository,
                            ActivityLogRepository activityLogRepository,
@@ -112,7 +116,8 @@ public class ActivityService {
                            FaithPointsService faithPointsService,
                            StreakService streakService,
                            BadgeService badgeService,
-                           ActivityCountsService activityCountsService) {
+                           ActivityCountsService activityCountsService,
+                           MilestoneEventsService milestoneEventsService) {
         this.userRepository = userRepository;
         this.activityLogRepository = activityLogRepository;
         this.faithPointsRepository = faithPointsRepository;
@@ -122,6 +127,7 @@ public class ActivityService {
         this.streakService = streakService;
         this.badgeService = badgeService;
         this.activityCountsService = activityCountsService;
+        this.milestoneEventsService = milestoneEventsService;
     }
 
     @Transactional
@@ -208,6 +214,41 @@ public class ActivityService {
             BadgeResult badgeResult = badgeService.checkBadges(context, alreadyEarned);
             newBadgeDefs = badgeResult.newlyEarnedDefinitions();
             persistNewBadges(userId, newBadgeDefs, alreadyEarned);
+
+            // 4f. Emit milestone events (Spec 2.5.4b). All inside the existing
+            // @Transactional boundary so the events roll back with the parent.
+            // Skipped on the record-only path (firstTimeToday=false) — re-doing
+            // an activity already done today does not cross any milestone.
+
+            // LEVEL_UP — single emission per level change.
+            if (levelUp) {
+                milestoneEventsService.recordEvent(userId, MilestoneEventType.LEVEL_UP,
+                    Map.of("newLevel", levelInfo.level()));
+            }
+
+            // STREAK_MILESTONE — emit once per threshold crossed by THIS update.
+            // "Crossed" means oldStreak < threshold && newStreak >= threshold.
+            // A streak reset (newStreak < oldStreak) cannot satisfy the guard,
+            // so resets correctly emit nothing.
+            int oldStreak = streakData.currentStreak();
+            int newStreakDays = newStreakState.currentStreak();
+            for (int threshold : BadgeThresholds.STREAK) {
+                if (oldStreak < threshold && newStreakDays >= threshold) {
+                    milestoneEventsService.recordEvent(userId,
+                        MilestoneEventType.STREAK_MILESTONE,
+                        Map.of("streakDays", threshold));
+                }
+            }
+
+            // BADGE_EARNED — one event per entry in newBadgeDefs (BadgeService's
+            // applyEarnedFilter has already removed non-repeatable already-earned
+            // badges; repeatable badges intentionally remain and emit a fresh
+            // event row each time).
+            for (BadgeDefinition def : newBadgeDefs) {
+                milestoneEventsService.recordEvent(userId,
+                    MilestoneEventType.BADGE_EARNED,
+                    Map.of("badgeId", def.id()));
+            }
 
             totalPoints = newLifetime;
             currentLevel = levelInfo.level();

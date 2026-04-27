@@ -496,6 +496,91 @@ class ActivityControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     // ─────────────────────────────────────────────────────────────────
+    // J) Milestone event emission (Spec 2.5.4b — 3 tests)
+    // ─────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("J) Milestone emission (Spec 2.5.4b)")
+    class MilestoneEmission {
+
+        @Test
+        void recordActivity_levelUp_insertsLevelUpMilestoneRow() throws Exception {
+            // Pre-seed total_points just below the level-2 threshold (100).
+            jdbc.update(
+                "INSERT INTO faith_points (user_id, total_points, current_level, last_updated) " +
+                "VALUES (?, 95, 1, NOW())", user.getId());
+
+            mvc.perform(post("/api/v1/activity")
+                    .header("Authorization", "Bearer " + validToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body("journal", "daily-journal")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.levelUp").value(true));
+
+            Long levelUpRows = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM milestone_events WHERE user_id = ? AND event_type = 'level_up'",
+                Long.class, user.getId());
+            assertThat(levelUpRows).isEqualTo(1L);
+
+            String metadata = jdbc.queryForObject(
+                "SELECT event_metadata::text FROM milestone_events " +
+                "WHERE user_id = ? AND event_type = 'level_up'",
+                String.class, user.getId());
+            assertThat(metadata).contains("\"newLevel\"").contains("2");
+        }
+
+        @Test
+        void recordActivity_streakHits7Days_insertsStreakMilestoneRow() throws Exception {
+            // Pre-seed currentStreak=6, lastActiveDate=yesterday so today's activity
+            // crosses the streak threshold {7}.
+            LocalDate yesterday = LocalDate.now(ZoneOffset.UTC).minusDays(1);
+            jdbc.update(
+                "INSERT INTO streak_state " +
+                "(user_id, current_streak, longest_streak, last_active_date, grace_days_used) " +
+                "VALUES (?, 6, 6, ?, 0)", user.getId(), yesterday);
+
+            mvc.perform(post("/api/v1/activity")
+                    .header("Authorization", "Bearer " + validToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body("pray", "daily-pray")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.streak.current").value(7));
+
+            Long streakRows = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM milestone_events " +
+                "WHERE user_id = ? AND event_type = 'streak_milestone'",
+                Long.class, user.getId());
+            assertThat(streakRows).isEqualTo(1L);
+
+            String metadata = jdbc.queryForObject(
+                "SELECT event_metadata::text FROM milestone_events " +
+                "WHERE user_id = ? AND event_type = 'streak_milestone'",
+                String.class, user.getId());
+            assertThat(metadata).contains("\"streakDays\"").contains("7");
+        }
+
+        @Test
+        void recordActivity_firstPrayer_insertsBadgeEarnedRow() throws Exception {
+            // Empty user; first pray earns first_prayer badge (and level_1).
+            mvc.perform(post("/api/v1/activity")
+                    .header("Authorization", "Bearer " + validToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body("pray", "daily-pray")))
+                .andExpect(status().isOk());
+
+            // Expect at least one badge_earned row whose metadata contains first_prayer.
+            // Multiple BADGE_EARNED rows are valid (level_1 + first_prayer); we only
+            // assert first_prayer appears in the set.
+            List<String> metadatas = jdbc.queryForList(
+                "SELECT event_metadata::text FROM milestone_events " +
+                "WHERE user_id = ? AND event_type = 'badge_earned'",
+                String.class, user.getId());
+            assertThat(metadatas)
+                .anyMatch(m -> m.contains("\"badgeId\"") && m.contains("first_prayer"));
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
     // I) Response shape stability (1 test)
     // ─────────────────────────────────────────────────────────────────
 

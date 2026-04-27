@@ -77,6 +77,26 @@ describe('getSocialInteractions', () => {
       recapDismissals: [],
     });
   });
+
+  // Regression guard: a prior implementation used a module-level
+  // EMPTY_SOCIAL_DATA singleton + shallow spread, so callers that pushed into
+  // the returned arrays mutated the singleton. Two calls when localStorage is
+  // empty must return distinct array references — pushing into the first must
+  // never affect the second.
+  it('returns fresh array references on each empty-localStorage call', () => {
+    const first = getSocialInteractions();
+    first.encouragements.push(makeEncouragement(USER_ID, FRIEND_A));
+    first.nudges.push(makeNudge(USER_ID, FRIEND_A));
+    first.recapDismissals.push('2026-04-21');
+
+    const second = getSocialInteractions();
+    expect(second.encouragements).toHaveLength(0);
+    expect(second.nudges).toHaveLength(0);
+    expect(second.recapDismissals).toHaveLength(0);
+    expect(second.encouragements).not.toBe(first.encouragements);
+    expect(second.nudges).not.toBe(first.nudges);
+    expect(second.recapDismissals).not.toBe(first.recapDismissals);
+  });
 });
 
 describe('saveSocialInteractions', () => {

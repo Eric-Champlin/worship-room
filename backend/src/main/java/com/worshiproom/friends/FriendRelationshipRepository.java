@@ -23,6 +23,8 @@ public interface FriendRelationshipRepository
     boolean existsByUserIdAndFriendUserIdAndStatus(
         UUID userId, UUID friendUserId, FriendRelationshipStatus status);
 
+    long countByUserIdAndStatus(UUID userId, FriendRelationshipStatus status);
+
     /**
      * True when EITHER (a -> b) OR (b -> a) has status = BLOCKED. Used to gate
      * sendRequest and acceptRequest. JPQL because the comparison fits.

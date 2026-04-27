@@ -202,6 +202,31 @@ class FriendsServiceTest extends AbstractIntegrationTest {
                 "SELECT COUNT(*) FROM friend_relationships WHERE status = 'active'", Long.class);
             assertThat(activeCount).isEqualTo(0L);
         }
+
+        @Test
+        void acceptRequest_firstFriendThresholdCrossed_emitsFriendMilestone() {
+            // userA <-> userB go from 0 friends to 1 friend each — both cross
+            // BadgeThresholds.FRIENDS[0] = 1.
+            FriendRequest req = friendsService.sendRequest(userA.getId(), userB.getId(), null);
+            friendsService.acceptRequest(req.getId(), userB.getId());
+
+            Long countA = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM milestone_events "
+              + "WHERE user_id = ? AND event_type = 'friend_milestone'",
+                Long.class, userA.getId());
+            Long countB = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM milestone_events "
+              + "WHERE user_id = ? AND event_type = 'friend_milestone'",
+                Long.class, userB.getId());
+            assertThat(countA).isEqualTo(1L);
+            assertThat(countB).isEqualTo(1L);
+
+            String metadataA = jdbc.queryForObject(
+                "SELECT event_metadata::text FROM milestone_events "
+              + "WHERE user_id = ? AND event_type = 'friend_milestone'",
+                String.class, userA.getId());
+            assertThat(metadataA).contains("\"friendCount\"").contains("1");
+        }
     }
 
     // -----------------------------------------------------------------

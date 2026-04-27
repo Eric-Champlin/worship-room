@@ -2,11 +2,13 @@ package com.worshiproom.config;
 
 import com.worshiproom.auth.AuthException;
 import com.worshiproom.auth.AuthenticatedUser;
+import com.worshiproom.friends.SelfActionException;
 import com.worshiproom.proxy.bible.FcbhNotFoundException;
 import com.worshiproom.proxy.common.RateLimitExceededException;
 import com.worshiproom.proxy.common.SafetyBlockException;
 import com.worshiproom.proxy.common.UpstreamException;
 import com.worshiproom.proxy.common.UpstreamTimeoutException;
+import com.worshiproom.social.RateLimitedException;
 import com.worshiproom.user.UserException;
 import io.sentry.Hint;
 import io.sentry.SentryEvent;
@@ -68,6 +70,11 @@ class SentryConfigTest {
             // whose constructors take MethodParameter / MethodValidationResult shapes
             // we do not have on hand. The filter only checks `instanceof`, so a Mockito
             // mock satisfies the contract.
+            //
+            // FriendsException and SocialException are abstract, so concrete subclasses
+            // (SelfActionException, RateLimitedException) stand in. The filter resolves
+            // the base class via instanceof, so any concrete subclass of either will
+            // also be dropped.
             Throwable[] expected = new Throwable[] {
                 AuthException.unauthorized(),
                 new UserExceptionStub(),
@@ -78,7 +85,9 @@ class SentryConfigTest {
                 new UpstreamException("upstream"),
                 new UpstreamTimeoutException("timeout"),
                 new SafetyBlockException("blocked"),
-                new FcbhNotFoundException("not found")
+                new FcbhNotFoundException("not found"),
+                new SelfActionException("self-action"),
+                new RateLimitedException("rate limited")
             };
 
             assertThat(expected).hasSize(SentryConfig.EXPECTED_EXCEPTIONS.size());
@@ -107,6 +116,32 @@ class SentryConfigTest {
             SentryEvent event = new SentryEvent(unexpected);
 
             assertThat(beforeSend.execute(event, new Hint())).isSameAs(event);
+        }
+
+        @Test
+        @DisplayName("dropsAllFriendsAndSocialSubclasses — base-class entries cover every concrete subclass")
+        void dropsAllFriendsAndSocialSubclasses() {
+            // The FriendsException and SocialException entries in EXPECTED_EXCEPTIONS
+            // are deliberately base classes so concrete subclasses inherit the drop.
+            // If a future refactor narrows either entry to a specific subclass, this
+            // test fails — preventing the silent regression where new domain
+            // exceptions slip through and flood Sentry.
+            Throwable[] subclasses = new Throwable[] {
+                new com.worshiproom.friends.SelfActionException("self"),
+                new com.worshiproom.friends.UserNotFoundException("not found"),
+                new com.worshiproom.friends.InvalidInputException("invalid"),
+                new com.worshiproom.friends.NotFriendsException("not friends"),
+                new com.worshiproom.social.NotFriendsException("not friends (social)"),
+                new com.worshiproom.social.RateLimitedException("rate limited"),
+                new com.worshiproom.social.NudgeCooldownException("cooldown")
+            };
+
+            for (Throwable t : subclasses) {
+                SentryEvent event = new SentryEvent(t);
+                assertThat(beforeSend.execute(event, new Hint()))
+                    .as("beforeSend should drop %s via its base class", t.getClass().getName())
+                    .isNull();
+            }
         }
     }
 

@@ -74,11 +74,33 @@ codes with many throw sites, see the source files for the full list. The
 | `INVALID_INPUT` | 400 | (a) `@Valid @RequestBody` failure on a proxy controller; (b) `@RequestParam`/`@PathVariable` Bean Validation failure (handled by both `ConstraintViolationException` and `HandlerMethodValidationException` paths); (c) missing required `@RequestParam`; (d) user-domain rule violations from `UserException` (invalid timezone, custom-display-name preference without value, blank required field, explicit null on non-nullable field, invalid display-name preference enum value) | Dynamic per field. Format: `"<field>: <validation message>"` for body validation, `"<field> cannot be blank"` / `"Unknown timezone identifier: '<value>'"` etc. for user-domain rules | `ProxyExceptionHandler.handleValidation`, `handleConstraintViolation`, `handleHandlerMethodValidation`, `handleMissingParam`; `UserException` factories (`invalidTimezone`, `invalidDisplayNamePreference`, `customDisplayNameRequired`, `fieldBlank`, `nonNullableFieldNull`) | Body shape: flat `ProxyError`, no `fieldErrors` map. Wins for proxy controllers because `ProxyExceptionHandler` is package-scoped to `com.worshiproom.proxy`. See § 6.1 for the drift between this code and `VALIDATION_FAILED`. |
 | `VALIDATION_FAILED` | 400 | `@Valid @RequestBody` failure on an auth or user controller (`MethodArgumentNotValidException`) | Static message: `"Request validation failed."`; per-field detail in the `fieldErrors` map | `AuthValidationExceptionHandler.handleValidation`; `UserValidationExceptionHandler.handleValidation` | **Body shape extends the standard envelope** with `fieldErrors: { <fieldName>: <message> }`. Wins for auth and user controllers because those advices are package-scoped to `com.worshiproom.auth` / `com.worshiproom.user`. Same exception type as one branch of `INVALID_INPUT` — see § 6.1. |
 
+### Friends / Social
+
+The friends and social packages emit a related family of domain rejections.
+Two codes (`NOT_FRIENDS`, `USER_NOT_FOUND`) appear with **different HTTP
+statuses** in different packages — that's deliberate, not drift. See the Notes
+column for each.
+
+| Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
+|---|---|---|---|---|---|
+| `ALREADY_FRIENDS` | 409 | `sendRequest` to a user with whom an ACTIVE friendship row already exists | Dynamic per-call | `AlreadyFriendsException` ← `FriendsService.sendRequest` | Spec 2.5.3. |
+| `BLOCKED_USER` | 403 | Either party has BLOCKED the other when `sendRequest` or `acceptRequest` runs | Dynamic per-call | `BlockedUserException` ← `FriendsService.sendRequest`, `acceptRequest` | Spec 2.5.3. The block check runs on accept too, guarding against a block placed mid-flight between send and accept. |
+| `DUPLICATE_FRIEND_REQUEST` | 409 | `friend_requests` UNIQUE constraint violation on `(from_user_id, to_user_id)` | Dynamic per-call | `DuplicateFriendRequestException` ← `FriendsService.sendRequest` | Spec 2.5.3. Caught from `DataIntegrityViolationException` and remapped. |
+| `FRIEND_REQUEST_NOT_FOUND` | 404 | `acceptRequest` / `declineRequest` referring to a missing or already-resolved request id | Dynamic per-call | `FriendRequestNotFoundException` ← `FriendsService.acceptRequest`, `declineRequest` | Spec 2.5.3. |
+| `INVALID_REQUEST_STATE` | 409 | `acceptRequest` / `declineRequest` on a request whose status is no longer PENDING | Dynamic per-call | `InvalidRequestStateException` ← `FriendsService.acceptRequest`, `declineRequest` | Spec 2.5.3. |
+| `NOT_BLOCKED` | 404 | `unblockUser` for a user not currently blocked by the caller | Dynamic per-call | `NotBlockedException` ← `FriendsService.unblockUser` | Spec 2.5.3. |
+| `NOT_FRIENDS` (friends) | **404** | `removeFriend` when no ACTIVE friendship row exists | Dynamic per-call | `com.worshiproom.friends.NotFriendsException` ← `FriendsService.removeFriend` | Spec 2.5.3. **Different status from the social-package version below.** Friends uses 404 because `removeFriend`'s lookup behaves like a "not found" — there is no resource to remove. |
+| `NOT_FRIENDS` (social) | **403** | `sendEncouragement` / `sendNudge` when no ACTIVE friendship row exists between sender and recipient | `"Cannot send encouragement to a non-friend"` / `"Cannot nudge a non-friend"` | `com.worshiproom.social.NotFriendsException` ← `SocialInteractionsService.sendEncouragement`, `sendNudge` | Spec 2.5.4b. Social uses 403 because the user authenticates successfully but the action is rejected on authorization grounds. **Same code, different package, different status.** |
+| `NUDGE_COOLDOWN` | 409 | `sendNudge` while the most recent nudge to the same recipient is still within `worshiproom.social.nudge.cooldown-days` (default 7) | `"Nudge cooldown active for this friend."` | `NudgeCooldownException` ← `SocialInteractionsService.sendNudge` | Spec 2.5.4b. Frontend `NUDGE_COOLDOWN_DAYS` constant must agree with the backend value. |
+| `SELF_ACTION_FORBIDDEN` | 400 | An action targeting `principal.userId()` (e.g., friend request to self, encouragement to self, nudge self) | Dynamic per-call | `SelfActionException` ← `FriendsService.sendRequest`, `removeFriend`, `blockUser`, `unblockUser`; `SocialInteractionsService.sendEncouragement`, `sendNudge` | Specs 2.5.3 and 2.5.4b. Reused across both packages — the friends-package class is imported into social via cross-package import (caught by the deliberately-unscoped `FriendsExceptionHandler`). |
+| `UNAUTHORIZED_ACTION` | 403 | `acceptRequest` / `declineRequest` when the acting user is not the request's recipient | Dynamic per-call | `UnauthorizedActionException` ← `FriendsService.acceptRequest`, `declineRequest` | Spec 2.5.3. |
+| `USER_NOT_FOUND` (friends) | **404** | A friends or social action targeting a non-existent / soft-deleted / banned user | Dynamic per-call | `com.worshiproom.friends.UserNotFoundException` ← `FriendsService.*`; `SocialInteractionsService.sendEncouragement`, `sendNudge` | Specs 2.5.3 and 2.5.4b. **Same code as `USER_NOT_FOUND` in the Auth section above (which is 401).** Friends/social use 404 — the target is a domain resource, not the authenticated principal. The auth case is a force-logout scenario; this case is "the friend you tried to act on doesn't exist." Frontend MUST branch on status, not just code. |
+
 ### Rate limit
 
 | Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
 |---|---|---|---|---|---|
-| `RATE_LIMITED` | 429 | Token bucket exhausted on (a) per-IP proxy bucket, (b) per-IP login bucket, or (c) per-email login bucket | Dynamic: `"Too many requests. Try again in <N> seconds."` | `RateLimitExceededException` ← `RateLimitFilter` (proxy, per-IP) and `LoginRateLimitFilter` (login, per-email + per-IP) | Always carries `Retry-After` header (integer seconds). Successful and rate-limited responses both carry `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`. `LoginRateLimitFilter` reports the tighter of the two dimensions in those headers (see filter source for the rationale). |
+| `RATE_LIMITED` | 429 | (a) `RateLimitFilter` per-IP proxy bucket exhausted; (b) `LoginRateLimitFilter` per-IP or per-email login bucket exhausted; (c) social-package per-user hourly cap or per-friend daily cap exceeded (Spec 2.5.4b) | Dynamic. Filter path: `"Too many requests. Try again in <N> seconds."` Service path: `"Hourly encouragement cap reached. Please try again later."` / `"Daily encouragement cap for this friend reached."` / `"Hourly nudge cap reached. Please try again later."` | `RateLimitExceededException` ← `RateLimitFilter`, `LoginRateLimitFilter` (filter path); `com.worshiproom.social.RateLimitedException` ← `SocialInteractionsService.sendEncouragement`, `sendNudge` (service path) | Filter path always carries `Retry-After` header. Service path does NOT — the service-layer caps don't have a deterministic reset moment to advertise (see the master plan rate-limit section for the trade-off). Frontend should branch on `Retry-After` presence, not assume it. The two emit paths share a code because frontend retry behavior is identical: back off and retry later. |
 
 ### Proxy / upstream
 
@@ -99,13 +121,13 @@ codes with many throw sites, see the source files for the full list. The
 
 ### Existing pool — descriptive, factual
 
-The 14 codes in this catalog use three different shapes:
+The catalog's codes use three different shapes:
 
-- **Adjective-noun:** `INVALID_INPUT`, `INVALID_CREDENTIALS`
+- **Adjective-noun:** `INVALID_INPUT`, `INVALID_CREDENTIALS`, `INVALID_REQUEST_STATE`, `DUPLICATE_FRIEND_REQUEST`
 - **Verb-past-tense:** `RATE_LIMITED`, `VALIDATION_FAILED`
-- **Noun-only:** `UNAUTHORIZED`, `NOT_FOUND`, `INTERNAL_ERROR`, `UPSTREAM_ERROR`, `UPSTREAM_TIMEOUT`, `SAFETY_BLOCK`, `TOKEN_EXPIRED`, `TOKEN_INVALID`, `TOKEN_MALFORMED`, `USER_NOT_FOUND`
+- **Noun-only:** `UNAUTHORIZED`, `UNAUTHORIZED_ACTION`, `NOT_FOUND`, `NOT_FRIENDS`, `NOT_BLOCKED`, `INTERNAL_ERROR`, `UPSTREAM_ERROR`, `UPSTREAM_TIMEOUT`, `SAFETY_BLOCK`, `TOKEN_EXPIRED`, `TOKEN_INVALID`, `TOKEN_MALFORMED`, `USER_NOT_FOUND`, `FRIEND_REQUEST_NOT_FOUND`, `BLOCKED_USER`, `ALREADY_FRIENDS`, `NUDGE_COOLDOWN`, `SELF_ACTION_FORBIDDEN`
 
-All 14 are SCREAMING_SNAKE_CASE. That part is consistent.
+All are SCREAMING_SNAKE_CASE. That part is consistent.
 
 ### Convention for new codes (Phase 2+)
 

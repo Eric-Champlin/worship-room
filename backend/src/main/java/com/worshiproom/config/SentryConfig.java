@@ -2,11 +2,13 @@ package com.worshiproom.config;
 
 import com.worshiproom.auth.AuthenticatedUser;
 import com.worshiproom.auth.AuthException;
+import com.worshiproom.friends.FriendsException;
 import com.worshiproom.proxy.bible.FcbhNotFoundException;
 import com.worshiproom.proxy.common.RateLimitExceededException;
 import com.worshiproom.proxy.common.SafetyBlockException;
 import com.worshiproom.proxy.common.UpstreamException;
 import com.worshiproom.proxy.common.UpstreamTimeoutException;
+import com.worshiproom.social.SocialException;
 import com.worshiproom.user.UserException;
 import io.sentry.Sentry;
 import io.sentry.SentryOptions;
@@ -61,7 +63,14 @@ public class SentryConfig {
     /**
      * Exceptions deliberately dropped before reaching Sentry. Each maps to one of the
      * "expected" error codes in {@code backend/docs/api-error-codes.md} — auth failures,
-     * validation errors, rate limits, upstream errors, safety blocks, FCBH not-found.
+     * validation errors, rate limits, upstream errors, safety blocks, FCBH not-found,
+     * and the friends/social domain rejections (block, self-action, not-friends,
+     * nudge cooldown, encouragement caps).
+     *
+     * <p>{@link FriendsException} and {@link SocialException} are added as base
+     * classes so the entry covers every concrete subclass without listing each by
+     * name (Spec 2.5.4b: {@code NotFriendsException}, {@code RateLimitedException},
+     * {@code NudgeCooldownException}; Spec 2.5.3 friends-domain subclasses).
      *
      * <p>Updating this set requires code review per spec § 4.4 — NOT env-var-tunable.
      */
@@ -75,7 +84,9 @@ public class SentryConfig {
         UpstreamException.class,
         UpstreamTimeoutException.class,
         SafetyBlockException.class,
-        FcbhNotFoundException.class
+        FcbhNotFoundException.class,
+        FriendsException.class,
+        SocialException.class
     );
 
     /**

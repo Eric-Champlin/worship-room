@@ -20,6 +20,15 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => mockAuth(),
 }))
 
+// Spec 2.5.4b dual-write needs api mocks present even though dual-write
+// tests live in a separate file — useSocialInteractions imports the api
+// module unconditionally and would call the real network in this suite.
+vi.mock('@/services/api/social-api', () => ({
+  sendEncouragementApi: vi.fn(),
+  sendNudgeApi: vi.fn(),
+  sendRecapDismissalApi: vi.fn(),
+}))
+
 const MOCK_FRIEND: FriendProfile = {
   id: FRIEND_ID,
   displayName: FRIEND_NAME,
@@ -153,4 +162,8 @@ describe('useSocialInteractions', () => {
     // Should not have stored anything because friend doesn't exist
     expect(localStorage.getItem(SOCIAL_KEY)).toBeNull()
   })
+
+  // Spec 2.5.4b dual-write tests live in
+  // useSocialInteractions.dualWrite.test.ts to isolate them from the
+  // localStorage state leakage that this outer suite generates.
 })

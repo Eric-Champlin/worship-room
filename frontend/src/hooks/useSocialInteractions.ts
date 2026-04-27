@@ -11,6 +11,26 @@ import {
 } from '@/services/social-storage'
 import { getFriendsData } from '@/services/friends-storage'
 import { getCurrentWeekStart } from '@/utils/date'
+import { isBackendSocialEnabled } from '@/lib/env'
+import { getStoredToken } from '@/lib/auth-storage'
+import {
+  sendEncouragementApi,
+  sendNudgeApi,
+  sendRecapDismissalApi,
+} from '@/services/api/social-api'
+
+/**
+ * Spec 2.5.4b dual-write guard. Mirrors useFriends.shouldDualWrite().
+ * Returns true when:
+ *   - VITE_USE_BACKEND_SOCIAL === 'true' (env flag), AND
+ *   - getStoredToken() returns a non-null JWT.
+ *
+ * The token check prevents AUTH_INVALIDATED_EVENT loops for simulated-auth
+ * users (same rationale as the friends dual-write guard).
+ */
+function shouldDualWriteSocial(): boolean {
+  return isBackendSocialEnabled() && getStoredToken() !== null
+}
 
 export interface UseSocialInteractions {
   // Encouragements
@@ -60,6 +80,12 @@ export function useSocialInteractions(): UseSocialInteractions {
       })
 
       forceUpdate((n) => n + 1)
+
+      if (shouldDualWriteSocial()) {
+        sendEncouragementApi(toUserId, message).catch((err) => {
+          console.warn('[useSocialInteractions] backend sendEncouragement dual-write failed:', err)
+        })
+      }
     },
     [isAuthenticated, userId, userName],
   )
@@ -100,6 +126,12 @@ export function useSocialInteractions(): UseSocialInteractions {
       })
 
       forceUpdate((n) => n + 1)
+
+      if (shouldDualWriteSocial()) {
+        sendNudgeApi(toUserId).catch((err) => {
+          console.warn('[useSocialInteractions] backend sendNudge dual-write failed:', err)
+        })
+      }
     },
     [isAuthenticated, userId, userName],
   )
@@ -131,6 +163,12 @@ export function useSocialInteractions(): UseSocialInteractions {
       saveSocialInteractions(data)
     }
     forceUpdate((n) => n + 1)
+
+    if (shouldDualWriteSocial()) {
+      sendRecapDismissalApi(weekStart).catch((err) => {
+        console.warn('[useSocialInteractions] backend dismissRecap dual-write failed:', err)
+      })
+    }
   }, [isAuthenticated])
 
   return {

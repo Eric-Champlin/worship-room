@@ -1,9 +1,12 @@
 package com.worshiproom.friends;
 
+import com.worshiproom.activity.constants.BadgeThresholds;
 import com.worshiproom.activity.constants.LevelThresholds;
 import com.worshiproom.friends.dto.FriendDto;
 import com.worshiproom.friends.dto.FriendRequestDto;
 import com.worshiproom.friends.dto.UserSearchResultDto;
+import com.worshiproom.social.MilestoneEventType;
+import com.worshiproom.social.MilestoneEventsService;
 import com.worshiproom.user.DisplayNamePreference;
 import com.worshiproom.user.DisplayNameResolver;
 import com.worshiproom.user.User;
@@ -42,13 +45,16 @@ public class FriendsService {
     private final FriendRelationshipRepository relationshipRepo;
     private final FriendRequestRepository requestRepo;
     private final UserRepository userRepository;
+    private final MilestoneEventsService milestoneEventsService;
 
     public FriendsService(FriendRelationshipRepository relationshipRepo,
                           FriendRequestRepository requestRepo,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          MilestoneEventsService milestoneEventsService) {
         this.relationshipRepo = relationshipRepo;
         this.requestRepo = requestRepo;
         this.userRepository = userRepository;
+        this.milestoneEventsService = milestoneEventsService;
     }
 
     @Transactional(readOnly = true)
@@ -183,6 +189,27 @@ public class FriendsService {
             req.getFromUserId(), req.getToUserId(), FriendRelationshipStatus.ACTIVE));
         relationshipRepo.save(new FriendRelationship(
             req.getToUserId(), req.getFromUserId(), FriendRelationshipStatus.ACTIVE));
+
+        // Spec 2.5.4b: emit FRIEND_MILESTONE for both parties when friend count
+        // crosses a configured threshold ({1, 10}). Both users equally cross the
+        // threshold; suppressing one would be arbitrary. Emission lives inside
+        // the existing @Transactional boundary so milestone rows roll back if
+        // the parent fails.
+        emitFriendMilestoneIfThresholdCrossed(req.getToUserId());
+        emitFriendMilestoneIfThresholdCrossed(req.getFromUserId());
+    }
+
+    private void emitFriendMilestoneIfThresholdCrossed(UUID userId) {
+        long count = relationshipRepo.countByUserIdAndStatus(
+            userId, FriendRelationshipStatus.ACTIVE);
+        for (int threshold : BadgeThresholds.FRIENDS) {
+            if (count == threshold) {
+                milestoneEventsService.recordEvent(userId,
+                    MilestoneEventType.FRIEND_MILESTONE,
+                    Map.of("friendCount", threshold));
+                break; // count == threshold can only match one threshold
+            }
+        }
     }
 
     @Transactional

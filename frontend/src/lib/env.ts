@@ -102,3 +102,21 @@ export function isBackendFriendsEnabled(): boolean {
   return USE_BACKEND_FRIENDS === 'true'
 }
 
+const USE_BACKEND_SOCIAL = import.meta.env.VITE_USE_BACKEND_SOCIAL as string | undefined
+
+/**
+ * Returns true when social-mutation events should be dual-written to the
+ * backend (POST /api/v1/social/encouragements, /nudges, /recap-dismissal)
+ * alongside the existing localStorage write to wr_social_interactions.
+ *
+ * Strict equality to the string `'true'` — `'false'`, `''`, `undefined`,
+ * and any other value all return false (fail-closed).
+ *
+ * Default: false. Cutover (flag default flip) is owned by Spec 2.5.5.
+ *
+ * Used by: useSocialInteractions (Spec 2.5.4b — Social/Milestone Dual-Write).
+ */
+export function isBackendSocialEnabled(): boolean {
+  return USE_BACKEND_SOCIAL === 'true'
+}
+

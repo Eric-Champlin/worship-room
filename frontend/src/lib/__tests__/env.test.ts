@@ -122,3 +122,50 @@ describe('isBackendFriendsEnabled (Spec 2.5.4 — Frontend Friends Dual-Write)',
     expect(isBackendFriendsEnabled()).toBe(false)
   })
 })
+
+describe('isBackendSocialEnabled (Spec 2.5.4b — Frontend Social/Milestone Dual-Write)', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  })
+
+  it("returns true for the exact string 'true'", async () => {
+    vi.stubEnv('VITE_USE_BACKEND_SOCIAL', 'true')
+    const { isBackendSocialEnabled } = await loadEnv()
+    expect(isBackendSocialEnabled()).toBe(true)
+  })
+
+  it("returns false for the exact string 'false'", async () => {
+    vi.stubEnv('VITE_USE_BACKEND_SOCIAL', 'false')
+    const { isBackendSocialEnabled } = await loadEnv()
+    expect(isBackendSocialEnabled()).toBe(false)
+  })
+
+  it('returns false for the empty string (fail-closed)', async () => {
+    vi.stubEnv('VITE_USE_BACKEND_SOCIAL', '')
+    const { isBackendSocialEnabled } = await loadEnv()
+    expect(isBackendSocialEnabled()).toBe(false)
+  })
+
+  it('returns false when the env variable is unset (fail-closed)', async () => {
+    vi.stubEnv('VITE_USE_BACKEND_SOCIAL', undefined)
+    const { isBackendSocialEnabled } = await loadEnv()
+    expect(isBackendSocialEnabled()).toBe(false)
+  })
+
+  it("returns false for 'TRUE' (case-sensitive comparison)", async () => {
+    vi.stubEnv('VITE_USE_BACKEND_SOCIAL', 'TRUE')
+    const { isBackendSocialEnabled } = await loadEnv()
+    expect(isBackendSocialEnabled()).toBe(false)
+  })
+
+  it("returns false for '1' (no implicit truthy-string coercion)", async () => {
+    vi.stubEnv('VITE_USE_BACKEND_SOCIAL', '1')
+    const { isBackendSocialEnabled } = await loadEnv()
+    expect(isBackendSocialEnabled()).toBe(false)
+  })
+})

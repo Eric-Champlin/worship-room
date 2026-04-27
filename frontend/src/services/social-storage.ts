@@ -15,16 +15,22 @@ export const SOCIAL_KEY = 'wr_social_interactions';
 export const MILESTONE_KEY = 'wr_milestone_feed';
 export const NOTIFICATIONS_KEY = 'wr_notifications';
 
-const EMPTY_SOCIAL_DATA: SocialInteractionsData = {
-  encouragements: [],
-  nudges: [],
-  recapDismissals: [],
-};
+// Always return a freshly-allocated object with freshly-allocated arrays.
+// A module-level singleton + shallow spread (`{ ...SINGLETON }`) reuses the
+// inner array references — callers that push into the returned arrays mutate
+// the singleton, leaking state across calls (and across tests).
+function emptySocialData(): SocialInteractionsData {
+  return {
+    encouragements: [],
+    nudges: [],
+    recapDismissals: [],
+  };
+}
 
 export function getSocialInteractions(): SocialInteractionsData {
   try {
     const raw = localStorage.getItem(SOCIAL_KEY);
-    if (!raw) return { ...EMPTY_SOCIAL_DATA };
+    if (!raw) return emptySocialData();
     const parsed = JSON.parse(raw);
     if (
       !parsed ||
@@ -32,12 +38,12 @@ export function getSocialInteractions(): SocialInteractionsData {
       !Array.isArray(parsed.nudges) ||
       !Array.isArray(parsed.recapDismissals)
     ) {
-      return { ...EMPTY_SOCIAL_DATA };
+      return emptySocialData();
     }
     return parsed as SocialInteractionsData;
   } catch (_e) {
     // localStorage may be unavailable or data malformed
-    return { ...EMPTY_SOCIAL_DATA };
+    return emptySocialData();
   }
 }
 
