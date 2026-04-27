@@ -177,3 +177,26 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Priority:** MEDIUM. Skews the backend `activity_log` toward non-music activities until wired. Backfill closes the gap eventually.
 
 ---
+
+## GrowthGarden test time-of-day flake
+
+**Date discovered:** 2026-04-27
+**Discovered during:** Spec 2.9 (Phase 2 cutover) execution at Step 6 verification
+**Severity:** Low (test-only; production code is correct)
+**Status:** Open
+
+**Symptom:** 14 tests in `frontend/src/components/dashboard/__tests__/GrowthGarden.test.tsx` fail when the test suite runs during the "dawn" or "night" time-of-day windows. Fail count is 0 outside those windows.
+
+**Cause:** `GrowthGarden.tsx:44-47`'s `getGardenAriaLabel` function appends `" at dawn"` or `" at night"` to the aria-label based on real-wall-clock time-of-day. The test assertions were written expecting the no-suffix branch only and were never taught to mock the time-of-day reading.
+
+**Origin commit:** `5afccf0` (growth-garden-enhancement, 2026-04-01) added the time-of-day branch but did not update the corresponding tests.
+
+**Why this matters now:** Spec 2.9 verification at Step 6 ran during the dawn window and surfaced the failures. The failures are unrelated to Spec 2.9's flag flip (Vite does not read `.env.example` at runtime; GrowthGarden has no reference to `VITE_USE_BACKEND_ACTIVITY`). Verified by code inspection.
+
+**Fix sketch:** Mock the time-of-day reading in the test setup to a fixed value (e.g., always return `'day'`). Or refactor `getGardenAriaLabel` to take `timeOfDay` as a parameter so the test can pass it explicitly.
+
+**Scope to fix:** A small standalone spec — modifies only `GrowthGarden.test.tsx` (and possibly `GrowthGarden.tsx` if the parameter-injection refactor is preferred). No production behavior change.
+
+**Deferred until:** A future cleanup spec; not urgent.
+
+---
