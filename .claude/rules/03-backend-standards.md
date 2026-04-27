@@ -4,7 +4,7 @@ paths: ["backend/**"]
 
 ## Forums Wave Backend Standards
 
-**Status: AI proxy layer shipped (Gemini, Maps, FCBH via `com.example.worshiproom.proxy.*`); Forums Wave master plan v2.8 ready to execute.** The backend is built using Spring Boot 3.x. The Key Protection Wave closed the proxy layer (Specs 1–4: foundation, Gemini, Maps, FCBH); Forums Wave will extend this backend with auth, Liquibase schemas, and domain services per `_forums_master_plan/round3-master-plan.md`.
+**Status: Forums Wave Phase 1 (Backend Foundation, 24/30 specs) and Phase 2 (Activity Engine Migration, 10/10 specs) shipped. Phase 2.5 (Friends Migration) starting next; master plan v2.9 with Phase 1 and Phase 2 Execution Reality Addendums is authoritative.** The backend is built using Spring Boot 3.x. The Key Protection Wave closed the proxy layer (Specs 1–4: foundation, Gemini, Maps, FCBH); Phase 1 added auth + Liquibase + JPA + production hardening; Phase 2 added the activity engine in dual-write mode.
 
 **Authority hierarchy:** If this file conflicts with the master plan's Universal Rules or Architectural Decisions, the master plan wins.
 
@@ -160,37 +160,49 @@ backend/src/main/resources/db/changelog/
 
 ### Package Structure
 
-**Base package:** **`com.example.worshiproom`** until Forums Wave Phase 1 Spec 1.1 merges, then **`com.worshiproom`** globally. The rename is a deliberate step in Spec 1.1 (now sized L, risk Medium in v2.7+ of the master plan) covering ~60+ proxy files + tests + `pom.xml` `groupId` + Docker image tags. **Before writing any backend code, check the actual current package:** `ls backend/src/main/java/com/`. If `example/worshiproom/` still exists on `main`, use the old path. If only `worshiproom/` exists, Spec 1.1 has merged and the new path is canonical. During the Spec 1.1 review itself, both packages may coexist transiently; treat the spec's own instructions as authoritative during that window.
+**Base package:** **`com.worshiproom`**. Phase 1 Spec 1.1 ✅ renamed from the original `com.example.worshiproom` (covered ~60+ proxy files + tests + `pom.xml` `groupId` + Docker image tags). The new path is canonical everywhere. If `com/example/worshiproom/` still appears anywhere in the codebase post-Phase-1, that's a regression — the rename was complete and verified.
 
-**Current structure (as of Spec 1 merged):**
+**Current structure (post-Phase-2):**
 ```
-com.example.worshiproom/
+com.worshiproom/
 ├── WorshipRoomApplication.java
 ├── config/
-│   ├── CorsConfig.java
-│   └── ProxyConfig.java           (binds proxy.* properties, exposes WebClient + IpResolver beans)
+│   ├── CorsConfig.java                  (binds proxy.cors.allowed-origins, exposes WebMvcConfigurer)
+│   ├── JsonNullableConfig.java          (Phase 1 — Jackson registration for jsonnullable)
+│   ├── ProxyConfig.java                 (binds proxy.* properties, exposes WebClient + IpResolver beans)
+│   ├── SecurityHeadersConfig.java       (Phase 1 Spec 1.10g — 6 security headers as servlet filter at HIGHEST_PRECEDENCE+6)
+│   └── SentryConfig.java                (Phase 1 Spec 1.10d — graceful no-op when SENTRY_DSN unset; PII boundary; expected-exception filter)
 ├── controller/
-│   └── ApiController.java         (/api/health, /api/v1/health, /api/hello)
-└── proxy/
-    ├── common/                    (shared across all proxy subpackages)
+│   └── ApiController.java               (/api/v1/health, /api/v1/hello — health endpoint reports providers.* status)
+├── auth/                                (Phase 1 — Spring Security + JWT: login/register/me endpoints, JwtAuthenticationFilter, LoginRateLimitFilter, BCrypt, anti-enumeration)
+├── user/                                (Phase 1 — User entity, UserController, UserService, UserRepository, DisplayNameResolver, PATCH /users/me)
+├── activity/                            (Phase 2 — ActivityLog, FaithPoints, Streak, Badge, ActivityCounts; pure-function services + dual-write POST /api/v1/activity + POST /api/v1/activity/backfill)
+└── proxy/                               (Key Protection Wave; package renamed in Phase 1 Spec 1.1)
+    ├── common/                          (shared across all proxy subpackages)
     │   ├── ProxyResponse.java
     │   ├── ProxyError.java
-    │   ├── ProxyException.java        (base class)
-    │   ├── UpstreamException.java     (502 UPSTREAM_ERROR)
-    │   ├── UpstreamTimeoutException.java  (504 UPSTREAM_TIMEOUT)
+    │   ├── ProxyException.java              (base class)
+    │   ├── UpstreamException.java           (502 UPSTREAM_ERROR)
+    │   ├── UpstreamTimeoutException.java    (504 UPSTREAM_TIMEOUT)
     │   ├── RateLimitExceededException.java  (429 RATE_LIMITED)
-    │   ├── SafetyBlockException.java  (422 SAFETY_BLOCK, added in Spec 2)
-    │   ├── ProxyExceptionHandler.java (@RestControllerAdvice(basePackages="...proxy"))
-    │   ├── RateLimitExceptionHandler.java (global @RestControllerAdvice — filter-raised, see Error Handling)
-    │   ├── RequestIdFilter.java       (@Order(HIGHEST_PRECEDENCE))
-    │   ├── RateLimitFilter.java       (@Order(HIGHEST_PRECEDENCE + 10), scoped to /api/v1/proxy/**)
+    │   ├── SafetyBlockException.java        (422 SAFETY_BLOCK, added in Spec 2)
+    │   ├── ProxyExceptionHandler.java       (@RestControllerAdvice(basePackages="...proxy"))
+    │   ├── RateLimitExceptionHandler.java   (global @RestControllerAdvice — filter-raised, see Error Handling)
+    │   ├── RequestIdFilter.java             (@Order(HIGHEST_PRECEDENCE))
+    │   ├── RateLimitFilter.java             (@Order(HIGHEST_PRECEDENCE + 10), scoped to /api/v1/proxy/**)
     │   └── IpResolver.java
-    └── ai/                        (Spec 2 — GeminiController, GeminiService, GeminiPrompts, request/response DTOs)
+    ├── ai/                              (Spec 2 — Gemini)
+    ├── maps/                            (Spec 3 — Google Maps Places)
+    └── bible/                           (Spec 4 — FCBH DBP)
 ```
 
-**Proxy subpackage convention (MANDATORY):** Every proxy feature lives under `com.example.worshiproom.proxy.{feature}/` — `proxy.ai` for Gemini (Spec 2), `proxy.maps` for Google Maps (Spec 3), `proxy.bible` for FCBH (Spec 4). Feature packages contain their controller + service + prompts/DTOs/helpers specific to that upstream. They NEVER redefine what already exists in `proxy.common` — shared types, exceptions, filters, and handlers always stay in common. Note: the master plan v2.6 listed provisional names (`proxy.places`, `proxy.audio`) that were superseded during execution — specs chose domain names (`proxy.maps`, `proxy.bible`) per "spec is feature authority." The current on-disk structure is authoritative.
+**Test-only packages** at `backend/src/test/java/com/worshiproom/`:
+- `support/` — `AbstractIntegrationTest`, `AbstractDataJpaTest`, `TestContainers` (singleton PostgreSQL container, started once per JVM run; both base classes register `spring.liquibase.contexts=test` via `@DynamicPropertySource`)
+- `db/` — `LiquibaseSmokeTest` (runs all changesets against Testcontainers, verifies clean migration on every test suite run)
 
-**Forums Wave target structure (Phase 1+, not current):** When Forums Wave Phase 1 adds authentication and domain logic, new top-level packages (auth/, user/, prayer/, moderation/, friends/, social/, verse/, email/, legal/, notification/, infrastructure/) will sit alongside `proxy/`. Do not create those packages preemptively — Forums Wave specs own them.
+**Proxy subpackage convention (MANDATORY):** Every proxy feature lives under `com.worshiproom.proxy.{feature}/` — `proxy.ai` for Gemini (Spec 2), `proxy.maps` for Google Maps (Spec 3), `proxy.bible` for FCBH (Spec 4). Feature packages contain their controller + service + prompts/DTOs/helpers specific to that upstream. They NEVER redefine what already exists in `proxy.common` — shared types, exceptions, filters, and handlers always stay in common. Note: the master plan v2.6 listed provisional names (`proxy.places`, `proxy.audio`) that were superseded during execution — specs chose domain names (`proxy.maps`, `proxy.bible`) per "spec is feature authority." The current on-disk structure is authoritative.
+
+**Forums Wave package additions (Phases 2.5+ — still future):** Phase 2.5 will add `com.worshiproom.friends/` and `com.worshiproom.social/` (the latter for `social_interactions` and `milestone_events` write paths). Phase 3 will add `com.worshiproom.post/` (unified `posts` family). Phase 10 will add `com.worshiproom.moderation/`. Phase 12 will add `com.worshiproom.notification/`. Phase 15 will add `com.worshiproom.email/`. Do not create those packages preemptively — each phase's specs own them.
 
 ### Controller Conventions
 - Annotate with `@RestController` and `@RequestMapping("/api/v1/...")`
@@ -238,7 +250,7 @@ com.example.worshiproom/
 
 ### `@RestControllerAdvice` Scoping (MANDATORY pattern)
 
-Proxy advices are **package-scoped** via `@RestControllerAdvice(basePackages = "com.example.worshiproom.proxy")`. This prevents a proxy exception handler from accidentally catching and reshaping exceptions thrown by unrelated Forums Wave controllers in sibling packages.
+Proxy advices are **package-scoped** via `@RestControllerAdvice(basePackages = "com.worshiproom.proxy")`. This prevents a proxy exception handler from accidentally catching and reshaping exceptions thrown by unrelated Forums Wave controllers in sibling packages.
 
 **Filter-raised exception gotcha (non-obvious):** Package-scoped advices DO NOT catch exceptions thrown from servlet filters. When a filter throws, the Spring `HandlerExceptionResolver` chain runs with `handler == null` (there is no controller associated with a filter-raised exception), which causes the advice's `isApplicableToBeanType(null)` check to fail. Package-scoped advices are silently skipped for filter-raised exceptions.
 

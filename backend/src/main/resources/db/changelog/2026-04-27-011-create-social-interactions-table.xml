@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.5.1 — `social_interactions` per master plan Decision 8
+       (line 3236). Third of four Phase 2.5 schema changesets. Stores three
+       interaction types: encouragements (3-per-friend-per-day rate limit),
+       nudges (1-per-friend-per-week rate limit), and weekly-recap dismissals.
+       Payload JSONB carries type-specific fields:
+         encouragement: { preset_message_id, preset_text }
+         nudge: { } (empty; nudges carry no payload)
+         recap_dismissal: { week_start_date }
+       The two indexes match expected query patterns for Spec 2.5.4b's rate-
+       limit checks and recipient inbox queries; add more in a future tuning
+       spec when production query plans reveal need.
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-011-create-social-interactions-table" author="worship-room">
+
+    <createTable tableName="social_interactions">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="from_user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="to_user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="interaction_type" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="payload" type="JSONB"/>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="social_interactions"
+      baseColumnNames="from_user_id"
+      constraintName="fk_social_interactions_from_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="social_interactions"
+      baseColumnNames="to_user_id"
+      constraintName="fk_social_interactions_to_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Named CHECK: interaction_type enum. -->
+    <sql>
+      ALTER TABLE social_interactions ADD CONSTRAINT social_interactions_type_check
+      CHECK (interaction_type IN ('encouragement', 'nudge', 'recap_dismissal'));
+    </sql>
+
+    <!-- Recipient's inbox query (master plan line 3250). -->
+    <createIndex tableName="social_interactions" indexName="idx_social_interactions_to_user_created">
+      <column name="to_user_id"/>
+      <column name="created_at" descending="true"/>
+    </createIndex>
+
+    <!-- Rate-limit window queries: 3 encouragements/friend/day, 1 nudge/friend/week. -->
+    <createIndex tableName="social_interactions" indexName="idx_social_interactions_pair_type_created">
+      <column name="from_user_id"/>
+      <column name="to_user_id"/>
+      <column name="interaction_type"/>
+      <column name="created_at" descending="true"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="social_interactions"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

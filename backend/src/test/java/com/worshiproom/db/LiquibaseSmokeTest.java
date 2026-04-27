@@ -72,7 +72,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
-        assertThat(rows).hasSize(8);
+        assertThat(rows).hasSize(12);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");
@@ -121,6 +121,30 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         assertThat(eighth.get("author")).isEqualTo("worship-room");
         assertThat((String) eighth.get("filename"))
             .endsWith("2026-04-27-008-add-activity-log-backfill-idempotency-index.xml");
+
+        Map<String, Object> ninth = rows.get(8);
+        assertThat(ninth.get("id")).isEqualTo("2026-04-27-009-create-friend-relationships-table");
+        assertThat(ninth.get("author")).isEqualTo("worship-room");
+        assertThat((String) ninth.get("filename"))
+            .endsWith("2026-04-27-009-create-friend-relationships-table.xml");
+
+        Map<String, Object> tenth = rows.get(9);
+        assertThat(tenth.get("id")).isEqualTo("2026-04-27-010-create-friend-requests-table");
+        assertThat(tenth.get("author")).isEqualTo("worship-room");
+        assertThat((String) tenth.get("filename"))
+            .endsWith("2026-04-27-010-create-friend-requests-table.xml");
+
+        Map<String, Object> eleventh = rows.get(10);
+        assertThat(eleventh.get("id")).isEqualTo("2026-04-27-011-create-social-interactions-table");
+        assertThat(eleventh.get("author")).isEqualTo("worship-room");
+        assertThat((String) eleventh.get("filename"))
+            .endsWith("2026-04-27-011-create-social-interactions-table.xml");
+
+        Map<String, Object> twelfth = rows.get(11);
+        assertThat(twelfth.get("id")).isEqualTo("2026-04-27-012-create-milestone-events-table");
+        assertThat(twelfth.get("author")).isEqualTo("worship-room");
+        assertThat((String) twelfth.get("filename"))
+            .endsWith("2026-04-27-012-create-milestone-events-table.xml");
     }
 
     @Test
@@ -343,6 +367,312 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
             String.class, "activity_counts"
         );
         assertThat(pkColumns).containsExactly("user_id", "count_type");
+    }
+
+    @Test
+    void friendRelationshipsTableExistsWithExpectedColumnsAndCompositePK() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, is_nullable FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'friend_relationships' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(4);
+        assertThat(columns).extracting("column_name")
+            .containsExactly("user_id", "friend_user_id", "status", "created_at");
+
+        Map<String, Object> userIdColumn = columns.stream()
+            .filter(c -> "user_id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(userIdColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(userIdColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> statusColumn = columns.stream()
+            .filter(c -> "status".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(statusColumn.get("data_type")).isEqualTo("character varying");
+        assertThat(statusColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> createdAtColumn = columns.stream()
+            .filter(c -> "created_at".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(createdAtColumn.get("data_type")).isEqualTo("timestamp with time zone");
+
+        List<String> pkColumns = jdbcTemplate.queryForList(
+            "SELECT kcu.column_name " +
+            "FROM information_schema.table_constraints tc " +
+            "JOIN information_schema.key_column_usage kcu " +
+            "  ON tc.constraint_name = kcu.constraint_name " +
+            "WHERE tc.table_schema = 'public' " +
+            "  AND tc.table_name = ? " +
+            "  AND tc.constraint_type = 'PRIMARY KEY' " +
+            "ORDER BY kcu.ordinal_position",
+            String.class, "friend_relationships"
+        );
+        assertThat(pkColumns).containsExactly("user_id", "friend_user_id");
+    }
+
+    @Test
+    void friendRequestsTableExistsWithExpectedColumnsAndUnique() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, character_maximum_length, is_nullable " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'friend_requests' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(7);
+        assertThat(columns).extracting("column_name")
+            .containsExactly(
+                "id", "from_user_id", "to_user_id", "status", "message",
+                "created_at", "responded_at"
+            );
+
+        Map<String, Object> idColumn = columns.stream()
+            .filter(c -> "id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(idColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(idColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> messageColumn = columns.stream()
+            .filter(c -> "message".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(messageColumn.get("data_type")).isEqualTo("character varying");
+        assertThat(messageColumn.get("character_maximum_length")).isEqualTo(280);
+        assertThat(messageColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> respondedAtColumn = columns.stream()
+            .filter(c -> "responded_at".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(respondedAtColumn.get("data_type")).isEqualTo("timestamp with time zone");
+        assertThat(respondedAtColumn.get("is_nullable")).isEqualTo("YES");
+
+        List<String> uniqueColumns = jdbcTemplate.queryForList(
+            "SELECT kcu.column_name " +
+            "FROM information_schema.table_constraints tc " +
+            "JOIN information_schema.key_column_usage kcu " +
+            "  ON tc.constraint_name = kcu.constraint_name " +
+            "WHERE tc.table_schema = 'public' " +
+            "  AND tc.table_name = ? " +
+            "  AND tc.constraint_name = ? " +
+            "ORDER BY kcu.ordinal_position",
+            String.class, "friend_requests", "friend_requests_unique_sender_recipient"
+        );
+        assertThat(uniqueColumns).containsExactly("from_user_id", "to_user_id");
+    }
+
+    @Test
+    void socialInteractionsTableExistsWithExpectedColumns() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, is_nullable FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'social_interactions' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(6);
+        assertThat(columns).extracting("column_name")
+            .containsExactly(
+                "id", "from_user_id", "to_user_id", "interaction_type",
+                "payload", "created_at"
+            );
+
+        Map<String, Object> idColumn = columns.stream()
+            .filter(c -> "id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(idColumn.get("data_type")).isEqualTo("uuid");
+
+        Map<String, Object> payloadColumn = columns.stream()
+            .filter(c -> "payload".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(payloadColumn.get("data_type")).isEqualTo("jsonb");
+        assertThat(payloadColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> createdAtColumn = columns.stream()
+            .filter(c -> "created_at".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(createdAtColumn.get("data_type")).isEqualTo("timestamp with time zone");
+        assertThat(createdAtColumn.get("is_nullable")).isEqualTo("NO");
+    }
+
+    @Test
+    void milestoneEventsTableExistsWithExpectedColumns() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, is_nullable FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'milestone_events' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(5);
+        assertThat(columns).extracting("column_name")
+            .containsExactly("id", "user_id", "event_type", "event_metadata", "occurred_at");
+
+        Map<String, Object> idColumn = columns.stream()
+            .filter(c -> "id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(idColumn.get("data_type")).isEqualTo("uuid");
+
+        Map<String, Object> eventMetadataColumn = columns.stream()
+            .filter(c -> "event_metadata".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(eventMetadataColumn.get("data_type")).isEqualTo("jsonb");
+        assertThat(eventMetadataColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> occurredAtColumn = columns.stream()
+            .filter(c -> "occurred_at".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(occurredAtColumn.get("data_type")).isEqualTo("timestamp with time zone");
+        assertThat(occurredAtColumn.get("is_nullable")).isEqualTo("NO");
+    }
+
+    @ParameterizedTest(name = "phase 2.5 CHECK {0} rejects invalid value")
+    @CsvSource({
+        "friend_relationships_status_check",
+        "friend_relationships_no_self_reference",
+        "friend_requests_status_check",
+        "friend_requests_no_self_reference",
+        "social_interactions_type_check",
+        "milestone_events_type_check"
+    })
+    void phase25CheckConstraintRejectsInvalidValue(String constraintName) {
+        UUID userA = insertTestUser(constraintName + "-a");
+        UUID userB = insertTestUser(constraintName + "-b");
+
+        assertThatThrownBy(() -> {
+            switch (constraintName) {
+                case "friend_relationships_status_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO friend_relationships (user_id, friend_user_id, status) " +
+                        "VALUES (?, ?, ?)",
+                        userA, userB, "accepted"); // 'accepted' belongs to friend_requests, not _relationships
+                case "friend_relationships_no_self_reference" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO friend_relationships (user_id, friend_user_id, status) " +
+                        "VALUES (?, ?, ?)",
+                        userA, userA, "active");
+                case "friend_requests_status_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO friend_requests (from_user_id, to_user_id, status) " +
+                        "VALUES (?, ?, ?)",
+                        userA, userB, "unknown_status");
+                case "friend_requests_no_self_reference" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO friend_requests (from_user_id, to_user_id, status) " +
+                        "VALUES (?, ?, ?)",
+                        userA, userA, "pending");
+                case "social_interactions_type_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO social_interactions (from_user_id, to_user_id, interaction_type) " +
+                        "VALUES (?, ?, ?)",
+                        userA, userB, "spam");
+                case "milestone_events_type_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO milestone_events (user_id, event_type) VALUES (?, ?)",
+                        userA, "unknown_event");
+                default ->
+                    throw new IllegalStateException("Unhandled constraint: " + constraintName);
+            }
+        }).isInstanceOf(DataIntegrityViolationException.class)
+          .hasMessageContaining(constraintName);
+    }
+
+    @Test
+    void friendRequestsUniqueBlocksRequestAfterDecline() {
+        UUID sender = insertTestUser("unique-decline-sender");
+        UUID recipient = insertTestUser("unique-decline-recipient");
+
+        // First request goes through.
+        jdbcTemplate.update(
+            "INSERT INTO friend_requests (from_user_id, to_user_id, status) VALUES (?, ?, ?)",
+            sender, recipient, "pending"
+        );
+
+        // Recipient declines.
+        jdbcTemplate.update(
+            "UPDATE friend_requests SET status = ?, responded_at = NOW() " +
+            "WHERE from_user_id = ? AND to_user_id = ?",
+            "declined", sender, recipient
+        );
+
+        // Sender attempts a fresh request — must fail with UNIQUE violation.
+        assertThatThrownBy(() ->
+            jdbcTemplate.update(
+                "INSERT INTO friend_requests (from_user_id, to_user_id, status) VALUES (?, ?, ?)",
+                sender, recipient, "pending"
+            )
+        ).isInstanceOf(DataIntegrityViolationException.class)
+         .hasMessageContaining("friend_requests_unique_sender_recipient");
+    }
+
+    @Test
+    void friendRequestsUniqueBlocksRequestAfterCancel() {
+        UUID sender = insertTestUser("unique-cancel-sender");
+        UUID recipient = insertTestUser("unique-cancel-recipient");
+
+        jdbcTemplate.update(
+            "INSERT INTO friend_requests (from_user_id, to_user_id, status) VALUES (?, ?, ?)",
+            sender, recipient, "pending"
+        );
+
+        jdbcTemplate.update(
+            "UPDATE friend_requests SET status = ?, responded_at = NOW() " +
+            "WHERE from_user_id = ? AND to_user_id = ?",
+            "cancelled", sender, recipient
+        );
+
+        assertThatThrownBy(() ->
+            jdbcTemplate.update(
+                "INSERT INTO friend_requests (from_user_id, to_user_id, status) VALUES (?, ?, ?)",
+                sender, recipient, "pending"
+            )
+        ).isInstanceOf(DataIntegrityViolationException.class)
+         .hasMessageContaining("friend_requests_unique_sender_recipient");
+    }
+
+    @ParameterizedTest(name = "deleting user cascades rows from {0}")
+    @CsvSource({
+        "friend_relationships",
+        "friend_requests",
+        "social_interactions",
+        "milestone_events"
+    })
+    void phase25TableCascadesOnUserDelete(String tableName) {
+        UUID userA = insertTestUser("cascade-" + tableName + "-a");
+        UUID userB = insertTestUser("cascade-" + tableName + "-b");
+
+        switch (tableName) {
+            case "friend_relationships" ->
+                jdbcTemplate.update(
+                    "INSERT INTO friend_relationships (user_id, friend_user_id, status) " +
+                    "VALUES (?, ?, ?)",
+                    userA, userB, "active");
+            case "friend_requests" ->
+                jdbcTemplate.update(
+                    "INSERT INTO friend_requests (from_user_id, to_user_id, status) " +
+                    "VALUES (?, ?, ?)",
+                    userA, userB, "pending");
+            case "social_interactions" ->
+                jdbcTemplate.update(
+                    "INSERT INTO social_interactions (from_user_id, to_user_id, interaction_type) " +
+                    "VALUES (?, ?, ?)",
+                    userA, userB, "encouragement");
+            case "milestone_events" ->
+                jdbcTemplate.update(
+                    "INSERT INTO milestone_events (user_id, event_type) VALUES (?, ?)",
+                    userA, "level_up");
+            default ->
+                throw new IllegalStateException("Unhandled table: " + tableName);
+        }
+
+        // Sanity: row exists before delete. Tables that own the user via a "from_user_id"
+        // column (friend_requests, social_interactions) are queried by that column;
+        // friend_relationships and milestone_events use the plain "user_id" column.
+        String userColumn = switch (tableName) {
+            case "friend_relationships", "milestone_events" -> "user_id";
+            case "friend_requests", "social_interactions" -> "from_user_id";
+            default -> throw new IllegalStateException("Unhandled table: " + tableName);
+        };
+        Integer beforeCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM " + tableName + " WHERE " + userColumn + " = ?",
+            Integer.class, userA
+        );
+        assertThat(beforeCount).isEqualTo(1);
+
+        // Delete userA — cascade should remove all rows referencing userA.
+        jdbcTemplate.update("DELETE FROM users WHERE id = ?", userA);
+
+        Integer afterCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM " + tableName + " WHERE " + userColumn + " = ?",
+            Integer.class, userA
+        );
+        assertThat(afterCount).isEqualTo(0);
     }
 
     @AfterEach

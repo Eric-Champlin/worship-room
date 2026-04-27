@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.5.1 — `friend_relationships` per master plan Decision 8.
+       First of four Phase 2.5 schema changesets. Mutual friendships are stored as
+       two rows (A→B and B→A inserted by Spec 2.5.2's FriendsService.acceptRequest
+       inside one @Transactional). Block is unidirectional: blocker → blocked,
+       single row, status='blocked'. The CHECK on status forbids 'accepted' here
+       — that value belongs to friend_requests.status (different vocabulary). The
+       reverse-direction index covers "who friended user Y?" queries; the forward
+       direction is covered by the composite PK.
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-009-create-friend-relationships-table" author="worship-room">
+
+    <createTable tableName="friend_relationships">
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="friend_user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="status" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addPrimaryKey
+      tableName="friend_relationships"
+      constraintName="pk_friend_relationships"
+      columnNames="user_id, friend_user_id"/>
+
+    <addForeignKeyConstraint
+      baseTableName="friend_relationships"
+      baseColumnNames="user_id"
+      constraintName="fk_friend_relationships_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="friend_relationships"
+      baseColumnNames="friend_user_id"
+      constraintName="fk_friend_relationships_friend_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Named CHECK: status must be 'active' or 'blocked' (NOT 'accepted' —
+         that value belongs to friend_requests.status). -->
+    <sql>
+      ALTER TABLE friend_relationships ADD CONSTRAINT friend_relationships_status_check
+      CHECK (status IN ('active', 'blocked'));
+    </sql>
+
+    <!-- Named CHECK: a user cannot friend or block themselves. -->
+    <sql>
+      ALTER TABLE friend_relationships ADD CONSTRAINT friend_relationships_no_self_reference
+      CHECK (user_id &lt;&gt; friend_user_id);
+    </sql>
+
+    <!-- Reverse-direction index supports "who friended user Y?" / "who blocked
+         user Y?" queries. The composite PK covers the forward direction. -->
+    <createIndex tableName="friend_relationships" indexName="idx_friend_relationships_friend_user">
+      <column name="friend_user_id"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="friend_relationships"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

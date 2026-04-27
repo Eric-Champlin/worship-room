@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.5.1 — `milestone_events` per master plan Decision 8
+       (line 3254). Fourth of four Phase 2.5 schema changesets. Per-user feed of
+       milestone events: streak hits (7/30/100/365), level-ups, badge earns,
+       prayer-count milestones, friend milestones. event_metadata JSONB carries
+       type-specific fields (e.g., { streak: 30 } or { badge_id: 'first-prayer' }).
+       occurred_at (NOT created_at) — events HAPPEN at a moment.
+       The (user_id, occurred_at DESC) index supports the per-user feed lookup;
+       (user_id, event_type, occurred_at DESC) supports Spec 2.5.4b's 60-second
+       idempotency window dedup (event_type filter is the dedup discriminator).
+       The cross-user weekly-recap aggregator index (occurred_at DESC) mentioned
+       at master plan line 3266 is deferred to Phase 13 — adding it here wastes
+       write bandwidth.
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-012-create-milestone-events-table" author="worship-room">
+
+    <createTable tableName="milestone_events">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="event_type" type="VARCHAR(40)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="event_metadata" type="JSONB"/>
+      <column name="occurred_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="milestone_events"
+      baseColumnNames="user_id"
+      constraintName="fk_milestone_events_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Named CHECK: event_type enum (5 documented types). -->
+    <sql>
+      ALTER TABLE milestone_events ADD CONSTRAINT milestone_events_type_check
+      CHECK (event_type IN ('streak_milestone', 'level_up', 'badge_earned',
+                            'prayer_count_milestone', 'friend_milestone'));
+    </sql>
+
+    <!-- Per-user feed lookup (master plan line 3266). -->
+    <createIndex tableName="milestone_events" indexName="idx_milestone_events_user_occurred">
+      <column name="user_id"/>
+      <column name="occurred_at" descending="true"/>
+    </createIndex>
+
+    <!-- Spec 2.5.4b 60-second idempotency-window dedup; event_type
+         distinguishes which milestone class is being deduplicated. -->
+    <createIndex tableName="milestone_events" indexName="idx_milestone_events_user_type_occurred">
+      <column name="user_id"/>
+      <column name="event_type"/>
+      <column name="occurred_at" descending="true"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="milestone_events"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

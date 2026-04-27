@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.5.1 — `friend_requests` per master plan Decision 8.
+       Second of four Phase 2.5 schema changesets. Tracks the lifecycle of a
+       friend request: pending → accepted/declined/cancelled. responded_at is
+       NULL while pending; set when status transitions out of pending.
+       FULL UNIQUE on (from_user_id, to_user_id) — not partial. Anti-harassment
+       policy: once A sends a request to B, A cannot send another regardless of
+       outcome. B can still send a fresh request to A (different pair). The
+       UNIQUE constraint creates its own index, so no separate <createIndex>
+       for (from_user_id, to_user_id) lookups. The two indexes below cover
+       per-user list-by-status queries.
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-010-create-friend-requests-table" author="worship-room">
+
+    <createTable tableName="friend_requests">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="from_user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="to_user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="status" type="VARCHAR(20)" defaultValue="pending">
+        <constraints nullable="false"/>
+      </column>
+      <column name="message" type="VARCHAR(280)"/>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="responded_at" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="friend_requests"
+      baseColumnNames="from_user_id"
+      constraintName="fk_friend_requests_from_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="friend_requests"
+      baseColumnNames="to_user_id"
+      constraintName="fk_friend_requests_to_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- FULL UNIQUE (Decision 8 line 1180). Once A → B request exists in any
+         state, A cannot send another to B. -->
+    <addUniqueConstraint
+      tableName="friend_requests"
+      columnNames="from_user_id, to_user_id"
+      constraintName="friend_requests_unique_sender_recipient"/>
+
+    <!-- Named CHECK: status enum. -->
+    <sql>
+      ALTER TABLE friend_requests ADD CONSTRAINT friend_requests_status_check
+      CHECK (status IN ('pending', 'accepted', 'declined', 'cancelled'));
+    </sql>
+
+    <!-- Named CHECK: a user cannot send a request to themselves. -->
+    <sql>
+      ALTER TABLE friend_requests ADD CONSTRAINT friend_requests_no_self_reference
+      CHECK (from_user_id &lt;&gt; to_user_id);
+    </sql>
+
+    <!-- Recipient's pending-incoming-requests query. -->
+    <createIndex tableName="friend_requests" indexName="idx_friend_requests_to_user_status">
+      <column name="to_user_id"/>
+      <column name="status"/>
+    </createIndex>
+
+    <!-- Sender's pending-outgoing-requests query. -->
+    <createIndex tableName="friend_requests" indexName="idx_friend_requests_from_user_status">
+      <column name="from_user_id"/>
+      <column name="status"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="friend_requests"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>
