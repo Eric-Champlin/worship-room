@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 3.1 — `post_comments` per master plan Decision 4.
+       Hosts comments on the unified posts table. parent_comment_id ships now
+       (nullable, self-reference ON DELETE CASCADE) so Phase 4 threaded replies
+       can land without re-touching this high-traffic table. is_helpful column
+       ships now (DEFAULT FALSE) for the same reason. moderation_status and
+       crisis_flag columns mirror posts (Universal Rule 13). post_id-scoped
+       feed index uses ASC created_at because comments display oldest-first.
+       Once this changeset runs, its MD5 is permanent in DATABASECHANGELOG;
+       future schema changes go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-015-create-post-comments-table" author="worship-room">
+
+    <createTable tableName="post_comments">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="post_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="parent_comment_id" type="UUID"/>
+      <column name="content" type="TEXT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_helpful" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE"/>
+      <column name="moderation_status" type="VARCHAR(20)" defaultValue="approved">
+        <constraints nullable="false"/>
+      </column>
+      <column name="crisis_flag" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="post_comments"
+      baseColumnNames="post_id"
+      constraintName="fk_post_comments_post"
+      referencedTableName="posts"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="post_comments"
+      baseColumnNames="user_id"
+      constraintName="fk_post_comments_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Self-reference for Phase 4 threaded replies. Deleting a parent comment
+         CASCADEs to its children — matches Reddit/HN convention. -->
+    <addForeignKeyConstraint
+      baseTableName="post_comments"
+      baseColumnNames="parent_comment_id"
+      constraintName="fk_post_comments_parent"
+      referencedTableName="post_comments"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <sql>
+      ALTER TABLE post_comments ADD CONSTRAINT post_comments_moderation_status_check
+      CHECK (moderation_status IN ('approved', 'flagged', 'hidden', 'removed'));
+    </sql>
+
+    <sql>
+      ALTER TABLE post_comments ADD CONSTRAINT post_comments_soft_delete_consistency
+      CHECK ((is_deleted = FALSE AND deleted_at IS NULL) OR (is_deleted = TRUE AND deleted_at IS NOT NULL));
+    </sql>
+
+    <!-- Per-user activity feed. -->
+    <createIndex tableName="post_comments" indexName="idx_post_comments_user_id_created">
+      <column name="user_id"/>
+      <column name="created_at" descending="true"/>
+    </createIndex>
+
+    <!-- Per-post comment list. ASCENDING created_at because comments render
+         oldest-first per UX convention (vs. posts which sort newest-first). -->
+    <sql>
+      CREATE INDEX idx_post_comments_post_id_created
+        ON post_comments (post_id, created_at)
+        WHERE is_deleted = FALSE;
+    </sql>
+
+    <sql>
+      CREATE INDEX idx_post_comments_parent
+        ON post_comments (parent_comment_id)
+        WHERE parent_comment_id IS NOT NULL;
+    </sql>
+
+    <rollback>
+      <dropTable tableName="post_comments"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

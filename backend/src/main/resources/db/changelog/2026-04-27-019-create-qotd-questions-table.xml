@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 3.1 — `qotd_questions`. Note: master plan registry
+       attributes this to Spec 3.9 but the spec body and master plan body
+       are explicit — the table is created here in 3.1; Spec 3.2 only seeds
+       it. The id column is VARCHAR(50) (NOT a UUID) so the existing
+       frontend ids (`qotd-1` through `qotd-72`) survive the migration
+       byte-for-byte. display_order is INTEGER UNIQUE so "today's QOTD"
+       rotation has a deterministic ordering. is_active=TRUE by default
+       so a moderator can soft-disable a question without deleting it.
+       No FKs (self-contained content table). Once this changeset runs,
+       its MD5 is permanent in DATABASECHANGELOG; future schema changes
+       go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-019-create-qotd-questions-table" author="worship-room">
+
+    <createTable tableName="qotd_questions">
+      <column name="id" type="VARCHAR(50)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="text" type="TEXT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="theme" type="VARCHAR(30)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="hint" type="TEXT"/>
+      <column name="display_order" type="INTEGER">
+        <constraints nullable="false" unique="true" uniqueConstraintName="qotd_questions_display_order_unique"/>
+      </column>
+      <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <sql>
+      ALTER TABLE qotd_questions ADD CONSTRAINT qotd_questions_theme_check
+      CHECK (theme IN ('faith_journey', 'practical', 'reflective', 'encouraging', 'community', 'seasonal'));
+    </sql>
+
+    <!-- "Today's QOTD" rotation: ordered by display_order across the active set. -->
+    <sql>
+      CREATE INDEX idx_qotd_questions_active_order
+        ON qotd_questions (display_order)
+        WHERE is_active = TRUE;
+    </sql>
+
+    <rollback>
+      <dropTable tableName="qotd_questions"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

@@ -90,7 +90,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 
 | #   | Spec | Title                                          | Size | Risk   | Status |
 | --- | ---- | ---------------------------------------------- | ---- | ------ | ------ |
-| 51  | 3.1  | Prayer Wall Schema (Liquibase)                 | L    | Medium | ⬜     |
+| 51  | 3.1  | Prayer Wall Schema (Liquibase)                 | L    | Medium | ✅     |
 | 52  | 3.2  | Mock Data Seed Migration                       | M    | Low    | ⬜     |
 | 53  | 3.3  | Posts Read Endpoints                           | L    | Medium | ⬜     |
 | 54  | 3.4  | Comments, Reactions, Bookmarks Read Endpoints  | M    | Low    | ⬜     |
@@ -288,3 +288,15 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 15        | Email & Push         | 5       | 0         |
 | 16        | Polish & Performance | 7       | 1         |
 | **Total** |                      | **156** | **16**    |
+
+---
+
+## Post-Execution Notes
+
+Per-spec deviations captured after a spec shipped. The full diagnostic narrative for each entry lives in the named plan's Execution Log; this section is the index, NOT the truth — read the linked source for the canonical detail.
+
+When Phase N closes, these per-spec notes roll up into a "Phase N Execution Reality Addendum" inside the master plan, mirroring the Phase 1 and Phase 2 addendums. Until rollup, this section is the authoritative location for post-execution drift.
+
+| Spec | Note | Sources |
+| ---- | ---- | ------- |
+| 3.1  | Plan Deviation #1: `post_reports_review_consistency` CHECK relaxed on closed branches — DB now requires only `reviewed_at IS NOT NULL` on `reviewed`/`dismissed`/`actioned` rows; `reviewer_id` non-null is application-layer enforcement (handoff to Spec 3.8). Original strict CHECK blocked FK cascade SET NULL because Postgres re-fires CHECKs on cascade UPDATE. Fix: changeset `2026-04-27-020-relax-post-reports-review-consistency.xml`. Cross-cutting rule added to `.claude/rules/05-database.md`. | `_specs/forums/spec-3-1.md` § Post-Execution Addendum · `_plans/forums/2026-04-28-spec-3-1.md` Execution Log Plan Deviation #1 · changeset 020 header comment |

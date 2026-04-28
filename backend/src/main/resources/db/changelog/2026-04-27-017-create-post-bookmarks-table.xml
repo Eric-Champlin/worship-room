@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 3.1 — `post_bookmarks`. Simplest of the engagement
+       tables. Composite PK on (post_id, user_id) is the entire identity:
+       a user has at most one bookmark per post. NO soft-delete column —
+       bookmarks toggle (DELETE on un-bookmark). Once this changeset runs,
+       its MD5 is permanent in DATABASECHANGELOG; future schema changes go
+       in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-017-create-post-bookmarks-table" author="worship-room">
+
+    <createTable tableName="post_bookmarks">
+      <column name="post_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addPrimaryKey
+      tableName="post_bookmarks"
+      constraintName="pk_post_bookmarks"
+      columnNames="post_id, user_id"/>
+
+    <addForeignKeyConstraint
+      baseTableName="post_bookmarks"
+      baseColumnNames="post_id"
+      constraintName="fk_post_bookmarks_post"
+      referencedTableName="posts"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="post_bookmarks"
+      baseColumnNames="user_id"
+      constraintName="fk_post_bookmarks_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Per-user bookmark feed ("My Bookmarks"). The composite PK already
+         supports (post_id, user_id) lookups (i.e., the isBookmarked query). -->
+    <createIndex tableName="post_bookmarks" indexName="idx_post_bookmarks_user_created">
+      <column name="user_id"/>
+      <column name="created_at" descending="true"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="post_bookmarks"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

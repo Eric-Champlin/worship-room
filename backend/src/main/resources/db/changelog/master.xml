@@ -21,6 +21,13 @@
   <include file="db/changelog/2026-04-27-011-create-social-interactions-table.xml"/>
   <include file="db/changelog/2026-04-27-012-create-milestone-events-table.xml"/>
   <include file="db/changelog/2026-04-27-013-create-user-mutes-table.xml"/>
+  <include file="db/changelog/2026-04-27-014-create-posts-table.xml"/>
+  <include file="db/changelog/2026-04-27-015-create-post-comments-table.xml"/>
+  <include file="db/changelog/2026-04-27-016-create-post-reactions-table.xml"/>
+  <include file="db/changelog/2026-04-27-017-create-post-bookmarks-table.xml"/>
+  <include file="db/changelog/2026-04-27-018-create-post-reports-table.xml"/>
+  <include file="db/changelog/2026-04-27-019-create-qotd-questions-table.xml"/>
+  <include file="db/changelog/2026-04-27-020-relax-post-reports-review-consistency.xml"/>
   <include file="db/changelog/contexts/dev-seed.xml"/>
 
 </databaseChangeLog>

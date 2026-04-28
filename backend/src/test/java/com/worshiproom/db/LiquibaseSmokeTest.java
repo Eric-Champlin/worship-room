@@ -72,7 +72,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
-        assertThat(rows).hasSize(13);
+        assertThat(rows).hasSize(20);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");
@@ -151,6 +151,48 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         assertThat(thirteenth.get("author")).isEqualTo("worship-room");
         assertThat((String) thirteenth.get("filename"))
             .endsWith("2026-04-27-013-create-user-mutes-table.xml");
+
+        Map<String, Object> fourteenth = rows.get(13);
+        assertThat(fourteenth.get("id")).isEqualTo("2026-04-27-014-create-posts-table");
+        assertThat(fourteenth.get("author")).isEqualTo("worship-room");
+        assertThat((String) fourteenth.get("filename"))
+            .endsWith("2026-04-27-014-create-posts-table.xml");
+
+        Map<String, Object> fifteenth = rows.get(14);
+        assertThat(fifteenth.get("id")).isEqualTo("2026-04-27-015-create-post-comments-table");
+        assertThat(fifteenth.get("author")).isEqualTo("worship-room");
+        assertThat((String) fifteenth.get("filename"))
+            .endsWith("2026-04-27-015-create-post-comments-table.xml");
+
+        Map<String, Object> sixteenth = rows.get(15);
+        assertThat(sixteenth.get("id")).isEqualTo("2026-04-27-016-create-post-reactions-table");
+        assertThat(sixteenth.get("author")).isEqualTo("worship-room");
+        assertThat((String) sixteenth.get("filename"))
+            .endsWith("2026-04-27-016-create-post-reactions-table.xml");
+
+        Map<String, Object> seventeenth = rows.get(16);
+        assertThat(seventeenth.get("id")).isEqualTo("2026-04-27-017-create-post-bookmarks-table");
+        assertThat(seventeenth.get("author")).isEqualTo("worship-room");
+        assertThat((String) seventeenth.get("filename"))
+            .endsWith("2026-04-27-017-create-post-bookmarks-table.xml");
+
+        Map<String, Object> eighteenth = rows.get(17);
+        assertThat(eighteenth.get("id")).isEqualTo("2026-04-27-018-create-post-reports-table");
+        assertThat(eighteenth.get("author")).isEqualTo("worship-room");
+        assertThat((String) eighteenth.get("filename"))
+            .endsWith("2026-04-27-018-create-post-reports-table.xml");
+
+        Map<String, Object> nineteenth = rows.get(18);
+        assertThat(nineteenth.get("id")).isEqualTo("2026-04-27-019-create-qotd-questions-table");
+        assertThat(nineteenth.get("author")).isEqualTo("worship-room");
+        assertThat((String) nineteenth.get("filename"))
+            .endsWith("2026-04-27-019-create-qotd-questions-table.xml");
+
+        Map<String, Object> twentieth = rows.get(19);
+        assertThat(twentieth.get("id")).isEqualTo("2026-04-27-020-relax-post-reports-review-consistency");
+        assertThat(twentieth.get("author")).isEqualTo("worship-room");
+        assertThat((String) twentieth.get("filename"))
+            .endsWith("2026-04-27-020-relax-post-reports-review-consistency.xml");
     }
 
     @Test
@@ -518,6 +560,342 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         assertThat(occurredAtColumn.get("is_nullable")).isEqualTo("NO");
     }
 
+    @Test
+    void postsTableExistsWithExpectedColumnsAndIndexes() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, is_nullable FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'posts' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(26);
+        assertThat(columns).extracting("column_name")
+            .containsExactly(
+                "id", "user_id", "post_type", "content", "category", "is_anonymous",
+                "challenge_id", "qotd_id", "scripture_reference", "scripture_text",
+                "visibility", "is_answered", "answered_text", "answered_at",
+                "moderation_status", "crisis_flag", "is_deleted", "deleted_at",
+                "praying_count", "candle_count", "comment_count", "bookmark_count",
+                "report_count", "created_at", "updated_at", "last_activity_at"
+            );
+
+        Map<String, Object> idColumn = columns.stream()
+            .filter(c -> "id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(idColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(idColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> userIdColumn = columns.stream()
+            .filter(c -> "user_id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(userIdColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(userIdColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> contentColumn = columns.stream()
+            .filter(c -> "content".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(contentColumn.get("data_type")).isEqualTo("text");
+        assertThat(contentColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> categoryColumn = columns.stream()
+            .filter(c -> "category".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(categoryColumn.get("data_type")).isEqualTo("character varying");
+        assertThat(categoryColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> isAnonColumn = columns.stream()
+            .filter(c -> "is_anonymous".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(isAnonColumn.get("data_type")).isEqualTo("boolean");
+        assertThat(isAnonColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> prayingCountColumn = columns.stream()
+            .filter(c -> "praying_count".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(prayingCountColumn.get("data_type")).isEqualTo("integer");
+        assertThat(prayingCountColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> lastActivityAtColumn = columns.stream()
+            .filter(c -> "last_activity_at".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(lastActivityAtColumn.get("data_type")).isEqualTo("timestamp with time zone");
+        assertThat(lastActivityAtColumn.get("is_nullable")).isEqualTo("NO");
+
+        List<Map<String, Object>> indexes = jdbcTemplate.queryForList(
+            "SELECT indexname, indexdef FROM pg_indexes " +
+            "WHERE schemaname = 'public' AND tablename = 'posts'"
+        );
+        assertThat(indexes).extracting("indexname")
+            .contains(
+                "idx_posts_user_id_created_at",
+                "idx_posts_visibility_moderation_created",
+                "idx_posts_category_created",
+                "idx_posts_post_type_created",
+                "idx_posts_last_activity",
+                "idx_posts_qotd_id",
+                "idx_posts_challenge_id",
+                "idx_posts_crisis_flag",
+                "idx_posts_is_answered_created"
+            );
+
+        // Spot-check predicates on two partial indexes — the WHERE clause is
+        // re-rendered by Postgres with explicit type casts, so assert structural
+        // pieces rather than the exact rendering.
+        String crisisFlagDef = (String) indexes.stream()
+            .filter(r -> "idx_posts_crisis_flag".equals(r.get("indexname")))
+            .findFirst().orElseThrow().get("indexdef");
+        assertThat(crisisFlagDef).contains("WHERE");
+        assertThat(crisisFlagDef).contains("crisis_flag");
+        assertThat(crisisFlagDef).contains("is_deleted");
+
+        String qotdIdDef = (String) indexes.stream()
+            .filter(r -> "idx_posts_qotd_id".equals(r.get("indexname")))
+            .findFirst().orElseThrow().get("indexdef");
+        assertThat(qotdIdDef).contains("WHERE");
+        assertThat(qotdIdDef).contains("qotd_id IS NOT NULL");
+    }
+
+    @Test
+    void postCommentsTableExistsWithExpectedColumns() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, is_nullable FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'post_comments' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(12);
+        assertThat(columns).extracting("column_name")
+            .containsExactly(
+                "id", "post_id", "user_id", "parent_comment_id", "content",
+                "is_helpful", "is_deleted", "deleted_at", "moderation_status",
+                "crisis_flag", "created_at", "updated_at"
+            );
+
+        Map<String, Object> idColumn = columns.stream()
+            .filter(c -> "id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(idColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(idColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> parentColumn = columns.stream()
+            .filter(c -> "parent_comment_id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(parentColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(parentColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> isHelpfulColumn = columns.stream()
+            .filter(c -> "is_helpful".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(isHelpfulColumn.get("data_type")).isEqualTo("boolean");
+        assertThat(isHelpfulColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> crisisFlagColumn = columns.stream()
+            .filter(c -> "crisis_flag".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(crisisFlagColumn.get("data_type")).isEqualTo("boolean");
+        assertThat(crisisFlagColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> createdAtColumn = columns.stream()
+            .filter(c -> "created_at".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(createdAtColumn.get("data_type")).isEqualTo("timestamp with time zone");
+        assertThat(createdAtColumn.get("is_nullable")).isEqualTo("NO");
+
+        List<String> indexNames = jdbcTemplate.queryForList(
+            "SELECT indexname FROM pg_indexes " +
+            "WHERE schemaname = 'public' AND tablename = 'post_comments'",
+            String.class
+        );
+        assertThat(indexNames).contains(
+            "idx_post_comments_post_id_created",
+            "idx_post_comments_user_id_created",
+            "idx_post_comments_parent"
+        );
+    }
+
+    @Test
+    void postReactionsTableExistsWithExpectedColumnsAndCompositePK() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, is_nullable FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'post_reactions' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(4);
+        assertThat(columns).extracting("column_name")
+            .containsExactly("post_id", "user_id", "reaction_type", "created_at");
+
+        List<String> pkColumns = jdbcTemplate.queryForList(
+            "SELECT kcu.column_name " +
+            "FROM information_schema.table_constraints tc " +
+            "JOIN information_schema.key_column_usage kcu " +
+            "  ON tc.constraint_name = kcu.constraint_name " +
+            "WHERE tc.table_schema = 'public' " +
+            "  AND tc.table_name = ? " +
+            "  AND tc.constraint_type = 'PRIMARY KEY' " +
+            "ORDER BY kcu.ordinal_position",
+            String.class, "post_reactions"
+        );
+        assertThat(pkColumns).containsExactly("post_id", "user_id", "reaction_type");
+
+        List<String> indexNames = jdbcTemplate.queryForList(
+            "SELECT indexname FROM pg_indexes " +
+            "WHERE schemaname = 'public' AND tablename = 'post_reactions'",
+            String.class
+        );
+        assertThat(indexNames).contains(
+            "idx_post_reactions_post_type",
+            "idx_post_reactions_user_created"
+        );
+    }
+
+    @Test
+    void postBookmarksTableExistsWithExpectedColumnsAndCompositePK() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, is_nullable FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'post_bookmarks' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(3);
+        assertThat(columns).extracting("column_name")
+            .containsExactly("post_id", "user_id", "created_at");
+
+        List<String> pkColumns = jdbcTemplate.queryForList(
+            "SELECT kcu.column_name " +
+            "FROM information_schema.table_constraints tc " +
+            "JOIN information_schema.key_column_usage kcu " +
+            "  ON tc.constraint_name = kcu.constraint_name " +
+            "WHERE tc.table_schema = 'public' " +
+            "  AND tc.table_name = ? " +
+            "  AND tc.constraint_type = 'PRIMARY KEY' " +
+            "ORDER BY kcu.ordinal_position",
+            String.class, "post_bookmarks"
+        );
+        assertThat(pkColumns).containsExactly("post_id", "user_id");
+
+        List<String> indexNames = jdbcTemplate.queryForList(
+            "SELECT indexname FROM pg_indexes " +
+            "WHERE schemaname = 'public' AND tablename = 'post_bookmarks'",
+            String.class
+        );
+        assertThat(indexNames).contains("idx_post_bookmarks_user_created");
+    }
+
+    @Test
+    void postReportsTableExistsWithExpectedColumns() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, is_nullable FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'post_reports' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(11);
+        assertThat(columns).extracting("column_name")
+            .containsExactly(
+                "id", "post_id", "comment_id", "reporter_id", "reason",
+                "details", "status", "reviewer_id", "reviewed_at",
+                "action_taken", "created_at"
+            );
+
+        Map<String, Object> postIdColumn = columns.stream()
+            .filter(c -> "post_id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(postIdColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(postIdColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> commentIdColumn = columns.stream()
+            .filter(c -> "comment_id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(commentIdColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(commentIdColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> reporterIdColumn = columns.stream()
+            .filter(c -> "reporter_id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(reporterIdColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(reporterIdColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> reasonColumn = columns.stream()
+            .filter(c -> "reason".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(reasonColumn.get("data_type")).isEqualTo("character varying");
+        assertThat(reasonColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> detailsColumn = columns.stream()
+            .filter(c -> "details".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(detailsColumn.get("data_type")).isEqualTo("text");
+        assertThat(detailsColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> reviewerIdColumn = columns.stream()
+            .filter(c -> "reviewer_id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(reviewerIdColumn.get("data_type")).isEqualTo("uuid");
+        assertThat(reviewerIdColumn.get("is_nullable")).isEqualTo("YES");
+
+        Map<String, Object> actionTakenColumn = columns.stream()
+            .filter(c -> "action_taken".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(actionTakenColumn.get("data_type")).isEqualTo("character varying");
+        assertThat(actionTakenColumn.get("is_nullable")).isEqualTo("YES");
+
+        List<String> indexNames = jdbcTemplate.queryForList(
+            "SELECT indexname FROM pg_indexes " +
+            "WHERE schemaname = 'public' AND tablename = 'post_reports'",
+            String.class
+        );
+        assertThat(indexNames).contains(
+            "idx_post_reports_status_created",
+            "idx_post_reports_post_id",
+            "idx_post_reports_comment_id",
+            "idx_post_reports_reporter_id_created"
+        );
+    }
+
+    @Test
+    void qotdQuestionsTableExistsWithExpectedColumns() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+            "SELECT column_name, data_type, character_maximum_length, is_nullable " +
+            "FROM information_schema.columns " +
+            "WHERE table_schema = 'public' AND table_name = 'qotd_questions' " +
+            "ORDER BY ordinal_position"
+        );
+
+        assertThat(columns).hasSize(7);
+        assertThat(columns).extracting("column_name")
+            .containsExactly("id", "text", "theme", "hint", "display_order", "is_active", "created_at");
+
+        Map<String, Object> idColumn = columns.stream()
+            .filter(c -> "id".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(idColumn.get("data_type")).isEqualTo("character varying");
+        assertThat(idColumn.get("character_maximum_length")).isEqualTo(50);
+        assertThat(idColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> displayOrderColumn = columns.stream()
+            .filter(c -> "display_order".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(displayOrderColumn.get("data_type")).isEqualTo("integer");
+        assertThat(displayOrderColumn.get("is_nullable")).isEqualTo("NO");
+
+        Map<String, Object> isActiveColumn = columns.stream()
+            .filter(c -> "is_active".equals(c.get("column_name"))).findFirst().orElseThrow();
+        assertThat(isActiveColumn.get("data_type")).isEqualTo("boolean");
+        assertThat(isActiveColumn.get("is_nullable")).isEqualTo("NO");
+
+        List<String> pkColumns = jdbcTemplate.queryForList(
+            "SELECT kcu.column_name " +
+            "FROM information_schema.table_constraints tc " +
+            "JOIN information_schema.key_column_usage kcu " +
+            "  ON tc.constraint_name = kcu.constraint_name " +
+            "WHERE tc.table_schema = 'public' " +
+            "  AND tc.table_name = ? " +
+            "  AND tc.constraint_type = 'PRIMARY KEY' " +
+            "ORDER BY kcu.ordinal_position",
+            String.class, "qotd_questions"
+        );
+        assertThat(pkColumns).containsExactly("id");
+
+        Integer uniqueCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM information_schema.table_constraints " +
+            "WHERE table_schema = 'public' AND table_name = 'qotd_questions' " +
+            "AND constraint_name = 'qotd_questions_display_order_unique' " +
+            "AND constraint_type = 'UNIQUE'",
+            Integer.class
+        );
+        assertThat(uniqueCount).isEqualTo(1);
+
+        List<Map<String, Object>> indexes = jdbcTemplate.queryForList(
+            "SELECT indexname, indexdef FROM pg_indexes " +
+            "WHERE schemaname = 'public' AND tablename = 'qotd_questions' " +
+            "AND indexname = 'idx_qotd_questions_active_order'"
+        );
+        assertThat(indexes).hasSize(1);
+        String indexDef = (String) indexes.get(0).get("indexdef");
+        assertThat(indexDef).contains("WHERE");
+        assertThat(indexDef).contains("is_active");
+    }
+
     @ParameterizedTest(name = "phase 2.5 CHECK {0} rejects invalid value")
     @CsvSource({
         "friend_relationships_status_check",
@@ -689,6 +1067,261 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         assertThat(afterCount).isEqualTo(0);
     }
 
+    @ParameterizedTest(name = "phase 3 CHECK {0} rejects invalid value")
+    @CsvSource({
+        "posts_post_type_check",
+        "posts_category_check",
+        "posts_visibility_check",
+        "posts_moderation_status_check",
+        "posts_soft_delete_consistency",
+        "posts_answered_consistency",
+        "post_comments_moderation_status_check",
+        "post_comments_soft_delete_consistency",
+        "post_reactions_reaction_type_check",
+        "post_reports_target_xor_check_both_set",
+        "post_reports_target_xor_check_neither_set",
+        "post_reports_status_check",
+        "post_reports_review_consistency",
+        "qotd_questions_theme_check"
+    })
+    void phase3CheckConstraintRejectsInvalidValue(String caseName) {
+        // The XOR check is tested twice (both-set + neither-set) but both branches
+        // assert the same constraint name `post_reports_target_xor_check`.
+        // The status_check case is special: any invalid status simultaneously
+        // violates both `post_reports_status_check` and `post_reports_review_consistency`
+        // (the latter requires status to be in the same enum), so Postgres reports
+        // whichever it evaluates first — accept either name.
+        String constraintName = caseName.startsWith("post_reports_target_xor_check")
+            ? "post_reports_target_xor_check"
+            : caseName;
+        String[] acceptableConstraintNames = caseName.equals("post_reports_status_check")
+            ? new String[]{"post_reports_status_check", "post_reports_review_consistency"}
+            : new String[]{constraintName};
+
+        UUID userA = insertTestUser(caseName + "-a");
+
+        assertThatThrownBy(() -> {
+            switch (caseName) {
+                case "posts_post_type_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO posts (user_id, post_type, content) VALUES (?, ?, ?)",
+                        userA, "invalid_type", "test");
+                case "posts_category_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO posts (user_id, post_type, content, category) VALUES (?, ?, ?, ?)",
+                        userA, "prayer_request", "test", "invalid_category");
+                case "posts_visibility_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO posts (user_id, post_type, content, visibility) VALUES (?, ?, ?, ?)",
+                        userA, "prayer_request", "test", "invalid_visibility");
+                case "posts_moderation_status_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO posts (user_id, post_type, content, moderation_status) VALUES (?, ?, ?, ?)",
+                        userA, "prayer_request", "test", "invalid_status");
+                case "posts_soft_delete_consistency" ->
+                    // is_deleted=TRUE with deleted_at=NULL is the illegal pair.
+                    jdbcTemplate.update(
+                        "INSERT INTO posts (user_id, post_type, content, is_deleted, deleted_at) VALUES (?, ?, ?, ?, ?)",
+                        userA, "prayer_request", "test", true, null);
+                case "posts_answered_consistency" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO posts (user_id, post_type, content, is_answered, answered_at) VALUES (?, ?, ?, ?, ?)",
+                        userA, "prayer_request", "test", true, null);
+                case "post_comments_moderation_status_check" -> {
+                    UUID postId = insertTestPost(userA);
+                    jdbcTemplate.update(
+                        "INSERT INTO post_comments (post_id, user_id, content, moderation_status) VALUES (?, ?, ?, ?)",
+                        postId, userA, "test", "invalid_status");
+                }
+                case "post_comments_soft_delete_consistency" -> {
+                    UUID postId = insertTestPost(userA);
+                    jdbcTemplate.update(
+                        "INSERT INTO post_comments (post_id, user_id, content, is_deleted, deleted_at) VALUES (?, ?, ?, ?, ?)",
+                        postId, userA, "test", true, null);
+                }
+                case "post_reactions_reaction_type_check" -> {
+                    // 'praising' is rejected per Spec Divergence 3 — Phase 6.6
+                    // adds it via an ALTER changeset; Phase 3 must reject it.
+                    UUID postId = insertTestPost(userA);
+                    jdbcTemplate.update(
+                        "INSERT INTO post_reactions (post_id, user_id, reaction_type) VALUES (?, ?, ?)",
+                        postId, userA, "praising");
+                }
+                case "post_reports_target_xor_check_both_set" -> {
+                    UUID postId = insertTestPost(userA);
+                    UUID commentId = UUID.randomUUID();
+                    jdbcTemplate.update(
+                        "INSERT INTO post_comments (id, post_id, user_id, content) VALUES (?, ?, ?, ?)",
+                        commentId, postId, userA, "test");
+                    jdbcTemplate.update(
+                        "INSERT INTO post_reports (post_id, comment_id, reporter_id, reason) VALUES (?, ?, ?, ?)",
+                        postId, commentId, userA, "spam");
+                }
+                case "post_reports_target_xor_check_neither_set" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO post_reports (post_id, comment_id, reporter_id, reason) VALUES (?, ?, ?, ?)",
+                        null, null, userA, "spam");
+                case "post_reports_status_check" -> {
+                    UUID postId = insertTestPost(userA);
+                    jdbcTemplate.update(
+                        "INSERT INTO post_reports (post_id, reporter_id, reason, status) VALUES (?, ?, ?, ?)",
+                        postId, userA, "spam", "invalid_status");
+                }
+                case "post_reports_review_consistency" -> {
+                    // status='reviewed' requires reviewer_id AND reviewed_at to be non-null.
+                    UUID postId = insertTestPost(userA);
+                    jdbcTemplate.update(
+                        "INSERT INTO post_reports (post_id, reporter_id, reason, status, reviewer_id) VALUES (?, ?, ?, ?, ?)",
+                        postId, userA, "spam", "reviewed", null);
+                }
+                case "qotd_questions_theme_check" ->
+                    jdbcTemplate.update(
+                        "INSERT INTO qotd_questions (id, text, theme, display_order) VALUES (?, ?, ?, ?)",
+                        "test-q-" + UUID.randomUUID(), "test?", "invalid_theme", 999_000 + (int) (Math.random() * 1000));
+                default ->
+                    throw new IllegalStateException("Unhandled case: " + caseName);
+            }
+        }).isInstanceOf(DataIntegrityViolationException.class)
+          .satisfies(ex -> assertThat(ex.getMessage()).containsAnyOf(acceptableConstraintNames));
+    }
+
+    @ParameterizedTest(name = "deleting user cascades rows from {0}")
+    @CsvSource({
+        "posts",
+        "post_comments",
+        "post_reactions",
+        "post_bookmarks",
+        "post_reports"
+    })
+    void phase3TableCascadesOnUserDelete(String tableName) {
+        UUID userA = insertTestUser("phase3-cascade-" + tableName + "-a");
+
+        // For child tables (post_comments, post_reactions, post_bookmarks,
+        // post_reports), seed a parent post owned by userA so the cascade
+        // can be verified on the child row's user/reporter column.
+        switch (tableName) {
+            case "posts" ->
+                jdbcTemplate.update(
+                    "INSERT INTO posts (user_id, post_type, content) VALUES (?, ?, ?)",
+                    userA, "prayer_request", "test");
+            case "post_comments" -> {
+                UUID postId = insertTestPost(userA);
+                jdbcTemplate.update(
+                    "INSERT INTO post_comments (post_id, user_id, content) VALUES (?, ?, ?)",
+                    postId, userA, "test");
+            }
+            case "post_reactions" -> {
+                UUID postId = insertTestPost(userA);
+                jdbcTemplate.update(
+                    "INSERT INTO post_reactions (post_id, user_id, reaction_type) VALUES (?, ?, ?)",
+                    postId, userA, "praying");
+            }
+            case "post_bookmarks" -> {
+                UUID postId = insertTestPost(userA);
+                jdbcTemplate.update(
+                    "INSERT INTO post_bookmarks (post_id, user_id) VALUES (?, ?)",
+                    postId, userA);
+            }
+            case "post_reports" -> {
+                UUID postId = insertTestPost(userA);
+                jdbcTemplate.update(
+                    "INSERT INTO post_reports (post_id, reporter_id, reason) VALUES (?, ?, ?)",
+                    postId, userA, "spam");
+            }
+            default ->
+                throw new IllegalStateException("Unhandled table: " + tableName);
+        }
+
+        String userColumn = switch (tableName) {
+            case "posts", "post_comments", "post_reactions", "post_bookmarks" -> "user_id";
+            case "post_reports" -> "reporter_id";
+            default -> throw new IllegalStateException("Unhandled table: " + tableName);
+        };
+        Integer beforeCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM " + tableName + " WHERE " + userColumn + " = ?",
+            Integer.class, userA
+        );
+        assertThat(beforeCount).isEqualTo(1);
+
+        // Delete userA — cascade should remove the row.
+        jdbcTemplate.update("DELETE FROM users WHERE id = ?", userA);
+
+        Integer afterCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM " + tableName + " WHERE " + userColumn + " = ?",
+            Integer.class, userA
+        );
+        assertThat(afterCount).isEqualTo(0);
+    }
+
+    @Test
+    void postReportsReviewerSetsNullOnUserDelete() {
+        UUID reporter = insertTestUser("reviewer-setnull-reporter");
+        UUID moderator = insertTestUser("reviewer-setnull-moderator");
+        UUID postId = insertTestPost(reporter);
+
+        UUID reportId = UUID.randomUUID();
+        jdbcTemplate.update(
+            "INSERT INTO post_reports (id, post_id, reporter_id, reason, status, reviewer_id, reviewed_at) " +
+            "VALUES (?, ?, ?, ?, ?, ?, NOW())",
+            reportId, postId, reporter, "spam", "reviewed", moderator
+        );
+
+        Map<String, Object> beforeRow = jdbcTemplate.queryForMap(
+            "SELECT reviewer_id, reviewed_at, status FROM post_reports WHERE id = ?",
+            reportId
+        );
+        assertThat(beforeRow.get("reviewer_id")).isEqualTo(moderator);
+        assertThat(beforeRow.get("reviewed_at")).isNotNull();
+
+        // Delete the moderator. The report row must survive — its audit trail
+        // (reviewed_at, action_taken) is preserved while reviewer_id is set
+        // to NULL by the FK cascade. Postgres re-fires CHECK constraints on
+        // cascade UPDATE, so post_reports_review_consistency is intentionally
+        // permissive on the closed branch (`status IN (closed) AND reviewed_at
+        // IS NOT NULL`) to accommodate this orphaned-reviewer state without
+        // blocking the cascade.
+        jdbcTemplate.update("DELETE FROM users WHERE id = ?", moderator);
+
+        Map<String, Object> afterRow = jdbcTemplate.queryForMap(
+            "SELECT reviewer_id, reviewed_at, status FROM post_reports WHERE id = ?",
+            reportId
+        );
+        assertThat(afterRow.get("reviewer_id")).isNull();
+        assertThat(afterRow.get("reviewed_at")).isNotNull();
+        assertThat(afterRow.get("status")).isEqualTo("reviewed");
+    }
+
+    @Test
+    void postCommentsParentReferenceCascades() {
+        UUID userA = insertTestUser("parent-cascade");
+        UUID postId = insertTestPost(userA);
+
+        UUID parentCommentId = UUID.randomUUID();
+        jdbcTemplate.update(
+            "INSERT INTO post_comments (id, post_id, user_id, content) VALUES (?, ?, ?, ?)",
+            parentCommentId, postId, userA, "parent"
+        );
+
+        jdbcTemplate.update(
+            "INSERT INTO post_comments (post_id, user_id, parent_comment_id, content) VALUES (?, ?, ?, ?)",
+            postId, userA, parentCommentId, "child"
+        );
+
+        Integer beforeCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM post_comments WHERE post_id = ?",
+            Integer.class, postId
+        );
+        assertThat(beforeCount).isEqualTo(2);
+
+        jdbcTemplate.update("DELETE FROM post_comments WHERE id = ?", parentCommentId);
+
+        Integer afterCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM post_comments WHERE post_id = ?",
+            Integer.class, postId
+        );
+        assertThat(afterCount).isEqualTo(0);
+    }
+
     @AfterEach
     void cleanupCheckTestUsers() {
         // ON DELETE CASCADE on every FK to users.id means deleting the parent
@@ -696,6 +1329,18 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         // CHECK-rejection test may have left behind. Targets only emails with
         // the check-test- prefix so other tests' fixtures are untouched.
         jdbcTemplate.update("DELETE FROM users WHERE email LIKE 'check-test-%'");
+    }
+
+    @AfterEach
+    void cleanupPhase3QotdTestRows() {
+        // qotd_questions is a self-contained content table — no FK to users —
+        // so cleanupCheckTestUsers does NOT transitively clear test rows here.
+        // The phase3CheckConstraintRejectsInvalidValue case for the theme CHECK
+        // inserts a 'test-q-' prefixed row whose CHECK violation aborts the
+        // INSERT before it reaches the heap, BUT a future test that crafts a
+        // valid row (or the prefix is reused) would leak. Sweep on the same
+        // prefix the test uses to keep the table empty between invocations.
+        jdbcTemplate.update("DELETE FROM qotd_questions WHERE id LIKE 'test-q-%'");
     }
 
     @ParameterizedTest(name = "{0} rejects invalid value")
@@ -755,6 +1400,15 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
             "VALUES (?, ?, ?, ?, ?)",
             id, "check-test-" + emailSuffix + "@example.com",
             "bcrypt-placeholder", "Test", "User"
+        );
+        return id;
+    }
+
+    private UUID insertTestPost(UUID userId) {
+        UUID id = UUID.randomUUID();
+        jdbcTemplate.update(
+            "INSERT INTO posts (id, user_id, post_type, content) VALUES (?, ?, ?, ?)",
+            id, userId, "prayer_request", "test post"
         );
         return id;
     }

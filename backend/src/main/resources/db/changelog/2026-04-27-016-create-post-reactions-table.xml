@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 3.1 — `post_reactions` per master plan Decision 5
+       (Light a Candle). Composite PK on (post_id, user_id, reaction_type)
+       gives free deduplication: a user can only have one row per
+       reaction-type per post. CHECK is restricted to ('praying','candle')
+       in Phase 3 (Spec Divergence 3); Phase 6.6 Answered Wall ALTERs the
+       constraint to add 'praising' and 'celebrate'. NO soft-delete columns —
+       reactions toggle (DELETE on un-react) by design. Once this changeset
+       runs, its MD5 is permanent in DATABASECHANGELOG; future schema
+       changes go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-016-create-post-reactions-table" author="worship-room">
+
+    <createTable tableName="post_reactions">
+      <column name="post_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="reaction_type" type="VARCHAR(30)" defaultValue="praying">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addPrimaryKey
+      tableName="post_reactions"
+      constraintName="pk_post_reactions"
+      columnNames="post_id, user_id, reaction_type"/>
+
+    <addForeignKeyConstraint
+      baseTableName="post_reactions"
+      baseColumnNames="post_id"
+      constraintName="fk_post_reactions_post"
+      referencedTableName="posts"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="post_reactions"
+      baseColumnNames="user_id"
+      constraintName="fk_post_reactions_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Phase 3 ships only 'praying' and 'candle'. Phase 6.6 Answered Wall
+         adds 'praising' and 'celebrate' via an ALTER changeset. Tightening
+         the constraint now prevents any read endpoint from encountering a
+         value it doesn't know how to render. -->
+    <sql>
+      ALTER TABLE post_reactions ADD CONSTRAINT post_reactions_reaction_type_check
+      CHECK (reaction_type IN ('praying', 'candle'));
+    </sql>
+
+    <!-- Counter-aggregation index: "how many of each reaction does this post have?". -->
+    <createIndex tableName="post_reactions" indexName="idx_post_reactions_post_type">
+      <column name="post_id"/>
+      <column name="reaction_type"/>
+    </createIndex>
+
+    <!-- Per-user activity feed: "what has this user reacted to recently?". -->
+    <createIndex tableName="post_reactions" indexName="idx_post_reactions_user_created">
+      <column name="user_id"/>
+      <column name="created_at" descending="true"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="post_reactions"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 3.1 — `post_reports`. Reports target either a post
+       OR a comment (XOR enforced via CHECK). reviewer_id uses ON DELETE
+       SET NULL (NOT cascade) so deleting a moderator account preserves
+       the audit trail of their decisions. CHECK constraints validate the
+       XOR target invariant, the status enum, and review consistency
+       (status='pending' implies no reviewer; closed statuses imply both
+       reviewer_id and reviewed_at are populated). Once this changeset
+       runs, its MD5 is permanent in DATABASECHANGELOG; future schema
+       changes go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-018-create-post-reports-table" author="worship-room">
+
+    <createTable tableName="post_reports">
+      <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="post_id" type="UUID"/>
+      <column name="comment_id" type="UUID"/>
+      <column name="reporter_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="reason" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="details" type="TEXT"/>
+      <column name="status" type="VARCHAR(20)" defaultValue="pending">
+        <constraints nullable="false"/>
+      </column>
+      <column name="reviewer_id" type="UUID"/>
+      <column name="reviewed_at" type="TIMESTAMP WITH TIME ZONE"/>
+      <column name="action_taken" type="VARCHAR(50)"/>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="post_reports"
+      baseColumnNames="post_id"
+      constraintName="fk_post_reports_post"
+      referencedTableName="posts"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="post_reports"
+      baseColumnNames="comment_id"
+      constraintName="fk_post_reports_comment"
+      referencedTableName="post_comments"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="post_reports"
+      baseColumnNames="reporter_id"
+      constraintName="fk_post_reports_reporter"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- reviewer_id uses SET NULL (not CASCADE) — deleting a moderator account
+         must NOT erase the audit trail of reports they reviewed. The reviewed_at
+         and action_taken columns retain their values. Note: PostgreSQL CHECK
+         constraints don't re-fire on FK cascade SET NULL, so the
+         post_reports_review_consistency invariant only applies on INSERT/UPDATE. -->
+    <addForeignKeyConstraint
+      baseTableName="post_reports"
+      baseColumnNames="reviewer_id"
+      constraintName="fk_post_reports_reviewer"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="SET NULL"/>
+
+    <!-- Exactly-one-of XOR: a report targets either a post or a comment, never
+         both, never neither. -->
+    <sql>
+      ALTER TABLE post_reports ADD CONSTRAINT post_reports_target_xor_check
+      CHECK ((post_id IS NOT NULL AND comment_id IS NULL) OR (post_id IS NULL AND comment_id IS NOT NULL));
+    </sql>
+
+    <sql>
+      ALTER TABLE post_reports ADD CONSTRAINT post_reports_status_check
+      CHECK (status IN ('pending', 'reviewed', 'dismissed', 'actioned'));
+    </sql>
+
+    <!-- Review consistency: pending reports must not have a reviewer; closed
+         reports must have one. Enforced on INSERT/UPDATE only (Postgres does
+         not re-fire CHECKs on cascade SET NULL — see fk_post_reports_reviewer). -->
+    <sql>
+      ALTER TABLE post_reports ADD CONSTRAINT post_reports_review_consistency
+      CHECK ((status = 'pending' AND reviewer_id IS NULL AND reviewed_at IS NULL) OR (status IN ('reviewed', 'dismissed', 'actioned') AND reviewer_id IS NOT NULL AND reviewed_at IS NOT NULL));
+    </sql>
+
+    <!-- Per-reporter activity feed. -->
+    <createIndex tableName="post_reports" indexName="idx_post_reports_reporter_id_created">
+      <column name="reporter_id"/>
+      <column name="created_at" descending="true"/>
+    </createIndex>
+
+    <!-- Moderator queue: pending reports oldest-first (FIFO). ASC created_at. -->
+    <sql>
+      CREATE INDEX idx_post_reports_status_created
+        ON post_reports (status, created_at)
+        WHERE status = 'pending';
+    </sql>
+
+    <!-- "Has this post been reported?" lookup (post detail page admin overlay). -->
+    <sql>
+      CREATE INDEX idx_post_reports_post_id
+        ON post_reports (post_id)
+        WHERE post_id IS NOT NULL;
+    </sql>
+
+    <!-- "Has this comment been reported?" lookup. -->
+    <sql>
+      CREATE INDEX idx_post_reports_comment_id
+        ON post_reports (comment_id)
+        WHERE comment_id IS NOT NULL;
+    </sql>
+
+    <rollback>
+      <dropTable tableName="post_reports"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

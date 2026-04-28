@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 3.1 follow-on (Plan Deviation #1) — relax
+       `post_reports_review_consistency` to allow `reviewer_id IS NULL` on
+       closed reports. The original strict form blocked the FK cascade SET
+       NULL update path: when a moderator account is deleted, Postgres tries
+       to UPDATE post_reports SET reviewer_id = NULL, which produces a row
+       state of (status IN closed, reviewer_id IS NULL, reviewed_at IS NOT
+       NULL). The strict form rejected this because branch 2 required
+       `reviewer_id IS NOT NULL`; PostgreSQL DOES re-fire CHECK constraints
+       on cascade UPDATE (the original plan's assumption that it does not
+       was incorrect). The relaxed form preserves the audit-trail intent of
+       the SET NULL FK: closed reports retain `reviewed_at` even after the
+       reviewer's account is deleted; only `reviewer_id` is nulled. The
+       application-layer service that creates reports still sets
+       `reviewer_id` at action time. Once this changeset runs, its MD5 is
+       permanent in DATABASECHANGELOG; future schema changes go in new
+       YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-020-relax-post-reports-review-consistency" author="worship-room">
+
+    <sql>
+      ALTER TABLE post_reports DROP CONSTRAINT post_reports_review_consistency;
+      ALTER TABLE post_reports ADD CONSTRAINT post_reports_review_consistency
+      CHECK ((status = 'pending' AND reviewer_id IS NULL AND reviewed_at IS NULL) OR (status IN ('reviewed', 'dismissed', 'actioned') AND reviewed_at IS NOT NULL));
+    </sql>
+
+    <rollback>
+      <sql>
+        ALTER TABLE post_reports DROP CONSTRAINT post_reports_review_consistency;
+        ALTER TABLE post_reports ADD CONSTRAINT post_reports_review_consistency
+        CHECK ((status = 'pending' AND reviewer_id IS NULL AND reviewed_at IS NULL) OR (status IN ('reviewed', 'dismissed', 'actioned') AND reviewer_id IS NOT NULL AND reviewed_at IS NOT NULL));
+      </sql>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

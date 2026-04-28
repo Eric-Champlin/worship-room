@@ -102,6 +102,21 @@ CHECK (post_type IN ('prayer_request','testimony','question','discussion','encou
 CHECK (status IN ('pending','reviewing','closed_action','closed_no_action'))
 ```
 
+### CHECK constraints over `ON DELETE SET NULL` columns (MANDATORY)
+
+**Source of this rule:** Spec 3.1 Plan Deviation #1 (2026-04-28). The `post_reports_review_consistency` CHECK was originally written to require `reviewer_id IS NOT NULL` on closed-status branches. The same table has `fk_post_reports_reviewer ... ON DELETE SET NULL` so deleting a moderator's `users` row preserves the audit trail with `reviewer_id` cleared. PostgreSQL **re-fires CHECK constraints on cascade UPDATE** (cascade SET NULL is implemented as an UPDATE under the hood); the CHECK rejected the cascade-produced row, blocking the moderator delete. Resolution required a follow-on changeset that relaxed the CHECK on closed branches.
+
+**The rule:** Any CHECK constraint that references a column subject to `ON DELETE SET NULL` on a foreign key MUST remain satisfied with that column nulled out. Otherwise the cascade fails at the moment the FK rule fires and the parent DELETE is rejected.
+
+**At schema-design time, ask:**
+- Does this table have any FK with `ON DELETE SET NULL`?
+- Does any CHECK constraint reference the SET-NULL column directly?
+- Would the CHECK still pass if that column became NULL while the rest of the row stayed unchanged?
+
+If the answer to (3) is "no," EITHER move the SET-NULL column out of the CHECK predicate, OR move the invariant the CHECK was enforcing into the application layer. Encoding "this column must be present at action time" via a CHECK over a SET-NULL column is structurally incompatible with the SET-NULL semantics. Either pick CASCADE (the column disappears with the parent) or accept that the column can be nulled (the CHECK must permit NULL).
+
+**`/code-review` MUST flag any new CHECK constraint that references a SET-NULL FK column without explicitly handling the NULL case.**
+
 ## Liquibase Seed Data & Value Patterns
 
 **Source of these patterns:** Phase 1 execution (Spec 1.8). Also canonicalized in master plan v2.9 addendum, items 3 and 4. Trust this rule file over any older changeset that predates these patterns.
