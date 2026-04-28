@@ -75,3 +75,14 @@ export async function blockUserApi(userId: string): Promise<void> {
     body: JSON.stringify(body),
   })
 }
+
+/**
+ * DELETE /api/v1/users/me/blocks/{userId} — unblock a user. Idempotent.
+ * Backend unblock leaves no relationship row (per Spec 2.5.2 design); refriending
+ * requires a new friend request.
+ */
+export async function unblockUserApi(userId: string): Promise<void> {
+  await apiFetch<void>(`/api/v1/users/me/blocks/${userId}`, {
+    method: 'DELETE',
+  })
+}

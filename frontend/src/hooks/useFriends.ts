@@ -10,6 +10,7 @@ import {
   cancelOutgoingRequest as storageCancelRequest,
   removeFriend as storageRemoveFriend,
   blockUser as storageBlockUser,
+  unblockUser as storageUnblockUser,
   attachBackendId as storageAttachBackendId,
 } from '@/services/friends-storage'
 import { ALL_MOCK_USERS, MOCK_SUGGESTIONS } from '@/mocks/friends-mock-data'
@@ -20,6 +21,7 @@ import {
   respondToFriendRequestApi,
   removeFriendApi,
   blockUserApi,
+  unblockUserApi,
 } from '@/services/api/friends-api'
 
 /**
@@ -60,6 +62,7 @@ export function useFriends(): {
   cancelRequest: (requestId: string) => void
   removeFriend: (friendId: string) => void
   blockUser: (userId: string) => void
+  unblockUser: (userId: string) => void
   friendCount: number
 } {
   const { isAuthenticated, user } = useAuth()
@@ -238,6 +241,20 @@ export function useFriends(): {
     [isAuthenticated, data, persist],
   )
 
+  const unblockAUser = useCallback(
+    (userId: string) => {
+      if (!isAuthenticated) return
+      persist(storageUnblockUser(data, userId))
+
+      if (shouldDualWrite()) {
+        unblockUserApi(userId).catch((err) => {
+          console.warn('[useFriends] backend unblockUser dual-write failed:', err)
+        })
+      }
+    },
+    [isAuthenticated, data, persist],
+  )
+
   return {
     friends,
     pendingIncoming: data.pendingIncoming,
@@ -251,6 +268,7 @@ export function useFriends(): {
     cancelRequest,
     removeFriend: removeAFriend,
     blockUser: blockAUser,
+    unblockUser: unblockAUser,
     friendCount: data.friends.length,
   }
 }

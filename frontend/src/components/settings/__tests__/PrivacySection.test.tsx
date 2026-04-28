@@ -1,27 +1,26 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ToastProvider } from '@/components/ui/Toast'
 import { PrivacySection } from '../PrivacySection'
 import { DEFAULT_SETTINGS } from '@/services/settings-storage'
-import { FRIENDS_KEY } from '@/services/friends-storage'
-import type { FriendsData } from '@/types/dashboard'
 
 const defaultPrivacy = { ...DEFAULT_SETTINGS.privacy }
 
 function renderPrivacy(props: Partial<Parameters<typeof PrivacySection>[0]> = {}) {
   const onUpdatePrivacy = props.onUpdatePrivacy ?? vi.fn()
-  const onUnblockUser = props.onUnblockUser ?? vi.fn()
+  const onUnblock = props.onUnblock ?? vi.fn()
   const result = render(
     <ToastProvider>
       <PrivacySection
         privacy={props.privacy ?? defaultPrivacy}
+        friendsBlocked={props.friendsBlocked ?? []}
         onUpdatePrivacy={onUpdatePrivacy}
-        onUnblockUser={onUnblockUser}
+        onUnblock={onUnblock}
       />
     </ToastProvider>,
   )
-  return { ...result, onUpdatePrivacy, onUnblockUser }
+  return { ...result, onUpdatePrivacy, onUnblock }
 }
 
 describe('PrivacySection', () => {
@@ -118,56 +117,62 @@ describe('PrivacySection', () => {
     expect(unselected.className).toContain('bg-white/5')
   })
 
-  // --- Blocked Users ---
+  // --- Blocked Users (Spec 2.5.6) ---
 
-  it('empty blocked users shows message', () => {
+  it('empty blocked users shows message when both lists are empty', () => {
     renderPrivacy()
     expect(screen.getByText("You haven't blocked anyone")).toBeInTheDocument()
   })
 
-  it('blocked users list renders', () => {
-    renderPrivacy({
-      privacy: { ...defaultPrivacy, blockedUsers: ['user-mock-1', 'user-mock-2'] },
-    })
+  it('blocked list renders from friendsBlocked (canonical source)', () => {
+    renderPrivacy({ friendsBlocked: ['user-mock-1', 'user-mock-2'] })
     const unblockButtons = screen.getAllByRole('button', { name: 'Unblock' })
     expect(unblockButtons).toHaveLength(2)
   })
 
-  it('unblock removes from settings', async () => {
-    const user = userEvent.setup()
-    const { onUnblockUser } = renderPrivacy({
-      privacy: { ...defaultPrivacy, blockedUsers: ['user-mock-1'] },
+  it('merges friendsBlocked with legacy privacy.blockedUsers and dedupes by id', () => {
+    renderPrivacy({
+      friendsBlocked: ['user-mock-1'],
+      privacy: { ...defaultPrivacy, blockedUsers: ['user-mock-1', 'user-mock-2'] },
     })
-    await user.click(screen.getByRole('button', { name: 'Unblock' }))
-    expect(onUnblockUser).toHaveBeenCalledWith('user-mock-1')
+    // user-mock-1 should appear ONCE despite being in both lists
+    const unblockButtons = screen.getAllByRole('button', { name: 'Unblock' })
+    expect(unblockButtons).toHaveLength(2)
   })
 
-  it('unblock removes from wr_friends', async () => {
+  it('clicking Unblock opens ConfirmDialog with unblock copy', async () => {
     const user = userEvent.setup()
-    const friendsData: FriendsData = {
-      friends: [],
-      pendingIncoming: [],
-      pendingOutgoing: [],
-      blocked: ['user-mock-1'],
-    }
-    localStorage.setItem(FRIENDS_KEY, JSON.stringify(friendsData))
-
-    renderPrivacy({
-      privacy: { ...defaultPrivacy, blockedUsers: ['user-mock-1'] },
-    })
+    renderPrivacy({ friendsBlocked: ['user-mock-1'] })
     await user.click(screen.getByRole('button', { name: 'Unblock' }))
-
-    const updated = JSON.parse(localStorage.getItem(FRIENDS_KEY)!)
-    expect(updated.blocked).toEqual([])
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+    expect(
+      screen.getByText(/You won't automatically become friends/),
+    ).toBeInTheDocument()
   })
 
-  it('unblock shows toast', async () => {
+  it('confirming dialog calls onUnblock', async () => {
     const user = userEvent.setup()
-    renderPrivacy({
-      privacy: { ...defaultPrivacy, blockedUsers: ['user-mock-1'] },
-    })
+    const { onUnblock } = renderPrivacy({ friendsBlocked: ['user-mock-1'] })
     await user.click(screen.getByRole('button', { name: 'Unblock' }))
-    // The toast message includes the display name (or "Unknown User" for mock IDs not in ALL_MOCK_USERS)
-    expect(screen.getByText(/has been unblocked/)).toBeInTheDocument()
+    const dialog = screen.getByRole('alertdialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Unblock' }))
+    expect(onUnblock).toHaveBeenCalledWith('user-mock-1')
+  })
+
+  it('canceling dialog does not call onUnblock', async () => {
+    const user = userEvent.setup()
+    const { onUnblock } = renderPrivacy({ friendsBlocked: ['user-mock-1'] })
+    await user.click(screen.getByRole('button', { name: 'Unblock' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(onUnblock).not.toHaveBeenCalled()
+  })
+
+  it('shows toast after confirmed unblock', async () => {
+    const user = userEvent.setup()
+    renderPrivacy({ friendsBlocked: ['user-mock-1'] })
+    await user.click(screen.getByRole('button', { name: 'Unblock' }))
+    const dialog = screen.getByRole('alertdialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Unblock' }))
+    expect(await screen.findByText(/has been unblocked/)).toBeInTheDocument()
   })
 })

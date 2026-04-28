@@ -134,6 +134,13 @@ export function blockUser(data: FriendsData, userId: string): FriendsData {
   }
 }
 
+export function unblockUser(data: FriendsData, userId: string): FriendsData {
+  return {
+    ...data,
+    blocked: data.blocked.filter((id) => id !== userId),
+  }
+}
+
 /**
  * Attaches the backend's UUID to the outgoing friend request matching `toUserId`,
  * if and only if that request does not already have a `backendId`. Idempotent

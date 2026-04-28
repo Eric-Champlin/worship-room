@@ -11,6 +11,7 @@ import {
   respondToFriendRequestApi,
   removeFriendApi,
   blockUserApi,
+  unblockUserApi,
 } from '../friends-api'
 
 describe('friends-api', () => {
@@ -79,6 +80,27 @@ describe('friends-api', () => {
       expect(apiFetch).toHaveBeenCalledWith('/api/v1/users/me/blocks', {
         method: 'POST',
         body: JSON.stringify({ userId: 'user-uuid' }),
+      })
+    })
+  })
+
+  describe('unblockUserApi', () => {
+    it('calls DELETE /api/v1/users/me/blocks/{userId}', async () => {
+      await unblockUserApi('user-uuid')
+      expect(apiFetch).toHaveBeenCalledWith('/api/v1/users/me/blocks/user-uuid', {
+        method: 'DELETE',
+      })
+    })
+
+    it('passes through apiFetch rejection', async () => {
+      vi.mocked(apiFetch).mockRejectedValueOnce(new Error('500'))
+      await expect(unblockUserApi('user-uuid')).rejects.toThrow('500')
+    })
+
+    it('passes raw path-segment user IDs (does not encode — matches removeFriendApi)', async () => {
+      await unblockUserApi('user-with/slash')
+      expect(apiFetch).toHaveBeenCalledWith('/api/v1/users/me/blocks/user-with/slash', {
+        method: 'DELETE',
       })
     })
   })

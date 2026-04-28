@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
@@ -16,6 +16,7 @@ import { SEO } from '@/components/SEO'
 import { SETTINGS_METADATA } from '@/lib/seo/routeMetadata'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
+import { useFriends } from '@/hooks/useFriends'
 import { cn } from '@/lib/utils'
 
 type SettingsSection = 'profile' | 'dashboard' | 'notifications' | 'privacy' | 'account' | 'app'
@@ -32,8 +33,25 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
 // Loading state: use SettingsSkeleton
 export function Settings() {
   const { isAuthenticated, user } = useAuth()
-  const { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser } = useSettings()
+  const {
+    settings,
+    updateProfile,
+    updateNotifications,
+    updatePrivacy,
+    unblockUser: unblockSettings,
+  } = useSettings()
+  const { blocked: friendsBlocked, unblockUser: unblockFriend } = useFriends()
   const [activeSection, setActiveSection] = useState<SettingsSection>('profile')
+
+  // Spec 2.5.6 cleanup-on-unblock dual-call: clears the canonical wr_friends.blocked
+  // entry AND any legacy wr_settings.privacy.blockedUsers entry for the same userId.
+  const handleUnblock = useCallback(
+    (userId: string) => {
+      unblockFriend(userId)
+      unblockSettings(userId)
+    },
+    [unblockFriend, unblockSettings],
+  )
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
@@ -140,8 +158,9 @@ export function Settings() {
             {activeSection === 'privacy' && (
               <PrivacySection
                 privacy={settings.privacy}
+                friendsBlocked={friendsBlocked}
                 onUpdatePrivacy={updatePrivacy}
-                onUnblockUser={unblockUser}
+                onUnblock={handleUnblock}
               />
             )}
             {activeSection === 'account' && (

@@ -12,6 +12,7 @@ import {
   cancelOutgoingRequest,
   removeFriend,
   blockUser,
+  unblockUser,
   attachBackendId,
   isBlocked,
   isFriend,
@@ -257,6 +258,20 @@ describe('friends-storage', () => {
       const data = makeData({ blocked: ['alice'] })
       const result = blockUser(data, 'alice')
       expect(result.blocked.filter((id) => id === 'alice')).toHaveLength(1)
+    })
+  })
+
+  describe('unblockUser', () => {
+    it('removes user from blocked array', () => {
+      const data = makeData({ blocked: ['alice', 'bob'] })
+      const result = unblockUser(data, 'alice')
+      expect(result.blocked).toEqual(['bob'])
+    })
+
+    it('is a no-op when user is not in blocked array', () => {
+      const data = makeData({ blocked: ['bob'] })
+      const result = unblockUser(data, 'alice')
+      expect(result.blocked).toEqual(['bob'])
     })
   })
 

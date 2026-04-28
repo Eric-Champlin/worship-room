@@ -167,7 +167,6 @@ describe('Friends Page', () => {
   // --- Integration: Block from menu ---
 
   it('block from menu removes friend and hides from search', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const user = userEvent.setup()
     renderFriends()
 
@@ -176,18 +175,19 @@ describe('Friends Page', () => {
     expect(screen.getByText('Sarah M.')).toBeInTheDocument()
 
     // Open three-dot menu for Sarah M.
-    // Sarah M. should be in the list — find her menu button
     const sarahRow = screen.getByText('Sarah M.').closest('[role="listitem"]') as HTMLElement
     const sarahMenuBtn = within(sarahRow).getByLabelText(/Options for/)
     await user.click(sarahMenuBtn)
 
-    // Click Block
+    // Click Block menu item — opens ConfirmDialog (Spec 2.5.6)
     await user.click(screen.getByRole('menuitem', { name: 'Block' }))
+
+    // Confirm in the dialog
+    const dialog = screen.getByRole('alertdialog', { name: 'Block Sarah M.?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Block' }))
 
     // Friend count decreases
     expect(screen.getByText(/Friends \(9\)/)).toBeInTheDocument()
-
-    vi.restoreAllMocks()
   })
 
   // --- Integration: Empty state when all friends removed ---

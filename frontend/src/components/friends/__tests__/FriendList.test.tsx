@@ -110,30 +110,67 @@ describe('FriendList', () => {
     expect(screen.getByRole('menuitem', { name: 'Block' })).toBeInTheDocument()
   })
 
-  it('remove confirmation calls onRemove', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
+  it('remove menu item opens ConfirmDialog with remove copy', async () => {
+    const user = userEvent.setup()
+    renderFriendList()
+
+    await user.click(screen.getAllByLabelText(/Options for/)[0])
+    await user.click(screen.getByRole('menuitem', { name: 'Remove Friend' }))
+
+    expect(
+      screen.getByRole('alertdialog', { name: 'Remove Sarah M. from friends?' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/You can send another friend request later/),
+    ).toBeInTheDocument()
+  })
+
+  it('confirming remove dialog calls onRemove', async () => {
     const user = userEvent.setup()
     const { onRemove } = renderFriendList()
 
     await user.click(screen.getAllByLabelText(/Options for/)[0])
     await user.click(screen.getByRole('menuitem', { name: 'Remove Friend' }))
+    await user.click(screen.getByRole('button', { name: 'Remove' }))
 
-    expect(window.confirm).toHaveBeenCalledWith('Remove Sarah M. from friends?')
     expect(onRemove).toHaveBeenCalledWith('friend-1')
-    vi.restoreAllMocks()
   })
 
-  it('block confirmation calls onBlock', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
+  it('block menu item opens ConfirmDialog with block copy', async () => {
+    const user = userEvent.setup()
+    renderFriendList()
+
+    await user.click(screen.getAllByLabelText(/Options for/)[0])
+    await user.click(screen.getByRole('menuitem', { name: 'Block' }))
+
+    expect(
+      screen.getByRole('alertdialog', { name: 'Block Sarah M.?' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Existing friendship and pending requests will be removed/),
+    ).toBeInTheDocument()
+  })
+
+  it('confirming block dialog calls onBlock', async () => {
     const user = userEvent.setup()
     const { onBlock } = renderFriendList()
 
     await user.click(screen.getAllByLabelText(/Options for/)[0])
     await user.click(screen.getByRole('menuitem', { name: 'Block' }))
+    await user.click(screen.getByRole('button', { name: 'Block' }))
 
-    expect(window.confirm).toHaveBeenCalled()
     expect(onBlock).toHaveBeenCalledWith('friend-1')
-    vi.restoreAllMocks()
+  })
+
+  it('canceling block dialog does NOT call onBlock', async () => {
+    const user = userEvent.setup()
+    const { onBlock } = renderFriendList()
+
+    await user.click(screen.getAllByLabelText(/Options for/)[0])
+    await user.click(screen.getByRole('menuitem', { name: 'Block' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(onBlock).not.toHaveBeenCalled()
   })
 
   it('empty state renders when no friends', () => {

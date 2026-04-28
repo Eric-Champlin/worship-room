@@ -32,6 +32,7 @@ vi.mock('@/services/api/friends-api', () => ({
   respondToFriendRequestApi: vi.fn(),
   removeFriendApi: vi.fn(),
   blockUserApi: vi.fn(),
+  unblockUserApi: vi.fn(),
 }))
 
 // Get reference to control mock
@@ -43,6 +44,7 @@ import {
   respondToFriendRequestApi,
   removeFriendApi,
   blockUserApi,
+  unblockUserApi,
 } from '@/services/api/friends-api'
 const mockUseAuth = vi.mocked(useAuth)
 
@@ -263,6 +265,7 @@ describe('useFriends — dual-write (Spec 2.5.4)', () => {
     vi.mocked(respondToFriendRequestApi).mockReset().mockResolvedValue(undefined)
     vi.mocked(removeFriendApi).mockReset().mockResolvedValue(undefined)
     vi.mocked(blockUserApi).mockReset().mockResolvedValue(undefined)
+    vi.mocked(unblockUserApi).mockReset().mockResolvedValue(undefined)
   })
 
   // Group A — Flag-off behavior
@@ -538,5 +541,79 @@ describe('useFriends — dual-write (Spec 2.5.4)', () => {
       result.current.sendRequest(MOCK_SUGGESTIONS[0])
     })
     expect(sendFriendRequestApi).toHaveBeenCalledTimes(1)
+  })
+
+  // Spec 2.5.6 — unblockUser dual-write tests
+  it('flag off + no JWT → no api call fires for unblockUser', () => {
+    const { result } = renderHook(() => useFriends())
+    act(() => {
+      result.current.blockUser('user-caleb-w')
+    })
+    act(() => {
+      result.current.unblockUser('user-caleb-w')
+    })
+    expect(unblockUserApi).not.toHaveBeenCalled()
+  })
+
+  it('flag on + JWT → unblockUser fires DELETE /api/v1/users/me/blocks/{id}', () => {
+    vi.mocked(isBackendFriendsEnabled).mockReturnValue(true)
+    vi.mocked(getStoredToken).mockReturnValue('jwt-token')
+
+    const { result } = renderHook(() => useFriends())
+    act(() => {
+      result.current.unblockUser('user-caleb-w')
+    })
+    expect(unblockUserApi).toHaveBeenCalledWith('user-caleb-w')
+  })
+
+  it('flag on + simulated-auth (no JWT) → no api call fires for unblockUser', () => {
+    vi.mocked(isBackendFriendsEnabled).mockReturnValue(true)
+    vi.mocked(getStoredToken).mockReturnValue(null)
+
+    const { result } = renderHook(() => useFriends())
+    act(() => {
+      result.current.unblockUser('user-caleb-w')
+    })
+    expect(unblockUserApi).not.toHaveBeenCalled()
+  })
+
+  it('unblockUser removes user from data.blocked (localStorage)', () => {
+    const { result } = renderHook(() => useFriends())
+    act(() => {
+      result.current.blockUser('user-caleb-w')
+    })
+    expect(result.current.blocked).toContain('user-caleb-w')
+    act(() => {
+      result.current.unblockUser('user-caleb-w')
+    })
+    expect(result.current.blocked).not.toContain('user-caleb-w')
+  })
+
+  it('unblockUser backend error → console.warn, localStorage still updated', async () => {
+    vi.mocked(isBackendFriendsEnabled).mockReturnValue(true)
+    vi.mocked(getStoredToken).mockReturnValue('jwt-token')
+    vi.mocked(unblockUserApi).mockRejectedValue(new Error('500'))
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    seedFriendsData({
+      friends: [],
+      pendingIncoming: [],
+      pendingOutgoing: [],
+      blocked: ['user-caleb-w'],
+    })
+
+    const { result } = renderHook(() => useFriends())
+    await act(async () => {
+      result.current.unblockUser('user-caleb-w')
+    })
+    await vi.waitFor(() => {
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[useFriends] backend unblockUser dual-write failed:',
+        expect.any(Error),
+      )
+    })
+    const stored = JSON.parse(localStorage.getItem(FRIENDS_KEY)!) as FriendsData
+    expect(stored.blocked).not.toContain('user-caleb-w')
+    warnSpy.mockRestore()
   })
 })
