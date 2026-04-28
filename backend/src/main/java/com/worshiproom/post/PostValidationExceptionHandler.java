@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,5 +45,15 @@ public class PostValidationExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ProxyError.of("INVALID_INPUT", "Invalid request parameters", requestId));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProxyError> handleNotReadable(HttpMessageNotReadableException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("Post request not readable: cause={}", ex.getMostSpecificCause().getClass().getSimpleName());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProxyError.of("INVALID_INPUT",
+                        "Request body is malformed or contains invalid values.",
+                        requestId));
     }
 }

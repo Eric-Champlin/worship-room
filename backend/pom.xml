@@ -58,6 +58,15 @@
             <version>8.18.0</version>
         </dependency>
 
+        <!-- OWASP Java HTML Sanitizer (Spec 3.5) — strips HTML/JS from user-generated
+             content per 02-security.md plain-text policy. Used by PostService to
+             sanitize content, answeredText, scriptureText before persist. -->
+        <dependency>
+            <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+            <artifactId>owasp-java-html-sanitizer</artifactId>
+            <version>20240325.1</version>
+        </dependency>
+
         <!-- Spring Security (Spec 1.4) — auth filter chain, BCrypt encoder -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

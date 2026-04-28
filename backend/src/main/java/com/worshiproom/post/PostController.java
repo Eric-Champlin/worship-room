@@ -3,11 +3,15 @@ package com.worshiproom.post;
 import com.worshiproom.auth.AuthenticatedUser;
 import com.worshiproom.post.comment.PostCommentService;
 import com.worshiproom.post.comment.dto.CommentListResponse;
+import com.worshiproom.post.dto.CreatePostRequest;
+import com.worshiproom.post.dto.CreatePostResponse;
 import com.worshiproom.post.dto.PostDto;
 import com.worshiproom.post.dto.PostListResponse;
+import com.worshiproom.post.dto.UpdatePostRequest;
 import com.worshiproom.post.engagement.EngagementService;
 import com.worshiproom.post.engagement.dto.ReactionsResponse;
 import com.worshiproom.proxy.common.ProxyResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,12 +21,18 @@ import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
 import java.util.Set;
 import java.util.UUID;
 
@@ -135,6 +145,47 @@ public class PostController {
         PostListResponse body = engagementService.listBookmarks(
                 viewerId, page, limit, MDC.get("requestId"));
         return ResponseEntity.ok(body);
+    }
+
+    @PostMapping("/posts")
+    public ResponseEntity<CreatePostResponse> createPost(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @Valid @RequestBody CreatePostRequest request
+    ) {
+        UUID authorId = principal.userId();
+        String requestId = MDC.get("requestId");
+        log.info("Post create requested userId={} postType={} hasIdempotencyKey={}",
+                authorId, request.postType(), idempotencyKey != null);
+
+        CreatePostResponse response = postService.createPost(authorId, request, idempotencyKey, requestId);
+        URI location = URI.create("/api/v1/posts/" + response.data().id());
+        return ResponseEntity.created(location).body(response);
+    }
+
+    @PatchMapping("/posts/{id}")
+    public ResponseEntity<ProxyResponse<PostDto>> updatePost(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdatePostRequest request
+    ) {
+        String requestId = MDC.get("requestId");
+        log.info("Post update requested editorId={} postId={}", principal.userId(), id);
+
+        PostDto dto = postService.updatePost(id, principal, request, requestId);
+        return ResponseEntity.ok(ProxyResponse.of(dto, requestId));
+    }
+
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<Void> deletePost(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID id
+    ) {
+        String requestId = MDC.get("requestId");
+        log.info("Post delete requested deleterId={} postId={}", principal.userId(), id);
+
+        postService.deletePost(id, principal, requestId);
+        return ResponseEntity.noContent().build();
     }
 
     private static void validateCategory(String category) {

@@ -45,6 +45,14 @@ public class SecurityConfig {
                 // header — see spec Decision #5), and actuator health probes.
                 .requestMatchers(PublicPaths.PATTERNS.toArray(new String[0])).permitAll()
 
+                // Spec 3.5 — write methods on /api/v1/posts require authentication.
+                // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule
+                // wins over the path-only permitAll. Spring Security iterates rules
+                // in order; first match wins.
+                .requestMatchers(HttpMethod.POST, "/api/v1/posts").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/posts/*").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/*").authenticated()
+
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes
                 // them so a valid token extracts a principal for personalization.

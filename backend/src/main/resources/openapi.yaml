@@ -1349,6 +1349,52 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [Posts]
+      summary: Create a new post
+      description: |
+        Authenticated post creation. Crisis-keyword detection runs server-side;
+        flagged posts are STILL created (the `crisisFlag` field is true on the
+        response, and a `crisisResources` block sits at the response root).
+
+        Rate limit: 5 posts per 24h per user. Returns 429 RATE_LIMITED with
+        `Retry-After` header when exceeded.
+
+        Idempotency: clients may pass `Idempotency-Key` header to deduplicate
+        retried POSTs. Same key + same body → returns the cached response.
+        Same key + different body → returns 422 IDEMPOTENCY_KEY_MISMATCH.
+      operationId: createPost
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string, maxLength: 100 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePostRequest' }
+      responses:
+        '201':
+          description: Post created (with optional crisisResources block)
+          headers:
+            Location:
+              schema: { type: string }
+              description: URL of the newly created post.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreatePostResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422':
+          description: Idempotency key reused with a different request body
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
 
   /api/v1/posts/{id}:
     get:
@@ -1388,6 +1434,89 @@ paths:
                       requestId: { type: string }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    patch:
+      tags: [Posts]
+      summary: Update a post
+      description: |
+        Author-ownership-gated edit. Most fields editable only within the 5-minute
+        window from createdAt; isAnswered and answeredText are window-exempt.
+        Visibility downgrade always allowed; visibility upgrade requires window.
+
+        postType and isAnonymous are immutable post-create. `crisisFlag` is
+        server-managed and rejected if present in the body. Once set, crisis_flag
+        is never cleared by an author edit (only moderators clear it).
+      operationId: updatePost
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdatePostRequest' }
+      responses:
+        '200':
+          description: Post updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PostDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: Not author and not admin
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Edit window expired (or visibility upgrade outside window)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    delete:
+      tags: [Posts]
+      summary: Soft-delete a post
+      description: |
+        Author-ownership-gated soft-delete. Idempotent — a second DELETE on an
+        already-deleted post returns 204 (mission accomplished). Content is NOT
+        replaced; user_id stays.
+
+        Account-deletion-driven content replacement is Spec 10.11's concern;
+        this endpoint only sets is_deleted=true, deleted_at=NOW(), updated_at=NOW().
+        Comments are NOT cascade-deleted (cascade fires only on hard delete).
+      operationId: deletePost
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Post soft-deleted (or already deleted)
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: Not author and not admin
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
         '404': { $ref: '#/components/responses/NotFound' }
         '500': { $ref: '#/components/responses/InternalError' }
 
@@ -2558,6 +2687,100 @@ components:
           type: array
           items: { $ref: '#/components/schemas/PostDto' }
         meta: { $ref: '#/components/schemas/PostListMeta' }
+
+    CreatePostRequest:
+      description: Request body for POST /api/v1/posts (Spec 3.5).
+      type: object
+      required: [postType, content]
+      properties:
+        postType:
+          type: string
+          enum: [prayer_request, testimony, question, discussion, encouragement]
+        content:
+          type: string
+          maxLength: 2000
+        category:
+          type: string
+          enum: [health, mental-health, family, work, grief, gratitude, praise, relationships, other, discussion]
+          nullable: true
+        isAnonymous:
+          type: boolean
+          default: false
+        visibility:
+          type: string
+          enum: [public, friends, private]
+          default: public
+        challengeId:
+          type: string
+          maxLength: 50
+          nullable: true
+        qotdId:
+          type: string
+          maxLength: 50
+          nullable: true
+        scriptureReference:
+          type: string
+          maxLength: 100
+          nullable: true
+        scriptureText:
+          type: string
+          maxLength: 2000
+          nullable: true
+
+    UpdatePostRequest:
+      description: Request body for PATCH /api/v1/posts/{id} (Spec 3.5). All fields optional.
+      type: object
+      properties:
+        content: { type: string, maxLength: 2000 }
+        category:
+          type: string
+          enum: [health, mental-health, family, work, grief, gratitude, praise, relationships, other, discussion]
+        visibility:
+          type: string
+          enum: [public, friends, private]
+        isAnswered: { type: boolean }
+        answeredText: { type: string, maxLength: 2000 }
+        challengeId: { type: string, maxLength: 50 }
+        qotdId: { type: string, maxLength: 50 }
+        scriptureReference: { type: string, maxLength: 100 }
+        scriptureText: { type: string, maxLength: 2000 }
+
+    CreatePostResponse:
+      description: |
+        Response envelope for POST /api/v1/posts (Spec 3.5). When the post tripped
+        the crisis-keyword detector, the optional `crisisResources` block sits at
+        the response root parallel to `data`.
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: '#/components/schemas/PostDto' }
+        crisisResources:
+          $ref: '#/components/schemas/CrisisResourcesBlock'
+        meta:
+          type: object
+          required: [requestId]
+          properties:
+            requestId: { type: string }
+
+    CrisisResourcesBlock:
+      description: Crisis-resource payload returned when a post is flagged.
+      type: object
+      required: [message, resources]
+      properties:
+        message: { type: string }
+        resources:
+          type: array
+          items: { $ref: '#/components/schemas/CrisisResource' }
+
+    CrisisResource:
+      description: Single crisis-resource entry. Exactly one of phone/text is non-null.
+      type: object
+      required: [name, link]
+      properties:
+        name: { type: string }
+        phone: { type: string, nullable: true }
+        text: { type: string, nullable: true }
+        link: { type: string, format: uri }
 
     CommentDto:
       description: |

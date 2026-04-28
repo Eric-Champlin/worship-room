@@ -90,7 +90,7 @@ public class Post {
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
+    @Column(name = "updated_at", nullable = false, insertable = false)
     private OffsetDateTime updatedAt;
 
     @Column(name = "last_activity_at", nullable = false, insertable = false, updatable = false)
@@ -124,6 +124,31 @@ public class Post {
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public OffsetDateTime getLastActivityAt() { return lastActivityAt; }
+
+    public void setAnsweredAt(OffsetDateTime answeredAt) { this.answeredAt = answeredAt; }
+    public void setAnsweredText(String answeredText) { this.answeredText = answeredText; }
+    public void setAnswered(boolean answered) { this.isAnswered = answered; }
+    public void setAnonymous(boolean anonymous) { this.isAnonymous = anonymous; }
+    public void setBookmarkCount(int bookmarkCount) { this.bookmarkCount = bookmarkCount; }
+    public void setCandleCount(int candleCount) { this.candleCount = candleCount; }
+    public void setCategory(String category) { this.category = category; }
+    public void setChallengeId(String challengeId) { this.challengeId = challengeId; }
+    public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
+    public void setContent(String content) { this.content = content; }
+    public void setCrisisFlag(boolean crisisFlag) { this.crisisFlag = crisisFlag; }
+    public void setDeleted(boolean deleted) { this.isDeleted = deleted; }
+    public void setDeletedAt(OffsetDateTime deletedAt) { this.deletedAt = deletedAt; }
+    public void setId(UUID id) { this.id = id; }
+    public void setModerationStatus(ModerationStatus status) { this.moderationStatus = status; }
+    public void setPostType(PostType postType) { this.postType = postType; }
+    public void setPrayingCount(int prayingCount) { this.prayingCount = prayingCount; }
+    public void setQotdId(String qotdId) { this.qotdId = qotdId; }
+    public void setReportCount(int reportCount) { this.reportCount = reportCount; }
+    public void setScriptureReference(String scriptureReference) { this.scriptureReference = scriptureReference; }
+    public void setScriptureText(String scriptureText) { this.scriptureText = scriptureText; }
+    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setUserId(UUID userId) { this.userId = userId; }
+    public void setVisibility(PostVisibility visibility) { this.visibility = visibility; }
 
     @Override
     public boolean equals(Object o) {
