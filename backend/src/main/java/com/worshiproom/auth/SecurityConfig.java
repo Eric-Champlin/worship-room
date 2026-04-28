@@ -45,6 +45,12 @@ public class SecurityConfig {
                 // header — see spec Decision #5), and actuator health probes.
                 .requestMatchers(PublicPaths.PATTERNS.toArray(new String[0])).permitAll()
 
+                // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
+                // requests through, but JwtAuthenticationFilter still processes
+                // them so a valid token extracts a principal for personalization.
+                // Invalid tokens still return 401.
+                .requestMatchers(PublicPaths.OPTIONAL_AUTH_PATTERNS.toArray(new String[0])).permitAll()
+
                 // Everything under /api/v1/** requires a valid JWT
                 .requestMatchers("/api/v1/**").authenticated()
 

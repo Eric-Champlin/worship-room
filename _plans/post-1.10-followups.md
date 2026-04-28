@@ -265,3 +265,15 @@ These limits are not enforced by 2.5.3.
 **Priority:** MEDIUM. Mute is dual-write shadow-only with default-off env flag — no abuse vector today.
 
 ---
+
+## 14. Replace kebab-case username derivation with users.username lookup (low priority)
+
+**Status:** Wave-interim shim shipped in Spec 3.3 (`UserResolverService.resolveByKebabCase`).
+
+**Owner:** Phase 8.1 (`round3-phase08-spec01-username-system`).
+
+**What's deferred:** `UserResolverService.resolveByKebabCase()` derives a viewer-visible identifier from `first_name + '-' + last_name` (lowercased) so `GET /api/v1/users/{username}/posts` can resolve a path param to a UUID. When Phase 8.1 ships the `users.username` column + uniqueness invariants, swap the derivation for a single-column lookup and remove the kebab-case fallback. Caught during Spec 3.3 planning, 2026-04-28.
+
+**Priority:** LOW. Kebab-case derivation works for current mock seed (single-word first/last names). Becomes incorrect when users with multi-word names (e.g., "Mary Anne Smith") arrive — Phase 8.1 lands well before that.
+
+---

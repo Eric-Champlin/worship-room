@@ -42,6 +42,8 @@ tags:
     description: Encouragements, nudges, and recap dismissals — Spec 2.5.4b
   - name: Mutes
     description: User mutes — feed-scoped, asymmetric, softer than block — Spec 2.5.7
+  - name: Posts
+    description: Prayer Wall posts (public feed, single post detail, author posts) — Spec 3.3
 
 paths:
   /api/v1/health:
@@ -1291,6 +1293,152 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/posts:
+    get:
+      tags: [Posts]
+      summary: List posts (paginated public feed)
+      description: |
+        Paginated feed of posts. Optional auth via Bearer JWT — anonymous
+        viewers see only public posts; authenticated viewers see public +
+        relevant friends-visibility + their own posts. Muted authors
+        filtered out for authenticated viewers.
+
+        Returns 200 with empty `data: []` when no posts match (NOT 404).
+      operationId: listPosts
+      security:
+        - bearerAuth: []
+        - {}
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [health, mental-health, family, work, grief, gratitude, praise, relationships, other, discussion]
+        - name: postType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [prayer_request, testimony, question, discussion, encouragement]
+        - name: qotdId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [bumped, recent, answered]
+            default: bumped
+      responses:
+        '200':
+          description: Paginated posts (possibly empty)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PostListResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/posts/{id}:
+    get:
+      tags: [Posts]
+      summary: Get a single post by id
+      description: |
+        Returns a single post if visible to the caller. Mute filter is NOT
+        applied here (Spec 3.3 Divergence 1) — direct ID lookups bypass
+        discovery filters so notification/share-link paths still work.
+
+        Returns 404 POST_NOT_FOUND if the post does not exist, is
+        soft-deleted, or fails the visibility predicate (anti-enumeration —
+        no differential between "forbidden" and "missing").
+      operationId: getPostById
+      security:
+        - bearerAuth: []
+        - {}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Post detail
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PostDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/{username}/posts:
+    get:
+      tags: [Posts]
+      summary: List posts by author
+      description: |
+        Lists posts authored by the given user. {username} accepts either a
+        kebab-case identifier (first_name + '-' + last_name, lowercased)
+        or a literal UUID. Visibility predicate + mute filter applied.
+
+        Returns 200 with empty `data: []` if the username does not resolve
+        (NOT 404 — anti-enumeration).
+
+        Phase 8.1 will replace kebab-case derivation with users.username
+        lookup; the URL surface is stable.
+      operationId: listAuthorPosts
+      security:
+        - bearerAuth: []
+        - {}
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [bumped, recent, answered]
+            default: recent
+      responses:
+        '200':
+          description: Paginated posts authored by the resolved user (possibly empty)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PostListResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
 components:
   schemas:
     ProxyResponse:
@@ -2172,6 +2320,116 @@ components:
       properties:
         id: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
+
+    AuthorDto:
+      description: |
+        Nested author block in PostDto. The `id` field is null for
+        anonymous posts (and is rendered as `"id": null` rather than
+        being omitted — frontend code distinguishes "field absent" from
+        "field present-with-null").
+      type: object
+      required: [id, displayName, avatarUrl]
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Author user UUID; null for anonymous posts.
+        displayName:
+          type: string
+          description: |
+            Resolved display name per the user's display_name_preference.
+            Always "Anonymous" for anonymous posts.
+        avatarUrl:
+          type: string
+          nullable: true
+          description: User avatar URL; null for anonymous posts or users with no avatar.
+
+    PostDto:
+      description: |
+        Outbound post representation. Excludes `is_deleted`/`deleted_at`
+        (filtered upstream) and `report_count` (moderation-internal).
+      type: object
+      required:
+        - id
+        - postType
+        - content
+        - isAnonymous
+        - visibility
+        - isAnswered
+        - moderationStatus
+        - crisisFlag
+        - prayingCount
+        - candleCount
+        - commentCount
+        - bookmarkCount
+        - createdAt
+        - updatedAt
+        - lastActivityAt
+        - author
+      properties:
+        id: { type: string, format: uuid }
+        postType:
+          type: string
+          enum: [prayer_request, testimony, question, discussion, encouragement]
+        content: { type: string }
+        category:
+          type: string
+          nullable: true
+          enum: [health, mental-health, family, work, grief, gratitude, praise, relationships, other, discussion]
+        isAnonymous: { type: boolean }
+        challengeId: { type: string, nullable: true }
+        qotdId: { type: string, nullable: true }
+        scriptureReference: { type: string, nullable: true }
+        scriptureText: { type: string, nullable: true }
+        visibility:
+          type: string
+          enum: [public, friends, private]
+        isAnswered: { type: boolean }
+        answeredText: { type: string, nullable: true }
+        answeredAt: { type: string, format: date-time, nullable: true }
+        moderationStatus:
+          type: string
+          enum: [approved, flagged, hidden, removed]
+        crisisFlag: { type: boolean }
+        prayingCount: { type: integer, minimum: 0 }
+        candleCount: { type: integer, minimum: 0 }
+        commentCount: { type: integer, minimum: 0 }
+        bookmarkCount: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        lastActivityAt: { type: string, format: date-time }
+        author: { $ref: '#/components/schemas/AuthorDto' }
+
+    PostListMeta:
+      description: Pagination metadata for the post list endpoints.
+      type: object
+      required:
+        - page
+        - limit
+        - totalCount
+        - totalPages
+        - hasNextPage
+        - hasPrevPage
+        - requestId
+      properties:
+        page: { type: integer, minimum: 1 }
+        limit: { type: integer, minimum: 1, maximum: 50 }
+        totalCount: { type: integer, minimum: 0 }
+        totalPages: { type: integer, minimum: 0 }
+        hasNextPage: { type: boolean }
+        hasPrevPage: { type: boolean }
+        requestId: { type: string }
+
+    PostListResponse:
+      description: Paginated post-list response envelope.
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/PostDto' }
+        meta: { $ref: '#/components/schemas/PostListMeta' }
 
   responses:
     BadRequest:

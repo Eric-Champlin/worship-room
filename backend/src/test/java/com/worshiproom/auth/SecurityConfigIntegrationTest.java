@@ -157,11 +157,11 @@ class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
     void validJwtOnUnmappedProtectedRouteReturns404NotDoubled401() throws Exception {
         String validToken = buildToken(UUID.randomUUID(), false, Instant.now().plusSeconds(3600));
 
-        // /api/v1/posts is a Phase 3 route, not yet mapped. Any protected-but-unmapped
-        // path works for this disambiguation test. Originally pointed at /api/v1/users/me
-        // until Spec 1.6 mapped that route; updated to /api/v1/posts to keep the
-        // "unmapped" premise valid.
-        mvc.perform(get("/api/v1/posts")
+        // /api/v1/notifications is a Phase 12 route, not yet mapped. Any protected-but-unmapped
+        // path works for this disambiguation test. Originally pointed at /api/v1/users/me until
+        // Spec 1.6 mapped that route; then /api/v1/posts until Spec 3.3 mapped that route;
+        // updated to /api/v1/notifications to keep the "unmapped" premise valid.
+        mvc.perform(get("/api/v1/notifications")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + validToken))
             .andExpect(status().isNotFound());
     }

@@ -1,0 +1,144 @@
+package com.worshiproom.post;
+
+import com.worshiproom.friends.FriendRelationship;
+import com.worshiproom.friends.FriendRelationshipStatus;
+import com.worshiproom.mute.UserMute;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.UUID;
+
+/**
+ * Composable JPA Specification building blocks for Post queries.
+ *
+ * Visibility predicate is the load-bearing correctness concern — a buggy
+ * visibleTo() leaks private content. Mirror of master plan Spec 7.7 SQL
+ * (line 6307–6321) is documented inline as JavaDoc on visibleTo().
+ *
+ * Mute filter is composed at the feed and author-posts call sites only,
+ * NOT at single-post detail (Spec 3.3 Divergence 1 — direct ID lookups
+ * bypass discovery filters).
+ */
+public final class PostSpecifications {
+
+    private PostSpecifications() {}
+
+    /**
+     * Canonical visibility predicate (master plan Spec 7.7, line 6307–6321):
+     *
+     * <pre>
+     *   WHERE posts.is_deleted = FALSE
+     *     AND posts.moderation_status IN ('approved', 'flagged')
+     *     AND (
+     *           posts.visibility = 'public'
+     *        OR (posts.visibility = 'friends'
+     *            AND :viewer_id IS NOT NULL
+     *            AND EXISTS (SELECT 1 FROM friend_relationships fr
+     *                         WHERE fr.user_id = posts.user_id
+     *                           AND fr.friend_user_id = :viewer_id
+     *                           AND fr.status = 'active'))
+     *        OR (posts.visibility = 'private' AND posts.user_id = :viewer_id)
+     *        OR posts.user_id = :viewer_id
+     *     )
+     * </pre>
+     *
+     * The friend_relationships subquery direction is critical:
+     * fr.user_id = post author, fr.friend_user_id = viewer. Reversing leaks
+     * private content. Tests in PostSpecificationsTest verify both directions.
+     */
+    public static Specification<Post> visibleTo(@Nullable UUID viewerId) {
+        return (root, query, cb) -> {
+            Predicate notDeleted = cb.isFalse(root.get("isDeleted"));
+            Predicate moderationVisible = root.get("moderationStatus")
+                    .in(ModerationStatus.APPROVED, ModerationStatus.FLAGGED);
+
+            Predicate publicPost = cb.equal(root.get("visibility"), PostVisibility.PUBLIC);
+
+            Predicate friendsPost;
+            Predicate privatePost;
+            Predicate ownPost;
+
+            if (viewerId == null) {
+                friendsPost = cb.disjunction();
+                privatePost = cb.disjunction();
+                ownPost = cb.disjunction();
+            } else {
+                Subquery<Integer> frSubquery = query.subquery(Integer.class);
+                Root<FriendRelationship> fr = frSubquery.from(FriendRelationship.class);
+                frSubquery.select(cb.literal(1)).where(
+                        cb.equal(fr.get("userId"), root.get("userId")),
+                        cb.equal(fr.get("friendUserId"), viewerId),
+                        cb.equal(fr.get("status"), FriendRelationshipStatus.ACTIVE)
+                );
+                friendsPost = cb.and(
+                        cb.equal(root.get("visibility"), PostVisibility.FRIENDS),
+                        cb.exists(frSubquery)
+                );
+
+                privatePost = cb.and(
+                        cb.equal(root.get("visibility"), PostVisibility.PRIVATE),
+                        cb.equal(root.get("userId"), viewerId)
+                );
+
+                ownPost = cb.equal(root.get("userId"), viewerId);
+            }
+
+            Predicate visibilityClause = cb.or(publicPost, friendsPost, privatePost, ownPost);
+            return cb.and(notDeleted, moderationVisible, visibilityClause);
+        };
+    }
+
+    /**
+     * Mute filter — composes WITH visibleTo() for feed and author-posts endpoints,
+     * NOT for single-post detail (Spec 3.3 Divergence 1).
+     *
+     * Implemented as Specification subquery (NOT per-row MuteService.isMuted)
+     * to fold into a single SELECT and avoid N+1.
+     */
+    public static Specification<Post> notMutedBy(@Nullable UUID viewerId) {
+        if (viewerId == null) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+        return (root, query, cb) -> {
+            Subquery<Integer> muteSubquery = query.subquery(Integer.class);
+            Root<UserMute> um = muteSubquery.from(UserMute.class);
+            muteSubquery.select(cb.literal(1)).where(
+                    cb.equal(um.get("muterId"), viewerId),
+                    cb.equal(um.get("mutedId"), root.get("userId"))
+            );
+            return cb.not(cb.exists(muteSubquery));
+        };
+    }
+
+    public static Specification<Post> byAuthor(UUID authorUserId) {
+        return (root, query, cb) -> cb.equal(root.get("userId"), authorUserId);
+    }
+
+    public static Specification<Post> byCategory(@Nullable String category) {
+        if (category == null) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+        return (root, query, cb) -> cb.equal(root.get("category"), category);
+    }
+
+    public static Specification<Post> byPostType(@Nullable PostType postType) {
+        if (postType == null) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+        return (root, query, cb) -> cb.equal(root.get("postType"), postType);
+    }
+
+    public static Specification<Post> byQotdId(@Nullable String qotdId) {
+        if (qotdId == null) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+        return (root, query, cb) -> cb.equal(root.get("qotdId"), qotdId);
+    }
+
+    public static Specification<Post> isAnswered() {
+        return (root, query, cb) -> cb.isTrue(root.get("isAnswered"));
+    }
+}
