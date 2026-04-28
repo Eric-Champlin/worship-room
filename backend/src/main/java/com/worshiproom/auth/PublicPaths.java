@@ -56,6 +56,7 @@ public final class PublicPaths {
     public static final List<String> OPTIONAL_AUTH_PATTERNS = List.of(
         "/api/v1/posts",
         "/api/v1/posts/*",
+        "/api/v1/posts/*/comments",
         "/api/v1/users/*/posts"
     );
 }

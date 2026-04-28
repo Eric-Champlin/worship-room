@@ -1,8 +1,12 @@
 package com.worshiproom.post;
 
 import com.worshiproom.auth.AuthenticatedUser;
+import com.worshiproom.post.comment.PostCommentService;
+import com.worshiproom.post.comment.dto.CommentListResponse;
 import com.worshiproom.post.dto.PostDto;
 import com.worshiproom.post.dto.PostListResponse;
+import com.worshiproom.post.engagement.EngagementService;
+import com.worshiproom.post.engagement.dto.ReactionsResponse;
 import com.worshiproom.proxy.common.ProxyResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -35,9 +39,15 @@ public class PostController {
     );
 
     private final PostService postService;
+    private final PostCommentService postCommentService;
+    private final EngagementService engagementService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService,
+                          PostCommentService postCommentService,
+                          EngagementService engagementService) {
         this.postService = postService;
+        this.postCommentService = postCommentService;
+        this.engagementService = engagementService;
     }
 
     @GetMapping("/posts")
@@ -86,6 +96,44 @@ public class PostController {
         PostService.SortKey sortKey = PostService.SortKey.parse(sort, PostService.SortKey.RECENT);
         PostListResponse body = postService.listAuthorPosts(
                 username, viewerId, page, limit, sortKey, MDC.get("requestId"));
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/posts/{id}/comments")
+    public ResponseEntity<CommentListResponse> listComments(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "1") @Min(1) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit
+    ) {
+        UUID viewerId = principal == null ? null : principal.userId();
+        log.info("Comments requested viewerId={} postId={} page={} limit={}",
+                viewerId, id, page, limit);
+        CommentListResponse body = postCommentService.listForPost(
+                id, viewerId, page, limit, MDC.get("requestId"));
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/users/me/reactions")
+    public ResponseEntity<ProxyResponse<ReactionsResponse>> myReactions(
+            @AuthenticationPrincipal AuthenticatedUser principal
+    ) {
+        UUID viewerId = principal.userId();
+        log.info("Reactions map requested viewerId={}", viewerId);
+        ReactionsResponse body = engagementService.reactionsFor(viewerId);
+        return ResponseEntity.ok(ProxyResponse.of(body, MDC.get("requestId")));
+    }
+
+    @GetMapping("/users/me/bookmarks")
+    public ResponseEntity<PostListResponse> myBookmarks(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @RequestParam(defaultValue = "1") @Min(1) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit
+    ) {
+        UUID viewerId = principal.userId();
+        log.info("Bookmarks requested viewerId={} page={} limit={}", viewerId, page, limit);
+        PostListResponse body = engagementService.listBookmarks(
+                viewerId, page, limit, MDC.get("requestId"));
         return ResponseEntity.ok(body);
     }
 

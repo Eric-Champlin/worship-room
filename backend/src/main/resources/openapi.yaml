@@ -1439,6 +1439,134 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/posts/{id}/comments:
+    get:
+      tags: [Posts]
+      summary: List comments for a post
+      description: |
+        Paginated comments for a post. Top-level comments only (parent_comment_id
+        IS NULL); replies are nested under each parent in the `replies` array
+        (always present, possibly empty during Phase 3 since no UI creates
+        replies yet — Phase 4 enables that).
+
+        Optional auth via Bearer JWT — anonymous viewers can read comments on
+        publicly-visible posts. Pre-checks parent post visibility via the
+        canonical visibility predicate (Spec 3.3). Returns 404 POST_NOT_FOUND
+        when the post does not exist, is soft-deleted, or fails the visibility
+        predicate (anti-enumeration).
+
+        Soft-deleted comments and comments with moderation_status hidden/removed
+        are excluded.
+      operationId: listPostComments
+      security:
+        - bearerAuth: []
+        - {}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+      responses:
+        '200':
+          description: Paginated top-level comments with replies nested
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CommentListResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/me/reactions:
+    get:
+      tags: [Posts]
+      summary: Viewer's reactions across all posts (flat map)
+      description: |
+        Returns a flat map keyed by post UUID, where each value is a
+        `{isPraying, isBookmarked}` pair. Posts where the viewer has neither
+        reacted nor bookmarked are NOT in the map (frontend treats absence
+        as both-false). Map iteration order is not guaranteed.
+
+        Candle reactions (Phase 6.6 Answered Wall) are NOT included in this
+        response; that endpoint will extend the shape with an `isCandled` field.
+
+        No pagination — the response is bounded by the viewer's actual
+        engagement count. Per-user data only; reactions and bookmarks made
+        by other users are not visible.
+
+        No visibility filtering — the response reflects the viewer's own
+        engagement history. Frontend joins this map with the visible-post-list
+        from `GET /api/v1/posts` at render time, naturally filtering posts
+        the viewer can no longer see.
+      operationId: getMyReactions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Reactions map
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ReactionsResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/me/bookmarks:
+    get:
+      tags: [Posts]
+      summary: Viewer's bookmarked posts (paginated)
+      description: |
+        Paginated list of posts the viewer has bookmarked. Returns full
+        PostDto rows (not just bookmark records). Same envelope shape as
+        `GET /api/v1/posts`.
+
+        Sort order is `post_bookmarks.created_at DESC` (most-recently-bookmarked
+        first), which is distinct from `posts.created_at` — bookmarking an old
+        post today places it at the top of this response.
+
+        Visibility predicate applied: bookmarks for posts that are no longer
+        visible to the viewer (now-private/deleted/hidden, or whose authors
+        the viewer has since muted or been unfriended by) do not appear.
+        Bookmarks the viewer made on their OWN posts always appear regardless
+        of visibility (they explicitly bookmarked their own thing).
+      operationId: getMyBookmarks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+      responses:
+        '200':
+          description: Paginated bookmarked posts (possibly empty)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PostListResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
 components:
   schemas:
     ProxyResponse:
@@ -2430,6 +2558,83 @@ components:
           type: array
           items: { $ref: '#/components/schemas/PostDto' }
         meta: { $ref: '#/components/schemas/PostListMeta' }
+
+    CommentDto:
+      description: |
+        Outbound comment representation. Excludes `is_deleted`/`deleted_at`
+        (filtered upstream). The `replies` array is always present; for
+        top-level comments without children it serializes as `[]`. Phase 4
+        will enable reply UI; for now no API path creates replies.
+      type: object
+      required:
+        - id
+        - postId
+        - content
+        - isHelpful
+        - moderationStatus
+        - crisisFlag
+        - createdAt
+        - updatedAt
+        - author
+        - replies
+      properties:
+        id: { type: string, format: uuid }
+        postId: { type: string, format: uuid }
+        parentCommentId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Null for top-level comments.
+        content: { type: string }
+        isHelpful: { type: boolean }
+        moderationStatus:
+          type: string
+          enum: [approved, flagged]
+          description: |
+            Hidden/removed comments are filtered out of the response, so this
+            field can only be `approved` or `flagged` on the wire.
+        crisisFlag: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        author: { $ref: '#/components/schemas/AuthorDto' }
+        replies:
+          type: array
+          description: |
+            Nested replies. Sorted ascending by `createdAt`. Empty during
+            Phase 3 because no UI creates replies; populated when reply data
+            exists in DB. Always present (never absent or null).
+          items: { $ref: '#/components/schemas/CommentDto' }
+
+    CommentListResponse:
+      description: Paginated comment-list response envelope.
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/CommentDto' }
+        meta: { $ref: '#/components/schemas/PostListMeta' }
+
+    PerPostReaction:
+      description: Per-post engagement flags inside the reactions map.
+      type: object
+      required: [isPraying, isBookmarked]
+      properties:
+        isPraying: { type: boolean }
+        isBookmarked: { type: boolean }
+
+    ReactionsResponse:
+      description: |
+        Flat map keyed by post UUID. Posts where the viewer has neither
+        reacted nor bookmarked are not in the map. Map iteration order is
+        not guaranteed.
+      type: object
+      required: [reactions]
+      properties:
+        reactions:
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/PerPostReaction' }
+          description: Map of post UUID strings to PerPostReaction values.
 
   responses:
     BadRequest:
