@@ -222,3 +222,46 @@ These limits are not enforced by 2.5.3.
 **Priority:** MEDIUM. No abuse vector today (friends writes are dual-write shadow-only; localStorage is primary), but goes hot when Phase 7 reads friends from backend.
 
 ---
+
+## 12. Spec 2.5.7 — Mute filter integration in Prayer Wall feed reads (medium priority)
+
+**Status:** Deferred from Spec 2.5.7 per its Divergence 3 — data layer ships now, read-path integration ships in Phase 3.
+
+**Owner:** Phase 3 — Spec 3.3 (Posts Read Endpoints, backend) + Spec 3.10 (Frontend Service API Implementations, frontend).
+
+**What's missing:** Spec 2.5.7 ships the mute data layer (`user_mutes` table, `MuteService.isMuted(viewerId, posterId)`, `useMutes` hook, Settings UI). No consumer fires `isMuted` today. The spec's premise — "muted users' posts won't appear in your feed" — is not yet observable end-to-end.
+
+**Verifies:**
+- `MuteService.isMuted(viewerId, posterId)` is called from `FeedService` so muted users' posts are excluded from `GET /api/v1/feed` responses.
+- On the frontend, `useMutes.muted` filters muted user IDs out of the rendered feed list.
+- Muted users' presence excluded from active-now / suggestions surfaces.
+- Muted users' reactions on the muter's OWN posts still appear (asymmetric semantic preserved — Spec 2.5.7 § "What Mute Means").
+
+**Why deferred:** Spec 2.5.7 ships the data layer; Phase 3 owns the read paths.
+
+**Caught during:** Spec 2.5.7 planning, 2026-04-27.
+
+**Priority:** MEDIUM. Mute is dormant until Phase 3 wires the read filter.
+
+---
+
+## 13. Spec 2.5.7 — Backend rate limiting on mute endpoints (medium priority)
+
+**Status:** Deferred from Spec 2.5.7 per Watch-For #8 and the Spec 2.5.3 Divergence 1 precedent.
+
+**Owner:** Phase 10.9 (`round3-phase10-spec09-rate-limit-tightening`).
+
+**What's missing:** Spec 2.5.7 ships 3 mute endpoints (`POST /api/v1/mutes`, `DELETE /api/v1/mutes/{userId}`, `GET /api/v1/mutes`) with JWT auth as the only gate. No per-user rate limiting.
+
+**Verifies:**
+- POST/DELETE/GET on mute endpoints return 429 RATE_LIMITED with `Retry-After` after exceeding the configured per-user limit.
+- Standard `X-RateLimit-Limit` / `X-RateLimit-Remaining` / `X-RateLimit-Reset` headers present on every response.
+- Suggested limits to consider when Phase 10.9 lands: 30 mutes/hour, 30 unmutes/hour (mirrors the friends-action category in `02-security.md` § Forums Wave Rate Limits).
+
+**Why deferred:** Same precedent as item #11 (friends rate limiting) — per-user rate limiting is centralized in Phase 10.9, not retrofitted per-spec. The current `RateLimitFilter` is per-IP and scoped to `/api/v1/proxy/**` only.
+
+**Caught during:** Spec 2.5.7 planning, 2026-04-27.
+
+**Priority:** MEDIUM. Mute is dual-write shadow-only with default-off env flag — no abuse vector today.
+
+---

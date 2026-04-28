@@ -120,3 +120,22 @@ export function isBackendSocialEnabled(): boolean {
   return USE_BACKEND_SOCIAL === 'true'
 }
 
+const USE_BACKEND_MUTES = import.meta.env.VITE_USE_BACKEND_MUTES as string | undefined
+
+/**
+ * Returns true when mute mutations should be dual-written to the backend
+ * (POST/DELETE /api/v1/mutes/*) alongside the existing localStorage write
+ * to wr_mutes.
+ *
+ * Strict equality to the string `'true'` — `'false'`, `''`, `undefined`,
+ * and any other value all return false (fail-closed).
+ *
+ * Default: false (manual flip after Spec 2.5.7 ships and a smoke test
+ * confirms backend rows appear/vanish correctly).
+ *
+ * Used by: useMutes (Spec 2.5.7).
+ */
+export function isBackendMutesEnabled(): boolean {
+  return USE_BACKEND_MUTES === 'true'
+}
+

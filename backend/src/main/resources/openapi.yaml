@@ -40,6 +40,8 @@ tags:
     description: Mutual friendships, friend requests, blocks, and user search — Spec 2.5.3
   - name: Social
     description: Encouragements, nudges, and recap dismissals — Spec 2.5.4b
+  - name: Mutes
+    description: User mutes — feed-scoped, asymmetric, softer than block — Spec 2.5.7
 
 paths:
   /api/v1/health:
@@ -1051,6 +1053,96 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/mutes:
+    post:
+      tags: [Mutes]
+      summary: Mute a user
+      description: |
+        Idempotent: muting an already-muted target returns 201 without
+        creating a duplicate row. Per Spec 2.5.7, mute is asymmetric and
+        feed-scoped — the muted user does NOT learn they have been muted.
+      operationId: muteUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MuteUserRequest' }
+      responses:
+        '201':
+          description: User muted (idempotent on re-mute)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [mutedUserId, mutedAt]
+                    properties:
+                      mutedUserId: { type: string, format: uuid }
+                      mutedAt: { type: string, format: date-time }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    get:
+      tags: [Mutes]
+      summary: List muted users
+      description: |
+        Returns the caller's muted users ordered by created_at DESC (most
+        recent first). Includes targets that are deleted or banned so the
+        muter can still unmute them. Empty array when no mutes.
+      operationId: listMutes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of muted users (possibly empty)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/MutedUserDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/mutes/{userId}:
+    delete:
+      tags: [Mutes]
+      summary: Unmute a previously muted user
+      operationId: unmuteUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Mute removed (no body)
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
   /api/v1/users/search:
     get:
       tags: [Friends]
@@ -1951,6 +2043,34 @@ components:
           type: string
           format: uuid
           description: User to block.
+
+    MuteUserRequest:
+      description: Body for POST /api/v1/mutes.
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: User to mute.
+
+    MutedUserDto:
+      description: |
+        Item shape for GET /api/v1/mutes. Display name resolved server-side
+        via DisplayNameResolver from the muted user's preference (matching
+        FriendDto). Includes targets that are deleted or banned.
+      type: object
+      required: [userId, displayName, mutedAt]
+      properties:
+        userId: { type: string, format: uuid, description: 'Muted user''s ID.' }
+        displayName:
+          type: string
+          description: Server-computed via DisplayNameResolver.
+        avatarUrl: { type: string, maxLength: 500, nullable: true }
+        mutedAt:
+          type: string
+          format: date-time
+          description: When the mute was created (server clock).
 
     FriendDto:
       description: |

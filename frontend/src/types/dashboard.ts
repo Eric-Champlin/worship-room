@@ -130,6 +130,11 @@ export interface FriendsData {
   blocked: string[];
 }
 
+export interface MutesData {
+  /** Array of muted user IDs (no display names — looked up via ALL_MOCK_USERS or backend). */
+  muted: string[];
+}
+
 // Leaderboard types (Spec 10)
 
 export interface LeaderboardEntry {

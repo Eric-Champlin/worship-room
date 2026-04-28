@@ -20,6 +20,7 @@
   <include file="db/changelog/2026-04-27-010-create-friend-requests-table.xml"/>
   <include file="db/changelog/2026-04-27-011-create-social-interactions-table.xml"/>
   <include file="db/changelog/2026-04-27-012-create-milestone-events-table.xml"/>
+  <include file="db/changelog/2026-04-27-013-create-user-mutes-table.xml"/>
   <include file="db/changelog/contexts/dev-seed.xml"/>
 
 </databaseChangeLog>

@@ -127,6 +127,7 @@ describe('BB-34 Empty State Rendering', () => {
         <FriendList
           friends={[]}
           onRemove={vi.fn()}
+          onMute={vi.fn()}
           onBlock={vi.fn()}
           onScrollToInvite={vi.fn()}
         />,
@@ -141,6 +142,7 @@ describe('BB-34 Empty State Rendering', () => {
         <FriendList
           friends={[]}
           onRemove={vi.fn()}
+          onMute={vi.fn()}
           onBlock={vi.fn()}
           onScrollToInvite={vi.fn()}
         />,

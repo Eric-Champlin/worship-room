@@ -3,6 +3,7 @@ import { ToggleSwitch } from './ToggleSwitch'
 import { RadioPillGroup } from './RadioPillGroup'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useToast } from '@/components/ui/Toast'
+import { useMutes } from '@/hooks/useMutes'
 import { ALL_MOCK_USERS } from '@/mocks/friends-mock-data'
 import type { UserSettingsPrivacy, NudgePermission, StreakVisibility } from '@/types/settings'
 
@@ -25,13 +26,13 @@ const STREAK_OPTIONS = [
   { value: 'only_me', label: 'Only me' },
 ]
 
-function getBlockedUserName(userId: string): string {
+function getMockUserName(userId: string): string {
   const user = ALL_MOCK_USERS.find((u) => u.id === userId)
   return user?.displayName ?? 'Unknown User'
 }
 
-function getBlockedUserInitial(userId: string): string {
-  const name = getBlockedUserName(userId)
+function getMockUserInitial(userId: string): string {
+  const name = getMockUserName(userId)
   return name.charAt(0).toUpperCase()
 }
 
@@ -43,6 +44,9 @@ export function PrivacySection({
 }: PrivacySectionProps) {
   const { showToast } = useToast()
   const [confirmingUserId, setConfirmingUserId] = useState<string | null>(null)
+  const [confirmingMuteUserId, setConfirmingMuteUserId] = useState<string | null>(null)
+
+  const { muted, unmuteUser: unmuteFromMutes } = useMutes()
 
   // friendsBlocked is canonical going forward (Spec 2.5.6).
   // privacy.blockedUsers is legacy from pre-2.5.6 data; merged so the user can
@@ -58,7 +62,7 @@ export function PrivacySection({
 
   function handleConfirmUnblock() {
     if (!confirmingUserId) return
-    const name = getBlockedUserName(confirmingUserId)
+    const name = getMockUserName(confirmingUserId)
     onUnblock(confirmingUserId)
     showToast(`${name} has been unblocked.`)
     setConfirmingUserId(null)
@@ -66,6 +70,22 @@ export function PrivacySection({
 
   function handleCancelUnblock() {
     setConfirmingUserId(null)
+  }
+
+  function handleUnmuteClick(userId: string) {
+    setConfirmingMuteUserId(userId)
+  }
+
+  function handleConfirmUnmute() {
+    if (!confirmingMuteUserId) return
+    const name = getMockUserName(confirmingMuteUserId)
+    unmuteFromMutes(confirmingMuteUserId)
+    showToast(`${name} has been unmuted.`)
+    setConfirmingMuteUserId(null)
+  }
+
+  function handleCancelUnmute() {
+    setConfirmingMuteUserId(null)
   }
 
   return (
@@ -121,9 +141,9 @@ export function PrivacySection({
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-semibold text-white"
                       aria-hidden="true"
                     >
-                      {getBlockedUserInitial(userId)}
+                      {getMockUserInitial(userId)}
                     </div>
-                    <span className="text-sm text-white">{getBlockedUserName(userId)}</span>
+                    <span className="text-sm text-white">{getMockUserName(userId)}</span>
                   </div>
                   <button
                     type="button"
@@ -137,15 +157,55 @@ export function PrivacySection({
             </div>
           )}
         </div>
+
+        {/* Muted Users — Spec 2.5.7. Below Blocked Users (gentler action sits below the destructive one). */}
+        <div className="border-t border-white/10 pt-6">
+          <h3 className="text-sm font-medium text-white/80 mb-3">Muted Users</h3>
+          {muted.length === 0 ? (
+            <p className="text-sm text-white/60">You haven&apos;t muted anyone.</p>
+          ) : (
+            <div className="space-y-3">
+              {muted.map((userId) => (
+                <div key={userId} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-semibold text-white"
+                      aria-hidden="true"
+                    >
+                      {getMockUserInitial(userId)}
+                    </div>
+                    <span className="text-sm text-white">{getMockUserName(userId)}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleUnmuteClick(userId)}
+                    className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2"
+                  >
+                    Unmute
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <ConfirmDialog
         isOpen={confirmingUserId !== null}
-        title={confirmingUserId ? `Unblock ${getBlockedUserName(confirmingUserId)}?` : ''}
+        title={confirmingUserId ? `Unblock ${getMockUserName(confirmingUserId)}?` : ''}
         body="They'll be able to send you friend requests again. You won't automatically become friends."
         confirmLabel="Unblock"
         variant="destructive"
         onConfirm={handleConfirmUnblock}
         onCancel={handleCancelUnblock}
+      />
+      <ConfirmDialog
+        isOpen={confirmingMuteUserId !== null}
+        title={confirmingMuteUserId ? `Unmute ${getMockUserName(confirmingMuteUserId)}?` : ''}
+        body="Their posts will appear in your feed again."
+        confirmLabel="Unmute"
+        variant="default"
+        onConfirm={handleConfirmUnmute}
+        onCancel={handleCancelUnmute}
       />
     </div>
   )

@@ -20,10 +20,11 @@ const LEVEL_ICONS: Record<number, React.ElementType> = {
 interface FriendRowProps {
   friend: FriendProfile
   onRemove: (friendId: string) => void
+  onMute: (userId: string) => void
   onBlock: (userId: string) => void
 }
 
-const FriendRowInner = function FriendRow({ friend, onRemove, onBlock }: FriendRowProps) {
+const FriendRowInner = function FriendRow({ friend, onRemove, onMute, onBlock }: FriendRowProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
   const { first, last } = splitDisplayName(friend.displayName)
@@ -58,6 +59,10 @@ const FriendRowInner = function FriendRow({ friend, onRemove, onBlock }: FriendR
   const handleRemove = useCallback(() => {
     onRemove(friend.id)
   }, [friend.id, onRemove])
+
+  const handleMute = useCallback(() => {
+    onMute(friend.id)
+  }, [friend.id, onMute])
 
   const handleBlock = useCallback(() => {
     onBlock(friend.id)
@@ -126,6 +131,7 @@ const FriendRowInner = function FriendRow({ friend, onRemove, onBlock }: FriendR
             <FriendMenu
               friendName={friend.displayName}
               onRemove={handleRemove}
+              onMute={handleMute}
               onBlock={handleBlock}
               onClose={handleMenuClose}
             />

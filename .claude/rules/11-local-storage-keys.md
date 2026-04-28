@@ -46,7 +46,13 @@ When adding a new key, default to `wr_*` unless there is a specific reason to us
 | `wr_milestone_feed`      | MilestoneEvent[] (max 50) | Friend milestone events                       |
 | `wr_notifications`       | NotificationEntry[]       | All notification types with read state        |
 | `wr_leaderboard_global`  | LeaderboardEntry[]        | Global leaderboard data                       |
- 
+
+### Mutes
+
+| Key         | Type      | Feature                                                                                                                          |
+| ----------- | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `wr_mutes`  | MutesData | Asymmetric per-user mute list — `{ muted: string[] }`. Read by `useMutes` hook. Spec 2.5.7. Module: `services/mutes-storage.ts`. |
+
 ### Dashboard & UI State
  
 | Key                              | Type                 | Feature                                                                                                                                  |

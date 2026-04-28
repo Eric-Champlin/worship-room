@@ -6,6 +6,7 @@ import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 interface FriendListProps {
   friends: FriendProfile[]
   onRemove: (friendId: string) => void
+  onMute: (userId: string) => void
   onBlock: (userId: string) => void
   onScrollToInvite: () => void
 }
@@ -13,6 +14,7 @@ interface FriendListProps {
 export function FriendList({
   friends,
   onRemove,
+  onMute,
   onBlock,
   onScrollToInvite,
 }: FriendListProps) {
@@ -41,6 +43,7 @@ export function FriendList({
             key={friend.id}
             friend={friend}
             onRemove={onRemove}
+            onMute={onMute}
             onBlock={onBlock}
           />
         ))}

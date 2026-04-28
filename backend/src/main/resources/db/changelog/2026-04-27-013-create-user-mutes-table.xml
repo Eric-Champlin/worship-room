@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 2.5.7 — `user_mutes` per master plan Appendix E.
+       Mute is asymmetric, feed-scoped, and unilateral — orthogonal to the
+       friend_relationships table (Divergence 1). Composite PK on
+       (muter_id, muted_id) makes "is X muted by Y?" a primary-key lookup.
+       FK CASCADE on both columns per 05-database.md mandatory rule.
+       CHECK constraint forbids self-mute at the DB level (defense in
+       depth — service also throws SelfActionException). Once this changeset
+       runs, its MD5 is permanent in DATABASECHANGELOG; future schema
+       changes go in new YYYY-MM-DD-NNN-*.xml changesets. -->
+  <changeSet id="2026-04-27-013-create-user-mutes-table" author="worship-room">
+
+    <createTable tableName="user_mutes">
+      <column name="muter_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="muted_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addPrimaryKey
+      tableName="user_mutes"
+      constraintName="pk_user_mutes"
+      columnNames="muter_id, muted_id"/>
+
+    <addForeignKeyConstraint
+      baseTableName="user_mutes"
+      baseColumnNames="muter_id"
+      constraintName="fk_user_mutes_muter"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="user_mutes"
+      baseColumnNames="muted_id"
+      constraintName="fk_user_mutes_muted"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Named CHECK: a user cannot mute themselves. -->
+    <sql>
+      ALTER TABLE user_mutes ADD CONSTRAINT user_mutes_no_self_mute
+      CHECK (muter_id &lt;&gt; muted_id);
+    </sql>
+
+    <!-- Secondary index supports "list my mutes" ordered by recency.
+         The composite PK already covers (muter_id, muted_id) lookups
+         (i.e., the isMuted query). -->
+    <createIndex tableName="user_mutes" indexName="idx_user_mutes_muter">
+      <column name="muter_id"/>
+      <column name="created_at" descending="true"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="user_mutes"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

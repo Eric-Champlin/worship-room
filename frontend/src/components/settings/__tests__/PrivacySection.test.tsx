@@ -4,6 +4,17 @@ import userEvent from '@testing-library/user-event'
 import { ToastProvider } from '@/components/ui/Toast'
 import { PrivacySection } from '../PrivacySection'
 import { DEFAULT_SETTINGS } from '@/services/settings-storage'
+import { MUTES_KEY } from '@/services/mutes-storage'
+
+// PrivacySection now consumes useMutes (Spec 2.5.7), which calls useAuth internally.
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    user: { name: 'Test', id: 'test-user' },
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
+}))
 
 const defaultPrivacy = { ...DEFAULT_SETTINGS.privacy }
 
@@ -174,5 +185,49 @@ describe('PrivacySection', () => {
     const dialog = screen.getByRole('alertdialog')
     await user.click(within(dialog).getByRole('button', { name: 'Unblock' }))
     expect(await screen.findByText(/has been unblocked/)).toBeInTheDocument()
+  })
+
+  // --- Muted Users (Spec 2.5.7) ---
+
+  it('Muted Users section renders empty state when wr_mutes.muted is empty', () => {
+    renderPrivacy()
+    expect(screen.getByText("You haven't muted anyone.")).toBeInTheDocument()
+  })
+
+  it('Muted Users section renders entries from wr_mutes with display names from ALL_MOCK_USERS', () => {
+    localStorage.setItem(MUTES_KEY, JSON.stringify({ muted: ['user-emma-c'] }))
+    renderPrivacy()
+    // The display name 'Emma C.' (from ALL_MOCK_USERS) should be visible
+    expect(screen.getByText('Emma C.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Unmute' })).toBeInTheDocument()
+  })
+
+  it('Unmute click opens ConfirmDialog with title "Unmute {name}?" and the verse-reappears body', async () => {
+    const user = userEvent.setup()
+    localStorage.setItem(MUTES_KEY, JSON.stringify({ muted: ['user-emma-c'] }))
+    renderPrivacy()
+    await user.click(screen.getByRole('button', { name: 'Unmute' }))
+    expect(screen.getByRole('alertdialog', { name: 'Unmute Emma C.?' })).toBeInTheDocument()
+    expect(
+      screen.getByText('Their posts will appear in your feed again.'),
+    ).toBeInTheDocument()
+  })
+
+  it('Confirming Unmute removes the entry; canceling does not', async () => {
+    const user = userEvent.setup()
+    localStorage.setItem(MUTES_KEY, JSON.stringify({ muted: ['user-emma-c'] }))
+    renderPrivacy()
+
+    // Cancel path first — the entry must remain
+    await user.click(screen.getByRole('button', { name: 'Unmute' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByText('Emma C.')).toBeInTheDocument()
+
+    // Confirm path — the entry vanishes from the rendered list, toast fires
+    await user.click(screen.getByRole('button', { name: 'Unmute' }))
+    const dialog = screen.getByRole('alertdialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Unmute' }))
+    expect(await screen.findByText(/has been unmuted/)).toBeInTheDocument()
+    expect(screen.queryByText('Emma C.')).not.toBeInTheDocument()
   })
 })

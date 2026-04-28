@@ -4,14 +4,15 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 interface FriendMenuProps {
   friendName: string
   onRemove: () => void
+  onMute: () => void
   onBlock: () => void
   onClose: () => void
 }
 
-export function FriendMenu({ friendName, onRemove, onBlock, onClose }: FriendMenuProps) {
+export function FriendMenu({ friendName, onRemove, onMute, onBlock, onClose }: FriendMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
   const firstItemRef = useRef<HTMLButtonElement>(null)
-  const [confirmAction, setConfirmAction] = useState<'remove' | 'block' | null>(null)
+  const [confirmAction, setConfirmAction] = useState<'remove' | 'mute' | 'block' | null>(null)
 
   // Focus first item on open
   useEffect(() => {
@@ -44,6 +45,12 @@ export function FriendMenu({ friendName, onRemove, onBlock, onClose }: FriendMen
     setConfirmAction('remove')
   }
 
+  function handleMute(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setConfirmAction('mute')
+  }
+
   function handleBlock(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
@@ -52,6 +59,7 @@ export function FriendMenu({ friendName, onRemove, onBlock, onClose }: FriendMen
 
   function handleConfirm() {
     if (confirmAction === 'remove') onRemove()
+    else if (confirmAction === 'mute') onMute()
     else if (confirmAction === 'block') onBlock()
     setConfirmAction(null)
     onClose()
@@ -80,6 +88,13 @@ export function FriendMenu({ friendName, onRemove, onBlock, onClose }: FriendMen
         </button>
         <button
           role="menuitem"
+          onClick={handleMute}
+          className="min-h-[44px] w-full px-4 py-2 text-left text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white focus:bg-white/5 focus:outline-none"
+        >
+          Mute
+        </button>
+        <button
+          role="menuitem"
           onClick={handleBlock}
           className="min-h-[44px] w-full px-4 py-2 text-left text-sm font-medium text-red-400 transition-colors hover:bg-white/5 hover:text-red-300 focus:bg-white/5 focus:outline-none"
         >
@@ -92,6 +107,15 @@ export function FriendMenu({ friendName, onRemove, onBlock, onClose }: FriendMen
         body="You can send another friend request later if you change your mind."
         confirmLabel="Remove"
         variant="destructive"
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
+      <ConfirmDialog
+        isOpen={confirmAction === 'mute'}
+        title={`Mute ${friendName}?`}
+        body="Their posts won't appear in your feed. They won't know you've muted them. You can unmute anytime in Settings → Privacy."
+        confirmLabel="Mute"
+        variant="default"
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />

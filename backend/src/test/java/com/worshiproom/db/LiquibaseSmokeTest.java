@@ -72,7 +72,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
-        assertThat(rows).hasSize(12);
+        assertThat(rows).hasSize(13);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");
@@ -145,6 +145,12 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         assertThat(twelfth.get("author")).isEqualTo("worship-room");
         assertThat((String) twelfth.get("filename"))
             .endsWith("2026-04-27-012-create-milestone-events-table.xml");
+
+        Map<String, Object> thirteenth = rows.get(12);
+        assertThat(thirteenth.get("id")).isEqualTo("2026-04-27-013-create-user-mutes-table");
+        assertThat(thirteenth.get("author")).isEqualTo("worship-room");
+        assertThat((String) thirteenth.get("filename"))
+            .endsWith("2026-04-27-013-create-user-mutes-table.xml");
     }
 
     @Test
@@ -519,7 +525,8 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         "friend_requests_status_check",
         "friend_requests_no_self_reference",
         "social_interactions_type_check",
-        "milestone_events_type_check"
+        "milestone_events_type_check",
+        "user_mutes_no_self_mute"
     })
     void phase25CheckConstraintRejectsInvalidValue(String constraintName) {
         UUID userA = insertTestUser(constraintName + "-a");
@@ -556,6 +563,13 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
                     jdbcTemplate.update(
                         "INSERT INTO milestone_events (user_id, event_type) VALUES (?, ?)",
                         userA, "unknown_event");
+                case "user_mutes_no_self_mute" ->
+                    // Spec 2.5.7 — DB-level defense-in-depth for self-mute. Service also
+                    // throws SelfActionException; this asserts the CHECK constraint catches
+                    // any code path that bypasses the service (raw SQL, future endpoints).
+                    jdbcTemplate.update(
+                        "INSERT INTO user_mutes (muter_id, muted_id) VALUES (?, ?)",
+                        userA, userA);
                 default ->
                     throw new IllegalStateException("Unhandled constraint: " + constraintName);
             }

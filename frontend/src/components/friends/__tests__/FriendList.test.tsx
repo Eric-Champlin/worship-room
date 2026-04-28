@@ -49,6 +49,7 @@ const FRIENDS: FriendProfile[] = [
 
 function renderFriendList(friends: FriendProfile[] = FRIENDS) {
   const onRemove = vi.fn()
+  const onMute = vi.fn()
   const onBlock = vi.fn()
   const onScrollToInvite = vi.fn()
 
@@ -57,13 +58,14 @@ function renderFriendList(friends: FriendProfile[] = FRIENDS) {
       <FriendList
         friends={friends}
         onRemove={onRemove}
+        onMute={onMute}
         onBlock={onBlock}
         onScrollToInvite={onScrollToInvite}
       />
     </MemoryRouter>,
   )
 
-  return { ...result, onRemove, onBlock, onScrollToInvite }
+  return { ...result, onRemove, onMute, onBlock, onScrollToInvite }
 }
 
 describe('FriendList', () => {
@@ -107,7 +109,52 @@ describe('FriendList', () => {
     await user.click(menuButtons[0])
     expect(screen.getByRole('menu')).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Remove Friend' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Mute' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Block' })).toBeInTheDocument()
+  })
+
+  it('menu items appear in order Remove / Mute / Block', async () => {
+    const user = userEvent.setup()
+    renderFriendList()
+
+    await user.click(screen.getAllByLabelText(/Options for/)[0])
+    const items = screen.getAllByRole('menuitem')
+    expect(items[0]).toHaveTextContent('Remove Friend')
+    expect(items[1]).toHaveTextContent('Mute')
+    expect(items[2]).toHaveTextContent('Block')
+  })
+
+  it('mute menu item opens ConfirmDialog with mute copy', async () => {
+    const user = userEvent.setup()
+    renderFriendList()
+
+    await user.click(screen.getAllByLabelText(/Options for/)[0])
+    await user.click(screen.getByRole('menuitem', { name: 'Mute' }))
+
+    expect(
+      screen.getByRole('alertdialog', { name: 'Mute Sarah M.?' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/They won't know you've muted them/),
+    ).toBeInTheDocument()
+  })
+
+  it('confirming mute dialog calls onMute; canceling does not', async () => {
+    const user = userEvent.setup()
+    const { onMute } = renderFriendList()
+
+    // Confirm path
+    await user.click(screen.getAllByLabelText(/Options for/)[0])
+    await user.click(screen.getByRole('menuitem', { name: 'Mute' }))
+    await user.click(screen.getByRole('button', { name: 'Mute' }))
+    expect(onMute).toHaveBeenCalledWith('friend-1')
+
+    // Cancel path — open menu again, click Mute, then Cancel
+    onMute.mockClear()
+    await user.click(screen.getAllByLabelText(/Options for/)[0])
+    await user.click(screen.getByRole('menuitem', { name: 'Mute' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(onMute).not.toHaveBeenCalled()
   })
 
   it('remove menu item opens ConfirmDialog with remove copy', async () => {
@@ -195,7 +242,7 @@ describe('FriendList', () => {
     renderFriendList()
     await user.click(screen.getAllByLabelText(/Options for/)[0])
     expect(screen.getByRole('menu')).toBeInTheDocument()
-    expect(screen.getAllByRole('menuitem')).toHaveLength(2)
+    expect(screen.getAllByRole('menuitem')).toHaveLength(3)
   })
 
   it('three-dot has aria-haspopup="menu"', () => {

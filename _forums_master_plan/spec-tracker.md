@@ -83,8 +83,8 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 46  | 2.5.4  | Frontend Friends Dual-Write                       | L    | Medium | ✅     |
 | 47  | 2.5.4b | Social Interactions & Milestone Events Dual-Write | M    | Medium | ✅     |
 | 48  | 2.5.5  | Phase 2.5 Cutover                                 | S    | Medium | ✅     |
-| 49  | 2.5.6  | Block User Feature                                | M    | Medium | ⬜     |
-| 50  | 2.5.7  | Mute User Feature                                 | S    | Low    | ⬜     |
+| 49  | 2.5.6  | Block User Feature                                | M    | Medium | ✅     |
+| 50  | 2.5.7  | Mute User Feature                                 | S    | Low    | ✅     |
 
 ## Phase 3 — Prayer Wall Backend (12 specs)
 

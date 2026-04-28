@@ -17,6 +17,7 @@ import {
 } from '@/components/friends'
 import { useAuth } from '@/hooks/useAuth'
 import { useFriends } from '@/hooks/useFriends'
+import { useMutes } from '@/hooks/useMutes'
 import { LeaderboardTab } from '@/components/leaderboard'
 
 type FriendsTab = 'friends' | 'leaderboard'
@@ -45,6 +46,7 @@ export function Friends() {
     removeFriend,
     blockUser,
   } = useFriends()
+  const { muteUser } = useMutes()
 
   const activeTab = (searchParams.get('tab') as FriendsTab) || 'friends'
 
@@ -155,6 +157,7 @@ export function Friends() {
               <FriendList
                 friends={friends}
                 onRemove={removeFriend}
+                onMute={muteUser}
                 onBlock={blockUser}
                 onScrollToInvite={handleScrollToInvite}
               />
