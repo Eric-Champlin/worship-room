@@ -102,4 +102,10 @@
     </insert>
 
   </changeSet>
+
+  <!-- Forums Wave Spec 3.2 — mock prayer-wall seed data (10 users, 24 posts,
+       35 comments, 5 reactions, 72 QOTDs). Same context="dev" gating; lives
+       in its own file because the seed payload is large (~1900 lines). -->
+  <include file="db/changelog/contexts/2026-04-27-021-prayer-wall-mock-seed.xml"/>
+
 </databaseChangeLog>

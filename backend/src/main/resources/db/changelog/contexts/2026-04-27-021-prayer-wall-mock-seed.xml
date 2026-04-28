@@ -1,0 +1,1887 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 3.2 — dev-only mock prayer-wall seed.
+       context="dev" so prod (contexts=production) and tests (contexts=test) skip.
+
+       Mirrors content from frontend/src/mocks/prayer-wall-mock-data.ts and
+       frontend/src/constants/question-of-the-day.ts. 10 mock prayer-wall users
+       separate from Phase 1.8's 5 auth-seed users (UUIDs ...0101..010a vs
+       ...001..005). Reset path: docker compose down -v.
+
+       UUID scheme:
+         users:          ...0101 .. ...010a (10 entries)
+         posts:          ...0201 .. ...0218 (24 entries; 3 QOTD + 3 mental-health + 18 regular)
+         post_comments:  ...0301 .. ...0323 (35 entries)
+         post_reactions: composite PK, no UUID (5 entries — only isPraying=true seeded)
+         qotd_questions: VARCHAR id 'qotd-1'..'qotd-72' (72 entries)
+
+       BCrypt hash is the same shared dev hash from Phase 1.8 ($2a$10$vMBG...)
+       — plaintext "WorshipRoomDev2026!". Wrapped in CDATA per master plan
+       Decision 2 to protect '$' delimiters.
+
+       Anonymous prayers (3) get user_id=...010a (mock user-10 "Anonymous User")
+       AND is_anonymous=true since posts.user_id is NOT NULL.
+
+       qotd_id for the 3 QOTD-response posts is pinned to 'qotd-1' for stability
+       (frontend's getTodaysQuestion() is a moving target). -->
+
+  <changeSet id="2026-04-27-021-prayer-wall-mock-seed" author="worship-room" context="dev">
+
+    <preConditions onFail="HALT">
+      <not>
+        <sqlCheck expectedResult="0">
+          SELECT COUNT(*) FROM information_schema.tables
+          WHERE table_schema='public' AND table_name='posts'
+        </sqlCheck>
+      </not>
+      <not>
+        <sqlCheck expectedResult="0">
+          SELECT COUNT(*) FROM information_schema.tables
+          WHERE table_schema='public' AND table_name='qotd_questions'
+        </sqlCheck>
+      </not>
+    </preConditions>
+
+    <!-- ===== 10 MOCK PRAYER-WALL USERS ===== -->
+
+    <!-- user-1: Sarah Johnson (mock current user) -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="email" value="mock-sarah-johnson@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Sarah"/>
+      <column name="last_name" value="Johnson"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="Wife, mother, and believer. Finding peace in prayer and gratitude every day."/>
+      <column name="avatar_url" value="https://i.pravatar.cc/150?u=user1"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-2: David Chen -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000102"/>
+      <column name="email" value="mock-david-chen@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="David"/>
+      <column name="last_name" value="Chen"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="Worship leader at Grace Community Church. Music is my love language with God."/>
+      <column name="avatar_url" value="https://i.pravatar.cc/150?u=user2"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-3: Emily Rodriguez -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000103"/>
+      <column name="email" value="mock-emily-rodriguez@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Emily"/>
+      <column name="last_name" value="Rodriguez"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="Seminary student. Passionate about scripture study and community prayer."/>
+      <column name="avatar_url" value="https://i.pravatar.cc/150?u=user3"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-4: James Mitchell -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="email" value="mock-james-mitchell@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="James"/>
+      <column name="last_name" value="Mitchell"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="Retired pastor. Still serving through prayer and encouragement."/>
+      <column name="avatar_url" value="https://i.pravatar.cc/150?u=user4"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-5: Rachel Kim -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000105"/>
+      <column name="email" value="mock-rachel-kim@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Rachel"/>
+      <column name="last_name" value="Kim"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="Teacher and prayer warrior. Lifting up students and families daily."/>
+      <column name="avatar_url" value="https://i.pravatar.cc/150?u=user5"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-6: Michael Thompson -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000106"/>
+      <column name="email" value="mock-michael-thompson@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Michael"/>
+      <column name="last_name" value="Thompson"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="New to faith. Finding my way one prayer at a time."/>
+      <column name="avatar_url" value="https://i.pravatar.cc/150?u=user6"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-7: Grace Okafor -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000107"/>
+      <column name="email" value="mock-grace-okafor@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Grace"/>
+      <column name="last_name" value="Okafor"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="Nurse and mother of three. God sustains me through every shift."/>
+      <column name="avatar_url" value="https://i.pravatar.cc/150?u=user7"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-8: Daniel Park (no avatar) -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000108"/>
+      <column name="email" value="mock-daniel-park@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Daniel"/>
+      <column name="last_name" value="Park"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="College student navigating faith and life. Grateful for this community."/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-9: Maria Santos (no avatar) -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-000000000109"/>
+      <column name="email" value="mock-maria-santos@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Maria"/>
+      <column name="last_name" value="Santos"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="bio" value="Grandmother of five. Every day is a blessing."/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- user-10: Anonymous User (conceptual owner of anonymous mock prayers) -->
+    <insert tableName="users">
+      <column name="id" value="00000000-0000-0000-0000-00000000010a"/>
+      <column name="email" value="mock-anonymous-user@worshiproom.local"/>
+      <column name="password_hash"><![CDATA[$2a$10$vMBG.iIj1eGxc9kDtOqWF.4tIulAKsz6lyJhAsB40.yYVml7HwFO.]]></column>
+      <column name="first_name" value="Anonymous"/>
+      <column name="last_name" value="User"/>
+      <column name="display_name_preference" value="first_only"/>
+      <column name="is_email_verified" valueBoolean="true"/>
+      <column name="timezone" value="America/Chicago"/>
+      <column name="joined_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-15 10:00:00+00'"/>
+    </insert>
+
+    <!-- ===== 24 MOCK PRAYERS (posts) ===== -->
+
+    <!-- prayer-qotd-1 (Emily, user-3) — id ...0201 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000201"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000103"/>
+      <column name="post_type" value="discussion"/>
+      <column name="content" value="For me, it has been spending just 10 minutes every morning before I check my phone. Even on busy days, that quiet time sets the tone for everything else. It does not have to be long — just consistent."/>
+      <column name="category" value="discussion"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="qotd_id" value="qotd-1"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="5"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="1"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 08:30:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 08:30:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 09:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-qotd-2 (James, user-4) — id ...0202 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000202"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="post_type" value="discussion"/>
+      <column name="content" value="After 30 years of ministry, I can honestly say the thing that has helped me the most is journaling my prayers. When I look back at old journals, I see how faithful God has been even when I could not see it in the moment."/>
+      <column name="category" value="discussion"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="qotd_id" value="qotd-1"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="8"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="2"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 07:15:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 07:15:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 07:15:00+00'"/>
+    </insert>
+
+    <!-- prayer-qotd-3 (Grace, user-7) — id ...0203 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000203"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000107"/>
+      <column name="post_type" value="discussion"/>
+      <column name="content" value="Listening to worship music during my commute has been a game changer. It turns a stressful drive into a time of praise and prayer. Highly recommend it!"/>
+      <column name="category" value="discussion"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="qotd_id" value="qotd-1"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="3"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="0"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 06:45:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 06:45:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-22 06:45:00+00'"/>
+    </insert>
+
+    <!-- prayer-19 (Michael, user-6, mental-health) — id ...0204 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000204"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000106"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Struggling with anxiety that won't let go. Please pray for peace in my mind."/>
+      <column name="category" value="mental-health"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="34"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="7"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-20 09:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-20 09:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-20 14:30:00+00'"/>
+    </insert>
+
+    <!-- prayer-20 (Anonymous, user-10, mental-health) — id ...0205 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000205"/>
+      <column name="user_id" value="00000000-0000-0000-0000-00000000010a"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Going through depression and finding it hard to get out of bed. Prayers for strength and hope."/>
+      <column name="category" value="mental-health"/>
+      <column name="is_anonymous" valueBoolean="true"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="41"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="5"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-19 18:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-19 18:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-20 08:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-21 (Rachel, user-5, mental-health) — id ...0206 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000206"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000105"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Burnout from work and life is overwhelming. Please pray for rest and clarity."/>
+      <column name="category" value="mental-health"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="28"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="3"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-18 21:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-18 21:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-03-19 12:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-1 (Sarah, user-1) — id ...0207 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Please pray for my mother who was just diagnosed with cancer. She starts chemo next week and we are all scared but trusting in God. She has been the rock of our family for 40 years and I cannot imagine life without her strength and love. We need a miracle."/>
+      <column name="category" value="health"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="47"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="12"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 14:30:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 14:30:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 10:15:00+00'"/>
+    </insert>
+
+    <!-- prayer-2 (David, user-2) — id ...0208 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000208"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000102"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Our church is going through a difficult transition with our lead pastor retiring. Please pray for unity, wisdom for the elders, and that God would send the right person to shepherd our congregation."/>
+      <column name="category" value="other"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="31"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="8"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 09:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 09:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 08:30:00+00'"/>
+    </insert>
+
+    <!-- prayer-3 (Anonymous, user-10, addiction) — id ...0209 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000209"/>
+      <column name="user_id" value="00000000-0000-0000-0000-00000000010a"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="I am struggling with addiction and feel so alone. I know God can help me but I keep falling. Please pray that I find the strength to reach out for help and that God would surround me with people who care."/>
+      <column name="category" value="health"/>
+      <column name="is_anonymous" valueBoolean="true"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="56"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="6"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 22:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 22:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 07:45:00+00'"/>
+    </insert>
+
+    <!-- prayer-4 (Emily, user-3, finals) — id ...020a -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-00000000020a"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000103"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Pray for my finals this week. Trusting God with the results."/>
+      <column name="category" value="work"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="12"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="3"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-5 (James, user-4, ANSWERED — daughter's pregnancy) — id ...020b -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-00000000020b"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Praise God! After two years of infertility, my daughter and her husband are expecting their first child! Thank you to everyone who prayed with us. God is faithful."/>
+      <column name="category" value="praise"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="true"/>
+      <column name="answered_text" value="We prayed for two years and God answered in His perfect timing. Baby is due in July. Our family is overjoyed and so grateful for this community."/>
+      <column name="answered_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 16:00:00+00'"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="89"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="15"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2024-03-10 12:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2024-03-10 12:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 20:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-6 (Rachel, user-5, student grief) — id ...020c -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-00000000020c"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000105"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="One of my students lost their parent this week. Please pray for comfort and peace for the whole family. They need to know they are not alone."/>
+      <column name="category" value="grief"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="38"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="5"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-23 18:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-23 18:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 16:30:00+00'"/>
+    </insert>
+
+    <!-- prayer-7 (Michael, user-6, new job) — id ...020d -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-00000000020d"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000106"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Starting a new job Monday. Nervous but grateful."/>
+      <column name="category" value="work"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="18"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="2"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 10:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 10:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 15:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-8 (Grace, user-7, husband job loss) — id ...020e -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-00000000020e"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000107"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="My husband lost his job last month and we are struggling to make ends meet. We have three young children and the bills are piling up. I am trying to trust God but the anxiety is overwhelming. Please pray for provision and for my husband to find work soon. We need doors to open."/>
+      <column name="category" value="family"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="42"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="10"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-22 20:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-22 20:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 12:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-9 (Daniel, user-8, disconnection) — id ...020f -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-00000000020f"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000108"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Feeling disconnected from God lately. Please pray that I can find my way back. I used to feel His presence so strongly and now everything feels quiet."/>
+      <column name="category" value="other"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="25"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="4"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 22:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 22:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 09:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-10 (Maria, user-9, gratitude grandchildren) — id ...0210 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000210"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000109"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Thank you, Lord, for another beautiful day with my grandchildren. Praying for all the grandparents out there raising little ones. You are not forgotten."/>
+      <column name="category" value="gratitude"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="15"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="2"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 15:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 15:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 15:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-11 (Anonymous, user-10, marriage) — id ...0211 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000211"/>
+      <column name="user_id" value="00000000-0000-0000-0000-00000000010a"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Pray for my marriage. We need God to intervene."/>
+      <column name="category" value="relationships"/>
+      <column name="is_anonymous" valueBoolean="true"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="33"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="3"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-23 08:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-23 08:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 11:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-12 (Sarah, user-1, ANSWERED — son's college acceptance) — id ...0212 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000212"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="God answered! My son got accepted into his dream college with a full scholarship. We have been praying about this for over a year. God is so good!"/>
+      <column name="category" value="praise"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="true"/>
+      <column name="answered_text" value="After months of waiting and praying, the acceptance letter came today. Full ride. We are in tears. Thank you to everyone who lifted us up."/>
+      <column name="answered_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-18 10:00:00+00'"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="64"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="9"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2025-11-15 12:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2025-11-15 12:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-23 14:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-13 (David, user-2, worship team) — id ...0213 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000213"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000102"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Please lift up our worship team. We have a big Easter service coming up and we want every note to glorify God. Pray for unity and anointing."/>
+      <column name="category" value="work"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="20"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="0"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-21 14:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-21 14:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-22 18:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-14 (Rachel, user-5, gratitude community) — id ...0214 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000214"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000105"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Grateful for this community. You all lift me up."/>
+      <column name="category" value="gratitude"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="8"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="1"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 08:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 08:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 08:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-15 (Emily, user-3, roommate) — id ...0215 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000215"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000103"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="My roommate is going through a really hard time and I do not know how to help. She is not a believer but she is open to prayer. Please pray that God opens her heart and that I can be the friend she needs right now without being pushy."/>
+      <column name="category" value="relationships"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="22"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="4"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-19 20:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-19 20:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 06:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-16 (Grace, user-7, ANSWERED — husband job offer) — id ...0216 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000216"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000107"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="UPDATE: My husband got a job offer today! It is even better than his last position. God provided exactly when we needed it most. Thank you all for praying with us!"/>
+      <column name="category" value="family"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="true"/>
+      <column name="answered_text" value="Three weeks of uncertainty and God came through. Better pay, better hours, closer to home. He truly works all things for good."/>
+      <column name="answered_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-15 17:00:00+00'"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="51"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="7"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-28 12:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-01-28 12:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-18 09:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-17 (James, user-4, persecuted church) — id ...0217 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000217"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Pray for the persecuted church around the world. So many believers are suffering for their faith. May God strengthen them and protect them."/>
+      <column name="category" value="other"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="35"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="2"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-15 07:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-15 07:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-17 12:00:00+00'"/>
+    </insert>
+
+    <!-- prayer-18 (Michael, user-6, baptism) — id ...0218 -->
+    <insert tableName="posts">
+      <column name="id" value="00000000-0000-0000-0000-000000000218"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000106"/>
+      <column name="post_type" value="prayer_request"/>
+      <column name="content" value="Just got baptized last Sunday! Best decision of my life. Thank you to this community for helping me find my way to faith. I never thought I would be here but God had other plans."/>
+      <column name="category" value="gratitude"/>
+      <column name="is_anonymous" valueBoolean="false"/>
+      <column name="visibility" value="public"/>
+      <column name="is_answered" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="praying_count" valueNumeric="72"/>
+      <column name="candle_count" valueNumeric="0"/>
+      <column name="comment_count" valueNumeric="11"/>
+      <column name="bookmark_count" valueNumeric="0"/>
+      <column name="report_count" valueNumeric="0"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-10 16:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-10 16:00:00+00'"/>
+      <column name="last_activity_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-14 20:00:00+00'"/>
+    </insert>
+
+    <!-- ===== 35 MOCK COMMENTS ===== -->
+
+    <!-- comment-1 → prayer-1 (...0207), David (...0102) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000301"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000102"/>
+      <column name="content" value="Lifting your mother up in prayer right now. God is the great healer."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 10:15:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 10:15:00+00'"/>
+    </insert>
+
+    <!-- comment-2 → prayer-1, Emily (...0103) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000302"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000103"/>
+      <column name="content" value="@Sarah Standing with you in prayer. Psalm 46:1 — God is our refuge and strength."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 09:30:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 09:30:00+00'"/>
+    </insert>
+
+    <!-- comment-3 → prayer-1, James (...0104) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000303"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="content" value="Lord, be with this family. Wrap them in Your peace. Amen."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 08:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 08:00:00+00'"/>
+    </insert>
+
+    <!-- comment-4 → prayer-1, Rachel (...0105) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000304"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000105"/>
+      <column name="content" value="Praying for complete healing. Keep trusting."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 22:30:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 22:30:00+00'"/>
+    </insert>
+
+    <!-- comment-5 → prayer-1, Grace (...0107) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000305"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000107"/>
+      <column name="content" value="@Sarah As a nurse, I have seen miracles happen. Keep your faith strong. Praying for your mom."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 21:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 21:00:00+00'"/>
+    </insert>
+
+    <!-- comment-6 → prayer-1, Maria (...0109) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000306"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000109"/>
+      <column name="content" value="My heart goes out to you, dear. Praying without ceasing."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 19:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 19:00:00+00'"/>
+    </insert>
+
+    <!-- comment-7 → prayer-1, Daniel (...0108) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000307"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000108"/>
+      <column name="content" value="God is bigger than any diagnosis. Believing with you."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 18:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 18:00:00+00'"/>
+    </insert>
+
+    <!-- comment-8 → prayer-1, Michael (...0106) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000308"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000106"/>
+      <column name="content" value="Praying for strength for the whole family."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 17:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 17:00:00+00'"/>
+    </insert>
+
+    <!-- comment-9 → prayer-2 (...0208), James (...0104) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000309"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000208"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="content" value="As a retired pastor, transitions are hard but God always provides. Praying for your elders."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 08:30:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 08:30:00+00'"/>
+    </insert>
+
+    <!-- comment-10 → prayer-2, Sarah (...0101) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000030a"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000208"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="content" value="@David Praying for your church family. God has someone perfect in mind."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 20:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 20:00:00+00'"/>
+    </insert>
+
+    <!-- comment-11 → prayer-2, Emily (...0103) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000030b"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000208"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000103"/>
+      <column name="content" value="Unity in the body of Christ is so important. Lifting this up."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 15:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 15:00:00+00'"/>
+    </insert>
+
+    <!-- comment-12 → prayer-3 (...0209), James (...0104) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000030c"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000209"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="content" value="You are not alone in this fight. God sees you and loves you exactly where you are. One step at a time."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 07:45:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 07:45:00+00'"/>
+    </insert>
+
+    <!-- comment-13 → prayer-3, Grace (...0107) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000030d"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000209"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000107"/>
+      <column name="content" value="Praying for freedom and healing. Reach out to someone you trust today."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:00:00+00'"/>
+    </insert>
+
+    <!-- comment-14 → prayer-3, David (...0102) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000030e"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000209"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000102"/>
+      <column name="content" value="Romans 8:38-39 — nothing can separate you from the love of God. Keep fighting."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 01:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 01:00:00+00'"/>
+    </insert>
+
+    <!-- comment-15 → prayer-4 (...020a), Sarah (...0101) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000030f"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020a"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="content" value="You got this, Emily! Praying for peace and focus."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 07:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 07:00:00+00'"/>
+    </insert>
+
+    <!-- comment-16 → prayer-4, Maria (...0109) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000310"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020a"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000109"/>
+      <column name="content" value="@Emily Praying for you sweetheart. Do your best and leave the rest to God."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:30:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:30:00+00'"/>
+    </insert>
+
+    <!-- comment-17 → prayer-4, Daniel (...0108) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000311"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020a"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000108"/>
+      <column name="content" value="Same here! Finals are stressful. We can do this."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:15:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 06:15:00+00'"/>
+    </insert>
+
+    <!-- comment-18 → prayer-5 (...020b), Sarah (...0101) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000312"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020b"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="content" value="This makes my heart so full! Congratulations to your daughter!"/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 17:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 17:00:00+00'"/>
+    </insert>
+
+    <!-- comment-19 → prayer-5, Grace (...0107) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000313"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020b"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000107"/>
+      <column name="content" value="@James What beautiful news! God is so faithful. Praying for a healthy pregnancy."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 18:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 18:00:00+00'"/>
+    </insert>
+
+    <!-- comment-20 → prayer-6 (...020c), James (...0104) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000314"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020c"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="content" value="Lord, comfort this child and their family. Be their strength."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 16:30:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 16:30:00+00'"/>
+    </insert>
+
+    <!-- comment-21 → prayer-6, Emily (...0103) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000315"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020c"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000103"/>
+      <column name="content" value="@Rachel You are such a caring teacher. Praying for your student."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 10:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 10:00:00+00'"/>
+    </insert>
+
+    <!-- comment-22 → prayer-7 (...020d), David (...0102) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000316"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020d"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000102"/>
+      <column name="content" value="You will do great! Praying for confidence and favor."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 15:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 15:00:00+00'"/>
+    </insert>
+
+    <!-- comment-23 → prayer-7, Rachel (...0105) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000317"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020d"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000105"/>
+      <column name="content" value="New beginnings are exciting! God has great plans for you."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 12:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 12:00:00+00'"/>
+    </insert>
+
+    <!-- comment-24 → prayer-8 (...020e), Sarah (...0101) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000318"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020e"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="content" value="@Grace My family went through the same thing. God will provide. Philippians 4:19."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 12:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 12:00:00+00'"/>
+    </insert>
+
+    <!-- comment-25 → prayer-8, James (...0104) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000319"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020e"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="content" value="Praying for provision and peace. God has not forgotten you."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 08:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 08:00:00+00'"/>
+    </insert>
+
+    <!-- comment-26 → prayer-9 (...020f), James (...0104) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000031a"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020f"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="content" value="Spiritual dry seasons happen to everyone. Keep seeking Him. He is closer than you think."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 09:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 09:00:00+00'"/>
+    </insert>
+
+    <!-- comment-27 → prayer-9, Emily (...0103) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000031b"/>
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020f"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000103"/>
+      <column name="content" value="@Daniel I have been there. Sometimes silence is where God does His deepest work. Praying for you."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 07:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-25 07:00:00+00'"/>
+    </insert>
+
+    <!-- comment-28 → prayer-10 (...0210), Rachel (...0105) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000031c"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000210"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000105"/>
+      <column name="content" value="What a beautiful heart you have, Maria. Blessings to you and your grandchildren!"/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 16:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 16:00:00+00'"/>
+    </insert>
+
+    <!-- comment-29 → prayer-11 (...0211), Maria (...0109) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000031d"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000211"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000109"/>
+      <column name="content" value="Marriage is worth fighting for. Praying God restores what feels broken."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 11:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-24 11:00:00+00'"/>
+    </insert>
+
+    <!-- comment-30 → prayer-15 (...0215), Sarah (...0101) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000031e"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000215"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="content" value="@Emily Just be present. Sometimes the best witness is a faithful friend."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 06:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 06:00:00+00'"/>
+    </insert>
+
+    <!-- comment-31 → prayer-15, James (...0104) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-00000000031f"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000215"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="content" value="Praying for open doors and open hearts."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-19 22:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-19 22:00:00+00'"/>
+    </insert>
+
+    <!-- comment-32 → prayer-16 (...0216), David (...0102) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000320"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000216"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000102"/>
+      <column name="content" value="God is so good! Rejoicing with you!"/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-18 09:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-18 09:00:00+00'"/>
+    </insert>
+
+    <!-- comment-33 → prayer-18 (...0218), Sarah (...0101) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000321"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000218"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="content" value="@Michael Welcome to the family! This is the best news!"/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-14 20:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-14 20:00:00+00'"/>
+    </insert>
+
+    <!-- comment-34 → prayer-18, James (...0104) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000322"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000218"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000104"/>
+      <column name="content" value="The angels are celebrating with you! What a journey. Praise God."/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-11 10:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-11 10:00:00+00'"/>
+    </insert>
+
+    <!-- comment-35 → prayer-18, Grace (...0107) -->
+    <insert tableName="post_comments">
+      <column name="id" value="00000000-0000-0000-0000-000000000323"/>
+      <column name="post_id" value="00000000-0000-0000-0000-000000000218"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000107"/>
+      <column name="content" value="Tears of joy reading this. God changes lives!"/>
+      <column name="is_helpful" valueBoolean="false"/>
+      <column name="is_deleted" valueBoolean="false"/>
+      <column name="moderation_status" value="approved"/>
+      <column name="crisis_flag" valueBoolean="false"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-10 20:00:00+00'"/>
+      <column name="updated_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-10 20:00:00+00'"/>
+    </insert>
+
+    <!-- ===== 5 MOCK REACTIONS (composite PK; only isPraying=true entries) ===== -->
+    <!-- All 5 reactions are by Sarah (user-1, ...0101) — the mock current user.
+         MOCK_REACTIONS in prayer-wall-mock-data.ts represents the current user's
+         reactions, keyed by prayerId. Sarah's self-reactions on her own prayers
+         (prayer-1, prayer-12) are allowed by the composite PK. -->
+
+    <!-- Sarah → prayer-1 (...0207) -->
+    <insert tableName="post_reactions">
+      <column name="post_id" value="00000000-0000-0000-0000-000000000207"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="reaction_type" value="praying"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 10:00:00+00'"/>
+    </insert>
+
+    <!-- Sarah → prayer-3 (...0209) -->
+    <insert tableName="post_reactions">
+      <column name="post_id" value="00000000-0000-0000-0000-000000000209"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="reaction_type" value="praying"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-26 07:30:00+00'"/>
+    </insert>
+
+    <!-- Sarah → prayer-5 (...020b) -->
+    <insert tableName="post_reactions">
+      <column name="post_id" value="00000000-0000-0000-0000-00000000020b"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="reaction_type" value="praying"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-20 17:00:00+00'"/>
+    </insert>
+
+    <!-- Sarah → prayer-12 (...0212) -->
+    <insert tableName="post_reactions">
+      <column name="post_id" value="00000000-0000-0000-0000-000000000212"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="reaction_type" value="praying"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-23 14:00:00+00'"/>
+    </insert>
+
+    <!-- Sarah → prayer-18 (...0218) -->
+    <insert tableName="post_reactions">
+      <column name="post_id" value="00000000-0000-0000-0000-000000000218"/>
+      <column name="user_id" value="00000000-0000-0000-0000-000000000101"/>
+      <column name="reaction_type" value="praying"/>
+      <column name="created_at" valueComputed="TIMESTAMP WITH TIME ZONE '2026-02-14 20:00:00+00'"/>
+    </insert>
+
+    <!-- ===== 72 QOTD QUESTIONS (id is VARCHAR, NOT UUID) ===== -->
+
+    <!-- Faith Journey (10) — qotd-1 .. qotd-10, display_order 0..9 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-1"/>
+      <column name="text" value="What Bible verse has meant the most to you this year?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="hint" value="Think about a verse that spoke to you during a specific season."/>
+      <column name="display_order" valueNumeric="0"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-2"/>
+      <column name="text" value="How has your prayer life changed over the years?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="display_order" valueNumeric="1"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-3"/>
+      <column name="text" value="What was the moment you first felt called to follow Jesus?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="hint" value="It could be a big event or a quiet realization."/>
+      <column name="display_order" valueNumeric="2"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-4"/>
+      <column name="text" value="What spiritual practice has helped you grow the most this year?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="display_order" valueNumeric="3"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-5"/>
+      <column name="text" value="How do you handle seasons of doubt in your faith?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="hint" value="Doubt is part of the journey for many believers."/>
+      <column name="display_order" valueNumeric="4"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-6"/>
+      <column name="text" value="What is one thing you wish someone had told you early in your faith journey?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="display_order" valueNumeric="5"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-7"/>
+      <column name="text" value="What hymn or worship song has shaped your faith the most?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="hint" value="Think about a song that brings you back to a meaningful moment."/>
+      <column name="display_order" valueNumeric="6"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-8"/>
+      <column name="text" value="How has God surprised you in the last year?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="display_order" valueNumeric="7"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-9"/>
+      <column name="text" value="What book of the Bible are you most drawn to right now, and why?"/>
+      <column name="theme" value="faith_journey"/>
+      <column name="hint" value="Sometimes a particular book speaks to our current season."/>
+      <column name="display_order" valueNumeric="8"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-10"/>
+      <column name="text" value='What does "walking by faith, not by sight" look like in your everyday life?'/>
+      <column name="theme" value="faith_journey"/>
+      <column name="display_order" valueNumeric="9"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Practical (10) — qotd-11 .. qotd-20, display_order 10..19 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-11"/>
+      <column name="text" value="How do you make time for God in a busy schedule?"/>
+      <column name="theme" value="practical"/>
+      <column name="hint" value="Share a routine or habit that helps you stay connected."/>
+      <column name="display_order" valueNumeric="10"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-12"/>
+      <column name="text" value="What is your favorite way to memorize Scripture?"/>
+      <column name="theme" value="practical"/>
+      <column name="display_order" valueNumeric="11"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-13"/>
+      <column name="text" value="How do you bring your faith into your workplace or school?"/>
+      <column name="theme" value="practical"/>
+      <column name="hint" value="Small actions can have a big impact."/>
+      <column name="display_order" valueNumeric="12"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-14"/>
+      <column name="text" value="What is one practical way you serve others in your daily routine?"/>
+      <column name="theme" value="practical"/>
+      <column name="display_order" valueNumeric="13"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-15"/>
+      <column name="text" value="How do you stay consistent with Bible reading when life gets hectic?"/>
+      <column name="theme" value="practical"/>
+      <column name="hint" value="What tools or plans have worked for you?"/>
+      <column name="display_order" valueNumeric="14"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-16"/>
+      <column name="text" value="What does your morning quiet time look like?"/>
+      <column name="theme" value="practical"/>
+      <column name="display_order" valueNumeric="15"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-17"/>
+      <column name="text" value="How do you teach your children or younger family members about faith?"/>
+      <column name="theme" value="practical"/>
+      <column name="hint" value="Even small conversations can plant seeds."/>
+      <column name="display_order" valueNumeric="16"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-18"/>
+      <column name="text" value="What is one way you practice generosity in everyday life?"/>
+      <column name="theme" value="practical"/>
+      <column name="display_order" valueNumeric="17"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-19"/>
+      <column name="text" value="How do you choose which devotional or Bible plan to follow?"/>
+      <column name="theme" value="practical"/>
+      <column name="display_order" valueNumeric="18"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-20"/>
+      <column name="text" value="What is a simple habit that has deepened your relationship with God?"/>
+      <column name="theme" value="practical"/>
+      <column name="hint" value="Sometimes the smallest changes make the biggest difference."/>
+      <column name="display_order" valueNumeric="19"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Reflective (10) — qotd-21 .. qotd-30, display_order 20..29 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-21"/>
+      <column name="text" value="When was the last time you felt God's presence clearly?"/>
+      <column name="theme" value="reflective"/>
+      <column name="hint" value="Think about a moment this week where you felt peace."/>
+      <column name="display_order" valueNumeric="20"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-22"/>
+      <column name="text" value="What does forgiveness mean to you, and who have you needed to forgive?"/>
+      <column name="theme" value="reflective"/>
+      <column name="display_order" valueNumeric="21"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-23"/>
+      <column name="text" value="How has a difficult season ultimately strengthened your faith?"/>
+      <column name="theme" value="reflective"/>
+      <column name="hint" value="Looking back, what did God teach you through it?"/>
+      <column name="display_order" valueNumeric="22"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-24"/>
+      <column name="text" value='What does it mean to you to "be still and know that I am God"?'/>
+      <column name="theme" value="reflective"/>
+      <column name="display_order" valueNumeric="23"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-25"/>
+      <column name="text" value="What is a prayer you prayed that was answered differently than you expected?"/>
+      <column name="theme" value="reflective"/>
+      <column name="hint" value="God's answer is sometimes better than what we asked for."/>
+      <column name="display_order" valueNumeric="24"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-26"/>
+      <column name="text" value="How do you experience God in nature or the world around you?"/>
+      <column name="theme" value="reflective"/>
+      <column name="display_order" valueNumeric="25"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-27"/>
+      <column name="text" value="What part of the Gospel story resonates most deeply with you right now?"/>
+      <column name="theme" value="reflective"/>
+      <column name="hint" value="Different seasons draw us to different parts of the story."/>
+      <column name="display_order" valueNumeric="26"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-28"/>
+      <column name="text" value="How has worship changed the way you see a problem you are facing?"/>
+      <column name="theme" value="reflective"/>
+      <column name="display_order" valueNumeric="27"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-29"/>
+      <column name="text" value="What is a lesson you keep learning over and over in your walk with God?"/>
+      <column name="theme" value="reflective"/>
+      <column name="display_order" valueNumeric="28"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-30"/>
+      <column name="text" value="If you could sit down with any person from the Bible, who would it be and why?"/>
+      <column name="theme" value="reflective"/>
+      <column name="hint" value="What question would you ask them?"/>
+      <column name="display_order" valueNumeric="29"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Encouraging (10) — qotd-31 .. qotd-40, display_order 30..39 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-31"/>
+      <column name="text" value="What is one thing God has taught you recently?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="hint" value="It might be something small but meaningful."/>
+      <column name="display_order" valueNumeric="30"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-32"/>
+      <column name="text" value="What is a blessing you almost overlooked today?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="display_order" valueNumeric="31"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-33"/>
+      <column name="text" value="How has God shown His faithfulness in your life this month?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="hint" value="Sometimes faithfulness shows up in unexpected ways."/>
+      <column name="display_order" valueNumeric="32"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-34"/>
+      <column name="text" value="What is a promise from Scripture that you are holding onto right now?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="display_order" valueNumeric="33"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-35"/>
+      <column name="text" value="What is one way God has provided for you when you least expected it?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="hint" value="Sharing stories of provision encourages others."/>
+      <column name="display_order" valueNumeric="34"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-36"/>
+      <column name="text" value="What makes you grateful to be part of the body of Christ?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="display_order" valueNumeric="35"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-37"/>
+      <column name="text" value="What is a kind word or encouragement someone shared with you that you still remember?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="hint" value="Words of encouragement can last a lifetime."/>
+      <column name="display_order" valueNumeric="36"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-38"/>
+      <column name="text" value="How do you remind yourself of God's goodness on hard days?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="display_order" valueNumeric="37"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-39"/>
+      <column name="text" value="What answered prayer are you most thankful for?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="display_order" valueNumeric="38"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-40"/>
+      <column name="text" value="What does joy look like in your life right now?"/>
+      <column name="theme" value="encouraging"/>
+      <column name="hint" value="Joy does not always mean happiness — it can be a deep peace."/>
+      <column name="display_order" valueNumeric="39"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Community (10) — qotd-41 .. qotd-50, display_order 40..49 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-41"/>
+      <column name="text" value="How has another believer encouraged you this week?"/>
+      <column name="theme" value="community"/>
+      <column name="hint" value="Even a simple text or smile can make a difference."/>
+      <column name="display_order" valueNumeric="40"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-42"/>
+      <column name="text" value="What does Christian community mean to you?"/>
+      <column name="theme" value="community"/>
+      <column name="display_order" valueNumeric="41"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-43"/>
+      <column name="text" value="How do you support a friend who is going through a tough season?"/>
+      <column name="theme" value="community"/>
+      <column name="hint" value="Sometimes just showing up is enough."/>
+      <column name="display_order" valueNumeric="42"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-44"/>
+      <column name="text" value="What is the most meaningful way your church has served your community?"/>
+      <column name="theme" value="community"/>
+      <column name="display_order" valueNumeric="43"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-45"/>
+      <column name="text" value="Who is someone you would like to pray for today, and why?"/>
+      <column name="theme" value="community"/>
+      <column name="hint" value="Lifting others up in prayer is a gift."/>
+      <column name="display_order" valueNumeric="44"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-46"/>
+      <column name="text" value="How do you welcome newcomers into your faith community?"/>
+      <column name="theme" value="community"/>
+      <column name="display_order" valueNumeric="45"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-47"/>
+      <column name="text" value="What is one thing you have learned from a fellow believer recently?"/>
+      <column name="theme" value="community"/>
+      <column name="hint" value="We grow stronger when we learn from each other."/>
+      <column name="display_order" valueNumeric="46"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-48"/>
+      <column name="text" value="How do you stay connected with your church family during busy seasons?"/>
+      <column name="theme" value="community"/>
+      <column name="display_order" valueNumeric="47"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-49"/>
+      <column name="text" value="What role does accountability play in your spiritual growth?"/>
+      <column name="theme" value="community"/>
+      <column name="display_order" valueNumeric="48"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-50"/>
+      <column name="text" value="How has this online community helped you in your faith journey?"/>
+      <column name="theme" value="community"/>
+      <column name="hint" value="Share how connecting with others here has impacted you."/>
+      <column name="display_order" valueNumeric="49"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Seasonal (10 general + 12 liturgical = 22) — qotd-51 .. qotd-72, display_order 50..71 -->
+    <!-- General seasonal (10) — qotd-51..60, display_order 50..59 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-51"/>
+      <column name="text" value="What are you praying for this season?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Seasons change, and so do our prayers."/>
+      <column name="display_order" valueNumeric="50"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-52"/>
+      <column name="text" value="What is a New Year resolution you made for your spiritual life?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="51"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-53"/>
+      <column name="text" value="How do you celebrate Easter in a way that deepens your faith?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="What traditions or practices are meaningful to you?"/>
+      <column name="display_order" valueNumeric="52"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-54"/>
+      <column name="text" value="What does Advent or the Christmas season teach you about waiting on God?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="53"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-55"/>
+      <column name="text" value="How do you practice gratitude during the Thanksgiving season?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Gratitude is a discipline, not just a holiday."/>
+      <column name="display_order" valueNumeric="54"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-56"/>
+      <column name="text" value="What is a Bible passage that feels especially relevant to the season you are in?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="55"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-57"/>
+      <column name="text" value="How do you find rest during the busy holiday season?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Rest is not laziness — it is obedience."/>
+      <column name="display_order" valueNumeric="56"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-58"/>
+      <column name="text" value="What spiritual goal are you working toward this month?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="57"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-59"/>
+      <column name="text" value="How has the changing of the seasons reminded you of God's faithfulness?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Creation itself declares His glory."/>
+      <column name="display_order" valueNumeric="58"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-60"/>
+      <column name="text" value="What is one thing you want to surrender to God before this year ends?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="59"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Liturgical seasonal (12) — qotd-61..72, display_order 60..71.
+         Frontend's `liturgicalSeason` field is dropped at the boundary
+         (column doesn't exist; theme='seasonal' is the canonical value). -->
+
+    <!-- Advent (3) — qotd-61..63 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-61"/>
+      <column name="text" value="What are you most anticipating about the coming of Christ this Advent season?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Advent is a season of waiting and hope."/>
+      <column name="display_order" valueNumeric="60"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-62"/>
+      <column name="text" value="How are you preparing your heart for Christmas this Advent?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="61"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-63"/>
+      <column name="text" value="What does the theme of hope mean to you during this Advent season?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Hope is one of the four Advent themes: hope, peace, joy, and love."/>
+      <column name="display_order" valueNumeric="62"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Lent (3) — qotd-64..66 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-64"/>
+      <column name="text" value="What spiritual practice are you taking on or giving up this Lenten season?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Lent is a season of self-examination and renewal."/>
+      <column name="display_order" valueNumeric="63"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-65"/>
+      <column name="text" value="How is God drawing you closer to Himself during this season of Lent?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="64"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-66"/>
+      <column name="text" value="What area of your life is God inviting you to surrender this Lent?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Surrender is not defeat — it is trust."/>
+      <column name="display_order" valueNumeric="65"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Easter (3) — qotd-67..69 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-67"/>
+      <column name="text" value="How does the resurrection of Jesus give you hope in your daily life?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Easter is not just a day — it is a season of celebration."/>
+      <column name="display_order" valueNumeric="66"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-68"/>
+      <column name="text" value="What area of your life feels like it needs resurrection right now?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="67"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-69"/>
+      <column name="text" value="How are you celebrating the new life that Easter represents?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="New life can show up in unexpected places."/>
+      <column name="display_order" valueNumeric="68"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <!-- Christmas (3) — qotd-70..72 -->
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-70"/>
+      <column name="text" value="What does the birth of Jesus mean for your life today?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="Christmas is the celebration of God entering our world."/>
+      <column name="display_order" valueNumeric="69"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-71"/>
+      <column name="text" value="How are you sharing the love of Christ with others this Christmas season?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="display_order" valueNumeric="70"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+    <insert tableName="qotd_questions">
+      <column name="id" value="qotd-72"/>
+      <column name="text" value="What gift of God are you most grateful for this Christmas?"/>
+      <column name="theme" value="seasonal"/>
+      <column name="hint" value="The greatest gift is not under the tree."/>
+      <column name="display_order" valueNumeric="71"/>
+      <column name="is_active" valueBoolean="true"/>
+    </insert>
+
+    <rollback>
+      <!-- Reverse FK order: reactions → comments → posts → users; qotd_questions independent. -->
+      <delete tableName="post_reactions">
+        <where>user_id = '00000000-0000-0000-0000-000000000101'::uuid AND reaction_type = 'praying' AND post_id IN ('00000000-0000-0000-0000-000000000207'::uuid, '00000000-0000-0000-0000-000000000209'::uuid, '00000000-0000-0000-0000-00000000020b'::uuid, '00000000-0000-0000-0000-000000000212'::uuid, '00000000-0000-0000-0000-000000000218'::uuid)</where>
+      </delete>
+      <delete tableName="post_comments">
+        <where>id BETWEEN '00000000-0000-0000-0000-000000000301'::uuid AND '00000000-0000-0000-0000-000000000323'::uuid</where>
+      </delete>
+      <delete tableName="posts">
+        <where>id BETWEEN '00000000-0000-0000-0000-000000000201'::uuid AND '00000000-0000-0000-0000-000000000218'::uuid</where>
+      </delete>
+      <delete tableName="users">
+        <where>id BETWEEN '00000000-0000-0000-0000-000000000101'::uuid AND '00000000-0000-0000-0000-00000000010a'::uuid</where>
+      </delete>
+      <delete tableName="qotd_questions">
+        <where>id LIKE 'qotd-%'</where>
+      </delete>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

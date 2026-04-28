@@ -147,6 +147,44 @@ Run via `./mvnw test -Dtest=DevSeedBcryptHashGenerator`, copy the printed hash, 
 
 The dev password is plaintext in this README because dev data is scoped to local machines only — the dev context is blocked in prod by `application-prod.properties` (`spring.liquibase.contexts=production`) and in tests by `AbstractIntegrationTest` / `AbstractDataJpaTest` (`spring.liquibase.contexts=test`).
 
+### Dev seed mock prayer-wall content (Spec 3.2)
+
+In addition to the 5 auth-seed users above, `contexts/dev-seed.xml` includes a separate Spec 3.2 mock-seed file (`contexts/2026-04-27-021-prayer-wall-mock-seed.xml`) that loads ten **non-loginable** mock prayer-wall users plus realistic Prayer Wall content under the same `context="dev"` gating.
+
+The mock users are **separate** from the 5 auth-seed users. They share the same dev BCrypt hash (so technically they're loginable) but their email pattern (`mock-{name}@worshiproom.local`) and their role as "content authors" rather than "test accounts" make the distinction clear in dev tools.
+
+| Group | Count | Purpose |
+|-------|-------|---------|
+| Mock users | 10 | UUIDs `...0101`..`...010a`; authors of mock prayers/comments/reactions |
+| Mock prayers | 24 | UUIDs `...0201`..`...0218`; 3 QOTD responses + 3 mental-health + 18 regular |
+| Mock comments | 35 | UUIDs `...0301`..`...0323` |
+| Mock reactions | 5 | composite-PK rows (post_id, user_id=`...0101` Sarah, reaction_type='praying') |
+| QOTD questions | 72 | ids `qotd-1`..`qotd-72`; 60 general + 12 liturgical-season |
+
+**Verify the seed loaded:**
+
+```sh
+psql -h localhost -U worshiproom -d worshiproom_dev -c "
+  SELECT 'users' AS table_name, COUNT(*) FROM users
+  UNION ALL SELECT 'posts',   COUNT(*) FROM posts
+  UNION ALL SELECT 'post_comments',  COUNT(*) FROM post_comments
+  UNION ALL SELECT 'post_reactions', COUNT(*) FROM post_reactions
+  UNION ALL SELECT 'qotd_questions', COUNT(*) FROM qotd_questions;
+"
+```
+
+Expected output (after a fresh `docker compose down -v && docker compose up -d postgres && ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`):
+
+- `users`: 15 (5 Phase 1.8 auth + 10 Phase 3.2 mock)
+- `posts`: 24
+- `post_comments`: 35
+- `post_reactions`: 5
+- `qotd_questions`: 72
+
+**Reset path:** same as auth seed — `docker compose down -v` destroys the volume, next backend boot reapplies all migrations including both seeds.
+
+**Production safety:** `application-prod.properties` sets `spring.liquibase.contexts=production` — the `context="dev"` mock seed is NEVER applied to production deployments. Tests under `AbstractIntegrationTest` pin `contexts=test`, so the mock seed is also NEVER applied during the test suite (verified by `MockSeedDevContextTest.mockSeedDoesNotLoadUnderTestContext`).
+
 ## Key files referenced by project rules
 
 - `.claude/rules/03-backend-standards.md` — Spring Boot conventions, API contract, `@RestControllerAdvice` scoping patterns
