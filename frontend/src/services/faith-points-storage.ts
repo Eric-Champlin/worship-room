@@ -7,7 +7,7 @@ const POINTS_KEY = 'wr_faith_points';
 const STREAK_KEY = 'wr_streak';
 
 const ACTIVITY_BOOLEAN_KEYS: ActivityType[] = [
-  'mood', 'pray', 'listen', 'prayerWall', 'readingPlan', 'meditate', 'journal', 'gratitude', 'reflection', 'challenge', 'localVisit', 'devotional',
+  'mood', 'pray', 'listen', 'prayerWall', 'readingPlan', 'meditate', 'journal', 'gratitude', 'reflection', 'challenge', 'localVisit', 'devotional', 'intercession',
 ];
 
 export function freshDailyActivities(): DailyActivities {
@@ -17,6 +17,7 @@ export function freshDailyActivities(): DailyActivities {
     challenge: false,
     localVisit: false,
     devotional: false,
+    intercession: false,
     pointsEarned: 0, multiplier: 1,
   };
 }

@@ -53,11 +53,13 @@ class PostVisibilityTransitionTest {
 
     @BeforeEach
     void setUp() {
+        org.owasp.html.PolicyFactory htmlSanitizerPolicy =
+                org.owasp.html.Sanitizers.FORMATTING.and(org.owasp.html.Sanitizers.LINKS);
         postService = new PostService(
                 postRepository, postMapper, userResolverService,
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
-                entityManager);
+                htmlSanitizerPolicy, entityManager);
     }
 
     private static Post buildPost(UUID id, UUID userId,

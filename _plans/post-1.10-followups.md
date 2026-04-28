@@ -282,57 +282,59 @@ These limits are not enforced by 2.5.3.
 
 ---
 
-## 15. LLM-classifier-based crisis detection on post creation (deferred)
+## 15. LLM-classifier-based crisis detection on post + comment creation (deferred)
 
-**Status:** Deferred per Spec 3.5 Divergence 1, 2026-04-28.
+**Status:** Deferred per Spec 3.5 Divergence 1, 2026-04-28. Extended to comments per Spec 3.6, 2026-04-28.
 
 **Owner:** Future spec, likely Phase 4 once production keyword-detector signal is collected.
 
-**Approach:** Per `01-ai-safety.md`: route through `/api/v1/proxy/ai/*` Gemini, parse JSON `{ isCrisis, confidence, category }`, fail-closed on parse failure (UI shows resources), do NOT auto-flag on parse failure (no admin alert). Composes with Spec 3.5's `PostCrisisDetector` keyword path; both run, OR semantics. Consume signal from `posts.crisis_flag` accumulation to tune classifier threshold.
+**Approach:** Per `01-ai-safety.md`: route through `/api/v1/proxy/ai/*` Gemini, parse JSON `{ isCrisis, confidence, category }`, fail-closed on parse failure (UI shows resources), do NOT auto-flag on parse failure (no admin alert). Composes with `PostCrisisDetector` and `CommentCrisisDetector` keyword paths; both run, OR semantics. Consume signal from `posts.crisis_flag` and `post_comments.crisis_flag` accumulation to tune classifier threshold.
 
-**Why deferred:** Spec 3.5 ships keyword-only to match existing detector pattern (deterministic, no upstream timeout failure modes), and to collect production false-positive/false-negative signal before tuning a classifier.
+**Applies to comments (Spec 3.6) too** — replace `CommentCrisisDetector.detectsCrisis` keyword check with the same LLM classifier. The two detectors share `PostCrisisDetector.SELF_HARM_KEYWORDS` structurally, so the LLM upgrade is a single substitution against both code paths.
+
+**Why deferred:** Spec 3.5/3.6 ship keyword-only to match existing detector pattern (deterministic, no upstream timeout failure modes), and to collect production false-positive/false-negative signal before tuning a classifier.
 
 **Priority:** MEDIUM. Crisis detection is safety-critical; the keyword path is sufficient for MVP, but the classifier improves recall on phrasings like "I just want it all to stop."
 
 ---
 
-## 16. SMTP email alert on crisis-flagged posts (deferred)
+## 16. SMTP email alert on crisis-flagged posts + comments (deferred)
 
-**Status:** Deferred per Spec 3.5 Divergence 2, 2026-04-28.
+**Status:** Deferred per Spec 3.5 Divergence 2, 2026-04-28. Extended to comments per Spec 3.6, 2026-04-28.
 
 **Owner:** Phase 15.x (likely Phase 15.1b Welcome Email Sequence or 15.x SMTP cutover).
 
-**Approach:** When SMTP unblocks, add `EmailService.sendCrisisAlert(postId, userId)` call to `CrisisAlertService.alert(...)`. The Sentry alert continues alongside (defense-in-depth: if SMTP queues fail or admin email filters bury the message, Sentry is the second channel).
+**Approach:** When SMTP unblocks, add `EmailService.sendCrisisAlert(contentId, userId, type)` call to `CrisisAlertService.alert(...)`. `CrisisAlertService` already supports `ContentType.COMMENT` (post-Spec-3.6); the email template MUST distinguish post vs comment in the subject line so moderators can triage at-a-glance. The Sentry alert continues alongside (defense-in-depth: if SMTP queues fail or admin email filters bury the message, Sentry is the second channel).
 
-**Why deferred:** SMTP infrastructure not shipped (Phase 1.5b–g specs are SMTP-blocked). Spec 3.5 uses Sentry + `posts.crisis_flag=true` as the alert mechanism for now.
+**Why deferred:** SMTP infrastructure not shipped (Phase 1.5b–g specs are SMTP-blocked). Spec 3.5/3.6 use Sentry + `crisis_flag=true` columns as the alert mechanism for now.
 
 **Priority:** HIGH (when SMTP unblocks). Email alerts are the established admin notification channel for safety-critical events; Sentry is a defensible interim but not the long-term answer.
 
 ---
 
-## 17. `@RequireVerifiedEmail` gate on post writes (deferred)
+## 17. `@RequireVerifiedEmail` gate on post + comment writes (deferred)
 
-**Status:** Deferred per Spec 3.5 recon, 2026-04-28.
+**Status:** Deferred per Spec 3.5 recon, 2026-04-28. Extended to comments per Spec 3.6, 2026-04-28.
 
 **Owner:** Phase 1.5d (Email Verification spec) when SMTP unblocks.
 
-**Approach:** Once Spec 1.5d ships and `@RequireVerifiedEmail` annotation exists in the codebase, apply it to `POST /api/v1/posts`, `PATCH /api/v1/posts/{id}`, and (if appropriate) write endpoints in subsequent specs. Per `02-security.md`, writes require verified email; reads have a 7-day grace.
+**Approach:** Once Spec 1.5d ships and `@RequireVerifiedEmail` annotation exists in the codebase, apply it to `POST /api/v1/posts`, `PATCH /api/v1/posts/{id}`, **`POST /api/v1/posts/{postId}/comments`, `PATCH /api/v1/comments/{id}`**, and (if appropriate) write endpoints in subsequent specs. Per `02-security.md`, writes require verified email; reads have a 7-day grace.
 
-**Why deferred:** Phase 1.5d is in the SMTP-blocked cluster. Spec 3.5 dropped the gate to avoid blocking on the SMTP cluster; without 1.5d, `is_email_verified=false` for all users would block all post creation.
+**Why deferred:** Phase 1.5d is in the SMTP-blocked cluster. Spec 3.5/3.6 dropped the gate to avoid blocking on the SMTP cluster; without 1.5d, `is_email_verified=false` for all users would block all post and comment creation.
 
 **Priority:** MEDIUM. Email-verification gating prevents anonymous-disposable-account abuse but is a hardening pass, not an MVP blocker.
 
 ---
 
-## 18. Strict unknown-field rejection on post DTOs (deferred)
+## 18. Strict unknown-field rejection on post + comment DTOs (deferred)
 
-**Status:** Deferred per Spec 3.5 Deviation #1, 2026-04-28.
+**Status:** Deferred per Spec 3.5 Deviation #1, 2026-04-28. Same posture for `UpdateCommentRequest` per Spec 3.6, 2026-04-28.
 
 **Owner:** Future spec when stricter input validation matters operationally.
 
-**What's missing:** Spec 3.5 added `@JsonIgnoreProperties(ignoreUnknown = false)` to `CreatePostRequest` and `UpdatePostRequest` records expecting Jackson to throw `HttpMessageNotReadableException` on unknown fields like `id` or `crisisFlag`. In Spring Boot 3.5.11 / Jackson 2.x, the global setting `spring.jackson.deserialization.fail-on-unknown-properties=false` overrides the record-level annotation, so unknown fields are silently dropped instead of rejected.
+**What's missing:** Spec 3.5 added `@JsonIgnoreProperties(ignoreUnknown = false)` to `CreatePostRequest` and `UpdatePostRequest` records expecting Jackson to throw `HttpMessageNotReadableException` on unknown fields like `id` or `crisisFlag`. In Spring Boot 3.5.11 / Jackson 2.x, the global setting `spring.jackson.deserialization.fail-on-unknown-properties=false` overrides the record-level annotation, so unknown fields are silently dropped instead of rejected. **Same hardening for `UpdateCommentRequest` (Spec 3.6) — currently uses `@JsonIgnoreProperties(ignoreUnknown=true)` per Spec 3.5 deviation #1; future hardening switches to strict rejection for all PATCH bodies.**
 
-**Why this is currently safe:** The typed record fields are the only ones the service-layer code ever uses — silently-dropped unknown values cannot influence post state. `crisisFlag` is server-managed regardless of what the client sends; `id` is generated server-side via `UUID.randomUUID()`. The dropped values do not produce a path to security or correctness issues today.
+**Why this is currently safe:** The typed record fields are the only ones the service-layer code ever uses — silently-dropped unknown values cannot influence post or comment state. `crisisFlag` is server-managed regardless of what the client sends; `id` is generated server-side via `UUID.randomUUID()`; `parentCommentId` and `isHelpful` on comment PATCH are deliberately not editable. The dropped values do not produce a path to security or correctness issues today.
 
 **Approach:** Add a Spring `Jackson2ObjectMapperBuilderCustomizer` that enables `FAIL_ON_UNKNOWN_PROPERTIES` for these specific record types via a `BeanDeserializerModifier` + `MixIn`, OR convert the records to classes with explicit `@JsonCreator` constructors that validate field presence.
 

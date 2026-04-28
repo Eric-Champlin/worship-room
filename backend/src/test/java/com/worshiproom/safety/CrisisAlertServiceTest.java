@@ -21,8 +21,9 @@ import static org.mockito.Mockito.times;
 /**
  * Verifies the CrisisAlertService's contract:
  *  1. Sentry receives a WARNING-level message tagged {@code crisis_keyword_match}.
- *  2. The message text does NOT contain post content.
- *  3. Both post_id and user_id tags are attached.
+ *  2. The message text does NOT contain post / comment content body.
+ *  3. content_type, content_id, and user_id tags are attached.
+ *  4. The legacy {@code post_id} tag is NEVER set (Spec 3.6 generalization).
  */
 class CrisisAlertServiceTest {
 
@@ -42,13 +43,13 @@ class CrisisAlertServiceTest {
 
     @Test
     void alert_callsSentryCaptureMessageOnce() {
-        UUID postId = UUID.randomUUID();
+        UUID contentId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
-        service.alert(postId, userId);
+        service.alert(contentId, userId, ContentType.POST);
 
         sentryMock.verify(
-                () -> Sentry.captureMessage(eq("Crisis keyword match on prayer wall post"), any(ScopeCallback.class)),
+                () -> Sentry.captureMessage(eq("Crisis keyword match on prayer wall content"), any(ScopeCallback.class)),
                 times(1)
         );
     }
@@ -57,18 +58,18 @@ class CrisisAlertServiceTest {
     void alert_messageDoesNotContainContent() {
         // The message string is hardcoded in CrisisAlertService — verifying
         // it is short and scrubbed-of-content protects future maintainers
-        // from accidentally including post.content in the message string.
+        // from accidentally including content body in the message string.
         sentryMock.verify(
                 () -> Sentry.captureMessage(any(String.class), any(ScopeCallback.class)),
                 times(0)
         );  // Sanity: nothing called yet.
 
-        service.alert(UUID.randomUUID(), UUID.randomUUID());
+        service.alert(UUID.randomUUID(), UUID.randomUUID(), ContentType.POST);
 
         sentryMock.verify(
                 () -> Sentry.captureMessage(
                         org.mockito.ArgumentMatchers.argThat(msg ->
-                                msg != null && !msg.toLowerCase().contains("content") && msg.length() < 100),
+                                msg != null && msg.length() < 100),
                         any(ScopeCallback.class)
                 ),
                 times(1)
@@ -76,12 +77,10 @@ class CrisisAlertServiceTest {
     }
 
     @Test
-    void alert_attachesPostIdAndUserIdAsTags() {
-        UUID postId = UUID.randomUUID();
+    void alert_attachesContentIdUserIdAndContentTypeAsTagsForPost() {
+        UUID contentId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
-        // Use a real Scope captor pattern: invoke captured ScopeCallback against
-        // a stub Scope, assert the right tags were set.
         IScope capturedScope = new Scope(new SentryOptions());
 
         sentryMock.when(() -> Sentry.captureMessage(any(String.class), any(ScopeCallback.class)))
@@ -91,11 +90,54 @@ class CrisisAlertServiceTest {
                     return null;
                 });
 
-        service.alert(postId, userId);
+        service.alert(contentId, userId, ContentType.POST);
 
-        // Assert tags are populated. Sentry's Scope.getTags() returns the map.
         assertThat(capturedScope.getTags()).containsEntry("event_type", "crisis_keyword_match");
-        assertThat(capturedScope.getTags()).containsEntry("post_id", postId.toString());
+        assertThat(capturedScope.getTags()).containsEntry("content_type", "post");
+        assertThat(capturedScope.getTags()).containsEntry("content_id", contentId.toString());
         assertThat(capturedScope.getTags()).containsEntry("user_id", userId.toString());
+    }
+
+    @Test
+    void alert_attachesContentTypeCommentForCommentEvents() {
+        UUID contentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        IScope capturedScope = new Scope(new SentryOptions());
+
+        sentryMock.when(() -> Sentry.captureMessage(any(String.class), any(ScopeCallback.class)))
+                .thenAnswer(inv -> {
+                    ScopeCallback cb = inv.getArgument(1);
+                    cb.run(capturedScope);
+                    return null;
+                });
+
+        service.alert(contentId, userId, ContentType.COMMENT);
+
+        assertThat(capturedScope.getTags()).containsEntry("content_type", "comment");
+        assertThat(capturedScope.getTags()).containsEntry("content_id", contentId.toString());
+    }
+
+    @Test
+    void alert_doesNotSetLegacyPostIdTag() {
+        // Spec 3.6 generalized the event from post-specific to (post|comment).
+        // The old `post_id` Sentry tag must NOT be set on either content type
+        // — the canonical key is now `content_id`. This guards against
+        // anyone re-adding `setTag("post_id", ...)` during a refactor.
+        UUID contentId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        IScope capturedScope = new Scope(new SentryOptions());
+
+        sentryMock.when(() -> Sentry.captureMessage(any(String.class), any(ScopeCallback.class)))
+                .thenAnswer(inv -> {
+                    ScopeCallback cb = inv.getArgument(1);
+                    cb.run(capturedScope);
+                    return null;
+                });
+
+        service.alert(contentId, userId, ContentType.POST);
+
+        assertThat(capturedScope.getTags()).doesNotContainKey("post_id");
     }
 }

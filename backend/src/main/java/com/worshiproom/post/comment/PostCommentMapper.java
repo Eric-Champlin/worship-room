@@ -58,6 +58,28 @@ public class PostCommentMapper {
         }).toList();
     }
 
+    /**
+     * Maps a single {@link PostComment} for write-response use (Spec 3.6 — POST/PATCH).
+     * Replies are always empty — write responses do not include the threaded children.
+     * The author parameter is supplied by the caller so the service-layer author resolution
+     * (single user lookup) doesn't go through the batch path that {@link #toDtoList} uses.
+     */
+    public CommentDto toDto(PostComment comment, AuthorDto author) {
+        return new CommentDto(
+                comment.getId(),
+                comment.getPostId(),
+                comment.getParentCommentId(),
+                comment.getContent(),
+                comment.isHelpful(),
+                comment.getModerationStatus().value(),
+                comment.isCrisisFlag(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt(),
+                author,
+                List.of()
+        );
+    }
+
     private static CommentDto buildDto(PostComment c, Map<UUID, User> userById, List<CommentDto> replies) {
         User u = userById.get(c.getUserId());
         if (u == null) {

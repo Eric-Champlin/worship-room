@@ -10,13 +10,13 @@ import com.worshiproom.post.dto.PostDto;
 import com.worshiproom.post.dto.PostListMeta;
 import com.worshiproom.post.dto.PostListResponse;
 import com.worshiproom.post.dto.UpdatePostRequest;
+import com.worshiproom.safety.ContentType;
 import com.worshiproom.safety.CrisisDetectedEvent;
 import com.worshiproom.safety.CrisisResources;
 import com.worshiproom.safety.PostCrisisDetector;
 import com.worshiproom.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -76,6 +76,7 @@ public class PostService {
                        PostsIdempotencyService idempotencyService,
                        ApplicationEventPublisher eventPublisher,
                        PostsRateLimitConfig config,
+                       PolicyFactory htmlSanitizerPolicy,
                        EntityManager entityManager) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
@@ -87,10 +88,8 @@ public class PostService {
         this.idempotencyService = idempotencyService;
         this.eventPublisher = eventPublisher;
         this.config = config;
+        this.htmlSanitizerPolicy = htmlSanitizerPolicy;
         this.entityManager = entityManager;
-        // OWASP "no scripts, no styles, no event handlers" preset. For our use this
-        // strips ALL HTML tags from inputs that should be plain text.
-        this.htmlSanitizerPolicy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
     }
 
     public PostListResponse listFeed(
@@ -260,7 +259,7 @@ public class PostService {
         // Step 6 (continued, AFTER_COMMIT): publish crisis event AFTER save+flush so
         // the listener has a real persisted row by the time it fires AFTER_COMMIT.
         if (crisisFlag) {
-            eventPublisher.publishEvent(new CrisisDetectedEvent(saved.getId(), authorId));
+            eventPublisher.publishEvent(new CrisisDetectedEvent(saved.getId(), authorId, ContentType.POST));
         }
 
         // Step 10: store idempotency cache entry.
@@ -415,7 +414,7 @@ public class PostService {
 
         // AFTER_COMMIT crisis event if needed.
         if (fireCrisisEvent) {
-            eventPublisher.publishEvent(new CrisisDetectedEvent(saved.getId(), saved.getUserId()));
+            eventPublisher.publishEvent(new CrisisDetectedEvent(saved.getId(), saved.getUserId(), ContentType.POST));
         }
 
         // Step 11: NO activity recording on edit.

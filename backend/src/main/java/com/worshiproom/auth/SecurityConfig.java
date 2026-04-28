@@ -53,6 +53,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/posts/*").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/*").authenticated()
 
+                // Spec 3.6 — write methods on comments require authentication. Same
+                // first-match-wins rule as Spec 3.5: these come BEFORE OPTIONAL_AUTH_PATTERNS
+                // so the method-specific rule wins over the path-only permitAll on the
+                // GET path declared by Spec 3.4.
+                .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/comments").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/comments/*").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/*").authenticated()
+
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes
                 // them so a valid token extracts a principal for personalization.

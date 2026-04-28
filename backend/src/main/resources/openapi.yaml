@@ -1613,6 +1613,175 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
         '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [Posts]
+      summary: Create a comment on a post (Spec 3.6)
+      description: |
+        Creates a top-level comment OR a threaded reply (when `parentCommentId`
+        is set). The reply must reference a live comment on the same post; a
+        cross-post `parentCommentId` returns 400 INVALID_INPUT.
+
+        Sanitization strips all HTML before persisting. If the sanitized content
+        contains a self-harm keyword, `crisis_flag` is set TRUE and the response
+        carries an optional `crisisResources` block; the comment is still
+        created (per Spec D2 — surface resources, do not block content). The
+        Spec 3.5 / 3.6 generalized crisis event is published AFTER_COMMIT.
+
+        Rate-limited to 30 comment writes per hour per user (POST + PATCH +
+        DELETE share the bucket). On 429, includes `Retry-After` header.
+
+        Optional `Idempotency-Key` header de-duplicates identical retries within
+        a 24-hour window per (user, key); body-hash mismatch returns 422.
+
+        Records an `INTERCESSION` activity in the activity engine with
+        sourceFeature `prayer-wall-comment`. Increments `posts.comment_count`
+        and bumps `posts.last_activity_at` atomically (SQL-side).
+      operationId: createComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The parent post UUID.
+          schema: { type: string, format: uuid }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: |
+            Optional client-supplied idempotency key. Subsequent calls with the
+            same (user, key) and matching body hash return the cached response.
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCommentRequest' }
+      responses:
+        '201':
+          description: |
+            Comment created. Response includes the optional `crisisResources`
+            block when `crisis_flag` is true. `Location` header points at the
+            new comment's canonical URL.
+          headers:
+            Location:
+              description: URI of the new comment (`/api/v1/comments/{id}`).
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreateCommentResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422':
+          description: |
+            Idempotency-Key mismatch — the same key was previously used with a
+            different request body. Response code `IDEMPOTENCY_KEY_MISMATCH`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /api/v1/comments/{id}:
+    patch:
+      tags: [Posts]
+      summary: Edit a comment within the 5-minute edit window (Spec 3.6)
+      description: |
+        Partial update — only `content` is editable. Unknown fields (e.g.,
+        `parentCommentId`, `isHelpful`) are silently dropped per Jackson
+        `@JsonIgnoreProperties(ignoreUnknown=true)`. The 5-minute edit window
+        starts at `created_at`; past it, the endpoint returns
+        409 EDIT_WINDOW_EXPIRED.
+
+        Author or admin only — non-author non-admin returns 403 FORBIDDEN.
+        Soft-deleted comments return 404 NOT_FOUND.
+
+        Crisis re-detection runs on the new content. If the edit introduces a
+        self-harm keyword, `crisis_flag` is set true and a fresh crisis event
+        is published AFTER_COMMIT. The flag is NEVER cleared by author edit
+        (moderator-only clear).
+
+        Does NOT bump `posts.last_activity_at`. Does NOT record a new
+        intercession activity.
+
+        Shares the 30/hour bucket with POST and DELETE.
+      operationId: updateComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The comment UUID.
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateCommentRequest' }
+      responses:
+        '200':
+          description: Comment updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/CommentDto' }
+                  meta:
+                    type: object
+                    additionalProperties: true
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: |
+            Edit-window expired (5 minutes after `created_at`). Response code
+            `EDIT_WINDOW_EXPIRED`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+    delete:
+      tags: [Posts]
+      summary: Soft-delete a comment (Spec 3.6)
+      description: |
+        Soft-delete — content is preserved, `user_id` stays, `is_deleted` flips
+        true, `deleted_at` records the moment. The read endpoint filters
+        soft-deleted comments out of responses.
+
+        Idempotent: a second DELETE on an already-deleted comment by the same
+        author returns 204. A non-author attempting to delete an
+        already-deleted comment returns 403 (Spec D8 — owner UX wins over
+        theoretical privacy leak; UUIDs are not enumerable).
+
+        Author or admin only. Replies to the deleted comment are NOT
+        cascade-deleted — they stay attached with `parent_comment_id` pointing
+        at the soft-deleted parent.
+
+        SQL-side `comment_count` decrement with `> 0` guard ensures the
+        counter cannot drift negative under any race. Does NOT bump
+        `posts.last_activity_at`.
+
+        Shares the 30/hour bucket with POST and PATCH.
+      operationId: deleteComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: Comment soft-deleted (or already deleted — idempotent). }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
 
   /api/v1/users/me/reactions:
     get:
@@ -2837,6 +3006,61 @@ components:
           type: array
           items: { $ref: '#/components/schemas/CommentDto' }
         meta: { $ref: '#/components/schemas/PostListMeta' }
+
+    CreateCommentRequest:
+      description: |
+        Request body for POST /api/v1/posts/{id}/comments (Spec 3.6). Plain
+        text only — backend OWASP-strips all HTML before persisting and
+        validates the post-sanitization length. `parentCommentId` is optional;
+        when present, the service-layer validation enforces that the parent
+        exists, is not soft-deleted, and lives on the same post.
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          description: Plain text. HTML is sanitized server-side.
+        parentCommentId:
+          type: string
+          format: uuid
+          nullable: true
+          description: |
+            Optional. Must reference a live (not soft-deleted) comment on the
+            same post; otherwise 400 INVALID_INPUT.
+
+    UpdateCommentRequest:
+      description: |
+        Request body for PATCH /api/v1/comments/{id} (Spec 3.6). Only `content`
+        is editable. Unknown fields are silently dropped (Jackson
+        `@JsonIgnoreProperties(ignoreUnknown=true)`); `parentCommentId`,
+        `isHelpful`, `crisisFlag`, and other comment fields are NOT editable
+        via PATCH.
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+
+    CreateCommentResponse:
+      description: |
+        Response envelope for POST /api/v1/posts/{id}/comments (Spec 3.6).
+        When the comment trips the crisis-keyword detector, the optional
+        `crisisResources` block sits at the response root parallel to `data`.
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: '#/components/schemas/CommentDto' }
+        crisisResources:
+          $ref: '#/components/schemas/CrisisResourcesBlock'
+        meta:
+          type: object
+          required: [requestId]
+          properties:
+            requestId: { type: string }
 
     PerPostReaction:
       description: Per-post engagement flags inside the reactions map.

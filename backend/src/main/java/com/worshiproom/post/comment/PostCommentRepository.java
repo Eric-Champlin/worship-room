@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -22,4 +23,18 @@ public interface PostCommentRepository
     // Batch reply load (N+1 prevention per Spec 3.4 Watch-For #8).
     List<PostComment> findByParentCommentIdInAndIsDeletedFalseAndModerationStatusInOrderByCreatedAtAsc(
             Collection<UUID> parentIds, Collection<ModerationStatus> statuses);
+
+    // Spec 3.6 write-side helpers.
+
+    /** Live (not soft-deleted) comment lookup — used by updateComment + deleteComment. */
+    Optional<PostComment> findByIdAndIsDeletedFalse(UUID id);
+
+    /** Already-soft-deleted comment lookup — used by deleteComment idempotency check. */
+    Optional<PostComment> findByIdAndIsDeletedTrue(UUID id);
+
+    /**
+     * Cross-post threaded-reply validation — the parent comment must (a) belong to the same
+     * post the new reply is being posted on AND (b) not be soft-deleted. Spec D11.
+     */
+    Optional<PostComment> findByIdAndPostIdAndIsDeletedFalse(UUID id, UUID postId);
 }

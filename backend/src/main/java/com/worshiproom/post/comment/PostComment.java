@@ -13,11 +13,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Read-only JPA mapping for {@code post_comments} (Spec 3.1 changeset 015).
+ * JPA mapping for {@code post_comments} (Spec 3.1 changeset 015).
  *
- * <p>Spec 3.4 ships read endpoints only — write operations are added in
- * Spec 3.6. Timestamps and {@code id} are DB-managed; do not write them
- * from application code.
+ * <p>Spec 3.4 shipped read endpoints; Spec 3.6 enables writes (create / update / delete).
+ * {@code created_at} stays DB-managed (insertable=false, updatable=false). {@code updated_at}
+ * is DB-DEFAULT-NOW on insert (insertable=false) but service-managed on update — Spec 3.6's
+ * PATCH path explicitly assigns the timestamp so tests can pin it. {@code id} is application-set
+ * (random UUID at create time, see {@code PostCommentService.createComment}).
  */
 @Entity
 @Table(name = "post_comments")
@@ -58,10 +60,12 @@ public class PostComment {
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
+    // updatable defaults to true — service explicitly assigns updated_at on PATCH and DELETE.
+    // insertable=false because DB DEFAULT NOW() supplies the initial value.
+    @Column(name = "updated_at", nullable = false, insertable = false)
     private OffsetDateTime updatedAt;
 
-    protected PostComment() {}
+    public PostComment() {}
 
     public UUID getId() { return id; }
     public UUID getPostId() { return postId; }
@@ -75,6 +79,18 @@ public class PostComment {
     public boolean isCrisisFlag() { return crisisFlag; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
+
+    public void setId(UUID id) { this.id = id; }
+    public void setPostId(UUID postId) { this.postId = postId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
+    public void setParentCommentId(UUID parentCommentId) { this.parentCommentId = parentCommentId; }
+    public void setContent(String content) { this.content = content; }
+    public void setHelpful(boolean helpful) { this.isHelpful = helpful; }
+    public void setDeleted(boolean deleted) { this.isDeleted = deleted; }
+    public void setDeletedAt(OffsetDateTime deletedAt) { this.deletedAt = deletedAt; }
+    public void setModerationStatus(ModerationStatus moderationStatus) { this.moderationStatus = moderationStatus; }
+    public void setCrisisFlag(boolean crisisFlag) { this.crisisFlag = crisisFlag; }
+    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     @Override
     public boolean equals(Object o) {

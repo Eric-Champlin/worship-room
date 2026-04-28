@@ -23,7 +23,8 @@ export type ActivityType =
   | 'reflection'
   | 'challenge'
   | 'localVisit'
-  | 'devotional';
+  | 'devotional'
+  | 'intercession';
 
 export type CelebrationTier =
   | 'toast'

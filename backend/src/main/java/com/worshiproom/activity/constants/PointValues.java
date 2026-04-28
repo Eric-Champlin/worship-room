@@ -21,7 +21,8 @@ public final class PointValues {
         Map.entry(ActivityType.REFLECTION,   10),
         Map.entry(ActivityType.CHALLENGE,    20),
         Map.entry(ActivityType.LOCAL_VISIT,  10),
-        Map.entry(ActivityType.DEVOTIONAL,   10)
+        Map.entry(ActivityType.DEVOTIONAL,   10),
+        Map.entry(ActivityType.INTERCESSION, 10)
     );
 
     private PointValues() {}

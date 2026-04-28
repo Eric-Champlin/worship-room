@@ -56,7 +56,7 @@ const DEFAULT_STATE: FaithPointsState = {
   currentLevel: 1,
   levelName: 'Seedling',
   pointsToNextLevel: 100,
-  todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, readingPlan: false, meditate: false, journal: false, gratitude: false, reflection: false, challenge: false, localVisit: false, devotional: false },
+  todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, readingPlan: false, meditate: false, journal: false, gratitude: false, reflection: false, challenge: false, localVisit: false, devotional: false, intercession: false },
   todayPoints: 0,
   todayMultiplier: 1,
   currentStreak: 0,
@@ -80,6 +80,7 @@ function extractActivities(da: DailyActivities): Record<ActivityType, boolean> {
     challenge: da.challenge,
     localVisit: da.localVisit,
     devotional: da.devotional ?? false,
+    intercession: da.intercession ?? false,
   };
 }
 

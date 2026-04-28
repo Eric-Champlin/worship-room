@@ -57,11 +57,13 @@ class PostServiceWriteTest {
 
     @BeforeEach
     void setUp() {
+        org.owasp.html.PolicyFactory htmlSanitizerPolicy =
+                org.owasp.html.Sanitizers.FORMATTING.and(org.owasp.html.Sanitizers.LINKS);
         postService = new PostService(
                 postRepository, postMapper, userResolverService,
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
-                entityManager);
+                htmlSanitizerPolicy, entityManager);
     }
 
     private CreatePostRequest sampleRequest() {
@@ -140,7 +142,12 @@ class PostServiceWriteTest {
 
         postService.createPost(authorId, crisisRequest(), null, "rid");
 
-        verify(eventPublisher, times(1)).publishEvent(any(com.worshiproom.safety.CrisisDetectedEvent.class));
+        ArgumentCaptor<com.worshiproom.safety.CrisisDetectedEvent> eventCaptor =
+                ArgumentCaptor.forClass(com.worshiproom.safety.CrisisDetectedEvent.class);
+        verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
+        // Spec 3.6 — verify the event carries ContentType.POST.
+        assertThat(eventCaptor.getValue().type()).isEqualTo(com.worshiproom.safety.ContentType.POST);
+        assertThat(eventCaptor.getValue().authorId()).isEqualTo(authorId);
     }
 
     @Test

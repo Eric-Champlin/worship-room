@@ -18,7 +18,7 @@ export interface MoodEntry {
   timeOfDay?: 'morning' | 'evening';
 }
 
-export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan' | 'gratitude' | 'reflection' | 'challenge' | 'localVisit' | 'devotional';
+export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan' | 'gratitude' | 'reflection' | 'challenge' | 'localVisit' | 'devotional' | 'intercession';
 
 export interface DailyActivities {
   mood: boolean;
@@ -33,6 +33,7 @@ export interface DailyActivities {
   challenge: boolean;
   localVisit: boolean;
   devotional: boolean;
+  intercession: boolean;
   pointsEarned: number;
   multiplier: number;
 }

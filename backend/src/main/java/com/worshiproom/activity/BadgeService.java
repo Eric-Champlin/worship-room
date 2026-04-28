@@ -345,6 +345,7 @@ public class BadgeService {
             case READING_PLAN -> counts.readingPlan();
             case GRATITUDE -> counts.gratitude();
             case REFLECTION -> counts.reflection();
+            case INTERCESSION -> counts.intercessionCount();
             case MOOD, CHALLENGE, LOCAL_VISIT, DEVOTIONAL -> 0;
         };
     }
