@@ -94,7 +94,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 52  | 3.2  | Mock Data Seed Migration                       | M    | Low    | ✅     |
 | 53  | 3.3  | Posts Read Endpoints                           | L    | Medium | ✅     |
 | 54  | 3.4  | Comments, Reactions, Bookmarks Read Endpoints  | M    | Low    | ✅     |
-| 55  | 3.5  | Posts Write Endpoints (Create, Update, Delete) | XL   | High   | ⬜     |
+| 55  | 3.5  | Posts Write Endpoints (Create, Update, Delete) | XL   | High   | ✅     |
 | 56  | 3.6  | Comments Write Endpoints                       | L    | High   | ⬜     |
 | 57  | 3.7  | Reactions and Bookmarks Write Endpoints        | L    | Medium | ⬜     |
 | 58  | 3.8  | Reports Write Endpoint                         | M    | Medium | ⬜     |

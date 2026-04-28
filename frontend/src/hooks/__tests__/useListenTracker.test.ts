@@ -8,11 +8,32 @@ vi.mock('@/components/audio/AudioProvider', () => ({
   useAudioState: () => ({ isPlaying: mockIsPlaying }),
 }));
 
+// Mock activity-backend and env modules so dual-write (followup #10) tests can
+// control the flag and assert the backend call. Default
+// `isBackendActivityEnabled` returns false → dual-write skipped → existing
+// tests run unchanged.
+vi.mock('@/services/activity-backend', () => ({
+  postActivityToBackend: vi.fn(),
+}));
+
+vi.mock('@/lib/env', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/env')>();
+  return {
+    ...actual,
+    isBackendActivityEnabled: vi.fn(() => false),
+  };
+});
+
+import { postActivityToBackend } from '@/services/activity-backend';
+import { isBackendActivityEnabled } from '@/lib/env';
+
 beforeEach(() => {
   localStorage.clear();
   vi.useFakeTimers();
   vi.setSystemTime(new Date(2026, 2, 16, 12, 0, 0));
   mockIsPlaying = false;
+  vi.mocked(isBackendActivityEnabled).mockReturnValue(false);
+  vi.mocked(postActivityToBackend).mockReset();
 });
 
 afterEach(() => {
@@ -173,5 +194,48 @@ describe('useListenTracker', () => {
     // Advance past threshold — should NOT record since unmounted
     vi.advanceTimersByTime(30_000);
     expect(localStorage.getItem('wr_daily_activities')).toBeNull();
+  });
+
+  describe('backend dual-write (followup #10)', () => {
+    it('calls postActivityToBackend once with ("listen", "music") when flag is enabled', () => {
+      vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+      vi.mocked(postActivityToBackend).mockResolvedValue(undefined);
+
+      mockIsPlaying = true;
+      renderHook(() => useListenTracker(true));
+
+      vi.advanceTimersByTime(35_000);
+
+      // localStorage write still happens
+      const log = JSON.parse(localStorage.getItem('wr_daily_activities')!);
+      expect(log['2026-03-16'].listen).toBe(true);
+
+      // Backend dual-write fires exactly once with the right args
+      expect(postActivityToBackend).toHaveBeenCalledTimes(1);
+      expect(postActivityToBackend).toHaveBeenCalledWith('listen', 'music');
+    });
+
+    it('does NOT call postActivityToBackend when flag is disabled', () => {
+      vi.mocked(isBackendActivityEnabled).mockReturnValue(false);
+      const eventListener = vi.fn();
+      window.addEventListener('wr:activity-recorded', eventListener);
+
+      mockIsPlaying = true;
+      renderHook(() => useListenTracker(true));
+
+      vi.advanceTimersByTime(35_000);
+
+      // localStorage write still happens
+      const log = JSON.parse(localStorage.getItem('wr_daily_activities')!);
+      expect(log['2026-03-16'].listen).toBe(true);
+
+      // wr:activity-recorded event still fires
+      expect(eventListener).toHaveBeenCalledTimes(1);
+
+      // But no backend call
+      expect(postActivityToBackend).not.toHaveBeenCalled();
+
+      window.removeEventListener('wr:activity-recorded', eventListener);
+    });
   });
 });

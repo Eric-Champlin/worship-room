@@ -155,7 +155,11 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 
 ---
 
-## 10. Activity dual-write gap: `wr:activity-recorded` event paths bypass Spec 2.7 (medium priority)
+## 10. Activity dual-write gap: `wr:activity-recorded` event paths bypass Spec 2.7 (resolved)
+
+**Status:** Resolved 2026-04-28.
+
+**Fix shipped:** Extracted `postActivityToBackend` to `frontend/src/services/activity-backend.ts`; `useListenTracker.recordListenActivity` now invokes it gated by `isBackendActivityEnabled()`. Spec 2.10 backfill remains gated on useFaithPoints.recordActivity (intentional — fires once per session on any non-music activity).
 
 **Captured:** During Spec 2.7 execution, 2026-04-26.
 

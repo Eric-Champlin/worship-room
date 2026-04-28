@@ -27,14 +27,13 @@ import {
   clearNewlyEarned as clearNewlyEarnedData,
 } from '@/services/badge-storage';
 import { checkForNewBadges } from '@/services/badge-engine';
-import { apiFetch } from '@/lib/api-client';
 import { isBackendActivityEnabled } from '@/lib/env';
+import { postActivityToBackend } from '@/services/activity-backend';
 import {
   isBackfillCompleted,
   markBackfillCompleted,
   triggerBackfill,
 } from '@/services/activity-backfill';
-import type { ActivityRequest } from '@/types/api/activity';
 import type { ActivityType, DailyActivities, FaithPointsData, StreakData, StreakRepairData } from '@/types/dashboard';
 
 interface FaithPointsState {
@@ -130,30 +129,6 @@ function loadState(): FaithPointsState {
 const noopRecordActivity = (_type: ActivityType, _sourceFeature: string) => {};
 const noopClearNewlyEarned = () => {};
 const noopRepairStreak = (_useFreeRepair: boolean) => {};
-
-/**
- * Fire-and-forget POST to /api/v1/activity. Spec 2.7 dual-write.
- *
- * NEVER awaited by callers — failures are logged and swallowed.
- * The backend is a shadow copy; localStorage stays canonical for reads.
- * Authorization header is attached automatically by apiFetch via auth-storage.
- *
- * `apiFetch<void>` matches the existing pattern at auth-service.ts:131 for
- * endpoints whose response is intentionally discarded.
- */
-async function postActivityToBackend(
-  type: ActivityType,
-  sourceFeature: string,
-): Promise<void> {
-  const body: ActivityRequest = {
-    activityType: type,
-    sourceFeature,
-  };
-  await apiFetch<void>('/api/v1/activity', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
 
 export function useFaithPoints(): FaithPointsState & {
   recordActivity: (type: ActivityType, sourceFeature: string) => void

@@ -3778,9 +3778,9 @@ qotd_questions
 - [ ] Edit window is 5 minutes from creation (after that, content is immutable)
 - [ ] Marking answered sets `is_answered`, `answered_text`, `answered_at`
 - [ ] `DELETE /api/v1/posts/{id}` soft-deletes (does not hard-delete)
-- [ ] Soft-deleted posts return 404 from the read endpoints
-- [ ] OpenAPI spec includes all endpoints
-- [ ] At least 35 integration tests cover happy paths, validation, ownership, crisis detection, rate limiting, anonymous handling
+- \[ \] Soft-deleted posts return 404 from the read endpoints
+- \[ \] OpenAPI spec includes all endpoints
+- \[ \] At least 35 integration tests cover happy paths, validation, ownership, crisis detection, rate limiting, anonymous handling
 
 ### Spec 3.6 — Comments Write Endpoints
 
@@ -3794,14 +3794,14 @@ qotd_questions
 
 **Acceptance criteria:**
 
-- [ ] Create comment increments parent post's `comment_count`
-- [ ] Create comment updates parent post's `last_activity_at`
-- [ ] Crisis detection runs on every comment
-- [ ] Rate limit enforced
-- [ ] Threaded replies (parent_comment_id) accepted
-- [ ] 5-minute edit window
-- [ ] Soft delete
-- [ ] At least 25 integration tests
+- \[ \] Create comment increments parent post's `comment_count`
+- \[ \] Create comment updates parent post's `last_activity_at`
+- \[ \] Crisis detection runs on every comment
+- \[ \] Rate limit enforced
+- \[ \] Threaded replies (parent_comment_id) accepted
+- \[ \] 5-minute edit window
+- \[ \] Soft delete
+- \[ \] At least 25 integration tests
 
 ### Phase 3.6 Addendum — Comment Edit Window and Error Code
 
@@ -3819,13 +3819,13 @@ Comments inherit the same 5-minute edit window as posts (consistent with the exi
 
 **Acceptance criteria:**
 
-- [ ] Reacting twice does not double-count (idempotent)
-- [ ] Unreacting decrements counter
-- [ ] Bookmarking twice does not double-count
-- [ ] Counters update transactionally
-- [ ] Reaction creates an intercession activity (faith points)
-- [ ] Reaction deletion does not subtract points
-- [ ] At least 15 integration tests
+- \[ \] Reacting twice does not double-count (idempotent)
+- \[ \] Unreacting decrements counter
+- \[ \] Bookmarking twice does not double-count
+- \[ \] Counters update transactionally
+- \[ \] Reaction creates an intercession activity (faith points)
+- \[ \] Reaction deletion does not subtract points
+- \[ \] At least 15 integration tests
 
 ### Phase 3.7 Addendum — Reaction Endpoint Signature for Light a Candle
 
@@ -3843,11 +3843,11 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 
 **Acceptance criteria:**
 
-- [ ] Reporting a post creates a row in `post_reports`
-- [ ] Reporting a comment creates a row with `comment_id` set, `post_id` null
-- [ ] Duplicate report from same user is idempotent
-- [ ] Rate limit: 10 reports per hour per user
-- [ ] At least 10 integration tests
+- \[ \] Reporting a post creates a row in `post_reports`
+- \[ \] Reporting a comment creates a row with `comment_id` set, `post_id` null
+- \[ \] Duplicate report from same user is idempotent
+- \[ \] Rate limit: 10 reports per hour per user
+- \[ \] At least 10 integration tests
 
 ### Spec 3.9 — QOTD Backend Migration
 
@@ -3874,12 +3874,12 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/v1/qotd/today` returns the same question for the same day
-- [ ] Returns a different question on the next day
-- [ ] Day-of-year modulo 60 produces the same rotation as the existing frontend logic
-- [ ] Caching works (no DB query on every request within a day)
-- [ ] Frontend reads from API in production
-- [ ] At least 8 unit/integration tests
+- \[ \] `GET /api/v1/qotd/today` returns the same question for the same day
+- \[ \] Returns a different question on the next day
+- \[ \] Day-of-year modulo 60 produces the same rotation as the existing frontend logic
+- \[ \] Caching works (no DB query on every request within a day)
+- \[ \] Frontend reads from API in production
+- \[ \] At least 8 unit/integration tests
 
 ### Spec 3.10 — Frontend Service API Implementations
 
@@ -3904,15 +3904,15 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 
 **Acceptance criteria:**
 
-- [ ] All Prayer Wall service functions have an API implementation with matching signatures
-- [ ] Flag off: existing localStorage behavior unchanged
-- [ ] Flag on: all Prayer Wall reads come from backend, all writes go to backend
-- [ ] Optimistic reaction updates rollback on backend error
-- [ ] Pagination works correctly through the swap layer
-- [ ] Network errors surface as toasts
-- [ ] Auth errors trigger AuthModal
-- [ ] Rate limit errors show friendly message
-- [ ] At least 25 tests covering both flag states with MSW mocks
+- \[ \] All Prayer Wall service functions have an API implementation with matching signatures
+- \[ \] Flag off: existing localStorage behavior unchanged
+- \[ \] Flag on: all Prayer Wall reads come from backend, all writes go to backend
+- \[ \] Optimistic reaction updates rollback on backend error
+- \[ \] Pagination works correctly through the swap layer
+- \[ \] Network errors surface as toasts
+- \[ \] Auth errors trigger AuthModal
+- \[ \] Rate limit errors show friendly message
+- \[ \] At least 25 tests covering both flag states with MSW mocks
 
 ### Spec 3.11 — Reactive Store Backend Adapter
 
@@ -3932,13 +3932,13 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 
 **Acceptance criteria:**
 
-- [ ] Hook return shape unchanged
-- [ ] On login, store hydrates from backend
-- [ ] Toggling praying calls backend AND updates cache
-- [ ] Backend error rolls back the cache and shows a toast
-- [ ] Offline (network error) falls back to localStorage cache
-- [ ] BB-45 subscription tests still pass
-- [ ] At least 12 new tests cover backend integration
+- \[ \] Hook return shape unchanged
+- \[ \] On login, store hydrates from backend
+- \[ \] Toggling praying calls backend AND updates cache
+- \[ \] Backend error rolls back the cache and shows a toast
+- \[ \] Offline (network error) falls back to localStorage cache
+- \[ \] BB-45 subscription tests still pass
+- \[ \] At least 12 new tests cover backend integration
 
 ### Spec 3.12 — Phase 3 Cutover
 
@@ -3948,19 +3948,19 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 - **Prerequisites:** 3.11
 - **Goal:** Flip `VITE_USE_BACKEND_PRAYER_WALL` to `true`. End-to-end Playwright test of Prayer Wall against the backend. Cross-device sync verification.
 
-**Approach:** Default the flag on. Playwright test: register a user, post a prayer, react to it, comment on it, bookmark it, navigate to the dashboard, verify everything is present, log out, log back in, verify everything still present. Manual cross-device test: post on Eric's laptop, refresh on his phone, verify the post is there. Update CLAUDE.md and `_plans/forums-wave/phase03-cutover-checklist.md`.
+**Approach:** Default the flag on. Playwright test: register a user, post a prayer, react to it, comment on it, bookmark it, navigate to the dashboard, verify everything is present, log out, log back in, verify everything still present. Manual cross-device test: post on Eric's laptop, refresh on his phone, verify the post is there. Update [CLAUDE.md](http://CLAUDE.md) and `_plans/forums-wave/phase03-cutover-checklist.md`.
 
 **Acceptance criteria:**
 
-- [ ] Flag default `true` in `.env.example` and Vite config
-- [ ] Playwright test passes end-to-end
-- [ ] Cross-device manual test passes (post on laptop → see on phone)
-- [ ] Reactions persist across devices
-- [ ] Comments persist across devices
-- [ ] Bookmarks persist across devices
-- [ ] CLAUDE.md updated
-- [ ] Cutover checklist completed
-- [ ] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase3-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
+- \[ \] Flag default `true` in `.env.example` and Vite config
+- \[ \] Playwright test passes end-to-end
+- \[ \] Cross-device manual test passes (post on laptop → see on phone)
+- \[ \] Reactions persist across devices
+- \[ \] Comments persist across devices
+- \[ \] Bookmarks persist across devices
+- \[ \] [CLAUDE.md](http://CLAUDE.md) updated
+- \[ \] Cutover checklist completed
+- \[ \] Universal Rule 17 per-phase accessibility smoke test passes: axe-core automated scan on routes and components introduced or modified in this phase returns zero CRITICAL violations; keyboard-only navigation walkthrough of this phase's primary user flows completes without dead-ends; VoiceOver spot-check on the 2-3 most complex interactions introduced in this phase completes without blocking issues; evidence committed to `_cutover-evidence/phase3-a11y-smoke.json` (axe-core report) plus a brief markdown note recording keyboard and VoiceOver outcomes
 
 **Out-of-band notes for Eric:** This is the moment Prayer Wall becomes a real social product. Every action you take now lives on a server and syncs across devices. The next phases (post type expansion, hero features, integrations) build on this foundation but the foundation itself is now stable.
 
@@ -3996,11 +3996,11 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 
 **Acceptance criteria:**
 
-- [ ] `POST_TYPES` constant has all 5 entries with: `id`, `label`, `pluralLabel`, `icon` (Lucide name), `accentColor` (Tailwind class), `expiryRule`, `composerCopy`, `cardCopy`
-- [ ] Brand voice review of every copy string passes the pastor's wife test
-- [ ] Backend enum matches frontend strings character-for-character
-- [ ] Frontend tests verify constants match backend enum via OpenAPI types
-- [ ] At least 8 unit tests
+- \[ \] `POST_TYPES` constant has all 5 entries with: `id`, `label`, `pluralLabel`, `icon` (Lucide name), `accentColor` (Tailwind class), `expiryRule`, `composerCopy`, `cardCopy`
+- \[ \] Brand voice review of every copy string passes the pastor's wife test
+- \[ \] Backend enum matches frontend strings character-for-character
+- \[ \] Frontend tests verify constants match backend enum via OpenAPI types
+- \[ \] At least 8 unit tests
 
 ### Spec 4.2 — Prayer Request Polish
 

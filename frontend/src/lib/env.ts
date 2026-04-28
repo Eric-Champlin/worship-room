@@ -78,7 +78,9 @@ const USE_BACKEND_ACTIVITY = import.meta.env.VITE_USE_BACKEND_ACTIVITY as string
  *
  * Default: false. Cutover (flag default flip) is owned by Spec 2.9.
  *
- * Used by: useFaithPoints (Spec 2.7 — Frontend Activity Dual-Write).
+ * Used by:
+ * - useFaithPoints (Spec 2.7 — Frontend Activity Dual-Write)
+ * - useListenTracker (post-1.10 followup #10 — music listen dual-write)
  */
 export function isBackendActivityEnabled(): boolean {
   return USE_BACKEND_ACTIVITY === 'true'

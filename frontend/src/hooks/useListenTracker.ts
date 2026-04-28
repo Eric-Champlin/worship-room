@@ -11,6 +11,8 @@ import {
   freshDailyActivities,
 } from '@/services/faith-points-storage';
 import { getLevelForPoints } from '@/constants/dashboard/levels';
+import { isBackendActivityEnabled } from '@/lib/env';
+import { postActivityToBackend } from '@/services/activity-backend';
 
 const LISTEN_THRESHOLD_MS = 30_000; // 30 seconds
 const POLL_INTERVAL_MS = 5_000; // Check every 5 seconds
@@ -112,5 +114,11 @@ function recordListenActivity(today: string, isAuthenticated: boolean): void {
   if (success) {
     // Notify other hooks (e.g., useFaithPoints on dashboard) of the state change
     window.dispatchEvent(new CustomEvent('wr:activity-recorded', { detail: { type: 'listen' } }));
+
+    if (isBackendActivityEnabled()) {
+      postActivityToBackend('listen', 'music').catch((err) => {
+        console.warn('[useListenTracker] backend dual-write failed:', err);
+      });
+    }
   }
 }
