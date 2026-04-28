@@ -1783,18 +1783,212 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '429': { $ref: '#/components/responses/RateLimited' }
 
+  /api/v1/posts/{id}/reactions:
+    post:
+      tags: [Posts]
+      summary: Toggle a reaction (praying or candle) on a post (Spec 3.7)
+      description: |
+        Toggles the (postId, viewerId, reactionType) reaction row. If the row
+        does not exist, it is inserted and the response carries `state="added"`
+        with HTTP 201. If the row exists, it is deleted and the response
+        carries `state="removed"` with HTTP 200. The post's praying_count and
+        candle_count are returned in the body so the frontend can update its
+        local cache without a re-read.
+
+        Reaction add fires an INTERCESSION activity event (faith points
+        credited per the activity engine's per-user-per-day idempotency).
+        Reaction remove does NOT fire an activity event — no negative points.
+
+        **Toggle retry semantic (Spec 3.7 R16):** On a network drop where the
+        client retries the same POST, the second call inverts the toggle
+        (because the first call's row was already inserted). The `state` field
+        in the response lets the frontend detect this case and reconcile.
+        Idempotency-Key cache is not used — composite-key DB constraint
+        provides natural idempotency for the deterministic-by-key end state.
+
+        Rate limit: 60 reactions per hour per user (POST + DELETE share the
+        bucket).
+
+        Returns 404 if the post is not visible to the viewer (soft-deleted,
+        private and not the viewer's, or not friends-with author for friends-
+        visibility posts) — anti-enumeration: same code for all three.
+      operationId: toggleReaction
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ToggleReactionRequest' }
+      responses:
+        '200':
+          description: Reaction removed (state="removed")
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ToggleReactionResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '201':
+          description: Reaction added (state="added")
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ToggleReactionResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+    delete:
+      tags: [Posts]
+      summary: Explicit remove a reaction (idempotent — Spec 3.7)
+      description: |
+        Removes the (postId, viewerId, reactionType) reaction row if present.
+        Idempotent: 204 whether the row existed or not. Useful for cleanup
+        flows that want to assert "make sure the user is not reacted with this
+        type" without first checking. Frontend's primary toggle UX uses POST.
+
+        Rate limit: 60 reactions per hour per user (POST + DELETE share the
+        bucket).
+      operationId: removeReaction
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: reactionType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [praying, candle]
+      responses:
+        '204':
+          description: Reaction removed (or already absent)
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/posts/{id}/bookmark:
+    post:
+      tags: [Posts]
+      summary: Bookmark a post (idempotent — Spec 3.7)
+      description: |
+        Inserts a bookmark row if absent. Idempotent: returns 201 if newly
+        inserted, 200 if already bookmarked. The post's bookmark_count is
+        returned in the body.
+
+        Bookmarks NEVER fire activity events — they are a private
+        organizational action, not community engagement.
+
+        Rate limit: 60 bookmarks per hour per user (POST + DELETE share the
+        bucket).
+      operationId: addBookmark
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Already bookmarked (idempotent no-op)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BookmarkResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '201':
+          description: Newly bookmarked
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/BookmarkResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+    delete:
+      tags: [Posts]
+      summary: Remove a bookmark (idempotent — Spec 3.7)
+      description: |
+        Deletes the bookmark row if present. Idempotent: 204 whether the row
+        existed or not.
+
+        Rate limit: 60 bookmarks per hour per user.
+      operationId: removeBookmark
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Bookmark removed (or already absent)
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
   /api/v1/users/me/reactions:
     get:
       tags: [Posts]
       summary: Viewer's reactions across all posts (flat map)
       description: |
         Returns a flat map keyed by post UUID, where each value is a
-        `{isPraying, isBookmarked}` pair. Posts where the viewer has neither
-        reacted nor bookmarked are NOT in the map (frontend treats absence
-        as both-false). Map iteration order is not guaranteed.
+        `{isPraying, isCandle, isBookmarked}` triple. Posts where the viewer
+        has neither reacted (praying or candle) nor bookmarked are NOT in
+        the map (frontend treats absence as all-false). Map iteration order
+        is not guaranteed.
 
-        Candle reactions (Phase 6.6 Answered Wall) are NOT included in this
-        response; that endpoint will extend the shape with an `isCandled` field.
+        Spec 3.7 extended the value type with `isCandle`; the read-side now
+        reflects both reaction types (Spec 3.4 Divergence 3 — candle
+        excluded — is superseded). Phase 6.6 Answered Wall will extend
+        further with `praising` and `celebrate`.
 
         No pagination — the response is bounded by the viewer's actual
         engagement count. Per-user data only; reactions and bookmarks made
@@ -3063,18 +3257,24 @@ components:
             requestId: { type: string }
 
     PerPostReaction:
-      description: Per-post engagement flags inside the reactions map.
+      description: |
+        Per-post engagement summary for the viewer. Spec 3.7 added `isCandle`
+        alongside `isPraying` and `isBookmarked`. Future reaction types
+        (Phase 6.6 Answered Wall) will extend this DTO further.
       type: object
-      required: [isPraying, isBookmarked]
+      required: [isPraying, isCandle, isBookmarked]
       properties:
         isPraying: { type: boolean }
+        isCandle: { type: boolean }
         isBookmarked: { type: boolean }
 
     ReactionsResponse:
       description: |
         Flat map keyed by post UUID. Posts where the viewer has neither
-        reacted nor bookmarked are not in the map. Map iteration order is
-        not guaranteed.
+        reacted (praying or candle) nor bookmarked are not in the map.
+        Map iteration order is not guaranteed. Spec 3.7 extended the value
+        type with `isCandle`; the read-side now reflects both reaction types
+        (Spec 3.4 Divergence 3 — candle excluded — is superseded).
       type: object
       required: [reactions]
       properties:
@@ -3082,6 +3282,62 @@ components:
           type: object
           additionalProperties: { $ref: '#/components/schemas/PerPostReaction' }
           description: Map of post UUID strings to PerPostReaction values.
+
+    ToggleReactionRequest:
+      description: |
+        Request body for `POST /api/v1/posts/{id}/reactions` (Spec 3.7).
+      type: object
+      required: [reactionType]
+      properties:
+        reactionType:
+          type: string
+          enum: [praying, candle]
+          description: |
+            The reaction type to toggle. Future reaction types (Phase 6.6
+            Answered Wall: praising, celebrate) will extend this enum.
+
+    ToggleReactionResponse:
+      description: |
+        Response data for `POST /api/v1/posts/{id}/reactions` (Spec 3.7 D11).
+        Status disambiguates `state`: 201 on add, 200 on remove. Both counters
+        are returned regardless of which type was toggled.
+      type: object
+      required: [reactionType, state, prayingCount, candleCount]
+      properties:
+        reactionType:
+          type: string
+          enum: [praying, candle]
+        state:
+          type: string
+          enum: [added, removed]
+          description: |
+            Direction of the toggle. Set independently of counter math —
+            necessary for the frontend to reconcile under network reorder.
+        prayingCount:
+          type: integer
+          minimum: 0
+          description: Post-mutation praying count for the parent post.
+        candleCount:
+          type: integer
+          minimum: 0
+          description: Post-mutation candle count for the parent post.
+
+    BookmarkResponse:
+      description: |
+        Response data for `POST /api/v1/posts/{id}/bookmark` (Spec 3.7 D2).
+        Status disambiguates: 201 = newly inserted, 200 = idempotent no-op.
+        DELETE returns 204 with no body — `BookmarkResponse` is not used on
+        the DELETE path.
+      type: object
+      required: [bookmarked, bookmarkCount]
+      properties:
+        bookmarked:
+          type: boolean
+          description: Always `true` on POST (the user is now bookmarked).
+        bookmarkCount:
+          type: integer
+          minimum: 0
+          description: Post-mutation bookmark count for the parent post.
 
   responses:
     BadRequest:

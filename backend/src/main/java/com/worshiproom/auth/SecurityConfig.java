@@ -61,6 +61,16 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/comments/*").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/*").authenticated()
 
+                // Spec 3.7 — write methods on reactions and bookmarks require
+                // authentication. Same first-match-wins rule as Specs 3.5 and 3.6:
+                // these come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific
+                // rule wins. Spring's AntPathMatcher does NOT match nested paths
+                // via /api/v1/posts/* — explicit nested patterns required (Spec 3.7 R7).
+                .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/reactions").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/*/reactions").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/bookmark").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/*/bookmark").authenticated()
+
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes
                 // them so a valid token extracts a principal for personalization.

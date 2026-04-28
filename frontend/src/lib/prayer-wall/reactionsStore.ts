@@ -7,6 +7,15 @@ let cache: Record<string, PrayerReaction> | null = null
 let snapshotCache: Record<string, PrayerReaction> | null = null
 const listeners = new Set<() => void>()
 
+/**
+ * Loosened guard (Spec 3.7): `isCandle` is treated as optional during
+ * the shape transition. Missing `isCandle` is default-filled to `false`
+ * in `readFromStorage` and written back, completing a one-way migration
+ * for users who upgrade with old-shape (3-field) data in localStorage.
+ *
+ * After the migration runs once, all stored entries are 4-field. Future
+ * reads encounter only 4-field data.
+ */
 function isValidReaction(value: unknown): value is PrayerReaction {
   if (typeof value !== 'object' || value === null) return false
   const r = value as Record<string, unknown>
@@ -14,6 +23,8 @@ function isValidReaction(value: unknown): value is PrayerReaction {
     typeof r.prayerId === 'string' &&
     typeof r.isPraying === 'boolean' &&
     typeof r.isBookmarked === 'boolean'
+    // NOTE: isCandle deliberately NOT validated here — old-shape data
+    // missing isCandle should pass the guard so we can default-fill.
   )
 }
 
@@ -28,9 +39,21 @@ function readFromStorage(): Record<string, PrayerReaction> | null {
       return null
     }
     const result: Record<string, PrayerReaction> = {}
+    let migrationOccurred = false
     for (const [key, value] of Object.entries(parsed)) {
       if (!isValidReaction(value)) return null
-      result[key] = value
+      const v = value as PrayerReaction & { isCandle?: boolean }
+      if (typeof v.isCandle !== 'boolean') {
+        // Default-fill old-shape data (Spec 3.7 migration).
+        result[key] = { ...v, isCandle: false }
+        migrationOccurred = true
+      } else {
+        result[key] = v
+      }
+    }
+    // Persist the migrated shape so future reads short-circuit the migration branch.
+    if (migrationOccurred) {
+      writeToStorage(result)
     }
     return result
   } catch {
@@ -101,6 +124,7 @@ export function togglePraying(prayerId: string): boolean {
     prayerId,
     isPraying: !wasPraying,
     isBookmarked: current?.isBookmarked ?? false,
+    isCandle: current?.isCandle ?? false,
   }
   cache = { ...getCache(), [prayerId]: next }
   writeToStorage(cache)
@@ -115,10 +139,27 @@ export function toggleBookmark(prayerId: string): void {
     prayerId,
     isPraying: current?.isPraying ?? false,
     isBookmarked: !(current?.isBookmarked ?? false),
+    isCandle: current?.isCandle ?? false,
   }
   cache = { ...getCache(), [prayerId]: next }
   writeToStorage(cache)
   notify()
+}
+
+/** Toggles isCandle for prayerId. Returns the PREVIOUS isCandle value (mirrors togglePraying). Spec 3.7. */
+export function toggleCandle(prayerId: string): boolean {
+  const current = getCache()[prayerId]
+  const wasCandle = current?.isCandle ?? false
+  const next: PrayerReaction = {
+    prayerId,
+    isPraying: current?.isPraying ?? false,
+    isBookmarked: current?.isBookmarked ?? false,
+    isCandle: !wasCandle,
+  }
+  cache = { ...getCache(), [prayerId]: next }
+  writeToStorage(cache)
+  notify()
+  return wasCandle
 }
 
 /** Subscribe to store changes. Returns an unsubscribe function. */

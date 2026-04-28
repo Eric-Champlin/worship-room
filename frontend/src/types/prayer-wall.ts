@@ -42,4 +42,5 @@ export interface PrayerReaction {
   prayerId: string
   isPraying: boolean
   isBookmarked: boolean
+  isCandle: boolean
 }

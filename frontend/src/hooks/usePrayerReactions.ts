@@ -4,6 +4,7 @@ import {
   getSnapshot,
   togglePraying,
   toggleBookmark,
+  toggleCandle,
 } from '@/lib/prayer-wall/reactionsStore'
 import type { PrayerReaction } from '@/types/prayer-wall'
 
@@ -15,7 +16,8 @@ export function usePrayerReactions(): {
   reactions: Record<string, PrayerReaction>
   togglePraying: (prayerId: string) => boolean
   toggleBookmark: (prayerId: string) => void
+  toggleCandle: (prayerId: string) => boolean
 } {
   const reactions = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
-  return { reactions, togglePraying, toggleBookmark }
+  return { reactions, togglePraying, toggleBookmark, toggleCandle }
 }

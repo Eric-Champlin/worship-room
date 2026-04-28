@@ -55,4 +55,53 @@ public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificat
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Post p SET p.commentCount = p.commentCount - 1 WHERE p.id = :postId AND p.commentCount > 0")
     int decrementCommentCount(@Param("postId") UUID postId);
+
+    /**
+     * SQL-side increment for praying counter (Spec 3.7 reaction-add path).
+     *
+     * <p>Atomic single-statement update — race-safe under concurrent reactions.
+     *
+     * <p>NO {@code last_activity_at} bump (Spec 3.7 R9). Reactions are
+     * low-friction social signals that should not artificially promote posts
+     * in the BUMPED feed sort.
+     *
+     * <p>Returns rows affected. Service asserts {@code == 1} after the call to
+     * detect TOCTOU where the parent post disappeared between the visibility
+     * check and the counter update.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.prayingCount = p.prayingCount + 1 WHERE p.id = :postId")
+    int incrementPrayingCount(@Param("postId") UUID postId);
+
+    /**
+     * SQL-side decrement for praying counter with {@code > 0} guard
+     * (Spec 3.7 reaction-remove path; mirrors Spec 3.6 D9).
+     *
+     * <p>Under any race, the {@code > 0} guard correctly produces 0 rows
+     * affected and the service treats that as "counter already at floor,
+     * no-op." Negative drift would be a bug. NO {@code last_activity_at} bump.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.prayingCount = p.prayingCount - 1 WHERE p.id = :postId AND p.prayingCount > 0")
+    int decrementPrayingCount(@Param("postId") UUID postId);
+
+    /** SQL-side increment for candle counter (Spec 3.7). NO {@code last_activity_at} bump. */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.candleCount = p.candleCount + 1 WHERE p.id = :postId")
+    int incrementCandleCount(@Param("postId") UUID postId);
+
+    /** SQL-side decrement for candle counter with {@code > 0} guard (Spec 3.7). NO {@code last_activity_at} bump. */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.candleCount = p.candleCount - 1 WHERE p.id = :postId AND p.candleCount > 0")
+    int decrementCandleCount(@Param("postId") UUID postId);
+
+    /** SQL-side increment for bookmark counter (Spec 3.7). NO {@code last_activity_at} bump (private action). */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.bookmarkCount = p.bookmarkCount + 1 WHERE p.id = :postId")
+    int incrementBookmarkCount(@Param("postId") UUID postId);
+
+    /** SQL-side decrement for bookmark counter with {@code > 0} guard (Spec 3.7). NO {@code last_activity_at} bump. */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.bookmarkCount = p.bookmarkCount - 1 WHERE p.id = :postId AND p.bookmarkCount > 0")
+    int decrementBookmarkCount(@Param("postId") UUID postId);
 }

@@ -8,16 +8,23 @@ import com.worshiproom.post.dto.CreatePostResponse;
 import com.worshiproom.post.dto.PostDto;
 import com.worshiproom.post.dto.PostListResponse;
 import com.worshiproom.post.dto.UpdatePostRequest;
+import com.worshiproom.post.engagement.BookmarkWriteService;
 import com.worshiproom.post.engagement.EngagementService;
+import com.worshiproom.post.engagement.ReactionWriteService;
+import com.worshiproom.post.engagement.dto.BookmarkResponse;
 import com.worshiproom.post.engagement.dto.ReactionsResponse;
+import com.worshiproom.post.engagement.dto.ToggleReactionRequest;
+import com.worshiproom.post.engagement.dto.ToggleReactionResponse;
 import com.worshiproom.proxy.common.ProxyResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -51,13 +58,19 @@ public class PostController {
     private final PostService postService;
     private final PostCommentService postCommentService;
     private final EngagementService engagementService;
+    private final ReactionWriteService reactionWriteService;
+    private final BookmarkWriteService bookmarkWriteService;
 
     public PostController(PostService postService,
                           PostCommentService postCommentService,
-                          EngagementService engagementService) {
+                          EngagementService engagementService,
+                          ReactionWriteService reactionWriteService,
+                          BookmarkWriteService bookmarkWriteService) {
         this.postService = postService;
         this.postCommentService = postCommentService;
         this.engagementService = engagementService;
+        this.reactionWriteService = reactionWriteService;
+        this.bookmarkWriteService = bookmarkWriteService;
     }
 
     @GetMapping("/posts")
@@ -185,6 +198,72 @@ public class PostController {
         log.info("Post delete requested deleterId={} postId={}", principal.userId(), id);
 
         postService.deletePost(id, principal, requestId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─── Spec 3.7 — Reactions write paths ─────────────────────────────────────
+
+    @PostMapping("/posts/{id}/reactions")
+    public ResponseEntity<ProxyResponse<ToggleReactionResponse>> toggleReaction(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID id,
+            @Valid @RequestBody ToggleReactionRequest request
+    ) {
+        UUID userId = principal.userId();
+        String requestId = MDC.get("requestId");
+        log.info("Reaction toggle requested userId={} postId={} reactionType={}",
+                userId, id, request.reactionType());
+
+        ToggleReactionResponse body = reactionWriteService.toggle(
+                id, userId, request.reactionType(), requestId);
+
+        // Status disambiguates toggle direction: 201 on add, 200 on remove (Spec 3.7 D11).
+        HttpStatus status = "added".equals(body.state()) ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(ProxyResponse.of(body, requestId));
+    }
+
+    @DeleteMapping("/posts/{id}/reactions")
+    public ResponseEntity<Void> removeReaction(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID id,
+            @RequestParam @NotBlank @Pattern(regexp = "^(praying|candle)$") String reactionType
+    ) {
+        UUID userId = principal.userId();
+        String requestId = MDC.get("requestId");
+        log.info("Reaction remove requested userId={} postId={} reactionType={}",
+                userId, id, reactionType);
+
+        reactionWriteService.remove(id, userId, reactionType, requestId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─── Spec 3.7 — Bookmark write paths ──────────────────────────────────────
+
+    @PostMapping("/posts/{id}/bookmark")
+    public ResponseEntity<ProxyResponse<BookmarkResponse>> addBookmark(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID id
+    ) {
+        UUID userId = principal.userId();
+        String requestId = MDC.get("requestId");
+        log.info("Bookmark add requested userId={} postId={}", userId, id);
+
+        BookmarkWriteService.AddResult result = bookmarkWriteService.add(id, userId, requestId);
+        // Status disambiguates: 201 on newly-inserted, 200 on idempotent no-op (Spec 3.7 D5).
+        HttpStatus status = result.created() ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(ProxyResponse.of(result.response(), requestId));
+    }
+
+    @DeleteMapping("/posts/{id}/bookmark")
+    public ResponseEntity<Void> removeBookmark(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID id
+    ) {
+        UUID userId = principal.userId();
+        String requestId = MDC.get("requestId");
+        log.info("Bookmark remove requested userId={} postId={}", userId, id);
+
+        bookmarkWriteService.remove(id, userId, requestId);
         return ResponseEntity.noContent().build();
     }
 

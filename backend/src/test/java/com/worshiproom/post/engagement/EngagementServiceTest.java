@@ -107,7 +107,7 @@ class EngagementServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void reactionsFor_combinesPrayingAndBookmark_correctlyFlagged() {
+    void reactionsFor_combinesPrayingCandleAndBookmark_correctlyFlagged() {
         UUID postA = seedPost(bob.getId(), "public", false);
         UUID postB = seedPost(bob.getId(), "public", false);
         UUID postC = seedPost(bob.getId(), "public", false);
@@ -120,19 +120,30 @@ class EngagementServiceTest extends AbstractIntegrationTest {
         seedReaction(postD, alice.getId(), "candle");
 
         ReactionsResponse resp = engagementService.reactionsFor(alice.getId());
-        assertThat(resp.reactions()).hasSize(3);
-        assertThat(resp.reactions().get(postA)).isEqualTo(new PerPostReaction(true, false));
-        assertThat(resp.reactions().get(postB)).isEqualTo(new PerPostReaction(false, true));
-        assertThat(resp.reactions().get(postC)).isEqualTo(new PerPostReaction(true, true));
-        assertThat(resp.reactions().get(postD)).isNull();
+        // Spec 3.7 — candle reactions are now included in the read-side map. All four posts
+        // should appear (the prior expectation of size=3 with postD absent reflected the
+        // pre-3.7 Spec 3.4 Divergence 3 behavior, which is now superseded).
+        assertThat(resp.reactions()).hasSize(4);
+        assertThat(resp.reactions().get(postA)).isEqualTo(new PerPostReaction(true, false, false));
+        assertThat(resp.reactions().get(postB)).isEqualTo(new PerPostReaction(false, false, true));
+        assertThat(resp.reactions().get(postC)).isEqualTo(new PerPostReaction(true, false, true));
+        assertThat(resp.reactions().get(postD)).isEqualTo(new PerPostReaction(false, true, false));
     }
 
     @Test
-    void reactionsFor_candleNotInMap_perDivergence3() {
+    void reactionsFor_includesCandleReactions_perSpec37() {
+        // Spec 3.7 R6 — candle reactions are surfaced on /users/me/reactions
+        // (replaces the prior Spec 3.4 Divergence 3 candle-excluded test).
         UUID postId = seedPost(bob.getId(), "public", false);
         seedReaction(postId, alice.getId(), "candle");
+
         ReactionsResponse resp = engagementService.reactionsFor(alice.getId());
-        assertThat(resp.reactions()).isEmpty();
+
+        PerPostReaction reaction = resp.reactions().get(postId);
+        assertThat(reaction).isNotNull();
+        assertThat(reaction.isPraying()).isFalse();
+        assertThat(reaction.isCandle()).isTrue();
+        assertThat(reaction.isBookmarked()).isFalse();
     }
 
     @Test

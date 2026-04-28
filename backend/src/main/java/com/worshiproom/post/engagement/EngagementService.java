@@ -36,6 +36,7 @@ import java.util.UUID;
 public class EngagementService {
 
     private static final String PRAYING = "praying";
+    private static final String CANDLE = "candle";
 
     private final ReactionRepository reactionRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -51,18 +52,25 @@ public class EngagementService {
 
     public ReactionsResponse reactionsFor(UUID viewerId) {
         List<PostReaction> prayings = reactionRepository.findByUserIdAndReactionType(viewerId, PRAYING);
+        // Spec 3.7 — candle reactions now included in the read-side map (was excluded per
+        // Spec 3.4 Divergence 3; that exclusion is superseded now that 3.7 ships the write-side).
+        List<PostReaction> candles = reactionRepository.findByUserIdAndReactionType(viewerId, CANDLE);
         List<PostBookmark> bookmarks = bookmarkRepository.findByUserId(viewerId);
 
         Map<UUID, PerPostReactionMutable> accum = new HashMap<>();
         for (PostReaction r : prayings) {
             accum.computeIfAbsent(r.getPostId(), k -> new PerPostReactionMutable()).isPraying = true;
         }
+        for (PostReaction r : candles) {
+            accum.computeIfAbsent(r.getPostId(), k -> new PerPostReactionMutable()).isCandle = true;
+        }
         for (PostBookmark b : bookmarks) {
             accum.computeIfAbsent(b.getPostId(), k -> new PerPostReactionMutable()).isBookmarked = true;
         }
 
         Map<UUID, PerPostReaction> finalMap = new HashMap<>(accum.size());
-        accum.forEach((postId, m) -> finalMap.put(postId, new PerPostReaction(m.isPraying, m.isBookmarked)));
+        accum.forEach((postId, m) -> finalMap.put(postId,
+                new PerPostReaction(m.isPraying, m.isCandle, m.isBookmarked)));
         return new ReactionsResponse(finalMap);
     }
 
@@ -83,6 +91,7 @@ public class EngagementService {
 
     private static final class PerPostReactionMutable {
         boolean isPraying;
+        boolean isCandle;
         boolean isBookmarked;
     }
 }

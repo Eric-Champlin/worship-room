@@ -6,6 +6,7 @@ import {
   getSnapshot,
   togglePraying,
   toggleBookmark,
+  toggleCandle,
   subscribe,
   _resetForTesting,
 } from '../reactionsStore'
@@ -129,5 +130,96 @@ describe('resilience', () => {
 
   it('returns undefined for unknown prayer IDs via getReaction', () => {
     expect(getReaction('nonexistent-prayer-id')).toBeUndefined()
+  })
+})
+
+describe('Spec 3.7 — toggleCandle and shape migration', () => {
+  it('toggleCandle flips only isCandle, preserving isPraying and isBookmarked', () => {
+    togglePraying('new-prayer-c1')   // isPraying: true
+    toggleBookmark('new-prayer-c1')  // isBookmarked: true
+    const before = getReaction('new-prayer-c1')!
+    expect(before.isPraying).toBe(true)
+    expect(before.isBookmarked).toBe(true)
+    expect(before.isCandle).toBe(false)
+
+    const wasCandle = toggleCandle('new-prayer-c1')
+    expect(wasCandle).toBe(false)
+    const after = getReaction('new-prayer-c1')!
+    expect(after.isPraying).toBe(true)
+    expect(after.isBookmarked).toBe(true)
+    expect(after.isCandle).toBe(true)
+
+    // Toggle again — should return previous (true), flip back to false.
+    expect(toggleCandle('new-prayer-c1')).toBe(true)
+    expect(getReaction('new-prayer-c1')!.isCandle).toBe(false)
+  })
+
+  it('togglePraying does not affect isCandle', () => {
+    toggleCandle('new-prayer-c2')
+    expect(getReaction('new-prayer-c2')!.isCandle).toBe(true)
+    togglePraying('new-prayer-c2')
+    expect(getReaction('new-prayer-c2')!.isCandle).toBe(true) // still true
+  })
+
+  it('toggleBookmark does not affect isCandle', () => {
+    toggleCandle('new-prayer-c3')
+    expect(getReaction('new-prayer-c3')!.isCandle).toBe(true)
+    toggleBookmark('new-prayer-c3')
+    expect(getReaction('new-prayer-c3')!.isCandle).toBe(true) // still true
+  })
+
+  it('hydrate from old-shape (3-field) localStorage default-fills isCandle to false', () => {
+    // Pre-seed localStorage with old-shape data — no isCandle field.
+    const oldShape = {
+      'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: false },
+      'prayer-2': { prayerId: 'prayer-2', isPraying: false, isBookmarked: true },
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(oldShape))
+    _resetForTesting()
+
+    // First read triggers hydration + migration.
+    const snap = getReactions()
+
+    expect(snap['prayer-1']).toEqual({
+      prayerId: 'prayer-1',
+      isPraying: true,
+      isBookmarked: false,
+      isCandle: false,
+    })
+    expect(snap['prayer-2']).toEqual({
+      prayerId: 'prayer-2',
+      isPraying: false,
+      isBookmarked: true,
+      isCandle: false,
+    })
+
+    // localStorage was rewritten with the new shape — both entries now have isCandle.
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+    expect(stored['prayer-1'].isCandle).toBe(false)
+    expect(stored['prayer-2'].isCandle).toBe(false)
+  })
+
+  it('hydration on already-migrated data does not re-write storage', () => {
+    // Pre-seed with new-shape data.
+    const newShape = {
+      'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: false, isCandle: true },
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newShape))
+    _resetForTesting()
+
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
+    getReactions()
+    // The migration branch is the only path that calls writeToStorage from inside readFromStorage.
+    // (The mock seed branch also writes, but only when localStorage is empty.)
+    expect(setItemSpy).not.toHaveBeenCalled()
+  })
+
+  it('mock seed includes isCandle field on every entry', () => {
+    // localStorage is empty — seedFromMock runs.
+    const snap = getReactions()
+    expect(Object.keys(snap).length).toBeGreaterThan(0)
+    for (const reaction of Object.values(snap)) {
+      expect(typeof reaction.isCandle).toBe('boolean')
+    }
   })
 })
