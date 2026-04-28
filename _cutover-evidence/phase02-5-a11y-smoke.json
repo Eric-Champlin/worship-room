@@ -1,0 +1,10 @@
+{
+  "_placeholder": "Replace this object with axe-core scan output captured by Eric during the Phase 2.5 cutover smoke test. See _cutover-evidence/capture-axe-evidence.mjs from prior phases for the canonical capture script — extend the ROUTES array to include /, /daily, /prayer-wall, and /profile/:userId. Phase 2.5 added no new routes (Recon I), so the route set matches Phase 2's.",
+  "_authoredBy": "Eric Champlin",
+  "_authoredDuring": "Phase 2.5 cutover smoke test (Spec 2.5.5)",
+  "_expectedShape": {
+    "captured": "ISO 8601 timestamp",
+    "frontendUrl": "URL of the frontend that was scanned (local dev or deployed)",
+    "results": "object keyed by route, each value is the @axe-core/playwright AxeResults shape"
+  }
+}
