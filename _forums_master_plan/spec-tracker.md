@@ -111,18 +111,25 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 
 ## Phase 4 — Post Types (10 specs)
 
-| #   | Spec | Title                                                     | Size | Risk   | Status |
-| --- | ---- | --------------------------------------------------------- | ---- | ------ | ------ |
-| 63  | 4.1  | Post Type Foundation (Frontend Types + Backend Enum Sync) | M    | Low    | ⬜     |
-| 64  | 4.2  | Prayer Request Polish                                     | M    | Low    | ⬜     |
-| 65  | 4.3  | Testimony Post Type                                       | L    | Medium | ⬜     |
-| 66  | 4.4  | Question Post Type                                        | L    | Medium | ⬜     |
-| 67  | 4.5  | Devotional Discussion Post Type                           | M    | Medium | ⬜     |
-| 68  | 4.6  | Encouragement Post Type                                   | M    | Medium | ⬜     |
-| 69  | 4.6b | Image Upload for Testimonies & Questions                  | L    | Medium | ⬜     |
-| 70  | 4.7  | Composer Chooser                                          | L    | Medium | ⬜     |
-| 71  | 4.7b | Ways to Help MVP                                          | M    | Low    | ⬜     |
-| 72  | 4.8  | Room Selector and Phase 4 Cutover                         | L    | Medium | ⬜     |
+| #   | Spec     | Title                                                     | Size | Risk   | Status |
+| --- | -------- | --------------------------------------------------------- | ---- | ------ | ------ |
+| 63  | 4.1      | Post Type Foundation (Frontend Types + Backend Enum Sync) | M    | Low    | ⬜     |
+| 64  | 4.2      | Prayer Request Polish                                     | M    | Low    | ⬜     |
+| 65  | 4.3      | Testimony Post Type                                       | L    | Medium | ⬜     |
+| 66  | 4.4      | Question Post Type                                        | L    | Medium | ⬜     |
+| 67  | 4.5      | Devotional Discussion Post Type                           | M    | Medium | ⬜     |
+| 68  | 4.6      | Encouragement Post Type                                   | M    | Medium | ⬜     |
+| 69  | 4.6b\*\* | Image Upload for Testimonies & Questions                  | L    | Medium | ⬜     |
+| 70  | 4.7      | Composer Chooser                                          | L    | Medium | ⬜     |
+| 71  | 4.7b     | Ways to Help MVP                                          | M    | Low    | ⬜     |
+| 72  | 4.8      | Room Selector and Phase 4 Cutover                         | L    | Medium | ⬜     |
+
+**Pre-deploy operator step (Eric):** Before the 4.6b deploy that
+activates real R2 image uploads, set the 5 production env vars in
+Railway per `backend/docs/runbook-storage.md` § Production Cutover
+Checklist. The S3StorageAdapter fail-fast check (Spec 1.10e) will
+reject the deploy if any are missing, but knowing this in advance
+prevents a wasted deploy attempt.
 
 ## Phase 5 — Visual Polish (6 specs)
 
