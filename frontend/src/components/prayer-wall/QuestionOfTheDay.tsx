@@ -1,5 +1,5 @@
 import { MessageCircle } from 'lucide-react'
-import { getTodaysQuestion } from '@/constants/question-of-the-day'
+import { useQotdToday } from '@/hooks/useQotdToday'
 import { ShareButton } from '@/components/daily/ShareButton'
 
 interface QuestionOfTheDayProps {
@@ -15,7 +15,42 @@ export function QuestionOfTheDay({
   onToggleComposer,
   onScrollToResponses,
 }: QuestionOfTheDayProps) {
-  const question = getTodaysQuestion()
+  const { question, isLoading } = useQotdToday()
+
+  // Skeleton state during initial fetch — anti-pressure (no copy, no spinner).
+  // aria-busy + aria-live let assistive tech announce the eventual content.
+  if (isLoading || !question) {
+    return (
+      <section
+        aria-labelledby="qotd-heading"
+        aria-busy="true"
+        aria-live="polite"
+        className="rounded-2xl border border-primary/20 bg-primary/[0.12] p-4 sm:p-5 lg:p-6"
+      >
+        <span className="sr-only">Loading today's question</span>
+        <MessageCircle className="h-6 w-6 text-primary" aria-hidden="true" />
+        <p className="mt-2 text-xs uppercase tracking-wider text-white/50">
+          Question of the Day
+        </p>
+        {/* Heading placeholder — preserves layout height and the qotd-heading id */}
+        <h2 id="qotd-heading" className="mt-2 sr-only">
+          Loading
+        </h2>
+        <div
+          className="mt-2 h-7 w-4/5 rounded bg-white/[0.08]"
+          aria-hidden="true"
+        />
+        <div
+          className="mt-3 h-4 w-3/5 rounded bg-white/[0.06]"
+          aria-hidden="true"
+        />
+        <div
+          className="mt-4 h-11 w-44 rounded-lg bg-white/[0.08]"
+          aria-hidden="true"
+        />
+      </section>
+    )
+  }
 
   const responseLabel =
     responseCount === 0
@@ -43,10 +78,7 @@ export function QuestionOfTheDay({
         Question of the Day
       </p>
 
-      <h2
-        id="qotd-heading"
-        className="mt-2 text-lg font-bold text-white"
-      >
+      <h2 id="qotd-heading" className="mt-2 text-lg font-bold text-white">
         {question.text}
       </h2>
 
@@ -60,7 +92,11 @@ export function QuestionOfTheDay({
         type="button"
         onClick={handleResponseCountClick}
         className="mt-3 flex min-h-[44px] items-center text-sm text-white/60 transition-colors hover:text-white/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-        aria-label={responseCount === 0 ? 'Be the first to respond to today\'s question' : `View ${responseLabel} to today's question`}
+        aria-label={
+          responseCount === 0
+            ? "Be the first to respond to today's question"
+            : `View ${responseLabel} to today's question`
+        }
       >
         {responseLabel}
       </button>

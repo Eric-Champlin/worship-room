@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "description": "Drift detection between the frontend (frontend/src/constants/question-of-the-day.ts getTodaysQuestion) and backend (backend/src/main/java/com/worshiproom/post/QotdService) QOTD rotation logic. Both implementations must agree on the modulo-72 path: dayOfYear % 72 -> POOL[index]. Liturgical-season-aware rotation is deferred to Phase 9.2; consumer tests MUST mock or bypass the seasonal branch so all dates exercise the modulo path. See _specs/forums/spec-3-9.md D1 + Test Specifications. Consumed by backend/src/test/java/com/worshiproom/post/QotdDriftDetectionTest.java and frontend/src/constants/__tests__/qotd-drift.test.ts.",
+  "scenarios": [
+    {
+      "id": "mid-january-non-leap",
+      "date": "2026-01-15",
+      "dayOfYear": 15,
+      "expectedQotdId": "qotd-16"
+    },
+    {
+      "id": "mid-summer-independence-day",
+      "date": "2026-07-04",
+      "dayOfYear": 185,
+      "expectedQotdId": "qotd-42"
+    },
+    {
+      "id": "late-summer",
+      "date": "2026-08-22",
+      "dayOfYear": 234,
+      "expectedQotdId": "qotd-19"
+    },
+    {
+      "id": "early-fall",
+      "date": "2026-09-10",
+      "dayOfYear": 253,
+      "expectedQotdId": "qotd-38"
+    },
+    {
+      "id": "modulo-zero-mid-october",
+      "date": "2026-10-15",
+      "dayOfYear": 288,
+      "expectedQotdId": "qotd-1"
+    },
+    {
+      "id": "leap-day-2024",
+      "date": "2024-02-29",
+      "dayOfYear": 60,
+      "expectedQotdId": "qotd-61"
+    },
+    {
+      "id": "mid-june-after-pentecost",
+      "date": "2026-06-15",
+      "dayOfYear": 166,
+      "expectedQotdId": "qotd-23"
+    },
+    {
+      "id": "early-november",
+      "date": "2026-11-01",
+      "dayOfYear": 305,
+      "expectedQotdId": "qotd-18"
+    }
+  ]
+}

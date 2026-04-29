@@ -44,6 +44,8 @@ tags:
     description: User mutes — feed-scoped, asymmetric, softer than block — Spec 2.5.7
   - name: Posts
     description: Prayer Wall posts (public feed, single post detail, author posts) — Spec 3.3
+  - name: QOTD
+    description: Question of the Day rotation endpoint — Spec 3.9
 
 paths:
   /api/v1/health:
@@ -2059,6 +2061,47 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/qotd/today:
+    get:
+      tags: [QOTD]
+      summary: Today's Question of the Day
+      description: |
+        Returns the active question for today's UTC rotation slot. Computed as
+        `LocalDate.now(UTC).getDayOfYear() % 72`. The 72-question pool is seeded
+        in production via Liquibase changeset 2026-04-29-001.
+
+        Public endpoint — no JWT required (declared in `PublicPaths.OPTIONAL_AUTH_PATTERNS`).
+        Anonymous and authenticated requests yield identical responses; no personalization.
+
+        Liturgical-season-aware rotation is deferred to Phase 9.2 (LiturgicalCalendarService
+        Java port). Today's rotation is modulo-72 only.
+      operationId: getTodaysQuestion
+      security: []
+      responses:
+        '200':
+          description: Today's QOTD
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProxyResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/QotdQuestionResponse' }
+        '404':
+          description: Active question pool is empty
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+              examples:
+                qotdUnavailable:
+                  value:
+                    code: QOTD_UNAVAILABLE
+                    message: 'No question is available right now.'
+                    requestId: 'abcdefghijklmnopqrstuv'
+                    timestamp: '2026-04-29T10:30:00Z'
+        '500': { $ref: '#/components/responses/InternalError' }
+
 components:
   schemas:
     ProxyResponse:
@@ -3050,6 +3093,32 @@ components:
           type: array
           items: { $ref: '#/components/schemas/PostDto' }
         meta: { $ref: '#/components/schemas/PostListMeta' }
+
+    QotdQuestionResponse:
+      description: |
+        Response shape for `GET /api/v1/qotd/today`. Server-internal rotation metadata
+        (`displayOrder`, `isActive`, `createdAt`) is intentionally NOT exposed.
+      type: object
+      required: [id, text, theme]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: 'qotd-42'
+          description: Stable id, `qotd-1` through `qotd-72`.
+        text:
+          type: string
+          example: 'What Bible verse has comforted you most recently?'
+          description: Question text rendered as the prayer-wall QOTD heading.
+        theme:
+          type: string
+          enum: [faith_journey, practical, reflective, encouraging, community, seasonal]
+          description: Question category. Mirrors the database CHECK constraint.
+        hint:
+          type: string
+          nullable: true
+          description: Optional helper text rendered as italic line beneath the question.
 
     CreatePostRequest:
       description: Request body for POST /api/v1/posts (Spec 3.5).

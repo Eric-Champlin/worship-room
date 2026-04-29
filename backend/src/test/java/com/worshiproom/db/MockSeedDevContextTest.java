@@ -129,10 +129,15 @@ class MockSeedDevContextTest extends AbstractIntegrationTest {
             Long.class);
         assertThat(commentsCount).as("0 mock comments under test context").isEqualTo(0L);
 
+        // Spec 3.9 added a context-less production seed (changeset 2026-04-29-001) that
+        // populates 72 qotd-* rows in EVERY environment, including the test context.
+        // The dev-mock seed adds nothing on top — those 72 ids overlap with the prod seed
+        // and `ON CONFLICT (id) DO NOTHING` no-ops. So the test-context invariant is
+        // "exactly 72 qotd rows from the prod seed; zero from the dev mock."
         Long qotdCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM qotd_questions",
             Long.class);
-        assertThat(qotdCount).as("0 QOTD rows under test context").isEqualTo(0L);
+        assertThat(qotdCount).as("72 QOTD rows from prod seed under test context").isEqualTo(72L);
     }
 
     private Document parseSeedXml() throws Exception {

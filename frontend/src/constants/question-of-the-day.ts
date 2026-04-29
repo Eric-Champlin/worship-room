@@ -1,3 +1,23 @@
+/**
+ * @deprecated As of Spec 3.9 (2026-04-29). The Question of the Day rotation
+ * lives on the backend at `GET /api/v1/qotd/today`. The frontend now fetches
+ * via `useQotdToday()` (hooks/useQotdToday.ts).
+ *
+ * This file remains shipped as the **offline / API-failure fallback path** —
+ * `useQotdToday` calls `getTodaysQuestion()` here when the backend is
+ * unreachable, returns a non-200 response, or returns 404 QOTD_UNAVAILABLE.
+ *
+ * The file MUST stay in sync with the backend production seed (Liquibase
+ * changeset `2026-04-29-001-seed-qotd-questions-production.xml`) for
+ * offline / online consistency. When Phase 9.2 adds liturgical-season-aware
+ * rotation server-side, this file's `getTodaysQuestion` will diverge from the
+ * server response on named-season dates — that is documented in Spec 3.9 D1
+ * and is the deferred regression.
+ *
+ * Removal of this file is deferred to a future Phase 4 offline-first
+ * architecture spec that settles on a different fallback story (e.g.,
+ * service-worker-cached API responses).
+ */
 import type { LiturgicalSeasonId } from '@/constants/liturgical-calendar'
 import { getLiturgicalSeason, getDayWithinSeason } from '@/constants/liturgical-calendar'
 

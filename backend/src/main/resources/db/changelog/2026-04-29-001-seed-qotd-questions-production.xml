@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 3.9 — production seed of QOTD questions.
+       NO context filter — runs in dev, test, and prod. Idempotent via
+       INSERT ... ON CONFLICT (id) DO NOTHING. Dev no-ops because changeset
+       2026-04-27-021 (context="dev") already inserted these 72 rows; prod and
+       test get a clean seed.
+
+       Content is copied verbatim from changeset 2026-04-27-021 (lines 1300-1865).
+       Liquibase changesets are immutable, so we version the questions at THIS
+       changeset for production. Future content edits ship as new changesets
+       layered on top.
+
+       Rollback DELETEs all qotd-* rows. In dev this also wipes 021's rows; the
+       expected reset path is `docker compose down -v`, not Liquibase rollback. -->
+
+  <changeSet id="2026-04-29-001-seed-qotd-questions-production" author="worship-room">
+
+    <preConditions onFail="HALT">
+      <not>
+        <sqlCheck expectedResult="0">
+          SELECT COUNT(*) FROM information_schema.tables
+          WHERE table_schema='public' AND table_name='qotd_questions'
+        </sqlCheck>
+      </not>
+    </preConditions>
+
+    <sql splitStatements="true" stripComments="false"><![CDATA[
+      -- Faith Journey (10) — qotd-1..10, display_order 0..9
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-1', 'What Bible verse has meant the most to you this year?', 'faith_journey', 'Think about a verse that spoke to you during a specific season.', 0, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-2', 'How has your prayer life changed over the years?', 'faith_journey', NULL, 1, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-3', 'What was the moment you first felt called to follow Jesus?', 'faith_journey', 'It could be a big event or a quiet realization.', 2, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-4', 'What spiritual practice has helped you grow the most this year?', 'faith_journey', NULL, 3, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-5', 'How do you handle seasons of doubt in your faith?', 'faith_journey', 'Doubt is part of the journey for many believers.', 4, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-6', 'What is one thing you wish someone had told you early in your faith journey?', 'faith_journey', NULL, 5, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-7', 'What hymn or worship song has shaped your faith the most?', 'faith_journey', 'Think about a song that brings you back to a meaningful moment.', 6, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-8', 'How has God surprised you in the last year?', 'faith_journey', NULL, 7, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-9', 'What book of the Bible are you most drawn to right now, and why?', 'faith_journey', 'Sometimes a particular book speaks to our current season.', 8, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-10', 'What does "walking by faith, not by sight" look like in your everyday life?', 'faith_journey', NULL, 9, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+
+      -- Practical (10) — qotd-11..20, display_order 10..19
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-11', 'How do you make time for God in a busy schedule?', 'practical', 'Share a routine or habit that helps you stay connected.', 10, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-12', 'What is your favorite way to memorize Scripture?', 'practical', NULL, 11, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-13', 'How do you bring your faith into your workplace or school?', 'practical', 'Small actions can have a big impact.', 12, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-14', 'What is one practical way you serve others in your daily routine?', 'practical', NULL, 13, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-15', 'How do you stay consistent with Bible reading when life gets hectic?', 'practical', 'What tools or plans have worked for you?', 14, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-16', 'What does your morning quiet time look like?', 'practical', NULL, 15, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-17', 'How do you teach your children or younger family members about faith?', 'practical', 'Even small conversations can plant seeds.', 16, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-18', 'What is one way you practice generosity in everyday life?', 'practical', NULL, 17, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-19', 'How do you choose which devotional or Bible plan to follow?', 'practical', NULL, 18, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-20', 'What is a simple habit that has deepened your relationship with God?', 'practical', 'Sometimes the smallest changes make the biggest difference.', 19, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+
+      -- Reflective (10) — qotd-21..30, display_order 20..29
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-21', 'When was the last time you felt God''s presence clearly?', 'reflective', 'Think about a moment this week where you felt peace.', 20, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-22', 'What does forgiveness mean to you, and who have you needed to forgive?', 'reflective', NULL, 21, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-23', 'How has a difficult season ultimately strengthened your faith?', 'reflective', 'Looking back, what did God teach you through it?', 22, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-24', 'What does it mean to you to "be still and know that I am God"?', 'reflective', NULL, 23, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-25', 'What is a prayer you prayed that was answered differently than you expected?', 'reflective', 'God''s answer is sometimes better than what we asked for.', 24, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-26', 'How do you experience God in nature or the world around you?', 'reflective', NULL, 25, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-27', 'What part of the Gospel story resonates most deeply with you right now?', 'reflective', 'Different seasons draw us to different parts of the story.', 26, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-28', 'How has worship changed the way you see a problem you are facing?', 'reflective', NULL, 27, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-29', 'What is a lesson you keep learning over and over in your walk with God?', 'reflective', NULL, 28, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-30', 'If you could sit down with any person from the Bible, who would it be and why?', 'reflective', 'What question would you ask them?', 29, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+
+      -- Encouraging (10) — qotd-31..40, display_order 30..39
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-31', 'What is one thing God has taught you recently?', 'encouraging', 'It might be something small but meaningful.', 30, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-32', 'What is a blessing you almost overlooked today?', 'encouraging', NULL, 31, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-33', 'How has God shown His faithfulness in your life this month?', 'encouraging', 'Sometimes faithfulness shows up in unexpected ways.', 32, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-34', 'What is a promise from Scripture that you are holding onto right now?', 'encouraging', NULL, 33, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-35', 'What is one way God has provided for you when you least expected it?', 'encouraging', 'Sharing stories of provision encourages others.', 34, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-36', 'What makes you grateful to be part of the body of Christ?', 'encouraging', NULL, 35, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-37', 'What is a kind word or encouragement someone shared with you that you still remember?', 'encouraging', 'Words of encouragement can last a lifetime.', 36, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-38', 'How do you remind yourself of God''s goodness on hard days?', 'encouraging', NULL, 37, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-39', 'What answered prayer are you most thankful for?', 'encouraging', NULL, 38, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-40', 'What does joy look like in your life right now?', 'encouraging', 'Joy does not always mean happiness — it can be a deep peace.', 39, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+
+      -- Community (10) — qotd-41..50, display_order 40..49
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-41', 'How has another believer encouraged you this week?', 'community', 'Even a simple text or smile can make a difference.', 40, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-42', 'What does Christian community mean to you?', 'community', NULL, 41, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-43', 'How do you support a friend who is going through a tough season?', 'community', 'Sometimes just showing up is enough.', 42, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-44', 'What is the most meaningful way your church has served your community?', 'community', NULL, 43, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-45', 'Who is someone you would like to pray for today, and why?', 'community', 'Lifting others up in prayer is a gift.', 44, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-46', 'How do you welcome newcomers into your faith community?', 'community', NULL, 45, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-47', 'What is one thing you have learned from a fellow believer recently?', 'community', 'We grow stronger when we learn from each other.', 46, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-48', 'How do you stay connected with your church family during busy seasons?', 'community', NULL, 47, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-49', 'What role does accountability play in your spiritual growth?', 'community', NULL, 48, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-50', 'How has this online community helped you in your faith journey?', 'community', 'Share how connecting with others here has impacted you.', 49, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+
+      -- Seasonal general (10) — qotd-51..60, display_order 50..59
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-51', 'What are you praying for this season?', 'seasonal', 'Seasons change, and so do our prayers.', 50, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-52', 'What is a New Year resolution you made for your spiritual life?', 'seasonal', NULL, 51, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-53', 'How do you celebrate Easter in a way that deepens your faith?', 'seasonal', 'What traditions or practices are meaningful to you?', 52, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-54', 'What does Advent or the Christmas season teach you about waiting on God?', 'seasonal', NULL, 53, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-55', 'How do you practice gratitude during the Thanksgiving season?', 'seasonal', 'Gratitude is a discipline, not just a holiday.', 54, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-56', 'What is a Bible passage that feels especially relevant to the season you are in?', 'seasonal', NULL, 55, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-57', 'How do you find rest during the busy holiday season?', 'seasonal', 'Rest is not laziness — it is obedience.', 56, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-58', 'What spiritual goal are you working toward this month?', 'seasonal', NULL, 57, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-59', 'How has the changing of the seasons reminded you of God''s faithfulness?', 'seasonal', 'Creation itself declares His glory.', 58, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-60', 'What is one thing you want to surrender to God before this year ends?', 'seasonal', NULL, 59, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+
+      -- Liturgical seasonal (12) — qotd-61..72, display_order 60..71
+      -- Advent (3) — qotd-61..63
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-61', 'What are you most anticipating about the coming of Christ this Advent season?', 'seasonal', 'Advent is a season of waiting and hope.', 60, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-62', 'How are you preparing your heart for Christmas this Advent?', 'seasonal', NULL, 61, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-63', 'What does the theme of hope mean to you during this Advent season?', 'seasonal', 'Hope is one of the four Advent themes: hope, peace, joy, and love.', 62, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      -- Lent (3) — qotd-64..66
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-64', 'What spiritual practice are you taking on or giving up this Lenten season?', 'seasonal', 'Lent is a season of self-examination and renewal.', 63, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-65', 'How is God drawing you closer to Himself during this season of Lent?', 'seasonal', NULL, 64, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-66', 'What area of your life is God inviting you to surrender this Lent?', 'seasonal', 'Surrender is not defeat — it is trust.', 65, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      -- Easter (3) — qotd-67..69
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-67', 'How does the resurrection of Jesus give you hope in your daily life?', 'seasonal', 'Easter is not just a day — it is a season of celebration.', 66, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-68', 'What area of your life feels like it needs resurrection right now?', 'seasonal', NULL, 67, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-69', 'How are you celebrating the new life that Easter represents?', 'seasonal', 'New life can show up in unexpected places.', 68, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      -- Christmas (3) — qotd-70..72
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-70', 'What does the birth of Jesus mean for your life today?', 'seasonal', 'Christmas is the celebration of God entering our world.', 69, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-71', 'How are you sharing the love of Christ with others this Christmas season?', 'seasonal', NULL, 70, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO qotd_questions (id, text, theme, hint, display_order, is_active) VALUES
+        ('qotd-72', 'What gift of God are you most grateful for this Christmas?', 'seasonal', 'The greatest gift is not under the tree.', 71, TRUE)
+      ON CONFLICT (id) DO NOTHING;
+    ]]></sql>
+
+    <rollback>
+      <sql><![CDATA[
+        DELETE FROM qotd_questions WHERE id LIKE 'qotd-%';
+      ]]></sql>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

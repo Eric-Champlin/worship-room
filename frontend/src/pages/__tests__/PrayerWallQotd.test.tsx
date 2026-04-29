@@ -14,6 +14,17 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
 }))
 
+// Spec 3.9 — QuestionOfTheDay reads from useQotdToday(). Mock to return the
+// constants-derived question synchronously so these integration tests don't
+// hit the network and don't see the skeleton state.
+vi.mock('@/hooks/useQotdToday', () => ({
+  useQotdToday: () => ({
+    question: getTodaysQuestion(),
+    isLoading: false,
+    source: 'fallback',
+  }),
+}))
+
 vi.mock('@/hooks/useFaithPoints', () => ({
   useFaithPoints: () => ({
     totalPoints: 0, currentLevel: 1, levelName: 'Seedling', pointsToNextLevel: 100,

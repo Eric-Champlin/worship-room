@@ -70,12 +70,12 @@ class PostWriteIntegrationTest extends AbstractIntegrationTest {
     @BeforeEach
     void seed() {
         // Order: posts depend on users; activity_log depends on users.
+        // Spec 3.9 added a context-less production seed for qotd_questions
+        // (changeset 2026-04-29-001) — qotd-1..qotd-72 are present in every
+        // environment, so this test no longer DELETEs/INSERTs into that table.
         jdbc.update("DELETE FROM activity_log");
         postRepository.deleteAll();
         userRepository.deleteAll();
-        jdbc.update("DELETE FROM qotd_questions");
-        jdbc.update("INSERT INTO qotd_questions (id, text, theme, display_order, is_active) " +
-                "VALUES ('qotd-1', 'How is your faith today?', 'reflective', 1, true)");
 
         alice = userRepository.saveAndFlush(new User("alice-write@test.local", "$2a$10$x",
                 "Alice", "Anderson", "UTC"));
@@ -88,12 +88,12 @@ class PostWriteIntegrationTest extends AbstractIntegrationTest {
     @AfterEach
     void cleanup() {
         // The Testcontainers Postgres is a singleton across the JVM run, so test
-        // data can leak across classes. MockSeedDevContextTest expects qotd_questions
-        // to be empty under the test context — clean up our seed row here.
+        // data can leak across classes. We clean up the rows this test creates;
+        // qotd_questions is left intact so the Spec 3.9 prod-seed rows persist
+        // for any later test class that depends on them.
         jdbc.update("DELETE FROM activity_log");
         postRepository.deleteAll();
         userRepository.deleteAll();
-        jdbc.update("DELETE FROM qotd_questions");
     }
 
     // =====================================================================

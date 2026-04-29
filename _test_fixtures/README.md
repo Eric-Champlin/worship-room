@@ -5,6 +5,7 @@ This directory holds JSON fixture files consumed by both the backend (Java/Maven
 ## Files
 
 - `activity-engine-scenarios.json` — Drift detection between the frontend and backend activity engines (faith points, streak, badges, repair eligibility). Consumed by `backend/src/test/java/com/worshiproom/activity/DriftDetectionTest.java` and `frontend/src/services/__tests__/activity-drift.test.ts`. Introduced by Forums Wave Spec 2.8.
+- `qotd-rotation.json` — Drift detection between the frontend `getTodaysQuestion()` (`frontend/src/constants/question-of-the-day.ts`) and the backend `QotdService.findForDate()` (`backend/src/main/java/com/worshiproom/post/QotdService.java`) on the modulo-72 rotation path. Consumed by `backend/src/test/java/com/worshiproom/post/QotdDriftDetectionTest.java` and `frontend/src/constants/__tests__/qotd-drift.test.ts`. Introduced by Forums Wave Spec 3.9. Frontend consumer mocks `getLiturgicalSeason` to `isNamedSeason: false` so all dates exercise the shared modulo path; the seasonal branch is the deferred Phase 9.2 regression documented in spec D1.
 
 ## Adding a Scenario
 

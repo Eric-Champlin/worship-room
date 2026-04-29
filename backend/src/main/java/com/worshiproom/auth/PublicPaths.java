@@ -57,6 +57,7 @@ public final class PublicPaths {
         "/api/v1/posts",
         "/api/v1/posts/*",
         "/api/v1/posts/*/comments",
-        "/api/v1/users/*/posts"
+        "/api/v1/users/*/posts",
+        "/api/v1/qotd/today"
     );
 }

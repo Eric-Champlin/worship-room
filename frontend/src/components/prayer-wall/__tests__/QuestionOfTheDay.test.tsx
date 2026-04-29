@@ -1,9 +1,14 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QuestionOfTheDay } from '../QuestionOfTheDay'
 import { getTodaysQuestion } from '@/constants/question-of-the-day'
+
+vi.mock('@/hooks/useQotdToday', () => ({
+  useQotdToday: vi.fn(),
+}))
+import { useQotdToday } from '@/hooks/useQotdToday'
 
 const defaultProps = {
   responseCount: 0,
@@ -21,6 +26,31 @@ function renderCard(overrides: Partial<typeof defaultProps> = {}) {
 }
 
 describe('QuestionOfTheDay', () => {
+  // Default mock: loaded state with the constants-derived question (matches pre-3.9 behavior).
+  beforeEach(() => {
+    vi.mocked(useQotdToday).mockReturnValue({
+      question: getTodaysQuestion(),
+      isLoading: false,
+      source: 'fallback',
+    })
+  })
+
+  it('renders skeleton state while loading', () => {
+    vi.mocked(useQotdToday).mockReturnValueOnce({
+      question: null,
+      isLoading: true,
+      source: null,
+    })
+    renderCard()
+
+    const region = screen.getByRole('region')
+    expect(region).toHaveAttribute('aria-busy', 'true')
+    expect(region).toHaveAttribute('aria-live', 'polite')
+    expect(screen.getByText("Loading today's question")).toHaveClass('sr-only')
+    // Visible label + icon stay during skeleton.
+    expect(screen.getByText('Question of the Day')).toBeInTheDocument()
+  })
+
   it('renders MessageCircle icon', () => {
     renderCard()
     const question = getTodaysQuestion()
