@@ -46,6 +46,12 @@ tags:
     description: Prayer Wall posts (public feed, single post detail, author posts) — Spec 3.3
   - name: QOTD
     description: Question of the Day rotation endpoint — Spec 3.9
+  - name: Dev / Storage
+    description: |
+      Development-only presigned-URL serving for the LocalFilesystem
+      storage adapter. Registered ONLY when `spring.profiles.active=dev`.
+      Production deployments do NOT expose this endpoint — production
+      consumers fetch directly from R2/S3 via signed URLs.
 
 paths:
   /api/v1/health:
@@ -2101,6 +2107,74 @@ paths:
                     requestId: 'abcdefghijklmnopqrstuv'
                     timestamp: '2026-04-29T10:30:00Z'
         '500': { $ref: '#/components/responses/InternalError' }
+
+  /dev-storage/{key}:
+    get:
+      tags: [Dev / Storage]
+      summary: Serve a stored object via dev-mode presigned URL
+      description: |
+        Streams the bytes of the object at `key`. ONLY registered under
+        `spring.profiles.active=dev`. Production deployments do not expose this
+        endpoint — production consumers receive R2/S3-issued signed URLs and
+        fetch directly from the provider.
+
+        The HMAC signature is computed over `key:expires` using the
+        `worshiproom.storage.dev-signing-secret` configured at boot. Both
+        expiry and signature must validate; either failure returns the
+        respective 410 / 401 with no object bytes.
+      operationId: getDevStorageObject
+      security: []
+      parameters:
+        - in: path
+          name: key
+          required: true
+          description: |
+            Object key (forward-slash-separated, e.g. `post-images/abc/thumb.jpg`).
+            Constrained to `[a-z0-9._/-]+`, max 256 chars, no `..`, no leading
+            or trailing `/`. See `StorageKeyValidator` for the canonical rules.
+          schema:
+            type: string
+        - in: query
+          name: expires
+          required: true
+          description: Unix-seconds expiry timestamp (object becomes 410 Gone after this instant).
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          name: signature
+          required: true
+          description: Base64-URL HMAC-SHA256 of `key:expires` using the dev signing secret.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Object bytes streamed
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Storage key validation failed (key contains illegal characters, is too long, etc.)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '401':
+          description: Invalid signature
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '404':
+          description: Key not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '410':
+          description: Presigned URL expired
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
 
 components:
   schemas:

@@ -58,6 +58,11 @@ public final class PublicPaths {
         "/api/v1/posts/*",
         "/api/v1/posts/*/comments",
         "/api/v1/users/*/posts",
-        "/api/v1/qotd/today"
+        "/api/v1/qotd/today",
+        // Spec 1.10e — DevStorageController is @Profile("dev"), so this pattern is
+        // unreachable under test/prod (no controller listens, request 404s via the MVC
+        // dispatcher). The HMAC signature check inside the controller is the actual
+        // authorization mechanism for dev-mode presigned URLs.
+        "/dev-storage/**"
     );
 }

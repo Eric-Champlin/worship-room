@@ -47,7 +47,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 20  | 1.10  | Phase 1 Cutover and End-to-End Test            | M    | Medium   | ✅     |
 | 21  | 1.10b | Deployment Target Decision Document            | S    | Low      | ✅     |
 | 22  | 1.10d | Production Monitoring Foundation               | M    | Low      | ✅     |
-| 23  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ⬜     |
+| 23  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ✅     |
 | 24  | 1.10c | Database Backup Strategy                       | S    | Low      | ‼️     |
 | 25  | 1.10f | Terms of Service and Privacy Policy Surfaces   | M    | Med-High | ⬜ ⚠   |
 | 26  | 1.10g | Security Headers Middleware (CSP/HSTS/etc.)    | S    | Low      | ✅     |

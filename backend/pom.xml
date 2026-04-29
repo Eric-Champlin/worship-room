@@ -22,6 +22,21 @@
         <java.version>21</java.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- AWS SDK v2 BOM (Spec 1.10e) — pins coherent versions for s3 + s3-transfer-manager
+                 + their transitive nio/netty/auth/regions deps. Per-artifact pins are forbidden;
+                 the BOM resolves all sub-artifacts together. -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>2.32.13</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -187,6 +202,25 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers MinIO module (Spec 1.10e) — S3-API-compatible local container
+             used by S3StorageAdapterIntegrationTest to exercise the S3 code path. -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>minio</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- AWS SDK v2 (Spec 1.10e) — versions resolved by the BOM in dependencyManagement.
+             s3 = high-level + low-level S3 client; s3-transfer-manager = multipart upload helper. -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3-transfer-manager</artifactId>
         </dependency>
     </dependencies>
 
