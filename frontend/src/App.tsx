@@ -93,6 +93,7 @@ const MoodCheckInPreview = lazy(() =>
   import('./pages/MoodCheckInPreview').then((m) => ({ default: m.MoodCheckInPreview }))
 )
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })))
+const CommunityGuidelines = lazy(() => import('./pages/CommunityGuidelines').then((m) => ({ default: m.CommunityGuidelines })))
 const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage').then((m) => ({ default: m.AccessibilityPage })))
 
 function RouteLoadingFallback() {
@@ -285,6 +286,7 @@ function App() {
           )}
           <Route path="/login" element={<ComingSoon title="Log In" />} />
           <Route path="/register" element={<RouteErrorBoundary><Suspense fallback={null}><RegisterPage /></Suspense></RouteErrorBoundary>} />
+          <Route path="/community-guidelines" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><CommunityGuidelines /></Suspense></RouteErrorBoundary>} />
           <Route path="/accessibility" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><AccessibilityPage /></Suspense></RouteErrorBoundary>} />
           <Route path="*" element={<NotFound />} />
         </Routes>

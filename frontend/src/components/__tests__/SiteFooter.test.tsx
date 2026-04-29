@@ -29,12 +29,19 @@ describe('SiteFooter', () => {
     expect(screen.getByText('Worship Room')).toBeInTheDocument()
   })
 
-  it('renders 4 column labels (non-heading elements)', () => {
+  it('renders 5 column labels (non-heading elements)', () => {
     renderSiteFooter()
     expect(screen.getByText('Daily')).toBeInTheDocument()
     expect(screen.getByText('Study')).toBeInTheDocument()
     expect(screen.getByText('Music')).toBeInTheDocument()
     expect(screen.getByText('Support')).toBeInTheDocument()
+    expect(screen.getByText('Legal')).toBeInTheDocument()
+  })
+
+  it('renders Community Guidelines link in the Legal column', () => {
+    renderSiteFooter()
+    const link = screen.getByRole('link', { name: 'Community Guidelines' })
+    expect(link).toHaveAttribute('href', '/community-guidelines')
   })
 
   it('renders all 11 nav links with correct hrefs', () => {
