@@ -3797,24 +3797,24 @@ qotd_questions
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/v1/posts` returns paginated feed with `{data, meta}` shape
-- [ ] Pagination defaults: `page=1`, `limit=20`, `max limit=50`
-- [ ] `?category=health` filters to health posts only
-- [ ] `?postType=prayer_request` filters to prayer requests only
-- [ ] `?qotdId=qotd-faith-001` returns only QOTD responses for that question
-- [ ] `?sort=bumped` sorts by `last_activity_at DESC`
-- [ ] `?sort=recent` sorts by `created_at DESC`
-- [ ] `?sort=answered` returns only `is_answered=true` posts sorted by `answered_at DESC`
-- [ ] `GET /api/v1/posts/{id}` returns single post with comments inlined
-- [ ] `GET /api/v1/users/{username}/posts` returns posts authored by that user
-- [ ] Anonymous posts return `displayName: "Anonymous"` and `avatarUrl: null` for all viewers
-- [ ] `visibility=private` posts only visible to author
-- [ ] `visibility=friends` posts only visible to author and friends
-- [ ] `visibility=public` posts visible to everyone (including unauthenticated)
-- [ ] Soft-deleted posts (`is_deleted=true`) excluded from all feeds
-- [ ] Hidden/removed posts (`moderation_status` in `('hidden', 'removed')`) excluded from public feeds
-- [ ] OpenAPI spec includes all endpoints with full request/response schemas
-- [ ] At least 30 integration tests cover happy paths, filtering, pagination, visibility, anonymous handling, soft delete, moderation state
+- \[ \] `GET /api/v1/posts` returns paginated feed with `{data, meta}` shape
+- \[ \] Pagination defaults: `page=1`, `limit=20`, `max limit=50`
+- \[ \] `?category=health` filters to health posts only
+- \[ \] `?postType=prayer_request` filters to prayer requests only
+- \[ \] `?qotdId=qotd-faith-001` returns only QOTD responses for that question
+- \[ \] `?sort=bumped` sorts by `last_activity_at DESC`
+- \[ \] `?sort=recent` sorts by `created_at DESC`
+- \[ \] `?sort=answered` returns only `is_answered=true` posts sorted by `answered_at DESC`
+- \[ \] `GET /api/v1/posts/{id}` returns single post with comments inlined
+- \[ \] `GET /api/v1/users/{username}/posts` returns posts authored by that user
+- \[ \] Anonymous posts return `displayName: "Anonymous"` and `avatarUrl: null` for all viewers
+- \[ \] `visibility=private` posts only visible to author
+- \[ \] `visibility=friends` posts only visible to author and friends
+- \[ \] `visibility=public` posts visible to everyone (including unauthenticated)
+- \[ \] Soft-deleted posts (`is_deleted=true`) excluded from all feeds
+- \[ \] Hidden/removed posts (`moderation_status` in `('hidden', 'removed')`) excluded from public feeds
+- \[ \] OpenAPI spec includes all endpoints with full request/response schemas
+- \[ \] At least 30 integration tests cover happy paths, filtering, pagination, visibility, anonymous handling, soft delete, moderation state
 
 ### Spec 3.4 — Comments, Reactions, Bookmarks Read Endpoints
 
@@ -3828,13 +3828,13 @@ qotd_questions
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/v1/posts/{id}/comments?page=1&limit=20` returns paginated comments
-- [ ] Comments sorted by `created_at ASC`
-- [ ] Threaded comments (with `parent_comment_id`) returned with the parent context
-- [ ] `GET /api/v1/users/me/reactions` returns `{ reactions: { [postId]: { isPraying, isBookmarked } } }`
-- [ ] `GET /api/v1/users/me/bookmarks` returns paginated bookmarked posts
-- [ ] Soft-deleted comments excluded
-- [ ] At least 15 integration tests
+- \[ \] `GET /api/v1/posts/{id}/comments?page=1&limit=20` returns paginated comments
+- \[ \] Comments sorted by `created_at ASC`
+- \[ \] Threaded comments (with `parent_comment_id`) returned with the parent context
+- \[ \] `GET /api/v1/users/me/reactions` returns `{ reactions: { [postId]: { isPraying, isBookmarked } } }`
+- \[ \] `GET /api/v1/users/me/bookmarks` returns paginated bookmarked posts
+- \[ \] Soft-deleted comments excluded
+- \[ \] At least 15 integration tests
 
 ### Spec 3.5 — Posts Write Endpoints (Create, Update, Delete)
 
@@ -3864,21 +3864,21 @@ qotd_questions
 
 **Acceptance criteria:**
 
-- [ ] `POST /api/v1/posts` creates a post with valid body and returns 201 with full PostResponse
-- [ ] Invalid `postType` returns 400
-- [ ] Invalid `category` returns 400
-- [ ] Content over max length (configurable, default 2000 chars) returns 400
-- [ ] Empty content returns 400
-- [ ] `<script>` and other HTML tags stripped from content before storage
-- [ ] Crisis detection runs on every create and sets `crisis_flag=true` when triggered
-- [ ] Crisis-flagged posts are still created (NOT blocked) and the response includes `crisis_resources` field
-- [ ] Rate limit: 6th post in 24 hours returns 429 with `Retry-After`
-- [ ] Anonymous posts have `is_anonymous=true` and the displayName is masked in subsequent reads
-- [ ] Activity engine integration: creating a post records a `prayer_wall` activity which earns points and updates streak
-- [ ] `PATCH /api/v1/posts/{id}` requires author ownership (returns 403 otherwise)
-- [ ] Edit window is 5 minutes from creation (after that, content is immutable)
-- [ ] Marking answered sets `is_answered`, `answered_text`, `answered_at`
-- [ ] `DELETE /api/v1/posts/{id}` soft-deletes (does not hard-delete)
+- \[ \] `POST /api/v1/posts` creates a post with valid body and returns 201 with full PostResponse
+- \[ \] Invalid `postType` returns 400
+- \[ \] Invalid `category` returns 400
+- \[ \] Content over max length (configurable, default 2000 chars) returns 400
+- \[ \] Empty content returns 400
+- \[ \] `<script>` and other HTML tags stripped from content before storage
+- \[ \] Crisis detection runs on every create and sets `crisis_flag=true` when triggered
+- \[ \] Crisis-flagged posts are still created (NOT blocked) and the response includes `crisis_resources` field
+- \[ \] Rate limit: 6th post in 24 hours returns 429 with `Retry-After`
+- \[ \] Anonymous posts have `is_anonymous=true` and the displayName is masked in subsequent reads
+- \[ \] Activity engine integration: creating a post records a `prayer_wall` activity which earns points and updates streak
+- \[ \] `PATCH /api/v1/posts/{id}` requires author ownership (returns 403 otherwise)
+- \[ \] Edit window is 5 minutes from creation (after that, content is immutable)
+- \[ \] Marking answered sets `is_answered`, `answered_text`, `answered_at`
+- \[ \] `DELETE /api/v1/posts/{id}` soft-deletes (does not hard-delete)
 - \[ \] Soft-deleted posts return 404 from the read endpoints
 - \[ \] OpenAPI spec includes all endpoints
 - \[ \] At least 35 integration tests cover happy paths, validation, ownership, crisis detection, rate limiting, anonymous handling
@@ -3930,7 +3930,7 @@ Comments inherit the same 5-minute edit window as posts (consistent with the exi
 
 ### Phase 3.7 Addendum — Reaction Endpoint Signature for Light a Candle
 
-The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: 'praying' | 'candle' }` in the request body. The endpoint toggles the row in `post_reactions` matching `(post_id, user_id, reaction_type)`. Sending the same reaction_type a second time removes the row (toggle-off). Sending a different reaction_type adds an additional row (a single user can both pray AND light a candle). The denormalized `posts.praying_count` and `posts.candle_count` update transactionally. **`candle_count` and `reaction_type` already exist** — both shipped in Spec 3.1 (changesets 014 and 016 respectively); Spec 3.7 adds zero new schema. Frontend `usePrayerReactions` hook is extended with `toggleCandle(postId)` mirroring the existing `togglePraying(postId)`. Reactive store key `wr_prayer_reactions` is a `Record<string, { isPraying: boolean, isBookmarked: boolean, isCandle: boolean }>`; Spec 3.7 added `isCandle`. The migration shipped as additive default-fill on hydrate (no version key required) — see `11b-local-storage-keys-bible.md` § "Reactive stores across the codebase" for the canonical shape and Pattern A (subscription) consumption via `usePrayerReactions()`.
+The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: 'praying' | 'candle' }` in the request body. The endpoint toggles the row in `post_reactions` matching `(post_id, user_id, reaction_type)`. Sending the same reaction_type a second time removes the row (toggle-off). Sending a different reaction_type adds an additional row (a single user can both pray AND light a candle). The denormalized `posts.praying_count` and `posts.candle_count` update transactionally. `candle_count` **and** `reaction_type` **already exist** — both shipped in Spec 3.1 (changesets 014 and 016 respectively); Spec 3.7 adds zero new schema. Frontend `usePrayerReactions` hook is extended with `toggleCandle(postId)` mirroring the existing `togglePraying(postId)`. Reactive store key `wr_prayer_reactions` is a `Record<string, { isPraying: boolean, isBookmarked: boolean, isCandle: boolean }>`; Spec 3.7 added `isCandle`. The migration shipped as additive default-fill on hydrate (no version key required) — see `11b-local-storage-keys-bible.md` § "Reactive stores across the codebase" for the canonical shape and Pattern A (subscription) consumption via `usePrayerReactions()`.
 
 ### Spec 3.8 — Reports Write Endpoint
 
@@ -4007,7 +4007,6 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 - `frontend/src/services/index.ts` (add prayer wall swap point)
 - `frontend/.env.example` (add `VITE_USE_BACKEND_PRAYER_WALL`)
 - All four Prayer Wall pages if needed to support async loading states (most should already handle this)
-
 **Acceptance criteria:**
 
 - \[ \] All Prayer Wall service functions have an API implementation with matching signatures
