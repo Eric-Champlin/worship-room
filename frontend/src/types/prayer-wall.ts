@@ -26,7 +26,29 @@ export interface PrayerRequest {
   lastActivityAt: string // for bump/sort
   prayingCount: number
   commentCount: number
+
+  // --- Spec 3.10 (D5) — optional Phase 3.7+ fields. Mapper passes through
+  // when present; older call sites that don't read them are unaffected.
+  // Phase 4.1 (Post Type Foundation) will make `postType` required.
+  postType?: PostType
+  candleCount?: number
+  bookmarkCount?: number
+  updatedAt?: string
+  scriptureReference?: string
+  scriptureText?: string
+  // --- Intentionally NOT exposed:
+  // - crisisFlag — server-side supersession only (Phase 3 Addendum #7)
+  // - moderationStatus — server pre-filters; UI assumes 'approved'
+  // - visibility — deferred until Phase 8 friend visibility
 }
+
+/** Spec 3.10 — discriminator for the unified posts table (Decision 4). */
+export type PostType =
+  | 'prayer_request'
+  | 'testimony'
+  | 'question'
+  | 'discussion'
+  | 'encouragement'
 
 export interface PrayerComment {
   id: string

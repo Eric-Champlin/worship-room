@@ -141,3 +141,28 @@ export function isBackendMutesEnabled(): boolean {
   return USE_BACKEND_MUTES === 'true'
 }
 
+const USE_BACKEND_PRAYER_WALL = import.meta.env.VITE_USE_BACKEND_PRAYER_WALL as string | undefined
+
+/**
+ * Returns true when Prayer Wall reads and writes route to the backend
+ * (`/api/v1/posts/**`, `/api/v1/qotd/today`, `/api/v1/users/me/reactions`,
+ * `/api/v1/users/me/bookmarks`) instead of the in-memory mocks at
+ * `@/mocks/prayer-wall-mock-data`.
+ *
+ * Strict equality to the string `'true'` — `'false'`, `''`, `undefined`,
+ * and any other value all return false (fail-closed).
+ *
+ * Phase 3 read-swap semantics (NOT dual-write): when this flag is true,
+ * the backend is the source-of-truth for both reads AND writes. Differs
+ * from Phase 2/2.5 dual-write specs (`isBackendActivityEnabled`,
+ * `isBackendFriendsEnabled`, etc.) where localStorage stays primary.
+ *
+ * Default: false. Cutover (flag default flip) is owned by Spec 3.12.
+ *
+ * Used by: Spec 3.11 (consumer hooks) and Spec 3.12 (cutover smoke test).
+ * Spec 3.10 only ships this helper; no call sites consume it yet.
+ */
+export function isBackendPrayerWallEnabled(): boolean {
+  return USE_BACKEND_PRAYER_WALL === 'true'
+}
+
