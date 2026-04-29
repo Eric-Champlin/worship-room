@@ -31,6 +31,7 @@ Issues, hygiene, and small refactors discovered during or after the Spec 1.10 cu
 **Most likely cause:** Filter-raised 401 from JwtAuthenticationFilter on `/users/me` not being CORS-allowed for the Railway frontend origin in prod. AuthContext.catch sets isAuthenticated=false (UI restores), but apiFetch's 401-specific clearStoredToken handler never fires because browser blocked the response.
 
 **Diagnostic next step (don't fix without verifying):**
+
 1. Verify backend's `PROXY_CORS_ALLOWED_ORIGINS` env var includes `https://worship-room-frontend-production.up.railway.app` exactly.
 2. Verify backend redeploy after CorsFilter code landed actually picked up the new code.
 3. Manual reproduction in browser DevTools: corrupt `wr_jwt_token`, reload, watch Network tab. Should be 401; if shows ERR_FAILED then CORS is the issue.
@@ -58,6 +59,7 @@ Issues, hygiene, and small refactors discovered during or after the Spec 1.10 cu
 ## 4. Prayer Wall primary-color contrast — design-system gap (medium priority)
 
 **Captured:** `_cutover-evidence/phase1-a11y-smoke.json` shows 1 violation on `/prayer-wall` logged-out:
+
 - `.border-primary` (`#6D28D9`, contrast 2.73 vs 4.5 minimum)
 - `.border-primary/40` (`#8B5CF6`, contrast 3.72 vs 4.5 minimum)
 
@@ -74,6 +76,7 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Deferred from:** Spec 1.10 § 6.1 (Universal Rule 17 mandatory accessibility smoke).
 
 **What was deferred:**
+
 - Keyboard-only walkthrough with focus-ring + skip-link verification
 - VoiceOver (macOS) spot-check
 
@@ -100,12 +103,14 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Discovered during:** Spec 1.10c kickoff, 2026-04-24. CC flagged `.claude/rules/11-local-storage-keys.md` as exceeding the 40 KB performance threshold; surgical trim brought it to 39.16 KB.
 
 **Other oversized files in the same directory:**
+
 - `.claude/rules/09-design-system.md` — **83.21 KB** (2× over)
 - `.claude/rules/10-ux-flows.md` — **55.87 KB** (1.4× over)
 
 **Cause:** Both have grown organically across many specs without ever being split. Surgical prose trimming alone won't bring them under 40 KB — they need actual restructuring (split into multiple rule files by topic).
 
 **Likely splits worth considering:**
+
 - `09-design-system.md` → keep design tokens + core component patterns; extract typography/spacing/animation details to a sibling file
 - `10-ux-flows.md` → keep the cross-cutting UX rules; extract feature-specific flow docs (Prayer Wall, Daily, Bible reader) to feature-scoped files
 
@@ -145,6 +150,7 @@ Both fail WCAG 2.1 AA. Exact match to existing `test.fixme` at `frontend/e2e/pha
 **Reason:** worshiproom.com is a premium domain currently listed at ~$1,500. Eric is not planning to purchase until closer to public launch.
 **Blocks:** Specs 1.5b–g (password reset, email verification, change-password notification, welcome emails, account lockout notification, additional auth-flow emails).
 **Decision criteria for revisit:**
+
 - Domain purchased (worshiproom.com OR alternative TLD/name)
 - Worship Room within ~30 days of public launch
 - Real users about to register, making email flows user-facing-required
@@ -236,6 +242,7 @@ These limits are not enforced by 2.5.3.
 **What's missing:** Spec 2.5.7 ships the mute data layer (`user_mutes` table, `MuteService.isMuted(viewerId, posterId)`, `useMutes` hook, Settings UI). No consumer fires `isMuted` today. The spec's premise — "muted users' posts won't appear in your feed" — is not yet observable end-to-end.
 
 **Verifies:**
+
 - `MuteService.isMuted(viewerId, posterId)` is called from `FeedService` so muted users' posts are excluded from `GET /api/v1/feed` responses.
 - On the frontend, `useMutes.muted` filters muted user IDs out of the rendered feed list.
 - Muted users' presence excluded from active-now / suggestions surfaces.
@@ -258,6 +265,7 @@ These limits are not enforced by 2.5.3.
 **What's missing:** Spec 2.5.7 ships 3 mute endpoints (`POST /api/v1/mutes`, `DELETE /api/v1/mutes/{userId}`, `GET /api/v1/mutes`) with JWT auth as the only gate. No per-user rate limiting.
 
 **Verifies:**
+
 - POST/DELETE/GET on mute endpoints return 429 RATE_LIMITED with `Retry-After` after exceeding the configured per-user limit.
 - Standard `X-RateLimit-Limit` / `X-RateLimit-Remaining` / `X-RateLimit-Reset` headers present on every response.
 - Suggested limits to consider when Phase 10.9 lands: 30 mutes/hour, 30 unmutes/hour (mirrors the friends-action category in `02-security.md` § Forums Wave Rate Limits).
@@ -357,5 +365,28 @@ These limits are not enforced by 2.5.3.
 **Approach when picked up:** Rename to `PostsConfig`, add a class-level Javadoc enumerating the three sub-sections, OR split into three classes (`PostsRateLimitConfig`, `PostsEditWindowConfig`, `PostsIdempotencyConfig`) each with its own narrow prefix. The split is cleaner but adds two beans; the rename is one find-and-replace.
 
 **Priority:** LOW. Internal naming with no external surface impact. Pick up opportunistically when the file is next touched.
+
+---
+
+## 20. R2 production credentials — Railway env var plumbing required before Phase 4.6b deploy
+
+When Phase 4.6b ships and image uploads need real cloud storage,
+five Railway env vars must be set BEFORE the deploy that activates
+the prod-profile storage code path:
+
+- STORAGE_BUCKET=worshiproom-prod
+- STORAGE_ACCESS_KEY (from 1Password — Worship Room Cloudflare R2)
+- STORAGE_SECRET_KEY (from 1Password — Worship Room Cloudflare R2)
+- STORAGE_ENDPOINT_URL=https://<account-id>.r2.cloudflarestorage.com
+- STORAGE_MAX_PRESIGN_HOURS=1
+
+The 1.10e spec includes a startup-time fail-fast check (deploy will
+NOT silently fall back to LocalFilesystem) and the runbook at
+`backend/docs/runbook-storage.md` includes the full cutover
+checklist. This entry exists to surface the dependency during the
+4.6b plan-time recon.
+
+Captured: 2026-04-29 during 1.10e brief authoring.
+Revisit: when 4.6b's spec is authored.
 
 ---
