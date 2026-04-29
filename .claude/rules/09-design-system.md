@@ -299,7 +299,11 @@ The BibleReader was rebuilt during the Bible wave (BB-0 through BB-29) and exten
 - **ExplainPanel.tsx** (BB-30) — AI-generated passage explanation. Triggered from the BibleReader top bar. Calls Gemini 2.5 Flash Lite via the BB-32 cache layer. Anti-pressure voice — explanations are short and explicitly not authoritative.
 - **ReflectPanel.tsx** (BB-31) — AI-generated personal reflection prompts for any verse range. Same model and cache as ExplainPanel. Reflections are first-person prompts, not interpretations.
 - **NotificationPermissionPrompt.tsx** (BB-41) — Contextual non-modal card that appears at the bottom of the BibleReader after the user completes a reading session. Asks "Want a daily verse to keep this rhythm going?" with Enable / Maybe later buttons. Fires at most once per user (tracked via `wr_notification_prompt_dismissed`). Only fires on the second reading session of the day, not the first.
-- **HighlightStore, BookmarkStore, NoteStore, JournalStore, ChapterVisitStore, MemorizationStore, EchoStore** — Reactive store modules at `frontend/src/lib/<feature>/store.ts`. Each exposes a custom hook that internally subscribes via `useSyncExternalStore`. Components consuming these stores **must use the hook**, never `useState(getAll*())`. See `11-local-storage-keys.md` § "Reactive Store Consumption" for the BB-45 anti-pattern.
+- **Reactive stores (Bible wave + Phase 0.5):**
+  - **Pattern A (subscription via standalone hook, `useSyncExternalStore`):** `useMemorizationStore` (`hooks/bible/useMemorizationStore.ts` over `lib/memorize/store.ts`), `useStreakStore` (`hooks/bible/useStreakStore.ts` over `lib/bible/streakStore.ts`), `usePrayerReactions` (`hooks/usePrayerReactions.ts` over `lib/prayer-wall/reactionsStore.ts`).
+  - **Pattern B (inline subscription via `subscribe()` in a `useEffect`):** `highlightStore` (`lib/bible/highlightStore.ts`), `bookmarkStore` (`lib/bible/bookmarkStore.ts`), `noteStore` (`lib/bible/notes/store.ts`), `journalStore` (`lib/bible/journalStore.ts`), `chapterVisitStore` (`lib/heatmap/chapterVisitStore.ts`), `plansStore` (`lib/bible/plansStore.ts`). No standalone hook — consumers wire `useState` + `useEffect` + `subscribe()` themselves.
+  - Echo dismissal persistence was deferred — `useEcho` (session-scoped) is the only echo-related hook; `useEchoStore` does NOT exist. See `11b-local-storage-keys-bible.md` § "Note on BB-46 echoes".
+  - Components consuming any of these **MUST subscribe** (Pattern A automatic via the hook; Pattern B requires the explicit `subscribe()` call). See `11b-local-storage-keys-bible.md` § "Reactive Store Consumption" for the BB-45 anti-pattern.
 
 ### Prayer Wall Components (`components/prayer-wall/`)
 
@@ -381,7 +385,7 @@ The BibleReader was rebuilt during the Bible wave (BB-0 through BB-29) and exten
 
 ### Bible Reactive Store Hooks & Subscription (BB-7 through BB-45)
 
-Bible-wave stores use two subscription patterns. **Components consuming these stores MUST subscribe** — never call `getAllX()` and store the result in local `useState` without a `subscribe()` call. See `11-local-storage-keys.md` § "Reactive Store Consumption" for the full pattern documentation and the BB-45 anti-pattern.
+Bible-wave stores use two subscription patterns. **Components consuming these stores MUST subscribe** — never call `getAllX()` and store the result in local `useState` without a `subscribe()` call. See `11b-local-storage-keys-bible.md` § "Reactive Store Consumption" for the full pattern documentation and the BB-45 anti-pattern.
 
 **Standalone hooks (Pattern A — `useSyncExternalStore`):**
 
@@ -535,7 +539,7 @@ This pattern is canonical for any feature where users invest emotional/time effo
 
 ### Reactive Store Pattern (BB-7 onward)
 
-Bible-wave personal-layer features use reactive stores instead of plain CRUD services. Two subscription patterns coexist: standalone hooks via `useSyncExternalStore` (memorization, streak) and inline `useState` + `subscribe()` (highlights, bookmarks, notes, journals, chapter visits, plans). Both patterns are correct. **Storing a snapshot in `useState` without calling the store's `subscribe()` function is the BB-45 anti-pattern and ships as a silent correctness bug.** See `11-local-storage-keys.md` § "Reactive Store Consumption" for the full pattern documentation.
+Bible-wave personal-layer features use reactive stores instead of plain CRUD services. Two subscription patterns coexist: Pattern A (subscription via standalone hook with `useSyncExternalStore` — `useMemorizationStore`, `useStreakStore`, `usePrayerReactions`) and Pattern B (inline `useState` + `useEffect` + `subscribe()` — highlights, bookmarks, notes, journals, chapter visits, plans). Both patterns are correct. **Storing a snapshot in `useState` without calling the store's `subscribe()` function is the BB-45 anti-pattern and ships as a silent correctness bug.** See `11b-local-storage-keys-bible.md` § "Reactive Store Consumption" for the full pattern documentation.
 
 ---
 

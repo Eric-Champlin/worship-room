@@ -613,7 +613,7 @@ The My Bible page consolidates everything the user has personally engaged with i
 4. **Memorization Deck (BB-45)** — Flip card grid for verses the user is memorizing
 5. **Activity feed** — Unified chronological feed of highlights, notes, bookmarks, and journal entries
  
-The page reads from seven reactive stores via hooks: `useChapterVisitStore()`, `useHighlightStore()`, `useBookmarkStore()`, `useNoteStore()`, `useJournalStore()`, `useMemorizationStore()`, and `useEchoStore()`. **Components on this page must use the hooks, never local `useState` mirrors.** See `11-local-storage-keys.md` § "Reactive Store Consumption" for the BB-45 anti-pattern.
+The page reads from six reactive stores. **Pattern A (subscription via standalone hook):** `useMemorizationStore()`. **Pattern B (inline `subscribe()` in a `useEffect`):** `chapterVisitStore` (heatmap), `highlightStore`, `bookmarkStore`, `noteStore`, `journalStore`. Echo dismissals are session-scoped via `useEcho` — `useEchoStore` does NOT exist (BB-46 dismissal persistence deferred). **Components on this page must subscribe — Pattern A via the hook, Pattern B via an explicit `subscribe()` call inside `useEffect`. Local `useState` mirrors without subscription are the BB-45 anti-pattern.** See `11b-local-storage-keys-bible.md` § "Reactive Store Consumption".
  
 ---
  
@@ -745,7 +745,7 @@ A small frosted-glass card containing:
 ### Interaction
  
 - **Tap the card** → navigates to the verse via BB-38 deep link (`/bible/<book>/<chapter>?verse=<n>`)
-- **Tap the X (if shown)** → dismisses this specific echo. Dismissed echo IDs persist in `wr_echo_dismissals` via `useEchoStore()`. The selection engine excludes dismissed echoes from future picks.
+- **Tap the X (if shown)** → dismisses this specific echo for the current session. Dismissed echo IDs are held in a session-scoped `Set<string>` inside `hooks/useEcho.ts` — they reset on page reload. Persistent dismissal across sessions (`wr_echo_dismissals`) was considered but deferred; if needed in the future, it ships as its own spec with a proper reactive store. The selection engine excludes session-dismissed echoes from future picks during the same session.
  
 ### Selection engine
  
@@ -760,7 +760,7 @@ The engine scores candidate verses based on:
 - Significance of the date interval (30 days, 7 days, 1 year — anniversary-style intervals score higher than random gaps)
 - Source type (highlights and memorization weighted higher than passive reading)
 - Recency tiebreaker (more recent within the same interval scores higher)
-- Dismissal exclusion (anything in `wr_echo_dismissals` is filtered out)
+- Dismissal exclusion (anything in the session-scoped `Set` from `useEcho` is filtered out for the current session)
  
 Returns the top candidate, or `null` if there are zero candidates.
  

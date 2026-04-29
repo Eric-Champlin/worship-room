@@ -499,7 +499,8 @@ Consider how you (or a future you) will experience this diff:
  
 | Check | Status | Evidence |
 |-------|--------|----------|
-| Crisis detection on user text inputs (Pray, Journal, Prayer Wall, Mood Check-In) | OK / MISSING / BYPASSED / N/A | {file}:{line} |
+| Crisis detection on user text inputs (Pray, Journal, Prayer Wall, Mood Check-In) routes through `CrisisAlertService.alert(contentId, authorId, ContentType)` (do NOT introduce sibling alert services per Phase 3 Addendum #7) | OK / MISSING / BYPASSED / SIBLING SERVICE / N/A | {file}:{line} |
+| New multi-consumer reactive store has BB-45 cross-mount subscription test (mutate store after mount, assert re-render in separate consumer) per Phase 3 Addendum #12 | OK / MISSING / N/A | {file}:{line} |
 | No `dangerouslySetInnerHTML` on user content | OK / VIOLATION | {file}:{line} |
 | Demo mode: no database writes for logged-out users | OK / VIOLATION / N/A | {file}:{line} |
 | Auth modal triggers correctly for gated actions | OK / MISSING / N/A | {file}:{line} |
@@ -762,10 +763,35 @@ When reviewing code that touches the backend (Spring Boot, Liquibase, dual-write
 | OpenAPI spec EXTENDED at `backend/src/main/resources/openapi.yaml` (never created at `backend/api/openapi.yaml`) | OK / WRONG PATH | {file} |
 | Cutover specs produce `_cutover-evidence/{phase}-a11y-smoke.json` axe-core evidence (Universal Rule 17) | OK / MISSING / N/A | {file} |
 | Drift detection test present for Phase 2 dual-write specs (Decision 12) | OK / MISSING / N/A | {file}:{line} |
+| **Phase 3 Addendum #2 — L1-cache trap fixed.** Service layer calls `entityManager.refresh(saved)` after `save()` for entities with `@Column(insertable=false, updatable=false)` columns; create-endpoint integration tests assert non-null timestamps in response body | OK / VIOLATION / N/A | {file}:{line} |
+| **Phase 3 Addendum #3 — `@Modifying(clearAutomatically=true, flushAutomatically=true)`** on every new bulk JPQL UPDATE/DELETE method (both flags REQUIRED) | OK / VIOLATION / N/A | {file}:{line} |
+| **Phase 3 Addendum #4 — SecurityConfig method-specific rules** placed BEFORE `OPTIONAL_AUTH_PATTERNS.permitAll()`; nested paths (`/api/v1/posts/*/reactions`) have their own explicit rules | OK / WRONG ORDER / MISSING NESTED RULE | {file}:{line} |
+| **Phase 3 Addendum #5 — Caffeine-bounded bucket pattern** for any per-user/per-IP/per-key cache; `@ConfigurationProperties(prefix = "worshiproom.{feature}")`, never `ConcurrentHashMap` keyed on external input | OK / VIOLATION | {file}:{line} |
+| **Phase 3 Addendum #6 — Domain-scoped `@RestControllerAdvice`** for new domains (`com.worshiproom.{domain}`); unscoped companion advice (single-exception-class) for any filter-raised exceptions | OK / VIOLATION / N/A | {file}:{line} |
+| **Phase 3 Addendum #7 — `CrisisAlertService.alert(contentId, authorId, ContentType)`** is the unified entry for any user-generated-content surface; do NOT introduce sibling alert services | OK / VIOLATION / N/A | {file}:{line} |
+| **Phase 3 Addendum #8 — schema realities verified.** Any new Liquibase changeset does NOT recreate already-shipped schema (cross-check against addendum item 8 list: `posts.candle_count`, `post_reactions.reaction_type`, the 5 denormalized counters, `qotd_questions`, `post_reports.review_consistency`, friends/social/milestone tables, `user_mutes`) | OK / VIOLATION / N/A | {file} |
+| **Phase 3 Addendum #1 — EditWindowExpired returns 409 (not 400)** with code `EDIT_WINDOW_EXPIRED` for any edit-window-bearing PATCH endpoint | OK / VIOLATION / N/A | {file}:{line} |
+| **Phase 3 Addendum #9 — INTERCESSION ActivityType drift.** New `ActivityType` enum value paired with `ACTIVITY_POINTS` frontend constant addition; current total is 13 (per Decision 12 drift-detection test) | OK / DRIFT / N/A | {file}:{line} |
 
 **Backend violations are Blocker severity** — same as Worship Room safety violations.
 
 **Note:** Some checks in this table only apply to Forums Wave specs (dual-write, master-plan Universal Rules). For non-Forums backend work (e.g., AI proxy specs), mark those rows N/A.
+
+**Recommended grep commands for the Phase 3 Addendum gates** (these are starter heuristics — they catch the common violation shapes but are NOT exhaustive. Multi-line `@Modifying` annotations split across continuation lines, `Map` subtypes other than `ConcurrentHashMap`, nested-class `Cache<K, V>` declarations, and dynamically-instantiated maps will not be caught. Use them as a fast first pass; visually scan the diff for the patterns above when the grep is silent):
+
+```bash
+# Phase 3 Addendum #3 — verify @Modifying flags complete (single-line annotations only)
+grep -rn '@Modifying' backend/src/main/java | grep -v 'clearAutomatically.*flushAutomatically\|flushAutomatically.*clearAutomatically'
+# Should return zero matches; any match = missing flag (or annotation split across lines — eyeball-check)
+
+# Phase 3 Addendum #4 — SecurityConfig rule ordering line-number check
+grep -n 'requestMatchers\|OPTIONAL_AUTH_PATTERNS' backend/src/main/java/com/worshiproom/auth/SecurityConfig.java
+# Verify all method-specific .authenticated() lines appear at LOWER line numbers than the OPTIONAL_AUTH_PATTERNS reference
+
+# Phase 3 Addendum #5 — Caffeine-bounded check (flags ConcurrentHashMap directly; misses ConcurrentSkipListMap, HashMap inside synchronized blocks, Guava Cache)
+grep -rn 'ConcurrentHashMap<.*\(String\|Long\|UUID\),' backend/src/main/java | grep -v 'test\|Test'
+# Each match needs review: is the key external input? If yes, flag for Caffeine migration
+```
 
 ---
 
@@ -773,9 +799,9 @@ When reviewing code that touches the backend (Spring Boot, Liquibase, dual-write
 
 **Run this subsection when the diff touches the proxy package or any frontend file that calls `/api/v1/proxy/*`.**
 
-**PACKAGE PATH NOTE (critical at Forums Wave Phase 1):** The proxy package is currently `com.example.worshiproom.proxy` and becomes `com.worshiproom.proxy` after Phase 1 Spec 1.1 merges. The checks below reference the OLD path (`com.example.worshiproom.proxy`) — this is correct for the current state of `main`. **Post-Spec-1.1**, update every reference in this section: run condition, `@RestControllerAdvice` check, grep commands in this section, and the Run Condition header. Before running this review, check the actual current package with `ls backend/src/main/java/com/` and use that path in all checks below. If you see BOTH packages simultaneously during the Spec 1.1 review itself (the rename is in progress), the checks must pass for whichever package the advice lives in.
+**Package path:** Phase 1 Spec 1.1 ✅ renamed `com.example.worshiproom.proxy` → `com.worshiproom.proxy`. The `com/example/worshiproom/` path should NOT appear anywhere in the codebase post-Phase-1; if it does, that's a regression worth flagging.
 
-**Run Condition:** `backend/src/main/java/com/example/worshiproom/proxy/` (current) OR `backend/src/main/java/com/worshiproom/proxy/` (post-Spec-1.1).
+**Run Condition:** `backend/src/main/java/com/worshiproom/proxy/`.
 
 The proxy package wraps upstream third-party APIs (Gemini, Google Places, FCBH). The entire reason the proxy exists is to keep API keys off the frontend and to prevent key/secret leakage. Every review of proxy code MUST verify these invariants:
 
@@ -792,7 +818,7 @@ The proxy package wraps upstream third-party APIs (Gemini, Google Places, FCBH).
 | Proxy endpoints return the standard `{ code, message, requestId, timestamp }` error shape from `ProxyError` | OK / VIOLATION | {file}:{line} |
 | `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` headers present on every `/api/v1/proxy/*` response | OK / MISSING | {file}:{line} |
 | 429 responses include `Retry-After` header (seconds, not date) | OK / MISSING | {file}:{line} |
-| `@RestControllerAdvice` is scoped with `basePackages = "com.example.worshiproom.proxy"` (or `com.worshiproom.proxy` post-Spec-1.1) so it doesn't swallow exceptions from non-proxy controllers | OK / OVER-BROAD | {file}:{line} |
+| `@RestControllerAdvice` is scoped with `basePackages = "com.worshiproom.proxy"` so it doesn't swallow exceptions from non-proxy controllers | OK / OVER-BROAD | {file}:{line} |
 | Health endpoint reports provider readiness as booleans only (never the key values themselves) | OK / VIOLATION | {file}:{line} |
 | Frontend no longer references `VITE_GEMINI_API_KEY` / `VITE_GOOGLE_MAPS_API_KEY` / `VITE_FCBH_API_KEY` after migration specs (Specs 2-4) — grep the frontend diff to confirm | OK / STILL PRESENT / N/A | {file}:{line} |
 | Frontend calls the proxy at `/api/v1/proxy/*` using `VITE_API_BASE_URL`, not direct upstream URLs | OK / VIOLATION / N/A | {file}:{line} |
@@ -804,10 +830,7 @@ The proxy package wraps upstream third-party APIs (Gemini, Google Places, FCBH).
 **Recommended grep commands during review:**
 
 ```bash
-# Adjust the package path below based on whether Phase 1 Spec 1.1 has merged:
-#   BEFORE Spec 1.1: backend/src/main/java/com/example/worshiproom/
-#   AFTER  Spec 1.1: backend/src/main/java/com/worshiproom/
-# Run `ls backend/src/main/java/com/` on the current branch to see which applies.
+# Package path is com.worshiproom (Phase 1 Spec 1.1 ✅).
 
 # Verify no API key in logs
 grep -rn 'log\.\(info\|debug\|warn\|error\).*apiKey\|log\.\(info\|debug\|warn\|error\).*getApiKey' backend/src/main/java

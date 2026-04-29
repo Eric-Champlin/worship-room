@@ -31,7 +31,7 @@ The following tables are defined by the master plan. Each table's full schema is
 ### Phase 1 — Foundation
 | Table | Created In | Purpose |
 |-------|-----------|---------|
-| `users` | Spec 1.3 | Core user accounts (email, password_hash, name, is_admin, timezone, terms_version, privacy_version) |
+| `users` | Spec 1.3 (+ 1.10f future) | Core user accounts. **Shipped columns** (Spec 1.3 + 1.3b): email, password_hash, name, is_admin, timezone. **Future columns (Spec 1.10f, NOT yet on table):** terms_version, privacy_version. |
 
 ### Phase 2 — Activity Engine
 | Table | Created In | Purpose |
@@ -58,7 +58,7 @@ The following tables are defined by the master plan. Each table's full schema is
 | `post_reactions` | Spec 3.1 | Reactions (praying, amen, heart, praising, celebrate + Light a Candle composite PK) |
 | `post_bookmarks` | Spec 3.1 | User bookmarks on posts |
 | `post_reports` | Spec 3.1 | Post-level moderation reports |
-| `qotd_questions` | Spec 3.9 | Question of the Day (72 rotating questions) |
+| `qotd_questions` | Spec 3.1 (table) + Spec 3.2 (seed) | Question of the Day (72 rotating questions: 60 general + 12 liturgical). Table created by Spec 3.1 changeset 019; 72 rows seeded by Spec 3.2 changeset 021. Spec 3.9 owns the rotation endpoint, not the schema. |
 
 ### Phase 6 — Engagement Features
 | Table | Created In | Purpose |

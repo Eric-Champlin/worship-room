@@ -133,9 +133,14 @@ Reactive store specs always include at least one cross-mount subscription test r
 
 ### Reactive Store Consumer Pattern (BB-45 anti-pattern)
 
-Bible wave reactive stores (`useHighlightStore()`, `useBookmarkStore()`, etc.) require subscription tests — not just initial-render tests. The BB-45 anti-pattern: a component that mirrors the store into local `useState` looks correct initially but breaks when the store mutates from elsewhere.
+Bible-wave and Phase 0.5 reactive stores require subscription tests — not just initial-render tests. The BB-45 anti-pattern: a component that mirrors the store into local `useState` looks correct initially but breaks when the store mutates from elsewhere.
 
-**Required pattern:** Mutate the store AFTER the component mounts, then assert re-render:
+Two subscription patterns coexist (see `11b-local-storage-keys-bible.md` § "Reactive Store Consumption"):
+
+- **Pattern A (subscription via standalone hook):** `useSyncExternalStore`-based hook file. Real Pattern A hooks: `useMemorizationStore`, `useStreakStore`, `usePrayerReactions`. Consumer simply calls the hook.
+- **Pattern B (inline subscription):** No standalone hook file. Consumer wires `useState` + `useEffect` + `subscribe()` itself. Stores: `highlightStore`, `bookmarkStore`, `noteStore`, `journalStore`, `chapterVisitStore`, `plansStore`. Consumer MUST call the store's `subscribe()` function inside a `useEffect`; without that call, the component snapshots on mount and never updates.
+
+**Required pattern (test):** Mutate the store AFTER the component mounts, then assert re-render:
 ```tsx
 test('renders new cards added after mount', async () => {
   render(<MemorizationDeck />);
@@ -147,7 +152,9 @@ test('renders new cards added after mount', async () => {
 
 **Forbidden:** Mocking the entire store (`vi.mock(...)`) bypasses the subscription mechanism.
 
-**Stores requiring this pattern:** `useHighlightStore`, `useBookmarkStore`, `useNoteStore`, `useJournalStore`, `useChapterVisitStore`, `useMemorizationStore`, `useEchoStore`
+**Stores requiring this test pattern:** Pattern A — `useMemorizationStore`, `useStreakStore`, `usePrayerReactions`. Pattern B — `highlightStore`, `bookmarkStore`, `noteStore`, `journalStore`, `chapterVisitStore`, `plansStore` (consumed inline; consumer + store + test all share the responsibility).
+
+**Note on echoes (BB-46):** `useEchoStore` and `wr_echo_dismissals` were considered but deferred — see `11b-local-storage-keys-bible.md` § "Note on BB-46 echoes". The current echo system uses session-scoped state inside `hooks/useEcho.ts` and does not require this test pattern.
 
 ---
 

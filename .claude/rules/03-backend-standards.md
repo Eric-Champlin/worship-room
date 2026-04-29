@@ -176,7 +176,12 @@ com.worshiproom/
 │   └── ApiController.java               (/api/v1/health, /api/v1/hello — health endpoint reports providers.* status)
 ├── auth/                                (Phase 1 — Spring Security + JWT: login/register/me endpoints, JwtAuthenticationFilter, LoginRateLimitFilter, BCrypt, anti-enumeration)
 ├── user/                                (Phase 1 — User entity, UserController, UserService, UserRepository, DisplayNameResolver, PATCH /users/me)
-├── activity/                            (Phase 2 — ActivityLog, FaithPoints, Streak, Badge, ActivityCounts; pure-function services + dual-write POST /api/v1/activity + POST /api/v1/activity/backfill)
+├── activity/                            (Phase 2 — ActivityLog, FaithPoints, Streak, Badge, ActivityCounts; pure-function services + dual-write POST /api/v1/activity + POST /api/v1/activity/backfill; 13 ActivityType values incl. INTERCESSION added in Spec 3.6)
+├── friends/                             (Phase 2.5 — friend_relationships, friend_requests; mutual-model service)
+├── social/                              (Phase 2.5 — social_interactions, milestone_events write paths)
+├── mute/                                (Spec 2.5.7 — user_mutes, MutesService; asymmetric per-user mute filtering)
+├── safety/                              (Phase 3 — CrisisAlertService canonical entry point; ContentType.POST | ContentType.COMMENT)
+├── post/                                (Phase 3 — unified posts family: Post + PostComment + PostReaction + PostBookmark, PostController + PostService + write services, PostExceptionHandler package-scoped advice, PostsRateLimitConfig, PostsIdempotencyService, QotdQuestion entity + repository, UserResolverService kebab-case shim)
 └── proxy/                               (Key Protection Wave; package renamed in Phase 1 Spec 1.1)
     ├── common/                          (shared across all proxy subpackages)
     │   ├── ProxyResponse.java
@@ -202,7 +207,7 @@ com.worshiproom/
 
 **Proxy subpackage convention (MANDATORY):** Every proxy feature lives under `com.worshiproom.proxy.{feature}/` — `proxy.ai` for Gemini (Spec 2), `proxy.maps` for Google Maps (Spec 3), `proxy.bible` for FCBH (Spec 4). Feature packages contain their controller + service + prompts/DTOs/helpers specific to that upstream. They NEVER redefine what already exists in `proxy.common` — shared types, exceptions, filters, and handlers always stay in common. Note: the master plan v2.6 listed provisional names (`proxy.places`, `proxy.audio`) that were superseded during execution — specs chose domain names (`proxy.maps`, `proxy.bible`) per "spec is feature authority." The current on-disk structure is authoritative.
 
-**Forums Wave package additions (Phases 2.5+ — still future):** Phase 2.5 will add `com.worshiproom.friends/` and `com.worshiproom.social/` (the latter for `social_interactions` and `milestone_events` write paths). Phase 3 will add `com.worshiproom.post/` (unified `posts` family). Phase 10 will add `com.worshiproom.moderation/`. Phase 12 will add `com.worshiproom.notification/`. Phase 15 will add `com.worshiproom.email/`. Do not create those packages preemptively — each phase's specs own them.
+**Forums Wave package additions:** Phase 2.5 ✅ shipped `com.worshiproom.friends/`, `com.worshiproom.social/`, and `com.worshiproom.mute/` (Spec 2.5.7). Phase 3 ✅ shipped `com.worshiproom.post/` (unified `posts` family) and `com.worshiproom.safety/` (CrisisAlertService — the canonical entry point for crisis-flag handling per Spec 3.5/3.6). **Still future:** Phase 10 will add `com.worshiproom.moderation/` (Spec 10.10 admin foundation, 10.7 peer moderator queue). Phase 12 will add `com.worshiproom.notification/`. Phase 15 will add `com.worshiproom.email/` (SMTP-blocked until domain purchase per `_plans/post-1.10-followups.md`). **Spec 2.5.6 (Block User) is NOT yet shipped despite older tracker text** — `com.worshiproom.block/` does not exist; Block reuses the Mute pattern when it ships. Do not create future packages preemptively — each phase's specs own them.
 
 ### Controller Conventions
 - Annotate with `@RestController` and `@RequestMapping("/api/v1/...")`
@@ -233,6 +238,8 @@ com.worshiproom/
 - Custom queries via `@Query` with JPQL (prefer JPQL over native SQL unless performance-critical)
 - Method naming: `findAllByUserIdOrderByCreatedAtDesc(UUID userId)`
 - Pageable support: `Page<Entity> findAllByUserId(UUID userId, Pageable pageable)`
+- **Bulk UPDATE/DELETE methods MUST use `@Modifying(clearAutomatically = true, flushAutomatically = true)`.** Without `clearAutomatically`, subsequent reads in the same transaction return stale entities from Hibernate's persistence context. Without `flushAutomatically`, pending in-memory changes don't reach the DB before the bulk update fires. Convention established in Spec 3.7; used 11 times across `PostRepository`, `BookmarkRepository`, `ReactionRepository`. `/code-review` MUST flag any new `@Modifying` annotation missing either flag.
+- **L1-cache trap on save → flush → findById.** A repository `save()` followed immediately by `findById()` returns the entity from the persistence context, NOT a fresh DB read. For columns marked `@Column(insertable=false, updatable=false)` (typical for DB-default audit timestamps like `created_at`/`updated_at`), the in-memory entity has `null` for those columns even after the SQL INSERT populates them. **Canonical fix:** call `entityManager.refresh(saved)` after `save()` and before DTO mapping. **Test guard:** any create-endpoint integration test that asserts a non-null timestamp in the response body catches this regression. Surfaced by Spec 3.5 + Spec 3.6 plan deviations; `ReactionWriteService.java:102` carries an explanatory comment.
 
 ### DTO Conventions
 - Use Java records for request/response DTOs: `public record CreatePostRequest(...) {}`
@@ -259,6 +266,30 @@ Proxy advices are **package-scoped** via `@RestControllerAdvice(basePackages = "
 2. **HandlerExceptionResolver delegation from inside the filter** — the filter injects `@Qualifier("handlerExceptionResolver") HandlerExceptionResolver` and calls `resolver.resolveException(request, response, null, ex)` instead of throwing. The resolver chain finds the appropriate advice because the resolver explicitly iterates advices. Spec 1's `RateLimitFilter` uses this pattern so the rate-limit response body + `Retry-After` header are emitted correctly.
 
 Either pattern is acceptable. The unscoped-companion-advice pattern is simpler for single-exception cases; the resolver-delegation pattern is better when the filter needs fine control over the response. DO NOT add `basePackages` to an advice that must catch filter-raised exceptions — it will silently fail in production.
+
+### SecurityConfig rule ordering (MANDATORY pattern)
+
+Spring Security uses **first-match-wins** when evaluating `requestMatchers` rules. Method-specific `.authenticated()` rules MUST appear BEFORE permissive rules like `OPTIONAL_AUTH_PATTERNS.permitAll()` — otherwise the permissive rule wins and unauthenticated writes silently succeed.
+
+Additionally, Spring's `AntPathMatcher` treats `*` as a single path segment. `/api/v1/posts/*` does NOT match `/api/v1/posts/*/reactions`. Nested paths require their own explicit rules.
+
+**Pattern (canonical from Specs 3.5/3.6/3.7 `SecurityConfig.java`):**
+
+```java
+http.authorizeHttpRequests(auth -> auth
+    // Method-specific rules FIRST — first-match-wins
+    .requestMatchers(POST, "/api/v1/posts").authenticated()
+    .requestMatchers(PATCH, "/api/v1/posts/*").authenticated()
+    .requestMatchers(DELETE, "/api/v1/posts/*").authenticated()
+    .requestMatchers(POST, "/api/v1/posts/*/reactions").authenticated()  // Nested path needs its own rule
+    .requestMatchers(DELETE, "/api/v1/posts/*/reactions").authenticated()
+    // Permissive rules LAST
+    .requestMatchers(OPTIONAL_AUTH_PATTERNS).permitAll()
+    .anyRequest().authenticated()
+);
+```
+
+**`/code-review` MUST flag** any new `.authenticated()` rule that appears AFTER `permitAll()`, OR any nested path that depends on a parent rule's `*` to match. Phase 4 post-type writes, 6.1/6.2/6.6 hero-feature writes, 8.1 username PATCH, 10.7b user reports, 10.11 account deletion all need explicit method-specific rules ordered above the permissive set.
 
 ### Input Validation
 - All user inputs validated for length, format, content

@@ -76,11 +76,18 @@ Explore the codebase to ground the plan in reality. **Prioritize in this order:*
 4. **`.claude/rules/05-database.md`** — schema, table definitions, naming conventions
 5. **`.claude/rules/02-security.md`** — JWT, rate limiting, auth patterns
 6. **`.claude/rules/06-testing.md`** — test patterns, Testcontainers setup
-7. **Existing backend code** — current package is `backend/src/main/java/com/example/worshiproom/` until Phase 1 Spec 1.1 renames it to `backend/src/main/java/com/worshiproom/`. Use the old path for specs that execute BEFORE Spec 1.1 (Phase 0, Phase 0.5, and Spec 1.1 itself); use the new path for specs that execute AFTER Spec 1.1 (every Phase 1.2+ spec through Phase 16). If unsure, grep the current repo: `ls backend/src/main/java/com/` will show which package actually exists on the current branch.
+7. **Existing backend code** — package is `com.worshiproom`. Phase 1 Spec 1.1 ✅ renamed from `com.example.worshiproom` (covered ~60+ proxy files + tests + `pom.xml` `groupId` + Docker image tags). The new path is canonical everywhere — `com/example/worshiproom/` should NOT appear anywhere in the codebase post-Phase-1; if it does, that's a regression. The grep fallback (`ls backend/src/main/java/com/`) still applies if anything seems off.
 8. **Existing frontend code** — `frontend/src/` for dual-write patterns, hooks, components
-9. **Existing Liquibase changesets** — `backend/src/main/resources/db/changelog/` for naming and ordering. Before assigning a new changeset filename, run `ls backend/src/main/resources/db/changelog/` and confirm no existing file has the same `YYYY-MM-DD-NNN` prefix as yours. A collision will cause Liquibase checksum failure on deploy.
+9. **Existing Liquibase changesets** — `backend/src/main/resources/db/changelog/` for naming and ordering. Before assigning a new changeset filename, run `ls backend/src/main/resources/db/changelog/` and confirm no existing file has the same `YYYY-MM-DD-NNN` prefix as yours. A collision will cause Liquibase checksum failure on deploy. **Filename = today's actual date + next available sequence number** (master plan body uses `YYYY-MM-DD-NNN-` placeholders illustratively; per Spec 3.1 Plan Deviation #1).
+   - **Before adding ANY new changeset, verify the schema element doesn't already exist.** Phase 3 has shipped many tables/columns that future specs may try to recreate. Authoritative reference: `_forums_master_plan/round3-master-plan.md` § "Phase 3 Execution Reality Addendum" item 8 lists all known "do NOT recreate" elements (`posts.candle_count`, `post_reactions.reaction_type`, the 5 denormalized counters, `qotd_questions`, `post_reports.review_consistency`, the friends/social/milestone tables, `user_mutes`). For any element the spec proposes creating, grep the existing changesets for the table/column name FIRST.
 10. **Existing tests** — `backend/src/test/` for backend test patterns, `frontend/src/**/*.test.tsx` (colocated with source, NOT `frontend/__tests__/`) for frontend test patterns
-11. **Existing OpenAPI spec** — `backend/src/main/resources/openapi.yaml` ALREADY EXISTS (shipped by Key Protection Wave with shared schemas `ProxyResponse` + `ProxyError` and 10+ proxy endpoints). Forums Wave specs EXTEND this file — add new paths that `$ref` the shared components; do NOT create a new file at `backend/api/openapi.yaml` (that path was provisional in master plan v2.6, superseded by v2.7; current as of v2.8).
+11. **Existing OpenAPI spec** — `backend/src/main/resources/openapi.yaml` ALREADY EXISTS (shipped by Key Protection Wave with shared schemas `ProxyResponse` + `ProxyError` and 10+ proxy endpoints; extended by Phase 3 Specs 3.3–3.7 with the unified `posts` family). Forums Wave specs EXTEND this file — add new paths that `$ref` the shared components; do NOT create a new file at `backend/api/openapi.yaml` (that path was provisional in master plan v2.6, superseded by v2.7; **current as of v2.9 + Phase 1, Phase 2, and Phase 3 Execution Reality Addendums** — addendums are AUTHORITATIVE over older spec body text where they disagree).
+
+**Before exhaustive recon — handle `[VERIFY]` claims from the spec.**
+
+If the spec was authored without filesystem access (per spec-forums Step 4.5), it may contain claims tagged `[VERIFY]`. The plan MUST resolve every one with on-disk verification before drafting steps. Conversely, if the spec body claims "X exists" but recon shows X doesn't (or vice versa), trust the codebase for facts and surface the discrepancy in the plan's Edge Cases & Decisions table — do NOT silently align with the spec's wrong claim.
+
+**Trust calibration:** trust CC on what code DOES (codebase facts); trust the spec author on what code SHOULD DO (design intent). When facts and intent collide, surface the conflict in the plan rather than guessing.
 
 **For backend-heavy specs, discover:**
 - Project structure and package conventions
@@ -158,7 +165,7 @@ All 17 Universal Rules from `_forums_master_plan/round3-master-plan.md`. Check E
 - [ ] Rule 5: User-facing strings in Copy Deck with i18n-ready constants structure; Anti-Pressure Copy Checklist applied
 - [ ] Rule 6: Tests written for all new functionality (JUnit + Testcontainers backend; Vitest + RTL frontend; Playwright E2E where relevant)
 - [ ] Rule 7: New `wr_*` localStorage keys documented in `11-local-storage-keys.md` with store module path + subscription pattern
-- [ ] Rule 8: BB-45 anti-pattern forbidden (reactive store consumers use the hook, not mirrored `useState`; tests mutate store after mount)
+- [ ] Rule 8: BB-45 anti-pattern forbidden (reactive store consumers use the hook, not mirrored `useState`; tests mutate store after mount). New stores prefer **Pattern A (subscription via standalone hook with `useSyncExternalStore`)** per `11b-local-storage-keys-bible.md` § "Reactive Store Consumption". There is NO "Pattern A migration pattern" — that ambiguity bit Spec 3.7's brief authoring; "Pattern A" always means subscription via standalone hook.
 - [ ] Rule 9: Accessibility not optional (keyboard nav, ARIA, focus management, `prefers-reduced-motion`, WCAG AA contrast, 44×44px touch targets, Lighthouse A11y 95+)
 - [ ] Rule 10: Performance not optional (Lighthouse Perf/Best/SEO 90+, animation tokens from `animation.ts` not hardcoded, bundle regression ≤50 KB without justification)
 - [ ] Rule 11: Brand voice mandatory (pastor's-wife test on every copy string, no exclamation points near vulnerability, scripture as gift not decoration)
@@ -243,11 +250,17 @@ Cutover specs flip the feature flag from `false` to `true` and declare a phase c
 
 The "Affected Frontend Routes" section is `N/A — backend-only spec`. `/verify-with-playwright` will skip visual verification. Focus on:
 
-1. Liquibase changeset with rollback block (Rule 3)
-2. Testcontainers integration test (06-testing.md — never H2)
-3. OpenAPI spec EXTENSION, not creation (Rule 4 — `backend/src/main/resources/openapi.yaml` already exists)
-4. JPA entity + repository + service + controller with standard response shape
-5. Rate limiting on all endpoints (Rule 15)
+1. Liquibase changeset with rollback block (Rule 3) AND verified to NOT recreate already-shipped schema (see Phase 3 Execution Reality Addendum item 8)
+2. Testcontainers integration test extending `AbstractIntegrationTest` (06-testing.md — never H2; never per-class containers; reuse the singleton from Spec 1.7)
+3. OpenAPI spec EXTENSION, not creation (Rule 4 — `backend/src/main/resources/openapi.yaml` already exists at ~2700+ lines after Phase 3)
+4. JPA entity + repository + service + controller with standard response shape from `03-backend-standards.md`
+5. Rate limiting on all endpoints (Rule 15) — use the **Caffeine-bounded bucket pattern** + `@ConfigurationProperties(prefix = "worshiproom.{feature}")` per Phase 3 Addendum item 5. Never `ConcurrentHashMap` keyed on external input.
+6. **SecurityConfig method-specific rules ordered ABOVE `OPTIONAL_AUTH_PATTERNS.permitAll()`** per addendum item 4. Nested paths (`/api/v1/posts/*/reactions`) need their own explicit rules — `*` matches one segment only.
+7. **Domain-scoped `@RestControllerAdvice`** for the new domain (`com.worshiproom.{domain}`); unscoped companion advice for any filter-raised exceptions per addendum item 6.
+8. **Bulk JPQL UPDATE/DELETE methods MUST use `@Modifying(clearAutomatically=true, flushAutomatically=true)`** per addendum item 3.
+9. **Create-endpoint integration tests assert non-null timestamps in response body** as regression guard for the L1-cache trap per addendum item 2. Service layer calls `entityManager.refresh(saved)` after `save()`.
+10. **Edit-window endpoints return 409 `EDIT_WINDOW_EXPIRED`** (not 400) per addendum item 1.
+11. **User-generated-content endpoints route crisis flags through `CrisisAlertService.alert(contentId, authorId, ContentType)`** per addendum item 7. Do NOT introduce sibling alert services.
 
 ### If this is a FRONTEND-ONLY spec inside Forums Wave (rare — most Forums Wave frontend work is dual-write)
 
@@ -307,6 +320,42 @@ Consider whether the non-forums `/plan` skill is the better fit. If the spec cle
 
 ---
 
+## Plan Tightening Audit
+
+After drafting all steps, audit the plan against these lenses (Phase 3 plans 3.5/3.6/3.7 each ran ~15 lenses; below are the ones that catch real drift). Mark each as **OK**, **FIXED** (audit caught and corrected during planning), **N/A**, or **FLAGGED for Eric's review** (deviation from brief that needs explicit go-ahead).
+
+1. **Schema state explicit.** For every schema element this spec touches, the plan states whether it's already shipped (cite changeset) OR is being newly created.
+2. **Existing entity / class / file reuse.** No step says "create X" when X already exists in the codebase per recon.
+3. **SQL-side counter updates everywhere.** All counter mutations route through `@Modifying @Query` JPQL UPDATE statements — never load-modify-save.
+4. **Activity engine — fire on ADD / mutation only, not on REMOVE / undo.** No negative points.
+5. **SecurityConfig rule ordering.** Method-specific `.authenticated()` rules placed BEFORE `OPTIONAL_AUTH_PATTERNS.permitAll()`. Nested paths get their own explicit rules.
+6. **Validation surface at controller boundary.** `@Pattern` / `@Valid` annotations reject bad input at the boundary; never let DB CHECK constraints be the validation surface (produces 500 with leaky stack trace).
+7. **Pattern A clarification.** Any reference to "Pattern A" qualifies it as "Pattern A (subscription via standalone hook with `useSyncExternalStore`)". There is NO Pattern A migration pattern.
+8. **BB-45 cross-mount subscription test.** New multi-consumer reactive stores have a test that mutates the store after mount and asserts re-render in a separate consumer.
+9. **Step dependency map.** Every step lists what it depends on; independent steps are flagged as parallelizable.
+10. **Test count vs brief.** Plan total within ±5 of the brief target; explain overruns / underruns.
+11. **L1-cache trap.** Create-endpoint flows that return DB-default-populated timestamps include `entityManager.refresh(saved)` and a non-null-timestamp test assertion.
+12. **`@Modifying` flags complete.** Every `@Modifying @Query` carries both `clearAutomatically=true` and `flushAutomatically=true`.
+13. **Caffeine-bounded caches.** Per-user / per-IP / per-key caches use the Caffeine bounded pattern + `@ConfigurationProperties`, never `ConcurrentHashMap` keyed on external input.
+14. **Domain-scoped advice.** New domain has its own `@RestControllerAdvice(basePackages = "com.worshiproom.{domain}")`; filter-raised exceptions have unscoped companion advice or `HandlerExceptionResolver` delegation.
+15. **Crisis content via `CrisisAlertService`.** User-generated-content endpoints extend `ContentType` rather than introducing sibling alert services.
+
+If any lens finds drift, fix it in the plan body BEFORE saving. Document the fix in this audit section so Eric can see what was caught.
+
+---
+
+## Plan-Time Divergences from Brief
+
+Decisions made during planning that are NOT in the brief or recon overrides — capture each with reasoning so Eric (and future-you) can audit the planner judgment calls.
+
+| # | Decision | Reason | Reversible? |
+|---|---|---|---|
+| 1 | {e.g., "Field order in extended DTO is X, not Y"} | {e.g., "Keeps related fields adjacent; mirrored in generated TypeScript"} | {Yes/No} |
+
+If empty, write "No plan-time divergences from brief — plan reflects brief + recon overrides exactly."
+
+---
+
 ## Step Dependency Map
 
 | Step | Depends On | Description |
@@ -330,20 +379,35 @@ Consider whether the non-forums `/plan` skill is the better fit. If the spec cle
 
 **Before saving, verify ALL of these:**
 
+### Core checklist
+
 1. [ ] Every step has: exact file paths, method signatures, DO NOT guardrails, test specs, verification commands
 2. [ ] **No tentative language** — no "should probably", "might want to", "consider doing"
 3. [ ] Patterns match what was found in reconnaissance, not assumed from general knowledge
 4. [ ] Universal Rules checklist populated with rules relevant to this spec
 5. [ ] **Affected Frontend Routes** section populated — either with the actual user-facing routes touched by this spec (one per line, backtick-wrapped, including query params), or with "N/A — backend-only spec" if no UI is involved. Required for `/verify-with-playwright` plan-only invocation.
-6. [ ] Every Liquibase changeset filename is unique (checked against existing changesets in `db/changelog/`)
+6. [ ] Every Liquibase changeset filename is unique (checked against existing changesets in `db/changelog/`). **Filename uses today's date + next available sequence number** (master plan body uses `YYYY-MM-DD-NNN-` placeholders illustratively; real filenames use the execution date — Spec 3.1 Plan Deviation #1).
 7. [ ] Every API endpoint follows the standard response shape from `03-backend-standards.md`
 8. [ ] Backend verification includes compile + test commands for every backend step
 9. [ ] Frontend verification includes build + test + visual check for every frontend step
 10. [ ] Steps are small — each touches ≤3 files and is independently verifiable
 11. [ ] Steps are ordered for safety — database migrations before services, services before controllers, backend before frontend
-12. [ ] Test count calibrated to complexity (simple utility: 2-4; complex service with edge cases: 10-15)
+12. [ ] Test count calibrated to complexity (simple utility: 2-4; complex service with edge cases: 10-15). Phase 3 reality for medium-large specs is 30-50 tests; if your plan is far below or above, justify in the Edge Cases & Decisions table.
 13. [ ] Edge Cases & Decisions table populated
 14. [ ] No deprecated patterns introduced (check `09-design-system.md` § "Deprecated Patterns" for frontend steps)
+
+### Phase 3 Execution Reality Addendum gates
+
+These items propagate the 12 conventions established by Phase 3 Specs 3.1–3.7 (see `_forums_master_plan/round3-master-plan.md` § "Phase 3 Execution Reality Addendum"). For backend-touching plans, every applicable item must be verified BEFORE saving — these are the "blocks bad PRs at planning time" surface.
+
+15. [ ] **Phase 3 Addendum item 1 — EditWindowExpired returns 409, not 400.** Any edit-window-bearing endpoint (PATCH posts, PATCH comments, future username/profile/testimony PATCH) returns `409 CONFLICT` with code `EDIT_WINDOW_EXPIRED`. Exempt operations (mark-answered, status transitions, moderator actions) bypass the window per Spec 3.5's exempt-operations list.
+16. [ ] **Phase 3 Addendum item 2 — L1-cache trap fixed.** For any create-endpoint that returns a DTO including DB-default-populated columns (`created_at`, `updated_at`), service layer calls `entityManager.refresh(saved)` after `save()` and before DTO mapping. Test specs include a "non-null timestamp in create response body" assertion as regression guard.
+17. [ ] **Phase 3 Addendum item 3 — `@Modifying(clearAutomatically=true, flushAutomatically=true)`** on every new bulk JPQL UPDATE/DELETE method. Without these flags, subsequent reads in the same transaction return stale entities; pending in-memory changes don't reach the DB before the bulk update fires. Used 11 times across `PostRepository`/`BookmarkRepository`/`ReactionRepository`.
+18. [ ] **Phase 3 Addendum item 4 — SecurityConfig method-specific rules ordered ABOVE `OPTIONAL_AUTH_PATTERNS.permitAll()`.** Spring Security is first-match-wins. Nested paths (`/api/v1/posts/*/reactions`) need their OWN explicit rules — `/api/v1/posts/*` does NOT match nested paths because Spring's `AntPathMatcher` treats `*` as one path segment. See `03-backend-standards.md` § "SecurityConfig rule ordering" for the canonical Java example.
+19. [ ] **Phase 3 Addendum item 5 — Caffeine-bounded bucket pattern** for any per-feature rate limit / idempotency / counter cache. `@ConfigurationProperties(prefix = "worshiproom.{feature}")` reading from `application-{profile}.properties`. Never `ConcurrentHashMap` keyed on external input. Phase 3 canonical references: `PostsRateLimitConfig`, `PostsIdempotencyService`, `CommentsRateLimitConfig`, `BookmarksRateLimitConfig`, `ReactionsRateLimitConfig`.
+20. [ ] **Phase 3 Addendum item 6 — Domain-scoped `@RestControllerAdvice`** for the new domain (`com.worshiproom.{domain}`) + unscoped companion advice (single-exception-class) for any filter-raised exceptions. Do NOT extend `PostExceptionHandler` for non-post domains.
+21. [ ] **Phase 3 Addendum item 7 — `CrisisAlertService.alert(contentId, authorId, ContentType)` is the unified entry point** for crisis-flag handling. Phase 4 testimony/question/discussion/encouragement, Phase 12.5 mention parsing, Phase 13 personal insights aggregations all extend `ContentType` rather than introducing sibling alert services.
+22. [ ] **Phase 3 Addendum item 8 — schema realities verified.** For every `CREATE TABLE` / `ALTER TABLE` proposed in the Database Changes table, recon confirmed it does NOT already exist on disk. Specs 3.7 / 3.9 / Phase 4 / Phase 6.6 are at risk; see addendum item 8 for the authoritative "do NOT recreate" list.
 
 ---
 

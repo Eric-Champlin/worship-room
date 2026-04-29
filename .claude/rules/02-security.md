@@ -91,7 +91,7 @@ The push subscription is stored in `wr_push_subscription` (localStorage) for now
 
 Any map, cache, or lookup structure keyed by untrusted external input — client IP, `User-Agent`, arbitrary request header values, opaque client-supplied tokens, etc. — MUST be bounded. Use Caffeine (`Caffeine.newBuilder().maximumSize(N).expireAfterAccess(Duration).build()`) or an equivalent bounded cache. An unbounded `ConcurrentHashMap` keyed on external input is a denial-of-service vector: an attacker cycling input values grows the map indefinitely until the JVM runs out of heap.
 
-Spec 1 Round 2 caught this on the rate-limit bucket map (`maximumSize(10_000)` + `expireAfterAccess(15m)`, ~1 MB worst case). The same rule applies to every future cache of this shape — session stores, idempotency keys, request-ID dedupe caches, per-IP circuit breakers, and so on. `/code-review` MUST flag any new unbounded map keyed on external input.
+Spec 1 Round 2 caught this on the rate-limit bucket map (`maximumSize(10_000)` + `expireAfterAccess(15m)`, ~1 MB worst case). The same rule applies to every future cache of this shape — session stores, idempotency keys, request-ID dedupe caches, per-IP circuit breakers, and so on. **Phase 3 canonical references:** `PostsRateLimitConfig` + `PostsRateLimitService` (per-user post-creation buckets), `PostsIdempotencyService` (per-(userId, idempotencyKey) cache, 24h TTL, max 10K entries), `CommentsRateLimitConfig`, `BookmarksRateLimitConfig`, `ReactionsRateLimitConfig`. Future per-feature limits (1.5b password reset, 1.5e change-email, 6.8 Verse-Finds-You, 8.1 username-change, 10.7b user-report, 10.11 export, 16.1 offline cache) MUST follow this pattern, never `ConcurrentHashMap`. Configuration via `@ConfigurationProperties(prefix = "worshiproom.{feature}")` reading `application-{profile}.properties`. `/code-review` MUST flag any new unbounded map keyed on external input.
 
 **Frontend AI cache (BB-32)**: BB-30 Explain and BB-31 Reflect use the client-side `bb32-v1:*` localStorage cache to avoid duplicate Gemini calls for the same verse range. This is a courtesy reduction in upstream calls, NOT a security boundary — the backend rate limiter is the actual enforcement (per-IP today, per-user once auth wires up).
 
@@ -245,7 +245,7 @@ See `_forums_master_plan/round3-master-plan.md` Appendix E for full spec stubs.
 
 - Registration form includes a consent checkbox (NOT pre-checked per GDPR rules)
 - Submit disabled until checkbox checked
-- Server stores `users.terms_version` and `users.privacy_version` at registration
+- Server stores `users.terms_version` and `users.privacy_version` at registration **(Spec 1.10f future work — columns NOT yet on `users` table; only the canonical legal markdown at `content/{terms-of-service,privacy-policy}.md` has shipped to date)**
 - On ToS/privacy update: version-mismatch triggers consent modal on next login
 - Users who decline the update get interaction-locked (can browse, cannot post/react)
 - 30-day advance notice for policy changes

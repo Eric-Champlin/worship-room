@@ -49,14 +49,18 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 22  | 1.10d | Production Monitoring Foundation               | M    | Low      | ✅     |
 | 23  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ⬜     |
 | 24  | 1.10c | Database Backup Strategy                       | S    | Low      | ‼️     |
-| 25  | 1.10f | Terms of Service and Privacy Policy Surfaces   | M    | Med-High | ✅     |
+| 25  | 1.10f | Terms of Service and Privacy Policy Surfaces   | M    | Med-High | ⬜ ⚠     |
 | 26  | 1.10g | Security Headers Middleware (CSP/HSTS/etc.)    | S    | Low      | ✅     |
 | 27  | 1.10h | API Error Code Catalog                         | S    | Low      | ✅     |
 | 28  | 1.10i | Backend Environment Variables Runbook          | S    | Low      | ✅     |
 | 29  | 1.10j | Liveness/Readiness Health Checks               | S    | Low      | ✅     |
 | 30  | 1.10k | HikariCP Connection Pool Tuning                | S    | Low      | ⬜     |
 | 31  | 1.10l | Playwright E2E Test Infrastructure             | M    | Low      | ✅     |
-| 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ✅     |
+| 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ⬜ ⚠     |
+
+> **1.10f partial-shipped (2026-04-28 audit):** Canonical legal markdown at `content/{terms-of-service,privacy-policy,community-guidelines}.md` IS shipped. The `users.terms_version` / `users.privacy_version` columns, registration consent checkbox, `LegalVersionService.java`, `TermsUpdateModal.tsx`, `GET /api/v1/legal/versions`, and `POST /api/v1/users/me/legal/accept` endpoints are NOT yet shipped. Tracker reverted to ⬜ pending the column-and-endpoint work; the legal-content portion remains in `content/`.
+>
+> **1.10m partial-shipped (2026-04-28 audit):** Markdown at `content/community-guidelines.md` IS shipped. The public `/community-guidelines` route + `CommunityGuidelines` page component referenced in `12-project-reference.md` does NOT yet exist in `frontend/src/`. Tracker reverted to ⬜ pending the page+route work.
 
 ## Phase 2 — Activity Engine Migration (10 specs)
 
@@ -83,8 +87,10 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 46  | 2.5.4  | Frontend Friends Dual-Write                       | L    | Medium | ✅     |
 | 47  | 2.5.4b | Social Interactions & Milestone Events Dual-Write | M    | Medium | ✅     |
 | 48  | 2.5.5  | Phase 2.5 Cutover                                 | S    | Medium | ✅     |
-| 49  | 2.5.6  | Block User Feature                                | M    | Medium | ✅     |
+| 49  | 2.5.6  | Block User Feature                                | M    | Medium | ⬜     |
 | 50  | 2.5.7  | Mute User Feature                                 | S    | Low    | ✅     |
+
+> **2.5.6 verification (2026-04-28 audit):** Despite earlier ✅, no `com.worshiproom.block/` package exists, no `UserBlock*` Java code, and no `user_blocks` Liquibase changeset. Spec 2.5.7 Mute (the sibling spec) DID ship — `user_mutes` table at changeset 013, `MutesService`, `useMutes` hook all exist. Block remains unimplemented; reverted to ⬜.
 
 ## Phase 3 — Prayer Wall Backend (12 specs)
 
@@ -92,12 +98,12 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | --- | ---- | ---------------------------------------------- | ---- | ------ | ------ |
 | 51  | 3.1  | Prayer Wall Schema (Liquibase)                 | L    | Medium | ✅     |
 | 52  | 3.2  | Mock Data Seed Migration                       | M    | Low    | ✅     |
-|     |
+| 53  | 3.3  | Posts Read Endpoints                           | L    | Medium | ✅     |
 | 54  | 3.4  | Comments, Reactions, Bookmarks Read Endpoints  | M    | Low    | ✅     |
 | 55  | 3.5  | Posts Write Endpoints (Create, Update, Delete) | XL   | High   | ✅     |
 | 56  | 3.6  | Comments Write Endpoints                       | L    | High   | ✅     |
 | 57  | 3.7  | Reactions and Bookmarks Write Endpoints        | L    | Medium | ✅     |
-| 58  | 3.8  | Reports Write Endpoint                         | M    | Medium | ✅     |
+| 58  | 3.8  | Reports Write Endpoint                         | M    | Medium | ⬜     |
 | 59  | 3.9  | QOTD Backend Migration                         | M    | Low    | ⬜     |
 | 60  | 3.10 | Frontend Service API Implementations           | XL   | High   | ⬜     |
 | 61  | 3.11 | Reactive Store Backend Adapter                 | L    | Medium | ⬜     |

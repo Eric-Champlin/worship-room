@@ -85,7 +85,8 @@ New branch: {branch_name}
 
 **Conditionally mandatory (read if the spec touches the area):**
 
-7. **`.claude/rules/06-testing.md`** — when the spec includes test specifications
+7. **Phase 3 Execution Reality Addendum** in `_forums_master_plan/round3-master-plan.md` — when the spec touches edit windows (return 409, not 400, with code `EDIT_WINDOW_EXPIRED` per addendum item 1), bulk JPQL UPDATE/DELETE (must use `@Modifying(clearAutomatically=true, flushAutomatically=true)` per item 3), SecurityConfig rules (method-specific rules ABOVE `OPTIONAL_AUTH_PATTERNS` per item 4), per-feature rate limits or idempotency caches (Caffeine-bounded pattern per item 5), domain advices (per item 6), user-generated content (must use `CrisisAlertService.alert(contentId, authorId, ContentType)` per item 7), or activity types (INTERCESSION makes total 13 per item 9). The addendum is AUTHORITATIVE over older spec body text where they disagree.
+8. **`.claude/rules/06-testing.md`** — when the spec includes test specifications
 8. **`.claude/rules/07-logging-monitoring.md`** — when the spec involves error tracking or structured logging
 9. **`.claude/rules/08-deployment.md`** — when the spec involves env vars or deployment config
 10. **`.claude/rules/09-design-system.md`** — when the spec touches frontend UI
@@ -93,8 +94,22 @@ New branch: {branch_name}
 
 **Codebase reconnaissance (always do):**
 
-12. **Existing code in `backend/` and `frontend/`** — understand what's already built so the spec references real files and patterns
+12. **Existing code in `backend/` and `frontend/`** — understand what's already built so the spec references real files and patterns. **For every schema element, file, package, method, or column the spec mentions creating, verify it does NOT already exist on disk:**
+    - Liquibase changesets: `ls backend/src/main/resources/db/changelog/` — search for any prior changeset that already creates the table/column the spec proposes
+    - Java packages / classes: `ls backend/src/main/java/com/worshiproom/{package}/` — Phase 3 specs repeatedly proposed creating files that already shipped in Spec 3.1 (`candle_count`, `reaction_type`), Spec 1.1 (`com.worshiproom` package), Spec 3.6 (`INTERCESSION` ActivityType)
+    - Frontend stores / hooks: `grep -rn "{StoreName}" frontend/src/` — verify the store doesn't already exist
+    - **Recon override pattern:** if any element already exists, mark it explicitly in the spec body as "Files already exist (do NOT recreate)" with the source spec/changeset cited — see Spec 3.7 Recon R1/R2/R3 for the canonical pattern
 13. **Previous Forums Wave specs in `_specs/forums/`** — match depth, tone, and format of specs already written
+
+---
+
+## Step 4.5: Recon Failure Handling
+
+**If recon tools (filesystem MCP, codebase grep, file reads) cannot run** — for example, the brief was authored from Claude Desktop without filesystem access, or MCP servers are down at brief-authoring time:
+
+- **Do NOT inline unverified codebase claims as divergences.** Spec 3.7's brief proposed schema migrations for already-shipped columns because the brief author couldn't run `ls backend/src/main/resources/db/changelog/`. The result was 14 paragraphs of "actually this already exists" overrides at recon time.
+- **Instead, prefix every codebase claim with `[VERIFY]`** so the planner (running `/plan-forums`) knows which claims to confirm during plan-time recon. Example: `[VERIFY] post_reactions has reaction_type column added by Spec 3.1 changeset 016`.
+- **Trust calibration:** trust the codebase on what code DOES (facts); trust the brief author on what code SHOULD DO (design intent). When conflicts surface, the codebase wins for facts and Eric wins for direction.
 
 ---
 
@@ -171,8 +186,12 @@ Before saving:
 - [ ] Spec ID matches the master plan exactly
 - [ ] All prerequisite specs are listed
 - [ ] Universal Rules referenced where relevant
-- [ ] Database changes include Liquibase changeset filenames
+- [ ] Database changes include Liquibase changeset filenames AND each table/column has been verified to NOT already exist (per Step 4 schema-realities recon)
 - [ ] API changes include endpoint paths and HTTP methods
+- [ ] Edit-window-bearing endpoints return 409 `EDIT_WINDOW_EXPIRED` (not 400) per Phase 3 Execution Reality Addendum item 1
+- [ ] User-generated-content endpoints route crisis flags through `CrisisAlertService.alert(contentId, authorId, ContentType)` (do NOT introduce sibling alert services) per addendum item 7
+- [ ] New ActivityType values update both backend enum AND frontend `ACTIVITY_POINTS` (current total: 13 incl. INTERCESSION per addendum item 9)
+- [ ] Pattern A references qualified as "Pattern A (subscription via standalone hook with `useSyncExternalStore`)" — there is NO Pattern A migration pattern (Spec 3.7 ambiguity)
 - [ ] Acceptance criteria are present and testable
 - [ ] Out of scope section exists
 - [ ] **Affected Frontend Routes** section populated — either with the actual user-facing routes touched by this spec (one per line, backtick-wrapped, including query params), or with "N/A — backend-only spec" if no UI is involved. Required for `/verify-with-playwright` plan-only invocation downstream.

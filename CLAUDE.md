@@ -65,7 +65,7 @@ Protocols run in order on a single deep-review branch and produce a consolidated
 - **Navigation**: 5 top-level nav items (Daily Hub, Bible, Grow, Prayer Wall, Music) + Local Support dropdown + avatar dropdown for authenticated users. Mobile: grouped section drawer.
 - **Sound Design**: Web Audio API synthesized sound effects, on by default, gated behind `wr_sound_effects_enabled` and `prefers-reduced-motion`.
 - **Visual Design Authority**: All visual patterns live in `09-design-system.md`. CLAUDE.md does not duplicate them.
-- **Reactive Store Pattern**: Bible-wave personal-layer features use reactive stores with custom hooks. Components must consume the hook (`useHighlightStore()`, etc.), never local `useState`. See `11-local-storage-keys.md` § "Reactive Store Consumption" for the BB-45 anti-pattern documentation.
+- **Reactive Store Pattern**: Bible-wave and Phase 0.5 personal-layer features use reactive stores. Real Pattern A (subscription via standalone hook, `useSyncExternalStore`) hooks: `useMemorizationStore`, `useStreakStore`, `usePrayerReactions`. Pattern B (inline `subscribe()` in `useEffect`) stores: `highlightStore`, `bookmarkStore`, `noteStore`, `journalStore`, `chapterVisitStore`, `plansStore` — consumers wire subscription themselves. See `11b-local-storage-keys-bible.md` § "Reactive Store Consumption" for the BB-45 anti-pattern documentation.
 - **Anti-pressure voice**: All AI features and personal data displays use anti-pressure copy. Reading heatmaps, memorization decks, and echo callbacks treat sparse activity as valid. No streaks-as-shame, no "you missed N days" messaging, no gamified verse quizzes.
 
 ---
@@ -76,7 +76,7 @@ For full feature details see the rule files. This section is an at-a-glance inde
 
 ### Foundation
 
-Authentication (mock/simulated, real JWT in Phase 3), React Router, Landing Page, Dashboard with visual garden, Design System (dark theme, frosted glass cards, HorizonGlow on Daily Hub, BB-33 canonical animation tokens), First-Run Welcome (BB-34, never on deep-linked routes).
+Authentication (real JWT — Spring Security + BCrypt — shipped in Forums Wave Phase 1 Specs 1.4 + 1.5 + 1.9; legacy `wr_auth_simulated` mock kept for transitional test seeding), React Router, Landing Page, Dashboard with visual garden, Design System (dark theme, frosted glass cards, HorizonGlow on Daily Hub, BB-33 canonical animation tokens), First-Run Welcome (BB-34, never on deep-linked routes).
 
 ### Daily Experience
 
@@ -146,13 +146,13 @@ See `.claude/rules/12-project-reference.md` for the complete route inventory (pu
 
 **Round 3 — Enhancement & Engagement** ✅ Homepage redesign (HP-1→HP-15) + Daily Hub Round 3 (Specs 1-Z + Waves 1-7). Established dark cinematic theme, visible glow orbs, FrostedCard, HorizonGlow, DevotionalPreviewPanel, AudioDrawer unified entry. See `09-design-system.md` § "Round 3 Visual Patterns".
 
-**Bible Redesign + Polish Wave (BB-0 through BB-46)** ✅ Merged 2026-04-13. The largest single wave. Rebuilt Bible reader, AI features (BB-30/31/32), PWA (BB-39), SEO (BB-40), web push (BB-41), full-text search (BB-42), heatmap + progress map (BB-43), memorization deck (BB-45), verse echoes (BB-46), audio Bible (BB-26/27/28/29/44). Introduced BB-45 store-consumer anti-pattern (see `11-local-storage-keys.md` § "Reactive Store Consumption"). Final certification at `_plans/recon/bb37b-final-audit.md`.
+**Bible Redesign + Polish Wave (BB-0 through BB-46)** ✅ Merged 2026-04-13. The largest single wave. Rebuilt Bible reader, AI features (BB-30/31/32), PWA (BB-39), SEO (BB-40), web push (BB-41), full-text search (BB-42), heatmap + progress map (BB-43), memorization deck (BB-45), verse echoes (BB-46), audio Bible (BB-26/27/28/29/44). Introduced BB-45 store-consumer anti-pattern (see `11b-local-storage-keys-bible.md` § "Reactive Store Consumption"). Final certification at `_plans/recon/bb37b-final-audit.md`.
 
 **AI Integration Wave** ✅ Three frontend features converted from mock to real Gemini: Ask (AI-1), Pray (AI-2), Journal Reflection (AI-3). Transitional frontend-direct-call footprint migrated to backend proxy in the next wave.
 
 **Key Protection Wave** ✅ First backend-heavy wave. Spring Boot proxy at `com.example.worshiproom.proxy.*` (renamed to `com.worshiproom.proxy` in Phase 1 Spec 1.1, ✅ shipped). Four specs: `ai-proxy-foundation` (filters, exception handlers, WebClient, `/api/v1/health`), `ai-proxy-gemini`, `ai-proxy-maps`, `ai-proxy-fcbh`. All three external APIs migrated — zero `VITE_*_API_KEY` in frontend bundle. ~280 backend tests at wave wrap. Deviation #1: narrow `ExchangeFunctions=INFO` log suppression in dev profile to prevent query-string key leaks.
 
-**Phase 3 — Forums Wave** IN PROGRESS. 156 specs across 19 phases. **Phase 1 (Backend Foundation)** complete: 24/30 specs shipped, 6 deferred (1.5b–g auth lifecycle SMTP-blocked until domain purchase; 1.10c/e/k pending consumer code). **Phase 2 (Activity Engine Migration)** complete: 10/10 specs shipped, dual-write live in dev. **Phase 2.5 (Friends Migration)** starting next, 8 specs. Master plan: `_forums_master_plan/round3-master-plan.md` (v2.9 with **Phase 1 and Phase 2 Execution Reality Addendums** — those addendums are AUTHORITATIVE over older spec body text where they disagree). Pipeline: `/spec-forums` → `/plan-forums` → `/execute-plan-forums` → `/code-review` → `/verify-with-playwright` (skipped for backend-only specs).
+**Phase 3 — Forums Wave** IN PROGRESS. 156 specs across 19 phases. **Phase 1 (Backend Foundation):** 21/30 shipped, 7 deferred (1.5b–g auth lifecycle SMTP-blocked until domain purchase; 1.10c backup deferred), 2 pending (1.10e Object Storage, 1.10k HikariCP). 2 entries previously marked ✅ have been reverted to ⬜ pending the column-and-endpoint portions of their work (1.10f Terms/Privacy: legal markdown shipped, columns + modal + endpoints pending; 1.10m Community Guidelines: markdown shipped, page + route pending). **Phase 2 (Activity Engine Migration)** complete: 10/10 specs shipped, dual-write live in dev. **Phase 2.5 (Friends Migration)** complete: 7/8 specs shipped (2.5.6 Block reverted to ⬜ after Pass 2 audit found no production code; 2.5.7 Mute IS live). **Phase 3 (Prayer Wall Backend)** IN PROGRESS: 7/12 shipped (3.1–3.7); next is Spec 3.9 (3.8 Reports reverted to ⬜). Master plan: `_forums_master_plan/round3-master-plan.md` (v2.9 with **Phase 1, Phase 2, and Phase 3 Execution Reality Addendums** — addendums are AUTHORITATIVE over older spec body text where they disagree). Pipeline: `/spec-forums` → `/plan-forums` → `/execute-plan-forums` → `/code-review` → `/verify-with-playwright` (skipped for backend-only specs).
 
 **Phase 4 — Light Mode & Native Prep** (deferred) — Light mode toggle, real TTS audio files, performance optimization, native app planning.
 
@@ -261,7 +261,7 @@ The protocols catch issues that the per-spec workflow can't: cross-spec contract
 
 ### Forums Wave Working Guidelines (Phase 3)
 
-- **Master plan is authoritative** — `_forums_master_plan/round3-master-plan.md` (v2.8) contains all 156 specs, 17 Universal Rules, and 17 Decisions. Read the relevant spec section before executing any work.
+- **Master plan is authoritative** — `_forums_master_plan/round3-master-plan.md` (v2.9 + Phase 1 / Phase 2 / Phase 3 Execution Reality Addendums) contains all 156 specs, 17 Universal Rules, and 17 Decisions. Read the relevant spec section AND the relevant addendum before executing any work — addendums are authoritative over older spec body text where they disagree.
 - **Liquibase for all schema changes** — every table creation, column addition, and index must be a Liquibase changeset. No raw SQL migrations. Changeset filenames follow `YYYY-MM-DD-NNN-description.xml` pattern.
 - **Dual-write discipline** — Phases 2, 2.5, and 3 use the dual-write migration pattern: localStorage remains primary for reads, backend receives shadow writes. Feature flags (`VITE_USE_BACKEND_*`) control the read source. Never flip a flag default without a cutover spec's smoke test passing.
 - **Crisis content supersedes everything** — Universal Rule 13. Any feature touching user-generated content must handle crisis detection. When crisis resources are needed, they override all other feature behavior. See Spec 10.5 (three-tier escalation) and the master plan's crisis-related Decisions.

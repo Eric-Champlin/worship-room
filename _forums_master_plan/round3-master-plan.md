@@ -377,7 +377,108 @@ Future specs should anchor regression baselines off these post-Phase-2 numbers, 
 
 ---
 
+## Phase 3 Execution Reality Addendum (added 2026-04-28)
 
+> **Why this section exists:** Phase 3 (Prayer Wall Backend) is in progress — Specs 3.1–3.7 have shipped. Several of them surfaced cross-spec conventions and schema realities that diverge from older spec body text in this document. This addendum consolidates those for future spec authors so they don't have to re-discover them. Individual spec bodies below may still show pre-execution text; trust THIS section over the older spec text where they disagree.
+>
+> **Scope:** Phase 3 only (Specs 3.1–3.7 shipped; 3.8–3.12 pending). Phase 1 + Phase 2 findings live in their own addendums above. Phase 4+ specs are unaffected except where called out explicitly.
+
+### 1. EditWindowExpiredException returns 409, not 400
+
+**Pre-execution assumption (Phase 3.6 Addendum body):** `PATCH /api/v1/posts/{id}` and the comment edit endpoint return `400 EDIT_WINDOW_EXPIRED` when content is edited past the 5-minute window.
+
+**Execution reality:** Both `EditWindowExpiredException` (Spec 3.5) and `CommentEditWindowExpiredException` (Spec 3.6) shipped with `HttpStatus.CONFLICT` (409). Reasoning: 409 means "current state of the resource conflicts with the request," which fits an immutable past-window edit better than 400's generic "bad request" framing. Spec 3.5 explicitly rejected 410 (Gone) — the resource still exists, it just isn't mutable.
+
+**Canonical rule for future specs:** Any future spec implementing an edit-window check on user content (posts, comments, reports, profile fields, usernames, testimony updates, etc.) MUST return **`409 CONFLICT`** with code `EDIT_WINDOW_EXPIRED`. Exempt operations (mark-answered, status transitions, moderator actions) bypass the window per Spec 3.5's exempt-operations list.
+
+### 2. L1-cache trap on save → flush → findById
+
+**Symptom:** A repository save followed immediately by `findById` returns the entity from Hibernate's persistence context, NOT a fresh DB read. For columns marked `@Column(insertable=false, updatable=false)` (typical for DB-default audit timestamps), the in-memory entity has `null` for those columns even after the SQL INSERT populates them. DTO mapping then ships the null to the client.
+
+**Bit Spec 3.5 and Spec 3.6:** Both surfaced this on `created_at` / `updated_at` in create-response payloads.
+
+**Canonical fix:** Call `entityManager.refresh(saved)` after `save()` and before DTO mapping when the entity has any DB-default-populated columns the response needs. Add a regression-guard integration test asserting `createdAt`/`updatedAt` are non-null in the create response body.
+
+**Future specs at risk:** Phase 3.8 (Reports Write), Phase 4 (all 5 post-type create endpoints), 6.1 (Prayer Receipt POST), 6.2 (Quick Lift POST), 6.6 (Mark-Answered PATCH), 8.1 (username PATCH), 12.3 (Notification Generators), 13.1 (Insights aggregations).
+
+### 3. `@Modifying(clearAutomatically=true, flushAutomatically=true)` for bulk updates
+
+**Pre-execution assumption:** `@Modifying` alone is sufficient on JPQL bulk UPDATE/DELETE methods.
+
+**Execution reality (Spec 3.7):** Without `clearAutomatically=true`, subsequent reads in the same transaction return stale entities from the persistence context. Without `flushAutomatically=true`, pending in-memory changes don't reach the DB before the bulk update fires. Both flags are required.
+
+**Canonical pattern:** Used 11 times across `PostRepository`, `BookmarkRepository`, `ReactionRepository`. New bulk-update repository methods in Phase 4 (resolve, mark-answered counter resets), 6.4/6.6 (counter resets), 8.1 (username change), 10.4 (trust-level promotions), 10.5/10.6 (escalation status), 10.11 (cascade soft-delete), 12.3 (notification mark-read) MUST use both flags.
+
+### 4. Method-specific SecurityConfig rule ordering
+
+**Pre-execution assumption:** Spring Security rules can appear in any order — `OPTIONAL_AUTH_PATTERNS.permitAll()` covers most paths, method-specific `.authenticated()` rules can be added afterwards.
+
+**Execution reality (Specs 3.5/3.6/3.7):** Spring Security uses first-match-wins. Method-specific rules MUST appear BEFORE `OPTIONAL_AUTH_PATTERNS.permitAll()` or the permissive rule wins and unauthenticated writes silently succeed. Additionally, Spring's `AntPathMatcher` treats `*` as one path segment — `/api/v1/posts/*` does NOT match `/api/v1/posts/*/reactions`. Nested paths require their own explicit rules.
+
+**Future specs at risk:** Phase 3.8 (Reports POST under `/posts/*/reports`), Phase 4 (post-type-specific writes), 6.1/6.2/6.6, 8.1, 8.2 (`GET /users/{username}` — optional auth), 10.7b (POST user reports, GET moderator queue), 10.11 (DELETE account, GET export). Recon for any new write method on a read-public resource MUST verify rule ordering.
+
+### 5. Caffeine-bounded bucket pattern is canonical for any external-input-keyed cache
+
+**Pre-execution context:** Spec 1 Round 2 established `Caffeine.newBuilder().maximumSize(10_000).expireAfterAccess(Duration.ofMinutes(15)).build()` for the rate-limit bucket map and codified the rule in `02-security.md` § BOUNDED EXTERNAL-INPUT CACHES.
+
+**Phase 3 reality (Spec 3.5):** `PostsRateLimitConfig`, `PostsIdempotencyService`, and the per-domain rate-limit configs followed this pattern exactly. Profile-aware via `@ConfigurationProperties(prefix = "worshiproom.{feature}")` reading from `application-{profile}.properties`.
+
+**Canonical rule for future specs:** Future specs introducing per-user / per-email / per-IP / per-content-key rate limits or idempotency caches MUST use the Caffeine-bounded pattern. Configuration loaded via `@ConfigurationProperties`, never hardcoded. Future targets: 1.5b (password reset), 1.5e (change-email), 1.5f (account lockout), 6.8 (Verse-Finds-You per-user cooldown), 8.1 (username-change rate limit), 10.7b (user-report rate limit), 10.9 (rate-limit tightening), 10.11 (export rate limit), 16.1 (offline cache), 16.2 (queued posts retries).
+
+### 6. Domain-scoped `@RestControllerAdvice` + unscoped companion advice for filter-raised exceptions
+
+**Established by:** Spec 1 (`RateLimitExceptionHandler` — global, single-exception) + Spec 3.5 (`PostExceptionHandler` — `@RestControllerAdvice(basePackages = "com.worshiproom.post")`).
+
+**Rule:** Each new domain (`com.worshiproom.moderation/`, `com.worshiproom.notification/`, `com.worshiproom.email/`, `com.worshiproom.search/`, etc.) creates its own domain-scoped advice for domain exceptions. Filter-raised exceptions need an unscoped companion advice (single exception type) OR resolver delegation per Spec 1's pattern. Future specs do NOT extend `PostExceptionHandler` for non-post domains.
+
+### 7. `CrisisAlertService` is the single integration point for crisis-flag handling
+
+**Established by:** Spec 3.5 introduced `CrisisAlertService` + `crisis_flag` boolean on `posts`. Spec 3.6 generalized the alert service to `(contentId, authorId, ContentType.POST | ContentType.COMMENT)`.
+
+**Canonical rule:** Any future spec that surfaces, ranks, hides, suppresses, or notifies on user-generated content MUST consult `posts.crisis_flag` and `post_comments.crisis_flag`. The `CrisisAlertService.alert(contentId, authorId, ContentType)` API is the single integration point — Phase 4 testimony/question/discussion/encouragement, Phase 12.5 mention parsing, Phase 13 personal insights aggregations, Phase 15.1b welcome email sequence (suspend on crisis) all extend `ContentType` rather than introducing sibling alert services.
+
+**Deferred upgrades** (do NOT bundle these into per-spec work):
+- LLM crisis classifier (Followup #15) — keyword-only today
+- SMTP crisis-alert email (Followup #16) — Sentry alert + DB column flag only today
+- `@RequireVerifiedEmail` gate (Followup #17) — Phase 4 specs MUST NOT assume this gate exists
+
+### 8. Schema realities: do NOT recreate
+
+These columns / tables ALREADY EXIST from earlier specs. Future specs that describe creating them are stale.
+
+| Schema element | Created by | Future spec that may try to recreate |
+|---|---|---|
+| `posts.candle_count` | Spec 3.1 changeset 014 | Phase 3.7 Addendum body, Phase 9.5 Candle Mode UI |
+| `post_reactions.reaction_type` + CHECK `IN ('praying','candle')` | Spec 3.1 changeset 016 | Phase 6.6 Answered Wall — must ALTER CHECK to add `'praising'`, `'celebrate'`, NOT recreate |
+| `posts.{praying,comment,bookmark,report}_count` denormalized counters | Spec 3.1 changeset 014 | Phase 6.6, 8.4 |
+| `qotd_questions` table | Spec 3.1 changeset 019 (NOT 3.9) | Spec 3.9 |
+| `post_reports.review_consistency` CHECK relaxed | Spec 3.1 changeset 020 | Phase 10.x moderation specs |
+| `friend_relationships`, `friend_requests`, `social_interactions`, `milestone_events` | Phase 2.5 changesets 009–012 | Any Phase 6.x/7.x/8.x/12.x/13.x spec |
+| `user_mutes` | Spec 2.5.7 changeset 013 | Spec 2.5.6 (Block) — must create separate `user_blocks`, do NOT extend `user_mutes` |
+
+### 9. `INTERCESSION` ActivityType — total is now 13, not 12
+
+Spec 3.6 added `INTERCESSION` (10 points) for users who comment on Prayer Wall posts. Frontend `ACTIVITY_POINTS` and backend `ActivityType` both have 13 entries now. Future specs that add new ActivityType values MUST update both the backend enum AND the frontend constant (Decision 12 drift detection), include `PointValues` entries, drift fixture additions, and `ActivityCount` table consideration.
+
+### 10. `wr_prayer_reactions` shape and migration
+
+**Pre-execution claim (Phase 3.7 Addendum body):** Shape changes from `Record<string, { praying: boolean }>` to `Record<string, { praying: boolean, candle: boolean }>`; needs version bump (Pattern A migration logic).
+
+**Execution reality:** Shape was already `Record<string, { isPraying, isBookmarked }>` since Phase 0.5 — fields are `is*` prefixed. Spec 3.7 added `isCandle`. Migration shipped as additive default-fill on hydrate (no version key required). The `Record<string, { praying, candle }>` framing in the addendum is the abbreviated illustration, NOT the actual field names. See `11-local-storage-keys.md` Prayer Wall row for the canonical shape.
+
+### 11. Liquibase changeset filename convention (today's date, next sequence)
+
+**Established by:** Spec 3.1 Plan Deviation #1.
+
+**Rule:** Master plan body uses `YYYY-MM-DD-NNN-` placeholders illustratively. Real changeset filenames use the execution date and the next available sequence number within that day (must not collide with prior dates). As of 2026-04-28 the latest changeset is `2026-04-27-021`. Recon for future schema specs MUST `ls backend/src/main/resources/db/changelog/` and continue from the latest.
+
+### 12. Reactive store consumer Pattern A/B + BB-45 cross-mount subscription test for new multi-consumer features
+
+**Established by:** Bible wave + `11-local-storage-keys.md` § Reactive Store Consumption (which lives in `11b-local-storage-keys-bible.md`).
+
+**Rule:** Future specs introducing a localStorage-backed feature with multi-component consumers MUST implement as a reactive store (Pattern A standalone hook with `useSyncExternalStore`, OR Pattern B inline `subscribe()`). Acceptance criteria MUST include the BB-45 cross-mount subscription test (consumer renders correctly when store mutates from a different surface). Specs 6.9 (Composer Drafts), 11.3 (Search recent searches), 16.1b (Offline-queued posts) qualify.
+
+---
 
 ## Quick Reference
 
@@ -431,7 +532,7 @@ These are the whole-project decisions that every spec assumes. Full rationale li
 
 7. **Friends system migrates to the backend in Phase 2.5** (between activity engine and Prayer Wall). Same dual-write strategy. The `wr_friends` data structure is preserved on the frontend; the backend gets a copy. Friends backend is required so Phase 7's "friends pin to top of Prayer Wall feed" can work cross-device.
 
-8. **The reaction bug is fixed in Phase 0.5 BEFORE backend work starts.** Convert `usePrayerReactions` from `useState(getMockReactions())` to a reactive store with `useSyncExternalStore` (Pattern A from `.claude/rules/11-local-storage-keys.md`), persisting to a new `wr_prayer_reactions` localStorage key. Cross-page consistency works immediately. When Phase 3 lands the backend, the localStorage adapter swaps under the same hook signature with zero changes to consumer components. **This is a one-day quick win that removes the worst current Prayer Wall bug while the bigger phases are in flight.**
+8. **The reaction bug is fixed in Phase 0.5 BEFORE backend work starts.** Convert `usePrayerReactions` from `useState(getMockReactions())` to a reactive store with `useSyncExternalStore` (Pattern A — subscription via standalone hook, per `11b-local-storage-keys-bible.md` § "Reactive Store Consumption"), persisting to a new `wr_prayer_reactions` localStorage key. Cross-page consistency works immediately. When Phase 3 lands the backend, the localStorage adapter swaps under the same hook signature with zero changes to consumer components. **This is a one-day quick win that removes the worst current Prayer Wall bug while the bigger phases are in flight.**
 
 9. **Profile pages merge at `/u/:username`** with 301 redirects from `/profile/:userId` and `/prayer-wall/user/:id`. Discourse-inspired Summary tab + Activity tabs (Prayer Wall, Growth, Bible, Friends). Three-tier privacy (private / friends / public) per section. Username system is new (Phase 8.1) and replaces UUID-based URLs.
 
@@ -443,7 +544,7 @@ These are the whole-project decisions that every spec assumes. Full rationale li
 
 13. **QOTD already exists and gets MIGRATED, not built.** The 60 existing questions across 6 themes (faith_journey, practical, reflective, encouraging, community, seasonal) move to a backend table in Phase 3. The day-of-year modulo rotation logic moves to the backend. Frontend reads "today's question" from the API. **The following details from the existing `prayer-wall-question-of-day.md` spec MUST be preserved during migration:** (a) each question record includes an optional `hint` field — a 1-sentence conversation-starter prompt rendered in Lora italic below the question; (b) response count UX shows "X responses" / "1 response" / "Be the first to respond" — tapping the count scrolls to the first QOTD response in the feed (or opens the composer if zero); (c) QOTD response cards display a "Re: Question of the Day" badge above the author name (small pill, primary-tinted styling); (d) the QOTD composer is intentionally simpler than the Prayer Wall composer — no anonymous toggle, no category selector (responses are auto-tagged `category='discussion'` with `qotd_id` foreign key); (e) posting a QOTD response triggers `recordActivity('prayerWall')` for faith points (same 15 points as a regular Prayer Wall reaction). The backend `qotd_questions` table schema must include `id`, `text`, `theme`, and nullable `hint` columns.
 
-14. **Reactive store pattern (BB-45) is mandatory for any new state in Prayer Wall.** New stores prefer Pattern A (standalone hook with `useSyncExternalStore`) per `.claude/rules/11-local-storage-keys.md`. Tests for reactive store consumers MUST verify subscription behavior (mutate the store after mount, assert re-render), not just initial render. The BB-45 anti-pattern (snapshot-without-subscribe) is forbidden in all new code.
+14. **Reactive store pattern (BB-45) is mandatory for any new state in Prayer Wall.** New stores prefer Pattern A (subscription — standalone hook with `useSyncExternalStore`) per `11b-local-storage-keys-bible.md` § "Reactive Store Consumption". Tests for reactive store consumers MUST verify subscription behavior (mutate the store after mount, assert re-render), not just initial render. The BB-45 anti-pattern (snapshot-without-subscribe) is forbidden in all new code.
 
 15. **API contract follows project standards.** Success: `{ data, meta: { requestId } }`. Error: `{ code, message, requestId, timestamp }`. Headers: `X-Request-Id`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After` on 429s. Pagination: `?page=1&limit=20`. Versioned as `/api/v1/` from day one. Generated TypeScript types from OpenAPI spec, never hand-written. Full conventions in `.claude/rules/03-backend-standards.md`.
 
@@ -701,7 +802,7 @@ These apply to every Forums Wave spec, always, without exception. CC must respec
 
 7. **No localStorage keys created or modified without documenting them in `.claude/rules/11-local-storage-keys.md`.** New reactive stores must specify their store module path and subscription pattern (Pattern A or Pattern B) in the same file. A spec that adds a localStorage key without updating the inventory is incomplete and will fail code review.
 
-8. **BB-45 anti-pattern is forbidden in all new code.** Components reading from a reactive store must use the store's hook (`useSyncExternalStore` Pattern A preferred for new code, Pattern B inline subscribe acceptable for legacy compatibility). Tests for reactive store consumers must mutate the store after mount and verify re-render. Mocking the store entirely bypasses the subscription mechanism — forbidden. The original BB-45 implementation surfaced this anti-pattern as a real correctness bug and it now has zero tolerance.
+8. **BB-45 anti-pattern is forbidden in all new code.** Components reading from a reactive store must use the store's hook (`useSyncExternalStore` Pattern A — subscription via standalone hook — preferred for new code, Pattern B — inline `subscribe()` — acceptable for legacy compatibility). Tests for reactive store consumers must mutate the store after mount and verify re-render. Mocking the store entirely bypasses the subscription mechanism — forbidden. The original BB-45 implementation surfaced this anti-pattern as a real correctness bug and it now has zero tolerance.
 
 9. **Accessibility is not optional.** Keyboard navigation works for every interactive element. ARIA labels on icon-only buttons and any control whose accessible name is not visible. Focus management on modals, drawers, and inline expansions. `prefers-reduced-motion` honored on every animation. Color contrast meets WCAG AA (4.5:1 normal text, 3:1 large text). Touch targets minimum 44x44 px on mobile. Lighthouse Accessibility 95+ on every Prayer Wall page (BB-35 baseline).
 
@@ -1091,7 +1192,7 @@ Both the frontend (existing `services/`) and the backend ports of the calculatio
 
 **The bug.** The Prayer Wall reaction state currently lives in `usePrayerReactions.ts` as `useState(getMockReactions())`. Each component that calls the hook gets its own copy. The four pages (PrayerWall, PrayerWallDashboard, PrayerDetail, PrayerWallProfile) each instantiate the hook independently. Tapping "praying" on the feed mutates only the feed page's state. Navigating to the detail page creates a new state. The reaction is lost. **This is exactly the BB-45 anti-pattern documented in** `.claude/rules/06-testing.md` **and** `.claude/rules/11-local-storage-keys.md`**.**
 
-**The decision.** Phase 0.5 ships a single spec that converts `usePrayerReactions` from snapshot-without-subscription to a reactive store using `useSyncExternalStore` (Pattern A). The store persists to a new `wr_prayer_reactions` localStorage key. Cross-page consistency works immediately. **This ships before any backend work starts** (after the Phase 0 learning doc is read).
+**The decision.** Phase 0.5 ships a single spec that converts `usePrayerReactions` from snapshot-without-subscription to a reactive store using `useSyncExternalStore` (Pattern A — subscription via standalone hook). The store persists to a new `wr_prayer_reactions` localStorage key. Cross-page consistency works immediately. **This ships before any backend work starts** (after the Phase 0 learning doc is read).
 
 **Why this is a quick win:**
 
@@ -3805,7 +3906,7 @@ qotd_questions
 
 ### Phase 3.6 Addendum — Comment Edit Window and Error Code
 
-Comments inherit the same 5-minute edit window as posts (consistent with the existing `prayer-wall-redesign.md` pattern). After 5 minutes from `created_at`, the comment becomes immutable. `PATCH /api/v1/posts/{post_id}/comments/{comment_id}` returns `400 EDIT_WINDOW_EXPIRED` with response body `{ "code": "EDIT_WINDOW_EXPIRED", "message": "Comments can be edited within 5 minutes of posting.", "edit_window_seconds": 300 }` for late edits. Frontend `CommentItem.tsx` hides the edit button after the window expires (computed client-side from `created_at` + 300 seconds, refreshed every second on a mounted comment). Deletion has no time window — authors can delete their own comments at any time. The 5-minute window is configurable via `COMMENT_EDIT_WINDOW_SECONDS` env var (default 300). After the edit window, the only changes possible are: deletion (by author), moderation actions (by trust level 2+), and admin actions (by admin).
+Comments inherit the same 5-minute edit window as posts (consistent with the existing `prayer-wall-redesign.md` pattern). After 5 minutes from `created_at`, the comment becomes immutable. `PATCH /api/v1/posts/{post_id}/comments/{comment_id}` returns `409 CONFLICT` with code `EDIT_WINDOW_EXPIRED` and response body `{ "code": "EDIT_WINDOW_EXPIRED", "message": "Comments can be edited within 5 minutes of posting.", "edit_window_seconds": 300 }` for late edits. (The shipped reality: both `EditWindowExpiredException` and `CommentEditWindowExpiredException` use `HttpStatus.CONFLICT`. See Phase 3 Execution Reality Addendum item 1.) Frontend `CommentItem.tsx` hides the edit button after the window expires (computed client-side from `created_at` + 300 seconds, refreshed every second on a mounted comment). Deletion has no time window — authors can delete their own comments at any time. The 5-minute window is configurable via `COMMENT_EDIT_WINDOW_SECONDS` env var (default 300). After the edit window, the only changes possible are: deletion (by author), moderation actions (by trust level 2+), and admin actions (by admin).
 
 ### Spec 3.7 — Reactions and Bookmarks Write Endpoints
 
@@ -3829,7 +3930,7 @@ Comments inherit the same 5-minute edit window as posts (consistent with the exi
 
 ### Phase 3.7 Addendum — Reaction Endpoint Signature for Light a Candle
 
-The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: 'praying' | 'candle' }` in the request body. The endpoint toggles the row in `post_reactions` matching `(post_id, user_id, reaction_type)`. Sending the same reaction_type a second time removes the row (toggle-off). Sending a different reaction_type adds an additional row (a single user can both pray AND light a candle). The denormalized `posts.praying_count` and a new `posts.candle_count` (added by the same Liquibase changeset that introduces `reaction_type`) update transactionally. Frontend `usePrayerReactions` hook is extended with `toggleCandle(postId)` mirroring the existing `togglePraying(postId)`. Reactive store key `wr_prayer_reactions` value shape changes from `Record<string, { praying: boolean }>` to `Record<string, { praying: boolean, candle: boolean }>` — this is a localStorage migration that needs a version bump (Pattern A migration logic per `.claude/rules/11-local-storage-keys.md`).
+The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: 'praying' | 'candle' }` in the request body. The endpoint toggles the row in `post_reactions` matching `(post_id, user_id, reaction_type)`. Sending the same reaction_type a second time removes the row (toggle-off). Sending a different reaction_type adds an additional row (a single user can both pray AND light a candle). The denormalized `posts.praying_count` and `posts.candle_count` update transactionally. **`candle_count` and `reaction_type` already exist** — both shipped in Spec 3.1 (changesets 014 and 016 respectively); Spec 3.7 adds zero new schema. Frontend `usePrayerReactions` hook is extended with `toggleCandle(postId)` mirroring the existing `togglePraying(postId)`. Reactive store key `wr_prayer_reactions` is a `Record<string, { isPraying: boolean, isBookmarked: boolean, isCandle: boolean }>`; Spec 3.7 added `isCandle`. The migration shipped as additive default-fill on hydrate (no version key required) — see `11b-local-storage-keys-bible.md` § "Reactive stores across the codebase" for the canonical shape and Pattern A (subscription) consumption via `usePrayerReactions()`.
 
 ### Spec 3.8 — Reports Write Endpoint
 
@@ -3855,17 +3956,22 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 - **Size:** M
 - **Risk:** Low
 - **Prerequisites:** 3.8
-- **Goal:** Move the QOTD rotation logic from frontend constants to the backend. New endpoint `GET /api/v1/qotd/today` returns today's question. Existing 60 questions seeded in 3.2 are the initial dataset.
+- **Goal:** Move the QOTD rotation logic from frontend constants to the backend. New endpoint `GET /api/v1/qotd/today` returns today's question. The existing **72 questions** seeded in 3.2 (60 general + 12 liturgical-seasonal, ids `qotd-1` through `qotd-72`) are the initial dataset.
 
-**Approach:** `QotdController` with `GET /api/v1/qotd/today`. Implementation: compute day-of-year, modulo 60, look up by `display_order`, return the question. Caching: return value cached in memory until midnight server time (or 24-hour TTL). Frontend `QuestionOfTheDay.tsx` component updated to fetch from this endpoint instead of reading frontend constants. The frontend constants file is preserved but marked deprecated for offline test fallback.
+**Approach:** `QotdController` with `GET /api/v1/qotd/today`. Recon must reconcile two constraints: (1) the frontend's `getTodaysQuestion()` (`frontend/src/constants/question-of-the-day.ts:455`) is **liturgical-season-aware** — it filters by `liturgicalSeason === currentSeason.id` and picks via `getDayWithinSeason()`, falling back to general-pool `dayOfYear % 72` when no named season applies; (2) the shipped `qotd_questions` table (Spec 3.1 changeset 019) does NOT have a `liturgical_season` column today. Recon must choose: (a) extend the schema with a `liturgical_season VARCHAR` column + reseed via 3.2-style migration to preserve frontend behavior, or (b) ship modulo-72 only and accept losing seasonal awareness. Caching: return value cached in memory until midnight server time (or 24-hour TTL). Frontend `QuestionOfTheDay.tsx` component updated to fetch from this endpoint. The frontend constants file is preserved but marked deprecated for offline test fallback.
 
 **Files to create:**
 
-- `backend/src/main/java/com/worshiproom/qotd/QotdController.java`
-- `backend/src/main/java/com/worshiproom/qotd/QotdService.java`
-- `backend/src/main/java/com/worshiproom/qotd/QotdQuestionRepository.java`
-- `backend/src/main/java/com/worshiproom/qotd/dto/QotdQuestionResponse.java`
-- `backend/src/test/java/com/worshiproom/qotd/QotdServiceTest.java`
+- `backend/src/main/java/com/worshiproom/post/QotdController.java`
+- `backend/src/main/java/com/worshiproom/post/QotdService.java`
+- `backend/src/main/java/com/worshiproom/post/dto/QotdQuestionResponse.java`
+- `backend/src/test/java/com/worshiproom/post/QotdServiceTest.java`
+
+**Files already exist (do NOT recreate — created by Spec 3.1 / Spec 3.5):**
+
+- `backend/src/main/java/com/worshiproom/post/QotdQuestion.java` (JPA entity, Spec 3.5)
+- `backend/src/main/java/com/worshiproom/post/QotdQuestionRepository.java` (Spec 3.5)
+- `backend/src/main/resources/db/changelog/2026-04-27-019-create-qotd-questions-table.xml` (table itself, Spec 3.1)
 
 **Files to modify:**
 
@@ -3876,7 +3982,7 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 
 - \[ \] `GET /api/v1/qotd/today` returns the same question for the same day
 - \[ \] Returns a different question on the next day
-- \[ \] Day-of-year modulo 60 produces the same rotation as the existing frontend logic
+- \[ \] Backend rotation logic matches the frontend's `getTodaysQuestion()` behavior — liturgical-season-aware (when `liturgical_season` column ships) or `dayOfYear % 72` fallback (when it doesn't). Drift-detection test feeds same `Date` to both implementations and asserts identical question id.
 - \[ \] Caching works (no DB query on every request within a day)
 - \[ \] Frontend reads from API in production
 - \[ \] At least 8 unit/integration tests
@@ -5480,7 +5586,7 @@ Mental-health prayers being "answered" is a genuinely complicated theological/cl
 
 - "Praying" reaction replaced by "Praising with you" (same mechanic, different label and icon — a soft sunrise / raised hands / "hallelujah" visual)
 - "Light a Candle" reaction replaced by "Celebrate" (warm sunrise palette, different animation from the mourning-candle)
-- Backend-wise, these are new `reaction_type` values: `'praising'` and `'celebrate'` alongside the existing `'praying'` and `'candle'`. CHECK constraint extended per Decision 5 pattern. Reaction endpoint from Phase 3.7 Addendum handles all four types transparently.
+- Backend-wise, these are new `reaction_type` values: `'praising'` and `'celebrate'` alongside the existing `'praying'` and `'candle'`. **CHECK constraint must be ALTERed, not recreated** — Spec 3.1 changeset 016 already created `post_reactions.reaction_type` with `CHECK (reaction_type IN ('praying','candle'))`. The Spec 6.6 Liquibase changeset DROPs the old constraint and ADDs a new one allowing all four values. Do NOT issue a `CREATE TABLE` or attempt to re-add the column — both will fail Liquibase. See Phase 3 Execution Reality Addendum item 8 for the full schema-already-shipped list. Reaction endpoint from Phase 3.7 Addendum handles all four types transparently.
 - Counts rendered separately: "12 praising with you · 3 celebrating"
 
 **Comments on answered posts:**
