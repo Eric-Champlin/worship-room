@@ -2050,6 +2050,120 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/posts/{postId}/reports:
+    post:
+      tags: [Posts]
+      summary: Submit a report against a post (Spec 3.8)
+      description: |
+        Creates a `pending` row in `post_reports` for the authenticated user.
+
+        Idempotent on PENDING (Spec 3.8 D4): if the same user has an existing
+        pending report against this post, returns 200 with the existing report
+        ID and `created: false`. Closed reports (`reviewed`, `dismissed`,
+        `actioned`) allow re-reporting — a moderator already processed the
+        original; the new report is fresh signal.
+
+        Self-report (reporter == post author) returns 400 SELF_REPORT.
+
+        Crisis-flagged and soft-deleted posts ARE reportable (Spec 3.8 D9 —
+        deliberate departure from Phase 3 Addendum #7 visibility filtering;
+        reports against such content are still valid moderator-queue signal).
+
+        Rate limit: 10 reports per hour per user. Post-reports and
+        comment-reports SHARE the same bucket (Spec 3.8 D6).
+      operationId: reportPost
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateReportRequest' }
+      responses:
+        '200':
+          description: |
+            Idempotent — existing pending report returned. Response body's
+            `data.created` is `false` and `data.reportId` is the existing
+            row's id.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProxyResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ReportData' }
+        '201':
+          description: |
+            Newly created report. Response body's `data.created` is `true`
+            and `data.reportId` is the new row's id.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProxyResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ReportData' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /api/v1/comments/{commentId}/reports:
+    post:
+      tags: [Comments]
+      summary: Submit a report against a comment (Spec 3.8)
+      description: |
+        Same semantics as POST /posts/{postId}/reports but for comments.
+        Shares the per-user 10/hour rate-limit bucket with post-reports.
+      operationId: reportComment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: commentId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateReportRequest' }
+      responses:
+        '200':
+          description: |
+            Idempotent — existing pending report returned. Response body's
+            `data.created` is `false` and `data.reportId` is the existing
+            row's id.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProxyResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ReportData' }
+        '201':
+          description: |
+            Newly created report. Response body's `data.created` is `true`
+            and `data.reportId` is the new row's id.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProxyResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ReportData' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
   /api/v1/users/me/reactions:
     get:
       tags: [Posts]
@@ -3605,6 +3719,44 @@ components:
           type: integer
           minimum: 0
           description: Post-mutation bookmark count for the parent post.
+
+    CreateReportRequest:
+      description: |
+        Request body for `POST /api/v1/posts/{postId}/reports` and
+        `POST /api/v1/comments/{commentId}/reports` (Spec 3.8). `details`
+        is plain text — no HTML, no Markdown rendering. The 500-character
+        cap is the canonical limit (matches frontend ReportDialog
+        CharacterCount).
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          $ref: '#/components/schemas/ReportReason'
+        details:
+          type: string
+          maxLength: 500
+          description: Optional free-text context. Plain text only.
+
+    ReportReason:
+      type: string
+      enum: [spam, harassment, hate, self_harm, sexual, other]
+      description: Categorical reason for the report.
+
+    ReportData:
+      description: |
+        Response payload for the report-write endpoints (Spec 3.8).
+        `created` is `true` when a new pending row was inserted, `false`
+        when an existing pending report was returned (idempotent semantics
+        per Spec 3.8 D4).
+      type: object
+      required: [reportId, created]
+      properties:
+        reportId:
+          type: string
+          format: uuid
+        created:
+          type: boolean
+          description: true if a new report was inserted; false if idempotent.
 
   responses:
     BadRequest:

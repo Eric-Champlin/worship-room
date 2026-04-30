@@ -4,23 +4,53 @@ import { Button } from '@/components/ui/Button'
 import { CharacterCount } from '@/components/ui/CharacterCount'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useAuth } from '@/hooks/useAuth'
+import { useAuthModal } from './AuthModalProvider'
+import { useToast } from '@/components/ui/Toast'
+import { ApiError } from '@/types/auth'
+import type { ReportReason } from '@/services/api/reports-api'
 
 interface ReportDialogProps {
   prayerId: string
-  onReport?: (prayerId: string, reason: string) => void
+  /**
+   * Spec 3.8: signature is now async and accepts the structured reason +
+   * optional details. Previous string-only signature is gone.
+   */
+  onReport?: (
+    prayerId: string,
+    reason: ReportReason,
+    details?: string,
+  ) => Promise<void>
 }
+
+const REASON_OPTIONS: Array<{ value: ReportReason; label: string }> = [
+  { value: 'spam', label: 'Spam' },
+  { value: 'harassment', label: 'Harassment' },
+  { value: 'hate', label: 'Hate speech' },
+  { value: 'self_harm', label: 'Self-harm' },
+  { value: 'sexual', label: 'Inappropriate content' },
+  { value: 'other', label: 'Other' },
+]
 
 export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [reason, setReason] = useState('')
+  const [details, setDetails] = useState('')
+  const [selectedReason, setSelectedReason] = useState<ReportReason>('other')
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const reducedMotion = useReducedMotion()
+
+  const { isAuthenticated } = useAuth()
+  const authModal = useAuthModal()
+  const { showToast } = useToast()
+
   const handleClose = useCallback(() => {
     if (reducedMotion) {
       setIsOpen(false)
-      setReason('')
+      setDetails('')
+      setSelectedReason('other')
       setSubmitted(false)
       return
     }
@@ -28,7 +58,8 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
     closeTimeoutRef.current = setTimeout(() => {
       setIsClosing(false)
       setIsOpen(false)
-      setReason('')
+      setDetails('')
+      setSelectedReason('other')
       setSubmitted(false)
     }, 150)
   }, [reducedMotion])
@@ -50,15 +81,54 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleSubmit = () => {
-    onReport?.(prayerId, reason.trim())
-    setSubmitted(true)
-    setTimeout(() => {
-      setIsOpen(false)
-      setSubmitted(false)
-      setReason('')
-      setIsClosing(false)
-    }, 1500)
+  const handleOpenClick = () => {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal()
+      return
+    }
+    setIsOpen(true)
+  }
+
+  const handleSubmit = async () => {
+    if (submitting) return
+    setSubmitting(true)
+    try {
+      await onReport?.(prayerId, selectedReason, details.trim() || undefined)
+      setSubmitted(true)
+      setSubmitting(false)
+      setTimeout(() => {
+        setIsOpen(false)
+        setSubmitted(false)
+        setDetails('')
+        setSelectedReason('other')
+        setIsClosing(false)
+      }, 1500)
+    } catch (e) {
+      setSubmitting(false)
+      if (e instanceof ApiError) {
+        if (e.status === 401) {
+          // apiFetch already cleared token + dispatched wr:auth-invalidated;
+          // AuthModal opens via global listener. No toast needed.
+          return
+        }
+        if (e.status === 404) {
+          showToast('This content is no longer available.', 'error')
+          return
+        }
+        if (e.status === 429) {
+          showToast(
+            e.message || 'Please slow down a moment. You can report again soon.',
+            'error',
+          )
+          return
+        }
+        if (e.status === 400 && e.code === 'SELF_REPORT') {
+          showToast("You can't report your own posts.", 'error')
+          return
+        }
+      }
+      showToast('Something went wrong. Try again in a moment.', 'error')
+    }
   }
 
   const visible = isOpen || isClosing
@@ -73,7 +143,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpenClick}
         className="flex min-h-[44px] items-center gap-1 px-2 text-xs text-white/50 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:rounded sm:min-h-0 sm:px-0"
       >
         <Flag className="h-3 w-3" aria-hidden="true" />
@@ -106,33 +176,58 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
                 >
                   Report Prayer Request
                 </h2>
-                <p className="mt-1 text-sm text-white/60">
-                  Help us keep this community safe. Describe the issue (optional):
-                </p>
+                <fieldset className="mt-3">
+                  <legend className="text-sm text-white/70">Reason:</legend>
+                  <div role="radiogroup" className="mt-2 grid grid-cols-2 gap-2">
+                    {REASON_OPTIONS.map((option) => (
+                      <label
+                        key={option.value}
+                        className="flex min-h-[44px] items-center gap-2 text-sm text-white"
+                      >
+                        <input
+                          type="radio"
+                          name="report-reason"
+                          value={option.value}
+                          checked={selectedReason === option.value}
+                          onChange={() => setSelectedReason(option.value)}
+                          className="h-4 w-4 accent-primary"
+                        />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <p className="mt-4 text-sm text-white/60">Tell us more (optional):</p>
                 <textarea
                   ref={textareaRef}
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Reason for reporting..."
+                  value={details}
+                  onChange={(e) => setDetails(e.target.value)}
+                  placeholder="Add more context..."
                   maxLength={500}
-                  className="mt-3 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="mt-2 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   rows={3}
                   aria-label="Report reason"
                   aria-describedby="report-char-count"
                 />
                 <div className="mt-1">
-                  <CharacterCount current={reason.length} max={500} visibleAt={300} id="report-char-count" />
+                  <CharacterCount current={details.length} max={500} visibleAt={300} id="report-char-count" />
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleClose}
+                    disabled={submitting}
                   >
                     Cancel
                   </Button>
-                  <Button variant="primary" size="sm" onClick={handleSubmit}>
-                    Submit Report
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleSubmit}
+                    isLoading={submitting}
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Report'}
                   </Button>
                 </div>
               </>

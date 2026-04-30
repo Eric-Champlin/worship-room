@@ -390,3 +390,29 @@ Captured: 2026-04-29 during 1.10e brief authoring.
 Revisit: when 4.6b's spec is authored.
 
 ---
+
+## 21. Comment-report UI — backend endpoint shipped in Spec 3.8, no UI surface
+
+`POST /api/v1/comments/{commentId}/reports` is fully implemented and tested
+in Spec 3.8 (controller, service, idempotency, rate limit, OpenAPI). No
+frontend consumer exists today — `CommentItem` has no flag icon, no
+`ReportCommentDialog` component. The `reports-api.reportComment` function
+is exported but unused.
+
+**Likely homes for the UI:**
+- Phase 4 polish spec adding an overflow menu to `CommentItem`
+- Phase 10 moderation queue spec (when the queue UI surfaces "report this
+  comment from the queue context" flows)
+
+**Acceptance when picked up:**
+- `CommentItem` adds a Report affordance (overflow menu OR small flag icon)
+- New `ReportCommentDialog` mirrors `ReportDialog`'s reason-picker shape
+- Anonymous click triggers AuthModal (existing pattern)
+- Own-comment Report affordance hidden (mirrors `prayer.userId !== user?.id`)
+- 6 toast strings reused from `ReportDialog`
+
+Captured: 2026-04-30 during Spec 3.8 execution.
+Revisit: when comment-engagement polish is on the queue (Phase 4) or
+when Phase 10 moderation queue UI lands.
+
+---

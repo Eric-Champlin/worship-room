@@ -71,6 +71,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/bookmark").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/*/bookmark").authenticated()
 
+                // Spec 3.8 — write methods on reports require authentication. Same
+                // first-match-wins rule as Specs 3.5/3.6/3.7: these come BEFORE
+                // OPTIONAL_AUTH_PATTERNS so the method-specific rule wins. Spring's
+                // AntPathMatcher does NOT match nested paths via /api/v1/posts/* or
+                // /api/v1/comments/* — explicit nested patterns required (Phase 3
+                // Addendum #4).
+                .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/reports").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/comments/*/reports").authenticated()
+
                 // Spec 1.10f — POST /api/v1/users/me/legal/accept requires authentication.
                 // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule wins.
                 .requestMatchers(HttpMethod.POST, "/api/v1/users/me/legal/accept").authenticated()

@@ -13,6 +13,8 @@ import { CommentInput } from '@/components/prayer-wall/CommentInput'
 import { MarkAsAnsweredForm } from '@/components/prayer-wall/MarkAsAnsweredForm'
 import { DeletePrayerDialog } from '@/components/prayer-wall/DeletePrayerDialog'
 import { ReportDialog } from '@/components/prayer-wall/ReportDialog'
+import { reportPost as apiReportPost } from '@/services/api/reports-api'
+import type { ReportReason } from '@/services/api/reports-api'
 import { useToast } from '@/components/ui/Toast'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
@@ -192,10 +194,21 @@ function PrayerDetailContent() {
             />
           </div>
 
-          {/* Report link */}
-          <div className="mt-3 border-t border-white/10 pt-3">
-            <ReportDialog prayerId={prayer.id} />
-          </div>
+          {/* Report link — hidden on own posts (Spec 3.8 D11 + Watch-For #18). */}
+          {!isOwner && (
+            <div className="mt-3 border-t border-white/10 pt-3">
+              <ReportDialog
+                prayerId={prayer.id}
+                onReport={async (
+                  prayerId: string,
+                  reason: ReportReason,
+                  details?: string,
+                ) => {
+                  await apiReportPost(prayerId, reason, details)
+                }}
+              />
+            </div>
+          )}
         </PrayerCard>
       </main>
     </PageShell>

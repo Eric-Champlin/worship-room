@@ -1,13 +1,31 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
-import { PrayerDetail } from '../PrayerDetail'
+
+// Mutable auth mock — tests reassign `mockAuthValue` to simulate
+// logged-out / logged-in-as-other / logged-in-as-author states.
+const mockAuthValue: {
+  user: { id: string; name: string } | null
+  isAuthenticated: boolean
+} = { user: null, isAuthenticated: false }
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+  useAuth: () => ({
+    ...mockAuthValue,
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
 }))
+
+// Mock the reports-api module so we can assert calls without network.
+const mockReportPost = vi.fn().mockResolvedValue({ reportId: 'r-1', created: true })
+vi.mock('@/services/api/reports-api', () => ({
+  reportPost: (...args: unknown[]) => mockReportPost(...args),
+}))
+
+import { PrayerDetail } from '../PrayerDetail'
 
 function renderDetail(prayerId: string) {
   return render(
@@ -27,6 +45,12 @@ function renderDetail(prayerId: string) {
 }
 
 describe('PrayerDetail', () => {
+  beforeEach(() => {
+    mockAuthValue.user = null
+    mockAuthValue.isAuthenticated = false
+    mockReportPost.mockClear()
+  })
+
   it('renders full prayer text without truncation for a known prayer', () => {
     renderDetail('prayer-1')
     // prayer-1 from mock data should render without "Show more"
@@ -77,6 +101,30 @@ describe('PrayerDetail', () => {
   })
 
   it('shows report link', () => {
+    renderDetail('prayer-1')
+    expect(screen.getByText('Report')).toBeInTheDocument()
+  })
+
+  // Spec 3.8 — own-post hide + reports-api wiring tests.
+
+  it('Spec 3.8: hides Report button when viewing own prayer', () => {
+    // prayer-1 has userId 'user-1'.
+    mockAuthValue.user = { id: 'user-1', name: 'Sarah' }
+    mockAuthValue.isAuthenticated = true
+    renderDetail('prayer-1')
+    expect(screen.queryByText('Report')).not.toBeInTheDocument()
+  })
+
+  it('Spec 3.8: shows Report button when viewing other user\'s prayer', () => {
+    mockAuthValue.user = { id: 'user-99', name: 'Bob' }
+    mockAuthValue.isAuthenticated = true
+    renderDetail('prayer-1')
+    expect(screen.getByText('Report')).toBeInTheDocument()
+  })
+
+  it('Spec 3.8: shows Report button when logged out (AuthModal handles gate)', () => {
+    mockAuthValue.user = null
+    mockAuthValue.isAuthenticated = false
     renderDetail('prayer-1')
     expect(screen.getByText('Report')).toBeInTheDocument()
   })

@@ -58,6 +58,10 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 31  | 1.10l | Playwright E2E Test Infrastructure             | M    | Low      | ✅     |
 | 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ✅     |
 
+After 15.1 ships: 1.5b, 1.5d, 1.5e.
+After 5.6 ships: 1.5g.
+Right now: 1.5c and 1.5f.
+
 > **1.10f partial-shipped (2026-04-28 audit):** Canonical legal markdown at `content/{terms-of-service,privacy-policy,community-guidelines}.md` IS shipped. The `users.terms_version` / `users.privacy_version` columns, registration consent checkbox, `LegalVersionService.java`, `TermsUpdateModal.tsx`, `GET /api/v1/legal/versions`, and `POST /api/v1/users/me/legal/accept` endpoints are NOT yet shipped. Tracker reverted to ⬜ pending the column-and-endpoint work; the legal-content portion remains in `content/`.
 >
 > **1.10m partial-shipped (2026-04-28 audit):** Markdown at `content/community-guidelines.md` IS shipped. The public `/community-guidelines` route + `CommunityGuidelines` page component referenced in `12-project-reference.md` does NOT yet exist in `frontend/src/`. Tracker reverted to ⬜ pending the page+route work.
@@ -103,7 +107,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 55  | 3.5  | Posts Write Endpoints (Create, Update, Delete) | XL   | High   | ✅     |
 | 56  | 3.6  | Comments Write Endpoints                       | L    | High   | ✅     |
 | 57  | 3.7  | Reactions and Bookmarks Write Endpoints        | L    | Medium | ✅     |
-| 58  | 3.8  | Reports Write Endpoint                         | M    | Medium | ⬜     |
+| 58  | 3.8  | Reports Write Endpoint                         | M    | Medium | ✅     |
 | 59  | 3.9  | QOTD Backend Migration                         | M    | Low    | ✅     |
 | 60  | 3.10 | Frontend Service API Implementations           | XL   | High   | ✅     |
 | 61  | 3.11 | Reactive Store Backend Adapter                 | L    | Medium | ⬜     |
