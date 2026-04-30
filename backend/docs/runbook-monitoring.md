@@ -33,7 +33,7 @@ Operationally, this runbook supports three workflows:
 | Uptime (process unreachable, JVM crashed, port not bound) | ❌ NOT monitored via Sentry | Sentry can't catch a dead JVM — a dead process emits no events. UptimeRobot procedure documented in § 7; Railway's platform-level `/actuator/health/readiness` probe is the fallback. |
 | APM / performance traces | ❌ NOT captured | `traces-sample-rate=0.0`. Future spec when scoped. |
 | Custom metrics / business KPIs (e.g., login success rate, journal save latency) | ❌ NOT captured | Future spec when scoped. |
-| Logback ERROR-level events (the Sentry Logback appender) | ❌ DELIBERATELY EXCLUDED | The Spring starter already captures every `@ExceptionHandler`-routed exception. Adding the Logback appender would double-count every error. See § 8. |
+| Logback ERROR-level events (the Sentry Logback appender) | ❌ DELIBERATELY EXCLUDED | The Spring starter already captures every `@ExceptionHandler`-routed exception. Adding the Logback appender would double-count every error. See § 9. |
 
 ---
 
@@ -140,7 +140,78 @@ This is independent of Sentry — UptimeRobot covers the failure mode where Sent
 
 ---
 
-## 8. Known gaps and follow-ups
+## 8. HikariCP Connection Pool
+
+The backend uses HikariCP (the default Spring Boot connection pool)
+with explicit tuning per Spec 1.10k. Configuration lives in
+`application.properties` (shared defaults) and `application-dev.properties`
+(dev override).
+
+### Current Configuration
+
+| Property | Shared | Dev | Rationale |
+|---|---|---|---|
+| `maximum-pool-size` | 10 | 5 | Headroom under Railway's 100-conn limit; dev uses less |
+| `minimum-idle` | 2 | 1 | Avoid cold-start penalty |
+| `connection-timeout` | 30000ms | (inherits) | Matches Spring default; explicit for clarity |
+| `idle-timeout` | 600000ms (10m) | (inherits) | Balance keep-alive vs server resources |
+| `max-lifetime` | 1800000ms (30m) | (inherits) | Force connection rotation |
+| `leak-detection-threshold` | 60000ms (60s) | (inherits) | Catch service-layer bugs |
+| `pool-name` | WorshipRoomHikariPool | (inherits) | Log/metrics identification |
+
+### When to Tune Up
+
+Symptoms that suggest raising `maximum-pool-size`:
+- Frequent `HikariPool-1 - Connection is not available, request timed out`
+  errors in logs (means the pool ran dry; threads waited >30s for a
+  connection)
+- Sustained latency spikes correlating with traffic peaks
+- Active connections at the cap for sustained periods (visible in
+  `/actuator/metrics/hikaricp.connections.active`)
+
+Before raising, verify Railway's PostgreSQL connection limit (typically
+100 for small plans). Multi-instance deployments must aggregate: 3 app
+instances × 20 max-pool-size = 60 connections, leaving 40 for the
+database's own internal use. Don't push past 75% of the server limit.
+
+### When to Investigate
+
+Symptoms that suggest a connection leak (NOT a pool-size issue):
+- `Connection leak detection triggered` in logs (Hikari fires this
+  after `leak-detection-threshold` is exceeded)
+- Active connections growing monotonically over time without traffic to
+  match
+- Pool exhaustion under low traffic
+
+Leaks usually mean a transactional boundary is wrong (e.g., a
+`@Transactional` method that opens a connection then awaits an external
+I/O call, holding the connection for the duration). Audit recent
+service-layer changes; check that long-running operations are NOT
+wrapped in `@Transactional`.
+
+### Metrics
+
+Available via `/actuator/metrics`:
+- `hikaricp.connections.active` — currently in-use
+- `hikaricp.connections.idle` — idle but pooled
+- `hikaricp.connections.pending` — threads waiting for a connection
+- `hikaricp.connections.usage` — distribution of how long connections
+  are held (histogram)
+
+For dev, also enable `management.endpoints.web.exposure.include=metrics`
+in `application-dev.properties` (already enabled per existing config).
+
+### Reference
+
+- HikariCP docs: https://github.com/brettwooldridge/HikariCP
+- Spring Boot Hikari config:
+  https://docs.spring.io/spring-boot/docs/current/reference/html/data.html#data.sql.datasource.connection-pool
+- Railway PostgreSQL connection limits:
+  https://docs.railway.com/databases/postgresql#connection-limits
+
+---
+
+## 9. Known gaps and follow-ups
 
 - **Frontend Sentry → spec 1.10d-bis** when scoped. ErrorBoundary integration points: `frontend/src/components/ErrorBoundary.tsx`, `ChunkErrorBoundary.tsx`, `RouteErrorBoundary.tsx` — all `console.error` today. Will need: `@sentry/react` dependency, `Sentry.init` in `main.tsx`, `Sentry.captureException` from each ErrorBoundary `componentDidCatch`, and a Sentry origin added to the CSP `connect-src` directive in `SecurityHeadersConfig.java` so the browser SDK can POST events.
 - **APM / tracing → future spec.** `traces-sample-rate=0.0` is pinned. Raising it is a separate concern (cost, signal-to-noise, transaction definition).
@@ -151,7 +222,7 @@ This is independent of Sentry — UptimeRobot covers the failure mode where Sent
 
 ---
 
-## 9. Related documents
+## 10. Related documents
 
 - `.claude/rules/07-logging-monitoring.md` — § Error Tracking (Sentry), § Uptime Monitoring, § Audit Logging.
 - `backend/docs/env-vars-runbook.md` — § 3.6 `SENTRY_DSN` and `SENTRY_ENVIRONMENT` detail blocks (rotation, defaults, behavior-if-absent).

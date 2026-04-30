@@ -54,7 +54,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 27  | 1.10h | API Error Code Catalog                         | S    | Low      | ✅     |
 | 28  | 1.10i | Backend Environment Variables Runbook          | S    | Low      | ✅     |
 | 29  | 1.10j | Liveness/Readiness Health Checks               | S    | Low      | ✅     |
-| 30  | 1.10k | HikariCP Connection Pool Tuning                | S    | Low      | ⬜     |
+| 30  | 1.10k | HikariCP Connection Pool Tuning                | S    | Low      | ✅     |
 | 31  | 1.10l | Playwright E2E Test Infrastructure             | M    | Low      | ✅     |
 | 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ✅     |
 
