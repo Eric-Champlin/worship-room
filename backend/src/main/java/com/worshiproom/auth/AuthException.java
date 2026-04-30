@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
  * maps instances back to the shared ProxyError API response shape.
  *
  * Error codes: UNAUTHORIZED, TOKEN_INVALID, TOKEN_EXPIRED, TOKEN_MALFORMED,
- * INVALID_CREDENTIALS.
+ * INVALID_CREDENTIALS, ACCOUNT_LOCKED.
  */
 public class AuthException extends RuntimeException {
     private final HttpStatus status;
@@ -44,5 +44,8 @@ public class AuthException extends RuntimeException {
     public static AuthException invalidCredentials() {
         return new AuthException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS",
             "Invalid email or password.");
+    }
+    public static AccountLockedException accountLocked(long retryAfterSeconds) {
+        return new AccountLockedException(Math.max(1L, retryAfterSeconds));
     }
 }

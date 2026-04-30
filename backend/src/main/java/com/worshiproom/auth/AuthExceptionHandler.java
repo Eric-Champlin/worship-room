@@ -4,6 +4,7 @@ import com.worshiproom.proxy.common.ProxyError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,8 +35,10 @@ public class AuthExceptionHandler {
     public ResponseEntity<ProxyError> handleAuth(AuthException ex) {
         var requestId = MDC.get("requestId");
         log.info("Auth rejected: code={} message={}", ex.getCode(), ex.getMessage());
-        return ResponseEntity
-            .status(ex.getStatus())
-            .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(ex.getStatus());
+        if (ex instanceof AccountLockedException locked) {
+            builder.header(HttpHeaders.RETRY_AFTER, String.valueOf(locked.getRetryAfterSeconds()));
+        }
+        return builder.body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
     }
 }

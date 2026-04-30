@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,6 +31,7 @@ class AuthServiceTest {
 
     @Mock private UserRepository userRepository;
     @Mock private JwtService jwtService;
+    @Mock private LoginAttemptService loginAttemptService;
 
     private BCryptPasswordEncoder realEncoder;
     private AuthService authService;
@@ -36,7 +39,8 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         realEncoder = new BCryptPasswordEncoder();
-        authService = new AuthService(userRepository, realEncoder, jwtService, new LegalVersionService());
+        authService = new AuthService(userRepository, realEncoder, jwtService,
+            new LegalVersionService(), loginAttemptService);
     }
 
     private static final String V = LegalVersionService.TERMS_VERSION; // shorthand for current versions in tests
@@ -270,6 +274,156 @@ class AuthServiceTest {
             logbackLogger.detachAppender(appender);
             logbackLogger.setLevel(prevLevel);
         }
+    }
+
+    // ─── Spec 1.5f: Account lockout flow ──────────────────────────────────
+
+    @Test
+    void loginSuccessfulResetsPriorFailedCount() {
+        User user = buildUser("alice@example.com", realEncoder.encode("hunter2hunter2"));
+        user.setFailedLoginCount(1);
+        when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(user.getId(), false)).thenReturn("jwt");
+
+        authService.login(new LoginRequest("alice@example.com", "hunter2hunter2"));
+
+        verify(loginAttemptService, times(1)).recordSuccessfulLogin(user);
+        verify(loginAttemptService, never()).recordFailedAttempt(any(UUID.class));
+    }
+
+    @Test
+    void loginWrongPasswordCallsRecordFailedAttempt() {
+        User user = buildUser("alice@example.com", realEncoder.encode("correctpassword"));
+        when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.login(new LoginRequest("alice@example.com", "wrongpassword")))
+            .isInstanceOf(AuthException.class);
+
+        verify(loginAttemptService, times(1)).recordFailedAttempt(user.getId());
+        verify(loginAttemptService, never()).recordSuccessfulLogin(any(User.class));
+    }
+
+    @Test
+    void loginLockedWithWrongPasswordReturns401NotLocked() {
+        User user = buildUser("alice@example.com", realEncoder.encode("correctpassword"));
+        user.setFailedLoginCount(5);
+        user.setLockedUntil(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(10));
+        when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.login(new LoginRequest("alice@example.com", "wrongpassword")))
+            .isInstanceOfSatisfying(AuthException.class, ex -> {
+                assertThat(ex.getCode()).isEqualTo("INVALID_CREDENTIALS");
+                assertThat(ex).isNotInstanceOf(AccountLockedException.class);
+            });
+
+        verify(loginAttemptService, times(1)).recordFailedAttempt(user.getId());
+        verify(loginAttemptService, never()).recordSuccessfulLogin(any(User.class));
+    }
+
+    @Test
+    void loginLockedWithCorrectPasswordReturns423() {
+        User user = buildUser("alice@example.com", realEncoder.encode("correctpassword"));
+        user.setFailedLoginCount(5);
+        user.setLockedUntil(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(10));
+        when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.login(new LoginRequest("alice@example.com", "correctpassword")))
+            .isInstanceOfSatisfying(AccountLockedException.class, ex -> {
+                assertThat(ex.getCode()).isEqualTo("ACCOUNT_LOCKED");
+                assertThat(ex.getRetryAfterSeconds()).isBetween(595L, 605L);
+            });
+
+        verify(loginAttemptService, never()).recordSuccessfulLogin(any(User.class));
+        verify(loginAttemptService, never()).recordFailedAttempt(any(UUID.class));
+        verify(jwtService, never()).generateToken(any(UUID.class), any(boolean.class));
+    }
+
+    @Test
+    void loginLockedExpiredAcceptsCorrectPassword() {
+        User user = buildUser("alice@example.com", realEncoder.encode("correctpassword"));
+        user.setFailedLoginCount(5);
+        user.setLockedUntil(OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1));
+        when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(user.getId(), false)).thenReturn("jwt");
+
+        AuthResponse response = authService.login(new LoginRequest("alice@example.com", "correctpassword"));
+
+        assertThat(response.token()).isEqualTo("jwt");
+        verify(loginAttemptService, times(1)).recordSuccessfulLogin(user);
+    }
+
+    @Test
+    void loginLockedExpiredFailedPasswordIncrementsAfresh() {
+        User user = buildUser("alice@example.com", realEncoder.encode("correctpassword"));
+        user.setFailedLoginCount(5);
+        user.setFailedLoginWindowStart(OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(30));
+        user.setLockedUntil(OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1));
+        when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.login(new LoginRequest("alice@example.com", "wrongpassword")))
+            .isInstanceOf(AuthException.class)
+            .hasFieldOrPropertyWithValue("code", "INVALID_CREDENTIALS");
+
+        verify(loginAttemptService, times(1)).recordFailedAttempt(user.getId());
+    }
+
+    @Test
+    void loginUnknownEmailUnchangedDummyHashStillFires() {
+        when(userRepository.findByEmailIgnoreCase("nobody@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(new LoginRequest("nobody@example.com", "anything")))
+            .isInstanceOf(AuthException.class)
+            .hasFieldOrPropertyWithValue("code", "INVALID_CREDENTIALS");
+
+        verifyNoInteractions(loginAttemptService);
+    }
+
+    @Test
+    void loginUnknownEmailDoesNotTouchLockoutService() {
+        when(userRepository.findByEmailIgnoreCase("unknown@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(new LoginRequest("unknown@example.com", "x")))
+            .isInstanceOf(AuthException.class);
+
+        verifyNoInteractions(loginAttemptService);
+    }
+
+    @Test
+    void loginRetryAfterSecondsClampedToOne() {
+        User user = buildUser("alice@example.com", realEncoder.encode("correctpassword"));
+        user.setFailedLoginCount(5);
+        user.setLockedUntil(OffsetDateTime.now(ZoneOffset.UTC).plusNanos(500_000_000L));
+        when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.login(new LoginRequest("alice@example.com", "correctpassword")))
+            .isInstanceOfSatisfying(AccountLockedException.class, ex -> {
+                assertThat(ex.getRetryAfterSeconds()).isGreaterThanOrEqualTo(1L);
+            });
+    }
+
+    @Test
+    void loginAdminFlagPreservedThroughLockoutPath() {
+        User user = buildUser("admin@example.com", realEncoder.encode("hunter2hunter2"));
+        user.setAdmin(true);
+        when(userRepository.findByEmailIgnoreCase("admin@example.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(user.getId(), true)).thenReturn("admin-jwt");
+
+        AuthResponse response = authService.login(new LoginRequest("admin@example.com", "hunter2hunter2"));
+
+        assertThat(response.token()).isEqualTo("admin-jwt");
+        verify(jwtService, times(1)).generateToken(user.getId(), true);
+    }
+
+    @Test
+    void loginCorrectPasswordSkipsResetWhenStateAlreadyClean() {
+        User user = buildUser("alice@example.com", realEncoder.encode("hunter2hunter2"));
+        when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(user.getId(), false)).thenReturn("jwt");
+
+        authService.login(new LoginRequest("alice@example.com", "hunter2hunter2"));
+
+        // Service-level guard is INSIDE LoginAttemptService — we just assert the call happens.
+        verify(loginAttemptService, times(1)).recordSuccessfulLogin(user);
     }
 
     private static User buildUser(String email, String passwordHash) {

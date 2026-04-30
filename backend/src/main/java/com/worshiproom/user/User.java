@@ -80,6 +80,15 @@ public class User {
     @Column(name = "privacy_version", length = 20)
     private String privacyVersion;
 
+    @Column(name = "failed_login_count", nullable = false)
+    private int failedLoginCount = 0;
+
+    @Column(name = "failed_login_window_start")
+    private OffsetDateTime failedLoginWindowStart;
+
+    @Column(name = "locked_until")
+    private OffsetDateTime lockedUntil;
+
     protected User() {}
 
     public User(String email, String passwordHash, String firstName, String lastName, String timezone) {
@@ -124,6 +133,9 @@ public class User {
     public String getTimezone() { return timezone; }
     public String getTermsVersion() { return termsVersion; }
     public String getPrivacyVersion() { return privacyVersion; }
+    public int getFailedLoginCount() { return failedLoginCount; }
+    public OffsetDateTime getFailedLoginWindowStart() { return failedLoginWindowStart; }
+    public OffsetDateTime getLockedUntil() { return lockedUntil; }
 
     public void setEmail(String email) { this.email = email; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
@@ -145,6 +157,9 @@ public class User {
     public void setTimezone(String timezone) { this.timezone = timezone; }
     public void setTermsVersion(String termsVersion) { this.termsVersion = termsVersion; }
     public void setPrivacyVersion(String privacyVersion) { this.privacyVersion = privacyVersion; }
+    public void setFailedLoginCount(int failedLoginCount) { this.failedLoginCount = failedLoginCount; }
+    public void setFailedLoginWindowStart(OffsetDateTime t) { this.failedLoginWindowStart = t; }
+    public void setLockedUntil(OffsetDateTime t) { this.lockedUntil = t; }
 
     @Override
     public String toString() {

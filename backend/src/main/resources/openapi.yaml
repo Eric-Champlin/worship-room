@@ -613,6 +613,11 @@ paths:
         Timing-equalized login. Rate-limited: 5 attempts per 15 min per email,
         20 attempts per 15 min per IP. Both limits enforced. On 429 includes
         Retry-After header.
+
+        Persistent account lockout (Spec 1.5f): after 5 failed attempts within
+        15 minutes the account is locked for 15 minutes. Locked + correct
+        password returns 423 with Retry-After header; locked + wrong password
+        still returns 401 (anti-enumeration).
       operationId: loginUser
       security: []
       requestBody:
@@ -638,6 +643,25 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401':
           description: Invalid email or password (timing-equalized; same response for unknown email or wrong password)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '423':
+          description: |
+            Account temporarily locked. Returned when the supplied password matches
+            but the account has accumulated 5+ failed login attempts within a 15-minute
+            window. Locked accounts auto-unlock after 15 minutes. The `Retry-After`
+            header indicates the integer number of seconds until the lock expires.
+
+            Anti-enumeration: an unsuccessful login attempt against a locked account
+            with a WRONG password returns 401 INVALID_CREDENTIALS, not 423 — the
+            request must include the correct password to learn the account is locked.
+          headers:
+            Retry-After:
+              description: Integer seconds until the lock expires (clamped >= 1).
+              schema:
+                type: integer
+                minimum: 1
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ProxyError' }

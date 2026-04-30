@@ -416,3 +416,27 @@ Revisit: when comment-engagement polish is on the queue (Phase 4) or
 when Phase 10 moderation queue UI lands.
 
 ---
+
+## Admin unlock endpoint (Spec 10.10b prerequisite)
+
+Spec 1.5f shipped the persistent account-lockout layer with three columns
+on `users` (`failed_login_count`, `failed_login_window_start`, `locked_until`)
+and 423 ACCOUNT_LOCKED responses with Retry-After. Manual unlock is via
+psql; the runbook lives at `backend/docs/runbook-account-lockout.md`.
+
+When Spec 10.10 (Admin Foundation) lands, add `POST /api/v1/admin/users/{id}/unlock`
+that performs the equivalent UPDATE (zero-out the three columns) and writes
+an `admin_audit_log` entry. This converts the manual psql workflow into a
+proper admin-UI affordance and gives every unlock a forensic trail.
+
+**Acceptance when picked up:**
+
+- New endpoint gated by `is_admin = true` (Spec 10.10 admin guard pattern)
+- Reuses `LoginAttemptRepository.resetLoginAttempts(userId)` (already exists)
+- Writes `admin_audit_log` row with `action='unlocked_account'`, target_user_id, moderator_note
+- Admin UI surface in `/admin/audit-log` or dedicated unlock view
+
+Captured: 2026-04-30 during Spec 1.5f execution.
+Revisit: when Spec 10.10 (Admin Foundation) is on the queue.
+
+---

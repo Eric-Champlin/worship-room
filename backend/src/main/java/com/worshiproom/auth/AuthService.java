@@ -17,7 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DateTimeException;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -42,15 +45,18 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final LegalVersionService legalVersionService;
+    private final LoginAttemptService loginAttemptService;
 
     public AuthService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       LegalVersionService legalVersionService) {
+                       LegalVersionService legalVersionService,
+                       LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.legalVersionService = legalVersionService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Transactional
@@ -95,7 +101,13 @@ public class AuthService {
         return RegisterResponse.ok();
     }
 
-    @Transactional(readOnly = true)
+    // noRollbackFor: AuthException is expected business behavior (wrong password,
+    // unknown email, locked account). When wrong-password fires, we MUST commit the
+    // lockout-counter UPDATE that LoginAttemptService.recordFailedAttempt() just made,
+    // even though we're about to throw AuthException.invalidCredentials(). Default
+    // rollback-on-RuntimeException would silently undo the lockout write — five wrong
+    // attempts would never accumulate, defeating the entire spec.
+    @Transactional(noRollbackFor = AuthException.class)
     public AuthResponse login(LoginRequest request) {
         String normalizedEmail = request.email().toLowerCase(Locale.ROOT).trim();
         Optional<User> maybeUser = userRepository.findByEmailIgnoreCase(normalizedEmail);
@@ -122,10 +134,31 @@ public class AuthService {
         }
 
         User user = maybeUser.get();
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+
+        // Spec 1.5f: ALWAYS run BCrypt on the known-email path BEFORE checking lock
+        // state — for timing equalization AND anti-enumeration (locked + wrong
+        // password must look identical to unlocked + wrong password from the
+        // attacker's perspective).
+        boolean passwordMatches = passwordEncoder.matches(request.password(), user.getPasswordHash());
+
+        if (!passwordMatches) {
+            // Wrong password: increment counter (and maybe lock). If account was
+            // already locked, do NOT reveal that — return generic 401.
+            loginAttemptService.recordFailedAttempt(user.getId());
             log.debug("loginWrongPassword userId={}", user.getId());
             throw AuthException.invalidCredentials();
         }
+
+        // Password matches. NOW check lock state — only legitimate users see 423.
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
+            long retryAfterSec = ChronoUnit.SECONDS.between(now, user.getLockedUntil());
+            log.info("loginLockedAccount userId={} retryAfterSec={}", user.getId(), retryAfterSec);
+            throw AuthException.accountLocked(Math.max(1, retryAfterSec));
+        }
+
+        // Password correct and not locked — reset counters (conditional) and issue token.
+        loginAttemptService.recordSuccessfulLogin(user);
 
         String token = jwtService.generateToken(user.getId(), user.isAdmin());
         UserSummary summary = new UserSummary(

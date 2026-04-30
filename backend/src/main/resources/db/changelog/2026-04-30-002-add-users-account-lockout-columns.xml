@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 1.5f — Account lockout columns on users.
+       Persistent layer that complements LoginRateLimitFilter (Spec 1.5).
+       Three columns (count + window_start + locked_until) implement a sliding
+       15-minute window with atomic JPQL CASE UPDATE in LoginAttemptRepository.
+       Existing rows get count=0, both timestamps NULL automatically. -->
+
+  <changeSet id="2026-04-30-002-add-users-account-lockout-columns" author="worship-room">
+    <addColumn tableName="users">
+      <column name="failed_login_count" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="failed_login_window_start" type="TIMESTAMP WITH TIME ZONE">
+        <constraints nullable="true"/>
+      </column>
+      <column name="locked_until" type="TIMESTAMP WITH TIME ZONE">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+    <rollback>
+      <dropColumn tableName="users" columnName="failed_login_count"/>
+      <dropColumn tableName="users" columnName="failed_login_window_start"/>
+      <dropColumn tableName="users" columnName="locked_until"/>
+    </rollback>
+  </changeSet>
+
+</databaseChangeLog>
