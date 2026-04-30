@@ -137,6 +137,9 @@ describe('auth-service', () => {
         isAdmin: false,
         timezone: 'America/New_York',
         isEmailVerified: false, // hardcoded on summary; /users/me corrects it
+        // Spec 1.10f — same transient pattern as isEmailVerified.
+        termsVersion: null,
+        privacyVersion: null,
       })
     })
 

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useGatedAction } from '@/hooks/useGatedAction'
 import type { FriendProfile, FriendRequest, FriendsData } from '@/types/dashboard'
 import { useAuth } from '@/hooks/useAuth'
 import {
@@ -255,6 +256,14 @@ export function useFriends(): {
     [isAuthenticated, data, persist],
   )
 
+  // Spec 1.10f. Spec D9 — gate "intent to engage" actions on legal-version
+  // freshness. sendRequest and acceptRequest re-show the modal when stale and
+  // replay after a successful accept. declineRequest, cancelRequest,
+  // removeFriend, blockUser, unblockUser are NOT gated — they're often safety
+  // actions that should fire even when versions are stale.
+  const gatedSendRequest = useGatedAction(sendRequest)
+  const gatedAcceptRequest = useGatedAction(acceptRequest)
+
   return {
     friends,
     pendingIncoming: data.pendingIncoming,
@@ -262,8 +271,8 @@ export function useFriends(): {
     blocked: data.blocked,
     suggestions,
     searchUsers,
-    sendRequest,
-    acceptRequest,
+    sendRequest: gatedSendRequest,
+    acceptRequest: gatedAcceptRequest,
     declineRequest,
     cancelRequest,
     removeFriend: removeAFriend,

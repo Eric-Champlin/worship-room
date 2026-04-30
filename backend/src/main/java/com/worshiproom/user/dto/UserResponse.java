@@ -34,7 +34,9 @@ public record UserResponse(
     String timezone,
     boolean isAdmin,
     boolean isEmailVerified,
-    OffsetDateTime joinedAt
+    OffsetDateTime joinedAt,
+    String termsVersion,
+    String privacyVersion
 ) {
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -52,7 +54,9 @@ public record UserResponse(
             user.getTimezone(),
             user.isAdmin(),
             user.isEmailVerified(),
-            user.getJoinedAt()
+            user.getJoinedAt(),
+            user.getTermsVersion(),
+            user.getPrivacyVersion()
         );
     }
 }

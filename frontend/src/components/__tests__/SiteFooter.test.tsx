@@ -44,6 +44,21 @@ describe('SiteFooter', () => {
     expect(link).toHaveAttribute('href', '/community-guidelines')
   })
 
+  // Spec 1.10f — Legal column extended with Terms of Service and Privacy
+  // Policy alongside the existing Community Guidelines entry.
+  it('Legal column includes all three legal-document links with correct hrefs', () => {
+    renderSiteFooter()
+    const expectedLegalLinks = [
+      { name: 'Terms of Service', href: '/terms-of-service' },
+      { name: 'Privacy Policy', href: '/privacy-policy' },
+      { name: 'Community Guidelines', href: '/community-guidelines' },
+    ]
+    for (const { name, href } of expectedLegalLinks) {
+      const link = screen.getByRole('link', { name })
+      expect(link).toHaveAttribute('href', href)
+    }
+  })
+
   it('renders all 11 nav links with correct hrefs', () => {
     renderSiteFooter()
 

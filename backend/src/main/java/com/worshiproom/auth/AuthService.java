@@ -5,6 +5,8 @@ import com.worshiproom.auth.dto.LoginRequest;
 import com.worshiproom.auth.dto.RegisterRequest;
 import com.worshiproom.auth.dto.RegisterResponse;
 import com.worshiproom.auth.dto.UserSummary;
+import com.worshiproom.legal.LegalVersionService;
+import com.worshiproom.legal.VersionMismatchException;
 import com.worshiproom.user.DisplayNameResolver;
 import com.worshiproom.user.User;
 import com.worshiproom.user.UserRepository;
@@ -39,17 +41,32 @@ public class AuthService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LegalVersionService legalVersionService;
 
     public AuthService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       LegalVersionService legalVersionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.legalVersionService = legalVersionService;
     }
 
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
+        // Validate legal versions FIRST — Spec 1.10f. If they don't match, reject
+        // before any BCrypt cost. Version mismatch is a protocol error, not a
+        // content-leak channel: the response timing diverges from the existing-
+        // email branch only when the client submitted a malformed/stale version,
+        // which is a known protocol state, not a user-existence signal.
+        if (!legalVersionService.isTermsVersionCurrent(request.termsVersion())) {
+            throw new VersionMismatchException();
+        }
+        if (!legalVersionService.isPrivacyVersionCurrent(request.privacyVersion())) {
+            throw new VersionMismatchException();
+        }
+
         String normalizedEmail = request.email().toLowerCase(Locale.ROOT).trim();
         String resolvedTimezone = resolveTimezoneOrUtc(request.timezone());
 
@@ -71,6 +88,8 @@ public class AuthService {
         String passwordHash = passwordEncoder.encode(request.password());
         User user = new User(normalizedEmail, passwordHash,
             request.firstName(), request.lastName(), resolvedTimezone);
+        user.setTermsVersion(request.termsVersion());
+        user.setPrivacyVersion(request.privacyVersion());
         User saved = userRepository.save(user);
         log.debug("registerSucceeded userId={} emailHash={}", saved.getId(), EmailHasher.hash(normalizedEmail));
         return RegisterResponse.ok();

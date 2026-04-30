@@ -3,6 +3,7 @@ package com.worshiproom.auth;
 import com.worshiproom.auth.dto.AuthResponse;
 import com.worshiproom.auth.dto.LoginRequest;
 import com.worshiproom.auth.dto.RegisterRequest;
+import com.worshiproom.legal.LegalVersionService;
 import com.worshiproom.user.DisplayNamePreference;
 import com.worshiproom.user.User;
 import com.worshiproom.user.UserRepository;
@@ -35,8 +36,10 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         realEncoder = new BCryptPasswordEncoder();
-        authService = new AuthService(userRepository, realEncoder, jwtService);
+        authService = new AuthService(userRepository, realEncoder, jwtService, new LegalVersionService());
     }
+
+    private static final String V = LegalVersionService.TERMS_VERSION; // shorthand for current versions in tests
 
     @Test
     void registerWithNewEmailCreatesUser() {
@@ -44,7 +47,7 @@ class AuthServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         authService.register(new RegisterRequest(
-            "Alice@Example.COM", "verylongpassword123", "Alice", "Smith", "America/Chicago"));
+            "Alice@Example.COM", "verylongpassword123", "Alice", "Smith", "America/Chicago", V, V));
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
@@ -59,7 +62,7 @@ class AuthServiceTest {
         when(userRepository.existsByEmailIgnoreCase("taken@example.com")).thenReturn(true);
 
         authService.register(new RegisterRequest(
-            "taken@example.com", "verylongpassword123", "Bob", "Jones", "UTC"));
+            "taken@example.com", "verylongpassword123", "Bob", "Jones", "UTC", V, V));
 
         verify(userRepository, never()).save(any());
     }
@@ -70,7 +73,7 @@ class AuthServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         authService.register(new RegisterRequest(
-            "Foo@BAR.com", "verylongpassword123", "Foo", "Bar", "UTC"));
+            "Foo@BAR.com", "verylongpassword123", "Foo", "Bar", "UTC", V, V));
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
@@ -83,7 +86,7 @@ class AuthServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         authService.register(new RegisterRequest(
-            "x@example.com", "verylongpassword123", "X", "Y", null));
+            "x@example.com", "verylongpassword123", "X", "Y", null, V, V));
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
@@ -96,7 +99,7 @@ class AuthServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         authService.register(new RegisterRequest(
-            "x@example.com", "verylongpassword123", "X", "Y", "Not/AZone"));
+            "x@example.com", "verylongpassword123", "X", "Y", "Not/AZone", V, V));
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
@@ -118,12 +121,12 @@ class AuthServiceTest {
         for (int i = 0; i < iterations; i++) {
             long t0 = System.nanoTime();
             authService.register(new RegisterRequest(
-                "new@example.com", "verylongpassword123", "N", "N", "UTC"));
+                "new@example.com", "verylongpassword123", "N", "N", "UTC", V, V));
             newTimings[i] = System.nanoTime() - t0;
 
             long t1 = System.nanoTime();
             authService.register(new RegisterRequest(
-                "exists@example.com", "verylongpassword123", "E", "E", "UTC"));
+                "exists@example.com", "verylongpassword123", "E", "E", "UTC", V, V));
             existsTimings[i] = System.nanoTime() - t1;
         }
 
@@ -255,7 +258,7 @@ class AuthServiceTest {
 
         try {
             authService.register(new RegisterRequest(
-                "canary@example.com", canary, "C", "N", "UTC"));
+                "canary@example.com", canary, "C", "N", "UTC", V, V));
         } catch (Exception ignored) {}
 
         try {

@@ -29,6 +29,7 @@
   <include file="db/changelog/2026-04-27-019-create-qotd-questions-table.xml"/>
   <include file="db/changelog/2026-04-27-020-relax-post-reports-review-consistency.xml"/>
   <include file="db/changelog/2026-04-29-001-seed-qotd-questions-production.xml"/>
+  <include file="db/changelog/2026-04-30-001-add-users-legal-version-columns.xml"/>
   <include file="db/changelog/contexts/dev-seed.xml"/>
 
 </databaseChangeLog>

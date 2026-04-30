@@ -29,6 +29,8 @@ const FOOTER_SUPPORT_LINKS = [
 ]
 
 const FOOTER_LEGAL_LINKS = [
+  { label: 'Terms of Service', to: '/terms-of-service' },
+  { label: 'Privacy Policy', to: '/privacy-policy' },
   { label: 'Community Guidelines', to: '/community-guidelines' },
 ]
 

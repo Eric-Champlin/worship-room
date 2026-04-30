@@ -30,7 +30,7 @@ interface UserSummaryWire {
   timezone: string | null
 }
 
-/** Full UserResponse from GET/PATCH /users/me — includes isEmailVerified and profile fields. */
+/** Full UserResponse from GET/PATCH /users/me — includes isEmailVerified, legal versions, and profile fields. */
 interface UserResponseWire extends UserSummaryWire {
   displayNamePreference: string
   customDisplayName: string | null
@@ -40,6 +40,9 @@ interface UserResponseWire extends UserSummaryWire {
   favoriteVerseText: string | null
   isEmailVerified: boolean
   joinedAt: string
+  // Spec 1.10f. Null for legacy users.
+  termsVersion: string | null
+  privacyVersion: string | null
 }
 
 interface AuthResponseWire {
@@ -71,6 +74,11 @@ function toAuthUserFromSummary(u: UserSummaryWire): AuthUser {
     isAdmin: u.isAdmin,
     timezone: u.timezone,
     isEmailVerified: false,
+    // termsVersion + privacyVersion are not in the login summary; hydrated by
+    // boot-time getCurrentUser() on next page load. Same transient pattern as
+    // isEmailVerified above (Spec 1.10f).
+    termsVersion: null,
+    privacyVersion: null,
   }
 }
 
@@ -85,6 +93,8 @@ function toAuthUserFromResponse(u: UserResponseWire): AuthUser {
     isAdmin: u.isAdmin,
     timezone: u.timezone,
     isEmailVerified: u.isEmailVerified,
+    termsVersion: u.termsVersion,
+    privacyVersion: u.privacyVersion,
   }
 }
 

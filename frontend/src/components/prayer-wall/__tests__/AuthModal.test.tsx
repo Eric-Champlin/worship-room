@@ -17,6 +17,22 @@ vi.mock('@/hooks/useReducedMotion', () => ({
   useReducedMotion: () => true,
 }))
 
+// Spec 1.10f. Stable legal-version mock so register flows don't block on
+// "Please wait a moment" — the registration helper now requires that
+// useLegalVersions resolved a value before submit.
+vi.mock('@/hooks/useLegalVersions', () => ({
+  useLegalVersions: () => ({
+    versions: {
+      termsVersion: '2026-04-29',
+      privacyVersion: '2026-04-29',
+      communityGuidelinesVersion: '2026-04-29',
+    },
+    isLoading: false,
+    error: null,
+  }),
+  __resetLegalVersionsCache: () => {},
+}))
+
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -264,6 +280,9 @@ describe('AuthModal — register validation', () => {
   it('submit with empty fields shows all inline errors', async () => {
     const user = userEvent.setup()
     render(<AuthModal {...registerProps} />, { wrapper: Wrapper })
+    // Spec 1.10f — check the consent box so the submit button is enabled and
+    // the form can run its empty-field validation pass.
+    await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'Create Account' }))
     expect(screen.getByText('First name is required')).toBeInTheDocument()
     expect(screen.getByText('Last name is required')).toBeInTheDocument()
@@ -469,6 +488,7 @@ describe('AuthModal — backend integration', () => {
       screen.getByLabelText(/Confirm password/i),
       'long-enough-password',
     )
+    await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'Create Account' }))
 
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(2))
@@ -509,6 +529,7 @@ describe('AuthModal — backend integration', () => {
       screen.getByLabelText(/Confirm password/i),
       'long-enough-password',
     )
+    await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'Create Account' }))
 
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(2))
@@ -544,6 +565,7 @@ describe('AuthModal — backend integration', () => {
       screen.getByLabelText(/Confirm password/i),
       'wrong-pass-1234',
     )
+    await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'Create Account' }))
 
     await waitFor(() => {
@@ -730,6 +752,7 @@ describe('AuthModal — backend integration', () => {
       screen.getByLabelText(/Confirm password/i),
       'long-enough-password',
     )
+    await user.click(screen.getByRole('checkbox'))
     await act(async () => {
       await user.click(screen.getByRole('button', { name: 'Create Account' }))
     })

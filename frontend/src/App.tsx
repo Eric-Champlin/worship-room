@@ -9,6 +9,7 @@ import { UpdatePrompt } from '@/components/pwa/UpdatePrompt'
 import { OfflineIndicator } from '@/components/pwa/OfflineIndicator'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 import { InstallPromptProvider } from '@/contexts/InstallPromptProvider'
+import { LegalVersionGate } from '@/components/legal/LegalVersionGate'
 import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
 import { LOGIN_METADATA, NOT_FOUND_METADATA } from '@/lib/seo/routeMetadata'
@@ -94,6 +95,8 @@ const MoodCheckInPreview = lazy(() =>
 )
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })))
 const CommunityGuidelines = lazy(() => import('./pages/CommunityGuidelines').then((m) => ({ default: m.CommunityGuidelines })))
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then((m) => ({ default: m.TermsOfServicePage })))
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then((m) => ({ default: m.PrivacyPolicyPage })))
 const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage').then((m) => ({ default: m.AccessibilityPage })))
 
 function RouteLoadingFallback() {
@@ -212,6 +215,7 @@ function App() {
         <HelmetProvider>
         <ErrorBoundary>
         <AuthProvider>
+        <LegalVersionGate>
         <InstallPromptProvider>
         <ToastProvider>
         <AuthModalProvider>
@@ -287,6 +291,8 @@ function App() {
           <Route path="/login" element={<ComingSoon title="Log In" />} />
           <Route path="/register" element={<RouteErrorBoundary><Suspense fallback={null}><RegisterPage /></Suspense></RouteErrorBoundary>} />
           <Route path="/community-guidelines" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><CommunityGuidelines /></Suspense></RouteErrorBoundary>} />
+          <Route path="/terms-of-service" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><TermsOfServicePage /></Suspense></RouteErrorBoundary>} />
+          <Route path="/privacy-policy" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><PrivacyPolicyPage /></Suspense></RouteErrorBoundary>} />
           <Route path="/accessibility" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><AccessibilityPage /></Suspense></RouteErrorBoundary>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -299,6 +305,7 @@ function App() {
         </AuthModalProvider>
         </ToastProvider>
         </InstallPromptProvider>
+        </LegalVersionGate>
         </AuthProvider>
         </ErrorBoundary>
         </HelmetProvider>

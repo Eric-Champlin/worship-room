@@ -1,6 +1,7 @@
 package com.worshiproom.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.worshiproom.legal.LegalVersionService;
 import com.worshiproom.support.AbstractIntegrationTest;
 import com.worshiproom.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -158,7 +159,9 @@ class LoginRateLimitFilterTest extends AbstractIntegrationTest {
                 "email", "reg" + i + "@example.com",
                 "password", "verylongpassword123",
                 "firstName", "R",
-                "lastName", "R"));
+                "lastName", "R",
+                "termsVersion", LegalVersionService.TERMS_VERSION,
+                "privacyVersion", LegalVersionService.PRIVACY_VERSION));
             mvc.perform(post("/api/v1/auth/register")
                     .header("X-Forwarded-For", IP_TEST_7)
                     .contentType(MediaType.APPLICATION_JSON).content(body))

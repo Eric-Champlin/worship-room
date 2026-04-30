@@ -740,6 +740,74 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/legal/versions:
+    get:
+      tags: [Legal]
+      summary: Get current legal-document versions
+      description: |
+        Returns the canonical version strings for Terms of Service,
+        Privacy Policy, and Community Guidelines. Public — no JWT
+        required. Frontend fetches once on app boot and uses the values
+        to detect stale acceptance and to populate the registration form.
+
+        Per Spec 1.10f.
+      operationId: getLegalVersions
+      security: []
+      responses:
+        '200':
+          description: Current legal-document versions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/LegalVersionsResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/users/me/legal/accept:
+    post:
+      tags: [Legal]
+      summary: Record current user's acceptance of latest legal versions
+      description: |
+        Records the authenticated user's acceptance of the current Terms
+        of Service and Privacy Policy versions. Returns 204 No Content
+        on success. The frontend re-fetches GET /users/me to refresh the
+        cached AuthUser with the new versions (Spec D5 + D15).
+
+        Submitted versions MUST exactly equal the current canonical
+        versions (string equality, not lexicographic). Mismatched
+        versions return 400 VERSION_MISMATCH.
+
+        Rate limited to 5 attempts per hour per user (mirrors PostsRateLimit
+        pattern; Caffeine-bounded bucket map).
+
+        Per Spec 1.10f.
+      operationId: acceptLegalVersions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AcceptLegalVersionsRequest' }
+      responses:
+        '204':
+          description: Acceptance recorded
+        '400':
+          description: VERSION_MISMATCH (submitted versions don't match current canonical) or VALIDATION_FAILED (malformed body)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
   /api/v1/activity:
     post:
       tags: [Activity]
@@ -2470,7 +2538,7 @@ components:
 
     RegisterRequest:
       type: object
-      required: [email, password, firstName, lastName]
+      required: [email, password, firstName, lastName, termsVersion, privacyVersion]
       properties:
         email:
           type: string
@@ -2492,6 +2560,18 @@ components:
           type: string
           maxLength: 50
           description: IANA timezone. Defaults to UTC when omitted or invalid.
+        termsVersion:
+          type: string
+          maxLength: 20
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2026-04-29'
+          description: Required (Spec 1.10f). Must equal current canonical Terms of Service version.
+        privacyVersion:
+          type: string
+          maxLength: 20
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2026-04-29'
+          description: Required (Spec 1.10f). Must equal current canonical Privacy Policy version.
 
     LoginRequest:
       type: object
@@ -2586,6 +2666,50 @@ components:
           type: string
           format: date-time
           description: Account creation timestamp (ISO-8601 with offset).
+        termsVersion:
+          type: string
+          maxLength: 20
+          nullable: true
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Spec 1.10f. ISO-8601 date of the last accepted Terms of Service version. Null for users created before Spec 1.10f shipped.
+        privacyVersion:
+          type: string
+          maxLength: 20
+          nullable: true
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Spec 1.10f. ISO-8601 date of the last accepted Privacy Policy version. Null for users created before Spec 1.10f shipped.
+
+    LegalVersionsResponse:
+      type: object
+      required: [termsVersion, privacyVersion, communityGuidelinesVersion]
+      properties:
+        termsVersion:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2026-04-29'
+        privacyVersion:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2026-04-29'
+        communityGuidelinesVersion:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2026-04-29'
+
+    AcceptLegalVersionsRequest:
+      type: object
+      required: [termsVersion, privacyVersion]
+      properties:
+        termsVersion:
+          type: string
+          maxLength: 20
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2026-04-29'
+        privacyVersion:
+          type: string
+          maxLength: 20
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2026-04-29'
 
     UpdateUserRequest:
       description: |

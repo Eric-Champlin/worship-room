@@ -51,6 +51,7 @@ describe('auth types', () => {
       'ACCOUNT_LOCKED',
       'AUTO_LOGIN_FAILED',
       'NETWORK_ERROR',
+      'VERSION_MISMATCH',
       'UNKNOWN',
     ]
     expect(Object.keys(AUTH_ERROR_COPY).sort()).toEqual([...codes].sort())

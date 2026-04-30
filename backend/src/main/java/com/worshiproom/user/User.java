@@ -74,6 +74,12 @@ public class User {
     @Column(name = "timezone", nullable = false, length = 50)
     private String timezone = "UTC";
 
+    @Column(name = "terms_version", length = 20)
+    private String termsVersion;
+
+    @Column(name = "privacy_version", length = 20)
+    private String privacyVersion;
+
     protected User() {}
 
     public User(String email, String passwordHash, String firstName, String lastName, String timezone) {
@@ -116,6 +122,8 @@ public class User {
     public boolean isDeleted() { return isDeleted; }
     public OffsetDateTime getDeletedAt() { return deletedAt; }
     public String getTimezone() { return timezone; }
+    public String getTermsVersion() { return termsVersion; }
+    public String getPrivacyVersion() { return privacyVersion; }
 
     public void setEmail(String email) { this.email = email; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
@@ -135,6 +143,8 @@ public class User {
     public void setDeleted(boolean deleted) { this.isDeleted = deleted; }
     public void setDeletedAt(OffsetDateTime t) { this.deletedAt = t; }
     public void setTimezone(String timezone) { this.timezone = timezone; }
+    public void setTermsVersion(String termsVersion) { this.termsVersion = termsVersion; }
+    public void setPrivacyVersion(String privacyVersion) { this.privacyVersion = privacyVersion; }
 
     @Override
     public String toString() {

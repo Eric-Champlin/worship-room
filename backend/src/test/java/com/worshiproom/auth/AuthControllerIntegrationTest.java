@@ -2,6 +2,7 @@ package com.worshiproom.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.worshiproom.legal.LegalVersionService;
 import com.worshiproom.support.AbstractIntegrationTest;
 import com.worshiproom.user.User;
 import com.worshiproom.user.UserRepository;
@@ -43,6 +44,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private JwtService jwtService;
 
+    private static final String V = LegalVersionService.TERMS_VERSION;
+
     @BeforeEach
     void clean() { userRepository.deleteAll(); }
 
@@ -53,7 +56,9 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
             "password", "hunter2hunter2",
             "firstName", "Sarah",
             "lastName", "Johnson",
-            "timezone", "America/Chicago"));
+            "timezone", "America/Chicago",
+            "termsVersion", V,
+            "privacyVersion", V));
 
         mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isOk())
@@ -70,7 +75,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     void registerExistingEmailReturnsSameShape_noSecondRow() throws Exception {
         String body = mapper.writeValueAsString(Map.of(
             "email", "dup@example.com", "password", "hunter2hunter2",
-            "firstName", "D", "lastName", "U"));
+            "firstName", "D", "lastName", "U",
+            "termsVersion", V, "privacyVersion", V));
         mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON).content(body));
 
         mvc.perform(post("/api/v1/auth/register")
@@ -190,7 +196,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     void registerInvalidTimezoneSilentlyDefaultsToUtc() throws Exception {
         String body = mapper.writeValueAsString(Map.of(
             "email", "badtz@example.com", "password", "hunter2hunter2",
-            "firstName", "B", "lastName", "T", "timezone", "Not/AZone"));
+            "firstName", "B", "lastName", "T", "timezone", "Not/AZone",
+            "termsVersion", V, "privacyVersion", V));
         mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isOk());
 
@@ -221,7 +228,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
             throws Exception {
         String body = mapper.writeValueAsString(Map.of(
             "email", email, "password", password,
-            "firstName", fn, "lastName", ln, "timezone", tz));
+            "firstName", fn, "lastName", ln, "timezone", tz,
+            "termsVersion", V, "privacyVersion", V));
         mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isOk());
     }

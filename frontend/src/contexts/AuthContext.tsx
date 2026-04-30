@@ -51,6 +51,13 @@ export interface AuthContextValue {
   register: (request: RegisterRequest) => Promise<void>
   logout: () => Promise<void>
   simulateLegacyAuth: (name: string) => void
+  /**
+   * Spec 1.10f. Re-fetches `GET /users/me` to refresh the cached AuthUser
+   * with current data (including newly-accepted legal versions). Used by
+   * `LegalVersionGate` after a successful POST /me/legal/accept. Never
+   * throws — degrades silently on token absence or non-401 errors.
+   */
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -104,6 +111,10 @@ function buildLegacyUser(id: string, name: string): AuthUser {
     isAdmin: false,
     timezone: null,
     isEmailVerified: false,
+    // Spec 1.10f. Legacy mock auth path predates legal-version tracking;
+    // null is the right answer until the user upgrades to real auth.
+    termsVersion: null,
+    privacyVersion: null,
   }
 }
 
@@ -217,6 +228,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ isAuthenticated: false, isAuthResolving: false, user: null })
   }, [])
 
+  const refreshUser = useCallback(async () => {
+    // Spec 1.10f. Used by LegalVersionGate after a successful accept.
+    const token = getStoredToken()
+    if (!token) return
+    try {
+      const user = await getCurrentUser()
+      mirrorToLegacyKeys(user) // Transitional — removed in Phase 2 cutover
+      setState({ isAuthenticated: true, isAuthResolving: false, user })
+    } catch {
+      // 401 already cleared via apiFetch; degrade silently otherwise.
+    }
+  }, [mirrorToLegacyKeys])
+
   const simulateLegacyAuth = useCallback((name: string) => {
     // Transitional helper for pre-backend mock flows (WelcomeWizard onboarding
     // name setter, DevAuthToggle). Writes the 3 legacy keys directly so
@@ -296,8 +320,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       logout,
       simulateLegacyAuth,
+      refreshUser,
     }),
-    [state, login, register, logout, simulateLegacyAuth],
+    [state, login, register, logout, simulateLegacyAuth, refreshUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

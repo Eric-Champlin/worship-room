@@ -71,6 +71,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/bookmark").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/*/bookmark").authenticated()
 
+                // Spec 1.10f — POST /api/v1/users/me/legal/accept requires authentication.
+                // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule wins.
+                .requestMatchers(HttpMethod.POST, "/api/v1/users/me/legal/accept").authenticated()
+
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes
                 // them so a valid token extracts a principal for personalization.

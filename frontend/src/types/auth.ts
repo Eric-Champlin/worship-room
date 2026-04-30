@@ -15,6 +15,11 @@ export interface AuthUser {
   isAdmin: boolean
   timezone: string | null
   isEmailVerified: boolean
+  // Spec 1.10f. Null for legacy users (created before 1.10f shipped) and
+  // for the transient login-summary state (login response doesn't carry
+  // versions; `getCurrentUser()` rehydration on next page load fills them).
+  termsVersion: string | null
+  privacyVersion: string | null
 }
 
 export interface LoginCredentials {
@@ -28,6 +33,11 @@ export interface RegisterRequest {
   firstName: string
   lastName: string
   timezone?: string
+  // Spec 1.10f. Required ISO-8601 date strings; backend rejects mismatches
+  // and missing values with 400. The frontend reads current values from
+  // `useLegalVersions()` and includes them in every register call.
+  termsVersion: string
+  privacyVersion: string
 }
 
 export type AuthErrorCode =
@@ -37,6 +47,7 @@ export type AuthErrorCode =
   | 'ACCOUNT_LOCKED'
   | 'AUTO_LOGIN_FAILED'
   | 'NETWORK_ERROR'
+  | 'VERSION_MISMATCH'
   | 'UNKNOWN'
 
 export const AUTH_ERROR_COPY: Record<AuthErrorCode, string> = {
@@ -49,6 +60,8 @@ export const AUTH_ERROR_COPY: Record<AuthErrorCode, string> = {
   AUTO_LOGIN_FAILED: 'Your account is ready. Please log in to continue.',
   NETWORK_ERROR:
     "We couldn't reach the server. Check your connection and try again.",
+  VERSION_MISMATCH:
+    'The terms updated again while you were reading. Please review and accept the latest versions.',
   UNKNOWN: "Something didn't go through. Please try again.",
 }
 

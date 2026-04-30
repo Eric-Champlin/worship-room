@@ -7,6 +7,7 @@ import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { Button } from '@/components/ui/Button'
 import { FormError } from '@/components/ui/FormError'
 import { AuthError, AUTH_ERROR_COPY, type AuthErrorCode } from '@/types/auth'
+import { useLegalVersions } from '@/hooks/useLegalVersions'
 
 const PASSWORD_MIN_LENGTH = 8
 
@@ -58,6 +59,10 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const reducedMotion = useReducedMotion()
   const { login, register } = useAuth()
+  // Spec 1.10f. Required consent state for the register view; current
+  // canonical versions submitted with the register call.
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false)
+  const { versions: legalVersions } = useLegalVersions()
 
   const firstNameRef = useRef<HTMLInputElement>(null)
   const lastNameRef = useRef<HTMLInputElement>(null)
@@ -116,6 +121,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
       setSubmitted(false)
       setFormError(null)
       setIsSubmitting(false)
+      setHasAcceptedTerms(false)
     }
   }, [isOpen, initialView])
 
@@ -216,6 +222,28 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         if (view === 'login') {
           await login({ email: emailValue, password: passwordValue })
         } else {
+          // Spec 1.10f. Versions must be available and the consent checkbox
+          // must be checked. The Submit button is disabled when either fails,
+          // but defense-in-depth: a programmatic submit (Enter key on a field)
+          // also blocks here.
+          if (!legalVersions) {
+            setFormError({
+              code: 'UNKNOWN',
+              message: 'Please wait a moment and try again.',
+            })
+            requestAnimationFrame(() => formErrorRef.current?.focus())
+            setIsSubmitting(false)
+            return
+          }
+          if (!hasAcceptedTerms) {
+            setFormError({
+              code: 'VALIDATION_FAILED',
+              message: 'Please agree to the Terms of Service and Privacy Policy to continue.',
+            })
+            requestAnimationFrame(() => formErrorRef.current?.focus())
+            setIsSubmitting(false)
+            return
+          }
           const timezone = safeResolveTimezone()
           await register({
             email: emailValue,
@@ -223,6 +251,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
             firstName: firstNameValue,
             lastName: lastNameValue,
             timezone,
+            termsVersion: legalVersions.termsVersion,
+            privacyVersion: legalVersions.privacyVersion,
           })
         }
         handleClose()
@@ -241,7 +271,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
         setIsSubmitting(false)
       }
     },
-    [emailValue, passwordValue, firstNameValue, lastNameValue, confirmPasswordValue, view, handleClose, login, register, focusField, applyServerFieldErrors],
+    [emailValue, passwordValue, firstNameValue, lastNameValue, confirmPasswordValue, view, handleClose, login, register, focusField, applyServerFieldErrors, hasAcceptedTerms, legalVersions],
   )
 
   const handleForgotSubmit = useCallback(
@@ -523,6 +553,52 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 </button>
               )}
 
+              {/* Spec 1.10f — required consent checkbox on register view. */}
+              {view === 'register' && (
+                <div className="mb-4">
+                  <label className="flex items-start gap-3 text-sm text-white/80">
+                    <input
+                      type="checkbox"
+                      checked={hasAcceptedTerms}
+                      onChange={(e) => setHasAcceptedTerms(e.target.checked)}
+                      required
+                      aria-required="true"
+                      className="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                    />
+                    <span>
+                      I have read and agree to the{' '}
+                      <a
+                        href="/terms-of-service"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white underline hover:text-white/90"
+                      >
+                        Terms of Service
+                      </a>{' '}
+                      and{' '}
+                      <a
+                        href="/privacy-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white underline hover:text-white/90"
+                      >
+                        Privacy Policy
+                      </a>
+                      . I have also reviewed the{' '}
+                      <a
+                        href="/community-guidelines"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white underline hover:text-white/90"
+                      >
+                        Community Guidelines
+                      </a>
+                      .
+                    </span>
+                  </label>
+                </div>
+              )}
+
               {formError && (
                 <div ref={formErrorRef} tabIndex={-1} className="mb-3 focus:outline-none">
                   <FormError severity="error" onDismiss={() => setFormError(null)}>
@@ -531,7 +607,12 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 </div>
               )}
 
-              <Button type="submit" isLoading={isSubmitting} className={whitePillClass}>
+              <Button
+                type="submit"
+                isLoading={isSubmitting}
+                disabled={view === 'register' && !hasAcceptedTerms}
+                className={whitePillClass}
+              >
                 {view === 'login' ? 'Log In' : 'Create Account'}
               </Button>
             </form>

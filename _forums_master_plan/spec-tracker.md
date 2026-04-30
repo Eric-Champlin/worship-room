@@ -49,14 +49,14 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 22  | 1.10d | Production Monitoring Foundation               | M    | Low      | ✅     |
 | 23  | 1.10e | Object Storage Adapter Foundation              | M    | Medium   | ✅     |
 | 24  | 1.10c | Database Backup Strategy                       | S    | Low      | ‼️     |
-| 25  | 1.10f | Terms of Service and Privacy Policy Surfaces   | M    | Med-High | ⬜ ⚠   |
+| 25  | 1.10f | Terms of Service and Privacy Policy Surfaces   | M    | Med-High | ✅     |
 | 26  | 1.10g | Security Headers Middleware (CSP/HSTS/etc.)    | S    | Low      | ✅     |
 | 27  | 1.10h | API Error Code Catalog                         | S    | Low      | ✅     |
 | 28  | 1.10i | Backend Environment Variables Runbook          | S    | Low      | ✅     |
 | 29  | 1.10j | Liveness/Readiness Health Checks               | S    | Low      | ✅     |
 | 30  | 1.10k | HikariCP Connection Pool Tuning                | S    | Low      | ⬜     |
 | 31  | 1.10l | Playwright E2E Test Infrastructure             | M    | Low      | ✅     |
-| 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ✅.    |
+| 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ✅     |
 
 > **1.10f partial-shipped (2026-04-28 audit):** Canonical legal markdown at `content/{terms-of-service,privacy-policy,community-guidelines}.md` IS shipped. The `users.terms_version` / `users.privacy_version` columns, registration consent checkbox, `LegalVersionService.java`, `TermsUpdateModal.tsx`, `GET /api/v1/legal/versions`, and `POST /api/v1/users/me/legal/accept` endpoints are NOT yet shipped. Tracker reverted to ⬜ pending the column-and-endpoint work; the legal-content portion remains in `content/`.
 >
