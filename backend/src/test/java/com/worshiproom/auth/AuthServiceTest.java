@@ -32,6 +32,7 @@ class AuthServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private JwtService jwtService;
     @Mock private LoginAttemptService loginAttemptService;
+    @Mock private ChangePasswordRateLimitService changePasswordRateLimitService;
 
     private BCryptPasswordEncoder realEncoder;
     private AuthService authService;
@@ -40,7 +41,7 @@ class AuthServiceTest {
     void setUp() {
         realEncoder = new BCryptPasswordEncoder();
         authService = new AuthService(userRepository, realEncoder, jwtService,
-            new LegalVersionService(), loginAttemptService);
+            new LegalVersionService(), loginAttemptService, changePasswordRateLimitService);
     }
 
     private static final String V = LegalVersionService.TERMS_VERSION; // shorthand for current versions in tests

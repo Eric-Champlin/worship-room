@@ -34,7 +34,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 7   | 1.4   | Spring Security and JWT Setup                  | L    | Med-High | ✅     |
 | 8   | 1.5   | Auth Endpoints (Register, Login, Logout)       | L    | High     | ✅     |
 | 9   | 1.5b  | Password Reset Flow                            | L    | High     | ‼️     |
-| 10  | 1.5c  | Change Password Endpoint                       | S    | Low      | ‼️     |
+| 10  | 1.5c  | Change Password Endpoint                       | S    | Low      | ✅     |
 | 11  | 1.5d  | Email Verification Flow                        | L    | Medium   | ‼️     |
 | 12  | 1.5e  | Change Email with Re-Verification              | M    | Medium   | ‼️     |
 | 13  | 1.5f  | Account Lockout & Brute Force Protection       | M    | Medium   | ✅     |
@@ -60,7 +60,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 
 After 15.1 ships: 1.5b, 1.5d, 1.5e.
 After 5.6 ships: 1.5g.
-Right now: 1.5c
+1.10c is $20/month.
 
 > **1.10f partial-shipped (2026-04-28 audit):** Canonical legal markdown at `content/{terms-of-service,privacy-policy,community-guidelines}.md` IS shipped. The `users.terms_version` / `users.privacy_version` columns, registration consent checkbox, `LegalVersionService.java`, `TermsUpdateModal.tsx`, `GET /api/v1/legal/versions`, and `POST /api/v1/users/me/legal/accept` endpoints are NOT yet shipped. Tracker reverted to ⬜ pending the column-and-endpoint work; the legal-content portion remains in `content/`.
 >

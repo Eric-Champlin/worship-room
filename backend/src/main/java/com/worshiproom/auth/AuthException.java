@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
  * maps instances back to the shared ProxyError API response shape.
  *
  * Error codes: UNAUTHORIZED, TOKEN_INVALID, TOKEN_EXPIRED, TOKEN_MALFORMED,
- * INVALID_CREDENTIALS, ACCOUNT_LOCKED.
+ * INVALID_CREDENTIALS, ACCOUNT_LOCKED, CURRENT_PASSWORD_INCORRECT,
+ * PASSWORDS_MUST_DIFFER, CHANGE_PASSWORD_RATE_LIMITED.
  */
 public class AuthException extends RuntimeException {
     private final HttpStatus status;
@@ -47,5 +48,25 @@ public class AuthException extends RuntimeException {
     }
     public static AccountLockedException accountLocked(long retryAfterSeconds) {
         return new AccountLockedException(Math.max(1L, retryAfterSeconds));
+    }
+    /**
+     * 403 (not 401) by design. The caller IS authenticated — their JWT validated
+     * fine; we just won't let them complete the action because they couldn't prove
+     * they know the current password. 401 would trigger frontend `apiFetch`'s
+     * global token-clear + `wr:auth-invalidated` dispatch (see
+     * `frontend/src/lib/api-client.ts`), forcibly logging the user out on a wrong-
+     * password attempt. 403 ("authenticated but forbidden") matches the security
+     * boundary and lets the modal show the inline error without unmounting.
+     */
+    public static AuthException currentPasswordIncorrect() {
+        return new AuthException(HttpStatus.FORBIDDEN, "CURRENT_PASSWORD_INCORRECT",
+            "Your current password isn't correct.");
+    }
+    public static AuthException passwordsMustDiffer() {
+        return new AuthException(HttpStatus.BAD_REQUEST, "PASSWORDS_MUST_DIFFER",
+            "Your new password must differ from your current password.");
+    }
+    public static ChangePasswordRateLimitedException changePasswordRateLimited(long retryAfterSeconds) {
+        return new ChangePasswordRateLimitedException(Math.max(1L, retryAfterSeconds));
     }
 }

@@ -1,6 +1,6 @@
 # API Error Code Catalog
 
-**Last updated:** 2026-04-25 (Spec 1.10h initial catalog)
+**Last updated:** 2026-04-30 (Spec 1.5c — Change Password)
 **Owner:** backend
 **Sibling docs:** `backend/docs/runbook-security-headers.md`
 
@@ -60,7 +60,10 @@ codes with many throw sites, see the source files for the full list. The
 
 | Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
 |---|---|---|---|---|---|
+| `CHANGE_PASSWORD_RATE_LIMITED` | 429 | More than 5 change-password attempts (success or failure) within a 15-min refill window per user | `"Too many password-change attempts. Please try again later."` (static) | `AuthException.changePasswordRateLimited()` → `ChangePasswordRateLimitedException` ← `ChangePasswordRateLimitService.checkAndConsume` ← `AuthService.changePassword` | Spec 1.5c. Per-user (UUID-keyed) Caffeine bucket; eviction window (30 min) strictly longer than refill window (15 min) to prevent free-retry-after-eviction. `AuthExceptionHandler` adds `Retry-After` header. **Verb-past-tense convention deviation** — parallels grandfathered `RATE_LIMITED`. |
+| `CURRENT_PASSWORD_INCORRECT` | **403** (not 401) | Wrong current password supplied to `POST /api/v1/auth/change-password` | `"Your current password isn't correct."` (static) | `AuthException.currentPasswordIncorrect()` ← `AuthService.changePassword` | Spec 1.5c. **Status-code deviation by design** — see § 6.7. 401 would trigger frontend `apiFetch`'s global token-clear + `wr:auth-invalidated` dispatch and force-logout the user on a wrong-password attempt. 403 ("authenticated but forbidden") matches the security boundary and lets the modal show the inline error without unmounting. **Adjective-noun convention deviation** — parallels grandfathered `INVALID_CREDENTIALS`. |
 | `INVALID_CREDENTIALS` | 401 | Login attempt with unknown email or wrong password | `"Invalid email or password."` (static; same for both branches per anti-enumeration) | `AuthException.invalidCredentials()` ← `AuthService.login` | Timing-equalized — backend performs BCrypt verify on a dummy hash for unknown emails. Frontend should NOT differentiate "no such email" from "wrong password". |
+| `PASSWORDS_MUST_DIFFER` | 400 | `POST /api/v1/auth/change-password` where the new password BCrypt-matches the current hash | `"Your new password must differ from your current password."` (static) | `AuthException.passwordsMustDiffer()` ← `AuthService.changePassword` | Spec 1.5c. Detected by `passwordEncoder.matches(newPassword, oldHash)` BEFORE encoding the new password (cheaper than encode-and-compare). Distinct from `VALIDATION_FAILED` because the input is structurally valid — this is a domain-rule rejection. **Verb-form convention deviation** — domain rule is more readable as a sentence than as `PASSWORD_DUPLICATE` or `NEW_PASSWORD_REUSED`. |
 | `TOKEN_EXPIRED` | 401 | JWT `exp` claim is in the past | `"Authentication token has expired."` (static) | `AuthException.tokenExpired()` ← `JwtAuthenticationFilter` on `ExpiredJwtException` | Frontend should clear in-memory JWT and redirect to login. |
 | `TOKEN_INVALID` | 401 | JWT signature verification failed, or any other unexpected JWT parsing error | `"Authentication token is invalid."` (static) | `AuthException.tokenInvalid()` ← `JwtAuthenticationFilter` on `SignatureException` and the catch-all branch | Catch-all also covers any non-`Expired`/`Malformed` JJWT exception. |
 | `TOKEN_MALFORMED` | 401 | Bearer token is structurally invalid (not three dot-separated segments) or `sub` is not a UUID | `"Authentication token is malformed."` (static) | `AuthException.tokenMalformed()` ← `JwtAuthenticationFilter` on `MalformedJwtException` and `IllegalArgumentException` | `IllegalArgumentException` covers `UUID.fromString` failure on the subject claim. |
@@ -287,6 +290,24 @@ dedicated spec** — frontend code branches on these strings.
   `"finishReason="`, no internal API field names). Wrap `GeminiService`
   messages at the throw site, not the catch site, so the explain/reflect
   endpoints get the same user-safe copy as the wrapped feature services.
+
+### 6.7 `CURRENT_PASSWORD_INCORRECT` returns 403, not 401
+
+- The conventional choice for "wrong password" is 401, but the change-password
+  endpoint operates on an already-authenticated request. The caller's JWT IS
+  valid; they just couldn't prove they know the *current* password.
+- Returning 401 would trigger frontend `apiFetch`'s global 401 handler
+  (`frontend/src/lib/api-client.ts`), which clears the JWT and dispatches
+  `wr:auth-invalidated`. `AuthContext` listens for that event and sets
+  `isAuthenticated: false`, which causes `Settings.tsx` to redirect to `/`.
+  Net effect: a user who mistypes their current password gets logged out
+  and bounced to home before they can read the inline error message.
+- 403 ("authenticated, but forbidden from completing this action") is the
+  semantically correct status. The code lives in the Auth section because
+  the rule is auth-domain, even though the status is the friends/social
+  family's `403`.
+- **No future cleanup spec** — this is the intended design. Recorded here
+  so the deviation is discoverable.
 
 ## 7. Related documents
 

@@ -38,6 +38,8 @@ public class AuthExceptionHandler {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(ex.getStatus());
         if (ex instanceof AccountLockedException locked) {
             builder.header(HttpHeaders.RETRY_AFTER, String.valueOf(locked.getRetryAfterSeconds()));
+        } else if (ex instanceof ChangePasswordRateLimitedException rl) {
+            builder.header(HttpHeaders.RETRY_AFTER, String.valueOf(rl.getRetryAfterSeconds()));
         }
         return builder.body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
     }

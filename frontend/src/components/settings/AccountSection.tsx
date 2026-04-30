@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
 import { DeleteAccountModal } from './DeleteAccountModal'
+import { ChangePasswordModal } from './ChangePasswordModal'
 
 interface AccountSectionProps {
   email: string
@@ -13,6 +14,7 @@ export function AccountSection({ email }: AccountSectionProps) {
   const { logout } = useAuth()
   const navigate = useNavigate()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
 
   function handleDeleteConfirm() {
     // Remove all wr_ prefixed keys
@@ -61,7 +63,7 @@ export function AccountSection({ email }: AccountSectionProps) {
           <div>
             <button
               type="button"
-              onClick={() => showToast('This feature is on the way.')}
+              onClick={() => setShowChangePasswordModal(true)}
               className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               Change Password
@@ -83,6 +85,15 @@ export function AccountSection({ email }: AccountSectionProps) {
           </button>
         </div>
       </div>
+
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+        onSuccess={() => {
+          setShowChangePasswordModal(false)
+          showToast('Your password has been updated.')
+        }}
+      />
 
       <DeleteAccountModal
         isOpen={showDeleteModal}

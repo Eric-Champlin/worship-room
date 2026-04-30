@@ -1,6 +1,7 @@
 package com.worshiproom.auth;
 
 import com.worshiproom.auth.dto.AuthResponse;
+import com.worshiproom.auth.dto.ChangePasswordRequest;
 import com.worshiproom.auth.dto.LoginRequest;
 import com.worshiproom.auth.dto.RegisterRequest;
 import com.worshiproom.auth.dto.RegisterResponse;
@@ -23,6 +24,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -46,17 +48,20 @@ public class AuthService {
     private final JwtService jwtService;
     private final LegalVersionService legalVersionService;
     private final LoginAttemptService loginAttemptService;
+    private final ChangePasswordRateLimitService changePasswordRateLimitService;
 
     public AuthService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        LegalVersionService legalVersionService,
-                       LoginAttemptService loginAttemptService) {
+                       LoginAttemptService loginAttemptService,
+                       ChangePasswordRateLimitService changePasswordRateLimitService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.legalVersionService = legalVersionService;
         this.loginAttemptService = loginAttemptService;
+        this.changePasswordRateLimitService = changePasswordRateLimitService;
     }
 
     @Transactional
@@ -172,6 +177,46 @@ public class AuthService {
         );
         log.info("loginSucceeded userId={}", user.getId());
         return new AuthResponse(token, summary);
+    }
+
+    /**
+     * Spec 1.5c — Change Password.
+     *
+     * Flow: rate-limit check (fail-fast on abuse) → load user → BCrypt-verify
+     * current password (always run, for timing equalization defense-in-depth) →
+     * BCrypt-verify new differs from current → re-hash and save.
+     *
+     * Does NOT invalidate other sessions (Spec 1.5g territory; Redis-blocked).
+     * Does NOT issue a new JWT — caller continues with their existing token.
+     */
+    @Transactional
+    public void changePassword(UUID userId, ChangePasswordRequest request) {
+        changePasswordRateLimitService.checkAndConsume(userId);
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalStateException(
+                "Authenticated principal references non-existent user: " + userId));
+
+        boolean currentMatches = passwordEncoder.matches(
+            request.currentPassword(), user.getPasswordHash());
+        if (!currentMatches) {
+            log.info("changePasswordCurrentIncorrect userId={}", userId);
+            throw AuthException.currentPasswordIncorrect();
+        }
+
+        if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())) {
+            log.info("changePasswordSameAsCurrent userId={}", userId);
+            throw AuthException.passwordsMustDiffer();
+        }
+
+        String newHash = passwordEncoder.encode(request.newPassword());
+        user.setPasswordHash(newHash);
+        // Manual bump — User entity has no @PreUpdate hook; canonical pattern
+        // mirrors UserService.update() and LegalController accept-versions.
+        user.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        userRepository.save(user);
+
+        log.info("changePasswordSucceeded userId={}", userId);
     }
 
     private static String resolveTimezoneOrUtc(String input) {

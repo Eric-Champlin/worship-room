@@ -6,6 +6,12 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { AccountSection } from '../AccountSection'
 
 const mockLogout = vi.fn()
+const mockChangePasswordApi = vi.fn()
+
+vi.mock('@/services/api/auth-api', () => ({
+  changePasswordApi: (current: string, next: string) =>
+    mockChangePasswordApi(current, next),
+}))
 
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -46,6 +52,7 @@ describe('AccountSection', () => {
   beforeEach(() => {
     localStorage.clear()
     mockLogout.mockClear()
+    mockChangePasswordApi.mockReset()
   })
 
   it('email displayed from settings', () => {
@@ -60,11 +67,13 @@ describe('AccountSection', () => {
     expect(screen.getByText('This feature is on the way.')).toBeInTheDocument()
   })
 
-  it('Change Password shows toast', async () => {
+  it('Change Password button opens ChangePasswordModal', async () => {
     const user = userEvent.setup()
     renderAccount()
     await user.click(screen.getByRole('button', { name: 'Change Password' }))
-    expect(screen.getByText('This feature is on the way.')).toBeInTheDocument()
+    // Modal renders with the Update password submit button visible.
+    expect(screen.getByRole('button', { name: 'Update password' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Current password')).toBeInTheDocument()
   })
 
   it('Delete Account button has danger styling', () => {

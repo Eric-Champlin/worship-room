@@ -1,13 +1,16 @@
 package com.worshiproom.auth;
 
 import com.worshiproom.auth.dto.AuthResponse;
+import com.worshiproom.auth.dto.ChangePasswordRequest;
 import com.worshiproom.auth.dto.LoginRequest;
 import com.worshiproom.auth.dto.RegisterRequest;
 import com.worshiproom.auth.dto.RegisterResponse;
 import com.worshiproom.proxy.common.ProxyResponse;
 import jakarta.validation.Valid;
 import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,5 +41,14 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        authService.changePassword(principal.userId(), request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

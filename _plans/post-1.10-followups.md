@@ -440,3 +440,15 @@ Captured: 2026-04-30 during Spec 1.5f execution.
 Revisit: when Spec 10.10 (Admin Foundation) is on the queue.
 
 ---
+
+## 22. Change-password should invalidate other sessions (Spec 1.5g dependency)
+
+When 1.5g (Session Invalidation & Logout-All-Devices) ships, AuthService.changePassword
+should optionally invalidate all other active sessions for the user (keep current
+session, blocklist all others). Today (Spec 1.5c shipped without 1.5g): password
+change updates the hash; existing JWTs remain valid until natural TTL expiry.
+
+Captured: 2026-04-30 during Spec 1.5c authoring.
+Revisit: when Spec 1.5g is in flight.
+
+---

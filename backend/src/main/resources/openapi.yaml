@@ -682,6 +682,71 @@ paths:
         '204':
           description: No content
 
+  /api/v1/auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Change the authenticated user's password
+      description: |
+        Verifies the current password via BCrypt, rejects if the new password
+        matches the current hash, then re-hashes and saves the new password.
+        Existing JWTs (current request and other devices) remain valid until
+        their natural expiry — Spec 1.5g will add session invalidation.
+
+        Rate-limited per user: 5 attempts per 15 min. On 429 includes
+        Retry-After header.
+
+        BCrypt verification of `currentPassword` runs on every request for
+        timing-equalization defense-in-depth.
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
+      responses:
+        '204':
+          description: Password updated successfully (no body)
+        '400':
+          description: |
+            Validation failed (current/new blank, new < 8 chars, etc.) OR new
+            password matches current (code PASSWORDS_MUST_DIFFER).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '401':
+          description: |
+            Missing/invalid JWT (UNAUTHORIZED, TOKEN_INVALID, TOKEN_EXPIRED,
+            TOKEN_MALFORMED).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '403':
+          description: |
+            Current password verification failed (CURRENT_PASSWORD_INCORRECT).
+            Returned as 403 (not 401) by design — the caller is authenticated;
+            we won't let them complete the action because they couldn't prove
+            they know the current password. 401 would trigger the frontend's
+            global token-clear and force a logout on a wrong-password attempt.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: |
+            Rate limit exceeded (5 attempts / 15 min per user). The
+            `Retry-After` header indicates seconds until the bucket refills.
+          headers:
+            Retry-After:
+              description: Integer seconds until the rate-limit bucket refills (clamped >= 1).
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
   /api/v1/users/me:
     get:
       tags: [Users]
@@ -2723,6 +2788,23 @@ components:
           type: string
           minLength: 1
           maxLength: 255
+
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: The user's current password (verified via BCrypt).
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 255
+          description: |
+            New password. Minimum 8 characters; no complexity requirements.
+            Must differ from the current password (BCrypt-checked).
 
     RegisterResponseData:
       type: object
