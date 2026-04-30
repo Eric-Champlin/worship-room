@@ -13,7 +13,11 @@ interface CommentsSectionProps {
   isOpen: boolean
   comments: PrayerComment[]
   totalCount: number
-  onSubmitComment: (prayerId: string, content: string) => void
+  onSubmitComment: (
+    prayerId: string,
+    content: string,
+    idempotencyKey?: string
+  ) => boolean | Promise<boolean>
   prayerContent?: string
 }
 
@@ -36,19 +40,15 @@ export function CommentsSection({
   return (
     <div
       className={cn(
-        '-m-0.5 overflow-hidden p-0.5 transition-all motion-reduce:transition-none duration-base ease-standard',
-        isOpen ? 'visible max-h-[1200px] opacity-100' : 'invisible max-h-0 opacity-0',
+        '-m-0.5 overflow-hidden p-0.5 transition-all duration-base ease-standard motion-reduce:transition-none',
+        isOpen ? 'visible max-h-[1200px] opacity-100' : 'invisible max-h-0 opacity-0'
       )}
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
       <div className="mt-3 border-t border-white/10 pt-3">
         {visibleComments.map((comment) => (
-          <CommentItem
-            key={comment.id}
-            comment={comment}
-            onReply={handleReply}
-          />
+          <CommentItem key={comment.id} comment={comment} onReply={handleReply} />
         ))}
 
         {totalCount > MAX_VISIBLE_COMMENTS && (

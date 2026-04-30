@@ -56,7 +56,7 @@ describe('InlineComposer — challenge integration', () => {
   })
 
   it('checking checkbox passes challengeId on submit', async () => {
-    const onSubmit = vi.fn()
+    const onSubmit = vi.fn().mockResolvedValue(true)
     render(
       <MemoryRouter>
         <InlineComposer isOpen onClose={vi.fn()} onSubmit={onSubmit} />
@@ -82,11 +82,12 @@ describe('InlineComposer — challenge integration', () => {
       false,
       'health',
       'pray40-lenten-journey',
+      expect.any(String),
     )
   })
 
   it('unchecked checkbox does not pass challengeId', async () => {
-    const onSubmit = vi.fn()
+    const onSubmit = vi.fn().mockResolvedValue(true)
     render(
       <MemoryRouter>
         <InlineComposer isOpen onClose={vi.fn()} onSubmit={onSubmit} />
@@ -97,7 +98,7 @@ describe('InlineComposer — challenge integration', () => {
     fireEvent.click(screen.getByText('Health'))
     fireEvent.click(screen.getByText('Submit Prayer Request'))
 
-    expect(onSubmit).toHaveBeenCalledWith('Test', false, 'health', undefined)
+    expect(onSubmit).toHaveBeenCalledWith('Test', false, 'health', undefined, expect.any(String))
   })
 
   it('checkbox has accessible label association', () => {

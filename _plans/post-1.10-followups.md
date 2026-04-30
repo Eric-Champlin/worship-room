@@ -452,3 +452,50 @@ Captured: 2026-04-30 during Spec 1.5c authoring.
 Revisit: when Spec 1.5g is in flight.
 
 ---
+
+## 23. Deprecate `prayer-wall-mock-data.ts` after component-test migration to MSW
+
+**Status:** Filed during Spec 3.12 cutover, 2026-04-30.
+
+Per Spec 3.12 master-plan deviation #3 (mock data preservation), `frontend/src/mocks/prayer-wall-mock-data.ts` is preserved because component tests at `frontend/src/components/prayer-wall/__tests__/` and the older page tests in `frontend/src/pages/__tests__/` mock from it. The flag-off branch in each rewired consumer continues to call `getMockPrayers / getMockComments / getMockAllComments`; the production path always takes the flag-on branch.
+
+**Future action:** Migrate component tests to MSW (the pattern Spec 3.10 used for `prayer-wall-api.test.ts`); then delete the mock data module in a small cleanup spec. Estimated work: 1–2 days.
+
+**Priority:** LOW. The mock module is dead code in production but doesn't ship in the bundle when tree-shaken via Vite's production build.
+
+Captured: 2026-04-30 during Spec 3.12 cutover.
+Revisit: after Phase 3 lands and the component test suite is up for refresh.
+
+---
+
+## 24. Phase 8.1 — swap dashboard + profile from `listPosts` filter to `listAuthorPosts(myUsername)`
+
+**Status:** Filed during Spec 3.12 cutover, 2026-04-30.
+
+`PrayerWallDashboard.tsx` (My Prayers tab) and `PrayerWallProfile.tsx` (prayers tab) currently use `prayerWallApi.listPosts({ page: 1, limit: 50, sort: 'recent' })` filtered client-side by `userId === auth.user.id` (dashboard) or `userId === route.params.id` (profile) in flag-on mode. This over-fetches because `AuthUser` does not carry a username field, so `listAuthorPosts(username)` cannot be called today.
+
+**Future action:** When Phase 8.1 ships username on `AuthUser` plus a UUID-based variant of `listAuthorPosts` (or a `users/:id/posts` endpoint), swap the dashboard's My Prayers tab and the profile's prayers tab to use the per-user endpoint. Removes the over-fetch + client-side filter pattern. The TODO comment in `PrayerWallDashboard.tsx` and `PrayerWallProfile.tsx` references this followup.
+
+**Priority:** MEDIUM. Inefficiency, not correctness — UX is identical, but the backend processes more rows than necessary, and pagination over the full feed limits how far back the user's history can be paginated.
+
+Captured: 2026-04-30 during Spec 3.12 cutover.
+Revisit: when Phase 8.1 (User Profile + Username) is in flight.
+
+---
+
+## 25. Phase 4.x — list-my-comments endpoint and reacted-posts pagination
+
+**Status:** Filed during Spec 3.12 cutover, 2026-04-30. Originally surfaced as Spec 3.10 watch-for #20 + #21.
+
+`PrayerWallDashboard.tsx`'s "My Comments" tab and `PrayerWallProfile.tsx`'s "Replies" tab cannot fully hydrate from the backend in flag-on mode because the corresponding endpoints (`GET /api/v1/users/me/comments`, `GET /api/v1/users/:id/comments`, paginated) do not exist. The cutover ships these tabs with empty-tab placeholders ("My comments are coming soon" / "Replies are coming soon") and a documented gap.
+
+The Reactions tab (dashboard) cross-references already-loaded `apiMyPrayers ∪ apiBookmarkedPrayers` against `usePrayerReactions` (per Edge Cases §2 Option A in the Spec 3.12 plan). Reacted-but-unloaded prayers are not surfaced — that's the second documented gap. A `GET /api/v1/users/me/reactions/posts?page=1` paginated endpoint would close it.
+
+**Future action:** Add three endpoints in a Phase 4 backend spec (likely Phase 4.x where x lines up with the Forums Wave's 'Personal Activity' surfaces): `GET /api/v1/users/me/comments`, `GET /api/v1/users/:id/comments`, `GET /api/v1/users/me/reactions/posts`. Then rewire the dashboard's Comments + Reactions tabs and the profile's Replies tab to consume them.
+
+**Priority:** MEDIUM. Visible UX gap on the dashboard + public profile pages but not a blocker — most users use the My Prayers and Bookmarks tabs.
+
+Captured: 2026-04-30 during Spec 3.12 cutover.
+Revisit: when Phase 4 personal-activity surfaces are in scope.
+
+---

@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { Link, useParams } from 'react-router-dom'
+import { AlertCircle, MessageCircle } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { PRAYER_WALL_PROFILE_METADATA } from '@/lib/seo/routeMetadata'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -10,6 +11,9 @@ import { Avatar } from '@/components/prayer-wall/Avatar'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
+import { SkeletonCard } from '@/components/skeletons/SkeletonCard'
+import { SkeletonText } from '@/components/skeletons/SkeletonText'
 import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
 import { useAuth } from '@/hooks/useAuth'
@@ -23,6 +27,10 @@ import {
   getMockAllComments,
   getMockComments,
 } from '@/mocks/prayer-wall-mock-data'
+import { isBackendPrayerWallEnabled } from '@/lib/env'
+import * as prayerWallApi from '@/services/api/prayer-wall-api'
+import { ApiError } from '@/types/auth'
+import { mapApiErrorToToast } from '@/lib/prayer-wall/apiErrors'
 import type { PrayerRequest } from '@/types/prayer-wall'
 
 type ProfileTab = 'prayers' | 'replies' | 'reactions'
@@ -35,7 +43,11 @@ const tabs: { key: ProfileTab; label: string }[] = [
 
 function PrayerWallProfileContent() {
   const { id } = useParams<{ id: string }>()
-  const profileUser = id ? getMockUser(id) : undefined
+  // Flag-off: synchronous lookup. Flag-on: no profile endpoint exists yet
+  // (Phase 8.1 ships /api/v1/users/:username) — fall back to a placeholder
+  // chrome derived from the first loaded post (or generic "Profile" label).
+  const flagOn = isBackendPrayerWallEnabled()
+  const mockProfileUser = id && !flagOn ? getMockUser(id) : undefined
   const { user: currentUser } = useAuth()
   const [activeTab, setActiveTab] = useState<ProfileTab>('prayers')
   const { reactions, togglePraying, toggleBookmark } = usePrayerReactions()
@@ -62,47 +74,145 @@ function PrayerWallProfileContent() {
         }
       }
     },
-    [togglePraying, allPrayers, currentUser],
+    [togglePraying, allPrayers, currentUser]
   )
 
   const allComments = getMockAllComments()
-  const [prayers, setPrayers] = useState<PrayerRequest[]>(allPrayers)
+  const [prayers, setPrayers] = useState<PrayerRequest[]>(() => (flagOn ? [] : allPrayers))
+
+  // Per-tab fetch state for flag-on prayers tab.
+  const [apiUserPrayers, setApiUserPrayers] = useState<PrayerRequest[]>([])
+  const [isLoadingPrayers, setIsLoadingPrayers] = useState(false)
+  const [prayersError, setPrayersError] = useState<{
+    message: string
+    severity: 'error' | 'warning' | 'info'
+  } | null>(null)
+  const [prayersReloadTrigger, setPrayersReloadTrigger] = useState(0)
+
+  // Fetch user's prayers in flag-on mode.
+  // TODO(Phase 8.1): swap to prayerWallApi.listAuthorPosts(username, ...)
+  // once usernames ship on AuthUser. Today the route param is a UUID, so we
+  // over-fetch listPosts and filter client-side by userId.
+  useEffect(() => {
+    if (activeTab !== 'prayers') return
+    if (!flagOn || !id) return
+    let cancelled = false
+    async function loadPrayers() {
+      setIsLoadingPrayers(true)
+      setPrayersError(null)
+      try {
+        const result = await prayerWallApi.listPosts({ page: 1, limit: 50, sort: 'recent' })
+        if (cancelled) return
+        const filtered = result.posts.filter((p) => p.userId === id && !p.isAnonymous)
+        setApiUserPrayers(filtered)
+      } catch (err) {
+        if (cancelled) return
+        if (err instanceof ApiError) {
+          setPrayersError(mapApiErrorToToast(err))
+        } else {
+          setPrayersError({
+            message: 'Something went wrong. Try again in a moment.',
+            severity: 'error',
+          })
+        }
+      } finally {
+        if (!cancelled) setIsLoadingPrayers(false)
+      }
+    }
+    loadPrayers()
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, id, flagOn, prayersReloadTrigger])
+
+  // Profile chrome: flag-on derives from first loaded post; flag-off uses mock.
+  const profileChrome = useMemo(() => {
+    if (!flagOn) {
+      return mockProfileUser
+        ? {
+            id: mockProfileUser.id,
+            firstName: mockProfileUser.firstName,
+            lastName: mockProfileUser.lastName,
+            avatarUrl: mockProfileUser.avatarUrl,
+            bio: mockProfileUser.bio,
+            joinedDate: mockProfileUser.joinedDate,
+          }
+        : null
+    }
+    // Flag-on: derive from first loaded post (best-effort until Phase 8.1).
+    const firstPost = apiUserPrayers[0]
+    if (!firstPost) return null
+    const [firstName = '', ...rest] = (firstPost.authorName ?? '').split(' ')
+    return {
+      id: id ?? '',
+      firstName: firstName || 'Profile',
+      lastName: rest.join(' '),
+      avatarUrl: firstPost.authorAvatarUrl ?? null,
+      bio: null as string | null,
+      joinedDate: firstPost.createdAt,
+    }
+  }, [flagOn, mockProfileUser, apiUserPrayers, id])
 
   const handleSubmitComment = useCallback(
-    (prayerId: string, _content: string) => {
-      setPrayers((prev) =>
-        prev.map((p) =>
-          p.id === prayerId
-            ? {
-                ...p,
-                commentCount: p.commentCount + 1,
-                lastActivityAt: new Date().toISOString(),
-              }
-            : p,
-        ),
-      )
-      showToast('Comment shared.')
+    async (prayerId: string, content: string, idempotencyKey?: string): Promise<boolean> => {
+      if (!isBackendPrayerWallEnabled()) {
+        setPrayers((prev) =>
+          prev.map((p) =>
+            p.id === prayerId
+              ? {
+                  ...p,
+                  commentCount: p.commentCount + 1,
+                  lastActivityAt: new Date().toISOString(),
+                }
+              : p
+          )
+        )
+        showToast('Comment shared.')
+        return true
+      }
+      try {
+        await prayerWallApi.createComment(prayerId, content, idempotencyKey)
+        const bump = (list: PrayerRequest[]): PrayerRequest[] =>
+          list.map((p) =>
+            p.id === prayerId
+              ? { ...p, commentCount: p.commentCount + 1, lastActivityAt: new Date().toISOString() }
+              : p
+          )
+        setPrayers(bump)
+        setApiUserPrayers(bump)
+        showToast('Comment shared.')
+        return true
+      } catch (err) {
+        // CommentInput hides the submit affordance for anonymous viewers, so
+        // AnonymousWriteAttemptError is unreachable here in practice. Route
+        // every catchable ApiError through the canonical toast taxonomy
+        // (Universal Rule 11 — no new copy strings at the page layer).
+        if (err instanceof ApiError) {
+          const descriptor = mapApiErrorToToast(err)
+          if (descriptor.message) showToast(descriptor.message)
+        }
+        return false
+      }
     },
-    [showToast],
+    [showToast]
   )
 
-  if (!profileUser) {
+  // Flag-off: if the mock lookup didn't return a user, render not-found.
+  // Flag-on: don't short-circuit here — user discovery is best-effort until
+  // Phase 8.1 ships the profile endpoint, and the prayers fetch may still be
+  // in flight. The render branches below handle loading/error/empty cases.
+  if (!flagOn && !mockProfileUser) {
     return (
       <PageShell>
         <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
           <div className="mb-6">
             <Breadcrumb
-              items={[
-                { label: 'Prayer Wall', href: '/prayer-wall' },
-                { label: 'User Profile' },
-              ]}
+              items={[{ label: 'Prayer Wall', href: '/prayer-wall' }, { label: 'User Profile' }]}
               maxWidth="max-w-[720px]"
             />
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.06] p-8 text-center">
-            <p className="text-lg font-semibold text-white">
-              User not found
-            </p>
+            <p className="text-lg font-semibold text-white">User not found</p>
             <p className="mt-2 text-sm text-white/60">
               This profile doesn't exist or has been removed.
             </p>
@@ -112,12 +222,17 @@ function PrayerWallProfileContent() {
     )
   }
 
-  const userPrayers = prayers.filter(
-    (p) => p.userId === id && !p.isAnonymous,
-  )
-  const userComments = allComments.filter((c) => c.userId === id)
+  const userPrayers = flagOn
+    ? apiUserPrayers
+    : prayers.filter((p) => p.userId === id && !p.isAnonymous)
+  // Replies tab — flag-on has no list-my-comments endpoint yet (gap mirrors
+  // PrayerWallDashboard.comments). Flag-off keeps the existing mock filter.
+  const userComments = flagOn ? [] : allComments.filter((c) => c.userId === id)
   // Reactions are private per-user data — only show for the profile owner.
-  // In mock mode we have no per-user reaction data, so this tab is always empty.
+  // In mock mode we have no per-user reaction data, so this tab is always
+  // empty. Flag-on stays empty as well: there is no per-user reactions
+  // endpoint yet (followups §25 in `_plans/post-1.10-followups.md` tracks
+  // `GET /api/v1/users/me/reactions/posts` which would close the gap).
   const reactedPrayers: typeof allPrayers = []
 
   return (
@@ -125,18 +240,19 @@ function PrayerWallProfileContent() {
       {/* BB-40: dynamic title overrides static base; ogImage/alt from constant */}
       <SEO
         {...PRAYER_WALL_PROFILE_METADATA}
-        title={`${profileUser.firstName}'s Prayers`}
-        description={`Prayers shared by ${profileUser.firstName} on the Worship Room community prayer wall.`}
+        title={profileChrome ? `${profileChrome.firstName}'s Prayers` : 'Prayer Wall Profile'}
+        description={
+          profileChrome
+            ? `Prayers shared by ${profileChrome.firstName} on the Worship Room community prayer wall.`
+            : 'A profile on the Worship Room community prayer wall.'
+        }
       />
-      <main
-        id="main-content"
-        className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
-      >
+      <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6 sm:py-8">
         <div className="mb-6">
           <Breadcrumb
             items={[
               { label: 'Prayer Wall', href: '/prayer-wall' },
-              { label: `${profileUser.firstName}'s Profile` },
+              { label: profileChrome ? `${profileChrome.firstName}'s Profile` : 'Profile' },
             ]}
             maxWidth="max-w-[720px]"
           />
@@ -145,24 +261,24 @@ function PrayerWallProfileContent() {
         {/* Profile header */}
         <header className="mb-6 flex flex-col items-center text-center">
           <Avatar
-            firstName={profileUser.firstName}
-            lastName={profileUser.lastName}
-            avatarUrl={profileUser.avatarUrl}
+            firstName={profileChrome?.firstName ?? 'P'}
+            lastName={profileChrome?.lastName ?? ''}
+            avatarUrl={profileChrome?.avatarUrl ?? null}
             size="lg"
-            userId={profileUser.id}
-            alt={`${profileUser.firstName}'s profile photo`}
+            userId={profileChrome?.id ?? id ?? ''}
+            alt={profileChrome ? `${profileChrome.firstName}'s profile photo` : 'Profile photo'}
           />
           <h1 className="mt-3 text-xl font-semibold text-white">
-            {profileUser.firstName}
+            {profileChrome?.firstName ?? 'Profile'}
           </h1>
-          {profileUser.bio && (
-            <p className="mt-2 max-w-md font-serif italic text-white/70">
-              {profileUser.bio}
+          {profileChrome?.bio && (
+            <p className="mt-2 max-w-md font-serif italic text-white/70">{profileChrome.bio}</p>
+          )}
+          {profileChrome?.joinedDate && (
+            <p className="mt-1 text-sm text-white/60">
+              Joined: {formatFullDate(profileChrome.joinedDate)}
             </p>
           )}
-          <p className="mt-1 text-sm text-white/60">
-            Joined: {formatFullDate(profileUser.joinedDate)}
-          </p>
         </header>
 
         {/* Tab bar */}
@@ -194,9 +310,7 @@ function PrayerWallProfileContent() {
               }}
               className={cn(
                 'px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                activeTab === tab.key
-                  ? 'text-white'
-                  : 'text-white/60 hover:text-white/80',
+                activeTab === tab.key ? 'text-white' : 'text-white/60 hover:text-white/80'
               )}
             >
               {tab.label}
@@ -206,7 +320,7 @@ function PrayerWallProfileContent() {
             className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-standard"
             style={{
               width: `${100 / tabs.length}%`,
-              transform: `translateX(${tabs.findIndex(t => t.key === activeTab) * 100}%)`,
+              transform: `translateX(${tabs.findIndex((t) => t.key === activeTab) * 100}%)`,
             }}
             aria-hidden="true"
           />
@@ -222,7 +336,28 @@ function PrayerWallProfileContent() {
         >
           {activeTab === 'prayers' && (
             <div className="flex flex-col gap-4">
-              {userPrayers.length > 0 ? (
+              {flagOn && isLoadingPrayers ? (
+                <div aria-busy="true">
+                  <span className="sr-only">Loading</span>
+                  {[0, 1, 2].map((i) => (
+                    <SkeletonCard key={i} className="mb-3">
+                      <SkeletonText lines={3} />
+                    </SkeletonCard>
+                  ))}
+                </div>
+              ) : flagOn && prayersError ? (
+                <FeatureEmptyState
+                  icon={AlertCircle}
+                  heading="We couldn't load this profile"
+                  description={prayersError.message}
+                  ctaLabel="Try again"
+                  onCtaClick={() => {
+                    setPrayersError(null)
+                    setPrayersReloadTrigger((n) => n + 1)
+                  }}
+                  compact
+                />
+              ) : userPrayers.length > 0 ? (
                 userPrayers.map((prayer) => (
                   <PrayerCard key={prayer.id} prayer={prayer}>
                     <InteractionBar
@@ -236,7 +371,7 @@ function PrayerWallProfileContent() {
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
-                      comments={getMockComments(prayer.id)}
+                      comments={flagOn ? [] : getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
                     />
@@ -252,15 +387,20 @@ function PrayerWallProfileContent() {
 
           {activeTab === 'replies' && (
             <div className="flex flex-col gap-3">
-              {userComments.length > 0 ? (
+              {flagOn ? (
+                <FeatureEmptyState
+                  icon={MessageCircle}
+                  heading="Replies are coming soon"
+                  description="We'll show this person's replies in a future update."
+                  compact
+                />
+              ) : userComments.length > 0 ? (
                 userComments.map((comment) => (
                   <div
                     key={comment.id}
                     className="rounded-xl border border-white/10 bg-white/[0.06] p-4"
                   >
-                    <p className="whitespace-pre-wrap text-sm text-white/80">
-                      {comment.content}
-                    </p>
+                    <p className="whitespace-pre-wrap text-sm text-white/80">{comment.content}</p>
                     <Link
                       to={`/prayer-wall/${comment.prayerId}`}
                       className="mt-2 block text-xs text-primary hover:underline"
@@ -270,9 +410,7 @@ function PrayerWallProfileContent() {
                   </div>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-white/50">
-                  No replies yet.
-                </p>
+                <p className="py-8 text-center text-sm text-white/50">No replies yet.</p>
               )}
             </div>
           )}
@@ -300,9 +438,7 @@ function PrayerWallProfileContent() {
                   </PrayerCard>
                 ))
               ) : (
-                <p className="py-8 text-center text-sm text-white/50">
-                  No reactions yet.
-                </p>
+                <p className="py-8 text-center text-sm text-white/50">No reactions yet.</p>
               )}
             </div>
           )}

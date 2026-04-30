@@ -6,7 +6,7 @@ import { QotdComposer } from '../QotdComposer'
 const defaultProps = {
   isOpen: true,
   onClose: vi.fn(),
-  onSubmit: vi.fn(),
+  onSubmit: vi.fn().mockResolvedValue(true),
 }
 
 function renderComposer(overrides: Partial<typeof defaultProps> = {}) {
@@ -26,13 +26,13 @@ describe('QotdComposer', () => {
 
   it('submit calls onSubmit with trimmed content', async () => {
     const user = userEvent.setup()
-    const onSubmit = vi.fn()
+    const onSubmit = vi.fn().mockResolvedValue(true)
     renderComposer({ onSubmit })
 
     await user.type(screen.getByLabelText('Your response to the question of the day'), '  Hello world  ')
     await user.click(screen.getByRole('button', { name: 'Post Response' }))
 
-    expect(onSubmit).toHaveBeenCalledWith('Hello world')
+    expect(onSubmit).toHaveBeenCalledWith('Hello world', expect.any(String))
   })
 
   it('character count shows at 400+ chars', async () => {

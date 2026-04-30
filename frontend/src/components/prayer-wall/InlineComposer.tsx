@@ -7,7 +7,11 @@ import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
 import { PRAYER_POST_MAX_LENGTH } from '@/constants/content-limits'
-import { PRAYER_CATEGORIES, CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
+import {
+  PRAYER_CATEGORIES,
+  CATEGORY_LABELS,
+  type PrayerCategory,
+} from '@/constants/prayer-categories'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
@@ -17,7 +21,19 @@ import { useRovingTabindex } from '@/hooks/useRovingTabindex'
 interface InlineComposerProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (content: string, isAnonymous: boolean, category: PrayerCategory, challengeId?: string) => void
+  /**
+   * Submit handler. Return `true` on successful create (composer resets);
+   * return `false` to keep the current content and idempotency key so a
+   * retry of the SAME content reuses the SAME key (W5 + Spec 3.5 backend
+   * dedup contract).
+   */
+  onSubmit: (
+    content: string,
+    isAnonymous: boolean,
+    category: PrayerCategory,
+    challengeId?: string,
+    idempotencyKey?: string
+  ) => boolean | Promise<boolean>
 }
 
 export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProps) {
@@ -28,6 +44,13 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
   const [selectedCategory, setSelectedCategory] = useState<PrayerCategory | null>(null)
   const [showCategoryError, setShowCategoryError] = useState(false)
   const [crisisDetected, setCrisisDetected] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  // Idempotency key: regenerate whenever the content changes so a fresh
+  // post gets a fresh key, but a retry of the SAME content reuses the SAME
+  // key (W5 + backend dedup).
+  const [idempotencyKey, setIdempotencyKey] = useState<string>(() =>
+    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
+  )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(content.length > 0)
 
@@ -35,35 +58,41 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
   const activeChallengeInfo = getActiveChallengeInfo()
   const activeChallenge = activeChallengeInfo ? getChallenge(activeChallengeInfo.challengeId) : null
   const [isChallengePrayer, setIsChallengePrayer] = useState(
-    () => searchParams.get('challengePrayer') === 'true',
+    () => searchParams.get('challengePrayer') === 'true'
   )
 
   const initialCategoryIndex = useMemo(
     () => (selectedCategory ? PRAYER_CATEGORIES.indexOf(selectedCategory) : 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    []
   )
 
-  const { setFocusedIndex: setCategoryFocusedIndex, getItemProps: getCategoryItemProps } = useRovingTabindex({
-    itemCount: PRAYER_CATEGORIES.length,
-    onSelect: (index) => {
-      setSelectedCategory(PRAYER_CATEGORIES[index])
-      setShowCategoryError(false)
-    },
-    orientation: 'horizontal',
-    initialIndex: initialCategoryIndex,
-  })
+  const { setFocusedIndex: setCategoryFocusedIndex, getItemProps: getCategoryItemProps } =
+    useRovingTabindex({
+      itemCount: PRAYER_CATEGORIES.length,
+      onSelect: (index) => {
+        setSelectedCategory(PRAYER_CATEGORIES[index])
+        setShowCategoryError(false)
+      },
+      orientation: 'horizontal',
+      initialIndex: initialCategoryIndex,
+    })
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
+    // Bump idempotency key on every content edit so a fresh post gets a fresh
+    // key. Retry of the SAME content reuses the SAME key (no edits in between).
+    setIdempotencyKey(
+      typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
+    )
     const textarea = e.target
     textarea.style.height = 'auto'
     textarea.style.height = textarea.scrollHeight + 'px'
   }, [])
 
-  // TODO(phase-3): replace keyword check with backend crisis detection API.
-  // See .claude/rules/01-ai-safety.md — backend check is mandatory before production.
-  const handleSubmit = useCallback(() => {
+  // Crisis keyword check is the client-side courtesy fast-path — backend's
+  // CrisisAlertService is the canonical entry (Phase 3 Addendum #7).
+  const handleSubmit = useCallback(async () => {
     if (!content.trim()) return
     if (!selectedCategory) {
       setShowCategoryError(true)
@@ -73,17 +102,41 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
       setCrisisDetected(true)
       return
     }
-    onSubmit(content.trim(), isAnonymous, selectedCategory, isChallengePrayer && activeChallenge ? activeChallenge.id : undefined)
-    setContent('')
-    setIsAnonymous(false)
-    setSelectedCategory(null)
-    setIsChallengePrayer(false)
-    setShowCategoryError(false)
-    setCrisisDetected(false)
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
+    setIsSubmitting(true)
+    try {
+      const success = await onSubmit(
+        content.trim(),
+        isAnonymous,
+        selectedCategory,
+        isChallengePrayer && activeChallenge ? activeChallenge.id : undefined,
+        idempotencyKey
+      )
+      if (!success) return
+      setContent('')
+      setIsAnonymous(false)
+      setSelectedCategory(null)
+      setIsChallengePrayer(false)
+      setShowCategoryError(false)
+      setCrisisDetected(false)
+      // Generate a fresh idempotency key for the next prayer.
+      setIdempotencyKey(
+        typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
+      )
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-  }, [content, isAnonymous, selectedCategory, onSubmit, isChallengePrayer, activeChallenge])
+  }, [
+    content,
+    isAnonymous,
+    selectedCategory,
+    onSubmit,
+    isChallengePrayer,
+    activeChallenge,
+    idempotencyKey,
+  ])
 
   const handleCancel = useCallback(() => {
     setContent('')
@@ -100,16 +153,14 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
   return (
     <div
       className={cn(
-        'overflow-hidden transition-all motion-reduce:transition-none duration-base ease-standard',
-        isOpen ? 'visible mb-4 max-h-[800px] opacity-100' : 'invisible max-h-0 opacity-0',
+        'overflow-hidden transition-all duration-base ease-standard motion-reduce:transition-none',
+        isOpen ? 'visible mb-4 max-h-[800px] opacity-100' : 'invisible max-h-0 opacity-0'
       )}
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
       <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm sm:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-white">
-          Share a Prayer Request
-        </h2>
+        <h2 className="mb-4 text-lg font-semibold text-white">Share a Prayer Request</h2>
 
         {!isOnline && (
           <OfflineMessage
@@ -133,7 +184,10 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
         />
 
         {activeChallenge && (
-          <label className="mt-3 flex items-center gap-2 text-sm text-white/70" htmlFor="challenge-prayer-checkbox">
+          <label
+            className="mt-3 flex items-center gap-2 text-sm text-white/70"
+            htmlFor="challenge-prayer-checkbox"
+          >
             <input
               type="checkbox"
               checked={isChallengePrayer}
@@ -156,8 +210,18 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
           aria-invalid={showCategoryError || undefined}
           aria-describedby={showCategoryError ? 'composer-category-error' : undefined}
         >
-          <legend className="mb-2 text-sm font-medium text-white/70">Category<span className="text-red-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span></legend>
-          <div role="radiogroup" aria-label="Prayer category" className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible">
+          <legend className="mb-2 text-sm font-medium text-white/70">
+            Category
+            <span className="ml-0.5 text-red-400" aria-hidden="true">
+              *
+            </span>
+            <span className="sr-only"> required</span>
+          </legend>
+          <div
+            role="radiogroup"
+            aria-label="Prayer category"
+            className="scrollbar-none flex flex-nowrap gap-2 overflow-x-auto lg:flex-wrap lg:overflow-visible"
+          >
             {PRAYER_CATEGORIES.map((cat, index) => {
               const itemProps = getCategoryItemProps(index)
               return (
@@ -166,12 +230,16 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
                   type="button"
                   role="radio"
                   aria-checked={selectedCategory === cat}
-                  onClick={() => { setSelectedCategory(cat); setShowCategoryError(false); setCategoryFocusedIndex(index) }}
+                  onClick={() => {
+                    setSelectedCategory(cat)
+                    setShowCategoryError(false)
+                    setCategoryFocusedIndex(index)
+                  }}
                   className={cn(
-                    'min-h-[44px] shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-fast ease-standard whitespace-nowrap',
+                    'min-h-[44px] shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-fast ease-standard',
                     selectedCategory === cat
                       ? 'border-primary/40 bg-primary/20 text-primary-lt'
-                      : 'border-white/10 bg-white/10 text-white/70 hover:bg-white/15',
+                      : 'border-white/10 bg-white/10 text-white/70 hover:bg-white/15'
                   )}
                   tabIndex={itemProps.tabIndex}
                   onKeyDown={itemProps.onKeyDown}
@@ -212,13 +280,21 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
             variant="primary"
             disabled={!isOnline || !content.trim() || content.length > PRAYER_POST_MAX_LENGTH}
             onClick={handleSubmit}
+            isLoading={isSubmitting}
           >
             Submit Prayer Request
           </Button>
         </div>
 
         <div className="mt-2">
-          <CharacterCount current={content.length} max={1000} warningAt={800} dangerAt={960} visibleAt={500} id="composer-char-count" />
+          <CharacterCount
+            current={content.length}
+            max={1000}
+            warningAt={800}
+            dangerAt={960}
+            visibleAt={500}
+            id="composer-char-count"
+          />
         </div>
 
         {crisisDetected && (
@@ -232,7 +308,10 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
             <ul className="space-y-1 text-sm text-white/90">
               <li>
                 <strong>{CRISIS_RESOURCES.suicide_prevention.name}:</strong>{' '}
-                <a href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`} className="font-medium text-primary underline">
+                <a
+                  href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`}
+                  className="font-medium text-primary underline"
+                >
                   {CRISIS_RESOURCES.suicide_prevention.phone}
                 </a>
               </li>
@@ -242,7 +321,10 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
               </li>
               <li>
                 <strong>{CRISIS_RESOURCES.samhsa.name}:</strong>{' '}
-                <a href={`tel:${CRISIS_RESOURCES.samhsa.phone}`} className="font-medium text-primary underline">
+                <a
+                  href={`tel:${CRISIS_RESOURCES.samhsa.phone}`}
+                  className="font-medium text-primary underline"
+                >
                   {CRISIS_RESOURCES.samhsa.phone}
                 </a>
               </li>

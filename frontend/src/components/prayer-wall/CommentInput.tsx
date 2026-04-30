@@ -10,16 +10,34 @@ const MAX_COMMENT_LENGTH = 500
 
 interface CommentInputProps {
   prayerId: string
-  onSubmit: (prayerId: string, content: string) => void
+  /**
+   * Submit handler. Return `true` on success (input clears); `false` to keep
+   * the value and idempotency key so a retry of the SAME content reuses the
+   * SAME key (W5 + Spec 3.5 backend dedup contract).
+   */
+  onSubmit: (
+    prayerId: string,
+    content: string,
+    idempotencyKey?: string
+  ) => boolean | Promise<boolean>
   initialValue?: string
   onLoginClick?: () => void
 }
 
-export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginClick }: CommentInputProps) {
+export function CommentInput({
+  prayerId,
+  onSubmit,
+  initialValue = '',
+  onLoginClick,
+}: CommentInputProps) {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
   const [value, setValue] = useState(initialValue)
   const [crisisDetected, setCrisisDetected] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [idempotencyKey, setIdempotencyKey] = useState<string>(() =>
+    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
+  )
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -41,17 +59,26 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
     )
   }
 
-  // TODO(phase-3): replace keyword check with backend crisis detection API.
-  // See .claude/rules/01-ai-safety.md — backend check is mandatory before production.
-  const handleSubmit = () => {
+  // Crisis keyword check is the client-side courtesy fast-path — backend's
+  // CrisisAlertService is the canonical entry (Phase 3 Addendum #7).
+  const handleSubmit = async () => {
     if (!value.trim()) return
     if (containsCrisisKeyword(value)) {
       setCrisisDetected(true)
       return
     }
-    onSubmit(prayerId, value.trim())
-    setValue('')
-    setCrisisDetected(false)
+    setIsSubmitting(true)
+    try {
+      const success = await onSubmit(prayerId, value.trim(), idempotencyKey)
+      if (!success) return
+      setValue('')
+      setCrisisDetected(false)
+      setIdempotencyKey(
+        typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -72,6 +99,12 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
             if (e.target.value.length <= MAX_COMMENT_LENGTH) {
               setValue(e.target.value)
               setCrisisDetected(false)
+              // Bump idempotency key on edit so a fresh comment gets a fresh key.
+              setIdempotencyKey(
+                typeof crypto !== 'undefined' && crypto.randomUUID
+                  ? crypto.randomUUID()
+                  : `${Date.now()}`
+              )
             }
           }}
           onKeyDown={handleKeyDown}
@@ -80,33 +113,67 @@ export function CommentInput({ prayerId, onSubmit, initialValue = '', onLoginCli
           className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Comment"
           aria-invalid={crisisDetected || undefined}
-          aria-describedby={crisisDetected ? `comment-crisis-banner-${prayerId} comment-char-count-${prayerId}` : `comment-char-count-${prayerId}`}
+          aria-describedby={
+            crisisDetected
+              ? `comment-crisis-banner-${prayerId} comment-char-count-${prayerId}`
+              : `comment-char-count-${prayerId}`
+          }
         />
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={!value.trim()}
+          disabled={!value.trim() || isSubmitting}
+          aria-busy={isSubmitting}
           className={cn(
-            'min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded',
-            value.trim() ? 'text-primary hover:text-primary-lt' : 'text-white/20',
+            'flex min-h-[44px] min-w-[44px] items-center justify-center focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+            value.trim() && !isSubmitting ? 'text-primary hover:text-primary-lt' : 'text-white/20'
           )}
           aria-label="Submit comment"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
       <div className="mt-1 flex justify-end">
-        <CharacterCount current={value.length} max={500} warningAt={400} dangerAt={480} visibleAt={300} id={`comment-char-count-${prayerId}`} />
+        <CharacterCount
+          current={value.length}
+          max={500}
+          warningAt={400}
+          dangerAt={480}
+          visibleAt={300}
+          id={`comment-char-count-${prayerId}`}
+        />
       </div>
       {crisisDetected && (
-        <div id={`comment-crisis-banner-${prayerId}`} role="alert" className="mt-3 rounded-lg border border-danger/30 bg-danger/10 p-3">
+        <div
+          id={`comment-crisis-banner-${prayerId}`}
+          role="alert"
+          className="mt-3 rounded-lg border border-danger/30 bg-danger/10 p-3"
+        >
           <p className="mb-1 text-xs font-semibold text-danger">
             If you are in crisis, please reach out for help:
           </p>
           <ul className="space-y-0.5 text-xs text-white/90">
-            <li>{CRISIS_RESOURCES.suicide_prevention.name}: <a href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`} className="font-medium text-primary underline">{CRISIS_RESOURCES.suicide_prevention.phone}</a></li>
-            <li>{CRISIS_RESOURCES.crisis_text.name}: {CRISIS_RESOURCES.crisis_text.text}</li>
-            <li>{CRISIS_RESOURCES.samhsa.name}: <a href={`tel:${CRISIS_RESOURCES.samhsa.phone}`} className="font-medium text-primary underline">{CRISIS_RESOURCES.samhsa.phone}</a></li>
+            <li>
+              {CRISIS_RESOURCES.suicide_prevention.name}:{' '}
+              <a
+                href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`}
+                className="font-medium text-primary underline"
+              >
+                {CRISIS_RESOURCES.suicide_prevention.phone}
+              </a>
+            </li>
+            <li>
+              {CRISIS_RESOURCES.crisis_text.name}: {CRISIS_RESOURCES.crisis_text.text}
+            </li>
+            <li>
+              {CRISIS_RESOURCES.samhsa.name}:{' '}
+              <a
+                href={`tel:${CRISIS_RESOURCES.samhsa.phone}`}
+                className="font-medium text-primary underline"
+              >
+                {CRISIS_RESOURCES.samhsa.phone}
+              </a>
+            </li>
           </ul>
         </div>
       )}

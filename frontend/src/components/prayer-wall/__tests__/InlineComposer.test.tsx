@@ -22,13 +22,23 @@ vi.mock('@/hooks/useUnsavedChanges', () => ({
   }),
 }))
 
-function renderComposer(overrides?: { isOpen?: boolean; onClose?: () => void; onSubmit?: (content: string, isAnonymous: boolean, category: PrayerCategory, challengeId?: string) => void }) {
+function renderComposer(overrides?: {
+  isOpen?: boolean
+  onClose?: () => void
+  onSubmit?: (
+    content: string,
+    isAnonymous: boolean,
+    category: PrayerCategory,
+    challengeId?: string,
+    idempotencyKey?: string,
+  ) => boolean | Promise<boolean>
+}) {
   return render(
     <MemoryRouter>
       <InlineComposer
         isOpen={overrides?.isOpen ?? true}
         onClose={overrides?.onClose ?? vi.fn()}
-        onSubmit={overrides?.onSubmit ?? vi.fn()}
+        onSubmit={overrides?.onSubmit ?? vi.fn().mockResolvedValue(true)}
       />
     </MemoryRouter>,
   )
@@ -73,23 +83,23 @@ describe('InlineComposer', () => {
 
   it('submit calls onSubmit with content, anonymous flag, and category', async () => {
     const user = userEvent.setup()
-    const onSubmit = vi.fn()
+    const onSubmit = vi.fn().mockResolvedValue(true)
     renderComposer({ onSubmit })
     await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
     await user.click(screen.getByText('Health'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', false, 'health', undefined)
+    expect(onSubmit).toHaveBeenCalledWith('My prayer', false, 'health', undefined, expect.any(String))
   })
 
   it('submit with anonymous checked', async () => {
     const user = userEvent.setup()
-    const onSubmit = vi.fn()
+    const onSubmit = vi.fn().mockResolvedValue(true)
     renderComposer({ onSubmit })
     await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
     await user.click(screen.getByText('Health'))
     await user.click(screen.getByLabelText('Post anonymously'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', true, 'health', undefined)
+    expect(onSubmit).toHaveBeenCalledWith('My prayer', true, 'health', undefined, expect.any(String))
   })
 
   // Category-specific tests

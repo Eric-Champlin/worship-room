@@ -8,34 +8,50 @@ import { QOTD_MAX_LENGTH, QOTD_WARNING_THRESHOLD } from '@/constants/content-lim
 interface QotdComposerProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (content: string) => void
+  onSubmit: (content: string, idempotencyKey?: string) => boolean | Promise<boolean>
 }
 
 export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
   const [content, setContent] = useState('')
   const [crisisDetected, setCrisisDetected] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [idempotencyKey, setIdempotencyKey] = useState<string>(() =>
+    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
+  )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
+    setIdempotencyKey(
+      typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
+    )
     const textarea = e.target
     textarea.style.height = 'auto'
     textarea.style.height = textarea.scrollHeight + 'px'
   }, [])
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (!content.trim()) return
     if (containsCrisisKeyword(content)) {
       setCrisisDetected(true)
       return
     }
-    onSubmit(content.trim())
-    setContent('')
-    setCrisisDetected(false)
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
+    setIsSubmitting(true)
+    try {
+      const success = await onSubmit(content.trim(), idempotencyKey)
+      if (!success) return
+      setContent('')
+      setCrisisDetected(false)
+      setIdempotencyKey(
+        typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
+      )
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-  }, [content, onSubmit])
+  }, [content, onSubmit, idempotencyKey])
 
   const handleCancel = useCallback(() => {
     setContent('')
@@ -49,16 +65,14 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
   return (
     <div
       className={cn(
-        'overflow-hidden transition-all motion-reduce:transition-none duration-base ease-standard',
-        isOpen ? 'visible mt-3 max-h-[600px] opacity-100' : 'invisible max-h-0 opacity-0',
+        'overflow-hidden transition-all duration-base ease-standard motion-reduce:transition-none',
+        isOpen ? 'visible mt-3 max-h-[600px] opacity-100' : 'invisible max-h-0 opacity-0'
       )}
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
       <div className="rounded-xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-sm sm:p-5">
-        <h3 className="mb-3 text-base font-semibold text-white">
-          Share Your Thoughts
-        </h3>
+        <h3 className="mb-3 text-base font-semibold text-white">Share Your Thoughts</h3>
 
         <textarea
           ref={textareaRef}
@@ -91,6 +105,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
             variant="primary"
             disabled={!content.trim() || content.length > QOTD_MAX_LENGTH}
             onClick={handleSubmit}
+            isLoading={isSubmitting}
             className="min-h-[44px]"
           >
             Post Response
@@ -108,7 +123,10 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
             <ul className="space-y-1 text-sm text-white/90">
               <li>
                 <strong>{CRISIS_RESOURCES.suicide_prevention.name}:</strong>{' '}
-                <a href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`} className="font-medium text-primary underline">
+                <a
+                  href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`}
+                  className="font-medium text-primary underline"
+                >
                   {CRISIS_RESOURCES.suicide_prevention.phone}
                 </a>
               </li>
@@ -118,7 +136,10 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
               </li>
               <li>
                 <strong>{CRISIS_RESOURCES.samhsa.name}:</strong>{' '}
-                <a href={`tel:${CRISIS_RESOURCES.samhsa.phone}`} className="font-medium text-primary underline">
+                <a
+                  href={`tel:${CRISIS_RESOURCES.samhsa.phone}`}
+                  className="font-medium text-primary underline"
+                >
                   {CRISIS_RESOURCES.samhsa.phone}
                 </a>
               </li>

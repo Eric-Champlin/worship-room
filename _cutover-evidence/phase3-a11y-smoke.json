@@ -1,0 +1,13 @@
+{
+  "_placeholder": "Replace this object with axe-core scan output captured by Eric during the Phase 3 cutover smoke test. See _cutover-evidence/capture-axe-evidence.mjs from prior phases for the canonical capture script — extend the ROUTES array to include /prayer-wall, /prayer-wall/:id, /prayer-wall/dashboard, /prayer-wall/user/:id. The /:id and /user/:id routes need real UUIDs; substitute Sarah's UUID from wr_user_id and the post UUID created during Smoke 5 of phase03-cutover-checklist.md.",
+  "_authoredBy": "Eric Champlin",
+  "_authoredDuring": "Phase 3 cutover smoke test (Spec 3.12)",
+  "_expectedShape": {
+    "captured": "ISO 8601 timestamp",
+    "frontendUrl": "URL of the frontend that was scanned (local dev or deployed Railway URL)",
+    "results": "object keyed by route, each value is the @axe-core/playwright AxeResults shape"
+  },
+  "captured": null,
+  "frontendUrl": null,
+  "results": {}
+}

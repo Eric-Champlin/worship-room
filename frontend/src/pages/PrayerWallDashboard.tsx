@@ -1,8 +1,8 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { Link, Navigate } from 'react-router-dom'
-import { Bookmark, Heart, MessageCircle, Pencil } from 'lucide-react'
+import { AlertCircle, Bookmark, Heart, MessageCircle, Pencil } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { PRAYER_WALL_DASHBOARD_METADATA } from '@/lib/seo/routeMetadata'
 import { PageShell } from '@/components/prayer-wall/PageShell'
@@ -15,6 +15,8 @@ import { DeletePrayerDialog } from '@/components/prayer-wall/DeletePrayerDialog'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
+import { SkeletonCard } from '@/components/skeletons/SkeletonCard'
+import { SkeletonText } from '@/components/skeletons/SkeletonText'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils'
 import { formatFullDate } from '@/lib/time'
@@ -29,6 +31,10 @@ import {
   getMockComments,
   MOCK_CURRENT_USER,
 } from '@/mocks/prayer-wall-mock-data'
+import { isBackendPrayerWallEnabled } from '@/lib/env'
+import * as prayerWallApi from '@/services/api/prayer-wall-api'
+import { ApiError } from '@/types/auth'
+import { mapApiErrorToToast } from '@/lib/prayer-wall/apiErrors'
 import type { PrayerRequest } from '@/types/prayer-wall'
 
 type DashboardTab = 'prayers' | 'comments' | 'bookmarks' | 'reactions' | 'settings'
@@ -54,8 +60,23 @@ function DashboardContent() {
   const { recordActivity } = useFaithPoints()
   const [activeTab, setActiveTab] = useState<DashboardTab>('prayers')
 
-  // TODO(phase-3): fetch real user profile from backend instead of mock data
-  const dashboardUser = MOCK_CURRENT_USER
+  // dashboardUser swap (Edge Cases §4): in flag-on use the authenticated user;
+  // flag-off keeps MOCK_CURRENT_USER so existing tests/regression remain stable.
+  // Bio + avatarUrl + joinedDate are not yet on AuthUser — Phase 8.1 ships them.
+  const dashboardUser = useMemo(() => {
+    if (isBackendPrayerWallEnabled() && user) {
+      return {
+        id: user.id,
+        firstName: user.firstName ?? user.name ?? '',
+        lastName: user.lastName ?? '',
+        avatarUrl: null as string | null,
+        bio: null as string | null,
+        joinedDate: new Date().toISOString(),
+      }
+    }
+    return MOCK_CURRENT_USER
+  }, [user])
+
   const [displayName, setDisplayName] = useState(dashboardUser.firstName)
   const [bio, setBio] = useState(dashboardUser.bio ?? '')
   const [editingName, setEditingName] = useState(false)
@@ -64,8 +85,94 @@ function DashboardContent() {
   const allPrayers = useMemo(() => getMockPrayers(), [])
   const allComments = getMockAllComments()
   const { reactions, togglePraying, toggleBookmark } = usePrayerReactions()
-  const [prayers, setPrayers] = useState<PrayerRequest[]>(allPrayers)
+  const [prayers, setPrayers] = useState<PrayerRequest[]>(() =>
+    isBackendPrayerWallEnabled() ? [] : allPrayers
+  )
   const { openSet: openComments, toggle: handleToggleComments } = useOpenSet()
+
+  // Per-tab fetch state (flag-on only; flag-off uses synchronous mock data).
+  const [apiMyPrayers, setApiMyPrayers] = useState<PrayerRequest[]>([])
+  const [isLoadingPrayers, setIsLoadingPrayers] = useState(false)
+  const [prayersError, setPrayersError] = useState<{
+    message: string
+    severity: 'error' | 'warning' | 'info'
+  } | null>(null)
+  const [apiBookmarkedPrayers, setApiBookmarkedPrayers] = useState<PrayerRequest[]>([])
+  const [isLoadingBookmarks, setIsLoadingBookmarks] = useState(false)
+  const [bookmarksError, setBookmarksError] = useState<{
+    message: string
+    severity: 'error' | 'warning' | 'info'
+  } | null>(null)
+  const [prayersReloadTrigger, setPrayersReloadTrigger] = useState(0)
+  const [bookmarksReloadTrigger, setBookmarksReloadTrigger] = useState(0)
+
+  // Fetch prayers tab data when activated in flag-on mode.
+  // TODO(Phase 8.1): swap to prayerWallApi.listAuthorPosts(myUsername, ...)
+  // once usernames ship on AuthUser. Today AuthUser has no username field, so
+  // we over-fetch listPosts and filter client-side by user.id.
+  useEffect(() => {
+    if (activeTab !== 'prayers') return
+    if (!isBackendPrayerWallEnabled()) return
+    let cancelled = false
+    async function loadPrayers() {
+      setIsLoadingPrayers(true)
+      setPrayersError(null)
+      try {
+        const result = await prayerWallApi.listPosts({ page: 1, limit: 50, sort: 'recent' })
+        if (cancelled) return
+        const filtered = user ? result.posts.filter((p) => p.userId === user.id) : []
+        setApiMyPrayers(filtered)
+      } catch (err) {
+        if (cancelled) return
+        if (err instanceof ApiError) {
+          setPrayersError(mapApiErrorToToast(err))
+        } else {
+          setPrayersError({
+            message: 'Something went wrong. Try again in a moment.',
+            severity: 'error',
+          })
+        }
+      } finally {
+        if (!cancelled) setIsLoadingPrayers(false)
+      }
+    }
+    loadPrayers()
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, user, prayersReloadTrigger])
+
+  // Fetch bookmarks tab data when activated in flag-on mode.
+  useEffect(() => {
+    if (activeTab !== 'bookmarks') return
+    if (!isBackendPrayerWallEnabled()) return
+    let cancelled = false
+    async function loadBookmarks() {
+      setIsLoadingBookmarks(true)
+      setBookmarksError(null)
+      try {
+        const result = await prayerWallApi.listMyBookmarks({ page: 1, limit: 50 })
+        if (cancelled) return
+        setApiBookmarkedPrayers(result.posts)
+      } catch (err) {
+        if (cancelled) return
+        if (err instanceof ApiError) {
+          setBookmarksError(mapApiErrorToToast(err))
+        } else {
+          setBookmarksError({
+            message: 'Something went wrong. Try again in a moment.',
+            severity: 'error',
+          })
+        }
+      } finally {
+        if (!cancelled) setIsLoadingBookmarks(false)
+      }
+    }
+    loadBookmarks()
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, bookmarksReloadTrigger])
 
   const handleTogglePraying = useCallback(
     (prayerId: string) => {
@@ -86,91 +193,162 @@ function DashboardContent() {
         }
       }
     },
-    [togglePraying, recordActivity, prayers, user],
+    [togglePraying, recordActivity, prayers, user]
   )
 
   const handleMarkAnswered = useCallback(
-    (prayerId: string, praiseText: string) => {
-      setPrayers((prev) =>
-        prev.map((p) =>
-          p.id === prayerId
-            ? {
-                ...p,
-                isAnswered: true,
-                answeredText: praiseText || null,
-                answeredAt: new Date().toISOString(),
-              }
-            : p,
-        ),
-      )
-      showToast('What a testimony. God is faithful.')
+    async (prayerId: string, praiseText: string) => {
+      if (!isBackendPrayerWallEnabled()) {
+        setPrayers((prev) =>
+          prev.map((p) =>
+            p.id === prayerId
+              ? {
+                  ...p,
+                  isAnswered: true,
+                  answeredText: praiseText || null,
+                  answeredAt: new Date().toISOString(),
+                }
+              : p
+          )
+        )
+        showToast('What a testimony. God is faithful.')
+        return
+      }
+      try {
+        const updated = await prayerWallApi.updatePost(prayerId, {
+          isAnswered: true,
+          answeredText: praiseText || undefined,
+        })
+        const replace = (list: PrayerRequest[]): PrayerRequest[] =>
+          list.map((p) => (p.id === prayerId ? updated : p))
+        setPrayers(replace)
+        setApiMyPrayers(replace)
+        setApiBookmarkedPrayers(replace)
+        showToast('What a testimony. God is faithful.')
+      } catch (err) {
+        if (err instanceof ApiError) {
+          const descriptor = mapApiErrorToToast(err)
+          if (descriptor.message) showToast(descriptor.message)
+        }
+      }
     },
-    [showToast],
+    [showToast]
   )
 
   const handleDelete = useCallback(
-    (prayerId: string) => {
-      setPrayers((prev) => prev.filter((p) => p.id !== prayerId))
-      showToast('Prayer removed from your list.')
+    async (prayerId: string) => {
+      if (!isBackendPrayerWallEnabled()) {
+        setPrayers((prev) => prev.filter((p) => p.id !== prayerId))
+        showToast('Prayer removed from your list.')
+        return
+      }
+      try {
+        await prayerWallApi.deletePost(prayerId)
+        const remove = (list: PrayerRequest[]): PrayerRequest[] =>
+          list.filter((p) => p.id !== prayerId)
+        setPrayers(remove)
+        setApiMyPrayers(remove)
+        setApiBookmarkedPrayers(remove)
+        showToast('Prayer removed from your list.')
+      } catch (err) {
+        if (err instanceof ApiError) {
+          const descriptor = mapApiErrorToToast(err)
+          if (descriptor.message) showToast(descriptor.message)
+        }
+      }
     },
-    [showToast],
+    [showToast]
   )
 
   const handleSubmitComment = useCallback(
-    (prayerId: string, _content: string) => {
-      setPrayers((prev) =>
-        prev.map((p) =>
-          p.id === prayerId
-            ? {
-                ...p,
-                commentCount: p.commentCount + 1,
-                lastActivityAt: new Date().toISOString(),
-              }
-            : p,
-        ),
-      )
-      recordActivity('prayerWall', 'prayer_wall')
-      showToast('Comment shared.')
+    async (prayerId: string, content: string, idempotencyKey?: string): Promise<boolean> => {
+      if (!isBackendPrayerWallEnabled()) {
+        setPrayers((prev) =>
+          prev.map((p) =>
+            p.id === prayerId
+              ? {
+                  ...p,
+                  commentCount: p.commentCount + 1,
+                  lastActivityAt: new Date().toISOString(),
+                }
+              : p
+          )
+        )
+        recordActivity('prayerWall', 'prayer_wall')
+        showToast('Comment shared.')
+        return true
+      }
+      try {
+        await prayerWallApi.createComment(prayerId, content, idempotencyKey)
+        // Bump comment count on whichever per-tab list contains this prayer.
+        const bump = (list: PrayerRequest[]): PrayerRequest[] =>
+          list.map((p) =>
+            p.id === prayerId
+              ? { ...p, commentCount: p.commentCount + 1, lastActivityAt: new Date().toISOString() }
+              : p
+          )
+        setPrayers(bump)
+        setApiMyPrayers(bump)
+        setApiBookmarkedPrayers(bump)
+        recordActivity('prayerWall', 'prayer_wall')
+        showToast('Comment shared.')
+        return true
+      } catch (err) {
+        // Dashboard is auth-gated (Navigate to /login when !isAuthenticated),
+        // so AnonymousWriteAttemptError is unreachable here in practice. Route
+        // every catchable ApiError through the canonical toast taxonomy
+        // (Universal Rule 11 — no new copy strings at the page layer).
+        if (err instanceof ApiError) {
+          const descriptor = mapApiErrorToToast(err)
+          if (descriptor.message) showToast(descriptor.message)
+        }
+        return false
+      }
     },
-    [showToast, recordActivity],
+    [showToast, recordActivity]
   )
 
   if (!isAuthenticated) {
     return <Navigate to="/login?returnTo=/prayer-wall/dashboard" replace />
   }
 
-  const myPrayers = prayers.filter(
-    (p) => p.userId === dashboardUser.id,
-  )
-  const myComments = allComments.filter(
-    (c) => c.userId === dashboardUser.id,
-  )
+  const flagOn = isBackendPrayerWallEnabled()
+
+  const myPrayers = flagOn ? apiMyPrayers : prayers.filter((p) => p.userId === dashboardUser.id)
+  // Flag-on "My Comments" tab is a documented gap (Spec 3.10 watch-for #20):
+  // backend has no /api/v1/users/me/comments endpoint yet. Render empty-tab
+  // placeholder; flag-off path keeps the existing mock derivation.
+  const myComments = flagOn ? [] : allComments.filter((c) => c.userId === dashboardUser.id)
   const bookmarkedPrayerIds = Object.entries(reactions)
     .filter(([, r]) => r.isBookmarked)
     .map(([id]) => id)
-  const bookmarkedPrayers = prayers.filter((p) =>
-    bookmarkedPrayerIds.includes(p.id),
-  )
+  const bookmarkedPrayers = flagOn
+    ? apiBookmarkedPrayers
+    : prayers.filter((p) => bookmarkedPrayerIds.includes(p.id))
   const reactedPrayerIds = Object.entries(reactions)
     .filter(([, r]) => r.isPraying)
     .map(([id]) => id)
-  const reactedPrayers = prayers.filter((p) =>
-    reactedPrayerIds.includes(p.id),
-  )
+  // Reactions tab — Edge Cases §2 Option A: derive from already-loaded prayers.
+  // In flag-on we use the union of myPrayers + bookmarkedPrayers as the working
+  // set. Reacted-but-unloaded prayers are a documented limitation (Spec 3.10
+  // watch-for #21); the followups file tracks the future endpoint.
+  const reactedPrayers = flagOn
+    ? Array.from(
+        new Map(
+          [...apiMyPrayers, ...apiBookmarkedPrayers]
+            .filter((p) => reactedPrayerIds.includes(p.id))
+            .map((p) => [p.id, p])
+        ).values()
+      )
+    : prayers.filter((p) => reactedPrayerIds.includes(p.id))
 
   return (
     <PageShell>
       <SEO {...PRAYER_WALL_DASHBOARD_METADATA} />
-      <main
-        id="main-content"
-        className="mx-auto max-w-[720px] px-4 py-6 sm:py-8"
-      >
+      <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6 sm:py-8">
         <div className="mb-6">
           <Breadcrumb
-            items={[
-              { label: 'Prayer Wall', href: '/prayer-wall' },
-              { label: 'My Dashboard' },
-            ]}
+            items={[{ label: 'Prayer Wall', href: '/prayer-wall' }, { label: 'My Dashboard' }]}
             maxWidth="max-w-[720px]"
           />
         </div>
@@ -216,13 +394,11 @@ function DashboardContent() {
             </div>
           ) : (
             <div className="mt-3 flex items-center gap-2">
-              <h1 className="text-xl font-semibold text-white">
-                {displayName}
-              </h1>
+              <h1 className="text-xl font-semibold text-white">{displayName}</h1>
               <button
                 type="button"
                 onClick={() => setEditingName(true)}
-                className="text-white/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="text-white/50 hover:text-primary focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Edit name"
               >
                 <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
@@ -244,9 +420,7 @@ function DashboardContent() {
                 aria-label="Bio"
               />
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-xs text-white/60">
-                  {bio.length}/500
-                </span>
+                <span className="text-xs text-white/60">{bio.length}/500</span>
                 <Button
                   variant="primary"
                   size="sm"
@@ -261,13 +435,11 @@ function DashboardContent() {
             </div>
           ) : (
             <div className="mt-2 flex items-start gap-2">
-              <p className="max-w-md font-serif italic text-white/70">
-                {bio || 'Add a bio...'}
-              </p>
+              <p className="max-w-md font-serif italic text-white/70">{bio || 'Add a bio...'}</p>
               <button
                 type="button"
                 onClick={() => setEditingBio(true)}
-                className="mt-0.5 text-text-light hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="mt-0.5 text-text-light hover:text-primary focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Edit bio"
               >
                 <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
@@ -276,7 +448,7 @@ function DashboardContent() {
           )}
 
           <p className="mt-1 text-sm text-white/60">
-            Joined: {formatFullDate(MOCK_CURRENT_USER.joinedDate)}
+            Joined: {formatFullDate(dashboardUser.joinedDate)}
           </p>
         </header>
 
@@ -309,9 +481,7 @@ function DashboardContent() {
               }}
               className={cn(
                 'whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                activeTab === tab.key
-                  ? 'text-white'
-                  : 'text-white/60 hover:text-white/80',
+                activeTab === tab.key ? 'text-white' : 'text-white/60 hover:text-white/80'
               )}
             >
               {tab.label}
@@ -321,7 +491,7 @@ function DashboardContent() {
             className="absolute bottom-0 h-0.5 bg-primary motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-standard"
             style={{
               width: `${100 / tabs.length}%`,
-              transform: `translateX(${tabs.findIndex(t => t.key === activeTab) * 100}%)`,
+              transform: `translateX(${tabs.findIndex((t) => t.key === activeTab) * 100}%)`,
             }}
             aria-hidden="true"
           />
@@ -337,7 +507,28 @@ function DashboardContent() {
         >
           {activeTab === 'prayers' && (
             <div className="flex flex-col gap-4">
-              {myPrayers.length > 0 ? (
+              {flagOn && isLoadingPrayers ? (
+                <div aria-busy="true">
+                  <span className="sr-only">Loading</span>
+                  {[0, 1, 2].map((i) => (
+                    <SkeletonCard key={i} className="mb-3">
+                      <SkeletonText lines={3} />
+                    </SkeletonCard>
+                  ))}
+                </div>
+              ) : flagOn && prayersError ? (
+                <FeatureEmptyState
+                  icon={AlertCircle}
+                  heading="We couldn't load your prayers"
+                  description={prayersError.message}
+                  ctaLabel="Try again"
+                  onCtaClick={() => {
+                    setPrayersError(null)
+                    setPrayersReloadTrigger((n) => n + 1)
+                  }}
+                  compact
+                />
+              ) : myPrayers.length > 0 ? (
                 myPrayers.map((prayer) => (
                   <PrayerCard key={prayer.id} prayer={prayer}>
                     <InteractionBar
@@ -351,20 +542,16 @@ function DashboardContent() {
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
-                      comments={getMockComments(prayer.id)}
+                      comments={flagOn ? [] : getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
                     />
                     {!prayer.isAnswered && (
                       <div className="mt-3 flex items-center gap-4 border-t border-white/10 pt-3">
                         <MarkAsAnsweredForm
-                          onConfirm={(praiseText) =>
-                            handleMarkAnswered(prayer.id, praiseText)
-                          }
+                          onConfirm={(praiseText) => handleMarkAnswered(prayer.id, praiseText)}
                         />
-                        <DeletePrayerDialog
-                          onDelete={() => handleDelete(prayer.id)}
-                        />
+                        <DeletePrayerDialog onDelete={() => handleDelete(prayer.id)} />
                       </div>
                     )}
                   </PrayerCard>
@@ -384,15 +571,22 @@ function DashboardContent() {
 
           {activeTab === 'comments' && (
             <div className="flex flex-col gap-3">
-              {myComments.length > 0 ? (
+              {flagOn ? (
+                <FeatureEmptyState
+                  icon={MessageCircle}
+                  heading="My comments are coming soon"
+                  description="A future update will show comments you've left. For now, you can find them on each prayer."
+                  ctaLabel="Visit Prayer Wall"
+                  ctaHref="/prayer-wall"
+                  compact
+                />
+              ) : myComments.length > 0 ? (
                 myComments.map((comment) => (
                   <div
                     key={comment.id}
                     className="rounded-xl border border-white/10 bg-white/[0.06] p-4"
                   >
-                    <p className="whitespace-pre-wrap text-sm text-white/80">
-                      {comment.content}
-                    </p>
+                    <p className="whitespace-pre-wrap text-sm text-white/80">{comment.content}</p>
                     <Link
                       to={`/prayer-wall/${comment.prayerId}`}
                       className="mt-2 block text-xs text-primary hover:underline"
@@ -416,7 +610,28 @@ function DashboardContent() {
 
           {activeTab === 'bookmarks' && (
             <div className="flex flex-col gap-4">
-              {bookmarkedPrayers.length > 0 ? (
+              {flagOn && isLoadingBookmarks ? (
+                <div aria-busy="true">
+                  <span className="sr-only">Loading</span>
+                  {[0, 1, 2].map((i) => (
+                    <SkeletonCard key={i} className="mb-3">
+                      <SkeletonText lines={3} />
+                    </SkeletonCard>
+                  ))}
+                </div>
+              ) : flagOn && bookmarksError ? (
+                <FeatureEmptyState
+                  icon={AlertCircle}
+                  heading="We couldn't load your bookmarks"
+                  description={bookmarksError.message}
+                  ctaLabel="Try again"
+                  onCtaClick={() => {
+                    setBookmarksError(null)
+                    setBookmarksReloadTrigger((n) => n + 1)
+                  }}
+                  compact
+                />
+              ) : bookmarkedPrayers.length > 0 ? (
                 bookmarkedPrayers.map((prayer) => (
                   <PrayerCard key={prayer.id} prayer={prayer}>
                     <InteractionBar
@@ -430,7 +645,7 @@ function DashboardContent() {
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
-                      comments={getMockComments(prayer.id)}
+                      comments={flagOn ? [] : getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
                     />
@@ -465,7 +680,7 @@ function DashboardContent() {
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
-                      comments={getMockComments(prayer.id)}
+                      comments={flagOn ? [] : getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
                     />
@@ -486,13 +701,9 @@ function DashboardContent() {
 
           {activeTab === 'settings' && (
             <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
-              <h2 className="mb-4 text-lg font-semibold text-white">
-                Notification Preferences
-              </h2>
+              <h2 className="mb-4 text-lg font-semibold text-white">Notification Preferences</h2>
               <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-900/20 p-3">
-                <p className="text-sm text-amber-200">
-                  Notifications coming soon
-                </p>
+                <p className="text-sm text-amber-200">Notifications coming soon</p>
               </div>
               {NOTIFICATION_TYPES.map((type) => (
                 <label
