@@ -110,7 +110,7 @@ After 5.6 ships: 1.5g.
 | 58  | 3.8  | Reports Write Endpoint                         | M    | Medium | ✅     |
 | 59  | 3.9  | QOTD Backend Migration                         | M    | Low    | ✅     |
 | 60  | 3.10 | Frontend Service API Implementations           | XL   | High   | ✅     |
-| 61  | 3.11 | Reactive Store Backend Adapter                 | L    | Medium | ⬜     |
+| 61  | 3.11 | Reactive Store Backend Adapter                 | L    | Medium | ✅     |
 | 62  | 3.12 | Phase 3 Cutover                                | M    | High   | ⬜     |
 
 ## Phase 4 — Post Types (10 specs)

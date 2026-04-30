@@ -4,6 +4,7 @@ import {
   AnonymousWriteAttemptError,
   PRAYER_WALL_API_ERROR_COPY,
   mapApiErrorToToast,
+  mapHydrationErrorToToast,
   parseRetryAfter,
 } from '../apiErrors'
 
@@ -113,6 +114,49 @@ describe('mapApiErrorToToast — status-code-driven generics', () => {
     const err = new ApiError('TEAPOT', 418, 'no coffee', null)
     expect(mapApiErrorToToast(err).message).toBe(
       PRAYER_WALL_API_ERROR_COPY.UNKNOWN,
+    )
+  })
+})
+
+describe('mapHydrationErrorToToast', () => {
+  it('returns hydration-specific copy for NETWORK_ERROR', () => {
+    const err = new ApiError('NETWORK_ERROR', 0, 'offline', null)
+    expect(mapHydrationErrorToToast(err)).toEqual({
+      message: PRAYER_WALL_API_ERROR_COPY.HYDRATION_FAILED,
+      severity: 'warning',
+    })
+  })
+
+  it('returns concern-specific copy when concern is provided', () => {
+    const err = new ApiError('NETWORK_ERROR', 0, 'offline', null)
+    expect(mapHydrationErrorToToast(err, 'reactions').message).toBe(
+      PRAYER_WALL_API_ERROR_COPY.HYDRATION_FAILED_PARTIAL_REACTIONS,
+    )
+    expect(mapHydrationErrorToToast(err, 'bookmarks').message).toBe(
+      PRAYER_WALL_API_ERROR_COPY.HYDRATION_FAILED_PARTIAL_BOOKMARKS,
+    )
+  })
+
+  it('returns hydration copy for 5xx status', () => {
+    const err = new ApiError('SERVER_ERROR', 500, 'oops', null)
+    expect(mapHydrationErrorToToast(err).message).toBe(
+      PRAYER_WALL_API_ERROR_COPY.HYDRATION_FAILED,
+    )
+  })
+
+  it('returns silent toast (empty message) for 401', () => {
+    const err = new ApiError('UNAUTHORIZED', 401, 'no auth', null)
+    expect(mapHydrationErrorToToast(err)).toEqual({
+      message: '',
+      severity: 'error',
+    })
+  })
+
+  it('falls through to mapApiErrorToToast for 4xx not handled by hydration', () => {
+    // 403 is a standard Forbidden — falls through to the generic taxonomy.
+    const err = new ApiError('FORBIDDEN', 403, 'no perm', null)
+    expect(mapHydrationErrorToToast(err).message).toBe(
+      PRAYER_WALL_API_ERROR_COPY.FORBIDDEN,
     )
   })
 })

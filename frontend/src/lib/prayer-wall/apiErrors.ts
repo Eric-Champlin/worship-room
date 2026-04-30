@@ -71,6 +71,14 @@ export const PRAYER_WALL_API_ERROR_COPY = {
   IDEMPOTENCY_KEY_MISMATCH: "Something didn't go through. Try again.",
   SERVER_ERROR: 'Something went wrong on our end. Try again in a moment.',
   UNKNOWN: 'Something went wrong. Try again in a moment.',
+  // Spec 3.11 — distinct hydration copy. Passive ("couldn't refresh") rather
+  // than action-oriented ("couldn't reach the server"). Used by
+  // mapHydrationErrorToToast for background-sync failures.
+  HYDRATION_FAILED: "We couldn't refresh your reactions. Try again later.",
+  HYDRATION_FAILED_PARTIAL_REACTIONS:
+    "We couldn't refresh your reactions. Try again later.",
+  HYDRATION_FAILED_PARTIAL_BOOKMARKS:
+    "We couldn't refresh your bookmarks. Try again later.",
 } as const
 
 /** Format the rate-limit message with a Retry-After number. */
@@ -171,6 +179,51 @@ export function mapApiErrorToToast(
     }
   }
   return { message: PRAYER_WALL_API_ERROR_COPY.UNKNOWN, severity: 'error' }
+}
+
+/**
+ * Maps a hydration error to a toast descriptor. Distinct from
+ * `mapApiErrorToToast` because hydration failures use "couldn't refresh"
+ * copy (passive — failed background sync) rather than "couldn't reach
+ * the server" (active — user-initiated action failed).
+ *
+ * @param error  ApiError thrown by a hydration call (`getMyReactions` /
+ *               `listMyBookmarks`).
+ * @param concern Which API call failed: `'reactions'`, `'bookmarks'`, or
+ *               `'both'` (default — used when the source isn't disambiguated).
+ *
+ * Special handling:
+ *  - 401 returns `{ message: '', severity: 'error' }` — apiFetch already
+ *    cleared the token and dispatched `wr:auth-invalidated`; no toast for 401.
+ *  - NETWORK_ERROR / status 0 / 5xx → hydration-specific copy with
+ *    severity `'warning'`.
+ *  - Anything else falls through to `mapApiErrorToToast` for the standard
+ *    taxonomy.
+ */
+export function mapHydrationErrorToToast(
+  error: ApiError,
+  concern: 'reactions' | 'bookmarks' | 'both' = 'both',
+): ToastDescriptor {
+  // 401 — apiFetch already cleared token; no toast (AuthModal-only flow).
+  if (error.status === 401) return { message: '', severity: 'error' }
+
+  // Network / 5xx → hydration-specific copy.
+  if (
+    error.code === 'NETWORK_ERROR' ||
+    error.status === 0 ||
+    error.status >= 500
+  ) {
+    const message =
+      concern === 'reactions'
+        ? PRAYER_WALL_API_ERROR_COPY.HYDRATION_FAILED_PARTIAL_REACTIONS
+        : concern === 'bookmarks'
+          ? PRAYER_WALL_API_ERROR_COPY.HYDRATION_FAILED_PARTIAL_BOOKMARKS
+          : PRAYER_WALL_API_ERROR_COPY.HYDRATION_FAILED
+    return { message, severity: 'warning' }
+  }
+
+  // Anything else falls through to the standard taxonomy.
+  return mapApiErrorToToast(error)
 }
 
 /**
