@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { Button } from '@/components/ui/Button'
 
 interface ResumeReadingCardProps {
   book: string
@@ -19,13 +20,7 @@ export function ResumeReadingCard({
   nextChapter,
 }: ResumeReadingCardProps) {
   return (
-    <FrostedCard
-      as="article"
-      className="border-l-4 border-l-primary/60 shadow-[0_0_35px_rgba(139,92,246,0.12),0_4px_25px_rgba(0,0,0,0.35)]"
-    >
-      <p className="text-xs font-medium uppercase tracking-widest text-white/60">
-        Continue reading
-      </p>
+    <FrostedCard as="article" variant="accent" eyebrow="Pick up where you left off">
       <h3 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
         {book} {chapter}
       </h3>
@@ -34,12 +29,11 @@ export function ResumeReadingCard({
       )}
       <p className="mt-1 text-xs text-white/50 sm:text-sm">Read {relativeTime.toLowerCase()}</p>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        <Link
-          to={`/bible/${slug}/${chapter}`}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-hero-bg shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all motion-reduce:transition-none duration-base hover:shadow-[0_0_20px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
-        >
-          Continue reading {book} {chapter}
-        </Link>
+        <Button variant="gradient" size="md" asChild>
+          <Link to={`/bible/${slug}/${chapter}`}>
+            Continue reading {book} {chapter}
+          </Link>
+        </Button>
         {nextChapter && (
           <Link
             to={`/bible/${nextChapter.bookSlug}/${nextChapter.chapter}`}

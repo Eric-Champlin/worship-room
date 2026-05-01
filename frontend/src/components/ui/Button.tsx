@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import { LoadingSpinner } from './LoadingSpinner'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'light'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'light' | 'gradient'
   size?: 'sm' | 'md' | 'lg'
   /** When true, render merged styles onto the single child element instead of a <button>. */
   asChild?: boolean
@@ -43,20 +43,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center font-medium transition-[colors,transform] duration-fast motion-reduce:transition-none',
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
       'disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]',
-      variant !== 'light' && 'rounded-md',
+      variant !== 'light' && variant !== 'gradient' && 'rounded-md',
       variant === 'light' &&
         'rounded-full bg-white text-primary hover:bg-gray-100 gap-2 font-semibold min-h-[44px]',
+      variant === 'gradient' &&
+        'rounded-full bg-gradient-to-br from-violet-400 to-violet-300 text-violet-900 hover:from-violet-300 hover:to-violet-200 shadow-gradient-button hover:shadow-gradient-button-hover hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 focus-visible:ring-violet-300 gap-2 font-semibold min-h-[44px]',
       {
         'bg-primary text-white hover:bg-primary-lt': variant === 'primary',
         'bg-gray-200 text-gray-900 hover:bg-gray-300': variant === 'secondary',
         'border border-primary text-primary hover:bg-primary/5': variant === 'outline',
         'text-primary hover:bg-primary/5': variant === 'ghost',
-        'h-9 px-3 text-sm': size === 'sm' && variant !== 'light',
-        'h-10 px-4': size === 'md' && variant !== 'light',
-        'h-12 px-6 text-lg': size === 'lg' && variant !== 'light',
-        'px-4 py-2 text-sm': size === 'sm' && variant === 'light',
-        'px-6 py-2.5 text-sm': size === 'md' && variant === 'light',
-        'px-8 py-3 text-base': size === 'lg' && variant === 'light',
+        'h-9 px-3 text-sm': size === 'sm' && variant !== 'light' && variant !== 'gradient',
+        'h-10 px-4': size === 'md' && variant !== 'light' && variant !== 'gradient',
+        'h-12 px-6 text-lg': size === 'lg' && variant !== 'light' && variant !== 'gradient',
+        'px-4 py-2 text-sm': size === 'sm' && (variant === 'light' || variant === 'gradient'),
+        'px-6 py-2.5 text-sm': size === 'md' && (variant === 'light' || variant === 'gradient'),
+        'px-8 py-3 text-base': size === 'lg' && (variant === 'light' || variant === 'gradient'),
       },
       className,
     )

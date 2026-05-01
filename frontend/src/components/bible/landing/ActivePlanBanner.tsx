@@ -22,14 +22,7 @@ export function ActivePlanBanner({
   const progressPercent = Math.round((currentDay / totalDays) * 100)
 
   return (
-    <FrostedCard
-      as="article"
-      className="border-l-4 border-l-primary/60 shadow-[0_0_35px_rgba(139,92,246,0.12),0_4px_25px_rgba(0,0,0,0.35)]"
-    >
-      <p className="text-xs font-medium uppercase tracking-widest text-white/60">
-        You&apos;re on a plan
-      </p>
-
+    <FrostedCard as="article" variant="accent" eyebrow="Today's reading">
       <h3 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{planTitle}</h3>
 
       {/* Day progress */}

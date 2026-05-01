@@ -49,7 +49,7 @@ export function BibleHeroSlot() {
             nextChapter={nextChapter}
           />
         )}
-        <VerseOfTheDay />
+        <VerseOfTheDay variant="default" />
       </div>
     )
   }
@@ -66,7 +66,7 @@ export function BibleHeroSlot() {
           firstLine={firstLineOfChapter}
           nextChapter={nextChapter}
         />
-        <VerseOfTheDay />
+        <VerseOfTheDay variant="default" />
       </div>
     )
   }

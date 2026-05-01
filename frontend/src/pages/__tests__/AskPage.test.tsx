@@ -336,15 +336,15 @@ describe('AskPage — Response Display', () => {
     expect(screen.getAllByText('2 Corinthians 1:3-4').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('verse cards are FrostedCard (rounded-2xl, border-white/[0.12], bg-white/[0.06])', async () => {
+  it('verse cards are FrostedCard (rounded-3xl, border-white/[0.12], bg-white/[0.07])', async () => {
     await submitAndWait()
     const verseCards = screen.getAllByText('Romans 8:28')
     const verseCard = verseCards
-      .find((el) => el.closest('.rounded-2xl'))
-      ?.closest('.rounded-2xl') as HTMLElement | null
-    expect(verseCard?.className).toContain('rounded-2xl')
+      .find((el) => el.closest('.rounded-3xl'))
+      ?.closest('.rounded-3xl') as HTMLElement | null
+    expect(verseCard?.className).toContain('rounded-3xl')
     expect(verseCard?.className).toContain('border-white/[0.12]')
-    expect(verseCard?.className).toContain('bg-white/[0.06]')
+    expect(verseCard?.className).toContain('bg-white/[0.07]')
     expect(verseCard?.className).toContain('backdrop-blur-sm')
   })
 

@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
-import { HorizonGlow } from '@/components/daily/HorizonGlow'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { BIBLE_LANDING_METADATA, buildBibleSearchMetadata } from '@/lib/seo/routeMetadata'
 import { BibleHero } from '@/components/bible/landing/BibleHero'
@@ -138,8 +138,7 @@ function BibleLandingInner() {
     : BIBLE_LANDING_METADATA
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
-      <HorizonGlow />
+    <BackgroundCanvas className="flex flex-col font-sans">
       <Navbar transparent />
       <SEO {...seoMetadata} jsonLd={bibleBreadcrumbs} />
 
@@ -236,7 +235,7 @@ function BibleLandingInner() {
           }}
         />
       )}
-    </div>
+    </BackgroundCanvas>
   )
 }
 

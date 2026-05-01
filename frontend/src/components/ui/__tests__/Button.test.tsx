@@ -226,4 +226,49 @@ describe('Button', () => {
       spy.mockRestore()
     })
   })
+
+  describe('gradient variant', () => {
+    it('gradient variant renders with bg-gradient-to-br', () => {
+      render(<Button variant="gradient">Go</Button>)
+      const btn = screen.getByRole('button')
+      expect(btn.className).toContain('bg-gradient-to-br')
+      expect(btn.className).toContain('from-violet-400')
+      expect(btn.className).toContain('to-violet-300')
+    })
+
+    it('gradient variant uses violet-900 text color', () => {
+      render(<Button variant="gradient">Go</Button>)
+      expect(screen.getByRole('button').className).toContain('text-violet-900')
+    })
+
+    it('gradient variant uses rounded-full', () => {
+      render(<Button variant="gradient">Go</Button>)
+      const btn = screen.getByRole('button')
+      expect(btn.className).toContain('rounded-full')
+      expect(btn.className).not.toContain('rounded-md')
+    })
+
+    it('gradient variant uses min-h-[44px]', () => {
+      render(<Button variant="gradient">Go</Button>)
+      expect(screen.getByRole('button').className).toContain('min-h-[44px]')
+    })
+
+    it('gradient variant + asChild forwards classes to child', () => {
+      render(
+        <Button variant="gradient" asChild>
+          <a href="/x">Go</a>
+        </Button>,
+      )
+      const link = screen.getByRole('link', { name: 'Go' })
+      expect(link.tagName).toBe('A')
+      expect(link.className).toContain('bg-gradient-to-br')
+      expect(link.className).toContain('rounded-full')
+      expect(link.className).toContain('text-violet-900')
+    })
+
+    it('gradient variant has shadow-gradient-button', () => {
+      render(<Button variant="gradient">Go</Button>)
+      expect(screen.getByRole('button').className).toContain('shadow-gradient-button')
+    })
+  })
 })

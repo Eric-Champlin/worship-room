@@ -173,7 +173,7 @@ describe('DifferentiatorSection', () => {
 
   it('FrostedCard has h-full and flex-col', () => {
     const { container } = render(<DifferentiatorSection />)
-    const frostedCards = container.querySelectorAll('.rounded-2xl')
+    const frostedCards = container.querySelectorAll('.rounded-3xl')
     expect(frostedCards).toHaveLength(6)
     for (const card of frostedCards) {
       expect(card.className).toContain('h-full')

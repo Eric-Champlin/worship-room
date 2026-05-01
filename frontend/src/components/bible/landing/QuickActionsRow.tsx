@@ -20,7 +20,7 @@ export function QuickActionsRow() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {/* Browse Books — opens the drawer */}
-      <FrostedCard as="article" className="min-h-[44px]">
+      <FrostedCard as="article" variant="subdued" className="min-h-[44px]">
         <button
           ref={browseRef}
           type="button"
@@ -34,7 +34,7 @@ export function QuickActionsRow() {
       </FrostedCard>
 
       {/* My Bible — auth-gated click (BB-52 Requirement 4) */}
-      <FrostedCard as="article" className="min-h-[44px]">
+      <FrostedCard as="article" variant="subdued" className="min-h-[44px]">
         <Link
           to="/bible/my"
           onClick={(e) => {
@@ -54,7 +54,7 @@ export function QuickActionsRow() {
       </FrostedCard>
 
       {/* Reading Plans — auth-optional */}
-      <FrostedCard as="article" className="min-h-[44px]">
+      <FrostedCard as="article" variant="subdued" className="min-h-[44px]">
         <Link
           to="/bible/plans"
           className="flex flex-col items-center gap-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"

@@ -72,13 +72,13 @@ describe('ConversionPrompt', () => {
     expect(onDismiss).toHaveBeenCalledTimes(1)
   })
 
-  it('uses FrostedCard wrapper (bg-white/[0.06], backdrop-blur-sm, border-white/[0.12], rounded-2xl)', () => {
+  it('uses FrostedCard wrapper (bg-white/[0.07], backdrop-blur-sm, border-white/[0.12], rounded-3xl)', () => {
     renderPrompt()
     const card = screen
       .getByText('This is just the beginning.')
-      .closest('.rounded-2xl') as HTMLElement | null
+      .closest('.rounded-3xl') as HTMLElement | null
     expect(card).toBeInTheDocument()
-    expect(card?.className).toContain('bg-white/[0.06]')
+    expect(card?.className).toContain('bg-white/[0.07]')
     expect(card?.className).toContain('backdrop-blur-sm')
     expect(card?.className).toContain('border-white/[0.12]')
   })

@@ -287,7 +287,7 @@ describe('DevotionalTabContent', () => {
       const blockquote = screen.getByRole('blockquote')
       const card = blockquote.closest('[class*="backdrop-blur"]') as HTMLElement
       expect(card).not.toBeNull()
-      expect(card!.className).toContain('bg-white/[0.06]')
+      expect(card!.className).toContain('bg-white/[0.07]')
     })
 
     it('no section border dividers between content sections', () => {
@@ -347,7 +347,7 @@ describe('DevotionalTabContent', () => {
         expect(reflectionContent).not.toBeNull()
         const frostedCard = reflectionContent!.closest('[class*="backdrop-blur"]') as HTMLElement
         expect(frostedCard).not.toBeNull()
-        expect(frostedCard!.className).toContain('bg-white/[0.06]')
+        expect(frostedCard!.className).toContain('bg-white/[0.07]')
       })
 
       it('Tier 3: reflection FrostedCard has generous padding', () => {

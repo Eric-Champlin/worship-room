@@ -14,7 +14,11 @@ import {
 } from '@/lib/bible/bookmarkStore'
 import { VotdShareModal } from './VotdShareModal'
 
-export function VerseOfTheDay() {
+interface VerseOfTheDayProps {
+  variant?: 'accent' | 'default'
+}
+
+export function VerseOfTheDay({ variant = 'accent' }: VerseOfTheDayProps = {}) {
   const { votd, isLoading } = useVerseOfTheDay()
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
@@ -88,7 +92,7 @@ export function VerseOfTheDay() {
   if (isLoading || !votd) {
     return (
       <div className="w-full">
-        <FrostedCard as="article">
+        <FrostedCard as="article" variant="default" eyebrow="Verse of the Day">
           <div className="motion-safe:animate-pulse space-y-4">
             <div className="h-3 w-32 rounded bg-white/10" />
             <div className="space-y-2">
@@ -113,12 +117,7 @@ export function VerseOfTheDay() {
 
   return (
     <div className="w-full">
-      <FrostedCard as="article">
-        {/* VERSE OF THE DAY label */}
-        <span className="text-xs font-medium uppercase tracking-widest text-white/50">
-          Verse of the Day
-        </span>
-
+      <FrostedCard as="article" variant={variant} eyebrow="Verse of the Day">
         {/* Verse text — cinematic display, no quotation marks */}
         <blockquote className={`mt-4 text-center sm:text-left ${verseFontClass}`}>
           {verseText}

@@ -56,10 +56,10 @@ describe('ResumeReadingCard', () => {
     expect(screen.queryByText(/or read the next chapter/i)).not.toBeInTheDocument()
   })
 
-  it('has accent border', () => {
+  it('uses accent variant (violet-tinted border)', () => {
     const { container } = renderCard()
     const article = container.querySelector('article')
-    expect(article?.className).toContain('border-l-primary/60')
+    expect(article?.className).toContain('border-violet-400/70')
   })
 
   it('"Continue" button has 44px min height', () => {

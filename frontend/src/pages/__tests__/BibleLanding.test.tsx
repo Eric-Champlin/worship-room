@@ -104,7 +104,7 @@ describe('BibleLanding', () => {
     renderLanding()
     // First-time reader: VOTD shown, no resume card
     expect(screen.getByText('Verse of the Day')).toBeInTheDocument()
-    expect(screen.queryByText('Continue reading')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pick up where you left off')).not.toBeInTheDocument()
     // Plan card returns null when no active plans (BB-50)
     expect(screen.queryByText('Try a reading plan')).not.toBeInTheDocument()
     // No streak chip visible
@@ -117,7 +117,7 @@ describe('BibleLanding', () => {
       JSON.stringify({ book: 'John', chapter: 3, verse: 16, timestamp: Date.now() })
     )
     renderLanding()
-    expect(screen.getByText('Continue reading')).toBeInTheDocument()
+    expect(screen.getByText('Pick up where you left off')).toBeInTheDocument()
     expect(screen.getByText('John 3')).toBeInTheDocument()
   })
 

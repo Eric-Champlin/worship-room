@@ -29,6 +29,18 @@ export default {
         'medal-bronze': '#CD7F32',
         'spotify-green': '#1DB954',
         'surface-dark': '#1a0f2e',
+        'violet-50': '#F5F3FF',
+        'violet-100': '#EDE9FE',
+        'violet-200': '#DDD6FE',
+        'violet-300': '#C4B5FD',
+        'violet-400': '#A78BFA',
+        'violet-500': '#8B5CF6',
+        'violet-600': '#7C3AED',
+        'violet-700': '#6D28D9',
+        'violet-800': '#5B21B6',
+        'violet-900': '#4C1D95',
+        'canvas-shoulder': '#0F0A1A',
+        'canvas-deep': '#0A0814',
       },
       fontFamily: {
         sans: ['Inter', 'Inter Fallback', 'ui-sans-serif', 'system-ui'],
@@ -46,6 +58,14 @@ export default {
         decelerate: 'cubic-bezier(0, 0, 0.2, 1)',
         accelerate: 'cubic-bezier(0.4, 0, 1, 1)',
         sharp: 'cubic-bezier(0.4, 0, 0.6, 1)',
+      },
+      boxShadow: {
+        'frosted-base': '0 4px 16px rgba(0,0,0,0.30)',
+        'frosted-hover': '0 6px 24px rgba(0,0,0,0.35)',
+        'frosted-accent': '0 0 30px rgba(139,92,246,0.12), 0 4px 20px rgba(0,0,0,0.35)',
+        'frosted-accent-hover': '0 0 30px rgba(139,92,246,0.18), 0 6px 24px rgba(0,0,0,0.40)',
+        'gradient-button': '0 0 24px rgba(167,139,250,0.35), 0 4px 16px rgba(0,0,0,0.40)',
+        'gradient-button-hover': '0 0 32px rgba(167,139,250,0.45), 0 6px 20px rgba(0,0,0,0.40)',
       },
       keyframes: {
         'cursor-blink': {
