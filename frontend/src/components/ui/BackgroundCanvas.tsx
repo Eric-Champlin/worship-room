@@ -7,7 +7,9 @@ interface BackgroundCanvasProps {
 }
 
 const CANVAS_BACKGROUND = `
-  radial-gradient(ellipse 50% 35% at 50% 20%, rgba(167,139,250,0.10) 0%, transparent 60%),
+  radial-gradient(ellipse 50% 35% at 50% 8%, rgba(167,139,250,0.10) 0%, transparent 60%),
+  radial-gradient(ellipse 45% 30% at 80% 50%, rgba(167,139,250,0.06) 0%, transparent 65%),
+  radial-gradient(ellipse 50% 35% at 20% 88%, rgba(167,139,250,0.08) 0%, transparent 65%),
   radial-gradient(ellipse 70% 55% at 60% 50%, rgba(0,0,0,0.65) 0%, transparent 70%),
   linear-gradient(135deg, #120A1F 0%, #08051A 50%, #0A0814 100%)
 `

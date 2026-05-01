@@ -271,4 +271,46 @@ describe('Button', () => {
       expect(screen.getByRole('button').className).toContain('shadow-gradient-button')
     })
   })
+
+  describe('subtle variant', () => {
+    it('subtle variant renders with bg-white/[0.07]', () => {
+      render(<Button variant="subtle">Sub</Button>)
+      expect(screen.getByRole('button').className).toContain('bg-white/[0.07]')
+    })
+
+    it('subtle variant renders with border-white/[0.12]', () => {
+      render(<Button variant="subtle">Sub</Button>)
+      expect(screen.getByRole('button').className).toContain('border-white/[0.12]')
+    })
+
+    it('subtle variant uses rounded-full', () => {
+      render(<Button variant="subtle">Sub</Button>)
+      const btn = screen.getByRole('button')
+      expect(btn.className).toContain('rounded-full')
+      expect(btn.className).not.toContain('rounded-md')
+    })
+
+    it('subtle variant uses min-h-[44px]', () => {
+      render(<Button variant="subtle">Sub</Button>)
+      expect(screen.getByRole('button').className).toContain('min-h-[44px]')
+    })
+
+    it('subtle variant has backdrop-blur-sm', () => {
+      render(<Button variant="subtle">Sub</Button>)
+      expect(screen.getByRole('button').className).toContain('backdrop-blur-sm')
+    })
+
+    it('subtle variant + asChild forwards classes to child', () => {
+      render(
+        <Button variant="subtle" asChild>
+          <a href="/x">Go</a>
+        </Button>,
+      )
+      const link = screen.getByRole('link', { name: 'Go' })
+      expect(link.tagName).toBe('A')
+      expect(link.className).toContain('rounded-full')
+      expect(link.className).toContain('bg-white/[0.07]')
+      expect(link.className).toContain('text-white')
+    })
+  })
 })

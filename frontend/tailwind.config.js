@@ -66,6 +66,7 @@ export default {
         'frosted-accent-hover': '0 0 30px rgba(139,92,246,0.18), 0 6px 24px rgba(0,0,0,0.40)',
         'gradient-button': '0 0 24px rgba(167,139,250,0.35), 0 4px 16px rgba(0,0,0,0.40)',
         'gradient-button-hover': '0 0 32px rgba(167,139,250,0.45), 0 6px 20px rgba(0,0,0,0.40)',
+        'subtle-button-hover': '0 0 16px rgba(139,92,246,0.10), 0 4px 12px rgba(0,0,0,0.30)',
       },
       keyframes: {
         'cursor-blink': {

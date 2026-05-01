@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams, useLocation } from 'react-router-dom'
 import { Heart, PenLine, Wind, BookOpen, Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
-import { HorizonGlow } from '@/components/daily/HorizonGlow'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
@@ -211,8 +211,7 @@ function DailyHubContent() {
   )
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
-      <HorizonGlow />
+    <BackgroundCanvas className="flex flex-col font-sans">
       <SEO {...TAB_METADATA[activeTab]} jsonLd={dailyHubBreadcrumbs} />
       <Navbar transparent />
 
@@ -244,7 +243,7 @@ function DailyHubContent() {
           <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">
             <div
               ref={tabBarRef}
-              className="flex w-full rounded-full border border-white/[0.12] bg-white/[0.06] p-1"
+              className="flex w-full rounded-full border border-white/[0.08] bg-white/[0.07] p-1 backdrop-blur-md"
               role="tablist"
               aria-label="Daily practices"
               {...(tabBarTooltip.shouldShow ? { 'aria-describedby': 'daily-hub-tabs' } : {})}
@@ -268,7 +267,7 @@ function DailyHubContent() {
                     className={cn(
                       'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:text-base active:scale-[0.98]',
                       isActive
-                        ? 'bg-white/[0.12] border border-white/[0.15] text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
+                        ? 'bg-violet-500/[0.13] border border-violet-400/45 text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]'
                         : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
                     )}
                   >
@@ -375,7 +374,7 @@ function DailyHubContent() {
 
       {/* Sticky ambient pill FAB */}
       <DailyAmbientPillFAB context={getAmbientContextForTab(activeTab)} />
-    </div>
+    </BackgroundCanvas>
   )
 }
 

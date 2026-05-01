@@ -23,6 +23,34 @@ describe('FrostedCard', () => {
     expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument()
   })
 
+  it('as="button" defaults to type="button" (prevents accidental form submit)', () => {
+    render(
+      <FrostedCard as="button" onClick={vi.fn()}>
+        Click me
+      </FrostedCard>,
+    )
+    expect(screen.getByRole('button', { name: 'Click me' })).toHaveAttribute('type', 'button')
+  })
+
+  it('as="button" honors explicit type prop', () => {
+    render(
+      <FrostedCard as="button" type="submit" onClick={vi.fn()}>
+        Submit
+      </FrostedCard>,
+    )
+    expect(screen.getByRole('button', { name: 'Submit' })).toHaveAttribute('type', 'submit')
+  })
+
+  it('as="div" does not render a type attribute', () => {
+    const { container } = render(<FrostedCard>Content</FrostedCard>)
+    expect(container.firstElementChild).not.toHaveAttribute('type')
+  })
+
+  it('as="article" does not render a type attribute', () => {
+    const { container } = render(<FrostedCard as="article">Content</FrostedCard>)
+    expect(container.firstElementChild).not.toHaveAttribute('type')
+  })
+
   it('as="article" renders article element', () => {
     const { container } = render(<FrostedCard as="article">Article content</FrostedCard>)
     expect(container.querySelector('article')).toBeInTheDocument()

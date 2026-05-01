@@ -98,9 +98,10 @@ describe('MeditateTabContent', () => {
   it('standard card has frosted glass classes', () => {
     renderComponent()
     const card = screen.getByText('Breathing Exercise').closest('button')!
-    expect(card.className).toContain('bg-white/[0.06]')
+    // FrostedCard default variant (post-migration; matches shipped FrostedCard.tsx VARIANT_CLASSES.default)
+    expect(card.className).toContain('bg-white/[0.07]')
     expect(card.className).toContain('border-white/[0.12]')
-    expect(card.className).toContain('shadow-[')
+    expect(card.className).toContain('shadow-frosted-base')
   })
 
   it('standard card has hover lift classes', () => {
@@ -110,19 +111,20 @@ describe('MeditateTabContent', () => {
     expect(card.className).toContain('motion-reduce:hover:translate-y-0')
   })
 
-  it('focus ring uses hero-bg offset', () => {
+  it('focus ring uses white/50 (FrostedCard interactive)', () => {
     renderComponent()
     const card = screen.getByText('Breathing Exercise').closest('button')!
-    expect(card.className).toContain('ring-offset-hero-bg')
-    expect(card.className).not.toContain('ring-offset-dashboard-dark')
+    // FrostedCard's interactive focus ring (post-migration; intentional change from rolls-own ring-primary + ring-offset-hero-bg)
+    expect(card.className).toContain('focus-visible:ring-white/50')
   })
 
   it('suggested card has enhanced shadow', () => {
     // 'pray' action type maps to '/meditate/acts' which is the ACTS Prayer Walk card
     renderComponent({ challengeContext: { actionType: 'pray', dayTitle: 'Test Day' } })
     const suggestedCard = screen.getByText('ACTS Prayer Walk').closest('button')!
-    expect(suggestedCard.className).toContain('border-primary')
-    expect(suggestedCard.className).toContain('shadow-[0_0_30px_rgba(139,92,246,0.12)')
+    // FrostedCard accent variant (post-migration; matches shipped FrostedCard.tsx VARIANT_CLASSES.accent)
+    expect(suggestedCard.className).toContain('border-violet-400/70')
+    expect(suggestedCard.className).toContain('shadow-frosted-accent')
   })
 
   it('renders 6 meditation cards', () => {

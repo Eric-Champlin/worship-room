@@ -14,9 +14,9 @@ import { useCompletionTracking } from '@/hooks/useCompletionTracking'
 import { useAuth } from '@/hooks/useAuth'
 import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
 import { getMeditationSuggestion } from '@/data/challenge-prefills'
-import { cn } from '@/lib/utils'
 import { MEDITATION_TYPES, VERSE_FRAMINGS } from '@/constants/daily-experience'
 import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import type { ChallengeActionType } from '@/types/challenges'
 import type { MeditationType } from '@/types/daily-experience'
 import type { MeditationVerseContext } from '@/types/meditation'
@@ -102,15 +102,15 @@ export function MeditateTabContent({ isActive = true }: MeditateTabContentProps)
             )
             const isSuggested = suggestedId === type.id
             return (
-              <button
+              <FrostedCard
                 key={type.id}
-                type="button"
+                as="button"
+                variant={isSuggested ? 'accent' : 'default'}
                 onClick={() => {
                   if (!isAuthenticated) {
                     authModal?.openAuthModal('Sign in to start meditating')
                     return
                   }
-                  // Clear challenge context on navigation
                   if (challengeContext) {
                     navigate(location.pathname + location.search, { replace: true, state: null })
                   }
@@ -118,25 +118,7 @@ export function MeditateTabContent({ isActive = true }: MeditateTabContentProps)
                     ...(meditationVerseContext && { state: { meditationVerseContext } }),
                   })
                 }}
-                className={cn(
-                  'group rounded-2xl p-4 text-left sm:p-5',
-                  'transition-all motion-reduce:transition-none duration-base ease-decelerate',
-                  'active:scale-[0.98]',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
-                  isSuggested
-                    ? [
-                        'border-2 border-primary bg-primary/10 ring-1 ring-primary/30',
-                        'shadow-[0_0_30px_rgba(139,92,246,0.12),0_4px_20px_rgba(0,0,0,0.3)]',
-                      ]
-                    : [
-                        'border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm',
-                        'shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]',
-                        'hover:bg-white/[0.09] hover:border-white/[0.18]',
-                        'hover:shadow-[0_0_35px_rgba(139,92,246,0.10),0_6px_25px_rgba(0,0,0,0.35)]',
-                        'hover:-translate-y-0.5',
-                        'motion-reduce:hover:translate-y-0',
-                      ]
-                )}
+                className="p-4 sm:p-5 text-left"
               >
                 {isSuggested && (
                   <span className="mb-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
@@ -164,7 +146,7 @@ export function MeditateTabContent({ isActive = true }: MeditateTabContentProps)
                 <p className="mt-2 text-xs font-medium text-primary">
                   {type.time}
                 </p>
-              </button>
+              </FrostedCard>
             )
           })}
         </div>

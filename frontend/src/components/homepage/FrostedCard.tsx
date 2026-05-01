@@ -13,6 +13,10 @@ interface FrostedCardProps {
   variant?: FrostedCardVariant
   eyebrow?: string
   eyebrowColor?: 'violet' | 'white'
+  /** Only meaningful when `as="button"`. Defaults to `"button"` to prevent
+   * accidental form submission — HTML defaults `<button>` to `type="submit"`,
+   * which is the wrong default for every current consumer. */
+  type?: 'button' | 'submit' | 'reset'
 }
 
 interface VariantClassSet {
@@ -46,9 +50,12 @@ export function FrostedCard({
   variant = 'default',
   eyebrow,
   eyebrowColor,
+  type,
 }: FrostedCardProps) {
   const isInteractive = !!onClick
   const variantClasses = VARIANT_CLASSES[variant]
+  const buttonProps =
+    Component === 'button' ? { type: type ?? 'button' } : {}
 
   return (
     <Component
@@ -56,6 +63,7 @@ export function FrostedCard({
       tabIndex={tabIndex}
       role={role}
       onKeyDown={onKeyDown}
+      {...buttonProps}
       className={cn(
         variantClasses.base,
         'transition-all motion-reduce:transition-none duration-base ease-decelerate',

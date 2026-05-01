@@ -286,10 +286,9 @@ describe('DailyHub', () => {
     expect(screen.getByLabelText('Journal entry')).toBeInTheDocument()
   })
 
-  it('root background uses hero-bg, not dashboard-dark', () => {
+  it('root background does not use dashboard-dark', () => {
     const { container } = renderPage()
     const root = container.firstElementChild as HTMLElement
-    expect(root.className).toContain('bg-hero-bg')
     expect(root.className).not.toContain('bg-dashboard-dark')
   })
 
@@ -299,36 +298,25 @@ describe('DailyHub', () => {
     expect(hero.querySelector('[data-testid="glow-orb"]')).toBeNull()
   })
 
-  it('root has relative overflow-hidden bg-hero-bg', () => {
+  it('root has relative + overflow-hidden + min-h-screen (BackgroundCanvas shell)', () => {
     const { container } = renderPage()
     const root = container.firstElementChild as HTMLElement
     expect(root.className).toContain('relative')
     expect(root.className).toContain('overflow-hidden')
-    expect(root.className).toContain('bg-hero-bg')
-  })
-
-  it('renders HorizonGlow as a root-level decorative layer', () => {
-    const { container } = renderPage()
-    const root = container.firstElementChild as HTMLElement
-    // HorizonGlow container is the first aria-hidden + pointer-events-none div
-    const decorativeLayers = root.querySelectorAll(':scope > [aria-hidden="true"].pointer-events-none')
-    expect(decorativeLayers.length).toBeGreaterThanOrEqual(1)
-    // First decorative layer is HorizonGlow with exactly 5 glow spots
-    const horizonGlow = decorativeLayers[0]
-    expect(horizonGlow.children.length).toBe(5)
+    expect(root.className).toContain('min-h-screen')
   })
 
   it('tab bar has pill-shaped container', () => {
     renderPage()
     const tablist = screen.getByRole('tablist')
     expect(tablist.className).toContain('rounded-full')
-    expect(tablist.className).toContain('bg-white/[0.06]')
+    expect(tablist.className).toContain('bg-white/[0.07]')
   })
 
   it('active tab has pill indicator with background', () => {
     renderPage()
     const activeTab = screen.getByRole('tab', { selected: true })
-    expect(activeTab.className).toContain('bg-white/[0.12]')
+    expect(activeTab.className).toContain('bg-violet-500/[0.13]')
   })
 
   it('inactive tabs have muted text color', () => {
