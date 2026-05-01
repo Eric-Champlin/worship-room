@@ -71,4 +71,30 @@ describe('RelatedPlanCallout', () => {
     await user.click(screen.getByText('Start this plan'))
     expect(mockOpenAuthModal).toHaveBeenCalledWith('Sign in to start this reading plan')
   })
+
+  it('renders inside a FrostedCard accent variant (violet hallmark class)', () => {
+    const { container } = renderCallout()
+    const accentCard = container.querySelector('.bg-violet-500\\/\\[0\\.08\\]')
+    expect(accentCard).not.toBeNull()
+  })
+
+  it('eyebrow renders with violet leading dot', () => {
+    renderCallout()
+    const eyebrow = screen.getByText('Go Deeper')
+    const dot = eyebrow.previousElementSibling as HTMLElement
+    expect(dot).not.toBeNull()
+    expect(dot.className).toContain('bg-violet-400')
+    expect(dot.className).toContain('rounded-full')
+  })
+
+  it('CTA renders as subtle Button with min-h-[44px] and mt-4', () => {
+    renderCallout()
+    const link = screen.getByText('Start this plan').closest('a') as HTMLAnchorElement
+    expect(link).not.toBeNull()
+    expect(link.className).toContain('min-h-[44px]')
+    expect(link.className).toContain('rounded-full')
+    expect(link.className).toContain('text-white')
+    expect(link.className).toContain('mt-4')
+    expect(link.className).toContain('bg-white/[0.07]')
+  })
 })

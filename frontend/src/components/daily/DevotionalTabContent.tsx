@@ -198,7 +198,7 @@ export function DevotionalTabContent({
           </div>
 
           {/* Devotional title */}
-          <h3 className="pt-8 text-center text-2xl font-bold text-white sm:pt-10 sm:text-3xl">
+          <h3 className="pt-3 text-center text-2xl font-bold text-white sm:pt-4 sm:text-3xl">
             {devotional.title}
           </h3>
 
@@ -267,11 +267,20 @@ export function DevotionalTabContent({
           {/* Quote section */}
           <div className="py-6 sm:py-8">
             <FrostedCard variant="default" className="p-5 sm:p-6">
-              <span className="font-serif text-5xl leading-none text-white/25" aria-hidden="true">
-                &ldquo;
-              </span>
-              <blockquote className="mt-2 font-serif text-xl italic leading-[1.6] text-white sm:text-2xl">
+              <blockquote className="font-serif text-xl italic leading-[1.6] text-white sm:text-2xl">
+                <span
+                  className="font-serif text-5xl leading-none text-white/25 align-top mr-1"
+                  aria-hidden="true"
+                >
+                  &ldquo;
+                </span>
                 {devotional.quote.text}
+                <span
+                  className="font-serif text-5xl leading-none text-white/25 align-bottom ml-1"
+                  aria-hidden="true"
+                >
+                  &rdquo;
+                </span>
               </blockquote>
               <p className="mt-3 text-sm text-white/80">&mdash; {devotional.quote.attribution}</p>
             </FrostedCard>

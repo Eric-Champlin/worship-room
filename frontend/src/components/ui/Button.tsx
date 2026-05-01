@@ -47,14 +47,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant === 'light' &&
         'rounded-full bg-white text-primary hover:bg-gray-100 gap-2 font-semibold min-h-[44px]',
       variant === 'gradient' &&
-        'rounded-full bg-gradient-to-br from-violet-400 to-violet-300 text-violet-900 hover:from-violet-300 hover:to-violet-200 shadow-gradient-button hover:shadow-gradient-button-hover hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 focus-visible:ring-violet-300 gap-2 font-semibold min-h-[44px]',
+        'rounded-full bg-gradient-to-br from-violet-400 to-violet-300 text-black hover:from-violet-300 hover:to-violet-200 shadow-gradient-button hover:shadow-gradient-button-hover hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 focus-visible:ring-violet-300 gap-2 font-semibold min-h-[44px]',
       variant === 'subtle' &&
         'rounded-full bg-white/[0.07] border border-white/[0.12] text-white backdrop-blur-sm hover:bg-white/[0.12] hover:border-white/[0.20] hover:shadow-subtle-button-hover hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 gap-2 font-medium min-h-[44px]',
       {
         'bg-primary text-white hover:bg-primary-lt': variant === 'primary',
         'bg-gray-200 text-gray-900 hover:bg-gray-300': variant === 'secondary',
         'border border-primary text-primary hover:bg-primary/5': variant === 'outline',
-        'text-primary hover:bg-primary/5': variant === 'ghost',
+        'text-white/80 hover:text-white hover:bg-white/5': variant === 'ghost',
         'h-9 px-3 text-sm': size === 'sm' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',
         'h-10 px-4': size === 'md' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',
         'h-12 px-6 text-lg': size === 'lg' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',

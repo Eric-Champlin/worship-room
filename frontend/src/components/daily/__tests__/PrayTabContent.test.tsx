@@ -763,14 +763,14 @@ describe('PrayTabContent (accessibility)', () => {
     renderPrayTab()
     const textarea = screen.getByLabelText('Prayer request')
     await user.type(textarea, 'Hello God')
-    expect(screen.getByText('9 / 500')).toBeInTheDocument()
+    expect(screen.getByText('9 / 1,000')).toBeInTheDocument()
   })
 
-  it('character count shows warning color at 400 chars', async () => {
+  it('character count shows warning color at 800 chars', async () => {
     const user = userEvent.setup()
     renderPrayTab()
     const textarea = screen.getByLabelText('Prayer request')
-    const longText = 'a'.repeat(400)
+    const longText = 'a'.repeat(800)
     await user.click(textarea)
     // Use fireEvent for large text to avoid slow typing
     await act(async () => {
@@ -779,7 +779,7 @@ describe('PrayTabContent (accessibility)', () => {
       textarea.dispatchEvent(new Event('input', { bubbles: true }))
       textarea.dispatchEvent(new Event('change', { bubbles: true }))
     })
-    const countEl = screen.getByText('400 / 500')
+    const countEl = screen.getByText('800 / 1,000')
     expect(countEl).toHaveClass('text-amber-400')
   })
 

@@ -102,6 +102,34 @@ describe('DevotionalTabContent', () => {
       expect(decorativeQuote).toHaveAttribute('aria-hidden', 'true')
     })
 
+    it('saint quote renders as pull-quote with inline opening and closing marks inside the blockquote', () => {
+      renderComponent()
+      const blockquote = screen.getByRole('blockquote')
+      const openSpan = blockquote.querySelector('span[aria-hidden="true"]:first-child') as HTMLElement
+      const closeSpan = blockquote.querySelector('span[aria-hidden="true"]:last-child') as HTMLElement
+      expect(openSpan).not.toBeNull()
+      expect(openSpan.textContent).toBe('\u201C')
+      expect(openSpan.className).toContain('font-serif')
+      expect(openSpan.className).toContain('text-5xl')
+      expect(openSpan.className).toContain('align-top')
+      expect(openSpan.className).toContain('mr-1')
+      expect(closeSpan).not.toBeNull()
+      expect(closeSpan.textContent).toBe('\u201D')
+      expect(closeSpan.className).toContain('font-serif')
+      expect(closeSpan.className).toContain('text-5xl')
+      expect(closeSpan.className).toContain('align-bottom')
+      expect(closeSpan.className).toContain('ml-1')
+    })
+
+    it('devotional title has tightened pt-3 sm:pt-4 (Change 1)', () => {
+      renderComponent()
+      const title = screen.getByRole('heading', { level: 3 })
+      expect(title.className).toContain('pt-3')
+      expect(title.className).toContain('sm:pt-4')
+      expect(title.className).not.toContain('pt-8')
+      expect(title.className).not.toContain('sm:pt-10')
+    })
+
     it('does not render Closing Prayer section', () => {
       renderComponent()
       expect(screen.queryByText('Closing Prayer')).not.toBeInTheDocument()

@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 
@@ -30,20 +32,15 @@ export function RelatedPlanCallout({
   }
 
   return (
-    <div className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-6">
-      <p className="text-xs uppercase tracking-widest text-white/70">
-        Go Deeper
-      </p>
-      <p className="mt-2 text-base font-semibold text-white">{planTitle}</p>
+    <FrostedCard variant="accent" eyebrow="Go Deeper" className="mt-8">
+      <p className="text-base font-semibold text-white">{planTitle}</p>
       <p className="mt-1 text-sm text-white/60">{planDuration}-day plan</p>
-      <Link
-        to={`/reading-plans/${planId}`}
-        onClick={handleClick}
-        className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
-      >
-        {ctaText}
-        <ChevronRight size={16} />
-      </Link>
-    </div>
+      <Button variant="subtle" size="md" asChild>
+        <Link to={`/reading-plans/${planId}`} onClick={handleClick} className="mt-4">
+          {ctaText}
+          <ChevronRight size={16} aria-hidden="true" />
+        </Link>
+      </Button>
+    </FrostedCard>
   )
 }

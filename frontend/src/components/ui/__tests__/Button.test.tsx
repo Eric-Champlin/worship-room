@@ -236,9 +236,9 @@ describe('Button', () => {
       expect(btn.className).toContain('to-violet-300')
     })
 
-    it('gradient variant uses violet-900 text color', () => {
+    it('gradient variant uses black text color', () => {
       render(<Button variant="gradient">Go</Button>)
-      expect(screen.getByRole('button').className).toContain('text-violet-900')
+      expect(screen.getByRole('button').className).toContain('text-black')
     })
 
     it('gradient variant uses rounded-full', () => {
@@ -263,7 +263,7 @@ describe('Button', () => {
       expect(link.tagName).toBe('A')
       expect(link.className).toContain('bg-gradient-to-br')
       expect(link.className).toContain('rounded-full')
-      expect(link.className).toContain('text-violet-900')
+      expect(link.className).toContain('text-black')
     })
 
     it('gradient variant has shadow-gradient-button', () => {
@@ -311,6 +311,17 @@ describe('Button', () => {
       expect(link.className).toContain('rounded-full')
       expect(link.className).toContain('bg-white/[0.07]')
       expect(link.className).toContain('text-white')
+    })
+  })
+
+  describe('ghost variant', () => {
+    it('ghost variant uses white text on dark surfaces with hover-brighten + hover bg', () => {
+      render(<Button variant="ghost">G</Button>)
+      const btn = screen.getByRole('button')
+      expect(btn.className).toContain('text-white/80')
+      expect(btn.className).toContain('hover:text-white')
+      expect(btn.className).toContain('hover:bg-white/5')
+      expect(btn.className).not.toContain('text-primary')
     })
   })
 })

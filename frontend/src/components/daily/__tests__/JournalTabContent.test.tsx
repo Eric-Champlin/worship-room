@@ -549,6 +549,32 @@ describe('JournalTabContent (accessibility)', () => {
     // Text should still be there (modal is mocked as not showing)
     expect(textarea).toHaveValue('My journal entry')
   })
+
+  it('textarea has manual resize tokens (resize-y and max-h-[500px])', () => {
+    renderJournalTab()
+    const textarea = screen.getByLabelText('Journal entry')
+    expect(textarea.className).toContain('resize-y')
+    expect(textarea.className).toContain('max-h-[500px]')
+  })
+
+  it('draft indicator and Save button containers carry tightened margins', async () => {
+    const user = userEvent.setup()
+    renderJournalTab()
+    const textarea = screen.getByLabelText('Journal entry')
+    await user.type(textarea, 'Some text')
+    const saveBtn = screen.getByRole('button', { name: /save entry/i })
+    const saveContainer = saveBtn.parentElement
+    expect(saveContainer?.className).toContain('mb-4')
+    expect(saveContainer?.className).not.toContain('mb-8')
+    // Find the draft indicator wrapper (the aria-live polite region above CrisisBanner)
+    const draftWrappers = document.querySelectorAll('[aria-live="polite"]')
+    const draftIndicator = Array.from(draftWrappers).find((el) =>
+      el.className.includes('flex h-5 items-center justify-end'),
+    )
+    expect(draftIndicator).toBeDefined()
+    expect(draftIndicator!.className).toContain('mb-2')
+    expect(draftIndicator!.className).not.toContain('mb-4')
+  })
 })
 
 describe('JournalTabContent atmospheric visuals', () => {

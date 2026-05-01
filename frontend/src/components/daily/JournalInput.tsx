@@ -280,7 +280,7 @@ export function JournalInput({
           placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
           maxLength={JOURNAL_MAX_LENGTH}
           rows={6}
-          className="min-h-[200px] w-full resize-none rounded-lg border border-violet-400/30 bg-white/[0.04] px-4 pb-10 pt-3 text-lg leading-relaxed text-white placeholder:text-white/40 shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
+          className="min-h-[200px] max-h-[500px] w-full resize-y rounded-lg border border-violet-400/30 bg-white/[0.04] px-4 pb-10 pt-3 text-lg leading-relaxed text-white placeholder:text-white/40 shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
           aria-label="Journal entry"
           aria-describedby="journal-char-count"
         />
@@ -328,7 +328,7 @@ export function JournalInput({
       </div>
 
       {/* Draft Saved Indicator */}
-      <div className="mb-4 flex h-5 items-center justify-end" aria-live="polite">
+      <div className="mb-2 flex h-5 items-center justify-end" aria-live="polite">
         {draftSaved && (
           <p className="motion-safe:animate-fade-in flex items-center gap-1 text-xs text-white/50">
             <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />
@@ -341,7 +341,7 @@ export function JournalInput({
       <CrisisBanner text={text} />
 
       {/* Save Button */}
-      <div className="mb-8 text-center">
+      <div className="mb-4 text-center">
         <Button
           variant="gradient"
           size="lg"
