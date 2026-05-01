@@ -261,19 +261,21 @@ describe('DevotionalTabContent', () => {
       expect(screen.queryByTestId('glow-orb')).not.toBeInTheDocument()
     })
 
-    it('reflection question card has frosted glass styling with purple border', () => {
+    it('reflection question is rolls-own Tier 2 callout with left-stripe accent', () => {
       renderComponent()
       const questionText = screen.getByText(/Something to think about/)
-      const card = questionText.closest('[class*="backdrop-blur"]') as HTMLElement
-      expect(card).not.toBeNull()
-      expect(card!.className).toContain('border-l-primary')
+      const callout = questionText.closest('.rounded-xl.border-l-4') as HTMLElement
+      expect(callout).not.toBeNull()
+      expect(callout!.className).toContain('border-l-primary/60')
+      expect(callout!.className).toContain('bg-white/[0.04]')
     })
 
-    it('action buttons have frosted glass styling', () => {
+    it('action buttons render as subtle Button variant with frosted glass chrome', () => {
       renderComponent()
       const shareBtn = screen.getByRole('button', { name: /Share today/i })
-      expect(shareBtn.className).toContain('rounded-xl')
+      expect(shareBtn.className).toContain('rounded-full')
       expect(shareBtn.className).toContain('backdrop-blur-sm')
+      expect(shareBtn.className).toContain('bg-white/[0.07]')
     })
 
     it('does not render BackgroundSquiggle', () => {
@@ -341,16 +343,17 @@ describe('DevotionalTabContent', () => {
         expect(outerDiv.className).not.toContain('border-t')
       })
 
-      it('Tier 3: reflection body is wrapped in FrostedCard', () => {
+      it('Tier 1: reflection body uses FrostedCard accent variant', () => {
         const { container } = renderComponent()
         const reflectionContent = container.querySelector('.space-y-5') as HTMLElement
         expect(reflectionContent).not.toBeNull()
         const frostedCard = reflectionContent!.closest('[class*="backdrop-blur"]') as HTMLElement
         expect(frostedCard).not.toBeNull()
-        expect(frostedCard!.className).toContain('bg-white/[0.07]')
+        expect(frostedCard!.className).toContain('bg-violet-500/[0.08]')
+        expect(frostedCard!.className).toContain('border-violet-400')
       })
 
-      it('Tier 3: reflection FrostedCard has generous padding', () => {
+      it('Tier 1: reflection FrostedCard has generous padding', () => {
         const { container } = renderComponent()
         const reflectionContent = container.querySelector('.space-y-5') as HTMLElement
         expect(reflectionContent).not.toBeNull()
@@ -358,6 +361,22 @@ describe('DevotionalTabContent', () => {
         expect(frostedCard).not.toBeNull()
         expect(frostedCard!.className).toContain('p-5')
         expect(frostedCard!.className).toContain('sm:p-8')
+      })
+
+      it("'Today's reflection' eyebrow renders on accent reflection card", () => {
+        renderComponent()
+        expect(screen.getByText("Today's reflection")).toBeInTheDocument()
+      })
+
+      it('reflection question callout matches passage callout Tier 2 idiom', () => {
+        const { container } = renderComponent()
+        const callouts = container.querySelectorAll('.rounded-xl.border-l-4')
+        // Two callouts on the page: the passage callout AND the reflection question callout
+        expect(callouts.length).toBe(2)
+        callouts.forEach((callout) => {
+          expect(callout.className).toContain('border-l-primary/60')
+          expect(callout.className).toContain('bg-white/[0.04]')
+        })
       })
 
     })
@@ -409,8 +428,8 @@ describe('DevotionalTabContent', () => {
         renderComponent()
         const label = screen.getByText('Something to think about')
         expect(label.className).toContain('uppercase')
-        expect(label.className).toContain('tracking-widest')
-        expect(label.className).toContain('text-white/70')
+        expect(label.className).toContain('tracking-[0.15em]')
+        expect(label.className).toContain('text-white/50')
         expect(label.className).toContain('font-medium')
       })
 
@@ -457,11 +476,12 @@ describe('DevotionalTabContent', () => {
       expect(screen.getByRole('button', { name: /Pray about today.*reading/ })).toBeInTheDocument()
     })
 
-    it('CTA button has pill styling', () => {
+    it('Pray CTA renders as gradient Button (page emotional peak)', () => {
       renderComponent()
       const btn = screen.getByRole('button', { name: /Pray about today.*reading/ })
       expect(btn.className).toContain('rounded-full')
-      expect(btn.className).toContain('bg-white')
+      expect(btn.className).toContain('bg-gradient-to-br')
+      expect(btn.className).toContain('from-violet-400')
     })
 
     it('CTA button meets 44px touch target', () => {

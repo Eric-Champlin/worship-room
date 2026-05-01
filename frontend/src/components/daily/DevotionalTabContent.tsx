@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Share2, Volume2, Check } from 'lucide-react'
 import { EchoCard } from '@/components/echoes/EchoCard'
 import { cn } from '@/lib/utils'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { Button } from '@/components/ui/Button'
 import { getTodaysDevotional, formatDevotionalDate } from '@/data/devotionals'
 import { useSwipe } from '@/hooks/useSwipe'
 import { useAuth } from '@/hooks/useAuth'
@@ -232,12 +233,13 @@ export function DevotionalTabContent({
               </p>
             </div>
             <div className="mt-4 flex items-center gap-4">
-              <Link
-                to={`/meditate/soaking?verse=${encodeURIComponent(devotional.passage.reference)}&verseText=${encodeURIComponent(devotional.passage.verses.map((v) => v.text).join(' '))}&verseTheme=${encodeURIComponent(devotional.theme)}`}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
-              >
-                Meditate on this passage &rarr;
-              </Link>
+              <Button variant="subtle" size="md" asChild>
+                <Link
+                  to={`/meditate/soaking?verse=${encodeURIComponent(devotional.passage.reference)}&verseText=${encodeURIComponent(devotional.passage.verses.map((v) => v.text).join(' '))}&verseTheme=${encodeURIComponent(devotional.theme)}`}
+                >
+                  Meditate on this passage &rarr;
+                </Link>
+              </Button>
             </div>
             <SharePanel
               verseText={devotional.passage.verses.map((v) => v.text).join(' ')}
@@ -249,7 +251,11 @@ export function DevotionalTabContent({
 
           {/* Reflection section */}
           <div className="py-6 sm:py-8">
-            <FrostedCard className="p-5 sm:p-8">
+            <FrostedCard
+              variant="accent"
+              eyebrow="Today's reflection"
+              className="p-5 sm:p-8"
+            >
               <div className="space-y-5 text-[17px] leading-[1.8] text-white sm:text-lg">
                 {devotional.reflection.map((paragraph, i) => (
                   <p key={i}>{paragraph}</p>
@@ -260,7 +266,7 @@ export function DevotionalTabContent({
 
           {/* Quote section */}
           <div className="py-6 sm:py-8">
-            <FrostedCard className="p-5 sm:p-6">
+            <FrostedCard variant="default" className="p-5 sm:p-6">
               <span className="font-serif text-5xl leading-none text-white/25" aria-hidden="true">
                 &ldquo;
               </span>
@@ -273,44 +279,46 @@ export function DevotionalTabContent({
 
           {/* Reflection question section */}
           <div className="py-6 sm:py-8" ref={questionRef}>
-            <FrostedCard className="border-l-2 border-l-primary p-4 sm:p-6">
-              <p className="text-xs font-medium uppercase tracking-widest text-white/70">Something to think about</p>
-              <p className="mt-2 text-xl font-medium leading-[1.5] text-white sm:text-2xl">
+            <div className="rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-5 py-6 sm:px-7 sm:py-7">
+              <p className="text-xs font-medium uppercase tracking-[0.15em] text-white/50 mb-3">
+                Something to think about
+              </p>
+              <p className="text-xl font-medium leading-[1.5] text-white sm:text-2xl mb-5">
                 {devotional.reflectionQuestion.replace('Something to think about today: ', '')}
               </p>
-              <div className="mt-5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const reflectionQuestion = devotional.reflectionQuestion.replace(
-                      'Something to think about today: ',
-                      '',
-                    )
-                    onSwitchToJournal?.(devotional.theme, reflectionQuestion, buildSnapshot())
-                  }}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-[colors,transform] duration-fast hover:bg-gray-100 active:scale-[0.98]"
-                >
-                  Journal about this question &rarr;
-                </button>
-              </div>
-            </FrostedCard>
+              <Button
+                variant="subtle"
+                size="sm"
+                type="button"
+                onClick={() => {
+                  const reflectionQuestion = devotional.reflectionQuestion.replace(
+                    'Something to think about today: ',
+                    '',
+                  )
+                  onSwitchToJournal?.(devotional.theme, reflectionQuestion, buildSnapshot())
+                }}
+              >
+                Journal about this question &rarr;
+              </Button>
+            </div>
           </div>
 
           {/* Pray CTA section */}
           <div className="py-6 sm:py-8">
             <div className="flex flex-col items-center gap-3 text-center">
               <p className="text-sm text-white/60">Ready to pray about today&apos;s reading?</p>
-              <button
+              <Button
+                variant="gradient"
+                size="lg"
                 type="button"
                 onClick={() => {
                   const verseText = devotional.passage.verses.map((v) => v.text).join(' ')
                   const customPrompt = `I'm reflecting on today's devotional about ${devotional.theme}. The passage is ${devotional.passage.reference}: "${verseText}". Help me pray about what I've read.`
                   onSwitchToPray?.(devotional.theme, customPrompt, buildSnapshot())
                 }}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-[colors,transform] duration-fast hover:bg-gray-100 active:scale-[0.98]"
               >
                 Pray about today&apos;s reading &rarr;
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -336,24 +344,18 @@ export function DevotionalTabContent({
 
           {/* Share & Read Aloud */}
           <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:justify-center">
-            <button
-              onClick={handleShareClick}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)] active:scale-[0.98]"
-            >
+            <Button variant="subtle" size="md" type="button" onClick={handleShareClick}>
               <Share2 size={18} aria-hidden="true" />
               Share today&apos;s devotional
-            </button>
-            <button
-              onClick={handleReadAloudClick}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm font-medium text-white backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.04)] transition-all motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18] hover:shadow-[0_0_20px_rgba(139,92,246,0.08)] active:scale-[0.98]"
-            >
+            </Button>
+            <Button variant="subtle" size="md" type="button" onClick={handleReadAloudClick}>
               <Volume2 size={18} aria-hidden="true" />
               {readAloud.state === 'idle'
                 ? 'Read aloud'
                 : readAloud.state === 'playing'
                   ? 'Pause'
                   : 'Resume'}
-            </button>
+            </Button>
           </div>
 
           {/* Bottom padding */}

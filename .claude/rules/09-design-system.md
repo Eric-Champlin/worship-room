@@ -651,8 +651,10 @@ The Daily Hub uses a different background architecture than the homepage. Instea
 
 The Daily Hub devotional uses a content tier system to prioritize reading-heavy elements:
 
-- **Tier 1 (primary reading content):** Standard FrostedCard with `text-white`, `leading-[1.75]` to `leading-[1.8]`, font sizing `text-[17px] sm:text-lg`. Used for: reflection body, saint quote, reflection question. Italic styling removed for readability.
-- **Tier 2 (scripture callout):** `rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-4 py-3` — a left-border accent treatment for the devotional passage. Lighter than a full FrostedCard but still distinct from body prose.
+- **Tier 1 (primary reading content):** Standard FrostedCard with `text-white`, `leading-[1.75]` to `leading-[1.8]`, font sizing `text-[17px] sm:text-lg`. Reflection body uses `variant="accent"` with eyebrow ("Today's reflection") + violet leading dot — DailyHub 2 promoted this card to centerpiece tier. Saint quote uses `variant="default"` for a quieter supporting voice. Italic styling removed from reading prose for legibility (kept on the saint quote because short quoted commentary reads well in italic).
+- **Tier 2 (scripture callout):** `rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-4 py-3` (or `px-5 py-6 sm:px-7 sm:py-7` for content-heavy callouts) — a left-border accent treatment originally introduced for the devotional passage and extended in DailyHub 2 to the reflection question. Both callouts share the same class string for visual unification across the tab. Lighter than a full FrostedCard but still distinct from body prose.
+
+**Eyebrow distinction (DailyHub 2):** Tier 1 (FrostedCard accent variant) and Tier 2 (rolls-own callout) both support an uppercase tracked eyebrow above the inner content, but they render the eyebrow differently. Tier 1 — when used with `<FrostedCard variant="accent" eyebrow="...">` — renders the eyebrow as a violet leading dot (`bg-violet-400`) followed by the label (`text-violet-300 font-semibold tracking-[0.15em]`). The dot is the visual signature of the most prominent tier. Tier 2 — when used as a rolls-own `<div>` with an inline eyebrow paragraph — renders ONLY the label (`text-white/50 font-medium tracking-[0.15em]`) with NO leading dot. The left-stripe accent (`border-l-4 border-l-primary/60`) is the Tier 2 signature; adding a dot would double up on accent. Apply the dot to Tier 1 eyebrows only.
 
 This tier system is canonical for any future feature with mixed content density (reading content + accent callouts).
 
