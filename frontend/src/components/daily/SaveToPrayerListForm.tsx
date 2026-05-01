@@ -4,6 +4,8 @@ import { CrisisBanner } from './CrisisBanner'
 import { addPrayer } from '@/services/prayer-list-storage'
 import { PRAYER_CATEGORIES, CATEGORY_LABELS } from '@/constants/prayer-categories'
 import { useToast } from '@/components/ui/Toast'
+import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PrayerVerseContext } from '@/types/daily-experience'
 
@@ -55,7 +57,7 @@ export function SaveToPrayerListForm({
   }, [title, category, prayerText, onSave, showToast, verseContext])
 
   return (
-    <div className="mt-4 rounded-lg border border-white/[0.12] bg-white/[0.06] p-4 backdrop-blur-sm">
+    <FrostedCard as="div" variant="subdued" className="mt-4">
       <h4 className="mb-3 text-sm font-semibold text-white">
         Save to your prayer list
       </h4>
@@ -95,27 +97,25 @@ export function SaveToPrayerListForm({
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <button
+        <Button
+          variant="subtle"
+          size="md"
           type="button"
           onClick={handleSave}
           disabled={!category}
-          className={cn(
-            'rounded-lg px-4 py-2 text-sm font-semibold text-white transition-[colors,transform] duration-fast active:scale-[0.98]',
-            category
-              ? 'bg-primary hover:bg-primary-lt'
-              : 'cursor-not-allowed bg-white/20',
-          )}
         >
           Save
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
           type="button"
           onClick={onCancel}
-          className="text-sm text-white/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+          className="min-h-[44px]"
         >
           Cancel
-        </button>
+        </Button>
       </div>
-    </div>
+    </FrostedCard>
   )
 }

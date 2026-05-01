@@ -14,6 +14,7 @@ import { GUIDED_PRAYER_SESSIONS } from '@/data/guided-prayer-sessions'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useCompletionTracking } from '@/hooks/useCompletionTracking'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 
 const ICON_COMPONENTS: Record<string, React.ComponentType<{ className?: string }>> = {
   Sunrise,
@@ -57,11 +58,12 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
           const isComplete = isAuthenticated && isGuidedPrayerComplete(session.id)
 
           return (
-            <button
+            <FrostedCard
               key={session.id}
-              type="button"
+              as="button"
+              variant="default"
               onClick={() => handleCardClick(session)}
-              className="relative w-[220px] min-w-[220px] flex flex-col flex-shrink-0 snap-center rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 text-left transition-all motion-reduce:transition-none duration-base hover:bg-white/[0.10] hover:border-white/20 hover:shadow-[0_0_25px_rgba(139,92,246,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:w-auto sm:min-w-0 sm:min-h-[260px] active:scale-[0.98]"
+              className="relative w-[220px] min-w-[220px] flex flex-col flex-shrink-0 snap-center sm:w-auto sm:min-w-0 sm:min-h-[260px] text-left"
             >
               {isComplete && (
                 <CheckCircle2
@@ -83,7 +85,7 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
               <span className="mt-2 self-start rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70">
                 {session.durationMinutes} min
               </span>
-            </button>
+            </FrostedCard>
           )
         })}
       </div>

@@ -5,6 +5,7 @@ import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
+import { Button } from '@/components/ui/Button'
 import { UnsavedChangesModal } from '@/components/ui/UnsavedChangesModal'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
@@ -160,31 +161,35 @@ export function JournalInput({
       <AnnouncerRegion />
 
       {/* Mode Toggle */}
-      <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
-        <div className="inline-flex rounded-lg border border-white/10" role="group" aria-label="Journal mode">
+      <div className="mb-6 flex items-center justify-center">
+        <div
+          className="flex w-full max-w-xs rounded-full border border-white/[0.08] bg-white/[0.07] p-1 backdrop-blur-md"
+          role="group"
+          aria-label="Journal mode"
+        >
           <button
             type="button"
             onClick={() => onModeChange('guided')}
-            className={cn(
-              'min-h-[44px] rounded-l-lg px-4 py-2 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]',
-              mode === 'guided'
-                ? 'bg-primary/20 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/15',
-            )}
             aria-pressed={mode === 'guided'}
+            className={cn(
+              'min-h-[44px] flex-1 rounded-full text-sm font-medium transition-all duration-base motion-reduce:transition-none active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+              mode === 'guided'
+                ? 'bg-violet-500/[0.13] border border-violet-400/45 text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]'
+                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
+            )}
           >
             Guided
           </button>
           <button
             type="button"
             onClick={() => onModeChange('free')}
-            className={cn(
-              'min-h-[44px] rounded-r-lg px-4 py-2 text-sm font-medium transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]',
-              mode === 'free'
-                ? 'bg-primary/20 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/15',
-            )}
             aria-pressed={mode === 'free'}
+            className={cn(
+              'min-h-[44px] flex-1 rounded-full text-sm font-medium transition-all duration-base motion-reduce:transition-none active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+              mode === 'free'
+                ? 'bg-violet-500/[0.13] border border-violet-400/45 text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]'
+                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
+            )}
           >
             Free Write
           </button>
@@ -210,15 +215,16 @@ export function JournalInput({
           </div>
           {showPromptRefresh && prayContext?.from !== 'devotional' && (
             <div className="mt-2 text-center">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 type="button"
                 onClick={onTryDifferentPrompt}
-                className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="New prompt"
               >
                 <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
                 Try a different prompt
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -274,7 +280,7 @@ export function JournalInput({
           placeholder={mode === 'guided' ? 'Start writing your reflection...' : 'What\'s on your heart today?'}
           maxLength={JOURNAL_MAX_LENGTH}
           rows={6}
-          className="min-h-[200px] w-full resize-none rounded-lg border border-white/30 bg-white/[0.06] px-4 pb-10 pt-3 text-lg leading-relaxed text-white placeholder:text-white/50 shadow-[0_0_20px_3px_rgba(255,255,255,0.50),0_0_40px_8px_rgba(255,255,255,0.30)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="min-h-[200px] w-full resize-none rounded-lg border border-violet-400/30 bg-white/[0.04] px-4 pb-10 pt-3 text-lg leading-relaxed text-white placeholder:text-white/40 shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
           aria-label="Journal entry"
           aria-describedby="journal-char-count"
         />
@@ -287,17 +293,19 @@ export function JournalInput({
           className="absolute bottom-2 left-3"
         />
         {isAuthenticated && isVoiceSupported && (
-          <button
+          <Button
+            variant="subtle"
+            size="sm"
             type="button"
             onClick={handleVoiceToggle}
             disabled={isPermissionDenied}
             className={cn(
-              'absolute bottom-2 right-2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+              'absolute bottom-2 right-2 min-w-[44px] !rounded-full !px-0',
               isPermissionDenied
-                ? 'cursor-not-allowed opacity-40'
+                ? 'opacity-40'
                 : isListening
-                  ? 'bg-red-500/20 text-red-400 motion-safe:animate-mic-pulse'
-                  : 'bg-white/10 text-white/50 hover:bg-white/15 hover:text-white/70',
+                  ? 'motion-safe:animate-mic-pulse !border-red-400/60 !bg-red-500/20 !text-red-400'
+                  : '',
             )}
             aria-label={
               isPermissionDenied
@@ -315,7 +323,7 @@ export function JournalInput({
             ) : (
               <Mic className="h-5 w-5" />
             )}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -334,14 +342,15 @@ export function JournalInput({
 
       {/* Save Button */}
       <div className="mb-8 text-center">
-        <button
+        <Button
+          variant="gradient"
+          size="lg"
           type="button"
           onClick={handleSave}
           disabled={!text.trim()}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all motion-reduce:transition-none duration-base hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
         >
           Save Entry
-        </button>
+        </Button>
       </div>
 
       <UnsavedChangesModal isOpen={showModal} onLeave={confirmLeave} onStay={cancelLeave} />

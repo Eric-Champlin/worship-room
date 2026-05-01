@@ -18,6 +18,8 @@ import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { JournalInput } from '@/components/daily/JournalInput'
 import { SavedEntriesList } from '@/components/daily/SavedEntriesList'
 import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
+import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
 import { getAllJournalEntries, createJournalEntry, JournalStorageFullError } from '@/lib/bible/journalStore'
 import type { JournalMode, SavedJournalEntry, PrayContext, JournalVerseContext } from '@/types/daily-experience'
@@ -309,36 +311,35 @@ export function JournalTabContent({ prayContext = null, onSwitchTab, urlPrompt }
     <div>
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         {draftConflictPending && prayContext?.from === 'devotional' && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="draft-conflict-title"
-            className="mb-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] p-6 backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]"
-          >
-            <h3 id="draft-conflict-title" className="mb-2 text-lg font-semibold text-white">
-              You have an unsaved draft
-            </h3>
-            <p className="mb-4 text-sm text-white/80">
-              Would you like to start fresh with today&apos;s devotional prompt, or keep working on your current draft?
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleStartFresh}
-                className="min-h-[44px] rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              >
-                Start fresh
-              </button>
-              <button
-                type="button"
-                onClick={handleKeepDraft}
-                className="min-h-[44px] rounded-lg border border-white/[0.12] bg-transparent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                autoFocus
-              >
-                Keep my current draft
-              </button>
+          <FrostedCard as="div" variant="default" className="mb-6">
+            <div role="dialog" aria-modal="true" aria-labelledby="draft-conflict-title">
+              <h3 id="draft-conflict-title" className="mb-2 text-lg font-semibold text-white">
+                You have an unsaved draft
+              </h3>
+              <p className="mb-4 text-sm text-white/80">
+                Would you like to start fresh with today&apos;s devotional prompt, or keep working on your current draft?
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="subtle"
+                  size="md"
+                  type="button"
+                  onClick={handleStartFresh}
+                >
+                  Start fresh
+                </Button>
+                <Button
+                  variant="subtle"
+                  size="md"
+                  type="button"
+                  onClick={handleKeepDraft}
+                  autoFocus
+                >
+                  Keep my current draft
+                </Button>
+              </div>
             </div>
-          </div>
+          </FrostedCard>
         )}
 
         {/* Verse Prompt Card (from Bible bridge) */}

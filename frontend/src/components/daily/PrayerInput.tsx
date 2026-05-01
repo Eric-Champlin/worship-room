@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
+import { Button } from '@/components/ui/Button'
 import { DEFAULT_PRAYER_CHIPS, PRAYER_DRAFT_KEY } from '@/constants/daily-experience'
 
 export interface PrayerInputProps {
@@ -109,14 +110,15 @@ export function PrayerInput({
       {showChips && (
         <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
           {DEFAULT_PRAYER_CHIPS.map((chip) => (
-            <button
+            <Button
               key={chip}
+              variant="subtle"
+              size="sm"
               type="button"
               onClick={() => handleChipClick(chip)}
-              className="min-h-[44px] shrink-0 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white transition-[colors,transform] duration-fast hover:border-primary hover:text-primary active:scale-[0.98]"
             >
               {chip}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -134,7 +136,7 @@ export function PrayerInput({
           placeholder="Start typing here..."
           maxLength={500}
           rows={8}
-          className="w-full resize-y min-h-[200px] max-h-[500px] rounded-lg border border-white/30 bg-white/[0.06] px-4 py-3 text-white placeholder:text-white/50 shadow-[0_0_20px_3px_rgba(255,255,255,0.50),0_0_40px_8px_rgba(255,255,255,0.30)] focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="w-full resize-y min-h-[200px] max-h-[500px] rounded-lg border border-violet-400/30 bg-white/[0.04] px-4 py-3 text-white placeholder:text-white/40 shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
           aria-label="Prayer request"
           aria-describedby={nudge ? 'pray-error pray-char-count' : 'pray-char-count'}
           aria-invalid={nudge ? 'true' : undefined}
@@ -163,14 +165,15 @@ export function PrayerInput({
       )}
 
       <div className="text-center">
-        <button
+        <Button
+          variant="gradient"
+          size="lg"
           type="button"
           onClick={handleSubmit}
-          disabled={isLoading}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all motion-reduce:transition-none duration-base hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+          isLoading={isLoading}
         >
           Help Me Pray
-        </button>
+        </Button>
       </div>
     </>
   )

@@ -183,19 +183,20 @@ When adding new animations, default to using the global rule (do nothing — the
 
 ---
 
-## Textarea Glow Pattern (Daily Hub Round 3)
+## Textarea Glow Pattern (Daily Hub Round 4 / DailyHub 1B)
 
-The Pray and Journal textareas use a **static white box-shadow** instead of an animated glow. The previous `animate-glow-pulse` was removed because the pulsing motion competed with the user's focus during emotionally vulnerable writing.
+The Pray and Journal textareas use a **static violet box-shadow** that matches the FrostedCard default-tier surface, replacing the prior white-glow pattern. The previous `animate-glow-pulse` (Wave 6) and the white-glow shadow (Round 3) are both deprecated. The current pattern reads as a frosted writing surface consistent with the cards around it on the multi-bloom canvas (DailyHub 1A).
 
 **Canonical class string for textarea glow:**
 
 ```
-shadow-[0_0_20px_3px_rgba(255,255,255,0.50),0_0_40px_8px_rgba(255,255,255,0.30)]
-border border-white/30
-focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30
+shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)]
+border border-violet-400/30 bg-white/[0.04]
+focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30
+placeholder:text-white/40
 ```
 
-**Apply to:** PrayerInput textarea, JournalInput textarea. Other textareas (Bible search, AskPage, Reading Plan create flow) may continue using their existing glow treatment or be migrated to this pattern.
+**Apply to:** PrayerInput textarea, JournalInput textarea. Other textareas (Bible search, AskPage, Reading Plan create flow) may continue using their existing glow treatment or be migrated to this pattern as part of a future spec.
 
 ---
 
@@ -261,8 +262,8 @@ Shared building blocks for the landing page, created during the Round 3 homepage
 - **JournalTabContent.tsx** — Journal tab content. Plain `<div>` wrapper with same padding pattern. Renders `JournalInput` (Guided/Free Write toggle, prompt card, draft auto-save, crisis banner, saved entries, AI reflection). No GlowBackground, no BackgroundSquiggle.
 - **MeditateTabContent.tsx** — Meditate tab content. Plain `<div>` wrapper. Renders 6 auth-gated FrostedCard meditation cards, completion checkmarks, all-6-complete celebration banner, and the Spec Z verse banner when arriving from devotional with verse params. No heading. No GlowBackground, no BackgroundSquiggle.
 - **DevotionalTabContent.tsx** — Devotional tab content. Plain `<div>` wrapper. No heading. Renders date navigation, devotional title, passage (Tier 2 scripture callout), reflection body (Tier 1 FrostedCard), saint quote (Tier 1 FrostedCard, positioned BELOW reflection body per Wave 5), reflection question card with embedded "Journal about this question" CTA (Spec O), authentic Pray flow CTA (Spec P). No GlowBackground (replaced by Daily Hub HorizonGlow). Theme tags removed (Wave 5).
-- **PrayerInput.tsx** — Pray tab textarea with 3 starter chips, `rows={8} min-h-[200px] max-h-[500px] resize-y`, white textarea glow, draft auto-save (1s debounce, `wr_prayer_draft` key), draft saved indicator, "Help Me Pray" white pill button matching homepage primary CTA style.
-- **JournalInput.tsx** — Journal tab input with mode toggle (Guided/Free Write), prompt card (Inter sans, NOT italic, white text, leading-relaxed), draft auto-save (`wr_journal_draft` key), white textarea glow, "Save Entry" button matching homepage primary CTA. Mounts `DevotionalPreviewPanel` at the top when arriving from devotional context.
+- **PrayerInput.tsx** — Pray tab textarea with 3 starter chips (`<Button variant="subtle" size="sm">`), `rows={8} min-h-[200px] max-h-[500px] resize-y`, **violet textarea glow** (DailyHub 1B), draft auto-save (1s debounce, `wr_prayer_draft` key), draft saved indicator, "Help Me Pray" `<Button variant="gradient" size="lg">` showstopper.
+- **JournalInput.tsx** — Journal tab input with mode toggle (Guided/Free Write — DailyHub 1A-style violet active pill), prompt card (Inter sans, NOT italic, white text, leading-relaxed — stays rolls-own scripture-callout idiom), draft auto-save (`wr_journal_draft` key), **violet textarea glow** (DailyHub 1B), voice mic (`<Button variant="subtle" size="sm">`), "Save Entry" `<Button variant="gradient" size="lg">` showstopper. Mounts `DevotionalPreviewPanel` at the top when arriving from devotional context.
 - **DevotionalPreviewPanel.tsx** (Spec X) — Sticky collapsible inline preview panel. Pinned at `top-2 z-30` so it follows the user as they scroll. Collapsed state: small pill showing "TODAY'S DEVOTIONAL" label + title + reference + chevron. Expanded state: smooth max-height animation (300ms `decelerate`) revealing the passage, reflection question (callout), reflection body, and quote with internal scroll capped at `max-h-[50vh]`. Includes an `X` close button next to the chevron (Wave 6) for dismissing the panel. Mounted in JournalInput AND PrayerInput when `prayContext?.from === 'devotional' && devotionalSnapshot && !contextDismissed`.
 - **DailyAmbientPillFAB.tsx** (Wave 7) — Sticky bottom-right floating action button wrapping `AmbientSoundPill`. Mounted on the DailyHub root only (not on meditation activity sub-pages, which have their own transport controls). Auto-hides when `state.drawerOpen === true` (chat-widget pattern). Uses `pointer-events-none` outer + `pointer-events-auto` inner so empty space around the pill remains clickable. Includes `env(safe-area-inset-*)` for iOS notch / Android nav bar respect.
 - **HorizonGlow.tsx** (Spec Y) — Daily Hub-only atmospheric glow layer. Renders 5 large soft purple/lavender glow blobs at strategic vertical percentages (5%, 15%, 35%, 60%, 85%) of the page body. Each glow is `position: absolute` with percentage `top`/`left`, large `width`/`height` (300-900px), heavy `filter: blur(100-120px)`, and centered via `transform: translate(-50%, -50%)`. **Final tuned opacity values (low intensity for readability):** Glow 1: 0.32, Glow 2: 0.28, Glow 3: 0.35, Glow 4: 0.30, Glow 5: 0.28. Mounted on the DailyHub root. **Do not use on other pages** without explicit reconsideration — the layer is scoped to the Daily Hub controlled experience.
@@ -825,13 +826,14 @@ The following patterns have been replaced by Round 3 / Daily Hub Round 3 / Bible
 | `Caveat` font on headings                                       | `GRADIENT_TEXT_STYLE` (white-to-purple gradient)                                        |
 | `BackgroundSquiggle` on Daily Hub                               | None — Daily Hub uses HorizonGlow only. Squiggles remain on homepage JourneySection.    |
 | `GlowBackground` per Daily Hub section                          | HorizonGlow at Daily Hub root                                                           |
-| `animate-glow-pulse` on textareas                               | Static white box-shadow (see "Textarea Glow Pattern")                                   |
+| `animate-glow-pulse` on textareas                               | Violet textarea glow (Daily Hub Round 4 / DailyHub 1B) — see "Textarea Glow Pattern"    |
 | Inline expanding dropdown panel for AmbientSoundPill idle state | Open AudioDrawer right-side flyout in both states                                       |
 | `font-serif italic` on Journal prompts                          | `font-sans` Inter, no italic, white text                                                |
 | Side-by-side SongPickSection layout                             | Centered single-column with equal-width heading lines                                   |
 | "What's On Your Heart/Mind/Spirit?" headings on Daily Hub tabs  | No headings — content speaks for itself                                                 |
 | Devotional theme tag pills                                      | Removed; theme is still passed via cross-feature CTAs but not displayed                 |
-| Cyan/purple textarea glow border                                | White border with white glow shadow                                                     |
+| Cyan/purple textarea glow border                                | Violet textarea glow (Daily Hub Round 4 / DailyHub 1B) — see "Textarea Glow Pattern"    |
+| White border with white glow shadow on Pray/Journal textareas   | Violet textarea glow (Daily Hub Round 4 / DailyHub 1B) — see "Textarea Glow Pattern"    |
 | `line-clamp-3` on guided prayer card descriptions               | `min-h-[260px]` with no clamp                                                           |
 | Hardcoded `200ms`/`cubic-bezier(...)` in component CSS          | Import canonical tokens from `frontend/src/constants/animation.ts` (BB-33)              |
 | Spring easings on modals/toasts/drawers                         | `standard`, `decelerate`, or `accelerate` from `constants/animation.ts` (BB-33)         |

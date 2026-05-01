@@ -4,7 +4,8 @@ import { SearchX } from 'lucide-react'
 import { useStaggeredEntrance } from '@/hooks/useStaggeredEntrance'
 import { JournalSearchFilter } from '@/components/daily/JournalSearchFilter'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import type { JournalMode, SavedJournalEntry } from '@/types/daily-experience'
 
 const EMPTY_REFLECTING_IDS: ReadonlySet<string> = new Set()
@@ -171,61 +172,64 @@ export function SavedEntriesList({
       {filteredEntries.map((entry, entryIndex) => {
         const stagger = getEntryStaggerProps(entryIndex)
         return (
-        <article
+        <div
           key={entry.id}
-          className={cn('rounded-lg border border-white/10 bg-white/[0.06] backdrop-blur-sm p-4', stagger.className)}
+          className={stagger.className}
           style={stagger.style}
-          aria-label={`Journal entry from ${formatDateTime(new Date(entry.timestamp))}`}
         >
-          <p className="mb-2 text-xs text-white/60">
-            {formatDateTime(new Date(entry.timestamp))}
-            {entry.mode === 'guided' && (
-              <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-primary">
-                <span className="sr-only">Mode: </span>Guided
-              </span>
-            )}
-          </p>
-          {entry.promptText && (
-            <p className="mb-2 text-xs italic text-white/60">
-              Prompt: {entry.promptText}
+          <FrostedCard as="article" variant="default" className="p-4">
+            <p className="mb-2 text-xs text-white/60">
+              {formatDateTime(new Date(entry.timestamp))}
+              {entry.mode === 'guided' && (
+                <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-primary">
+                  <span className="sr-only">Mode: </span>Guided
+                </span>
+              )}
             </p>
-          )}
-          <p className="whitespace-pre-wrap font-serif text-base leading-relaxed text-white/80">
-            {entry.content}
-          </p>
+            {entry.promptText && (
+              <p className="mb-2 text-xs italic text-white/60">
+                Prompt: {entry.promptText}
+              </p>
+            )}
+            <p className="whitespace-pre-wrap font-serif text-base leading-relaxed text-white/80">
+              {entry.content}
+            </p>
 
-          {entry.reflection ? (
-            <div className="mt-3 rounded-lg bg-white/[0.04] p-3">
-              <p className="mb-1 text-xs font-medium text-primary">
-                Reflection
-              </p>
-              <p className="text-sm leading-relaxed text-white/80">
-                {entry.reflection}
-              </p>
-            </div>
-          ) : reflectingIds.has(entry.id) ? (
-            <div
-              role="status"
-              aria-live="polite"
-              className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1.5 text-sm text-white/70"
-            >
-              <span
-                aria-hidden="true"
-                className="h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-primary motion-reduce:animate-none"
-              />
-              Reflecting on your words&hellip;
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => onReflect(entry.id)}
-              className="mt-3 text-sm text-primary underline transition-colors hover:text-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              aria-label={`Reflect on entry from ${formatDateTime(new Date(entry.timestamp))}`}
-            >
-              Reflect on my entry
-            </button>
-          )}
-        </article>
+            {entry.reflection ? (
+              <FrostedCard as="div" variant="subdued" className="mt-3 p-3">
+                <p className="mb-1 text-xs font-medium text-primary">
+                  Reflection
+                </p>
+                <p className="text-sm leading-relaxed text-white/80">
+                  {entry.reflection}
+                </p>
+              </FrostedCard>
+            ) : reflectingIds.has(entry.id) ? (
+              <div
+                role="status"
+                aria-live="polite"
+                className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1.5 text-sm text-white/70"
+              >
+                <span
+                  aria-hidden="true"
+                  className="h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-primary motion-reduce:animate-none"
+                />
+                Reflecting on your words&hellip;
+              </div>
+            ) : (
+              <Button
+                variant="subtle"
+                size="sm"
+                type="button"
+                onClick={() => onReflect(entry.id)}
+                className="mt-3"
+                aria-label={`Reflect on entry from ${formatDateTime(new Date(entry.timestamp))}`}
+              >
+                Reflect on my entry
+              </Button>
+            )}
+          </FrostedCard>
+        </div>
         )
       })}
       </div>

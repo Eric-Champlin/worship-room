@@ -19,6 +19,8 @@ import { KaraokeText } from '@/components/daily/KaraokeText'
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal'
 import { ShareButton } from '@/components/daily/ShareButton'
 import { SaveToPrayerListForm } from '@/components/daily/SaveToPrayerListForm'
+import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getPrayers, MAX_PRAYERS } from '@/services/prayer-list-storage'
 import { cn } from '@/lib/utils'
 import { getClassicPrayers } from '@/mocks/daily-experience-mock-data'
@@ -207,10 +209,12 @@ export function PrayerResponse({
       {/* Generated Prayer Display */}
       {prayer && !isLoading && (
         <div className="motion-safe:animate-fade-in" aria-live="polite">
-          <p className="mb-2 text-sm font-medium text-white/50">
-            Your prayer:
-          </p>
-          <div className="mb-6 rounded-2xl bg-white/[0.06] backdrop-blur-sm border border-white/10 p-6">
+          <FrostedCard
+            as="article"
+            variant="accent"
+            eyebrow="Your prayer"
+            className="mb-6"
+          >
             {/* Full text for screen readers (hidden visually during animation) */}
             <span className="sr-only">{prayer.text}</span>
             <div aria-hidden="true">
@@ -230,7 +234,7 @@ export function PrayerResponse({
                 />
               )}
             </div>
-          </div>
+          </FrostedCard>
 
           {/* Skip link during reveal */}
           {!revealComplete && (
@@ -272,15 +276,16 @@ export function PrayerResponse({
 
           {/* Action Buttons */}
           <div className="mb-6 flex items-center gap-2">
-            <button
+            <Button
+              variant="subtle"
+              size="sm"
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
               aria-label="Copy prayer"
             >
               <Copy className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Copy</span>
-            </button>
+            </Button>
 
             <span
               role="presentation"
@@ -292,29 +297,31 @@ export function PrayerResponse({
               />
             </span>
 
-            <button
+            <Button
+              variant="subtle"
+              size="sm"
               type="button"
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
               aria-label="Save prayer"
             >
               <Bookmark className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Save</span>
-            </button>
+            </Button>
 
             {/* Save to prayer list */}
             {!savedToList ? (
-              <button
+              <Button
+                variant="subtle"
+                size="sm"
                 type="button"
                 onClick={handleSaveToList}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-[colors,transform] duration-fast hover:bg-white/15 active:scale-[0.98]"
                 aria-label="Save to prayer list"
               >
                 <ListPlus className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Save to List</span>
-              </button>
+              </Button>
             ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm text-success">
+              <span className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-white/[0.12] bg-white/[0.07] px-4 py-2 text-sm text-success backdrop-blur-sm">
                 <Check className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Saved</span>
               </span>
@@ -322,15 +329,16 @@ export function PrayerResponse({
 
             {/* Mobile overflow menu */}
             <div ref={mobileMenuRef} className="relative sm:hidden">
-              <button
+              <Button
+                variant="subtle"
+                size="sm"
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="inline-flex items-center rounded-lg bg-white/10 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/15"
                 aria-label="More actions"
                 aria-expanded={mobileMenuOpen}
               >
                 <MoreHorizontal className="h-4 w-4" />
-              </button>
+              </Button>
               {mobileMenuOpen && (
                 <div
                   role="menu"

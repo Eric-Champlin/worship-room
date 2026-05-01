@@ -581,15 +581,14 @@ describe('JournalTabContent atmospheric visuals', () => {
     expect(savedEntryContent).toBeInTheDocument()
   })
 
-  it('mode toggle has flex-wrap and items-center', () => {
+  it('mode toggle is centered with items-center and justify-center', () => {
     renderJournalTab()
     const guidedButton = screen.getByRole('button', { name: 'Guided' })
     const toggleGroup = guidedButton.closest('[role="group"]')
     const container = toggleGroup?.parentElement
     expect(container).not.toBeNull()
-    expect(container!.className).toContain('flex-wrap')
     expect(container!.className).toContain('items-center')
-    expect(container!.className).toContain('gap-3')
+    expect(container!.className).toContain('justify-center')
   })
 
   it('does not render BackgroundSquiggle', () => {

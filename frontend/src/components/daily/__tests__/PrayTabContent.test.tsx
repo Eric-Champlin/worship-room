@@ -335,7 +335,7 @@ describe('karaoke prayer reveal', () => {
     await flushPrayerPromise()
 
     // Prayer should be displayed
-    expect(screen.getByText('Your prayer:')).toBeInTheDocument()
+    expect(screen.getByText('Your prayer')).toBeInTheDocument()
   })
 
   it('skip link visible during reveal', async () => {
@@ -586,7 +586,7 @@ describe('full prayer experience flow', () => {
 
     // Step 2: Wait for prayer display
     await flushPrayerPromise()
-    expect(screen.getByText('Your prayer:')).toBeInTheDocument()
+    expect(screen.getByText('Your prayer')).toBeInTheDocument()
 
     // Step 3: Skip reveal
     await user.click(screen.getByRole('button', { name: /skip/i }))
@@ -633,7 +633,7 @@ describe('full prayer experience flow', () => {
     await flushPrayerPromise()
 
     // Verify new prayer appears with fresh reveal
-    expect(screen.getByText('Your prayer:')).toBeInTheDocument()
+    expect(screen.getByText('Your prayer')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
   })
 
@@ -689,7 +689,7 @@ describe('full prayer experience flow', () => {
     await flushPrayerPromise()
 
     // Prayer should appear
-    expect(screen.getByText('Your prayer:')).toBeInTheDocument()
+    expect(screen.getByText('Your prayer')).toBeInTheDocument()
 
     // Text should appear instantly (KaraokeTextReveal handles prefers-reduced-motion)
     // Skip link should disappear quickly since reveal is instant
