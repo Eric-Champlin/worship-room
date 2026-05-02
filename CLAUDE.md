@@ -162,7 +162,16 @@ See `.claude/rules/12-project-reference.md` for the complete route inventory (pu
 
 Verify current state with `./mvnw test` (backend), `pnpm test` (frontend), `pnpm build`, `pnpm lint`, and `frontend/scripts/measure-bundle.mjs` (bundle size). Numbers drift; always run before relying.
 
-**Frontend regression baseline (post-Key-Protection):** 8,811 pass / 11 pre-existing fail across 7 files. The 11 failures are documented tech debt (orphan test for a deleted hook, CSS class drift in one plan browser test, logged-out mock listing cards in Local Support / Counselors / Celebrate Recovery / Churches, Pray loading-text timing flake). **Any NEW failing file or fail count > 11 after a Forums Wave spec lands is a regression.**
+**Frontend regression baseline (refreshed 2026-05-02):** 8,932 pass / 11 fail across 693 test files (7 failing). Known failures:
+- `src/hooks/__tests__/useBibleAudio.test.ts` — entire file
+- `src/pages/__tests__/CelebrateRecovery.test.tsx` — "renders mock listing cards for logged-out users"
+- `src/pages/__tests__/Churches.test.tsx` — "renders mock listing cards for logged-out users"
+- `src/pages/__tests__/Counselors.test.tsx` — "renders mock listing cards for logged-out users"
+- `src/pages/__tests__/LocalSupportEnhancements.test.tsx` — 6 tests: "mock results are visible with no bookmark or visit buttons", "CTAs visible in expanded card for logged-out users", "Churches shows church-specific CTAs", "Counselors shows counselor-specific CTAs", "CelebrateRecovery shows CR-specific CTAs", "URL params work without triggering auto-search when absent"
+- `src/pages/__tests__/Pray.test.tsx` — "shows loading then prayer after generating"
+- `src/pages/bible/__tests__/PlanBrowserPage.test.tsx` — "hero heading uses Daily Hub pt-36/sm:pt-40/lg:pt-44 padding"
+
+Any NEW failing file beyond this list after a Forums Wave spec lands is a regression.
 
 **Backend baseline:** ~280 pass / 0 fail (post-Spec-4 Key Protection Wave). Growth expected as Forums Wave lands.
 
