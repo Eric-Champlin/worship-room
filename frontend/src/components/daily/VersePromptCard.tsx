@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { Button } from '@/components/ui/Button'
 import type { VerseContext } from '@/types/daily-experience'
 
 interface VersePromptCardProps {
@@ -15,19 +16,21 @@ export function VersePromptCard({ context, onRemove, framingLine }: VersePromptC
   return (
     <div
       className={cn(
-        'relative mb-4 rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-4 py-4',
+        'relative mb-4 rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-5 py-6 sm:px-7 sm:py-7',
         !prefersReduced && 'motion-safe:animate-fade-in',
       )}
       role="region"
       aria-label={`Verse prompt: ${context.reference}`}
     >
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={onRemove}
-        className="absolute right-2 top-2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-white/50 transition-colors hover:text-white/80"
         aria-label="Remove verse prompt"
+        className="absolute right-2 top-2 rounded-full !p-0 h-11 w-11"
       >
-        <X className="h-5 w-5" />
-      </button>
+        <X className="h-5 w-5" aria-hidden="true" />
+      </Button>
 
       <p className="pr-12 font-serif text-base font-semibold text-white sm:text-lg">
         {context.reference}
@@ -56,7 +59,7 @@ export function VersePromptCard({ context, onRemove, framingLine }: VersePromptC
 export function VersePromptSkeleton() {
   return (
     <div
-      className="mb-4 rounded-xl border-l-4 border-l-primary/30 bg-white/[0.04] px-4 py-4"
+      className="mb-4 rounded-xl border-l-4 border-l-primary/30 bg-white/[0.04] px-5 py-6 sm:px-7 sm:py-7"
       aria-hidden="true"
     >
       <div className="h-5 w-32 motion-safe:animate-pulse rounded bg-white/10" />

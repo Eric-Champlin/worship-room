@@ -198,4 +198,37 @@ describe('DevotionalPreviewPanel', () => {
     await user.click(screen.getByRole('button', { name: /dismiss devotional preview/i }))
     expect(expandButton).toHaveAttribute('aria-expanded', 'false')
   })
+
+  it('inner chrome is FrostedCard default variant', () => {
+    const { container } = render(<DevotionalPreviewPanel snapshot={mockSnapshot} onDismiss={mockDismiss} />)
+    // Inner element after the sticky wrapper
+    const inner = container.firstElementChild?.firstElementChild as HTMLElement
+    expect(inner.className).toContain('rounded-3xl')
+    expect(inner.className).toContain('border-white/[0.12]')
+    expect(inner.className).toContain('shadow-frosted-base')
+    expect(inner.className).toContain('p-0')
+    expect(inner.className).toContain('overflow-hidden')
+  })
+
+  it('eyebrow uses canonical Tier 2 class string', () => {
+    render(<DevotionalPreviewPanel snapshot={mockSnapshot} onDismiss={mockDismiss} />)
+    const eyebrow = screen.getByText(/today's devotional/i)
+    expect(eyebrow.className).toContain('tracking-[0.15em]')
+    expect(eyebrow.className).toContain('text-white/50')
+    // Old Tier 2 deviation classes should be gone
+    expect(eyebrow.className).not.toContain('font-semibold')
+    expect(eyebrow.className).not.toContain('tracking-widest')
+  })
+
+  it('dismiss button is rendered via Button ghost variant', () => {
+    render(<DevotionalPreviewPanel snapshot={mockSnapshot} onDismiss={mockDismiss} />)
+    const button = screen.getByRole('button', { name: /dismiss devotional preview/i })
+    // Ghost variant text classes from Button.tsx:57
+    expect(button.className).toContain('text-white/80')
+    expect(button.className).toContain('hover:text-white')
+    expect(button.className).toContain('hover:bg-white/5')
+    // 44×44 tap target
+    expect(button.className).toContain('h-11')
+    expect(button.className).toContain('w-11')
+  })
 })

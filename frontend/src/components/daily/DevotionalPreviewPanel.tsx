@@ -1,6 +1,8 @@
 import { useId, useState } from 'react'
 import { BookOpen, ChevronDown, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { Button } from '@/components/ui/Button'
 import type { DevotionalSnapshot } from '@/types/daily-experience'
 
 interface DevotionalPreviewPanelProps {
@@ -15,12 +17,10 @@ export function DevotionalPreviewPanel({ snapshot, onDismiss }: DevotionalPrevie
 
   return (
     <div className="sticky top-2 z-30 mb-4">
-      <div
-        className={cn(
-          'bg-white/[0.06] backdrop-blur-md border border-white/[0.12] rounded-2xl',
-          'shadow-[0_4px_20px_rgba(0,0,0,0.3)]',
-          'transition-all motion-reduce:transition-none duration-base',
-        )}
+      <FrostedCard
+        variant="default"
+        as="div"
+        className="overflow-hidden p-0"
       >
         {/* Collapsed Pill (always visible) */}
         <div className="flex w-full items-center gap-3 px-4 py-3 sm:px-5 lg:px-6">
@@ -33,7 +33,7 @@ export function DevotionalPreviewPanel({ snapshot, onDismiss }: DevotionalPrevie
           >
             <BookOpen className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
+              <p className="text-xs font-medium uppercase tracking-[0.15em] text-white/50">
                 Today&apos;s Devotional
               </p>
               <p className="truncate text-sm font-medium text-white">
@@ -48,14 +48,15 @@ export function DevotionalPreviewPanel({ snapshot, onDismiss }: DevotionalPrevie
               aria-hidden="true"
             />
           </button>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onDismiss}
             aria-label="Dismiss devotional preview"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="rounded-full !p-0 h-11 w-11 shrink-0"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
 
         {/* Expanded Content */}
@@ -115,7 +116,7 @@ export function DevotionalPreviewPanel({ snapshot, onDismiss }: DevotionalPrevie
             </blockquote>
           </div>
         </div>
-      </div>
+      </FrostedCard>
     </div>
   )
 }

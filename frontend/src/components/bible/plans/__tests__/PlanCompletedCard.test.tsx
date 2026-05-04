@@ -47,10 +47,11 @@ describe('PlanCompletedCard', () => {
     expect(screen.getByText('Completed')).toBeInTheDocument()
   })
 
-  it('renders at reduced opacity', () => {
+  it('renders at reduced opacity (on inner FrostedCard)', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link.className).toContain('opacity-85')
+    const frostedDiv = link.firstElementChild as HTMLElement
+    expect(frostedDiv.className).toContain('opacity-85')
   })
 
   it('renders completion date', () => {
@@ -66,15 +67,28 @@ describe('PlanCompletedCard', () => {
     expect(link).toHaveAttribute('href', '/bible/plans/finding-comfort')
   })
 
-  it('applies new frosted glass styling (BB-52)', () => {
+  it('uses FrostedCard chrome (Spec 3 migration)', () => {
+    const { container } = renderCard()
+    const link = screen.getByRole('link')
+    const frostedDiv = link.firstElementChild as HTMLElement
+    expect(frostedDiv.className).toContain('rounded-3xl')
+    expect(frostedDiv.className).toContain('border-white/[0.12]')
+    expect(frostedDiv.className).toContain('shadow-frosted-base')
+    expect(frostedDiv.className).toContain('min-h-[140px]')
+    expect(frostedDiv.className).toContain('relative') // required for absolute Completed badge
+    // Old rolls-own chrome should be gone
+    expect(link.className).not.toContain('bg-white/[0.03]')
+    expect(link.className).not.toContain('rounded-xl')
+    expect(container.querySelector('.bg-white\\/20.h-px')).toBeNull() // top-edge accent removed
+  })
+
+  it('FrostedCard hover lift via group-hover; opacity-85 + group-hover both on inner card', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link.className).toContain('bg-white/[0.03]')
-    expect(link.className).toContain('backdrop-blur-sm')
-    expect(link.className).toContain('border-white/[0.08]')
-    expect(link.className).toContain('rounded-xl')
-    expect(link.className).not.toContain('bg-gradient-to-br')
-    expect(link.className).not.toContain('aspect-[4/3]')
+    const frostedDiv = link.firstElementChild as HTMLElement
+    expect(frostedDiv.className).toContain('group-hover:bg-white/[0.10]')
+    expect(frostedDiv.className).toContain('group-hover:-translate-y-0.5')
+    expect(frostedDiv.className).toContain('opacity-85')
   })
 
   it('does not render dark scrim', () => {

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import type { PlanMetadata, PlanProgress } from '@/types/bible-plans'
 import { getPlanIconConfig } from './plan-icon-map'
 
@@ -14,10 +15,11 @@ export function PlanInProgressCard({ plan, progress }: PlanInProgressCardProps) 
 
   return (
     <article aria-label={plan.title}>
-      <div className="relative flex min-h-[140px] flex-col gap-3 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-5 transition-all motion-reduce:transition-none duration-base ease-standard hover:bg-white/[0.06] hover:border-white/20">
-        {/* Brighter top-edge accent */}
-        <div className="absolute inset-x-0 top-0 h-px bg-white/20" aria-hidden="true" />
-
+      <FrostedCard
+        variant="default"
+        as="div"
+        className="min-h-[140px] flex flex-col gap-3 transition-all motion-reduce:transition-none duration-base ease-decelerate"
+      >
         {/* Icon + Title row */}
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
@@ -54,7 +56,7 @@ export function PlanInProgressCard({ plan, progress }: PlanInProgressCardProps) 
         >
           Continue
         </Link>
-      </div>
+      </FrostedCard>
     </article>
   )
 }

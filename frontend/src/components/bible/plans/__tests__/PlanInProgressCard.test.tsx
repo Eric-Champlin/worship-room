@@ -64,19 +64,29 @@ describe('PlanInProgressCard', () => {
     expect(screen.getByText('Paused')).toBeInTheDocument()
   })
 
-  it('applies new frosted glass styling (BB-52)', () => {
+  it('uses FrostedCard chrome (Spec 3 migration)', () => {
     const { container } = renderCard()
     const card = container.querySelector('article > div') as HTMLElement
-    expect(card.className).toContain('bg-white/[0.03]')
-    expect(card.className).toContain('backdrop-blur-sm')
-    expect(card.className).toContain('border-white/[0.08]')
-    expect(card.className).toContain('rounded-xl')
-    expect(card.className).not.toContain('bg-gradient-to-br')
-    expect(card.className).not.toContain('aspect-[4/3]')
+    expect(card.className).toContain('rounded-3xl')
+    expect(card.className).toContain('border-white/[0.12]')
+    expect(card.className).toContain('shadow-frosted-base')
+    expect(card.className).toContain('min-h-[140px]')
+    // Old rolls-own chrome should be gone
+    expect(card.className).not.toContain('bg-white/[0.03]')
+    expect(card.className).not.toContain('rounded-xl')
+    expect(container.querySelector('.bg-white\\/20.h-px')).toBeNull() // top-edge accent removed
   })
 
   it('does not render dark scrim', () => {
     const { container } = renderCard()
     expect(container.querySelector('.bg-gradient-to-t')).toBeNull()
+  })
+
+  it('outer card is NOT wrapped in a Link (only Continue button is interactive)', () => {
+    renderCard()
+    // Only one link in the document — the Continue button. No outer card-level link.
+    const links = screen.getAllByRole('link')
+    expect(links).toHaveLength(1)
+    expect(links[0]).toHaveTextContent(/Continue/)
   })
 })

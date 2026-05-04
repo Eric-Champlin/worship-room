@@ -94,11 +94,38 @@ describe('VersePromptCard', () => {
     ).toBeInTheDocument()
   })
 
-  it('X button has 44px tap target', () => {
+  it('X button has 44px tap target via h-11 w-11 (44px)', () => {
     render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
     const button = screen.getByRole('button', { name: 'Remove verse prompt' })
-    expect(button.className).toContain('min-h-[44px]')
-    expect(button.className).toContain('min-w-[44px]')
+    expect(button.className).toContain('h-11')
+    expect(button.className).toContain('w-11')
+  })
+
+  it('X button is rendered via Button ghost variant', () => {
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
+    const button = screen.getByRole('button', { name: 'Remove verse prompt' })
+    // Ghost variant text classes from Button.tsx:57
+    expect(button.className).toContain('text-white/80')
+    expect(button.className).toContain('hover:text-white')
+    expect(button.className).toContain('hover:bg-white/5')
+  })
+
+  it('outer container has canonical Tier 2 padding', () => {
+    render(<VersePromptCard context={singleVerseContext} onRemove={noop} framingLine="What do you want to say to God about this?" />)
+    const region = screen.getByRole('region')
+    expect(region.className).toContain('px-5')
+    expect(region.className).toContain('py-6')
+    expect(region.className).toContain('sm:px-7')
+    expect(region.className).toContain('sm:py-7')
+  })
+
+  it('skeleton has matching Tier 2 padding', () => {
+    render(<VersePromptSkeleton />)
+    const skeleton = document.querySelector('[aria-hidden="true"]') as HTMLElement
+    expect(skeleton.className).toContain('px-5')
+    expect(skeleton.className).toContain('py-6')
+    expect(skeleton.className).toContain('sm:px-7')
+    expect(skeleton.className).toContain('sm:py-7')
   })
 
   it('X button calls onRemove', () => {

@@ -46,31 +46,36 @@ describe('PlanBrowseCard', () => {
     expect(link).toHaveAttribute('href', '/bible/plans/finding-comfort')
   })
 
-  it('applies new frosted glass styling (BB-52)', () => {
-    renderCard()
-    const link = screen.getByRole('link')
-    expect(link.className).toContain('bg-white/[0.03]')
-    expect(link.className).toContain('backdrop-blur-sm')
-    expect(link.className).toContain('border-white/[0.08]')
-    expect(link.className).toContain('rounded-xl')
-    expect(link.className).not.toContain('bg-gradient-to-br')
-    expect(link.className).not.toContain('from-primary/30')
-    expect(link.className).not.toContain('aspect-[4/3]')
-  })
-
-  it('renders brighter top-edge accent', () => {
+  it('uses FrostedCard chrome (Spec 3 migration)', () => {
     const { container } = renderCard()
-    const accent = container.querySelector('.bg-white\\/20.h-px')
-    expect(accent).not.toBeNull()
+    // Inner FrostedCard div lives inside the Link
+    const link = screen.getByRole('link')
+    const frostedDiv = link.firstElementChild as HTMLElement
+    expect(frostedDiv.className).toContain('rounded-3xl')
+    expect(frostedDiv.className).toContain('border-white/[0.12]')
+    expect(frostedDiv.className).toContain('shadow-frosted-base')
+    expect(frostedDiv.className).toContain('min-h-[140px]')
+    // Old rolls-own chrome should be gone
+    expect(link.className).not.toContain('bg-white/[0.03]')
+    expect(link.className).not.toContain('rounded-xl')
+    expect(container.querySelector('.bg-white\\/20.h-px')).toBeNull() // top-edge accent removed
   })
 
-  it('hover transition uses duration-base animation token', () => {
+  it('outer Link uses group + focus ring for hover-lift propagation', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link.className).toContain('duration-base')
-    expect(link.className).toContain('ease-standard')
-    expect(link.className).not.toContain('duration-300')
-    expect(link.className).not.toContain('duration-200')
+    expect(link.className).toContain('group')
+    expect(link.className).toContain('focus-visible:ring-2')
+  })
+
+  it('FrostedCard hover lift is gated by group-hover', () => {
+    renderCard()
+    const link = screen.getByRole('link')
+    const frostedDiv = link.firstElementChild as HTMLElement
+    expect(frostedDiv.className).toContain('group-hover:bg-white/[0.10]')
+    expect(frostedDiv.className).toContain('group-hover:-translate-y-0.5')
+    expect(frostedDiv.className).toContain('duration-base')
+    expect(frostedDiv.className).toContain('ease-decelerate')
   })
 
   it('title uses text-white, subtitle text-white/70, meta text-white/50', () => {

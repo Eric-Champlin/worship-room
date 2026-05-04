@@ -125,9 +125,25 @@ describe('EchoCard', () => {
     expect(serifs).toHaveLength(0)
   })
 
-  it('applies hover class', () => {
+  it('renders FrostedCard chrome on the inner article', () => {
+    renderCard(makeEcho())
+    const article = screen.getByRole('article')
+    expect(article.className).toContain('rounded-3xl')
+    expect(article.className).toContain('border-white/[0.12]')
+    expect(article.className).toContain('shadow-frosted-base')
+  })
+
+  it('applies group-hover lift on the inner article', () => {
+    renderCard(makeEcho())
+    const article = screen.getByRole('article')
+    expect(article.className).toContain('group-hover:bg-white/[0.10]')
+    expect(article.className).toContain('group-hover:-translate-y-0.5')
+  })
+
+  it('outer Link uses group + focus-ring classes', () => {
     renderCard(makeEcho())
     const link = screen.getByRole('link')
-    expect(link.className).toContain('hover:bg-white/[0.08]')
+    expect(link.className).toContain('group')
+    expect(link.className).toContain('focus-visible:ring-2')
   })
 })

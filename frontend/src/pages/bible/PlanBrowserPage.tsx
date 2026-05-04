@@ -1,6 +1,6 @@
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
-import { HorizonGlow } from '@/components/daily/HorizonGlow'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { PlanBrowseCard } from '@/components/bible/plans/PlanBrowseCard'
 import { PlanBrowserEmptyState } from '@/components/bible/plans/PlanBrowserEmptyState'
 import { PlanBrowserSection } from '@/components/bible/plans/PlanBrowserSection'
@@ -16,14 +16,13 @@ export function PlanBrowserPage() {
     usePlanBrowser()
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
-      <HorizonGlow />
+    <BackgroundCanvas className="flex flex-col font-sans">
       <Navbar transparent />
       <SEO {...BIBLE_PLANS_BROWSER_METADATA} />
 
       <main id="main-content" className="relative z-10 flex-1">
-        {/* Hero — matches BibleHero spacing (BB-53 parity) */}
-        <section className="pt-30 sm:pt-34 relative flex w-full flex-col items-center px-4 pb-10 text-center antialiased sm:pb-12 lg:pt-36">
+        {/* Hero — matches BibleHero spacing (BB-53 parity); pb tightened in Spec 3 */}
+        <section className="pt-30 sm:pt-34 relative flex w-full flex-col items-center px-4 pb-3 text-center antialiased sm:pb-4 lg:pt-36">
           <h1
             className="pb-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
             style={GRADIENT_TEXT_STYLE}
@@ -35,16 +34,16 @@ export function PlanBrowserPage() {
           </p>
         </section>
 
-        <div className="mx-auto max-w-6xl border-t border-white/[0.08]" />
-
-        {/* Content */}
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+        {/* Content (tightened py in Spec 3; border-t divider removed) */}
+        <div className="mx-auto max-w-6xl px-4 py-4 sm:py-6">
           {/* Empty state: no manifest */}
           {isEmpty && <PlanBrowserEmptyState variant="no-manifest" />}
 
-          {/* In Progress section */}
+          {/* In Progress section.
+              `first:mt-2` collapses to ~8px when this section is the first rendered child after the hero,
+              tightening hero→first-section rhythm. Between-section rhythm preserved by mt-8 / mt-12. */}
           {!isEmpty && sections.inProgress.length > 0 && (
-            <PlanBrowserSection title="In progress" className="mt-8">
+            <PlanBrowserSection title="In progress" className="first:mt-2 mt-8">
               {sections.inProgress.map(({ plan, progress }) => (
                 <PlanInProgressCard key={plan.slug} plan={plan} progress={progress} />
               ))}
@@ -53,7 +52,7 @@ export function PlanBrowserPage() {
 
           {/* Browse Plans section */}
           {!isEmpty && (
-            <PlanBrowserSection title="Browse plans" className="mt-12">
+            <PlanBrowserSection title="Browse plans" className="first:mt-2 mt-12">
               {isAllStarted ? (
                 <PlanBrowserEmptyState variant="all-started" />
               ) : isFilteredEmpty ? (
@@ -66,7 +65,7 @@ export function PlanBrowserPage() {
 
           {/* Completed section */}
           {!isEmpty && sections.completed.length > 0 && (
-            <PlanBrowserSection title="Completed" className="mt-12">
+            <PlanBrowserSection title="Completed" className="first:mt-2 mt-12">
               {sections.completed.map(({ plan, progress }) => (
                 <PlanCompletedCard key={plan.slug} plan={plan} progress={progress} />
               ))}
@@ -76,6 +75,6 @@ export function PlanBrowserPage() {
       </main>
 
       <SiteFooter />
-    </div>
+    </BackgroundCanvas>
   )
 }

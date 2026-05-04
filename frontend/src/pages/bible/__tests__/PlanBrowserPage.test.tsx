@@ -13,8 +13,12 @@ vi.mock('@/components/Navbar', () => ({
 vi.mock('@/components/SiteFooter', () => ({
   SiteFooter: () => null,
 }))
-vi.mock('@/components/daily/HorizonGlow', () => ({
-  HorizonGlow: () => null,
+vi.mock('@/components/ui/BackgroundCanvas', () => ({
+  BackgroundCanvas: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div data-testid="background-canvas" className={className}>
+      {children}
+    </div>
+  ),
 }))
 vi.mock('@/components/SEO', () => ({
   SEO: ({ title }: { title: string }) => { document.title = title; return null },
@@ -217,5 +221,77 @@ describe('PlanBrowserPage', () => {
     const { container } = renderPage()
     const darkBgElements = container.querySelectorAll('[style*="0f0a1e"]')
     expect(darkBgElements.length).toBe(0)
+  })
+
+  it('wraps page in BackgroundCanvas (multi-bloom atmospheric layer)', () => {
+    renderPage()
+    const canvas = screen.getByTestId('background-canvas')
+    expect(canvas).toBeInTheDocument()
+    expect(canvas.className).toContain('flex')
+    expect(canvas.className).toContain('flex-col')
+    expect(canvas.className).toContain('font-sans')
+  })
+
+  it('hero pb classes tightened (pb-3 sm:pb-4)', () => {
+    const { container } = renderPage()
+    const hero = container.querySelector('section.pt-30')
+    expect(hero?.className).toContain('pb-3')
+    expect(hero?.className).toContain('sm:pb-4')
+    // Old values should not be present
+    expect(hero?.className).not.toContain('pb-10')
+    expect(hero?.className).not.toContain('sm:pb-12')
+  })
+
+  it('border-t divider removed from main', () => {
+    const { container } = renderPage()
+    const main = container.querySelector('main#main-content')
+    // Look for the specific divider class combo that used to live here
+    const divider = main?.querySelector(':scope > div.border-t.border-white\\/\\[0\\.08\\]')
+    expect(divider).toBeNull()
+  })
+
+  it('content wrapper py classes tightened (py-4 sm:py-6)', () => {
+    const { container } = renderPage()
+    const main = container.querySelector('main#main-content')
+    // The content wrapper is the immediate div child after the hero <section>
+    const contentWrapper = main?.querySelector(':scope > div.max-w-6xl.px-4')
+    expect(contentWrapper?.className).toContain('py-4')
+    expect(contentWrapper?.className).toContain('sm:py-6')
+    expect(contentWrapper?.className).not.toContain('py-8')
+    expect(contentWrapper?.className).not.toContain('sm:py-12')
+  })
+
+  it('Browse Plans section as first child has first:mt-2 alongside mt-12', () => {
+    // Default scenario: no in-progress, Browse Plans is first rendered section
+    const { container } = renderPage()
+    const sections = container.querySelectorAll('main#main-content section')
+    // sections[0] is the hero <section>, sections[1] is the first PlanBrowserSection
+    const firstPlanSection = sections[1]
+    expect(firstPlanSection.className).toContain('first:mt-2')
+    expect(firstPlanSection.className).toContain('mt-12')
+  })
+
+  it('In Progress section as first child has first:mt-2; Browse Plans second has mt-12 only', () => {
+    const progress = makeProgress('comfort-7', { currentDay: 3, completedDays: [1, 2] })
+    mockUsePlanBrowser.mockReturnValue(
+      defaultResult({
+        sections: {
+          inProgress: [{ plan: COMFORT_PLAN, progress }],
+          browse: [PRAYER_PLAN],
+          completed: [],
+        },
+        filteredBrowse: [PRAYER_PLAN],
+      }),
+    )
+    const { container } = renderPage()
+    const sections = container.querySelectorAll('main#main-content section')
+    // sections[0] hero, sections[1] In Progress (first), sections[2] Browse Plans
+    const inProgressSection = sections[1]
+    const browseSection = sections[2]
+    expect(inProgressSection.className).toContain('first:mt-2')
+    expect(inProgressSection.className).toContain('mt-8')
+    expect(browseSection.className).toContain('first:mt-2')
+    expect(browseSection.className).toContain('mt-12')
+    // first: variant is no-op when not first child; mt-12 governs the between-sections rhythm
   })
 })
