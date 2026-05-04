@@ -134,7 +134,7 @@ function MoodTooltip({ active, payload }: MoodTooltipProps) {
   if (!data?.mood || !data.moodLabel) return null;
 
   return (
-    <div className="rounded-lg border border-white/15 bg-hero-mid px-3 py-2 text-sm text-white shadow-lg">
+    <div className="rounded-lg border border-white/[0.12] bg-white/[0.07] px-3 py-2 text-sm text-white shadow-lg backdrop-blur-md">
       <p className="font-medium">{formatTooltipDate(data.date)}</p>
       <p className="text-white/70">{data.moodLabel}</p>
     </div>

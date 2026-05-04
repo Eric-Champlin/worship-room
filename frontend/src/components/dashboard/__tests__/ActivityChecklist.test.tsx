@@ -169,11 +169,11 @@ describe('ActivityChecklist', () => {
     expect(labels[6]).toHaveTextContent('Journal')
   })
 
-  it('completed activity shows check icon and success color', () => {
+  it('completed activity shows check icon and mint completion color', () => {
     renderChecklist({ todayActivities: { ...ALL_FALSE, pray: true } })
     const prayRow = screen.getByLabelText(/Pray — completed/)
     expect(prayRow).toBeInTheDocument()
-    const checkIcon = prayRow.querySelector('.text-success')
+    const checkIcon = prayRow.querySelector('.text-emerald-300')
     expect(checkIcon).toBeInTheDocument()
   })
 

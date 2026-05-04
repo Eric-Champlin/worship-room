@@ -26,18 +26,18 @@ export function TodaysDevotionalCard() {
           {devotional.title}
           {isRead && (
             <Check
-              className="ml-1.5 inline h-4 w-4 text-success"
+              className="ml-1.5 inline h-4 w-4 text-emerald-300"
               aria-label="Completed"
             />
           )}
         </h3>
       </div>
 
-      <span className="mt-1.5 inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/60">
+      <span className="mt-1.5 inline-block rounded-full bg-white/[0.05] px-2.5 py-0.5 text-xs text-white/70">
         {formatThemeName(devotional.theme)}
       </span>
 
-      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/60">
+      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/80">
         {devotional.reflection[0]}
       </p>
 

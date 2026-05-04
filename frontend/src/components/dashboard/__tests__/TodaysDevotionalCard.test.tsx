@@ -45,7 +45,7 @@ describe('TodaysDevotionalCard', () => {
     renderCard()
     expect(screen.getByText('Trust')).toBeInTheDocument()
     const pill = screen.getByText('Trust')
-    expect(pill).toHaveClass('rounded-full', 'bg-white/10', 'text-xs', 'text-white/60')
+    expect(pill).toHaveClass('rounded-full', 'bg-white/[0.05]', 'text-xs', 'text-white/70')
   })
 
   it('renders 2-line reflection preview', () => {

@@ -171,11 +171,11 @@ export function ReadingPlanWidget() {
   if (allCompleted) {
     return (
       <div className="flex flex-col items-center gap-2 py-2 text-center">
-        <Check className="h-8 w-8 text-success" />
+        <Check className="h-8 w-8 text-emerald-300" />
         <p className="text-base font-semibold text-white">
           You&apos;ve completed all plans!
         </p>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-white/80">
           What an incredible journey through Scripture.
         </p>
       </div>
@@ -187,7 +187,7 @@ export function ReadingPlanWidget() {
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <Check className="h-6 w-6 flex-shrink-0 text-success" />
+          <Check className="h-6 w-6 flex-shrink-0 text-emerald-300" />
           <p className="text-base font-semibold text-white">
             You completed {recentlyCompleted.title}!
           </p>

@@ -39,8 +39,8 @@ function NumberedHeart({ number }: { number: number }) {
       className="relative flex h-7 w-7 flex-shrink-0 items-center justify-center"
       aria-hidden="true"
     >
-      <Heart className="absolute h-5 w-5 fill-pink-400/20 text-pink-400" />
-      <span className="relative text-xs font-bold text-pink-400">{number}</span>
+      <Heart className="absolute h-5 w-5 fill-pink-300/20 text-pink-300" />
+      <span className="relative text-xs font-bold text-pink-300">{number}</span>
     </span>
   )
 }
@@ -118,20 +118,22 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
           {todayEntry?.items.map((item, i) => (
             <div key={i} className="flex items-center gap-2" role="listitem">
               <Check
-                className="h-4 w-4 flex-shrink-0 text-success"
+                className="h-4 w-4 flex-shrink-0 text-emerald-300"
                 aria-hidden="true"
               />
               <span className="text-sm text-white/80">{item}</span>
             </div>
           ))}
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           type="button"
           onClick={handleEdit}
-          className="min-h-[44px] text-sm text-white/70 transition-colors hover:text-white"
+          className="min-h-[44px]"
         >
           Edit
-        </button>
+        </Button>
       </div>
     )
   }
@@ -158,7 +160,7 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
               placeholder={placeholders[i]}
               maxLength={150}
               aria-label={GRATITUDE_LABELS[i]}
-              className="h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="h-11 w-full rounded-lg border border-violet-400/30 bg-white/[0.04] px-3 text-sm text-white placeholder:text-white/40 shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
             />
           </div>
         ))}

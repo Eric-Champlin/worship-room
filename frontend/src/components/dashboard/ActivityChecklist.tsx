@@ -147,7 +147,7 @@ export function ActivityChecklist({
               cx="30"
               cy="30"
               r={RING_RADIUS}
-              stroke="#6D28D9"
+              className="stroke-violet-600"
               strokeWidth="6"
               fill="none"
               strokeLinecap="round"
@@ -176,17 +176,18 @@ export function ActivityChecklist({
             const isReadingPlan = type === 'readingPlan'
             const isReflection = type === 'reflection'
 
-            const iconColor = completed ? 'text-success' : 'text-white/20'
+            const iconColor = completed ? 'text-emerald-300' : 'text-white/20'
             let Icon
             if (isReadingPlan) {
-              Icon = <BookOpen className={`h-5 w-5 flex-shrink-0 ${iconColor}`} aria-hidden="true" />
+              const readingPlanColor = completed ? 'text-emerald-300' : 'text-sky-300'
+              Icon = <BookOpen className={`h-5 w-5 flex-shrink-0 ${readingPlanColor}`} aria-hidden="true" />
             } else if (isReflection) {
               Icon = completed
-                ? <CircleCheck className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
-                : <Moon className="h-5 w-5 flex-shrink-0 text-indigo-300/50" aria-hidden="true" />
+                ? <CircleCheck className="h-5 w-5 flex-shrink-0 text-emerald-300" aria-hidden="true" />
+                : <Moon className="h-5 w-5 flex-shrink-0 text-violet-300" aria-hidden="true" />
             } else {
               Icon = completed
-                ? <CircleCheck className="h-5 w-5 flex-shrink-0 text-success" aria-hidden="true" />
+                ? <CircleCheck className={`h-5 w-5 flex-shrink-0 ${iconColor}`} aria-hidden="true" />
                 : <Circle className="h-5 w-5 flex-shrink-0 text-white/20" aria-hidden="true" />
             }
 
@@ -211,7 +212,7 @@ export function ActivityChecklist({
                 <span
                   className={
                     completed
-                      ? 'ml-auto text-xs text-success'
+                      ? 'ml-auto text-xs text-emerald-300'
                       : 'ml-auto text-xs text-white/60'
                   }
                 >

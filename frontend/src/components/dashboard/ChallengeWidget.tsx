@@ -1,6 +1,7 @@
 import { Flame } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { Button } from '@/components/ui/Button'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { CHALLENGES } from '@/data/challenges'
 import { useChallengeProgress } from '@/hooks/useChallengeProgress'
@@ -140,18 +141,16 @@ export function ChallengeWidget() {
             Next challenge starts in {daysUntil} {daysUntil === 1 ? 'day' : 'days'}
           </p>
           <p className="mt-1 text-sm text-white/80">{challenge.title}</p>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             type="button"
             onClick={() => toggleReminder(challenge.id)}
-            className={`mt-2 rounded-lg border px-3 py-1.5 text-xs transition-colors ${
-              isReminderSet
-                ? 'border-white/30 text-white/80'
-                : 'border-white/20 text-white/60 hover:bg-white/5'
-            }`}
             aria-pressed={isReminderSet}
+            className={`mt-2 min-h-[44px] ${isReminderSet ? 'text-white/80' : 'text-white/60'}`}
           >
             {isReminderSet ? 'Reminder set' : 'Set reminder'}
-          </button>
+          </Button>
         </div>
       )
     }

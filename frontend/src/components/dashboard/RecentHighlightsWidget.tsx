@@ -9,7 +9,7 @@ export function RecentHighlightsWidget() {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center py-6 text-center">
-        <BookOpen className="mb-2 h-8 w-8 text-white/30" aria-hidden="true" />
+        <BookOpen className="mb-2 h-8 w-8 text-yellow-300" aria-hidden="true" />
         <p className="text-sm text-white/50">Start highlighting as you read</p>
         <Link
           to="/bible"
@@ -40,7 +40,7 @@ export function RecentHighlightsWidget() {
               />
             ) : (
               <StickyNote
-                className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-white/40"
+                className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-yellow-300"
                 aria-hidden="true"
               />
             )}

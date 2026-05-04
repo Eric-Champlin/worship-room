@@ -217,12 +217,12 @@ export function StreakCard({
                   {currentStreak === 1 ? 'day streak' : 'days streak'}
                 </span>
               </div>
-              <p className="text-xs text-white/50">
+              <p className="text-xs text-white/60">
                 Longest: {longestStreak} days
               </p>
               {canShowRepair ? (
                 <div className="mt-2 space-y-2">
-                  <p className="text-sm italic text-white/60">
+                  <p className="text-sm text-white/60">
                     Everyone misses a day. Grace is built into your journey.
                   </p>
                   {isFreeRepairAvailable ? (
@@ -271,7 +271,7 @@ export function StreakCard({
                 </span>
                 <span className="text-sm text-white/60">day streak</span>
               </div>
-              <p className="text-xs text-white/50">
+              <p className="text-xs text-white/60">
                 Longest: {longestStreak} days
               </p>
               {streakMessage && (
@@ -351,8 +351,7 @@ export function StreakCard({
                   <button
                     key={badge.id}
                     onClick={() => setShowBadgeGrid(true)}
-                    className="flex h-11 w-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-white/50 sm:h-8 sm:w-8"
-                    style={{ backgroundColor: 'rgba(139,92,246,0.2)' }}
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-violet-500/20 transition-colors hover:bg-violet-500/30 focus-visible:ring-2 focus-visible:ring-white/50 sm:h-8 sm:w-8"
                     title={badge.name}
                     aria-label={`${badge.name} badge`}
                     type="button"

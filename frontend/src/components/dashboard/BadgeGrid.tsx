@@ -1,5 +1,7 @@
 import { memo, useMemo } from 'react'
 import { X, Lock } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { cn } from '@/lib/utils'
 import { BADGE_DEFINITIONS, BADGE_MAP } from '@/constants/dashboard/badges'
 import { getBadgeIcon } from '@/constants/dashboard/badge-icons'
@@ -154,7 +156,7 @@ const BadgeCellInner = function BadgeCell({ badge, earned }: BadgeCellProps) {
 
       {/* Lock icon overlay for locked badges */}
       {!isEarned && (
-        <Lock className="absolute bottom-0 right-0 h-4 w-4 text-white/40" aria-hidden="true" />
+        <Lock className="absolute bottom-0 right-0 h-4 w-4 text-white/20" aria-hidden="true" />
       )}
 
       {/* Tooltip */}
@@ -173,6 +175,8 @@ const BadgeCell = memo(BadgeCellInner)
 // --- Component ---
 
 export function BadgeGrid({ onClose }: BadgeGridProps) {
+  const containerRef = useFocusTrap(true, onClose)
+
   const badgeData = useMemo(() => {
     try {
       return getBadgeData()
@@ -187,7 +191,13 @@ export function BadgeGrid({ onClose }: BadgeGridProps) {
   const earnedCount = Object.keys(badgeData.earned).length
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-6">
+    <div
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Badge collection"
+      className="rounded-2xl border border-white/[0.10] bg-white/[0.05] p-4 backdrop-blur-sm sm:p-6"
+    >
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white">
@@ -197,14 +207,16 @@ export function BadgeGrid({ onClose }: BadgeGridProps) {
           </span>
         </h3>
         {onClose && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50 sm:h-8 sm:w-8"
             aria-label="Close badge collection"
             type="button"
+            className="flex h-11 w-11 items-center justify-center sm:h-8 sm:w-8"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         )}
       </div>
 

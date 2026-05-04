@@ -123,7 +123,7 @@ export function DashboardWidgetGrid({
             key="mood-chart"
             id="mood-chart"
             title="7-Day Mood"
-            icon={<TrendingUp className="h-5 w-5" />}
+            icon={<TrendingUp className="h-5 w-5 text-violet-300" />}
             action={{ label: 'See More', to: '/insights' }}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
@@ -138,7 +138,7 @@ export function DashboardWidgetGrid({
             key="votd"
             id="verse-of-the-day"
             title="Verse of the Day"
-            icon={<BookOpen className="h-5 w-5" />}
+            icon={<BookOpen className="h-5 w-5 text-amber-100" />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
@@ -152,7 +152,7 @@ export function DashboardWidgetGrid({
             key="devotional"
             id="todays-devotional"
             title="Today's Devotional"
-            icon={<BookOpen className="h-5 w-5" />}
+            icon={<BookOpen className="h-5 w-5 text-sky-300" />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
@@ -166,7 +166,7 @@ export function DashboardWidgetGrid({
             key="reading-plan"
             id="reading-plan"
             title="Reading Plan"
-            icon={<BookOpen className="h-5 w-5" />}
+            icon={<BookOpen className="h-5 w-5 text-sky-300" />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
@@ -180,7 +180,7 @@ export function DashboardWidgetGrid({
             key="prayer-list"
             id="prayer-list"
             title="My Prayers"
-            icon={<Heart className="h-5 w-5" />}
+            icon={<Heart className="h-5 w-5 text-fuchsia-300" />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
@@ -194,7 +194,7 @@ export function DashboardWidgetGrid({
             key="recent-highlights"
             id="recent-highlights"
             title="Recent Highlights"
-            icon={<Highlighter className="h-5 w-5" />}
+            icon={<Highlighter className="h-5 w-5 text-yellow-300" />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
@@ -208,7 +208,7 @@ export function DashboardWidgetGrid({
             key="gratitude"
             id="todays-gratitude"
             title="Today's Gratitude"
-            icon={<Heart className="h-5 w-5 text-pink-400" />}
+            icon={<Heart className="h-5 w-5 text-pink-300" />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
@@ -222,7 +222,7 @@ export function DashboardWidgetGrid({
             key="streak"
             id="streak-points"
             title="Streak & Faith Points"
-            icon={<Flame className="h-5 w-5" />}
+            icon={<Flame className={`h-5 w-5 ${currentStreak > 0 ? 'text-amber-400' : 'text-white/30'}`} />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
@@ -248,7 +248,7 @@ export function DashboardWidgetGrid({
             key="activity-checklist"
             id="activity-checklist"
             title="Today's Activity"
-            icon={<CheckCircle2 className="h-5 w-5" />}
+            icon={<CheckCircle2 className="h-5 w-5 text-emerald-300" />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
@@ -266,7 +266,7 @@ export function DashboardWidgetGrid({
             key="challenge"
             id="challenge"
             title="Challenge"
-            icon={<Target className="h-5 w-5" />}
+            icon={<Target className="h-5 w-5 text-amber-300" />}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
           >
