@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react'
+import { PartyPopper } from 'lucide-react'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 
 export interface AnniversaryCardProps {
@@ -25,35 +27,41 @@ export function AnniversaryCard({
   }, [playSoundEffect])
 
   return (
-    <div
-      data-testid="anniversary-card"
-      className="rounded-2xl border border-white/10 bg-white/5 p-6 ring-1 ring-amber-500/10 backdrop-blur-sm"
+    <FrostedCard
+      variant="default"
+      as="section"
+      className="ring-1 ring-amber-500/10"
     >
-      <h3 className="text-lg font-semibold text-white">{heading}</h3>
+      <div data-testid="anniversary-card">
+        <div className="flex items-center gap-2">
+          <PartyPopper className="h-5 w-5 text-amber-300" aria-hidden="true" />
+          <h3 className="text-lg font-semibold text-white">{heading}</h3>
+        </div>
 
-      {stats.length > 0 && (
-        <ul className="mt-3 space-y-1">
-          {stats.map((stat) => (
-            <li key={stat.label} className="text-sm text-white/70">
-              {stat.label}: <span className="font-medium">{stat.value}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+        {stats.length > 0 && (
+          <ul className="mt-3 space-y-1">
+            {stats.map((stat) => (
+              <li key={stat.label} className="text-sm text-white/70">
+                {stat.label}: <span className="font-medium">{stat.value}</span>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      <p className="mt-4 font-serif text-sm italic text-white/60">
-        {closingMessage}
-      </p>
+        <p className="mt-4 text-sm text-white/60">
+          {closingMessage}
+        </p>
 
-      <div className="mt-4 flex justify-end">
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="min-h-[44px] min-w-[44px] px-3 text-sm text-white/40 transition-colors hover:text-white/60"
-        >
-          Dismiss
-        </button>
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="min-h-[44px] min-w-[44px] px-3 text-sm text-white/40 transition-colors hover:text-white/60"
+          >
+            Dismiss
+          </button>
+        </div>
       </div>
-    </div>
+    </FrostedCard>
   )
 }

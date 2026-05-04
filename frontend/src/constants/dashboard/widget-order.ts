@@ -138,3 +138,12 @@ export function getTimeOfDay(): TimeOfDay {
   if (hour >= 17 && hour < 22) return 'evening'
   return 'night'
 }
+
+/**
+ * InstallCard intentionally renders LAST in the Dashboard grid.
+ * Sentinel value (high integer, not part of the widget ordering sequence)
+ * so the card always sits at grid-end regardless of which other widgets
+ * the user has enabled. PWA install reminder is non-essential; tail position
+ * keeps it from competing for primary-content attention.
+ */
+export const INSTALL_CARD_ORDER = 999

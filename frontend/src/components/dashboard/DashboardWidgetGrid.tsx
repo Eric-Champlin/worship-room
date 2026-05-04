@@ -4,7 +4,7 @@ import type { useFaithPoints } from '@/hooks/useFaithPoints'
 import { cn } from '@/lib/utils'
 import { useWeeklyRecap } from '@/hooks/useWeeklyRecap'
 import { useDashboardLayout } from '@/hooks/useDashboardLayout'
-import { WIDGET_MAP, type WidgetId } from '@/constants/dashboard/widget-order'
+import { WIDGET_MAP, INSTALL_CARD_ORDER, type WidgetId } from '@/constants/dashboard/widget-order'
 import { DashboardCard } from './DashboardCard'
 import { MoodChart } from './MoodChart'
 import { QuickActions } from './QuickActions'
@@ -280,7 +280,7 @@ export function DashboardWidgetGrid({
             key="friends"
             id="friends-preview"
             title="Friends & Leaderboard"
-            icon={<Users className="h-5 w-5" />}
+            icon={<Users className="h-5 w-5 text-emerald-300" />}
             action={{ label: 'See all', to: '/friends?tab=leaderboard' }}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
@@ -295,7 +295,7 @@ export function DashboardWidgetGrid({
             key="weekly-recap"
             id="weekly-recap"
             title="Weekly Recap"
-            icon={<BarChart3 className="h-5 w-5" />}
+            icon={<BarChart3 className="h-5 w-5 text-violet-300" />}
             collapsible={false}
             className={cn(def.colSpan, animClass, transitionClass)}
             style={{ order: index, ...animStyle }}
@@ -356,7 +356,7 @@ export function DashboardWidgetGrid({
     <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
       <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-5">
         {orderedWidgets.map((id, index) => renderWidget(id, index))}
-        <div className="lg:col-span-5" style={{ order: 9999 }}>
+        <div className="lg:col-span-5" style={{ order: INSTALL_CARD_ORDER }}>
           <InstallCard />
         </div>
       </div>

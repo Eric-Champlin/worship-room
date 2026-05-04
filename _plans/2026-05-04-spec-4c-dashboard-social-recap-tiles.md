@@ -1490,20 +1490,32 @@ Steps 2–13 can be parallelized in execution if desired; they touch independent
 
 ## Execution Log
 
+**User-directed deviations (locked at execution-time pre-checklist):**
+- WeeklyGodMoments, AnniversaryCard, EveningReflectionBanner, InstallCard chrome MIGRATED to FrostedCard default (override of plan's "preserve rolls-own" defaults). Rationale: half-way migration creates exactly the visual incoherence the spec rejected for icons; first-class widgets join the system.
+- AnniversaryCard amber ring preserved as `ring-1 ring-amber-500/10` styling detail INSIDE FrostedCard default (Decision 4 was about checklists, not AnniversaryCard).
+- EveningReflectionBanner indigo tint dropped; Moon icon `text-violet-300` carries the evening voice.
+
+**Plan/reality reconciliations during Step 1 reading:**
+- FriendsPreview is rendered INSIDE `<DashboardCard>` at `DashboardWidgetGrid.tsx:279` with `icon={<Users />}` — tonal applied at the call site (line 283), no internal FriendsPreview.tsx changes (avoids competing with DashboardCard external title).
+- WeeklyRecap is rendered INSIDE `<DashboardCard>` at line 294 with `icon={<BarChart3 />}` — tonal applied at the call site (line 298). Internal changes scoped to empty-state copy + 4 stat-row icons (no internal header eyebrow added).
+- EchoCard at `Dashboard.tsx:539` is rendered as a direct child of a plain `<div>` (NOT wrapped in DashboardCard). Single-FrostedCard chrome via EchoCard's internal `<FrostedCard variant="default">`. **Locked:** keep internal wrapper, icon class swap only.
+- WelcomeWizard headings at lines 329 + 517 confirmed user-visible (Screen1Welcome + Screen4Results, conditionally rendered).
+- Hidden bug fix: `FrostedCard` did not accept `aria-label` prop; my pass-through was being silently dropped. Added `'aria-label'?: string` to `FrostedCardProps` and wired through. Side-effect benefit: future consumers can now use FrostedCard with descriptive ARIA labels.
+
 | Step | Title | Status | Completion Date | Notes / Actual Files |
 |------|-------|--------|-----------------|----------------------|
-| 1 | Pre-execution verification + baseline capture | [NOT STARTED] | | |
-| 2 | Add INSTALL_CARD_ORDER + update DashboardWidgetGrid | [NOT STARTED] | | |
-| 3 | InstallCard — add Download icon + tonal cyan | [NOT STARTED] | | |
-| 4 | FriendsPreview — add Users header icon + tonal mint | [NOT STARTED] | | |
-| 5 | WeeklyRecap — header BarChart3 + 4 stat icons + empty-state copy | [NOT STARTED] | | |
-| 6 | WeeklyGodMoments — add Sparkles header + amber tonal | [NOT STARTED] | | |
-| 7 | QuickActions — tile chrome migration + 4 tonal + hover lift | [NOT STARTED] | | |
-| 8 | AnniversaryCard — add PartyPopper + closing-message migration | [NOT STARTED] | | |
-| 9 | EveningReflectionBanner — Moon tonal swap | [NOT STARTED] | | |
-| 10 | EchoCard — tonal swap + double-nest resolution | [NOT STARTED] | | |
-| 11 | GettingStartedCelebration ceremony heading | [NOT STARTED] | | |
-| 12 | WelcomeWizard 2 ceremony headings | [NOT STARTED] | | |
-| 13 | WelcomeBack ceremony heading | [NOT STARTED] | | |
-| 14 | Test class-string updates + Caveat residual grep | [NOT STARTED] | | |
-| 15 | Quality gates + visual eyeball check | [NOT STARTED] | | |
+| 1 | Pre-execution verification + baseline capture | [COMPLETE] | 2026-05-04 | Read 14 source files. Baseline: 9,438 pass / 1 fail (1 file: `useFaithPoints.test.ts` `intercession` drift — pre-existing, unrelated to 4C). [UNVERIFIED] decisions locked: EchoCard NO double-nest; WelcomeWizard headings user-visible. |
+| 2 | Add INSTALL_CARD_ORDER + update DashboardWidgetGrid | [COMPLETE] | 2026-05-04 | `widget-order.ts` + `DashboardWidgetGrid.tsx`. `999` constant exported with documenting comment. `style.order: 9999` magic replaced. |
+| 3 | InstallCard — Download icon + FrostedCard chrome migration | [COMPLETE] | 2026-05-04 | `InstallCard.tsx`. Added Download (`text-cyan-300`). **DEVIATION** per user override: migrated rolls-own chrome to `<FrostedCard variant="default">`. |
+| 4 | FriendsPreview — Users tonal mint | [COMPLETE] | 2026-05-04 | **Plan/reality reconciliation:** FriendsPreview already in DashboardCard. Single-line change: `DashboardWidgetGrid.tsx:283` Users icon now `text-emerald-300`. No internal FriendsPreview.tsx edits. |
+| 5 | WeeklyRecap — full migration | [COMPLETE] | 2026-05-04 | `DashboardWidgetGrid.tsx:298` BarChart3 → `text-violet-300`. `WeeklyRecap.tsx` rewritten: empty-state copy migrated to Decision 8 strings (heading "Faith grows stronger together" + description + arrow CTA), UserPlus import dropped, 4 stat icons get per-row tonal classes (pink/violet/emerald/cyan). |
+| 6 | WeeklyGodMoments — Sparkles + chrome migration | [COMPLETE] | 2026-05-04 | `WeeklyGodMoments.tsx`. Added Sparkles header (`text-amber-300`). **DEVIATION** per user override: migrated rolls-own primary-tinted banner chrome (`bg-primary/10 border-primary/20`) to `<FrostedCard variant="default" as="section" role="region" aria-label="Your week with God summary">`. Dismiss button + 3-stat row + fade animation preserved. Required `FrostedCardProps['aria-label']` prop addition. |
+| 7 | QuickActions — tile chrome + 4 tonal + hover lift | [COMPLETE] | 2026-05-04 | `QuickActions.tsx` rewritten. 4 tiles wrap `<Link>` outer + `<FrostedCard variant="subdued">` inner. Tonal icons (Heart=pink, BookOpen=sky, Brain=violet, Music=cyan). Hover: `motion-safe:hover:-translate-y-0.5 hover:bg-white/[0.08] transition-all duration-200`. Verified: all 4 tiles same y at desktop 1440px; 2x2 grid at 375px. |
+| 8 | AnniversaryCard — PartyPopper + chrome migration + closing message | [COMPLETE] | 2026-05-04 | `AnniversaryCard.tsx` rewritten. Added PartyPopper header (`text-amber-300`). Closing message: dropped `font-serif italic` (Decision 7). **DEVIATION** per user override: migrated rolls-own chrome to `<FrostedCard variant="default" as="section">` with `ring-1 ring-amber-500/10` preserved as inner styling detail. Sparkle sound effect, dismiss handler, stats list, `data-testid="anniversary-card"` (now on inner div) preserved. Test updated: `card.closest('section')` to find the ring on the FrostedCard outer. |
+| 9 | EveningReflectionBanner — Moon + chrome migration | [COMPLETE] | 2026-05-04 | `EveningReflectionBanner.tsx`. Moon `text-indigo-300` → `text-violet-300`. **DEVIATION** per user override: dropped indigo-tinted chrome (`border-indigo-400/20 bg-indigo-900/30`), migrated to `<FrostedCard variant="default" as="section">`. `motion-safe:animate-widget-enter` conditional preserved. Reflect Now `<Button variant="subtle">` and Not Tonight link unchanged. |
+| 10 | EchoCard — tonal swap (no double-nest resolution needed) | [COMPLETE] | 2026-05-04 | `EchoCard.tsx`. Icon `text-white/30` → `text-amber-300`, added `aria-hidden="true"`. **Resolution path: direct rendering on Dashboard.tsx:539 confirmed; EchoCard's internal `<FrostedCard variant="default">` is sole chrome — kept verbatim.** Cross-surface usage on `/daily?tab=devotional` unaffected (same component, same chrome). |
+| 11 | GettingStartedCelebration gradient heading | [COMPLETE] | 2026-05-04 | `GettingStartedCelebration.tsx:77`. `font-script text-white` replaced with `bg-gradient-to-br from-violet-300 to-violet-200 bg-clip-text text-transparent font-bold`. Size cascade preserved. |
+| 12 | WelcomeWizard 2 gradient headings | [COMPLETE] | 2026-05-04 | `WelcomeWizard.tsx` lines 329 + 517. Same gradient pattern. `id`, `ref`, `tabIndex={-1}`, `outline-none` preserved on both for focus management. |
+| 13 | WelcomeBack gradient heading | [COMPLETE] | 2026-05-04 | `WelcomeBack.tsx:134`. Gradient pattern inside `cn()` invocation. `fadeIn` continuation, `style={stagger(0)}`, `ref`, `tabIndex={-1}` preserved. |
+| 14 | Test class-string updates + Caveat residual grep | [COMPLETE] | 2026-05-04 | Updated 6 test files: GettingStartedCelebration, WelcomeWizard (2 assertions), WeeklyRecap, AnniversaryCard, empty-states (2 assertions). Migrated `font-script` assertions to gradient class checks. Migrated WeeklyRecap empty-state copy assertions to Decision 8 strings. AnniversaryCard ring test now queries `.closest('section')`. empty-states uses `getAllByText` because both FriendsPreview AND WeeklyRecap empty states render "Faith grows stronger together" (Decision 8 unifies brand voice across both surfaces). **Grep verification: 0 `font-script` matches in `frontend/src/components/dashboard/*.tsx` and `frontend/src/components/echoes/*.tsx`.** |
+| 15 | Quality gates + visual eyeball check | [COMPLETE] | 2026-05-04 | `tsc --noEmit` clean. `pnpm test --run`: 9,438 pass / 1 fail (same pre-existing baseline failure; **net regression: 0**). `pnpm build` clean (1 chunk-size warning, pre-existing). `pnpm lint` clean. Headless Playwright at 1440px + 375px confirmed: 9 widget header tonal icons render correctly (4B baselines preserved + 4C additions verified — Friends emerald-300, all QuickActions tonal); QuickActions desktop 4-tile single row at y=1688; QuickActions mobile 2x2 grid (Pray+Journal y=1620, Meditate+Music y=1722); FrostedCard subdued chrome on tiles confirmed; hover lift + brightness boost classes confirmed; no console errors. Screenshots saved to `frontend/playwright-screenshots/spec4c-dashboard-{desktop,mobile}-final.png`. WeeklyGodMoments aria-label test passing after FrostedCard `aria-label` prop addition. Gradient text contrast eyeball check: PASSES with default `from-violet-300 to-violet-200` (no fallback to violet-400 needed). |

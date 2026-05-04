@@ -17,6 +17,7 @@ interface FrostedCardProps {
    * accidental form submission — HTML defaults `<button>` to `type="submit"`,
    * which is the wrong default for every current consumer. */
   type?: 'button' | 'submit' | 'reset'
+  'aria-label'?: string
   'aria-labelledby'?: string
   style?: React.CSSProperties
 }
@@ -53,6 +54,7 @@ export function FrostedCard({
   eyebrow,
   eyebrowColor,
   type,
+  'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   style,
 }: FrostedCardProps) {
@@ -67,6 +69,7 @@ export function FrostedCard({
       tabIndex={tabIndex}
       role={role}
       onKeyDown={onKeyDown}
+      aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy}
       style={style}
       {...buttonProps}

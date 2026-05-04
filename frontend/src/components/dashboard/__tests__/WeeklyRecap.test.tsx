@@ -59,11 +59,12 @@ describe('WeeklyRecap', () => {
   beforeEach(resetState)
   afterEach(resetState)
 
-  it('renders no-friends state with CTA', () => {
+  it('renders no-friends state with Decision 8 copy + CTA', () => {
     seedFriends(0)
     renderRecap()
-    expect(screen.getByText('Add friends to see your weekly recap')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /find friends/i })).toHaveAttribute('href', '/friends')
+    expect(screen.getByText('Faith grows stronger together')).toBeInTheDocument()
+    expect(screen.getByText('Your weekly journey, walked alongside friends')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /find people you walk with/i })).toHaveAttribute('href', '/friends')
   })
 
   it('renders stats with friend data, correct layout, contribution %, and notification', () => {

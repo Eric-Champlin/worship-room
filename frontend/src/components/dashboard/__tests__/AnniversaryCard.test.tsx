@@ -59,8 +59,8 @@ describe('AnniversaryCard', () => {
 
   it('has golden glow ring', () => {
     render(<AnniversaryCard {...DEFAULT_PROPS} />)
-    const card = screen.getByTestId('anniversary-card')
-    expect(card.className).toContain('ring-amber-500/10')
+    const card = screen.getByTestId('anniversary-card').closest('section')
+    expect(card?.className).toContain('ring-amber-500/10')
   })
 
   it('dismiss button meets 44px touch target', () => {

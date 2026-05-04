@@ -74,7 +74,7 @@ export function GettingStartedCelebration({ onDismiss }: GettingStartedCelebrati
         <div className="flex min-h-screen flex-col items-center justify-center px-4 sm:px-8">
           <h2
             id="getting-started-celebration-title"
-            className="text-center font-script text-3xl text-white sm:text-4xl md:text-5xl"
+            className="text-center bg-gradient-to-br from-violet-300 to-violet-200 bg-clip-text text-transparent text-3xl font-bold sm:text-4xl md:text-5xl"
           >
             You're all set! Welcome to Worship Room.
           </h2>

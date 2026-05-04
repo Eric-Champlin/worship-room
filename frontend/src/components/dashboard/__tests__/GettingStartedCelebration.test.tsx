@@ -32,10 +32,13 @@ describe('GettingStartedCelebration', () => {
     expect(screen.getByText("Let's Go")).toBeInTheDocument()
   })
 
-  it('heading uses Caveat font', () => {
+  it('heading uses gradient text treatment', () => {
     renderCelebration()
     const heading = screen.getByText("You're all set! Welcome to Worship Room.")
-    expect(heading.className).toContain('font-script')
+    expect(heading.className).toContain('bg-clip-text')
+    expect(heading.className).toContain('text-transparent')
+    expect(heading.className).toContain('from-violet-300')
+    expect(heading.className).not.toContain('font-script')
   })
 
   it('onDismiss called when "Let\'s Go" clicked', () => {

@@ -326,7 +326,7 @@ const Screen1Welcome = forwardRef<HTMLHeadingElement, Screen1Props>(
           id="wizard-heading-welcome"
           ref={ref}
           tabIndex={-1}
-          className="text-center font-script text-3xl font-bold text-white outline-none sm:text-4xl"
+          className="text-center bg-gradient-to-br from-violet-300 to-violet-200 bg-clip-text text-transparent text-3xl font-bold outline-none sm:text-4xl"
         >
           Welcome to Worship Room
         </h2>
@@ -514,7 +514,7 @@ const Screen4Results = forwardRef<HTMLHeadingElement, Screen4Props>(
           id="wizard-heading-results"
           ref={ref}
           tabIndex={-1}
-          className="font-script text-2xl font-bold text-white outline-none sm:text-3xl"
+          className="bg-gradient-to-br from-violet-300 to-violet-200 bg-clip-text text-transparent text-2xl font-bold outline-none sm:text-3xl"
         >
           You&rsquo;re All Set!
         </h2>

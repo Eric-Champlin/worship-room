@@ -36,7 +36,7 @@ export function EchoCard({ echo, onNavigate }: EchoCardProps) {
         className="transition-all motion-reduce:transition-none duration-base ease-decelerate group-hover:bg-white/[0.10] group-hover:shadow-frosted-hover group-hover:-translate-y-0.5 motion-reduce:group-hover:translate-y-0"
       >
         <div className="flex items-center gap-1.5 mb-3">
-          <Icon className="h-3.5 w-3.5 text-white/30 shrink-0" />
+          <Icon className="h-3.5 w-3.5 text-amber-300 shrink-0" aria-hidden="true" />
           <span className="text-xs text-white/50">
             You {verb} this {echo.relativeLabel}
           </span>

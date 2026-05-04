@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { BookOpen, CheckCircle, TrendingUp, Minus, Heart, X } from 'lucide-react'
+import { BookOpen, CheckCircle, TrendingUp, Minus, Heart, Sparkles, X } from 'lucide-react'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { MoodTrend } from '@/hooks/useWeeklyGodMoments'
 
@@ -53,11 +54,13 @@ export function WeeklyGodMoments({
   const devotionalColor = devotionalsRead >= 7 ? 'text-success' : 'text-white/60'
 
   return (
-    <div
-      className="relative rounded-2xl border border-primary/20 bg-primary/10 p-4 transition-opacity motion-reduce:transition-none duration-base md:p-6"
-      style={{ opacity: fading ? 0 : 1 }}
+    <FrostedCard
+      variant="default"
+      as="section"
       role="region"
       aria-label="Your week with God summary"
+      className="relative transition-opacity motion-reduce:transition-none duration-base"
+      style={{ opacity: fading ? 0 : 1 }}
     >
       <button
         onClick={handleDismiss}
@@ -67,7 +70,10 @@ export function WeeklyGodMoments({
         <X className="h-5 w-5" />
       </button>
 
-      <h2 className="mb-4 text-lg font-semibold text-white">Your Week with God</h2>
+      <div className="mb-4 flex items-center gap-2">
+        <Sparkles className="h-5 w-5 text-amber-300" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-white">Your Week with God</h2>
+      </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:gap-0 sm:divide-x sm:divide-white/10">
         <div className="flex items-center gap-3 sm:pr-6">
@@ -94,6 +100,6 @@ export function WeeklyGodMoments({
           </div>
         </div>
       </div>
-    </div>
+    </FrostedCard>
   )
 }

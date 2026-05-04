@@ -8,7 +8,7 @@ export function CircleNetwork({ size = 'small' }: CircleNetworkProps) {
     : { w: 200, h: 120, r: 16 }
 
   return (
-    <div className="flex justify-center" aria-hidden="true">
+    <div className="flex justify-center" aria-hidden="true" data-testid="circle-network">
       <svg width={s.w} height={s.h} viewBox={`0 0 ${s.w} ${s.h}`}>
         {/* Connection lines */}
         <line x1={s.w * 0.25} y1={s.h * 0.3} x2={s.w * 0.5} y2={s.h * 0.5} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />

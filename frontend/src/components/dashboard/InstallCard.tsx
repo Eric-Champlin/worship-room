@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { useToast } from '@/components/ui/Toast'
 
@@ -28,8 +30,11 @@ export function InstallCard() {
   }
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
-      <p className="text-white text-base font-medium">Take Worship Room with you</p>
+    <FrostedCard variant="default">
+      <div className="flex items-center gap-2">
+        <Download className="h-5 w-5 text-cyan-300" aria-hidden="true" />
+        <p className="text-white text-base font-medium">Take Worship Room with you</p>
+      </div>
       <p className="text-white/60 text-sm mt-1">Install the app for a faster, fuller experience.</p>
       <div className="flex items-center gap-3 mt-3">
         <Button variant="subtle" size="md" onClick={handleInstall}>
@@ -43,6 +48,6 @@ export function InstallCard() {
           Not now
         </button>
       </div>
-    </div>
+    </FrostedCard>
   )
 }

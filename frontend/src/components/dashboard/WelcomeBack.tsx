@@ -131,7 +131,7 @@ export function WelcomeBack({ userName, faithPoints, onStepIn, onSkipToDashboard
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className={cn('font-script text-4xl font-bold text-white sm:text-5xl', fadeIn)}
+          className={cn('bg-gradient-to-br from-violet-300 to-violet-200 bg-clip-text text-transparent text-4xl font-bold sm:text-5xl', fadeIn)}
           style={stagger(0)}
         >
           {userName ? `Welcome back, ${userName}` : 'Welcome Back'}

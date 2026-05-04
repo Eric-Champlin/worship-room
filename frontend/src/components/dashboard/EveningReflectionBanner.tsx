@@ -1,5 +1,6 @@
 import { Moon } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { cn } from '@/lib/utils'
 
 export interface EveningReflectionBannerProps {
@@ -10,15 +11,14 @@ export interface EveningReflectionBannerProps {
 
 export function EveningReflectionBanner({ onReflectNow, onDismiss, animate }: EveningReflectionBannerProps) {
   return (
-    <div
-      className={cn(
-        'rounded-2xl border border-indigo-400/20 bg-indigo-900/30 p-4 md:p-6',
-        animate && 'motion-safe:animate-widget-enter',
-      )}
+    <FrostedCard
+      variant="default"
+      as="section"
+      className={cn(animate && 'motion-safe:animate-widget-enter')}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex flex-1 items-start gap-3 sm:items-center">
-          <Moon className="mt-0.5 h-6 w-6 shrink-0 text-indigo-300 sm:mt-0" aria-hidden="true" />
+          <Moon className="mt-0.5 h-6 w-6 shrink-0 text-violet-300 sm:mt-0" aria-hidden="true" />
           <div>
             <h3 className="text-lg font-semibold text-white">Evening Reflection</h3>
             <p className="text-sm text-white/70">Take a moment to close your day with God.</p>
@@ -42,6 +42,6 @@ export function EveningReflectionBanner({ onReflectNow, onDismiss, animate }: Ev
           </button>
         </div>
       </div>
-    </div>
+    </FrostedCard>
   )
 }

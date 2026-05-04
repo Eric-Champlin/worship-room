@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -80,9 +80,21 @@ describe('Empty States — New User Dashboard', () => {
     expect(screen.getByText('A new day, a new opportunity to grow')).toBeInTheDocument()
   })
 
-  it('shows friends empty state with circle network', () => {
+  it('shows friends empty state with circle network and unified copy', () => {
     renderGrid()
-    expect(screen.getByText('Faith grows stronger together')).toBeInTheDocument()
+    // Decision 8 unifies the empty-state heading "Faith grows stronger together"
+    // across BOTH the FriendsPreview and WeeklyRecap surfaces. Assert each
+    // surface independently (scoped by card title) so a regression on either is
+    // caught — a global getAllByText would silently pass if only one rendered.
+    const friendsCard = screen.getByRole('heading', { name: 'Friends & Leaderboard' }).closest('section')
+    const recapCard = screen.getByRole('heading', { name: 'Weekly Recap' }).closest('section')
+    expect(friendsCard).not.toBeNull()
+    expect(recapCard).not.toBeNull()
+    expect(within(friendsCard as HTMLElement).getByText('Faith grows stronger together')).toBeInTheDocument()
+    expect(within(recapCard as HTMLElement).getByText('Faith grows stronger together')).toBeInTheDocument()
+    // FriendsPreview empty state renders the CircleNetwork illustration
+    // (Decision 8 business-goal protection — friends growth invitation).
+    expect(within(friendsCard as HTMLElement).getByTestId('circle-network')).toBeInTheDocument()
   })
 
   it('shows "You vs. Yesterday" in friends preview', () => {
@@ -96,7 +108,8 @@ describe('Empty States — New User Dashboard', () => {
       screen.getByText('Your mood journey starts today'),
       screen.getByText('A new streak starts today'),
       screen.getByText('A new day, a new opportunity to grow'),
-      screen.getByText('Faith grows stronger together'),
+      // Both FriendsPreview and WeeklyRecap empty states render this copy.
+      ...screen.getAllByText('Faith grows stronger together'),
     ]
     emptyTexts.forEach((el) => {
       expect(el.closest('[aria-hidden="true"]')).toBeNull()

@@ -60,10 +60,13 @@ afterEach(() => {
 // ===========================================================================
 
 describe('Screen 1 — Welcome', () => {
-  it('renders welcome heading in Caveat font', () => {
+  it('renders welcome heading with gradient text treatment', () => {
     renderWizard()
     const heading = screen.getByText('Welcome to Worship Room')
-    expect(heading.className).toContain('font-script')
+    expect(heading.className).toContain('bg-clip-text')
+    expect(heading.className).toContain('text-transparent')
+    expect(heading.className).toContain('from-violet-300')
+    expect(heading.className).not.toContain('font-script')
   })
 
   it('pre-fills display name from userName prop', () => {
@@ -432,10 +435,13 @@ describe('Screen 4 — Results & Launch', () => {
     return user
   }
 
-  it('renders "You\'re All Set!" heading in Caveat font', async () => {
+  it('renders "You\'re All Set!" heading with gradient text treatment', async () => {
     await goToScreen4()
     const heading = screen.getByText(/You.re All Set!/i)
-    expect(heading.className).toContain('font-script')
+    expect(heading.className).toContain('bg-clip-text')
+    expect(heading.className).toContain('text-transparent')
+    expect(heading.className).toContain('from-violet-300')
+    expect(heading.className).not.toContain('font-script')
   })
 
   it('displays quiz result recommendation title', async () => {
