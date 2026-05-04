@@ -6,7 +6,7 @@ interface FrostedCardProps {
   children: React.ReactNode
   onClick?: () => void
   className?: string
-  as?: 'div' | 'button' | 'article'
+  as?: 'div' | 'button' | 'article' | 'section'
   tabIndex?: number
   role?: string
   onKeyDown?: React.KeyboardEventHandler
@@ -17,6 +17,8 @@ interface FrostedCardProps {
    * accidental form submission — HTML defaults `<button>` to `type="submit"`,
    * which is the wrong default for every current consumer. */
   type?: 'button' | 'submit' | 'reset'
+  'aria-labelledby'?: string
+  style?: React.CSSProperties
 }
 
 interface VariantClassSet {
@@ -51,6 +53,8 @@ export function FrostedCard({
   eyebrow,
   eyebrowColor,
   type,
+  'aria-labelledby': ariaLabelledBy,
+  style,
 }: FrostedCardProps) {
   const isInteractive = !!onClick
   const variantClasses = VARIANT_CLASSES[variant]
@@ -63,6 +67,8 @@ export function FrostedCard({
       tabIndex={tabIndex}
       role={role}
       onKeyDown={onKeyDown}
+      aria-labelledby={ariaLabelledBy}
+      style={style}
       {...buttonProps}
       className={cn(
         variantClasses.base,

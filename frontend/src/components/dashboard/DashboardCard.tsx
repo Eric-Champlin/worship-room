@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 import { useCallback, useId, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { cn } from '@/lib/utils'
 import { getInitialCollapsed, setCollapseState } from '@/services/dashboard-collapse-storage'
 
@@ -43,10 +44,13 @@ export function DashboardCard({
   }, [id])
 
   return (
-    <section
+    <FrostedCard
+      as="section"
+      variant="default"
       aria-labelledby={titleId}
       className={cn(
-        'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6 transition-colors duration-fast hover:border-white/20 motion-reduce:transition-none',
+        'min-w-0 p-4 md:p-6',
+        'hover:bg-white/[0.10] hover:shadow-frosted-hover motion-safe:hover:-translate-y-0.5 motion-reduce:hover:translate-y-0',
         className,
       )}
       style={style}
@@ -70,7 +74,7 @@ export function DashboardCard({
           {action && (
             <Link
               to={action.to}
-              className="text-sm text-primary transition-colors hover:text-primary-lt"
+              className="text-sm text-white/80 transition-colors hover:text-white"
             >
               {action.label}
             </Link>
@@ -105,6 +109,6 @@ export function DashboardCard({
           <div className="pt-3">{children}</div>
         </div>
       </div>
-    </section>
+    </FrostedCard>
   )
 }

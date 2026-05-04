@@ -1,4 +1,5 @@
 import { Moon } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
 export interface EveningReflectionBannerProps {
@@ -24,13 +25,14 @@ export function EveningReflectionBanner({ onReflectNow, onDismiss, animate }: Ev
           </div>
         </div>
         <div className="flex flex-col items-center gap-2 sm:items-end">
-          <button
-            type="button"
+          <Button
+            variant="subtle"
+            size="md"
             onClick={onReflectNow}
-            className="w-full rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-lt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dashboard-dark sm:w-auto"
+            className="w-full sm:w-auto"
           >
             Reflect Now
-          </button>
+          </Button>
           <button
             type="button"
             onClick={onDismiss}

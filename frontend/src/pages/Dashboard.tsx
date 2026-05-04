@@ -55,6 +55,7 @@ import { useWhisperToast } from '@/hooks/useWhisperToast'
 import { useRoutePreload } from '@/hooks/useRoutePreload'
 import { useDashboardLayout } from '@/hooks/useDashboardLayout'
 import { CustomizePanel } from '@/components/dashboard/CustomizePanel'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { SlidersHorizontal } from 'lucide-react'
 import type { WidgetId } from '@/constants/dashboard/widget-order'
 import type { MoodEntry } from '@/types/dashboard'
@@ -98,6 +99,20 @@ export function Dashboard() {
   const season = useLiturgicalSeason()
   const gardenElements = useGardenElements()
   const gardenRef = useRef<SVGSVGElement>(null)
+  // Single GrowthGarden instance: size is tracked via matchMedia at the lg
+  // breakpoint (1024px) so the gardenRef stays current as the viewport changes.
+  const [gardenSize, setGardenSize] = useState<'md' | 'lg'>(() => {
+    if (typeof window === 'undefined') return 'md'
+    return window.matchMedia('(min-width: 1024px)').matches ? 'lg' : 'md'
+  })
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const update = () => setGardenSize(mq.matches ? 'lg' : 'md')
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
   const { isVisible: recapVisible, hasFriends: recapHasFriends } = useWeeklyRecap()
   const godMoments = useWeeklyGodMoments()
   const topEcho = useEcho()
@@ -455,139 +470,127 @@ export function Dashboard() {
           so the canonical root metadata is identical regardless of auth state. */}
       <SEO {...HOME_METADATA} />
       <Navbar transparent />
-      <main
-        id="main-content"
-        className="motion-safe:animate-fade-in motion-reduce:animate-none"
-      >
-        <div
-          className={shouldAnimate ? 'motion-safe:animate-widget-enter' : undefined}
-          style={shouldAnimate ? { animationDelay: '0ms' } : undefined}
+      <BackgroundCanvas>
+        <main
+          id="main-content"
+          className="motion-safe:animate-fade-in motion-reduce:animate-none"
         >
-          <DashboardHero
-            userName={user.name}
-            currentStreak={faithPoints.currentStreak}
-            levelName={faithPoints.levelName}
-            totalPoints={faithPoints.totalPoints}
-            pointsToNextLevel={faithPoints.pointsToNextLevel}
-            currentLevel={faithPoints.currentLevel}
-            meditationMinutesThisWeek={getMeditationMinutesForWeek()}
-            headerAction={
-              !showGettingStarted ? (
-                <button
-                  ref={customizeButtonRef}
-                  onClick={() => setCustomizePanelOpen(true)}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-                  Customize
-                </button>
-              ) : undefined
-            }
-            gardenSlot={
-              <div>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-white/60">Your Garden</p>
-                  <GardenShareButton
-                    gardenRef={gardenRef}
-                    userName={user.name}
-                    levelName={faithPoints.levelName}
-                    streakCount={faithPoints.currentStreak}
-                  />
-                </div>
-                <div className="mt-1 lg:hidden">
-                  <GrowthGarden
-                    ref={gardenRef}
-                    stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}
-                    animated={true}
-                    showSparkle={gardenSparkle}
-                    amplifiedSparkle={gardenLevelUp}
-                    streakActive={faithPoints.currentStreak > 0}
-                    showRainbow={showRainbow}
-                    size="md"
-                    seasonName={season.seasonName}
-                    activityElements={gardenElements}
-                  />
-                </div>
-                <div className="mt-1 hidden lg:block">
-                  <GrowthGarden
-                    ref={gardenRef}
-                    stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}
-                    animated={true}
-                    showSparkle={gardenSparkle}
-                    amplifiedSparkle={gardenLevelUp}
-                    streakActive={faithPoints.currentStreak > 0}
-                    showRainbow={showRainbow}
-                    size="lg"
-                    seasonName={season.seasonName}
-                    activityElements={gardenElements}
-                  />
-                </div>
-              </div>
-            }
-          />
-        </div>
-        {topEcho && (
           <div
-            className={cn(
-              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
-              shouldAnimate && 'motion-safe:animate-widget-enter',
-            )}
-            style={shouldAnimate ? { animationDelay: '100ms' } : undefined}
+            className={shouldAnimate ? 'motion-safe:animate-widget-enter' : undefined}
+            style={shouldAnimate ? { animationDelay: '0ms' } : undefined}
           >
-            <EchoCard
-              echo={topEcho}
-              onNavigate={() => markEchoSeen(topEcho.id)}
+            <DashboardHero
+              userName={user.name}
+              currentStreak={faithPoints.currentStreak}
+              levelName={faithPoints.levelName}
+              totalPoints={faithPoints.totalPoints}
+              pointsToNextLevel={faithPoints.pointsToNextLevel}
+              currentLevel={faithPoints.currentLevel}
+              meditationMinutesThisWeek={getMeditationMinutesForWeek()}
+              headerAction={
+                !showGettingStarted ? (
+                  <button
+                    ref={customizeButtonRef}
+                    onClick={() => setCustomizePanelOpen(true)}
+                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+                    Customize
+                  </button>
+                ) : undefined
+              }
+              gardenSlot={
+                <div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-white/60">Your Garden</p>
+                    <GardenShareButton
+                      gardenRef={gardenRef}
+                      userName={user.name}
+                      levelName={faithPoints.levelName}
+                      streakCount={faithPoints.currentStreak}
+                    />
+                  </div>
+                  <div className="mt-1">
+                    <GrowthGarden
+                      ref={gardenRef}
+                      stage={faithPoints.currentLevel as 1 | 2 | 3 | 4 | 5 | 6}
+                      animated={true}
+                      showSparkle={gardenSparkle}
+                      amplifiedSparkle={gardenLevelUp}
+                      streakActive={faithPoints.currentStreak > 0}
+                      showRainbow={showRainbow}
+                      size={gardenSize}
+                      seasonName={season.seasonName}
+                      activityElements={gardenElements}
+                    />
+                  </div>
+                </div>
+              }
             />
           </div>
-        )}
-        {godMoments.isVisible && (
-          <div
-            className={cn(
-              'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
-              shouldAnimate && 'motion-safe:animate-widget-enter',
-            )}
-            style={shouldAnimate ? { animationDelay: '100ms' } : undefined}
-          >
-            <WeeklyGodMoments {...godMoments} />
-          </div>
-        )}
-        <DashboardWidgetGrid
-          orderedWidgets={dashboardLayout.orderedWidgets}
-          faithPoints={faithPoints}
-          justCompletedCheckIn={justCompletedCheckIn}
-          onRequestCheckIn={handleRequestCheckIn}
-          quickActionsRef={quickActionsRef}
-          quickActionsTooltipVisible={quickActionsTooltip.shouldShow}
-          animateEntrance={shouldAnimate}
-          staggerStartIndex={1 + (godMoments.isVisible ? 1 : 0)}
-          showGettingStarted={showGettingStarted}
-          gettingStartedProps={{
-            items: gettingStarted.items,
-            completedCount: gettingStarted.completedCount,
-            onDismiss: handleGettingStartedDismiss,
-            onRequestCheckIn: handleRequestCheckIn,
-          }}
-          showAnniversary={showAnniversary}
-          anniversaryProps={anniversary.show ? {
-            heading: anniversary.heading!,
-            closingMessage: anniversary.closingMessage!,
-            stats: anniversary.stats!,
-            onDismiss: handleAnniversaryDismiss,
-          } : undefined}
-          showEveningBanner={showEveningBanner}
-          eveningBannerProps={{
-            onReflectNow: () => {
-              setShowReflectionOverlay(true)
-              playSoundEffect('bell')
-            },
-            onDismiss: handleDismissReflection,
-          }}
-          hasActiveReadingPlan={hasActiveReadingPlan}
-          hasActiveChallenge={hasActiveChallenge}
-          hasHighlightsOrNotes={hasHighlightsOrNotes}
-          isCustomizing={customizePanelOpen}
-        />
-      </main>
+          {topEcho && (
+            <div
+              className={cn(
+                'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
+                shouldAnimate && 'motion-safe:animate-widget-enter',
+              )}
+              style={shouldAnimate ? { animationDelay: '100ms' } : undefined}
+            >
+              <EchoCard
+                echo={topEcho}
+                onNavigate={() => markEchoSeen(topEcho.id)}
+              />
+            </div>
+          )}
+          {godMoments.isVisible && (
+            <div
+              className={cn(
+                'mx-auto max-w-6xl px-4 pb-4 sm:px-6 md:pb-6',
+                shouldAnimate && 'motion-safe:animate-widget-enter',
+              )}
+              style={shouldAnimate ? { animationDelay: '100ms' } : undefined}
+            >
+              <WeeklyGodMoments {...godMoments} />
+            </div>
+          )}
+          <DashboardWidgetGrid
+            orderedWidgets={dashboardLayout.orderedWidgets}
+            faithPoints={faithPoints}
+            justCompletedCheckIn={justCompletedCheckIn}
+            onRequestCheckIn={handleRequestCheckIn}
+            quickActionsRef={quickActionsRef}
+            quickActionsTooltipVisible={quickActionsTooltip.shouldShow}
+            animateEntrance={shouldAnimate}
+            staggerStartIndex={1 + (godMoments.isVisible ? 1 : 0)}
+            showGettingStarted={showGettingStarted}
+            gettingStartedProps={{
+              items: gettingStarted.items,
+              completedCount: gettingStarted.completedCount,
+              onDismiss: handleGettingStartedDismiss,
+              onRequestCheckIn: handleRequestCheckIn,
+            }}
+            showAnniversary={showAnniversary}
+            anniversaryProps={anniversary.show ? {
+              heading: anniversary.heading!,
+              closingMessage: anniversary.closingMessage!,
+              stats: anniversary.stats!,
+              onDismiss: handleAnniversaryDismiss,
+            } : undefined}
+            showEveningBanner={showEveningBanner}
+            eveningBannerProps={{
+              onReflectNow: () => {
+                setShowReflectionOverlay(true)
+                playSoundEffect('bell')
+              },
+              onDismiss: handleDismissReflection,
+            }}
+            hasActiveReadingPlan={hasActiveReadingPlan}
+            hasActiveChallenge={hasActiveChallenge}
+            hasHighlightsOrNotes={hasHighlightsOrNotes}
+            isCustomizing={customizePanelOpen}
+          />
+        </main>
+      </BackgroundCanvas>
       {quickActionsTooltip.shouldShow && (
         <TooltipCallout
           targetRef={quickActionsRef}

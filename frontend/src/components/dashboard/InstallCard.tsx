@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from '@/components/ui/Button'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { useToast } from '@/components/ui/Toast'
 
@@ -31,13 +32,9 @@ export function InstallCard() {
       <p className="text-white text-base font-medium">Take Worship Room with you</p>
       <p className="text-white/60 text-sm mt-1">Install the app for a faster, fuller experience.</p>
       <div className="flex items-center gap-3 mt-3">
-        <button
-          type="button"
-          onClick={handleInstall}
-          className="bg-primary text-white text-sm rounded-full px-4 py-2 hover:bg-primary-lt transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        >
+        <Button variant="subtle" size="md" onClick={handleInstall}>
           Install
-        </button>
+        </Button>
         <button
           type="button"
           onClick={handleDismiss}

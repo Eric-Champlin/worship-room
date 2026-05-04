@@ -51,7 +51,7 @@ export function TodaysDevotionalCard() {
       ) : (
         <Link
           to="/daily?tab=devotional"
-          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary-lt hover:text-primary"
+          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-white/80 hover:text-white"
         >
           Read today&apos;s devotional &rarr;
         </Link>

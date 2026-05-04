@@ -6,6 +6,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { getCollapseState, setCollapseState } from '@/services/dashboard-collapse-storage'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import type { GettingStartedItem } from '@/hooks/useGettingStarted'
 
 export interface GettingStartedCardProps {
@@ -102,10 +103,12 @@ export function GettingStartedCard({
   )
 
   return (
-    <section
+    <FrostedCard
+      as="section"
+      variant="accent"
       aria-labelledby={titleId}
       className={cn(
-        'min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:p-6 transition-opacity duration-base motion-reduce:transition-none',
+        'min-w-0 p-4 md:p-6',
         fadingOut && 'opacity-0',
       )}
     >
@@ -266,7 +269,7 @@ export function GettingStartedCard({
                   {!item.completed && (
                     <button
                       onClick={() => handleGoClick(item)}
-                      className="ml-auto flex-shrink-0 rounded px-2 py-1 text-sm font-medium text-primary transition-colors hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                      className="ml-auto flex-shrink-0 rounded px-2 py-1 text-sm font-medium text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
                       aria-label={`Go to ${item.label.toLowerCase()}`}
                     >
                       Go
@@ -278,6 +281,6 @@ export function GettingStartedCard({
           </div>
         </div>
       </div>
-    </section>
+    </FrostedCard>
   )
 }

@@ -91,4 +91,29 @@ describe('DashboardCard', () => {
     const title = document.getElementById(labelledBy!)
     expect(title?.textContent).toBe('Test Card')
   })
+
+  it('renders FrostedCard default-tier chrome tokens', () => {
+    renderCard()
+    const section = screen.getByRole('region')
+    expect(section.className).toContain('bg-white/[0.07]')
+    expect(section.className).toContain('border-white/[0.12]')
+    expect(section.className).toContain('rounded-3xl')
+    expect(section.className).toContain('shadow-frosted-base')
+  })
+
+  it('preserves p-4 md:p-6 padding override', () => {
+    renderCard()
+    const section = screen.getByRole('region')
+    expect(section.className).toContain('p-4')
+    expect(section.className).toContain('md:p-6')
+  })
+
+  it('applies hover lift classes (non-interactive section)', () => {
+    renderCard()
+    const section = screen.getByRole('region')
+    expect(section.className).toContain('hover:bg-white/[0.10]')
+    expect(section.className).toContain('hover:shadow-frosted-hover')
+    expect(section.className).toContain('motion-safe:hover:-translate-y-0.5')
+    expect(section.className).toContain('motion-reduce:hover:translate-y-0')
+  })
 })

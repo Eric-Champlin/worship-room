@@ -53,10 +53,19 @@ describe('EveningReflectionBanner', () => {
   it('buttons have visible focus rings', () => {
     renderBanner()
     const reflectBtn = screen.getByRole('button', { name: 'Reflect Now' })
-    expect(reflectBtn.className).toContain('focus:ring-2')
+    // Migrated to <Button variant="subtle"> — uses focus-visible:ring-2 (keyboard-only focus)
+    expect(reflectBtn.className).toContain('focus-visible:ring-2')
 
     const dismissBtn = screen.getByRole('button', { name: 'Not tonight' })
     expect(dismissBtn.className).toContain('focus:ring-2')
+  })
+
+  it('Reflect Now uses Button subtle variant', () => {
+    renderBanner()
+    const reflectBtn = screen.getByRole('button', { name: 'Reflect Now' })
+    expect(reflectBtn.className).toContain('bg-white/[0.07]')
+    expect(reflectBtn.className).toContain('border-white/[0.12]')
+    expect(reflectBtn.className).toContain('rounded-full')
   })
 
   it('Not tonight button has min touch target (44px)', () => {

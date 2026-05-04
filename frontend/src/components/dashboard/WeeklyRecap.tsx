@@ -13,7 +13,7 @@ export function WeeklyRecap() {
         <p className="mb-3 text-sm text-white/50">Add friends to see your weekly recap</p>
         <Link
           to="/friends"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
         >
           <UserPlus className="h-4 w-4" aria-hidden="true" />
           Find friends
@@ -53,7 +53,7 @@ export function WeeklyRecap() {
       </div>
 
       {/* User contribution */}
-      <p className="mt-3 text-sm font-medium text-primary">
+      <p className="mt-3 text-sm font-medium text-white/80">
         You contributed {userContributionPercent}% of the group&apos;s growth!
       </p>
     </div>

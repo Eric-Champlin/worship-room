@@ -9,6 +9,7 @@ import {
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources';
 import { saveMoodEntry } from '@/services/mood-storage';
 import { getLocalDateString } from '@/utils/date';
+import { Button } from '@/components/ui/Button';
 import { CharacterCount } from '@/components/ui/CharacterCount';
 import { KaraokeTextReveal } from '@/components/daily/KaraokeTextReveal';
 import { cn } from '@/lib/utils';
@@ -215,12 +216,14 @@ export function MoodCheckIn({ userName, onComplete, onSkip }: MoodCheckInProps) 
                 </div>
 
                 {/* Continue Button */}
-                <button
+                <Button
+                  variant="subtle"
+                  size="md"
                   onClick={handleContinue}
-                  className="mt-4 w-full rounded-lg bg-primary px-6 py-2 font-semibold text-white hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:w-auto"
+                  className="mt-4 w-full sm:w-auto"
                 >
                   Continue
-                </button>
+                </Button>
               </div>
             )}
 

@@ -56,6 +56,20 @@ describe('FrostedCard', () => {
     expect(container.querySelector('article')).toBeInTheDocument()
   })
 
+  it('as="section" renders section element', () => {
+    const { container } = render(<FrostedCard as="section">Section content</FrostedCard>)
+    expect(container.querySelector('section')).toBeInTheDocument()
+  })
+
+  it('forwards aria-labelledby to the host element', () => {
+    const { container } = render(
+      <FrostedCard as="section" aria-labelledby="title-id">
+        Section content
+      </FrostedCard>,
+    )
+    expect(container.querySelector('section')).toHaveAttribute('aria-labelledby', 'title-id')
+  })
+
   it('with onClick has cursor-pointer', () => {
     const { container } = render(<FrostedCard onClick={vi.fn()}>Clickable</FrostedCard>)
     expect((container.firstElementChild as HTMLElement).className).toContain('cursor-pointer')

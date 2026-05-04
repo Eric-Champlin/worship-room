@@ -106,7 +106,8 @@ describe('Dashboard', () => {
   it('has dark background', () => {
     seedTodayMoodEntry()
     renderDashboard()
-    const root = screen.getByRole('main').closest('.min-h-screen')
+    const root = screen.getByRole('main').closest('.bg-dashboard-dark')
     expect(root).toHaveClass('bg-dashboard-dark')
+    expect(root).toHaveClass('min-h-screen')
   })
 })

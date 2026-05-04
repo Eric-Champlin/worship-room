@@ -370,7 +370,7 @@ export function StreakCard({
       {recentBadges.length > 0 && !showBadgeGrid && (
         <button
           onClick={() => setShowBadgeGrid(true)}
-          className="inline-flex min-h-[44px] items-center text-xs text-primary hover:text-primary-lt focus-visible:ring-2 focus-visible:ring-white/50"
+          className="inline-flex min-h-[44px] items-center text-xs text-white/80 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50"
           type="button"
         >
           View all badges

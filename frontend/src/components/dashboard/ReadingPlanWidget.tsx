@@ -152,7 +152,7 @@ export function ReadingPlanWidget() {
 
         <Link
           to={`/reading-plans/${activePlan.id}`}
-          className="inline-flex items-center gap-1 text-sm font-medium text-primary-lt transition-colors hover:text-primary"
+          className="inline-flex items-center gap-1 text-sm font-medium text-white/80 transition-colors hover:text-white"
         >
           Continue reading
           <ChevronRight size={14} />
@@ -197,7 +197,7 @@ export function ReadingPlanWidget() {
         </span>
         <Link
           to="/grow?tab=plans"
-          className="inline-flex items-center gap-1 text-sm font-medium text-primary-lt transition-colors hover:text-primary"
+          className="inline-flex items-center gap-1 text-sm font-medium text-white/80 transition-colors hover:text-white"
         >
           Start another plan
           <ChevronRight size={14} />
@@ -233,7 +233,7 @@ export function ReadingPlanWidget() {
 
       <Link
         to="/grow?tab=plans"
-        className="inline-flex items-center gap-1 text-sm font-medium text-primary-lt transition-colors hover:text-primary"
+        className="inline-flex items-center gap-1 text-sm font-medium text-white/80 transition-colors hover:text-white"
       >
         Browse all plans
         <ChevronRight size={14} />

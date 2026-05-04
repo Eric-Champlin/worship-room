@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Heart, Check } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
@@ -163,14 +164,15 @@ export function GratitudeWidget({ onGratitudeSaved }: GratitudeWidgetProps) {
         ))}
       </div>
 
-      <button
-        type="button"
+      <Button
+        variant="subtle"
+        size="md"
         onClick={handleSave}
         disabled={!hasContent}
-        className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-opacity motion-reduce:transition-none hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto w-full"
+        className="w-full sm:w-auto"
       >
         Save
-      </button>
+      </Button>
     </div>
   )
 }

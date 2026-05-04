@@ -197,7 +197,7 @@ function MoodChartEmptyState({ onRequestCheckIn }: MoodChartEmptyStateProps) {
           <button
             type="button"
             onClick={onRequestCheckIn}
-            className="text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+            className="text-sm font-medium text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
           >
             Check in now
           </button>

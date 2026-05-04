@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { GripVertical, X } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDragReorder } from '@/hooks/useDragReorder'
@@ -110,7 +111,7 @@ export function CustomizePanel({
         aria-label="Customize Dashboard"
         aria-modal="true"
         className={cn(
-          'fixed z-50 flex flex-col bg-hero-mid/95 backdrop-blur-xl border border-white/15',
+          'fixed z-50 flex flex-col bg-white/[0.05] backdrop-blur-xl border border-white/[0.10]',
           // Mobile: bottom sheet
           'bottom-0 left-0 right-0 max-h-[80vh] rounded-t-2xl',
           // Desktop: side panel
@@ -167,7 +168,7 @@ export function CustomizePanel({
                 key={id}
                 data-drag-item
                 className={cn(
-                  'flex items-center gap-3 rounded-lg bg-white/[0.06] p-3 min-h-[44px]',
+                  'flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.05] p-3 min-h-[44px]',
                   isDragging && 'shadow-lg scale-[1.02] motion-reduce:scale-100',
                   isKeyboardActive && 'ring-2 ring-primary',
                   isHidden && 'opacity-50',
@@ -225,21 +226,19 @@ export function CustomizePanel({
 
         {/* Footer */}
         <div className="flex items-center justify-between gap-3 border-t border-white/10 px-4 py-4">
-          <button
+          <Button
+            variant="subtle"
+            size="sm"
             onClick={() => {
               onResetToDefault()
               onClose()
             }}
-            className="rounded-lg bg-white/10 px-4 py-2 text-sm text-white/60 hover:bg-white/15 hover:text-white transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
           >
             Reset to Default
-          </button>
-          <button
-            onClick={onClose}
-            className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]"
-          >
+          </Button>
+          <Button variant="subtle" size="sm" onClick={onClose}>
             Done
-          </button>
+          </Button>
         </div>
       </div>
     </>

@@ -13,7 +13,7 @@ export function RecentHighlightsWidget() {
         <p className="text-sm text-white/50">Start highlighting as you read</p>
         <Link
           to="/bible"
-          className="mt-2 text-sm text-primary-lt transition-colors hover:text-primary"
+          className="mt-2 text-sm text-white/80 transition-colors hover:text-white"
         >
           Open Bible &gt;
         </Link>
@@ -60,7 +60,7 @@ export function RecentHighlightsWidget() {
       })}
       <Link
         to="/bible"
-        className="block text-sm text-primary-lt transition-colors hover:text-primary"
+        className="block text-sm text-white/80 transition-colors hover:text-white"
       >
         See all &gt;
       </Link>

@@ -60,7 +60,7 @@ describe('TodaysDevotionalCard', () => {
     const link = screen.getByRole('link', { name: /Read today's devotional/ })
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('href', '/daily?tab=devotional')
-    expect(link).toHaveClass('text-primary-lt')
+    expect(link).toHaveClass('text-white/80')
   })
 
   it('renders green checkmark when read', () => {

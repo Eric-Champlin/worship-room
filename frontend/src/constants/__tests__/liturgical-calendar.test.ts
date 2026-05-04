@@ -264,4 +264,91 @@ describe('liturgical-calendar', () => {
       expect(getDayWithinSeason('advent', new Date(2026, 11, 5))).toBe(6)
     })
   })
+
+  describe('greeting recency window (14-day)', () => {
+    it('Easter Sunday → "Happy Easter"', () => {
+      // 2026 Easter = April 5 (day 0)
+      expect(getLiturgicalSeason(new Date(2026, 3, 5)).greeting).toBe('Happy Easter')
+    })
+
+    it('Easter +14 → still "Happy Easter" (last day of window)', () => {
+      // April 5 + 14 = April 19
+      expect(getLiturgicalSeason(new Date(2026, 3, 19)).greeting).toBe('Happy Easter')
+    })
+
+    it('Easter +15 → empty greeting (just outside window) but season + isNamedSeason preserved', () => {
+      // April 20 = Easter + 15
+      const result = getLiturgicalSeason(new Date(2026, 3, 20))
+      expect(result.greeting).toBe('')
+      expect(result.seasonName).toBe('Easter')
+      expect(result.isNamedSeason).toBe(true)
+    })
+
+    it('Easter +29 (today, 2026-05-04) → empty greeting', () => {
+      const result = getLiturgicalSeason(new Date(2026, 4, 4))
+      expect(result.greeting).toBe('')
+      expect(result.seasonName).toBe('Easter')
+      expect(result.isNamedSeason).toBe(true)
+    })
+
+    it('Christmas Dec 25 → "Merry Christmas"', () => {
+      expect(getLiturgicalSeason(new Date(2026, 11, 25)).greeting).toBe('Merry Christmas')
+    })
+
+    it('Christmas +9 (Jan 3, within window AND within Christmas range) → "Merry Christmas"', () => {
+      // Christmas range is Dec 25–Jan 5; Jan 3 = day 9 of window
+      expect(getLiturgicalSeason(new Date(2027, 0, 3)).greeting).toBe('Merry Christmas')
+    })
+
+    it('Pentecost Sunday → "Happy Pentecost"', () => {
+      // 2026 Easter = April 5; Pentecost = May 24
+      expect(getLiturgicalSeason(new Date(2026, 4, 24)).greeting).toBe('Happy Pentecost')
+    })
+
+    it('Holy Week (Palm Sunday) → "Blessed Holy Week"', () => {
+      // 2026 Easter = April 5; Palm Sunday = March 29
+      expect(getLiturgicalSeason(new Date(2026, 2, 29)).greeting).toBe('Blessed Holy Week')
+    })
+
+    it('Advent Sunday → "Blessed Advent"', () => {
+      // 2026 Advent starts Nov 29
+      expect(getLiturgicalSeason(new Date(2026, 10, 29)).greeting).toBe('Blessed Advent')
+    })
+
+    it('Advent +14 → still "Blessed Advent" (last day of window)', () => {
+      // Nov 29 + 14 = Dec 13
+      expect(getLiturgicalSeason(new Date(2026, 11, 13)).greeting).toBe('Blessed Advent')
+    })
+
+    it('Advent +15 → empty greeting (still in Advent season, outside window)', () => {
+      // Nov 29 + 15 = Dec 14
+      const result = getLiturgicalSeason(new Date(2026, 11, 14))
+      expect(result.greeting).toBe('')
+      expect(result.seasonName).toBe('Advent')
+      expect(result.isNamedSeason).toBe(true)
+    })
+
+    it('Epiphany Jan 6 → "Happy Epiphany" (single-day season, day 0 of window)', () => {
+      expect(getLiturgicalSeason(new Date(2026, 0, 6)).greeting).toBe('Happy Epiphany')
+    })
+
+    it('Lent +11 (March 1, 2026) → still "Blessed Lent"', () => {
+      // 2026 Ash Wednesday = Feb 18; March 1 = day 11
+      expect(getLiturgicalSeason(new Date(2026, 2, 1)).greeting).toBe('Blessed Lent')
+    })
+
+    it('Lent +38 (March 28 = day before Palm Sunday) → empty greeting', () => {
+      // Feb 18 + 38 = March 28; outside the 14-day window
+      const result = getLiturgicalSeason(new Date(2026, 2, 28))
+      expect(result.greeting).toBe('')
+      expect(result.seasonName).toBe('Lent')
+      expect(result.isNamedSeason).toBe(true)
+    })
+
+    it('Ordinary Time always has empty greeting (no window concept)', () => {
+      const result = getLiturgicalSeason(new Date(2026, 6, 15))
+      expect(result.greeting).toBe('')
+      expect(result.isNamedSeason).toBe(false)
+    })
+  })
 })

@@ -235,6 +235,25 @@ function daysBetween(a: Date, b: Date): number {
   return Math.round(Math.abs(utcB - utcA) / (1000 * 60 * 60 * 24))
 }
 
+const GREETING_RECENCY_WINDOW_DAYS = 14
+
+/**
+ * Holiday greetings ("Happy Easter", "Merry Christmas", etc.) only fire within
+ * GREETING_RECENCY_WINDOW_DAYS of each season's start. Outside the window, the
+ * caller falls back to an empty greeting while still reporting the active
+ * seasonName / themeColor / isNamedSeason.
+ *
+ * Ordinary Time has no holiday greeting; the window concept doesn't apply.
+ */
+function isWithinGreetingRecencyWindow(
+  seasonId: LiturgicalSeasonId,
+  date: Date,
+): boolean {
+  if (seasonId === 'ordinary-time') return false
+  const start = getSeasonStartDate(seasonId, date)
+  return daysBetween(start, date) <= GREETING_RECENCY_WINDOW_DAYS
+}
+
 /**
  * Returns the start date of the next season transition after the current season's end.
  */
@@ -374,7 +393,9 @@ export function getLiturgicalSeason(date: Date = new Date()): LiturgicalSeasonRe
         seasonName: season.name,
         themeColor: season.themeColor,
         icon: season.icon,
-        greeting: season.greeting,
+        greeting: isWithinGreetingRecencyWindow(range.id, date)
+          ? season.greeting
+          : '',
         daysUntilNextSeason: computeDaysUntilNextSeason(date),
         isNamedSeason: range.id !== 'ordinary-time',
       }

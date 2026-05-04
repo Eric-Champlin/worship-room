@@ -70,7 +70,7 @@ export function FriendsPreview() {
         <p className="text-sm text-white/60">Faith grows stronger together</p>
         <Link
           to="/friends?tab=friends"
-          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
         >
           <UserPlus className="h-4 w-4" aria-hidden="true" />
           Invite a friend

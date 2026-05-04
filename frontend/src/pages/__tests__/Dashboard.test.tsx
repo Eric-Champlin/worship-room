@@ -84,8 +84,19 @@ describe('Dashboard', () => {
   it('renders dashboard with dark background when checked in', () => {
     seedTodayMoodEntry()
     renderDashboard()
-    const root = screen.getByRole('main').closest('.min-h-screen')
+    const root = screen.getByRole('main').closest('.bg-dashboard-dark')
     expect(root).toHaveClass('bg-dashboard-dark')
+    expect(root).toHaveClass('min-h-screen')
+  })
+
+  it('wraps main inside BackgroundCanvas (multi-bloom atmospheric layer)', () => {
+    seedTodayMoodEntry()
+    renderDashboard()
+    const main = screen.getByRole('main')
+    const canvas = main.parentElement
+    expect(canvas?.className).toContain('relative')
+    expect(canvas?.className).toContain('min-h-screen')
+    expect(canvas?.className).toContain('overflow-hidden')
   })
 
   it('has main content landmark when checked in', () => {
@@ -106,6 +117,104 @@ describe('Dashboard', () => {
     seedTodayMoodEntry()
     renderDashboard()
     expect(screen.queryByText('Coming in Spec 3')).not.toBeInTheDocument()
+  })
+})
+
+describe('Dashboard — GrowthGarden consolidation (Spec 4A Step 10)', () => {
+  // Mock window.matchMedia with a controllable `matches` value and
+  // listener bookkeeping so tests can fire `change` events deterministically.
+  function mockMatchMedia(initialMatches: boolean) {
+    const listeners: Array<(e: MediaQueryListEvent) => void> = []
+    const mql = {
+      matches: initialMatches,
+      media: '(min-width: 1024px)',
+      onchange: null,
+      addEventListener: vi.fn(
+        (_event: string, cb: (e: MediaQueryListEvent) => void) => {
+          listeners.push(cb)
+        },
+      ),
+      removeEventListener: vi.fn(
+        (_event: string, cb: (e: MediaQueryListEvent) => void) => {
+          const idx = listeners.indexOf(cb)
+          if (idx !== -1) listeners.splice(idx, 1)
+        },
+      ),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }
+    const spy = vi.spyOn(window, 'matchMedia').mockReturnValue(mql as unknown as MediaQueryList)
+    return {
+      mql,
+      spy,
+      fireChange: (newMatches: boolean) => {
+        mql.matches = newMatches
+        for (const cb of listeners) cb({ matches: newMatches } as MediaQueryListEvent)
+      },
+    }
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('renders exactly one GrowthGarden SVG (single instance, not dual-mount)', () => {
+    seedTodayMoodEntry()
+    renderDashboard()
+    const gardens = document.querySelectorAll(
+      'svg[role="img"][aria-label^="Your garden"]',
+    )
+    expect(gardens).toHaveLength(1)
+  })
+
+  it('defaults gardenSize to "md" when matchMedia matches:false (sub-1024px viewport)', () => {
+    mockMatchMedia(false)
+    seedTodayMoodEntry()
+    renderDashboard()
+    const garden = document.querySelector(
+      'svg[role="img"][aria-label^="Your garden"]',
+    )
+    // GrowthGarden wraps its <svg> in a <div> whose height class encodes size:
+    // sm=h-[150px], md=h-[200px], lg=h-[300px] (see GrowthGarden.tsx SIZE_CLASSES).
+    expect(garden?.parentElement?.className).toContain('h-[200px]')
+  })
+
+  it('defaults gardenSize to "lg" when matchMedia matches:true (>=1024px viewport)', () => {
+    mockMatchMedia(true)
+    seedTodayMoodEntry()
+    renderDashboard()
+    const garden = document.querySelector(
+      'svg[role="img"][aria-label^="Your garden"]',
+    )
+    expect(garden?.parentElement?.className).toContain('h-[300px]')
+  })
+
+  it('updates gardenSize when matchMedia "change" listener fires (no remount)', () => {
+    const { fireChange } = mockMatchMedia(false)
+    seedTodayMoodEntry()
+    renderDashboard()
+    let garden = document.querySelector(
+      'svg[role="img"][aria-label^="Your garden"]',
+    )
+    expect(garden?.parentElement?.className).toContain('h-[200px]')
+    act(() => {
+      fireChange(true)
+    })
+    garden = document.querySelector('svg[role="img"][aria-label^="Your garden"]')
+    expect(garden?.parentElement?.className).toContain('h-[300px]')
+  })
+
+  it('removes the matchMedia "change" listener on unmount (no leak)', () => {
+    const { mql } = mockMatchMedia(false)
+    seedTodayMoodEntry()
+    const { unmount } = renderDashboard()
+    expect(mql.addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    unmount()
+    expect(mql.removeEventListener).toHaveBeenCalledWith(
+      'change',
+      expect.any(Function),
+    )
   })
 })
 

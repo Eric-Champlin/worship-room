@@ -102,7 +102,7 @@ describe('VerseOfTheDayCard', () => {
   it('meditation link has correct styling', () => {
     renderCard()
     const meditateLink = screen.getByText('Meditate on this verse >')
-    expect(meditateLink.className).toContain('text-primary-lt')
+    expect(meditateLink.className).toContain('text-white/80')
     expect(meditateLink.className).toContain('text-sm')
   })
 })

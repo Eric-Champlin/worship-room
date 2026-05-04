@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { Button } from '@/components/ui/Button'
 import { getPrayers, getPrayerCounts, getAnsweredThisMonth } from '@/services/prayer-list-storage'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 
@@ -25,12 +26,9 @@ export function PrayerListWidget() {
     return (
       <div className="flex flex-col items-center gap-3 py-4 text-center">
         <p className="text-sm text-white/60">Start your prayer list</p>
-        <Link
-          to="/my-prayers"
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-lt"
-        >
-          Add Prayer
-        </Link>
+        <Button asChild variant="subtle" size="md">
+          <Link to="/my-prayers">Add Prayer</Link>
+        </Button>
       </div>
     )
   }
@@ -51,7 +49,7 @@ export function PrayerListWidget() {
       </p>
       <Link
         to="/my-prayers"
-        className="mt-2 inline-block text-sm font-medium text-primary-lt transition-colors hover:text-primary"
+        className="mt-2 inline-block text-sm font-medium text-white/80 transition-colors hover:text-white"
       >
         View all &rarr;
       </Link>
