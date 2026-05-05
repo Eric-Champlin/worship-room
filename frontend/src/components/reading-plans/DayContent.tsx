@@ -1,5 +1,6 @@
 import { forwardRef } from 'react'
 
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { VerseLink } from '@/components/shared/VerseLink'
 import type { PlanDayContent as DayContentType } from '@/types/reading-plans'
 
@@ -60,12 +61,12 @@ export const DayContent = forwardRef<HTMLDivElement, DayContentProps>(
 
         {/* Action step section */}
         <section className="border-t border-white/10 py-8 sm:py-10" ref={ref}>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-6">
+          <FrostedCard variant="subdued">
             <p className="text-sm text-white/60">Today&apos;s Action Step</p>
             <p className="mt-2 text-lg font-medium text-white">
               {day.actionStep}
             </p>
-          </div>
+          </FrostedCard>
         </section>
       </div>
     )

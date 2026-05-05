@@ -21,6 +21,7 @@ import type { ActivityType } from '@/types/dashboard'
 import { cn } from '@/lib/utils'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 export function ReadingPlanDetail() {
@@ -157,10 +158,6 @@ export function ReadingPlanDetail() {
   }
   if (!plan) return <PlanNotFound />
 
-  const titleWords = plan.title.split(' ')
-  const titleLastWord = titleWords[titleWords.length - 1]
-  const titlePrefix = titleWords.slice(0, -1).join(' ')
-
   const completionPercent = progress
     ? Math.round((progress.completedDays.length / plan.durationDays) * 100)
     : 0
@@ -197,10 +194,10 @@ export function ReadingPlanDetail() {
           </div>
 
           <h1 className="mt-4 px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl pb-2" style={GRADIENT_TEXT_STYLE}>
-            {titlePrefix} <span className="font-script">{titleLastWord}</span>
+            {plan.title}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
+          <p className="mx-auto mt-3 max-w-xl text-base text-white/70 leading-relaxed sm:text-lg">
             {plan.description}
           </p>
 
@@ -235,82 +232,84 @@ export function ReadingPlanDetail() {
           )}
         </section>
 
-        {/* Breadcrumb */}
-        <Breadcrumb
-          items={[
-            { label: 'Grow', href: '/grow?tab=plans' },
-            { label: 'Reading Plans', href: '/grow?tab=plans' },
-            { label: plan.title },
-          ]}
-          maxWidth="max-w-2xl"
-        />
+        <BackgroundCanvas>
+          {/* Breadcrumb */}
+          <Breadcrumb
+            items={[
+              { label: 'Grow', href: '/grow?tab=plans' },
+              { label: 'Reading Plans', href: '/grow?tab=plans' },
+              { label: plan.title },
+            ]}
+            maxWidth="max-w-2xl"
+          />
 
-        {/* Day content */}
-        {currentDayContent && (
-          <DayContent day={currentDayContent} ref={actionStepRef} />
-        )}
+          {/* Day content */}
+          {currentDayContent && (
+            <DayContent day={currentDayContent} ref={actionStepRef} />
+          )}
 
-        {/* Day completion celebration */}
-        {justCompletedDay === selectedDay && (
-          <div className="mx-auto max-w-2xl px-4 sm:px-6">
-            <DayCompletionCelebration
-              dayNumber={selectedDay}
-              pointsAwarded={!pointsAlreadyAwardedRef.current}
-              isLastDay={isLastDay}
-              onContinue={() => {
-                setJustCompletedDay(null)
-                handleNextDay()
-              }}
-            />
-          </div>
-        )}
+          {/* Day completion celebration */}
+          {justCompletedDay === selectedDay && (
+            <div className="mx-auto max-w-2xl px-4 sm:px-6">
+              <DayCompletionCelebration
+                dayNumber={selectedDay}
+                pointsAwarded={!pointsAlreadyAwardedRef.current}
+                isLastDay={isLastDay}
+                onContinue={() => {
+                  setJustCompletedDay(null)
+                  handleNextDay()
+                }}
+              />
+            </div>
+          )}
 
-        {/* Day navigation */}
-        <div className="mx-auto max-w-2xl px-4 pb-12 sm:px-6">
-          <div className="mt-8 flex flex-col items-center gap-4 sm:mt-10">
-            <DaySelector
-              totalDays={plan.durationDays}
-              selectedDay={selectedDay}
-              progress={progress}
-              dayTitles={plan.days.map((d) => d.title)}
-              onSelectDay={handleDayChange}
-            />
+          {/* Day navigation */}
+          <div className="mx-auto max-w-2xl px-4 pb-12 sm:px-6">
+            <div className="mt-8 flex flex-col items-center gap-4 sm:mt-10">
+              <DaySelector
+                totalDays={plan.durationDays}
+                selectedDay={selectedDay}
+                progress={progress}
+                dayTitles={plan.days.map((d) => d.title)}
+                onSelectDay={handleDayChange}
+              />
 
-            <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-              <button
-                type="button"
-                onClick={handlePreviousDay}
-                disabled={selectedDay <= 1}
-                aria-label="Go to previous day"
-                className={cn(
-                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
-                  selectedDay <= 1
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'hover:bg-white/15',
-                )}
-              >
-                <ChevronLeft size={16} aria-hidden="true" />
-                Previous Day
-              </button>
+              <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+                <button
+                  type="button"
+                  onClick={handlePreviousDay}
+                  disabled={selectedDay <= 1}
+                  aria-label="Go to previous day"
+                  className={cn(
+                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                    selectedDay <= 1
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'hover:bg-white/15',
+                  )}
+                >
+                  <ChevronLeft size={16} aria-hidden="true" />
+                  Previous Day
+                </button>
 
-              <button
-                type="button"
-                onClick={handleNextDay}
-                disabled={selectedDay >= plan.durationDays}
-                aria-label="Go to next day"
-                className={cn(
-                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
-                  selectedDay >= plan.durationDays
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'hover:bg-white/15',
-                )}
-              >
-                Next Day
-                <ChevronRight size={16} aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  onClick={handleNextDay}
+                  disabled={selectedDay >= plan.durationDays}
+                  aria-label="Go to next day"
+                  className={cn(
+                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                    selectedDay >= plan.durationDays
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'hover:bg-white/15',
+                  )}
+                >
+                  Next Day
+                  <ChevronRight size={16} aria-hidden="true" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </BackgroundCanvas>
       </div>
 
       {/* Plan completion overlay */}

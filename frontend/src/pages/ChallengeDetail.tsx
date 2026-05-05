@@ -35,6 +35,7 @@ import {
 } from '@/constants/challenges'
 import { getChallengeCalendarInfo } from '@/lib/challenge-calendar'
 import { cn } from '@/lib/utils'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
 function getCountdownColorClass(daysUntilStart: number): string {
@@ -91,7 +92,6 @@ export function ChallengeDetail() {
 
   const initialDay = progress?.currentDay ?? 1
   const [selectedDay, setSelectedDay] = useState(initialDay)
-  const [justCompletedFinalDay, setJustCompletedFinalDay] = useState(false)
 
   const currentDayContent = useMemo(() => {
     if (!challenge) return undefined
@@ -144,7 +144,6 @@ export function ChallengeDetail() {
     playSoundEffect('ascending')
 
     if (result.isCompletion) {
-      setJustCompletedFinalDay(true)
       const badgeId = result.newBadgeIds.find((id) => id.startsWith('challenge_') && !id.includes('first') && !id.includes('master'))
       const badge = badgeId ? BADGE_MAP[badgeId] : undefined
       setCompletionOverlay({
@@ -275,7 +274,7 @@ export function ChallengeDetail() {
             {challenge.title}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-xl font-serif italic text-base text-white/60 sm:text-lg">
+          <p className="mx-auto mt-3 max-w-xl text-base text-white/70 leading-relaxed sm:text-lg">
             {challenge.description}
           </p>
 
@@ -407,131 +406,118 @@ export function ChallengeDetail() {
         </div>
       </section>
 
-      {/* Breadcrumb — its own max-w-2xl */}
-      <Breadcrumb
-        items={[
-          { label: 'Grow', href: '/grow?tab=challenges' },
-          { label: 'Challenges', href: '/grow?tab=challenges' },
-          { label: challenge.title },
-        ]}
-        maxWidth="max-w-2xl"
-      />
-
-      {/* Milestone card */}
-      {activeMilestone && challengeId && challenge && (
-        <MilestoneCard
-          milestoneTitle={activeMilestone.title}
-          challengeTitle={challenge.title}
-          challengeId={challengeId}
-          themeColor={challenge.themeColor}
-          currentDay={activeMilestone.day}
-          totalDays={challenge.durationDays}
-          streak={progress?.streak ?? 0}
-          onDismiss={() => {
-            markMilestoneShown(challengeId, activeMilestone.day)
-            setActiveMilestone(null)
-          }}
+      <BackgroundCanvas>
+        {/* Breadcrumb — its own max-w-2xl */}
+        <Breadcrumb
+          items={[
+            { label: 'Grow', href: '/grow?tab=challenges' },
+            { label: 'Challenges', href: '/grow?tab=challenges' },
+            { label: challenge.title },
+          ]}
+          maxWidth="max-w-2xl"
         />
-      )}
 
-      {/* Day content */}
-      {showDayContent && (
-        <ChallengeDayContent
-          day={currentDayContent}
-          themeColor={challenge.themeColor}
-          isCurrentDay={
-            isJoined && !isCompleted && selectedDay === progress?.currentDay
-          }
-          isAuthenticated={isAuthenticated}
-          isPastChallenge={isPastChallenge}
-          onMarkComplete={handleMarkComplete}
-          actionRoute={ACTION_TYPE_ROUTES[currentDayContent.actionType]}
-          actionLabel={ACTION_TYPE_LABELS[currentDayContent.actionType]}
-          challengeId={challenge.id}
-          challengeTitle={challenge.title}
-          completedDaysCount={progress?.completedDays.length ?? 0}
-          streak={progress?.streak ?? 0}
-          totalDays={challenge.durationDays}
+        {/* Milestone card */}
+        {activeMilestone && challengeId && challenge && (
+          <MilestoneCard
+            milestoneTitle={activeMilestone.title}
+            challengeTitle={challenge.title}
+            challengeId={challengeId}
+            themeColor={challenge.themeColor}
+            currentDay={activeMilestone.day}
+            totalDays={challenge.durationDays}
+            streak={progress?.streak ?? 0}
+            onDismiss={() => {
+              markMilestoneShown(challengeId, activeMilestone.day)
+              setActiveMilestone(null)
+            }}
+          />
+        )}
+
+        {/* Day content */}
+        {showDayContent && (
+          <ChallengeDayContent
+            day={currentDayContent}
+            themeColor={challenge.themeColor}
+            isCurrentDay={
+              isJoined && !isCompleted && selectedDay === progress?.currentDay
+            }
+            isAuthenticated={isAuthenticated}
+            isPastChallenge={isPastChallenge}
+            onMarkComplete={handleMarkComplete}
+            actionRoute={ACTION_TYPE_ROUTES[currentDayContent.actionType]}
+            actionLabel={ACTION_TYPE_LABELS[currentDayContent.actionType]}
+            challengeId={challenge.id}
+            challengeTitle={challenge.title}
+            completedDaysCount={progress?.completedDays.length ?? 0}
+            streak={progress?.streak ?? 0}
+            totalDays={challenge.durationDays}
+          />
+        )}
+
+        {/* Community feed — state-aware */}
+        <CommunityFeed
+          status={communityStatus}
+          dayNumber={selectedDay}
+          challengeDuration={challenge.durationDays}
+          remindersCount={challenge.remindersCount}
+          activeParticipantsCount={challenge.activeParticipantsCount}
+          completedCount={challenge.completedCount}
+          startDateLabel={formattedStartDateLabel}
+          hasReminder={hasReminder}
+          onToggleReminder={isFutureChallenge ? handleFutureReminderToggle : undefined}
         />
-      )}
 
-      {/* Community feed — state-aware */}
-      <CommunityFeed
-        status={communityStatus}
-        dayNumber={selectedDay}
-        challengeDuration={challenge.durationDays}
-        remindersCount={challenge.remindersCount}
-        activeParticipantsCount={challenge.activeParticipantsCount}
-        completedCount={challenge.completedCount}
-        startDateLabel={formattedStartDateLabel}
-        hasReminder={hasReminder}
-        onToggleReminder={isFutureChallenge ? handleFutureReminderToggle : undefined}
-      />
+        {/* Day navigation */}
+        {!isFutureChallenge && (
+          <div className="mx-auto max-w-2xl px-4 pb-12 sm:px-6">
+            <div className="mt-8 flex flex-col items-center gap-4 sm:mt-10">
+              <ChallengeDaySelector
+                totalDays={challenge.durationDays}
+                selectedDay={selectedDay}
+                progress={progress}
+                dayTitles={challenge.dailyContent.map((d) => d.title)}
+                onSelectDay={handleDayChange}
+                isPastChallenge={isPastChallenge}
+              />
 
-      {/* Completion celebration */}
-      {justCompletedFinalDay && (
-        <div className="mx-auto max-w-2xl px-4 sm:px-6">
-          <div className="rounded-2xl border border-success/20 bg-success/10 p-6 text-center">
-            <p className="text-lg font-semibold text-white">
-              You&apos;ve completed {challenge.title}!
-            </p>
-            <p className="mt-2 text-sm text-white/70">
-              What an incredible journey. {participantCount.toLocaleString()} others
-              completed this challenge with you.
-            </p>
-          </div>
-        </div>
-      )}
+              <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+                <button
+                  type="button"
+                  onClick={handlePreviousDay}
+                  disabled={selectedDay <= 1}
+                  aria-label="Go to previous day"
+                  className={cn(
+                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                    selectedDay <= 1
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'hover:bg-white/15',
+                  )}
+                >
+                  <ChevronLeft size={16} aria-hidden="true" />
+                  Previous Day
+                </button>
 
-      {/* Day navigation */}
-      {!isFutureChallenge && (
-        <div className="mx-auto max-w-2xl px-4 pb-12 sm:px-6">
-          <div className="mt-8 flex flex-col items-center gap-4 sm:mt-10">
-            <ChallengeDaySelector
-              totalDays={challenge.durationDays}
-              selectedDay={selectedDay}
-              progress={progress}
-              dayTitles={challenge.dailyContent.map((d) => d.title)}
-              onSelectDay={handleDayChange}
-              isPastChallenge={isPastChallenge}
-            />
-
-            <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-              <button
-                type="button"
-                onClick={handlePreviousDay}
-                disabled={selectedDay <= 1}
-                aria-label="Go to previous day"
-                className={cn(
-                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
-                  selectedDay <= 1
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'hover:bg-white/15',
-                )}
-              >
-                <ChevronLeft size={16} aria-hidden="true" />
-                Previous Day
-              </button>
-
-              <button
-                type="button"
-                onClick={handleNextDay}
-                disabled={selectedDay >= challenge.durationDays}
-                aria-label="Go to next day"
-                className={cn(
-                  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
-                  selectedDay >= challenge.durationDays
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'hover:bg-white/15',
-                )}
-              >
-                Next Day
-                <ChevronRight size={16} aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  onClick={handleNextDay}
+                  disabled={selectedDay >= challenge.durationDays}
+                  aria-label="Go to next day"
+                  className={cn(
+                    'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                    selectedDay >= challenge.durationDays
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'hover:bg-white/15',
+                  )}
+                >
+                  Next Day
+                  <ChevronRight size={16} aria-hidden="true" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </BackgroundCanvas>
 
       {/* Switch challenge dialog */}
       {switchDialog && (() => {

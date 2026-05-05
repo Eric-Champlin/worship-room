@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Brain, Heart, MessageSquare, Music2, PenLine, Smile, type LucideIcon } from 'lucide-react'
 
 import { ChallengeShareButton } from '@/components/challenges/ChallengeShareButton'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getMusicDestination } from '@/data/challenge-prefills'
 import type { ChallengeActionType, DayChallengeContent } from '@/types/challenges'
 
@@ -79,7 +80,7 @@ export function ChallengeDayContent({
 
       {/* Daily action callout */}
       <section className="border-t border-white/10 py-8 sm:py-10">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-6">
+        <FrostedCard variant="subdued">
           <div className="mb-3 flex items-center gap-3">
             <ActionIcon
               className="h-5 w-5 shrink-0"
@@ -139,7 +140,7 @@ export function ChallengeDayContent({
               completedDaysCount={completedDaysCount}
             />
           )}
-        </div>
+        </FrostedCard>
       </section>
     </div>
   )
