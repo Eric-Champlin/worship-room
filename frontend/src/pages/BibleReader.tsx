@@ -31,6 +31,7 @@ import { AmbientAudioPicker } from '@/components/bible/reader/AmbientAudioPicker
 import { useReaderAudioAutoStart } from '@/hooks/useReaderAudioAutoStart'
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { Button } from '@/components/ui/Button'
 import { useActivePlan } from '@/hooks/bible/useActivePlan'
 import { setCelebrationShown } from '@/lib/bible/plansStore'
 import { recordReadToday } from '@/lib/bible/streakStore'
@@ -648,13 +649,14 @@ function BibleReaderInner() {
           <FrostedCard className="max-w-md text-center">
             <p className="mb-6 text-lg text-white">That book doesn't exist.</p>
             <div className="flex flex-col items-center gap-3">
-              <button
+              <Button
+                variant="subtle"
+                size="md"
                 type="button"
                 onClick={() => bibleDrawer.open()}
-                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
               >
                 Browse books
-              </button>
+              </Button>
               <Link to="/bible" className="text-sm text-white/50 transition-colors hover:text-white/70">
                 &larr; Back to Bible
               </Link>
@@ -683,12 +685,11 @@ function BibleReaderInner() {
               {book.name} only has {book.chapters} chapter{book.chapters !== 1 ? 's' : ''}.
             </p>
             <div className="flex flex-col items-center gap-3">
-              <Link
-                to={`/bible/${book.slug}/${book.chapters}`}
-                className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
-              >
-                Go to Chapter {book.chapters}
-              </Link>
+              <Button variant="subtle" size="md" asChild>
+                <Link to={`/bible/${book.slug}/${book.chapters}`}>
+                  Go to Chapter {book.chapters}
+                </Link>
+              </Button>
               <button
                 type="button"
                 onClick={() => bibleDrawer.open()}
@@ -832,7 +833,9 @@ function BibleReaderInner() {
                 <p className="mb-6 text-lg text-white">
                   Couldn't load this chapter. Check your connection.
                 </p>
-                <button
+                <Button
+                  variant="subtle"
+                  size="md"
                   type="button"
                   onClick={() => {
                     setLoadError(false)
@@ -852,10 +855,9 @@ function BibleReaderInner() {
                         setIsLoading(false)
                       })
                   }}
-                  className="min-h-[44px] rounded-lg bg-primary px-6 py-2 font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
                 >
                   Try Again
-                </button>
+                </Button>
               </FrostedCard>
             </div>
           ) : (

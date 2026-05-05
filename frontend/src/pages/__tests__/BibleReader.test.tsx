@@ -203,6 +203,17 @@ describe('BibleReader (BB-4 Immersive Reader)', () => {
     })
   })
 
+  it('invalid book CTA renders Button subtle chrome', async () => {
+    renderReader('/bible/notabook/1')
+
+    await waitFor(() => {
+      const btn = screen.getByRole('button', { name: 'Browse books' })
+      expect(btn.className).toContain('bg-white/[0.07]')
+      expect(btn.className).toContain('border-white/[0.12]')
+      expect(btn.className).toContain('rounded-full')
+    })
+  })
+
   it('invalid chapter shows chapter count', async () => {
     renderReader('/bible/john/99')
 
@@ -215,10 +226,33 @@ describe('BibleReader (BB-4 Immersive Reader)', () => {
     renderReader('/bible/john/99')
 
     await waitFor(() => {
-      const btn = screen.getByText('Go to Chapter 21')
-      expect(btn).toBeTruthy()
-      const link = btn.closest('a')
-      expect(link?.getAttribute('href')).toBe('/bible/john/21')
+      const link = screen.getByRole('link', { name: /Go to Chapter 21/ })
+      expect(link.getAttribute('href')).toBe('/bible/john/21')
+      expect(link.tagName).toBe('A')
+      expect(link.className).toContain('bg-white/[0.07]')
+      expect(link.className).toContain('border-white/[0.12]')
+      expect(link.className).toContain('rounded-full')
+    })
+  })
+
+  it('invalid chapter CTA emits single semantic <a> with no button ancestor', async () => {
+    renderReader('/bible/john/99')
+
+    await waitFor(() => {
+      const link = screen.getByRole('link', { name: /Go to Chapter 21/ })
+      expect(link.tagName).toBe('A')
+      expect(link.closest('button')).toBeNull()
+    })
+  })
+
+  it('load error renders Try Again Button subtle', async () => {
+    renderReader('/bible/john/1')
+
+    await waitFor(() => {
+      const btn = screen.getByRole('button', { name: 'Try Again' })
+      expect(btn.className).toContain('bg-white/[0.07]')
+      expect(btn.className).toContain('border-white/[0.12]')
+      expect(btn.className).toContain('rounded-full')
     })
   })
 
