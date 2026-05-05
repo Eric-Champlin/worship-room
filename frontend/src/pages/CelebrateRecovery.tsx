@@ -1,4 +1,5 @@
 import { LocalSupportPage } from '@/components/local-support/LocalSupportPage'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { CELEBRATE_RECOVERY_METADATA } from '@/lib/seo/routeMetadata'
 const crBreadcrumbs = {
@@ -23,7 +24,10 @@ export function CelebrateRecovery() {
         subtitle:
           "Freedom from hurts, habits, and hang-ups starts with showing up. Celebrate Recovery is a Christ-centered 12-step recovery program where you'll find people who understand — because they've been there too.",
         extraHeroContent: (
-          <div className="mx-auto mt-4 max-w-2xl rounded-xl bg-white/10 px-6 py-4 text-left text-sm text-white/80 backdrop-blur-sm">
+          <FrostedCard
+            variant="subdued"
+            className="mx-auto mt-4 max-w-2xl text-left text-sm text-white/80"
+          >
             <p className="font-semibold text-white">What is Celebrate Recovery?</p>
             <p className="mt-1">
               Celebrate Recovery is a Christ-centered, 12-step recovery program for anyone
@@ -31,7 +35,7 @@ export function CelebrateRecovery() {
               weekly at local churches across the country and offers a safe space for healing
               through small groups, worship, and community support.
             </p>
-          </div>
+          </FrostedCard>
         ),
         searchKeyword: 'Celebrate Recovery',
         filterOptions: null,

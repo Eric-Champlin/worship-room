@@ -86,4 +86,23 @@ describe('VisitButton', () => {
     await user.click(screen.getByRole('button', { name: /visited/i }))
     expect(onVisit).toHaveBeenCalledTimes(1)
   })
+
+  // Spec 5 Step 12 — Tonal Icon Pattern: visited state uses text-amber-300
+
+  it('visited state container uses text-amber-300 (Tonal Icon Pattern; Check icon inherits via currentColor)', async () => {
+    const user = userEvent.setup()
+    render(<TestVisitButton {...defaultProps} />)
+    await user.click(screen.getByRole('button', { name: /mark .* as visited/i }))
+    const button = screen.getByRole('button', { name: /visited/i })
+    expect(button.className).toContain('text-amber-300')
+    expect(button.className).not.toContain('text-success')
+  })
+
+  it('unvisited state preserves border + text-white/50 + hover:text-primary', () => {
+    render(<TestVisitButton {...defaultProps} />)
+    const button = screen.getByRole('button', { name: /mark .* as visited/i })
+    expect(button.className).toContain('border-white/10')
+    expect(button.className).toContain('text-white/50')
+    expect(button.className).toContain('hover:text-primary')
+  })
 })

@@ -53,4 +53,22 @@ describe('CelebrateRecovery', () => {
     expect(screen.getByLabelText('Use my current location')).toBeInTheDocument()
   })
 
+  // Spec 5 Step 15 — extraHeroContent migrated to FrostedCard subdued
+  it('CR explainer renders inside FrostedCard subdued chrome (bg-white/[0.05] not bg-white/10)', () => {
+    renderPage()
+    const heading = screen.getByText(/what is celebrate recovery\?/i)
+    // Walk up to find the FrostedCard wrapper carrying the subdued variant tokens
+    let cursor: HTMLElement | null = heading.parentElement
+    while (cursor) {
+      if (cursor.className?.includes('bg-white/[0.05]')) break
+      cursor = cursor.parentElement
+    }
+    expect(cursor).not.toBeNull()
+    expect(cursor?.className).toContain('bg-white/[0.05]')
+    expect(cursor?.className).toContain('rounded-3xl')
+    expect(cursor?.className).toContain('mx-auto')
+    expect(cursor?.className).toContain('max-w-2xl')
+    expect(cursor?.className).not.toContain('bg-white/10')
+    expect(cursor?.className).not.toContain('rounded-xl ')
+  })
 })

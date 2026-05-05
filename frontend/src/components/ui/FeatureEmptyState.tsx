@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils'
 
 interface FeatureEmptyStateProps {
   icon: LucideIcon
+  /** Override the default `text-white/30` icon color (e.g., `text-white/40` for the Local Support saved-tab empty state per Spec 5 Change 12). Sizing classes are preserved. */
+  iconClassName?: string
   heading: string
   description: string
   ctaLabel?: string
@@ -18,6 +20,7 @@ interface FeatureEmptyStateProps {
 
 export function FeatureEmptyState({
   icon: Icon,
+  iconClassName,
   heading,
   description,
   ctaLabel,
@@ -36,7 +39,7 @@ export function FeatureEmptyState({
       )}
     >
       <Icon
-        className="mb-3 h-10 w-10 text-white/30 sm:h-12 sm:w-12"
+        className={cn('mb-3 h-10 w-10 sm:h-12 sm:w-12', iconClassName ?? 'text-white/30')}
         aria-hidden="true"
       />
       <h3 className="text-lg font-bold text-white/70">{heading}</h3>

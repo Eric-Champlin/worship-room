@@ -134,11 +134,41 @@ describe('ListingCard', () => {
     expect(screen.getByRole('button', { name: /bookmark/i })).toBeInTheDocument()
   })
 
-  it('highlighted card has ring', () => {
+  // Spec 5 Step 12 — Bookmark active uses fill-emerald-300 text-emerald-300
+  it('bookmark active state uses fill-emerald-300 text-emerald-300 (Tonal Icon Pattern)', () => {
+    render(<ListingCard {...defaultProps} isBookmarked={true} />)
+    const bookmarkButton = screen.getByRole('button', { name: /bookmark/i })
+    const icon = bookmarkButton.querySelector('svg')
+    const iconClass = icon?.getAttribute('class') ?? ''
+    expect(iconClass).toContain('fill-emerald-300')
+    expect(iconClass).toContain('text-emerald-300')
+    expect(iconClass).not.toContain('fill-success')
+    expect(iconClass).not.toContain('text-success')
+  })
+
+  it('bookmark inactive state preserves text-white/50', () => {
+    render(<ListingCard {...defaultProps} isBookmarked={false} />)
+    const bookmarkButton = screen.getByRole('button', { name: /bookmark/i })
+    const icon = bookmarkButton.querySelector('svg')
+    expect(icon?.getAttribute('class')).toContain('text-white/50')
+  })
+
+  it('highlighted card has violet ring (ring-violet-400/60 per Spec 5 Decision 2)', () => {
     const { container } = render(<ListingCard {...defaultProps} isHighlighted={true} />)
     const article = container.querySelector('article')
     expect(article?.className).toContain('ring-2')
-    expect(article?.className).toContain('ring-primary')
+    expect(article?.className).toContain('ring-violet-400/60')
+    expect(article?.className).not.toContain('ring-primary')
+  })
+
+  it('renders ListingCard chrome via FrostedCard default variant (bg-white/[0.07])', () => {
+    const { container } = render(<ListingCard {...defaultProps} />)
+    const article = container.querySelector('article')
+    expect(article).not.toBeNull()
+    // FrostedCard default variant base — distinctive bg-white/[0.07]
+    expect(article?.className).toContain('bg-white/[0.07]')
+    // The pre-migration rolls-own chrome (bg-white/[0.06]) is gone
+    expect(article?.className).not.toContain('bg-white/[0.06]')
   })
 
   describe('facelift styling', () => {
@@ -149,11 +179,27 @@ describe('ListingCard', () => {
       expect(address.className).not.toContain('text-white/60')
     })
 
-    it('MapPin icon before address is text-white/70', () => {
+    it('MapPin icon before address uses text-white/50 (Spec 5 Change 11e drift correction)', () => {
       render(<ListingCard {...defaultProps} />)
       const address = screen.getByText('115 W 7th St, Columbia, TN 38401')
       const icon = address.querySelector('svg')
-      expect(icon?.getAttribute('class')).toContain('text-white/70')
+      expect(icon?.getAttribute('class')).toContain('text-white/50')
+      expect(icon?.getAttribute('class')).not.toContain('text-white/70')
+    })
+
+    it('Phone icon before phone uses text-white/50 (Spec 5 Change 11e drift correction)', () => {
+      render(<ListingCard {...defaultProps} />)
+      const phoneRow = screen.getByRole('link', { name: '(931) 555-0101' }).parentElement
+      const icon = phoneRow?.querySelector('svg')
+      expect(icon?.getAttribute('class')).toContain('text-white/50')
+    })
+
+    it('website ExternalLink icon uses text-white/50 (Spec 5 Change 11e drift correction)', () => {
+      render(<ListingCard {...defaultProps} isExpanded={true} />)
+      const websiteLink = screen.getByRole('link', { name: 'Visit Website' })
+      const websiteRow = websiteLink.parentElement
+      const icon = websiteRow?.querySelector('svg')
+      expect(icon?.getAttribute('class')).toContain('text-white/50')
     })
 
     it('phone anchor renders in text-white with hover underline and primary-lt focus ring', () => {
@@ -208,15 +254,41 @@ describe('ListingCard', () => {
       expect(placeholder!.className).toContain('sm:w-20')
     })
 
-    it('Get Directions renders as white pill with text-primary and glow shadow', () => {
+    // Spec 5 Step 11 — Get Directions migrated to subtle Button via asChild
+    it('Get Directions renders subtle Button styling on the anchor (via Button asChild)', () => {
       render(<ListingCard {...defaultProps} isExpanded={true} />)
       const link = screen.getByRole('link', { name: /Get Directions/ })
       expect(link.className).toContain('rounded-full')
-      expect(link.className).toContain('bg-white')
-      expect(link.className).toContain('text-primary')
-      expect(link.className).toContain('font-semibold')
-      expect(link.className).toContain('shadow-[0_0_20px_rgba(255,255,255,0.15)]')
-      expect(link.className).toContain('focus-visible:ring-primary-lt')
+      expect(link.className).toContain('bg-white/[0.07]')
+      expect(link.className).toContain('border-white/[0.12]')
+      expect(link.className).toContain('text-white')
+      expect(link.className).toContain('min-h-[44px]')
+      // Old white-pill tokens are gone
+      expect(link.className).not.toContain('text-primary')
+      expect(link.className).not.toContain('shadow-[0_0_20px_rgba(255,255,255,0.15)]')
+    })
+
+    it('Get Directions preserves href, target, rel security attributes', () => {
+      render(<ListingCard {...defaultProps} isExpanded={true} />)
+      const link = screen.getByRole('link', { name: /Get Directions/ })
+      expect(link.getAttribute('href')).toContain('google.com/maps/dir/')
+      expect(link.getAttribute('href')).toContain(`destination=${mockPlace.lat},${mockPlace.lng}`)
+      expect(link.getAttribute('target')).toBe('_blank')
+      expect(link.getAttribute('rel')).toBe('noopener noreferrer')
+    })
+
+    it('Get Directions icon is ExternalLink (not MapPin) per Spec 5 icon table', () => {
+      render(<ListingCard {...defaultProps} isExpanded={true} />)
+      const link = screen.getByRole('link', { name: /Get Directions/ })
+      // ExternalLink icon — lucide renders SVG, we identify by structure: it has
+      // child paths characteristic of ExternalLink (the "leaving the app" arrow).
+      // Simpler: verify there's exactly one svg in the link.
+      const svgs = link.querySelectorAll('svg')
+      expect(svgs.length).toBe(1)
+      // ExternalLink doesn't carry a tonal class — inherits text color from anchor (Button text-white)
+      const iconClass = svgs[0].getAttribute('class') ?? ''
+      expect(iconClass).not.toContain('text-sky-300')
+      expect(iconClass).not.toContain('text-pink-300')
     })
 
     it('Visit Website anchor uses text-white for readability on dark cards', () => {

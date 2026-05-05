@@ -146,14 +146,14 @@ export function ListingShareDropdown({
   const encodedText = encodeURIComponent(shareText)
 
   const itemClass =
-    'flex w-full items-center gap-3 px-4 py-2 text-sm text-text-dark transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:bg-gray-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary'
+    'flex w-full items-center gap-2 px-4 py-2 text-sm text-white/80 transition-colors hover:text-white hover:bg-white/[0.05] focus-visible:outline-none focus-visible:bg-white/[0.08] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-violet-400/40'
 
   return (
     <div
       ref={dropdownRef}
       role="menu"
       aria-label="Share options"
-      className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-2 shadow-lg"
+      className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl bg-hero-mid/95 backdrop-blur-md border border-white/10 shadow-frosted-base py-2"
       onKeyDown={handleKeyDown}
     >
       <button
@@ -165,9 +165,9 @@ export function ListingShareDropdown({
         className={itemClass}
       >
         {copied ? (
-          <Check className="h-4 w-4 text-success" aria-hidden="true" />
+          <Check className="h-4 w-4 text-emerald-300" aria-hidden="true" />
         ) : (
-          <Copy className="h-4 w-4" aria-hidden="true" />
+          <Copy className="h-4 w-4 text-white/60" aria-hidden="true" />
         )}
         {copied ? 'Copied!' : 'Copy link'}
       </button>
@@ -178,7 +178,7 @@ export function ListingShareDropdown({
         tabIndex={-1}
         className={itemClass}
       >
-        <Mail className="h-4 w-4" aria-hidden="true" />
+        <Mail className="h-4 w-4 text-white/60" aria-hidden="true" />
         Email
       </a>
 
@@ -188,7 +188,7 @@ export function ListingShareDropdown({
         tabIndex={-1}
         className={`${itemClass} sm:hidden`}
       >
-        <MessageSquare className="h-4 w-4" aria-hidden="true" />
+        <MessageSquare className="h-4 w-4 text-white/60" aria-hidden="true" />
         SMS
       </a>
 

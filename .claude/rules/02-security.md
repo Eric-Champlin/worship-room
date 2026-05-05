@@ -20,13 +20,14 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - Meditation: card clicks in MeditateTabContent (auth modal) + route-level redirect on all 6 sub-pages (`/meditate/*` → `/daily?tab=meditate` via `<Navigate>` when logged out)
 - Prayer Wall posting, commenting, bookmarking
 - Prayer saving
-- Local Support search, Local Support bookmarking
+- Local Support bookmarking, Local Support visit-recording (the "I visited" affordance is hidden entirely when logged-out, so no auth modal — bookmark is the only Local Support action that surfaces the modal)
  
 **What works without login:**
  
 - Browsing Daily Hub, switching tabs, typing in textareas (but can't submit/save)
 - Draft auto-save to localStorage (Journal)
 - Reading Prayer Wall, expanding comments, sharing
+- **Local Support search and results display (Decision 12 — Spec 5):** browsing churches, counselors, and Celebrate Recovery groups is intentionally public — anyone can find local support without an account. Especially for crisis-adjacent surfaces (Counselors, Celebrate Recovery), removing barriers to discovery is a moral imperative, not just a UX preference. Search input, geolocation, geocoding, results list, results map, "View Details" deep links, "Get Directions" external links, and the share dropdown all work freely; only bookmark and visit-recording are gated.
 - Landing page, quiz, all navigation
 - **Bible features (intentionally unauthenticated):** Bible reader, highlighting verses, taking notes, bookmarking, building memorization decks, viewing reading heatmap and progress map, AI Explain, AI Reflect, full-text search, PWA install
 - **BB-41 push notifications:** A logged-out user can grant notification permission and receive daily verse pushes. The subscription is keyed by browser, not by user account.

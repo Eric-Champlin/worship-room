@@ -126,9 +126,10 @@ When adding a new key, default to `wr_*` unless there is a specific reason to us
 
 ### Local Support
 
-| Key               | Type                   | Feature                          |
-| ----------------- | ---------------------- | -------------------------------- |
-| `wr_local_visits` | LocalVisit[] (max 500) | "I visited" check-ins with notes |
+| Key                                                                                                                            | Type                                | Feature                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `wr_local_visits`                                                                                                              | LocalVisit[] (max 500)              | "I visited" check-ins with notes                                                                                                                                                                                                                                                   |
+| `wr_bookmarks_<category>` (3 variants: `wr_bookmarks_churches`, `wr_bookmarks_counselors`, `wr_bookmarks_celebrate-recovery`) | `string[]` of LocalSupportPlace IDs | Client-side bookmark state for Local Support listings. Persisted only when user is authenticated (logged-out bookmark click opens auth modal — never writes). No eviction (manual user action only). Consumed by `LocalSupportPage.tsx` (read on mount, write on bookmark toggle). |
 
 ### PWA
 

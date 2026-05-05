@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { MapPin, Search, Loader2 } from 'lucide-react'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
+import { Button } from '@/components/ui/Button'
 
 interface SearchControlsProps {
   onSearch: (lat: number, lng: number, radius: number) => void
@@ -123,21 +124,22 @@ export function SearchControls({
     <div className="space-y-4">
       {/* Location input row */}
       <form onSubmit={onInteractionBlocked ? (e) => { e.preventDefault(); onInteractionBlocked() } : handleSearchSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <button
+        <Button
+          variant="subtle"
+          size="md"
           type="button"
           onClick={onInteractionBlocked ?? handleUseMyLocation}
           disabled={isGeolocating}
           aria-label="Use my current location"
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] disabled:opacity-50"
         >
           {isGeolocating ? (
             <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden="true" />
           ) : (
-            <MapPin size={18} aria-hidden="true" />
+            <MapPin size={18} className="text-sky-300" aria-hidden="true" />
           )}
           <span className="sm:hidden lg:inline">Use My Location</span>
           <span className="hidden sm:inline lg:hidden">My Location</span>
-        </button>
+        </Button>
 
         <div className="flex flex-1 gap-2">
           <div className="flex-1">
@@ -158,15 +160,16 @@ export function SearchControls({
               className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
             />
           </div>
-          <button
+          <Button
+            variant="subtle"
+            size="md"
             type="submit"
             disabled={isLoading || !locationInput.trim()}
             aria-label="Search"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] disabled:opacity-50"
           >
             <Search size={18} aria-hidden="true" />
             <span className="hidden sm:inline">Search</span>
-          </button>
+          </Button>
         </div>
       </form>
 

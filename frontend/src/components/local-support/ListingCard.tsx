@@ -3,6 +3,8 @@ import { Bookmark, ChevronDown, ExternalLink, ImageOff, MapPin, Phone, Share2, S
 import type { LocalSupportPlace, LocalSupportCategory } from '@/types/local-support'
 import { VisitButton, VisitNote, useVisitState } from './VisitButton'
 import { ListingCTAs } from './ListingCTAs'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
 interface ListingCardProps {
@@ -73,12 +75,11 @@ export function ListingCard({
   })
 
   return (
-    <article
+    <FrostedCard
+      as="article"
+      variant="default"
       aria-label={`${place.name} — ${place.address}`}
-      className={cn(
-        'rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20',
-        isHighlighted && 'ring-2 ring-primary',
-      )}
+      className={cn('p-5 sm:p-6', isHighlighted && 'ring-2 ring-violet-400/60')}
     >
       {/* Main card content */}
       <div className="flex gap-4">
@@ -112,13 +113,13 @@ export function ListingCard({
           </div>
 
           <p className="mt-1 flex items-center gap-1 text-sm text-white">
-            <MapPin size={14} className="shrink-0 text-white/70" aria-hidden="true" />
+            <MapPin size={14} className="shrink-0 text-white/50" aria-hidden="true" />
             {place.address}
           </p>
 
           {place.phone && (
             <p className="mt-1 flex items-center gap-1 text-sm">
-              <Phone size={14} className="shrink-0 text-white/70" aria-hidden="true" />
+              <Phone size={14} className="shrink-0 text-white/50" aria-hidden="true" />
               <a
                 href={`tel:${place.phone}`}
                 className="rounded text-white hover:underline focus:outline-none focus:ring-2 focus:ring-primary-lt"
@@ -149,7 +150,7 @@ export function ListingCard({
                 size={18}
                 aria-hidden="true"
                 className={cn(
-                  isBookmarked ? 'fill-success text-success' : 'text-white/50',
+                  isBookmarked ? 'fill-emerald-300 text-emerald-300' : 'text-white/50',
                 )}
               />
             </button>
@@ -203,7 +204,7 @@ export function ListingCard({
         <div className="space-y-3 border-t border-white/10 pt-4 text-sm">
           {place.website && (
             <p className="flex items-center gap-2">
-              <ExternalLink size={14} className="shrink-0 text-white/60" aria-hidden="true" />
+              <ExternalLink size={14} className="shrink-0 text-white/50" aria-hidden="true" />
               <a
                 href={place.website}
                 target="_blank"
@@ -244,15 +245,16 @@ export function ListingCard({
             <p className="text-white/60">{place.description}</p>
           )}
 
-          <a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
-          >
-            <MapPin size={14} aria-hidden="true" />
-            Get Directions
-          </a>
+          <Button asChild variant="subtle" size="md">
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink size={14} aria-hidden="true" />
+              Get Directions
+            </a>
+          </Button>
 
           {category && (
             <ListingCTAs
@@ -263,6 +265,6 @@ export function ListingCard({
           )}
         </div>
       </div>
-    </article>
+    </FrostedCard>
   )
 }

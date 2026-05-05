@@ -89,4 +89,28 @@ describe('LocalSupportPage — visit toast integration', () => {
     const { container } = renderPage()
     expect(container.querySelector('main')).toBeInTheDocument()
   })
+
+  // Spec 5 Step 3 — BackgroundCanvas wraps the shell
+  it('wraps hero + main inside BackgroundCanvas atmospheric layer', () => {
+    const { container } = renderPage()
+    const main = container.querySelector('main')
+    expect(main).toBeInTheDocument()
+    // BackgroundCanvas's distinctive wrapper has `relative min-h-screen overflow-hidden`
+    // classes plus the consumer-supplied `flex flex-1 flex-col`. The hero + main are
+    // descendants. We assert by finding a min-h-screen ancestor of <main> that ALSO
+    // contains the gradient text style on the hero h1.
+    let canvas: HTMLElement | null = null
+    let cursor: HTMLElement | null = main
+    while (cursor) {
+      if (cursor.className?.includes('min-h-screen') && cursor.className?.includes('overflow-hidden')) {
+        canvas = cursor
+        break
+      }
+      cursor = cursor.parentElement
+    }
+    expect(canvas).not.toBeNull()
+    expect(canvas?.className).toContain('min-h-screen')
+    expect(canvas?.className).toContain('overflow-hidden')
+    expect(canvas?.className).toContain('flex-1')
+  })
 })

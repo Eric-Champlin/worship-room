@@ -122,32 +122,61 @@ describe('SearchControls', () => {
   })
 
   describe('white-pill CTA styling', () => {
-    it('Use My Location button renders as white pill with text-primary', () => {
+    // Spec 5 Step 8 — Use My Location + Search migrated to subtle Button
+    it('Use My Location renders subtle Button (bg-white/[0.07] + min-h-[44px] + text-white)', () => {
       render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
       const button = screen.getByLabelText('Use my current location')
-      expect(button.className).toContain('bg-white')
-      expect(button.className).toContain('text-primary')
+      expect(button.className).toContain('bg-white/[0.07]')
+      expect(button.className).toContain('border-white/[0.12]')
+      expect(button.className).toContain('text-white')
       expect(button.className).toContain('rounded-full')
-      expect(button.className).toContain('font-semibold')
-      expect(button.className).toContain('shadow-[0_0_20px_rgba(255,255,255,0.15)]')
-      expect(button.className).toContain('focus-visible:ring-primary-lt')
-      expect(button.className).toContain('focus-visible:ring-offset-hero-bg')
+      expect(button.className).toContain('min-h-[44px]')
+      expect(button.className).not.toContain('text-primary')
     })
 
-    it('Search submit button renders as white pill with text-primary', () => {
+    it('Use My Location MapPin icon uses text-sky-300 per Tonal Icon Pattern', () => {
+      render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
+      const button = screen.getByLabelText('Use my current location')
+      const mapPinIcon = button.querySelector('svg')
+      expect(mapPinIcon?.getAttribute('class')).toContain('text-sky-300')
+    })
+
+    it('Search submit renders subtle Button (bg-white/[0.07] + text-white)', () => {
       render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
       const button = screen.getByRole('button', { name: /search/i })
-      expect(button.className).toContain('bg-white')
-      expect(button.className).toContain('text-primary')
+      expect(button.className).toContain('bg-white/[0.07]')
+      expect(button.className).toContain('text-white')
       expect(button.className).toContain('rounded-full')
-      expect(button.className).toContain('font-semibold')
-      expect(button.className).toContain('shadow-[0_0_20px_rgba(255,255,255,0.15)]')
+      expect(button.className).toContain('min-h-[44px]')
     })
 
-    it('Use My Location button preserves disabled:opacity-50 for loading state', () => {
+    it('Search icon stays neutral (no tonal color override)', () => {
       render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
-      const button = screen.getByLabelText('Use my current location')
-      expect(button.className).toContain('disabled:opacity-50')
+      const button = screen.getByRole('button', { name: /search/i })
+      const searchIcon = button.querySelector('svg')
+      // Neutral = inherits Button text color (white). No tonal class on the icon itself.
+      const iconClass = searchIcon?.getAttribute('class') ?? ''
+      expect(iconClass).not.toContain('text-sky-300')
+      expect(iconClass).not.toContain('text-pink-300')
+      expect(iconClass).not.toContain('text-violet-300')
+    })
+
+    it('Both buttons preserve disabled:opacity-50 (subtle Button base)', () => {
+      render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
+      const useLoc = screen.getByLabelText('Use my current location')
+      const search = screen.getByRole('button', { name: /search/i })
+      expect(useLoc.className).toContain('disabled:opacity-50')
+      expect(search.className).toContain('disabled:opacity-50')
+    })
+
+    // Form input chrome preserved per Decision 8
+    it('Form input chrome preserved (utility input idiom — Decision 8)', () => {
+      render(<SearchControls onSearch={vi.fn()} onGeocode={mockGeocode} isLoading={false} />)
+      const input = screen.getByPlaceholderText('City or zip code')
+      expect(input.className).toContain('bg-white/[0.06]')
+      expect(input.className).toContain('border-white/10')
+      expect(input.className).toContain('focus:border-primary')
+      expect(input.className).toContain('focus:ring-primary/20')
     })
   })
 })

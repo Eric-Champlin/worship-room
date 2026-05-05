@@ -1,6 +1,8 @@
 import { AlertCircle, MapPin, SearchX } from 'lucide-react'
 import type { LocalSupportCategory } from '@/types/local-support'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { Button } from '@/components/ui/Button'
 
 function categoryNoun(category: LocalSupportCategory): string {
   switch (category) {
@@ -58,13 +60,9 @@ export function SearchError({ message, onRetry }: SearchErrorProps) {
     <div className="flex flex-col items-center py-12 text-center">
       <AlertCircle size={48} className="mb-4 text-danger" aria-hidden="true" />
       <p className="mb-4 max-w-md text-base text-white/60">{message}</p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]"
-      >
+      <Button variant="subtle" size="md" type="button" onClick={onRetry}>
         Try Again
-      </button>
+      </Button>
     </div>
   )
 }
@@ -76,9 +74,10 @@ export function ListingSkeleton() {
     <div className="space-y-4" role="status" aria-label="Loading results">
       <span className="sr-only">Loading results...</span>
       {[1, 2, 3].map((i) => (
-        <div
+        <FrostedCard
           key={i}
-          className="rounded-xl border border-white/10 bg-white/[0.06] p-5 sm:p-6"
+          variant="default"
+          className="p-5 sm:p-6 motion-safe:animate-pulse"
         >
           <div className="flex gap-4">
             <div className="hidden h-20 w-20 motion-safe:animate-pulse rounded-lg bg-white/[0.08] sm:block" />
@@ -95,7 +94,7 @@ export function ListingSkeleton() {
             </div>
             <div className="h-8 w-8 motion-safe:animate-pulse rounded-lg bg-white/[0.08]" />
           </div>
-        </div>
+        </FrostedCard>
       ))}
     </div>
   )

@@ -204,4 +204,51 @@ describe('FeatureEmptyState', () => {
     const wrapper = container.firstElementChild as HTMLElement
     expect(wrapper.className).toContain('mt-8')
   })
+
+  // Spec 5 Step 1 — iconClassName prop (additive, backward-compatible)
+
+  it('uses default text-white/30 when iconClassName is omitted', () => {
+    renderWithRouter(
+      <FeatureEmptyState
+        icon={Heart}
+        heading="Heading"
+        description="Description"
+      />,
+    )
+    const icon = document.querySelector('svg') as SVGElement
+    expect(icon.getAttribute('class')).toContain('text-white/30')
+  })
+
+  it('applies iconClassName when provided and omits the default', () => {
+    renderWithRouter(
+      <FeatureEmptyState
+        icon={Heart}
+        heading="Heading"
+        description="Description"
+        iconClassName="text-white/40"
+      />,
+    )
+    const icon = document.querySelector('svg') as SVGElement
+    const className = icon.getAttribute('class') ?? ''
+    expect(className).toContain('text-white/40')
+    expect(className).not.toContain('text-white/30')
+  })
+
+  it('preserves sizing classes when iconClassName is provided', () => {
+    renderWithRouter(
+      <FeatureEmptyState
+        icon={Heart}
+        heading="Heading"
+        description="Description"
+        iconClassName="text-amber-300"
+      />,
+    )
+    const icon = document.querySelector('svg') as SVGElement
+    const className = icon.getAttribute('class') ?? ''
+    expect(className).toContain('text-amber-300')
+    expect(className).toContain('h-10')
+    expect(className).toContain('w-10')
+    expect(className).toContain('sm:h-12')
+    expect(className).toContain('sm:w-12')
+  })
 })

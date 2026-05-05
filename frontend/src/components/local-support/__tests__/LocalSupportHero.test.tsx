@@ -96,7 +96,10 @@ describe('LocalSupportHero', () => {
     expect(heading.querySelector('.font-script')).toBeNull()
   })
 
-  it('renders inside GlowBackground with two glow orbs', () => {
+  // Spec 5 Step 4 — GlowBackground removed (Decision 1: BackgroundCanvas at the
+  // shell level provides atmosphere; Decision 16: hero gradient text is preserved
+  // verbatim). The hero no longer wraps its section in GlowBackground.
+  it('renders without a GlowBackground wrapper (atmospheric layer lives at shell level)', () => {
     const { container } = render(
       <LocalSupportHero
         headingId="test-heading"
@@ -105,7 +108,7 @@ describe('LocalSupportHero', () => {
       />,
     )
     const orbs = container.querySelectorAll('[data-testid="glow-orb"]')
-    expect(orbs.length).toBe(2)
+    expect(orbs.length).toBe(0)
   })
 
   it('heading has gradient text styling applied', () => {

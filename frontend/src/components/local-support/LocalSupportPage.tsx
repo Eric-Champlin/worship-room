@@ -9,14 +9,16 @@ import { categoryToPlaceType } from '@/services/local-visit-storage'
 import { calculateDistanceMiles } from '@/lib/geo'
 import type { LocalSupportPlace, LocalSupportCategory, SortOption } from '@/types/local-support'
 import { SiteFooter } from '@/components/SiteFooter'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { LocalSupportHero } from './LocalSupportHero'
 import { SearchControls } from './SearchControls'
 import { ResultsList } from './ResultsList'
 import { ResultsMap } from './ResultsMap'
 import { SearchPrompt, NoResults, SearchError, ListingSkeleton } from './SearchStates'
-import { List, Map as MapIcon } from 'lucide-react'
+import { Bookmark, List, Map as MapIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 
 export interface LocalSupportPageConfig {
   category: LocalSupportCategory
@@ -245,12 +247,13 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
         Skip to content
       </a>
       <Navbar transparent />
-      <LocalSupportHero
-        headingId={config.headingId}
-        title={config.title}
-        subtitle={config.subtitle}
-        extraContent={config.extraHeroContent}
-      />
+      <BackgroundCanvas className="flex flex-1 flex-col">
+        <LocalSupportHero
+          headingId={config.headingId}
+          title={config.title}
+          subtitle={config.subtitle}
+          extraContent={config.extraHeroContent}
+        />
 
         <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">
           {/* Disclaimer (A9) */}
@@ -275,7 +278,11 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
           />
 
           {/* Tabs (A2: role="tablist" + role="tab" + aria-selected + keyboard nav) */}
-          <div className="mt-6 mb-6 flex gap-2" role="tablist" aria-label="Results view">
+          <div
+            className="mt-6 mb-6 flex w-full rounded-full border border-white/[0.08] bg-white/[0.07] p-1 backdrop-blur-md"
+            role="tablist"
+            aria-label="Results view"
+          >
             {(isAuthenticated ? ['search', 'saved'] as const : ['search'] as const).map((tab, index, tabs) => (
               <button
                 key={tab}
@@ -301,10 +308,10 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                   tabRefs.current[nextIndex]?.focus()
                 }}
                 className={cn(
-                  'min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
+                  'flex-1 min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
                   activeTab === tab
-                    ? 'bg-white text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-[0.98]'
-                    : 'bg-white/10 text-white/60 hover:bg-white/15',
+                    ? 'bg-violet-500/[0.13] border border-violet-400/45 text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]'
+                    : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
                 )}
               >
                 {tab === 'search' ? 'Search Results' : `Saved (${bookmarkedIds.size})`}
@@ -374,16 +381,16 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
 
               {/* Mobile: toggle (A3: aria-pressed on view toggle buttons) */}
               <div className="lg:hidden">
-                <div className="mb-4 flex gap-2">
+                <div className="mb-4 flex w-full rounded-full border border-white/[0.08] bg-white/[0.07] p-1 backdrop-blur-md">
                   <button
                     type="button"
                     aria-pressed={mobileView === 'list'}
                     onClick={() => setMobileView('list')}
                     className={cn(
-                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
+                      'flex-1 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
                       mobileView === 'list'
-                        ? 'bg-white text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-[0.98]'
-                        : 'bg-white/10 text-white/60 hover:bg-white/15',
+                        ? 'bg-violet-500/[0.13] border border-violet-400/45 text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]'
+                        : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
                     )}
                   >
                     <List size={16} aria-hidden="true" />
@@ -394,10 +401,10 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
                     aria-pressed={mobileView === 'map'}
                     onClick={() => setMobileView('map')}
                     className={cn(
-                      'inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
+                      'flex-1 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-base motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
                       mobileView === 'map'
-                        ? 'bg-white text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-[0.98]'
-                        : 'bg-white/10 text-white/60 hover:bg-white/15',
+                        ? 'bg-violet-500/[0.13] border border-violet-400/45 text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]'
+                        : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
                     )}
                   >
                     <MapIcon size={16} aria-hidden="true" />
@@ -442,16 +449,21 @@ function LocalSupportPageContent({ config }: LocalSupportPageProps) {
             </div>
           )}
 
-          {/* Saved tab empty state */}
-          {activeTab === 'saved' && savedPlaces.length === 0 && (
-            <div className="flex flex-col items-center py-12 text-center">
-              <p className="text-base text-white/60">
-                No saved {config.category === 'celebrate-recovery' ? 'Celebrate Recovery groups' : config.category} yet.
-                Bookmark listings to see them here.
-              </p>
-            </div>
-          )}
+          {/* Saved tab empty state — Spec 5 Change 12 */}
+          {activeTab === 'saved' && savedPlaces.length === 0 && (() => {
+            const categoryLabel =
+              config.category === 'celebrate-recovery' ? 'Celebrate Recovery groups' : config.category
+            return (
+              <FeatureEmptyState
+                icon={Bookmark}
+                iconClassName="text-white/40"
+                heading={`Your saved ${categoryLabel}`}
+                description="Bookmark places to find them again later."
+              />
+            )
+          })()}
         </main>
+      </BackgroundCanvas>
       <SiteFooter />
     </div>
   )

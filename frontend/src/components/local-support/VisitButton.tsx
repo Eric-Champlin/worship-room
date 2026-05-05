@@ -102,7 +102,7 @@ export function VisitButton({ visitState }: { visitState: VisitState }) {
       className={cn(
         'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-colors min-h-[44px]',
         visited
-          ? 'text-success'
+          ? 'text-amber-300'
           : 'border border-white/10 text-white/50 hover:text-primary',
       )}
     >
