@@ -43,7 +43,7 @@ function ConfirmDialog({
     >
       <div
         ref={containerRef}
-        className="mx-auto max-w-sm rounded-2xl border border-white/15 bg-hero-mid p-6"
+        className="mx-auto max-w-sm rounded-2xl border border-white/10 bg-hero-mid/95 p-6 backdrop-blur-md"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold text-white">Switch Reading Plan?</h2>
@@ -53,13 +53,9 @@ function ConfirmDialog({
           later.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="min-h-[44px] rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
-          >
+          <Button variant="ghost" onClick={onCancel}>
             Keep Current
-          </button>
+          </Button>
           <Button variant="subtle" onClick={onConfirm}>
             Pause &amp; Start New
           </Button>

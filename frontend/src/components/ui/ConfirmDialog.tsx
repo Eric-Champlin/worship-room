@@ -39,7 +39,7 @@ export function ConfirmDialog({
   }
 
   const confirmButtonClass = cn(
-    'flex-1 rounded-lg px-4 py-3 font-medium transition-colors min-h-[44px] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan',
+    'flex-1 rounded-lg px-4 py-3 font-medium transition-colors min-h-[44px] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30',
     variant === 'destructive'
       ? 'bg-red-500 text-white hover:bg-red-600'
       : 'bg-primary text-white hover:bg-primary-lt',
@@ -58,7 +58,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={bodyId}
-        className="relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-surface-dark p-6 backdrop-blur-md motion-safe:animate-modal-spring-in"
+        className="relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-hero-mid/95 p-6 backdrop-blur-md motion-safe:animate-modal-spring-in"
       >
         <h2 id={titleId} className="mb-2 text-lg font-semibold text-white">
           {title}
@@ -70,7 +70,7 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-sm text-white transition-colors hover:bg-white/15 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
+            className="flex-1 rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-sm text-white transition-colors hover:bg-white/15 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30"
           >
             {cancelLabel}
           </button>

@@ -6,15 +6,12 @@ import type { LucideIcon } from 'lucide-react'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
 import { useToast } from '@/components/ui/Toast'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
+import { Button } from '@/components/ui/Button'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { matchPlanByKeywords } from '@/utils/plan-matcher'
 import { addCustomPlanId } from '@/utils/custom-plans-storage'
 import { cn } from '@/lib/utils'
-
-const CREATION_BG_STYLE = {
-  backgroundImage:
-    'radial-gradient(100% 80% at 50% 0%, #3B0764 0%, transparent 60%), linear-gradient(#0D0620 0%, #1E0B3E 30%, #4A1D96 55%, #0D0620 100%)',
-  backgroundSize: '100% 100%',
-} as const
 
 const TOPIC_CHIPS = [
   { label: 'Anxiety', starter: "I've been feeling anxious about..." },
@@ -103,7 +100,7 @@ export function CreatePlanFlow({ onClose }: CreatePlanFlowProps) {
   }, [topicText, navigate, showToast])
 
   return (
-    <div className="min-h-screen" style={CREATION_BG_STYLE}>
+    <BackgroundCanvas>
       <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
         {/* Back button */}
         {!isGenerating && (
@@ -158,7 +155,7 @@ export function CreatePlanFlow({ onClose }: CreatePlanFlowProps) {
           {step === 3 && <StepThree />}
         </div>
       </div>
-    </div>
+    </BackgroundCanvas>
   )
 }
 
@@ -179,7 +176,7 @@ function StepOne({
 }) {
   return (
     <div>
-      <h1 className="text-center font-script text-4xl text-white sm:text-5xl">
+      <h1 className="text-center text-4xl font-bold leading-snug sm:text-5xl" style={GRADIENT_TEXT_STYLE}>
         What&apos;s on your heart?
       </h1>
 
@@ -192,7 +189,7 @@ function StepOne({
           onChange={(e) => onTopicChange(e.target.value)}
           maxLength={500}
           placeholder="I'm struggling with anxiety about my job..."
-          className="w-full resize-none rounded-xl border border-glow-cyan/30 bg-white/5 p-4 text-white backdrop-blur-sm placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-[0_0_12px_2px_rgba(0,212,255,0.35),0_0_27px_5px_rgba(139,92,246,0.26)] min-h-[120px]"
+          className="w-full resize-none rounded-xl p-4 text-white backdrop-blur-sm min-h-[120px] shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] border border-violet-400/30 bg-white/[0.04] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30 placeholder:text-white/40"
           aria-label="What's on your heart"
           aria-describedby="plan-char-count"
         />
@@ -217,19 +214,16 @@ function StepOne({
 
       {/* Next button */}
       <div className="mt-8 text-center">
-        <button
+        <Button
+          variant="subtle"
+          size="md"
           type="button"
           onClick={onNext}
           disabled={!topicText.trim()}
-          className={cn(
-            'min-h-[44px] w-full rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-colors sm:w-auto',
-            topicText.trim()
-              ? 'hover:bg-primary-lt'
-              : 'cursor-not-allowed opacity-50',
-          )}
+          className="w-full sm:w-auto"
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -248,7 +242,7 @@ function StepTwo({
 }) {
   return (
     <div>
-      <h1 className="text-center font-script text-4xl text-white sm:text-5xl">
+      <h1 className="text-center text-4xl font-bold leading-snug sm:text-5xl" style={GRADIENT_TEXT_STYLE}>
         How long of a journey?
       </h1>
 
@@ -276,20 +270,17 @@ function StepTwo({
 
       {/* Generate button */}
       <div className="mt-8 text-center">
-        <button
+        <Button
+          variant="gradient"
+          size="md"
           type="button"
           onClick={onGenerate}
           disabled={!selectedDuration}
-          className={cn(
-            'min-h-[44px] w-full rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-colors sm:w-auto',
-            selectedDuration
-              ? 'hover:bg-primary-lt'
-              : 'cursor-not-allowed opacity-50',
-          )}
+          className="w-full sm:w-auto"
         >
-          <Sparkles className="mr-2 inline-block h-4 w-4" aria-hidden="true" />
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
           Generate My Plan
-        </button>
+        </Button>
       </div>
     </div>
   )

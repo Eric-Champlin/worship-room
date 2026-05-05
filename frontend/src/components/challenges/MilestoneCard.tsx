@@ -106,7 +106,7 @@ export function MilestoneCard({
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
       <div className="rounded-2xl border border-white/20 bg-white/10 p-6 text-center backdrop-blur-md sm:p-8">
-        <h2 className="font-script text-3xl sm:text-4xl" style={{ color: themeColor }}>
+        <h2 className="text-3xl font-bold sm:text-4xl" style={{ color: themeColor }}>
           {milestoneTitle}
         </h2>
 

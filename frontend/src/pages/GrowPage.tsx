@@ -88,8 +88,8 @@ export function GrowPage() {
           {/* Sticky Tab Bar */}
           <div
             className={cn(
-              'sticky top-0 z-40 bg-hero-bg/70 backdrop-blur-md transition-shadow duration-base motion-reduce:transition-none',
-              isSticky && 'shadow-md shadow-black/20',
+              'sticky top-0 z-40 backdrop-blur-md transition-shadow duration-base motion-reduce:transition-none',
+              isSticky && 'bg-hero-bg/70 shadow-md shadow-black/20',
             )}
           >
             <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">

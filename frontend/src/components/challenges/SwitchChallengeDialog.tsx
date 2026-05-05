@@ -84,7 +84,7 @@ export function SwitchChallengeDialog({
     >
       <div
         ref={dialogRef}
-        className="mx-4 w-full max-w-sm rounded-2xl border border-white/15 bg-hero-mid p-6"
+        className="mx-4 w-full max-w-sm rounded-2xl border border-white/10 bg-hero-mid/95 p-6 backdrop-blur-md"
       >
         <h2 className="text-lg font-semibold text-white">Switch Challenges?</h2>
         <p className="mt-3 text-sm text-white/70">

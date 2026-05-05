@@ -188,7 +188,7 @@ export function ChallengeCompletionOverlay({
 
         {/* Challenge title */}
         <h2
-          className="font-script text-4xl sm:text-5xl"
+          className="text-4xl font-bold sm:text-5xl"
           style={{ color: themeColor }}
         >
           {challengeTitle}

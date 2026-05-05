@@ -313,17 +313,43 @@ describe('GrowPage', () => {
     expect(subtitle.className).toContain('mt-2')
   })
 
-  // --- Spec 6A Step 3: Sticky tab bar tint ---
+  // --- Spec 6A Step 3 / Spec 6D: Sticky tab bar tint ---
+  // bg-hero-bg/70 is conditional: only applied when isSticky===true (sentinel leaves viewport).
+  // The global MockIntersectionObserver fires with isIntersecting:true → isSticky stays false at rest.
 
-  it('sticky tab bar wrapper has bg-hero-bg/70 + duration-base', () => {
+  it('sticky tab bar wrapper has always-on classes at rest', () => {
     const { container } = renderPage()
     const stickyWrapper = container.querySelector('.sticky.top-0.z-40')
     expect(stickyWrapper).toBeInTheDocument()
-    expect(stickyWrapper?.className).toContain('bg-hero-bg/70')
     expect(stickyWrapper?.className).toContain('duration-base')
     expect(stickyWrapper?.className).toContain('transition-shadow')
     expect(stickyWrapper?.className).toContain('motion-reduce:transition-none')
     expect(stickyWrapper?.className).toContain('backdrop-blur-md')
+    expect(stickyWrapper?.className).not.toContain('bg-hero-bg/70')
+  })
+
+  it('sticky tab bar wrapper gains bg-hero-bg/70 + shadow when sentinel leaves viewport', () => {
+    // Override IO to fire with isIntersecting:false so the sentinel appears scrolled past
+    const origIO = window.IntersectionObserver
+    let capturedCallback: IntersectionObserverCallback | null = null
+    window.IntersectionObserver = class {
+      constructor(cb: IntersectionObserverCallback) { capturedCallback = cb }
+      observe() {
+        capturedCallback!(
+          [{ isIntersecting: false } as IntersectionObserverEntry],
+          this as unknown as IntersectionObserver,
+        )
+      }
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof IntersectionObserver
+
+    const { container } = renderPage()
+    const stickyWrapper = container.querySelector('.sticky.top-0.z-40')
+    expect(stickyWrapper?.className).toContain('bg-hero-bg/70')
+    expect(stickyWrapper?.className).toContain('shadow-md')
+
+    window.IntersectionObserver = origIO
   })
 
   // --- Spec 6A Step 4: Tab icon tonal colors ---

@@ -42,10 +42,11 @@ describe('ChallengeCompletionOverlay', () => {
     vi.useRealTimers()
   })
 
-  it('renders challenge title in Caveat font', () => {
+  it('renders challenge title with themeColor brand expression', () => {
     renderOverlay()
     const title = screen.getByText('Easter Joy')
-    expect(title).toHaveClass('font-script')
+    expect(title).not.toHaveClass('font-script')
+    expect(title).toHaveStyle({ color: defaultProps.themeColor })
   })
 
   it('renders "Challenge Complete!" heading', () => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ANIMATION_DURATIONS, ANIMATION_EASINGS } from '@/constants/animation'
+import { Button } from '@/components/ui/Button'
 
 interface DayCompletionCelebrationProps {
   dayNumber: number
@@ -100,13 +101,9 @@ export function DayCompletionCelebration({
 
         {/* Continue button */}
         {!isLastDay && (
-          <button
-            type="button"
-            onClick={onContinue}
-            className="mt-3 w-full rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/90 sm:w-auto"
-          >
+          <Button variant="subtle" size="md" type="button" onClick={onContinue} className="mt-3 w-full sm:w-auto">
             Continue to Day {dayNumber + 1}
-          </button>
+          </Button>
         )}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { Button } from './Button'
 
 interface UnsavedChangesModalProps {
   isOpen: boolean
@@ -75,7 +76,7 @@ export function UnsavedChangesModal({ isOpen, onLeave, onStay }: UnsavedChangesM
         aria-modal="true"
         aria-labelledby="unsaved-dialog-title"
         aria-describedby="unsaved-dialog-desc"
-        className={`mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-surface-dark p-6 shadow-xl ${panelClass}`}
+        className={`mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-hero-mid/95 p-6 backdrop-blur-md ${panelClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="unsaved-dialog-title" className="text-lg font-semibold text-white">
@@ -85,21 +86,12 @@ export function UnsavedChangesModal({ isOpen, onLeave, onStay }: UnsavedChangesM
           You have unsaved changes. Leave without saving?
         </p>
         <div className="mt-6 flex gap-3 justify-end">
-          <button
-            type="button"
-            onClick={handleLeave}
-            className="rounded-lg border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan focus-visible:rounded-lg active:scale-[0.98]"
-          >
+          <Button variant="subtle" onClick={handleLeave}>
             Leave without saving
-          </button>
-          <button
-            type="button"
-            onClick={handleStay}
-            autoFocus
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan focus-visible:rounded-lg active:scale-[0.98]"
-          >
+          </Button>
+          <Button variant="ghost" onClick={handleStay} autoFocus>
             Keep editing
-          </button>
+          </Button>
         </div>
       </div>
     </div>

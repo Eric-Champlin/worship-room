@@ -1,4 +1,5 @@
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { Button } from '@/components/ui/Button'
 
 interface NudgeDialogProps {
   friendName: string
@@ -37,7 +38,7 @@ export function NudgeDialog({ friendName, onConfirm, onCancel }: NudgeDialogProp
         role="alertdialog"
         aria-labelledby="nudge-dialog-title"
         aria-describedby="nudge-dialog-body"
-        className="mx-4 w-full max-w-sm rounded-2xl border border-white/15 bg-hero-mid p-6 shadow-lg"
+        className="mx-4 w-full max-w-sm rounded-2xl border border-white/10 bg-hero-mid/95 p-6 backdrop-blur-md"
       >
         <h2 id="nudge-dialog-title" className="text-lg font-semibold text-white">
           Send a nudge
@@ -46,18 +47,12 @@ export function NudgeDialog({ friendName, onConfirm, onCancel }: NudgeDialogProp
           Let {friendName} know you&apos;re thinking of them. They&apos;ll receive a gentle reminder.
         </p>
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button
-            onClick={handleCancel}
-            className="min-h-[44px] px-6 py-2.5 text-sm text-white/60 transition-colors hover:text-white/80"
-          >
+          <Button variant="ghost" onClick={handleCancel}>
             Cancel
-          </button>
-          <button
-            onClick={handleConfirm}
-            className="min-h-[44px] rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
-          >
+          </Button>
+          <Button variant="primary" onClick={handleConfirm}>
             Send
-          </button>
+          </Button>
         </div>
       </div>
     </div>

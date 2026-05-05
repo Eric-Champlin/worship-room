@@ -8,6 +8,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { CONFETTI_COLORS } from '@/constants/dashboard/badge-icons'
 import { PLAN_COMPLETION_SCRIPTURES } from '@/constants/reading-plan-completion-scriptures'
 import { generatePlanCompletionImage } from '@/lib/plan-completion-canvas'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 
 interface PlanCompletionOverlayProps {
   planTitle: string
@@ -189,8 +190,8 @@ export function PlanCompletionOverlay({
           {/* Heading */}
           <h2
             id="plan-completion-title"
-            className="font-script text-4xl text-white sm:text-5xl"
-            style={fadeStyle(3)}
+            className="text-4xl font-bold sm:text-5xl"
+            style={{ ...fadeStyle(3), ...GRADIENT_TEXT_STYLE }}
           >
             Plan Complete!
           </h2>
