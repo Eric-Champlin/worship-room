@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { Download, Upload, X } from 'lucide-react'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { buildExport } from '@/lib/bible/exportBuilder'
@@ -286,13 +287,13 @@ export function BibleSettingsModal({ isOpen, onClose, onImportComplete }: BibleS
                 >
                   Replace local data
                 </button>
-                <button
-                  type="button"
+                <Button
+                  variant="subtle"
+                  size="sm"
                   onClick={() => handleMerge(importState.export.data)}
-                  className="min-h-[44px] rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-all motion-reduce:transition-none hover:bg-primary/80"
                 >
                   Merge with local data
-                </button>
+                </Button>
                 <button
                   type="button"
                   onClick={() => setImportState({ step: 'idle' })}

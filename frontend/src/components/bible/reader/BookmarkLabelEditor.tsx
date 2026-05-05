@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/Button'
 import type { VerseSelection } from '@/types/verse-actions'
 import { toggleBookmark, setBookmarkLabel } from '@/lib/bible/bookmarkStore'
 
@@ -145,13 +146,9 @@ export function BookmarkLabelEditor({
           >
             Cancel
           </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt active:scale-[0.98]"
-          >
+          <Button variant="subtle" size="sm" onClick={handleSave}>
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </>

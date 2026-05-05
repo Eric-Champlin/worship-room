@@ -1,4 +1,5 @@
 import { SearchX } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 
 interface EmptySearchResultsProps {
@@ -15,13 +16,9 @@ export function EmptySearchResults({ query, onClear }: EmptySearchResultsProps) 
         description="Try a different word, or clear the search to see everything."
         compact
       >
-        <button
-          type="button"
-          onClick={onClear}
-          className="mt-3 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-        >
+        <Button variant="subtle" size="sm" onClick={onClear} className="mt-3">
           Clear search
-        </button>
+        </Button>
       </FeatureEmptyState>
     </div>
   )

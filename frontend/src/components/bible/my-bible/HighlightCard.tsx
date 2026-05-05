@@ -1,7 +1,7 @@
 import { HIGHLIGHT_EMOTIONS } from '@/constants/bible'
 import { Layers } from 'lucide-react'
 import { useMemorizationStore } from '@/hooks/bible/useMemorizationStore'
-import { isCardForVerse, addCard, getCardForVerse, removeCard } from '@/lib/memorize'
+import { addCard, getCardForVerse, removeCard } from '@/lib/memorize'
 import { HighlightedText } from './HighlightedText'
 import type { HighlightData } from '@/types/my-bible'
 
@@ -26,8 +26,7 @@ export function HighlightCard({
   startVerse,
   endVerse,
 }: HighlightCardProps) {
-  // Subscribe to memorization store so inDeck recomputes on add/remove
-  useMemorizationStore()
+  const cards = useMemorizationStore()
 
   const emotion = HIGHLIGHT_EMOTIONS.find((e) => e.key === data.color)
   const hex = emotion?.hex ?? '#FDE047'
@@ -40,7 +39,13 @@ export function HighlightCard({
     startVerse !== undefined &&
     endVerse !== undefined
   const inDeck = hasVerseInfo
-    ? isCardForVerse(book, chapter, startVerse, endVerse)
+    ? cards.some(
+        (c) =>
+          c.book === book &&
+          c.chapter === chapter &&
+          c.startVerse === startVerse &&
+          c.endVerse === endVerse,
+      )
     : false
 
   const handleMemorize = (e: React.MouseEvent) => {

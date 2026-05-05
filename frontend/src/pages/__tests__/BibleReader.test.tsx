@@ -4,6 +4,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { BibleReader } from '../BibleReader'
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerProvider'
 import { AudioProvider } from '@/components/audio/AudioProvider'
+import { _resetForTesting as resetBibleProgress } from '@/hooks/useBibleProgress'
+import { _resetForTesting as resetChapterVisits } from '@/lib/heatmap/chapterVisitStore'
 
 // BB-27: mock audio engine, auth, and toast so AudioProvider/AudioPlayerProvider mount cleanly
 vi.mock('@/lib/audio-engine', () => {
@@ -149,6 +151,8 @@ function renderReader(route: string) {
 describe('BibleReader (BB-4 Immersive Reader)', () => {
   beforeEach(() => {
     localStorage.clear()
+    resetBibleProgress() // Spec 8B: useBibleProgress has a module-level cache
+    resetChapterVisits() // Spec 8B: chapterVisitStore has a module-level cache
     mockAudioState = { ...DEFAULT_MOCK_AUDIO_STATE }
     vi.clearAllMocks()
   })
@@ -239,6 +243,57 @@ describe('BibleReader (BB-4 Immersive Reader)', () => {
       const data = JSON.parse(raw!)
       expect(data.john).toContain(3)
     })
+  })
+
+  // --- Spec 8B Step 5: chapter-mount effect calls markChapterRead + recordChapterVisit ---
+
+  it('writes wr_chapters_visited on chapter load (Spec 8B Change 4a)', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      const raw = localStorage.getItem('wr_chapters_visited')
+      expect(raw).toBeTruthy()
+      const data = JSON.parse(raw!)
+      // chapterVisitStore stores by date; today's entry should include john 3
+      const todaysEntries = Object.values(data ?? {}).flat() as Array<{ book: string; chapter: number }>
+      expect(todaysEntries.some((e) => e.book === 'john' && e.chapter === 3)).toBe(true)
+    })
+  })
+
+  it('writes both wr_bible_progress and wr_chapters_visited atomically on chapter mount', async () => {
+    renderReader('/bible/john/3')
+
+    await waitFor(() => {
+      const progressRaw = localStorage.getItem('wr_bible_progress')
+      const visitsRaw = localStorage.getItem('wr_chapters_visited')
+      expect(progressRaw).toBeTruthy()
+      expect(visitsRaw).toBeTruthy()
+    })
+  })
+
+  it('does NOT write progress/visits when book is invalid (early return on !book)', async () => {
+    renderReader('/bible/notabook/1')
+
+    // Wait long enough for the effect to fire if it were going to
+    await waitFor(() => {
+      expect(screen.getByText("That book doesn't exist.")).toBeTruthy()
+    })
+
+    // Effect short-circuits when !book — neither store should have been written
+    expect(localStorage.getItem('wr_bible_progress')).toBeNull()
+    expect(localStorage.getItem('wr_chapters_visited')).toBeNull()
+  })
+
+  it('does NOT write progress/visits when chapter is invalid', async () => {
+    renderReader('/bible/john/99')
+
+    await waitFor(() => {
+      expect(screen.getByText('John only has 21 chapters.')).toBeTruthy()
+    })
+
+    // Effect short-circuits when verses.length === 0 (loadChapterWeb returns null for unknown chapter)
+    expect(localStorage.getItem('wr_bible_progress')).toBeNull()
+    expect(localStorage.getItem('wr_chapters_visited')).toBeNull()
   })
 
   it('has no global navbar (immersive mode)', async () => {

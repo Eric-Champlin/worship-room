@@ -10,7 +10,8 @@ const makeCard = (overrides?: Partial<MemorizationCard>): MemorizationCard => ({
   chapter: 3,
   startVerse: 16,
   endVerse: 16,
-  verseText: 'For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.',
+  verseText:
+    'For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.',
   reference: 'John 3:16',
   createdAt: Date.now() - 1000 * 60 * 60 * 24 * 21, // 3 weeks ago
   lastReviewedAt: null,
@@ -33,6 +34,18 @@ describe('MemorizationFlipCard', () => {
     const button = screen.getByRole('button', { name: /flip card to reveal verse text/i })
     fireEvent.click(button)
     expect(screen.getByText(/For God so loved the world/)).toBeInTheDocument()
+  })
+
+  it('flip button is a real <button> with aria-pressed (Spec 8B Change 9c)', () => {
+    render(
+      <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={vi.fn()} />,
+    )
+    const button = screen.getByRole('button', { name: /flip card/i })
+    expect(button.tagName).toBe('BUTTON')
+    expect(button).toHaveAttribute('aria-pressed', 'false')
+
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('calls onReview when flipping front to back', async () => {
@@ -58,35 +71,13 @@ describe('MemorizationFlipCard', () => {
     expect(onReview).toHaveBeenCalledTimes(1)
   })
 
-  it('flips with Enter key', async () => {
-    const onReview = vi.fn()
-    render(
-      <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={onReview} />,
-    )
-    const button = screen.getByRole('button', { name: /flip card/i })
-    fireEvent.keyDown(button, { key: 'Enter' })
-    await new Promise(queueMicrotask) // onReview is deferred via queueMicrotask
-    expect(onReview).toHaveBeenCalledWith('card-1')
-  })
-
-  it('flips with Space key', async () => {
-    const onReview = vi.fn()
-    render(
-      <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={onReview} />,
-    )
-    const button = screen.getByRole('button', { name: /flip card/i })
-    fireEvent.keyDown(button, { key: ' ' })
-    await new Promise(queueMicrotask) // onReview is deferred via queueMicrotask
-    expect(onReview).toHaveBeenCalledWith('card-1')
-  })
-
   it('shows remove confirmation on X click', () => {
     render(
       <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={vi.fn()} />,
     )
-    const removeButton = screen.getAllByLabelText(/remove john 3:16 from memorization deck/i)[0]
+    const removeButton = screen.getByLabelText(/remove john 3:16 from memorization deck/i)
     fireEvent.click(removeButton)
-    expect(screen.getAllByText('Remove this card?').length).toBeGreaterThan(0)
+    expect(screen.getByText(/^Remove\?$/)).toBeInTheDocument()
   })
 
   it('calls onRemove on Yes confirmation', () => {
@@ -94,9 +85,9 @@ describe('MemorizationFlipCard', () => {
     render(
       <MemorizationFlipCard card={makeCard()} onRemove={onRemove} onReview={vi.fn()} />,
     )
-    const removeButton = screen.getAllByLabelText(/remove john 3:16 from memorization deck/i)[0]
+    const removeButton = screen.getByLabelText(/remove john 3:16 from memorization deck/i)
     fireEvent.click(removeButton)
-    const yesButton = screen.getAllByText('Yes')[0]
+    const yesButton = screen.getByRole('button', { name: /^Yes$/ })
     fireEvent.click(yesButton)
     expect(onRemove).toHaveBeenCalledWith('card-1')
   })
@@ -105,21 +96,33 @@ describe('MemorizationFlipCard', () => {
     render(
       <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={vi.fn()} />,
     )
-    const removeButton = screen.getAllByLabelText(/remove john 3:16 from memorization deck/i)[0]
+    const removeButton = screen.getByLabelText(/remove john 3:16 from memorization deck/i)
     fireEvent.click(removeButton)
-    const cancelButton = screen.getAllByText('Cancel')[0]
+    const cancelButton = screen.getByRole('button', { name: /^Cancel$/ })
     fireEvent.click(cancelButton)
-    // Confirmation should be gone, remove button should be back
-    expect(screen.queryByText('Remove this card?')).not.toBeInTheDocument()
+    // Confirmation should be gone
+    expect(screen.queryByText(/^Remove\?$/)).not.toBeInTheDocument()
   })
 
-  it('remove button stops propagation (no flip)', () => {
+  it('remove button is a sibling of the flip button (not nested)', () => {
+    render(
+      <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={vi.fn()} />,
+    )
+    const flipButton = screen.getByRole('button', { name: /flip card/i })
+    const removeButton = screen.getByLabelText(/remove john 3:16 from memorization deck/i)
+    // Native HTML doesn't allow nested <button>; verify they don't share an ancestor button
+    expect(flipButton.contains(removeButton)).toBe(false)
+    expect(removeButton.contains(flipButton)).toBe(false)
+  })
+
+  it('remove button does not flip the card', async () => {
     const onReview = vi.fn()
     render(
       <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={onReview} />,
     )
-    const removeButton = screen.getAllByLabelText(/remove john 3:16 from memorization deck/i)[0]
+    const removeButton = screen.getByLabelText(/remove john 3:16 from memorization deck/i)
     fireEvent.click(removeButton)
+    await new Promise(queueMicrotask)
     expect(onReview).not.toHaveBeenCalled()
   })
 
@@ -127,9 +130,9 @@ describe('MemorizationFlipCard', () => {
     render(
       <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={vi.fn()} />,
     )
-    // Should show something like "Added 3 weeks ago"
+    // One date label per face = 2 occurrences
     const dateTexts = screen.getAllByText(/Added /)
-    expect(dateTexts.length).toBeGreaterThan(0)
+    expect(dateTexts.length).toBeGreaterThanOrEqual(1)
   })
 
   it('long verse text has scrollable container', () => {
@@ -141,8 +144,20 @@ describe('MemorizationFlipCard', () => {
         onReview={vi.fn()}
       />,
     )
-    // The back face container should have overflow-y-auto
     const verseEl = screen.getByText(longText)
     expect(verseEl.parentElement).toHaveClass('overflow-y-auto')
+  })
+
+  it('uses FrostedCard chrome on faces (Spec 8B Change 9a/9b)', () => {
+    const { container } = render(
+      <MemorizationFlipCard card={makeCard()} onRemove={vi.fn()} onReview={vi.fn()} />,
+    )
+    // Both face elements should have FrostedCard's signature chrome
+    const faces = container.querySelectorAll('[class*="bg-white/[0.07]"]')
+    expect(faces.length).toBe(2)
+    for (const face of faces) {
+      expect(face.className).toContain('rounded-2xl')
+      expect(face.className).toContain('border-white/[0.12]')
+    }
   })
 })

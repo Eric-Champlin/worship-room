@@ -23,9 +23,8 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => mockUseAuth(),
 }))
 
-const mockOpenAuthModal = vi.fn()
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
-  useAuthModal: () => ({ openAuthModal: mockOpenAuthModal }),
+  useAuthModal: () => ({ openAuthModal: vi.fn() }),
 }))
 
 vi.mock('@/components/bible/BibleDrawerProvider', () => ({
@@ -356,14 +355,14 @@ describe('MyBiblePage', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('My Bible')
   })
 
-  it('hero heading padding uses Daily Hub clearance pt-36 sm:pt-40 lg:pt-44', () => {
+  it('hero heading uses BibleLanding pt-28 pb-12 rhythm (Spec 8B Change 1c)', () => {
     mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
     renderPage()
     const heading = screen.getByRole('heading', { level: 1 })
     const section = heading.closest('section')
-    expect(section?.className).toContain('pt-36')
-    expect(section?.className).toContain('sm:pt-40')
-    expect(section?.className).toContain('lg:pt-44')
+    expect(section?.className).toContain('pt-28')
+    expect(section?.className).toContain('pb-12')
+    expect(section?.className).not.toContain('pt-36')
   })
 
   it('no ATMOSPHERIC_HERO_BG inline background color (#0f0a1e)', () => {
@@ -374,7 +373,7 @@ describe('MyBiblePage', () => {
     expect(darkBgElements.length).toBe(0)
   })
 
-  describe('logged-out conversion card (BB-51)', () => {
+  describe('logged-out experience (Spec 8B)', () => {
     beforeEach(() => {
       mockUseAuth.mockReturnValue({
         isAuthenticated: false,
@@ -383,36 +382,67 @@ describe('MyBiblePage', () => {
         logout: vi.fn(),
       })
       mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
+      localStorage.removeItem('wr_mybible_device_storage_seen')
     })
 
-    it('renders conversion card heading when logged out', () => {
+    it('renders the personal-layer page header when logged out', () => {
       renderPage()
       expect(screen.getByRole('heading', { level: 1, name: /My Bible/i })).toBeInTheDocument()
-      expect(
-        screen.getByText(/Track your reading journey, highlights, notes, and bookmarks/i),
-      ).toBeInTheDocument()
     })
 
-    it('renders Get Started CTA when logged out', () => {
+    it('does not render the legacy Get Started CTA shell', () => {
       renderPage()
       expect(
-        screen.getByRole('button', { name: /Get Started — It's Free/i }),
-      ).toBeInTheDocument()
+        screen.queryByRole('button', { name: /Get Started — It's Free/i }),
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByText(/Track your reading journey, highlights, notes, and bookmarks/i),
+      ).not.toBeInTheDocument()
     })
 
-    it('does not render the authenticated activity feed when logged out', () => {
+    it('renders the device-local-storage banner', () => {
       renderPage()
-      expect(screen.queryByText(/Your Bible highlights will show up here/i)).not.toBeInTheDocument()
-      expect(screen.queryByText(/Stored on this device/i)).not.toBeInTheDocument()
+      expect(screen.getByText(/Your data lives on this device/i)).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /Sign in/i })).toHaveAttribute('href', '/?auth=login')
     })
 
-    it('CTA opens auth modal with the expected subtitle', async () => {
+    it('dismissing the banner persists to localStorage and hides it', async () => {
       const user = userEvent.setup()
       renderPage()
-      await user.click(screen.getByRole('button', { name: /Get Started — It's Free/i }))
-      expect(mockOpenAuthModal).toHaveBeenCalledWith(
-        'Sign in to track your Bible reading journey',
+      await user.click(
+        screen.getByRole('button', { name: /Dismiss device-local-storage notice/i }),
       )
+      expect(localStorage.getItem('wr_mybible_device_storage_seen')).toBe('true')
+      expect(screen.queryByText(/Your data lives on this device/i)).not.toBeInTheDocument()
+    })
+
+    it('does not render the banner when previously dismissed', () => {
+      localStorage.setItem('wr_mybible_device_storage_seen', 'true')
+      renderPage()
+      expect(screen.queryByText(/Your data lives on this device/i)).not.toBeInTheDocument()
+    })
+
+    it('renders the personal-layer content (footer trust signal) for logged-out users', () => {
+      renderPage()
+      expect(screen.getByText(/Stored on this device/i)).toBeInTheDocument()
+    })
+  })
+
+  describe('logged-in experience (Spec 8B)', () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { name: 'Eric', id: 'u1' },
+        login: vi.fn(),
+        logout: vi.fn(),
+      })
+      mockUseActivityFeed.mockReturnValue(makeDefaultFeed())
+      localStorage.removeItem('wr_mybible_device_storage_seen')
+    })
+
+    it('hides the device-local-storage banner', () => {
+      renderPage()
+      expect(screen.queryByText(/Your data lives on this device/i)).not.toBeInTheDocument()
     })
   })
 })

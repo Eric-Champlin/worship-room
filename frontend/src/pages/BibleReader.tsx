@@ -34,6 +34,8 @@ import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useActivePlan } from '@/hooks/bible/useActivePlan'
 import { setCelebrationShown } from '@/lib/bible/plansStore'
 import { recordReadToday } from '@/lib/bible/streakStore'
+import { recordChapterVisit } from '@/lib/heatmap'
+import { markChapterRead } from '@/hooks/useBibleProgress'
 import { NotificationPrompt } from '@/components/bible/reader/NotificationPrompt'
 import { getPushSupportStatus, getPermissionState, requestPermission } from '@/lib/notifications/permissions'
 import { subscribeToPush } from '@/lib/notifications/subscription'
@@ -591,13 +593,8 @@ function BibleReaderInner() {
       }),
     )
 
-    const progressRaw = localStorage.getItem('wr_bible_progress')
-    const progress: Record<string, number[]> = progressRaw ? JSON.parse(progressRaw) : {}
-    const bookChapters = progress[bookSlug] ?? []
-    if (!bookChapters.includes(chapterNumber)) {
-      progress[bookSlug] = [...bookChapters, chapterNumber]
-      localStorage.setItem('wr_bible_progress', JSON.stringify(progress))
-    }
+    markChapterRead(bookSlug, chapterNumber)
+    recordChapterVisit(bookSlug, chapterNumber)
 
     // Record today's read for the streak system (idempotent within a day)
     const streakResult = recordReadToday()

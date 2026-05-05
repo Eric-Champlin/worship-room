@@ -18,7 +18,7 @@ export function BookmarkCard({ data, verseText, searchQuery }: BookmarkCardProps
         <div className="h-4 w-3/4 motion-safe:animate-pulse rounded bg-white/10" />
       )}
       {data.label && (
-        <p className="text-sm italic text-white/50">
+        <p className="text-sm text-white/40">
           <HighlightedText text={data.label} query={searchQuery ?? ''} />
         </p>
       )}

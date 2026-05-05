@@ -7,6 +7,7 @@ const shared = {
   highlightListeners: new Set<() => void>(),
   bookmarkListeners: new Set<() => void>(),
   noteListeners: new Set<() => void>(),
+  journalListeners: new Set<() => void>(),
 }
 
 vi.mock('@/lib/bible/highlightStore', () => ({
@@ -27,6 +28,13 @@ vi.mock('@/lib/bible/notes/store', () => ({
   subscribe: vi.fn((fn: () => void) => {
     shared.noteListeners.add(fn)
     return () => shared.noteListeners.delete(fn)
+  }),
+}))
+
+vi.mock('@/lib/bible/journalStore', () => ({
+  subscribe: vi.fn((fn: () => void) => {
+    shared.journalListeners.add(fn)
+    return () => shared.journalListeners.delete(fn)
   }),
 }))
 
@@ -91,6 +99,7 @@ describe('useActivityFeed', () => {
     shared.highlightListeners.clear()
     shared.bookmarkListeners.clear()
     shared.noteListeners.clear()
+    shared.journalListeners.clear()
   })
 
   it('returns items from all stores on mount', () => {
@@ -136,6 +145,22 @@ describe('useActivityFeed', () => {
       shared.noteListeners.forEach((fn) => fn())
     })
     expect(result.current.items).toHaveLength(1)
+  })
+
+  it('re-loads when journal store changes (Spec 8B Change 6)', () => {
+    mockLoadAllActivity.mockReturnValue([])
+    const { result } = renderHook(() => useActivityFeed())
+    expect(result.current.items).toHaveLength(0)
+    expect(shared.journalListeners.size).toBe(1)
+
+    mockLoadAllActivity.mockReturnValue([
+      makeItem({ id: 'j1', type: 'journal', data: { type: 'journal', body: 'reflection' } }),
+    ])
+    act(() => {
+      shared.journalListeners.forEach((fn) => fn())
+    })
+    expect(result.current.items).toHaveLength(1)
+    expect(result.current.items[0].type).toBe('journal')
   })
 
   it('applies type filter', () => {

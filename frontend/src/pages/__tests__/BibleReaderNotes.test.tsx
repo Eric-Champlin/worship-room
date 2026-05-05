@@ -212,6 +212,12 @@ vi.mock('@/hooks/useBibleProgress', () => ({
     getBookProgress: vi.fn().mockReturnValue([]),
     isChapterRead: vi.fn().mockReturnValue(false),
   }),
+  // Spec 8B: BibleReader's chapter-mount effect imports markChapterRead as a
+  // named export (separate from the hook). The mock must expose it too.
+  markChapterRead: vi.fn(),
+  subscribeProgress: vi.fn(() => () => {}),
+  getProgressSnapshot: vi.fn(() => ({})),
+  _resetForTesting: vi.fn(),
 }))
 
 vi.mock('@/hooks/useBibleAudio', () => ({

@@ -1,17 +1,18 @@
 import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useMyBibleView, type MyBibleViewId } from '@/hooks/url/useMyBibleView'
-import { BookOpen, Paintbrush, PenLine, Bookmark as BookmarkIcon, Filter, Flame } from 'lucide-react'
+import { BookOpen, Paintbrush, PenLine, Bookmark as BookmarkIcon, Filter, Flame, X } from 'lucide-react'
 import { StreakDetailModal } from '@/components/bible/streak/StreakDetailModal'
 import { useStreakStore } from '@/hooks/bible/useStreakStore'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
-import { HorizonGlow } from '@/components/daily/HorizonGlow'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { SEO, SITE_URL } from '@/components/SEO'
 import { MY_BIBLE_METADATA } from '@/lib/seo/routeMetadata'
 import { BibleDrawerProvider, useBibleDrawer } from '@/components/bible/BibleDrawerProvider'
 import { BibleDrawer } from '@/components/bible/BibleDrawer'
 import { DrawerViewRouter } from '@/components/bible/DrawerViewRouter'
+import { Button } from '@/components/ui/Button'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { ActivityCard } from '@/components/bible/my-bible/ActivityCard'
 import { ActivityActionMenu } from '@/components/bible/my-bible/ActivityActionMenu'
@@ -35,9 +36,51 @@ import {
 } from '@/lib/heatmap'
 import type { ActivityItem, ActivityFilter } from '@/types/my-bible'
 import { useAuth } from '@/hooks/useAuth'
-import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
+
+const DEVICE_STORAGE_SEEN_KEY = 'wr_mybible_device_storage_seen'
+
+function DeviceLocalStorageBanner() {
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem(DEVICE_STORAGE_SEEN_KEY) === 'true'
+  })
+
+  if (dismissed) return null
+
+  const handleDismiss = () => {
+    setDismissed(true)
+    try {
+      localStorage.setItem(DEVICE_STORAGE_SEEN_KEY, 'true')
+    } catch {
+      // localStorage may be unavailable — fail silently
+    }
+  }
+
+  return (
+    <div className="relative z-10 mx-auto max-w-2xl px-4 pt-6">
+      <FrostedCard variant="subdued" className="relative">
+        <button
+          type="button"
+          onClick={handleDismiss}
+          aria-label="Dismiss device-local-storage notice"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white/80"
+        >
+          <X size={16} aria-hidden="true" />
+        </button>
+        <div className="flex flex-col gap-3 pr-10 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-white/70 sm:text-base">
+            Your data lives on this device. Sign in to keep it safe across devices.
+          </p>
+          <Button variant="subtle" size="sm" asChild className="flex-shrink-0">
+            <Link to="/?auth=login">Sign in</Link>
+          </Button>
+        </div>
+      </FrostedCard>
+    </div>
+  )
+}
 
 const BibleSettingsModal = lazy(() =>
   import('@/components/bible/my-bible/BibleSettingsModal').then((m) => ({
@@ -63,47 +106,6 @@ const STAT_CARDS = [
 
 function MyBiblePageInner() {
   const { isAuthenticated } = useAuth()
-  const authModal = useAuthModal()
-
-  if (!isAuthenticated) {
-    return (
-      <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
-        <HorizonGlow />
-        <Navbar transparent />
-        <SEO {...MY_BIBLE_METADATA} jsonLd={myBibleBreadcrumbs} />
-
-        <main id="main-content" className="relative z-10 flex-1">
-          <section className="mx-auto flex min-h-[calc(100vh-20rem)] max-w-[480px] items-center justify-center px-4 pt-36 sm:pt-40 lg:pt-44">
-            <FrostedCard as="article" className="w-full text-center">
-              <h1
-                className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
-                style={GRADIENT_TEXT_STYLE}
-              >
-                My Bible
-              </h1>
-              <p className="mt-4 text-base text-white/70 sm:text-lg">
-                Track your reading journey, highlights, notes, and bookmarks across all your devices.
-              </p>
-              <button
-                type="button"
-                onClick={() => authModal?.openAuthModal('Sign in to track your Bible reading journey')}
-                className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
-              >
-                Get Started — It's Free
-              </button>
-            </FrostedCard>
-          </section>
-        </main>
-
-        <SiteFooter />
-      </div>
-    )
-  }
-
-  return <MyBibleAuthenticatedInner />
-}
-
-function MyBibleAuthenticatedInner() {
   const navigate = useNavigate()
   const { isOpen: drawerOpen, close: closeDrawer } = useBibleDrawer()
   const {
@@ -209,14 +211,12 @@ function MyBibleAuthenticatedInner() {
   )
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
-      <HorizonGlow />
+    <BackgroundCanvas className="flex flex-col font-sans">
       <Navbar transparent />
       <SEO {...MY_BIBLE_METADATA} jsonLd={myBibleBreadcrumbs} />
 
       <main id="main-content" className="relative z-10 flex-1">
-        {/* Hero section — Daily Hub pt-36 pattern, no ATMOSPHERIC_HERO_BG */}
-        <section className="relative z-10 w-full px-4 pt-36 pb-6 sm:pt-40 sm:pb-8 lg:pt-44">
+        <section className="relative z-10 w-full px-4 pt-28 pb-12">
           <div className="mx-auto max-w-2xl text-center">
             <h1
               className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
@@ -230,6 +230,9 @@ function MyBibleAuthenticatedInner() {
 
         {/* Section divider */}
         <div className="mx-auto max-w-6xl border-t border-white/[0.08]" />
+
+        {/* Device-local-storage banner — logged-out only (Spec 8B Change 2c) */}
+        {!isAuthenticated && <DeviceLocalStorageBanner />}
 
         {/* Heatmap + Progress Map (BB-43) */}
         <div className="relative z-10 mx-auto max-w-2xl px-4">
@@ -270,36 +273,36 @@ function MyBibleAuthenticatedInner() {
               {STAT_CARDS.map(
                 (stat) =>
                   totalCounts[stat.key] > 0 && (
-                    <button
+                    <FrostedCard
                       key={stat.key}
-                      type="button"
+                      as="button"
                       onClick={() => setView(stat.filterType as MyBibleViewId)}
-                      className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-[colors,transform] duration-fast hover:border-white/[0.18] hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
+                      className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl !p-3"
                     >
                       <stat.icon size={16} className="text-white/40" aria-hidden="true" />
                       <span className="text-xl font-bold text-white">{totalCounts[stat.key]}</span>
                       <span className="text-xs text-white/50">{stat.label}</span>
-                    </button>
+                    </FrostedCard>
                   ),
               )}
               {totalCounts.booksSet.size > 0 && (
-                <div className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm">
+                <FrostedCard className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl !p-3">
                   <BookOpen size={16} className="text-white/40" aria-hidden="true" />
                   <span className="text-xl font-bold text-white">{totalCounts.booksSet.size}</span>
                   <span className="text-xs text-white/50">Books</span>
-                </div>
+                </FrostedCard>
               )}
               {totalCounts.streak > 0 && (
-                <button
-                  type="button"
+                <FrostedCard
+                  as="button"
                   onClick={() => setStreakModalOpen(true)}
-                  className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 backdrop-blur-sm transition-[colors,transform] duration-fast hover:bg-white/[0.09] min-h-[44px] active:scale-[0.98]"
+                  className="flex min-w-[100px] flex-shrink-0 snap-start flex-col items-center gap-1 rounded-xl !p-3"
                   aria-label={`Reading streak: ${totalCounts.streak} days. Tap for details.`}
                 >
                   <Flame size={16} className="text-white/40" aria-hidden="true" />
                   <span className="text-xl font-bold text-white">{totalCounts.streak}</span>
                   <span className="text-xs text-white/50">Streak</span>
-                </button>
+                </FrostedCard>
               )}
             </div>
           )}
@@ -346,13 +349,9 @@ function MyBibleAuthenticatedInner() {
                 description={`No ${filterTypeName} in ${filterBookName} match this filter.`}
                 compact
               >
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="mt-3 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
-                >
+                <Button variant="subtle" size="sm" onClick={clearFilters} className="mt-3">
                   Clear filters
-                </button>
+                </Button>
               </FeatureEmptyState>
             </div>
           ) : (
@@ -420,7 +419,7 @@ function MyBibleAuthenticatedInner() {
           atRisk={atRisk}
         />
       )}
-    </div>
+    </BackgroundCanvas>
   )
 }
 

@@ -1,23 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { HighlightCard } from '../HighlightCard'
-
-vi.mock('@/hooks/bible/useMemorizationStore', () => ({
-  useMemorizationStore: vi.fn(() => []),
-}))
-
-vi.mock('@/lib/memorize', () => ({
-  isCardForVerse: vi.fn(),
-  addCard: vi.fn(),
-  getCardForVerse: vi.fn(),
-  removeCard: vi.fn(),
-}))
-
-import { isCardForVerse, addCard, getCardForVerse, removeCard } from '@/lib/memorize'
-const mockedIsCard = vi.mocked(isCardForVerse)
-const mockedAddCard = vi.mocked(addCard)
-const mockedGetCard = vi.mocked(getCardForVerse)
-const mockedRemoveCard = vi.mocked(removeCard)
+import { addCard, removeCard, getAllCards, _resetForTesting } from '@/lib/memorize'
 
 const baseProps = {
   data: { type: 'highlight' as const, color: 'peace' as const },
@@ -30,43 +14,18 @@ const baseProps = {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks()
-  mockedIsCard.mockReturnValue(false)
-  mockedGetCard.mockReturnValue(undefined)
+  localStorage.clear()
+  _resetForTesting()
 })
 
-describe('HighlightCard memorize affordance', () => {
+describe('HighlightCard memorize affordance (Spec 8B Change 8 — real-store BB-45 pattern)', () => {
   it('renders Layers icon when verse not in deck', () => {
     render(<HighlightCard {...baseProps} />)
     expect(screen.getByLabelText('Add to memorization deck')).toBeInTheDocument()
   })
 
-  it('renders "In deck" label when verse in deck', () => {
-    mockedIsCard.mockReturnValue(true)
-    render(<HighlightCard {...baseProps} />)
-    expect(screen.getByText('In deck')).toBeInTheDocument()
-  })
-
-  it('clicking icon adds verse to deck', () => {
-    render(<HighlightCard {...baseProps} />)
-    fireEvent.click(screen.getByLabelText('Add to memorization deck'))
-    expect(mockedAddCard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        book: 'john',
-        bookName: 'John',
-        chapter: 3,
-        startVerse: 16,
-        endVerse: 16,
-        verseText: 'For God so loved the world...',
-        reference: 'John 3:16',
-      }),
-    )
-  })
-
-  it('clicking "In deck" removes from deck', () => {
-    mockedIsCard.mockReturnValue(true)
-    mockedGetCard.mockReturnValue({
-      id: 'card-1',
+  it('renders "In deck" label when verse is in deck', () => {
+    addCard({
       book: 'john',
       bookName: 'John',
       chapter: 3,
@@ -74,13 +33,79 @@ describe('HighlightCard memorize affordance', () => {
       endVerse: 16,
       verseText: 'For God so loved the world...',
       reference: 'John 3:16',
-      createdAt: Date.now(),
-      lastReviewedAt: null,
-      reviewCount: 0,
+    })
+    render(<HighlightCard {...baseProps} />)
+    expect(screen.getByText('In deck')).toBeInTheDocument()
+  })
+
+  it('clicking Add icon adds verse to the real deck', () => {
+    render(<HighlightCard {...baseProps} />)
+    fireEvent.click(screen.getByLabelText('Add to memorization deck'))
+    const cards = getAllCards()
+    expect(cards).toHaveLength(1)
+    expect(cards[0]).toMatchObject({
+      book: 'john',
+      bookName: 'John',
+      chapter: 3,
+      startVerse: 16,
+      endVerse: 16,
+      verseText: 'For God so loved the world...',
+      reference: 'John 3:16',
+    })
+  })
+
+  it('clicking "In deck" removes from the real deck', () => {
+    addCard({
+      book: 'john',
+      bookName: 'John',
+      chapter: 3,
+      startVerse: 16,
+      endVerse: 16,
+      verseText: 'For God so loved the world...',
+      reference: 'John 3:16',
     })
     render(<HighlightCard {...baseProps} />)
     fireEvent.click(screen.getByLabelText('In memorization deck'))
-    expect(mockedRemoveCard).toHaveBeenCalledWith('card-1')
+    expect(getAllCards()).toHaveLength(0)
+  })
+
+  it('updates "In deck" badge reactively when card added externally (BB-45 subscription verification)', async () => {
+    render(<HighlightCard {...baseProps} />)
+    expect(screen.getByLabelText('Add to memorization deck')).toBeInTheDocument()
+
+    act(() => {
+      addCard({
+        book: 'john',
+        bookName: 'John',
+        chapter: 3,
+        startVerse: 16,
+        endVerse: 16,
+        verseText: 'For God so loved the world...',
+        reference: 'John 3:16',
+      })
+    })
+
+    expect(await screen.findByText('In deck')).toBeInTheDocument()
+  })
+
+  it('updates "In deck" badge reactively when card removed externally', async () => {
+    const card = addCard({
+      book: 'john',
+      bookName: 'John',
+      chapter: 3,
+      startVerse: 16,
+      endVerse: 16,
+      verseText: 'For God so loved the world...',
+      reference: 'John 3:16',
+    })
+    render(<HighlightCard {...baseProps} />)
+    expect(screen.getByText('In deck')).toBeInTheDocument()
+
+    act(() => {
+      removeCard(card.id)
+    })
+
+    expect(await screen.findByLabelText('Add to memorization deck')).toBeInTheDocument()
   })
 
   it('click stops propagation', () => {

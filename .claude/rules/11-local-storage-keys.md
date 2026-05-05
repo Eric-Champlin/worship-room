@@ -150,6 +150,7 @@ When adding a new key, default to `wr_*` unless there is a specific reason to us
 | `wr_surprise_shown_rainbow`        | "true"                | Rainbow surprise one-time dismissal          |
 | `wr_anniversary_milestones_shown`  | number[]              | Fired anniversary milestone celebrations     |
 | `wr_gratitude_callback_last_shown` | string (date)         | Gratitude callback toast last-shown tracking |
+| `wr_mybible_device_storage_seen`   | `"true"`              | MyBible logged-out device-local-storage banner dismissal flag (Spec 8B). Set when user dismisses the "Your data lives on this device" banner on `/bible/my`. Read on mount; if `"true"`, banner is hidden. Cleared only by user-initiated localStorage clearance — there is no in-app reset. |
 
 ### Push Notifications (BB-41)
 

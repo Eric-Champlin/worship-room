@@ -3,6 +3,7 @@ import { subscribe as subscribeHighlights } from '@/lib/bible/highlightStore'
 import { subscribe as subscribeBookmarks } from '@/lib/bible/bookmarkStore'
 import { subscribe as subscribeNotes } from '@/lib/bible/notes/store'
 import { subscribe as subscribeStreak } from '@/lib/bible/streakStore'
+import { subscribe as subscribeJournal } from '@/lib/bible/journalStore'
 import { loadAllActivity, filterActivity, sortActivity } from '@/lib/bible/activityLoader'
 import { getBibleStreak } from '@/lib/bible/landingState'
 import { useVerseTextCache } from '@/hooks/bible/useVerseTextCache'
@@ -70,6 +71,7 @@ export function useActivityFeed() {
       subscribeBookmarks(reload),
       subscribeNotes(reload),
       subscribeStreak(reload),
+      subscribeJournal(reload),
     ]
     return () => unsubs.forEach((fn) => fn())
   }, [])
