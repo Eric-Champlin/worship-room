@@ -5,6 +5,7 @@ import { Sparkles, Star } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { CreatePlanFlow } from '@/components/reading-plans/CreatePlanFlow'
 import { PlanCard } from '@/components/reading-plans/PlanCard'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
@@ -59,13 +60,9 @@ function ConfirmDialog({
           >
             Keep Current
           </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="min-h-[44px] rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-lt"
-          >
+          <Button variant="subtle" onClick={onConfirm}>
             Pause &amp; Start New
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -162,14 +159,14 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
       <section id="reading-plans-content" className="px-4 py-8 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
           {/* Create Your Own Plan card — canonical FrostedCard treatment */}
-          <div className="mb-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-6 shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]">
+          <FrostedCard variant="default" className="mb-6">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <Sparkles className="h-6 w-6 text-primary" aria-hidden="true" />
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-white/[0.05]">
+                <Sparkles className="h-6 w-6 text-violet-300" aria-hidden="true" />
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-white">Create Your Own Plan</h3>
-                <p className="mt-1 text-sm text-white/60">
+                <p className="mt-1 text-sm text-white/70">
                   Tell us what you&apos;re going through and we&apos;ll create a personalized Scripture journey just for you.
                 </p>
               </div>
@@ -177,7 +174,7 @@ export function ReadingPlansContent({ createParam }: ReadingPlansContentProps = 
                 Create Plan
               </Button>
             </div>
-          </div>
+          </FrostedCard>
 
           {allCompleted ? (
             <FeatureEmptyState

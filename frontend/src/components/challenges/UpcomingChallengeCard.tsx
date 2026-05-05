@@ -2,6 +2,7 @@ import { Bell, Check } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import type { Challenge } from '@/types/challenges'
 
 import { CategoryTag } from './CategoryTag'
@@ -28,7 +29,7 @@ export function UpcomingChallengeCard({
   })
 
   return (
-    <article className="flex h-full flex-col rounded-xl border border-white/[0.12] bg-white/[0.06] p-6 backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] transition-[background-color,border-color] duration-base motion-reduce:transition-none hover:bg-white/[0.08] hover:border-white/20">
+    <FrostedCard as="article" variant="default" className="flex h-full flex-col p-6">
       <div className="flex items-center gap-3">
         <ChallengeIcon
           name={challenge.icon}
@@ -47,7 +48,7 @@ export function UpcomingChallengeCard({
 
       <div className="mt-auto flex flex-wrap gap-2 pt-4">
         <Button
-          variant="light"
+          variant="subtle"
           size="sm"
           onClick={onToggleReminder}
           aria-label={isReminderSet ? 'Remove reminder' : 'Set reminder'}
@@ -60,10 +61,10 @@ export function UpcomingChallengeCard({
           )}
           {isReminderSet ? 'Reminder set' : 'Remind me'}
         </Button>
-        <Button variant="light" size="sm" asChild>
+        <Button variant="subtle" size="sm" asChild>
           <Link to={`/challenges/${challenge.id}`}>View Details</Link>
         </Button>
       </div>
-    </article>
+    </FrostedCard>
   )
 }

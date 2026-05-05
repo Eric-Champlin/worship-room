@@ -1,5 +1,6 @@
 import { Users } from 'lucide-react'
 
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getParticipantCount, getCommunityGoalProgress, getContrastSafeColor } from '@/constants/challenges'
 import type { Challenge } from '@/types/challenges'
 
@@ -36,9 +37,7 @@ export function ActiveChallengeCard({
   const progressPercent = Math.min((communityProgress / goalNumber) * 100, 100)
 
   return (
-    <div
-      className="rounded-2xl border-2 border-primary/30 bg-white/[0.06] p-6 backdrop-blur-sm sm:p-8"
-    >
+    <FrostedCard variant="default" className="p-6 sm:p-8 border-2 border-primary/30">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <div className="mb-3 flex items-center gap-3">
@@ -126,6 +125,6 @@ export function ActiveChallengeCard({
           )}
         </div>
       </div>
-    </div>
+    </FrostedCard>
   )
 }

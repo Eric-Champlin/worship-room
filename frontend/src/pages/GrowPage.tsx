@@ -13,6 +13,7 @@ import { ChallengesContent } from '@/pages/Challenges'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 import { CHALLENGES } from '@/data/challenges'
 import { Tabs } from '@/components/ui/Tabs'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { cn } from '@/lib/utils'
 
 type TabId = 'plans' | 'challenges'
@@ -75,71 +76,73 @@ export function GrowPage() {
           >
             Grow in Faith
           </h1>
-          <p className="mt-2 font-serif italic text-base text-white/60 sm:text-lg">
+          <p className="mt-2 text-base text-white/70 leading-relaxed sm:text-lg">
             Structured journeys to deepen your walk with God
           </p>
         </section>
 
-        {/* Sentinel for sticky tab bar shadow */}
-        <div ref={sentinelRef} aria-hidden="true" />
+        <BackgroundCanvas>
+          {/* Sentinel for sticky tab bar shadow */}
+          <div ref={sentinelRef} aria-hidden="true" />
 
-        {/* Sticky Tab Bar */}
-        <div
-          className={cn(
-            'sticky top-0 z-40 backdrop-blur-md transition-shadow motion-reduce:transition-none',
-            isSticky && 'shadow-md shadow-black/20',
-          )}
-        >
-          <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">
-            <Tabs
-              ariaLabel="Grow in Faith sections"
-              activeId={activeTab}
-              onChange={(id) => switchTab(id as TabId)}
-              items={[
-                {
-                  id: 'plans',
-                  label: 'Reading Plans',
-                  icon: <BookOpen className="h-4 w-4" aria-hidden="true" />,
-                },
-                {
-                  id: 'challenges',
-                  label: 'Challenges',
-                  icon: <Flame className="h-4 w-4" aria-hidden="true" />,
-                  badge: activeChallengeInfo ? (
-                    <span
-                      className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
-                      style={{ backgroundColor: activeChallengeThemeColor }}
-                      aria-hidden="true"
-                    />
-                  ) : undefined,
-                },
-              ]}
-            />
+          {/* Sticky Tab Bar */}
+          <div
+            className={cn(
+              'sticky top-0 z-40 bg-hero-bg/70 backdrop-blur-md transition-shadow duration-base motion-reduce:transition-none',
+              isSticky && 'shadow-md shadow-black/20',
+            )}
+          >
+            <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">
+              <Tabs
+                ariaLabel="Grow in Faith sections"
+                activeId={activeTab}
+                onChange={(id) => switchTab(id as TabId)}
+                items={[
+                  {
+                    id: 'plans',
+                    label: 'Reading Plans',
+                    icon: <BookOpen className="h-4 w-4 text-sky-300" aria-hidden="true" />,
+                  },
+                  {
+                    id: 'challenges',
+                    label: 'Challenges',
+                    icon: <Flame className="h-4 w-4 text-amber-300" aria-hidden="true" />,
+                    badge: activeChallengeInfo ? (
+                      <span
+                        className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full motion-safe:animate-challenge-pulse"
+                        style={{ backgroundColor: activeChallengeThemeColor }}
+                        aria-hidden="true"
+                      />
+                    ) : undefined,
+                  },
+                ]}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Tab Panels — all mounted, CSS show/hide for state preservation */}
-        <div
-          role="tabpanel"
-          id="tabpanel-plans"
-          aria-labelledby="tab-plans"
-          tabIndex={0}
-          hidden={activeTab !== 'plans'}
-          className="motion-safe:animate-tab-fade-in"
-        >
-          <ReadingPlansContent createParam={createParam} />
-        </div>
+          {/* Tab Panels — all mounted, CSS show/hide for state preservation */}
+          <div
+            role="tabpanel"
+            id="tabpanel-plans"
+            aria-labelledby="tab-plans"
+            tabIndex={0}
+            hidden={activeTab !== 'plans'}
+            className="motion-safe:animate-tab-fade-in"
+          >
+            <ReadingPlansContent createParam={createParam} />
+          </div>
 
-        <div
-          role="tabpanel"
-          id="tabpanel-challenges"
-          aria-labelledby="tab-challenges"
-          tabIndex={0}
-          hidden={activeTab !== 'challenges'}
-          className="motion-safe:animate-tab-fade-in"
-        >
-          <ChallengesContent />
-        </div>
+          <div
+            role="tabpanel"
+            id="tabpanel-challenges"
+            aria-labelledby="tab-challenges"
+            tabIndex={0}
+            hidden={activeTab !== 'challenges'}
+            className="motion-safe:animate-tab-fade-in"
+          >
+            <ChallengesContent />
+          </div>
+        </BackgroundCanvas>
       </main>
 
       <SiteFooter />

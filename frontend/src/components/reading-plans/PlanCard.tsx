@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { PLAN_DIFFICULTY_LABELS, PLAN_THEME_LABELS } from '@/constants/reading-plans'
 import type { ReadingPlanMeta, PlanProgress } from '@/types/reading-plans'
 
@@ -35,7 +36,7 @@ function StatusAction({
 
   return (
     <Button
-      variant="light"
+      variant="subtle"
       className="w-full"
       onClick={(e) => {
         e.preventDefault()
@@ -52,50 +53,50 @@ export function PlanCard({ plan, status, progress, onStart, isCustom }: PlanCard
   return (
     <Link
       to={`/reading-plans/${plan.id}`}
-      className={cn(
-        'flex h-full flex-col rounded-2xl border border-white/[0.12] bg-white/[0.06] p-6 backdrop-blur-sm',
-        'shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]',
-        'transition-[background-color,border-color] duration-base motion-reduce:transition-none',
-        'hover:bg-white/[0.08] hover:border-white/20',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg',
-      )}
+      className="block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg"
     >
-      <div className="flex items-center gap-3">
-        <span className="text-lg leading-none" aria-hidden="true">
-          {plan.coverEmoji}
-        </span>
-        <h3 className="text-lg font-semibold text-white">{plan.title}</h3>
-      </div>
+      <FrostedCard
+        variant="default"
+        onClick={() => {}}
+        className="flex h-full flex-col p-6"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-lg leading-none" aria-hidden="true">
+            {plan.coverEmoji}
+          </span>
+          <h3 className="text-lg font-semibold text-white">{plan.title}</h3>
+        </div>
 
-      {isCustom && (
-        <span className="mt-2 inline-block rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary-lt">
-          Created for you
-        </span>
-      )}
+        {isCustom && (
+          <span className="mt-2 inline-block rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary-lt">
+            Created for you
+          </span>
+        )}
 
-      <p className="mt-2 line-clamp-2 text-sm text-white/70">{plan.description}</p>
+        <p className="mt-2 line-clamp-2 text-sm text-white/70">{plan.description}</p>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
-          {plan.durationDays} days
-        </span>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
-          {PLAN_DIFFICULTY_LABELS[plan.difficulty]}
-        </span>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
-          {PLAN_THEME_LABELS[plan.theme]}
-        </span>
-      </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
+            {plan.durationDays} days
+          </span>
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
+            {PLAN_DIFFICULTY_LABELS[plan.difficulty]}
+          </span>
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
+            {PLAN_THEME_LABELS[plan.theme]}
+          </span>
+        </div>
 
-      {progress && !progress.completedAt && (
-        <p className="mt-2 text-sm text-white/50">
-          Day {progress.currentDay} of {plan.durationDays}
-        </p>
-      )}
+        {progress && !progress.completedAt && (
+          <p className="mt-2 text-sm text-white/50">
+            Day {progress.currentDay} of {plan.durationDays}
+          </p>
+        )}
 
-      <div className={cn('mt-auto pt-4', status === 'completed' && 'text-center')}>
-        <StatusAction status={status} planId={plan.id} onStart={onStart} />
-      </div>
+        <div className={cn('mt-auto pt-4', status === 'completed' && 'text-center')}>
+          <StatusAction status={status} planId={plan.id} onStart={onStart} />
+        </div>
+      </FrostedCard>
     </Link>
   )
 }

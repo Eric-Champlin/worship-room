@@ -58,16 +58,18 @@ describe('UpcomingChallengeCard', () => {
   it('uses canonical FrostedCard classes', () => {
     const { container } = renderCard()
     const article = container.querySelector('article')
-    expect(article?.className).toContain('bg-white/[0.06]')
+    expect(article?.className).toContain('bg-white/[0.07]')
     expect(article?.className).toContain('border-white/[0.12]')
     expect(article?.className).toContain('backdrop-blur-sm')
+    expect(article?.className).toContain('rounded-3xl')
   })
 
-  it('Remind me button uses white pill variant', () => {
+  it('Remind me button uses subtle pill variant', () => {
     renderCard({ isReminderSet: false })
     const btn = screen.getByRole('button', { name: /Set reminder/ })
-    expect(btn.className).toContain('bg-white')
-    expect(btn.className).toContain('text-primary')
+    expect(btn.className).toContain('bg-white/[0.07]')
+    expect(btn.className).toContain('border-white/[0.12]')
+    expect(btn.className).toContain('text-white')
     expect(btn.className).toContain('rounded-full')
   })
 
@@ -75,7 +77,7 @@ describe('UpcomingChallengeCard', () => {
     renderCard()
     const link = screen.getByRole('link', { name: 'View Details' })
     expect(link).toHaveAttribute('href', '/challenges/fire-of-pentecost')
-    expect(link.className).toContain('bg-white')
+    expect(link.className).toContain('bg-white/[0.07]')
     expect(link.className).toContain('rounded-full')
   })
 

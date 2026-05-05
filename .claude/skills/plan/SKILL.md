@@ -224,13 +224,23 @@ This block is displayed verbatim by `/execute-plan` Step 4d before each UI step 
  
 **For any feature where multiple elements should sit on the same row** (chip rows, button groups, pills inline with inputs, label + input pairs, etc.), document the expected positional alignment so visual verification can catch wrapping bugs that CSS-only verification misses.
  
-| Element Group | Elements | Expected y-alignment | Wrap Tolerance |
-|---------------|----------|---------------------|----------------|
-| {e.g., "Pray chip row"} | Chip 1, Chip 2, Chip 3, Ambient pill | Same y ±5px at 1440px and 768px | Wrapping below 640px is acceptable |
+| Element Group | Elements | Expected alignment | Wrap Tolerance |
+|---------------|----------|--------------------|----------------|
+| {e.g., "Pray chip row"} | Chip 1, Chip 2, Chip 3, Ambient pill | No wrapping at 1440px and 768px (children stay within the row's vertical span) | Wrapping below 640px is acceptable |
  
 **If the feature has no inline-row layouts:** write "N/A — no inline-row layouts in this feature."
  
-This table is consumed by `/verify-with-playwright` Step 6l (Inline Element Positional Verification) to compare `boundingBox().y` values between elements.
+This table is consumed by `/verify-with-playwright` Step 6l (Inline Element Positional Verification).
+ 
+### How to phrase the alignment expectation
+ 
+Two distinct assertions, used in different contexts:
+ 
+1. **"No wrapping" — the right assertion for variable-height children.** Children stay within the row's vertical span. With `flex items-center` plus children of different intrinsic heights (e.g., a fixed-size icon next to a multi-line title and a CategoryTag chip), each child's `boundingBox().top` legitimately differs by 16–30px while the row is correctly center-aligned. A wrapping bug shows up as one child sitting an entire row-height (typically 40px+) below the others — that is what the verification step needs to catch. The assertion text should describe the anti-state: "No element drops below the row's vertical span" or simply "No wrap allowed" plus the breakpoint.
+ 
+2. **"Matching top-y values (±5px)" — only when children share intrinsic heights.** Use this when every element in the row has the same height by construction (e.g., a row of equal-height pill buttons, or a tab bar where every tab item has identical chrome). Spec 6A's sticky tab bar — `[role="tab"]` items with identical chrome — passed top-y matching at 0px delta at every breakpoint. If a row has any variable-height child, top-y matching produces false positives even when the layout is correct.
+ 
+**Default to "No wrapping".** Reserve "Matching top-y" for rows of structurally identical elements. If a heading-row contains an icon + multi-line title + chip, write "No wrap allowed" — Spec 6A's verification surfaced this anti-pattern when the plan's "Same y ±5px" expectation produced a 30px delta on a correctly-rendered `items-center` heading row. (See Spec 6A verification report, Finding 2.)
  
 ---
  

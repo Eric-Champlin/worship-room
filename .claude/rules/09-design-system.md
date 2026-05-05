@@ -112,10 +112,12 @@ All animations site-wide use canonical duration and easing tokens from `frontend
 
 | Token     | Value | Use case                                                               |
 | --------- | ----- | ---------------------------------------------------------------------- |
-| `instant` | 100ms | Press feedback, immediate state changes (button active, toggle flip)   |
+| `instant` | 0ms   | Press feedback, immediate state changes (button active, toggle flip)   |
 | `fast`    | 150ms | Hover states, tooltip reveals, dropdown open/close, micro-interactions |
-| `base`    | 300ms | Modal open/close, drawer slide, tab transitions, panel expand/collapse |
-| `slow`    | 500ms | Page transitions, celebration sequences, decorative fade-ins           |
+| `base`    | 250ms | Modal open/close, drawer slide, tab transitions, panel expand/collapse |
+| `slow`    | 400ms | Page transitions, celebration sequences, decorative fade-ins           |
+
+**Source of truth:** `frontend/src/constants/animation.ts` (`ANIMATION_DURATIONS`) and `frontend/tailwind.config.js` `transitionDuration` map. If this table and either of those code locations disagree, the code wins — update the table and grep the rest of the docs (`_protocol/99-project-specific-overrides.md`, in-flight specs/plans) for the same drift.
 
 ### Easing tokens
 

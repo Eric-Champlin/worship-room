@@ -276,4 +276,69 @@ describe('GrowPage', () => {
     // Both panels exist in DOM
     expect(document.getElementById('tabpanel-challenges')).toBeInTheDocument()
   })
+
+  // --- Spec 6A Step 1: BackgroundCanvas wrap ---
+
+  it('renders BackgroundCanvas wrapping below-hero content', () => {
+    const { container } = renderPage()
+    // BackgroundCanvas signature: relative + min-h-screen + overflow-hidden
+    const canvas = container.querySelector('.relative.min-h-screen.overflow-hidden')
+    expect(canvas).toBeInTheDocument()
+    // BackgroundCanvas should contain the sticky tab bar wrapper and tabpanels
+    expect(canvas?.querySelector('[role="tablist"]')).toBeInTheDocument()
+    expect(canvas?.querySelector('#tabpanel-plans')).toBeInTheDocument()
+    expect(canvas?.querySelector('#tabpanel-challenges')).toBeInTheDocument()
+    // Hero section should NOT be inside BackgroundCanvas
+    const heroSection = container.querySelector('section[aria-labelledby="grow-heading"]')
+    expect(heroSection).toBeInTheDocument()
+    expect(canvas?.contains(heroSection)).toBe(false)
+  })
+
+  // --- Spec 6A Step 2: Hero subtitle plain prose ---
+
+  it('hero subtitle is plain prose, no italic', () => {
+    renderPage()
+    const subtitle = screen.getByText('Structured journeys to deepen your walk with God')
+    expect(subtitle.className).not.toContain('font-serif')
+    expect(subtitle.className).not.toContain('italic')
+  })
+
+  it('hero subtitle uses text-white/70 with leading-relaxed', () => {
+    renderPage()
+    const subtitle = screen.getByText('Structured journeys to deepen your walk with God')
+    expect(subtitle.className).toContain('text-white/70')
+    expect(subtitle.className).toContain('leading-relaxed')
+    expect(subtitle.className).toContain('text-base')
+    expect(subtitle.className).toContain('sm:text-lg')
+    expect(subtitle.className).toContain('mt-2')
+  })
+
+  // --- Spec 6A Step 3: Sticky tab bar tint ---
+
+  it('sticky tab bar wrapper has bg-hero-bg/70 + duration-base', () => {
+    const { container } = renderPage()
+    const stickyWrapper = container.querySelector('.sticky.top-0.z-40')
+    expect(stickyWrapper).toBeInTheDocument()
+    expect(stickyWrapper?.className).toContain('bg-hero-bg/70')
+    expect(stickyWrapper?.className).toContain('duration-base')
+    expect(stickyWrapper?.className).toContain('transition-shadow')
+    expect(stickyWrapper?.className).toContain('motion-reduce:transition-none')
+    expect(stickyWrapper?.className).toContain('backdrop-blur-md')
+  })
+
+  // --- Spec 6A Step 4: Tab icon tonal colors ---
+
+  it('Plans tab BookOpen icon has text-sky-300', () => {
+    renderPage()
+    const plansTab = screen.getByRole('tab', { name: /Reading Plans/ })
+    const icon = plansTab.querySelector('svg')
+    expect(icon?.classList.contains('text-sky-300')).toBe(true)
+  })
+
+  it('Challenges tab Flame icon has text-amber-300', () => {
+    renderPage()
+    const challengesTab = screen.getByRole('tab', { name: /Challenges/ })
+    const icon = challengesTab.querySelector('svg')
+    expect(icon?.classList.contains('text-amber-300')).toBe(true)
+  })
 })

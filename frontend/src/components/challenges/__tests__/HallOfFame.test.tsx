@@ -66,4 +66,31 @@ describe('HallOfFame', () => {
     )
     expect(screen.getByRole('heading', { name: /Hall of Fame/ })).toBeInTheDocument()
   })
+
+  // --- Spec 6A Step 10: Trophy Tonal Icon Pattern + FrostedCard subdued chrome ---
+
+  it('Trophy icons use text-amber-300 (Tonal Icon Pattern, not text-amber-500)', () => {
+    const { container } = render(
+      <HallOfFame pastChallenges={[{ challenge: mockChallenge, info: mockInfo }]} />,
+    )
+    const trophies = container.querySelectorAll('svg.lucide-trophy')
+    expect(trophies.length).toBe(2) // section heading + item heading
+    trophies.forEach((trophy) => {
+      expect(trophy.classList.contains('text-amber-300')).toBe(true)
+      expect(trophy.classList.contains('text-amber-500')).toBe(false)
+    })
+  })
+
+  it('items use FrostedCard subdued chrome (rounded-3xl, bg-white/[0.05])', () => {
+    render(
+      <HallOfFame pastChallenges={[{ challenge: mockChallenge, info: mockInfo }]} />,
+    )
+    // The item is the closest ancestor with rounded-3xl (FrostedCard subdued default)
+    const titleEl = screen.getByText('Pray40: A Lenten Journey')
+    const itemCard = titleEl.closest('.rounded-3xl') as HTMLElement | null
+    expect(itemCard).not.toBeNull()
+    expect(itemCard?.className).toContain('bg-white/[0.05]')
+    expect(itemCard?.className).toContain('border-white/[0.10]')
+    expect(itemCard?.className).toContain('p-5')
+  })
 })

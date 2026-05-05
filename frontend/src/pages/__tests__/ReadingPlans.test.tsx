@@ -197,4 +197,63 @@ describe('ReadingPlans', () => {
 
     expect(screen.getByText(/Day 1 of/)).toBeInTheDocument()
   })
+
+  // --- Spec 6A Step 11: Create-Your-Own-Plan FrostedCard chrome + Sparkles tonal ---
+
+  it('Create-Your-Own-Plan card uses FrostedCard chrome', () => {
+    renderPage()
+    const heading = screen.getByText('Create Your Own Plan')
+    // Walk up to the FrostedCard div (the heading sits inside flex-1 div, which sits inside flex row, which sits inside FrostedCard div)
+    const card = heading.closest('.rounded-3xl') as HTMLElement | null
+    expect(card).not.toBeNull()
+    expect(card?.className).toContain('bg-white/[0.07]')
+    expect(card?.className).toContain('border-white/[0.12]')
+    expect(card?.className).toContain('mb-6')
+  })
+
+  it('Create-Your-Own-Plan Sparkles icon has text-violet-300 (Tonal Icon Pattern)', () => {
+    const { container } = renderPage()
+    const heading = screen.getByText('Create Your Own Plan')
+    const card = heading.closest('.rounded-3xl') as HTMLElement | null
+    const sparkles = card?.querySelector('svg.lucide-sparkles') ?? container.querySelector('svg[aria-hidden="true"]')
+    expect(sparkles?.classList.contains('text-violet-300')).toBe(true)
+  })
+
+  it('Create-Your-Own-Plan Sparkles container has bg-white/[0.05]', () => {
+    renderPage()
+    const heading = screen.getByText('Create Your Own Plan')
+    const card = heading.closest('.rounded-3xl') as HTMLElement | null
+    const iconContainer = card?.querySelector('.h-12.w-12') as HTMLElement | null
+    expect(iconContainer).not.toBeNull()
+    expect(iconContainer?.className).toContain('bg-white/[0.05]')
+  })
+
+  it('Create-Your-Own-Plan description has text-white/70', () => {
+    renderPage()
+    const description = screen.getByText(
+      /Tell us what you're going through and we'll create a personalized Scripture journey just for you./,
+    )
+    expect(description.className).toContain('text-white/70')
+  })
+
+  // --- Spec 6A Step 12: ConfirmDialog "Pause & Start New" subtle button ---
+
+  it('ConfirmDialog "Pause & Start New" uses subtle button chrome (not bg-primary)', async () => {
+    mockAuth.isAuthenticated = true
+    renderPage()
+    const user = userEvent.setup()
+
+    // Trigger the dialog via two starts
+    const startButtons = screen.getAllByRole('button', { name: 'Start Plan' })
+    await user.click(startButtons[0])
+    const remainingStarts = screen.getAllByRole('button', { name: 'Start Plan' })
+    await user.click(remainingStarts[0])
+
+    const pauseBtn = screen.getByRole('button', { name: 'Pause & Start New' })
+    expect(pauseBtn.className).toContain('bg-white/[0.07]')
+    expect(pauseBtn.className).toContain('rounded-full')
+    expect(pauseBtn.className).toContain('min-h-[44px]')
+    // Negative assertion: must NOT be the deprecated bg-primary solid button
+    expect(pauseBtn.className).not.toContain('bg-primary')
+  })
 })

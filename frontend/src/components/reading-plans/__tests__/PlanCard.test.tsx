@@ -35,24 +35,28 @@ describe('PlanCard', () => {
   it('applies canonical FrostedCard class string', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link.className).toContain('rounded-2xl')
-    expect(link.className).toContain('bg-white/[0.06]')
-    expect(link.className).toContain('border-white/[0.12]')
-    expect(link.className).toContain('backdrop-blur-sm')
+    const card = link.firstElementChild as HTMLElement
+    expect(card.className).toContain('rounded-3xl')
+    expect(card.className).toContain('bg-white/[0.07]')
+    expect(card.className).toContain('border-white/[0.12]')
+    expect(card.className).toContain('backdrop-blur-sm')
   })
 
   it('applies hover state classes', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link.className).toContain('hover:bg-white/[0.08]')
-    expect(link.className).toContain('hover:border-white/20')
+    const card = link.firstElementChild as HTMLElement
+    expect(card.className).toContain('hover:bg-white/[0.10]')
+    expect(card.className).toContain('hover:-translate-y-0.5')
+    expect(card.className).toContain('motion-reduce:hover:translate-y-0')
   })
 
   it('applies focus-visible ring classes with hero-bg offset', () => {
     renderCard()
     const link = screen.getByRole('link')
+    expect(link.className).toContain('rounded-3xl')
     expect(link.className).toContain('focus-visible:ring-2')
-    expect(link.className).toContain('focus-visible:ring-white/50')
+    expect(link.className).toContain('focus-visible:ring-violet-400/30')
     expect(link.className).toContain('focus-visible:ring-offset-2')
     expect(link.className).toContain('focus-visible:ring-offset-hero-bg')
   })
@@ -60,16 +64,18 @@ describe('PlanCard', () => {
   it('uses animation token duration-base (not hardcoded ms)', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link.className).toContain('duration-base')
-    expect(link.className).toContain('motion-reduce:transition-none')
+    const card = link.firstElementChild as HTMLElement
+    expect(card.className).toContain('duration-base')
+    expect(card.className).toContain('motion-reduce:transition-none')
   })
 
   it('uses flex h-full flex-col for equal heights', () => {
     renderCard()
     const link = screen.getByRole('link')
-    expect(link.className).toContain('flex')
-    expect(link.className).toContain('h-full')
-    expect(link.className).toContain('flex-col')
+    const card = link.firstElementChild as HTMLElement
+    expect(card.className).toContain('flex')
+    expect(card.className).toContain('h-full')
+    expect(card.className).toContain('flex-col')
   })
 
   it('renders emoji inline with title (text-lg, not text-4xl)', () => {
@@ -106,11 +112,12 @@ describe('PlanCard', () => {
     expect(durationPill.className).toContain('text-white/70')
   })
 
-  it('renders Start Plan as white pill (variant="light")', () => {
+  it('renders Start Plan as subtle pill (variant="subtle")', () => {
     renderCard('unstarted')
     const btn = screen.getByRole('button', { name: 'Start Plan' })
-    expect(btn.className).toContain('bg-white')
-    expect(btn.className).toContain('text-primary')
+    expect(btn.className).toContain('bg-white/[0.07]')
+    expect(btn.className).toContain('border-white/[0.12]')
+    expect(btn.className).toContain('text-white')
     expect(btn.className).toContain('rounded-full')
   })
 

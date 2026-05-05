@@ -2,6 +2,7 @@ import { Bell, Check, Calendar } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import type { Challenge } from '@/types/challenges'
 
 import { CategoryTag } from './CategoryTag'
@@ -38,7 +39,7 @@ export function NextChallengeCountdown({
   const countdownColor = getCountdownColorClass(daysUntilStart)
 
   return (
-    <div className="rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] p-6 sm:p-8">
+    <FrostedCard variant="default" className="p-5 sm:p-6">
       <div className="mb-4 flex items-center gap-2 text-white/60">
         <Calendar className="h-5 w-5" aria-hidden="true" />
         <span className="text-sm font-medium uppercase tracking-wide">Next Challenge</span>
@@ -69,7 +70,7 @@ export function NextChallengeCountdown({
 
       <div className="flex flex-wrap gap-2">
         <Button
-          variant="light"
+          variant="subtle"
           size="sm"
           onClick={onToggleReminder}
           aria-label={isReminderSet ? 'Remove reminder' : 'Set reminder'}
@@ -82,10 +83,10 @@ export function NextChallengeCountdown({
           )}
           {isReminderSet ? 'Reminder set' : 'Remind me'}
         </Button>
-        <Button variant="light" size="sm" asChild>
+        <Button variant="subtle" size="sm" asChild>
           <Link to={`/challenges/${challenge.id}`}>View Details</Link>
         </Button>
       </div>
-    </div>
+    </FrostedCard>
   )
 }
