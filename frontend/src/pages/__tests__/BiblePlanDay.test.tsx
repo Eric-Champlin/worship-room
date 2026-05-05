@@ -21,6 +21,25 @@ vi.mock('@/hooks/bible/usePlan', () => ({
 
 vi.mock('@/lib/bible/plansStore', () => ({
   markDayComplete: vi.fn(),
+  setCelebrationShown: vi.fn(),
+}))
+
+vi.mock('@/components/ui/BackgroundCanvas', () => ({
+  BackgroundCanvas: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div data-testid="background-canvas" className={className}>{children}</div>
+  ),
+}))
+vi.mock('@/components/Navbar', () => ({ Navbar: () => null }))
+vi.mock('@/components/SiteFooter', () => ({ SiteFooter: () => null }))
+vi.mock('@/components/SEO', () => ({ SEO: () => null }))
+vi.mock('@/components/bible/BibleDrawerProvider', () => ({
+  BibleDrawerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useBibleDrawer: () => ({ isOpen: false, close: vi.fn(), open: vi.fn(), toggle: vi.fn() }),
+}))
+vi.mock('@/components/bible/BibleDrawer', () => ({ BibleDrawer: () => null }))
+vi.mock('@/components/bible/DrawerViewRouter', () => ({ DrawerViewRouter: () => null }))
+vi.mock('@/components/bible/plans/PlanCompletionCelebration', () => ({
+  PlanCompletionCelebration: () => null,
 }))
 
 import { BiblePlanDay } from '../BiblePlanDay'
@@ -177,5 +196,79 @@ describe('BiblePlanDay', () => {
     renderDay(99)
 
     expect(screen.getByText(/Day 99 doesn't exist/)).toBeInTheDocument()
+  })
+
+  it('wraps page in BackgroundCanvas (atmospheric layer)', () => {
+    mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+    renderDay(1)
+    const canvas = screen.getByTestId('background-canvas')
+    expect(canvas).toBeInTheDocument()
+    expect(canvas.className).toContain('flex')
+    expect(canvas.className).toContain('flex-col')
+    expect(canvas.className).toContain('font-sans')
+  })
+
+  it('no ATMOSPHERIC_HERO_BG inline gradient (no rgba(109, 40, 217))', () => {
+    mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+    const { container } = renderDay(1)
+    const heroGradient = container.querySelectorAll('[style*="rgba(109"]')
+    expect(heroGradient.length).toBe(0)
+  })
+
+  it('no bg-dashboard-dark on page wrapper (#0f0a1e)', () => {
+    mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+    const { container } = renderDay(1)
+    const darkBgElements = container.querySelectorAll('[style*="0f0a1e"]')
+    expect(darkBgElements.length).toBe(0)
+  })
+
+  describe('heading semantics (Spec 8C Change 4)', () => {
+    it('Devotional section label is an h2', () => {
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+      renderDay(1)
+      expect(screen.getByRole('heading', { level: 2, name: /devotional/i })).toBeInTheDocument()
+    })
+
+    it('Passages section label is an h2', () => {
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+      renderDay(1)
+      expect(screen.getByRole('heading', { level: 2, name: /passages/i })).toBeInTheDocument()
+    })
+
+    it('Reflection section label is an h2', () => {
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+      renderDay(1)
+      expect(screen.getByRole('heading', { level: 2, name: /reflection/i })).toBeInTheDocument()
+    })
+
+    it('h1 (day title) is the only h1 — h2s do not skip levels', () => {
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+      renderDay(1)
+      expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+      expect(screen.getAllByRole('heading', { level: 2 }).length).toBeGreaterThanOrEqual(3)
+    })
+
+    it('section eyebrow class string preserved (text-xs font-medium uppercase tracking-widest text-white/60)', () => {
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+      renderDay(1)
+      const reflectionH2 = screen.getByRole('heading', { level: 2, name: /reflection/i })
+      expect(reflectionH2.className).toContain('text-xs')
+      expect(reflectionH2.className).toContain('font-medium')
+      expect(reflectionH2.className).toContain('uppercase')
+      expect(reflectionH2.className).toContain('tracking-widest')
+      expect(reflectionH2.className).toContain('text-white/60')
+    })
+
+    it('day with no devotional renders no Devotional h2', () => {
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+      renderDay(2)  // Day 2 in MOCK_PLAN has no devotional
+      expect(screen.queryByRole('heading', { level: 2, name: /devotional/i })).not.toBeInTheDocument()
+    })
+
+    it('day with no reflection prompts renders no Reflection h2', () => {
+      mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: PROGRESS_DAY_1, isLoading: false, isError: false })
+      renderDay(2)  // Day 2 in MOCK_PLAN has no reflectionPrompts
+      expect(screen.queryByRole('heading', { level: 2, name: /reflection/i })).not.toBeInTheDocument()
+    })
   })
 })

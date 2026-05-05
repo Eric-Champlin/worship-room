@@ -19,7 +19,7 @@ export function TodaysPlanCard({ plans }: TodaysPlanCardProps) {
 
   return (
     <FrostedCard as="article" variant="default">
-      <Link to={`/reading-plans/${plan.planId}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark">
+      <Link to={`/bible/plans/${plan.planId}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark">
         <h3 className="text-lg font-bold text-white">{plan.planName}</h3>
         <p className="mt-1 text-sm text-white/60">
           Day {plan.currentDay} of {plan.totalDays}

@@ -58,7 +58,15 @@ describe('TodaysPlanCard', () => {
   it('links to plan detail route', () => {
     renderWithRouter(<TodaysPlanCard plans={[PLAN_A]} />)
     const link = screen.getByRole('link', { name: /Gospel of John/i })
-    expect(link.getAttribute('href')).toBe('/reading-plans/gospel-john')
+    expect(link.getAttribute('href')).toBe('/bible/plans/gospel-john')
+  })
+
+  it('Bible-side URL pattern only', () => {
+    renderWithRouter(<TodaysPlanCard plans={[PLAN_A]} />)
+    const link = screen.getByRole('link', { name: /Gospel of John/i })
+    const href = link.getAttribute('href') ?? ''
+    expect(href).toContain('/bible/plans/')
+    expect(href).not.toContain('/reading-plans/')
   })
 
   it('shows +N more chip when multiple plans', () => {

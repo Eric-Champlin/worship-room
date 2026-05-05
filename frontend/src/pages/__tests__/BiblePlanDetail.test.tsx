@@ -26,6 +26,21 @@ vi.mock('@/lib/bible/plansStore', () => ({
   restartPlan: vi.fn(),
 }))
 
+vi.mock('@/components/ui/BackgroundCanvas', () => ({
+  BackgroundCanvas: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div data-testid="background-canvas" className={className}>{children}</div>
+  ),
+}))
+vi.mock('@/components/Navbar', () => ({ Navbar: () => null }))
+vi.mock('@/components/SiteFooter', () => ({ SiteFooter: () => null }))
+vi.mock('@/components/SEO', () => ({ SEO: () => null }))
+vi.mock('@/components/bible/BibleDrawerProvider', () => ({
+  BibleDrawerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useBibleDrawer: () => ({ isOpen: false, close: vi.fn(), open: vi.fn(), toggle: vi.fn() }),
+}))
+vi.mock('@/components/bible/BibleDrawer', () => ({ BibleDrawer: () => null }))
+vi.mock('@/components/bible/DrawerViewRouter', () => ({ DrawerViewRouter: () => null }))
+
 import { BiblePlanDetail } from '../BiblePlanDetail'
 
 const MOCK_PLAN = {
@@ -241,5 +256,37 @@ describe('BiblePlanDetail', () => {
 
       expect(mockOpenAuthModal).not.toHaveBeenCalled()
     })
+  })
+
+  it('wraps page in BackgroundCanvas (atmospheric layer)', () => {
+    mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: null, isLoading: false, isError: false })
+    renderDetail()
+    const canvas = screen.getByTestId('background-canvas')
+    expect(canvas).toBeInTheDocument()
+    expect(canvas.className).toContain('flex')
+    expect(canvas.className).toContain('flex-col')
+    expect(canvas.className).toContain('font-sans')
+  })
+
+  it('no ATMOSPHERIC_HERO_BG inline gradient on page wrapper', () => {
+    mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: null, isLoading: false, isError: false })
+    const { container } = renderDetail()
+    const radialElements = container.querySelectorAll('[style*="radial-gradient"]')
+    expect(radialElements.length).toBe(0)
+  })
+
+  it('preserves per-plan coverGradient overlay', () => {
+    mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: null, isLoading: false, isError: false })
+    const { container } = renderDetail()
+    // MOCK_PLAN.coverGradient = 'from-primary/30 to-hero-dark'
+    const gradientOverlay = container.querySelector('.from-primary\\/30')
+    expect(gradientOverlay).toBeInTheDocument()
+  })
+
+  it('no bg-dashboard-dark on page wrapper', () => {
+    mockUsePlan.mockReturnValue({ plan: MOCK_PLAN, progress: null, isLoading: false, isError: false })
+    const { container } = renderDetail()
+    const darkBgElements = container.querySelectorAll('.bg-dashboard-dark')
+    expect(darkBgElements.length).toBe(0)
   })
 })
