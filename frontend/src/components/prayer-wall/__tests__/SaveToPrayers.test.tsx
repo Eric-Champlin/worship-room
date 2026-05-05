@@ -101,7 +101,7 @@ describe('Save button in InteractionBar', () => {
     const user = userEvent.setup()
     renderBar()
     await user.click(screen.getByLabelText(/sign in to save/i))
-    expect(mockOpenAuthModal).toHaveBeenCalledWith('Sign in to save prayers to your list.')
+    expect(mockOpenAuthModal).toHaveBeenCalledWith('Sign in to save prayers to your list')
   })
 
   it('logged-in click calls onToggleSave', async () => {

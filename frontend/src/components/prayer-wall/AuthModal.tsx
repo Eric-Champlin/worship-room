@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { X, AlertCircle } from 'lucide-react'
+import { X, AlertCircle, Eye, EyeOff } from 'lucide-react'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAuth } from '@/hooks/useAuth'
@@ -51,6 +52,8 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
   const [lastNameError, setLastNameError] = useState<string | null>(null)
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null)
   const [resetEmailError, setResetEmailError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitted, setSubmitted] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
@@ -84,7 +87,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
     closeTimeoutRef.current = setTimeout(() => {
       setIsClosing(false)
       onClose()
-    }, 150)
+    }, ANIMATION_DURATIONS.fast)
   }, [onClose, reducedMotion])
 
   const containerRef = useFocusTrap(isOpen, handleClose)
@@ -464,11 +467,19 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   autoComplete="email"
                   className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                   aria-label="Email address"
-                  aria-invalid={emailError ? 'true' : undefined}
-                  aria-describedby={emailError ? 'email-error' : undefined}
+                  aria-invalid={(touched.email || submitted) && emailError ? 'true' : undefined}
+                  aria-describedby={(touched.email || submitted) && emailError ? 'email-error' : undefined}
                   onChange={(e) => { setEmailValue(e.target.value); setEmailError(null) }}
+                  onBlur={() => {
+                    markTouched('email')
+                    if (!emailValue) {
+                      setEmailError('Email is required')
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+                      setEmailError('Please enter a valid email')
+                    }
+                  }}
                 />
-                {emailError && (
+                {(touched.email || submitted) && emailError && (
                   <p id="email-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
                     <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {emailError}
@@ -480,21 +491,39 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 <label htmlFor="auth-password" className="mb-1 block text-sm font-medium text-white">
                   Password<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                 </label>
-                <input
-                  ref={passwordRef}
-                  id="auth-password"
-                  name="auth-password"
-                  type="password"
-                  required
-                  value={passwordValue}
-                  autoComplete={view === 'login' ? 'current-password' : 'new-password'}
-                  className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
-                  aria-label="Password"
-                  aria-invalid={passwordError ? 'true' : undefined}
-                  aria-describedby={passwordError ? 'password-error' : undefined}
-                  onChange={(e) => { setPasswordValue(e.target.value); setPasswordError(null) }}
-                />
-                {passwordError && (
+                <div className="relative">
+                  <input
+                    ref={passwordRef}
+                    id="auth-password"
+                    name="auth-password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={passwordValue}
+                    autoComplete={view === 'login' ? 'current-password' : 'new-password'}
+                    className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 pr-12 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+                    aria-label="Password"
+                    aria-invalid={(touched.password || submitted) && passwordError ? 'true' : undefined}
+                    aria-describedby={(touched.password || submitted) && passwordError ? 'password-error' : undefined}
+                    onChange={(e) => { setPasswordValue(e.target.value); setPasswordError(null) }}
+                    onBlur={() => {
+                      markTouched('password')
+                      if (!passwordValue) {
+                        setPasswordError('Password is required')
+                      } else if (passwordValue.length < PASSWORD_MIN_LENGTH) {
+                        setPasswordError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-white/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
+                  </button>
+                </div>
+                {(touched.password || submitted) && passwordError && (
                   <p id="password-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
                     <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {passwordError}
@@ -507,33 +536,43 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   <label htmlFor="auth-confirm-password" className="mb-1 block text-sm font-medium text-white">
                     Confirm password<span className="text-purple-400 ml-0.5" aria-hidden="true">*</span><span className="sr-only"> required</span>
                   </label>
-                  <input
-                    ref={confirmPasswordRef}
-                    id="auth-confirm-password"
-                    type="password"
-                    required
-                    autoComplete="new-password"
-                    value={confirmPasswordValue}
-                    onChange={(e) => {
-                      setConfirmPasswordValue(e.target.value)
-                      if (e.target.value && e.target.value !== passwordValue) {
-                        setConfirmPasswordError('Passwords do not match')
-                      } else {
-                        setConfirmPasswordError(null)
-                      }
-                    }}
-                    onBlur={() => {
-                      markTouched('confirmPassword')
-                      if (!confirmPasswordValue) {
-                        setConfirmPasswordError('Confirm password is required')
-                      } else if (confirmPasswordValue !== passwordValue) {
-                        setConfirmPasswordError('Passwords do not match')
-                      }
-                    }}
-                    aria-invalid={(touched.confirmPassword || submitted) && confirmPasswordError ? 'true' : undefined}
-                    aria-describedby={(touched.confirmPassword || submitted) && confirmPasswordError ? 'confirmpassword-error' : undefined}
-                    className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
-                  />
+                  <div className="relative">
+                    <input
+                      ref={confirmPasswordRef}
+                      id="auth-confirm-password"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      autoComplete="new-password"
+                      value={confirmPasswordValue}
+                      className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 pr-12 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:border-purple-400/50 focus-visible:shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+                      aria-invalid={(touched.confirmPassword || submitted) && confirmPasswordError ? 'true' : undefined}
+                      aria-describedby={(touched.confirmPassword || submitted) && confirmPasswordError ? 'confirmpassword-error' : undefined}
+                      onChange={(e) => {
+                        setConfirmPasswordValue(e.target.value)
+                        if (e.target.value && e.target.value !== passwordValue) {
+                          setConfirmPasswordError('Passwords do not match')
+                        } else {
+                          setConfirmPasswordError(null)
+                        }
+                      }}
+                      onBlur={() => {
+                        markTouched('confirmPassword')
+                        if (!confirmPasswordValue) {
+                          setConfirmPasswordError('Confirm password is required')
+                        } else if (confirmPasswordValue !== passwordValue) {
+                          setConfirmPasswordError('Passwords do not match')
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      aria-label={showConfirmPassword ? 'Hide confirmation' : 'Show confirmation'}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-white/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
+                    </button>
+                  </div>
                   {(touched.confirmPassword || submitted) && confirmPasswordError && (
                     <p id="confirmpassword-error" role="alert" className="mt-1 flex items-center gap-1.5 text-sm text-red-400">
                       <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -617,28 +656,28 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
               </Button>
             </form>
 
-            {/* Divider */}
-            <div className="my-4 flex items-center gap-3">
-              <div className="h-px flex-1 border-t border-white/[0.08]" />
+            {/* "or" divider */}
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 border-t border-white/[0.08]" />
               <span className="text-xs text-white/30">or</span>
-              <div className="h-px flex-1 border-t border-white/[0.08]" />
+              <div className="flex-1 border-t border-white/[0.08]" />
             </div>
 
-            {/* Spotify button (disabled) */}
+            {/* Spotify OAuth placeholder — disabled until Spotify auth integration ships */}
             <button
               type="button"
               disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full border border-white/[0.12] bg-transparent px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/[0.04] hover:border-white/[0.18]"
               aria-label="Continue with Spotify"
+              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full border border-white/[0.12] bg-transparent px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/[0.04] hover:border-white/[0.18]"
             >
-              <svg className="h-5 w-5 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-[#1DB954]" aria-hidden="true">
                 <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
               </svg>
               Continue with Spotify
             </button>
 
             {/* Toggle link */}
-            <p className="mt-4 text-center text-sm text-white/90">
+            <p className="mt-6 text-center text-sm text-white/90">
               {view === 'login' ? (
                 <>
                   No account?{' '}

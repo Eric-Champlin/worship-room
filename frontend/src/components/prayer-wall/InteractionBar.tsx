@@ -215,7 +215,7 @@ export function InteractionBar({
       ) : (
         <button
           type="button"
-          onClick={() => authModal?.openAuthModal('Sign in to save prayers to your list.')}
+          onClick={() => authModal?.openAuthModal('Sign in to save prayers to your list')}
           className={cn(btnBase, 'text-white/50 hover:text-primary')}
           aria-label="Sign in to save to your prayer list"
         >

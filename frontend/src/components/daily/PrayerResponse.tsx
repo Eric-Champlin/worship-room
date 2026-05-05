@@ -137,7 +137,7 @@ export function PrayerResponse({
 
   const handleSaveToList = () => {
     if (!isAuthenticated) {
-      authModal?.openAuthModal('Sign in to save prayers to your list.')
+      authModal?.openAuthModal('Sign in to save prayers to your list')
       return
     }
     if (getPrayers().length >= MAX_PRAYERS) {

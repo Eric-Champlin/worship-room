@@ -1,6 +1,6 @@
 # Forums Wave Spec Tracker
 
-**Total: 156 specs | 19 phases | Execution: sequential within each phase**
+**Total: 159 specs | 20 phases | Execution: sequential within each phase**
 
 **v2.8 additions (2026-04-22):** 18 new specs closed functional gaps surfaced during pre-execution completeness review — 13 in Phase 1 (auth lifecycle + production hardening), 2 in Phase 2.5 (block/mute), 1 in Phase 10 (admin audit viewer), 2 in Phase 16 (offline banner + error boundaries). See master plan v2.8 changelog + new Appendix E for spec details.
 
@@ -279,6 +279,21 @@ prevents a wasted deploy attempt.
 | 155 | 16.3b | Feature Flag Cleanup Pass             | S    | Low    | ⬜     |
 | 156 | 16.4  | Accessibility Audit (BB-35 Style)     | L    | Medium | ⬜     |
 
+## Phase 17 — Music Integrations (3 specs)
+
+| #   | Spec | Title                                                     | Size | Risk   | Status |
+| --- | ---- | --------------------------------------------------------- | ---- | ------ | ------ |
+| 157 | 17.1 | Encryption-at-Rest Infrastructure for Sensitive Columns   | M    | Medium | ⬜     |
+| 158 | 17.2 | Spotify OAuth Identity Linking                            | L    | High   | ⬜     |
+| 159 | 17.3 | Spotify Web Playback SDK Integration (Premium-only)       | M    | Medium | ⬜     |
+
+Phase 17 sequencing notes:
+- 17.1 is a prerequisite for 17.2 (encrypted token columns require the AttributeConverter pattern from 17.1).
+- 17.2 ships the OAuth flow; the AuthModal "Continue with Spotify" placeholder button gets wired here.
+- 17.3 is the user-facing payoff (session-wide playback for Premium users, browse-only for Free).
+- Identity-linking model: Spotify OAuth requires an existing Worship Room account (email/password) and links as a secondary identity. Spotify alone does NOT create a Worship Room account. Cleaner anti-enumeration posture and simpler account recovery.
+- Encryption approach: app-layer AES-GCM via JPA AttributeConverter, key from env var (Railway secret). Provider-agnostic, Testcontainers-friendly, reusable for any future encrypted columns.
+
 ---
 
 ## Summary by Phase
@@ -304,4 +319,5 @@ prevents a wasted deploy attempt.
 | 14        | Onboarding           | 4       | 0         |
 | 15        | Email & Push         | 5       | 0         |
 | 16        | Polish & Performance | 7       | 1         |
-| **Total** |                      | **156** | **16**    |
+| 17        | Music Integrations   | 3       | 1         |
+| **Total** |                      | **159** | **18**    |

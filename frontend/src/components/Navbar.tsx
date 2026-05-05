@@ -127,7 +127,7 @@ function DesktopAuthActions({ transparent }: { transparent: boolean }) {
           'inline-flex items-center rounded-full px-5 py-2 text-sm font-medium text-white transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]',
           transparent
             ? 'bg-white/20 hover:bg-white/30 border border-white/30'
-            : 'bg-primary hover:bg-primary-lt'
+            : 'bg-white text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]'
         )}
       >
         Get Started
@@ -193,12 +193,12 @@ export function Navbar({ transparent = false, hideBanner = false }: NavbarProps)
           )}
         >
           <div className="flex items-center justify-between px-6 py-3">
-            <NavbarLogo transparent />
-            <DesktopNav transparent />
+            <NavbarLogo transparent={transparent} />
+            <DesktopNav transparent={transparent} />
             {isAuthenticated ? (
               <DesktopUserActions />
             ) : (
-              <DesktopAuthActions transparent />
+              <DesktopAuthActions transparent={transparent} />
             )}
 
             {/* Hamburger button — visible below lg */}

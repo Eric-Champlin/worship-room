@@ -106,19 +106,23 @@ describe('AuthModal — homepage visual style', () => {
     expect(errorEl.className).toContain('text-red-400')
   })
 
-  it('Spotify button has transparent border style with green icon', () => {
-    renderModal()
-    const spotifyBtn = screen.getByLabelText('Continue with Spotify')
-    expect(spotifyBtn.className).toContain('border-white/[0.12]')
-    expect(spotifyBtn.className).toContain('text-white')
-    const icon = spotifyBtn.querySelector('svg')
-    expect(icon?.getAttribute('class')).toContain('text-[#1DB954]')
-  })
-
   it('toggle links use purple-400', () => {
     renderModal()
     const createLink = screen.getByRole('button', { name: 'Create one!' })
     expect(createLink.className).toContain('text-purple-400')
+  })
+
+  it('Spotify button has canonical chrome styling', () => {
+    renderModal()
+    const spotifyBtn = screen.getByRole('button', { name: 'Continue with Spotify' })
+    expect(spotifyBtn.className).toContain('border-white/[0.12]')
+    expect(spotifyBtn.className).toContain('text-white')
+  })
+
+  it('Spotify button is disabled (placeholder until integration ships)', () => {
+    renderModal()
+    const spotifyBtn = screen.getByRole('button', { name: 'Continue with Spotify' })
+    expect(spotifyBtn).toBeDisabled()
   })
 
   it('title uses gradient text style (not script font)', () => {
@@ -210,6 +214,45 @@ describe('AuthModal — validation', () => {
     await user.type(screen.getByLabelText('Email address'), 'a')
     expect(screen.queryByText('Email is required')).not.toBeInTheDocument()
   })
+
+  it('email error does not show before blur or submit', () => {
+    renderModal()
+    expect(screen.queryByText('Email is required')).not.toBeInTheDocument()
+  })
+
+  it('email error shows on blur without submit', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    const emailInput = screen.getByLabelText('Email address')
+    await user.click(emailInput)
+    await user.tab()
+    expect(screen.getByText('Email is required')).toBeInTheDocument()
+  })
+
+  it('invalid email shows format error on blur without submit', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    const emailInput = screen.getByLabelText('Email address')
+    await user.type(emailInput, 'user@x')
+    await user.tab()
+    expect(screen.getByText('Please enter a valid email')).toBeInTheDocument()
+  })
+
+  it('email error not shown while typing before blur', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    await user.type(screen.getByLabelText('Email address'), 'user@')
+    expect(screen.queryByText('Please enter a valid email')).not.toBeInTheDocument()
+  })
+
+  it('password error shows on blur without submit', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    const passwordInput = screen.getByLabelText('Password')
+    await user.click(passwordInput)
+    await user.tab()
+    expect(screen.getByText('Password is required')).toBeInTheDocument()
+  })
 })
 
 describe('AuthModal — register validation', () => {
@@ -298,6 +341,35 @@ describe('AuthModal — register validation', () => {
     expect(screen.getByLabelText('Email address')).toHaveAttribute('required')
     expect(screen.getByLabelText('Password')).toHaveAttribute('required')
   })
+
+  it('email error appears on blur with empty input (register view)', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />, { wrapper: Wrapper })
+    const emailInput = screen.getByLabelText('Email address')
+    await user.click(emailInput)
+    await user.tab()
+    expect(screen.getByText('Email is required')).toBeInTheDocument()
+  })
+
+  it('email error appears on blur with malformed input (register view)', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />, { wrapper: Wrapper })
+    const emailInput = screen.getByLabelText('Email address')
+    await user.type(emailInput, 'user@x')
+    await user.tab()
+    expect(screen.getByText('Please enter a valid email')).toBeInTheDocument()
+  })
+
+  it('password error appears on blur with too-short input (register view)', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...registerProps} />, { wrapper: Wrapper })
+    const passwordInput = screen.getByLabelText('Password')
+    await user.type(passwordInput, 'short')
+    await user.tab()
+    expect(
+      screen.getByText('Password must be at least 8 characters'),
+    ).toBeInTheDocument()
+  })
 })
 
 describe('AuthModal — password reset validation', () => {
@@ -320,6 +392,89 @@ describe('AuthModal — password reset validation', () => {
     await user.click(screen.getByRole('button', { name: 'Send Reset Link' }))
     const resetEmailInput = screen.getByLabelText(/Email/i)
     expect(resetEmailInput).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('reset email error does NOT appear on blur (submit-only timing preserved per Decision 8)', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    await user.click(screen.getByRole('button', { name: 'Forgot password?' }))
+    const resetEmailInput = screen.getByLabelText(/Email/i)
+    await user.click(resetEmailInput)
+    await user.tab()
+    expect(screen.queryByText('Email is required')).not.toBeInTheDocument()
+  })
+
+  it('reset email blur with malformed input does NOT show format error before submit', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    await user.click(screen.getByRole('button', { name: 'Forgot password?' }))
+    const resetEmailInput = screen.getByLabelText(/Email/i)
+    await user.type(resetEmailInput, 'user@x')
+    await user.tab()
+    expect(
+      screen.queryByText('Please enter a valid email'),
+    ).not.toBeInTheDocument()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Password visibility toggle tests (new in Spec 7)
+// ---------------------------------------------------------------------------
+
+describe('AuthModal — password visibility toggle', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('password toggle button renders with Show password label', () => {
+    renderModal()
+    expect(screen.getByLabelText('Show password')).toBeInTheDocument()
+  })
+
+  it('clicking toggle changes password input to type text', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    const passwordInput = screen.getByLabelText('Password')
+    expect(passwordInput).toHaveAttribute('type', 'password')
+    await user.click(screen.getByLabelText('Show password'))
+    expect(passwordInput).toHaveAttribute('type', 'text')
+  })
+
+  it('clicking toggle twice restores password type', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    const passwordInput = screen.getByLabelText('Password')
+    await user.click(screen.getByLabelText('Show password'))
+    await user.click(screen.getByLabelText('Hide password'))
+    expect(passwordInput).toHaveAttribute('type', 'password')
+  })
+
+  it('toggle aria-label changes to Hide password when active', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    await user.click(screen.getByLabelText('Show password'))
+    expect(screen.getByLabelText('Hide password')).toBeInTheDocument()
+    expect(screen.queryByLabelText('Show password')).not.toBeInTheDocument()
+  })
+
+  it('register view confirm password toggle is independent from password toggle', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...defaultProps} initialView="register" />, { wrapper: Wrapper })
+    const passwordInput = screen.getByLabelText('Password')
+    const confirmInput = screen.getByLabelText(/Confirm password/i)
+    const passwordToggle = screen.getByLabelText('Show password')
+    await user.click(passwordToggle)
+    expect(passwordInput).toHaveAttribute('type', 'text')
+    expect(confirmInput).toHaveAttribute('type', 'password')
+  })
+
+  it('register view confirm password toggle works independently', async () => {
+    const user = userEvent.setup()
+    render(<AuthModal {...defaultProps} initialView="register" />, { wrapper: Wrapper })
+    const confirmInput = screen.getByLabelText(/Confirm password/i)
+    const confirmToggle = screen.getByLabelText('Show confirmation')
+    await user.click(confirmToggle)
+    expect(confirmInput).toHaveAttribute('type', 'text')
   })
 })
 

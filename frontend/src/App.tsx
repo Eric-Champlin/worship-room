@@ -12,10 +12,11 @@ import { InstallPromptProvider } from '@/contexts/InstallPromptProvider'
 import { LegalVersionGate } from '@/components/legal/LegalVersionGate'
 import { useAuth } from '@/hooks/useAuth'
 import { SEO } from '@/components/SEO'
-import { LOGIN_METADATA, NOT_FOUND_METADATA } from '@/lib/seo/routeMetadata'
+import { NOT_FOUND_METADATA } from '@/lib/seo/routeMetadata'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
+import { AuthQueryParamHandler } from '@/components/AuthQueryParamHandler'
 import { cn } from '@/lib/utils'
 import { ChunkErrorBoundary } from '@/components/ChunkErrorBoundary'
 import { ScrollToTop } from '@/components/ScrollToTop'
@@ -113,25 +114,6 @@ function RouteLoadingFallback() {
         Worship Room
       </span>
     </div>
-  )
-}
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <Layout>
-      {/* BB-40: /login is the only caller of ComingSoon today. LOGIN_METADATA carries the noIndex + stub description. */}
-      <SEO {...LOGIN_METADATA} />
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="max-w-md text-center">
-          <h1 className="mb-4 text-3xl font-bold text-text-dark sm:text-4xl">
-            {title}
-          </h1>
-          <p className="font-script text-2xl text-primary sm:text-3xl">
-            Coming Soon
-          </p>
-        </div>
-      </div>
-    </Layout>
   )
 }
 
@@ -234,6 +216,7 @@ function App() {
         <ScrollToTop />
         <Suspense fallback={<RouteLoadingFallback />}>
         <RouteTransition>
+        <AuthQueryParamHandler />
         <Routes>
           <Route path="/" element={<RouteErrorBoundary><Suspense fallback={<DashboardSkeleton />}><RootRoute /></Suspense></RouteErrorBoundary>} />
           <Route path="/health" element={<Health />} />
@@ -288,7 +271,7 @@ function App() {
           {import.meta.env.DEV && (
             <Route path="/dev/mood-checkin" element={<MoodCheckInPreview />} />
           )}
-          <Route path="/login" element={<ComingSoon title="Log In" />} />
+          <Route path="/login" element={<Navigate to="/?auth=login" replace />} />
           <Route path="/register" element={<RouteErrorBoundary><Suspense fallback={null}><RegisterPage /></Suspense></RouteErrorBoundary>} />
           <Route path="/community-guidelines" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><CommunityGuidelines /></Suspense></RouteErrorBoundary>} />
           <Route path="/terms-of-service" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><TermsOfServicePage /></Suspense></RouteErrorBoundary>} />
