@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -10,6 +10,7 @@ import type { ParsedVerseReference } from '@/lib/parse-verse-references'
 import type { AuthContextValue } from '@/contexts/AuthContext'
 import type { Note } from '@/types/bible'
 import { NoteStorageFullError } from '@/lib/bible/notes/store'
+import { addCard, removeCard, _resetForTesting } from '@/lib/memorize'
 
 const { mockAuthFn } = vi.hoisted(() => {
   const mockAuthFn = vi.fn((): AuthContextValue => ({
@@ -75,6 +76,8 @@ function renderActions(
 }
 
 beforeEach(() => {
+  localStorage.clear()
+  _resetForTesting()
   mockAuthFn.mockReturnValue({
     isAuthenticated: false,
     user: null,
@@ -232,5 +235,81 @@ describe('VerseCardActions', () => {
     expect(screen.getByPlaceholderText('Add a note about this verse...')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Cancel/i }))
     expect(screen.queryByPlaceholderText('Add a note about this verse...')).not.toBeInTheDocument()
+  })
+
+  it('renders Memorize button', () => {
+    renderActions()
+    expect(screen.getByRole('button', { name: /Memorize this verse/i })).toBeInTheDocument()
+  })
+
+  it('Memorize button has aria-pressed="false" initially', () => {
+    renderActions()
+    expect(screen.getByRole('button', { name: /Memorize this verse/i })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('clicking Memorize adds card to store and shows Memorized', async () => {
+    const user = userEvent.setup()
+    renderActions()
+    await user.click(screen.getByRole('button', { name: /Memorize this verse/i }))
+    const btn = screen.getByRole('button', { name: /Remove from memorization deck/i })
+    expect(btn).toBeInTheDocument()
+    expect(btn).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('clicking Memorized removes card from store', async () => {
+    addCard({
+      book: 'romans',
+      bookName: 'Romans',
+      chapter: 8,
+      startVerse: 28,
+      endVerse: 28,
+      verseText: VERSE.text,
+      reference: VERSE.reference,
+    })
+    const user = userEvent.setup()
+    renderActions()
+    const btn = screen.getByRole('button', { name: /Remove from memorization deck/i })
+    expect(btn).toHaveAttribute('aria-pressed', 'true')
+    await user.click(btn)
+    expect(screen.getByRole('button', { name: /Memorize this verse/i })).toBeInTheDocument()
+  })
+
+  it('BB-45: store mutation after mount updates Memorize button (cross-mount sync)', async () => {
+    renderActions()
+    expect(screen.getByRole('button', { name: /Memorize this verse/i })).toBeInTheDocument()
+    act(() => {
+      addCard({
+        book: 'romans',
+        bookName: 'Romans',
+        chapter: 8,
+        startVerse: 28,
+        endVerse: 28,
+        verseText: VERSE.text,
+        reference: VERSE.reference,
+      })
+    })
+    expect(await screen.findByRole('button', { name: /Remove from memorization deck/i })).toBeInTheDocument()
+  })
+
+  it('Memorize button is NOT auth-gated (logged-out user can memorize)', async () => {
+    // Default beforeEach: isAuthenticated = false
+    const user = userEvent.setup()
+    renderActions()
+    await user.click(screen.getByRole('button', { name: /Memorize this verse/i }))
+    expect(screen.queryByText(/sign in/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Remove from memorization deck/i })).toBeInTheDocument()
+  })
+
+  it('renders four action buttons in correct order: Highlight, Memorize, Save note, Share', () => {
+    renderActions()
+    const buttons = screen.getAllByRole('button')
+    const names = buttons.map((b) => b.getAttribute('aria-label') ?? b.textContent?.trim())
+    const highlightIdx = names.findIndex((n) => /Highlight in Bible/i.test(n ?? ''))
+    const memorizeIdx = names.findIndex((n) => /Memorize this verse/i.test(n ?? ''))
+    const saveNoteIdx = names.findIndex((n) => /Save note/i.test(n ?? ''))
+    const shareIdx = names.findIndex((n) => /Share/i.test(n ?? ''))
+    expect(highlightIdx).toBeLessThan(memorizeIdx)
+    expect(memorizeIdx).toBeLessThan(saveNoteIdx)
+    expect(saveNoteIdx).toBeLessThan(shareIdx)
   })
 })

@@ -90,11 +90,15 @@ describe('AskPage — Shell Structure', () => {
     expect(offenders.length).toBe(0)
   })
 
-  it('renders GlowBackground orbs (≥3)', () => {
+  it('renders BackgroundCanvas wrapper', () => {
     const { container } = renderAskPage()
-    // GlowBackground variant="fullPage" renders 5 orbs; assert ≥3 for safety margin.
+    expect(container.querySelector('[data-testid="background-canvas"]')).toBeInTheDocument()
+  })
+
+  it('does not render any GlowBackground orbs', () => {
+    const { container } = renderAskPage()
     const orbs = container.querySelectorAll('[data-testid="glow-orb"]')
-    expect(orbs.length).toBeGreaterThanOrEqual(3)
+    expect(orbs.length).toBe(0)
   })
 })
 
@@ -203,6 +207,19 @@ describe('AskPage — Submit Button', () => {
     const button = screen.getByRole('button', { name: 'Find Answers' })
     expect(button).not.toBeDisabled()
   })
+
+  it('submit button has aria-label "Find Answers" when idle', () => {
+    renderAskPage()
+    expect(screen.getByRole('button', { name: 'Find Answers' })).toBeInTheDocument()
+  })
+
+  it('submit button is disabled when whitespace-only text is entered', async () => {
+    const user = userEvent.setup()
+    renderAskPage()
+    await user.type(screen.getByLabelText('Your question'), '   ')
+    const button = screen.getByRole('button', { name: 'Find Answers' })
+    expect(button).toBeDisabled()
+  })
 })
 
 describe('AskPage — Crisis Banner', () => {
@@ -286,6 +303,29 @@ describe('AskPage — Loading State', () => {
     renderAskPage()
     const liveRegion = document.querySelector('[aria-live="polite"]')
     expect(liveRegion).toBeInTheDocument()
+  })
+
+  it('loading region has role="status" and aria-busy="true"', () => {
+    fillAndSubmit()
+    const loadingRegion = document.querySelector('[role="status"][aria-busy="true"]')
+    expect(loadingRegion).toBeInTheDocument()
+  })
+
+  it('loading region contains sr-only text announcement', () => {
+    fillAndSubmit()
+    const loadingRegion = document.querySelector('[role="status"][aria-busy="true"]')
+    expect(loadingRegion).toBeInTheDocument()
+    const srOnly = loadingRegion?.querySelector('.sr-only')
+    expect(srOnly).toBeInTheDocument()
+    expect(srOnly?.textContent).toContain('Searching')
+  })
+
+  it('visible loading text has aria-hidden="true"', () => {
+    fillAndSubmit()
+    const hiddenText = document.querySelector(
+      '[aria-hidden="true"]'
+    )
+    expect(hiddenText).toBeInTheDocument()
   })
 })
 
@@ -380,6 +420,102 @@ describe('AskPage — Response Display', () => {
       .getByText('What Scripture Says')
       .closest('.motion-safe\\:animate-fade-in-up')
     expect(responseSection).toBeInTheDocument()
+  })
+})
+
+describe('AskPage — Focus Management on Response Arrival (Spec 9 a11y win 2)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    // jsdom doesn't implement scrollIntoView; stub before the 100ms scroll/focus timer fires.
+    Element.prototype.scrollIntoView = vi.fn()
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: true,
+      user: { name: 'Test User', id: 'test-user-id' },
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('moves focus to the latest response heading after a response arrives', async () => {
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'Why does God allow suffering?' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    await flushAskPromise()
+    // Advance past the 100ms setTimeout in handleSubmit that runs scrollIntoView + focus
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+    const heading = screen.getByRole('heading', { level: 2, name: 'What Scripture Says' })
+    expect(heading).toHaveAttribute('id', 'latest-response-heading')
+    expect(document.activeElement).toBe(heading)
+  })
+
+  it('still calls scrollIntoView for visual continuity alongside the focus move', async () => {
+    const scrollSpy = vi.spyOn(Element.prototype, 'scrollIntoView')
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'Why does God allow suffering?' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    await flushAskPromise()
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+    expect(scrollSpy).toHaveBeenCalled()
+  })
+})
+
+describe('AskPage — Submit Button Defensive Disabled (Spec 9 a11y win 3)', () => {
+  // The submit button has `disabled={!text.trim() || isLoading}` and
+  // `aria-label={isLoading ? 'Searching Scripture' : 'Find Answers'}` per Spec 9 a11y win 3.
+  // The `showInput = conversation.length === 0 && !isLoading` guard at AskPage.tsx:241
+  // unmounts the button while loading, so the loading branch of these bindings is not
+  // reachable from a normal render flow today. The defensive binding is preserved as
+  // belt-and-suspenders for any future spec that keeps the button visible during loading.
+  // The tests below pin the idle branch behaviour and confirm the unmount guard works.
+
+  beforeEach(() => {
+    mockAuthFn.mockReturnValue({
+      isAuthenticated: true,
+      user: { name: 'Test User', id: 'test-user-id' },
+      login: vi.fn(),
+      logout: vi.fn(),
+    })
+  })
+
+  it('idle: aria-label is "Find Answers" and disabled reflects !text.trim()', async () => {
+    const user = userEvent.setup()
+    renderAskPage()
+    const button = screen.getByRole('button', { name: 'Find Answers' })
+    expect(button).toHaveAttribute('aria-label', 'Find Answers')
+    expect(button).toBeDisabled()
+    await user.type(screen.getByLabelText('Your question'), 'a real question')
+    expect(button).toHaveAttribute('aria-label', 'Find Answers')
+    expect(button).not.toBeDisabled()
+  })
+
+  it('on submit: showInput guard unmounts the button (no orphaned button with stale aria-label)', () => {
+    vi.useFakeTimers()
+    Element.prototype.scrollIntoView = vi.fn()
+    renderAskPage()
+    fireEvent.change(screen.getByLabelText('Your question'), {
+      target: { value: 'test question' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Find Answers' }))
+    // isLoading=true → showInput=false → entire input section unmounts.
+    // Asserting on the stricter superset (Find Answers OR Searching Scripture) catches
+    // any future regression where the defensive aria-label fires but showInput stays true.
+    expect(
+      screen.queryByRole('button', { name: /Find Answers|Searching Scripture/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Your question')).not.toBeInTheDocument()
+    vi.useRealTimers()
   })
 })
 

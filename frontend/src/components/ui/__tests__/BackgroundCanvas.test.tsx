@@ -28,4 +28,9 @@ describe('BackgroundCanvas', () => {
     expect(root.className).toContain('min-h-screen')
     expect(root.className).toContain('overflow-hidden')
   })
+
+  it('exposes data-testid="background-canvas" on the root', () => {
+    const { container } = render(<BackgroundCanvas>x</BackgroundCanvas>)
+    expect(container.firstElementChild?.getAttribute('data-testid')).toBe('background-canvas')
+  })
 })

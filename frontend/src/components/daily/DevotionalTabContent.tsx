@@ -283,20 +283,29 @@ export function DevotionalTabContent({
               <p className="text-xl font-medium leading-[1.5] text-white sm:text-2xl mb-5">
                 {devotional.reflectionQuestion.replace('Something to think about today: ', '')}
               </p>
-              <Button
-                variant="subtle"
-                size="sm"
-                type="button"
-                onClick={() => {
-                  const reflectionQuestion = devotional.reflectionQuestion.replace(
-                    'Something to think about today: ',
-                    '',
-                  )
-                  onSwitchToJournal?.(devotional.theme, reflectionQuestion, buildSnapshot())
-                }}
-              >
-                Journal about this question &rarr;
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="subtle"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    const reflectionQuestion = devotional.reflectionQuestion.replace(
+                      'Something to think about today: ',
+                      '',
+                    )
+                    onSwitchToJournal?.(devotional.theme, reflectionQuestion, buildSnapshot())
+                  }}
+                >
+                  Journal about this question &rarr;
+                </Button>
+                <Button variant="subtle" size="sm" asChild>
+                  <Link
+                    to={`/ask?q=${encodeURIComponent(devotional.reflectionQuestion.replace('Something to think about today: ', ''))}`}
+                  >
+                    Ask about this &rarr;
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
 

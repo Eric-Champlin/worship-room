@@ -21,6 +21,7 @@ export type VerseAction =
   | 'memorize'
   | 'copy'
   | 'copy-with-ref'
+  | 'ask'
 
 export type VerseActionCategory = 'primary' | 'secondary'
 

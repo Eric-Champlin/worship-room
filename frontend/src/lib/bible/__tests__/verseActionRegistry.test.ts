@@ -68,11 +68,11 @@ function createMockContext(): VerseActionContext {
 
 describe('verseActionRegistry', () => {
   describe('registry structure', () => {
-    it('exports all 13 actions (4 primary + 9 secondary)', () => {
+    it('exports all 14 actions (4 primary + 10 secondary)', () => {
       const all = getAllActions()
-      expect(all).toHaveLength(13)
+      expect(all).toHaveLength(14)
       expect(getPrimaryActions()).toHaveLength(4)
-      expect(getSecondaryActions()).toHaveLength(9)
+      expect(getSecondaryActions()).toHaveLength(10)
     })
 
     it('getActionByType returns correct handler', () => {
@@ -176,14 +176,14 @@ describe('verseActionRegistry', () => {
       expect(element).not.toBeUndefined()
     })
 
-    it('appears in SECONDARY_ACTIONS immediately after explain and before memorize', () => {
+    it('appears in SECONDARY_ACTIONS immediately after explain and before ask (Spec 9 inserted ask between reflect and memorize)', () => {
       const secondary = getSecondaryActions()
       const explainIdx = secondary.findIndex((a) => a.action === 'explain')
       const reflectIdx = secondary.findIndex((a) => a.action === 'reflect')
-      const memorizeIdx = secondary.findIndex((a) => a.action === 'memorize')
+      const askIdx = secondary.findIndex((a) => a.action === 'ask')
       expect(explainIdx).toBeGreaterThanOrEqual(0)
       expect(reflectIdx).toBe(explainIdx + 1)
-      expect(memorizeIdx).toBe(reflectIdx + 1)
+      expect(askIdx).toBe(reflectIdx + 1)
     })
 
     it('onInvoke is a no-op (sub-view opens via renderSubView contract)', () => {
@@ -207,6 +207,46 @@ describe('verseActionRegistry', () => {
       expect(explain.sublabel).toBe('Understand the context')
       expect(explain.category).toBe('secondary')
       expect(explain.hasSubView).toBe(true)
+    })
+  })
+
+  describe('ask action (Spec 9)', () => {
+    it('is registered in the secondary actions category', () => {
+      const ask = getActionByType('ask')
+      expect(ask).toBeDefined()
+      expect(ask!.category).toBe('secondary')
+    })
+
+    it('has correct label, sublabel, and hasSubView', () => {
+      const ask = getActionByType('ask')!
+      expect(ask.label).toBe('Ask about this')
+      expect(ask.sublabel).toBe('Open in AI Bible Chat')
+      expect(ask.hasSubView).toBe(false)
+    })
+
+    it('is always available', () => {
+      const ask = getActionByType('ask')!
+      expect(ask.isAvailable(SINGLE_VERSE)).toBe(true)
+      expect(ask.isAvailable(MULTI_VERSE)).toBe(true)
+    })
+
+    it('appears between reflect and memorize in SECONDARY_ACTIONS', () => {
+      const secondary = getSecondaryActions()
+      const reflectIdx = secondary.findIndex((a) => a.action === 'reflect')
+      const askIdx = secondary.findIndex((a) => a.action === 'ask')
+      const memorizeIdx = secondary.findIndex((a) => a.action === 'memorize')
+      expect(askIdx).toBe(reflectIdx + 1)
+      expect(memorizeIdx).toBe(askIdx + 1)
+    })
+
+    it('onInvoke calls closeSheet with navigating:true and navigate to /ask URL', () => {
+      const ask = getActionByType('ask')!
+      const ctx = createMockContext()
+      ask.onInvoke(SINGLE_VERSE, ctx)
+      expect(ctx.closeSheet).toHaveBeenCalledWith({ navigating: true })
+      expect(ctx.navigate).toHaveBeenCalledWith(expect.stringContaining('/ask?'))
+      const navArg: string = (ctx.navigate as ReturnType<typeof vi.fn>).mock.calls[0][0]
+      expect(navArg).toContain('John+3%3A16')
     })
   })
 

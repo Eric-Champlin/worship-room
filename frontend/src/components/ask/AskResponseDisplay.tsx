@@ -6,6 +6,7 @@ import { LinkedAnswerText } from '@/components/ask/LinkedAnswerText'
 import { VerseCardActions } from '@/components/ask/VerseCardActions'
 import { DigDeeperSection } from '@/components/ask/DigDeeperSection'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { Button } from '@/components/ui/Button'
 import { parseVerseReferences } from '@/lib/parse-verse-references'
 import { useScrollReveal, staggerDelay } from '@/hooks/useScrollReveal'
 import type { AskResponse } from '@/types/ask'
@@ -15,6 +16,7 @@ interface AskResponseDisplayProps {
   isFirstResponse: boolean
   onFollowUpClick: (question: string) => void
   isLoading?: boolean
+  isLatestResponse?: boolean
   // First-response-only props
   onAskAnother?: () => void
   onJournal?: () => void
@@ -30,6 +32,7 @@ export function AskResponseDisplay({
   isFirstResponse,
   onFollowUpClick,
   isLoading,
+  isLatestResponse,
   onAskAnother,
   onJournal,
   onPray,
@@ -59,7 +62,13 @@ export function AskResponseDisplay({
       </FrostedCard>
 
       {/* What Scripture Says */}
-      <h2 className="mb-4 text-xl font-semibold text-white">What Scripture Says</h2>
+      <h2
+        id={isLatestResponse ? 'latest-response-heading' : undefined}
+        tabIndex={isLatestResponse ? -1 : undefined}
+        className="mb-4 text-xl font-semibold text-white focus:outline-none"
+      >
+        What Scripture Says
+      </h2>
       <div ref={versesReveal.ref as RefObject<HTMLDivElement>} className="space-y-4">
         {response.verses.map((verse, i) => {
           const parsed = parseVerseReferences(verse.reference)[0] ?? null
@@ -132,45 +141,39 @@ export function AskResponseDisplay({
               <RefreshCw className="h-4 w-4" aria-hidden="true" />
               Ask another question
             </button>
-            <button
+            <Button
               type="button"
+              variant="subtle"
+              size="md"
               onClick={onJournal}
-              className={cn(
-                'scroll-reveal',
-                actionsReveal.isVisible && 'is-visible',
-                'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]',
-              )}
+              className={cn('scroll-reveal', actionsReveal.isVisible && 'is-visible')}
               style={staggerDelay(1, 50)}
             >
               <BookOpen className="h-4 w-4" aria-hidden="true" />
               Journal about this
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="subtle"
+              size="md"
               onClick={onPray}
-              className={cn(
-                'scroll-reveal',
-                actionsReveal.isVisible && 'is-visible',
-                'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]',
-              )}
+              className={cn('scroll-reveal', actionsReveal.isVisible && 'is-visible')}
               style={staggerDelay(2, 50)}
             >
               <Heart className="h-4 w-4" aria-hidden="true" />
               Pray about this
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="subtle"
+              size="md"
               onClick={onShare}
-              className={cn(
-                'scroll-reveal',
-                actionsReveal.isVisible && 'is-visible',
-                'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-colors duration-base motion-reduce:transition-none hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]',
-              )}
+              className={cn('scroll-reveal', actionsReveal.isVisible && 'is-visible')}
               style={staggerDelay(3, 50)}
             >
               <Share2 className="h-4 w-4" aria-hidden="true" />
               Share
-            </button>
+            </Button>
           </div>
 
           {/* Feedback row — first response only */}

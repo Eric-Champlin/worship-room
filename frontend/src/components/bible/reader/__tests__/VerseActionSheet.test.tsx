@@ -26,8 +26,9 @@ vi.mock('@/hooks/useFocusTrap', () => ({
   },
 }))
 
+const { mockNavigate } = vi.hoisted(() => ({ mockNavigate: vi.fn() }))
 vi.mock('react-router-dom', () => ({
-  useNavigate: () => vi.fn(),
+  useNavigate: () => mockNavigate,
 }))
 
 vi.mock('@/data/bible', () => ({
@@ -143,13 +144,14 @@ describe('VerseActionSheet', () => {
     expect(screen.getByLabelText('Share')).toBeInTheDocument()
   })
 
-  it('renders 8 secondary action items', () => {
+  it('renders secondary action items including Ask about this', () => {
     renderSheet()
     expect(screen.getByLabelText('Pray about this')).toBeInTheDocument()
     expect(screen.getByLabelText('Journal about this')).toBeInTheDocument()
     expect(screen.getByLabelText('Meditate on this')).toBeInTheDocument()
     expect(screen.getByLabelText('Cross-references')).toBeInTheDocument()
     expect(screen.getByLabelText('Explain this passage')).toBeInTheDocument()
+    expect(screen.getByLabelText('Ask about this')).toBeInTheDocument()
     expect(screen.getByLabelText('Memorize')).toBeInTheDocument()
     expect(screen.getByLabelText('Copy')).toBeInTheDocument()
     expect(screen.getByLabelText('Copy with reference')).toBeInTheDocument()
@@ -246,5 +248,23 @@ describe('VerseActionSheet', () => {
     // The badge component renders asynchronously, so we just verify the row exists
     const crossRefsBtn = screen.getByLabelText('Cross-references')
     expect(crossRefsBtn).toBeInTheDocument()
+  })
+
+  it('Ask about this click calls onClose with navigating:true', () => {
+    const onClose = vi.fn()
+    renderSheet({ onClose })
+    fireEvent.click(screen.getByLabelText('Ask about this'))
+    expect(onClose).toHaveBeenCalledWith({ navigating: true })
+  })
+
+  it('Ask about this click navigates to /ask?q=<encoded prefilled question>', () => {
+    renderSheet()
+    fireEvent.click(screen.getByLabelText('Ask about this'))
+    expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/ask?q='))
+    const navArg = mockNavigate.mock.calls[0][0] as string
+    // Decoded q param contains the canonical "Help me understand <ref>: \"<text>\"" template
+    const q = new URLSearchParams(navArg.slice(navArg.indexOf('?'))).get('q')
+    expect(q).toContain('Help me understand')
+    expect(q).toContain('John 3:16')
   })
 })

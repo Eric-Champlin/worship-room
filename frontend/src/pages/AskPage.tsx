@@ -4,7 +4,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
-import { GlowBackground } from '@/components/homepage/GlowBackground'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
 import { UserQuestionBubble } from '@/components/ask/UserQuestionBubble'
@@ -86,15 +86,19 @@ export function AskPage() {
       setPendingQuestion(null)
       setIsLoading(false)
 
-      // Auto-scroll to new response
+      // Auto-scroll to new response and move focus to heading for screen readers
       scrollTimerRef.current = setTimeout(() => {
         const reducedMotion =
           typeof window !== 'undefined' &&
           window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-        document.getElementById('latest-response')?.scrollIntoView({
+        const target =
+          document.getElementById('latest-response-heading') ??
+          document.getElementById('latest-response')
+        target?.scrollIntoView({
           behavior: reducedMotion ? 'auto' : 'smooth',
           block: 'start',
         })
+        ;(target as HTMLElement | null)?.focus({ preventScroll: true })
       }, 100)
     })
   }
@@ -163,10 +167,14 @@ export function AskPage() {
         const reducedMotion =
           typeof window !== 'undefined' &&
           window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-        document.getElementById('latest-response')?.scrollIntoView({
+        const target =
+          document.getElementById('latest-response-heading') ??
+          document.getElementById('latest-response')
+        target?.scrollIntoView({
           behavior: reducedMotion ? 'auto' : 'smooth',
           block: 'start',
         })
+        ;(target as HTMLElement | null)?.focus({ preventScroll: true })
       }, 100)
     })
   }
@@ -245,7 +253,7 @@ export function AskPage() {
   return (
     <Layout transparentNav>
       <SEO {...ASK_METADATA} />
-      <GlowBackground variant="fullPage">
+      <BackgroundCanvas>
         <section
           aria-labelledby="ask-hero-heading"
           className="px-4 pt-32 pb-10 text-center sm:px-6 sm:pt-40 sm:pb-12"
@@ -282,7 +290,7 @@ export function AskPage() {
                   rows={3}
                   aria-label="Your question"
                   aria-describedby="ask-char-count"
-                  className="w-full resize-none rounded-lg border border-white/30 bg-white/[0.06] py-3 px-4 text-base text-white placeholder:text-white/50 shadow-[0_0_20px_3px_rgba(255,255,255,0.50),0_0_40px_8px_rgba(255,255,255,0.30)] transition-[border-color,box-shadow] duration-base motion-reduce:transition-none focus:border-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                  className="w-full resize-none rounded-lg border border-violet-400/30 bg-white/[0.04] py-3 px-4 text-base text-white placeholder:text-white/40 shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] transition-[border-color,box-shadow] duration-base motion-reduce:transition-none focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
                 />
                 <CharacterCount current={charCount} max={ASK_MAX_LENGTH} warningAt={400} dangerAt={480} visibleAt={300} id="ask-char-count" className="absolute bottom-2 right-3" />
               </div>
@@ -317,7 +325,8 @@ export function AskPage() {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={!text.trim()}
+                  disabled={!text.trim() || isLoading}
+                  aria-label={isLoading ? 'Searching Scripture' : 'Find Answers'}
                   className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all motion-reduce:transition-none duration-base hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
                 >
                   Find Answers
@@ -342,6 +351,7 @@ export function AskPage() {
                   <AskResponseDisplay
                     response={pair.response}
                     isFirstResponse={index === 0}
+                    isLatestResponse={index === conversation.length - 1}
                     onFollowUpClick={handleFollowUpClick}
                     isLoading={isLoading}
                     onAskAnother={handleAskAnother}
@@ -367,7 +377,8 @@ export function AskPage() {
                     <UserQuestionBubble question={pendingQuestion} />
                   </div>
                 )}
-                <div className="flex flex-col items-center justify-center py-16">
+                <div role="status" aria-busy="true" className="flex flex-col items-center justify-center py-16">
+                  <span className="sr-only">Searching Scripture for wisdom</span>
                   <div className="mb-4 flex gap-1">
                     <div className="h-2 w-2 motion-safe:animate-bounce motion-reduce:animate-none rounded-full bg-white/80" />
                     <div
@@ -379,8 +390,8 @@ export function AskPage() {
                       style={{ animationDelay: '300ms' }}
                     />
                   </div>
-                  <p className="text-white">Searching Scripture for wisdom...</p>
-                  <p className="mt-4 font-serif text-white/80">
+                  <p aria-hidden="true" className="text-white">Searching Scripture for wisdom...</p>
+                  <p aria-hidden="true" className="mt-4 font-serif text-white/80">
                     &ldquo;Your word is a lamp to my feet and a light for my path.&rdquo;
                     <span className="mt-1 block text-sm text-white/60">
                       &mdash; Psalm 119:105 WEB
@@ -399,7 +410,7 @@ export function AskPage() {
           {/* Save conversation button — after 2+ Q&A pairs (logged-in only) */}
           {isAuthenticated && <SaveConversationButton conversation={conversation} />}
         </section>
-      </GlowBackground>
+      </BackgroundCanvas>
     </Layout>
   )
 }

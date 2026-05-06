@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Highlighter, StickyNote, Share2 } from 'lucide-react'
+import { Highlighter, StickyNote, Share2, Layers } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { getNoteForVerse, upsertNote, NoteStorageFullError } from '@/lib/bible/notes/store'
@@ -8,6 +8,8 @@ import { useToast } from '@/components/ui/Toast'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { SharePanel } from '@/components/sharing/SharePanel'
 import { NOTE_BODY_MAX_CHARS } from '@/constants/bible'
+import { useMemorizationStore } from '@/hooks/bible/useMemorizationStore'
+import { addCard, removeCard } from '@/lib/memorize'
 import type { AskVerse } from '@/types/ask'
 import type { ParsedVerseReference } from '@/lib/parse-verse-references'
 
@@ -24,6 +26,18 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
   const [showNoteInput, setShowNoteInput] = useState(false)
   const [noteText, setNoteText] = useState('')
   const [showSharePanel, setShowSharePanel] = useState(false)
+
+  const cards = useMemorizationStore()
+  const memorizationCard = parsedRef
+    ? cards.find(
+        (c) =>
+          c.book === parsedRef.bookSlug &&
+          c.chapter === parsedRef.chapter &&
+          c.startVerse === parsedRef.verseStart &&
+          c.endVerse === (parsedRef.verseEnd ?? parsedRef.verseStart),
+      )
+    : undefined
+  const isMemorized = !!memorizationCard
 
   // Pre-fill with existing note when expanding
   useEffect(() => {
@@ -81,9 +95,27 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
     setNoteText('')
   }
 
+  const handleMemorizeToggle = () => {
+    if (isMemorized && memorizationCard) {
+      removeCard(memorizationCard.id)
+      showToast('Removed from memorization deck')
+    } else {
+      addCard({
+        book: parsedRef.bookSlug,
+        bookName: parsedRef.book,
+        chapter: parsedRef.chapter,
+        startVerse: parsedRef.verseStart,
+        endVerse: parsedRef.verseEnd ?? parsedRef.verseStart,
+        verseText: verse.text,
+        reference: verse.reference,
+      })
+      showToast('Added to memorization deck')
+    }
+  }
+
   return (
     <>
-      <div className="mt-3 flex gap-3">
+      <div className="mt-3 flex flex-wrap gap-3">
         <button
           type="button"
           onClick={handleHighlight}
@@ -91,6 +123,16 @@ export function VerseCardActions({ verse, parsedRef }: VerseCardActionsProps) {
         >
           <Highlighter className="h-3.5 w-3.5" aria-hidden="true" />
           Highlight in Bible
+        </button>
+        <button
+          type="button"
+          onClick={handleMemorizeToggle}
+          aria-pressed={isMemorized}
+          aria-label={isMemorized ? 'Remove from memorization deck' : 'Memorize this verse'}
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-xs font-medium text-white/80 transition-colors duration-base motion-reduce:transition-none hover:text-white"
+        >
+          <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+          {isMemorized ? 'Memorized' : 'Memorize'}
         </button>
         <button
           type="button"

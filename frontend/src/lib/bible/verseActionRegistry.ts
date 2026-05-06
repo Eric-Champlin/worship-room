@@ -13,6 +13,7 @@ import {
   Layers,
   Copy,
   ClipboardCopy,
+  MessageCircle,
 } from 'lucide-react'
 import { CrossRefsSubView, CrossRefBadge } from '@/components/bible/reader/CrossRefsSubView'
 import { ExplainSubView } from '@/components/bible/reader/ExplainSubView'
@@ -43,6 +44,7 @@ import { getNoteForVerse } from '@/lib/bible/notes/store'
 import { NoteEditorSubView } from '@/components/bible/reader/NoteEditorSubView'
 import { ShareSubView } from '@/components/bible/reader/ShareSubView'
 import { buildDailyHubVerseUrl } from '@/lib/bible/verseActions/buildDailyHubVerseUrl'
+import { buildAskUrl } from '@/lib/bible/verseActions/buildAskUrl'
 import {
   isCardForVerse,
   getCardForVerse,
@@ -375,6 +377,21 @@ const reflect: VerseActionHandler = {
   onInvoke: () => {},
 }
 
+const ask: VerseActionHandler = {
+  action: 'ask',
+  label: 'Ask about this',
+  sublabel: 'Open in AI Bible Chat',
+  icon: MessageCircle,
+  category: 'secondary',
+  hasSubView: false,
+  isAvailable: () => true,
+  onInvoke: (selection, ctx) => {
+    const url = buildAskUrl(selection)
+    ctx.closeSheet({ navigating: true })
+    ctx.navigate(url)
+  },
+}
+
 const memorize: VerseActionHandler = {
   action: 'memorize',
   label: 'Memorize',
@@ -467,6 +484,7 @@ const SECONDARY_ACTIONS: VerseActionHandler[] = [
   crossRefs,
   explain,
   reflect,
+  ask,
   memorize,
   copy,
   copyWithRef,

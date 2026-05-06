@@ -17,6 +17,7 @@ const CANVAS_BACKGROUND = `
 export function BackgroundCanvas({ children, className }: BackgroundCanvasProps) {
   return (
     <div
+      data-testid="background-canvas"
       className={cn('relative min-h-screen overflow-hidden', className)}
       style={{ background: CANVAS_BACKGROUND }}
     >

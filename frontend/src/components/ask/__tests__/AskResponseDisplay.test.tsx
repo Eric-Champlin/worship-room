@@ -131,6 +131,30 @@ describe('AskResponseDisplay', () => {
     expect(onAskAnother).toHaveBeenCalled()
   })
 
+  it('"Ask another question" retains white-pill primary chrome', () => {
+    renderDisplay({ isFirstResponse: true, onAskAnother: vi.fn() })
+    const btn = screen.getByRole('button', { name: /Ask another question/i })
+    expect(btn.className).toContain('bg-white')
+    expect(btn.className).toContain('text-primary')
+    // Must NOT have the subtle frosted chrome
+    expect(btn.className).not.toContain('bg-white/[0.07]')
+  })
+
+  it('secondary action buttons (Journal, Pray, Share) use subtle frosted chrome', () => {
+    renderDisplay({ isFirstResponse: true, onJournal: vi.fn(), onPray: vi.fn(), onShare: vi.fn() })
+    const journal = screen.getByRole('button', { name: /Journal about this/i })
+    const pray = screen.getByRole('button', { name: /Pray about this/i })
+    // VerseCardActions also has Share buttons (labeled "Share <reference>"); use exact match
+    const share = screen.getByRole('button', { name: 'Share' })
+    for (const btn of [journal, pray, share]) {
+      // Subtle variant: frosted glass background
+      expect(btn.className).toContain('bg-white/[0.07]')
+      expect(btn.className).toContain('border-white/[0.12]')
+      // NOT white pill primary chrome
+      expect(btn.className).not.toContain('text-primary')
+    }
+  })
+
   it('"Highlight in Bible" buttons render for each verse card', () => {
     renderDisplay()
     const buttons = screen.getAllByRole('button', { name: /Highlight in Bible/i })
@@ -141,5 +165,37 @@ describe('AskResponseDisplay', () => {
     renderDisplay()
     const buttons = screen.getAllByRole('button', { name: /Save note/i })
     expect(buttons).toHaveLength(3)
+  })
+
+  it('"Memorize" buttons render for each parsed verse card', () => {
+    renderDisplay()
+    const buttons = screen.getAllByRole('button', { name: /Memorize|Memorized/i })
+    expect(buttons.length).toBeGreaterThanOrEqual(1)
+  })
+})
+
+describe('AskResponseDisplay — isLatestResponse prop', () => {
+  it('adds id="latest-response-heading" to h2 when isLatestResponse=true', () => {
+    renderDisplay({ isLatestResponse: true })
+    const h2 = screen.getByRole('heading', { level: 2, name: 'What Scripture Says' })
+    expect(h2).toHaveAttribute('id', 'latest-response-heading')
+  })
+
+  it('adds tabIndex="-1" to h2 when isLatestResponse=true', () => {
+    renderDisplay({ isLatestResponse: true })
+    const h2 = screen.getByRole('heading', { level: 2, name: 'What Scripture Says' })
+    expect(h2).toHaveAttribute('tabIndex', '-1')
+  })
+
+  it('omits id from h2 when isLatestResponse=false', () => {
+    renderDisplay({ isLatestResponse: false })
+    const h2 = screen.getByRole('heading', { level: 2, name: 'What Scripture Says' })
+    expect(h2).not.toHaveAttribute('id')
+  })
+
+  it('omits id from h2 when isLatestResponse is not passed', () => {
+    renderDisplay()
+    const h2 = screen.getByRole('heading', { level: 2, name: 'What Scripture Says' })
+    expect(h2).not.toHaveAttribute('id')
   })
 })

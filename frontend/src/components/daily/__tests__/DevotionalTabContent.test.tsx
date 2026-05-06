@@ -515,6 +515,36 @@ describe('DevotionalTabContent', () => {
     })
   })
 
+  describe('Ask about this CTA (Spec 9)', () => {
+    it('renders "Ask about this" link in the reflection question section', () => {
+      renderComponent()
+      expect(screen.getByText(/Ask about this/i)).toBeInTheDocument()
+    })
+
+    it('"Ask about this" link points to /ask with q param', () => {
+      renderComponent()
+      const link = screen.getByText(/Ask about this/i).closest('a')!
+      const href = link.getAttribute('href')!
+      expect(href).toContain('/ask?')
+      expect(href).toContain('q=')
+    })
+
+    it('"Ask about this" link does not contain "Help me understand" prefix (direct reflection question)', () => {
+      renderComponent()
+      const link = screen.getByText(/Ask about this/i).closest('a')!
+      const href = link.getAttribute('href')!
+      const q = new URLSearchParams(href.slice(href.indexOf('?'))).get('q')
+      // The devotional CTA passes the reflection question directly, not a "Help me understand" prefix
+      expect(q).not.toMatch(/^Help me understand/)
+    })
+
+    it('"Ask about this" and "Journal about this question" are both in the reflection section', () => {
+      renderComponent()
+      expect(screen.getByText(/Ask about this/i)).toBeInTheDocument()
+      expect(screen.getByText(/Journal about this question/i)).toBeInTheDocument()
+    })
+  })
+
   describe('Meditate on passage link', () => {
     it('renders "Meditate on this passage" link in passage section', () => {
       renderComponent()
