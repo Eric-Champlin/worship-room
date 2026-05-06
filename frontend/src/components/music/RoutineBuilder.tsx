@@ -135,7 +135,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
   return (
     <>
       <div
-        className="rounded-2xl border border-white/10 p-6"
+        className="rounded-2xl border border-white/[0.12] p-6"
         style={{
           background: 'rgba(15, 10, 30, 0.95)',
           backdropFilter: 'blur(16px)',
@@ -152,7 +152,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
           onChange={(e) => { setName(e.target.value.slice(0, 50)); setShowNameError(false) }}
           maxLength={50}
           placeholder="My Bedtime Routine"
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="w-full rounded-lg border border-white/[0.12] bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           aria-invalid={showNameError ? 'true' : undefined}
           aria-describedby={showNameError ? 'routine-name-error routine-name-count' : 'routine-name-count'}
         />
@@ -178,7 +178,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
             <div role="list" className="relative space-y-3">
               {/* Connecting line */}
               {steps.length > 1 && (
-                <div className="absolute bottom-4 left-[22px] top-4 w-px bg-white/10" />
+                <div className="absolute bottom-4 left-[22px] top-4 w-px bg-white/[0.12]" />
               )}
 
               {steps.map((step, i) => (
@@ -197,7 +197,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
                           handleGapChange(i, Number(e.target.value) || 0)
                         }
                         aria-label={`Transition gap before step ${i + 1} in minutes`}
-                        className="w-12 rounded border border-white/10 bg-white/5 px-2 py-0.5 text-center text-xs text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                        className="w-12 rounded border border-white/[0.12] bg-white/5 px-2 py-0.5 text-center text-xs text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                       />
                       <span className="text-xs text-white/60">min</span>
                     </div>
@@ -271,7 +271,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
               id="routine-sleep-timer"
               value={sleepDuration}
               onChange={(e) => setSleepDuration(Number(e.target.value))}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full rounded-lg border border-white/[0.12] bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               {AUDIO_CONFIG.SLEEP_TIMER_OPTIONS.map((opt) => (
                 <option key={opt} value={opt} className="bg-hero-dark">
@@ -288,7 +288,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
               id="routine-fade-duration"
               value={fadeDuration}
               onChange={(e) => setFadeDuration(Number(e.target.value))}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full rounded-lg border border-white/[0.12] bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               {AUDIO_CONFIG.FADE_DURATION_OPTIONS.map((opt) => (
                 <option key={opt} value={opt} className="bg-hero-dark">
@@ -304,7 +304,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-white/20 px-6 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            className="min-h-[44px] rounded-lg border border-white/20 px-6 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
             Cancel
           </button>
@@ -312,7 +312,7 @@ export function RoutineBuilder({ initial, onSave, onCancel }: RoutineBuilderProp
             type="button"
             onClick={handleSave}
             disabled={steps.length === 0}
-            className="rounded-lg bg-primary px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
           >
             Save Routine
           </button>

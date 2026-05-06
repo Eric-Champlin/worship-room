@@ -67,11 +67,11 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative flex max-h-[90vh] w-full flex-col rounded-t-2xl border border-white/10 sm:mx-4 sm:max-w-2xl sm:rounded-2xl"
+        className="relative flex max-h-[90vh] w-full flex-col rounded-t-2xl border border-white/[0.12] sm:mx-4 sm:max-w-2xl sm:rounded-2xl"
         style={{ background: 'rgba(15, 10, 30, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-white/[0.12] px-5 py-4">
           <h2 id={titleId} className="text-lg font-semibold text-white">
             Choose Content
           </h2>
@@ -86,7 +86,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
         </div>
 
         {/* Tabs */}
-        <div role="tablist" aria-label="Content type" className="flex border-b border-white/10 px-5">
+        <div role="tablist" aria-label="Content type" className="flex border-b border-white/[0.12] px-5">
           {TAB_KEYS.map((key, index) => {
             const { label, Icon } = TAB_CONFIG[key]
             const isActive = activeTab === key
@@ -106,7 +106,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                 onKeyDown={(e) => handleTabKeyDown(e, index)}
                 className={`flex items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70 ${
                   isActive
-                    ? 'border-primary text-primary'
+                    ? 'border-white/30 text-white'
                     : 'border-transparent text-white/60 hover:text-white'
                 }`}
               >
@@ -131,7 +131,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                   key={scene.id}
                   type="button"
                   onClick={() => onSelect('scene', scene.id, scene.name)}
-                  className="rounded-lg border border-white/10 p-4 text-left transition-colors hover:border-primary hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                  className="rounded-lg border border-white/[0.12] p-4 text-left transition-colors hover:border-white/[0.18] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
                   <p className="font-medium text-white">{scene.name}</p>
                   <p className="mt-1 line-clamp-2 text-xs text-white/60">
@@ -160,7 +160,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                         onClick={() =>
                           onSelect('scripture', reading.id, reading.title)
                         }
-                        className="rounded-lg border border-white/10 p-3 text-left transition-colors hover:border-primary hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                        className="rounded-lg border border-white/[0.12] p-3 text-left transition-colors hover:border-white/[0.18] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                       >
                         <p className="text-sm font-medium text-white">
                           {reading.title}
@@ -183,7 +183,7 @@ export function ContentPicker({ type, onSelect, onClose }: ContentPickerProps) {
                   key={story.id}
                   type="button"
                   onClick={() => onSelect('story', story.id, story.title)}
-                  className="rounded-lg border border-white/10 p-4 text-left transition-colors hover:border-primary hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                  className="rounded-lg border border-white/[0.12] p-4 text-left transition-colors hover:border-white/[0.18] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
                 >
                   <p className="font-medium text-white">{story.title}</p>
                   <p className="mt-1 line-clamp-2 text-xs text-white/60">

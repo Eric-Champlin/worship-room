@@ -105,7 +105,7 @@ export function RoutineCard({
     >
       {/* Template badge */}
       {routine.isTemplate && (
-        <span className="mb-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+        <span className="mb-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-violet-300">
           Template
         </span>
       )}
@@ -145,7 +145,7 @@ export function RoutineCard({
         <button
           type="button"
           onClick={handleStart}
-          className="flex min-h-[44px] items-center gap-1.5 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
         >
           <Play size={14} fill="currentColor" aria-hidden="true" /> Start
         </button>
@@ -169,7 +169,7 @@ export function RoutineCard({
               role="menu"
               aria-label="Routine options"
               onKeyDown={handleMenuKeyDown}
-              className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-lg border border-white/10 py-1 shadow-lg"
+              className="absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-lg border border-white/[0.12] py-1 shadow-lg"
               style={{ background: 'rgba(15, 10, 30, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
             >
               {routine.isTemplate ? (

@@ -13,6 +13,7 @@ import { ROUTINE_TEMPLATES } from '@/data/music/routines'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useRoutinePlayer } from '@/hooks/useRoutinePlayer'
+import { useAudioState } from '@/components/audio/AudioProvider'
 import { useToast } from '@/components/ui/Toast'
 import { storageService } from '@/services/storage-service'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -21,7 +22,8 @@ import type { RoutineDefinition } from '@/types/storage'
 export function RoutinesPage() {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
-  const { startRoutine } = useRoutinePlayer()
+  const { startRoutine, endRoutine } = useRoutinePlayer()
+  const audioState = useAudioState()
   const { showToast } = useToast()
 
   const [userRoutines, setUserRoutines] = useState<RoutineDefinition[]>(() =>
@@ -79,6 +81,15 @@ export function RoutinesPage() {
 
   const handleDelete = () => {
     if (!deletingRoutine) return
+
+    // If the user is deleting the actively-playing routine, end it first so the
+    // AudioPill / AudioDrawer don't continue claiming "Currently in routine: <name>"
+    // against an orphaned reference. endRoutine() dispatches END_ROUTINE which clears
+    // state.activeRoutine and tears down player refs/timers via useRoutinePlayer.
+    if (audioState.activeRoutine?.routineId === deletingRoutine.id) {
+      endRoutine()
+    }
+
     storageService.deleteRoutine(deletingRoutine.id)
     refreshRoutines()
     showToast(`Deleted "${deletingRoutine.name}"`)
@@ -122,9 +133,9 @@ export function RoutinesPage() {
           className="px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
-          Bedtime <span className="font-script">Routines</span>
+          Bedtime Routines
         </h1>
-        <p className="mx-auto mt-4 max-w-lg font-serif italic text-base text-white/60 sm:text-lg">
+        <p className="mx-auto mt-4 max-w-lg text-base text-white/60 sm:text-lg">
           Build your path to peaceful sleep
         </p>
         <div className="mt-1 flex justify-center">
@@ -179,12 +190,16 @@ export function RoutinesPage() {
               ))}
             </div>
 
+            <p className="text-white/60 text-sm sm:text-base text-center mt-6 mb-4">
+              Tap a template to start, or create your own.
+            </p>
+
             {/* Create button */}
             <div className="mt-8 text-center">
               <button
                 type="button"
                 onClick={handleCreate}
-                className="rounded-lg bg-primary px-8 py-3 font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
               >
                 Create Routine
               </button>
