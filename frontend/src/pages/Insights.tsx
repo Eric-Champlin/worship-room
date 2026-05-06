@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { ArrowLeft, BarChart3 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
@@ -20,7 +20,7 @@ import { SEO } from '@/components/SEO'
 import { INSIGHTS_METADATA } from '@/lib/seo/routeMetadata'
 import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { useAuth } from '@/hooks/useAuth'
-import { getMoodEntries } from '@/services/mood-storage'
+import { InsightsDataProvider, useInsightsData } from '@/contexts/InsightsDataContext'
 import { getLocalDateString } from '@/utils/date'
 
 export type TimeRange = '30d' | '90d' | '180d' | '1y' | 'all'
@@ -118,7 +118,7 @@ function TimeRangePills({
             onClick={() => onChange(option.value)}
             className={
               selected
-                ? 'min-h-[44px] rounded-full bg-primary/20 px-4 py-2 text-sm font-medium text-primary-lt transition-colors duration-fast motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
+                ? 'min-h-[44px] rounded-full bg-white/15 border border-white/30 px-4 py-2 text-sm font-medium text-white transition-colors duration-fast motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
                 : 'min-h-[44px] rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors duration-fast hover:text-white/80 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70'
             }
           >
@@ -150,13 +150,49 @@ function AnimatedSection({
 // Loading state: use InsightsSkeleton
 export function Insights() {
   const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+  return (
+    <InsightsDataProvider>
+      <InsightsContent />
+    </InsightsDataProvider>
+  )
+}
+
+function InsightsContent() {
+  const { user } = useAuth()
   const [range, setRange] = useState<TimeRange>('30d')
   const [isSticky, setIsSticky] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
 
-  const entries = getMoodEntries()
+  const { moodEntries: entries } = useInsightsData()
   const hasData = entries.length > 0
   const rangeDays = getRangeDays(range, entries)
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good Morning'
+    if (hour < 17) return 'Good Afternoon'
+    return 'Good Evening'
+  }, [])
+
+  const greetingDisplay = user ? `${greeting}, ${user.name}!` : `${greeting}!`
+
+  const narrativeSubtitle = useMemo(() => {
+    if (entries.length === 0) return 'Your story is just beginning.'
+    // Don't assume storage ordering. Find the most recent valid timestamp.
+    let mostRecentTs = -Infinity
+    for (const e of entries) {
+      if (Number.isFinite(e.timestamp) && e.timestamp > mostRecentTs) {
+        mostRecentTs = e.timestamp
+      }
+    }
+    if (!Number.isFinite(mostRecentTs)) return 'Your story so far.'
+    const daysSinceLast = Math.floor((Date.now() - mostRecentTs) / (1000 * 60 * 60 * 24))
+    if (daysSinceLast > 14) return 'Welcome back. Your story continues.'
+    return 'Your story so far.'
+  }, [entries])
 
   useEffect(() => {
     const sentinel = sentinelRef.current
@@ -172,10 +208,6 @@ export function Insights() {
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [])
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />
-  }
 
   return (
     <div className="min-h-screen bg-dashboard-dark">
@@ -195,15 +227,16 @@ export function Insights() {
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Dashboard
         </Link>
+        <p className="mb-2 text-sm text-white/50">{greetingDisplay}</p>
         <h1
           id="insights-heading"
           className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
-          Mood <span className="font-script">Insights</span>
+          Mood Insights
         </h1>
-        <p className="font-serif italic text-base text-white/60 sm:text-lg">
-          Reflect on your journey
+        <p className="text-base text-white/60 sm:text-lg">
+          {narrativeSubtitle}
         </p>
       </section>
 

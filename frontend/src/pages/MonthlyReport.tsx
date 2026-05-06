@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SEO } from '@/components/SEO'
 import { INSIGHTS_MONTHLY_METADATA } from '@/lib/seo/routeMetadata'
@@ -15,7 +16,7 @@ import {
   getDefaultMonth,
   getEarliestMonth,
 } from '@/hooks/useMonthlyReportData'
-import { getMoodEntries } from '@/services/mood-storage'
+import { InsightsDataProvider, useInsightsData } from '@/contexts/InsightsDataContext'
 import { MonthlyStatCards } from '@/components/insights/MonthlyStatCards'
 import { MonthHeatmap } from '@/components/insights/MonthHeatmap'
 import { ActivityBarChart } from '@/components/insights/ActivityBarChart'
@@ -45,6 +46,18 @@ function AnimatedSection({
 
 export function MonthlyReport() {
   const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+  return (
+    <InsightsDataProvider>
+      <MonthlyReportContent />
+    </InsightsDataProvider>
+  )
+}
+
+function MonthlyReportContent() {
+  const { moodEntries: allEntries } = useInsightsData()
   const defaultMonth = getDefaultMonth()
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth.month)
   const [selectedYear, setSelectedYear] = useState(defaultMonth.year)
@@ -53,14 +66,7 @@ export function MonthlyReport() {
   const data = useMonthlyReportData(selectedMonth, selectedYear)
   const suggestions = getMonthlyReportSuggestions(data)
 
-  const earliest = useMemo(() => {
-    const allEntries = getMoodEntries()
-    return getEarliestMonth(allEntries)
-  }, [])
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />
-  }
+  const earliest = useMemo(() => getEarliestMonth(allEntries), [allEntries])
 
   const now = new Date()
   const isAtLatest =
@@ -107,7 +113,7 @@ export function MonthlyReport() {
           className="mb-3 px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
-          Monthly <span className="font-script">Report</span>
+          Monthly Report
         </h1>
         <div className="mt-2 flex items-center gap-3">
           <button
@@ -118,7 +124,7 @@ export function MonthlyReport() {
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
-          <span className="text-lg text-white/85 sm:text-xl">{data.monthName} {data.year}</span>
+          <span className="text-lg text-white sm:text-xl">{data.monthName} {data.year}</span>
           <button
             onClick={goToNextMonth}
             disabled={isAtLatest}
@@ -145,58 +151,78 @@ export function MonthlyReport() {
         key={`${selectedYear}-${selectedMonth}`}
         className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6 opacity-0 animate-fade-in motion-reduce:animate-none motion-reduce:opacity-100"
       >
-        <AnimatedSection index={0}>
-          <MonthlyStatCards
-            daysActive={data.daysActive}
-            daysInRange={data.daysInRange}
-            pointsEarned={data.pointsEarned}
-            startLevel={data.startLevel}
-            endLevel={data.endLevel}
-            levelProgressPct={data.levelProgressPct}
-            moodTrendPct={data.moodTrendPct}
+        {!data.hasData ? (
+          <FeatureEmptyState
+            icon={Calendar}
+            heading={
+              data.isCurrentMonth
+                ? 'This month is just beginning'
+                : `No entries yet for ${data.monthName} ${data.year}`
+            }
+            description={
+              data.isCurrentMonth
+                ? 'Check back at the end of the month for your report.'
+                : 'The report will populate as you add mood entries and journal pages.'
+            }
           />
-        </AnimatedSection>
-        <AnimatedSection index={1}>
-          <MonthHeatmap
-            month={selectedMonth}
-            year={selectedYear}
-            monthName={data.monthName}
-            entries={data.moodEntries}
-          />
-        </AnimatedSection>
-        <AnimatedSection index={2}>
-          <ActivityBarChart activityCounts={data.activityCounts} />
-        </AnimatedSection>
-        <AnimatedSection index={3}>
-          <MonthlyHighlights
-            longestStreak={data.longestStreak}
-            badgesEarned={data.badgesEarned}
-            bestDay={data.bestDay}
-          />
-        </AnimatedSection>
-        <AnimatedSection index={4}>
-          <MonthlyInsightCards />
-        </AnimatedSection>
-        {suggestions.length > 0 && (
-          <AnimatedSection index={5}>
-            <MonthlySuggestions suggestions={suggestions} />
-          </AnimatedSection>
+        ) : (
+          <>
+            {/* Share above the fold */}
+            <div className="flex flex-col items-center gap-2">
+              <MonthlyShareButton
+                monthName={data.monthName}
+                year={data.year}
+                moodEntries={data.moodEntries}
+                activityCounts={data.activityCounts}
+                longestStreak={data.longestStreak}
+              />
+              <button
+                className="inline-flex min-h-[44px] items-center text-sm text-white/50 underline hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                onClick={() => setShowEmailPreview(true)}
+              >
+                Preview Email
+              </button>
+            </div>
+
+            <AnimatedSection index={0}>
+              <MonthlyStatCards
+                daysActive={data.daysActive}
+                daysInRange={data.daysInRange}
+                pointsEarned={data.pointsEarned}
+                startLevel={data.startLevel}
+                endLevel={data.endLevel}
+                levelProgressPct={data.levelProgressPct}
+                moodTrendPct={data.moodTrendPct}
+              />
+            </AnimatedSection>
+            <AnimatedSection index={1}>
+              <MonthHeatmap
+                month={selectedMonth}
+                year={selectedYear}
+                monthName={data.monthName}
+                entries={data.moodEntries}
+              />
+            </AnimatedSection>
+            <AnimatedSection index={2}>
+              <ActivityBarChart activityCounts={data.activityCounts} />
+            </AnimatedSection>
+            <AnimatedSection index={3}>
+              <MonthlyHighlights
+                longestStreak={data.longestStreak}
+                badgesEarned={data.badgesEarned}
+                bestDay={data.bestDay}
+              />
+            </AnimatedSection>
+            <AnimatedSection index={4}>
+              <MonthlyInsightCards />
+            </AnimatedSection>
+            {suggestions.length > 0 && (
+              <AnimatedSection index={5}>
+                <MonthlySuggestions suggestions={suggestions} />
+              </AnimatedSection>
+            )}
+          </>
         )}
-        <AnimatedSection index={suggestions.length > 0 ? 6 : 5}>
-          <MonthlyShareButton
-            monthName={data.monthName}
-            year={data.year}
-            moodEntries={data.moodEntries}
-            activityCounts={data.activityCounts}
-            longestStreak={data.longestStreak}
-          />
-          <button
-            className="mt-2 mx-auto inline-flex min-h-[44px] items-center text-sm text-white/50 underline hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
-            onClick={() => setShowEmailPreview(true)}
-          >
-            Preview Email
-          </button>
-        </AnimatedSection>
       </main>
 
       <EmailPreviewModal

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { InsightCards } from '../InsightCards'
+import { InsightsDataProvider } from '@/contexts/InsightsDataContext'
 import {
   AI_INSIGHT_CARDS,
   getDayOfYear,
@@ -28,14 +29,22 @@ afterEach(() => {
 
 describe('InsightCards', () => {
   it('renders 4 insight cards with data', () => {
-    const { container } = render(<InsightCards hasData={true} />)
+    const { container } = render(
+      <InsightsDataProvider>
+        <InsightCards hasData={true} />
+      </InsightsDataProvider>,
+    )
     const grid = container.querySelector('.lg\\:grid-cols-2')
     const cards = grid?.querySelectorAll('.rounded-2xl')
     expect(cards?.length).toBe(4)
   })
 
   it('displays category labels from expected set', () => {
-    render(<InsightCards hasData={true} />)
+    render(
+      <InsightsDataProvider>
+        <InsightCards hasData={true} />
+      </InsightsDataProvider>,
+    )
     const validLabels = ['Trend', 'Activity', 'Scripture', 'Recommendation']
     const day = getDayOfYear()
     const cards = getInsightCardsForDay(day, 4, 0)
@@ -76,21 +85,33 @@ describe('InsightCards', () => {
   })
 
   it('shows empty state when no entries', () => {
-    render(<InsightCards hasData={false} />)
+    render(
+      <InsightsDataProvider>
+        <InsightCards hasData={false} />
+      </InsightsDataProvider>,
+    )
     expect(
       screen.getByText(/start checking in to see your insights grow/i),
     ).toBeInTheDocument()
   })
 
   it('disclaimer text present', () => {
-    render(<InsightCards hasData={true} />)
+    render(
+      <InsightsDataProvider>
+        <InsightCards hasData={true} />
+      </InsightsDataProvider>,
+    )
     expect(
       screen.getByText(/insights are illustrative examples/i),
     ).toBeInTheDocument()
   })
 
   it('2-column grid on desktop class', () => {
-    const { container } = render(<InsightCards hasData={true} />)
+    const { container } = render(
+      <InsightsDataProvider>
+        <InsightCards hasData={true} />
+      </InsightsDataProvider>,
+    )
     const grid = container.querySelector('.lg\\:grid-cols-2')
     expect(grid).toBeInTheDocument()
   })
@@ -127,7 +148,11 @@ describe('InsightCards', () => {
       entries.push(makeMoodEntry({ date, mood: 4, moodLabel: 'Good', timeOfDay: 'evening' }))
     }
     localStorage.setItem('wr_mood_entries', JSON.stringify(entries))
-    render(<InsightCards hasData={true} />)
+    render(
+      <InsightsDataProvider>
+        <InsightCards hasData={true} />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText(/mood tends to improve by evening/i)).toBeInTheDocument()
   })
 
@@ -139,7 +164,11 @@ describe('InsightCards', () => {
       entries.push(makeMoodEntry({ date, mood: 2, moodLabel: 'Heavy', timeOfDay: 'evening' }))
     }
     localStorage.setItem('wr_mood_entries', JSON.stringify(entries))
-    render(<InsightCards hasData={true} />)
+    render(
+      <InsightsDataProvider>
+        <InsightCards hasData={true} />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText(/mood tends to dip by evening/i)).toBeInTheDocument()
   })
 
@@ -151,7 +180,11 @@ describe('InsightCards', () => {
       entries.push(makeMoodEntry({ date, mood: 3, moodLabel: 'Okay', timeOfDay: 'evening' }))
     }
     localStorage.setItem('wr_mood_entries', JSON.stringify(entries))
-    render(<InsightCards hasData={true} />)
+    render(
+      <InsightsDataProvider>
+        <InsightCards hasData={true} />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText(/mood stays steady/i)).toBeInTheDocument()
   })
 
@@ -163,7 +196,11 @@ describe('InsightCards', () => {
       entries.push(makeMoodEntry({ date, mood: 5, moodLabel: 'Thriving', timeOfDay: 'evening' }))
     }
     localStorage.setItem('wr_mood_entries', JSON.stringify(entries))
-    render(<InsightCards hasData={true} />)
+    render(
+      <InsightsDataProvider>
+        <InsightCards hasData={true} />
+      </InsightsDataProvider>,
+    )
     expect(screen.queryByText(/Morning vs Evening/i)).not.toBeInTheDocument()
   })
 })

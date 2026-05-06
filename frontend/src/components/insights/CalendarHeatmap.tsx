@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { CalendarDays } from 'lucide-react'
-import { getMoodEntries } from '@/services/mood-storage'
+import { useInsightsData } from '@/contexts/InsightsDataContext'
 import { MOOD_COLORS } from '@/constants/dashboard/mood'
 import { getLocalDateString } from '@/utils/date'
 import type { MoodEntry, MoodValue } from '@/types/dashboard'
@@ -16,8 +16,7 @@ interface DayCell {
   entry: MoodEntry | null
 }
 
-function buildGrid(rangeDays: number): { cells: DayCell[]; weeks: number; entryMap: Map<string, MoodEntry> } {
-  const entries = getMoodEntries()
+function buildGrid(rangeDays: number, entries: MoodEntry[]): { cells: DayCell[]; weeks: number; entryMap: Map<string, MoodEntry> } {
   const entryMap = new Map(entries.map((e) => [e.date, e]))
 
   const today = new Date()
@@ -108,7 +107,8 @@ interface TooltipInfo {
 }
 
 export function CalendarHeatmap({ rangeDays }: CalendarHeatmapProps) {
-  const { cells, weeks } = useMemo(() => buildGrid(rangeDays), [rangeDays])
+  const { moodEntries } = useInsightsData()
+  const { cells, weeks } = useMemo(() => buildGrid(rangeDays, moodEntries), [rangeDays, moodEntries])
   const monthLabels = useMemo(() => getMonthLabels(cells), [cells])
   const [tooltipInfo, setTooltipInfo] = useState<TooltipInfo | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)

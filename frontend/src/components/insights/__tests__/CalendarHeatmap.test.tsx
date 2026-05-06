@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { CalendarHeatmap } from '../CalendarHeatmap'
+import { InsightsDataProvider } from '@/contexts/InsightsDataContext'
 import { getLocalDateString } from '@/utils/date'
 import type { MoodEntry } from '@/types/dashboard'
 
@@ -37,7 +38,11 @@ function seedEntries(entries: MoodEntry[]) {
 
 describe('CalendarHeatmap', () => {
   it('renders correct number of squares for 30d range', () => {
-    render(<CalendarHeatmap rangeDays={30} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={30} />
+      </InsightsDataProvider>,
+    )
     // Grid has squares with aria-labels
     const squares = screen.getAllByLabelText(/: /)
     // Should be at least 30 squares (may be slightly more due to week alignment)
@@ -51,7 +56,11 @@ describe('CalendarHeatmap', () => {
     ]
     seedEntries(entries)
 
-    render(<CalendarHeatmap rangeDays={30} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={30} />
+      </InsightsDataProvider>,
+    )
 
     const goodSquare = screen.getByLabelText(
       new RegExp(`${formatDate(daysAgo(1))}: Good`),
@@ -65,7 +74,11 @@ describe('CalendarHeatmap', () => {
   })
 
   it('empty days use transparent bg class', () => {
-    render(<CalendarHeatmap rangeDays={30} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={30} />
+      </InsightsDataProvider>,
+    )
     const noCheckinSquares = screen.getAllByLabelText(/No check-in/)
     expect(noCheckinSquares.length).toBeGreaterThan(0)
     // Should have bg-white/[0.04] class
@@ -75,14 +88,22 @@ describe('CalendarHeatmap', () => {
   })
 
   it('day labels show Mon, Wed, Fri', () => {
-    render(<CalendarHeatmap rangeDays={30} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={30} />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText('Mon')).toBeInTheDocument()
     expect(screen.getByText('Wed')).toBeInTheDocument()
     expect(screen.getByText('Fri')).toBeInTheDocument()
   })
 
   it('month labels appear', () => {
-    render(<CalendarHeatmap rangeDays={90} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={90} />
+      </InsightsDataProvider>,
+    )
     // At least one month abbreviation should be present
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const foundMonth = months.some((m) => screen.queryByText(m))
@@ -95,7 +116,11 @@ describe('CalendarHeatmap', () => {
     ]
     seedEntries(entries)
 
-    render(<CalendarHeatmap rangeDays={7} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={7} />
+      </InsightsDataProvider>,
+    )
 
     const todayLabel = formatDate(daysAgo(0))
     expect(
@@ -110,14 +135,22 @@ describe('CalendarHeatmap', () => {
     ]
     seedEntries(entries)
 
-    render(<CalendarHeatmap rangeDays={30} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={30} />
+      </InsightsDataProvider>,
+    )
     expect(
       screen.getByText(/2 days with check-ins out of \d+ days/),
     ).toBeInTheDocument()
   })
 
   it('renders empty state (all transparent squares) when no data', () => {
-    render(<CalendarHeatmap rangeDays={30} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={30} />
+      </InsightsDataProvider>,
+    )
     const noCheckinSquares = screen.getAllByLabelText(/No check-in/)
     const allSquares = screen.getAllByLabelText(/: /)
     expect(noCheckinSquares.length).toBe(allSquares.length)
@@ -129,7 +162,11 @@ describe('CalendarHeatmap', () => {
     ]
     seedEntries(entries)
 
-    render(<CalendarHeatmap rangeDays={7} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={7} />
+      </InsightsDataProvider>,
+    )
     const todayLabel = formatDate(daysAgo(0))
     const square = screen.getByLabelText(new RegExp(`${todayLabel}: Good`))
 
@@ -139,7 +176,11 @@ describe('CalendarHeatmap', () => {
   })
 
   it('horizontal scroll enabled for large ranges', () => {
-    render(<CalendarHeatmap rangeDays={180} />)
+    render(
+      <InsightsDataProvider>
+        <CalendarHeatmap rangeDays={180} />
+      </InsightsDataProvider>,
+    )
     // The container should have overflow-x-auto
     const scrollContainer = document.querySelector('.overflow-x-auto')
     expect(scrollContainer).toBeInTheDocument()

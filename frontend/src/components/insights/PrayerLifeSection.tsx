@@ -1,6 +1,6 @@
 import { HandHeart, Heart } from 'lucide-react'
 import { getPrayers } from '@/services/prayer-list-storage'
-import { getMoodEntries } from '@/services/mood-storage'
+import { useInsightsData } from '@/contexts/InsightsDataContext'
 import { CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 
 const MIN_CORRELATION_DAYS = 5
@@ -20,6 +20,7 @@ const CATEGORY_COLORS: Record<PrayerCategory, string> = {
 }
 
 export function PrayerLifeSection() {
+  const { moodEntries } = useInsightsData()
   const prayers = getPrayers()
   if (prayers.length === 0) return null
 
@@ -29,7 +30,6 @@ export function PrayerLifeSection() {
   const answerRate = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0
 
   // Mood correlation: match prayer lastPrayedAt dates with mood entries
-  const moodEntries = getMoodEntries()
   const moodByDate = new Map<string, number[]>()
   for (const entry of moodEntries) {
     const existing = moodByDate.get(entry.date)

@@ -1,17 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { CommunityConnections } from '../CommunityConnections'
-
-vi.mock('@/services/mood-storage', () => ({
-  getMoodEntries: () => {
-    try {
-      const raw = localStorage.getItem('wr_mood_entries')
-      return raw ? JSON.parse(raw) : []
-    } catch {
-      return []
-    }
-  },
-}))
+import { InsightsDataProvider } from '@/contexts/InsightsDataContext'
 
 beforeEach(() => {
   localStorage.clear()
@@ -19,7 +9,11 @@ beforeEach(() => {
 
 describe('CommunityConnections', () => {
   it('returns null when no visits exist', () => {
-    const { container } = render(<CommunityConnections hasData={false} />)
+    const { container } = render(
+      <InsightsDataProvider>
+        <CommunityConnections hasData={false} />
+      </InsightsDataProvider>,
+    )
     expect(container.innerHTML).toBe('')
   })
 
@@ -29,7 +23,11 @@ describe('CommunityConnections', () => {
       { id: '2', placeId: 'p2', placeName: 'Dr. Smith', placeType: 'counselor', visitDate: '2026-03-23', note: '' },
       { id: '3', placeId: 'p1', placeName: 'First Baptist', placeType: 'church', visitDate: '2026-03-22', note: '' },
     ]))
-    render(<CommunityConnections hasData={false} />)
+    render(
+      <InsightsDataProvider>
+        <CommunityConnections hasData={false} />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText('2')).toBeInTheDocument() // 2 unique places
     expect(screen.getByText(/1 church, 1 counselor/)).toBeInTheDocument()
   })
@@ -41,7 +39,11 @@ describe('CommunityConnections', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify([
       { id: 'm1', date: '2026-03-24', mood: 4, moodLabel: 'Good', timestamp: Date.now(), verseSeen: 'Ps 107:1' },
     ]))
-    render(<CommunityConnections hasData={true} />)
+    render(
+      <InsightsDataProvider>
+        <CommunityConnections hasData={true} />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText('4.0')).toBeInTheDocument()
     expect(screen.getByText(/your mood averaged/)).toBeInTheDocument()
   })
@@ -53,13 +55,21 @@ describe('CommunityConnections', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify([
       { id: 'm1', date: '2026-03-20', mood: 4, moodLabel: 'Good', timestamp: Date.now(), verseSeen: 'Ps 107:1' },
     ]))
-    render(<CommunityConnections hasData={true} />)
+    render(
+      <InsightsDataProvider>
+        <CommunityConnections hasData={true} />
+      </InsightsDataProvider>,
+    )
     expect(screen.queryByText(/your mood averaged/)).not.toBeInTheDocument()
   })
 
   it('handles corrupted visit data gracefully', () => {
     localStorage.setItem('wr_local_visits', 'invalid json')
-    const { container } = render(<CommunityConnections hasData={false} />)
+    const { container } = render(
+      <InsightsDataProvider>
+        <CommunityConnections hasData={false} />
+      </InsightsDataProvider>,
+    )
     expect(container.innerHTML).toBe('')
   })
 })

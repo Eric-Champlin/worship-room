@@ -5,6 +5,7 @@ import {
   getDefaultMonth,
   getEarliestMonth,
 } from '../useMonthlyReportData'
+import { InsightsDataProvider } from '@/contexts/InsightsDataContext'
 import type { MoodEntry } from '@/types/dashboard'
 
 // Mock localStorage
@@ -36,24 +37,21 @@ function makeMoodEntry(date: string, mood: 1 | 2 | 3 | 4 | 5 = 4): MoodEntry {
 }
 
 describe('useMonthlyReportData', () => {
-  it('returns mock data when localStorage is empty', () => {
-    const { result } = renderHook(() => useMonthlyReportData(1, 2026)) // February 2026
+  it('returns empty data when localStorage is empty', () => {
+    const { result } = renderHook(() => useMonthlyReportData(1, 2026), {
+      wrapper: InsightsDataProvider,
+    })
     const data = result.current
 
     expect(data.monthName).toBe('February')
-    expect(data.daysActive).toBe(24)
-    expect(data.pointsEarned).toBe(1847)
-    expect(data.startLevel).toBe('Sprout')
-    expect(data.endLevel).toBe('Blooming')
-    expect(data.levelProgressPct).toBe(67)
-    expect(data.moodTrendPct).toBe(12)
-    expect(data.longestStreak).toBe(7)
-    expect(data.badgesEarned).toHaveLength(3)
-    expect(data.bestDay).not.toBeNull()
-    expect(data.bestDay?.activityCount).toBe(5)
-    expect(data.bestDay?.mood).toBe('Thriving')
-    expect(data.activityCounts.mood).toBe(24)
-    expect(data.activityCounts.pray).toBe(18)
+    expect(data.daysActive).toBe(0)
+    expect(data.pointsEarned).toBe(0)
+    expect(data.longestStreak).toBe(0)
+    expect(data.badgesEarned).toHaveLength(0)
+    expect(data.bestDay).toBeNull()
+    expect(data.moodEntries).toHaveLength(0)
+    expect(data.hasData).toBe(false)
+    expect(data.isCurrentMonth).toBe(false)
   })
 
   it('filters mood entries by month', () => {
@@ -65,10 +63,13 @@ describe('useMonthlyReportData', () => {
     ]
     mockStorage['wr_mood_entries'] = JSON.stringify(entries)
 
-    const { result } = renderHook(() => useMonthlyReportData(1, 2026)) // February
+    const { result } = renderHook(() => useMonthlyReportData(1, 2026), {
+      wrapper: InsightsDataProvider,
+    })
     expect(result.current.moodEntries).toHaveLength(2)
     expect(result.current.moodEntries[0].date).toBe('2026-02-10')
     expect(result.current.moodEntries[1].date).toBe('2026-02-20')
+    expect(result.current.hasData).toBe(true)
   })
 
   it('computes daysActive correctly (distinct dates)', () => {
@@ -80,24 +81,30 @@ describe('useMonthlyReportData', () => {
     ]
     mockStorage['wr_mood_entries'] = JSON.stringify(entries)
 
-    const { result } = renderHook(() => useMonthlyReportData(1, 2026))
+    const { result } = renderHook(() => useMonthlyReportData(1, 2026), {
+      wrapper: InsightsDataProvider,
+    })
     expect(result.current.daysActive).toBe(3) // 3 distinct dates
   })
 
   it('handles partial month (current month)', () => {
     const now = new Date()
-    const { result } = renderHook(() =>
-      useMonthlyReportData(now.getMonth(), now.getFullYear()),
+    const { result } = renderHook(
+      () => useMonthlyReportData(now.getMonth(), now.getFullYear()),
+      { wrapper: InsightsDataProvider },
     )
     // daysInRange should be today's day-of-month
     expect(result.current.daysInRange).toBe(now.getDate())
+    expect(result.current.isCurrentMonth).toBe(true)
   })
 
   it('handles first month (no previous month data → moodTrendPct = 0)', () => {
     const entries: MoodEntry[] = [makeMoodEntry('2026-02-10', 4)]
     mockStorage['wr_mood_entries'] = JSON.stringify(entries)
 
-    const { result } = renderHook(() => useMonthlyReportData(1, 2026))
+    const { result } = renderHook(() => useMonthlyReportData(1, 2026), {
+      wrapper: InsightsDataProvider,
+    })
     expect(result.current.moodTrendPct).toBe(0)
   })
 
@@ -106,14 +113,19 @@ describe('useMonthlyReportData', () => {
     mockStorage['wr_daily_activities'] = '{bad'
     mockStorage['wr_faith_points'] = 'null'
 
-    const { result } = renderHook(() => useMonthlyReportData(1, 2026))
-    // Should return mock data without crashing
-    expect(result.current.daysActive).toBe(24)
-    expect(result.current.pointsEarned).toBe(1847)
+    const { result } = renderHook(() => useMonthlyReportData(1, 2026), {
+      wrapper: InsightsDataProvider,
+    })
+    // Should return empty/zero data without crashing
+    expect(result.current.daysActive).toBe(0)
+    expect(result.current.pointsEarned).toBe(0)
+    expect(result.current.hasData).toBe(false)
   })
 
   it('dateRange format is correct', () => {
-    const { result } = renderHook(() => useMonthlyReportData(1, 2026))
+    const { result } = renderHook(() => useMonthlyReportData(1, 2026), {
+      wrapper: InsightsDataProvider,
+    })
     expect(result.current.dateRange).toBe('February 1 - February 28, 2026')
   })
 })

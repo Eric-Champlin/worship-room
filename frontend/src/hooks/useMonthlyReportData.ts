@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { MoodEntry } from '@/types/dashboard'
-import { getMoodEntries } from '@/services/mood-storage'
+import { useInsightsData } from '@/contexts/InsightsDataContext'
 import { getActivityLog, getFaithPoints } from '@/services/faith-points-storage'
 import { getBadgeData } from '@/services/badge-storage'
 import { getLevelForPoints } from '@/constants/dashboard/levels'
@@ -23,9 +23,9 @@ export interface MonthlyReportData {
   bestDay: { date: string; formattedDate: string; activityCount: number; mood: string } | null
   activityCounts: Record<string, number>
   moodEntries: MoodEntry[]
+  hasData: boolean
+  isCurrentMonth: boolean
 }
-
-const MOCK_BADGE_IDS = ['first-light', 'week-one', 'prayer-starter']
 
 const MOOD_LABEL_MAP: Record<number, string> = {
   1: 'Struggling',
@@ -39,7 +39,7 @@ function getMonthName(month: number, year: number): string {
   return new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, month))
 }
 
-function isCurrentMonth(month: number, year: number): boolean {
+function checkIsCurrentMonth(month: number, year: number): boolean {
   const now = new Date()
   return now.getMonth() === month && now.getFullYear() === year
 }
@@ -83,6 +83,8 @@ export function getEarliestMonth(entries: MoodEntry[]): { month: number; year: n
 }
 
 export function useMonthlyReportData(month: number, year: number): MonthlyReportData {
+  const { moodEntries: allEntries, getMonthlyEntries } = useInsightsData()
+
   return useMemo(() => {
     const monthName = getMonthName(month, year)
     const firstDay = new Date(year, month, 1)
@@ -90,24 +92,22 @@ export function useMonthlyReportData(month: number, year: number): MonthlyReport
     const firstDayStr = getLocalDateString(firstDay)
     const lastDayStr = getLocalDateString(lastDay)
 
-    const daysInRange = isCurrentMonth(month, year)
+    const currentMonthFlag = checkIsCurrentMonth(month, year)
+
+    const daysInRange = currentMonthFlag
       ? new Date().getDate()
       : lastDay.getDate()
 
     const dateRange = `${monthName} 1 - ${monthName} ${lastDay.getDate()}, ${year}`
 
-    // Mood entries for this month
-    const allEntries = getMoodEntries()
-    const moodEntries = allEntries.filter(
-      (e) => e.date >= firstDayStr && e.date <= lastDayStr,
-    )
-
-    const hasRealData = moodEntries.length > 0
+    // Mood entries for this month from context
+    const moodEntries = getMonthlyEntries(month, year)
+    const hasData = moodEntries.length > 0
 
     // Days active (distinct dates with entries)
-    const daysActive = hasRealData
+    const daysActive = hasData
       ? new Set(moodEntries.map((e) => e.date)).size
-      : 24
+      : 0
 
     // Points earned this month
     const activityLog = getActivityLog()
@@ -132,44 +132,28 @@ export function useMonthlyReportData(month: number, year: number): MonthlyReport
       }
     }
 
-    // Mock fallback for activity counts
-    if (!hasRealData) {
-      activityCounts.mood = 24
-      activityCounts.pray = 18
-      activityCounts.journal = 15
-      activityCounts.meditate = 10
-      activityCounts.listen = 20
-      activityCounts.prayerWall = 8
-    }
-
-    if (pointsEarned === 0) pointsEarned = hasRealData ? 0 : 1847
-
-    // Level progress
+    // Level progress — only meaningful when this month actually has data.
+    // Current-level info applies to "now," not to a historical empty month, so
+    // returning empties for !hasData is more truthful than mirroring current state.
     const faithPoints = getFaithPoints()
     const currentLevel = getLevelForPoints(faithPoints.totalPoints)
-    let startLevel: string
-    let endLevel: string
-    let levelProgressPct: number
-    if (hasRealData) {
-      // Approximate: use current level info
-      startLevel = currentLevel.name
-      endLevel = currentLevel.name
-      levelProgressPct = currentLevel.pointsToNextLevel > 0
+    const startLevel = hasData ? currentLevel.name : ''
+    const endLevel = hasData ? currentLevel.name : ''
+    const levelProgressPct = hasData
+      ? currentLevel.pointsToNextLevel > 0
         ? Math.round(
             ((faithPoints.totalPoints - getLevelThresholdForName(currentLevel.name)) /
-              (faithPoints.totalPoints + currentLevel.pointsToNextLevel - getLevelThresholdForName(currentLevel.name))) *
+              (faithPoints.totalPoints +
+                currentLevel.pointsToNextLevel -
+                getLevelThresholdForName(currentLevel.name))) *
               100,
           )
         : 100
-    } else {
-      startLevel = 'Sprout'
-      endLevel = 'Blooming'
-      levelProgressPct = 67
-    }
+      : 0
 
     // Mood trend vs previous month
-    let moodTrendPct: number
-    if (hasRealData) {
+    let moodTrendPct = 0
+    if (hasData) {
       const prevMonthStart = new Date(year, month - 1, 1)
       const prevMonthEnd = new Date(year, month, 0)
       const prevFirstStr = getLocalDateString(prevMonthStart)
@@ -178,46 +162,28 @@ export function useMonthlyReportData(month: number, year: number): MonthlyReport
         (e) => e.date >= prevFirstStr && e.date <= prevLastStr,
       )
       if (prevEntries.length > 0) {
-        const currAvg =
-          moodEntries.reduce((sum, e) => sum + e.mood, 0) / moodEntries.length
-        const prevAvg =
-          prevEntries.reduce((sum, e) => sum + e.mood, 0) / prevEntries.length
+        const currAvg = moodEntries.reduce((sum, e) => sum + e.mood, 0) / moodEntries.length
+        const prevAvg = prevEntries.reduce((sum, e) => sum + e.mood, 0) / prevEntries.length
         moodTrendPct =
-          prevAvg > 0
-            ? Math.round(((currAvg - prevAvg) / prevAvg) * 100)
-            : 0
-      } else {
-        moodTrendPct = 0
+          prevAvg > 0 ? Math.round(((currAvg - prevAvg) / prevAvg) * 100) : 0
       }
-    } else {
-      moodTrendPct = 12
     }
 
     // Longest streak within the month
-    const longestStreak = hasRealData
-      ? computeLongestStreakInMonth(moodEntries)
-      : 7
+    const longestStreak = hasData ? computeLongestStreakInMonth(moodEntries) : 0
 
     // Badges earned this month
     const badgeData = getBadgeData()
-    let badgesEarned: string[]
-    if (hasRealData) {
-      badgesEarned = Object.entries(badgeData.earned)
-        .filter(([, entry]) => {
-          const earnedDate = new Date(entry.earnedAt)
-          return (
-            earnedDate.getMonth() === month &&
-            earnedDate.getFullYear() === year
-          )
-        })
-        .map(([id]) => id)
-    } else {
-      badgesEarned = MOCK_BADGE_IDS
-    }
+    const badgesEarned = Object.entries(badgeData.earned)
+      .filter(([, entry]) => {
+        const earnedDate = new Date(entry.earnedAt)
+        return earnedDate.getMonth() === month && earnedDate.getFullYear() === year
+      })
+      .map(([id]) => id)
 
     // Best day (most activities + highest mood)
     let bestDay: MonthlyReportData['bestDay'] = null
-    if (hasRealData) {
+    if (hasData) {
       let bestScore = -1
       for (const [date, activities] of Object.entries(activityLog)) {
         if (date < firstDayStr || date > lastDayStr) continue
@@ -242,21 +208,9 @@ export function useMonthlyReportData(month: number, year: number): MonthlyReport
               day: 'numeric',
             }).format(d),
             activityCount: actCount,
-            mood: dayEntry ? MOOD_LABEL_MAP[dayEntry.mood] ?? 'Okay' : 'Okay',
+            mood: dayEntry ? (MOOD_LABEL_MAP[dayEntry.mood] ?? 'Okay') : 'Okay',
           }
         }
-      }
-    } else {
-      // Mock best day
-      const mockDate = new Date(year, month, 12)
-      bestDay = {
-        date: getLocalDateString(mockDate),
-        formattedDate: new Intl.DateTimeFormat('en-US', {
-          month: 'long',
-          day: 'numeric',
-        }).format(mockDate),
-        activityCount: 5,
-        mood: 'Thriving',
       }
     }
 
@@ -277,8 +231,10 @@ export function useMonthlyReportData(month: number, year: number): MonthlyReport
       bestDay,
       activityCounts,
       moodEntries,
+      hasData,
+      isCurrentMonth: currentMonthFlag,
     }
-  }, [month, year])
+  }, [month, year, allEntries, getMonthlyEntries])
 }
 
 /** Helper to get the threshold for a level name */

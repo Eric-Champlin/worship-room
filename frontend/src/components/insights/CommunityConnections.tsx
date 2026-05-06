@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { MapPin } from 'lucide-react'
 import { getVisits, getUniqueVisitedPlaces } from '@/services/local-visit-storage'
-import { getMoodEntries } from '@/services/mood-storage'
+import { useInsightsData } from '@/contexts/InsightsDataContext'
 
 interface CommunityConnectionsProps {
   hasData: boolean
@@ -11,18 +11,18 @@ export function CommunityConnections({ hasData }: CommunityConnectionsProps) {
   const visits = useMemo(() => getVisits(), [])
   const stats = useMemo(() => getUniqueVisitedPlaces(), [])
 
+  const { moodEntries } = useInsightsData()
   const moodCorrelation = useMemo(() => {
     if (!hasData || visits.length === 0) return null
 
     const visitDates = new Set(visits.map(v => v.visitDate))
-    const moodEntries = getMoodEntries()
     const matchingEntries = moodEntries.filter(e => visitDates.has(e.date))
 
     if (matchingEntries.length === 0) return null
 
     const avgMood = matchingEntries.reduce((sum, e) => sum + e.mood, 0) / matchingEntries.length
     return avgMood
-  }, [visits, hasData])
+  }, [visits, hasData, moodEntries])
 
   // Don't render when no visits exist
   if (visits.length === 0) return null

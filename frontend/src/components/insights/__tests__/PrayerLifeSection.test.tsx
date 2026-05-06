@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { PrayerLifeSection } from '../PrayerLifeSection'
+import { InsightsDataProvider } from '@/contexts/InsightsDataContext'
 import type { PersonalPrayer } from '@/types/personal-prayer'
 import type { MoodEntry } from '@/types/dashboard'
 
@@ -39,9 +40,11 @@ beforeEach(() => {
 describe('PrayerLifeSection', () => {
   it('renders nothing when no prayers exist', () => {
     const { container } = render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     expect(container.querySelector('section')).toBeNull()
   })
@@ -57,9 +60,11 @@ describe('PrayerLifeSection', () => {
     localStorage.setItem('wr_prayer_list', JSON.stringify(prayers))
 
     render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     expect(screen.getByText('3')).toBeInTheDocument() // active
     expect(screen.getByText('2')).toBeInTheDocument() // answered
@@ -72,9 +77,11 @@ describe('PrayerLifeSection', () => {
     localStorage.setItem('wr_prayer_list', JSON.stringify(prayers))
 
     render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     const statsContainer = screen.getByText('Active').parentElement!.parentElement!
     expect(statsContainer.className).toContain('sm:flex-row')
@@ -99,9 +106,11 @@ describe('PrayerLifeSection', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
 
     render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     expect(screen.getByText(/On days you prayed for your prayer list/)).toBeInTheDocument()
     expect(screen.getByText('4.0')).toBeInTheDocument()
@@ -123,9 +132,11 @@ describe('PrayerLifeSection', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
 
     render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     expect(screen.queryByText(/On days you prayed/)).not.toBeInTheDocument()
   })
@@ -141,9 +152,11 @@ describe('PrayerLifeSection', () => {
     localStorage.setItem('wr_prayer_list', JSON.stringify(prayers))
 
     render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     expect(screen.getByText(/You pray most about/)).toBeInTheDocument()
     expect(screen.getByText('Health')).toBeInTheDocument()
@@ -154,9 +167,11 @@ describe('PrayerLifeSection', () => {
     localStorage.setItem('wr_prayer_list', JSON.stringify(prayers))
 
     render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     expect(screen.queryByText(/You pray most about/)).not.toBeInTheDocument()
   })
@@ -172,9 +187,11 @@ describe('PrayerLifeSection', () => {
     localStorage.setItem('wr_prayer_list', JSON.stringify(prayers))
 
     render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     const bar = screen.getByText(/You pray most about/).parentElement!.querySelector('.flex.h-2\\.5')
     expect(bar).not.toBeNull()
@@ -190,9 +207,11 @@ describe('PrayerLifeSection', () => {
 
     // We test the section component directly since the page has many dependencies
     render(
-      <MemoryRouter>
-        <PrayerLifeSection />
-      </MemoryRouter>,
+      <InsightsDataProvider>
+        <MemoryRouter>
+          <PrayerLifeSection />
+        </MemoryRouter>
+      </InsightsDataProvider>,
     )
     expect(screen.getByText('Prayer Life')).toBeInTheDocument()
   })

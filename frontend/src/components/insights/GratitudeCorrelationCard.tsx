@@ -1,14 +1,14 @@
 import { useMemo } from 'react'
 import { Heart } from 'lucide-react'
 import { getGratitudeEntries } from '@/services/gratitude-storage'
-import { getMoodEntries } from '@/services/mood-storage'
+import { useInsightsData } from '@/contexts/InsightsDataContext'
 
 const MIN_QUALIFYING_DAYS = 5
 
 export function GratitudeCorrelationCard() {
+  const { moodEntries } = useInsightsData()
   const data = useMemo(() => {
     const gratitudeEntries = getGratitudeEntries()
-    const moodEntries = getMoodEntries()
 
     if (gratitudeEntries.length === 0 || moodEntries.length === 0) return null
 
@@ -59,7 +59,7 @@ export function GratitudeCorrelationCard() {
       qualifyingDayCount: gratitudeMoodCount,
       encouragingText,
     }
-  }, [])
+  }, [moodEntries])
 
   if (!data) {
     return (

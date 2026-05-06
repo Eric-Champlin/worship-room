@@ -4,7 +4,7 @@ import {
   getDayOfYear,
   getInsightCardsForDay,
 } from '@/constants/dashboard/ai-insights'
-import { getMoodEntries } from '@/services/mood-storage'
+import { useInsightsData } from '@/contexts/InsightsDataContext'
 import type { MoodEntry } from '@/types/dashboard'
 
 interface InsightCardsProps {
@@ -63,10 +63,8 @@ export function InsightCards({ hasData }: InsightCardsProps) {
     return getInsightCardsForDay(day, 4, 0)
   }, [])
 
-  const moodChangeInsight = useMemo(() => {
-    const entries = getMoodEntries()
-    return computeMoodChangeInsight(entries)
-  }, [])
+  const { moodEntries: entries } = useInsightsData()
+  const moodChangeInsight = useMemo(() => computeMoodChangeInsight(entries), [entries])
 
   if (!hasData) {
     return (

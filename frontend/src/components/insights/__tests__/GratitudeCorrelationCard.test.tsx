@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { GratitudeCorrelationCard } from '../GratitudeCorrelationCard'
+import { InsightsDataProvider } from '@/contexts/InsightsDataContext'
 import type { GratitudeEntry } from '@/services/gratitude-storage'
 import type { MoodEntry } from '@/types/dashboard'
 
@@ -30,7 +31,11 @@ beforeEach(() => {
 
 describe('GratitudeCorrelationCard', () => {
   it('shows inline empty state when no gratitude entries', () => {
-    render(<GratitudeCorrelationCard />)
+    render(
+      <InsightsDataProvider>
+        <GratitudeCorrelationCard />
+      </InsightsDataProvider>,
+    )
     expect(
       screen.getByText(/gratitude insights will grow as you count your blessings/i),
     ).toBeInTheDocument()
@@ -53,7 +58,11 @@ describe('GratitudeCorrelationCard', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
     localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
 
-    render(<GratitudeCorrelationCard />)
+    render(
+      <InsightsDataProvider>
+        <GratitudeCorrelationCard />
+      </InsightsDataProvider>,
+    )
     expect(
       screen.getByText(/gratitude insights will grow as you count your blessings/i),
     ).toBeInTheDocument()
@@ -77,7 +86,11 @@ describe('GratitudeCorrelationCard', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
     localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
 
-    render(<GratitudeCorrelationCard />)
+    render(
+      <InsightsDataProvider>
+        <GratitudeCorrelationCard />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByLabelText('Gratitude and mood correlation')).toBeInTheDocument()
   })
 
@@ -101,7 +114,11 @@ describe('GratitudeCorrelationCard', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
     localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
 
-    render(<GratitudeCorrelationCard />)
+    render(
+      <InsightsDataProvider>
+        <GratitudeCorrelationCard />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText('4.4')).toBeInTheDocument()
   })
 
@@ -125,7 +142,11 @@ describe('GratitudeCorrelationCard', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
     localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
 
-    render(<GratitudeCorrelationCard />)
+    render(
+      <InsightsDataProvider>
+        <GratitudeCorrelationCard />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText(/Gratitude seems to lift your spirits/)).toBeInTheDocument()
   })
 
@@ -149,7 +170,11 @@ describe('GratitudeCorrelationCard', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
     localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
 
-    render(<GratitudeCorrelationCard />)
+    render(
+      <InsightsDataProvider>
+        <GratitudeCorrelationCard />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText(/Every act of gratitude matters/)).toBeInTheDocument()
   })
 
@@ -163,7 +188,11 @@ describe('GratitudeCorrelationCard', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
     localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
 
-    render(<GratitudeCorrelationCard />)
+    render(
+      <InsightsDataProvider>
+        <GratitudeCorrelationCard />
+      </InsightsDataProvider>,
+    )
     expect(screen.getByText(/Based on 7 days of data/)).toBeInTheDocument()
   })
 
@@ -177,7 +206,11 @@ describe('GratitudeCorrelationCard', () => {
     localStorage.setItem('wr_mood_entries', JSON.stringify(moods))
     localStorage.setItem('wr_gratitude_entries', JSON.stringify(gratitude))
 
-    render(<GratitudeCorrelationCard />)
+    render(
+      <InsightsDataProvider>
+        <GratitudeCorrelationCard />
+      </InsightsDataProvider>,
+    )
     const section = screen.getByLabelText('Gratitude and mood correlation')
     expect(section.className).toContain('bg-white/5')
     expect(section.className).toContain('backdrop-blur-sm')
