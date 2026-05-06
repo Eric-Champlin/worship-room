@@ -93,12 +93,6 @@ function SearchResults({
           </div>
         </div>
       )}
-      <p className="text-center text-xs text-white/60">
-        Not finding it?{' '}
-        <span className="text-primary-lt/50">
-          Search all music (coming soon)
-        </span>
-      </p>
     </div>
   )
 }
@@ -195,7 +189,7 @@ export function AmbientBrowser() {
           {/* Build Your Own Mix */}
           {search.filteredSounds.length > 0 && (
             <section aria-label="Build your own mix">
-              <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
+              <div className="rounded-xl border border-white/[0.12] bg-white/[0.06] p-6">
                 <SectionHeader variant="gradient">Build Your Own Mix</SectionHeader>
                 <SoundGrid
                   activeSoundIds={activeSoundIds}

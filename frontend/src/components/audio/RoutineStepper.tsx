@@ -39,7 +39,7 @@ export function RoutineStepper() {
                 className={cn(
                   'flex shrink-0 items-center justify-center rounded-full transition-transform motion-reduce:transition-none',
                   isCompleted && 'h-6 w-6 bg-primary/30 text-primary sm:h-7 sm:w-7',
-                  isCurrent && 'h-7 w-7 scale-110 bg-primary text-white sm:h-8 sm:w-8',
+                  isCurrent && 'h-7 w-7 scale-110 bg-white/15 text-white sm:h-8 sm:w-8',
                   !isCompleted && !isCurrent && 'h-6 w-6 bg-white/10 text-white/60 sm:h-7 sm:w-7',
                 )}
                 aria-label={`Step ${i + 1}: ${step.label}${isCompleted ? ' (completed)' : isCurrent ? ' (current)' : ''}`}

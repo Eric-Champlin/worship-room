@@ -71,7 +71,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
 
   return (
     <>
-      <div className="group relative rounded-xl border border-white/10 bg-white/[0.06] p-4 transition-shadow motion-reduce:transition-none hover:shadow-md hover:shadow-black/20">
+      <div className="group relative rounded-xl border border-white/[0.12] bg-white/[0.06] p-4 transition-shadow motion-reduce:transition-none hover:shadow-md hover:shadow-black/20">
         {/* Favorite button */}
         <FavoriteButton
           type="custom_mix"
@@ -138,7 +138,7 @@ export function SavedMixCard({ mix, onShare }: SavedMixCardProps) {
             type="button"
             onClick={handlePlay}
             aria-label={`Play ${mix.name}`}
-            className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+            className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-violet-300 transition-colors hover:bg-primary/20 hover:text-violet-200"
           >
             <Play size={12} fill="currentColor" aria-hidden="true" />
             Play

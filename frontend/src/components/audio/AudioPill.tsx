@@ -62,7 +62,7 @@ export function AudioPill() {
       <div
         role="complementary"
         aria-label="Routine shortcut"
-        className={`fixed z-[${Z.AUDIO_PILL}] flex h-14 min-w-[44px] items-center gap-3 rounded-full border border-primary/40 px-4 transition-opacity motion-reduce:transition-none duration-base bottom-0 left-1/2 -translate-x-1/2 mb-[max(24px,calc(env(safe-area-inset-bottom)+8px))] lg:left-auto lg:right-6 lg:bottom-6 lg:translate-x-0 lg:mb-0`}
+        className={`fixed z-[${Z.AUDIO_PILL}] flex h-14 min-w-[44px] items-center gap-3 rounded-full border border-white/[0.12] px-4 transition-opacity motion-reduce:transition-none duration-base bottom-0 left-1/2 -translate-x-1/2 mb-[max(24px,calc(env(safe-area-inset-bottom)+8px))] lg:left-auto lg:right-6 lg:bottom-6 lg:translate-x-0 lg:mb-0`}
         style={{
           background: 'rgba(15, 10, 30, 0.85)',
           backdropFilter: 'blur(8px)',
@@ -109,7 +109,7 @@ export function AudioPill() {
   return (
     <div
       aria-label="Audio player"
-      className={`fixed z-[${Z.AUDIO_PILL}] flex h-14 min-w-[44px] items-center gap-3 rounded-full border border-primary/40 px-4 transition-opacity motion-reduce:transition-none duration-base bottom-0 left-1/2 -translate-x-1/2 mb-[max(24px,calc(env(safe-area-inset-bottom)+8px))] lg:left-auto lg:right-6 lg:bottom-6 lg:translate-x-0 lg:mb-0`}
+      className={`fixed z-[${Z.AUDIO_PILL}] flex h-14 min-w-[44px] items-center gap-3 rounded-full border border-white/[0.12] px-4 transition-opacity motion-reduce:transition-none duration-base bottom-0 left-1/2 -translate-x-1/2 mb-[max(24px,calc(env(safe-area-inset-bottom)+8px))] lg:left-auto lg:right-6 lg:bottom-6 lg:translate-x-0 lg:mb-0`}
       style={{
         background: 'rgba(15, 10, 30, 0.85)',
         backdropFilter: 'blur(8px)',

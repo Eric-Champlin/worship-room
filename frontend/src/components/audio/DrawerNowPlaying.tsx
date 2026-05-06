@@ -56,7 +56,7 @@ export function DrawerNowPlaying() {
             dispatch({ type: state.isPlaying ? 'PAUSE_ALL' : 'PLAY_ALL' })
           }
           aria-label={state.isPlaying ? 'Pause all audio' : 'Resume all audio'}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
         >
           {state.isPlaying ? <Pause size={24} /> : <Play size={24} />}
         </button>
@@ -97,7 +97,7 @@ export function DrawerNowPlaying() {
                 className={cn(
                   'ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md transition-colors',
                   isTextOpen
-                    ? 'bg-primary/20 text-primary-lt'
+                    ? 'bg-white/15 text-white'
                     : 'text-white/60 hover:text-white/80',
                 )}
               >

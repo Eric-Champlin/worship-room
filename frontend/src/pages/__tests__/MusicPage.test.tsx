@@ -259,7 +259,7 @@ describe('MusicPage', () => {
   it('active tab has halo glow and pill background', () => {
     renderPage()
     const playlistsTab = screen.getByRole('tab', { name: /playlists/i })
-    expect(playlistsTab.className).toContain('bg-white/[0.12]')
+    expect(playlistsTab.className).toContain('bg-white/15')
     expect(playlistsTab.className).toContain('shadow-[0_0_12px_rgba(139,92,246,0.15)]')
   })
 

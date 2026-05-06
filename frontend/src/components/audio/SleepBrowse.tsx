@@ -36,7 +36,7 @@ export function SleepBrowse() {
 
         <BedtimeStoriesGrid onPlay={startSession} />
 
-        <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6 text-center">
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.06] p-6 text-center">
           <h3 className="mb-2 text-base font-semibold text-white">
             Build a Bedtime Routine
           </h3>

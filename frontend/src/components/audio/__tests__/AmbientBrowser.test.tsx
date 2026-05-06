@@ -193,19 +193,21 @@ describe('AmbientBrowser', () => {
     expect(screen.getByText(/No sounds or scenes match/)).toBeInTheDocument()
   })
 
-  it('"Search all music" link always visible in results', () => {
+  it('search results show sound cards when sounds match query', () => {
+    const rainSounds = SOUND_CATALOG.filter((s) =>
+      s.name.toLowerCase().includes('rain'),
+    )
     mockSearchReturn = {
       ...mockSearchReturn,
       searchQuery: 'rain',
       hasActiveSearch: true,
       filteredScenes: [],
-      filteredSounds: SOUND_CATALOG.filter((s) =>
-        s.name.toLowerCase().includes('rain'),
-      ),
+      filteredSounds: rainSounds,
     }
 
     render(<AmbientBrowser />)
-    expect(screen.getByText(/Search all music/)).toBeInTheDocument()
+    expect(screen.getByText(/Sounds/i)).toBeInTheDocument()
+    expect(screen.getByText(rainSounds[0].name)).toBeInTheDocument()
   })
 
   it('filters reduce visible scenes (All Scenes grid excludes featured)', () => {

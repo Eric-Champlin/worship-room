@@ -141,7 +141,7 @@ export function SaveMixButton() {
               type="button"
               onClick={handleSubmit}
               disabled={!name.trim()}
-              className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-[colors,transform] duration-fast hover:bg-primary-lt disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt active:scale-[0.98]"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg disabled:opacity-50 active:scale-[0.98]"
             >
               Save
             </button>

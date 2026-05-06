@@ -2,9 +2,6 @@ import { EXPLORE_PLAYLISTS, WORSHIP_PLAYLISTS } from '@/data/music/playlists'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { SpotifyEmbed } from './SpotifyEmbed'
 
-// Removed in visual polish — keeping for potential re-enable
-// import { useSpotifyAutoPause } from '@/hooks/useSpotifyAutoPause'
-
 const PREVIEW_DISCLAIMER =
   "Previews play here unless you're logged into a Spotify Premium account."
 

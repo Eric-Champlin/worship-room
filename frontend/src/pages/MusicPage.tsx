@@ -216,7 +216,7 @@ export function MusicPage() {
                     className={cn(
                       'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e] sm:text-base active:scale-[0.98]',
                       isActive
-                        ? 'bg-white/[0.12] border border-white/[0.15] text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
+                        ? 'bg-white/15 border border-white/[0.15] text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
                         : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
                     )}
                   >

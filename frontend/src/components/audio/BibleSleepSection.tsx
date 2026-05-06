@@ -50,7 +50,7 @@ export function BibleSleepSection() {
           e.preventDefault()
           navigate('/bible')
         }}
-        className="group block overflow-hidden rounded-xl border border-white/10 bg-white/[0.06] transition-shadow motion-reduce:transition-none hover:shadow-md hover:shadow-black/20"
+        className="group block overflow-hidden rounded-xl border border-white/[0.12] bg-white/[0.06] transition-shadow motion-reduce:transition-none hover:shadow-md hover:shadow-black/20"
       >
         <div className="h-1 bg-gradient-to-r from-amber-500 to-purple-600" />
         <div className="flex items-center gap-4 p-5">

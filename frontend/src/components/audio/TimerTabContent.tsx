@@ -266,7 +266,7 @@ export function TimerTabContent() {
               className={cn(
                 'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt',
                 !isCustom && selectedDuration === min
-                  ? 'bg-primary text-white'
+                  ? 'bg-white/15 text-white border border-white/30'
                   : 'border border-white/20 text-white/70 hover:bg-white/10',
               )}
             >
@@ -283,7 +283,7 @@ export function TimerTabContent() {
             className={cn(
               'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt',
               isCustom
-                ? 'bg-primary text-white'
+                ? 'bg-white/15 text-white border border-white/30'
                 : 'border border-white/20 text-white/70 hover:bg-white/10',
             )}
           >
@@ -331,7 +331,7 @@ export function TimerTabContent() {
               className={cn(
                 'min-h-[44px] rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt',
                 selectedFade === min
-                  ? 'bg-primary text-white'
+                  ? 'bg-white/15 text-white border border-white/30'
                   : 'border border-white/20 text-white/70 hover:bg-white/10',
               )}
             >
@@ -351,7 +351,7 @@ export function TimerTabContent() {
             : 'Select a timer duration to start'
         }
         className={cn(
-          'w-full rounded-lg bg-primary py-3 px-8 font-semibold text-white transition-opacity motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt',
+          'w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg motion-reduce:transition-none',
           !hasValidDuration && 'cursor-not-allowed opacity-50',
         )}
       >

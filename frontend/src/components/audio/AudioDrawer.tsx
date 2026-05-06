@@ -80,7 +80,7 @@ export function AudioDrawer() {
   useEffect(() => {
     if (state.drawerOpen && !reducedMotion) {
       setIsEntering(true)
-      const timer = setTimeout(() => setIsEntering(false), 300)
+      const timer = setTimeout(() => setIsEntering(false), ANIMATION_DURATIONS.base)
       return () => clearTimeout(timer)
     }
   }, [state.drawerOpen, reducedMotion])
@@ -103,7 +103,7 @@ export function AudioDrawer() {
         aria-modal="true"
         aria-label="Audio controls"
         className={cn(
-          `fixed z-[${Z.DRAWER}] flex flex-col overflow-hidden rounded-t-2xl border border-white/10 lg:rounded-none lg:border-l lg:border-t-0 lg:border-b-0 lg:border-r-0 bottom-0 left-0 right-0 h-[70vh] lg:top-0 lg:right-0 lg:left-auto lg:bottom-0 lg:h-full lg:w-[400px]`,
+          `fixed z-[${Z.DRAWER}] flex flex-col overflow-hidden rounded-t-2xl border border-white/[0.12] lg:rounded-none lg:border-l lg:border-t-0 lg:border-b-0 lg:border-r-0 bottom-0 left-0 right-0 h-[70vh] lg:top-0 lg:right-0 lg:left-auto lg:bottom-0 lg:h-full lg:w-[400px]`,
           !reducedMotion && isEntering && 'motion-safe:animate-bottom-sheet-slide-in lg:motion-safe:animate-drawer-slide-in',
         )}
         style={{

@@ -3,6 +3,7 @@ import { Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useFavorites } from '@/hooks/useFavorites'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import type { FavoriteType } from '@/types/storage'
 
 const ANNOUNCEMENT_CLEAR_MS = 3000
@@ -42,7 +43,7 @@ export function FavoriteButton({
     if (isAuthenticated) {
       setBouncing(true)
       clearTimeout(bounceTimerRef.current)
-      bounceTimerRef.current = setTimeout(() => setBouncing(false), 100)
+      bounceTimerRef.current = setTimeout(() => setBouncing(false), ANIMATION_DURATIONS.fast)
       setAnnouncement(
         favorited
           ? `${targetName} removed from favorites`

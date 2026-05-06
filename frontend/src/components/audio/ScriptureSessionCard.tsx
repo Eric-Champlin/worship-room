@@ -18,7 +18,7 @@ export function ScriptureSessionCard({ reading, onPlay }: ScriptureSessionCardPr
         type="button"
         aria-label={`Play ${reading.scriptureReference}: ${reading.title}, ${formatDuration(reading.durationSeconds)}, ${reading.voiceId} voice`}
         onClick={() => onPlay(reading)}
-        className="flex h-full w-full cursor-pointer flex-col rounded-xl border border-white/10 bg-white/[0.06] p-4 pr-12 text-left transition-colors hover:border-white/20 hover:shadow-md hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-[#0f0a1e]"
+        className="flex h-full w-full cursor-pointer flex-col rounded-xl border border-white/[0.12] bg-white/[0.06] p-4 pr-12 text-left transition-colors hover:border-white/20 hover:shadow-md hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-[#0f0a1e]"
       >
         <p className="text-sm font-medium text-white">{reading.title}</p>
         <p className="mt-0.5 text-xs text-white/60">{reading.scriptureReference}</p>

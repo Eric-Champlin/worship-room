@@ -31,7 +31,7 @@ export function FeaturedSceneCard({ scene, isActive, onPlay }: FeaturedSceneCard
           <p className="mt-1 line-clamp-2 text-sm text-white/70">{scene.description}</p>
         </div>
         <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/80 text-white">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary">
             <Play size={20} />
           </div>
         </div>

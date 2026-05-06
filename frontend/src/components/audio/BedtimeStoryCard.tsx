@@ -22,7 +22,7 @@ export function BedtimeStoryCard({ story, onPlay }: BedtimeStoryCardProps) {
         type="button"
         aria-label={`Play ${story.title}, ${capitalize(story.lengthCategory)}, ${formatDuration(story.durationSeconds)}, ${story.voiceId} voice`}
         onClick={() => onPlay(story)}
-        className="flex h-full w-full cursor-pointer flex-col rounded-xl border border-white/10 bg-white/[0.06] p-4 pr-12 text-left transition-colors hover:border-white/20 hover:shadow-md hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-[#0f0a1e]"
+        className="flex h-full w-full cursor-pointer flex-col rounded-xl border border-white/[0.12] bg-white/[0.06] p-4 pr-12 text-left transition-colors hover:border-white/20 hover:shadow-md hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-[#0f0a1e]"
       >
         <p className="text-sm font-medium text-white">{story.title}</p>
         <p className="mt-1 line-clamp-2 text-xs text-white/60">{story.description}</p>
