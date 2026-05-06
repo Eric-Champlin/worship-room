@@ -1,914 +1,612 @@
-import { test, expect, type Page } from '@playwright/test';
+/**
+ * Spec 11A — Music Page Shell + 3 Tabs + Audio Cluster Chrome
+ * Verification script for: /music routes + AudioDrawer states
+ */
+import { test, expect } from '@playwright/test'
 
-const BASE_URL = 'http://localhost:5173';
-const SCREENSHOT_DIR = 'playwright-screenshots';
+const BASE_URL = 'http://localhost:5173'
+const SS = 'playwright-screenshots'
 
-const BREAKPOINTS = {
-  mobileS:   { width: 375,  height: 812  },
-  tablet:    { width: 768,  height: 1024 },
-  desktop:   { width: 1440, height: 900  },
-};
+// Seeded mix: {"sounds":[{"id":"gentle-rain","v":0.7},{"id":"fireplace","v":0.5},{"id":"night-crickets","v":0.4}]}
+const MIX_B64 =
+  'eyJzb3VuZHMiOlt7ImlkIjoiZ2VudGxlLXJhaW4iLCJ2IjowLjd9LHsiaWQiOiJmaXJlcGxhY2UiLCJ2IjowLjV9LHsiaWQiOiJuaWdodC1jcmlja2V0cyIsInYiOjAuNH1dfQ'
 
-const IGNORE_PATTERNS = ['DevTools', 'HMR', '[vite]', 'favicon.ico', 'chrome-extension://'];
+const consoleErrors: string[] = []
+const IGNORE = ['DevTools', 'HMR', '[vite]', 'favicon.ico', 'chrome-extension://']
 
-const consoleErrors: string[] = [];
-const consoleWarnings: string[] = [];
-
-function captureConsole(page: Page) {
-  page.on('console', (msg) => {
-    const text = msg.text();
-    if (IGNORE_PATTERNS.some((p) => text.includes(p))) return;
-    if (msg.type() === 'error') consoleErrors.push(text);
-    if (msg.type() === 'warning') consoleWarnings.push(text);
-  });
+function seedAuth(page: Parameters<typeof page.addInitScript>[0]) {
+  // no-op — placeholder for addInitScript call signature; actual usage below
 }
 
-async function injectLoggedIn(page: Page) {
+async function setup(page: Parameters<typeof test>[0]['page'], viewport = { width: 1280, height: 900 }) {
   await page.addInitScript(() => {
-    localStorage.setItem('wr_auth_simulated', 'true');
-    localStorage.setItem('wr_user_name', 'Eric');
-  });
+    localStorage.setItem('wr_auth_simulated', 'true')
+    localStorage.setItem('wr_user_name', 'Eric')
+  })
+  await page.setViewportSize(viewport)
 }
 
-async function injectLoggedInWithCards(page: Page) {
-  await page.addInitScript(() => {
-    localStorage.setItem('wr_auth_simulated', 'true');
-    localStorage.setItem('wr_user_name', 'Eric');
-    localStorage.setItem('wr_memorization_cards', JSON.stringify([
-      {
-        id: 'card-test-1',
-        book: 'john',
-        bookName: 'John',
-        chapter: 3,
-        startVerse: 16,
-        endVerse: 16,
-        verseText: 'For God so loved the world...',
-        reference: 'John 3:16',
-        addedAt: Date.now(),
-      },
-    ]));
-  });
-}
-
-async function waitForRender(page: Page, selector?: string) {
-  await page.waitForLoadState('networkidle');
+async function waitForRender(page: Parameters<typeof test>[0]['page'], selector?: string) {
+  await page.waitForLoadState('networkidle')
   if (selector) {
-    await page.waitForSelector(selector, { state: 'visible', timeout: 10000 });
+    await page.waitForSelector(selector, { state: 'visible', timeout: 10000 })
   }
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(500)
 }
 
-async function screenshot(page: Page, name: string) {
-  await page.screenshot({
-    path: `${SCREENSHOT_DIR}/${name}.png`,
-    fullPage: true,
-  });
-}
+// ─── ROUTE 1: /music ────────────────────────────────────────────────────────
 
-// ---------------------------------------------------------------------------
-// ROUTE 1 — /ask (primary migration surface)
-// ---------------------------------------------------------------------------
-
-test.describe('Route 1 — /ask idle state', () => {
-  test('BackgroundCanvas present, no GlowBackground', async ({ page }) => {
-    captureConsole(page);
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    // BackgroundCanvas wrapper present
-    const canvas = page.locator('[data-testid="background-canvas"]');
-    await expect(canvas).toBeVisible();
-
-    // No GlowBackground orbs
-    const glowBg = page.locator('[data-testid="glow-background"]');
-    await expect(glowBg).toHaveCount(0);
-  });
-
-  test('Hero heading and subtitle render', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'h1');
-
-    const h1 = page.locator('h1');
-    await expect(h1).toContainText("Ask God's Word");
-
-    // Subtitle
-    const subtitle = page.locator('text=Bring your questions. Find wisdom in Scripture.');
-    await expect(subtitle).toBeVisible();
-  });
-
-  test('Textarea has violet-glow classes and correct attributes', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    const textarea = page.locator('textarea#ask-input');
-    await expect(textarea).toBeVisible();
-    await expect(textarea).toHaveAttribute('maxlength', '500');
-    await expect(textarea).toHaveAttribute('aria-label', 'Your question');
-    await expect(textarea).toHaveAttribute('aria-describedby', 'ask-char-count');
-    await expect(textarea).toHaveAttribute('rows', '3');
-
-    // Check violet border class present in class attribute
-    const cls = await textarea.getAttribute('class');
-    expect(cls).toContain('border-violet-400/30');
-    expect(cls).toContain('bg-white/[0.04]');
-    expect(cls).toContain('ring-violet-400/30');
-  });
-
-  test('Textarea focused screenshot — violet glow + BackgroundCanvas', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    await page.locator('textarea#ask-input').focus();
-    await page.waitForTimeout(300);
-    await screenshot(page, '1-ask-idle-textarea-focused-desktop');
-
-    await page.setViewportSize(BREAKPOINTS.mobileS);
-    await page.waitForTimeout(300);
-    await screenshot(page, '1-ask-idle-textarea-focused-mobile');
-  });
-
-  test('6 topic chips render with min-h-[44px]', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    // ASK_TOPIC_CHIPS: 6 known chip texts (from constants/ask.ts)
-    const chipTexts = [
-      'Why does God allow suffering?',
-      'How do I forgive someone?',
-      'What does the Bible say about anxiety?',
-      "How do I know God's plan for me?",
-      'Is it okay to doubt?',
-      'How do I pray better?',
-    ];
-
-    for (const text of chipTexts) {
-      const chip = page.locator(`button:has-text("${text.slice(0, 20)}")`).first();
-      await expect(chip).toBeVisible({ timeout: 5000 });
-      const cls = await chip.getAttribute('class');
-      expect(cls).toContain('min-h-[44px]');
+test('Route 1 — /music tab bar chrome (desktop 1280)', async ({ page }) => {
+  page.on('console', (msg) => {
+    const t = msg.text()
+    if (msg.type() === 'error' && !IGNORE.some((p) => t.includes(p))) {
+      consoleErrors.push(t)
     }
-  });
+  })
 
-  test('Submit button attributes and disabled state', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
+  await setup(page)
+  await page.goto(`${BASE_URL}/music`)
+  await waitForRender(page, '[role="tablist"]')
+  await page.screenshot({ path: `${SS}/route1-music-1280.png`, fullPage: true })
 
-    // Button should be disabled when textarea is empty
-    const submitBtn = page.locator('button[aria-label="Find Answers"], button[aria-label="Searching Scripture"]');
-    await expect(submitBtn).toBeDisabled();
+  // Tab list structure
+  const tabList = page.getByRole('tablist', { name: 'Music sections' })
+  await expect(tabList).toBeVisible()
 
-    // Should be white pill (bg-white class)
-    const cls = await submitBtn.getAttribute('class');
-    expect(cls).toContain('bg-white');
-    expect(cls).toContain('rounded-full');
+  // 3 tabs present
+  const tabs = page.getByRole('tab')
+  await expect(tabs).toHaveCount(3)
 
-    // Type text → button enables
-    await page.locator('textarea#ask-input').fill('What does the Bible say about hope?');
-    await expect(submitBtn).toBeEnabled();
-  });
+  // Active tab is "Worship Playlists" (default)
+  const activeTab = page.getByRole('tab', { selected: true })
+  await expect(activeTab).toBeVisible()
 
-  test('Submit button aria-label updates to Searching Scripture while loading', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
+  const activeClass = await activeTab.getAttribute('class')
+  expect(activeClass, 'Active tab must have bg-white/15').toContain('bg-white/15')
+  expect(activeClass, 'Active tab must have border class').toContain('border')
+  expect(activeClass, 'Active tab must show white text').toContain('text-white')
 
-    await page.locator('textarea#ask-input').fill('What does faith mean?');
-    const submitBtn = page.locator('button[aria-label="Find Answers"]');
-    await submitBtn.click();
-
-    // During loading, aria-label should change
-    // The loading state may be brief — check that either the loading state
-    // appeared or that we already have a response (fast mock)
-    const loadingOrResponse = page.locator('[role="status"][aria-busy="true"], #latest-response-heading');
-    await expect(loadingOrResponse.first()).toBeVisible({ timeout: 5000 });
-  });
-
-  test('CrisisBanner shows on crisis keyword input', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    await page.locator('textarea#ask-input').fill('I want to kill myself');
-    // Give CrisisBanner time to render
-    await page.waitForTimeout(500);
-
-    const banner = page.locator('[role="alert"]');
-    await expect(banner).toBeVisible();
-  });
-
-  test('CharacterCount appears at 300+ characters', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    // Fill 300+ chars
-    const longText = 'A'.repeat(310);
-    await page.locator('textarea#ask-input').fill(longText);
-    await page.waitForTimeout(200);
-
-    const charCount = page.locator('#ask-char-count, [id*="char-count"]');
-    await expect(charCount).toBeVisible();
-  });
-});
-
-test.describe('Route 1 — /ask response state', () => {
-  async function submitAndWaitForResponse(page: Page, question = 'What does the Bible say about hope?') {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-    await page.locator('textarea#ask-input').fill(question);
-    await page.locator('button[aria-label="Find Answers"]').click();
-    // Wait for response heading (mock fallback fires quickly)
-    await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(500);
+  // Inactive tabs have muted opacity
+  const inactiveTabs = page.getByRole('tab', { selected: false })
+  const inactiveCount = await inactiveTabs.count()
+  expect(inactiveCount).toBe(2)
+  for (let i = 0; i < inactiveCount; i++) {
+    const cls = await inactiveTabs.nth(i).getAttribute('class')
+    expect(cls, 'Inactive tabs must have text-white/50').toContain('text-white/50')
   }
 
-  test('Loading region has role=status + aria-busy=true + sr-only text', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-    await page.locator('textarea#ask-input').fill('What does faith mean?');
+  // Tab labels visible at 400px+ (sr-only on narrow)
+  await expect(page.getByRole('tab', { name: /Worship Playlists/ })).toBeVisible()
+  await expect(page.getByRole('tab', { name: /Ambient Sounds/ })).toBeVisible()
+  await expect(page.getByRole('tab', { name: /Sleep & Rest/ })).toBeVisible()
 
-    // Intercept the loading state — click and immediately check
-    await page.locator('button[aria-label="Find Answers"]').click();
+  // Switch to Ambient tab and verify active classes migrate
+  await page.getByRole('tab', { name: /Ambient Sounds/ }).click()
+  await page.waitForTimeout(300)
+  const newActive = page.getByRole('tab', { selected: true })
+  const newActiveClass = await newActive.getAttribute('class')
+  expect(newActiveClass, 'Newly active tab must have bg-white/15').toContain('bg-white/15')
 
-    try {
-      const loadingRegion = page.locator('[role="status"][aria-busy="true"]');
-      await expect(loadingRegion).toBeVisible({ timeout: 3000 });
+  // Switch back to default
+  await page.getByRole('tab', { name: /Worship Playlists/ }).click()
 
-      // sr-only text
-      const srText = loadingRegion.locator('.sr-only');
-      await expect(srText).toContainText('Searching Scripture');
-    } catch {
-      // Mock may respond too fast; if response already shown, that's OK
-      const response = page.locator('#latest-response-heading');
-      const responseVisible = await response.isVisible().catch(() => false);
-      if (!responseVisible) throw new Error('Neither loading region nor response found');
-    }
-  });
+  console.log(`Route 1 console errors: ${consoleErrors.length}`)
+})
 
-  test('Response contains "What Scripture Says" heading with id=latest-response-heading', async ({ page }) => {
-    await submitAndWaitForResponse(page);
+test('Route 1 — /music tab bar chrome (mobile 375)', async ({ page }) => {
+  await setup(page, { width: 375, height: 812 })
+  await page.goto(`${BASE_URL}/music`)
+  await waitForRender(page, '[role="tablist"]')
+  await page.screenshot({ path: `${SS}/route1-music-375.png`, fullPage: true })
 
-    const heading = page.locator('#latest-response-heading');
-    await expect(heading).toBeVisible();
-    await expect(heading).toContainText('What Scripture Says');
-  });
+  const tabList = page.getByRole('tablist', { name: 'Music sections' })
+  await expect(tabList).toBeVisible()
 
-  test('Verse card action row shows 4 buttons: Highlight, Memorize, Save note, Share', async ({ page }) => {
-    await submitAndWaitForResponse(page);
+  const activeTab = page.getByRole('tab', { selected: true })
+  const activeClass = await activeTab.getAttribute('class')
+  expect(activeClass, 'Active tab on mobile must have bg-white/15').toContain('bg-white/15')
 
-    // Find the action row — it has flex flex-wrap gap-3
-    const actionRow = page.locator('.flex.flex-wrap.gap-3').first();
-    await expect(actionRow).toBeVisible();
+  // Min-h-[44px] on tabs (touch target)
+  expect(activeClass, 'Active tab must have min-h-[44px]').toContain('min-h-[44px]')
+})
 
-    const buttons = actionRow.locator('button');
-    const count = await buttons.count();
-    expect(count).toBeGreaterThanOrEqual(4);
+// ─── ROUTE 2: /music?tab=playlists ──────────────────────────────────────────
 
-    // Check button labels in order
-    const buttonTexts = await buttons.allInnerTexts();
-    const joined = buttonTexts.join('|').toLowerCase();
-    expect(joined).toContain('highlight');
-    expect(joined).toContain('memorize');
-    expect(joined).toContain('save note');
-    expect(joined).toContain('share');
-  });
+test('Route 2 — playlists tab: no "coming soon" copy, no useSpotifyAutoPause', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/music?tab=playlists`)
+  // Use domcontentloaded — Spotify iframes keep network open indefinitely
+  await page.waitForLoadState('domcontentloaded')
+  await page.waitForSelector('[role="tabpanel"]', { state: 'visible', timeout: 10000 })
+  await page.waitForTimeout(500)
+  await page.screenshot({ path: `${SS}/route2-playlists-1280.png`, fullPage: true })
 
-  test('All action buttons have min-h-[44px]', async ({ page }) => {
-    await submitAndWaitForResponse(page);
+  // "coming soon" copy must be absent
+  const comingSoonInstances = await page.getByText('coming soon', { exact: false }).count()
+  expect(comingSoonInstances, '"coming soon" text must not appear on playlists tab').toBe(0)
 
-    const actionRow = page.locator('.flex.flex-wrap.gap-3').first();
-    const buttons = actionRow.locator('button');
-    const count = await buttons.count();
+  const comingSoonParenthetical = await page.getByText('(coming soon)', { exact: false }).count()
+  expect(comingSoonParenthetical, '"(coming soon)" text must not appear').toBe(0)
 
-    for (let i = 0; i < Math.min(count, 4); i++) {
-      const cls = await buttons.nth(i).getAttribute('class');
-      expect(cls).toContain('min-h-[44px]');
-    }
-  });
+  // Active tab is "Worship Playlists"
+  const activeTab = page.getByRole('tab', { selected: true })
+  await expect(activeTab).toContainText('Worship Playlists')
 
-  test('Inline positional alignment — action buttons on same row at desktop', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await submitAndWaitForResponse(page);
+  // Tab panel visible
+  const panel = page.locator('[role="tabpanel"][id="tabpanel-playlists"]')
+  await expect(panel).not.toHaveAttribute('hidden')
+})
 
-    const actionRow = page.locator('.flex.flex-wrap.gap-3').first();
-    const buttons = actionRow.locator('button');
-    const count = await buttons.count();
+// ─── ROUTE 3: /music?tab=ambient ────────────────────────────────────────────
 
-    if (count < 2) return; // Skip if fewer than 2 buttons
+test('Route 3 — ambient tab DOM + border classes (desktop 1280)', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/music?tab=ambient`)
+  await waitForRender(page, 'section[aria-label="Featured scenes"]')
+  await page.screenshot({ path: `${SS}/route3-ambient-1280.png`, fullPage: true })
 
-    const boxes = await Promise.all(
-      Array.from({ length: Math.min(count, 4) }, (_, i) => buttons.nth(i).boundingBox()),
-    );
-    const validBoxes = boxes.filter(Boolean) as Awaited<ReturnType<typeof buttons.nth>>['boundingBox'] extends Promise<infer T> ? NonNullable<T>[] : never[];
+  // Active tab is "Ambient Sounds"
+  const activeTab = page.getByRole('tab', { selected: true })
+  await expect(activeTab).toContainText('Ambient Sounds')
 
-    if (validBoxes.length >= 2) {
-      const firstY = validBoxes[0].y;
-      for (const box of validBoxes) {
-        expect(Math.abs(box.y - firstY)).toBeLessThanOrEqual(5);
-      }
-    }
-  });
+  // Tab panel visible
+  const panel = page.locator('[role="tabpanel"][id="tabpanel-ambient"]')
+  await expect(panel).not.toHaveAttribute('hidden')
 
-  test('Memorize button has aria-pressed and is not auth-gated (logged-out)', async ({ page }) => {
-    await submitAndWaitForResponse(page);
+  // Build Your Own Mix section: border-white/[0.12]
+  const buildMixHeader = page.getByText('Build Your Own Mix')
+  await expect(buildMixHeader).toBeVisible()
+  const buildMixContainer = buildMixHeader.locator('xpath=ancestor::div[contains(@class,"border-white")]').first()
+  const buildMixClass = await buildMixContainer.getAttribute('class')
+  expect(buildMixClass, 'Build Your Own Mix container must have border-white/[0.12]').toContain(
+    'border-white/[0.12]',
+  )
 
-    // Memorize button — logged-out, no auth gate expected
-    const memorizeBtn = page.locator('button[aria-pressed]').first();
-    await expect(memorizeBtn).toBeVisible();
+  // Featured scenes section present
+  const featuredSection = page.locator('section[aria-label="Featured scenes"]')
+  await expect(featuredSection).toBeVisible()
 
-    const ariaPressed = await memorizeBtn.getAttribute('aria-pressed');
-    expect(ariaPressed).toBe('false'); // not yet memorized
-  });
+  // FeaturedSceneCard: inner white-circle overlay in DOM
+  const featuredButtons = page.locator('section[aria-label="Featured scenes"] button[aria-label^="Play "]')
+  const featuredCount = await featuredButtons.count()
+  expect(featuredCount, 'At least one featured scene card should be present').toBeGreaterThan(0)
 
-  test('Memorize button toggles to Memorized state', async ({ page }) => {
-    await submitAndWaitForResponse(page);
+  // Check inner white circle div exists (bg-white text-primary)
+  const firstFeatured = featuredButtons.first()
+  const whiteCircle = firstFeatured.locator('div.bg-white.text-primary')
+  await expect(whiteCircle, 'FeaturedSceneCard inner white circle must be in DOM').toHaveCount(1)
 
-    const memorizeBtn = page.locator('button[aria-label="Memorize this verse"]').first();
-    await expect(memorizeBtn).toBeVisible();
+  // SceneCard: inner white-circle overlay in DOM
+  const allScenesSection = page.locator('section[aria-label="All scenes"]')
+  const sceneCardButtons = allScenesSection.locator('button[aria-label^="Play "]')
+  const sceneCount = await sceneCardButtons.count()
+  expect(sceneCount, 'At least one SceneCard should be present').toBeGreaterThan(0)
 
-    // Click to add to deck
-    await memorizeBtn.click();
-    await page.waitForTimeout(300);
+  const firstScene = sceneCardButtons.first()
+  const sceneWhiteCircle = firstScene.locator('div.bg-white.text-primary')
+  await expect(sceneWhiteCircle, 'SceneCard inner white circle must be in DOM').toHaveCount(1)
 
-    // Should now show "Memorized" text and aria-pressed=true
-    const memorizedBtn = page.locator('button[aria-label="Remove from memorization deck"]').first();
-    await expect(memorizedBtn).toBeVisible();
-    const ariaPressed = await memorizedBtn.getAttribute('aria-pressed');
-    expect(ariaPressed).toBe('true');
-  });
+  // FeaturedSceneCard outer hover overlay: bg-black/40 (post-review fix)
+  const featuredHoverOverlay = firstFeatured.locator('div[aria-hidden="true"]').first()
+  const featuredOverlayClass = await featuredHoverOverlay.getAttribute('class')
+  expect(featuredOverlayClass, 'FeaturedSceneCard overlay must have bg-black/40').toContain('bg-black/40')
 
-  test('Cross-mount sync — memorize card persists after re-mount', async ({ page }) => {
-    await submitAndWaitForResponse(page);
+  // Sound grid section present
+  await expect(page.locator('text=Build Your Own Mix')).toBeVisible()
 
-    // Click memorize
-    const memorizeBtn = page.locator('button[aria-label="Memorize this verse"]').first();
-    await memorizeBtn.click();
-    await page.waitForTimeout(300);
+  // No placeholder copy ("We're curating" or similar old patterns)
+  const placeholderCount = await page.getByText("We're curating", { exact: false }).count()
+  expect(placeholderCount, 'Old placeholder copy must be absent').toBe(0)
+})
 
-    // Verify memorized state
-    const memorizedBtn = page.locator('button[aria-label="Remove from memorization deck"]').first();
-    await expect(memorizedBtn).toBeVisible();
+test('Route 3 — ambient tab (mobile 375)', async ({ page }) => {
+  await setup(page, { width: 375, height: 812 })
+  await page.goto(`${BASE_URL}/music?tab=ambient`)
+  await waitForRender(page, 'section[aria-label="Featured scenes"]')
+  await page.screenshot({ path: `${SS}/route3-ambient-375.png`, fullPage: true })
 
-    // Navigate away and back — store should persist (localStorage backed)
-    await page.goto(`${BASE_URL}/`);
-    await page.waitForTimeout(300);
-    await page.goto(`${BASE_URL}/ask`);
-    await submitAndWaitForResponse(page, 'What does the Bible say about hope?');
+  const featuredSection = page.locator('section[aria-label="Featured scenes"]')
+  await expect(featuredSection).toBeVisible()
 
-    // The same verse should still show as memorized
-    // (this depends on same verse being returned; mock data is deterministic)
-    // Just verify the store subscription reconnects — button shows either state consistently
-    const btn = page.locator('button[aria-pressed]').first();
-    await expect(btn).toBeVisible();
-  });
+  // Build Your Own Mix visible on mobile
+  await expect(page.getByText('Build Your Own Mix')).toBeVisible()
+})
 
-  test('ConversionPrompt shows for logged-out after first response', async ({ page }) => {
-    await submitAndWaitForResponse(page);
+// ─── ROUTE 4: /music?tab=sleep ──────────────────────────────────────────────
 
-    // Look for ConversionPrompt — should appear for logged-out users
-    const prompt = page.locator('[data-testid="conversion-prompt"], text=/sign in|save your conversation|create a free account/i').first();
-    // It may or may not show depending on timing — check if it's present
-    const visible = await prompt.isVisible().catch(() => false);
-    // Not a hard failure if not shown — depends on implementation detail
-    // Just verify it doesn't crash
-    expect(true).toBe(true);
-  });
+test('Route 4 — sleep tab border classes (desktop 1280)', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/music?tab=sleep`)
+  await waitForRender(page, '[role="tabpanel"][id="tabpanel-sleep"]:not([hidden])')
+  await page.screenshot({ path: `${SS}/route4-sleep-1280.png`, fullPage: true })
 
-  test('Response screenshot — 4-action verse card desktop', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await submitAndWaitForResponse(page);
-    await screenshot(page, '2-ask-response-verse-card-desktop');
-  });
+  // Active tab is "Sleep & Rest"
+  const activeTab = page.getByRole('tab', { selected: true })
+  await expect(activeTab).toContainText('Sleep & Rest')
 
-  test('Response screenshot — 4-action verse card mobile', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.mobileS);
-    await submitAndWaitForResponse(page);
-    await screenshot(page, '2-ask-response-verse-card-mobile');
-  });
+  // "Build a Bedtime Routine" CTA section has border-white/[0.12]
+  const routineCTA = page.getByText('Build a Bedtime Routine')
+  await expect(routineCTA).toBeVisible()
+  const routineContainer = routineCTA.locator('xpath=ancestor::div[contains(@class,"border-white")]').first()
+  const routineClass = await routineContainer.getAttribute('class')
+  expect(routineClass, '"Build a Bedtime Routine" container must have border-white/[0.12]').toContain(
+    'border-white/[0.12]',
+  )
 
-  test('SaveConversationButton shows for logged-in after 2+ Q&A pairs', async ({ page }) => {
-    await injectLoggedIn(page);
-    await interceptAskRoute(page);
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
+  // BibleSleepSection: items with border-white/[0.12]
+  // BibleSleepSection renders book items with that border class
+  const bibleItems = page.locator('a.rounded-xl.border.border-white\\/\\[0\\.12\\]')
+  const bibleItemCount = await bibleItems.count()
+  // At least some items should have this border class OR check via evaluate
+  // If the class selector doesn't work due to escaping, use evaluate
+  if (bibleItemCount === 0) {
+    // Try via evaluate
+    const count = await page.evaluate(() => {
+      const all = document.querySelectorAll('[class*="border-white/[0.12]"]')
+      return all.length
+    })
+    expect(count, 'At least one element with border-white/[0.12] must exist on sleep tab').toBeGreaterThan(0)
+  } else {
+    expect(bibleItemCount).toBeGreaterThan(0)
+  }
 
-    // First question → pair 1
-    await page.locator('textarea#ask-input').fill('What does faith mean?');
-    await page.locator('button[aria-label="Find Answers"]').click();
-    await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(500);
+  // bg-primary/10 icon background preserved (BibleSleepSection book icon)
+  const primaryTintCount = await page.evaluate(() => {
+    const all = document.querySelectorAll('[class*="bg-primary/10"]')
+    return all.length
+  })
+  expect(primaryTintCount, 'bg-primary/10 decorative tint must be preserved on sleep tab').toBeGreaterThan(
+    0,
+  )
+})
 
-    // After a response, showInput = false (textarea is unmounted).
-    // Build pair 2 by clicking a follow-up chip from the mock response.
-    // The mock includes followUpQuestions[0] = 'What else does the Bible say about hope?'
-    const followUpChip = page
-      .locator('button:has-text("What else does the Bible say about hope?")')
-      .first();
-    const chipVisible = await followUpChip.isVisible().catch(() => false);
-    if (chipVisible) {
-      await followUpChip.click();
-      await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 10000 });
-      await page.waitForTimeout(300);
+test('Route 4 — sleep tab (mobile 375)', async ({ page }) => {
+  await setup(page, { width: 375, height: 812 })
+  await page.goto(`${BASE_URL}/music?tab=sleep`)
+  await waitForRender(page, '[role="tabpanel"][id="tabpanel-sleep"]:not([hidden])')
+  await page.screenshot({ path: `${SS}/route4-sleep-375.png`, fullPage: true })
+
+  await expect(page.getByText('Build a Bedtime Routine')).toBeVisible()
+})
+
+// ─── ROUTE 5: /music?mix=<base64> ───────────────────────────────────────────
+
+test('Route 5 — SharedMixHero gradient + Play This Mix white pill', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/music?tab=ambient&mix=${MIX_B64}`)
+  await waitForRender(page, '[data-testid="shared-mix-hero"], button')
+  await page.waitForTimeout(800) // allow SharedMixHero to mount
+  await page.screenshot({ path: `${SS}/route5-shared-mix-1280.png`, fullPage: true })
+
+  // SharedMixHero: "Play This Mix" button must be visible
+  const playBtn = page.getByRole('button', { name: /Play This Mix/ })
+  await expect(playBtn, '"Play This Mix" button must be visible in SharedMixHero').toBeVisible()
+
+  // Pattern 2 white-pill: bg-white on button
+  const playBtnClass = await playBtn.getAttribute('class')
+  expect(playBtnClass, '"Play This Mix" must have bg-white').toContain('bg-white')
+  expect(playBtnClass, '"Play This Mix" must have rounded-full').toContain('rounded-full')
+  expect(playBtnClass, '"Play This Mix" must have px-8').toContain('px-8')
+  expect(playBtnClass, '"Play This Mix" must have text-hero-bg').toContain('text-hero-bg')
+  expect(playBtnClass, '"Play This Mix" must have white shadow').toContain(
+    'shadow-[0_0_30px_rgba(255,255,255,0.20)]',
+  )
+  expect(playBtnClass, '"Play This Mix" must have hover shadow').toContain(
+    'hover:shadow-[0_0_40px_rgba(255,255,255,0.30)]',
+  )
+
+  // SharedMixHero section wrapper: gradient background preserved
+  // The section has an inline style with radial-gradient
+  const heroSection = page.locator('section').filter({ has: playBtn })
+  const heroStyle = await heroSection.getAttribute('style')
+  expect(heroStyle, 'SharedMixHero gradient must be preserved').toContain('radial-gradient')
+
+  // Mix sound names shown (gentle rain, fireplace, night crickets)
+  // These might appear as text in the hero — use heading role to avoid strict-mode multi-match
+  const gentleRainHeading = page.getByRole('heading', { name: /Gentle Rain/i })
+  const gentleRainCount = await gentleRainHeading.count()
+  if (gentleRainCount > 0) {
+    await expect(gentleRainHeading.first()).toBeVisible()
+  } else {
+    // Fall back to first text match if no heading role
+    await expect(page.getByText('Gentle Rain', { exact: false }).first()).toBeVisible()
+  }
+
+  // Dismiss button present
+  const dismissBtn = page.getByRole('button', { name: /Dismiss|dismiss|close|skip/i })
+  // Not strictly required but good to check
+  const dismissCount = await dismissBtn.count()
+  console.log(`Dismiss buttons found: ${dismissCount}`)
+
+  // Tab is forced to ambient when mix present
+  const activeTab = page.getByRole('tab', { selected: true })
+  await expect(activeTab).toContainText('Ambient Sounds')
+})
+
+// ─── AUDIODRAWER STATES ──────────────────────────────────────────────────────
+
+test('AudioDrawer — open via Daily Hub ambient pill + Mixer tab chrome', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/daily?tab=pray`)
+  await waitForRender(page, '[role="tablist"]')
+  await page.waitForTimeout(500)
+  await page.screenshot({ path: `${SS}/drawer-preflight-1280.png`, fullPage: true })
+
+  // Strategy: AudioPill routine-shortcut (z-9999) intercepts clicks on the DailyAmbientPillFAB.
+  // Click the routine shortcut's "Start …" button → dispatches START_ROUTINE → pillVisible=true
+  // synchronously, then "Open audio controls" becomes available on the now-playing AudioPill.
+  const routineStartBtn = page.getByRole('button', { name: /^Start /i }).first()
+  const hasRoutine = (await routineStartBtn.count()) > 0
+
+  if (hasRoutine) {
+    await routineStartBtn.click()
+    await page.waitForTimeout(500)
+    // "Open audio controls" is now on the now-playing pill (exact: true to avoid the "Playing: X, click to open audio controls" sibling)
+    const openDrawerBtn = page.getByRole('button', { name: 'Open audio controls', exact: true })
+    await expect(openDrawerBtn).toBeVisible()
+    await openDrawerBtn.click()
+    await page.waitForTimeout(400)
+  } else {
+    // Fallback: try clicking the DailyAmbientPillFAB directly
+    const ambientPill = page.getByRole('button', { name: 'Enhance with sound' })
+    await expect(ambientPill, 'Ambient pill must be visible on Daily Hub').toBeVisible()
+    await ambientPill.click()
+    await page.waitForTimeout(400)
+  }
+
+  // Drawer visible
+  const drawer = page.getByRole('dialog', { name: 'Audio controls' })
+  await expect(drawer, 'AudioDrawer must open on pill click').toBeVisible()
+  await page.screenshot({ path: `${SS}/drawer-open-mixer-1280.png`, fullPage: true })
+
+  // Drawer border: border-white/[0.12]
+  const drawerClass = await drawer.getAttribute('class')
+  expect(drawerClass, 'Drawer panel must have border-white/[0.12]').toContain('border-white/[0.12]')
+
+  // Drawer background: rgba(15, 10, 30, 0.95) via inline style
+  const drawerStyle = await drawer.evaluate((el) => (el as HTMLElement).style.background)
+  expect(drawerStyle, 'Drawer background must be rgba(15, 10, 30, 0.95)').toBe(
+    'rgba(15, 10, 30, 0.95)',
+  )
+
+  // Close button present
+  const closeBtn = page.getByRole('button', { name: 'Close audio controls' })
+  await expect(closeBtn).toBeVisible()
+
+  // DrawerTabs: 3 tabs (Mixer, Timer, Saved) — role="tab" not "button"
+  const mixerTab = page.getByRole('tab', { name: /Mixer/i })
+  const timerTab = page.getByRole('tab', { name: /Timer/i })
+  const savedTab = page.getByRole('tab', { name: /Saved/i })
+  await expect(mixerTab).toBeVisible()
+  await expect(timerTab).toBeVisible()
+  await expect(savedTab).toBeVisible()
+
+  // Mixer is default active tab — DrawerTabs uses underline style (border-b-2 border-primary) + aria-selected
+  // NOTE: DrawerTabs uses a different active pattern from the Music page shell tabs.
+  // Music shell tabs: bg-white/15 pill. DrawerTabs: border-b-2 border-primary underline.
+  await expect(mixerTab).toHaveAttribute('aria-selected', 'true')
+  const mixerTabClass = await mixerTab.getAttribute('class')
+  expect(mixerTabClass, 'Mixer tab active class must include border-primary').toContain('border-primary')
+  expect(mixerTabClass, 'Mixer tab active class must include text-primary').toContain('text-primary')
+})
+
+test('AudioDrawer — Timer tab active preset + Start Timer white pill', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/daily?tab=pray`)
+  await waitForRender(page, '[role="tablist"]')
+  await page.waitForTimeout(500)
+
+  // Open drawer via routine shortcut (same strategy as Mixer test)
+  const routineStartBtn = page.getByRole('button', { name: /^Start /i }).first()
+  if ((await routineStartBtn.count()) > 0) {
+    await routineStartBtn.click()
+    await page.waitForTimeout(500)
+    await page.getByRole('button', { name: 'Open audio controls', exact: true }).click()
+  } else {
+    await page.getByRole('button', { name: 'Enhance with sound' }).click()
+  }
+  await page.waitForTimeout(400)
+
+  const drawer = page.getByRole('dialog', { name: 'Audio controls' })
+  await expect(drawer).toBeVisible()
+
+  // Click Timer tab — role="tab" not "button"
+  const timerTab = page.getByRole('tab', { name: /Timer/i })
+  await timerTab.click()
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: `${SS}/drawer-timer-tab-1280.png`, fullPage: true })
+
+  // Timer tab becomes active — underline style same as Mixer
+  await expect(timerTab).toHaveAttribute('aria-selected', 'true')
+  const timerTabClass = await timerTab.getAttribute('class')
+  expect(timerTabClass, 'Timer tab active class must include border-primary').toContain('border-primary')
+
+  // Timer presets: no preset selected by default (selectedDuration starts null).
+  // Click the first preset (scoped to drawer panel to avoid matching Daily Hub guided prayer cards)
+  const activePanel = drawer.locator('[role="tabpanel"]')
+  // Preset buttons carry aria-checked attribute — scope within panel to skip background page elements
+  const presetBtns = activePanel.locator('button[aria-checked]')
+  const presetCount = await presetBtns.count()
+  if (presetCount > 0) {
+    const firstPreset = presetBtns.first()
+    await firstPreset.click()
+    await page.waitForTimeout(200)
+    const selectedPresetClass = await firstPreset.getAttribute('class')
+    expect(selectedPresetClass, 'Selected preset must have bg-white/15 active state').toContain('bg-white/15')
+    expect(selectedPresetClass, 'Selected preset must have text-white').toContain('text-white')
+    expect(selectedPresetClass, 'Selected preset must have border-white/30').toContain('border-white/30')
+  } else {
+    console.log('No aria-checked preset buttons found in timer panel; skipping preset check')
+  }
+
+  // Start Timer button: Pattern 2 white-pill (bg-white + rounded-full + shadow)
+  // Scoped to drawer to avoid matching any background Start buttons.
+  // Note: the button has an aria-label override ("Start sleep timer for X min...") so we
+  // match by visible text content, not accessible name.
+  const startTimerBtn = drawer.locator('button', { hasText: /^Start Timer$/ })
+  await expect(startTimerBtn, 'Start Timer button must be visible on Timer tab').toBeVisible()
+
+  const startTimerClass = await startTimerBtn.getAttribute('class')
+  expect(startTimerClass, 'Start Timer must have bg-white (Pattern 2 white pill)').toContain('bg-white')
+  expect(startTimerClass, 'Start Timer must have rounded-full').toContain('rounded-full')
+  expect(startTimerClass, 'Start Timer must have px-8').toContain('px-8')
+  // Pattern 2 uses text-hero-bg for the dark text on white button
+  expect(startTimerClass, 'Start Timer must have text-hero-bg').toContain('text-hero-bg')
+})
+
+test('AudioDrawer — close and FAB reappears', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/daily?tab=pray`)
+  await waitForRender(page, '[role="tablist"]')
+  await page.waitForTimeout(500)
+
+  // Open drawer via routine shortcut (same strategy as Mixer test)
+  const routineStartBtn = page.getByRole('button', { name: /^Start /i }).first()
+  if ((await routineStartBtn.count()) > 0) {
+    await routineStartBtn.click()
+    await page.waitForTimeout(500)
+    await page.getByRole('button', { name: 'Open audio controls', exact: true }).click()
+  } else {
+    await page.getByRole('button', { name: 'Enhance with sound' }).click()
+  }
+  await page.waitForTimeout(400)
+
+  const drawer = page.getByRole('dialog', { name: 'Audio controls' })
+  await expect(drawer).toBeVisible()
+
+  // FAB auto-hides when drawer open: the fixed z-40 wrapper gets aria-hidden="true"
+  const fabWrapper = page.locator('div.fixed.z-40')
+  await expect(fabWrapper).toHaveAttribute('aria-hidden', 'true')
+  console.log('DailyAmbientPillFAB correctly aria-hidden while drawer open')
+
+  // Close drawer
+  await page.getByRole('button', { name: 'Close audio controls' }).click()
+  await page.waitForTimeout(400)
+
+  // Drawer closed
+  await expect(drawer).not.toBeVisible()
+
+  // FAB reappears: aria-hidden removed/false after drawer closes
+  await expect(fabWrapper).not.toHaveAttribute('aria-hidden', 'true')
+  await page.screenshot({ path: `${SS}/drawer-closed-fab-restored-1280.png`, fullPage: true })
+})
+
+// ─── AUDIODRAWER ON MUSIC PAGE (routine shortcut pill check) ─────────────────
+
+test('AudioPill — routine shortcut border-white/[0.12] (Music page, logged in)', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/music`)
+  await waitForRender(page, '[role="tablist"]')
+  await page.waitForTimeout(500)
+  await page.screenshot({ path: `${SS}/audio-pill-routine-shortcut-1280.png`, fullPage: true })
+
+  // The routine shortcut AudioPill renders when isAuthenticated + !pillVisible
+  // Find the fixed pill element by its border class
+  const pillByAriaLabel = page.locator('[aria-label="Routine shortcut"]')
+  const routinePillCount = await pillByAriaLabel.count()
+
+  if (routinePillCount > 0) {
+    const pillClass = await pillByAriaLabel.getAttribute('class')
+    expect(pillClass, 'Routine shortcut pill must have border-white/[0.12]').toContain(
+      'border-white/[0.12]',
+    )
+  } else {
+    // AudioPill might not render if no routines found; check the now-playing pill instead
+    const nowPlayingPill = page.locator('[aria-label="Audio player"]')
+    const nowPlayingCount = await nowPlayingPill.count()
+    if (nowPlayingCount > 0) {
+      const pillClass = await nowPlayingPill.getAttribute('class')
+      expect(pillClass, 'Now-playing AudioPill must have border-white/[0.12]').toContain(
+        'border-white/[0.12]',
+      )
     } else {
-      console.log('Follow-up chip not visible — skipping second Q&A pair');
+      console.log('AudioPill not visible — no routines or audio active; skipping border check')
     }
-
-    // SaveConversationButton renders when conversation.length >= 2 (logged-in only)
-    const saveBtn = page
-      .locator('[data-testid="save-conversation-button"], button:has-text("Save Conversation"), button:has-text("Save conversation")')
-      .first();
-    const visible = await saveBtn.isVisible().catch(() => false);
-    console.log('SaveConversationButton visible after 2 Q&A:', visible, '(chip was visible:', chipVisible, ')');
-    // Non-fatal assertion — we log state; if chip wasn't clickable the test still passes
-  });
-});
-
-// ---------------------------------------------------------------------------
-// ROUTE 2 — /ask?q=Hello%20world (auto-submit deep-link)
-// ---------------------------------------------------------------------------
-
-/** Minimal AskResponse mock that satisfies the envelope schema */
-const MOCK_ASK_ENVELOPE = {
-  data: {
-    id: 'test-response',
-    answer: 'This is a test answer from the mock.',
-    verses: [
-      {
-        reference: 'John 3:16',
-        text: 'For God so loved the world, that he gave his one and only Son, that whoever believes in him should not perish, but have eternal life.',
-        translation: 'WEB',
-      },
-    ],
-    // Must be exactly 3 items to match AskResponse.followUpQuestions: [string, string, string]
-    followUpQuestions: [
-      'What else does the Bible say about hope?',
-      'How can I strengthen my faith?',
-      'What does the Bible say about love?',
-    ],
-  },
-  meta: { requestId: 'test-req-1' },
-};
-
-async function interceptAskRoute(page: Page) {
-  await page.route('**/api/v1/proxy/ai/ask', (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(MOCK_ASK_ENVELOPE),
-    }),
-  );
-}
-
-test.describe('Route 2 — /ask?q= auto-submit', () => {
-  test('Textarea pre-filled from ?q= param', async ({ page }) => {
-    await interceptAskRoute(page);
-    await page.goto(`${BASE_URL}/ask?q=Hello%20world`);
-    await page.waitForLoadState('domcontentloaded');
-
-    // showInput = conversation.length === 0 && !isLoading.
-    // The auto-submit fires synchronously (setTimeout 0) and the intercepted route
-    // responds immediately, so the response arrives before our checks run.
-    // After a response, the textarea is unmounted (showInput becomes false).
-    // We therefore wait for EITHER the textarea (pre-response) OR the response heading
-    // (post-response). Both confirm the ?q= param was read correctly.
-    await Promise.race([
-      page.waitForSelector('textarea#ask-input', { state: 'visible', timeout: 8000 }).catch(() => null),
-      page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 8000 }).catch(() => null),
-    ]);
-
-    const value = await page.evaluate(
-      () => (document.getElementById('ask-input') as HTMLTextAreaElement | null)?.value ?? '',
-    );
-    const responseVisible = await page.locator('#latest-response-heading').isVisible().catch(() => false);
-    // Either the textarea still holds the pre-filled value (response not yet arrived)
-    // OR the response arrived (proving pre-fill + auto-submit worked end-to-end).
-    expect(value === 'Hello world' || responseVisible).toBe(true);
-  });
-
-  test('Auto-submit fires and response arrives', async ({ page }) => {
-    captureConsole(page);
-    await interceptAskRoute(page);
-    await page.goto(`${BASE_URL}/ask?q=What%20does%20the%20Bible%20say%20about%20hope`);
-
-    // With intercepted backend, mock responds immediately
-    await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(300);
-
-    const heading = page.locator('#latest-response-heading');
-    await expect(heading).toBeVisible();
-  });
-
-  test('Bridge arrival screenshot — auto-submit with prefilled question', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await interceptAskRoute(page);
-    await page.goto(`${BASE_URL}/ask?q=What%20does%20the%20Bible%20say%20about%20hope`);
-    await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(300);
-    await screenshot(page, '5-ask-bridge-arrival-auto-submit');
-  });
-
-  test('No console errors during auto-submit', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      const text = msg.text();
-      if (msg.type() === 'error' && !IGNORE_PATTERNS.some((p) => text.includes(p))) {
-        errors.push(text);
-      }
-    });
-
-    await interceptAskRoute(page);
-    await page.goto(`${BASE_URL}/ask?q=What%20does%20faith%20mean`);
-    await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(300);
-
-    // Filter out expected network errors from backend being down
-    const appErrors = errors.filter(e => !e.includes('fetch') && !e.includes('ERR_') && !e.includes('net::'));
-    expect(appErrors).toHaveLength(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// ROUTE 3 — /bible/john/3 (BibleReader regression + Ask bridge)
-// ---------------------------------------------------------------------------
-
-test.describe('Route 3 — /bible/john/3 BibleReader bridge', () => {
-  test('BibleReader renders without console errors', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      const text = msg.text();
-      if (msg.type() === 'error' && !IGNORE_PATTERNS.some((p) => text.includes(p))) {
-        errors.push(text);
-      }
-    });
-
-    await page.goto(`${BASE_URL}/bible/john/3`);
-    await waitForRender(page, 'main, [data-testid="bible-reader"], .bible-reader');
-    await page.waitForTimeout(1000);
-
-    // Allow network errors since backend is down (audio API etc.)
-    const appErrors = errors.filter(e => !e.includes('fetch') && !e.includes('network') && !e.includes('ERR_') && !e.includes('net::'));
-    expect(appErrors).toHaveLength(0);
-  });
-
-  test('BibleReader chrome unchanged — ReaderChrome present, correct structure', async ({ page }) => {
-    await page.goto(`${BASE_URL}/bible/john/3`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-
-    // Verify chapter content is present
-    const body = await page.content();
-    expect(body).toContain('John');
-  });
-
-  test('VerseActionSheet opens and shows "Ask about this" secondary action', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await page.goto(`${BASE_URL}/bible/john/3`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1500);
-
-    // Verses have data-verse attribute on span elements (from ReaderBody.tsx)
-    // useVerseTap listens for pointerdown + pointerup to open VerseActionSheet
-    const verseSpan = page.locator('span[data-verse="16"]').first();
-    const verseVisible = await verseSpan.isVisible().catch(() => false);
-
-    if (verseVisible) {
-      await verseSpan.click();
-      await page.waitForTimeout(800);
-
-      // Check for VerseActionSheet dialog
-      const sheet = page.locator('[role="dialog"]').first();
-      const sheetVisible = await sheet.isVisible().catch(() => false);
-
-      if (sheetVisible) {
-        // Look for "Ask about this" secondary action
-        const askAction = page.locator('[role="dialog"] >> text=Ask about this').first();
-        const askVisible = await askAction.isVisible().catch(() => false);
-
-        if (askVisible) {
-          await expect(askAction).toBeVisible();
-        } else {
-          // Sheet is open but Ask action not visible — may need to scroll to secondary actions
-          console.log('Sheet open but Ask about this not visible — checking full sheet content');
-          const sheetText = await sheet.innerText().catch(() => '');
-          console.log('Sheet content includes Ask about this:', sheetText.includes('Ask about this'));
-          expect(sheetText).toContain('Ask about this');
-        }
-
-        await screenshot(page, '3-bible-reader-verse-action-sheet');
-      } else {
-        // Sheet didn't open — take screenshot of current state for diagnosis
-        await screenshot(page, '3-bible-reader-sheet-not-opened');
-        console.log('NOTE: VerseActionSheet did not open after span[data-verse="16"] click');
-        // Non-fatal — BibleReader still renders correctly (tested separately above)
-      }
-    } else {
-      console.log('NOTE: span[data-verse="16"] not found — John 3:16 may be loading or unavailable');
-      await screenshot(page, '3-bible-reader-verse-span-not-found');
-    }
-  });
-
-  test('VerseActionSheet "Ask about this" navigates to /ask?q= URL', async ({ page }) => {
-    await page.goto(`${BASE_URL}/bible/john/3`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1500);
-
-    // Try to open the action sheet by selecting verse text
-    const verseText = page.locator('p, span').filter({ hasText: 'For God so loved' }).first();
-
-    // Try multiple interaction methods
-    let navigated = false;
-
-    // Method 1: Look for direct "Ask about this" link/button without needing action sheet
-    const askDirectLinks = page.locator('a[href*="/ask?q="], button:has-text("Ask about this")');
-    const directCount = await askDirectLinks.count();
-
-    if (directCount > 0) {
-      const href = await askDirectLinks.first().getAttribute('href');
-      if (href) {
-        expect(href).toContain('/ask?q=');
-        navigated = true;
-      }
-    }
-
-    // Method 2: If action sheet was opened and Ask link is present
-    if (!navigated) {
-      await verseText.click().catch(() => {});
-      await page.waitForTimeout(500);
-
-      const askLink = page.locator('a[href*="/ask?q="]').first();
-      const linkVisible = await askLink.isVisible().catch(() => false);
-      if (linkVisible) {
-        const href = await askLink.getAttribute('href');
-        expect(href).toContain('/ask?q=');
-        expect(href).toContain('Help me understand');
-        navigated = true;
-      }
-    }
-
-    // Log result — non-fatal if action sheet interaction not achievable in test environment
-    console.log('Ask navigation link found:', navigated);
-  });
-
-  test('Decision 13 — BibleReader chrome unchanged (no Spec 9 structural drift)', async ({ page }) => {
-    await page.goto(`${BASE_URL}/bible/john/3`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-
-    // Verify core BibleReader elements remain
-    const bookTitle = page.locator('text=John').first();
-    await expect(bookTitle).toBeVisible();
-
-    // No new GlowBackground or BackgroundCanvas wrapper in BibleReader
-    const canvas = page.locator('[data-testid="background-canvas"]');
-    const canvasCount = await canvas.count();
-    // BackgroundCanvas should NOT be in BibleReader (Decision 13 boundary)
-    expect(canvasCount).toBe(0);
-  });
-
-  test('BibleReader regression — responsive screenshots', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await page.goto(`${BASE_URL}/bible/john/3`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1500);
-    await screenshot(page, '3-bible-reader-desktop');
-
-    await page.setViewportSize(BREAKPOINTS.mobileS);
-    await page.waitForTimeout(300);
-    await screenshot(page, '3-bible-reader-mobile');
-  });
-});
-
-// ---------------------------------------------------------------------------
-// ROUTE 4 — /daily?tab=devotional (Daily Hub regression + Ask bridge)
-// ---------------------------------------------------------------------------
-
-test.describe('Route 4 — /daily?tab=devotional Ask bridge', () => {
-  async function goToDevotional(page: Page) {
-    await page.goto(`${BASE_URL}/daily?tab=devotional`);
-    await waitForRender(page, 'main');
-    await page.waitForTimeout(1000);
   }
+})
 
-  test('Devotional tab renders without errors', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      const text = msg.text();
-      if (msg.type() === 'error' && !IGNORE_PATTERNS.some((p) => text.includes(p))) {
-        errors.push(text);
-      }
-    });
+// ─── KEYBOARD NAVIGATION ────────────────────────────────────────────────────
 
-    await goToDevotional(page);
-    const appErrors = errors.filter(e => !e.includes('fetch') && !e.includes('network') && !e.includes('ERR_'));
-    expect(appErrors).toHaveLength(0);
-  });
+test('Tab bar keyboard navigation — Arrow keys move between tabs', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/music`)
+  await waitForRender(page, '[role="tablist"]')
 
-  test('"Ask about this" CTA is present in DevotionalTabContent', async ({ page }) => {
-    await goToDevotional(page);
+  // Focus first tab
+  const firstTab = page.getByRole('tab', { name: /Worship Playlists/ })
+  await firstTab.focus()
+  await expect(firstTab).toBeFocused()
 
-    // Look for "Ask about this" button/link
-    const askCTA = page.locator('a:has-text("Ask about this"), button:has-text("Ask about this")').first();
-    await expect(askCTA).toBeVisible({ timeout: 5000 });
-  });
+  // ArrowRight moves to Ambient tab
+  await page.keyboard.press('ArrowRight')
+  const ambientTab = page.getByRole('tab', { name: /Ambient Sounds/ })
+  await expect(ambientTab).toBeFocused()
 
-  test('"Ask about this" CTA links to /ask?q= URL', async ({ page }) => {
-    await goToDevotional(page);
+  // ArrowRight again moves to Sleep tab
+  await page.keyboard.press('ArrowRight')
+  const sleepTab = page.getByRole('tab', { name: /Sleep & Rest/ })
+  await expect(sleepTab).toBeFocused()
 
-    const askLink = page.locator('a[href*="/ask?q="]').first();
-    await expect(askLink).toBeVisible({ timeout: 5000 });
+  // ArrowRight wraps to first tab
+  await page.keyboard.press('ArrowRight')
+  await expect(firstTab).toBeFocused()
 
-    const href = await askLink.getAttribute('href');
-    expect(href).toContain('/ask?q=');
-    // Should NOT contain the "Something to think about today:" prefix
-    expect(href).not.toContain('Something to think about today');
-  });
+  // Home key jumps to first
+  await ambientTab.focus()
+  await page.keyboard.press('Home')
+  await expect(firstTab).toBeFocused()
 
-  test('"Ask about this" and "Journal about this question" are both present in same row', async ({ page }) => {
-    await goToDevotional(page);
+  // End key jumps to last
+  await page.keyboard.press('End')
+  await expect(sleepTab).toBeFocused()
+})
 
-    const askLink = page.locator('a[href*="/ask?q="]').first();
-    const journalBtn = page.locator('button:has-text("Journal about this question"), a:has-text("Journal about this question")').first();
+// ─── STICKY TAB BAR ─────────────────────────────────────────────────────────
 
-    await expect(askLink).toBeVisible({ timeout: 5000 });
-    await expect(journalBtn).toBeVisible({ timeout: 5000 });
-  });
+test('Sticky tab bar — scroll shadow activates on scroll', async ({ page }) => {
+  await setup(page)
+  await page.goto(`${BASE_URL}/music?tab=ambient`)
+  await waitForRender(page, 'section[aria-label="Featured scenes"]')
 
-  test('Inline positional alignment — CTA row buttons on same line at desktop', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await goToDevotional(page);
+  // Scroll down to trigger sticky shadow
+  await page.evaluate(() => window.scrollBy(0, 300))
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: `${SS}/sticky-tab-bar-scrolled-1280.png`, fullPage: true })
 
-    const askLink = page.locator('a[href*="/ask?q="]').first();
-    const journalBtn = page.locator('button:has-text("Journal about this question")').first();
+  // Tab bar should still be visible after scroll
+  const tabList = page.getByRole('tablist', { name: 'Music sections' })
+  await expect(tabList).toBeVisible()
+})
 
-    const askBox = await askLink.boundingBox().catch(() => null);
-    const journalBox = await journalBtn.boundingBox().catch(() => null);
+// ─── CONSOLE ERROR SUMMARY ───────────────────────────────────────────────────
 
-    if (askBox && journalBox) {
-      // Both should be on the same row (y within ±5px)
-      expect(Math.abs(askBox.y - journalBox.y)).toBeLessThanOrEqual(5);
+test('Console error baseline check', async ({ page }) => {
+  const errors: string[] = []
+  page.on('console', (msg) => {
+    const t = msg.text()
+    if (msg.type() === 'error' && !IGNORE.some((p) => t.includes(p))) {
+      errors.push(t)
     }
-  });
+  })
 
-  test('"Ask about this" CTA navigates to /ask with pre-filled question', async ({ page }) => {
-    await goToDevotional(page);
+  await setup(page)
+  await page.goto(`${BASE_URL}/music`)
+  await waitForRender(page, '[role="tablist"]')
 
-    const askLink = page.locator('a[href*="/ask?q="]').first();
-    await expect(askLink).toBeVisible({ timeout: 5000 });
+  await page.getByRole('tab', { name: /Ambient Sounds/ }).click()
+  await page.waitForTimeout(500)
 
-    const href = await askLink.getAttribute('href');
-    console.log('Ask about this href:', href);
+  await page.getByRole('tab', { name: /Sleep & Rest/ }).click()
+  await page.waitForTimeout(500)
 
-    // Click and verify navigation
-    await askLink.click();
-    await page.waitForURL('**/ask**', { timeout: 5000 });
-
-    const url = page.url();
-    expect(url).toContain('/ask');
-    expect(url).toContain('q=');
-  });
-
-  test('Daily Hub bridge screenshot — Ask CTA placement', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await goToDevotional(page);
-    await screenshot(page, '4-daily-hub-devotional-ask-cta-desktop');
-
-    await page.setViewportSize(BREAKPOINTS.mobileS);
-    await page.waitForTimeout(300);
-    await screenshot(page, '4-daily-hub-devotional-ask-cta-mobile');
-  });
-
-  test('Daily Hub bridge arrival screenshot — after navigating from devotional', async ({ page }) => {
-    await page.setViewportSize(BREAKPOINTS.desktop);
-    await interceptAskRoute(page);
-    await goToDevotional(page);
-
-    const askLink = page.locator('a[href*="/ask?q="]').first();
-    const href = await askLink.getAttribute('href');
-
-    if (href) {
-      await page.goto(`${BASE_URL}${href}`);
-      await page.waitForSelector('#latest-response-heading, textarea#ask-input', { state: 'visible', timeout: 15000 });
-      await page.waitForTimeout(500);
-      await screenshot(page, '6-ask-from-daily-hub-devotional');
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// CROSS-CUTTING: Responsive breakpoints for /ask
-// ---------------------------------------------------------------------------
-
-test.describe('Cross-cutting — /ask responsive breakpoints', () => {
-  for (const [name, size] of Object.entries(BREAKPOINTS)) {
-    test(`/ask renders correctly at ${name} (${size.width}px)`, async ({ page }) => {
-      await page.setViewportSize(size);
-      await page.goto(`${BASE_URL}/ask`);
-      await waitForRender(page, 'textarea#ask-input');
-
-      const textarea = page.locator('textarea#ask-input');
-      await expect(textarea).toBeVisible();
-
-      const h1 = page.locator('h1');
-      await expect(h1).toBeVisible();
-
-      await screenshot(page, `ask-idle-${name}-${size.width}px`);
-    });
+  const musicRelatedErrors = errors.filter(
+    (e) => !e.includes('favicon') && !e.includes('audio') && !e.includes('net::'),
+  )
+  console.log(`Total console errors: ${errors.length}`)
+  console.log(`Music-related errors: ${musicRelatedErrors.length}`)
+  if (musicRelatedErrors.length > 0) {
+    console.log('Errors:', musicRelatedErrors.slice(0, 5))
   }
-});
-
-// ---------------------------------------------------------------------------
-// CROSS-CUTTING: No new localStorage keys
-// ---------------------------------------------------------------------------
-
-test.describe('Cross-cutting — localStorage discipline', () => {
-  test('No unexpected new localStorage keys written on /ask idle', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    const keys = await page.evaluate(() => Object.keys(localStorage));
-    const unexpected = keys.filter(
-      (k) => !k.startsWith('wr_') && !k.startsWith('bible:') && !k.startsWith('bb'),
-    );
-    expect(unexpected).toHaveLength(0);
-  });
-
-  test('wr_chat_feedback key schema unchanged after thumbs feedback', async ({ page }) => {
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    // Submit a question to get a response
-    await page.locator('textarea#ask-input').fill('Test question');
-    await page.locator('button[aria-label="Find Answers"]').click();
-    await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 15000 });
-
-    // Find thumbs buttons
-    const thumbsUp = page.locator('button[aria-label*="helpful"], button[aria-label*="thumbs up"], button[title*="helpful"]').first();
-    const thumbVisible = await thumbsUp.isVisible().catch(() => false);
-
-    if (thumbVisible) {
-      await thumbsUp.click();
-      await page.waitForTimeout(300);
-
-      const feedback = await page.evaluate(() => {
-        const raw = localStorage.getItem('wr_chat_feedback');
-        return raw ? JSON.parse(raw) : null;
-      });
-
-      if (feedback) {
-        expect(Array.isArray(feedback)).toBe(true);
-        // Each entry should have expected shape
-        const entry = feedback[0];
-        expect(entry).toHaveProperty('rating');
-      }
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// CROSS-CUTTING: Auth state checks
-// ---------------------------------------------------------------------------
-
-test.describe('Cross-cutting — Auth states', () => {
-  test('/ask logged-out: Memorize NOT auth-gated (fires immediately)', async ({ page }) => {
-    // No auth injection — logged-out state
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    await page.locator('textarea#ask-input').fill('What does faith mean?');
-    await page.locator('button[aria-label="Find Answers"]').click();
-    await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(500);
-
-    const memorizeBtn = page.locator('button[aria-label="Memorize this verse"]').first();
-    await expect(memorizeBtn).toBeVisible();
-
-    // Click should NOT open an auth modal
-    await memorizeBtn.click();
-    await page.waitForTimeout(300);
-
-    // Auth modal should NOT appear
-    const authModal = page.locator('[role="dialog"]:has-text("Sign in")');
-    const modalVisible = await authModal.isVisible().catch(() => false);
-    expect(modalVisible).toBe(false);
-
-    // Memorize state should toggle
-    const memorizedBtn = page.locator('button[aria-label="Remove from memorization deck"]').first();
-    await expect(memorizedBtn).toBeVisible();
-  });
-
-  test('/ask logged-in: No ConversionPrompt after response', async ({ page }) => {
-    await injectLoggedIn(page);
-    await page.goto(`${BASE_URL}/ask`);
-    await waitForRender(page, 'textarea#ask-input');
-
-    await page.locator('textarea#ask-input').fill('What does faith mean?');
-    await page.locator('button[aria-label="Find Answers"]').click();
-    await page.waitForSelector('#latest-response-heading', { state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(500);
-
-    // ConversionPrompt should NOT appear for logged-in users
-    const prompt = page.locator('text=/sign up|create a free account|save.*conversation/i').first();
-    const promptVisible = await prompt.isVisible().catch(() => false);
-    console.log('ConversionPrompt visible when logged in:', promptVisible);
-    // Logged-in users should not see sign-up prompts
-    expect(promptVisible).toBe(false);
-  });
-});
+  // Audio fetch errors (missing audio files) are expected in dev; only flag non-network errors
+  expect(musicRelatedErrors.length, 'Unexpected console errors on Music page').toBe(0)
+})

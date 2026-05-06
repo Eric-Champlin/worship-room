@@ -565,7 +565,7 @@ Global `AudioProvider` wraps the app (between `AuthModalProvider` and `Routes` i
 
 Music tabs: dark `#0f0a1e` (`bg-dashboard-dark`) background with frosted glass cards (`bg-white/[0.06] border border-white/10 rounded-xl`) and white text. AudioDrawer/AudioPill/overlays: dark-themed (`rgba(15,10,30,0.85)` with white text). Consistent with the rest of the dark-theme app.
 
-Hooks kept for potential re-enable: `useSpotifyAutoPause` (commented-out import in `WorshipPlaylistsTab.tsx`). All other previously listed music re-enable components (`TimeOfDaySection`, `PersonalizationSection`, `RecentlyAddedSection`, `ResumePrompt`, `MusicHint`, `LofiCrossReference`, `AmbientSearchBar`, `AmbientFilterBar`) and hooks (`useMusicHints`, `useTimeOfDayRecommendations`) have been deleted from the codebase.
+Previously listed music re-enable components (`TimeOfDaySection`, `PersonalizationSection`, `RecentlyAddedSection`, `ResumePrompt`, `MusicHint`, `LofiCrossReference`, `AmbientSearchBar`, `AmbientFilterBar`) and hooks (`useMusicHints`, `useTimeOfDayRecommendations`, `useSpotifyAutoPause`) have all been deleted from the codebase. The `WorshipPlaylistsTab.tsx` `useSpotifyAutoPause` commented-out import was removed in Spec 11A.
 
 ### Key Audio Components
 

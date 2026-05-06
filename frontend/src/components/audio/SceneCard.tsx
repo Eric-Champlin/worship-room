@@ -46,7 +46,7 @@ export function SceneCard({ scene, isActive, onPlay }: SceneCardProps) {
             ))}
           </div>
         </div>
-        <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100">
+        <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary">
             <Play size={20} />
           </div>
