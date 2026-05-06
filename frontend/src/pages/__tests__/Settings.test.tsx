@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useNavigationType } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
 import { SETTINGS_KEY } from '@/services/settings-storage'
 import { Settings } from '../Settings'
@@ -32,15 +32,49 @@ vi.mock('@/hooks/useSoundEffects', () => ({
 
 const mockUseAuth = mockAuthFn
 
-function renderSettings() {
+function renderSettings(path: string = '/settings') {
   return render(
     <MemoryRouter
-      initialEntries={['/settings']}
+      initialEntries={[path]}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <ToastProvider>
         <Routes>
           <Route path="/settings" element={<Settings />} />
+          <Route path="/" element={<div>Home</div>} />
+        </Routes>
+      </ToastProvider>
+    </MemoryRouter>,
+  )
+}
+
+function getDesktopTablist() {
+  const tablists = screen.getAllByRole('tablist')
+  return tablists.find((el) => el.getAttribute('aria-orientation') === 'vertical')!
+}
+
+function NavigationTypeProbe() {
+  const navType = useNavigationType()
+  return <div data-testid="nav-type">{navType}</div>
+}
+
+function renderSettingsWithProbe(path: string = '/settings') {
+  return render(
+    <MemoryRouter
+      initialEntries={[path]}
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
+      <ToastProvider>
+        <Routes>
+          <Route
+            path="/settings"
+            element={
+              <>
+                <Settings />
+                <NavigationTypeProbe />
+              </>
+            }
+          />
           <Route path="/" element={<div>Home</div>} />
         </Routes>
       </ToastProvider>
@@ -80,17 +114,30 @@ describe('Settings Page', () => {
 
   it('renders SEO component with correct title', () => {
     renderSettings()
-    // Title is managed by <SEO title="Settings"> (Helmet is globally mocked in test setup).
-    // Title rendering is verified in SEO.test.tsx and Playwright; here we just verify the page renders.
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
   })
 
-  // --- Desktop Sidebar ---
+  // --- Tab Pattern Unification ---
 
-  it('desktop: sidebar with 6 nav items', () => {
+  it('tab pattern: both contexts use role="tab" inside role="tablist"', () => {
     renderSettings()
-    const nav = screen.getByRole('navigation', { name: 'Settings' })
-    const buttons = nav.querySelectorAll('button')
+    const tablists = screen.getAllByRole('tablist')
+    expect(tablists).toHaveLength(2)
+    tablists.forEach((tablist) => {
+      const tabs = tablist.querySelectorAll('[role="tab"]')
+      expect(tabs).toHaveLength(6)
+    })
+  })
+
+  it('tab pattern: no <nav role="navigation"> wrapper', () => {
+    const { container } = renderSettings()
+    expect(container.querySelector('nav[role="navigation"]')).toBeNull()
+  })
+
+  it('desktop: sidebar with 6 tab items', () => {
+    renderSettings()
+    const desktopTablist = getDesktopTablist()
+    const buttons = desktopTablist.querySelectorAll('[role="tab"]')
     expect(buttons).toHaveLength(6)
     expect(buttons[0]).toHaveTextContent('Profile')
     expect(buttons[1]).toHaveTextContent('Dashboard')
@@ -100,40 +147,163 @@ describe('Settings Page', () => {
     expect(buttons[5]).toHaveTextContent('App')
   })
 
-  it('active sidebar item has highlighted background', () => {
-    renderSettings()
-    const nav = screen.getByRole('navigation', { name: 'Settings' })
-    const profileBtn = nav.querySelector('button')!
-    expect(profileBtn.className).toContain('bg-primary/10')
-  })
-
-  // --- Mobile Tabs ---
-
   it('mobile: tab bar with 6 tabs', () => {
     renderSettings()
     const tabs = screen.getAllByRole('tab')
-    expect(tabs).toHaveLength(6)
+    expect(tabs).toHaveLength(12) // 6 mobile + 6 desktop (both in jsdom)
   })
 
-  it('active mobile tab has aria-selected true', () => {
+  it('active tab has aria-selected true for profile by default', () => {
     renderSettings()
-    const tabs = screen.getAllByRole('tab')
-    expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
-    expect(tabs[1]).toHaveAttribute('aria-selected', 'false')
+    const profileTabs = screen
+      .getAllByRole('tab')
+      .filter((t) => t.textContent === 'Profile')
+    expect(profileTabs.length).toBeGreaterThan(0)
+    profileTabs.forEach((t) => expect(t).toHaveAttribute('aria-selected', 'true'))
+  })
+
+  // --- Active-State Styling ---
+
+  it('active-state styling: desktop vertical indicator uses bg-white/15 and border-l-2', () => {
+    renderSettings()
+    const desktopTablist = getDesktopTablist()
+    const activeTab = desktopTablist.querySelector('[aria-selected="true"]') as HTMLElement
+    expect(activeTab.className).toContain('bg-white/15')
+    expect(activeTab.className).toContain('text-white')
+    expect(activeTab.className).toContain('border-l-2')
+    expect(activeTab.className).toContain('border-white/40')
+  })
+
+  it('active-state styling: mobile horizontal indicator uses bg-white/15 and border-b-2', () => {
+    renderSettings()
+    const tablists = screen.getAllByRole('tablist')
+    const mobileTablist = tablists.find((el) => !el.getAttribute('aria-orientation'))!
+    const activeTab = mobileTablist.querySelector('[aria-selected="true"]') as HTMLElement
+    expect(activeTab.className).toContain('bg-white/15')
+    expect(activeTab.className).toContain('text-white')
+    expect(activeTab.className).toContain('border-b-2')
+    expect(activeTab.className).toContain('border-white/40')
+  })
+
+  it('inactive-state styling: inactive tabs have text-white/60', () => {
+    renderSettings()
+    const desktopTablist = getDesktopTablist()
+    const inactiveTab = desktopTablist.querySelector('[aria-selected="false"]') as HTMLElement
+    expect(inactiveTab.className).toContain('text-white/60')
+  })
+
+  // --- tabIndex Roving ---
+
+  it('tabIndex roving: active tab has tabIndex 0, inactive have -1', () => {
+    renderSettings()
+    const desktopTablist = getDesktopTablist()
+    const tabs = desktopTablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    expect(tabs[0].tabIndex).toBe(0) // Profile is active
+    for (let i = 1; i < tabs.length; i++) {
+      expect(tabs[i].tabIndex).toBe(-1)
+    }
+  })
+
+  // --- font-script Removal ---
+
+  it('font-script removal: h1 has no font-script span', () => {
+    renderSettings()
+    const heading = screen.getByRole('heading', { level: 1, name: 'Settings' })
+    expect(heading.querySelector('span.font-script')).toBeNull()
+  })
+
+  // --- URL State ---
+
+  it('URL state: deep link to ?tab=notifications renders Notifications section', () => {
+    renderSettings('/settings?tab=notifications')
+    expect(screen.getAllByRole('switch').length).toBeGreaterThanOrEqual(9)
+  })
+
+  it('URL state: missing tab defaults to profile', () => {
+    renderSettings('/settings')
+    expect(screen.getByLabelText('Display Name')).toBeInTheDocument()
+  })
+
+  it('URL state: invalid tab defaults to profile', () => {
+    renderSettings('/settings?tab=garbage')
+    expect(screen.getByLabelText('Display Name')).toBeInTheDocument()
+  })
+
+  it('URL state: tab click uses replace, not push', async () => {
+    const user = userEvent.setup()
+    renderSettingsWithProbe()
+    // Initial render: NavigationType is "POP" (memory router fresh entry).
+    expect(screen.getByTestId('nav-type')).toHaveTextContent('POP')
+
+    const desktopTablist = getDesktopTablist()
+    const notifTab = desktopTablist.querySelectorAll('[role="tab"]')[2] as HTMLElement
+    await user.click(notifTab)
+
+    // After a tab click, NavigationType must be "REPLACE" so the back button
+    // doesn't accumulate one history entry per tab switch.
+    expect(screen.getByTestId('nav-type')).toHaveTextContent('REPLACE')
+  })
+
+  // --- Arrow-Key Roving ---
+
+  it('arrow-key roving: ArrowRight advances to next tab', async () => {
+    renderSettings()
+    const desktopTablist = getDesktopTablist()
+    const tabs = desktopTablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    tabs[0].focus()
+    fireEvent.keyDown(tabs[0], { key: 'ArrowRight' })
+    expect(desktopTablist.querySelector('[aria-selected="true"]')).toHaveTextContent('Dashboard')
+  })
+
+  it('arrow-key roving: ArrowDown advances to next tab', async () => {
+    renderSettings()
+    const desktopTablist = getDesktopTablist()
+    const tabs = desktopTablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    tabs[0].focus()
+    fireEvent.keyDown(tabs[0], { key: 'ArrowDown' })
+    expect(desktopTablist.querySelector('[aria-selected="true"]')).toHaveTextContent('Dashboard')
+  })
+
+  it('arrow-key roving: ArrowLeft on first wraps to last', () => {
+    renderSettings()
+    const desktopTablist = getDesktopTablist()
+    const tabs = desktopTablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    tabs[0].focus()
+    fireEvent.keyDown(tabs[0], { key: 'ArrowLeft' })
+    expect(desktopTablist.querySelector('[aria-selected="true"]')).toHaveTextContent('App')
+  })
+
+  it('arrow-key roving: Home jumps to first tab', () => {
+    renderSettings('/settings?tab=privacy')
+    const desktopTablist = getDesktopTablist()
+    const tabs = desktopTablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    const privacyTab = Array.from(tabs).find((t) => t.textContent === 'Privacy')!
+    privacyTab.focus()
+    fireEvent.keyDown(privacyTab, { key: 'Home' })
+    expect(desktopTablist.querySelector('[aria-selected="true"]')).toHaveTextContent('Profile')
+  })
+
+  it('arrow-key roving: End jumps to last tab', () => {
+    renderSettings()
+    const desktopTablist = getDesktopTablist()
+    const tabs = desktopTablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    tabs[0].focus()
+    fireEvent.keyDown(tabs[0], { key: 'End' })
+    expect(desktopTablist.querySelector('[aria-selected="true"]')).toHaveTextContent('App')
   })
 
   // --- Section Switching ---
 
-  it('clicking nav switches section and renders real components', async () => {
+  it('clicking tab switches section and renders real components', async () => {
     const user = userEvent.setup()
     renderSettings()
 
     // Default: profile section renders with Display Name input
     expect(screen.getByLabelText('Display Name')).toBeInTheDocument()
 
-    // Switch to Notifications
-    const nav = screen.getByRole('navigation', { name: 'Settings' })
-    const notifBtn = nav.querySelectorAll('button')[2]
+    // Switch to Notifications via desktop tablist
+    const desktopTablist = getDesktopTablist()
+    const notifBtn = desktopTablist.querySelectorAll('[role="tab"]')[2] as HTMLElement
     await user.click(notifBtn)
 
     // Notifications section rendered
@@ -151,11 +321,11 @@ describe('Settings Page', () => {
     await user.tab()
 
     // Switch to Privacy
-    const nav = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav.querySelectorAll('button')[3])
+    const desktopTablist = getDesktopTablist()
+    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[3] as HTMLElement)
 
     // Switch back to Profile
-    await user.click(nav.querySelectorAll('button')[0])
+    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[0] as HTMLElement)
 
     // Name should be preserved
     const nameInputAgain = screen.getByLabelText('Display Name') as HTMLInputElement
@@ -167,8 +337,8 @@ describe('Settings Page', () => {
     const { unmount } = renderSettings()
 
     // Toggle a notification off
-    const nav = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav.querySelectorAll('button')[2]) // Notifications
+    const desktopTablist = getDesktopTablist()
+    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[2] as HTMLElement) // Notifications
     const switches = screen.getAllByRole('switch')
     const inAppToggle = switches[0]
     await user.click(inAppToggle) // Turn off in-app
@@ -177,8 +347,8 @@ describe('Settings Page', () => {
 
     // Remount
     renderSettings()
-    const nav2 = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav2.querySelectorAll('button')[2])
+    const desktopTablist2 = getDesktopTablist()
+    await user.click(desktopTablist2.querySelectorAll('[role="tab"]')[2] as HTMLElement)
     const switches2 = screen.getAllByRole('switch')
     expect(switches2[0]).toHaveAttribute('aria-checked', 'false')
   })
@@ -186,7 +356,6 @@ describe('Settings Page', () => {
   it('corrupted wr_settings recovers gracefully', () => {
     localStorage.setItem(SETTINGS_KEY, 'corrupted{{{')
     renderSettings()
-    // Should render without crashing, with defaults
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
     expect(screen.getByLabelText('Display Name')).toBeInTheDocument()
   })
@@ -196,8 +365,8 @@ describe('Settings Page', () => {
     renderSettings()
 
     // Switch to notifications to see toggles
-    const nav = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav.querySelectorAll('button')[2])
+    const desktopTablist = getDesktopTablist()
+    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[2] as HTMLElement)
 
     // Simulate another tab changing settings
     const newSettings = {
@@ -246,8 +415,8 @@ describe('Settings Page', () => {
     renderSettings()
 
     // Go to Account section
-    const nav = screen.getByRole('navigation', { name: 'Settings' })
-    await user.click(nav.querySelectorAll('button')[4])
+    const desktopTablist = getDesktopTablist()
+    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[4] as HTMLElement)
 
     // Click Delete Account
     await user.click(screen.getByRole('button', { name: 'Delete Account' }))

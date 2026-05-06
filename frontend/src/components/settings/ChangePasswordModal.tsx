@@ -14,23 +14,29 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [newPasswordTouched, setNewPasswordTouched] = useState(false)
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [currentError, setCurrentError] = useState<string | null>(null)
   const [generalError, setGeneralError] = useState<string | null>(null)
 
   if (!isOpen) return null
 
-  const newTooShort = newPassword.length > 0 && newPassword.length < 8
-  const confirmMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword
+  const newTooShort = newPasswordTouched && newPassword.length > 0 && newPassword.length < 8
+  const confirmMismatch = confirmPasswordTouched && confirmPassword.length > 0 && newPassword !== confirmPassword
   const formValid =
     currentPassword.length > 0 &&
     newPassword.length >= 8 &&
     newPassword === confirmPassword
 
+  const showNewPasswordHint = newPassword.length === 0 || !newPasswordTouched
+
   function resetAndClose() {
     setCurrentPassword('')
     setNewPassword('')
     setConfirmPassword('')
+    setNewPasswordTouched(false)
+    setConfirmPasswordTouched(false)
     setCurrentError(null)
     setGeneralError(null)
     onClose()
@@ -100,10 +106,10 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
                 onChange={(e) => { setCurrentPassword(e.target.value); setCurrentError(null) }}
                 aria-invalid={currentError !== null}
                 aria-describedby={currentError ? 'cp-current-error' : undefined}
-                className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-primary"
               />
               {currentError && (
-                <p id="cp-current-error" role="alert" className="mt-1 text-sm text-red-400">
+                <p id="cp-current-error" role="alert" className="mt-1 text-sm text-red-100">
                   {currentError}
                 </p>
               )}
@@ -121,15 +127,20 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
                 minLength={8}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
+                onBlur={() => setNewPasswordTouched(true)}
                 aria-invalid={newTooShort}
-                aria-describedby={newTooShort ? 'cp-new-error' : undefined}
-                className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-describedby={newTooShort ? 'cp-new-error' : showNewPasswordHint ? 'cp-new-hint' : undefined}
+                className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              {newTooShort && (
-                <p id="cp-new-error" role="alert" className="mt-1 text-sm text-red-400">
+              {newTooShort ? (
+                <p id="cp-new-error" role="alert" className="mt-1 text-sm text-red-100">
                   Use at least 8 characters.
                 </p>
-              )}
+              ) : showNewPasswordHint ? (
+                <p id="cp-new-hint" className="mt-1 text-xs text-white/60">
+                  Use at least 8 characters.
+                </p>
+              ) : null}
             </div>
 
             <div>
@@ -143,19 +154,20 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                onBlur={() => setConfirmPasswordTouched(true)}
                 aria-invalid={confirmMismatch}
                 aria-describedby={confirmMismatch ? 'cp-confirm-error' : undefined}
-                className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-xl bg-white/[0.06] border border-white/[0.12] px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-primary"
               />
               {confirmMismatch && (
-                <p id="cp-confirm-error" role="alert" className="mt-1 text-sm text-red-400">
+                <p id="cp-confirm-error" role="alert" className="mt-1 text-sm text-red-100">
                   Passwords don&apos;t match.
                 </p>
               )}
             </div>
 
             {generalError && (
-              <p role="alert" className="text-sm text-red-400">
+              <p role="alert" className="text-sm text-red-100">
                 {generalError}
               </p>
             )}
@@ -173,7 +185,7 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
             <button
               type="submit"
               disabled={!formValid || submitting}
-              className="flex-1 bg-primary text-white rounded-lg px-4 py-3 hover:bg-primary-lt transition-colors font-medium min-h-[44px] text-sm disabled:opacity-50"
+              className="flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-colors duration-base hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] disabled:opacity-50 motion-reduce:transition-none"
             >
               {submitting ? 'Updating…' : 'Update password'}
             </button>

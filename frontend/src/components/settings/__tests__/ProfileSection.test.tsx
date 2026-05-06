@@ -119,6 +119,18 @@ describe('ProfileSection', () => {
     expect(screen.getByText('Choose Your Avatar')).toBeInTheDocument()
   })
 
+  it('Change avatar button uses text-violet-300', () => {
+    renderProfile()
+    const btn = screen.getByRole('button', { name: 'Change avatar' })
+    expect(btn.className).toContain('text-violet-300')
+  })
+
+  it('Change avatar button has text-violet-200 hover class', () => {
+    renderProfile()
+    const btn = screen.getByRole('button', { name: 'Change avatar' })
+    expect(btn.className).toContain('hover:text-violet-200')
+  })
+
   // --- Bio ---
 
   it('bio saves on blur', async () => {

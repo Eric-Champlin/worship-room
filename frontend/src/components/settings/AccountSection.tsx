@@ -17,22 +17,22 @@ export function AccountSection({ email }: AccountSectionProps) {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
 
   function handleDeleteConfirm() {
-    // Remove all wr_ prefixed keys
-    const keysToRemove = Object.keys(localStorage).filter((k) => k.startsWith('wr_'))
-    keysToRemove.forEach((key) => localStorage.removeItem(key))
+    // Spec 10A widened sweep: covers Worship Room (wr_*), legacy Worship Room
+    // (worship-room-*), Bible reactive stores (bible:*), and Bible AI/audio cache
+    // (bb26-, bb29-, bb32-, bb44-). The 'bb' prefix is intentionally broad — every
+    // current bb*-v1: key is documented in 11b-local-storage-keys-bible.md. If a
+    // future feature introduces a 'bb' prefix that should NOT be deleted, this list
+    // needs revisiting.
+    const DELETE_PREFIXES = ['wr_', 'worship-room-', 'bible:', 'bb']
 
-    // Remove legacy keys from before the wr_ prefix rename
-    const legacyKeys = [
-      'worship-room-daily-completion',
-      'worship-room-journal-draft',
-      'worship-room-journal-mode',
-    ]
-    legacyKeys.forEach((key) => localStorage.removeItem(key))
-
-    // Remove any worship-room-bookmarks-* and other worship-room- prefixed keys
-    Object.keys(localStorage)
-      .filter((k) => k.startsWith('worship-room-'))
-      .forEach((key) => localStorage.removeItem(key))
+    const keysToDelete: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && DELETE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+        keysToDelete.push(key)
+      }
+    }
+    keysToDelete.forEach((key) => localStorage.removeItem(key))
 
     logout()
     navigate('/')
@@ -53,7 +53,7 @@ export function AccountSection({ email }: AccountSectionProps) {
             <button
               type="button"
               onClick={() => showToast('This feature is on the way.')}
-              className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+              className="text-sm text-violet-300 hover:text-violet-200 transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               Change Email
             </button>
@@ -64,7 +64,7 @@ export function AccountSection({ email }: AccountSectionProps) {
             <button
               type="button"
               onClick={() => setShowChangePasswordModal(true)}
-              className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+              className="text-sm text-violet-300 hover:text-violet-200 transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
             >
               Change Password
             </button>
@@ -79,7 +79,7 @@ export function AccountSection({ email }: AccountSectionProps) {
           <button
             type="button"
             onClick={() => setShowDeleteModal(true)}
-            className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 rounded-lg px-4 py-3 text-sm font-medium transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+            className="bg-red-950/30 border border-red-400/30 text-red-100 hover:bg-red-900/40 rounded-lg px-4 py-3 text-sm font-medium transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
           >
             Delete Account
           </button>

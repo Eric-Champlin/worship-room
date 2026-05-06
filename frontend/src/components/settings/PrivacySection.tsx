@@ -148,7 +148,7 @@ export function PrivacySection({
                   <button
                     type="button"
                     onClick={() => handleUnblockClick(userId)}
-                    className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2"
+                    className="text-sm text-violet-300 hover:text-violet-200 transition-colors min-h-[44px] px-2"
                   >
                     Unblock
                   </button>
@@ -179,7 +179,7 @@ export function PrivacySection({
                   <button
                     type="button"
                     onClick={() => handleUnmuteClick(userId)}
-                    className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2"
+                    className="text-sm text-violet-300 hover:text-violet-200 transition-colors min-h-[44px] px-2"
                   >
                     Unmute
                   </button>

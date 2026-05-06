@@ -147,6 +147,22 @@ describe('NotificationsSection', () => {
     expect(fireTestNotification).toHaveBeenCalled()
   })
 
+  it('Send test notification uses canonical white-pill (px-8 py-3.5)', () => {
+    vi.mocked(getPermissionState).mockReturnValue('granted')
+    localStorage.setItem('wr_notification_prefs', JSON.stringify({
+      enabled: true, dailyVerse: true, streakReminder: true,
+      dailyVerseTime: '08:00', lastDailyVerseFired: '', lastStreakReminderFired: '',
+    }))
+    renderNotifications()
+    const btn = screen.getByRole('button', { name: 'Send test notification' })
+    expect(btn.className).toContain('px-8')
+    expect(btn.className).toContain('py-3.5')
+    expect(btn.className).toContain('bg-white')
+    expect(btn.className).toContain('rounded-full')
+    expect(btn.className).toContain('text-hero-bg')
+    expect(btn.className).toContain('min-h-[44px]')
+  })
+
   // --- Status indicator ---
   it('shows "Not yet enabled" for default permission', () => {
     renderNotifications()
@@ -159,11 +175,25 @@ describe('NotificationsSection', () => {
     expect(screen.getByText(/Notifications enabled/)).toBeInTheDocument()
   })
 
+  it('granted status indicator uses text-emerald-300', () => {
+    vi.mocked(getPermissionState).mockReturnValue('granted')
+    renderNotifications()
+    const indicator = screen.getByText(/Notifications enabled/)
+    expect(indicator.className).toContain('text-emerald-300')
+  })
+
   it('shows denied status with instructions', () => {
     vi.mocked(getPermissionState).mockReturnValue('denied')
     renderNotifications()
     expect(screen.getByText(/Notifications blocked/)).toBeInTheDocument()
     expect(screen.getByText(/Notifications are blocked/)).toBeInTheDocument()
+  })
+
+  it('denied status indicator uses text-red-300', () => {
+    vi.mocked(getPermissionState).mockReturnValue('denied')
+    renderNotifications()
+    const indicator = screen.getByText(/Notifications blocked/)
+    expect(indicator.className).toContain('text-red-300')
   })
 
   // --- Unsupported ---

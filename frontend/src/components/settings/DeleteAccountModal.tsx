@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 interface DeleteAccountModalProps {
@@ -20,13 +21,17 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm }: DeleteAccount
       <div
         ref={containerRef}
         role="alertdialog"
+        aria-modal="true"
         aria-labelledby="delete-title"
         aria-describedby="delete-desc"
         className="relative z-10 rounded-2xl border border-white/10 bg-surface-dark backdrop-blur-md p-6 max-w-md w-full mx-4"
       >
-        <h2 id="delete-title" className="text-lg font-semibold text-white mb-2">
-          Delete Your Account?
-        </h2>
+        <div className="flex items-center gap-3 mb-2">
+          <AlertTriangle className="h-5 w-5 text-red-300 shrink-0" aria-hidden="true" />
+          <h2 id="delete-title" className="text-lg font-semibold text-white">
+            Delete Your Account?
+          </h2>
+        </div>
         <p id="delete-desc" className="text-sm text-white/70 mb-6">
           This will permanently delete all your Worship Room data including mood entries, journal
           drafts, badges, friends, and settings. This action cannot be undone.
@@ -45,7 +50,7 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm }: DeleteAccount
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 bg-red-500 text-white rounded-lg px-4 py-3 hover:bg-red-600 transition-colors font-medium min-h-[44px] text-sm"
+            className="flex-1 bg-red-950/30 border border-red-400/30 text-red-100 hover:bg-red-900/40 rounded-lg px-4 py-3 transition-colors font-medium min-h-[44px] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
           >
             Delete Everything
           </button>

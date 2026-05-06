@@ -104,7 +104,7 @@ export function ProfileSection({ profile, userName, onUpdateProfile }: ProfileSe
         <button
           type="button"
           onClick={() => setPickerOpen(true)}
-          className="text-sm text-primary hover:text-primary-lt transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+          className="text-sm text-violet-300 hover:text-violet-200 transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
           aria-label="Change avatar"
         >
           Change

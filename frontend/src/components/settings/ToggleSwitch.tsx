@@ -40,6 +40,8 @@ export function ToggleSwitch({ checked, onChange, label, description, id }: Togg
         className={cn(
           'relative inline-flex h-6 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors self-center p-0',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark',
+          // Toggle on-state uses bg-primary per Spec 10A Direction Decision 3.
+          // State indicators warrant high-saturation distinction; native OS toggle convention.
           checked ? 'bg-primary' : 'bg-white/20',
         )}
       >

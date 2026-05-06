@@ -42,6 +42,7 @@ export function AvatarPickerModal({
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chooseFileButtonRef = useRef<HTMLButtonElement>(null)
 
   const containerRef = useFocusTrap(isOpen, onClose)
 
@@ -109,6 +110,20 @@ export function AvatarPickerModal({
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
   }, [])
+
+  // Focus first meaningful element after open, overriding useFocusTrap's default first-child focus
+  useEffect(() => {
+    if (!isOpen) return
+    const id = setTimeout(() => {
+      if (activeTab === 'presets') {
+        const el = document.querySelector<HTMLElement>(`[data-avatar-id="${selectedAvatarId}"]`)
+        el?.focus()
+      } else {
+        chooseFileButtonRef.current?.focus()
+      }
+    }, 0)
+    return () => clearTimeout(id)
+  }, [isOpen, activeTab, selectedAvatarId])
 
   // Build flat list of all selectable preset IDs for arrow key navigation
   const selectablePresetIds = useRef<string[]>([])
@@ -194,8 +209,8 @@ export function AvatarPickerModal({
               aria-controls="panel-presets"
               onClick={() => setActiveTab('presets')}
               className={cn(
-                'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
-                activeTab === 'presets' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/70',
+                'flex-1 min-h-[44px] py-2 px-4 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                activeTab === 'presets' ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white/70',
               )}
             >
               Presets
@@ -207,8 +222,8 @@ export function AvatarPickerModal({
               aria-controls="panel-upload"
               onClick={() => setActiveTab('upload')}
               className={cn(
-                'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
-                activeTab === 'upload' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/70',
+                'flex-1 min-h-[44px] py-2 px-4 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70',
+                activeTab === 'upload' ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white/70',
               )}
             >
               Upload Photo
@@ -231,7 +246,7 @@ export function AvatarPickerModal({
 
               {/* Save error */}
               {saveError && (
-                <p className="text-sm text-red-400 text-center mb-3" role="alert">
+                <p className="text-sm text-red-100 text-center mb-3" role="alert">
                   {saveError}
                 </p>
               )}
@@ -343,7 +358,7 @@ export function AvatarPickerModal({
               {/* Save button */}
               <button
                 onClick={handleSave}
-                className="w-full bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-colors duration-base hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-mid active:scale-[0.98] disabled:opacity-50 motion-reduce:transition-none"
               >
                 Save
               </button>
@@ -367,7 +382,7 @@ export function AvatarPickerModal({
 
               {/* Error message */}
               {photoError && (
-                <p className="text-sm text-red-400 text-center mb-3" role="alert">
+                <p className="text-sm text-red-100 text-center mb-3" role="alert">
                   {photoError}
                 </p>
               )}
@@ -385,6 +400,7 @@ export function AvatarPickerModal({
               {/* Choose File button */}
               <div className="flex flex-col items-center gap-3">
                 <button
+                  ref={chooseFileButtonRef}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isProcessing}
                   className="bg-white/10 text-white border border-white/20 rounded-lg py-3 px-6 hover:bg-white/15 transition-colors disabled:opacity-50 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
@@ -405,7 +421,7 @@ export function AvatarPickerModal({
 
               {/* Save error */}
               {saveError && (
-                <p className="mt-3 text-sm text-red-400 text-center" role="alert">
+                <p className="mt-3 text-sm text-red-100 text-center" role="alert">
                   {saveError}
                 </p>
               )}
@@ -415,7 +431,7 @@ export function AvatarPickerModal({
                 {photoPreview && (
                   <button
                     onClick={handleSave}
-                    className="w-full bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt/70"
+                    className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-colors duration-base hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-mid active:scale-[0.98] disabled:opacity-50 motion-reduce:transition-none"
                   >
                     Use This Photo
                   </button>

@@ -174,4 +174,40 @@ describe('AvatarPickerModal', () => {
     // onClose should NOT have been called
     expect(DEFAULT_PROPS.onClose).not.toHaveBeenCalled()
   })
+
+  it('Save button uses canonical white-pill (px-8 py-3.5 bg-white rounded-full text-hero-bg)', () => {
+    renderModal()
+    const btn = screen.getByRole('button', { name: 'Save' })
+    expect(btn.className).toContain('px-8')
+    expect(btn.className).toContain('py-3.5')
+    expect(btn.className).toContain('bg-white')
+    expect(btn.className).toContain('rounded-full')
+    expect(btn.className).toContain('text-hero-bg')
+    expect(btn.className).toContain('min-h-[44px]')
+  })
+
+  it('tab buttons have min-h-[44px]', () => {
+    renderModal()
+    const tabs = screen.getAllByRole('tab')
+    tabs.forEach((tab) => expect(tab.className).toContain('min-h-[44px]'))
+  })
+
+  it('active tab uses bg-white/15', () => {
+    renderModal()
+    const presetsTab = screen.getByRole('tab', { name: 'Presets' })
+    expect(presetsTab.className).toContain('bg-white/15')
+    fireEvent.click(screen.getByRole('tab', { name: 'Upload Photo' }))
+    const uploadTab = screen.getByRole('tab', { name: 'Upload Photo' })
+    expect(uploadTab.className).toContain('bg-white/15')
+  })
+
+  it('save error uses text-red-100', () => {
+    const throwOnSave = vi.fn(() => {
+      throw new DOMException('quota exceeded', 'QuotaExceededError')
+    })
+    renderModal({ onSave: throwOnSave })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    const errorEl = screen.getByText(/storage is full/)
+    expect(errorEl.className).toContain('text-red-100')
+  })
 })

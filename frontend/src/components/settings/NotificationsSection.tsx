@@ -52,14 +52,14 @@ function PushStatusIndicator({ permission, pushSupport }: {
   }
   if (permission === 'granted') {
     return (
-      <span className="text-sm font-medium text-success">
+      <span className="text-sm font-medium text-emerald-300">
         &#10003; Notifications enabled
       </span>
     )
   }
   if (permission === 'denied') {
     return (
-      <span className="text-sm font-medium text-danger">
+      <span className="text-sm font-medium text-red-300">
         &#10007; Notifications blocked
       </span>
     )
@@ -235,7 +235,7 @@ export function NotificationsSection({ notifications, onUpdateNotifications }: N
                     type="button"
                     onClick={handleTestNotification}
                     disabled={testSending}
-                    className="bg-white text-hero-dark rounded-full px-6 py-2 font-semibold text-sm hover:bg-white/90 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-colors duration-base hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-lt focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] disabled:opacity-50 motion-reduce:transition-none"
                   >
                     {testSending ? 'Sending\u2026' : 'Send test notification'}
                   </button>

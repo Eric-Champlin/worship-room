@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { useCallback } from 'react'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { ATMOSPHERIC_HERO_BG } from '@/components/PageHero'
@@ -30,6 +30,8 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
   { id: 'app', label: 'App' },
 ]
 
+const VALID_SECTIONS: SettingsSection[] = ['profile', 'dashboard', 'notifications', 'privacy', 'account', 'app']
+
 // Loading state: use SettingsSkeleton
 export function Settings() {
   const { isAuthenticated, user } = useAuth()
@@ -41,7 +43,47 @@ export function Settings() {
     unblockUser: unblockSettings,
   } = useSettings()
   const { blocked: friendsBlocked, unblockUser: unblockFriend } = useFriends()
-  const [activeSection, setActiveSection] = useState<SettingsSection>('profile')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  const activeSection: SettingsSection = (VALID_SECTIONS as string[]).includes(tabParam ?? '')
+    ? (tabParam as SettingsSection)
+    : 'profile'
+
+  const setActiveSection = useCallback(
+    (section: SettingsSection) => {
+      setSearchParams({ tab: section }, { replace: true })
+    },
+    [setSearchParams],
+  )
+
+  const handleTabKeyDown = useCallback(
+    (e: React.KeyboardEvent, currentIndex: number) => {
+      const { key } = e
+      let nextIndex: number | null = null
+      if (key === 'ArrowLeft' || key === 'ArrowUp') {
+        e.preventDefault()
+        nextIndex = (currentIndex - 1 + SECTIONS.length) % SECTIONS.length
+      } else if (key === 'ArrowRight' || key === 'ArrowDown') {
+        e.preventDefault()
+        nextIndex = (currentIndex + 1) % SECTIONS.length
+      } else if (key === 'Home') {
+        e.preventDefault()
+        nextIndex = 0
+      } else if (key === 'End') {
+        e.preventDefault()
+        nextIndex = SECTIONS.length - 1
+      }
+      if (nextIndex !== null) {
+        const nextSection = SECTIONS[nextIndex].id
+        setActiveSection(nextSection)
+        const target = e.currentTarget as HTMLElement
+        const container = target.closest('[role="tablist"]')
+        const next = container?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[nextIndex]
+        next?.focus()
+      }
+    },
+    [setActiveSection],
+  )
 
   // Spec 2.5.6 cleanup-on-unblock dual-call: clears the canonical wr_friends.blocked
   // entry AND any legacy wr_settings.privacy.blockedUsers entry for the same userId.
@@ -80,32 +122,36 @@ export function Settings() {
           className="px-1 sm:px-2 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
-          <span className="font-script">Settings</span>
+          Settings
         </h1>
       </section>
 
       {/* Mobile tabs */}
       <div className="sm:hidden bg-white/[0.08] backdrop-blur-xl border-b border-white/10">
-        <div className="mx-auto max-w-4xl px-4" role="tablist" aria-label="Settings sections">
-          <div className="flex">
-            {SECTIONS.map((s) => (
-              <button
-                key={s.id}
-                role="tab"
-                aria-selected={activeSection === s.id}
-                aria-controls={`settings-panel-${s.id}`}
-                onClick={() => setActiveSection(s.id)}
-                className={cn(
-                  'flex-1 py-3 text-sm font-medium text-center transition-colors',
-                  activeSection === s.id
-                    ? 'text-white border-b-2 border-primary'
-                    : 'text-white/60',
-                )}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
+        <div
+          className="mx-auto max-w-4xl px-4 flex"
+          role="tablist"
+          aria-label="Settings sections"
+        >
+          {SECTIONS.map((s, idx) => (
+            <button
+              key={s.id}
+              role="tab"
+              aria-selected={activeSection === s.id}
+              aria-controls={`settings-panel-${s.id}`}
+              tabIndex={activeSection === s.id ? 0 : -1}
+              onClick={() => setActiveSection(s.id)}
+              onKeyDown={(e) => handleTabKeyDown(e, idx)}
+              className={cn(
+                'flex-1 py-3 text-sm font-medium text-center transition-colors',
+                activeSection === s.id
+                  ? 'bg-white/15 text-white border-b-2 border-white/40'
+                  : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
+              )}
+            >
+              {s.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -113,26 +159,32 @@ export function Settings() {
       <main id="main-content" className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="flex gap-8">
           {/* Desktop sidebar */}
-          <nav
-            role="navigation"
-            aria-label="Settings"
+          <div
+            role="tablist"
+            aria-label="Settings sections"
+            aria-orientation="vertical"
             className="hidden sm:block w-[200px] lg:w-[240px] shrink-0 bg-white/[0.04] border-r border-white/10 rounded-lg p-2"
           >
-            {SECTIONS.map((s) => (
+            {SECTIONS.map((s, idx) => (
               <button
                 key={s.id}
+                role="tab"
+                aria-selected={activeSection === s.id}
+                aria-controls={`settings-panel-${s.id}`}
+                tabIndex={activeSection === s.id ? 0 : -1}
                 onClick={() => setActiveSection(s.id)}
+                onKeyDown={(e) => handleTabKeyDown(e, idx)}
                 className={cn(
                   'w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors',
                   activeSection === s.id
-                    ? 'bg-primary/10 text-primary-lt'
+                    ? 'bg-white/15 text-white border-l-2 border-white/40'
                     : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
                 )}
               >
                 {s.label}
               </button>
             ))}
-          </nav>
+          </div>
 
           {/* Content panel */}
           <div

@@ -124,7 +124,7 @@ describe('PrivacySection', () => {
     const nudgeGroup = screen.getByRole('radiogroup', { name: 'Who can send nudges' })
     const selected = nudgeGroup.querySelector('[aria-checked="true"]') as HTMLElement
     const unselected = nudgeGroup.querySelector('[aria-checked="false"]') as HTMLElement
-    expect(selected.className).toContain('bg-primary/20')
+    expect(selected.className).toContain('bg-white/15')
     expect(unselected.className).toContain('bg-white/5')
   })
 
@@ -187,6 +187,12 @@ describe('PrivacySection', () => {
     expect(await screen.findByText(/has been unblocked/)).toBeInTheDocument()
   })
 
+  it('Unblock button uses text-violet-300', () => {
+    renderPrivacy({ friendsBlocked: ['user-mock-1'] })
+    const btn = screen.getByRole('button', { name: 'Unblock' })
+    expect(btn.className).toContain('text-violet-300')
+  })
+
   // --- Muted Users (Spec 2.5.7) ---
 
   it('Muted Users section renders empty state when wr_mutes.muted is empty', () => {
@@ -211,6 +217,13 @@ describe('PrivacySection', () => {
     expect(
       screen.getByText('Their posts will appear in your feed again.'),
     ).toBeInTheDocument()
+  })
+
+  it('Unmute button uses text-violet-300', () => {
+    localStorage.setItem(MUTES_KEY, JSON.stringify({ muted: ['user-emma-c'] }))
+    renderPrivacy()
+    const btn = screen.getByRole('button', { name: 'Unmute' })
+    expect(btn.className).toContain('text-violet-300')
   })
 
   it('Confirming Unmute removes the entry; canceling does not', async () => {
