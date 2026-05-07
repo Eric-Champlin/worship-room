@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '@/components/Layout'
@@ -20,7 +20,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import type { RoutineDefinition } from '@/types/storage'
 
 export function RoutinesPage() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const authModal = useAuthModal()
   const { startRoutine, endRoutine } = useRoutinePlayer()
   const audioState = useAudioState()
@@ -119,10 +119,18 @@ export function RoutinesPage() {
 
   const hasUserRoutines = userRoutines.length > 0
 
+  const greetingCopy = useMemo(() => {
+    if (audioState.activeRoutine) return 'Currently winding down.'
+    if (!isAuthenticated) return 'Your bedtime sanctuary.'
+    if (userRoutines.length > 0 && user?.name) return `Welcome back, ${user.name}.`
+    return 'Your bedtime sanctuary.'
+  }, [audioState.activeRoutine, isAuthenticated, userRoutines.length, user?.name])
+
   const renderRoutineCard = (routine: RoutineDefinition) => (
     <RoutineCard
       key={routine.id}
       routine={routine}
+      isActive={audioState.activeRoutine?.routineId === routine.id}
       onStart={() => startRoutine(routine)}
       onClone={routine.isTemplate ? () => handleClone(routine) : undefined}
       onEdit={!routine.isTemplate ? () => handleEdit(routine) : undefined}
@@ -136,9 +144,25 @@ export function RoutinesPage() {
       <SEO {...MUSIC_ROUTINES_METADATA} />
       {/* Hero */}
       <section
+        aria-labelledby="routines-heading"
         className="relative flex w-full flex-col items-center px-4 pt-32 pb-8 text-center sm:pt-36 sm:pb-12 lg:pt-40"
         style={ATMOSPHERIC_HERO_BG}
       >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          style={{
+            backgroundImage: `
+              radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,0.15), transparent),
+              radial-gradient(1px 1px at 28% 42%, rgba(255,255,255,0.10), transparent),
+              radial-gradient(1.5px 1.5px at 47% 22%, rgba(255,255,255,0.12), transparent),
+              radial-gradient(1px 1px at 63% 58%, rgba(255,255,255,0.08), transparent),
+              radial-gradient(1.5px 1.5px at 78% 31%, rgba(255,255,255,0.13), transparent),
+              radial-gradient(1px 1px at 88% 14%, rgba(255,255,255,0.09), transparent),
+              radial-gradient(1.5px 1.5px at 91% 67%, rgba(255,255,255,0.11), transparent)
+            `,
+          }}
+        />
         <Link
           to="/music"
           className="mb-4 inline-flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/70"
@@ -146,7 +170,11 @@ export function RoutinesPage() {
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Music
         </Link>
+        <p className="mb-2 text-sm text-white/50">
+          {greetingCopy}
+        </p>
         <h1
+          id="routines-heading"
           className="px-1 sm:px-2 text-3xl font-bold sm:text-4xl lg:text-5xl pb-2"
           style={GRADIENT_TEXT_STYLE}
         >
@@ -192,7 +220,8 @@ export function RoutinesPage() {
 
             {hasUserRoutines && (
               <>
-                <h2 className="text-xs text-white/60 uppercase tracking-wider mb-3 mt-8 sm:mt-10">
+                <h2 className="mb-3 mt-8 sm:mt-10 flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-violet-300 font-semibold">
+                  <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-violet-400" />
                   Your routines
                 </h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

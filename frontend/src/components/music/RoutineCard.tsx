@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { Mountain, BookOpen, Moon, MoreVertical, Play } from 'lucide-react'
+import { Mountain, BookOpen, Moon, MoreVertical, Play, Heart } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
+import { storageService } from '@/services/storage-service'
+import { SCENE_BY_ID } from '@/data/scenes'
 import type { RoutineDefinition } from '@/types/storage'
 
 const STEP_ICON_MAP = {
@@ -11,8 +13,26 @@ const STEP_ICON_MAP = {
   'bible-navigate': BookOpen,
 } as const
 
+const STEP_ICON_TINT_MAP: Record<string, { container: string; icon: string }> = {
+  scene: { container: 'bg-glow-cyan/15', icon: 'text-glow-cyan' },
+  scripture: { container: 'bg-amber-400/15', icon: 'text-amber-400' },
+  story: { container: 'bg-primary-lt/15', icon: 'text-primary-lt' },
+  'bible-navigate': { container: 'bg-amber-400/15', icon: 'text-amber-400' },
+} as const
+
+const DEFAULT_STEP_TINT = { container: 'bg-white/10', icon: 'text-white/60' }
+
+function getRoutineSceneStripGradient(routine: RoutineDefinition): string | null {
+  const firstSceneStep = routine.steps.find((s) => s.type === 'scene')
+  if (!firstSceneStep) return null
+  const scene = SCENE_BY_ID.get(firstSceneStep.contentId)
+  if (!scene?.themeColor) return null
+  return `linear-gradient(to right, ${scene.themeColor}aa, ${scene.themeColor}33)`
+}
+
 interface RoutineCardProps {
   routine: RoutineDefinition
+  isActive?: boolean
   onStart: () => void
   onClone?: () => void
   onEdit?: () => void
@@ -28,6 +48,7 @@ function estimateDuration(routine: RoutineDefinition): number {
 
 export function RoutineCard({
   routine,
+  isActive = false,
   onStart,
   onClone,
   onEdit,
@@ -39,6 +60,10 @@ export function RoutineCard({
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const menuTriggerRef = useRef<HTMLButtonElement>(null)
+
+  const [isFavorited, setIsFavorited] = useState<boolean>(() =>
+    storageService.isRoutineFavorited(routine.id),
+  )
 
   // Close menu on outside click or Escape key
   useEffect(() => {
@@ -70,6 +95,15 @@ export function RoutineCard({
     onStart()
   }
 
+  const handleFavoriteToggle = () => {
+    if (!isAuthenticated) {
+      authModal?.openAuthModal('Sign in to favorite routines')
+      return
+    }
+    storageService.toggleRoutineFavorite(routine.id)
+    setIsFavorited((prev) => !prev)
+  }
+
   function handleMenuKeyDown(e: React.KeyboardEvent) {
     const items = menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]')
     if (!items?.length) return
@@ -96,19 +130,34 @@ export function RoutineCard({
   }
 
   const durationEstimate = estimateDuration(routine)
+  const topStripGradient = getRoutineSceneStripGradient(routine)
 
   return (
     <div
       role="article"
       aria-label={`${routine.name} routine — ${routine.steps.length} steps, approximately ${durationEstimate} minutes`}
-      className="relative rounded-2xl border border-white/[0.12] bg-white/[0.06] p-5 backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] transition-[background-color,border-color] motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18]"
+      className={`relative rounded-2xl border ${isActive ? 'border-primary/40' : 'border-white/[0.12]'} bg-white/[0.06] p-5 backdrop-blur-sm shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] transition-[background-color,border-color] motion-reduce:transition-none hover:bg-white/[0.09] hover:border-white/[0.18]`}
     >
-      {/* Template badge */}
-      {routine.isTemplate && (
+      {/* Scene-color top strip */}
+      {topStripGradient && (
+        <div
+          aria-hidden="true"
+          className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
+          style={{ backgroundImage: topStripGradient }}
+        />
+      )}
+
+      {/* Badge slot — active takes precedence over template badge */}
+      {isActive ? (
+        <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-300">
+          <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-violet-400" />
+          Now playing
+        </span>
+      ) : routine.isTemplate ? (
         <span className="mb-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-violet-300">
           Template
         </span>
-      )}
+      ) : null}
 
       {/* Name */}
       <h3 className="text-base font-semibold text-white">{routine.name}</h3>
@@ -122,22 +171,28 @@ export function RoutineCard({
       <div className="mt-3 flex items-center gap-1.5">
         {routine.steps.map((step) => {
           const Icon = STEP_ICON_MAP[step.type]
+          const tint = STEP_ICON_TINT_MAP[step.type] ?? DEFAULT_STEP_TINT
           return (
             <span
               key={step.id}
               role="img"
-              className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10"
+              className={`flex h-6 w-6 items-center justify-center rounded-full ${tint.container}`}
               aria-label={step.type}
             >
-              <Icon size={12} className="text-white/60" aria-hidden="true" />
+              <Icon size={12} className={tint.icon} aria-hidden="true" />
             </span>
           )
         })}
       </div>
 
       {/* Meta */}
-      <p className="mt-2 text-xs text-white/60">
-        {routine.steps.length} steps &middot; ~{durationEstimate} min
+      <p className="mt-2 flex items-center gap-1.5 text-xs text-white/60">
+        {routine.sleepTimer && routine.sleepTimer.durationMinutes > 0 && (
+          <Moon size={12} className="text-violet-300" aria-hidden="true" />
+        )}
+        <span>
+          {routine.steps.length} steps &middot; ~{durationEstimate} min
+        </span>
       </p>
 
       {/* Actions */}
@@ -145,9 +200,24 @@ export function RoutineCard({
         <button
           type="button"
           onClick={handleStart}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-hero-bg shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark"
         >
           <Play size={14} fill="currentColor" aria-hidden="true" /> Start
+        </button>
+
+        {/* Favorite button */}
+        <button
+          type="button"
+          onClick={handleFavoriteToggle}
+          aria-label={isFavorited ? `Unfavorite ${routine.name}` : `Favorite ${routine.name}`}
+          aria-pressed={isFavorited}
+          className={`inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-dark ${
+            isFavorited
+              ? 'bg-pink-500/15 text-pink-300 hover:bg-pink-500/20'
+              : 'bg-white/10 text-white/60 hover:bg-white/15 hover:text-white/80'
+          }`}
+        >
+          <Heart size={18} fill={isFavorited ? 'currentColor' : 'none'} aria-hidden="true" />
         </button>
 
         {/* Three-dot menu */}

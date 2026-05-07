@@ -14,9 +14,13 @@ const mockShowToast = vi.fn()
 
 let mockIsAuthenticated = false
 let mockActiveRoutine: { routineId: string } | null = null
+let mockUserName: string | null = null
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isAuthenticated: mockIsAuthenticated }),
+  useAuth: () => ({
+    user: mockUserName ? { name: mockUserName } : null,
+    isAuthenticated: mockIsAuthenticated,
+  }),
 }))
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
@@ -67,6 +71,10 @@ vi.mock('@/services/storage-service', () => ({
     deleteRoutine: vi.fn(),
     duplicateRoutine: vi.fn(),
     logListeningSession: vi.fn(),
+    // Step 10 favorites methods (Spec 11c)
+    getRoutineFavorites: vi.fn().mockReturnValue([]),
+    toggleRoutineFavorite: vi.fn(),
+    isRoutineFavorited: vi.fn().mockReturnValue(false),
   },
 }))
 
@@ -110,6 +118,7 @@ describe('RoutinesPage', () => {
   beforeEach(() => {
     mockIsAuthenticated = false
     mockActiveRoutine = null
+    mockUserName = null
     vi.clearAllMocks()
     vi.mocked(storageService.getRoutines).mockReturnValue([])
   })
@@ -440,5 +449,110 @@ describe('RoutinesPage', () => {
     expect(templatesEyebrow.className).toContain('text-white/60')
     expect(templatesEyebrow.className).toContain('uppercase')
     expect(templatesEyebrow.className).toContain('tracking-wider')
+  })
+
+  // ── Spec 11c Step 1: Hero starfield + a11y ──────────────────────────
+
+  it('hero section has aria-labelledby attribute', () => {
+    const { container } = renderPage()
+    const heroSection = container.querySelector('section[aria-labelledby="routines-heading"]')
+    expect(heroSection).not.toBeNull()
+  })
+
+  it('h1 has id="routines-heading"', () => {
+    renderPage()
+    const h1 = screen.getByRole('heading', { level: 1, name: /Bedtime Routines/i })
+    expect(h1.id).toBe('routines-heading')
+  })
+
+  it('starfield overlay renders with aria-hidden and pointer-events-none inside hero', () => {
+    const { container } = renderPage()
+    const heroSection = container.querySelector('section[aria-labelledby="routines-heading"]')!
+    const starfield = heroSection.querySelector('div[aria-hidden="true"][class*="pointer-events-none"][class*="absolute"]')
+    expect(starfield).not.toBeNull()
+  })
+
+  // ── Spec 11c Step 2: Adaptive greeting ──────────────────────────────
+
+  it('greeting renders "Your bedtime sanctuary." when logged out', () => {
+    mockIsAuthenticated = false
+    renderPage()
+    expect(screen.getByText('Your bedtime sanctuary.')).toBeInTheDocument()
+  })
+
+  it('greeting renders "Welcome back, {name}." when logged in with at least one routine', () => {
+    mockIsAuthenticated = true
+    mockUserName = 'Eric'
+    vi.mocked(storageService.getRoutines).mockReturnValue([USER_ROUTINE])
+    renderPage()
+    expect(screen.getByText('Welcome back, Eric.')).toBeInTheDocument()
+  })
+
+  it('greeting renders "Your bedtime sanctuary." when logged in with zero routines', () => {
+    mockIsAuthenticated = true
+    mockUserName = 'Eric'
+    vi.mocked(storageService.getRoutines).mockReturnValue([])
+    renderPage()
+    expect(screen.getByText('Your bedtime sanctuary.')).toBeInTheDocument()
+  })
+
+  it('greeting renders "Currently winding down." when active routine (takes precedence)', () => {
+    mockActiveRoutine = { routineId: 'x' }
+    renderPage()
+    expect(screen.getByText('Currently winding down.')).toBeInTheDocument()
+  })
+
+  // ── Spec 11c Step 4: "Your routines" eyebrow promotion ──────────────
+
+  it('Templates eyebrow stays muted (text-white/60, no text-violet-300)', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([USER_ROUTINE])
+    renderPage()
+    const templatesH2 = screen.getByRole('heading', { level: 2, name: /^Templates$/ })
+    expect(templatesH2.className).toContain('text-white/60')
+    expect(templatesH2.className).not.toContain('text-violet-300')
+  })
+
+  it('"Your routines" eyebrow has violet leading dot (aria-hidden)', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([USER_ROUTINE])
+    renderPage()
+    const yourRoutinesH2 = screen.getByRole('heading', { level: 2, name: /^Your routines$/ })
+    const dot = yourRoutinesH2.querySelector('span[aria-hidden="true"][class*="bg-violet-400"]')
+    expect(dot).not.toBeNull()
+  })
+
+  it('"Your routines" eyebrow uses violet text + tighter tracking', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([USER_ROUTINE])
+    renderPage()
+    const yourRoutinesH2 = screen.getByRole('heading', { level: 2, name: /^Your routines$/ })
+    expect(yourRoutinesH2.className).toContain('text-violet-300')
+    expect(yourRoutinesH2.className).toContain('tracking-[0.15em]')
+    expect(yourRoutinesH2.className).toContain('font-semibold')
+  })
+
+  it('empty state suppresses both eyebrows', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([])
+    renderPage()
+    expect(screen.queryByRole('heading', { level: 2, name: /^Templates$/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 2, name: /^Your routines$/ })).not.toBeInTheDocument()
+  })
+
+  // ── Spec 11c Step 5: isActive prop + "Now playing" chip ─────────────
+
+  it('active routine card receives isActive=true (shows "Now playing" chip)', () => {
+    mockActiveRoutine = { routineId: 'template-evening-peace' }
+    renderPage()
+    // The Evening Peace template card should show "Now playing"
+    const cards = screen.getAllByRole('article')
+    const eveningPeaceCard = cards.find((c) => c.textContent?.includes('Evening Peace'))!
+    expect(within(eveningPeaceCard).getByText('Now playing')).toBeInTheDocument()
+  })
+
+  it('non-active routines do NOT show "Now playing" chip', () => {
+    mockActiveRoutine = { routineId: 'template-evening-peace' }
+    renderPage()
+    const cards = screen.getAllByRole('article')
+    // Scripture & Sleep card (not active) should NOT have Now playing
+    const otherCard = cards.find((c) => c.textContent?.includes('Scripture & Sleep'))!
+    expect(within(otherCard).queryByText('Now playing')).not.toBeInTheDocument()
   })
 })

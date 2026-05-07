@@ -15,6 +15,7 @@ const KEYS = {
   listeningHistory: 'wr_listening_history',
   sessionState: 'wr_session_state',
   routines: 'wr_routines',
+  routineFavorites: 'wr_routine_favorites',
 } as const
 
 const LISTENING_HISTORY_CAP = 100
@@ -62,6 +63,11 @@ export interface StorageService {
   updateRoutine(routine: RoutineDefinition): void
   deleteRoutine(id: string): void
   duplicateRoutine(id: string): RoutineDefinition | null
+
+  // Routine Favorites (not auth-gated at service layer; component layer gates)
+  getRoutineFavorites(): string[]
+  toggleRoutineFavorite(id: string): void
+  isRoutineFavorited(id: string): boolean
 
   // Sharing (read-only, no auth needed)
   createShareableLink(sounds: { soundId: string; volume: number }[]): string
@@ -325,6 +331,39 @@ export class LocalStorageService implements StorageService {
     routines.push(copy)
     writeJSON(KEYS.routines, routines)
     return copy
+  }
+
+  // ── Routine Favorites (no auth required at service layer) ───────
+  // Defensive shape pattern mirrors getRoutines (Spec 11B 6-patch):
+  // any non-array JSON or non-string element is filtered out with a warn.
+  getRoutineFavorites(): string[] {
+    const raw = readJSON<unknown>(KEYS.routineFavorites, [])
+    if (!Array.isArray(raw)) {
+      console.warn('[storageService] wr_routine_favorites is not an array, returning empty')
+      return []
+    }
+    const valid = raw.filter((id): id is string => typeof id === 'string')
+    if (valid.length !== raw.length) {
+      console.warn(
+        `[storageService] Filtered ${raw.length - valid.length} non-string entry(ies) from wr_routine_favorites`,
+      )
+    }
+    return valid
+  }
+
+  toggleRoutineFavorite(id: string): void {
+    const favorites = this.getRoutineFavorites()
+    const idx = favorites.indexOf(id)
+    if (idx === -1) {
+      favorites.push(id)
+    } else {
+      favorites.splice(idx, 1)
+    }
+    writeJSON(KEYS.routineFavorites, favorites)
+  }
+
+  isRoutineFavorited(id: string): boolean {
+    return this.getRoutineFavorites().includes(id)
   }
 
   // ── Sharing (no auth required) ──────────────────────────────────

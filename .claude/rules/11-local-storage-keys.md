@@ -80,6 +80,7 @@ When adding a new key, default to `wr_*` unless there is a specific reason to us
 | `wr_sound_effects_enabled` | "true"/"false"               | Sound effects toggle                       |
 | `wr_music_hint_pill`       | MusicHintState               | Music hint for audio pill (dismissed flag) |
 | `wr_music_hint_sound_grid` | MusicHintState               | Music hint for sound grid (dismissed flag) |
+| `wr_routine_favorites`     | `string[]` of routine IDs   | Favorited bedtime routine IDs (templates + user routines). Not auth-gated at the service layer — component layer gates writes. Survives logout. |
 
 ### Daily Hub & Journal
 

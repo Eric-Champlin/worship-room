@@ -368,6 +368,54 @@ describe('LocalStorageService', () => {
     })
   })
 
+  // ── Routine Favorites ─────────────────────────────────────────────
+  describe('Routine Favorites', () => {
+    it('getRoutineFavorites returns [] when no favorites stored', () => {
+      expect(service.getRoutineFavorites()).toEqual([])
+    })
+
+    it('toggleRoutineFavorite adds id when not yet favorited', () => {
+      service.toggleRoutineFavorite('routine-1')
+      expect(service.getRoutineFavorites()).toContain('routine-1')
+    })
+
+    it('toggleRoutineFavorite removes id when already favorited', () => {
+      service.toggleRoutineFavorite('routine-1')
+      service.toggleRoutineFavorite('routine-1')
+      expect(service.getRoutineFavorites()).not.toContain('routine-1')
+    })
+
+    it('isRoutineFavorited reflects current state', () => {
+      expect(service.isRoutineFavorited('routine-1')).toBe(false)
+      service.toggleRoutineFavorite('routine-1')
+      expect(service.isRoutineFavorited('routine-1')).toBe(true)
+    })
+
+    it('filters non-string entries defensively and warns', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      localStorage.setItem(
+        'wr_routine_favorites',
+        JSON.stringify(['valid-id', 123, null, 'another-valid-id']),
+      )
+      expect(service.getRoutineFavorites()).toEqual(['valid-id', 'another-valid-id'])
+      expect(warnSpy).toHaveBeenCalled()
+      warnSpy.mockRestore()
+    })
+
+    it('returns [] and warns when wr_routine_favorites holds non-array JSON', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      localStorage.setItem('wr_routine_favorites', JSON.stringify({ foo: 'bar' }))
+      expect(service.getRoutineFavorites()).toEqual([])
+      expect(warnSpy).toHaveBeenCalled()
+      warnSpy.mockRestore()
+    })
+
+    it('returns [] when wr_routine_favorites holds invalid JSON', () => {
+      localStorage.setItem('wr_routine_favorites', 'not valid json')
+      expect(service.getRoutineFavorites()).toEqual([])
+    })
+  })
+
   // ── QuotaExceededError ────────────────────────────────────────────
   describe('QuotaExceededError handling', () => {
     it('throws StorageQuotaError when localStorage is full', () => {
