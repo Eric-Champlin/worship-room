@@ -2,6 +2,7 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { ErrorBoundary } from '../ErrorBoundary'
+import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 function ThrowingChild({ error }: { error?: Error }) {
   if (error) throw error
@@ -60,6 +61,17 @@ describe('ErrorBoundary', () => {
     const alert = screen.getByRole('alert')
     expect(alert).toHaveTextContent('Something went wrong')
     expect(alert).toHaveTextContent('Something broke on our end')
+  })
+
+  it('fallback h1 uses GRADIENT_TEXT_STYLE constant (not legacy inline gradient)', () => {
+    render(
+      <ErrorBoundary>
+        <ThrowingChild error={new Error('boom')} />
+      </ErrorBoundary>,
+    )
+    const h1 = screen.getByRole('heading', { name: 'Something went wrong' })
+    expect(h1.style.backgroundImage).toBe(WHITE_PURPLE_GRADIENT)
+    expect(h1.style.backgroundImage).not.toContain('135deg')
   })
 
   it('renders a custom fallback when provided', () => {

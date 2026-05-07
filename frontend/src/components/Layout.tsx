@@ -10,12 +10,13 @@ interface LayoutProps {
    * When true, renders the navbar in transparent overlay mode (absolute positioning,
    * no background, matching `/daily` and `/grow`). Ignored when `hero` is supplied,
    * because hero mode already uses a transparent navbar.
-   * Defaults to false for backward compatibility with all existing consumers.
+   * Defaults to true — transparent is the canonical production mode. Opaque mode
+   * is retained as a defensive fallback via explicit transparentNav={false}.
    */
   transparentNav?: boolean
 }
 
-export function Layout({ children, hero, transparentNav = false }: LayoutProps) {
+export function Layout({ children, hero, transparentNav = true }: LayoutProps) {
   const navTransparent = Boolean(hero) || transparentNav
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-hero-bg font-sans">

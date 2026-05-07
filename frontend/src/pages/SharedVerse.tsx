@@ -24,7 +24,7 @@ export function SharedVerse() {
     return (
       <div className="flex min-h-screen flex-col bg-neutral-bg font-sans">
         <SEO title="Verse Not Found" description="This verse may no longer be available on Worship Room." noIndex />
-        <Navbar />
+        <Navbar transparent />
         <main id="main-content" className="flex flex-1 items-center justify-center">
           <div className="text-center">
             <h1 className="mb-2 text-2xl font-bold text-text-dark">

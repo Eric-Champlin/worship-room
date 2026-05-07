@@ -1,3 +1,4 @@
+import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
@@ -68,9 +69,24 @@ describe('Layout', () => {
   })
 
   describe('main wrapper modes', () => {
-    it('default mode wraps children in <main max-w-7xl py-8>', () => {
+    it('default mode (no hero, no prop) uses display:contents main (transparentNav=true is canonical default)', () => {
       mockSeason('ordinary-time')
       const { getByRole } = renderLayout()
+      const main = getByRole('main')
+      expect(main.className).toContain('contents')
+      expect(main.className).not.toContain('max-w-7xl')
+      expect(main.className).not.toContain('py-8')
+    })
+
+    it('explicit transparentNav={false} preserves legacy opaque main wrap', () => {
+      mockSeason('ordinary-time')
+      const { getByRole } = render(
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Layout transparentNav={false}>
+            <div>test content</div>
+          </Layout>
+        </MemoryRouter>,
+      )
       const main = getByRole('main')
       expect(main.className).toContain('max-w-7xl')
       expect(main.className).toContain('py-8')

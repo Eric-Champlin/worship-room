@@ -133,19 +133,6 @@ describe('ChunkErrorBoundary', () => {
     expect(screen.getByTestId('layout')).toBeInTheDocument()
   })
 
-  it('error fallback shows cross branding icon', () => {
-    const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
-
-    const { container } = render(
-      <ChunkErrorBoundary>
-        <ThrowingChild error={error} />
-      </ChunkErrorBoundary>
-    )
-
-    const svg = container.querySelector('svg[aria-hidden="true"]')
-    expect(svg).toBeInTheDocument()
-  })
-
   it('button has accessible focus ring classes', () => {
     const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
 
@@ -157,5 +144,58 @@ describe('ChunkErrorBoundary', () => {
 
     const button = screen.getByRole('button', { name: 'Refresh Page' })
     expect(button.className).toContain('focus-visible:ring-2')
+  })
+
+  it('fallback container has role="alert"', () => {
+    const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
+    render(
+      <ChunkErrorBoundary>
+        <ThrowingChild error={error} />
+      </ChunkErrorBoundary>
+    )
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent("Let's try that again")
+  })
+
+  it('fallback uses canonical FrostedCard chrome', () => {
+    const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
+    render(
+      <ChunkErrorBoundary>
+        <ThrowingChild error={error} />
+      </ChunkErrorBoundary>
+    )
+    const alert = screen.getByRole('alert')
+    expect(alert.className).toContain('border-white/[0.12]')
+    expect(alert.className).toContain('bg-white/[0.06]')
+    expect(alert.className).toContain('rounded-2xl')
+    expect(alert.className).toContain('backdrop-blur-sm')
+    expect(alert.className).toContain('mx-auto')
+    expect(alert.className).toContain('max-w-md')
+  })
+
+  it('fallback uses RefreshCw lucide icon', () => {
+    const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
+    const { container } = render(
+      <ChunkErrorBoundary>
+        <ThrowingChild error={error} />
+      </ChunkErrorBoundary>
+    )
+    const svg = container.querySelector('[role="alert"] svg[aria-hidden="true"]')
+    expect(svg).toBeInTheDocument()
+  })
+
+  it('fallback button is canonical white-pill primary (no bg-primary)', () => {
+    const error = new Error('Failed to fetch dynamically imported module: /chunk.js')
+    render(
+      <ChunkErrorBoundary>
+        <ThrowingChild error={error} />
+      </ChunkErrorBoundary>
+    )
+    const button = screen.getByRole('button', { name: 'Refresh Page' })
+    expect(button.className).toContain('bg-white')
+    expect(button.className).toContain('text-hero-bg')
+    expect(button.className).toContain('min-h-[44px]')
+    expect(button.className).toContain('rounded-full')
+    expect(button.className).not.toContain('bg-primary')
   })
 })

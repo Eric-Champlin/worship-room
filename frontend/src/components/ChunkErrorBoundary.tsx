@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { RefreshCw } from 'lucide-react'
 import { Layout } from '@/components/Layout'
 
 interface ChunkErrorBoundaryProps {
@@ -37,30 +38,22 @@ export class ChunkErrorBoundary extends Component<ChunkErrorBoundaryProps, Chunk
     if (this.state.hasChunkError) {
       return (
         <Layout>
-          <div className="flex min-h-[60vh] items-center justify-center px-6">
-            <div className="max-w-md text-center">
-              <svg
-                className="mx-auto mb-6 h-12 w-12 text-primary/60"
-                viewBox="0 0 48 48"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                aria-hidden="true"
-              >
-                <line x1="24" y1="8" x2="24" y2="40" />
-                <line x1="14" y1="18" x2="34" y2="18" />
-              </svg>
-              <h1 className="mb-3 text-2xl font-bold text-white">
+          <div className="flex min-h-[60vh] items-center justify-center px-4">
+            <div
+              role="alert"
+              className="mx-auto max-w-md rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-8 shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)] text-center"
+            >
+              <RefreshCw className="mx-auto h-8 w-8 text-violet-300" aria-hidden="true" />
+              <h1 className="mt-4 text-2xl font-bold text-white">
                 Let&apos;s try that again
               </h1>
-              <p className="mb-8 text-base text-white/70">
+              <p className="mt-2 text-base text-white/70">
                 Sometimes things don&apos;t load as expected. A quick refresh usually does the trick.
               </p>
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="rounded-xl bg-primary px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-lt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+                className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all motion-reduce:transition-none duration-base hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98]"
               >
                 Refresh Page
               </button>

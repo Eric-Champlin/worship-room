@@ -96,7 +96,7 @@ describe('useFaithPoints — unauthenticated', () => {
     expect(result.current.todayActivities).toEqual({
       mood: false, pray: false, listen: false,
       prayerWall: false, readingPlan: false, meditate: false, journal: false, gratitude: false, reflection: false,
-      challenge: false, localVisit: false, devotional: false,
+      challenge: false, localVisit: false, devotional: false, intercession: false,
     });
   });
 

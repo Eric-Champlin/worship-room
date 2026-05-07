@@ -375,7 +375,21 @@ describe('Navbar', () => {
 
   describe('Active route', () => {
     it('active top-level link has active styling', () => {
-      renderNavbar('/prayer-wall')
+      // Render with transparent prop to match canonical production mode (transparent navbar).
+      // Layout's transparentNav default is now true; Navbar's own default remains false
+      // (defensive), so this test renders via transparent Navbar directly.
+      render(
+        <MemoryRouter initialEntries={['/prayer-wall']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <ToastProvider>
+            <AuthModalProvider>
+              <Navbar transparent />
+              <Routes>
+                <Route path="*" element={null} />
+              </Routes>
+            </AuthModalProvider>
+          </ToastProvider>
+        </MemoryRouter>,
+      )
       const link = screen.getByRole('link', { name: 'Prayer Wall' })
       expect(link.className).toContain('text-white')
       expect(link.className).not.toContain('after:scale-x-0')

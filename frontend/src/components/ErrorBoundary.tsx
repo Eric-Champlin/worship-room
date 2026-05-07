@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -40,12 +41,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <div role="alert" className="relative rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-sm p-8 shadow-[0_0_40px_rgba(139,92,246,0.15),0_8px_30px_rgba(0,0,0,0.4)] text-center">
               <h1
                 className="text-3xl font-bold sm:text-4xl pb-1"
-                style={{
-                  background: 'linear-gradient(135deg, #ffffff 0%, #c4b5fd 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
+                style={GRADIENT_TEXT_STYLE}
               >
                 Something went wrong
               </h1>

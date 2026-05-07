@@ -14,7 +14,7 @@ export function PageShell({ children }: PageShellProps) {
       >
         Skip to content
       </a>
-      <Navbar />
+      <Navbar transparent />
       {children}
     </div>
   )
