@@ -2,7 +2,6 @@ import { Lock, Check, Flame } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthModal } from '@/components/prayer-wall/AuthModalProvider'
 import { useScrollReveal, staggerDelay } from '@/hooks/useScrollReveal'
-import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 import { GlowBackground } from './GlowBackground'
 import { SectionHeading } from './SectionHeading'
 import { PREVIEW_CARDS, getHeatmapColor, PRACTICES, FRIENDS } from './dashboard-preview-data'
@@ -170,7 +169,7 @@ export function DashboardPreview() {
           background: 'radial-gradient(circle, rgba(168, 130, 255, 0.25) 0%, transparent 70%)',
         }}
       />
-      <section aria-label="Dashboard preview">
+      <section aria-labelledby="dashboard-preview-heading">
         <div ref={ref as React.RefObject<HTMLDivElement>} className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           {/* Heading */}
           <div
@@ -178,6 +177,7 @@ export function DashboardPreview() {
             style={staggerDelay(0, 100, 0)}
           >
             <SectionHeading
+              id="dashboard-preview-heading"
               topLine="See How You're"
               bottomLine="Growing"
               tagline="Create a free account and unlock your personal dashboard."
@@ -233,14 +233,7 @@ export function DashboardPreview() {
             <button
               type="button"
               onClick={() => authModal?.openAuthModal(undefined, 'register')}
-              className={cn(
-                'inline-flex w-full items-center justify-center rounded-full px-8 py-3 text-base font-semibold text-hero-bg sm:w-auto',
-                'shadow-[0_0_20px_rgba(255,255,255,0.15)]',
-                'transition-all motion-reduce:transition-none hover:shadow-lg hover:brightness-110',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                'active:scale-[0.98]'
-              )}
-              style={{ background: WHITE_PURPLE_GRADIENT }}
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:w-auto sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] motion-reduce:transition-none"
             >
               Create a Free Account
             </button>

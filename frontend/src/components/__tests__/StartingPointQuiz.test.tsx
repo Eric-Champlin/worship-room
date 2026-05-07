@@ -27,7 +27,7 @@ let user: ReturnType<typeof userEvent.setup>
 
 async function selectAndAdvance(optionText: string, nextQuestionNum: number) {
   await user.click(
-    screen.getByRole('button', { name: new RegExp(optionText, 'i') })
+    screen.getByRole('radio', { name: new RegExp(optionText, 'i') })
   )
   if (nextQuestionNum <= QUIZ_QUESTIONS.length) {
     await waitFor(() => {
@@ -117,11 +117,11 @@ describe('StartingPointQuiz', () => {
       ).toBeInTheDocument()
     })
 
-    it('displays 4 answer options as buttons', () => {
+    it('displays 4 answer options as radio buttons', () => {
       renderQuiz()
       for (const option of QUIZ_QUESTIONS[0].options) {
         expect(
-          screen.getByRole('button', {
+          screen.getByRole('radio', {
             name: new RegExp(option.label, 'i'),
           })
         ).toBeInTheDocument()
@@ -140,14 +140,14 @@ describe('StartingPointQuiz', () => {
     it('selecting an answer shows selected state', async () => {
       renderQuiz()
 
-      const firstOption = screen.getByRole('button', {
+      const firstOption = screen.getByRole('radio', {
         name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
       })
 
       await user.click(firstOption)
 
       // Check immediately after click, before auto-advance timer fires
-      expect(firstOption).toHaveAttribute('aria-pressed', 'true')
+      expect(firstOption).toHaveAttribute('aria-checked', 'true')
     })
 
     it('selecting an answer auto-advances to next question after delay', async () => {
@@ -205,10 +205,10 @@ describe('StartingPointQuiz', () => {
       await user.click(screen.getByRole('button', { name: /back/i }))
 
       // Check the first option is still marked as selected
-      const firstOption = screen.getByRole('button', {
+      const firstOption = screen.getByRole('radio', {
         name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
       })
-      expect(firstOption).toHaveAttribute('aria-pressed', 'true')
+      expect(firstOption).toHaveAttribute('aria-checked', 'true')
     })
   })
 
@@ -380,19 +380,19 @@ describe('StartingPointQuiz', () => {
 
     it('option buttons have frosted glass styling', () => {
       renderQuiz()
-      const firstOption = screen.getByRole('button', {
+      const firstOption = screen.getByRole('radio', {
         name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
       })
       expect(firstOption.className).toContain('bg-white/[0.05]')
     })
 
-    it('selected option has purple highlight', async () => {
+    it('selected option has muted-white highlight', async () => {
       renderQuiz()
-      const firstOption = screen.getByRole('button', {
+      const firstOption = screen.getByRole('radio', {
         name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
       })
       await user.click(firstOption)
-      expect(firstOption.className).toContain('bg-purple-500/20')
+      expect(firstOption.className).toContain('bg-white/15')
     })
 
     it('progress bar uses thin track', () => {
@@ -444,15 +444,15 @@ describe('StartingPointQuiz', () => {
   })
 
   describe('Accessibility', () => {
-    it('answer buttons are keyboard accessible', () => {
+    it('answer options are keyboard accessible radio buttons', () => {
       renderQuiz()
-      const buttons = QUIZ_QUESTIONS[0].options.map((opt) =>
-        screen.getByRole('button', {
+      const options = QUIZ_QUESTIONS[0].options.map((opt) =>
+        screen.getByRole('radio', {
           name: new RegExp(opt.label, 'i'),
         })
       )
-      for (const button of buttons) {
-        expect(button.tagName).toBe('BUTTON')
+      for (const option of options) {
+        expect(option.tagName).toBe('BUTTON')
       }
     })
 
@@ -523,12 +523,40 @@ describe('StartingPointQuiz', () => {
     })
   })
 
-  describe('frosted glass container', () => {
-    it('dark variant has frosted glass container with rounded-3xl and border', () => {
+  describe('frosted glass container (Spec 13)', () => {
+    it('container uses FrostedCard bg (bg-white/[0.07]) not deprecated bg-white/[0.04]', () => {
       const { container } = renderQuiz()
       const frostedContainer = container.querySelector('.rounded-3xl')
-      expect(frostedContainer).toBeInTheDocument()
-      expect(frostedContainer?.className).toContain('border-white/[0.10]')
+      expect(frostedContainer?.className).toContain('bg-white/[0.07]')
+      expect(frostedContainer?.className).not.toContain('bg-white/[0.04]')
+    })
+
+    it('container className contains override padding chain', () => {
+      const { container } = renderQuiz()
+      const frostedContainer = container.querySelector('.rounded-3xl')
+      expect(frostedContainer?.className).toContain('p-6')
+      expect(frostedContainer?.className).toContain('sm:p-8')
+      expect(frostedContainer?.className).toContain('lg:p-10')
+      expect(frostedContainer?.className).toContain('mx-auto')
+      expect(frostedContainer?.className).toContain('max-w-3xl')
+    })
+
+    it('container does not use deprecated border border-white/[0.10]', () => {
+      const { container } = renderQuiz()
+      const frostedContainer = container.querySelector('.rounded-3xl')
+      expect(frostedContainer?.className).not.toContain('border-white/[0.10]')
+    })
+
+    it('container has FrostedCard tier 1 border border-white/[0.12]', () => {
+      const { container } = renderQuiz()
+      const frostedContainer = container.querySelector('.rounded-3xl')
+      expect(frostedContainer?.className).toContain('border-white/[0.12]')
+    })
+
+    it('inner max-w-[600px] wrapper is preserved inside the container', () => {
+      const { container } = renderQuiz()
+      const innerWrapper = container.querySelector('.max-w-\\[600px\\]')
+      expect(innerWrapper).toBeInTheDocument()
     })
 
     it('SectionHeading is NOT inside the frosted glass container', () => {
@@ -537,13 +565,256 @@ describe('StartingPointQuiz', () => {
       const heading = screen.getByRole('heading', { name: /not sure where to start/i })
       expect(frostedContainer?.contains(heading)).toBe(false)
     })
+  })
 
-    it('frosted glass container has max-w-3xl', () => {
-      const { container } = renderQuiz()
-      const frostedContainer = container.querySelector('.rounded-3xl')
-      expect(frostedContainer?.className).toContain('max-w-3xl')
+  describe('answer option styles (Spec 13)', () => {
+    it('selected option has muted-white bg-white/15 not bg-purple-500/20', async () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      await user.click(firstOption)
+      expect(firstOption.className).toContain('bg-white/15')
+      expect(firstOption.className).not.toContain('bg-purple-500/20')
     })
 
+    it('selected option has border-white/[0.18]', async () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      await user.click(firstOption)
+      expect(firstOption.className).toContain('border-white/[0.18]')
+    })
+
+    it('unselected option has canonical border-white/[0.12]', () => {
+      renderQuiz()
+      const secondOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[1].label, 'i'),
+      })
+      expect(secondOption.className).toContain('border-white/[0.12]')
+      expect(secondOption.className).not.toContain('border-white/[0.08]')
+    })
+
+    it('unselected option has hover:border-white/[0.18]', () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      expect(firstOption.className).toContain('hover:border-white/[0.18]')
+    })
+
+    it('unselected option has hover:bg-white/[0.08]', () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      expect(firstOption.className).toContain('hover:bg-white/[0.08]')
+    })
+  })
+
+  describe('retake quiz button (Spec 13)', () => {
+    beforeEach(async () => {
+      renderQuiz()
+      await answerAllQuestions()
+    })
+
+    it('retake button uses font-sans not font-script', async () => {
+      const btn = screen.getByRole('button', { name: /retake quiz/i })
+      expect(btn.className).toContain('font-sans')
+      expect(btn.className).not.toContain('font-script')
+    })
+
+    it('retake button uses font-semibold not font-normal', async () => {
+      const btn = screen.getByRole('button', { name: /retake quiz/i })
+      expect(btn.className).toContain('font-semibold')
+      expect(btn.className).not.toContain('font-normal')
+    })
+
+    it('retake button preserves text-xl size', async () => {
+      const btn = screen.getByRole('button', { name: /retake quiz/i })
+      expect(btn.className).toContain('text-xl')
+    })
+
+    it('retake button has duration-base', async () => {
+      const btn = screen.getByRole('button', { name: /retake quiz/i })
+      expect(btn.className).toContain('duration-base')
+    })
+
+    it('retake button has motion-reduce:transition-none', async () => {
+      const btn = screen.getByRole('button', { name: /retake quiz/i })
+      expect(btn.className).toContain('motion-reduce:transition-none')
+    })
+
+    it('retake button still has gradient text style', async () => {
+      const btn = screen.getByRole('button', { name: /retake quiz/i })
+      expect(btn.style.background).toBeTruthy()
+      expect(btn.style.backgroundClip).toBe('text')
+    })
+
+    it('retake button retains min-h-[44px]', async () => {
+      const btn = screen.getByRole('button', { name: /retake quiz/i })
+      expect(btn.className).toContain('min-h-[44px]')
+    })
+  })
+
+  describe('result CTA (Spec 13)', () => {
+    beforeEach(async () => {
+      renderQuiz()
+      await answerAllQuestions()
+    })
+
+    it('result CTA has Pattern 2 min-h-[44px]', async () => {
+      const cta = screen.getByRole('link', { name: /go to prayer/i })
+      expect(cta.className).toContain('min-h-[44px]')
+    })
+
+    it('result CTA has Pattern 2 white drop shadow', async () => {
+      const cta = screen.getByRole('link', { name: /go to prayer/i })
+      expect(cta.className).toContain('shadow-[0_0_30px_rgba(255,255,255,0.20)]')
+    })
+
+    it('result CTA has Pattern 2 hover shadow', async () => {
+      const cta = screen.getByRole('link', { name: /go to prayer/i })
+      expect(cta.className).toContain('hover:shadow-[0_0_40px_rgba(255,255,255,0.30)]')
+    })
+
+    it('result CTA has Pattern 2 focus ring ring-white/50 not ring-primary', async () => {
+      const cta = screen.getByRole('link', { name: /go to prayer/i })
+      expect(cta.className).toContain('ring-white/50')
+      expect(cta.className).not.toContain('ring-primary')
+    })
+
+    it('result CTA has duration-200', async () => {
+      const cta = screen.getByRole('link', { name: /go to prayer/i })
+      expect(cta.className).toContain('duration-200')
+    })
+
+    it('result CTA has text-hero-bg', async () => {
+      const cta = screen.getByRole('link', { name: /go to prayer/i })
+      expect(cta.className).toContain('text-hero-bg')
+    })
+
+    it('result CTA has ring-offset-hero-bg', async () => {
+      const cta = screen.getByRole('link', { name: /go to prayer/i })
+      expect(cta.className).toContain('ring-offset-hero-bg')
+    })
+  })
+
+  describe('WAI-ARIA radiogroup (Spec 13)', () => {
+    it('answer options wrapper has role=radiogroup', () => {
+      const { container } = renderQuiz()
+      expect(container.querySelector('[role="radiogroup"]')).toBeInTheDocument()
+    })
+
+    it('radiogroup is aria-labelledby the question h3', () => {
+      const { container } = renderQuiz()
+      const radiogroup = container.querySelector('[role="radiogroup"]')
+      const labelId = radiogroup?.getAttribute('aria-labelledby')
+      expect(labelId).toBeTruthy()
+      const labelEl = document.getElementById(labelId!)
+      expect(labelEl?.tagName).toBe('H3')
+    })
+
+    it('each answer option has role=radio', () => {
+      renderQuiz()
+      const options = screen.getAllByRole('radio')
+      expect(options.length).toBe(QUIZ_QUESTIONS[0].options.length)
+    })
+
+    it('selected option has aria-checked=true', async () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      await user.click(firstOption)
+      expect(firstOption).toHaveAttribute('aria-checked', 'true')
+    })
+
+    it('unselected options have aria-checked=false', () => {
+      renderQuiz()
+      const options = screen.getAllByRole('radio')
+      for (const option of options) {
+        expect(option).toHaveAttribute('aria-checked', 'false')
+      }
+    })
+
+    it('ArrowDown moves focus to next option without selecting', async () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      firstOption.focus()
+      await user.keyboard('{ArrowDown}')
+      const secondOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[1].label, 'i'),
+      })
+      expect(document.activeElement).toBe(secondOption)
+      // Arrow keys must not change selection — focus only.
+      expect(secondOption).toHaveAttribute('aria-checked', 'false')
+      // No auto-advance fires from focus changes.
+      expect(screen.getByText(/question 1 of 5/i)).toBeInTheDocument()
+    })
+
+    it('ArrowDown on last option wraps focus to first without selecting', async () => {
+      renderQuiz()
+      const lastIndex = QUIZ_QUESTIONS[0].options.length - 1
+      const lastOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[lastIndex].label, 'i'),
+      })
+      lastOption.focus()
+      await user.keyboard('{ArrowDown}')
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      expect(document.activeElement).toBe(firstOption)
+      expect(firstOption).toHaveAttribute('aria-checked', 'false')
+    })
+
+    it('ArrowUp on first option wraps focus to last without selecting', async () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      firstOption.focus()
+      await user.keyboard('{ArrowUp}')
+      const lastIndex = QUIZ_QUESTIONS[0].options.length - 1
+      const lastOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[lastIndex].label, 'i'),
+      })
+      expect(document.activeElement).toBe(lastOption)
+      expect(lastOption).toHaveAttribute('aria-checked', 'false')
+    })
+
+    it('Enter on focused option selects it', async () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      firstOption.focus()
+      await user.keyboard('{Enter}')
+      expect(firstOption).toHaveAttribute('aria-checked', 'true')
+    })
+
+    it('Space on focused option selects it', async () => {
+      renderQuiz()
+      const firstOption = screen.getByRole('radio', {
+        name: new RegExp(QUIZ_QUESTIONS[0].options[0].label, 'i'),
+      })
+      firstOption.focus()
+      await user.keyboard(' ')
+      expect(firstOption).toHaveAttribute('aria-checked', 'true')
+    })
+
+    it('progress label has aria-live=polite', () => {
+      const { container } = renderQuiz()
+      const progressLabel = container.querySelector('[aria-live="polite"]')
+      expect(progressLabel).toBeInTheDocument()
+      expect(progressLabel?.textContent).toMatch(/question 1 of 5/i)
+    })
+  })
+
+  describe('glow orbs', () => {
     it('result glow orb has updated 0.20 opacity', async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true })
       user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })

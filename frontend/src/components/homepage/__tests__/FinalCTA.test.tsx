@@ -131,3 +131,54 @@ describe('FinalCTA', () => {
     expect(button.className).toContain('hover:shadow-[0_0_40px')
   })
 })
+
+// --- Spec 13 Pattern 2 alignment ---
+
+describe('FinalCTA Pattern 2 alignment (Spec 13)', () => {
+  it('CTA has explicit min-h-[44px]', () => {
+    renderFinalCTA()
+    const btn = screen.getByRole('button', { name: /get started/i })
+    expect(btn.className).toContain('min-h-[44px]')
+  })
+
+  it('CTA matches canonical Pattern 2 chrome', () => {
+    renderFinalCTA()
+    const btn = screen.getByRole('button', { name: /get started/i })
+    expect(btn.className).toContain('bg-white')
+    expect(btn.className).toContain('text-hero-bg')
+    expect(btn.className).toContain('inline-flex')
+    expect(btn.className).toContain('items-center')
+    expect(btn.className).toContain('gap-2')
+    expect(btn.className).toContain('shadow-[0_0_30px_rgba(255,255,255,0.20)]')
+  })
+
+  it('CTA matches canonical Pattern 2 hover', () => {
+    renderFinalCTA()
+    const btn = screen.getByRole('button', { name: /get started/i })
+    expect(btn.className).toContain('hover:bg-white/90')
+    expect(btn.className).toContain('hover:shadow-[0_0_40px_rgba(255,255,255,0.30)]')
+  })
+
+  it('CTA uses transition-all duration-200 (not duration-base)', () => {
+    renderFinalCTA()
+    const btn = screen.getByRole('button', { name: /get started/i })
+    expect(btn.className).toContain('transition-all')
+    expect(btn.className).toContain('duration-200')
+    expect(btn.className).not.toContain('duration-base')
+  })
+
+  it('CTA uses canonical white focus ring with ring-offset-hero-bg', () => {
+    renderFinalCTA()
+    const btn = screen.getByRole('button', { name: /get started/i })
+    expect(btn.className).toContain('focus-visible:ring-white/50')
+    expect(btn.className).toContain('focus-visible:ring-offset-hero-bg')
+    expect(btn.className).not.toContain('focus-visible:ring-primary')
+  })
+
+  it('CTA padding is Pattern 2 canonical (px-8 py-3.5)', () => {
+    renderFinalCTA()
+    const btn = screen.getByRole('button', { name: /get started/i })
+    expect(btn.className).toContain('px-8')
+    expect(btn.className).toContain('py-3.5')
+  })
+})

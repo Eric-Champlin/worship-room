@@ -106,11 +106,12 @@ describe('DashboardPreview', () => {
     }
   })
 
-  it('section has aria-label', () => {
-    renderDashboardPreview()
-    expect(
-      screen.getByRole('region', { name: /dashboard preview/i })
-    ).toBeInTheDocument()
+  it('section has aria-labelledby pointing to heading', () => {
+    const { container } = renderDashboardPreview()
+    const section = container.querySelector('section[aria-labelledby="dashboard-preview-heading"]')
+    expect(section).toBeInTheDocument()
+    const heading = document.getElementById('dashboard-preview-heading')
+    expect(heading?.tagName).toBe('H2')
   })
 
   it('renders 6 lock overlays with lock icons', () => {
@@ -327,12 +328,6 @@ describe('card sizing and layout', () => {
     }
   })
 
-  it('CTA button has white glow shadow', () => {
-    renderDashboardPreview()
-    const btn = screen.getByRole('button', { name: /create a free account/i })
-    expect(btn.className).toContain('shadow-[0_0_20px')
-  })
-
   it('renders all 6 card descriptions', () => {
     renderDashboardPreview()
     for (const card of PREVIEW_CARDS) {
@@ -376,5 +371,56 @@ describe('card sizing and layout', () => {
   it('streak card title includes "Streaks" (plural)', () => {
     renderDashboardPreview()
     expect(screen.getByText('Streaks & Faith Points')).toBeInTheDocument()
+  })
+})
+
+// --- Spec 13 polish tests ---
+
+describe('CTA and a11y polish (Spec 13)', () => {
+  it('CTA has Pattern 2 min-h-[44px]', () => {
+    renderDashboardPreview()
+    const btn = screen.getByRole('button', { name: /create a free account/i })
+    expect(btn.className).toContain('min-h-[44px]')
+  })
+
+  it('CTA has Pattern 2 white bg with text-hero-bg', () => {
+    renderDashboardPreview()
+    const btn = screen.getByRole('button', { name: /create a free account/i })
+    expect(btn.className).toContain('bg-white')
+    expect(btn.className).toContain('text-hero-bg')
+  })
+
+  it('CTA has Pattern 2 white drop shadow', () => {
+    renderDashboardPreview()
+    const btn = screen.getByRole('button', { name: /create a free account/i })
+    expect(btn.className).toContain('shadow-[0_0_30px_rgba(255,255,255,0.20)]')
+  })
+
+  it('CTA has Pattern 2 hover shadow', () => {
+    renderDashboardPreview()
+    const btn = screen.getByRole('button', { name: /create a free account/i })
+    expect(btn.className).toContain('hover:shadow-[0_0_40px_rgba(255,255,255,0.30)]')
+  })
+
+  it('CTA has ring-white/50 focus ring (not ring-primary)', () => {
+    renderDashboardPreview()
+    const btn = screen.getByRole('button', { name: /create a free account/i })
+    expect(btn.className).toContain('focus-visible:ring-white/50')
+    expect(btn.className).not.toContain('ring-primary')
+  })
+
+  it('CTA has transition-all duration-200', () => {
+    renderDashboardPreview()
+    const btn = screen.getByRole('button', { name: /create a free account/i })
+    expect(btn.className).toContain('transition-all')
+    expect(btn.className).toContain('duration-200')
+  })
+
+  it('section has aria-labelledby="dashboard-preview-heading" and heading is h2', () => {
+    const { container } = renderDashboardPreview()
+    const section = container.querySelector('section[aria-labelledby="dashboard-preview-heading"]')
+    expect(section).toBeInTheDocument()
+    const heading = document.getElementById('dashboard-preview-heading')
+    expect(heading?.tagName).toBe('H2')
   })
 })

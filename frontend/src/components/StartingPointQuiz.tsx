@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useId } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -101,10 +101,14 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
               }}
             />
           </div>
-          <p className={cn(
-            'mb-2 mt-3 text-center text-sm',
-            isDark ? 'text-white' : 'text-text-light'
-          )}>
+          <p
+            aria-live="polite"
+            aria-atomic="true"
+            className={cn(
+              'mb-2 mt-3 text-center text-sm',
+              isDark ? 'text-white' : 'text-text-light'
+            )}
+          >
             Question {currentQuestion + 1} of {QUIZ_QUESTIONS.length}
           </p>
         </div>
@@ -191,17 +195,12 @@ export function StartingPointQuiz({ variant = 'dark' }: StartingPointQuizProps) 
               className={cn('scroll-reveal', isVisible && 'is-visible')}
               style={staggerDelay(1, 200)}
             >
-              {/* Frosted glass container */}
-              <div className={cn(
-                'relative mx-auto max-w-3xl',
-                'bg-white/[0.04] backdrop-blur-sm border border-white/[0.10] rounded-3xl',
-                'shadow-[0_0_30px_rgba(139,92,246,0.08),0_4px_25px_rgba(0,0,0,0.25)]',
-                'p-6 sm:p-8 lg:p-10'
-              )}>
+              {/* Canonical frosted glass container — Tier 1 default variant with bespoke dialog-tier padding */}
+              <FrostedCard className="relative mx-auto max-w-3xl p-6 sm:p-8 lg:p-10">
                 <div className="relative mx-auto max-w-[600px]">
                   {quizContent}
                 </div>
-              </div>
+              </FrostedCard>
             </div>
           </div>
         </GlowBackground>
@@ -245,6 +244,22 @@ interface QuestionCardProps {
 
 function QuestionCard({ questionIndex, selectedAnswer, onSelect, onBack, isDark }: QuestionCardProps) {
   const question = QUIZ_QUESTIONS[questionIndex]
+  const questionHeadingId = useId()
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([])
+
+  // Arrow keys move focus only — selection happens on Enter/Space via native button click.
+  const handleAnswerKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {
+    const count = question.options.length
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault()
+      const next = (index + 1) % count
+      optionRefs.current[next]?.focus()
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault()
+      const prev = (index - 1 + count) % count
+      optionRefs.current[prev]?.focus()
+    }
+  }, [question.options.length])
 
   return (
     <div>
@@ -271,23 +286,34 @@ function QuestionCard({ questionIndex, selectedAnswer, onSelect, onBack, isDark 
       </div>
 
       {/* Question text */}
-      <h3 className={cn(
-        'mb-4 px-6 pt-2 text-lg font-semibold sm:mb-6',
-        isDark ? 'text-white' : 'text-text-dark'
-      )}>
+      <h3
+        id={questionHeadingId}
+        className={cn(
+          'mb-4 px-6 pt-2 text-lg font-semibold sm:mb-6',
+          isDark ? 'text-white' : 'text-text-dark'
+        )}
+      >
         {question.question}
       </h3>
 
-      {/* Answer options */}
-      <div className="flex flex-col gap-3 px-6 pb-6">
+      {/* Answer options — WAI-ARIA radiogroup */}
+      <div
+        role="radiogroup"
+        aria-labelledby={questionHeadingId}
+        className="flex flex-col gap-3 px-6 pb-6"
+      >
         {question.options.map((option, index) => {
           const isSelected = selectedAnswer === index
           return (
             <button
               type="button"
               key={index}
+              ref={(el) => { optionRefs.current[index] = el }}
               onClick={() => onSelect(index)}
-              aria-pressed={isSelected}
+              onKeyDown={(e) => handleAnswerKeyDown(e, index)}
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={isSelected || (selectedAnswer === null && index === 0) ? 0 : -1}
               className={cn(
                 'flex w-full items-center justify-between rounded-xl border text-left text-sm transition-all motion-reduce:transition-none sm:text-base',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
@@ -297,10 +323,10 @@ function QuestionCard({ questionIndex, selectedAnswer, onSelect, onBack, isDark 
                 isDark ? 'text-white' : '',
                 isSelected
                   ? isDark
-                    ? 'bg-purple-500/20 border-purple-500/30 text-white'
+                    ? 'bg-white/15 border-white/[0.18] text-white'
                     : 'border-primary bg-[#8B5CF620]'
                   : isDark
-                    ? 'bg-white/[0.05] border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.12]'
+                    ? 'bg-white/[0.05] border-white/[0.12] hover:bg-white/[0.08] hover:border-white/[0.18]'
                     : 'border-gray-200 bg-gray-50 hover:border-primary/30 hover:bg-primary/5'
               )}
             >
@@ -363,11 +389,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
       {isDark ? (
         <Link
           to={destination.route}
-          className={cn(
-            'mx-6 mt-6 inline-block rounded-full bg-white px-6 py-3 text-base font-semibold text-hero-bg',
-            'transition-colors duration-base hover:bg-white/90',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
-          )}
+          className="mx-6 mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-hero-bg shadow-[0_0_30px_rgba(255,255,255,0.20)] transition-all duration-200 hover:bg-white/90 hover:shadow-[0_0_40px_rgba(255,255,255,0.30)] sm:text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] motion-reduce:transition-none"
         >
           Go to {destination.ctaLabel}
         </Link>
@@ -404,7 +426,7 @@ function ResultCard({ destination, onRetake, onExploreAll, isDark }: ResultCardP
           <button
             type="button"
             onClick={onRetake}
-            className="inline-flex min-h-[44px] items-center pb-1 font-script text-xl font-normal transition-colors hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="inline-flex min-h-[44px] items-center pb-1 font-sans text-xl font-semibold transition-colors duration-base motion-reduce:transition-none hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             style={{
               background: WHITE_PURPLE_GRADIENT,
               backgroundClip: 'text',

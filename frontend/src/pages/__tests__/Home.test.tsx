@@ -62,9 +62,9 @@ describe('Home', () => {
     expect(
       screen.getByRole('region', { name: /your journey to healing/i })
     ).toBeInTheDocument()
-    // Dashboard Preview
+    // Dashboard Preview (aria-labelledby the section heading, Spec 13)
     expect(
-      screen.getByRole('region', { name: /dashboard preview/i })
+      screen.getByRole('region', { name: /see how you're growing/i })
     ).toBeInTheDocument()
     // Quiz
     expect(

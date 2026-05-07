@@ -301,6 +301,79 @@ describe('RegisterPage', () => {
     expect(ctaButtons).toHaveLength(2)
   })
 
+  // --- Spec 13 Pattern 2 alignment ---
+
+  it('both CTAs use Pattern 2 padding (py-3.5 not py-4)', () => {
+    renderPage()
+    const btns = screen.getAllByRole('button', { name: /create your account/i })
+    expect(btns).toHaveLength(2)
+    for (const btn of btns) {
+      expect(btn.className).toContain('py-3.5')
+      expect(btn.className).not.toContain('py-4')
+    }
+  })
+
+  it('both CTAs use responsive text sizing (text-base + sm:text-lg)', () => {
+    renderPage()
+    const btns = screen.getAllByRole('button', { name: /create your account/i })
+    for (const btn of btns) {
+      expect(btn.className).toContain('text-base')
+      expect(btn.className).toContain('sm:text-lg')
+    }
+  })
+
+  it('both CTAs use canonical hover bg (hover:bg-white/90 not hover:bg-gray-100)', () => {
+    renderPage()
+    const btns = screen.getAllByRole('button', { name: /create your account/i })
+    for (const btn of btns) {
+      expect(btn.className).toContain('hover:bg-white/90')
+      expect(btn.className).not.toContain('hover:bg-gray-100')
+    }
+  })
+
+  it('both CTAs have canonical hover shadow', () => {
+    renderPage()
+    const btns = screen.getAllByRole('button', { name: /create your account/i })
+    for (const btn of btns) {
+      expect(btn.className).toContain('hover:shadow-[0_0_40px_rgba(255,255,255,0.30)]')
+    }
+  })
+
+  it('both CTAs use transition-all duration-200 (not transition-colors)', () => {
+    renderPage()
+    const btns = screen.getAllByRole('button', { name: /create your account/i })
+    for (const btn of btns) {
+      expect(btn.className).toContain('transition-all')
+      expect(btn.className).toContain('duration-200')
+      expect(btn.className).not.toContain('transition-colors')
+    }
+  })
+
+  it('both CTAs use canonical white focus ring (not ring-primary-lt)', () => {
+    renderPage()
+    const btns = screen.getAllByRole('button', { name: /create your account/i })
+    for (const btn of btns) {
+      expect(btn.className).toContain('focus-visible:ring-white/50')
+      expect(btn.className).not.toContain('ring-primary-lt')
+    }
+  })
+
+  it('both CTAs preserve animate-shine', () => {
+    renderPage()
+    const btns = screen.getAllByRole('button', { name: /create your account/i })
+    for (const btn of btns) {
+      expect(btn.className).toContain('animate-shine')
+    }
+  })
+
+  it('both CTAs preserve disabled:opacity-50', () => {
+    renderPage()
+    const btns = screen.getAllByRole('button', { name: /create your account/i })
+    for (const btn of btns) {
+      expect(btn.className).toContain('disabled:opacity-50')
+    }
+  })
+
   // --- Color compliance ---
 
   it('check icons inside main do not use text-primary', () => {
